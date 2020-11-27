@@ -2,23 +2,21 @@
 
 import abc
 
-from tap_base import PluginBase
+from tap_base.PluginBase import PluginBase
+
 
 class TapBase(PluginBase, metaclass=abc.ABCMeta):
     """Abstract base class for taps"""
-    
+
     @abc.abstractmethod
-    def get_capabilities():
+    def get_capabilities(self):
         pass
 
     @abc.abstractmethod
-    def sync():
-        pass
-    
-    @abc.abstractmethod
-    def get_state():
+    def sync(self):
         pass
 
     @abc.abstractmethod
-    def get_state():
+    def get_state(self):
         pass
+
