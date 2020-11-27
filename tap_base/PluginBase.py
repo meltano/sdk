@@ -1,11 +1,11 @@
-"""Shared parent class for TapBase, TargetBase, and TransformBase"""
+"""Shared parent class for TapBase, TargetBase, and TransformBase."""
 
 import abc
 from typing import List
 
 
 class PluginBase(metaclass=abc.ABCMeta):
-    """Abstract base class for taps"""
+    """Abstract base class for taps."""
 
     # Core plugin metadata:
 
