@@ -1,10 +1,11 @@
 """TapBase abstract class."""
 
 import abc
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple, Type
 
 from tap_base.PluginBase import PluginBase
 from tap_base.TapStreamBase import TapStreamBase
+from tap_base.TapConnectionBase import TapConnectionBase
 
 
 class TapBase(PluginBase, metaclass=abc.ABCMeta):
@@ -16,7 +17,8 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     _accepted_options: List[str]
     _option_set_requirements: List[List[str]]
     _config: dict
-    _conn: Any = None
+    _conn_class: Type[TapConnectionBase]
+    _conn: TapConnectionBase
 
     # Constructor
 
@@ -27,6 +29,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         capabilities: List[str],
         accepted_options: List[str],
         option_set_requirements: List[List[str]],
+        connection_class: Type[TapConnectionBase],
         config: dict,
         state: dict = None,
     ) -> None:
@@ -37,6 +40,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         self._accepted_options = accepted_options
         self._option_set_requirements = option_set_requirements
         self._config = config
+        self._conn_class = connection_class
         self._conn = self.get_connection()
 
     # Core plugin metadata:
@@ -85,21 +89,11 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
 
     # Connection management:
 
-    def is_connected(self) -> bool:
-        """Return True if connected."""
-        return self._conn is not None
-
-    @abc.abstractmethod
-    def open_connection(self) -> Any:
-        """Initialize the tap connection."""
-        pass
-
-    def get_connection(self) -> Any:
+    def get_connection(self) -> TapConnectionBase:
         """Get or create tap connection."""
-        if self.is_connected():
-            return self._conn
-        conn = self.open_connection()
-        return conn
+        if not self._conn:
+            self._conn = self._conn_class(self._config)
+        return self._conn
 
     # Abstract stream detection methods:
 

@@ -1,10 +1,17 @@
 """Sample tap test for tap-snowflake."""
 
 from pathlib import Path
+from tests.sample_tap_snowflake.SampleTapSnowfakeConnection import (
+    SampleTapSnowflakeConnection,
+)
 from typing import Any, Dict, List, Tuple
 
 from tap_base import TapBase
-from sample_tap_snowflake.SampleTapSnowflakeStream import SampleTapSnowflakeStream
+from sample_tap_snowflake import (
+    SampleTapSnowflakeStream,
+    SampleTapSnowflakeConnection,
+    utils,
+)
 import snowflake.connector
 
 
@@ -12,11 +19,11 @@ PLUGIN_NAME = "sample-tap-snowflake"
 PLUGIN_VERSION_FILE = "resources/VERSION"
 PLUGIN_CAPABILITIES = [
     "sync",
+    "catalog",
+    "discover",
+    "state",
 ]
 ACCEPTED_CONFIG = [
-    "",
-]
-REQUIRED_CONFIG = [
     "account",
     "dbname",
     "user",
@@ -24,10 +31,13 @@ REQUIRED_CONFIG = [
     "warehouse",
     "tables",
 ]
+REQUIRED_CONFIG_SETS = [
+    ["account", "dbname", "user", "password", "warehouse", "tables"]
+]
 
 
 class TooManyRecordsException(Exception):
-    """Exception to raise when query returns more records than max_records"""
+    """Exception to raise when query returns more records than max_records."""
 
 
 class TapSnowflake(TapBase):
@@ -41,26 +51,39 @@ class TapSnowflake(TapBase):
             version=vers,
             capabilities=PLUGIN_CAPABILITIES,
             accepted_options=ACCEPTED_CONFIG,
-            option_set_requirements=[REQUIRED_CONFIG],
+            option_set_requirements=REQUIRED_CONFIG_SETS,
             config=config,
+            connection_class=SampleTapSnowflakeConnection,
             state=state,
         )
-
-    def validate_config(self) -> Tuple[List[str], List[str]]:
-        """Validate configuration dictionary."""
-        return super().validate_config()
 
     # Core plugin metadata:
 
     def get_available_stream_ids(self) -> List[str]:
         """Return a list of all streams (tables)."""
-        result = self.query("""SELECT table_name from information_schema.tables""")
-        return list(result)
+        conn = self.get_connection()
+        conn.ensure_connected()
+        results = conn.query(
+            """SELECT catalog, schema_name, table_name from information_schema.tables"""
+        )
+        return [
+            utils.concatenate_tap_stream_id(table, catalog, schema)
+            for catalog, schema, table in results
+        ]
 
-    def create_stream(self, stream_id: str) -> SampleTapSnowflakeStream:
+    def initialize_stream_from_catalog(
+        self,
+        stream_id: str,
+        friendly_name: str,
+        schema: dict,
+        metadata: dict,
+        upstream_table_name: str,
+    ) -> SampleTapSnowflakeStream:
         """Return a tap stream object."""
         conn = self.get_connection()
-        return SampleTapSnowflakeStream(conn, stream_id)
+        return SampleTapSnowflakeStream(
+            stream_id, friendly_name, schema, metadata, upstream_table_name
+        )
 
     # Snowflake-specific functions:
 
@@ -77,27 +100,3 @@ class TapSnowflake(TapBase):
             # insecure_mode=True
         )
         return self._conn
-
-    def query(self, query, params=None, max_records=0):  # TODO: document return type
-        """Run a query in snowflake."""
-        result = []
-        with self.connect_with_backoff() as connection:
-            with connection.cursor(snowflake.connector.DictCursor) as cur:
-                queries = []
-                if isinstance(query, list):
-                    # Run every query in one transaction if query is a list of SQL
-                    queries.append("START TRANSACTION")
-                    queries.extend(query)
-                else:
-                    queries = [query]
-                for sql in queries:
-                    # LOGGER.debug("SNOWFLAKE - Running query: %s", sql) # TODO: Add logger
-                    cur.execute(sql, params)
-                    if 0 < max_records < cur.rowcount:
-                        # Raise exception if returned rows greater than max allowed records
-                        raise TooManyRecordsException(
-                            f"Query returned too many records. This query can return max {max_records} records"
-                        )
-                    if cur.rowcount > 0:
-                        result = cur.fetchall()
-        return result
