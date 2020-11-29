@@ -1,7 +1,12 @@
 """TapBase abstract class."""
 
 import abc
+import json
 from typing import Any, List, Tuple, Type
+from pathlib import Path
+
+import singer
+from singer import Catalog
 
 from tap_base.PluginBase import PluginBase
 from tap_base.TapStreamBase import TapStreamBase
@@ -19,6 +24,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     _config: dict
     _conn_class: Type[TapConnectionBase]
     _conn: TapConnectionBase
+    _streams: List[TapStreamBase]
 
     # Constructor
 
@@ -106,3 +112,12 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     def create_stream(self, stream_id: str) -> TapStreamBase:
         """Return a tap stream object."""
         pass
+
+    def get_catalog(self) -> Catalog:
+        """Return a catalog object."""
+        return
+
+    def write_catalog_file(self, outfile: str) -> str:
+        """Write out catalog file."""
+        Path(outfile).write_text(json.dumps(self.get_catalog().to_dict()))
+        return outfile
