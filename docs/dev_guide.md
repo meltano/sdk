@@ -1,5 +1,15 @@
 # Tap-Base Development Docs
 
+**Development Overview:**
+
+_Developing with `tap-base` requires overriding three classes:_
+
+- `TapBase` - _The core base class for taps. This class governs naming, configuration, and core capability mapping._
+- `TapConnectionBase` - _The base class for tap connections. This class is responsible for making a connection to the source, sending queries, and retrieving metadata._
+- `TapStreamBase` - _The base class for streams. This class is responsible for replication and bookmarking._
+
+**Detailed Instructions:**
+
 1. [Steps for developing a new tap:](#steps-for-developing-a-new-tap)
    - [Step 1: Create a new project from the `tap-template` CookieCutter repo](#step-1-create-a-new-project-from-the-tap-template-cookiecutter-repo)
    - [Step 2: Write and test the Tap class](#step-2-write-and-test-the-tap-class)
