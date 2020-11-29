@@ -1,14 +1,14 @@
 """Shared parent class for TapBase, TargetBase, and TransformBase."""
 
 import abc
-from typing import Any, List
+from typing import Any
 
 DEFAULT_QUOTE_CHAR = '"'
 OTHER_QUOTE_CHARS = ['"', "[", "]", "`"]
 
 
-class TapConnectionBase(metaclass=abc.ABCMeta):
-    """Abstract base class for tap connections."""
+class PluginGenericConnectionBase(metaclass=abc.ABCMeta):
+    """Abstract base class for generic tap connections."""
 
     _config: dict
     _conn: Any
@@ -30,6 +30,17 @@ class TapConnectionBase(metaclass=abc.ABCMeta):
         """Connect if not yet connected."""
         if not self.is_connected():
             self.open_connection()
+
+
+class PluginDatabaseConnectionBase(PluginGenericConnectionBase, metaclass=abc.ABCMeta):
+    """Abstract base class for database-type connections."""
+
+    _three_part_names: bool  # Uses db.schema.table syntax (versus 2-part: db.table)
+
+    def __init__(self, three_part_names: bool, config: dict):
+        """Initialize connection."""
+        self._three_part_names = False
+        super().__init__(config=config)
 
     def enquote(self, identifier: str):
         """Escape identifier to be SQL safe."""

@@ -8,9 +8,9 @@ from pathlib import Path
 import singer
 from singer import Catalog
 
-from tap_base.PluginBase import PluginBase
-from tap_base.TapStreamBase import TapStreamBase
-from tap_base.TapConnectionBase import TapConnectionBase
+from tap_base.plugin_base import PluginBase
+from tap_base.tap_stream_base import TapStreamBase
+from tap_base.tap_connection_base import TapConnectionBase
 
 
 class TapBase(PluginBase, metaclass=abc.ABCMeta):
