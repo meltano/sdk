@@ -9,11 +9,11 @@
       > By using Black, you agree to cede control over minutiae of hand-formatting. In return, Black gives you speed, determinism, and freedom from pycodestyle nagging about formatting. You will save time and mental energy for more important matters. **Black makes code review faster by producing the smallest diffs possible.** Blackened code looks the same regardless of the project you’re reading. **Formatting becomes transparent after a while and you can focus on the content instead.**
     - _If you use our companion cookiecutter template, your project will start out auto-formatted by Black. You can keep this default or change it - the choice is yours._
 2. **Pervasive Python Type Hints.**
-    - _Spend less time reading documentation due to pervasive type declarations in our base class._
+    - _Spend less time reading documentation thanks to pervasive type declarations in our base class._
 3. **Less is More.**
-    - _Because taps build from the template require less code and taking advantage of a common set of  base class capabilities, developers can dramatically reduce the time to develop a fully mature tap._
+    - _Because taps built from the template require less code, taking advantage of common base class capabilities, developers are able to dramatically reduce the time to develop a fully mature tap._
 4. **Create Future-Proof Plugins.**
-    - _Take advantage of new base class capabilities by simply updating your dependency version and retesting with the latest version._
+    - _Take advantage of new base class capabilities by simply updating your dependency version and retesting with the latest versions._
 
 ## Tap Dev Guide
 
