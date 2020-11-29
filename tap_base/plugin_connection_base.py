@@ -7,7 +7,7 @@ DEFAULT_QUOTE_CHAR = '"'
 OTHER_QUOTE_CHARS = ['"', "[", "]", "`"]
 
 
-class PluginGenericConnectionBase(metaclass=abc.ABCMeta):
+class GenericConnectionBase(metaclass=abc.ABCMeta):
     """Abstract base class for generic tap connections."""
 
     _config: dict
@@ -32,7 +32,7 @@ class PluginGenericConnectionBase(metaclass=abc.ABCMeta):
             self.open_connection()
 
 
-class PluginDatabaseConnectionBase(PluginGenericConnectionBase, metaclass=abc.ABCMeta):
+class DatabaseConnectionBase(GenericConnectionBase, metaclass=abc.ABCMeta):
     """Abstract base class for database-type connections."""
 
     _three_part_names: bool  # Uses db.schema.table syntax (versus 2-part: db.table)

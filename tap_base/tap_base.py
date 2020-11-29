@@ -10,7 +10,7 @@ from singer import Catalog
 
 from tap_base.plugin_base import PluginBase
 from tap_base.tap_stream_base import TapStreamBase
-from tap_base.tap_connection_base import TapConnectionBase
+from tap_base.plugin_connection_base import GenericConnectionBase
 
 
 class TapBase(PluginBase, metaclass=abc.ABCMeta):
@@ -22,8 +22,8 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     _accepted_options: List[str]
     _option_set_requirements: List[List[str]]
     _config: dict
-    _conn_class: Type[TapConnectionBase]
-    _conn: TapConnectionBase
+    _conn_class: Type[GenericConnectionBase]
+    _conn: GenericConnectionBase
     _streams: List[TapStreamBase]
 
     # Constructor
@@ -35,7 +35,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         capabilities: List[str],
         accepted_options: List[str],
         option_set_requirements: List[List[str]],
-        connection_class: Type[TapConnectionBase],
+        connection_class: Type[GenericConnectionBase],
         config: dict,
         state: dict = None,
     ) -> None:
@@ -47,7 +47,6 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         self._option_set_requirements = option_set_requirements
         self._config = config
         self._conn_class = connection_class
-        self._conn = None
         self._conn = self.get_connection()
 
     # Core plugin metadata:
@@ -96,7 +95,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
 
     # Connection management:
 
-    def get_connection(self) -> TapConnectionBase:
+    def get_connection(self) -> GenericConnectionBase:
         """Get or create tap connection."""
         if not self._conn:
             self._conn = self._conn_class(self._config)

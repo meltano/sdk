@@ -1,7 +1,7 @@
 """Sample tap test for tap-snowflake."""
 
 from pathlib import Path
-from tap_base.TapConnectionBase import TapConnectionBase
+from tap_base import DatabaseConnectionBase
 from typing import Any, Dict, List, Tuple
 
 import snowflake.connector
@@ -11,7 +11,7 @@ from tap_base.tests.sample_tap_snowflake.stream import SampleTapSnowflakeStream
 from tap_base.tests.sample_tap_snowflake import utils
 
 
-class SampleTapSnowflakeConnection(TapConnectionBase):
+class SampleTapSnowflakeConnection(DatabaseConnectionBase):
     """Snowflake Tap Connection Class."""
 
     def query(self, query, params=None, max_records=0):

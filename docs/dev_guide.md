@@ -5,7 +5,8 @@
 _Developing with `tap-base` requires overriding three classes:_
 
 - `TapBase` - _The core base class for taps. This class governs naming, configuration, and core capability mapping._
-- `TapConnectionBase` - _The base class for tap connections. This class is responsible for making a connection to the source, sending queries, and retrieving metadata._
+- `GenericConnectionBase` - _The base class for generic-type connections. This class is responsible for making a connection to the source, sending queries, and retrieving metadata._
+- `DatabaseConnectionBase` - _The base class for database-type connections. Adds specialized functionality for database-type connections._
 - `TapStreamBase` - _The base class for streams. This class is responsible for replication and bookmarking._
 
 **Detailed Instructions:**
