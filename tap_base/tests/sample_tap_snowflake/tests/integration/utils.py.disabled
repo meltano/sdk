@@ -45,15 +45,3 @@ def discover_catalog(snowflake_conn, config):
 
     return catalog
 
-
-def set_replication_method_and_key(stream, r_method, r_key):
-    new_md = singer.metadata.to_map(stream.metadata)
-    old_md = new_md.get(())
-    if r_method:
-        old_md.update({"replication-method": r_method})
-
-    if r_key:
-        old_md.update({"replication-key": r_key})
-
-    stream.metadata = singer.metadata.to_list(new_md)
-    return stream

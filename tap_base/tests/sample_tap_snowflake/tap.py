@@ -1,22 +1,18 @@
 """Sample tap test for tap-snowflake."""
 
 from pathlib import Path
-from tests.sample_tap_snowflake.SampleTapSnowfakeConnection import (
-    SampleTapSnowflakeConnection,
-)
 from typing import Any, Dict, List, Tuple
 
-from tap_base import TapBase
-from sample_tap_snowflake import (
-    SampleTapSnowflakeStream,
-    SampleTapSnowflakeConnection,
-    utils,
-)
 import snowflake.connector
+
+from tap_base import TapBase
+from tap_base.tests.sample_tap_snowflake.connection import SampleTapSnowflakeConnection
+from tap_base.tests.sample_tap_snowflake.stream import SampleTapSnowflakeStream
+from tap_base.tests.sample_tap_snowflake import utils
 
 
 PLUGIN_NAME = "sample-tap-snowflake"
-PLUGIN_VERSION_FILE = "resources/VERSION"
+PLUGIN_VERSION_FILE = "./VERSION"
 PLUGIN_CAPABILITIES = [
     "sync",
     "catalog",
@@ -40,7 +36,7 @@ class TooManyRecordsException(Exception):
     """Exception to raise when query returns more records than max_records."""
 
 
-class TapSnowflake(TapBase):
+class SampleTapSnowflake(TapBase):
     """Sample tap for Snowflake."""
 
     def __init__(self, config: dict, state: dict = None) -> None:
@@ -70,6 +66,11 @@ class TapSnowflake(TapBase):
             utils.concatenate_tap_stream_id(table, catalog, schema)
             for catalog, schema, table in results
         ]
+
+    def create_stream(self, stream_id: str) -> SampleTapSnowflakeStream:
+        return SampleTapSnowflakeStream(
+            stream_id=stream_id, schema=None, properties=None
+        )
 
     def initialize_stream_from_catalog(
         self,

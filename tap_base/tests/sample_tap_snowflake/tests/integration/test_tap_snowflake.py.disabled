@@ -4,8 +4,9 @@ import json
 import singer
 import snowflake.connector
 
-import tap_snowflake
-import tap_snowflake.sync_strategies.common as common
+from SampleTapSnowflake import SampleTapSnowflake
+
+import sample_tap_snowflake.sync_strategies.common as common
 
 from singer.schema import Schema
 

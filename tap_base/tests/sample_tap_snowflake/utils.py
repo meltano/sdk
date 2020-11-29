@@ -12,7 +12,8 @@ from singer import utils
 
 from snowflake import connector
 
-LOGGER = singer.get_logger("tap_snowflake")
+# LOGGER = singer.get_logger("tap_snowflake")
+# LOGGER = singer.get_logger()
 
 
 def concatenate_tap_stream_id(catalog_name, schema_name, table_name):

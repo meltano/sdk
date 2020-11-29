@@ -4,10 +4,11 @@ from pathlib import Path
 from tap_base.TapConnectionBase import TapConnectionBase
 from typing import Any, Dict, List, Tuple
 
-from tap_base import TapBase
-from sample_tap_snowflake.SampleTapSnowflakeStream import SampleTapSnowflakeStream
-from sample_tap_snowflake import utils
 import snowflake.connector
+
+from tap_base import TapBase
+from tap_base.tests.sample_tap_snowflake.stream import SampleTapSnowflakeStream
+from tap_base.tests.sample_tap_snowflake import utils
 
 
 class SampleTapSnowflakeConnection(TapConnectionBase):
@@ -37,3 +38,6 @@ class SampleTapSnowflakeConnection(TapConnectionBase):
                     if cur.rowcount > 0:
                         result = cur.fetchall()
         return result
+
+    def open_connection(self) -> Any:
+        pass

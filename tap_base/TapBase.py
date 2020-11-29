@@ -47,6 +47,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         self._option_set_requirements = option_set_requirements
         self._config = config
         self._conn_class = connection_class
+        self._conn = None
         self._conn = self.get_connection()
 
     # Core plugin metadata:
@@ -121,3 +122,8 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         """Write out catalog file."""
         Path(outfile).write_text(json.dumps(self.get_catalog().to_dict()))
         return outfile
+
+    # Standard CLI Functions:
+    def handle_cli_args(self, args, cwd, environ) -> None:
+        """Take necessary action in response to a CLI command."""
+        pass

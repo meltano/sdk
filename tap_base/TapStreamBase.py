@@ -1,6 +1,6 @@
 """TapStreamBase abstract class"""
 
-import abc
+import abc  # abstract base classes
 import time
 
 import singer
@@ -25,7 +25,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         state: StateMessage = None,
     ):
         """Initialize tap stream."""
-         self._catalog_entry = CatalogEntry(
+        self._catalog_entry = CatalogEntry(
             self,
             tap_stream_id=tap_stream_id,
             stream=friendly_name,
