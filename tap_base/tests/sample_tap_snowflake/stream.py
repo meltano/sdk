@@ -1,6 +1,5 @@
 """Sample tap stream test for tap-snowflake."""
 
-from singer import Schema
 from tap_base import TapStreamBase
 
 

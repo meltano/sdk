@@ -5,12 +5,11 @@ import json
 from typing import Any, List, Tuple, Type
 from pathlib import Path
 
-import singer
 from singer import Catalog
 
 from tap_base.plugin_base import PluginBase
 from tap_base.tap_stream_base import TapStreamBase
-from tap_base.plugin_connection_base import GenericConnectionBase
+from tap_base.connection_base import GenericConnectionBase
 
 
 class TapBase(PluginBase, metaclass=abc.ABCMeta):
@@ -47,6 +46,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         self._option_set_requirements = option_set_requirements
         self._config = config
         self._conn_class = connection_class
+        self._conn = None
         self._conn = self.get_connection()
 
     # Core plugin metadata:
@@ -98,15 +98,10 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     def get_connection(self) -> GenericConnectionBase:
         """Get or create tap connection."""
         if not self._conn:
-            self._conn = self._conn_class(self._config)
+            self._conn = self._conn_class(config=self._config)
         return self._conn
 
     # Abstract stream detection methods:
-
-    @abc.abstractmethod
-    def get_available_stream_ids(self) -> List[str]:
-        """Return a list of all streams (tables)."""
-        pass
 
     @abc.abstractmethod
     def create_stream(self, stream_id: str) -> TapStreamBase:

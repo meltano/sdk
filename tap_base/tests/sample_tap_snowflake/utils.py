@@ -16,11 +16,6 @@ from snowflake import connector
 # LOGGER = singer.get_logger()
 
 
-def concatenate_tap_stream_id(catalog_name, schema_name, table_name):
-    """Generate tap stream id as appears in properties.json."""
-    return catalog_name + "-" + schema_name + "-" + table_name
-
-
 # TODO: Move to catalog class:
 
 

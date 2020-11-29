@@ -1,9 +1,9 @@
-"""tap-base library for building singer-compliant taps"""
+"""tap-base library for building singer-compliant taps."""
 
 from tap_base.plugin_base import PluginBase
 from tap_base.tap_base import TapBase
 from tap_base.tap_stream_base import TapStreamBase
-from tap_base.plugin_connection_base import (
+from tap_base.connection_base import (
     GenericConnectionBase,
     DatabaseConnectionBase,
 )
