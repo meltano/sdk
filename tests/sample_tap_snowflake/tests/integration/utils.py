@@ -5,17 +5,17 @@ import singer
 import tap_snowflake
 from tap_snowflake.connection import SnowflakeConnection
 
-SCHEMA_NAME='tap_snowflake_test'
+SCHEMA_NAME = "tap_snowflake_test"
 
 
 def get_db_config():
     return {
-        'account': os.environ.get('TAP_SNOWFLAKE_ACCOUNT'),
-        'dbname': os.environ.get('TAP_SNOWFLAKE_DBNAME'),
-        'user': os.environ.get('TAP_SNOWFLAKE_USER'),
-        'password': os.environ.get('TAP_SNOWFLAKE_PASSWORD'),
-        'warehouse': os.environ.get('TAP_SNOWFLAKE_WAREHOUSE'),
-        'tables': 'FAKE_TABLES'
+        "account": os.environ.get("TAP_SNOWFLAKE_ACCOUNT"),
+        "dbname": os.environ.get("TAP_SNOWFLAKE_DBNAME"),
+        "user": os.environ.get("TAP_SNOWFLAKE_USER"),
+        "password": os.environ.get("TAP_SNOWFLAKE_PASSWORD"),
+        "warehouse": os.environ.get("TAP_SNOWFLAKE_WAREHOUSE"),
+        "tables": "FAKE_TABLES",
     }
 
 
@@ -24,12 +24,12 @@ def get_test_connection():
     snowflake_conn = SnowflakeConnection(db_config)
 
     with snowflake_conn.open_connection() as open_conn:
-        with open_conn.cursor() as cur:          
+        with open_conn.cursor() as cur:
             try:
-                cur.execute('DROP SCHEMA IF EXISTS {}'.format(SCHEMA_NAME))
+                cur.execute("DROP SCHEMA IF EXISTS {}".format(SCHEMA_NAME))
             except:
                 pass
-            cur.execute('CREATE SCHEMA {}'.format(SCHEMA_NAME))
+            cur.execute("CREATE SCHEMA {}".format(SCHEMA_NAME))
 
     return snowflake_conn
 
@@ -50,10 +50,10 @@ def set_replication_method_and_key(stream, r_method, r_key):
     new_md = singer.metadata.to_map(stream.metadata)
     old_md = new_md.get(())
     if r_method:
-        old_md.update({'replication-method': r_method})
+        old_md.update({"replication-method": r_method})
 
     if r_key:
-        old_md.update({'replication-key': r_key})
+        old_md.update({"replication-key": r_key})
 
     stream.metadata = singer.metadata.to_list(new_md)
     return stream
