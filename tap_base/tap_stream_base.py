@@ -4,7 +4,7 @@ import abc  # abstract base classes
 import time
 
 import singer
-from singer import CatalogEntry, StateMessage, Schema
+from singer import CatalogEntry, StateMessage
 
 
 class TapStreamBase(metaclass=abc.ABCMeta):
