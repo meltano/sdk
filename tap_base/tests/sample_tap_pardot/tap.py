@@ -15,17 +15,8 @@ PLUGIN_CAPABILITIES = [
     "discover",
     "state",
 ]
-ACCEPTED_CONFIG = [
-    "account",
-    "dbname",
-    "user",
-    "password",
-    "warehouse",
-    "tables",
-]
-REQUIRED_CONFIG_SETS = [
-    ["account", "dbname", "user", "password", "warehouse", "tables"]
-]
+ACCEPTED_CONFIG = ["filepath"]
+REQUIRED_CONFIG_SETS = [["filepath"]]
 
 
 class SampleTapPardot(TapBase):
