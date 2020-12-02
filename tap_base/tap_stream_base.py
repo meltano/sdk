@@ -77,7 +77,6 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         for row_dict in self.get_row_generator():
             record = self.transform_row_to_singer_record(row=row_dict)
             print(record)
-        raise Exception("No reason")
 
     @abc.abstractmethod
     def get_row_generator(self) -> Iterable[Iterable[Any]]:
