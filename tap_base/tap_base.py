@@ -44,7 +44,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     # Abstract stream detection methods:
 
     @abc.abstractmethod
-    def create_stream(self, stream_id: str) -> TapStreamBase:
+    def create_stream(self, tap_stream_id: str) -> TapStreamBase:
         """Return a tap stream object."""
         pass
 
@@ -61,3 +61,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     def handle_cli_args(self, args, cwd, environ) -> None:
         """Take necessary action in response to a CLI command."""
         pass
+
+    def sync_one(self, tap_stream_id: str):
+        stream = self.create_stream(tap_stream_id=tap_stream_id)
+        stream.sync()

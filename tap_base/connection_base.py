@@ -14,6 +14,10 @@ class GenericConnectionBase(metaclass=abc.ABCMeta):
         """Initialize connection."""
         self._config = config
 
+    def get_config(self, config_key: str, default: Any = None) -> Any:
+        """Return config value or a default value."""
+        return self._config.get(config_key, default)
+
     @abc.abstractmethod
     def open_connection(self) -> Any:
         """Initialize the tap connection."""
@@ -57,7 +61,9 @@ class DatabaseConnectionBase(GenericConnectionBase, metaclass=abc.ABCMeta):
                 """SELECT catalog, schema_name, table_name from information_schema.tables"""
             )
             return [
-                self.concatenate_tap_stream_id(table_name=table, catalog_name=catalog, schema_name=schema)
+                self.concatenate_tap_stream_id(
+                    table_name=table, catalog_name=catalog, schema_name=schema
+                )
                 for catalog, schema, table in results
             ]
         else:

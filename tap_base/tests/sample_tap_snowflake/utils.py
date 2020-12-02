@@ -89,48 +89,6 @@ def generate_select_sql(catalog_entry, columns):
     return select_sql
 
 
-# pylint: disable=too-many-branches
-def row_to_singer_record(catalog_entry, version, row, columns, time_extracted):
-    """Transform SQL row to singer compatible record message"""
-    row_to_persist = ()
-    for idx, elem in enumerate(row):
-        property_type = catalog_entry.schema.properties[columns[idx]].type
-        if isinstance(elem, datetime.datetime):
-            row_to_persist += (elem.isoformat() + "+00:00",)
-        elif isinstance(elem, datetime.date):
-            row_to_persist += (elem.isoformat() + "T00:00:00+00:00",)
-        elif isinstance(elem, datetime.timedelta):
-            epoch = datetime.datetime.utcfromtimestamp(0)
-            timedelta_from_epoch = epoch + elem
-            row_to_persist += (timedelta_from_epoch.isoformat() + "+00:00",)
-        elif isinstance(elem, datetime.time):
-            row_to_persist += (str(elem),)
-        elif isinstance(elem, bytes):
-            # for BIT value, treat 0 as False and anything else as True
-            if "boolean" in property_type:
-                boolean_representation = elem != b"\x00"
-                row_to_persist += (boolean_representation,)
-            else:
-                row_to_persist += (elem.hex(),)
-        elif "boolean" in property_type or property_type == "boolean":
-            if elem is None:
-                boolean_representation = None
-            elif elem == 0:
-                boolean_representation = False
-            else:
-                boolean_representation = True
-            row_to_persist += (boolean_representation,)
-        else:
-            row_to_persist += (elem,)
-    rec = dict(zip(columns, row_to_persist))
-    return singer.RecordMessage(
-        stream=catalog_entry.stream,
-        record=rec,
-        version=version,
-        time_extracted=time_extracted,
-    )
-
-
 def whitelist_bookmark_keys(bookmark_key_set, tap_stream_id, state):
     """..."""
     for bookmark_key in [

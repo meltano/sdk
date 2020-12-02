@@ -1,3 +1,4 @@
 # This file marks additional dependencies needed for python development, testing and debug.
 
+pyarrow
 snowflake-connector-python==2.0.4

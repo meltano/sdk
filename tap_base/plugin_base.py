@@ -37,6 +37,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         self._accepted_options = accepted_options
         self._option_set_requirements = option_set_requirements
         self._config = config
+        self.validate_config()
         self._conn_class = connection_class
         self._conn = None
         self._conn = self.get_connection()
@@ -61,7 +62,9 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     # Core plugin metadata:
 
-    def validate_config(self) -> Tuple[List[str], List[str]]:
+    def validate_config(
+        self, raise_errors: bool = True, warnings_as_errors: bool = False
+    ) -> Tuple[List[str], List[str]]:
         """Return a tuple: (warnings: List[str], errors: List[str])."""
         warnings: List[str] = []
         errors: List[str] = []
@@ -85,6 +88,14 @@ class PluginBase(metaclass=abc.ABCMeta):
                     "Please complete one or more of the following sets: "
                     f"{str(missing)}"
                 )
+        if raise_errors and errors:
+            raise RuntimeError(
+                f"One or more errors ocurred during validation: {errors}"
+            )
+        if warnings_as_errors and raise_errors and warnings:
+            raise RuntimeError(
+                f"One or more warnings ocurred during validation: {warnings}"
+            )
         return warnings, errors
 
     # Connection management:
