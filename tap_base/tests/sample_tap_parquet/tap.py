@@ -44,8 +44,8 @@ class SampleTapParquet(TapBase):
         return SampleTapParquetStream(
             tap_stream_id=tap_stream_id,
             connection=self._conn,
-            schema=None,
-            properties=None,
+            schema=None,  # TODO
+            properties=None,  # TODO
         )
 
     def initialize_stream_from_catalog(
