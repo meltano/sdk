@@ -36,7 +36,7 @@ class GenericConnectionBase(metaclass=abc.ABCMeta):
             self.open_connection()
 
     @abc.abstractmethod
-    def get_available_stream_ids(self) -> List[str]:
+    def discover_available_stream_ids(self) -> List[str]:
         """Return a list of all streams (tables)."""
         pass
 
@@ -51,21 +51,13 @@ class DiscoverableConnectionBase(GenericConnectionBase, metaclass=abc.ABCMeta):
     """Abstract base class for (generic) connections that support discovery."""
 
     _is_discoverable = True
-    _catalog: Catalog = None
-
-    def get_catalog_entry(self, tap_stream_id: str) -> CatalogEntry:
-        self._catalog.get_stream(tap_stream_id)
-
-    def get_selected_catalog_entries(self, tap_stream_id: str) -> CatalogEntry:
-        self._catalog.get_selected_streams()
 
     def discover_catalog(self) -> Catalog:
         """Return a list of all streams (tables)."""
         streams: List[CatalogEntry] = []
-        for tap_stream_id in self.get_available_stream_ids():
+        for tap_stream_id in self.discover_available_stream_ids():
             streams.append(self.discover_stream(tap_stream_id))
-        self._catalog = Catalog(streams)
-        return self._catalog
+        return Catalog(streams)
 
     @abc.abstractmethod
     def discover_stream(self, tap_stream_id) -> CatalogEntry:
@@ -88,7 +80,7 @@ class DatabaseConnectionBase(DiscoverableConnectionBase, metaclass=abc.ABCMeta):
         """Return config value or a default value."""
         return self._config.get(config_key, default)
 
-    def get_available_stream_ids(self) -> List[str]:
+    def discover_available_stream_ids(self) -> List[str]:
         """Return a list of all streams (tables)."""
         self.ensure_connected()
         if self.THREE_PART_NAMES:

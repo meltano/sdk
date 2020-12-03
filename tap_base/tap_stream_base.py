@@ -1,9 +1,9 @@
-"""TapStreamBase abstract class"""
+"""TapStreamBase abstract class."""
 
 import abc  # abstract base classes
 import datetime
 import time
-from typing import Dict, Iterable, List, Any, Optional, OrderedDict, Tuple
+from typing import Dict, Iterable, Any, Optional
 
 import singer
 from singer import CatalogEntry, StateMessage, RecordMessage
@@ -15,38 +15,22 @@ class TapStreamBase(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
     _id: str
-    _friendly_name: str
-    _upstream_name: str
-    _state: StateMessage
     _catalog_entry: CatalogEntry
+    _state: StateMessage
     _latest_state: StateMessage
 
     def __init__(
         self,
         tap_stream_id: str,
         connection: GenericConnectionBase,
-        friendly_name: str = None,
-        upstream_table_name: str = None,
+        catalog_entry: CatalogEntry = None,
         state: StateMessage = None,
     ):
         """Initialize tap stream."""
         self._id = tap_stream_id
         self._conn = connection
         self._state = state
-        self._catalog_entry = CatalogEntry(
-            tap_stream_id=tap_stream_id,
-            stream=friendly_name,
-            stream_alias=None,
-            key_properties=None,
-            schema=None,
-            replication_key=None,
-            is_view=None,
-            database=None,
-            table=None,
-            row_count=None,
-            metadata=None,
-            replication_method=None,
-        )
+        self._catalog_entry = catalog_entry
 
     def get_catalog_entry_as_dict(self) -> dict:
         return self._catalog_entry.to_dict()
@@ -95,7 +79,10 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         """Transform SQL row to singer compatible record message."""
         rec: Dict[str, Any] = {}
         for property_name, elem in row.items():
-            if not self._catalog_entry.schema:
+            if True:
+                # TODO: Debug this
+                property_type = "Unknown"
+            elif not self._catalog_entry.schema:
                 property_type = "Unknown"
             else:
                 property_type = self._catalog_entry.schema.properties[
