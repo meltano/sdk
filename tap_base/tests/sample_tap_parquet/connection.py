@@ -21,7 +21,7 @@ class SampleTapParquetConnection(DiscoverableConnectionBase):
         self._conn = "placeholder"
         return self._conn
 
-    def get_available_stream_ids(self) -> List[str]:
+    def discover_available_stream_ids(self) -> List[str]:
         return ["placeholder"]
 
     def discover_stream(self, tap_stream_id) -> CatalogEntry:

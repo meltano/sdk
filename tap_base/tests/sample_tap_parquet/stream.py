@@ -11,27 +11,11 @@ import pyarrow.parquet as pq
 class SampleTapParquetStream(TapStreamBase):
     """Sample tap test for parquet."""
 
-    def __init__(
-        self,
-        tap_stream_id: str,
-        connection: SampleTapParquetConnection,
-        schema: dict,
-        properties: dict = None,
-    ):
-        """Initialize stream class."""
-        super().__init__(
-            tap_stream_id=tap_stream_id,
-            connection=connection,
-            friendly_name=tap_stream_id,
-            upstream_table_name=None,
-            state=None,
-        )
-
     def get_row_generator(self) -> Iterable[Dict[str, Any]]:
         """Return a generator of row-type dictionary objects."""
         filepath = self._conn.get_config("filepath")
         if not filepath:
-            raise ValueError("Pardot 'filepath' config cannot be blank.")
+            raise ValueError("Parquet 'filepath' config cannot be blank.")
         try:
             parquet_file = pq.ParquetFile(filepath)
         except Exception as ex:

@@ -34,27 +34,7 @@ class SampleTapParquet(TapBase):
             accepted_options=ACCEPTED_CONFIG,
             option_set_requirements=REQUIRED_CONFIG_SETS,
             connection_class=SampleTapParquetConnection,
+            stream_class=SampleTapParquetStream,
             config=config,
             state=state,
         )
-
-    # Core plugin metadata:
-
-    def create_stream(self, tap_stream_id: str) -> SampleTapParquetStream:
-        return SampleTapParquetStream(
-            tap_stream_id=tap_stream_id,
-            connection=self._conn,
-            schema=None,  # TODO
-            properties=None,  # TODO
-        )
-
-    def initialize_stream_from_catalog(
-        self,
-        tap_stream_id: str,
-        friendly_name: str,
-        schema: dict,
-        metadata: dict,
-        upstream_table_name: str,
-    ) -> SampleTapParquetStream:
-        """Return a tap stream object."""
-        return SampleTapParquetStream(tap_stream_id, schema, metadata)

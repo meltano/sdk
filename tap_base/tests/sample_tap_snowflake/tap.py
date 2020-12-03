@@ -42,25 +42,6 @@ class SampleTapSnowflake(TapBase):
             option_set_requirements=REQUIRED_CONFIG_SETS,
             config=config,
             connection_class=SampleTapSnowflakeConnection,
+            stream_class=SampleTapSnowflakeStream,
             state=state,
-        )
-
-    # Core plugin metadata:
-
-    def create_stream(self, tap_stream_id: str) -> SampleTapSnowflakeStream:
-        return SampleTapSnowflakeStream(
-            tap_stream_id=tap_stream_id, schema=None, properties=None
-        )
-
-    def initialize_stream_from_catalog(
-        self,
-        tap_stream_id: str,
-        friendly_name: str,
-        schema: dict,
-        metadata: dict,
-        upstream_table_name: str,
-    ) -> SampleTapSnowflakeStream:
-        """Return a tap stream object."""
-        return SampleTapSnowflakeStream(
-            tap_stream_id, friendly_name, schema, metadata, upstream_table_name
         )

@@ -16,10 +16,16 @@ SAMPLE_CONFIG = {"filepath": SAMPLE_FILENAME}
 SAMPLE_CONFIG_BAD = {"not_valid": SAMPLE_FILENAME}
 
 
-def test_pardot_sync():
+def test_parquet_sync_one():
     _parquet_write()
     tap = SampleTapParquet(config=SAMPLE_CONFIG)
-    tap.sync_one(tap_stream_id="placeholder")
+    tap.sync_one(tap_stream_id="placeholder", allow_discover=True)
+
+
+def test_parquet_sync_all():
+    _parquet_write()
+    tap = SampleTapParquet(config=SAMPLE_CONFIG)
+    tap.sync_all(allow_discover=True)
 
 
 def _parquet_write():
