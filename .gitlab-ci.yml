@@ -13,7 +13,7 @@ cache:
 before_script:
   - python -V # Print out python version for debugging
   - pip install pipx
-  - pipx ensurepath
+  - export PATH=$PATH:/root/.local/bin
   - pipx install poetry
   - pipx install tox
   - source $(poetry env info --path)/bin/activate
