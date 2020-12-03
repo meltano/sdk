@@ -25,12 +25,12 @@ test:
     - poetry run pytest
     - tox -e py36,flake8
 
-run:
-  script:
-    - poetry build
-  # artifacts:
-  #   paths:
-  #     - dist/*.whl
+# run:
+#   script:
+#     - poetry build
+#   artifacts:
+#     paths:
+#       - dist/*.whl
 
 pages:
   script:
@@ -40,5 +40,5 @@ pages:
   artifacts:
     paths:
       - public
-  only:
-    - master
+  # only:
+  #   - master
