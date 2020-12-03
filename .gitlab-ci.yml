@@ -16,8 +16,8 @@ before_script:
   - export PATH=$PATH:/root/.local/bin
   - pipx install poetry
   - pipx install tox
-  - source $(poetry env info --path)/bin/activate
   - poetry install
+  - source $(poetry env info --path)/bin/activate
 
 test:
   script:
