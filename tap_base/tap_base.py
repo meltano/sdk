@@ -2,6 +2,8 @@
 
 import abc
 import json
+import logging
+
 from typing import List, Optional, Type, Dict
 from pathlib import Path
 
@@ -92,6 +94,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
                 tap_stream_id=catalog_entry.tap_stream_id,
                 catalog_entry=catalog_entry,
                 state=None,
+                logger=self.logger,
             )
 
     def _init_stream(
@@ -99,7 +102,9 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         tap_stream_id: str,
         catalog_entry: CatalogEntry,
         state: Optional[StateMessage],
+        logger: logging.Logger,
     ) -> TapStreamBase:
+        self.logger = logger
         new_stream = self._stream_class(
             tap_stream_id=tap_stream_id,
             connection=self._conn,

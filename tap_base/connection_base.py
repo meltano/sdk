@@ -1,21 +1,36 @@
 """Shared parent class for TapBase, TargetBase, and TransformBase."""
 
 import abc
+import logging
 from typing import Any, List, Optional
 
 from singer import Catalog, CatalogEntry
+import backoff
+
+
+class TooManyRecordsException(Exception):
+    """Exception to raise when query returns more records than max_records."""
+
+
+class TapConnectionFailure(Exception):
+    """Exception to raise when connection attempt fails or connection is disconnected."""
 
 
 class GenericConnectionBase(metaclass=abc.ABCMeta):
     """Abstract base class for generic tap connections."""
 
+    MAX_CONNECTION_RETRIES = 0
+
     _config: dict
     _conn: Any
     _is_discoverable: bool = False
 
-    def __init__(self, config: dict):
+    logger: logging.Logger
+
+    def __init__(self, config: dict, logger: logging.Logger):
         """Initialize connection."""
         self._config = config
+        self.logger = logger
 
     def get_config(self, config_key: str, default: Any = None) -> Any:
         """Return config value or a default value."""
@@ -25,6 +40,23 @@ class GenericConnectionBase(metaclass=abc.ABCMeta):
     def open_connection(self) -> Any:
         """Initialize the tap connection."""
         pass
+
+    def log_backoff_attempt(self, details):
+        """Log backoff attempts used by connection retry_pattern()."""
+        self.logger.info(
+            "Error communicating with source, "
+            f"triggering backoff: {details.get('tries')} try"
+        )
+
+    def connect_with_retries(self) -> Any:
+        """Run open_connection() and retry automatically a few times if failed."""
+        return backoff.on_exception(
+            backoff.expo,
+            exception=TapConnectionFailure,
+            max_tries=self.MAX_CONNECTION_RETRIES,
+            on_backoff=self.log_backoff_attempt,
+            factor=2,
+        )(self.open_connection)()
 
     def is_connected(self) -> bool:
         """Return True if connected."""
@@ -50,6 +82,8 @@ class GenericConnectionBase(metaclass=abc.ABCMeta):
 class DiscoverableConnectionBase(GenericConnectionBase, metaclass=abc.ABCMeta):
     """Abstract base class for (generic) connections that support discovery."""
 
+    MAX_CONNECTION_RETRIES = 0
+
     _is_discoverable = True
 
     def discover_catalog(self) -> Catalog:
@@ -68,13 +102,11 @@ class DiscoverableConnectionBase(GenericConnectionBase, metaclass=abc.ABCMeta):
 class DatabaseConnectionBase(DiscoverableConnectionBase, metaclass=abc.ABCMeta):
     """Abstract base class for database-type connections."""
 
+    MAX_CONNECTION_RETRIES = 5
+
     THREE_PART_NAMES: bool = True  # Uses db.schema.table syntax (versus 2-part: db.table)
     DEFAULT_QUOTE_CHAR = '"'
     OTHER_QUOTE_CHARS = ['"', "[", "]", "`"]
-
-    def __init__(self, config: dict):
-        """Initialize connection."""
-        super().__init__(config=config)
 
     def get_config(self, config_key: str, default: Any = None) -> Any:
         """Return config value or a default value."""

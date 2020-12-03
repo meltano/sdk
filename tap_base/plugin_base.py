@@ -1,6 +1,7 @@
 """Shared parent class for TapBase, TargetBase (future), and TransformBase (future)."""
 
 import abc
+import logging
 from typing import List, Type, Tuple, Any
 
 from tap_base.connection_base import GenericConnectionBase
@@ -17,6 +18,8 @@ class PluginBase(metaclass=abc.ABCMeta):
     _config: dict
     _conn_class: Type[GenericConnectionBase]
     _conn: GenericConnectionBase
+
+    logger: logging.Logger
 
     # Constructor
 
@@ -37,6 +40,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         self._accepted_options = accepted_options
         self._option_set_requirements = option_set_requirements
         self._config = config
+        self.logger = logging.getLogger(plugin_name)
         self.validate_config()
         self._conn_class = connection_class
         self._conn = None
@@ -103,7 +107,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     def get_connection(self) -> GenericConnectionBase:
         """Get or create tap connection."""
         if not self._conn:
-            self._conn = self._conn_class(config=self._config)
+            self._conn = self._conn_class(config=self._config, logger=self.logger)
         return self._conn
 
     # Standard CLI Functions:

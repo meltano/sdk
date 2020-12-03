@@ -7,14 +7,11 @@ import snowflake.connector
 from tap_base import DatabaseConnectionBase
 
 
-class TooManyRecordsException(Exception):
-    """Exception to raise when query returns more records than max_records."""
-
-
 class SampleSnowflakeConnection(DatabaseConnectionBase):
     """Snowflake Tap Connection Class."""
 
     THREE_PART_NAMES: bool = True
+    MAX_CONNECT_ATTEMPTS = 5
 
     _conn: SnowflakeConnection
 
