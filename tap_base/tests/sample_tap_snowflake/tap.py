@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from tap_base.tap_base import TapBase
-from tap_base.tests.sample_tap_snowflake.connection import SampleTapSnowflakeConnection
+from tap_base.tests.sample_tap_snowflake.connection import SampleSnowflakeConnection
 from tap_base.tests.sample_tap_snowflake.stream import SampleTapSnowflakeStream
 
 
@@ -41,7 +41,7 @@ class SampleTapSnowflake(TapBase):
             accepted_options=ACCEPTED_CONFIG,
             option_set_requirements=REQUIRED_CONFIG_SETS,
             config=config,
-            connection_class=SampleTapSnowflakeConnection,
+            connection_class=SampleSnowflakeConnection,
             stream_class=SampleTapSnowflakeStream,
             state=state,
         )

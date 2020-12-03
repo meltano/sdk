@@ -11,7 +11,7 @@ class TooManyRecordsException(Exception):
     """Exception to raise when query returns more records than max_records."""
 
 
-class SampleTapSnowflakeConnection(DatabaseConnectionBase):
+class SampleSnowflakeConnection(DatabaseConnectionBase):
     """Snowflake Tap Connection Class."""
 
     THREE_PART_NAMES: bool = True
