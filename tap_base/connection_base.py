@@ -65,7 +65,7 @@ class GenericConnectionBase(metaclass=abc.ABCMeta):
     def ensure_connected(self):
         """Connect if not yet connected."""
         if not self.is_connected():
-            self.open_connection()
+            self.connect_with_retries()
 
     @abc.abstractmethod
     def discover_available_stream_ids(self) -> List[str]:
