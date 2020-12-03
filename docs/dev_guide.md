@@ -23,20 +23,22 @@ _Developing with `tap-base` requires overriding three classes:_
     - [Step 4: Add more tests](#step-4-add-more-tests)
 2. [Troubleshooting Tips](#troubleshooting-tips)
 
-## Steps for developing a new tap
+## Initializing a new tap repo
 
-### Step 1: Create a new project from the `tap-template` [CookieCutter](https://cookiecutter.readthedocs.io) repo
+To get started, create a new project from the `tap-template` [CookieCutter](https://cookiecutter.readthedocs.io) repo:
 
 `TODO: TK - write cookiecutter instructions`
 
-### Step 2: Write and test the tap class
+## Developing a new tap
+
+## Step 1: Write and test the tap class
 
 _To create a tap class, follow these steps:_
 
 1. Map your Connection class to the `_conn` type.
-2. Override the constructor (`__init__()`) and call the base class constructor.
+2. Override the constructor "`__init__()`" and call the base class constructor.
 
-#### Parquet sample tap class
+**Parquet sample tap class:**
 
 ```py
 class SampleTapParquet(TapBase):
@@ -60,7 +62,7 @@ class SampleTapParquet(TapBase):
         )
 ```
 
-### Step 3: Write and test the connection class
+### Step 2: Write and test the connection class
 
 To create a generic connection class, follow these steps:
 
@@ -73,7 +75,7 @@ _**NOTE:**_
 - If your source is not discoverable, you can skip the two discover methods.
 - If your source is a databases which contains an `information_schema` metadata schema, you may also be able to skip these two methods.
 
-#### Parquet sample connection
+**Parquet sample connection class:**
 
 ```py
 class SampleParquetConnection(DiscoverableConnectionBase):
@@ -120,7 +122,7 @@ _To create a connection class, follow these steps:_
 
 1. Create the `get_row_generator()` method. This method will pass rows from the source connection when a sync is requested.
 
-#### Parquet sample stream class
+**Parquet sample stream class:**
 
 ```py
 class SampleTapParquetStream(TapStreamBase):
@@ -144,7 +146,7 @@ class SampleTapParquetStream(TapStreamBase):
                     }
 ```
 
-### Step 4: Add more tests
+## Adding more tests
 
 `TODO: TK - write test writing instructions`
 
