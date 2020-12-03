@@ -15,13 +15,13 @@ _Developing with `tap-base` requires overriding three classes:_
 
 **Detailed Instructions:**
 
-1. [Steps for developing a new tap:](#steps-for-developing-a-new-tap)
-    - [Step 1: Create a new project from the `tap-template` CookieCutter repo](#step-1-create-a-new-project-from-the-tap-template-cookiecutter-repo)
-    - [Step 2: Write and test the tap class](#step-2-write-and-test-the-tap-class)
-    - [Step 3: Write and test the connection class](#step-3-write-and-test-the-connection-class)
-    - [Step 3: Write and test the stream class](#step-3-write-and-test-the-stream-class)
-    - [Step 4: Add more tests](#step-4-add-more-tests)
-2. [Troubleshooting Tips](#troubleshooting-tips)
+1. [Initializing a new tap repo](#initializing-a-new-tap-repo)
+2. [Developing a new tap](#developing-a-new-tap)
+   1. [Step 1: Write the tap class](#step-1-write-the-tap-class)
+   2. [Step 2: Write the connection class](#step-2-write-the-connection-class)
+   3. [Step 3: Write the stream class](#step-3-write-the-stream-class)
+3. [Adding more tests](#adding-more-tests)
+4. [Troubleshooting Tips](#troubleshooting-tips)
 
 ## Initializing a new tap repo
 
@@ -31,7 +31,7 @@ To get started, create a new project from the `tap-template` [CookieCutter](http
 
 ## Developing a new tap
 
-## Step 1: Write and test the tap class
+### Step 1: Write the tap class
 
 _To create a tap class, follow these steps:_
 
@@ -62,7 +62,7 @@ class SampleTapParquet(TapBase):
         )
 ```
 
-### Step 2: Write and test the connection class
+### Step 2: Write the connection class
 
 To create a generic connection class, follow these steps:
 
@@ -116,7 +116,7 @@ class SampleParquetConnection(DiscoverableConnectionBase):
         )
 ```
 
-### Step 3: Write and test the stream class
+### Step 3: Write the stream class
 
 _To create a connection class, follow these steps:_
 
