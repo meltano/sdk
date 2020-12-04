@@ -17,7 +17,6 @@ before_script:
   - pipx install poetry
   - pipx install tox
   - poetry install
-  - source $(poetry env info --path)/bin/activate
 
 test:
   script:
