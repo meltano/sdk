@@ -17,6 +17,7 @@ pyarrow = "^2.0.0"
 [tool.poetry.dev-dependencies]
 snowflake-connector-python = "2.0.4"
 pyarrow = "^2.0.0"
+pytest = "^6.1.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
