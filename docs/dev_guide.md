@@ -25,9 +25,22 @@ _Developing with `tap-base` requires overriding three classes:_
 
 ## Initializing a new tap repo
 
-To get started, create a new project from the `tap-template` [CookieCutter](https://cookiecutter.readthedocs.io) repo:
+To get started, create a new project from the
+[`tap-template` cookiecutter repo](https://gitlab.com/meltano/tap-template):
 
-`TODO: TK - write cookiecutter instructions`
+1. Install [CookieCutter](https://cookiecutter.readthedocs.io) and it's dependencies:
+
+    ```bash
+    pip3 install pipx
+    pipx ensurepath
+    pipx install cookiecutter
+    ```
+
+2. Start a new project:
+
+    ```bash
+    cookiecutter https://gitlab.com/meltano/tap-template
+    ```
 
 ## Developing a new tap
 
