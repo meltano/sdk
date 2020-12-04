@@ -6,7 +6,7 @@ SAMPLE_FILENAME = "/mnt/c/Files/Source/tap-base/tap_base/tests/testfile.parquet"
 SAMPLE_CONFIG = {"filepath": SAMPLE_FILENAME}
 
 
-def test_tap_discovery():
+def test_parquet_tap_discovery():
     """Test class creation."""
     tap = SampleTapParquet(config=SAMPLE_CONFIG, state=None)
     catalog_json = tap.run_discovery()
