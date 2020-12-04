@@ -12,7 +12,7 @@ SAMPLE_CONFIG = {"filepath": SAMPLE_FILENAME}
 SAMPLE_CONFIG_BAD = {"not_valid": SAMPLE_FILENAME}
 
 
-def make_sample_data():
+def _make_sample_data():
     global COUNTER
 
     seed = COUNTER * 4
@@ -24,17 +24,19 @@ def make_sample_data():
     ]
 
 
-def make_sample_batch():
-    return pa.record_batch(make_sample_data(), names=["f0", "f1", "f2"])
+def _make_sample_batch():
+    return pa.record_batch(_make_sample_data(), names=["f0", "f1", "f2"])
 
 
 def test_parquet_sync_one():
+    """Test sync_one() for parquet sample."""
     _parquet_write()
     tap = SampleTapParquet(config=SAMPLE_CONFIG)
     tap.sync_one(tap_stream_id="placeholder", allow_discover=True)
 
 
 def test_parquet_sync_all():
+    """Test sync_all() for parquet sample."""
     _parquet_write()
     tap = SampleTapParquet(config=SAMPLE_CONFIG)
     tap.sync_all(allow_discover=True)
@@ -42,7 +44,7 @@ def test_parquet_sync_all():
 
 def _parquet_write():
     """Create a parquet file and read data from it."""
-    sample_batch = make_sample_batch()
+    sample_batch = _make_sample_batch()
     assert sample_batch.num_rows == 4
     assert sample_batch.num_columns == 3
 
@@ -51,12 +53,13 @@ def _parquet_write():
     table = pa.Table.from_batches([sample_batch])
     writer.write_table(table)
     for i in range(5):
-        table = pa.Table.from_batches([make_sample_batch()])
+        table = pa.Table.from_batches([_make_sample_batch()])
         writer.write_table(table)
     writer.close()
 
 
 def test_parquet_read():
+    """Test generic parquet read functionality."""
     _parquet_write()
 
     parquet_file = pq.ParquetFile(SAMPLE_FILENAME)

@@ -7,8 +7,8 @@ from singer.catalog import CatalogEntry
 
 from tap_base.connection_base import DiscoverableConnectionBase
 
-import pyarrow as pa
-import pyarrow.parquet as pq
+# import pyarrow as pa
+# import pyarrow.parquet as pq
 
 
 class SampleTapParquetConnection(DiscoverableConnectionBase):
@@ -22,6 +22,7 @@ class SampleTapParquetConnection(DiscoverableConnectionBase):
         return self._conn
 
     def discover_available_stream_ids(self) -> List[str]:
+        """Return a list of all stream IDs in the source."""
         # TODO: automatically infer this from the parquet schema
         return ["placeholder"]
 

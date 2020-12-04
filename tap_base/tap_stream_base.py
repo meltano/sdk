@@ -4,12 +4,12 @@ import abc  # abstract base classes
 import copy
 import datetime
 import logging
-from functools import lru_cache
+
+# from functools import lru_cache
 import time
 from typing import Dict, Iterable, Any, List, Optional, Tuple, Callable
 
 import singer
-import singer.metrics as metrics
 from singer import CatalogEntry, RecordMessage
 from singer import metadata
 
@@ -45,9 +45,6 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         self._state = state or {}
         self.logger = logger
 
-    def get_catalog_entry_as_dict(self) -> dict:
-        return self._catalog_entry.to_dict()
-
     def get_stream_version(self):
         """Get stream version from bookmark."""
         stream_version = singer.get_bookmark(
@@ -72,6 +69,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         return result
 
     def get_replication_method(self) -> str:
+        """Return the stream's replication method."""
         return (
             self.get_metadata("forced-replication-method")
             or self.get_metadata("replication-method")
@@ -79,6 +77,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         )
 
     def get_replication_key(self) -> str:
+        """Return the stream's replication key."""
         state_key = singer.get_bookmark(
             self._state, self._catalog_entry.tap_stream_id, "replication_key"
         )
@@ -99,6 +98,11 @@ class TapStreamBase(metaclass=abc.ABCMeta):
     def wipe_bookmarks(
         self, wipe_keys: List[str] = None, *, except_keys: List[str] = None,
     ) -> None:
+        """Wipe bookmarks.
+
+        You may specify a list to wipe or a list to keep, but not both.
+        """
+
         def _bad_args():
             raise ValueError(
                 "Incorrect number of arguments. "
@@ -123,6 +127,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
             )
 
     def sync(self):
+        """Sync this stream."""
         self.wipe_bookmarks(
             except_keys=[
                 "last_pk_fetched",
@@ -162,10 +167,11 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         singer.write_message(activate_version_message)
 
     def write_state_message(self):
+        """Write out a state message with the latest state."""
         singer.write_message(singer.StateMessage(value=copy.deepcopy(self._state)))
 
     def sync_records(self, row_generator: Callable, replication_method: str):
-        # columns = self.get_column_names()
+        """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
         for row_dict in row_generator():
             if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
@@ -179,6 +185,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
     def update_state(
         self, record_message: singer.RecordMessage, replication_method: str
     ):
+        """Update the stream's internal state with data from the provided record."""
         if not self._state:
             self._state = singer.write_bookmark(
                 self._state, self._tap_stream_id, "version", self.get_stream_version(),
@@ -221,7 +228,11 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         return self._state
 
     @abc.abstractmethod
-    def get_row_generator(self) -> Iterable[Iterable[Any]]:
+    def get_row_generator(self) -> Iterable[Iterable[Dict[str, Any]]]:
+        """Abstract row generator function. Must be overridden by the child class.
+
+        Each row emitted should be a dictionary of property names to their values.
+        """
         pass
 
     # pylint: disable=too-many-branches
@@ -234,7 +245,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
             datetime.timezone.utc
         ),
     ) -> RecordMessage:
-        """Transform SQL row to singer compatible record message."""
+        """Transform dictionary row data into a singer-compatible RECORD message."""
         rec: Dict[str, Any] = {}
         for property_name, elem in row.items():
             property_type = self._catalog_entry.schema.properties[property_name].type

@@ -2,13 +2,11 @@
 
 import abc
 import json
-import logging
 
-from typing import List, Optional, Type, Dict
+from typing import List, Type, Dict
 from pathlib import Path
 
 from singer import Catalog, CatalogEntry
-from singer.messages import StateMessage
 
 from tap_base.plugin_base import PluginBase
 from tap_base.tap_stream_base import TapStreamBase
@@ -54,18 +52,21 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     def get_all_stream_ids(
         self, allow_load: bool = True, allow_discover: bool = False
     ) -> List[str]:
+        """Return a list of all stream IDs."""
         self.init_catalog(allow_load=allow_load, allow_discover=allow_discover)
         return list(self._streams.keys())
 
     def get_stream(
         self, tap_stream_id, allow_load: bool = True, allow_discover: bool = False
     ) -> TapStreamBase:
+        """Return a stream object."""
         self.init_catalog(allow_load=allow_load, allow_discover=allow_discover)
         return self._streams[tap_stream_id]
 
     def get_streams(
         self, allow_load: bool = True, allow_discover: bool = False
     ) -> Dict[str, TapStreamBase]:
+        """Return a dictionary of all stream objects."""
         self.init_catalog(allow_load=allow_load, allow_discover=allow_discover)
         return self._streams
 
@@ -130,9 +131,6 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         """Return the catalog file text."""
         return json.dumps(self._catalog.to_dict())
 
-    def get_catalog_entry(self, tap_stream_id: str) -> CatalogEntry:
-        self._catalog.get_stream(tap_stream_id)
-
     # def get_selected_catalog_entries(self, tap_stream_id: str) -> List[CatalogEntry]:
     #     TODO: requires `state` arg
     #     self._catalog.get_selected_streams(state=state)
@@ -146,10 +144,12 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     def sync_one(
         self, tap_stream_id: str, allow_load: bool = True, allow_discover: bool = False
     ):
+        """Sync a single stream."""
         stream = self.get_stream(tap_stream_id, allow_load, allow_discover)
         stream.sync()
 
     def sync_all(self, allow_load: bool = True, allow_discover: bool = False):
+        """Sync all streams."""
         for tap_stream_id, stream in self.get_streams(
             allow_load=allow_load, allow_discover=allow_discover
         ).items():
