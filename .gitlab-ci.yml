@@ -22,8 +22,9 @@ test:
   script:
     - source $(poetry env info --path)/bin/activate
     - poetry run pytest
-    - tox -e py36,flake8
-# run:
+    # - tox -e py36,flake8
+
+    # run:
 #   script:
 #     - poetry build
 #   artifacts:
