@@ -11,7 +11,7 @@ from tap_base.connection_base import DiscoverableConnectionBase
 # import pyarrow.parquet as pq
 
 
-class SampleTapParquetConnection(DiscoverableConnectionBase):
+class SampleParquetConnection(DiscoverableConnectionBase):
     """Parquet Tap Connection Class."""
 
     _conn: Any

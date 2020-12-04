@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from tap_base.tap_base import TapBase
-from tap_base.tests.sample_tap_parquet.connection import SampleTapParquetConnection
+from tap_base.tests.sample_tap_parquet.connection import SampleParquetConnection
 from tap_base.tests.sample_tap_parquet.stream import SampleTapParquetStream
 
 
@@ -22,7 +22,7 @@ REQUIRED_CONFIG_SETS = [["filepath"]]
 class SampleTapParquet(TapBase):
     """Sample tap for Parquet."""
 
-    _conn: SampleTapParquetConnection
+    _conn: SampleParquetConnection
 
     def __init__(self, config: dict, state: dict = None) -> None:
         """Initialize the tap."""
@@ -33,7 +33,7 @@ class SampleTapParquet(TapBase):
             capabilities=PLUGIN_CAPABILITIES,
             accepted_options=ACCEPTED_CONFIG,
             option_set_requirements=REQUIRED_CONFIG_SETS,
-            connection_class=SampleTapParquetConnection,
+            connection_class=SampleParquetConnection,
             stream_class=SampleTapParquetStream,
             config=config,
             state=state,

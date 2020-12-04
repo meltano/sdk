@@ -57,7 +57,7 @@ _To create a tap class, follow these steps:_
 class SampleTapParquet(TapBase):
     """Sample tap for Parquet."""
 
-    _conn: SampleTapParquetConnection
+    _conn: SampleParquetConnection
 
     def __init__(self, config: dict, state: dict = None) -> None:
         """Initialize the tap."""
@@ -68,7 +68,7 @@ class SampleTapParquet(TapBase):
             capabilities=PLUGIN_CAPABILITIES,
             accepted_options=ACCEPTED_CONFIG,
             option_set_requirements=REQUIRED_CONFIG_SETS,
-            connection_class=SampleTapParquetConnection,
+            connection_class=SampleParquetConnection,
             stream_class=SampleTapParquetStream,
             config=config,
             state=state,
