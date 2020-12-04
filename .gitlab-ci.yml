@@ -23,7 +23,6 @@ test:
     - source $(poetry env info --path)/bin/activate
     - poetry run pytest
     - tox -e py36,flake8
-
 # run:
 #   script:
 #     - poetry build
@@ -31,13 +30,13 @@ test:
 #     paths:
 #       - dist/*.whl
 
-pages:
-  script:
-    - pip install sphinx sphinx-rtd-theme
-    - cd doc ; make html
-    - mv build/html/ ../public/
-  artifacts:
-    paths:
-      - public
-  # only:
-  #   - master
+# pages:
+#   script:
+#     - pip install sphinx sphinx-rtd-theme
+#     - cd doc ; make html
+#     - mv build/html/ ../public/
+#   artifacts:
+#     paths:
+#       - public
+#   # only:
+#   #   - master
