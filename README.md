@@ -19,3 +19,36 @@
 
 See the [dev guide](docs/dev_guide.md) for instructions on how to get started building your own
 taps.
+
+## Working within this repo
+
+First clone, then...
+
+### Install
+
+Install prereqs:
+
+```bash
+pip3 install pipx
+pipx ensurepath
+pipx install poetry
+```
+
+Install package dependencies:
+
+```bash
+cd tap-base
+```
+
+```bash
+# Install package and dependencies:
+poetry install
+# OR install in editable mode:
+poetry install --no-root
+```
+
+### Run tests
+
+```bash
+poetry run pytest
+```

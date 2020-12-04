@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "tap-base"
+version = "0.0.1"
+description = "An open framework for building singer-compliant taps"
+authors = ["Aaron Steers <aaronsteers@gmail.com>"]
+license = "Apache v2"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+singer-python = "5.9.0"
+backoff = "1.8.0"
+pendulum = "1.2.0"
+pytz = "2018.4"
+python-dateutil = "<2.8.1,>=2.1"
+pyarrow = "^2.0.0"
+
+[tool.poetry.dev-dependencies]
+snowflake-connector-python = "2.0.4"
+pyarrow = "^2.0.0"
+pytest = "^6.1.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
