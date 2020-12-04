@@ -1,4 +1,4 @@
-"""Tests discovery features for Parquet"""
+"""Tests discovery features for Parquet."""
 
 from tap_base.tests.sample_tap_parquet.tap import SampleTapParquet
 

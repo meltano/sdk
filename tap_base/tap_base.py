@@ -93,23 +93,18 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
             self._init_stream(
                 tap_stream_id=catalog_entry.tap_stream_id,
                 catalog_entry=catalog_entry,
-                state=None,
-                logger=self.logger,
+                state={},
             )
 
     def _init_stream(
-        self,
-        tap_stream_id: str,
-        catalog_entry: CatalogEntry,
-        state: Optional[StateMessage],
-        logger: logging.Logger,
+        self, tap_stream_id: str, catalog_entry: CatalogEntry, state: dict = {},
     ) -> TapStreamBase:
-        self.logger = logger
         new_stream = self._stream_class(
             tap_stream_id=tap_stream_id,
             connection=self._conn,
             catalog_entry=catalog_entry,
             state=state,
+            logger=self.logger,
         )
         self._streams[tap_stream_id] = new_stream
         return new_stream

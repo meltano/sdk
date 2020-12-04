@@ -1,8 +1,8 @@
 """Sample tap test for tap-parquet."""
 
-from typing import List, Union, Any
+from typing import List, Any
 
-from singer import Catalog, Schema
+from singer import Schema, metadata
 from singer.catalog import CatalogEntry
 
 from tap_base.connection_base import DiscoverableConnectionBase
@@ -28,23 +28,33 @@ class SampleTapParquetConnection(DiscoverableConnectionBase):
     def discover_stream(self, tap_stream_id) -> CatalogEntry:
         """Return a list of all streams (tables)."""
         # TODO: automatically infer this from the parquet schema
+        schema = Schema(
+            properties={
+                "f0": Schema(type=["string", "None"]),
+                "f1": Schema(type=["string", "None"]),
+                "f2": Schema(type=["string", "None"]),
+            }
+        )
+        key_properties = ["f0"]
+        replication_keys = ["f0"]
+        replication_method = "INCREMENTAL"
         return CatalogEntry(
             tap_stream_id=tap_stream_id,
             stream=tap_stream_id,
-            key_properties=[],
-            schema=Schema(
-                properties={
-                    "f0": Schema(type=["string", "None"]),
-                    "f1": Schema(type=["string", "None"]),
-                    "f2": Schema(type=["string", "None"]),
-                }
+            schema=schema,
+            metadata=metadata.get_standard_metadata(
+                schema=schema.to_dict(),
+                replication_method=replication_method,
+                key_properties=key_properties,
+                valid_replication_keys=replication_keys,
+                schema_name=None,
             ),
-            replication_key=None,
+            key_properties=key_properties,
+            replication_key=replication_keys[0],
+            replication_method=replication_method,
             is_view=None,
             database=None,
             table=None,
             row_count=None,
             stream_alias=None,
-            metadata=None,
-            replication_method=None,
         )
