@@ -7,7 +7,7 @@ from tap_base.tests.sample_tap_parquet.tap import SampleTapParquet
 
 COUNTER = 0
 
-SAMPLE_FILENAME = "/mnt/c/Files/Source/tap-base/tap_base/tests/testfile.parquet"
+SAMPLE_FILENAME = "/tmp/testfile.parquet"
 SAMPLE_CONFIG = {"filepath": SAMPLE_FILENAME}
 SAMPLE_CONFIG_BAD = {"not_valid": SAMPLE_FILENAME}
 
