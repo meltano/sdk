@@ -9,6 +9,5 @@ SAMPLE_CONFIG = {"filepath": SAMPLE_FILENAME}
 def test_tap_discovery():
     """Test class creation."""
     tap = SampleTapParquet(config=SAMPLE_CONFIG, state=None)
-    conn = tap.get_connection()
-    catalog = conn.discover_catalog()
-    assert catalog
+    catalog_json = tap.run_discovery()
+    assert catalog_json

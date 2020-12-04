@@ -79,15 +79,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         """Transform SQL row to singer compatible record message."""
         rec: Dict[str, Any] = {}
         for property_name, elem in row.items():
-            if True:
-                # TODO: Debug this
-                property_type = "Unknown"
-            elif not self._catalog_entry.schema:
-                property_type = "Unknown"
-            else:
-                property_type = self._catalog_entry.schema.properties[
-                    property_name
-                ].type
+            property_type = self._catalog_entry.schema.properties[property_name].type
             if isinstance(elem, datetime.datetime):
                 rec[property_name] = elem.isoformat() + "+00:00"
             elif isinstance(elem, datetime.date):

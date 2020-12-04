@@ -124,6 +124,13 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         Path(filepath).write_text(self.get_catalog_file_text())
         return filepath
 
+    def run_discovery(self) -> str:
+        """Write the catalog json to STDOUT and return the same as a string."""
+        self.init_catalog(allow_load=False, allow_discover=True)
+        catalog_json = self.get_catalog_file_text()
+        print(catalog_json)
+        return catalog_json
+
     def get_catalog_file_text(self) -> str:
         """Return the catalog file text."""
         return json.dumps(self._catalog.to_dict())

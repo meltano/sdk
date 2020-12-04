@@ -22,22 +22,23 @@ class SampleTapParquetConnection(DiscoverableConnectionBase):
         return self._conn
 
     def discover_available_stream_ids(self) -> List[str]:
+        # TODO: automatically infer this from the parquet schema
         return ["placeholder"]
 
     def discover_stream(self, tap_stream_id) -> CatalogEntry:
         """Return a list of all streams (tables)."""
-        _schema = Schema(
-            properties=[
-                Schema(description="f0", type=["string", "None"]),
-                Schema(description="f1", type=["string", "None"]),
-                Schema(description="f2", type=["string", "None"]),
-            ]
-        )
+        # TODO: automatically infer this from the parquet schema
         return CatalogEntry(
             tap_stream_id=tap_stream_id,
             stream=tap_stream_id,
             key_properties=[],
-            schema=_schema,
+            schema=Schema(
+                properties={
+                    "f0": Schema(type=["string", "None"]),
+                    "f1": Schema(type=["string", "None"]),
+                    "f2": Schema(type=["string", "None"]),
+                }
+            ),
             replication_key=None,
             is_view=None,
             database=None,
