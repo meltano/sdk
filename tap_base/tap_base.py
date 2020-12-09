@@ -149,7 +149,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
 
     def sync_all(self, allow_load: bool = True, allow_discover: bool = False):
         """Sync all streams."""
-        for tap_stream_id, stream in self.get_streams(
+        for stream in self.get_streams(
             allow_load=allow_load, allow_discover=allow_discover
-        ).items():
+        ).values():
             stream.sync()
