@@ -7,8 +7,6 @@ import os
 import gzip
 import json
 
-from dateutil import parser
-from dateutil.parser import ParserError
 from tempfile import mkstemp
 from decimal import Decimal
 

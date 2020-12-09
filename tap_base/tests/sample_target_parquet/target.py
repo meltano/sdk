@@ -4,6 +4,7 @@ import copy
 import json
 import sys
 import os
+from tap_base.tests.sample_target_parquet.target_stream import SampleParquetTargetStream
 
 from jsonschema import Draft4Validator, FormatChecker
 from pathlib import Path
@@ -35,16 +36,6 @@ class SampleTargetParquet(TargetBase):
     """Sample target for Parquet."""
 
     _conn: SampleParquetConnection
-    _schemas: Dict[str, Dict]
-    _validators: Dict[str, Draft4Validator]
-    _key_properties: Dict[str, List[str]] = {}
-    _records_to_load: Dict[str, Dict[str, Any]] = {}
-    _row_count: Dict[str, int] = {}
-    _stream_to_sync: Dict[str, Any] = {}
-    _total_row_count: Dict[str, int] = {}
-
-    _state = None
-    _flushed_state = None
 
     def __init__(self, config: dict, state: dict = None) -> None:
         """Initialize the target."""
@@ -56,5 +47,6 @@ class SampleTargetParquet(TargetBase):
             accepted_options=ACCEPTED_CONFIG,
             option_set_requirements=REQUIRED_CONFIG_SETS,
             connection_class=SampleParquetConnection,
+            target_stream_class=SampleParquetTargetStream,
             config=config,
         )

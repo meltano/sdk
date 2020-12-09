@@ -1,16 +1,9 @@
 """Sample Parquet target stream class, which handles writing streams."""
 
-
-from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
-
-from dateutil import parser
-from dateutil.parser import ParserError
 
 import pyarrow as pa
 import pyarrow.parquet as pq
-
-from tap_base.tests.sample_tap_parquet.connection import SampleParquetConnection
 
 from tap_base.target_stream_base import TargetStreamBase
 
