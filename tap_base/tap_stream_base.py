@@ -15,10 +15,10 @@ from singer import metadata
 
 from tap_base.connection_base import GenericConnectionBase
 
+DEBUG_MODE = True
+
 # How many records to emit between sending state message updates
-STATE_MSG_FREQUENCY = 10
-# TODO: revert after testing:
-# STATE_MSG_FREQUENCY = 1000
+STATE_MSG_FREQUENCY = 10 if DEBUG_MODE else 10000
 
 
 class TapStreamBase(metaclass=abc.ABCMeta):
@@ -227,14 +227,6 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         self._state = new_state
         return self._state
 
-    @abc.abstractmethod
-    def get_row_generator(self) -> Iterable[Iterable[Dict[str, Any]]]:
-        """Abstract row generator function. Must be overridden by the child class.
-
-        Each row emitted should be a dictionary of property names to their values.
-        """
-        pass
-
     # pylint: disable=too-many-branches
     def transform_row_to_singer_record(
         self,
@@ -286,3 +278,15 @@ class TapStreamBase(metaclass=abc.ABCMeta):
             version=version,
             time_extracted=time_extracted,
         )
+
+    ###########################
+    #### Abstract Methods #####
+    ###########################
+
+    @abc.abstractmethod
+    def get_row_generator(self) -> Iterable[Iterable[Dict[str, Any]]]:
+        """Abstract row generator function. Must be overridden by the child class.
+
+        Each row emitted should be a dictionary of property names to their values.
+        """
+        pass
