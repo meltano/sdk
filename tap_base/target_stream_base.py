@@ -8,13 +8,12 @@ import sys
 import re
 from logging import Logger
 import collections
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, Optional
 
 from jsonschema import Draft4Validator, FormatChecker
 
 from dateutil import parser
 
-import itertools
 import inflection
 
 from tap_base.connection_base import GenericConnectionBase
@@ -28,10 +27,12 @@ class RecordFlattener:
     max_level: Optional[int]
 
     def __init__(self, sep: str = "__", max_level: int = None):
+        """Initialize flattener."""
         self.sep = sep
         self.max_level = max_level
 
     def flatten_key(self, k, parent_key):
+        """Return a flattened version of the key."""
         full_key = parent_key + [k]
         inflected_key = full_key.copy()
         reducer_index = 0
@@ -50,6 +51,7 @@ class RecordFlattener:
         return self.sep.join(inflected_key)
 
     def flatten_record(self, d, flatten_schema=None, parent_key=[], level=0):
+        """Return a flattened version of the record."""
         items = []
         for k, v in d.items():
             new_key = self._flatten_key(k, parent_key)
@@ -89,10 +91,13 @@ class RecordFlattener:
 
 
 class TargetStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
+    """Abstract base class for target streams."""
 
     DEFAULT_BATCH_SIZE_ROWS = 100000
     DEFAULT_PARALLELISM = 0  # 0 The number of threads used to flush tables
-    DEFAULT_MAX_PARALLELISM = 16  # Don't use more than this number of threads by default when flushing streams in parallel
+    DEFAULT_MAX_PARALLELISM = 16
+    # Don't use more than this number of threads by default when flushing streams in
+    # parallel
 
     APPEND_SDC_METADATA_COLS = True
 
@@ -125,6 +130,7 @@ class TargetStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         schema: Dict,
         logger: Logger,
     ) -> None:
+        """Initialize target stream."""
         super().__init__(
             tap_stream_id=stream_name,
             connection=connection,
@@ -138,6 +144,7 @@ class TargetStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         self.validator = Draft4Validator(schema, format_checker=FormatChecker())
 
     def process_record(self, record: Dict, message: Dict):
+        """Process record."""
         self.validate_record(record)
         primary_key_string = self.record_primary_key_string(record)
         if not primary_key_string:
@@ -164,6 +171,7 @@ class TargetStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         return record
 
     def record_primary_key_string(self, record):
+        """Return a string representing the primary key."""
         if len(self.stream_schema_message["key_properties"]) == 0:
             return None
         if self.flattener:
@@ -185,6 +193,7 @@ class TargetStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
             return ",".join(key_props)
 
     def emit_state(self):
+        """Emit the stream's latest state."""
         if self._flushed_state:
             line = json.dumps(self._flushed_state)
             self.logger.info(f"Emitting state {line}")
@@ -224,6 +233,7 @@ class TargetStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         return None
 
     def validate_record(self, record: Dict) -> Dict:
+        """Validate or repair the record."""
         self.validate_timestamps_in_record(
             record=record, schema=self.schema, treatment="null"
         )
@@ -233,8 +243,11 @@ class TargetStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         self, record: Dict, schema: Dict, treatment: str
     ) -> None:
         """
-        Goes through every field that is of type date/datetime/time and if its value is out of range,
-        resets it to MAX value accordingly
+        Confirm or repair date or timestamp values in record.
+
+        Goes through every field that is of type date/datetime/time and if its value is
+        out of range, resets it to MAX value accordingly
+
         Args:
             record: record containing properties and values
             schema: json schema that has types of each property
@@ -276,8 +289,8 @@ class TargetStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
             self._records_cache,
             self._num_records_cached,
         )
-        self._records_cache, self._num_records_cached = [], 0
-        self.flush_records(records, num_records)
+        self._records_cache, self._num_records_cached = {}, 0
+        self.flush_records(records.values(), num_records)
         self._flushed_state = new_state
         self.emit_state()
         return self._flushed_state
