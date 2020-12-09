@@ -151,15 +151,15 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         activate_version_message = singer.ActivateVersionMessage(
             stream=self._catalog_entry.stream, version=self.get_stream_version()
         )
-        if not initial_full_table_complete and not (
-            version_exists and state_version is None
-        ):
-            singer.write_message(activate_version_message)
         replication_method = self.get_replication_method()
         self.logger.info(
             f"Beginning sync of '{self._tap_stream_id}' using "
             f"'{replication_method}' replication..."
         )
+        if not initial_full_table_complete and not (
+            version_exists and state_version is None
+        ):
+            singer.write_message(activate_version_message)
         self.sync_records(self.get_row_generator, replication_method)
         singer.clear_bookmark(self._state, self._tap_stream_id, "max_pk_values")
         singer.clear_bookmark(self._state, self._tap_stream_id, "last_pk_fetched")
