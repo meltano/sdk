@@ -7,19 +7,13 @@ from typing import Any, List, Optional
 from singer import Catalog, CatalogEntry
 import backoff
 
-
-class TooManyRecordsException(Exception):
-    """Exception to raise when query returns more records than max_records."""
+from tap_base.exceptions import TapStreamConnectionFailure
 
 
-class TapConnectionFailure(Exception):
-    """Exception to raise when connection attempt fails or connection is disconnected."""
+class GenericStreamBase(metaclass=abc.ABCMeta):
+    """Abstract base class for generic tap streams."""
 
-
-class GenericConnectionBase(metaclass=abc.ABCMeta):
-    """Abstract base class for generic tap connections."""
-
-    MAX_CONNECTION_RETRIES = 0
+    MAX_CONNECT_RETRIES = 0
 
     _config: dict
     _conn: Any
@@ -28,7 +22,7 @@ class GenericConnectionBase(metaclass=abc.ABCMeta):
     logger: logging.Logger
 
     def __init__(self, config: dict, logger: logging.Logger):
-        """Initialize connection."""
+        """Initialize stream."""
         self._config = config
         self.logger = logger
 
@@ -37,22 +31,22 @@ class GenericConnectionBase(metaclass=abc.ABCMeta):
         return self._config.get(config_key, default)
 
     @abc.abstractmethod
-    def open_connection(self) -> Any:
-        """Initialize the tap connection."""
+    def open_stream_connection(self) -> Any:
+        """Initialize the tap stream connection."""
         pass
 
     def log_backoff_attempt(self, details):
-        """Log backoff attempts used by connection retry_pattern()."""
+        """Log backoff attempts used by stream retry_pattern()."""
         self.logger.info(
             "Error communicating with source, "
             f"triggering backoff: {details.get('tries')} try"
         )
 
     def connect_with_retries(self) -> Any:
-        """Run open_connection() and retry automatically a few times if failed."""
+        """Run open_stream_connection() and retry automatically a few times if failed."""
         return backoff.on_exception(
             backoff.expo,
-            exception=TapConnectionFailure,
+            exception=TapStreamConnectionFailure,
             max_tries=self.MAX_CONNECTION_RETRIES,
             on_backoff=self.log_backoff_attempt,
             factor=2,
@@ -79,10 +73,10 @@ class GenericConnectionBase(metaclass=abc.ABCMeta):
         )
 
 
-class DiscoverableConnectionBase(GenericConnectionBase, metaclass=abc.ABCMeta):
-    """Abstract base class for (generic) connections that support discovery."""
+class DiscoverableStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
+    """Abstract base class for (generic) streams that support discovery."""
 
-    MAX_CONNECTION_RETRIES = 0
+    MAX_CONNECT_RETRIES = 0
 
     _is_discoverable = True
 
@@ -99,10 +93,10 @@ class DiscoverableConnectionBase(GenericConnectionBase, metaclass=abc.ABCMeta):
         pass
 
 
-class DatabaseConnectionBase(DiscoverableConnectionBase, metaclass=abc.ABCMeta):
-    """Abstract base class for database-type connections."""
+class DatabaseStreamBase(DiscoverableStreamBase, metaclass=abc.ABCMeta):
+    """Abstract base class for database-type streams."""
 
-    MAX_CONNECTION_RETRIES = 5
+    MAX_CONNECT_RETRIES = 5
 
     THREE_PART_NAMES: bool = True  # Uses db.schema.table syntax (versus 2-part: db.table)
     DEFAULT_QUOTE_CHAR = '"'
