@@ -83,14 +83,14 @@ class SampleSnowflakeTargetStream(TargetStreamBase):
                     outfile, records_to_load, self._record_to_csv_line
                 )
         size_bytes = os.path.getsize(csv_file)
-        s3_key = self.conn.put_to_stage(
+        s3_key = self._put_to_stage(
             csv_file, stream, expected_row_count, temp_dir=temp_dir
         )
-        self.conn.load_csv(s3_key, expected_row_count, size_bytes)
+        self._load_csv(self.conn, s3_key, expected_row_count, size_bytes)
         os.close(csv_fd)
         os.remove(csv_file)
         if not retain_s3_files:
-            self.conn.delete_from_stage(s3_key)
+            self._delete_from_stage(s3_key)
         return self._cached_state
 
     def _record_to_csv_line(self, record: Dict) -> str:
@@ -109,5 +109,23 @@ class SampleSnowflakeTargetStream(TargetStreamBase):
 
     def write_record_to_file(
         self, outfile: BinaryIO, records: Iterable[Dict], tranformer_fn: Callable
+    ):
+        raise NotImplementedError()
+
+    def _put_to_stage(
+        self,
+        conn: SampleSnowflakeConnection,
+        csv_file: str,
+        stream_name: str,
+        expected_row_count: Optional[int],
+        temp_dir: str,
+    ) -> str:
+        raise NotImplementedError()
+
+    def _delete_from_stage(self, conn: SampleSnowflakeConnection, s3_key: str):
+        raise NotImplementedError()
+
+    def _load_csv(
+        self, conn: SampleSnowflakeConnection, s3_key, expected_row_count, size_bytes
     ):
         raise NotImplementedError()
