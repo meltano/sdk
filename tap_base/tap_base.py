@@ -100,15 +100,14 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     def _init_stream(
         self, tap_stream_id: str, catalog_entry: CatalogEntry, state: dict = {},
     ) -> TapStreamBase:
-        new_stream = self._stream_class(
+        self._streams[tap_stream_id] = self._stream_class(
             tap_stream_id=tap_stream_id,
             connection=self._conn,
             catalog_entry=catalog_entry,
             state=state,
             logger=self.logger,
         )
-        self._streams[tap_stream_id] = new_stream
-        return new_stream
+        return self._streams[tap_stream_id]
 
     def read_catalog_file(self, filepath) -> Catalog:
         """Return a list of all streams (tables)."""
