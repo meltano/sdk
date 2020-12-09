@@ -1,7 +1,5 @@
 """Sample Snowflake target stream class, which handles writing streams."""
 
-
-from logging import FileHandler
 from typing import BinaryIO, Callable, Dict, Iterable, Optional
 import os
 import gzip
@@ -59,9 +57,9 @@ class SampleSnowflakeTargetStream(TargetStreamBase):
     def flush_records(
         self, records_to_load: Iterable[Dict], expected_row_count: Optional[int]
     ) -> dict:
-        temp_dir = self.get_config("temp_dir")
-        no_compression = self.get_config("no_compression")
-        retain_s3_files = self.get_config("retain_s3_files")
+        temp_dir = self._conn.get_config("temp_dir")
+        no_compression = self._conn.get_config("no_compression")
+        retain_s3_files = self._conn.get_config("retain_s3_files")
 
         if temp_dir:
             os.makedirs(temp_dir, exist_ok=True)

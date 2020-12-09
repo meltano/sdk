@@ -135,7 +135,7 @@ class TargetStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
             tap_stream_id=stream_name,
             connection=connection,
             catalog_entry=None,
-            state=None,
+            state={},
             logger=logger,
         )
         self.schema = schema
