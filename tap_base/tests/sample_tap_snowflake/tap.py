@@ -4,7 +4,7 @@ from pathlib import Path
 
 from tap_base.tap_base import TapBase
 from tap_base.tests.sample_tap_snowflake.connection import SampleSnowflakeConnection
-from tap_base.tests.sample_tap_snowflake.stream import SampleTapSnowflakeStream
+from tap_base.tests.sample_tap_snowflake.tap_stream import SampleTapSnowflakeStream
 
 
 PLUGIN_NAME = "sample-tap-snowflake"

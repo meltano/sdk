@@ -4,7 +4,7 @@ from pathlib import Path
 
 from tap_base.tap_base import TapBase
 from tap_base.tests.sample_tap_parquet.connection import SampleParquetConnection
-from tap_base.tests.sample_tap_parquet.stream import SampleTapParquetStream
+from tap_base.tests.sample_tap_parquet.tap_stream import SampleTapParquetStream
 
 
 PLUGIN_NAME = "sample-tap-parquet"
