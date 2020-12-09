@@ -5,6 +5,7 @@ from snowflake.connector.connection import SnowflakeConnection
 import snowflake.connector
 
 from tap_base import DatabaseConnectionBase
+from tap_base.exceptions import TooManyRecordsException
 
 
 class SampleSnowflakeConnection(DatabaseConnectionBase):
