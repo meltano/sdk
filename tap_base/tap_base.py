@@ -7,8 +7,6 @@ from logging import Logger
 from singer.catalog import Catalog
 from tap_base.helpers import classproperty
 
-# from tap_base.streams.discoverable import DiscoverableStreamBase
-
 from typing import Any, List, Optional, Type, Dict
 from pathlib import Path
 
