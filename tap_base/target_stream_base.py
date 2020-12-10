@@ -16,7 +16,6 @@ from dateutil import parser
 
 import inflection
 
-from tap_base.connection_base import GenericConnectionBase
 from tap_base.tap_stream_base import TapStreamBase
 
 
@@ -126,7 +125,6 @@ class TargetStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     def __init__(
         self,
         stream_name: str,
-        connection: GenericConnectionBase,
         schema: Dict,
         logger: Logger,
     ) -> None:

@@ -37,6 +37,7 @@ class SampleParquetTargetStream(TargetStreamBase):
     def flush_records(
         self, records_to_load: Iterable[Dict], expected_row_count: Optional[int]
     ):
+        print("Flushing records...")
         num_written = 0
         for record in records_to_load:
             schema = pa.schema([("some_int", pa.int32()), ("some_string", pa.string())])

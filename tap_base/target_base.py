@@ -3,12 +3,11 @@
 import abc
 import json
 
-from typing import Dict, Iterable, List, Type
+from typing import Any, Dict, Iterable, List, Optional, Type
 
 from singer import Catalog, CatalogEntry
 
 from tap_base.plugin_base import PluginBase
-from tap_base.connection_base import GenericConnectionBase
 from tap_base.target_stream_base import TargetStreamBase
 
 
@@ -20,28 +19,9 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
     _stream_class: Type[TargetStreamBase]
     _streams: Dict[str, TargetStreamBase] = {}
 
-    def __init__(
-        self,
-        plugin_name: str,
-        version: str,
-        capabilities: List[str],
-        accepted_options: List[str],
-        option_set_requirements: List[List[str]],
-        connection_class: Type[GenericConnectionBase],
-        target_stream_class: Type[TargetStreamBase],
-        config: dict,
-    ) -> None:
+    def __init__(self, config: Optional[Dict[str, Any]] = None,) -> None:
         """Initialize the tap."""
-        self._stream_class = target_stream_class
-        super().__init__(
-            plugin_name=plugin_name,
-            version=version,
-            capabilities=capabilities,
-            accepted_options=accepted_options,
-            option_set_requirements=option_set_requirements,
-            connection_class=connection_class,
-            config=config,
-        )
+        super().__init__(config=config)
 
     def get_stream(self, stream_name: str) -> TargetStreamBase:
         if stream_name in self._streams:
@@ -67,12 +47,9 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
             except json.decoder.JSONDecodeError:
                 self.logger.error("Unable to parse:\n{}".format(line))
                 raise
-
             if "type" not in o:
                 raise Exception("Line is missing required key 'type': {}".format(line))
-
             record_type, record_val = o["type"], o["value"]
-
             if record_type == "SCHEMA":
                 self.process_schema_message(record_val)
             elif record_type == "RECORD":

@@ -10,13 +10,15 @@ from tap_base.tests.sample_target_parquet.target import SampleTargetParquet
 
 SAMPLE_FILENAME = "/tmp/testfile.parquet"
 SAMPLE_TAP_CONFIG = {"filepath": SAMPLE_FILENAME}
-SAMPLE_TARGET_CONFIG = {"filepath": f"{SAMPLE_FILENAME}-{datetime.now()}"}
+SAMPLE_TARGET_CONFIG = {
+    "filepath": f"{SAMPLE_FILENAME.replace('.parquet', '-' + datetime.now().strftime('%Y%m%d-%H%M%S') + '.parquet')}"
+}
 
 
 def test_tap_to_target():
     tap = SampleTapParquet(config=SAMPLE_TAP_CONFIG, state=None)
-    target = SampleTargetParquet(config=SAMPLE_TARGET_CONFIG, state=None)
     with io.StringIO() as buf, redirect_stdout(buf):
-        tap.sync_all(allow_load=False, allow_discover=True)
+        tap.sync_all()
+        target = SampleTargetParquet(config=SAMPLE_TARGET_CONFIG)
         target.process_lines(buf)
     assert Path(SAMPLE_TARGET_CONFIG["filepath"]).exists()

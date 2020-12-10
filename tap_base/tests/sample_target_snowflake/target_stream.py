@@ -8,8 +8,6 @@ import json
 from tempfile import mkstemp
 from decimal import Decimal
 
-from tap_base.tests.sample_tap_snowflake.connection import SampleSnowflakeConnection
-
 from tap_base.target_stream_base import TargetStreamBase
 
 
