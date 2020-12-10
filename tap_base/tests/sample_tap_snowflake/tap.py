@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Type
 
 from tap_base.tap_base import TapBase
-from tap_base.tests.sample_tap_snowflake.connection import SampleSnowflakeConnection
 from tap_base.tests.sample_tap_snowflake.tap_stream import SampleTapSnowflakeStream
 
 

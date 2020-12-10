@@ -1,6 +1,6 @@
 """Sample tap stream test for tap-snowflake."""
 
-from tap_base.streams import TapStreamBase
+from tap_base.tap_stream_base import TapStreamBase
 from typing import List, Union
 from snowflake import connector
 

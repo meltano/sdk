@@ -25,13 +25,13 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = {},
-        catalog: Optional[Dict[str, Any]] = {},
-        state: Optional[Dict[str, Any]] = {},
+        config: Optional[Dict[str, Any]] = None,
+        catalog: Optional[Dict[str, Any]] = None,
+        state: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Initialize the tap."""
         self._state = state or {}
-        super().__init__(config=config,)
+        super().__init__(config=config)
         if catalog:
             self.load_catalog_streams(
                 catalog=catalog,
