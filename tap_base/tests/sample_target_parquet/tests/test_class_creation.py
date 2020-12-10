@@ -8,4 +8,4 @@ SAMPLE_CONFIG = {"filepath": SAMPLE_FILENAME}
 
 def test_target_class():
     """Test class creation."""
-    _ = SampleTargetParquet(config=SAMPLE_CONFIG, state=None)
+    _ = SampleTargetParquet(config=SAMPLE_CONFIG)

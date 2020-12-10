@@ -6,5 +6,4 @@ from tap_base.tests.sample_tap_snowflake.tap_stream import SampleTapSnowflakeStr
 __all__ = [
     "SampleTapSnowflake",
     "SampleTapSnowflakeStream",
-    "SampleSnowflakeConnection",
 ]
