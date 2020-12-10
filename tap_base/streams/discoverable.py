@@ -1,108 +1,44 @@
 """Shared parent class for TapBase, TargetBase, and TransformBase."""
 
 import abc
-import logging
-from typing import Any, List, Optional
+from logging import Logger
+from typing import Any, Dict, List, Optional
 
 from singer import Catalog, CatalogEntry
-import backoff
+
+from tap_base.tap_stream_base import FactoryType, TapStreamBase
+from tap_base.helpers import classproperty
 
 
-class TooManyRecordsException(Exception):
-    """Exception to raise when query returns more records than max_records."""
+# class DiscoverableStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
+#     """Abstract base class for (generic) streams that support discovery."""
+
+#     MAX_CONNECT_RETRIES = 0
+
+#     @classproperty
+#     def discoverable(cls):
+#         """Set to true if stream can discover its own metadata."""
+#         return True
+
+#     @classmethod
+#     def discover_streams(
+#         cls, config: Dict[str, Any], state: Dict[str, Any], logger: Logger
+#     ) -> Dict[str, FactoryType]:
+#         """Return a dictionary of all discovered streams."""
+#         for tap_stream_id in self.discover_available_stream_ids():
+#             streams.append(self.discover_stream(tap_stream_id))
+#         return Catalog(streams)
+
+#     @abc.abstractmethod
+#     def discover_stream(self, tap_stream_id) -> CatalogEntry:
+#         """Scan a specific stream and return its discovered CatalogEntry object."""
+#         pass
 
 
-class TapConnectionFailure(Exception):
-    """Exception to raise when connection attempt fails or connection is disconnected."""
+class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
+    """Abstract base class for database-type streams."""
 
-
-class GenericConnectionBase(metaclass=abc.ABCMeta):
-    """Abstract base class for generic tap connections."""
-
-    MAX_CONNECTION_RETRIES = 0
-
-    _config: dict
-    _conn: Any
-    _is_discoverable: bool = False
-
-    logger: logging.Logger
-
-    def __init__(self, config: dict, logger: logging.Logger):
-        """Initialize connection."""
-        self._config = config
-        self.logger = logger
-
-    def get_config(self, config_key: str, default: Any = None) -> Any:
-        """Return config value or a default value."""
-        return self._config.get(config_key, default)
-
-    @abc.abstractmethod
-    def open_connection(self) -> Any:
-        """Initialize the tap connection."""
-        pass
-
-    def log_backoff_attempt(self, details):
-        """Log backoff attempts used by connection retry_pattern()."""
-        self.logger.info(
-            "Error communicating with source, "
-            f"triggering backoff: {details.get('tries')} try"
-        )
-
-    def connect_with_retries(self) -> Any:
-        """Run open_connection() and retry automatically a few times if failed."""
-        return backoff.on_exception(
-            backoff.expo,
-            exception=TapConnectionFailure,
-            max_tries=self.MAX_CONNECTION_RETRIES,
-            on_backoff=self.log_backoff_attempt,
-            factor=2,
-        )(self.open_connection)()
-
-    def is_connected(self) -> bool:
-        """Return True if connected."""
-        return self._conn is not None
-
-    def ensure_connected(self):
-        """Connect if not yet connected."""
-        if not self.is_connected():
-            self.connect_with_retries()
-
-    @abc.abstractmethod
-    def discover_available_stream_ids(self) -> List[str]:
-        """Return a list of all streams (tables)."""
-        pass
-
-    def discover_catalog(self) -> Catalog:
-        """Return a list of all streams (tables)."""
-        raise NotImplementedError(
-            "This connection type does not yet support automatic discovery."
-        )
-
-
-class DiscoverableConnectionBase(GenericConnectionBase, metaclass=abc.ABCMeta):
-    """Abstract base class for (generic) connections that support discovery."""
-
-    MAX_CONNECTION_RETRIES = 0
-
-    _is_discoverable = True
-
-    def discover_catalog(self) -> Catalog:
-        """Return a list of all streams (tables)."""
-        streams: List[CatalogEntry] = []
-        for tap_stream_id in self.discover_available_stream_ids():
-            streams.append(self.discover_stream(tap_stream_id))
-        return Catalog(streams)
-
-    @abc.abstractmethod
-    def discover_stream(self, tap_stream_id) -> CatalogEntry:
-        """Scan a specific stream and return its discovered CatalogEntry object."""
-        pass
-
-
-class DatabaseConnectionBase(DiscoverableConnectionBase, metaclass=abc.ABCMeta):
-    """Abstract base class for database-type connections."""
-
-    MAX_CONNECTION_RETRIES = 5
+    MAX_CONNECT_RETRIES = 5
 
     THREE_PART_NAMES: bool = True  # Uses db.schema.table syntax (versus 2-part: db.table)
     DEFAULT_QUOTE_CHAR = '"'

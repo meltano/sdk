@@ -2,69 +2,79 @@
 
 import abc
 import logging
-from typing import List, Type, Tuple, Any
+from tap_base.helpers import classproperty
+from typing import Dict, List, Optional, Type, Tuple, Any
 
-from tap_base.connection_base import GenericConnectionBase
+import click
+
+from tap_base.stream_base import GenericStreamBase
 
 
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    _name: str
-    _vers: str
-    _capabilities: List[str]
-    _accepted_options: List[str]
-    _option_set_requirements: List[List[str]]
     _config: dict
-    _conn_class: Type[GenericConnectionBase]
-    _conn: GenericConnectionBase
+    _logger: Optional[logging.Logger] = None
 
-    logger: logging.Logger
+    @property
+    def logger(self) -> logging.Logger:
+        if not self._logger:
+            self._logger = logging.getLogger(self.plugin_name)
+        return self._logger
 
     # Constructor
 
-    def __init__(
-        self,
-        plugin_name: str,
-        version: str,
-        capabilities: List[str],
-        accepted_options: List[str],
-        option_set_requirements: List[List[str]],
-        connection_class: Type[GenericConnectionBase],
-        config: dict,
-    ) -> None:
+    def __init__(self, config: Optional[Dict[str, Any]] = {},) -> None:
         """Initialize the tap."""
-        self._name = plugin_name
-        self._vers = version
-        self._capabilities = capabilities
-        self._accepted_options = accepted_options
-        self._option_set_requirements = option_set_requirements
-        self._config = config
-        self.logger = logging.getLogger(plugin_name)
+        self._config = config or {}
         self.validate_config()
-        self._conn_class = connection_class
-        self._conn = None
-        self._conn = self.get_connection()
+
+    @classproperty
+    def plugin_name(cls) -> str:
+        """Return the plugin name."""
+        return "sample-plugin-name"
+
+    @classproperty
+    def stream_class(cls) -> Type[GenericStreamBase]:
+        """Return the stream class."""
+        return GenericStreamBase
+
+    @property
+    def capabilities(self) -> List[str]:
+        """Return a list of supported capabilities."""
+        return []
+
+    @abc.abstractproperty
+    @classproperty
+    def accepted_config_options(cls) -> List[str]:
+        return ["start_date"]
+
+    @abc.abstractproperty
+    @classproperty
+    def required_config_sets(cls) -> List[List[str]]:
+        return [[]]
 
     # Core plugin metadata:
 
-    def get_plugin_name(self) -> str:
-        """Return the plugin name."""
-        return self._name
+    @classproperty
+    def plugin_version(cls) -> str:
+        """Return the package version number."""
+        try:
+            from importlib import metadata
+        except ImportError:
+            # Running on pre-3.8 Python; use importlib-metadata package
+            import importlib_metadata as metadata
+        try:
+            version = metadata.version(cls.plugin_name)
+        except metadata.PackageNotFoundError:
+            version = "[could not be detected]"
+        return version
 
-    def get_plugin_version(self) -> str:
-        """Return the plugin version string."""
-        return self._vers
-
-    def get_capabilities(self) -> List[str]:
-        """Return a list of supported capabilities."""
-        return self._capabilities
+    # Core plugin config:
 
     def get_config(self, config_key: str, default: Any = None) -> Any:
         """Return config value or a default value."""
         return self._config.get(config_key, default)
-
-    # Core plugin metadata:
 
     def validate_config(
         self, raise_errors: bool = True, warnings_as_errors: bool = False
@@ -73,10 +83,10 @@ class PluginBase(metaclass=abc.ABCMeta):
         warnings: List[str] = []
         errors: List[str] = []
         for k in self._config:
-            if k not in self._accepted_options:
+            if k not in self.accepted_config_options:
                 warnings.append(f"Unexpected config option found: {k}.")
-        if self._option_set_requirements:
-            required_sets = self._option_set_requirements
+        if self.required_config_sets:
+            required_sets = self.required_config_sets
             matched_any = False
             missing: List[List[str]] = []
             for required_set in required_sets:
@@ -102,40 +112,12 @@ class PluginBase(metaclass=abc.ABCMeta):
             )
         return warnings, errors
 
-    # Connection management:
-
-    def get_connection(self) -> GenericConnectionBase:
-        """Get or create tap connection."""
-        if not self._conn:
-            self._conn = self._conn_class(config=self._config, logger=self.logger)
-        return self._conn
-
-    # Standard CLI Functions:
-
-    def print_help(self) -> None:
-        """Print help text for the tap."""
-        self.print_version()
-        print(self.get_usage_str())
-
     def print_version(self) -> None:
         """Print help text for the tap."""
-        print(self.get_usage_str())
+        print(f"{self.plugin_name} v{self.plugin_version}")
 
-    def get_usage_str(self) -> str:
-        """Get usage string (used in --help)."""
-        capabilities = self.get_capabilities()
-        plugin = self.get_plugin_name()
-        result = "\n".join([f"Usage for {plugin}:", ""])
-        if "sync" in capabilities:
-            result += f"  {plugin} sync [--config CONFIG]"
-            if "state" in capabilities:
-                result += " [--state STATE]"
-            if "catalog" in capabilities:
-                result += " [--catalog CATALOG]"
-            result += "\n"
-        return result
-
-    @abc.abstractmethod
-    def handle_cli_args(self, args, cwd, environ) -> None:
-        """Take necessary action in response to a CLI command."""
+    @classmethod
+    @click.command()
+    def cli(cls):
+        """Handle command line execution."""
         pass
