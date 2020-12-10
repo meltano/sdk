@@ -10,7 +10,7 @@ import time
 from typing import Dict, Iterable, Any, List, Optional, Tuple, Callable, TypeVar, Union
 
 import singer
-from singer import CatalogEntry, RecordMessage
+from singer import CatalogEntry, RecordMessage, SchemaMessage
 from singer import metadata
 from singer.catalog import Catalog
 from singer.schema import Schema
@@ -241,6 +241,7 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
             version_exists and state_version is None
         ):
             singer.write_message(activate_version_message)
+        self.write_schema_message()
         self.sync_records(self.get_row_generator, self.replication_method)
         singer.clear_bookmark(self._state, self._tap_stream_id, "max_pk_values")
         singer.clear_bookmark(self._state, self._tap_stream_id, "last_pk_fetched")
@@ -248,8 +249,16 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
         singer.write_message(activate_version_message)
 
     def write_state_message(self):
-        """Write out a state message with the latest state."""
+        """Write out a STATE message with the latest state."""
         singer.write_message(singer.StateMessage(value=copy.deepcopy(self._state)))
+
+    def write_schema_message(self):
+        """Write out a SCHEMA message with the stream schema."""
+        bookmark_keys = [self.bookmark_key] if self.bookmark_key else None
+        schema_message = SchemaMessage(
+            self.tap_stream_id, self.schema, self.primary_key, bookmark_keys
+        )
+        singer.write_message(schema_message)
 
     def sync_records(self, row_generator: Callable, replication_method: str):
         """Sync records, emitting RECORD and STATE messages."""
