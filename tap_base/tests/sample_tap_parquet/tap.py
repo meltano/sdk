@@ -1,16 +1,13 @@
 """Sample tap test for tap-parquet."""
 
 from logging import Logger
-from singer import metadata
+from typing import List, Type
 
 from singer.schema import Schema
-from tap_base.helpers import classproperty
-from typing import Any, Dict, List, Optional, Set, Type
 
 import click
 
-from singer.catalog import CatalogEntry
-
+from tap_base.helpers import classproperty
 from tap_base.tap_base import TapBase
 from tap_base.tests.sample_tap_parquet.tap_stream import SampleTapParquetStream
 
@@ -63,6 +60,9 @@ class SampleTapParquet(TapBase):
             new_stream.primary_key = ["f0"]
             new_stream.bookmark_key = "f0"
             self._streams[tap_stream_id] = new_stream
+
+
+# CLI Execution:
 
 
 @click.option("--discover", is_flag=True)

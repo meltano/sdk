@@ -1,26 +1,16 @@
 """Sample tap stream test for tap-parquet."""
 
-from typing import Any, Dict, Iterable
+from typing import Iterable
 
 import pyarrow.parquet as pq
 
-# from tap_base.streams.discoverable import DiscoverableStreamBase
 from tap_base.tap_stream_base import TapStreamBase
-from typing import List, Any
-
-from singer import Schema, metadata
-from singer.catalog import CatalogEntry
 
 
 class SampleTapParquetStream(TapStreamBase):
     """Sample tap test for parquet."""
 
-    def open_connection(self) -> Any:
-        """Connect to parquet database."""
-        self._conn = "ASampleTable"
-        return self._conn
-
-    def get_row_generator(self) -> Iterable[Dict[str, Any]]:
+    def get_row_generator(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
         filepath = self.get_config("filepath")
         if not filepath:
