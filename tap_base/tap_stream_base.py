@@ -142,19 +142,38 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
             stream_alias=None,
         )
 
+    def set_custom_metadata(self, md: Optional[dict]) -> None:
+        if md:
+            self._custom_metadata = md
+        pk = self.get_metadata("key-properties", from_metadata_dict=md)
+        bookmark_key = self.get_metadata("replication-key", from_metadata_dict=md)
+        valid_bookmark_key = self.get_metadata(
+            "valid-replication-keys", from_metadata_dict=md
+        )
+        method = self.get_metadata("forced-replication-method", from_metadata_dict=md)
+        method = method or self.get_metadata(
+            "replication-method", from_metadata_dict=md
+        )
+        if pk:
+            self.primary_key = pk
+        if bookmark_key:
+            self.bookmark_key = bookmark_key
+        elif valid_bookmark_key:
+            self.bookmark_key = valid_bookmark_key[0]
+
     # @lru_cache
     def get_metadata(
         self,
         key_name,
         default: Any = None,
         breadcrumb: Tuple = (),
-        generate: bool = False,
+        from_metadata_dict: dict = None,
     ):
         """Return top level metadata (breadcrumb="()")."""
-        if not generate:
+        if not from_metadata_dict:
             md_dict = self._custom_metadata
         else:
-            md_dict = self.singer_metadata
+            md_dict = from_metadata_dict
         if not md_dict:
             return default
         md_map = metadata.to_map(md_dict)
@@ -214,16 +233,15 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
         activate_version_message = singer.ActivateVersionMessage(
             stream=self.tap_stream_id, version=self.get_stream_version()
         )
-        replication_method = self.get_replication_method()
         self.logger.info(
             f"Beginning sync of '{self.tap_stream_id}' using "
-            f"'{replication_method}' replication..."
+            f"'{self.replication_method}' replication..."
         )
         if not initial_full_table_complete and not (
             version_exists and state_version is None
         ):
             singer.write_message(activate_version_message)
-        self.sync_records(self.get_row_generator, replication_method)
+        self.sync_records(self.get_row_generator, self.replication_method)
         singer.clear_bookmark(self._state, self._tap_stream_id, "max_pk_values")
         singer.clear_bookmark(self._state, self._tap_stream_id, "last_pk_fetched")
         singer.write_message(singer.StateMessage(value=copy.deepcopy(self._state)))
@@ -256,7 +274,6 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
         new_state = copy.deepcopy(self._state)
         if record_message:
             if replication_method == "FULL_TABLE":
-                key_properties = self.get_key_properties()
                 max_pk_values = singer.get_bookmark(
                     new_state, self._tap_stream_id, "max_pk_values"
                 )
@@ -264,7 +281,7 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
                     last_pk_fetched = {
                         k: v
                         for k, v in record_message.record.items()
-                        if k in key_properties
+                        if k in self.primary_key
                     }
                     new_state = singer.write_bookmark(
                         new_state,
@@ -368,13 +385,15 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
     ) -> FactoryType:
         """Create a stream object from a catalog's 'stream' dictionary entry."""
         stream_name = stream_dict.get("tap_stream_id", stream_dict.get("stream"))
-        return cls(
+        new_stream = cls(
             tap_stream_id=stream_name,
             schema=stream_dict.get("schema"),
             config=config,
             state=state,
             logger=logger,
         )
+        new_stream.set_custom_metadata(stream_dict.get("metadata"))
+        return new_stream
 
     # Abstract Methods
 
