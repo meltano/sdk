@@ -7,13 +7,15 @@ import logging
 
 # from functools import lru_cache
 import time
-from typing import Dict, Iterable, Any, List, Optional, Tuple, Callable
+from typing import Dict, Iterable, Any, List, Optional, Tuple, Callable, TypeVar, Union
 
 import singer
 from singer import CatalogEntry, RecordMessage
 from singer import metadata
+from singer.catalog import Catalog
+from singer.schema import Schema
 
-from tap_base.connection_base import GenericConnectionBase
+from tap_base.stream_base import GenericStreamBase
 
 DEBUG_MODE = True
 
@@ -21,29 +23,35 @@ DEBUG_MODE = True
 STATE_MSG_FREQUENCY = 10 if DEBUG_MODE else 10000
 
 
-class TapStreamBase(metaclass=abc.ABCMeta):
+FactoryType = TypeVar("FactoryType", bound="TapStreamBase")
+
+
+class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
     _tap_stream_id: str
-    _catalog_entry: CatalogEntry
     _state: dict
+    _schema: dict
+    _key_properties: List[str] = []
+    _replication_key: Optional[str] = None
 
     logger: logging.Logger
 
     def __init__(
         self,
         tap_stream_id: str,
-        connection: GenericConnectionBase,
-        catalog_entry: CatalogEntry,
-        state: dict,
+        schema: Union[Dict[str, Any], Schema],
+        state: Dict[str, Any],
         logger: logging.Logger,
+        config: dict,
     ):
         """Initialize tap stream."""
+        super().__init__(
+            config=config, logger=logger,
+        )
         self._tap_stream_id = tap_stream_id
-        self._conn = connection
-        self._catalog_entry = catalog_entry
+        self._schema = schema.to_dict() if isinstance(schema, Schema) else schema
         self._state = state or {}
-        self.logger = logger
 
     def get_stream_version(self):
         """Get stream version from bookmark."""
@@ -54,10 +62,79 @@ class TapStreamBase(metaclass=abc.ABCMeta):
             stream_version = int(time.time() * 1000)
         return stream_version
 
+    @property
+    def tap_stream_id(self) -> str:
+        return self._tap_stream_id
+
+    @property
+    def stream_name(self) -> str:
+        return self._tap_stream_id
+
+    @property
+    def primary_key(self) -> List[str]:
+        return self._key_properties
+
+    @primary_key.setter
+    def primary_key(self, pk: List[str]):
+        self._key_properties = pk
+
+    @property
+    def bookmark_key(self):
+        return self._replication_key
+
+    @bookmark_key.setter
+    def bookmark_key(self, key_name: str):
+        self._replication_key = key_name
+
+    @property
+    def schema(self) -> dict:
+        return self._schema
+
+    @property
+    def replication_method(self) -> str:
+        if self.forced_replication_method:
+            return str(self.forced_replication_method)
+        if self.bookmark_key:
+            return "INCREMENTAL"
+        return "FULL_TABLE"
+
+    @property
+    def forced_replication_method(self) -> Optional[str]:
+        # TODO: Not yet implemented.
+        return None
+
+    @property
+    def singer_metadata(self) -> dict:
+        md = metadata.get_standard_metadata(
+            schema=self.schema,
+            replication_method=self.replication_method,
+            key_properties=self.primary_key or None,
+            valid_replication_keys=[self.bookmark_key] if self.bookmark_key else None,
+            schema_name=None,
+        )
+        return md
+
+    @property
+    def singer_catalog_entry(self) -> CatalogEntry:
+        return CatalogEntry(
+            tap_stream_id=self._tap_stream_id,
+            stream=self._tap_stream_id,
+            schema=Schema.from_dict(self.schema),
+            metadata=self.singer_metadata,
+            key_properties=self.primary_key or None,
+            replication_key=self.bookmark_key,
+            replication_method=self.replication_method,
+            is_view=None,
+            database=None,
+            table=None,
+            row_count=None,
+            stream_alias=None,
+        )
+
     # @lru_cache
     def get_metadata(self, key_name, default: Any = None, breadcrumb: Tuple = ()):
         """Return top level metadata (breadcrumb="()")."""
-        md_map = metadata.to_map(self._catalog_entry.metadata)
+        md_map = metadata.to_map(self.singer_metadata)
         if not md_map:
             self.logger.warning(f"Could not find '{key_name}' metadata.")
             return default
@@ -73,15 +150,15 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         return (
             self.get_metadata("forced-replication-method")
             or self.get_metadata("replication-method")
-            or self._catalog_entry.replication_method
+            or self.replication_method
         )
 
     def get_replication_key(self) -> str:
         """Return the stream's replication key."""
         state_key = singer.get_bookmark(
-            self._state, self._catalog_entry.tap_stream_id, "replication_key"
+            self._state, self.tap_stream_id, "replication_key"
         )
-        stream_key = self._catalog_entry.replication_key
+        stream_key = self.bookmark_key
         metadata_key = self.get_metadata("replication-key")
         return state_key or stream_key or metadata_key
 
@@ -92,7 +169,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         metadata_val = self.get_metadata(
             "view-key-properties" if is_view else "table-key-properties", ()
         )
-        catalog_val = self._catalog_entry.key_properties
+        catalog_val = self.primary_key
         return catalog_val or metadata_val
 
     def wipe_bookmarks(
@@ -136,24 +213,18 @@ class TapStreamBase(metaclass=abc.ABCMeta):
                 "initial_full_table_complete",
             ]
         )
-        bookmark = self._state.get("bookmarks", {}).get(
-            self._catalog_entry.tap_stream_id, {}
-        )
+        bookmark = self._state.get("bookmarks", {}).get(self.tap_stream_id, {})
         version_exists = True if "version" in bookmark else False
         initial_full_table_complete = singer.get_bookmark(
-            self._state,
-            self._catalog_entry.tap_stream_id,
-            "initial_full_table_complete",
+            self._state, self.tap_stream_id, "initial_full_table_complete",
         )
-        state_version = singer.get_bookmark(
-            self._state, self._catalog_entry.tap_stream_id, "version"
-        )
+        state_version = singer.get_bookmark(self._state, self.tap_stream_id, "version")
         activate_version_message = singer.ActivateVersionMessage(
-            stream=self._catalog_entry.stream, version=self.get_stream_version()
+            stream=self.tap_stream_id, version=self.get_stream_version()
         )
         replication_method = self.get_replication_method()
         self.logger.info(
-            f"Beginning sync of '{self._tap_stream_id}' using "
+            f"Beginning sync of '{self.tap_stream_id}' using "
             f"'{replication_method}' replication..."
         )
         if not initial_full_table_complete and not (
@@ -240,7 +311,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         """Transform dictionary row data into a singer-compatible RECORD message."""
         rec: Dict[str, Any] = {}
         for property_name, elem in row.items():
-            property_type = self._catalog_entry.schema.properties[property_name].type
+            property_type = self.schema["properties"][property_name]["type"]
             if isinstance(elem, datetime.datetime):
                 rec[property_name] = elem.isoformat() + "+00:00"
             elif isinstance(elem, datetime.date):
@@ -273,15 +344,47 @@ class TapStreamBase(metaclass=abc.ABCMeta):
 
         # rec = dict(zip(columns, row_to_persist))
         return RecordMessage(
-            stream=self._catalog_entry.stream,
+            stream=self.stream_name,
             record=rec,
             version=version,
             time_extracted=time_extracted,
         )
 
-    ###########################
-    #### Abstract Methods #####
-    ###########################
+    # Class Factory Methods
+
+    @classmethod
+    def from_catalog_dict(
+        cls, catalog_dict: Dict[str, Any], state: dict, logger: logging.Logger,
+    ) -> Dict[str, FactoryType]:
+        """Create a dictionary of stream objects from a catalog dictionary."""
+        catalog = Catalog.from_dict(catalog_dict)
+        result: Dict[str, FactoryType] = {}
+        for catalog_entry in catalog.streams:
+            stream_name = catalog_entry.stream_name
+            result[stream_name] = cls.from_stream_dict(
+                catalog_entry.to_dict(), state=state, logger=logger
+            )
+        return result
+
+    @classmethod
+    def from_stream_dict(
+        cls,
+        stream_dict: Dict[str, Any],
+        config: dict,
+        state: dict,
+        logger: logging.Logger,
+    ) -> FactoryType:
+        """Create a stream object from a catalog's 'stream' dictionary entry."""
+        stream_name = stream_dict.get("tap_stream_id", stream_dict.get("stream"))
+        return cls(
+            tap_stream_id=stream_name,
+            schema=stream_dict.get("schema"),
+            config=config,
+            state=state,
+            logger=logger,
+        )
+
+    # Abstract Methods
 
     @abc.abstractmethod
     def get_row_generator(self) -> Iterable[Iterable[Dict[str, Any]]]:

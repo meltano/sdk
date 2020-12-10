@@ -4,15 +4,25 @@ from typing import Any, Dict, Iterable
 
 import pyarrow.parquet as pq
 
-from tap_base import TapStreamBase
+# from tap_base.streams.discoverable import DiscoverableStreamBase
+from tap_base.tap_stream_base import TapStreamBase
+from typing import List, Any
+
+from singer import Schema, metadata
+from singer.catalog import CatalogEntry
 
 
 class SampleTapParquetStream(TapStreamBase):
     """Sample tap test for parquet."""
 
+    def open_connection(self) -> Any:
+        """Connect to parquet database."""
+        self._conn = "ASampleTable"
+        return self._conn
+
     def get_row_generator(self) -> Iterable[Dict[str, Any]]:
         """Return a generator of row-type dictionary objects."""
-        filepath = self._conn.get_config("filepath")
+        filepath = self.get_config("filepath")
         if not filepath:
             raise ValueError("Parquet 'filepath' config cannot be blank.")
         try:
