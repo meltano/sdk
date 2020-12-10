@@ -34,6 +34,7 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
     _schema: dict
     _key_properties: List[str] = []
     _replication_key: Optional[str] = None
+    _custom_metadata: Optional[dict] = None
 
     logger: logging.Logger
 
@@ -71,8 +72,15 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
         return self._tap_stream_id
 
     @property
+    def is_view(self) -> bool:
+        return self.get_metadata("is-view", None)
+
+    @property
     def primary_key(self) -> List[str]:
-        return self._key_properties
+        metadata_val = self.get_metadata(
+            "view-key-properties" if self.is_view else "table-key-properties", ()
+        )
+        return self._key_properties or metadata_val
 
     @primary_key.setter
     def primary_key(self, pk: List[str]):
@@ -80,7 +88,11 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
 
     @property
     def bookmark_key(self):
-        return self._replication_key
+        state_key = singer.get_bookmark(
+            self._state, self.tap_stream_id, "replication_key"
+        )
+        metadata_key = self.get_metadata("replication-key")
+        return self._replication_key or state_key or metadata_key
 
     @bookmark_key.setter
     def bookmark_key(self, key_name: str):
@@ -100,8 +112,7 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
 
     @property
     def forced_replication_method(self) -> Optional[str]:
-        # TODO: Not yet implemented.
-        return None
+        return self.get_metadata("forced-replication-method")
 
     @property
     def singer_metadata(self) -> dict:
@@ -132,45 +143,26 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
         )
 
     # @lru_cache
-    def get_metadata(self, key_name, default: Any = None, breadcrumb: Tuple = ()):
+    def get_metadata(
+        self,
+        key_name,
+        default: Any = None,
+        breadcrumb: Tuple = (),
+        generate: bool = False,
+    ):
         """Return top level metadata (breadcrumb="()")."""
-        md_map = metadata.to_map(self.singer_metadata)
+        if not generate:
+            md_dict = self._custom_metadata
+        else:
+            md_dict = self.singer_metadata
+        if not md_dict:
+            return default
+        md_map = metadata.to_map(md_dict)
         if not md_map:
             self.logger.warning(f"Could not find '{key_name}' metadata.")
             return default
         result = md_map.get(breadcrumb, {}).get(key_name, default)
-        # self.logger.info(
-        #     f"DEBUG: Search for '{breadcrumb}'->'{key_name}' "
-        #     f"resulted in {result}. md_map was {md_map}"
-        # )
         return result
-
-    def get_replication_method(self) -> str:
-        """Return the stream's replication method."""
-        return (
-            self.get_metadata("forced-replication-method")
-            or self.get_metadata("replication-method")
-            or self.replication_method
-        )
-
-    def get_replication_key(self) -> str:
-        """Return the stream's replication key."""
-        state_key = singer.get_bookmark(
-            self._state, self.tap_stream_id, "replication_key"
-        )
-        stream_key = self.bookmark_key
-        metadata_key = self.get_metadata("replication-key")
-        return state_key or stream_key or metadata_key
-
-    # @lru_cache
-    def get_key_properties(self) -> List[str]:
-        """Get key properties from catalog."""
-        is_view = self.get_metadata("is-view", None)
-        metadata_val = self.get_metadata(
-            "view-key-properties" if is_view else "table-key-properties", ()
-        )
-        catalog_val = self.primary_key
-        return catalog_val or metadata_val
 
     def wipe_bookmarks(
         self, wipe_keys: List[str] = None, *, except_keys: List[str] = None,
@@ -281,7 +273,7 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
                         last_pk_fetched,
                     )
             elif replication_method == "INCREMENTAL":
-                replication_key = self.get_replication_key()
+                replication_key = self.bookmark_key
                 if replication_key is not None:
                     new_state = singer.write_bookmark(
                         new_state,
