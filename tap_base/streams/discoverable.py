@@ -10,31 +10,6 @@ from tap_base.tap_stream_base import FactoryType, TapStreamBase
 from tap_base.helpers import classproperty
 
 
-# class DiscoverableStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
-#     """Abstract base class for (generic) streams that support discovery."""
-
-#     MAX_CONNECT_RETRIES = 0
-
-#     @classproperty
-#     def discoverable(cls):
-#         """Set to true if stream can discover its own metadata."""
-#         return True
-
-#     @classmethod
-#     def discover_streams(
-#         cls, config: Dict[str, Any], state: Dict[str, Any], logger: Logger
-#     ) -> Dict[str, FactoryType]:
-#         """Return a dictionary of all discovered streams."""
-#         for tap_stream_id in self.discover_available_stream_ids():
-#             streams.append(self.discover_stream(tap_stream_id))
-#         return Catalog(streams)
-
-#     @abc.abstractmethod
-#     def discover_stream(self, tap_stream_id) -> CatalogEntry:
-#         """Scan a specific stream and return its discovered CatalogEntry object."""
-#         pass
-
-
 class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     """Abstract base class for database-type streams."""
 

@@ -102,7 +102,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
 
     def sync_one(self, tap_stream_id: str):
         """Sync a single stream."""
-        stream = self.stream[tap_stream_id]
+        stream = self.streams[tap_stream_id]
         stream.sync()
 
     def sync_all(self):

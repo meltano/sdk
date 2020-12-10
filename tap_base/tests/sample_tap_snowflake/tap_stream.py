@@ -1,7 +1,7 @@
 """Sample tap stream test for tap-snowflake."""
 
 from tap_base.tap_stream_base import TapStreamBase
-from typing import List, Union
+from typing import Iterable, List, Union
 from snowflake import connector
 
 from tap_base.streams import DatabaseStreamBase
@@ -14,9 +14,10 @@ class SampleTapSnowflakeStream(DatabaseStreamBase):
     THREE_PART_NAMES: bool = True
     MAX_CONNECT_ATTEMPTS = 5
 
-    def __init__(self, tap_stream_id: str, schema: dict, properties: dict = None):
-        """Initialize stream class."""
-        pass
+    def get_row_generator(self) -> Iterable[dict]:
+        """Return a generator of row-type dictionary objects."""
+        for row in self.query(f"SELECT * FROM {self.tap_stream_id}"):
+            yield row
 
     def query(self, query: Union[str, List[str]], params=None, max_records=0):
         """Run a query in snowflake."""
