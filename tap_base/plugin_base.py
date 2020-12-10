@@ -24,7 +24,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     # Constructor
 
-    def __init__(self, config: Optional[Dict[str, Any]] = {},) -> None:
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
         """Initialize the tap."""
         self._config = config or {}
         self.validate_config()
