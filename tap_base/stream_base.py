@@ -2,6 +2,8 @@
 
 import abc
 import logging
+import sys
+
 from typing import Any
 
 import backoff
@@ -63,3 +65,7 @@ class GenericStreamBase(metaclass=abc.ABCMeta):
         """Connect if not yet connected."""
         if not self.is_connected():
             self.connect_with_retries()
+
+    def fatal(self):
+        """Fatal error. Abort stream."""
+        sys.exit(1)
