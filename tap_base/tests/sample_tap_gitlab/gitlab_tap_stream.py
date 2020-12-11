@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any, Dict, Union
 
-from tap_base.streams.api_stream_base import APIStreamBase
+from tap_base.streams.api import APIStreamBase
 
 SITE_URL = "https://gitlab.com/api/v4"
 

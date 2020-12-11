@@ -2,7 +2,7 @@
 
 import json
 from logging import Logger
-from tap_base.streams.api_stream_base import APIStreamBase
+from tap_base.streams.api import APIStreamBase
 from typing import Any, Dict, List, Optional, Type, Union
 from pathlib import Path
 

@@ -13,7 +13,7 @@ from pathlib import Path
 import click
 
 from tap_base.plugin_base import PluginBase
-from tap_base.tap_stream_base import TapStreamBase
+from tap_base.streams.core import TapStreamBase
 
 
 class TapBase(PluginBase, metaclass=abc.ABCMeta):

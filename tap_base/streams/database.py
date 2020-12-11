@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 
 from singer import Catalog, CatalogEntry
 
-from tap_base.tap_stream_base import FactoryType, TapStreamBase
+from tap_base.streams.core import FactoryType, TapStreamBase
 from tap_base.helpers import classproperty
 
 

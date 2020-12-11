@@ -10,7 +10,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 
 from singer.schema import Schema
 
-from tap_base.tap_stream_base import TapStreamBase
+from tap_base.streams.core import TapStreamBase
 
 URLArgMap = Dict[str, Union[str, bool, int, datetime]]
 

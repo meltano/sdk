@@ -4,7 +4,7 @@ from typing import Iterable
 
 import pyarrow.parquet as pq
 
-from tap_base.tap_stream_base import TapStreamBase
+from tap_base.streams.core import TapStreamBase
 
 
 class SampleTapParquetStream(TapStreamBase):

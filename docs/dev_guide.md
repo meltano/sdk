@@ -2,16 +2,18 @@
 
 **Development Overview:**
 
-_Developing with `tap-base` requires overriding three classes:_
+_Developing with `tap-base` requires overriding just two classes:_
 
 1. The tap:
-    - `TapBase` - _The core base class for taps. This class governs naming, configuration, and core capability mapping._
+    - `TapBase` - _The core base class for all taps. This class governs configuration, validation, and stream discovery._
 2. The connection. You have three choices of connection base class when designing your tap:
     - `GenericConnectionBase` - _The base class for generic-type connections. This class is responsible for making a connection to the source, sending queries, and retrieving metadata._
     - `DiscoverableConnectionBase` - _The base class for 'discoverable' connections. Inherits from `GenericConnectionBase` and adds capabilities for stream metadata discovery._
     - `DatabaseConnectionBase` - _The base class for database-type connections. Inherits from `DiscoverableConnectionBase` and sdds specialized functionality for database-type connections._
-3. The stream.
-    - `TapStreamBase` - _The base class for streams. This class is responsible for replication and bookmarking._
+3. The stream. For the stream base class, you have three options depending on the type of data source you are working with.
+    - `TapStreamBase` - _The **generic** base class for streams. This class is responsible for replication and bookmarking._
+    - `DatabaseStreamBase` - _The base class for streams. This class is responsible for replication and bookmarking._
+    - `APIStreamBase` - _The base class for streams. This class is responsible for replication and bookmarking._
 
 **Detailed Instructions:**
 
