@@ -17,8 +17,8 @@ _Create with `tap-base` requires overriding just two classes:_
 2. [Step 2: Write the tap class](#step-2-write-the-tap-class)
 3. [Step 3: Write the stream class](#step-3-write-the-stream-class)
    1. ['Generic' stream classes](#generic-stream-classes)
-   2. ['Database' stream classes](#database-stream-classes)
-   3. ['API' stream classes](#api-stream-classes)
+   2. ['API' stream classes](#api-stream-classes)
+   3. ['Database' stream classes](#database-stream-classes)
 
 ## Step 1: Initialize a new tap repo
 
@@ -137,28 +137,6 @@ class SampleTapParquetStream(TapStreamBase):
                     }
 ```
 
-### 'Database' stream classes
-
-_Database streams inherit from the class `DatabaseStreamBase`. To create a database
-stream class, you will first override the `sql_query()` method. Depending upon how closely your
-source complies with standard `information_schema` conventions, you may also override between
-one and four class properties, in order to override specific metadata queries._
-
-**All database stream classes override:**
-
-1. `sql_query()` - This method should run a give SQL statement and incrementally return a dictionary
-   object for each resulting row.
-
-**Depending upon your implementation, you may also need to override one or more of the following properties:**
-
-1. `table_scan_sql` - A SQL string which should query for all tables, returning three columns: `database_name`, `schema_name`, and `table_name`.
-2. `view_scan_sql` - A SQL string which should query for all views, returning three columns: `database_name`, `schema_name`, and `view_name`.
-3. `column_scan_sql` - A SQL string which should query for all columns, returning five columns: `database_name`, `schema_name`, and `table_or_view_name`, `column_name`, and `data_type`.
-
-**An example using the `Snowflake` sample:**
-
-`TODO: TK - Snowflake example coming soon...`
-
 ### 'API' stream classes
 
 _API streams inherit from the class `APIStreamBase`. To create an API-based
@@ -211,3 +189,25 @@ class GitlabStream(APIStreamBase):
         """Transform raw data from HTTP GET into the expected property values."""
         return row
 ```
+
+### 'Database' stream classes
+
+_Database streams inherit from the class `DatabaseStreamBase`. To create a database
+stream class, you will first override the `sql_query()` method. Depending upon how closely your
+source complies with standard `information_schema` conventions, you may also override between
+one and four class properties, in order to override specific metadata queries._
+
+**All database stream classes override:**
+
+1. `sql_query()` - This method should run a give SQL statement and incrementally return a dictionary
+   object for each resulting row.
+
+**Depending upon your implementation, you may also need to override one or more of the following properties:**
+
+1. `table_scan_sql` - A SQL string which should query for all tables, returning three columns: `database_name`, `schema_name`, and `table_name`.
+2. `view_scan_sql` - A SQL string which should query for all views, returning three columns: `database_name`, `schema_name`, and `view_name`.
+3. `column_scan_sql` - A SQL string which should query for all columns, returning five columns: `database_name`, `schema_name`, and `table_or_view_name`, `column_name`, and `data_type`.
+
+**An example using the `Snowflake` sample:**
+
+`TODO: TK - Snowflake example coming soon...`
