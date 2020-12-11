@@ -3,6 +3,7 @@
 import abc  # abstract base classes
 import copy
 import datetime
+from functools import lru_cache
 import logging
 
 # from functools import lru_cache
@@ -316,6 +317,30 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
         self._state = new_state
         return self._state
 
+    @lru_cache
+    def get_property_schema(self, property: str, warn=True) -> Optional[dict]:
+        if property not in self.schema["properties"]:
+            if warn:
+                self.logger.warning(
+                    f"Could not locate schema mapping for property '{property}'. "
+                    "Any corresponding data will be excluded from the stream..."
+                )
+            return None
+        return self.schema["properties"][property]
+
+    def is_boolean_type(self, property_schema: dict) -> bool:
+        if "anyOf" not in property_schema and "type" not in property_schema:
+            logging.warning(
+                f"Could not detect data type in property schema: {property_schema}"
+            )
+            return False
+        for property_type in property_schema.get(
+            "anyOf", [property_schema.get("type")]
+        ):
+            if "boolean" in property_type or property_type == "boolean":
+                return True
+        return False
+
     # pylint: disable=too-many-branches
     def transform_row_to_singer_record(
         self,
@@ -329,7 +354,9 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
         """Transform dictionary row data into a singer-compatible RECORD message."""
         rec: Dict[str, Any] = {}
         for property_name, elem in row.items():
-            property_type = self.schema["properties"][property_name]["type"]
+            property_schema = self.get_property_schema(property_name)
+            if not property_schema:
+                continue
             if isinstance(elem, datetime.datetime):
                 rec[property_name] = elem.isoformat() + "+00:00"
             elif isinstance(elem, datetime.date):
@@ -343,12 +370,12 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
             elif isinstance(elem, bytes):
                 # for BIT value, treat 0 as False and anything else as True
                 bit_representation: bool
-                if "boolean" in property_type:
+                if self.is_boolean_type(property_schema):
                     bit_representation = elem != b"\x00"
                     rec[property_name] = bit_representation
                 else:
                     rec[property_name] = elem.hex()
-            elif "boolean" in property_type or property_type == "boolean":
+            elif self.is_boolean_type(property_schema):
                 boolean_representation: Optional[bool]
                 if elem is None:
                     boolean_representation = None
