@@ -9,7 +9,7 @@ import click
 
 from tap_base.helpers import classproperty
 from tap_base.tap_base import TapBase
-from tap_base.tests.sample_tap_parquet.tap_stream import SampleTapParquetStream
+from tap_base.tests.sample_tap_parquet.parquet_tap_stream import SampleTapParquetStream
 
 
 ACCEPTED_CONFIG_OPTIONS = ["filepath"]
@@ -65,9 +65,17 @@ class SampleTapParquet(TapBase):
 # CLI Execution:
 
 
+@click.option("--version", is_flag=True)
 @click.option("--discover", is_flag=True)
 @click.option("--config")
 @click.option("--catalog")
 @click.command()
-def cli(discover: bool = False, config: str = None, catalog: str = None):
-    SampleTapParquet.cli(discover=discover, config=config, catalog=catalog)
+def cli(
+    discover: bool = False,
+    config: str = None,
+    catalog: str = None,
+    version: bool = False,
+):
+    SampleTapParquet.cli(
+        version=version, discover=discover, config=config, catalog=catalog
+    )

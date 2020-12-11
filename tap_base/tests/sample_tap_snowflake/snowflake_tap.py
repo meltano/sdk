@@ -4,7 +4,9 @@ from pathlib import Path
 from typing import List, Type
 
 from tap_base.tap_base import TapBase
-from tap_base.tests.sample_tap_snowflake.tap_stream import SampleTapSnowflakeStream
+from tap_base.tests.sample_tap_snowflake.snowflake_tap_stream import (
+    SampleTapSnowflakeStream,
+)
 
 from tap_base.helpers import classproperty
 

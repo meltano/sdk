@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from tap_base.tests.sample_tap_snowflake.tap import SampleTapSnowflake
+from tap_base.tests.sample_tap_snowflake.snowflake_tap import SampleTapSnowflake
 
 SAMPLE_CATALOG_FILEPATH = (
     "tap_base/tests/sample_tap_snowflake/tests/catalog.sample.json"
