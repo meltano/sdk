@@ -85,8 +85,8 @@ class SampleTapGitlab(TapBase):
                     config=self._config,
                     url_pattern=stream_def["url_suffix"],
                 )
-                new_stream.primary_key = stream_def.get("primary_keys", None)
-                new_stream.bookmark_key = stream_def.get("replication_key", None)
+                new_stream.primary_keys = stream_def.get("primary_keys", None)
+                new_stream.replication_key = stream_def.get("replication_key", None)
                 self._streams[stream_name] = new_stream
 
 

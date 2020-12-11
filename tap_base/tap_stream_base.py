@@ -77,26 +77,26 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
         return self.get_metadata("is-view", None)
 
     @property
-    def primary_key(self) -> List[str]:
+    def primary_keys(self) -> List[str]:
         metadata_val = self.get_metadata(
             "view-key-properties" if self.is_view else "table-key-properties", ()
         )
         return self._key_properties or metadata_val
 
-    @primary_key.setter
-    def primary_key(self, pk: List[str]):
+    @primary_keys.setter
+    def primary_keys(self, pk: List[str]):
         self._key_properties = pk
 
     @property
-    def bookmark_key(self):
+    def replication_key(self):
         state_key = singer.get_bookmark(
             self._state, self.tap_stream_id, "replication_key"
         )
         metadata_key = self.get_metadata("replication-key")
         return self._replication_key or state_key or metadata_key
 
-    @bookmark_key.setter
-    def bookmark_key(self, key_name: str):
+    @replication_key.setter
+    def replication_key(self, key_name: str):
         self._replication_key = key_name
 
     @property
@@ -107,7 +107,7 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
     def replication_method(self) -> str:
         if self.forced_replication_method:
             return str(self.forced_replication_method)
-        if self.bookmark_key:
+        if self.replication_key:
             return "INCREMENTAL"
         return "FULL_TABLE"
 
@@ -120,8 +120,10 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
         md = metadata.get_standard_metadata(
             schema=self.schema,
             replication_method=self.replication_method,
-            key_properties=self.primary_key or None,
-            valid_replication_keys=[self.bookmark_key] if self.bookmark_key else None,
+            key_properties=self.primary_keys or None,
+            valid_replication_keys=[self.replication_key]
+            if self.replication_key
+            else None,
             schema_name=None,
         )
         return md
@@ -133,8 +135,8 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
             stream=self._tap_stream_id,
             schema=Schema.from_dict(self.schema),
             metadata=self.singer_metadata,
-            key_properties=self.primary_key or None,
-            replication_key=self.bookmark_key,
+            key_properties=self.primary_keys or None,
+            replication_key=self.replication_key,
             replication_method=self.replication_method,
             is_view=None,
             database=None,
@@ -147,7 +149,7 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
         if md:
             self._custom_metadata = md
         pk = self.get_metadata("key-properties", from_metadata_dict=md)
-        bookmark_key = self.get_metadata("replication-key", from_metadata_dict=md)
+        replication_key = self.get_metadata("replication-key", from_metadata_dict=md)
         valid_bookmark_key = self.get_metadata(
             "valid-replication-keys", from_metadata_dict=md
         )
@@ -156,11 +158,11 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
             "replication-method", from_metadata_dict=md
         )
         if pk:
-            self.primary_key = pk
-        if bookmark_key:
-            self.bookmark_key = bookmark_key
+            self.primary_keys = pk
+        if replication_key:
+            self.replication_key = replication_key
         elif valid_bookmark_key:
-            self.bookmark_key = valid_bookmark_key[0]
+            self.replication_key = valid_bookmark_key[0]
 
     # @lru_cache
     def get_metadata(
@@ -255,9 +257,9 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
 
     def write_schema_message(self):
         """Write out a SCHEMA message with the stream schema."""
-        bookmark_keys = [self.bookmark_key] if self.bookmark_key else None
+        bookmark_keys = [self.replication_key] if self.replication_key else None
         schema_message = SchemaMessage(
-            self.tap_stream_id, self.schema, self.primary_key, bookmark_keys
+            self.tap_stream_id, self.schema, self.primary_keys, bookmark_keys
         )
         singer.write_message(schema_message)
 
@@ -291,7 +293,7 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
                     last_pk_fetched = {
                         k: v
                         for k, v in record_message.record.items()
-                        if k in self.primary_key
+                        if k in self.primary_keys
                     }
                     new_state = singer.write_bookmark(
                         new_state,
@@ -300,7 +302,7 @@ class TapStreamBase(GenericStreamBase, metaclass=abc.ABCMeta):
                         last_pk_fetched,
                     )
             elif replication_method == "INCREMENTAL":
-                replication_key = self.bookmark_key
+                replication_key = self.replication_key
                 if replication_key is not None:
                     new_state = singer.write_bookmark(
                         new_state,

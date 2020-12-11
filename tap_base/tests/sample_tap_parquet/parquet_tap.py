@@ -57,8 +57,8 @@ class SampleTapParquet(TapBase):
                 logger=logger,
                 config=config,
             )
-            new_stream.primary_key = ["f0"]
-            new_stream.bookmark_key = "f0"
+            new_stream.primary_keys = ["f0"]
+            new_stream.replication_key = "f0"
             self._streams[tap_stream_id] = new_stream
 
 
