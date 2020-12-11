@@ -47,7 +47,7 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     THREE_PART_NAMES = True  # For backwards compatibility reasons
 
     @classproperty
-    def table_scan_query(cls) -> str:
+    def table_scan_sql(cls) -> str:
         """Return a SQL statement that provides the column."""
         return """
             SELECT catalog, schema_name, table_name
@@ -56,15 +56,15 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
             """
 
     @classproperty
-    def view_scan_query(cls) -> str:
+    def view_scan_sql(cls) -> str:
         """Return a SQL statement that provides the column."""
         return """
-            SELECT catalog, schema_name, table_name
+            SELECT catalog, schema_name, view_name
             FROM information_schema.views
             """
 
     @classproperty
-    def column_scan_query(cls) -> str:
+    def column_scan_sql(cls) -> str:
         """Return a SQL statement that provides the column."""
         return """
             SELECT
@@ -91,7 +91,7 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     def scan_and_collate_columns(
         cls, config
     ) -> Dict[Tuple[str, str, str], Dict[str, str]]:
-        columns_scan_result = cls.query(config=config, sql=cls.columns_scan_query)
+        columns_scan_result = cls.sql_query(config=config, sql=cls.columns_scan_sql)
         result: Dict[Tuple[str, str, str], Dict[str, str]] = {}
         for catalog, schema_name, table, column, data_type in columns_scan_result:
             result[(catalog, schema_name, table)][column] = data_type
@@ -99,7 +99,7 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
 
     @classmethod
     def scan_primary_keys(cls, config) -> Dict[Tuple[str, str, str], List[str]]:
-        columns_scan_result = cls.query(config=config, sql=cls.columns_scan_query)
+        columns_scan_result = cls.sql_query(config=config, sql=cls.columns_scan_sql)
         result: Dict[Tuple[str, str, str], Dict[str, str]] = {}
         for catalog, schema_name, table, column, data_type in columns_scan_result:
             result[(catalog, schema_name, table)][column] = data_type
@@ -109,8 +109,8 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     def from_discovery(cls, config: dict) -> List[FactoryType]:
         """Return a list of all streams (tables)."""
         result: List[DatabaseStreamBase] = []
-        table_scan_result = cls.query(config=config, sql=cls.table_scan_query)
-        view_scan_result = cls.query(config=config, sql=cls.view_scan_query)
+        table_scan_result = cls.sql_query(config=config, sql=cls.table_scan_sql)
+        view_scan_result = cls.sql_query(config=config, sql=cls.view_scan_sql)
         all_results = [
             (database, schema_name, table, False)
             for database, schema_name, table in table_scan_result
@@ -141,7 +141,7 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
             result.append(new_stream)
 
     @abc.abstractclassmethod
-    def query(cls, config, sql: str) -> Iterable[dict]:
+    def sql_query(cls, config, sql: str) -> Iterable[dict]:
         """Run a SQL query and generate a dict for each returned row."""
         pass
 

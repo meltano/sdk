@@ -106,10 +106,6 @@ class SampleTapParquet(TapBase):
 
 _Creating the stream class depends upon what type of tap you are creating._
 
-#### Developing a 'Database' stream class
-
-`TODO: TK - Coming soon...`
-
 #### Developing a 'Generic' (hand-coded) stream class
 
 _Generic streams inherit from the class `TapStreamBase`. To create a generic
@@ -142,6 +138,28 @@ class SampleTapParquetStream(TapStreamBase):
                         for i, val in enumerate(row, start=0)
                     }
 ```
+
+#### Developing a 'Database' stream class
+
+_Database streams inherit from the class `DatabaseStreamBase`. To create a database
+stream class, you will first override the `sql_query()` method. Depending upon how closely your
+source complies with standard `information_schema` conventions, you may also override between
+one and four class properties, in order to override specific metadata queries._
+
+**All database stream classes override:**
+
+1. `sql_query()` - This method should run a give SQL statement and incrementally return a dictionary
+   object for each resulting row.
+
+**Depending upon your implementation, you may also need to override one or more of the following properties:**
+
+1. `table_scan_sql` - A SQL string which should query for all tables, returning three columns: `database_name`, `schema_name`, and `table_name`.
+2. `view_scan_sql` - A SQL string which should query for all views, returning three columns: `database_name`, `schema_name`, and `view_name`.
+3. `column_scan_sql` - A SQL string which should query for all columns, returning five columns: `database_name`, `schema_name`, and `table_or_view_name`, `column_name`, and `data_type`.
+
+**An example using the `Snowflake` sample:**
+
+`TODO: TK - Snowflake example coming soon...`
 
 #### Developing an 'API' stream class
 
