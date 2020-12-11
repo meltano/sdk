@@ -1,87 +1,148 @@
 """Shared parent class for TapBase, TargetBase, and TransformBase."""
 
 import abc
-from logging import Logger
-from typing import Any, Dict, List, Optional
 
-from singer import Catalog, CatalogEntry
-
-from tap_base.streams.core import FactoryType, TapStreamBase
+import singer
 from tap_base.helpers import classproperty
+from typing import Dict, Iterable, List, Tuple, TypeVar
+
+from tap_base.streams.core import TapStreamBase
+
+FactoryType = TypeVar("FactoryType", bound="DatabaseStreamBase")
+
+
+DEFAULT_QUOTE_CHAR = '"'
+OTHER_QUOTE_CHARS = ['"', "[", "]", "`"]
+
+SINGER_STRING_TYPE = singer.Schema(type=["string", "null"])
+SINGER_FLOAT_TYPE = singer.Schema(type=["double", "null"])
+SINGER_INT_TYPE = singer.Schema(type=["int", "null"])
+SINGER_DECIMAL_TYPE = singer.Schema(type=["decimal", "null"])
+SINGER_DATETIME_TYPE = singer.Schema(type=["string", "null"], format="date-time")
+SINGER_TYPE_LOOKUP = {
+    # NOTE: This is an ordered mapping, with earlier mappings taking precedence.
+    #       If the SQL-provided type contains the type name on the left, the mapping
+    #       will return the respective singer type.
+    "timestamp": SINGER_DATETIME_TYPE,
+    "datetime": SINGER_DATETIME_TYPE,
+    "date": SINGER_DATETIME_TYPE,
+    "int": SINGER_INT_TYPE,
+    "decimal": SINGER_DECIMAL_TYPE,
+    "double": SINGER_FLOAT_TYPE,
+    "float": SINGER_FLOAT_TYPE,
+    "string": SINGER_STRING_TYPE,
+    "test": SINGER_STRING_TYPE,
+    "char": SINGER_STRING_TYPE,
+}
 
 
 class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
-    """Abstract base class for database-type streams."""
+    """Abstract base class for database-type streams.
+
+    This class currently supports databases with 3-part names only. For databases which
+    use two-part names, further modification to certain methods may be necessary.
+    """
 
     MAX_CONNECT_RETRIES = 5
+    THREE_PART_NAMES = True  # For backwards compatibility reasons
 
-    THREE_PART_NAMES: bool = True  # Uses db.schema.table syntax (versus 2-part: db.table)
-    DEFAULT_QUOTE_CHAR = '"'
-    OTHER_QUOTE_CHARS = ['"', "[", "]", "`"]
-
-    def get_config(self, config_key: str, default: Any = None) -> Any:
-        """Return config value or a default value."""
-        return self._config.get(config_key, default)
-
-    def discover_available_stream_ids(self) -> List[str]:
-        """Return a list of all streams (tables)."""
-        self.ensure_connected()
-        if self.THREE_PART_NAMES:
-            results = self.query(
-                """SELECT catalog, schema_name, table_name from information_schema.tables"""
-            )
-            return [
-                self.concatenate_tap_stream_id(
-                    table_name=table, catalog_name=catalog, schema_name=schema
-                )
-                for catalog, schema, table in results
-            ]
-        else:
-            results = self.query(
-                """SELECT catalog, schema_name, table_name from information_schema.tables"""
-            )
-            return [
-                self.concatenate_tap_stream_id(
-                    table_name=table, catalog_name=catalog, schema_name=schema
-                )
-                for catalog, table, schema in results
-            ]
-
-    def discover_stream(self, tap_stream_id) -> CatalogEntry:
-        """Scan a specific stream and return its discovered CatalogEntry object.
-
-        Note: the default implementation assumes 3-part table naming and access to
-        'information_schema' tables. For platforms which do not support
-        'information_schema', this method will need to be overridden.
-        """
-        db, schema, table = tap_stream_id.split("-")
-        _table_type = self.query(
-            f"""
-            SELECT table_type from information_schema.tables
-            WHERE catalog = '{db}'
-              AND schema  = '{schema}'
-              AND table   = '{table}'
+    @classproperty
+    def table_scan_query(cls) -> str:
+        """Return a SQL statement that provides the column."""
+        return """
+            SELECT catalog, schema_name, table_name
+            from information_schema.tables
+            WHERE UPPER(table_type) not like '%VIEW%'
             """
-        )
-        est_rowcount: Optional[int] = None
-        primary_key_cols: Optional[List[str]] = None
-        is_view = _table_type not in ["TABLE"]
-        return CatalogEntry(
-            tap_stream_id=tap_stream_id,
-            stream=tap_stream_id,
-            key_properties=primary_key_cols,
-            schema=None,
-            replication_key=None,
-            is_view=is_view,
-            database=db,
-            table=table,
-            row_count=est_rowcount,
-            stream_alias=tap_stream_id,
-            metadata=None,
-            replication_method=None,
-        )
 
-    def query(self, query: str):
+    @classproperty
+    def view_scan_query(cls) -> str:
+        """Return a SQL statement that provides the column."""
+        return """
+            SELECT catalog, schema_name, table_name
+            FROM information_schema.views
+            """
+
+    @classproperty
+    def column_scan_query(cls) -> str:
+        """Return a SQL statement that provides the column."""
+        return """
+            SELECT
+                  catalog, schema_name, table_name, column_name, data_type
+            FROM information_schema.columns
+            ORDER BY catalog, schema_name, table_name, ordinal
+            """
+
+    @staticmethod
+    def create_singer_schema(columns: Dict[str, str],) -> singer.Schema:
+        props: Dict[str, singer.Schema] = []
+        for column, sql_type in columns.items():
+            props[column] = DatabaseStreamBase.get_singer_type(sql_type=sql_type)
+        return props
+
+    @staticmethod
+    def get_singer_type(sql_type: str) -> singer.Schema:
+        for matchable, singer_type in SINGER_TYPE_LOOKUP:
+            if matchable in sql_type:
+                return singer_type
+        raise RuntimeError("Could not infer a Singer data type from type '{sql_type}'.")
+
+    @classmethod
+    def scan_and_collate_columns(
+        cls, config
+    ) -> Dict[Tuple[str, str, str], Dict[str, str]]:
+        columns_scan_result = cls.query(config=config, sql=cls.columns_scan_query)
+        result: Dict[Tuple[str, str, str], Dict[str, str]] = {}
+        for catalog, schema_name, table, column, data_type in columns_scan_result:
+            result[(catalog, schema_name, table)][column] = data_type
+        return result
+
+    @classmethod
+    def scan_primary_keys(cls, config) -> Dict[Tuple[str, str, str], List[str]]:
+        columns_scan_result = cls.query(config=config, sql=cls.columns_scan_query)
+        result: Dict[Tuple[str, str, str], Dict[str, str]] = {}
+        for catalog, schema_name, table, column, data_type in columns_scan_result:
+            result[(catalog, schema_name, table)][column] = data_type
+        return result
+
+    @classmethod
+    def from_discovery(cls, config: dict) -> List[FactoryType]:
+        """Return a list of all streams (tables)."""
+        result: List[DatabaseStreamBase] = []
+        table_scan_result = cls.query(config=config, sql=cls.table_scan_query)
+        view_scan_result = cls.query(config=config, sql=cls.view_scan_query)
+        all_results = [
+            (database, schema_name, table, False)
+            for database, schema_name, table in table_scan_result
+        ] + [
+            (database, schema_name, table, True)
+            for database, schema_name, table in view_scan_result
+        ]
+        collated_columns = cls.scan_and_collate_columns(config=config)
+        primary_keys_lookup = cls.scan_primary_keys(config=config)
+        for database, schema_name, table, is_view in all_results:
+            name_tuple = database, schema_name, table
+            full_name = ".".join(name_tuple)
+            columns = collated_columns.get(name_tuple, None)
+            singer_schema = cls.create_singer_schema(columns)
+            if not columns:
+                raise RuntimeError(f"Did not find any columns for table '{full_name}'")
+            primary_keys = primary_keys_lookup.get(name_tuple, None)
+            new_stream = DatabaseStreamBase(
+                tap_stream_id="-".join(name_tuple),
+                config=config,
+                database=database,
+                schema=singer_schema,
+            )
+            new_stream.primary_keys = primary_keys
+            # TODO: Expanded metadata support for setting `row_count` and `is_view`.
+            # new_stream.is_view = is_view
+            # new_stream.row_count = row_count
+            result.append(new_stream)
+
+    @abc.abstractclassmethod
+    def query(cls, config, sql: str) -> Iterable[dict]:
+        """Run a SQL query and generate a dict for each returned row."""
         pass
 
     def enquote(self, identifier: str):
@@ -99,12 +160,3 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         for quotechar in [self.DEFAULT_QUOTE_CHAR] + self.OTHER_QUOTE_CHARS:
             if identifier.startswith(quotechar):
                 return identifier.lstrip(quotechar).rstrip(quotechar)
-
-    def concatenate_tap_stream_id(
-        self, table_name: str, catalog_name: str, schema_name: str = None,
-    ):
-        """Generate tap stream id as appears in properties.json."""
-        if schema_name:
-            return catalog_name + "-" + schema_name + "-" + table_name
-        else:
-            return catalog_name + "-" + table_name
