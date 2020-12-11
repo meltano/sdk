@@ -2,7 +2,7 @@
 
 **Development Overview:**
 
-_Developing with `tap-base` requires overriding just two classes:_
+_Create with `tap-base` requires overriding just two classes:_
 
 1. The tap:
     - `TapBase` - _The core base class for all taps. This class governs configuration, validation, and stream discovery._
@@ -13,14 +13,14 @@ _Developing with `tap-base` requires overriding just two classes:_
 
 **Detailed Instructions:**
 
-1. [Initializing a new tap repo](#initializing-a-new-tap-repo)
-2. [Developing a new tap](#developing-a-new-tap)
-   1. [Step 1: Write the tap class](#step-1-write-the-tap-class)
-   2. [Step 2: Write the stream class](#step-2-write-the-stream-class)
-3. [Adding more tests](#adding-more-tests)
-4. [Troubleshooting Tips](#troubleshooting-tips)
+1. [Step 1: Initialize a new tap repo](#step-1-initialize-a-new-tap-repo)
+2. [Step 2: Write the tap class](#step-2-write-the-tap-class)
+3. [Step 3: Write the stream class](#step-3-write-the-stream-class)
+   1. [Write a 'Generic' stream class](#write-a-generic-stream-class)
+   2. [Write a 'Database' stream class](#write-a-database-stream-class)
+   3. [Write an 'API' stream class](#write-an-api-stream-class)
 
-## Initializing a new tap repo
+## Step 1: Initialize a new tap repo
 
 To get started, create a new project from the
 [`tap-template` cookiecutter repo](https://gitlab.com/meltano/tap-template):
@@ -39,9 +39,7 @@ To get started, create a new project from the
     cookiecutter https://gitlab.com/meltano/tap-template
     ```
 
-## Developing a new tap
-
-### Step 1: Write the tap class
+## Step 2: Write the tap class
 
 _To create a tap class, follow these steps:_
 
@@ -102,13 +100,13 @@ class SampleTapParquet(TapBase):
             self._streams[tap_stream_id] = new_stream
 ```
 
-### Step 2: Write the stream class
+## Step 3: Write the stream class
 
 _Creating the stream class depends upon what type of tap you are creating._
 
-#### Developing a 'Generic' (hand-coded) stream class
+### Write a 'Generic' stream class
 
-_Generic streams inherit from the class `TapStreamBase`. To create a generic
+_Generic (hand-coded) streams inherit from the class `TapStreamBase`. To create a generic
 stream class, you only need to override a single method:_
 
 1. `get_row_generator()` - This method should generate rows and return them incrementally with the
@@ -139,7 +137,7 @@ class SampleTapParquetStream(TapStreamBase):
                     }
 ```
 
-#### Developing a 'Database' stream class
+### Write a 'Database' stream class
 
 _Database streams inherit from the class `DatabaseStreamBase`. To create a database
 stream class, you will first override the `sql_query()` method. Depending upon how closely your
@@ -161,7 +159,7 @@ one and four class properties, in order to override specific metadata queries._
 
 `TODO: TK - Snowflake example coming soon...`
 
-#### Developing an 'API' stream class
+### Write an 'API' stream class
 
 _API streams inherit from the class `APIStreamBase`. To create an API-based
 stream class, you will override one class property and three methods:_
@@ -213,11 +211,3 @@ class GitlabStream(APIStreamBase):
         """Transform raw data from HTTP GET into the expected property values."""
         return row
 ```
-
-## Adding more tests
-
-`TODO: TK - write test writing instructions`
-
-## Troubleshooting Tips
-
-`TODO: TK - write troubleshooting tips`
