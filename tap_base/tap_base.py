@@ -115,6 +115,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     @classmethod
     def cli(
         cls,
+        version: bool = False,
         discover: bool = False,
         config: str = None,
         state: str = None,
@@ -127,6 +128,9 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
                 return None
             return json.loads(Path(path).read_text())
 
+        if version:
+            cls.print_version()
+            return
         config_dict = read_optional_json(config)
         state_dict = read_optional_json(state)
         catalog_dict = read_optional_json(catalog)
@@ -137,9 +141,15 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
             tap.sync_all()
 
 
+@click.option("--version", is_flag=True)
 @click.option("--discover", is_flag=True)
 @click.option("--config")
 @click.option("--catalog")
 @click.command()
-def cli(discover: bool = False, config: str = None, catalog: str = None):
-    TapBase.cli(discover=discover, config=config, catalog=catalog)
+def cli(
+    discover: bool = False,
+    config: str = None,
+    catalog: str = None,
+    version: bool = False,
+):
+    TapBase.cli(version=version, discover=discover, config=config, catalog=catalog)
