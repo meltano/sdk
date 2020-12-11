@@ -16,9 +16,9 @@ _Create with `tap-base` requires overriding just two classes:_
 1. [Step 1: Initialize a new tap repo](#step-1-initialize-a-new-tap-repo)
 2. [Step 2: Write the tap class](#step-2-write-the-tap-class)
 3. [Step 3: Write the stream class](#step-3-write-the-stream-class)
-   1. [Write a 'Generic' stream class](#write-a-generic-stream-class)
-   2. [Write a 'Database' stream class](#write-a-database-stream-class)
-   3. [Write an 'API' stream class](#write-an-api-stream-class)
+   1. ['Generic' stream classes](#generic-stream-classes)
+   2. ['Database' stream classes](#database-stream-classes)
+   3. ['API' stream classes](#api-stream-classes)
 
 ## Step 1: Initialize a new tap repo
 
@@ -104,7 +104,7 @@ class SampleTapParquet(TapBase):
 
 _Creating the stream class depends upon what type of tap you are creating._
 
-### Write a 'Generic' stream class
+### 'Generic' stream classes
 
 _Generic (hand-coded) streams inherit from the class `TapStreamBase`. To create a generic
 stream class, you only need to override a single method:_
@@ -137,7 +137,7 @@ class SampleTapParquetStream(TapStreamBase):
                     }
 ```
 
-### Write a 'Database' stream class
+### 'Database' stream classes
 
 _Database streams inherit from the class `DatabaseStreamBase`. To create a database
 stream class, you will first override the `sql_query()` method. Depending upon how closely your
@@ -159,7 +159,7 @@ one and four class properties, in order to override specific metadata queries._
 
 `TODO: TK - Snowflake example coming soon...`
 
-### Write an 'API' stream class
+### 'API' stream classes
 
 _API streams inherit from the class `APIStreamBase`. To create an API-based
 stream class, you will override one class property and three methods:_
