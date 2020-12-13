@@ -75,10 +75,8 @@ class SampleTapParquet(TapBase):
         """Return the stream class."""
         return SampleTapParquetStream
 
-    def discover_catalog_streams(
-        self, state: dict, config: dict, logger: Logger
-    ) -> None:
-        """Return a dictionary of all streams."""
+    def discover_catalog_streams(self) -> None:
+        """Initialize self._streams with a dictionary of all streams."""
         # TODO: automatically infer this from the parquet schema
         for tap_stream_id in ["ASampleTable"]:
             schema = Schema(
@@ -91,9 +89,9 @@ class SampleTapParquet(TapBase):
             new_stream = SampleTapParquetStream(
                 tap_stream_id=tap_stream_id,
                 schema=schema,
-                state=state,
-                logger=logger,
-                config=config,
+                state=self.state,
+                logger=self.logger,
+                config=self.config,
             )
             new_stream.primary_keys = ["f0"]
             new_stream.replication_key = "f0"

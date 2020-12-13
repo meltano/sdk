@@ -3,9 +3,11 @@
 from datetime import datetime
 from typing import Any, Dict, Union
 
-from tap_base.streams.rest import RESTStreamBase, URLArgMap
+from tap_base.streams.rest import RESTStreamBase
 
 SITE_URL = "https://gitlab.com/api/v4"
+
+URLArgMap = Dict[str, Union[str, bool, int, datetime]]
 
 
 class GitlabStream(RESTStreamBase):

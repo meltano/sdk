@@ -1,9 +1,11 @@
 """Abstract base class for API-type streams."""
 
 import abc
+import json
 import backoff
-import requests
 import logging
+import requests
+import sys
 
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Union
@@ -27,14 +29,16 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        tap_stream_id: str,
-        schema: Union[Dict[str, Any], Schema],
-        state: Dict[str, Any],
-        logger: logging.Logger,
         config: dict,
-        url_pattern: str,
+        logger: logging.Logger,
+        state: Dict[str, Any],
+        name: Optional[str],
+        schema: Optional[Union[Dict[str, Any], Schema]],
+        url_pattern: Optional[str],
     ):
-        super().__init__(tap_stream_id, schema, state, logger, config)
+        super().__init__(
+            name=name, schema=schema, state=state, logger=logger, config=config,
+        )
         self._url_pattern = url_pattern
         self._requests_session = requests.Session()
 
@@ -48,10 +52,11 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         return self.get_url()
 
     @staticmethod
-    def url_encode(val: Union[str, datetime, List[str]]) -> str:
-        # TODO: Add escape logic
-        result = str(val)
-        result = result.replace("/", "%2F")
+    def url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
+        if isinstance(val, str):
+            result = val.replace("/", "%2F")
+        else:
+            result = str(val)
         return result
 
     def get_url(self, url_suffix: str = None, extra_url_args: URLArgMap = None) -> str:
@@ -77,13 +82,10 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         and 400 <= e.response.status_code < 500,  # pylint: disable=line-too-long
         factor=2,
     )
-    def request_get_with_backoff(self, url, params=None):
+    def request_get_with_backoff(self, url, params=None) -> requests.Response:
         params = params or {}
 
-        request = requests.Request(
-            "GET", url, params=params, headers=self.get_auth_header()
-        ).prepare()
-        self.logger.info("Calling GET: {}".format(request.url))
+        request = self.prepare_request(url=url, params=params)
         response = self.requests_session.send(request)
 
         if response.status_code in [401, 403]:
@@ -101,7 +103,21 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
                 )
             )
             self.fatal()
+        logging.debug("Response received successfully.")
         return response
+
+    def prepare_request(
+        self, url, params=None, method="GET", data=None, json=None
+    ) -> requests.PreparedRequest:
+        request = requests.Request(
+            method=method,
+            url=url,
+            params=params,
+            headers=self.get_auth_header(),
+            data=data,
+            json=json,
+        ).prepare()
+        return request
 
     def request_paginated_get(self) -> Iterable[dict]:
         params = {"page": 1, "per_page": self._page_size}
@@ -110,13 +126,21 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         while next_page:
             params["page"] = int(next_page)
             resp = self.request_get_with_backoff(url, params)
-            resp_json = resp.json()
-            if isinstance(resp_json, dict):
-                yield resp_json
-            else:
-                for row in resp_json:
-                    yield row
-            next_page = resp.headers.get("X-Next-Page", None)
+            for row in self.parse_response(resp):
+                yield row
+            next_page = self.get_next_page(resp)
+
+    def get_next_page(self, response):
+        return response.headers.get("X-Next-Page", None)
+
+    def parse_response(self, response) -> Iterable[dict]:
+        """Parse the response and return an iterator of result rows."""
+        resp_json = response.json()
+        if isinstance(resp_json, dict):
+            yield resp_json
+        else:
+            for row in resp_json:
+                yield row
 
     def get_row_generator(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""

@@ -12,7 +12,7 @@ import click
 
 from tap_base.helpers import classproperty
 from tap_base.tap_base import TapBase
-from tap_base.tests.sample_tap_gitlab.gitlab_tap_stream import GitlabStream
+from tap_base.tests.sample_tap_gitlab.gitlab_rest_stream import GitlabStream
 
 
 ACCEPTED_CONFIG_OPTIONS = ["auth_token", "project_ids", "start_date"]
@@ -68,17 +68,15 @@ class SampleTapGitlab(TapBase):
         """Return the stream class."""
         return GitlabStream
 
-    def discover_catalog_streams(
-        self, state: dict, config: dict, logger: Logger
-    ) -> None:
-        """Return a dictionary of all streams."""
+    def discover_catalog_streams(self) -> None:
+        """Initialize self._streams with a dictionary of all streams."""
         # TODO: automatically infer this from the gitlab schema
         for stream_class, streams_dict in STREAM_TYPES.items():
             for stream_name, stream_def in streams_dict.items():
                 schemafile = Path(SCHEMAS_DIR) / f"{stream_name}.json"
                 schema = json.loads(Path(schemafile).read_text())
                 new_stream = stream_class(
-                    tap_stream_id=stream_name,
+                    name=stream_name,
                     schema=schema,
                     state={},
                     logger=self.logger,

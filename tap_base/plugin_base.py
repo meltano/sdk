@@ -7,11 +7,13 @@ from typing import Dict, List, Optional, Type, Tuple, Any
 
 import click
 
-from tap_base.stream_base import GenericStreamBase
+from tap_base.streams.core import TapStreamBase
 
 
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
+
+    plugin_name: str = "sample-plugin-name"
 
     _config: dict
     _logger: Optional[logging.Logger] = None
@@ -30,14 +32,9 @@ class PluginBase(metaclass=abc.ABCMeta):
         self.validate_config()
 
     @classproperty
-    def plugin_name(cls) -> str:
-        """Return the plugin name."""
-        return "sample-plugin-name"
-
-    @classproperty
-    def stream_class(cls) -> Type[GenericStreamBase]:
+    def stream_class(cls) -> Type[TapStreamBase]:
         """Return the stream class."""
-        return GenericStreamBase
+        return TapStreamBase
 
     @property
     def capabilities(self) -> List[str]:

@@ -19,7 +19,7 @@ class SampleTapSnowflakeStream(DatabaseStreamBase):
         for row in self.query(f"SELECT * FROM {self.tap_stream_id}"):
             yield row
 
-    def query(self, query: Union[str, List[str]], params=None, max_records=0):
+    def sql_query(self, query: Union[str, List[str]], params=None, max_records=0):
         """Run a query in snowflake."""
         result = []
         with self.connect_with_backoff() as connection:

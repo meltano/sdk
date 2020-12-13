@@ -33,6 +33,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         self._state = state or {}
         super().__init__(config=config)
         if catalog:
+            self.logger.info("loading catalog streams...")
             self.load_catalog_streams(
                 catalog=catalog,
                 config=self._config,
@@ -40,9 +41,8 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
                 logger=self.logger,
             )
         else:
-            self.discover_catalog_streams(
-                config=self._config, state=self._state, logger=self.logger
-            )
+            self.logger.info("discovering catalog streams...")
+            self.discover_catalog_streams()
 
     @classproperty
     def stream_class(cls) -> Type[TapStreamBase]:
@@ -74,9 +74,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
             )
             self._streams[stream_name] = new_stream
 
-    def discover_catalog_streams(
-        self, state: dict, config: dict, logger: Logger
-    ) -> None:
+    def discover_catalog_streams(self) -> None:
         raise NotImplementedError(
             f"Tap '{self.plugin_name}' does not support discovery. "
             "Please set the '--catalog' command line argument and try again."
