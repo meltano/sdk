@@ -2,7 +2,7 @@
 
 import json
 from logging import Logger
-from tap_base.streams.api import APIStreamBase
+from tap_base.streams.rest import RESTStreamBase
 from typing import Any, Dict, List, Optional, Type, Union
 from pathlib import Path
 
@@ -20,7 +20,7 @@ REQUIRED_CONFIG_SETS = [["auth_token", "project_ids", "start_date"]]
 SCHEMAS_DIR = "./tap_base/tests/sample_tap_gitlab/schemas"
 
 STREAM_TYPES: Dict[
-    Type[APIStreamBase], Dict[str, Dict[str, Union[None, str, List[str]]]],
+    Type[RESTStreamBase], Dict[str, Dict[str, Union[None, str, List[str]]]],
 ] = {
     GitlabStream: {
         "projects": {

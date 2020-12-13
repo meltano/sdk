@@ -8,7 +8,7 @@ _Create with `tap-base` requires overriding just two classes:_
     - `TapBase` - _The core base class for all taps. This class governs configuration, validation, and stream discovery._
 2. The stream. For the stream base class, you have three options depending on the type of data source you are working with.
     - `TapStreamBase` - _The **generic** base class for streams. This class is responsible for replication and bookmarking._
-    - `APIStreamBase` - _The base class for API-base streams. This class is responsible for replication and bookmarking._
+    - `RESTStreamBase` - _The base class for REST API-base streams. This class is responsible for replication and bookmarking._
     - `DatabaseStreamBase` - _The base class for database-type streams - specifically those which support the SQL language._
 
 **Detailed Instructions:**
@@ -139,7 +139,7 @@ class SampleTapParquetStream(TapStreamBase):
 
 ### 'API' stream classes
 
-_API streams inherit from the class `APIStreamBase`. To create an API-based
+_API streams inherit from the class `RESTStreamBase`. To create an API-based
 stream class, you will override one class property and three methods:_
 
 1. **`site_url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
@@ -161,7 +161,7 @@ stream class, you will override one class property and three methods:_
 **An example using the `GitLab` sample:**
 
 ```py
-class GitlabStream(APIStreamBase):
+class GitlabStream(RESTStreamBase):
     """Sample tap test for gitlab."""
 
     @property

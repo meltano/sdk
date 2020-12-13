@@ -17,7 +17,7 @@ URLArgMap = Dict[str, Union[str, bool, int, datetime]]
 DEFAULT_PAGE_SIZE = 1000
 
 
-class APIStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
+class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     """Abstract base class for API-type streams."""
 
     _url_pattern: str

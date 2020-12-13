@@ -3,14 +3,14 @@
 from datetime import datetime
 from typing import Any, Dict, Union
 
-from tap_base.streams.api import APIStreamBase
+from tap_base.streams.rest import RESTStreamBase
 
 SITE_URL = "https://gitlab.com/api/v4"
 
 URLArgMap = Dict[str, Union[str, bool, int, datetime]]
 
 
-class GitlabStream(APIStreamBase):
+class GitlabStream(RESTStreamBase):
     """Sample tap test for gitlab."""
 
     @property
