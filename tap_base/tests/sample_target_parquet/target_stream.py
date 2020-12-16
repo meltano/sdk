@@ -39,14 +39,15 @@ class SampleParquetTargetStream(TargetStreamBase):
     ):
         print("Flushing records...")
         num_written = 0
+        # TODO: This whole section needs rework/rewrite - probably use DEFAULT_BATCH_SIZE_ROWS to batch-save multiple rows at a time
         for record in records_to_load:
+            # TODO: Replace with actual schema from the SCHEMA message
             schema = pa.schema([("some_int", pa.int32()), ("some_string", pa.string())])
+
+            # TODO: Probably we want to use a `file_naming_scheme` rather than a static `filename` config
             writer = pq.ParquetWriter(self.get_config("filepath"), schema)
             table = pa.Table.from_batches([sample_batch])
             writer.write_table(table)
-            for i in range(5):
-                table = pa.Table.from_batches([_make_sample_batch()])
-                writer.write_table(table)
             writer.close()
             num_written += 1
         if num_written != expected_row_count:
