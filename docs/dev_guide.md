@@ -46,45 +46,12 @@ To get started, create a new project from the
 _To create a tap class, follow these steps:_
 
 1. Map your Connection class to the `_conn` type.
-2. Override three properties:
-   1. `name` - What to call your tap (for example, `tap-bestever`)
+2. Override tap config:
+   1. `name` - What to call your tap (for example, `tap-best-ever`)
    2. `accepted_config_keys` - A lit of all config options that this tap will accept.
    3. `required_config_options` - (Optional.) One or more required sets of options.
-   4. `default_stream_class` - (Optional.) The stream class to use if auto-discovering from a json catalog.
-3. Override the method `discover_catalog_streams`.
-4. (Optional.) Override
-
-**Parquet sample tap class:**
-
-```py
-class SampleTapParquet(TapBase):
-    """Sample tap for Parquet."""
-
-    name: str = "sample-tap-parquet"
-    accepted_config_keys: List[str] = ["filepath", "file_naming_scheme]
-    required_config_options: Optional[List[List[str]]] = [["filepath"], ["file_naming_schema"]]
-
-    def discover_catalog_streams(self) -> None:
-        """Initialize self._streams with a dictionary of all streams."""
-        # TODO: automatically infer this from the parquet schema
-        for tap_stream_id in ["ASampleTable"]:
-            schema = Schema(
-                properties={
-                    "f0": Schema(type=["string", "None"]),
-                    "f1": Schema(type=["string", "None"]),
-                    "f2": Schema(type=["string", "None"]),
-                }
-            )
-            new_stream = SampleTapParquetStream(
-                tap_stream_id=tap_stream_id,
-                schema=schema,
-                state=self.state,
-                config=self.config,
-            )
-            new_stream.primary_keys = ["f0"]
-            new_stream.replication_key = "f0"
-            self._streams[tap_stream_id] = new_stream
-```
+   4. `default_stream_class` - (Optional.) The stream class to use if auto-discovering from a json catalog file.
+3. Override the `discover_catalog_streams` method.
 
 ## Step 3: Write the stream class
 
