@@ -6,6 +6,7 @@ import datetime
 import json
 import logging
 import sys
+from tap_base.helpers import classproperty
 import time
 from functools import lru_cache
 from os import PathLike
@@ -30,48 +31,47 @@ FactoryType = TypeVar("FactoryType", bound="TapStreamBase")
 class TapStreamBase(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
-    name: Optional[str] = None
-    schema_filepath: Optional[Union[str, PathLike]] = None
-    schema: dict
-    primary_keys: List[str] = []
-    replication_key: Optional[str] = None
-    forced_replication_method: Optional[str] = None
-
-    discoverable: bool = False
-
-    _custom_metadata: Optional[dict] = None
-    _state: dict
-
     MAX_CONNECT_RETRIES = 0
+
+    tap_name: str = "sample-tap-name"  # For logging purposes
+    discoverable: bool = False
+    __logger: Optional[logging.Logger]
+
+    # name: Optional[str] = None
+    # schema_filepath: Optional[Union[str, PathLike]] = None
+    # primary_keys: List[str] = []
+    # replication_key: Optional[str] = None
 
     def __init__(
         self,
         config: dict,
         schema: Optional[Union[str, PathLike, Dict[str, Any], Schema]],
-        logger: logging.Logger,
         name: Optional[str],
         state: Dict[str, Any],
     ):
         """Initialize tap stream."""
-        self._config = config
-        self._logger = logger
         if name:
-            self.name = name
+            self.name: str = name
         if not self.name:
             raise ValueError("Missing argument or class variable 'name'.")
+        self._config: dict = config
         self._state = state or {}
+        self._schema: Optional[dict] = None
+        self.forced_replication_method: Optional[str] = None
+        self.replication_key: Optional[str] = None
+        self.primary_keys: Optional[List[str]] = None
         self.__init_schema(schema)
 
-    @property
+    @classproperty
     def logger(self) -> logging.Logger:
-        return self._logger
+        return logging.getLogger(self.tap_name)
 
     def __init_schema(
         self, schema: Union[str, PathLike, Dict[str, Any], Schema]
     ) -> None:
         if isinstance(schema, (str, PathLike)) and not self.schema_filepath:
             self.schema_filepath = schema
-        if self.schema_filepath:
+        if hasattr(self, "schema_filepath") and self.schema_filepath:
             self.schema_filepath = Path(self.schema_filepath)
             if not self.schema_filepath.exists():
                 raise FileExistsError("Could not find schema file '{filepath}'.")
@@ -88,7 +88,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
             )
 
     @property
-    def schema(self) -> dict:
+    def schema(self) -> Optional[dict]:
         return self._schema
 
     def get_config(self, config_key: str, default: Any = None) -> Any:
@@ -126,13 +126,14 @@ class TapStreamBase(metaclass=abc.ABCMeta):
 
     @property
     def singer_metadata(self) -> dict:
+        self.logger.debug(f"Schema Debug: {self.schema}")
         md = metadata.get_standard_metadata(
             schema=self.schema,
             replication_method=self.replication_method,
             key_properties=self.primary_keys or None,
-            valid_replication_keys=[self.replication_key]
-            if self.replication_key
-            else None,
+            valid_replication_keys=(
+                [self.replication_key] if self.replication_key else None
+            ),
             schema_name=None,
         )
         return md
@@ -334,7 +335,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
     def get_property_schema(self, property: str, warn=True) -> Optional[dict]:
         if property not in self.schema["properties"]:
             if warn:
-                self.logger.warning(
+                self.logger.debug(
                     f"Could not locate schema mapping for property '{property}'. "
                     "Any corresponding data will be excluded from the stream..."
                 )
@@ -420,17 +421,13 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         for catalog_entry in catalog.streams:
             stream_name = catalog_entry.stream_name
             result[stream_name] = cls.from_stream_dict(
-                catalog_entry.to_dict(), state=state, logger=logger, config=config
+                catalog_entry.to_dict(), state=state, config=config
             )
         return result
 
     @classmethod
     def from_stream_dict(
-        cls,
-        stream_dict: Dict[str, Any],
-        config: dict,
-        state: dict,
-        logger: logging.Logger,
+        cls, stream_dict: Dict[str, Any], config: dict, state: dict,
     ) -> FactoryType:
         """Create a stream object from a catalog's 'stream' dictionary entry."""
         stream_name = stream_dict.get("tap_stream_id", stream_dict.get("stream"))
@@ -439,31 +436,9 @@ class TapStreamBase(metaclass=abc.ABCMeta):
             schema=stream_dict.get("schema"),
             config=config,
             state=state,
-            logger=logger,
         )
         new_stream.set_custom_metadata(stream_dict.get("metadata"))
         return new_stream
-
-    # def open_stream_connection(self) -> Any:
-    #     """Perform any needed tasks to initialize the tap stream connection."""
-    #     pass
-
-    # def log_backoff_attempt(self, details):
-    #     """Log backoff attempts used by stream retry_pattern()."""
-    #     self.logger.info(
-    #         "Error communicating with source, "
-    #         f"triggering backoff: {details.get('tries')} try"
-    #     )
-
-    # def connect_with_retries(self) -> Any:
-    #     """Run open_stream_connection(), retry automatically a few times if failed."""
-    #     return backoff.on_exception(
-    #         backoff.expo,
-    #         exception=TapStreamConnectionFailure,
-    #         max_tries=self.MAX_CONNECT_RETRIES,
-    #         on_backoff=self.log_backoff_attempt,
-    #         factor=2,
-    #     )(self.open_stream_connection)()
 
     # def is_connected(self) -> bool:
     #     """Return True if connected."""

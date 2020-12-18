@@ -45,9 +45,9 @@ _To create a tap class, follow these steps:_
 
 1. Map your Connection class to the `_conn` type.
 2. Override three properties:
-   1. `plugin_name` - What to call your tap (for example, `tap-bestever`)
-   2. `accepted_config_options` - A lit of all config options that this tap will accept.
-   3. `required_config_sets` - One or more required sets of options.
+   1. `name` - What to call your tap (for example, `tap-bestever`)
+   2. `accepted_config_keys` - A lit of all config options that this tap will accept.
+   3. `required_config_options` - One or more required sets of options.
    4. `stream_class` - A reference to your stream class (see below)
 3. Override the method `discover_catalog_streams`.
 
@@ -57,23 +57,9 @@ _To create a tap class, follow these steps:_
 class SampleTapParquet(TapBase):
     """Sample tap for Parquet."""
 
-    @classproperty
-    def plugin_name(cls) -> str:
-        """Return the plugin name."""
-        return "sample-tap-parquet"
-
-    @classproperty
-    def accepted_config_options(cls) -> List[str]:
-        return ACCEPTED_CONFIG_OPTIONS
-
-    @classproperty
-    def required_config_sets(cls) -> List[List[str]]:
-        return REQUIRED_CONFIG_SETS
-
-    @classproperty
-    def stream_class(cls) -> Type[SampleTapParquetStream]:
-        """Return the stream class."""
-        return SampleTapParquetStream
+    name: str = "sample-tap-parquet"
+    accepted_config_keys: List[str] = ["filepath", "file_naming_scheme]
+    required_config_options: Optional[List[List[str]]] = [["filepath"], ["file_naming_schema"]]
 
     def discover_catalog_streams(self) -> None:
         """Initialize self._streams with a dictionary of all streams."""
@@ -90,7 +76,6 @@ class SampleTapParquet(TapBase):
                 tap_stream_id=tap_stream_id,
                 schema=schema,
                 state=self.state,
-                logger=self.logger,
                 config=self.config,
             )
             new_stream.primary_keys = ["f0"]

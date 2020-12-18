@@ -19,23 +19,10 @@ REQUIRED_CONFIG_SETS = [["filepath"]]
 class SampleTapParquet(TapBase):
     """Sample tap for Parquet."""
 
-    @classproperty
-    def plugin_name(cls) -> str:
-        """Return the plugin name."""
-        return "sample-tap-parquet"
-
-    @classproperty
-    def accepted_config_options(cls) -> List[str]:
-        return ACCEPTED_CONFIG_OPTIONS
-
-    @classproperty
-    def required_config_sets(cls) -> List[List[str]]:
-        return REQUIRED_CONFIG_SETS
-
-    @classproperty
-    def stream_class(cls) -> Type[SampleTapParquetStream]:
-        """Return the stream class."""
-        return SampleTapParquetStream
+    name: str = "sample-tap-parquet"
+    accepted_config_keys = ACCEPTED_CONFIG_OPTIONS
+    required_config_options = REQUIRED_CONFIG_SETS
+    default_stream_class = SampleTapParquetStream
 
     def discover_catalog_streams(self) -> None:
         """Return a dictionary of all streams."""
@@ -50,7 +37,6 @@ class SampleTapParquet(TapBase):
             )
             new_stream = SampleTapParquetStream(
                 config=self._config,
-                logger=self.logger,
                 state=self._state,
                 name=tap_stream_id,
                 schema=schema,

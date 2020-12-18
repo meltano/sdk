@@ -1,11 +1,10 @@
 """Abstract base class for API-type streams."""
 
 import abc
-import json
 import backoff
 import logging
+import jinja2
 import requests
-import sys
 
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Union
@@ -27,25 +26,25 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     _page_size: int = DEFAULT_PAGE_SIZE
     _requests_session: Optional[requests.Session]
 
-    def __init__(
-        self,
-        config: dict,
-        logger: logging.Logger,
-        state: Dict[str, Any],
-        name: Optional[str],
-        schema: Optional[Union[Dict[str, Any], Schema]],
-        url_pattern: Optional[str],
-    ):
-        super().__init__(
-            name=name, schema=schema, state=state, logger=logger, config=config,
-        )
-        self._url_pattern = url_pattern
-        self._requests_session = requests.Session()
-
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def site_url_base(self) -> str:
         """Return the base url, e.g. 'https://api.mysite.com/v3/'."""
         pass
+
+    def __init__(
+        self,
+        config: dict,
+        state: Dict[str, Any],
+        name: Optional[str] = None,
+        schema: Optional[Union[Dict[str, Any], Schema]] = None,
+        url_pattern: Optional[str] = None,
+    ):
+        super().__init__(
+            name=name, schema=schema, state=state, config=config,
+        )
+        self._url_pattern = url_pattern
+        self._requests_session = requests.Session()
 
     @property
     def endpoint_url(self) -> str:
@@ -60,12 +59,15 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         return result
 
     def get_url(self, url_suffix: str = None, extra_url_args: URLArgMap = None) -> str:
-        result = "".join([self.site_url_base, self._url_pattern, url_suffix or ""])
+        result = "".join(
+            [self.site_url_base or "", self._url_pattern or "", url_suffix or ""]
+        )
         replacement_map = extra_url_args or {}
         for k, v in replacement_map.items():
             search_text = "".join(["{", k, "}"])
             if search_text in self._url_pattern:
                 result = result.replace(search_text, self.url_encode(v))
+        self.logger.info(f"Tap '{self.name}' generated URL: {result}")
         return result
 
     @property
@@ -97,24 +99,27 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
                 "Requested resource was unauthorized, forbidden, or not found."
             )
         elif response.status_code >= 400:
-            self.logger.critical(
+            raise RuntimeError(
                 "Error making request to API: GET {} [{} - {}]".format(
                     request.url, response.status_code, response.content
                 )
             )
-            self.fatal()
         logging.debug("Response received successfully.")
         return response
 
+    def render(self, input: Union[str, jinja2.Template]) -> str:
+        if isinstance(input, jinja2.Template):
+            return str(input.render(**self.template_values))
+        return str(input)
+
     def prepare_request(
-        self, url, params=None, method="GET", data=None, json=None
+        self, url, params=None, method="GET", json=None
     ) -> requests.PreparedRequest:
         request = requests.Request(
             method=method,
-            url=url,
+            url=self.render(url),
             params=params,
             headers=self.get_auth_header(),
-            data=data,
             json=json,
         ).prepare()
         return request

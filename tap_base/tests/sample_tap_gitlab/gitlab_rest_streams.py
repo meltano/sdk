@@ -3,19 +3,15 @@
 from datetime import datetime
 from typing import Any, Dict, Union
 
-from tap_base.streams.rest import RESTStreamBase
+from tap_base.streams.rest import RESTStreamBase, URLArgMap
 
 SITE_URL = "https://gitlab.com/api/v4"
-
-URLArgMap = Dict[str, Union[str, bool, int, datetime]]
 
 
 class GitlabStream(RESTStreamBase):
     """Sample tap test for gitlab."""
 
-    @property
-    def site_url_base(self):
-        return SITE_URL
+    site_url_base = SITE_URL
 
     def get_auth_header(self) -> Dict[str, Any]:
         """Return an authorization header for REST API requests."""

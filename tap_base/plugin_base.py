@@ -13,16 +13,18 @@ from tap_base.streams.core import TapStreamBase
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    plugin_name: str = "sample-plugin-name"
+    name: str = "sample-plugin-name"
+    accepted_config_keys: List[str] = []
+    required_config_options: Optional[List[List[str]]] = [[]]
+
+    __always_accepted_config_keys: List[str] = ["start_date", "end_date"]
 
     _config: dict
     _logger: Optional[logging.Logger] = None
 
-    @property
+    @classproperty
     def logger(self) -> logging.Logger:
-        if not self._logger:
-            self._logger = logging.getLogger(self.plugin_name)
-        return self._logger
+        return logging.getLogger(self.name)
 
     # Constructor
 
@@ -31,25 +33,10 @@ class PluginBase(metaclass=abc.ABCMeta):
         self._config = config or {}
         self.validate_config()
 
-    @classproperty
-    def stream_class(cls) -> Type[TapStreamBase]:
-        """Return the stream class."""
-        return TapStreamBase
-
     @property
     def capabilities(self) -> List[str]:
         """Return a list of supported capabilities."""
         return []
-
-    @abc.abstractproperty
-    @classproperty
-    def accepted_config_options(cls) -> List[str]:
-        return ["start_date"]
-
-    @abc.abstractproperty
-    @classproperty
-    def required_config_sets(cls) -> List[List[str]]:
-        return [[]]
 
     # Core plugin metadata:
 
@@ -62,7 +49,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             # Running on pre-3.8 Python; use importlib-metadata package
             import importlib_metadata as metadata
         try:
-            version = metadata.version(cls.plugin_name)
+            version = metadata.version(cls.name)
         except metadata.PackageNotFoundError:
             version = "[could not be detected]"
         return version
@@ -80,13 +67,15 @@ class PluginBase(metaclass=abc.ABCMeta):
         warnings: List[str] = []
         errors: List[str] = []
         for k in self._config:
-            if k not in self.accepted_config_options:
+            if k not in set(
+                self.accepted_config_keys + self.__always_accepted_config_keys
+            ):
                 warnings.append(f"Unexpected config option found: {k}.")
-        if self.required_config_sets:
-            required_sets = self.required_config_sets
+        if self.required_config_options:
+            required_set_options = self.required_config_options
             matched_any = False
             missing: List[List[str]] = []
-            for required_set in required_sets:
+            for required_set in required_set_options:
                 if all([x in self._config.keys() for x in required_set]):
                     matched_any = True
                 else:
@@ -100,9 +89,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                     f"{str(missing)}"
                 )
         if raise_errors and errors:
-            raise RuntimeError(
-                f"One or more errors ocurred during validation: {errors}"
-            )
+            raise RuntimeError(f"Config validation failed: {f'; '.join(errors)}")
         if warnings_as_errors and raise_errors and warnings:
             raise RuntimeError(
                 f"One or more warnings ocurred during validation: {warnings}"
@@ -111,7 +98,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     def print_version(self) -> None:
         """Print help text for the tap."""
-        print(f"{self.plugin_name} v{self.plugin_version}")
+        print(f"{self.name} v{self.plugin_version}")
 
     @classmethod
     @click.command()
