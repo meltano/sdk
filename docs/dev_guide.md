@@ -7,9 +7,10 @@ _Create with `tap-base` requires overriding just two classes:_
 1. The tap:
     - `TapBase` - _The core base class for all taps. This class governs configuration, validation, and stream discovery._
 2. The stream. For the stream base class, you have three options depending on the type of data source you are working with.
-    - `TapStreamBase` - _The **generic** base class for streams. This class is responsible for replication and bookmarking._
-    - `RESTStreamBase` - _The base class for REST API-base streams. This class is responsible for replication and bookmarking._
-    - `DatabaseStreamBase` - _The base class for database-type streams - specifically those which support the SQL language._
+    - `TapStreamBase` - _The **generic** base class for streams._
+    - `RESTStreamBase` - _The base class for **REST**-type streams._
+    - `GraphQLStreamBase` - _The base class for **GraphQL**-type streams._
+    - `DatabaseStreamBase` - _The base class for **database**-type streams - specifically those which support the SQL language._
 
 **Detailed Instructions:**
 
