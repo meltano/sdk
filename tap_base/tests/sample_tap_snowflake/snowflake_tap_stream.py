@@ -1,6 +1,5 @@
 """Sample tap stream test for tap-snowflake."""
 
-from tap_base.streams.core import TapStreamBase
 from typing import Dict, Iterable, List, Tuple, Union, cast
 from snowflake import connector
 
@@ -17,13 +16,6 @@ class SampleTapSnowflakeStream(DatabaseStreamBase):
     """Sample tap test for snowflake."""
 
     tap_name = PLUGIN_NAME
-
-    def get_row_generator(self) -> Iterable[dict]:
-        """Return a generator of row-type dictionary objects."""
-        for row in self.sql_query(
-            sql=f"SELECT * FROM {self.tap_stream_id}", config=self._config
-        ):
-            yield cast(dict, row)
 
     @classmethod
     def scan_primary_keys(cls, config) -> Dict[Tuple[str, str, str], List[str]]:

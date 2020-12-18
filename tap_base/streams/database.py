@@ -6,7 +6,7 @@ import backoff
 import singer
 from tap_base.helpers import classproperty
 from tap_base.exceptions import TapStreamConnectionFailure, TooManyRecordsException
-from typing import Any, Dict, Iterable, List, Tuple, TypeVar, Union
+from typing import Any, Dict, Iterable, List, Tuple, TypeVar, Union, cast
 
 from tap_base.streams.core import TapStreamBase
 
@@ -52,6 +52,17 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
 
     DEFAULT_QUOTE_CHAR = '"'
     OTHER_QUOTE_CHARS = ['"', "[", "]", "`"]
+
+    def get_row_generator(self) -> Iterable[dict]:
+        """Return a generator of row-type dictionary objects."""
+        for row in self.sql_query(
+            sql=f"SELECT * FROM {self.fully_qualified_name}", config=self._config
+        ):
+            yield cast(dict, row)
+
+    @property
+    def fully_qualified_name(self):
+        return self.tap_stream_id
 
     @classproperty
     def table_scan_sql(cls) -> str:
@@ -203,6 +214,6 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         )(cls.open_connection)()
 
     @abc.abstractclassmethod
-    def open_connection(cls, config, logger) -> Any:
-        """Connect to snowflake database."""
+    def open_connection(cls, config) -> Any:
+        """Connect to the database source."""
         pass

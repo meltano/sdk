@@ -47,9 +47,10 @@ _To create a tap class, follow these steps:_
 2. Override three properties:
    1. `name` - What to call your tap (for example, `tap-bestever`)
    2. `accepted_config_keys` - A lit of all config options that this tap will accept.
-   3. `required_config_options` - One or more required sets of options.
-   4. `stream_class` - A reference to your stream class (see below)
+   3. `required_config_options` - (Optional.) One or more required sets of options.
+   4. `default_stream_class` - (Optional.) The stream class to use if auto-discovering from a json catalog.
 3. Override the method `discover_catalog_streams`.
+4. (Optional.) Override
 
 **Parquet sample tap class:**
 
@@ -92,7 +93,8 @@ _Creating the stream class depends upon what type of tap you are creating._
 _Generic (hand-coded) streams inherit from the class `TapStreamBase`. To create a generic
 stream class, you only need to override a single method:_
 
-1. `get_row_generator()` - This method should generate rows and return them incrementally with the
+1. `tap_name` The same name used in your tap class (for logging purposes).
+2. `get_row_generator()` - This method should generate rows and return them incrementally with the
    `yield` python operator.
 
 **An example using the `Parquet` sample:**
@@ -125,17 +127,18 @@ class SampleTapParquetStream(TapStreamBase):
 _API streams inherit from the class `RESTStreamBase`. To create an API-based
 stream class, you will override one class property and three methods:_
 
-1. **`site_url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
+1. `tap_name` The same name used in your tap class (for logging purposes).
+2. **`site_url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
    - For example: to connect to the GitLab v4 API, we use `"https://gitlab.com/api/v4"`.
-2. **`get_auth_header` method** - Build and return an authorization header which will be used when
+3. **`get_auth_header` method** - Build and return an authorization header which will be used when
    making calls to your API.
    - For example: to connect to the GitLab API, we pass "Private-Token" and (optionally) "User-Agent".
-3. **`get_url` method** - This method returns the concatenates and parameterizes the final URL which
+4. **`get_url` method** - This method returns the concatenates and parameterizes the final URL which
    will be sent to the python `requests` library.
    - For example: in our GitLab example, we pass some config setting along within as URL parameters,
      and then we call to the base class which automatically escapes the URL parameters and
      concatenates our provided URL with the `site_url_base` property we provided earlier.
-4. **`post_process` method** - This method gives us an opportunity to "clean up" the results prior
+5. **`post_process` method** - This method gives us an opportunity to "clean up" the results prior
    to returning them to the downstream tap - for instance: cleaning, renaming, or appending the list
    of properties returned by the API.
    - For our GitLab example, no cleansing was necessary and we passed along the result directly as
@@ -182,10 +185,12 @@ one and four class properties, in order to override specific metadata queries._
 
 **All database stream classes override:**
 
-1. `sql_query()` - This method should run a give SQL statement and incrementally return a dictionary
+1. `tap_name` The same name used in your tap class (for logging purposes).
+2. `sql_query()` - This method should run a give SQL statement and incrementally return a dictionary
    object for each resulting row.
+3. `open_connection()` - (Optional.) Open a connection to the database and return a connection object.
 
-**Depending upon your implementation, you may also need to override one or more of the following properties:**
+**Depending upon your implementation, you may also want to override one or more of the following properties:**
 
 1. `table_scan_sql` - A SQL string which should query for all tables, returning three columns: `database_name`, `schema_name`, and `table_name`.
 2. `view_scan_sql` - A SQL string which should query for all views, returning three columns: `database_name`, `schema_name`, and `view_name`.
