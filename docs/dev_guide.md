@@ -68,7 +68,7 @@ stream class, you only need to override a single method:_
 
 **More info:**
 
-- For more info, see the [Parquet](tap_base/tests/../../../tap_base/tests/sample_tap_parquet) sample.
+- For more info, see the [Parquet](/tap_base/tests/sample_tap_parquet) sample.
 
 ### 'REST' stream classes
 
@@ -117,12 +117,12 @@ _GraphQL streams inherit from the class `GraphQLStreamBase`. GraphQL streams are
 
 **More info:**
 
-- For more info, see the [GitLab](tap_base/tests/../../../tap_base/tests/sample_tap_gitlab) sample:
-  - [GitLab tap](tap_base\tests\sample_tap_gitlab\gitlab_tap.py)
-  - [GitLab GraphQL streams](tap_base\tests\sample_tap_gitlab\gitlab_rest_streams.py)
-- Or the [Countries API](tap_base\tests\sample_tap_countries) Sample:
-  - [Countries API Tap](tap_base\tests\sample_tap_countries\countries_tap.py)
-  - [Countries API Streams](tap_base\tests\sample_tap_countries\countries_streams.py)
+- For more info, see the [GitLab](/tap_base/tests/sample_tap_gitlab) sample:
+  - [GitLab tap](/tap_base/tests/sample_tap_gitlab/gitlab_tap.py)
+  - [GitLab GraphQL streams](/tap_base/tests/sample_tap_gitlab/gitlab_rest_streams.py)
+- Or the [Countries API](/tap_base/tests/sample_tap_countries) Sample:
+  - [Countries API Tap](/tap_base/tests/sample_tap_countries/countries_tap.py)
+  - [Countries API Streams](/tap_base/tests/sample_tap_countries/countries_streams.py)
 
 ### 'Database' stream classes
 
@@ -146,6 +146,6 @@ one and four class properties, in order to override specific metadata queries._
 
 **More info:**
 
-- For more info, see the [Snowflake](tap_base/tests/../../../tap_base/tests/sample_tap_snowflake) sample:
-  - [Snowflake tap](tap_base\tests\sample_tap_snowflake\snowflake_tap.py)
-  - [Snowflake streams](tap_base\tests\sample_tap_snowflake\snowflake_tap_stream.py)
+- For more info, see the [Snowflake](/tap_base/tests/sample_tap_snowflake) sample:
+  - [Snowflake tap](/tap_base/tests/sample_tap_snowflake/snowflake_tap.py)
+  - [Snowflake streams](/tap_base/tests/sample_tap_snowflake/snowflake_tap_stream.py)
