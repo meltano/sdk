@@ -19,7 +19,8 @@ _Create with `tap-base` requires overriding just two classes:_
 3. [Step 3: Write the stream class](#step-3-write-the-stream-class)
    1. ['Generic' stream classes](#generic-stream-classes)
    2. ['API' stream classes](#api-stream-classes)
-   3. ['Database' stream classes](#database-stream-classes)
+   3. ['GraphQL' stream classes](#graphql-stream-classes)
+   4. ['Database' stream classes](#database-stream-classes)
 
 ## Step 1: Initialize a new tap repo
 
@@ -98,34 +99,13 @@ stream class, you only need to override a single method:_
 2. `get_row_generator()` - This method should generate rows and return them incrementally with the
    `yield` python operator.
 
-**An example using the `Parquet` sample:**
+**More info:**
 
-```py
-class SampleTapParquetStream(TapStreamBase):
-    """Sample tap test for parquet."""
+- For more info, see the [Parquet](tap_base/tests/../../../tap_base/tests/sample_tap_parquet) sample.
 
-    def get_row_generator(self) -> Iterable[dict]:
-        """Return a generator of row-type dictionary objects."""
-        filepath = self.get_config("filepath")
-        if not filepath:
-            raise ValueError("Parquet 'filepath' config cannot be blank.")
-        try:
-            parquet_file = pq.ParquetFile(filepath)
-        except Exception as ex:
-            raise IOError(f"Could not read from parquet filepath '{filepath}': {ex}")
-        for i in range(parquet_file.num_row_groups):
-            table = parquet_file.read_row_group(i)
-            for batch in table.to_batches():
-                for row in zip(*batch.columns):
-                    yield {
-                        table.column_names[i]: val.as_py()
-                        for i, val in enumerate(row, start=0)
-                    }
-```
+### 'REST' stream classes
 
-### 'API' stream classes
-
-_API streams inherit from the class `RESTStreamBase`. To create an API-based
+_REST streams inherit from the class `RESTStreamBase`. To create an REST API-based
 stream class, you will override one class property and three methods:_
 
 1. `tap_name` The same name used in your tap class (for logging purposes).
@@ -139,43 +119,43 @@ stream class, you will override one class property and three methods:_
    - For example: in our GitLab example, we pass some config setting along within as URL parameters,
      and then we call to the base class which automatically escapes the URL parameters and
      concatenates our provided URL with the `site_url_base` property we provided earlier.
-5. **`post_process` method** - This method gives us an opportunity to "clean up" the results prior
+5. **`post_process` method** - (Optional.) This method gives us an opportunity to "clean up" the results prior
    to returning them to the downstream tap - for instance: cleaning, renaming, or appending the list
    of properties returned by the API.
    - For our GitLab example, no cleansing was necessary and we passed along the result directly as
      received from the API endpoint.
 
-**An example using the `GitLab` sample:**
+**More info:**
 
-```py
-class GitlabStream(RESTStreamBase):
-    """Sample tap test for gitlab."""
+- For more info, see the [GitLab](tap_base/tests/../../../tap_base/tests/sample_tap_gitlab) sample:
+  - [GitLab tap](tap_base\tests\sample_tap_gitlab\gitlab_tap.py)
+  - [GitLab REST streams](tap_base\tests\sample_tap_gitlab\gitlab_rest_streams.py)
 
-    @property
-    def site_url_base(self):
-        return "https://gitlab.com/api/v4"
+### 'GraphQL' stream classes
 
-    def get_auth_header(self) -> Dict[str, Any]:
-        """Return an authorization header for REST API requests."""
-        result = {"Private-Token": self.get_config("auth_token")}
-        if self.get_config("user_agent"):
-            result["User-Agent"] = self.get_config("user_agent")
-        return result
+_GraphQL streams inherit from the class `GraphQLStreamBase`. GraphQL streams are very similar toREST API-based streams, but instead of a `url_suffix`, you will override the GraphQL query text._
 
-    def get_url(self, url_suffix: str = None, extra_url_args: URLArgMap = None) -> str:
-        replacement_map = {
-            # TODO: Handle multiple projects:
-            "project_id": self.get_config("project_id"),
-            "start_date": self.get_config("start_date"),
-        }
-        if extra_url_args:
-            replacement_map.update(extra_url_args)
-        return super().get_url(url_suffix=url_suffix, extra_url_args=replacement_map)
+1. `tap_name` The same name used in your tap class (for logging purposes).
+2. **`site_url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
+   - For example: to connect to the GitLab v4 API, we use `"https://gitlab.com/graphql"`.
+3. **`get_auth_header` method** - Build and return an authorization header which will be used when
+   making calls to your API.
+   - For example: to connect to the GitLab API, we pass "Private-Token" and (optionally) "User-Agent".
+4. **`graphql_query` property** - This is where you specify your specific GraphQL query text.
+5. **`post_process` method** - (Optional.) This method gives us an opportunity to "clean up" the results prior
+   to returning them to the downstream tap - for instance: cleaning, renaming, or appending the list
+   of properties returned by the API.
+   - For our GitLab example, no cleansing was necessary and we passed along the result directly as
+     received from the API endpoint.
 
-    def post_process(self, row: dict) -> dict:
-        """Transform raw data from HTTP GET into the expected property values."""
-        return row
-```
+**More info:**
+
+- For more info, see the [GitLab](tap_base/tests/../../../tap_base/tests/sample_tap_gitlab) sample:
+  - [GitLab tap](tap_base\tests\sample_tap_gitlab\gitlab_tap.py)
+  - [GitLab GraphQL streams](tap_base\tests\sample_tap_gitlab\gitlab_rest_streams.py)
+- Or the [Countries API](tap_base\tests\sample_tap_countries) Sample:
+  - [Countries API Tap](tap_base\tests\sample_tap_countries\countries_tap.py)
+  - [Countries API Streams](tap_base\tests\sample_tap_countries\countries_streams.py)
 
 ### 'Database' stream classes
 
@@ -197,6 +177,8 @@ one and four class properties, in order to override specific metadata queries._
 2. `view_scan_sql` - A SQL string which should query for all views, returning three columns: `database_name`, `schema_name`, and `view_name`.
 3. `column_scan_sql` - A SQL string which should query for all columns, returning five columns: `database_name`, `schema_name`, and `table_or_view_name`, `column_name`, and `data_type`.
 
-**An example using the `Snowflake` sample:**
+**More info:**
 
-`TODO: TK - Snowflake example coming soon...`
+- For more info, see the [Snowflake](tap_base/tests/../../../tap_base/tests/sample_tap_snowflake) sample:
+  - [Snowflake tap](tap_base\tests\sample_tap_snowflake\snowflake_tap.py)
+  - [Snowflake streams](tap_base\tests\sample_tap_snowflake\snowflake_tap_stream.py)
