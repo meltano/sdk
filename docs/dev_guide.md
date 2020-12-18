@@ -94,9 +94,9 @@ stream class, you will override one class property and three methods:_
 
 **More info:**
 
-- For more info, see the [GitLab](tap_base/tests/../../../tap_base/tests/sample_tap_gitlab) sample:
-  - [GitLab tap](tap_base\tests\sample_tap_gitlab\gitlab_tap.py)
-  - [GitLab REST streams](tap_base\tests\sample_tap_gitlab\gitlab_rest_streams.py)
+- For more info, see the [GitLab](/tap_base/tests/sample_tap_gitlab) sample:
+  - [GitLab tap](/tap_base/tests/sample_tap_gitlab/gitlab_tap.py)
+  - [GitLab REST streams](tap_base/tests/sample_tap_gitlab/gitlab_rest_streams.py)
 
 ### 'GraphQL' stream classes
 
