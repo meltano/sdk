@@ -26,6 +26,7 @@ class GitlabStream(RESTStreamBase):
         return row
 
     def get_url(self, url_suffix: str = None, extra_url_args: URLArgMap = None) -> str:
+        """Return the full URL after applying any argument values."""
         # TODO: Handle this automatically in the framework's base class,
         #       apply template logic to fill placeholders.
         replacement_map = {

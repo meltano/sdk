@@ -1,8 +1,5 @@
 """Sample tap test for tap-gitlab."""
 
-import json
-from pathlib import Path
-
 import click
 
 from tap_base.tap_base import TapBase
@@ -57,6 +54,7 @@ def cli(
     catalog: str = None,
     version: bool = False,
 ):
+    """Handle CLI Execution."""
     SampleTapGitlab.cli(
         version=version, discover=discover, config=config, catalog=catalog
     )

@@ -42,15 +42,7 @@ class SampleTapSnowflakeStream(DatabaseStreamBase):
                 queries.extend(sql)
             else:
                 queries = [sql]
-            num_queries = len(queries)
-            for i, sql in enumerate(queries, 1):
-                # if i == num_queries:
-                #     cls.logger.info("Executing asynchronous Snowflake query: %s", sql)
-                #     cur.execute_async(sql, params)
-                #     cls.logger.into(f"Submitted asynchronous QueryID {cur.sfqid}")
-                #     # status = connection.get_query_status_throw_if_error(cur.sfqid)
-                #     cur.get_results_from_sfqid(cur.sfqid)
-                # else:
+            for sql in queries:
                 cls.logger.info("Executing synchronous Snowflake query: %s", sql)
                 cur.execute(sql, params)
                 if max_records and cur.rowcount > max_records:

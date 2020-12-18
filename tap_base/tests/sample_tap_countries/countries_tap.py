@@ -6,12 +6,10 @@ See the online explorer and query builder here:
   - https://countries.trevorblades.com/
 """
 
-from logging import Logger
 from typing import List
 
 import click
 
-from tap_base.helpers import classproperty
 from tap_base.tap_base import TapBase
 from tap_base.tests.sample_tap_countries.countries_streams import (
     CountriesStream,
@@ -30,12 +28,8 @@ class SampleTapCountries(TapBase):
         """Initialize self._streams with a dictionary of all streams."""
         self.logger.info("Loading streams types...")
         self._streams = {
-            "countries": CountriesStream(
-                config=self._config, state=self._state,
-            ),
-            "continents": ContinentsStream(
-                config=self._config, state=self._state,
-            ),
+            "countries": CountriesStream(config=self._config, state=self._state,),
+            "continents": ContinentsStream(config=self._config, state=self._state,),
         }
 
 
@@ -53,6 +47,7 @@ def cli(
     catalog: str = None,
     version: bool = False,
 ):
+    """Handle CLI Execution."""
     SampleTapCountries.cli(
         version=version, discover=discover, config=config, catalog=catalog
     )
