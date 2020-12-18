@@ -1,10 +1,9 @@
 """Sample tap stream test for tap-snowflake."""
 
-from typing import Dict, Iterable, List, Tuple, Union, cast
+from typing import Dict, Iterable, List, Tuple, Union
 from snowflake import connector
 
 from tap_base.streams import DatabaseStreamBase
-from tap_base.exceptions import TooManyRecordsException
 
 
 from tap_base.tests.sample_tap_snowflake.snowflake_config import PLUGIN_NAME
@@ -24,15 +23,9 @@ class SampleTapSnowflakeStream(DatabaseStreamBase):
 
     @classmethod
     def sql_query(
-        cls,
-        sql: Union[str, List[str]],
-        config,
-        params=None,
-        max_records=0,
-        dict_results=True,
+        cls, sql: Union[str, List[str]], config, dict_results=True,
     ) -> Union[Iterable[dict], Iterable[List]]:
         """Run a query in snowflake."""
-        # connection = cls.connect_with_retries()
         connection = cls.open_connection(config=config)
         with connection.cursor(connector.DictCursor) as cur:
             queries = []
@@ -44,13 +37,7 @@ class SampleTapSnowflakeStream(DatabaseStreamBase):
                 queries = [sql]
             for sql in queries:
                 cls.logger.info("Executing synchronous Snowflake query: %s", sql)
-                cur.execute(sql, params)
-                if max_records and cur.rowcount > max_records:
-                    # Raise exception if num rows greater than max allowed records
-                    raise TooManyRecordsException(
-                        "Query returned too many records. "
-                        f"This query can return max {max_records} records."
-                    )
+                cur.execute(sql)
                 result_batch = cur.fetchmany(DEFAULT_BATCH_SIZE)
                 while len(result_batch) > 0:
                     for result in result_batch:

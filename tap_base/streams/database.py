@@ -5,7 +5,7 @@ import backoff
 
 import singer
 from tap_base.helpers import classproperty
-from tap_base.exceptions import TapStreamConnectionFailure, TooManyRecordsException
+from tap_base.exceptions import TapStreamConnectionFailure
 from typing import Any, Dict, Iterable, List, Tuple, TypeVar, Union, cast
 
 from tap_base.streams.core import TapStreamBase
@@ -36,7 +36,7 @@ SINGER_TYPE_LOOKUP = {
     "text": SINGER_STRING_TYPE,
     "char": SINGER_STRING_TYPE,
     "bool": SINGER_BOOLEAN_TYPE,
-    "variant": SINGER_STRING_TYPE,  ## TODO: Support nested objects.
+    "variant": SINGER_STRING_TYPE,  # TODO: Support nested objects.
 }
 
 
@@ -170,7 +170,7 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
 
     @abc.abstractclassmethod
     def sql_query(
-        self, config, sql: Union[str, List[str]], dict_results=True
+        self, sql: Union[str, List[str]], config, dict_results=True
     ) -> Union[Iterable[dict], Iterable[Tuple]]:
         """Run a SQL query and generate a dict for each returned row."""
         pass
