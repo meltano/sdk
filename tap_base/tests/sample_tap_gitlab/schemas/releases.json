@@ -1,0 +1,54 @@
+{
+    "type": "object",
+    "properties": {
+        "tag_name": {
+            "type": "string"
+        },
+        "author_id": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "commit_id": {
+            "type": "string"
+        },
+        "project_id": {
+            "type": "integer"
+        },
+        "description": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "name": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "created_at": {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "released_at": {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        }
+    }
+}

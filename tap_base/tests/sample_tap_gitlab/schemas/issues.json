@@ -1,0 +1,197 @@
+{
+    "type": "object",
+    "properties": {
+        "project_id": {
+            "type": "integer"
+        },
+        "id": {
+            "type": "integer"
+        },
+        "iid": {
+            "type": "integer"
+        },
+        "milestone_id": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "author_id": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "assignee_id": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "assignees": {
+            "type": "array",
+            "items": {
+                "type": "integer"
+            }
+        },
+        "closed_by_id": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "title": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "description": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "state": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "labels": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "created_at": {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "updated_at": {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "closed_at": {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "subscribed": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "upvotes": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "downvotes": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "merge_requests_count": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "user_notes_count": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "due_date": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "weight": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "web_url": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "confidential": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "discussion_locked": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "has_tasks": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "task_status": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "time_estimate": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "total_time_spent": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "human_time_estimate": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "human_total_time_spent": {
+            "type": [
+                "null",
+                "string"
+            ]
+        }
+    }
+}

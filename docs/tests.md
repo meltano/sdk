@@ -54,5 +54,5 @@ poetry run sample-tap-parquet --discover \
     [tool.poetry.scripts]
     plugin-base = 'tap_base.plugin_base:PluginBase.cli'
     tap-base = 'tap_base.tap_base:cli'
-    sample-tap-parquet = 'tap_base.tests.sample_tap_parquet.tap:cli'
+    sample-tap-parquet = 'tap_base.tests.sample_tap_parquet.parquet_tap:cli'
     ```

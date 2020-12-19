@@ -13,14 +13,16 @@ from pathlib import Path
 import click
 
 from tap_base.plugin_base import PluginBase
-from tap_base.tap_stream_base import TapStreamBase
+from tap_base.streams.core import TapStreamBase
 
 
 class TapBase(PluginBase, metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    _streams: Dict[str, TapStreamBase] = {}
+    # TODO: Remove (Should be object-level, not class-level)
+    # _streams: Dict[str, TapStreamBase] = {}
 
+    default_stream_class: Optional[Type[TapStreamBase]] = None
     # Constructor
 
     def __init__(
@@ -31,23 +33,25 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     ) -> None:
         """Initialize the tap."""
         self._state = state or {}
+        self._streams: Dict[str, TapStreamBase] = {}
         super().__init__(config=config)
         if catalog:
+            self.logger.info("loading catalog streams...")
             self.load_catalog_streams(
-                catalog=catalog,
-                config=self._config,
-                state=self._state,
-                logger=self.logger,
+                catalog=catalog, config=self._config, state=self._state,
             )
         else:
-            self.discover_catalog_streams(
-                config=self._config, state=self._state, logger=self.logger
-            )
+            self.logger.info("discovering catalog streams...")
+            self.discover_catalog_streams()
 
-    @classproperty
-    def stream_class(cls) -> Type[TapStreamBase]:
-        """Return the stream class."""
-        return TapStreamBase
+    @classmethod
+    def get_stream_class(cls, stream_name: str) -> Type[TapStreamBase]:
+        if not cls.default_stream_class:
+            raise ValueError(
+                "No stream class detected for '{cls.name}' stream '{stream_name}'"
+                "and no default_stream_class defined."
+            )
+        return cls.default_stream_class
 
     @property
     def streams(self) -> Dict[str, TapStreamBase]:
@@ -57,28 +61,24 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     def capabilities(self) -> List[str]:
         """Return a list of supported capabilities."""
         result = ["sync", "catalog", "state"]
-        if self.stream_class.discoverable:
+        if self.discoverable:
             result.append("discover")
         return result
 
     # Abstract stream detection methods:
 
-    def load_catalog_streams(
-        self, catalog: dict, state: dict, config: dict, logger: Logger
-    ) -> None:
+    def load_catalog_streams(self, catalog: dict, state: dict, config: dict) -> None:
         streams: List[Dict] = catalog["streams"]
         for stream in streams:
             stream_name = stream["tap_stream_id"]
-            new_stream = self.stream_class.from_stream_dict(
-                stream_dict=stream, state=state, config=config, logger=logger
+            new_stream = self.get_stream_class(stream_name).from_stream_dict(
+                stream_dict=stream, state=state, config=config
             )
             self._streams[stream_name] = new_stream
 
-    def discover_catalog_streams(
-        self, state: dict, config: dict, logger: Logger
-    ) -> None:
+    def discover_catalog_streams(self) -> None:
         raise NotImplementedError(
-            f"Tap '{self.plugin_name}' does not support discovery. "
+            f"Tap '{self.name}' does not support discovery. "
             "Please set the '--catalog' command line argument and try again."
         )
 
@@ -102,6 +102,11 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
 
     def sync_one(self, tap_stream_id: str):
         """Sync a single stream."""
+        if tap_stream_id not in self.streams:
+            raise ValueError(
+                f"Could not find stream '{tap_stream_id}' in streams list: "
+                f"{sorted(self.streams.keys())}"
+            )
         stream = self.streams[tap_stream_id]
         stream.sync()
 
@@ -115,6 +120,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     @classmethod
     def cli(
         cls,
+        version: bool = False,
         discover: bool = False,
         config: str = None,
         state: str = None,
@@ -127,6 +133,9 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
                 return None
             return json.loads(Path(path).read_text())
 
+        if version:
+            cls.print_version()
+            return
         config_dict = read_optional_json(config)
         state_dict = read_optional_json(state)
         catalog_dict = read_optional_json(catalog)
@@ -137,9 +146,15 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
             tap.sync_all()
 
 
+@click.option("--version", is_flag=True)
 @click.option("--discover", is_flag=True)
 @click.option("--config")
 @click.option("--catalog")
 @click.command()
-def cli(discover: bool = False, config: str = None, catalog: str = None):
-    TapBase.cli(discover=discover, config=config, catalog=catalog)
+def cli(
+    discover: bool = False,
+    config: str = None,
+    catalog: str = None,
+    version: bool = False,
+):
+    TapBase.cli(version=version, discover=discover, config=config, catalog=catalog)

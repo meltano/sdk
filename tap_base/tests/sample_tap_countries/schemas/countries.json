@@ -1,0 +1,26 @@
+{
+    "type": "object",
+    "properties": {
+        "code": { "type": ["null", "string"] },
+        "name": { "type": ["null", "string"] },
+        "native": { "type": ["null", "string"] },
+        "phone": { "type": ["null", "string"] },
+        "capital": { "type": ["null", "string"] },
+        "currency": { "type": ["null", "string"] },
+        "emoji": { "type": ["null", "string"] },
+        "continent": {
+            "type": "object",
+            "properties": {
+                "code": { "type": ["null", "string"] },
+                "name": { "type": ["null", "string"] }
+            }
+        },
+        "languages": {
+            "type": "object",
+            "properties": {
+                "code": { "type": ["null", "string"] },
+                "name": { "type": ["null", "string"] }
+            }
+        }
+    }
+}

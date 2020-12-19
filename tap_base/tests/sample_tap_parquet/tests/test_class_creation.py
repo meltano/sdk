@@ -1,7 +1,7 @@
 """Test class creation."""
 
 
-from tap_base.tests.sample_tap_parquet.tap import SampleTapParquet
+from tap_base.tests.sample_tap_parquet.parquet_tap import SampleTapParquet
 
 SAMPLE_FILENAME = "/tmp/testfile.parquet"
 SAMPLE_CONFIG = {"filepath": SAMPLE_FILENAME}

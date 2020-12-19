@@ -9,7 +9,7 @@ import click
 
 from tap_base.helpers import classproperty
 from tap_base.tap_base import TapBase
-from tap_base.tests.sample_tap_parquet.tap_stream import SampleTapParquetStream
+from tap_base.tests.sample_tap_parquet.parquet_tap_stream import SampleTapParquetStream
 
 
 ACCEPTED_CONFIG_OPTIONS = ["filepath"]
@@ -19,27 +19,12 @@ REQUIRED_CONFIG_SETS = [["filepath"]]
 class SampleTapParquet(TapBase):
     """Sample tap for Parquet."""
 
-    @classproperty
-    def plugin_name(cls) -> str:
-        """Return the plugin name."""
-        return "sample-tap-parquet"
+    name: str = "sample-tap-parquet"
+    accepted_config_keys = ACCEPTED_CONFIG_OPTIONS
+    required_config_options = REQUIRED_CONFIG_SETS
+    default_stream_class = SampleTapParquetStream
 
-    @classproperty
-    def accepted_config_options(cls) -> List[str]:
-        return ACCEPTED_CONFIG_OPTIONS
-
-    @classproperty
-    def required_config_sets(cls) -> List[List[str]]:
-        return REQUIRED_CONFIG_SETS
-
-    @classproperty
-    def stream_class(cls) -> Type[SampleTapParquetStream]:
-        """Return the stream class."""
-        return SampleTapParquetStream
-
-    def discover_catalog_streams(
-        self, state: dict, config: dict, logger: Logger
-    ) -> None:
+    def discover_catalog_streams(self) -> None:
         """Return a dictionary of all streams."""
         # TODO: automatically infer this from the parquet schema
         for tap_stream_id in ["ASampleTable"]:
@@ -51,23 +36,30 @@ class SampleTapParquet(TapBase):
                 }
             )
             new_stream = SampleTapParquetStream(
-                tap_stream_id=tap_stream_id,
+                config=self._config,
+                state=self._state,
+                name=tap_stream_id,
                 schema=schema,
-                state=state,
-                logger=logger,
-                config=config,
             )
-            new_stream.primary_key = ["f0"]
-            new_stream.bookmark_key = "f0"
+            new_stream.primary_keys = ["f0"]
+            new_stream.replication_key = "f0"
             self._streams[tap_stream_id] = new_stream
 
 
 # CLI Execution:
 
 
+@click.option("--version", is_flag=True)
 @click.option("--discover", is_flag=True)
 @click.option("--config")
 @click.option("--catalog")
 @click.command()
-def cli(discover: bool = False, config: str = None, catalog: str = None):
-    SampleTapParquet.cli(discover=discover, config=config, catalog=catalog)
+def cli(
+    discover: bool = False,
+    config: str = None,
+    catalog: str = None,
+    version: bool = False,
+):
+    SampleTapParquet.cli(
+        version=version, discover=discover, config=config, catalog=catalog
+    )

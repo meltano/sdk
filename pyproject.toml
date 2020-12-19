@@ -14,18 +14,18 @@ pytz = "2018.4"
 python-dateutil = "<2.8.1,>=2.1"
 pyarrow = "^2.0.0"
 click = "^7.1.2"
+Jinja2 = "^2.11.2"
 
 [tool.poetry.dev-dependencies]
 snowflake-connector-python = "2.0.4"
 pyarrow = "^2.0.0"
 pytest = "^6.1.2"
-inflection = "^0.5.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+build-backend = "poetry.core.masonry.rest"
 
 [tool.poetry.scripts]
 plugin-base = 'tap_base.plugin_base:PluginBase.cli'
 tap-base = 'tap_base.tap_base:cli'
-sample-tap-parquet = 'tap_base.tests.sample_tap_parquet.tap:cli'
+sample-tap-parquet = 'tap_base.tests.sample_tap_parquet.parquet_tap:cli'

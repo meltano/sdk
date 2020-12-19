@@ -2,28 +2,27 @@
 
 **Development Overview:**
 
-_Developing with `tap-base` requires overriding three classes:_
+_Create with `tap-base` requires overriding just two classes:_
 
 1. The tap:
-    - `TapBase` - _The core base class for taps. This class governs naming, configuration, and core capability mapping._
-2. The connection. You have three choices of connection base class when designing your tap:
-    - `GenericConnectionBase` - _The base class for generic-type connections. This class is responsible for making a connection to the source, sending queries, and retrieving metadata._
-    - `DiscoverableConnectionBase` - _The base class for 'discoverable' connections. Inherits from `GenericConnectionBase` and adds capabilities for stream metadata discovery._
-    - `DatabaseConnectionBase` - _The base class for database-type connections. Inherits from `DiscoverableConnectionBase` and sdds specialized functionality for database-type connections._
-3. The stream.
-    - `TapStreamBase` - _The base class for streams. This class is responsible for replication and bookmarking._
+    - `TapBase` - _The core base class for all taps. This class governs configuration, validation, and stream discovery._
+2. The stream. For the stream base class, you have three options depending on the type of data source you are working with.
+    - `TapStreamBase` - _The **generic** base class for streams._
+    - `RESTStreamBase` - _The base class for **REST**-type streams._
+    - `GraphQLStreamBase` - _The base class for **GraphQL**-type streams._
+    - `DatabaseStreamBase` - _The base class for **database**-type streams - specifically those which support the SQL language._
 
 **Detailed Instructions:**
 
-1. [Initializing a new tap repo](#initializing-a-new-tap-repo)
-2. [Developing a new tap](#developing-a-new-tap)
-   1. [Step 1: Write the tap class](#step-1-write-the-tap-class)
-   2. [Step 2: Write the connection class](#step-2-write-the-connection-class)
-   3. [Step 3: Write the stream class](#step-3-write-the-stream-class)
-3. [Adding more tests](#adding-more-tests)
-4. [Troubleshooting Tips](#troubleshooting-tips)
+1. [Step 1: Initialize a new tap repo](#step-1-initialize-a-new-tap-repo)
+2. [Step 2: Write the tap class](#step-2-write-the-tap-class)
+3. [Step 3: Write the stream class](#step-3-write-the-stream-class)
+   1. ['Generic' stream classes](#generic-stream-classes)
+   2. ['API' stream classes](#api-stream-classes)
+   3. ['GraphQL' stream classes](#graphql-stream-classes)
+   4. ['Database' stream classes](#database-stream-classes)
 
-## Initializing a new tap repo
+## Step 1: Initialize a new tap repo
 
 To get started, create a new project from the
 [`tap-template` cookiecutter repo](https://gitlab.com/meltano/tap-template):
@@ -42,127 +41,111 @@ To get started, create a new project from the
     cookiecutter https://gitlab.com/meltano/tap-template
     ```
 
-## Developing a new tap
-
-### Step 1: Write the tap class
+## Step 2: Write the tap class
 
 _To create a tap class, follow these steps:_
 
 1. Map your Connection class to the `_conn` type.
-2. Override the constructor "`__init__()`" and call the base class constructor.
+2. Override tap config:
+   1. `name` - What to call your tap (for example, `tap-best-ever`)
+   2. `accepted_config_keys` - A lit of all config options that this tap will accept.
+   3. `required_config_options` - (Optional.) One or more required sets of options.
+   4. `default_stream_class` - (Optional.) The stream class to use if auto-discovering from a json catalog file.
+3. Override the `discover_catalog_streams` method.
 
-**Parquet sample tap class:**
+## Step 3: Write the stream class
 
-```py
-class SampleTapParquet(TapBase):
-    """Sample tap for Parquet."""
+_Creating the stream class depends upon what type of tap you are creating._
 
-    _conn: SampleParquetConnection
+### 'Generic' stream classes
 
-    def __init__(self, config: dict, state: dict = None) -> None:
-        """Initialize the tap."""
-        vers = Path(PLUGIN_VERSION_FILE).read_text()
-        super().__init__(
-            plugin_name=PLUGIN_NAME,
-            version=vers,
-            capabilities=PLUGIN_CAPABILITIES,
-            accepted_options=ACCEPTED_CONFIG,
-            option_set_requirements=REQUIRED_CONFIG_SETS,
-            connection_class=SampleParquetConnection,
-            stream_class=SampleTapParquetStream,
-            config=config,
-            state=state,
-        )
-```
+_Generic (hand-coded) streams inherit from the class `TapStreamBase`. To create a generic
+stream class, you only need to override a single method:_
 
-### Step 2: Write the connection class
+1. `tap_name` The same name used in your tap class (for logging purposes).
+2. `get_row_generator()` - This method should generate rows and return them incrementally with the
+   `yield` python operator.
 
-To create a generic connection class, follow these steps:
+**More info:**
 
-1. Create the `open_connection()` method. This method performs any needed functions to connect to the data source and store a connection handle for future operations.
-2. Create the `discover_available_stream_ids()` method. This method returns a list of unique stream IDs.
-3. Create the `discover_stream()` method. This method will be called with the inputs provided by the step above.
+- For more info, see the [Parquet](/tap_base/tests/sample_tap_parquet) sample.
 
-_**NOTE:**_
+### 'REST' stream classes
 
-- If your source is not discoverable, you can skip the two discover methods.
-- If your source is a databases which contains an `information_schema` metadata schema, you may also be able to skip these two methods.
+_REST streams inherit from the class `RESTStreamBase`. To create an REST API-based
+stream class, you will override one class property and three methods:_
 
-**Parquet sample connection class:**
+1. `tap_name` The same name used in your tap class (for logging purposes).
+2. **`site_url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
+   - For example: to connect to the GitLab v4 API, we use `"https://gitlab.com/api/v4"`.
+3. **`get_auth_header` method** - Build and return an authorization header which will be used when
+   making calls to your API.
+   - For example: to connect to the GitLab API, we pass "Private-Token" and (optionally) "User-Agent".
+4. **`get_url` method** - This method returns the concatenates and parameterizes the final URL which
+   will be sent to the python `requests` library.
+   - For example: in our GitLab example, we pass some config setting along within as URL parameters,
+     and then we call to the base class which automatically escapes the URL parameters and
+     concatenates our provided URL with the `site_url_base` property we provided earlier.
+5. **`post_process` method** - (Optional.) This method gives us an opportunity to "clean up" the results prior
+   to returning them to the downstream tap - for instance: cleaning, renaming, or appending the list
+   of properties returned by the API.
+   - For our GitLab example, no cleansing was necessary and we passed along the result directly as
+     received from the API endpoint.
 
-```py
-class SampleParquetConnection(DiscoverableConnectionBase):
-    """Parquet Tap Connection Class."""
+**More info:**
 
-    _conn: Any
+- For more info, see the [GitLab](/tap_base/tests/sample_tap_gitlab) sample:
+  - [GitLab tap](/tap_base/tests/sample_tap_gitlab/gitlab_tap.py)
+  - [GitLab REST streams](tap_base/tests/sample_tap_gitlab/gitlab_rest_streams.py)
 
-    def open_connection(self) -> Any:
-        """Connect to parquet database."""
-        self._conn = "placeholder"
-        return self._conn
+### 'GraphQL' stream classes
 
-    def discover_available_stream_ids(self) -> List[str]:
-        return ["placeholder"]
+_GraphQL streams inherit from the class `GraphQLStreamBase`. GraphQL streams are very similar toREST API-based streams, but instead of a `url_suffix`, you will override the GraphQL query text._
 
-    def discover_stream(self, tap_stream_id) -> CatalogEntry:
-        """Return a list of all streams (tables)."""
-        _schema = Schema(
-            properties=[
-                Schema(description="f0", type=["string", "None"]),
-                Schema(description="f1", type=["string", "None"]),
-                Schema(description="f2", type=["string", "None"]),
-            ]
-        )
-        return CatalogEntry(
-            tap_stream_id=tap_stream_id,
-            stream=tap_stream_id,
-            key_properties=[],
-            schema=_schema,
-            replication_key=None,
-            is_view=None,
-            database=None,
-            table=None,
-            row_count=None,
-            stream_alias=None,
-            metadata=None,
-            replication_method=None,
-        )
-```
+1. `tap_name` The same name used in your tap class (for logging purposes).
+2. **`site_url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
+   - For example: to connect to the GitLab v4 API, we use `"https://gitlab.com/graphql"`.
+3. **`get_auth_header` method** - Build and return an authorization header which will be used when
+   making calls to your API.
+   - For example: to connect to the GitLab API, we pass "Private-Token" and (optionally) "User-Agent".
+4. **`graphql_query` property** - This is where you specify your specific GraphQL query text.
+5. **`post_process` method** - (Optional.) This method gives us an opportunity to "clean up" the results prior
+   to returning them to the downstream tap - for instance: cleaning, renaming, or appending the list
+   of properties returned by the API.
+   - For our GitLab example, no cleansing was necessary and we passed along the result directly as
+     received from the API endpoint.
 
-### Step 3: Write the stream class
+**More info:**
 
-_To create a connection class, follow these steps:_
+- For more info, see the [GitLab](/tap_base/tests/sample_tap_gitlab) sample:
+  - [GitLab tap](/tap_base/tests/sample_tap_gitlab/gitlab_tap.py)
+  - [GitLab GraphQL streams](/tap_base/tests/sample_tap_gitlab/gitlab_rest_streams.py)
+- Or the [Countries API](/tap_base/tests/sample_tap_countries) Sample:
+  - [Countries API Tap](/tap_base/tests/sample_tap_countries/countries_tap.py)
+  - [Countries API Streams](/tap_base/tests/sample_tap_countries/countries_streams.py)
 
-1. Create the `get_row_generator()` method. This method will pass rows from the source connection when a sync is requested.
+### 'Database' stream classes
 
-**Parquet sample stream class:**
+_Database streams inherit from the class `DatabaseStreamBase`. To create a database
+stream class, you will first override the `sql_query()` method. Depending upon how closely your
+source complies with standard `information_schema` conventions, you may also override between
+one and four class properties, in order to override specific metadata queries._
 
-```py
-class SampleTapParquetStream(TapStreamBase):
-    """Sample tap test for parquet."""
+**All database stream classes override:**
 
-    def get_row_generator(self) -> Iterable[Dict[str, Any]]:
-        """Return a generator of row-type dictionary objects."""
-        filepath = self._conn.get_config("filepath")
-        if not filepath:
-            raise ValueError("Parquet 'filepath' config cannot be blank.")
-        try:
-            parquet_file = pq.ParquetFile(filepath)
-        except Exception as ex:
-            raise IOError(f"Could not read from parquet filepath '{filepath}': {ex}")
-        for i in range(parquet_file.num_row_groups):
-            table = parquet_file.read_row_group(i)
-            for batch in table.to_batches():
-                for row in zip(*batch.columns):
-                    yield {
-                        table.column_names[i]: val for i, val in enumerate(row, start=0)
-                    }
-```
+1. `tap_name` The same name used in your tap class (for logging purposes).
+2. `sql_query()` - This method should run a give SQL statement and incrementally return a dictionary
+   object for each resulting row.
+3. `open_connection()` - (Optional.) Open a connection to the database and return a connection object.
 
-## Adding more tests
+**Depending upon your implementation, you may also want to override one or more of the following properties:**
 
-`TODO: TK - write test writing instructions`
+1. `table_scan_sql` - A SQL string which should query for all tables, returning three columns: `database_name`, `schema_name`, and `table_name`.
+2. `view_scan_sql` - A SQL string which should query for all views, returning three columns: `database_name`, `schema_name`, and `view_name`.
+3. `column_scan_sql` - A SQL string which should query for all columns, returning five columns: `database_name`, `schema_name`, and `table_or_view_name`, `column_name`, and `data_type`.
 
-## Troubleshooting Tips
+**More info:**
 
-`TODO: TK - write troubleshooting tips`
+- For more info, see the [Snowflake](/tap_base/tests/sample_tap_snowflake) sample:
+  - [Snowflake tap](/tap_base/tests/sample_tap_snowflake/snowflake_tap.py)
+  - [Snowflake streams](/tap_base/tests/sample_tap_snowflake/snowflake_tap_stream.py)
