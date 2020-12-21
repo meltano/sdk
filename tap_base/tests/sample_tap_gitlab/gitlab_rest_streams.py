@@ -22,6 +22,11 @@ class GitlabStream(RESTStreamBase):
         return result
 
     def get_query_params(self) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
+        """Expose any needed config values into the URL parameterization process.
+
+        If a list of dictionaries is returned, one call will be made for each item
+        in the list.
+        """
         result: List[URLArgMap] = []
         project_ids = self.get_config("project_ids")
         if isinstance(project_ids, str):
