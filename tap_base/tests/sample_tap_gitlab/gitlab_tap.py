@@ -4,7 +4,6 @@ import click
 
 from tap_base.tap_base import TapBase
 from tap_base.tests.sample_tap_gitlab.gitlab_rest_streams import (
-    GitlabStream,
     ProjectsStream,
     ReleasesStream,
     IssuesStream,
@@ -15,7 +14,6 @@ from tap_base.tests.sample_tap_gitlab.gitlab_graphql_streams import (
 )
 
 STREAM_TYPES = [
-    # GitlabStream,
     ProjectsStream,
     ReleasesStream,
     IssuesStream,

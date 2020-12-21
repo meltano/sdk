@@ -21,10 +21,6 @@ class GitlabStream(RESTStreamBase):
             result["User-Agent"] = self.get_config("user_agent")
         return result
 
-    def post_process(self, row: dict) -> dict:
-        """Transform raw data from HTTP GET into the expected property values."""
-        return row
-
     def get_query_params(self) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
         result: List[URLArgMap] = []
         project_ids = self.get_config("project_ids")

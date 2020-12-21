@@ -155,7 +155,7 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     def get_row_generator(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
         for row in self.request_paginated_get():
-            yield self.post_process(row)
+            yield row
 
     # Abstract methods:
 
@@ -163,8 +163,3 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     def get_auth_header(self) -> Dict[str, Any]:
         """Return an authorization header for REST API requests."""
         pass
-
-    @abc.abstractmethod
-    def post_process(self, row: dict) -> dict:
-        """Transform raw data from HTTP GET into the expected property values."""
-        return row

@@ -28,10 +28,6 @@ class GitlabGraphQLStreamBase(RESTStreamBase):
         """Return an authorization header for GraphQL API requests."""
         return {"Authorization": f"token {self.get_config('auth_token')}"}
 
-    def post_process(self, row: dict) -> dict:
-        """Transform raw data from HTTP GET into the expected property values."""
-        return row
-
 
 class GraphQLCurrentUserStream(GitlabGraphQLStreamBase):
 

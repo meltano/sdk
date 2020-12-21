@@ -24,10 +24,6 @@ class CountriesAPIStreamBase(GraphQLStreamBase, metaclass=abc.ABCMeta):
         """Return an authorization header for GraphQL request."""
         return {}  # No auth required
 
-    def post_process(self, row: dict) -> dict:
-        """Transform raw data from HTTP GET into the expected property values."""
-        return row
-
 
 class CountriesStream(CountriesAPIStreamBase):
 

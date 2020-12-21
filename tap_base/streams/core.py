@@ -285,6 +285,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
         for row_dict in row_generator():
+            row_dict = self.post_process(row_dict)
             if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
                 self.write_state_message()
             record = self.transform_row_to_singer_record(row=row_dict)
@@ -470,3 +471,6 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         """
         pass
 
+    def post_process(self, row: dict) -> dict:
+        """Transform raw data from HTTP GET into the expected property values."""
+        return row
