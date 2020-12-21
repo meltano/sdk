@@ -1,13 +1,9 @@
 """Sample tap test for tap-parquet."""
 
-from logging import Logger
-from typing import List, Type
-
 from singer.schema import Schema
 
 import click
 
-from tap_base.helpers import classproperty
 from tap_base.tap_base import TapBase
 from tap_base.tests.sample_tap_parquet.parquet_tap_stream import SampleTapParquetStream
 
