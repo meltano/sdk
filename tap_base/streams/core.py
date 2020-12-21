@@ -11,7 +11,18 @@ import time
 from functools import lru_cache
 from os import PathLike
 from pathlib import Path
-from typing import Dict, Iterable, Any, List, Optional, Tuple, Callable, TypeVar, Union
+from typing import (
+    Dict,
+    Iterable,
+    Any,
+    List,
+    Optional,
+    Tuple,
+    Callable,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import singer
 from singer import CatalogEntry, RecordMessage, SchemaMessage
@@ -106,10 +117,6 @@ class TapStreamBase(metaclass=abc.ABCMeta):
 
     @property
     def tap_stream_id(self) -> str:
-        return self.name
-
-    @property
-    def stream_name(self) -> str:
         return self.name
 
     @property
@@ -403,7 +410,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
 
         # rec = dict(zip(columns, row_to_persist))
         return RecordMessage(
-            stream=self.stream_name,
+            stream=self.name,
             record=rec,
             version=version,
             time_extracted=time_extracted,
@@ -438,7 +445,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
             state=state,
         )
         new_stream.set_custom_metadata(stream_dict.get("metadata"))
-        return new_stream
+        return cast(FactoryType, new_stream)
 
     # def is_connected(self) -> bool:
     #     """Return True if connected."""

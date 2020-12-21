@@ -15,7 +15,7 @@ from tap_base.tests.sample_tap_gitlab.gitlab_graphql_streams import (
 )
 
 STREAM_TYPES = [
-    GitlabStream,
+    # GitlabStream,
     ProjectsStream,
     ReleasesStream,
     IssuesStream,
@@ -36,7 +36,7 @@ class SampleTapGitlab(TapBase):
         # Add REST and GraphQL Streams
         for stream_class in STREAM_TYPES:
             stream = stream_class(config=self._config, state={})
-            self._streams[stream.stream_name] = stream
+            self._streams[stream.name] = stream
 
 
 # CLI Execution:

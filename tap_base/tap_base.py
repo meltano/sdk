@@ -100,14 +100,14 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
 
     # Sync methods
 
-    def sync_one(self, tap_stream_id: str):
+    def sync_one(self, stream_name: str, /):
         """Sync a single stream."""
-        if tap_stream_id not in self.streams:
+        if stream_name not in self.streams:
             raise ValueError(
-                f"Could not find stream '{tap_stream_id}' in streams list: "
+                f"Could not find stream '{stream_name}' in streams list: "
                 f"{sorted(self.streams.keys())}"
             )
-        stream = self.streams[tap_stream_id]
+        stream = self.streams[stream_name]
         stream.sync()
 
     def sync_all(self):

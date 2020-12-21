@@ -1,7 +1,7 @@
 """Sample tap stream test for tap-gitlab."""
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Union
 
 from tap_base.streams.rest import RESTStreamBase, URLArgMap
 
@@ -25,22 +25,22 @@ class GitlabStream(RESTStreamBase):
         """Transform raw data from HTTP GET into the expected property values."""
         return row
 
-    def get_url(self, url_suffix: str = None, extra_url_args: URLArgMap = None) -> str:
-        """Return the full URL after applying any argument values."""
-        # TODO: Handle this automatically in the framework's base class,
-        #       apply template logic to fill placeholders.
-        replacement_map = {
-            # TODO: Handle multiple projects:
-            "project_id": self.get_config("project_ids")[0],
-            "start_date": self.get_config("start_date"),
-        }
-        if extra_url_args:
-            replacement_map.update(extra_url_args)
-        return super().get_url(url_suffix=url_suffix, extra_url_args=replacement_map)
+    def get_query_params(self) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
+        result: List[URLArgMap] = []
+        project_ids = self.get_config("project_ids")
+        if isinstance(project_ids, str):
+            id_list = project_ids.split(",")
+        else:
+            id_list = project_ids
+        for project_id in id_list:
+            result.append(
+                {"project_id": project_id, "start_date": self.get_config("start_date")}
+            )
+        return result
 
 
 class ProjectsStream(GitlabStream):
-    stream_name = "projects"
+    name = "projects"
     url_suffix = "/projects/{project_id}?statistics=1"
     primary_keys = ["id"]
     replication_key = None
@@ -48,7 +48,7 @@ class ProjectsStream(GitlabStream):
 
 
 class ReleasesStream(GitlabStream):
-    stream_name = "releases"
+    name = "releases"
     url_suffix = "/projects/{project_id}/releases"
     primary_keys = ["project_id", "commit_id", "tag_name"]
     replication_key = None
@@ -56,7 +56,7 @@ class ReleasesStream(GitlabStream):
 
 
 class IssuesStream(GitlabStream):
-    stream_name = "issues"
+    name = "issues"
     url_suffix = "/projects/{project_id}/issues?scope=all&updated_after={start_date}"
     primary_keys = ["id"]
     replication_key = None
@@ -64,7 +64,7 @@ class IssuesStream(GitlabStream):
 
 
 class CommitsStream(GitlabStream):
-    stream_name = "commits"
+    name = "commits"
     url_suffix = (
         "/projects/{project_id}/repository/commits?since={start_date}&with_stats=true"
     )

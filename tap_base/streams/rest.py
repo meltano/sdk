@@ -21,8 +21,6 @@ DEFAULT_PAGE_SIZE = 1000
 class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     """Abstract base class for API-type streams."""
 
-    _url_pattern: str
-    _url_args: URLArgMap = {}
     _page_size: int = DEFAULT_PAGE_SIZE
     _requests_session: Optional[requests.Session]
 
@@ -38,17 +36,14 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         state: Dict[str, Any],
         name: Optional[str] = None,
         schema: Optional[Union[Dict[str, Any], Schema]] = None,
-        url_pattern: Optional[str] = None,
+        url_suffix: Optional[str] = None,
     ):
         super().__init__(
             name=name, schema=schema, state=state, config=config,
         )
-        self._url_pattern = url_pattern
+        if url_suffix:
+            self.url_suffix = url_suffix
         self._requests_session = requests.Session()
-
-    @property
-    def endpoint_url(self) -> str:
-        return self.get_url()
 
     @staticmethod
     def url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
@@ -58,16 +53,26 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
             result = str(val)
         return result
 
-    def get_url(self, url_suffix: str = None, extra_url_args: URLArgMap = None) -> str:
-        result = "".join(
-            [self.site_url_base or "", self._url_pattern or "", url_suffix or ""]
-        )
-        replacement_map = extra_url_args or {}
-        for k, v in replacement_map.items():
-            search_text = "".join(["{", k, "}"])
-            if search_text in self._url_pattern:
-                result = result.replace(search_text, self.url_encode(v))
-        self.logger.info(f"Tap '{self.name}' generated URL: {result}")
+    def get_query_params(self) -> Union[List[URLArgMap], URLArgMap]:
+        return [{}]
+
+    def get_urls(self) -> List[str]:
+        url_pattern = "".join([self.site_url_base, self.url_suffix or ""])
+        result: List[str] = []
+        param_list = self.get_query_params()
+        if not isinstance(param_list, list):
+            param_list = [param_list]
+        for replacement_map in param_list:
+            url = url_pattern
+            for k, v in replacement_map.items():
+                search_text = "".join(["{", k, "}"])
+                if search_text in url:
+                    url = url.replace(search_text, self.url_encode(v))
+            self.logger.info(
+                f"Tap '{self.name}' generated URL: {url} from param list {param_list} "
+                f"and url_suffix '{self.url_suffix}'"
+            )
+            result.append(url)
         return result
 
     @property
@@ -127,13 +132,13 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     def request_paginated_get(self) -> Iterable[dict]:
         params = {"page": 1, "per_page": self._page_size}
         next_page = 1
-        url = self.endpoint_url
-        while next_page:
-            params["page"] = int(next_page)
-            resp = self.request_get_with_backoff(url, params)
-            for row in self.parse_response(resp):
-                yield row
-            next_page = self.get_next_page(resp)
+        for url in self.get_urls():
+            while next_page:
+                params["page"] = int(next_page)
+                resp = self.request_get_with_backoff(url, params)
+                for row in self.parse_response(resp):
+                    yield row
+                next_page = self.get_next_page(resp)
 
     def get_next_page(self, response):
         return response.headers.get("X-Next-Page", None)

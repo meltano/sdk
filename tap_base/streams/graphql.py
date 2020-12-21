@@ -22,7 +22,7 @@ class GraphQLStreamBase(RESTStreamBase, metaclass=abc.ABCMeta):
     """Abstract base class for API-type streams."""
 
     graphql_query: Optional[Union[str, jinja2.Template]] = None
-    url_pattern = ""  # use the base URL directly for GraphQL sources.
+    url_suffix = ""
 
     def __init__(
         self,
@@ -36,7 +36,7 @@ class GraphQLStreamBase(RESTStreamBase, metaclass=abc.ABCMeta):
             schema=schema,
             state=state,
             config=config,
-            url_pattern="",
+            url_suffix="",  # use the base URL directly for GraphQL sources.
         )
         self._requests_session = requests.Session()
 

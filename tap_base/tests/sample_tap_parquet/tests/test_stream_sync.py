@@ -32,7 +32,7 @@ def test_parquet_sync_one():
     """Test sync_one() for parquet sample."""
     _parquet_write()
     tap = SampleTapParquet(config=SAMPLE_CONFIG)
-    tap.sync_one(tap_stream_id="ASampleTable")
+    tap.sync_one("ASampleTable")
 
 
 def test_parquet_sync_all():
