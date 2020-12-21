@@ -5,10 +5,13 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from tap_base.target_stream_base import TargetStreamBase
+from tap_base.tests.sample_target_parquet.parquet_target_globals import PLUGIN_NAME
+from tap_base.target_sink_base import TargetSinkBase
 
 
-class SampleParquetTargetStream(TargetStreamBase):
+class SampleParquetTargetSink(TargetSinkBase):
+
+    target_name = PLUGIN_NAME
 
     DEFAULT_BATCH_SIZE_ROWS = 100000
     DEFAULT_PARALLELISM = 0  # 0 The number of threads used to flush tables
@@ -16,23 +19,7 @@ class SampleParquetTargetStream(TargetStreamBase):
 
     DATETIME_ERROR_TREATMENT = "MAX"
 
-    @staticmethod
-    def _get_parquet_type(singer_type: Union[str, Dict]) -> Any:
-        if singer_type in ["decimal", "float", "double"]:
-            return pa.decimal128
-        if singer_type in ["date-time"]:
-            return pa.datetime
-        if singer_type in ["date"]:
-            return pa.date64
-        return pa.string
-
-    def _get_parquet_schema(self) -> List[Tuple[str, Any]]:
-        col_list: List[Tuple[str, Any]] = []
-        for property in self.schema["properties"]:
-            col_list.append(
-                (property["name"], self._get_parquet_type(property["type"]))
-            )
-        return col_list
+    # Standard method overrides:
 
     def flush_records(
         self, records_to_load: Iterable[Dict], expected_row_count: Optional[int]
@@ -55,3 +42,23 @@ class SampleParquetTargetStream(TargetStreamBase):
                 f"Number of rows loaded ({num_written}) "
                 f"did not match expected count ({expected_row_count})."
             )
+
+    # Target-specific methods
+
+    @staticmethod
+    def get_target_data_type(singer_type: Union[str, Dict]) -> Any:
+        if singer_type in ["decimal", "float", "double"]:
+            return pa.decimal128
+        if singer_type in ["date-time"]:
+            return pa.datetime
+        if singer_type in ["date"]:
+            return pa.date64
+        return pa.string
+
+    def _get_parquet_schema(self) -> List[Tuple[str, Any]]:
+        col_list: List[Tuple[str, Any]] = []
+        for property in self.schema["properties"]:
+            col_list.append(
+                (property["name"], self.get_target_data_type(property["type"]))
+            )
+        return col_list

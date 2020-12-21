@@ -8,7 +8,7 @@ from typing import Any, Dict, Iterable, List, Optional, Type
 from singer import Catalog, CatalogEntry
 
 from tap_base.plugin_base import PluginBase
-from tap_base.target_stream_base import TargetStreamBase
+from tap_base.target_sink_base import TargetSinkBase
 
 
 class TargetBase(PluginBase, metaclass=abc.ABCMeta):
@@ -16,25 +16,25 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
 
     # Constructor
 
-    _stream_class: Type[TargetStreamBase]
-    _streams: Dict[str, TargetStreamBase] = {}
+    _stream_class: Type[TargetSinkBase]
+    _streams: Dict[str, TargetSinkBase] = {}
 
     def __init__(self, config: Optional[Dict[str, Any]] = None,) -> None:
         """Initialize the tap."""
         super().__init__(config=config)
 
-    def get_stream(self, stream_name: str) -> TargetStreamBase:
+    def get_stream(self, stream_name: str) -> TargetSinkBase:
         if stream_name in self._streams:
             return self._streams[stream_name]
         raise RuntimeError(
-            "Attempted to retrieve stream before initialization."
+            "Attempted to retrieve stream before initialization. "
             "Please check that the upstream tap has sent the proper SCHEMA message."
         )
 
     def stream_exists(self, stream_name: str) -> bool:
         return stream_name in self._streams
 
-    def init_stream(self, stream_name: str, schema: dict) -> TargetStreamBase:
+    def init_stream(self, stream_name: str, schema: dict) -> TargetSinkBase:
         self._streams[stream_name] = self._stream_class(
             stream_name=stream_name, schema=schema, logger=self.logger, flatten=False
         )
@@ -164,6 +164,7 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
     ):
         """
         Flushes all buckets and resets records count to 0 as well as empties records to load list
+
         :param streams: dictionary with records to load per stream
         :param row_count: dictionary with row count per stream
         :param stream_to_sync: Snowflake db sync instance per stream
@@ -246,4 +247,3 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
     def handle_cli_args(self, args, cwd, environ) -> None:
         """Take necessary action in response to a CLI command."""
         pass
-

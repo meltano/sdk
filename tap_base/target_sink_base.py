@@ -16,7 +16,7 @@ from dateutil import parser
 
 import inflection
 
-from tap_base.tap_stream_base import TapStreamBase
+from tap_base.streams.core import TapStreamBase
 
 
 class RecordFlattener:
@@ -89,7 +89,7 @@ class RecordFlattener:
         return False
 
 
-class TargetStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
+class TargetSinkBase(TapStreamBase, metaclass=abc.ABCMeta):
     """Abstract base class for target streams."""
 
     DEFAULT_BATCH_SIZE_ROWS = 100000
@@ -122,12 +122,7 @@ class TargetStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     _flushed_state: dict = {}
     _cache_state: dict = {}
 
-    def __init__(
-        self,
-        stream_name: str,
-        schema: Dict,
-        logger: Logger,
-    ) -> None:
+    def __init__(self, stream_name: str, schema: Dict, logger: Logger,) -> None:
         """Initialize target stream."""
         super().__init__(
             tap_stream_id=stream_name,
@@ -204,9 +199,9 @@ class TargetStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         if isinstance(value, float):
             return Decimal(str(value))
         if isinstance(value, list):
-            return [TargetStreamBase._float_to_decimal(child) for child in value]
+            return [TargetSinkBase._float_to_decimal(child) for child in value]
         if isinstance(value, dict):
-            return {k: TargetStreamBase._float_to_decimal(v) for k, v in value.items()}
+            return {k: TargetSinkBase._float_to_decimal(v) for k, v in value.items()}
         return value
 
     def _get_datelike_property_type(
@@ -292,6 +287,9 @@ class TargetStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         self._flushed_state = new_state
         self.emit_state()
         return self._flushed_state
+
+
+    # Abstract methods:
 
     @abc.abstractmethod
     def flush_records(

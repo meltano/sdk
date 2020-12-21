@@ -8,7 +8,7 @@ import json
 from tempfile import mkstemp
 from decimal import Decimal
 
-from tap_base.target_stream_base import TargetStreamBase
+from tap_base.target_sink_base import TargetSinkBase
 
 
 class RecordValidationException(Exception):
@@ -23,7 +23,7 @@ class InvalidValidationOperationException(Exception):
     pass
 
 
-class SampleSnowflakeTargetStream(TargetStreamBase):
+class SampleSnowflakeTargetStream(TargetSinkBase):
 
     DEFAULT_BATCH_SIZE_ROWS = 100000
     DEFAULT_PARALLELISM = 0  # 0 The number of threads used to flush tables
