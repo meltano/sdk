@@ -44,6 +44,7 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         if url_suffix:
             self.url_suffix = url_suffix
         self._requests_session = requests.Session()
+        self._cached_auth_header: Optional[dict] = None
 
     @staticmethod
     def url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
@@ -120,11 +121,13 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     def prepare_request(
         self, url, params=None, method="GET", json=None
     ) -> requests.PreparedRequest:
+        if not self._cached_auth_header:
+            self._cached_auth_header = self.get_auth_header()
         request = requests.Request(
             method=method,
             url=self.render(url),
             params=params,
-            headers=self.get_auth_header(),
+            headers=self._cached_auth_header,
             json=json,
         ).prepare()
         return request
