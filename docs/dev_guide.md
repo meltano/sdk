@@ -5,12 +5,15 @@
 _Create with `tap-base` requires overriding just two classes:_
 
 1. The tap:
-    - `TapBase` - _The core base class for all taps. This class governs configuration, validation, and stream discovery._
-2. The stream. For the stream base class, you have three options depending on the type of data source you are working with.
+    - `TapBase` - _The core base class for all taps. This class governs configuration, validation,
+      and stream discovery._
+2. The stream. For the stream base class, you have different options depending on the type of data
+   source you are working with.
     - `TapStreamBase` - _The **generic** base class for streams._
     - `RESTStreamBase` - _The base class for **REST**-type streams._
     - `GraphQLStreamBase` - _The base class for **GraphQL**-type streams._
-    - `DatabaseStreamBase` - _The base class for **database**-type streams - specifically those which support the SQL language._
+    - `DatabaseStreamBase` - _The base class for **database**-type streams - specifically those
+      which support the SQL language._
 
 **Detailed Instructions:**
 
@@ -62,8 +65,8 @@ _Creating the stream class depends upon what type of tap you are creating._
 _Generic (hand-coded) streams inherit from the class `TapStreamBase`. To create a generic
 stream class, you only need to override a single method:_
 
-1. `tap_name` The same name used in your tap class (for logging purposes).
-2. `get_row_generator()` - This method should generate rows and return them incrementally with the
+1. **`tap_name`** - The same name used in your tap class (for logging purposes).
+2. `get_record_generator()` - This method should generate rows and return them incrementally with the
    `yield` python operator.
 
 **More info:**
@@ -75,18 +78,23 @@ stream class, you only need to override a single method:_
 _REST streams inherit from the class `RESTStreamBase`. To create an REST API-based
 stream class, you will override one class property and three methods:_
 
-1. `tap_name` The same name used in your tap class (for logging purposes).
+1. **`tap_name`** - The same name used in your tap class (for logging purposes).
 2. **`site_url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
    - For example: to connect to the GitLab v4 API, we use `"https://gitlab.com/api/v4"`.
 3. **`get_auth_header` method** - Build and return an authorization header which will be used when
    making calls to your API.
    - For example: to connect to the GitLab API, we pass "Private-Token" and (optionally) "User-Agent".
-4. **`get_url` method** - This method returns the concatenates and parameterizes the final URL which
-   will be sent to the python `requests` library.
-   - For example: in our GitLab example, we pass some config setting along within as URL parameters,
-     and then we call to the base class which automatically escapes the URL parameters and
-     concatenates our provided URL with the `site_url_base` property we provided earlier.
-5. **`post_process` method** - (Optional.) This method gives us an opportunity to "clean up" the results prior
+
+**Depending upon your implementation, you may also want to override one or more of the following properties:**
+
+1. `get_query_params` method - (Optional.) This method returns a map (or list of maps) whose values can be
+   substituted into the query URLs. A list of maps is returned if multiple calls need to be made.
+   - For example: in our GitLab example, we want the use to be able to specify multiple project IDs
+     for extraction so we return multiple maps the URL parameters, each with a different
+     `project_id` value.
+   - If not provided, the user-provided config dictionary will automatically be scanned for possible
+     query parameters.
+2. `post_process` method - (Optional.) This method gives us an opportunity to "clean up" the results prior
    to returning them to the downstream tap - for instance: cleaning, renaming, or appending the list
    of properties returned by the API.
    - For our GitLab example, no cleansing was necessary and we passed along the result directly as
@@ -102,14 +110,17 @@ stream class, you will override one class property and three methods:_
 
 _GraphQL streams inherit from the class `GraphQLStreamBase`. GraphQL streams are very similar toREST API-based streams, but instead of a `url_suffix`, you will override the GraphQL query text._
 
-1. `tap_name` The same name used in your tap class (for logging purposes).
+1. **`tap_name`** - The same name used in your tap class (for logging purposes).
 2. **`site_url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
    - For example: to connect to the GitLab v4 API, we use `"https://gitlab.com/graphql"`.
 3. **`get_auth_header` method** - Build and return an authorization header which will be used when
    making calls to your API.
    - For example: to connect to the GitLab API, we pass "Private-Token" and (optionally) "User-Agent".
 4. **`graphql_query` property** - This is where you specify your specific GraphQL query text.
-5. **`post_process` method** - (Optional.) This method gives us an opportunity to "clean up" the results prior
+
+**Depending upon your implementation, you may also want to override one or more of the following properties:**
+
+1. **`post_process` method** - (Optional.) This method gives us an opportunity to "clean up" the results prior
    to returning them to the downstream tap - for instance: cleaning, renaming, or appending the list
    of properties returned by the API.
    - For our GitLab example, no cleansing was necessary and we passed along the result directly as
@@ -133,16 +144,16 @@ one and four class properties, in order to override specific metadata queries._
 
 **All database stream classes override:**
 
-1. `tap_name` The same name used in your tap class (for logging purposes).
-2. `sql_query()` - This method should run a give SQL statement and incrementally return a dictionary
+1. **`tap_name`** - The same name used in your tap class (for logging purposes).
+2. **`sql_query()` method** - This method should run a give SQL statement and incrementally return a dictionary
    object for each resulting row.
-3. `open_connection()` - (Optional.) Open a connection to the database and return a connection object.
 
 **Depending upon your implementation, you may also want to override one or more of the following properties:**
 
-1. `table_scan_sql` - A SQL string which should query for all tables, returning three columns: `database_name`, `schema_name`, and `table_name`.
-2. `view_scan_sql` - A SQL string which should query for all views, returning three columns: `database_name`, `schema_name`, and `view_name`.
-3. `column_scan_sql` - A SQL string which should query for all columns, returning five columns: `database_name`, `schema_name`, and `table_or_view_name`, `column_name`, and `data_type`.
+1. `open_connection()` method - (Optional.) Open a connection to the database and return a connection object.
+2. `table_scan_sql` - A SQL string which should query for all tables, returning three columns: `database_name`, `schema_name`, and `table_name`.
+3. `view_scan_sql` - A SQL string which should query for all views, returning three columns: `database_name`, `schema_name`, and `view_name`.
+4. `column_scan_sql` - A SQL string which should query for all columns, returning five columns: `database_name`, `schema_name`, and `table_or_view_name`, `column_name`, and `data_type`.
 
 **More info:**
 

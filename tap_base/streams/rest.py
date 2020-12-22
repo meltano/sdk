@@ -155,7 +155,7 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
             for row in resp_json:
                 yield row
 
-    def get_row_generator(self) -> Iterable[dict]:
+    def get_record_generator(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
         for row in self.request_paginated_get():
             yield row

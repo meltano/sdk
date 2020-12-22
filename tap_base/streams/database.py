@@ -53,7 +53,7 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     DEFAULT_QUOTE_CHAR = '"'
     OTHER_QUOTE_CHARS = ['"', "[", "]", "`"]
 
-    def get_row_generator(self) -> Iterable[dict]:
+    def get_record_generator(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
         for row in self.sql_query(
             sql=f"SELECT * FROM {self.fully_qualified_name}", config=self._config

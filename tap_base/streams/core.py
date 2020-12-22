@@ -263,7 +263,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         ):
             singer.write_message(activate_version_message)
         self.write_schema_message()
-        self.sync_records(self.get_row_generator, self.replication_method)
+        self.sync_records(self.get_record_generator, self.replication_method)
         singer.clear_bookmark(self._state, self.tap_stream_id, "max_pk_values")
         singer.clear_bookmark(self._state, self.tap_stream_id, "last_pk_fetched")
         singer.write_message(singer.StateMessage(value=copy.deepcopy(self._state)))
@@ -281,16 +281,23 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         )
         singer.write_message(schema_message)
 
-    def sync_records(self, row_generator: Callable, replication_method: str):
+    def sync_records(self, record_generator: Callable, replication_method: str):
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
-        for row_dict in row_generator():
+        for row_dict in record_generator():
             row_dict = self.post_process(row_dict)
             if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
                 self.write_state_message()
-            record = self.transform_row_to_singer_record(row=row_dict)
-            self.logger.info(row_dict)
-            singer.write_message(record)
+            record = self.conform_record_data_types(row_dict)
+            record_message = RecordMessage(
+                stream=self.name,
+                record=record,
+                version=None,
+                time_extracted=datetime.datetime.now(datetime.timezone.utc),
+            )
+            # TODO: remove this temporary debug message
+            # self.logger.info(row_dict)
+            singer.write_message(record_message)
             rows_sent += 1
             self.update_state(record, replication_method)
         self.write_state_message()
@@ -339,7 +346,6 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         self._state = new_state
         return self._state
 
-    @lru_cache
     def get_property_schema(self, property: str, warn=True) -> Optional[dict]:
         if property not in self.schema["properties"]:
             if warn:
@@ -364,7 +370,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         return False
 
     # pylint: disable=too-many-branches
-    def transform_row_to_singer_record(
+    def conform_record_data_types(
         self,
         row: Dict[str, Any],
         # columns: List[str],
@@ -373,7 +379,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
             datetime.timezone.utc
         ),
     ) -> RecordMessage:
-        """Transform dictionary row data into a singer-compatible RECORD message."""
+        """Translate values in record dictionary to singer-compatible data types."""
         rec: Dict[str, Any] = {}
         for property_name, elem in row.items():
             property_schema = self.get_property_schema(property_name)
@@ -410,12 +416,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
                 rec[property_name] = elem
 
         # rec = dict(zip(columns, row_to_persist))
-        return RecordMessage(
-            stream=self.name,
-            record=rec,
-            version=version,
-            time_extracted=time_extracted,
-        )
+        return rec
 
     # Class Factory Methods
 
@@ -464,7 +465,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
     # Abstract Methods
 
     @abc.abstractmethod
-    def get_row_generator(self) -> Iterable[Iterable[Dict[str, Any]]]:
+    def get_record_generator(self) -> Iterable[Iterable[Dict[str, Any]]]:
         """Abstract row generator function. Must be overridden by the child class.
 
         Each row emitted should be a dictionary of property names to their values.

@@ -8,12 +8,13 @@ from tap_base.streams.core import TapStreamBase
 
 PLUGIN_NAME = "sample-tap-parquet"
 
+
 class SampleTapParquetStream(TapStreamBase):
     """Sample tap test for parquet."""
 
     tap_name = PLUGIN_NAME
 
-    def get_row_generator(self) -> Iterable[dict]:
+    def get_record_generator(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
         filepath = self.get_config("filepath")
         if not filepath:
