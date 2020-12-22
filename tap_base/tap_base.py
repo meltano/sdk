@@ -2,10 +2,8 @@
 
 import abc
 import json
-from logging import Logger
 
 from singer.catalog import Catalog
-from tap_base.helpers import classproperty
 
 from typing import Any, List, Optional, Type, Dict
 from pathlib import Path
@@ -19,11 +17,7 @@ from tap_base.streams.core import TapStreamBase
 class TapBase(PluginBase, metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    # TODO: Remove (Should be object-level, not class-level)
-    # _streams: Dict[str, TapStreamBase] = {}
-
     default_stream_class: Optional[Type[TapStreamBase]] = None
-    # Constructor
 
     def __init__(
         self,
@@ -37,13 +31,14 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         super().__init__(config=config)
         if catalog:
             self.logger.info("loading catalog streams...")
-            self.load_catalog_streams(
+            list_of_streams = self.load_catalog_streams(
                 catalog=catalog, config=self._config, state=self._state,
             )
         else:
             self.logger.info("discovering catalog streams...")
-            for stream in self.discover_streams():
-                self._stream[stream.name] = stream
+            list_of_streams = self.discover_streams()
+        for stream in list_of_streams:
+            self._streams[stream.name] = stream
 
     @classmethod
     def get_stream_class(cls, stream_name: str) -> Type[TapStreamBase]:
@@ -65,24 +60,6 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         if self.discoverable:
             result.append("discover")
         return result
-
-    # Abstract stream detection methods:
-
-    def load_catalog_streams(self, catalog: dict, state: dict, config: dict) -> None:
-        streams: List[Dict] = catalog["streams"]
-        for stream in streams:
-            stream_name = stream["tap_stream_id"]
-            new_stream = self.get_stream_class(stream_name).from_stream_dict(
-                stream_dict=stream, state=state, config=config
-            )
-            self._streams[stream_name] = new_stream
-
-    def discover_streams(self) -> List[TapStreamBase]:
-        """Return a list of discovered streams."""
-        raise NotImplementedError(
-            f"Tap '{self.name}' does not support discovery. "
-            "Please set the '--catalog' command line argument and try again."
-        )
 
     def run_discovery(self) -> str:
         """Write the catalog json to STDOUT and return the same as a string."""
@@ -153,6 +130,29 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
                 tap.sync_all()
 
         return cli
+
+    # Abstract stream detection methods:
+
+    def load_catalog_streams(
+        self, catalog: dict, state: dict, config: dict
+    ) -> List[TapStreamBase]:
+        """Return a list of streams from the provided catalog."""
+        result: List[TapStreamBase] = []
+        stream_entries: List[Dict] = catalog["streams"]
+        for stream_entry in stream_entries:
+            stream_name = stream_entry["tap_stream_id"]
+            new_stream: TapStreamBase = self.get_stream_class(
+                stream_name
+            ).from_stream_dict(stream_dict=stream_entry, state=state, config=config)
+            result.append(new_stream)
+        return result
+
+    def discover_streams(self) -> List[TapStreamBase]:
+        """Return a list of discovered streams."""
+        raise NotImplementedError(
+            f"Tap '{self.name}' does not support discovery. "
+            "Please set the '--catalog' command line argument and try again."
+        )
 
 
 cli = TapBase.build_cli()
