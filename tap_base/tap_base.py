@@ -42,7 +42,8 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
             )
         else:
             self.logger.info("discovering catalog streams...")
-            self.discover_catalog_streams()
+            for stream in self.discover_streams():
+                self._stream[stream.name] = stream
 
     @classmethod
     def get_stream_class(cls, stream_name: str) -> Type[TapStreamBase]:
@@ -76,7 +77,8 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
             )
             self._streams[stream_name] = new_stream
 
-    def discover_catalog_streams(self) -> None:
+    def discover_streams(self) -> List[TapStreamBase]:
+        """Return a list of discovered streams."""
         raise NotImplementedError(
             f"Tap '{self.name}' does not support discovery. "
             "Please set the '--catalog' command line argument and try again."

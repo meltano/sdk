@@ -1,6 +1,7 @@
 """Sample tap test for tap-gitlab."""
 
-from tap_base.tap_base import TapBase
+from typing import List
+from tap_base import TapBase, TapStreamBase
 from tap_base.tests.sample_tap_gitlab.gitlab_rest_streams import (
     ProjectsStream,
     ReleasesStream,
@@ -27,12 +28,11 @@ class SampleTapGitlab(TapBase):
     accepted_config_keys = ["auth_token", "project_ids", "start_date"]
     required_config_options = [["auth_token", "project_ids", "start_date"]]
 
-    def discover_catalog_streams(self) -> None:
-        """Initialize self._streams with a dictionary of all streams."""
-        # Add REST and GraphQL Streams
-        for stream_class in STREAM_TYPES:
-            stream = stream_class(config=self._config, state={})
-            self._streams[stream.name] = stream
+    def discover_streams(self) -> List[TapStreamBase]:
+        """Return a list of discovered streams."""
+        return [
+            stream_class(config=self._config, state={}) for stream_class in STREAM_TYPES
+        ]
 
 
 # CLI Execution:

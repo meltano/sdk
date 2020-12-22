@@ -54,7 +54,7 @@ _To create a tap class, follow these steps:_
    2. `accepted_config_keys` - A lit of all config options that this tap will accept.
    3. `required_config_options` - (Optional.) One or more required sets of options.
    4. `default_stream_class` - (Optional.) The stream class to use if auto-discovering from a json catalog file.
-3. Override the `discover_catalog_streams` method.
+3. Override the `discover_streams` method.
 
 ## Step 3: Write the stream class
 

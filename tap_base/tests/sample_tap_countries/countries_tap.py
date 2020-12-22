@@ -8,7 +8,7 @@ See the online explorer and query builder here:
 
 from typing import List
 
-from tap_base.tap_base import TapBase
+from tap_base import TapBase, TapStreamBase
 from tap_base.tests.sample_tap_countries.countries_streams import (
     CountriesStream,
     ContinentsStream,
@@ -22,13 +22,12 @@ class SampleTapCountries(TapBase):
     accepted_config_keys: List[str] = []
     required_config_options = None
 
-    def discover_catalog_streams(self) -> None:
-        """Initialize self._streams with a dictionary of all streams."""
-        self.logger.info("Loading streams types...")
-        self._streams = {
-            "countries": CountriesStream(config=self._config, state=self._state,),
-            "continents": ContinentsStream(config=self._config, state=self._state,),
-        }
+    def discover_streams(self) -> List[TapStreamBase]:
+        """Return a list of discovered streams."""
+        return [
+            CountriesStream(config=self._config, state=self._state),
+            ContinentsStream(config=self._config, state=self._state),
+        ]
 
 
 # CLI Execution:
