@@ -6,7 +6,7 @@ import backoff
 import singer
 from tap_base.helpers import classproperty
 from tap_base.exceptions import TapStreamConnectionFailure
-from typing import Any, Dict, Iterable, List, Tuple, TypeVar, Union, cast
+from typing import Any, Dict, Iterable, List, Optional, Tuple, TypeVar, Union, cast
 
 from tap_base.streams.core import TapStreamBase
 
@@ -66,7 +66,13 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
 
     @classproperty
     def table_scan_sql(cls) -> str:
-        """Return a SQL statement that provides the column."""
+        """Return a SQL statement for syncable tables.
+
+        Result fields should be in this order:
+         - db_name
+         - schema_name
+         - table_name
+        """
         return """
             SELECT table_catalog, table_schema, table_name
             from information_schema.tables
@@ -75,7 +81,13 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
 
     @classproperty
     def view_scan_sql(cls) -> str:
-        """Return a SQL statement that provides the column."""
+        """Return a SQL statement for syncable views.
+
+        Result fields should be in this order:
+         - db_name
+         - schema_name
+         - view_name
+        """
         return """
             SELECT table_catalog, table_schema, table_name
             FROM information_schema.views
@@ -84,11 +96,47 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
 
     @classproperty
     def column_scan_sql(cls) -> str:
-        """Return a SQL statement that provides the column."""
+        """Return a SQL statement that provides the column names and types.
+
+        Result fields should be in this order:
+         - db_name
+         - schema_name
+         - table_name
+         - column_name
+         - column_type
+
+        Optionally, results can be sorted to preserve cardinal ordinaling.
+        """
         return """
             SELECT table_catalog, table_schema, table_name, column_name, data_type
             FROM information_schema.columns
             ORDER BY table_catalog, table_schema, table_name, ordinal_position
+            """
+
+    @classproperty
+    def primary_key_scan_sql(cls) -> Optional[str]:
+        """Return a SQL statement that provides the list of primary key columns.
+
+        Result fields should be in this order:
+         - db_name
+         - schema_name
+         - table_name
+         - column_name
+        """
+        return """
+            SELECT cols.table_catalog,
+                   cols.table_schema,
+                   cols.table_name,
+                   cols.column_name as key_column
+            FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS constraint
+            JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE cols
+                 on cols.constraint_name   = constraint.constraint_name
+                and cols.constraint_schema = constraint.constraint_schema
+                and cols.constraint_name   = constraint.constraint_name
+            WHERE constraint.constraint_type = 'PRIMARY KEY'
+            ORDER BY cols.table_schema,
+                     cols.table_name,
+                     cols.ordinal_position;
             """
 
     @staticmethod
@@ -122,13 +170,15 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
 
     @classmethod
     def scan_primary_keys(cls, config) -> Dict[Tuple[str, str, str], List[str]]:
-        columns_scan_result = cls.sql_query(config=config, sql=cls.column_scan_sql)
-        result: Dict[Tuple[str, str, str], Dict[str, str]] = {}
-        for row_dict in columns_scan_result:
-            catalog, schema_name, table, column, data_type = row_dict.values()
+        result: Dict[Tuple[str, str, str], List[str]] = {}
+        if not cls.primary_key_scan_sql:
+            return result
+        pk_scan_result = cls.sql_query(config=config, sql=cls.primary_key_scan_sql)
+        for row_dict in pk_scan_result:
+            catalog, schema_name, table, pk_column = row_dict.values()
             if (catalog, schema_name, table) not in result:
-                result[(catalog, schema_name, table)] = {}
-            result[(catalog, schema_name, table)][column] = data_type
+                result[(catalog, schema_name, table)] = []
+            result[(catalog, schema_name, table)].append(pk_column)
         return result
 
     @classmethod

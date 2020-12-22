@@ -85,7 +85,7 @@ stream class, you will override one class property and three methods:_
    making calls to your API.
    - For example: to connect to the GitLab API, we pass "Private-Token" and (optionally) "User-Agent".
 
-**Depending upon your implementation, you may also want to override one or more of the following properties:**
+_Depending upon your implementation, you may also want to override one or more of the following properties:_
 
 1. `get_query_params` method - (Optional.) This method returns a map (or list of maps) whose values can be
    substituted into the query URLs. A list of maps is returned if multiple calls need to be made.
@@ -118,7 +118,7 @@ _GraphQL streams inherit from the class `GraphQLStreamBase`. GraphQL streams are
    - For example: to connect to the GitLab API, we pass "Private-Token" and (optionally) "User-Agent".
 4. **`graphql_query` property** - This is where you specify your specific GraphQL query text.
 
-**Depending upon your implementation, you may also want to override one or more of the following properties:**
+_Depending upon your implementation, you may also want to override one or more of the following properties:_
 
 1. **`post_process` method** - (Optional.) This method gives us an opportunity to "clean up" the results prior
    to returning them to the downstream tap - for instance: cleaning, renaming, or appending the list
@@ -148,12 +148,13 @@ one and four class properties, in order to override specific metadata queries._
 2. **`sql_query()` method** - This method should run a give SQL statement and incrementally return a dictionary
    object for each resulting row.
 
-**Depending upon your implementation, you may also want to override one or more of the following properties:**
+_Depending upon your implementation, you may also want to override one or more of the following properties:_
 
 1. `open_connection()` method - (Optional.) Open a connection to the database and return a connection object.
 2. `table_scan_sql` - A SQL string which should query for all tables, returning three columns: `database_name`, `schema_name`, and `table_name`.
 3. `view_scan_sql` - A SQL string which should query for all views, returning three columns: `database_name`, `schema_name`, and `view_name`.
-4. `column_scan_sql` - A SQL string which should query for all columns, returning five columns: `database_name`, `schema_name`, and `table_or_view_name`, `column_name`, and `data_type`.
+4. `column_scan_sql` - A SQL string which should query for all columns, returning five columns: `database_name`, `schema_name`, `table_or_view_name`, `column_name`, and `data_type`.
+5. `primary_key_scan_sql` - Optional. A SQL string which should query for the list of primary keys, returning five columns: `database_name`, `schema_name`, `table_name`, `pk_column_name`.
 
 **More info:**
 

@@ -1,6 +1,7 @@
 """Sample tap stream test for tap-snowflake."""
 
-from typing import Dict, Iterable, List, Tuple, Union
+from tap_base.helpers import classproperty
+from typing import Dict, Iterable, List, Optional, Union
 from snowflake import connector
 
 from tap_base.streams import DatabaseStreamBase
@@ -16,10 +17,10 @@ class SampleTapSnowflakeStream(DatabaseStreamBase):
 
     tap_name = PLUGIN_NAME
 
-    @classmethod
-    def scan_primary_keys(cls, config) -> Dict[Tuple[str, str, str], List[str]]:
+    @classproperty
+    def primary_key_scan_sql(self) -> Optional[str]:
         """Snowflake does not support primary keys. Return empty result."""
-        return {}
+        return None
 
     @classmethod
     def sql_query(
