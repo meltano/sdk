@@ -5,7 +5,7 @@ import json
 import logging
 import os
 from pathlib import Path, PurePath
-from tap_base.helpers import classproperty, is_common_secret_key
+from tap_base.helpers import classproperty, is_common_secret_key, SecretString
 from typing import Dict, List, Optional, Type, Tuple, Any, Union
 
 import click
@@ -43,6 +43,9 @@ class PluginBase(metaclass=abc.ABCMeta):
         else:
             config_dict = config
         config_dict.update(self.get_env_var_config())
+        for k, v in config_dict.items():
+            if self.is_secret_config(k):
+                config_dict[k] = SecretString(v)
         self._config = config_dict
         self.validate_config()
 

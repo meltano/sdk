@@ -12,6 +12,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 from singer.schema import Schema
 
 from tap_base.streams.core import TapStreamBase
+from tap_base.helpers import SecretString
 
 URLArgMap = Dict[str, Union[str, bool, int, datetime]]
 
@@ -55,7 +56,8 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         return result
 
     def get_query_params(self) -> Union[List[URLArgMap], URLArgMap]:
-        return [{}]
+        """By default, return all config values which are not secrets."""
+        return [{k: v for k, v in self._config if not isinstance(v, SecretString)}]
 
     def get_urls(self) -> List[str]:
         url_pattern = "".join([self.site_url_base, self.url_suffix or ""])

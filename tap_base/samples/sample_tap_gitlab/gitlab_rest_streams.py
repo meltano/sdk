@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Union
 
 from tap_base.streams.rest import RESTStreamBase, URLArgMap
+from tap_base.helpers import listify
 
 SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_gitlab/schemas")
 
@@ -27,13 +28,11 @@ class GitlabStream(RESTStreamBase):
         If a list of dictionaries is returned, one call will be made for each item
         in the list.
         """
+        if "{project_id}" not in self.url_suffix:
+            # No need to return multiple calls. Return the default dictionary.
+            return super().get_query_params()
         result: List[URLArgMap] = []
-        project_ids = self.get_config("project_ids")
-        if isinstance(project_ids, str):
-            id_list = project_ids.split(",")
-        else:
-            id_list = project_ids
-        for project_id in id_list:
+        for project_id in listify(self.get_config("project_ids")):
             result.append(
                 {"project_id": project_id, "start_date": self.get_config("start_date")}
             )
