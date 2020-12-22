@@ -2,6 +2,7 @@
 
 import abc
 import json
+import os
 
 from singer.catalog import Catalog
 
@@ -18,6 +19,8 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
     default_stream_class: Optional[Type[TapStreamBase]] = None
+
+    # Constructor
 
     def __init__(
         self,
@@ -40,14 +43,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         for stream in list_of_streams:
             self._streams[stream.name] = stream
 
-    @classmethod
-    def get_stream_class(cls, stream_name: str) -> Type[TapStreamBase]:
-        if not cls.default_stream_class:
-            raise ValueError(
-                "No stream class detected for '{cls.name}' stream '{stream_name}'"
-                "and no default_stream_class defined."
-            )
-        return cls.default_stream_class
+    # Class properties
 
     @property
     def streams(self) -> Dict[str, TapStreamBase]:
@@ -60,6 +56,17 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         if self.discoverable:
             result.append("discover")
         return result
+
+    # Stream type detection:
+
+    @classmethod
+    def get_stream_class(cls, stream_name: str) -> Type[TapStreamBase]:
+        if not cls.default_stream_class:
+            raise ValueError(
+                "No stream class detected for '{cls.name}' stream '{stream_name}'"
+                "and no default_stream_class defined."
+            )
+        return cls.default_stream_class
 
     def run_discovery(self) -> str:
         """Write the catalog json to STDOUT and return the same as a string."""
@@ -113,14 +120,30 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
             """Handle command line execution."""
 
             def read_optional_json(path: Optional[str]) -> Optional[Dict[str, Any]]:
+                """If json filepath is specified, read it from disk."""
                 if not path:
                     return None
                 return json.loads(Path(path).read_text())
 
+            def get_env_var_config() -> Dict[str, Any]:
+                """Return any config specified in environment variables.
+
+                Variables must match the convention "PLUGIN_NAME_setting_name",
+                with dashes converted to underscores, the plugin name converted to all
+                caps, and the setting name in same-case as specified in settings config.
+                """
+                result: Dict[str, Any] = {}
+                for k, v in os.environ:
+                    for key in self.accepted_config_keys:
+                        if k == f"{cls.name.upper()}_{key}".replace("-", "_"):
+                            result[key] = v
+                return result
+
             if version:
                 cls.print_version()
                 return
-            config_dict = read_optional_json(config)
+            config_dict = read_optional_json(config) or {}
+            config_dict.update(get_env_var_config())
             state_dict = read_optional_json(state)
             catalog_dict = read_optional_json(catalog)
             tap = cls(config=config_dict, state=state_dict, catalog=catalog_dict)

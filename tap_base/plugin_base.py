@@ -2,7 +2,7 @@
 
 import abc
 import logging
-from tap_base.helpers import classproperty
+from tap_base.helpers import classproperty, is_common_secret_key
 from typing import Dict, List, Optional, Type, Tuple, Any
 
 import click
@@ -15,6 +15,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     name: str = "sample-plugin-name"
     accepted_config_keys: List[str] = []
+    protected_config_keys: List[str] = []
     required_config_options: Optional[List[List[str]]] = [[]]
 
     __always_accepted_config_keys: List[str] = ["start_date", "end_date"]
@@ -59,6 +60,16 @@ class PluginBase(metaclass=abc.ABCMeta):
     def get_config(self, config_key: str, default: Any = None) -> Any:
         """Return config value or a default value."""
         return self._config.get(config_key, default)
+
+    def is_secret_config(self, config_key: str) -> bool:
+        """Return true if a config value should be treated as a secret.
+
+        This avoids accidental printing to logs, and it prevents rendering the secrets
+        in jinja templating functions.
+        """
+        return (
+            is_common_secret_key(config_key) or config_key in self.protected_config_keys
+        )
 
     def validate_config(
         self, raise_errors: bool = True, warnings_as_errors: bool = False
