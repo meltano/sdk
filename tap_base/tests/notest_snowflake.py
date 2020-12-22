@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from tap_base.tests.sample_tap_snowflake.snowflake_tap import SampleTapSnowflake
+from tap_base.samples.sample_tap_snowflake.snowflake_tap import SampleTapSnowflake
 
 CONFIG_FILE = "tap_base/tests/.secrets/snowflake-config.json"
 

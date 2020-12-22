@@ -1,6 +1,6 @@
 """Tests discovery features for Parquet."""
 
-from tap_base.tests.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
+from tap_base.samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 
 CONFIG_FILE = "tap_base/tests/.secrets/gitlab-config.json"
 

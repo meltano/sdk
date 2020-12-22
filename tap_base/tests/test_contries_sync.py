@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from tap_base.tests.sample_tap_countries.countries_tap import SampleTapCountries
+from tap_base.samples.sample_tap_countries.countries_tap import SampleTapCountries
 
 COUNTER = 0
 

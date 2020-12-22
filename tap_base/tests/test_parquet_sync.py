@@ -3,7 +3,7 @@
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from tap_base.tests.sample_tap_parquet.parquet_tap import SampleTapParquet
+from tap_base.samples.sample_tap_parquet.parquet_tap import SampleTapParquet
 
 COUNTER = 0
 
