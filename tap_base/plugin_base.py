@@ -1,9 +1,12 @@
 """Shared parent class for TapBase, TargetBase (future), and TransformBase (future)."""
 
 import abc
+import json
 import logging
+import os
+from pathlib import Path, PurePath
 from tap_base.helpers import classproperty, is_common_secret_key
-from typing import Dict, List, Optional, Type, Tuple, Any
+from typing import Dict, List, Optional, Type, Tuple, Any, Union
 
 import click
 
@@ -29,15 +32,57 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     # Constructor
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, config: Union[PurePath, str, dict, None] = None) -> None:
         """Initialize the tap."""
-        self._config = config or {}
+        if not config:
+            config_dict = {}
+        elif isinstance(config, str) or isinstance(config, PurePath):
+            config_dict = (
+                self.read_optional_json_file(str(config), warn_missing=True) or {}
+            )
+        else:
+            config_dict = config
+        config_dict.update(self.get_env_var_config())
+        self._config = config_dict
         self.validate_config()
 
     @property
     def capabilities(self) -> List[str]:
         """Return a list of supported capabilities."""
         return []
+
+    # Read input files and parse env vars:
+
+    @classmethod
+    def read_optional_json_file(
+        cls, path: Optional[Union[PurePath, str]], warn_missing: bool = False
+    ) -> Optional[Dict[str, Any]]:
+        """If json filepath is specified, read it from disk."""
+        if not path:
+            return None
+        if Path(path).exists():
+            return json.loads(Path(path).read_text())
+        elif warn_missing:
+            cls.logger.warning(f"File at '{path}' was not found.")
+            return None
+        else:
+            raise FileExistsError(f"File at '{path}' was not found.")
+
+    @classmethod
+    def get_env_var_config(cls) -> Dict[str, Any]:
+        """Return any config specified in environment variables.
+
+        Variables must match the convention "PLUGIN_NAME_setting_name",
+        with dashes converted to underscores, the plugin name converted to all
+        caps, and the setting name in same-case as specified in settings config.
+        """
+        result: Dict[str, Any] = {}
+        for k, v in os.environ.items():
+            for key in cls.accepted_config_keys:
+                if k == f"{cls.name.upper()}_{key}".replace("-", "_"):
+                    cls.logger.info(f"Parsing '{key}' config from env variable '{k}'.")
+                    result[key] = v
+        return result
 
     # Core plugin metadata:
 

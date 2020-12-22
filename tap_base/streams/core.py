@@ -302,25 +302,21 @@ class TapStreamBase(metaclass=abc.ABCMeta):
             self.update_state(record, replication_method)
         self.write_state_message()
 
-    def update_state(
-        self, record_message: singer.RecordMessage, replication_method: str
-    ):
+    def update_state(self, latest_record: Dict[str, Any], replication_method: str):
         """Update the stream's internal state with data from the provided record."""
         if not self._state:
             self._state = singer.write_bookmark(
                 self._state, self.tap_stream_id, "version", self.get_stream_version(),
             )
         new_state = copy.deepcopy(self._state)
-        if record_message:
+        if latest_record:
             if replication_method == "FULL_TABLE":
                 max_pk_values = singer.get_bookmark(
                     new_state, self.tap_stream_id, "max_pk_values"
                 )
                 if max_pk_values:
                     last_pk_fetched = {
-                        k: v
-                        for k, v in record_message.record.items()
-                        if k in self.primary_keys
+                        k: v for k, v in latest_record.items() if k in self.primary_keys
                     }
                     new_state = singer.write_bookmark(
                         new_state,
@@ -341,7 +337,7 @@ class TapStreamBase(metaclass=abc.ABCMeta):
                         new_state,
                         self.tap_stream_id,
                         "replication_key_value",
-                        record_message.record[replication_key],
+                        latest_record[replication_key],
                     )
         self._state = new_state
         return self._state

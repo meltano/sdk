@@ -6,8 +6,8 @@ import os
 
 from singer.catalog import Catalog
 
-from typing import Any, List, Optional, Type, Dict
-from pathlib import Path
+from typing import Any, List, Optional, Type, Dict, Union
+from pathlib import Path, PurePath
 
 import click
 
@@ -24,18 +24,26 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        catalog: Optional[Dict[str, Any]] = None,
-        state: Optional[Dict[str, Any]] = None,
+        config: Union[PurePath, str, dict, None] = None,
+        catalog: Union[PurePath, str, dict, None] = None,
+        state: Union[PurePath, str, dict, None] = None,
     ) -> None:
         """Initialize the tap."""
-        self._state = state or {}
         self._streams: Dict[str, TapStreamBase] = {}
+        if isinstance(state, dict):
+            state_dict = state
+        else:
+            state_dict = self.read_optional_json_file(state) or {}
+        if isinstance(catalog, dict):
+            catalog_dict = catalog
+        else:
+            catalog_dict = self.read_optional_json_file(catalog) or {}
+        self._state = state_dict or {}
         super().__init__(config=config)
         if catalog:
             self.logger.info("loading catalog streams...")
             list_of_streams = self.load_catalog_streams(
-                catalog=catalog, config=self._config, state=self._state,
+                catalog=catalog_dict, config=self._config, state=self._state,
             )
         else:
             self.logger.info("discovering catalog streams...")
@@ -118,42 +126,10 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
             catalog: str = None,
         ):
             """Handle command line execution."""
-
-            def read_optional_json(
-                path: Optional[str], warn_missing: bool = False
-            ) -> Optional[Dict[str, Any]]:
-                """If json filepath is specified, read it from disk."""
-                if not path:
-                    return None
-                if Path(path).exists():
-                    return json.loads(Path(path).read_text())
-                elif warn_missing:
-                    cls.logger.warning(f"File at '{path}' was not found.")
-                else:
-                    raise FileExistsError(f"File at '{path}' was not found.")
-
-            def get_env_var_config() -> Dict[str, Any]:
-                """Return any config specified in environment variables.
-
-                Variables must match the convention "PLUGIN_NAME_setting_name",
-                with dashes converted to underscores, the plugin name converted to all
-                caps, and the setting name in same-case as specified in settings config.
-                """
-                result: Dict[str, Any] = {}
-                for k, v in os.environ:
-                    for key in self.accepted_config_keys:
-                        if k == f"{cls.name.upper()}_{key}".replace("-", "_"):
-                            result[key] = v
-                return result
-
             if version:
                 cls.print_version()
                 return
-            config_dict = read_optional_json(config, warn_missing=True) or {}
-            config_dict.update(get_env_var_config())
-            state_dict = read_optional_json(state)
-            catalog_dict = read_optional_json(catalog)
-            tap = cls(config=config_dict, state=state_dict, catalog=catalog_dict)
+            tap = cls(config=config, state=state, catalog=catalog)
             if discover:
                 tap.run_discovery()
             else:
