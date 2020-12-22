@@ -119,11 +119,18 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         ):
             """Handle command line execution."""
 
-            def read_optional_json(path: Optional[str]) -> Optional[Dict[str, Any]]:
+            def read_optional_json(
+                path: Optional[str], warn_missing: bool = False
+            ) -> Optional[Dict[str, Any]]:
                 """If json filepath is specified, read it from disk."""
                 if not path:
                     return None
-                return json.loads(Path(path).read_text())
+                if Path(path).exists():
+                    return json.loads(Path(path).read_text())
+                elif warn_missing:
+                    cls.logger.warning(f"File at '{path}' was not found.")
+                else:
+                    raise FileExistsError(f"File at '{path}' was not found.")
 
             def get_env_var_config() -> Dict[str, Any]:
                 """Return any config specified in environment variables.
@@ -142,7 +149,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
             if version:
                 cls.print_version()
                 return
-            config_dict = read_optional_json(config) or {}
+            config_dict = read_optional_json(config, warn_missing=True) or {}
             config_dict.update(get_env_var_config())
             state_dict = read_optional_json(state)
             catalog_dict = read_optional_json(catalog)
