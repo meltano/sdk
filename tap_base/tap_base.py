@@ -117,7 +117,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
 
     # Command Line Execution
 
-    @staticmethod
+    @classmethod
     def build_cli(cls):
         @click.option("--version", is_flag=True)
         @click.option("--discover", is_flag=True)
@@ -153,4 +153,4 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         return cli
 
 
-cli = TapBase.build_cli(TapBase)
+cli = TapBase.build_cli()

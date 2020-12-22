@@ -28,4 +28,4 @@ class SampleTapSnowflake(TapBase):
 # CLI Execution:
 
 
-cli = SampleTapSnowflake.build_cli(SampleTapSnowflake)
+cli = SampleTapSnowflake.build_cli()

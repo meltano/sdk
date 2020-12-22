@@ -33,4 +33,4 @@ class SampleTapCountries(TapBase):
 
 # CLI Execution:
 
-cli = SampleTapCountries.build_cli(SampleTapCountries)
+cli = SampleTapCountries.build_cli()

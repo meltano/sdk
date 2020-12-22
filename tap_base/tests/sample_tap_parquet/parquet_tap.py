@@ -43,4 +43,4 @@ class SampleTapParquet(TapBase):
 # CLI Execution:
 
 
-cli = SampleTapParquet.build_cli(SampleTapParquet)
+cli = SampleTapParquet.build_cli()

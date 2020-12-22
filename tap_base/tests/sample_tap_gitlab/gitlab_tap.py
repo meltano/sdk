@@ -37,4 +37,4 @@ class SampleTapGitlab(TapBase):
 
 # CLI Execution:
 
-cli = SampleTapGitlab.build_cli(SampleTapGitlab)
+cli = SampleTapGitlab.build_cli()
