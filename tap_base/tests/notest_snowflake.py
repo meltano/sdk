@@ -5,10 +5,10 @@ from pathlib import Path
 
 from tap_base.tests.sample_tap_snowflake.snowflake_tap import SampleTapSnowflake
 
-CONFIG_FILE = "tap_base/tests/sample_tap_snowflake/tests/.secrets/tap-snowflake.json"
+CONFIG_FILE = "tap_base/tests/.secrets/snowflake-config.json"
 
 SAMPLE_CATALOG_FILEPATH = (
-    "tap_base/tests/sample_tap_snowflake/tests/catalog.sample.json"
+    "tap_base/tests/sample_tap_snowflake/snowflake-catalog.sample.json"
 )
 
 

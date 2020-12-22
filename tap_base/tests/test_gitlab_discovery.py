@@ -2,7 +2,7 @@
 
 from tap_base.tests.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 
-CONFIG_FILE = "tap_base/tests/sample_tap_gitlab/tests/.secrets/tap-gitlab.json"
+CONFIG_FILE = "tap_base/tests/.secrets/gitlab-config.json"
 
 
 def test_gitlab_tap_discovery():

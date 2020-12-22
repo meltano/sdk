@@ -8,7 +8,7 @@ from tap_base.tests.sample_tap_countries.countries_tap import SampleTapCountries
 COUNTER = 0
 
 
-CONFIG_FILE = "tap_base/tests/sample_tap_countries/tests/.secrets/tap-countries.json"
+CONFIG_FILE = "tap_base/tests/.secrets/countries-config.json"
 SAMPLE_CONFIG_BAD = {"not": "correct"}
 
 

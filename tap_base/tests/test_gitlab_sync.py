@@ -5,7 +5,7 @@ from tap_base.tests.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 COUNTER = 0
 
 
-CONFIG_FILE = "tap_base/tests/sample_tap_gitlab/tests/.secrets/tap-gitlab.json"
+CONFIG_FILE = "tap_base/tests/.secrets/gitlab-config.json"
 SAMPLE_CONFIG_BAD = {"not": "correct"}
 
 
