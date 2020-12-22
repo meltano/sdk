@@ -96,9 +96,10 @@ class PluginBase(metaclass=abc.ABCMeta):
             )
         return warnings, errors
 
-    def print_version(self) -> None:
+    @classmethod
+    def print_version(cls) -> None:
         """Print help text for the tap."""
-        print(f"{self.name} v{self.plugin_version}")
+        print(f"{cls.name} v{cls.plugin_version}")
 
     @classmethod
     @click.command()
