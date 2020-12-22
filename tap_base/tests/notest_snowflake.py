@@ -8,7 +8,7 @@ from tap_base.samples.sample_tap_snowflake.snowflake_tap import SampleTapSnowfla
 CONFIG_FILE = "tap_base/tests/.secrets/snowflake-config.json"
 
 SAMPLE_CATALOG_FILEPATH = (
-    "tap_base/tests/sample_tap_snowflake/snowflake-catalog.sample.json"
+    "tap_base/samples/sample_tap_snowflake/snowflake-catalog.sample.json"
 )
 
 

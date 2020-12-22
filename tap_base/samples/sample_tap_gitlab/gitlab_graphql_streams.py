@@ -16,7 +16,7 @@ SITE_URL = "https://gitlab.com/graphql"
 
 URLArgMap = Dict[str, Union[str, bool, int, datetime]]
 
-SCHEMAS_DIR = Path("./tap_base/tests/sample_tap_gitlab/schemas")
+SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_gitlab/schemas")
 
 
 class GitlabGraphQLStreamBase(RESTStreamBase):

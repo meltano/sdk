@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Union
 
 from tap_base.streams.rest import RESTStreamBase, URLArgMap
 
-SCHEMAS_DIR = Path("./tap_base/tests/sample_tap_gitlab/schemas")
+SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_gitlab/schemas")
 
 
 class GitlabStream(RESTStreamBase):

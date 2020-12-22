@@ -12,7 +12,7 @@ from typing import Any, Dict
 
 from tap_base.streams.graphql import GraphQLStreamBase
 
-SCHEMAS_DIR = Path("./tap_base/tests/sample_tap_countries/schemas")
+SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_countries/schemas")
 
 
 class CountriesAPIStreamBase(GraphQLStreamBase, metaclass=abc.ABCMeta):
@@ -28,7 +28,7 @@ class CountriesAPIStreamBase(GraphQLStreamBase, metaclass=abc.ABCMeta):
 class CountriesStream(CountriesAPIStreamBase):
 
     name = "countries"
-    schema_filepath = "./tap_base/tests/sample_tap_countries/schemas/countries.json"
+    schema_filepath = "./tap_base/samples/sample_tap_countries/schemas/countries.json"
     graphql_query = """
         countries {
             code
