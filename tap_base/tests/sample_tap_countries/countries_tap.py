@@ -8,8 +8,6 @@ See the online explorer and query builder here:
 
 from typing import List
 
-import click
-
 from tap_base.tap_base import TapBase
 from tap_base.tests.sample_tap_countries.countries_streams import (
     CountriesStream,
@@ -35,19 +33,4 @@ class SampleTapCountries(TapBase):
 
 # CLI Execution:
 
-
-@click.option("--version", is_flag=True)
-@click.option("--discover", is_flag=True)
-@click.option("--config")
-@click.option("--catalog")
-@click.command()
-def cli(
-    discover: bool = False,
-    config: str = None,
-    catalog: str = None,
-    version: bool = False,
-):
-    """Handle CLI Execution."""
-    SampleTapCountries.cli(
-        version=version, discover=discover, config=config, catalog=catalog
-    )
+cli = SampleTapCountries.build_cli(SampleTapCountries)

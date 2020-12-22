@@ -23,3 +23,9 @@ class SampleTapSnowflake(TapBase):
         stream: SampleTapSnowflakeStream
         for stream in SampleTapSnowflakeStream.from_discovery(config=self._config):
             self._streams[stream.name] = stream
+
+
+# CLI Execution:
+
+
+cli = SampleTapSnowflake.build_cli(SampleTapSnowflake)

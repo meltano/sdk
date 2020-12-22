@@ -117,44 +117,40 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
 
     # Command Line Execution
 
-    @classmethod
-    def cli(
-        cls,
-        version: bool = False,
-        discover: bool = False,
-        config: str = None,
-        state: str = None,
-        catalog: str = None,
-    ):
-        """Handle command line execution."""
+    @staticmethod
+    def build_cli(cls):
+        @click.option("--version", is_flag=True)
+        @click.option("--discover", is_flag=True)
+        @click.option("--config")
+        @click.option("--catalog")
+        @click.command()
+        def cli(
+            version: bool = False,
+            discover: bool = False,
+            config: str = None,
+            state: str = None,
+            catalog: str = None,
+        ):
+            """Handle command line execution."""
 
-        def read_optional_json(path: Optional[str]) -> Optional[Dict[str, Any]]:
-            if not path:
-                return None
-            return json.loads(Path(path).read_text())
+            def read_optional_json(path: Optional[str]) -> Optional[Dict[str, Any]]:
+                if not path:
+                    return None
+                return json.loads(Path(path).read_text())
 
-        if version:
-            cls.print_version()
-            return
-        config_dict = read_optional_json(config)
-        state_dict = read_optional_json(state)
-        catalog_dict = read_optional_json(catalog)
-        tap = cls(config=config_dict, state=state_dict, catalog=catalog_dict)
-        if discover:
-            tap.run_discovery()
-        else:
-            tap.sync_all()
+            if version:
+                cls.print_version()
+                return
+            config_dict = read_optional_json(config)
+            state_dict = read_optional_json(state)
+            catalog_dict = read_optional_json(catalog)
+            tap = cls(config=config_dict, state=state_dict, catalog=catalog_dict)
+            if discover:
+                tap.run_discovery()
+            else:
+                tap.sync_all()
+
+        return cli
 
 
-@click.option("--version", is_flag=True)
-@click.option("--discover", is_flag=True)
-@click.option("--config")
-@click.option("--catalog")
-@click.command()
-def cli(
-    discover: bool = False,
-    config: str = None,
-    catalog: str = None,
-    version: bool = False,
-):
-    TapBase.cli(version=version, discover=discover, config=config, catalog=catalog)
+cli = TapBase.build_cli(TapBase)

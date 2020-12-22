@@ -1,7 +1,5 @@
 """Sample tap test for tap-gitlab."""
 
-import click
-
 from tap_base.tap_base import TapBase
 from tap_base.tests.sample_tap_gitlab.gitlab_rest_streams import (
     ProjectsStream,
@@ -38,21 +36,5 @@ class SampleTapGitlab(TapBase):
 
 
 # CLI Execution:
-# TODO: Move entirely to base class (https://gitlab.com/meltano/tap-base/-/issues/8)
 
-
-@click.option("--version", is_flag=True)
-@click.option("--discover", is_flag=True)
-@click.option("--config")
-@click.option("--catalog")
-@click.command()
-def cli(
-    discover: bool = False,
-    config: str = None,
-    catalog: str = None,
-    version: bool = False,
-):
-    """Handle CLI Execution."""
-    SampleTapGitlab.cli(
-        version=version, discover=discover, config=config, catalog=catalog
-    )
+cli = SampleTapGitlab.build_cli(SampleTapGitlab)
