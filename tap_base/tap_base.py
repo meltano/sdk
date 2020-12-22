@@ -79,7 +79,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
 
     # Sync methods
 
-    def sync_one(self, stream_name: str, /):
+    def sync_one(self, stream_name: str):
         """Sync a single stream."""
         if stream_name not in self.streams:
             raise ValueError(
