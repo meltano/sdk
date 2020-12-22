@@ -4,7 +4,9 @@ from typing import List
 from singer.schema import Schema
 
 from tap_base import TapBase, TapStreamBase
-from tap_base.tests.sample_tap_parquet.parquet_tap_stream import SampleTapParquetStream
+from tap_base.samples.sample_tap_parquet.parquet_tap_stream import (
+    SampleTapParquetStream,
+)
 
 
 ACCEPTED_CONFIG_OPTIONS = ["filepath"]

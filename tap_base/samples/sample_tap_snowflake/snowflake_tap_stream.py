@@ -6,7 +6,7 @@ from snowflake import connector
 from tap_base.streams import DatabaseStreamBase
 
 
-from tap_base.tests.sample_tap_snowflake.snowflake_config import PLUGIN_NAME
+from tap_base.samples.sample_tap_snowflake.snowflake_config import PLUGIN_NAME
 
 DEFAULT_BATCH_SIZE = 10000
 

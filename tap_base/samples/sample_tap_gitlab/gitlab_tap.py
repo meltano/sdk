@@ -2,13 +2,13 @@
 
 from typing import List
 from tap_base import TapBase, TapStreamBase
-from tap_base.tests.sample_tap_gitlab.gitlab_rest_streams import (
+from tap_base.samples.sample_tap_gitlab.gitlab_rest_streams import (
     ProjectsStream,
     ReleasesStream,
     IssuesStream,
     CommitsStream,
 )
-from tap_base.tests.sample_tap_gitlab.gitlab_graphql_streams import (
+from tap_base.samples.sample_tap_gitlab.gitlab_graphql_streams import (
     GraphQLCurrentUserStream,
 )
 

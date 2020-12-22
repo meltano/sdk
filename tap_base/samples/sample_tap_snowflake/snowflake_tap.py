@@ -2,10 +2,10 @@
 
 from typing import List
 from tap_base import TapBase, TapStreamBase
-from tap_base.tests.sample_tap_snowflake.snowflake_tap_stream import (
+from tap_base.samples.sample_tap_snowflake.snowflake_tap_stream import (
     SampleTapSnowflakeStream,
 )
-from tap_base.tests.sample_tap_snowflake.snowflake_config import (
+from tap_base.samples.sample_tap_snowflake.snowflake_config import (
     PLUGIN_NAME,
     ACCEPTED_CONFIG_OPTIONS,
     REQUIRED_CONFIG_SETS,
