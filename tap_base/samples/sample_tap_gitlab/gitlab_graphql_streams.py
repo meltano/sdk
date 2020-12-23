@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Dict, Union
 
 from jinja2 import Template
+import requests
 
 from tap_base.authenticators import SimpleAuthenticator
 from tap_base.streams.rest import RESTStreamBase
@@ -30,6 +31,34 @@ class GitlabGraphQLStreamBase(RESTStreamBase):
         """Return an authenticator for GraphQL API requests."""
         return SimpleAuthenticator(
             auth_header={"Authorization": f"token {self.get_config('auth_token')}"}
+        )
+
+    def prepare_request(
+        self, url, params=None, method="POST", json=None
+    ) -> requests.PreparedRequest:
+        """Prepare GraphQL API request."""
+        if method != "POST":
+            raise ValueError("Argument 'method' must be 'POST' for GraphQL streams.")
+        if not self.dimensions:
+            raise ValueError("Missing value for 'dimensions'.")
+        if not self.metrics:
+            raise ValueError("Missing value for 'metrics'.")
+        json_msg = {
+            "reportRequests": [
+                {
+                    "viewId": self.get_config("view_id"),
+                    "dimensions": self.dimensions,
+                    "metrics": self.metrics,
+                    # "orderBys": [
+                    #     {"fieldName": "ga:sessions", "sortOrder": "DESCENDING"},
+                    #     {"fieldName": "ga:pageviews", "sortOrder": "DESCENDING"},
+                    # ],
+                }
+            ]
+        }
+        self.logger.info(f"Attempting query:\n{json_msg}")
+        return super().prepare_request(
+            url=url, params=params, method="batchGet", json=json_msg
         )
 
 
