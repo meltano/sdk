@@ -16,7 +16,10 @@ SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_google_analytics/schemas")
 
 
 class GoogleJWTAuthenticator(OAuthJWTAuthenticator):
-    """Class responsible for Google Auth."""
+    """Class responsible for Google Auth via JWT and OAuth.
+
+    (Currently this class simply inherits from the base class.)
+    """
 
 
 class SampleGoogleAnalyticsStream(RESTStreamBase):
