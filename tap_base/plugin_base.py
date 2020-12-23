@@ -5,6 +5,7 @@ import json
 import logging
 import os
 from jsonschema import validate
+from jsonschema import ValidationError, SchemaError
 from pathlib import Path, PurePath
 
 from tap_base.helpers import classproperty, is_common_secret_key, SecretString
@@ -151,7 +152,10 @@ class PluginBase(metaclass=abc.ABCMeta):
                     f"{str(missing)}"
                 )
         if self.config_jsonschema:
-            validate(self._config, self.config_jsonschema)
+            try:
+                validate(self._config, self.config_jsonschema)
+            except (ValidationError, SchemaError) as ex:
+                errors.append(str(ex))
         if raise_errors and errors:
             raise RuntimeError(f"Config validation failed: {f'; '.join(errors)}")
         if warnings_as_errors and raise_errors and warnings:
