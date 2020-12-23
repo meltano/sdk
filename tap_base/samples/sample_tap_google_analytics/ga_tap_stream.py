@@ -1,7 +1,8 @@
 """Sample tap stream test for tap-google-analytics."""
 
 from pathlib import Path
-from typing import Dict, Iterable, Optional
+
+import requests
 
 from tap_base.streams import RESTStreamBase
 from tap_base.authenticators import OAuthJWTAuthenticator
@@ -22,15 +23,48 @@ class SampleGoogleAnalyticsStream(RESTStreamBase):
 
     tap_name = PLUGIN_NAME
     rest_method = "POST"
-    # site_url_base = "https://analyticsreporting.googleapis.com/v4/reports:batchGet"
-    site_url_base = "https://analyticsreporting.googleapis.com/v4/reports"
-    url_suffix = ""
+    site_url_base = "https://analyticsreporting.googleapis.com/v4"
+    url_suffix = "/reports:batchGet"
 
     def get_authenticator(self) -> OAuthJWTAuthenticator:
         return GoogleJWTAuthenticator(
             config=self._config,
             auth_endpoint=GOOGLE_OAUTH_ENDPOINT,
             oauth_scopes=GA_OAUTH_SCOPES,
+        )
+
+    def prepare_request(
+        self, url, params=None, method="POST", json=None
+    ) -> requests.PreparedRequest:
+        """Prepare GraphQL API request."""
+        if method != "POST":
+            raise ValueError("Argument 'method' must be 'POST' for GraphQL streams.")
+        if not self.dimensions:
+            raise ValueError("Missing value for 'dimensions'.")
+        if not self.metrics:
+            raise ValueError("Missing value for 'metrics'.")
+        json_msg = {
+            "reportRequests": [
+                {
+                    "viewId": self.get_config("view_id"),
+                    "metrics": [{"expression": m} for m in self.metrics],
+                    "dimensions": [{"name": d} for d in self.dimensions],
+                    # "dateRanges": [
+                    #     {
+                    #         "startDate": report_date_string,
+                    #         "endDate": report_date_string
+                    #     }
+                    # ],
+                    # "orderBys": [
+                    #     {"fieldName": "ga:sessions", "sortOrder": "DESCENDING"},
+                    #     {"fieldName": "ga:pageviews", "sortOrder": "DESCENDING"},
+                    # ],
+                }
+            ]
+        }
+        self.logger.info(f"Attempting query:\n{json_msg}")
+        return super().prepare_request(
+            url=url, params=params, method=method, json=json_msg
         )
 
 

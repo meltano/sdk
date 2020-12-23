@@ -58,7 +58,7 @@ class GitlabGraphQLStreamBase(RESTStreamBase):
         }
         self.logger.info(f"Attempting query:\n{json_msg}")
         return super().prepare_request(
-            url=url, params=params, method="batchGet", json=json_msg
+            url=url, params=params, method="POST", json=json_msg
         )
 
 
