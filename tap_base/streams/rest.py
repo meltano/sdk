@@ -55,10 +55,6 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
             result = str(val)
         return result
 
-    def get_query_params(self) -> Union[List[URLArgMap], URLArgMap]:
-        """By default, return all config values which are not secrets."""
-        return [{k: v for k, v in self._config if not isinstance(v, SecretString)}]
-
     def get_urls(self) -> List[str]:
         url_pattern = "".join([self.site_url_base, self.url_suffix or ""])
         result: List[str] = []
@@ -92,25 +88,20 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         and 400 <= e.response.status_code < 500,  # pylint: disable=line-too-long
         factor=2,
     )
-    def request_get_with_backoff(self, url, params=None) -> requests.Response:
+    def request_with_backoff(self, url, params=None) -> requests.Response:
         params = params or {}
-
         request = self.prepare_request(url=url, params=params)
         response = self.requests_session.send(request)
-
         if response.status_code in [401, 403]:
             self.logger.info("Skipping request to {}".format(request.url))
-            self.logger.info(
-                "Reason: {} - {}".format(response.status_code, response.content)
-            )
+            self.logger.info(f"Reason: {response.status_code} - {response.content}")
             raise RuntimeError(
                 "Requested resource was unauthorized, forbidden, or not found."
             )
         elif response.status_code >= 400:
             raise RuntimeError(
-                "Error making request to API: GET {} [{} - {}]".format(
-                    request.url, response.status_code, response.content
-                )
+                f"Error making request to API: GET {request.url} "
+                f"[{response.status_code} - {response.content}]"
             )
         logging.debug("Response received successfully.")
         return response
@@ -140,13 +131,10 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         for url in self.get_urls():
             while next_page:
                 params["page"] = int(next_page)
-                resp = self.request_get_with_backoff(url, params)
+                resp = self.request_with_backoff(url, params)
                 for row in self.parse_response(resp):
                     yield row
                 next_page = self.get_next_page(resp)
-
-    def get_next_page(self, response):
-        return response.headers.get("X-Next-Page", None)
 
     def parse_response(self, response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows."""
@@ -168,3 +156,6 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     def get_auth_header(self) -> Dict[str, Any]:
         """Return an authorization header for REST API requests."""
         pass
+
+    def get_next_page(self, response):
+        return response.headers.get("X-Next-Page", None)
