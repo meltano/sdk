@@ -68,10 +68,10 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
                 search_text = "".join(["{", k, "}"])
                 if search_text in url:
                     url = url.replace(search_text, self.url_encode(v))
-            self.logger.info(
-                f"Tap '{self.name}' generated URL: {url} from param list {params} "
-                f"and url_suffix '{self.url_suffix}'"
-            )
+            # self.logger.info(
+            #     f"Tap '{self.name}' generated URL: {url} from param list {params} "
+            #     f"and url_suffix '{self.url_suffix}'"
+            # )
             result.append(url)
         return result
 
@@ -101,7 +101,7 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
             )
         elif response.status_code >= 400:
             raise RuntimeError(
-                f"Error making request to API: GET {request.url} "
+                f"Error making request to API: {request.url} "
                 f"[{response.status_code} - {response.content}]".replace("\\n", "\n")
             )
         logging.debug("Response received successfully.")

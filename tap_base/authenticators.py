@@ -1,6 +1,7 @@
 """Classes to assist in authenticating to APIs."""
 
 import abc
+import logging
 import jwt
 import math
 import requests
@@ -18,6 +19,10 @@ class APIAuthenticatorBase(object):
 
     def __init__(self, config: Optional[dict] = None):
         self._config = config
+
+    @property
+    def logger(self):
+        return logging.getLogger(type(self).__name__)
 
     @abc.abstractproperty
     def auth_header(self) -> dict:
@@ -132,9 +137,15 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": jwt.encode(auth_request_body, private_key, "RS256"),
         }
+        # self.logger.debug(
+        #     f"Sending JWT token request with body {auth_request_body} "
+        #     f"and payload {payload}"
+        # )
         token_response = requests.post(self.auth_endpoint, data=payload)
+        # self.logger.debug(f"Received JWT request response: {token_response}")
         token_response.raise_for_status()
         token_json = token_response.json()
         self.access_token = token_json["access_token"]
         self.expires_in = token_json["expires_in"]
+        # self.logger.debug(f"Received JWT token: {token_json}")
         self.last_refreshed = request_time
