@@ -1,5 +1,8 @@
 """Helper functions, helper classes, and decorators."""
 
+import pytz
+
+from datetime import datetime
 from typing import Union
 
 
@@ -62,3 +65,7 @@ class classproperty(property):
 
     def __delete__(self, obj):
         super(classproperty, self).__delete__(type(obj))
+
+
+def utc_now():
+    return datetime.utcnow().replace(tzinfo=pytz.UTC)
