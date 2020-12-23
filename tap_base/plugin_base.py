@@ -4,7 +4,9 @@ import abc
 import json
 import logging
 import os
+from jsonschema import validate
 from pathlib import Path, PurePath
+
 from tap_base.helpers import classproperty, is_common_secret_key, SecretString
 from typing import Dict, List, Optional, Type, Tuple, Any, Union
 
@@ -20,6 +22,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     accepted_config_keys: List[str] = []
     protected_config_keys: List[str] = []
     required_config_options: Optional[List[List[str]]] = [[]]
+    config_jsonschema: Optional[dict] = None
 
     __always_accepted_config_keys: List[str] = ["start_date", "end_date"]
 
@@ -147,6 +150,8 @@ class PluginBase(metaclass=abc.ABCMeta):
                     "Please complete one or more of the following sets: "
                     f"{str(missing)}"
                 )
+        if self.config_jsonschema:
+            validate(self._config, self.config_jsonschema)
         if raise_errors and errors:
             raise RuntimeError(f"Config validation failed: {f'; '.join(errors)}")
         if warnings_as_errors and raise_errors and warnings:
