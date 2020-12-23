@@ -12,7 +12,6 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 from singer.schema import Schema
 
 from tap_base.streams.core import TapStreamBase
-from tap_base.helpers import SecretString
 
 URLArgMap = Dict[str, Union[str, bool, int, datetime]]
 
