@@ -2,9 +2,7 @@
 
 import abc
 import jinja2
-from json import dumps
 import requests
-import logging
 
 from datetime import datetime
 from typing import Any, Dict, Iterable, Optional, Union
@@ -24,26 +22,10 @@ class GraphQLStreamBase(RESTStreamBase, metaclass=abc.ABCMeta):
     graphql_query: Optional[Union[str, jinja2.Template]] = None
     url_suffix = ""
 
-    def __init__(
-        self,
-        config: dict,
-        state: Dict[str, Any],
-        name: Optional[str] = None,
-        schema: Optional[Union[Dict[str, Any], Schema]] = None,
-    ):
-        super().__init__(
-            name=name,
-            schema=schema,
-            state=state,
-            config=config,
-            url_suffix="",  # use the base URL directly for GraphQL sources.
-        )
-        self._requests_session = requests.Session()
-
     def prepare_request(
         self, url, params=None, method="POST", json=None
     ) -> requests.PreparedRequest:
-        self.logger.info("Preparing GraphQL API request...")
+        """Prepare GraphQL API request."""
         if method != "POST":
             raise ValueError("Argument 'method' must be 'POST' for GraphQL streams.")
         if not self.graphql_query:
@@ -52,7 +34,7 @@ class GraphQLStreamBase(RESTStreamBase, metaclass=abc.ABCMeta):
             query = self.graphql_query.render(**self.template_values)
         else:
             query = self.graphql_query
-        query = "query {\n    " + ("\n    ".join(query.splitlines())) + "}"
+        query = "query { " + (" ".join([l.strip() for l in query.splitlines()])) + " }"
         self.logger.info(f"Attempting query:\n{query}")
         return super().prepare_request(
             url=url, params=params, method="POST", json={"query": query}

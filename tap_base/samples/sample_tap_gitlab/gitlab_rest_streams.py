@@ -1,11 +1,13 @@
 """Sample tap stream test for tap-gitlab."""
 
 from pathlib import Path
+from tap_base.authenticators import SimpleAuthenticator
 from typing import Any, Dict, List, Union
 
 from tap_base.streams.rest import RESTStreamBase, URLArgMap
+from tap_base.helpers import listify
 
-SCHEMAS_DIR = Path("./tap_base/tests/sample_tap_gitlab/schemas")
+SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_gitlab/schemas")
 
 
 class GitlabStream(RESTStreamBase):
@@ -14,21 +16,24 @@ class GitlabStream(RESTStreamBase):
     tap_name = "sample-tap-gitlab"
     site_url_base = "https://gitlab.com/api/v4"
 
-    def get_auth_header(self) -> Dict[str, Any]:
-        """Return an authorization header for REST API requests."""
-        result = {"Private-Token": self.get_config("auth_token")}
+    def get_authenticator(self) -> SimpleAuthenticator:
+        """Return an authenticator for REST API requests."""
+        auth_header = {"Private-Token": self.get_config("auth_token")}
         if self.get_config("user_agent"):
-            result["User-Agent"] = self.get_config("user_agent")
-        return result
+            auth_header["User-Agent"] = self.get_config("user_agent")
+        return SimpleAuthenticator(auth_header=auth_header)
 
     def get_query_params(self) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
+        """Expose any needed config values into the URL parameterization process.
+
+        If a list of dictionaries is returned, one call will be made for each item
+        in the list.
+        """
+        if "{project_id}" not in self.url_suffix:
+            # No need to return multiple calls. Return the default dictionary.
+            return super().get_query_params()
         result: List[URLArgMap] = []
-        project_ids = self.get_config("project_ids")
-        if isinstance(project_ids, str):
-            id_list = project_ids.split(",")
-        else:
-            id_list = project_ids
-        for project_id in id_list:
+        for project_id in listify(self.get_config("project_ids")):
             result.append(
                 {"project_id": project_id, "start_date": self.get_config("start_date")}
             )

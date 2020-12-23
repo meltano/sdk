@@ -22,7 +22,7 @@ test:
   script:
     - source $(poetry env info --path)/bin/activate
     - poetry run pytest -k 'not snowflake'
-    - poetry run pytest -k 'snowflake'
+    # - poetry run pytest -k 'snowflake'
     # - tox -e py36,flake8
 
     # run:
