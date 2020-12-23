@@ -102,7 +102,7 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         elif response.status_code >= 400:
             raise RuntimeError(
                 f"Error making request to API: GET {request.url} "
-                f"[{response.status_code} - {response.content}]"
+                f"[{response.status_code} - {response.content}]".replace("\\n", "\n")
             )
         logging.debug("Response received successfully.")
         return response
@@ -120,11 +120,12 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         return request
 
     def request_paginated_get(self) -> Iterable[dict]:
-        params = {"page": 1, "per_page": self._page_size}
+        # params = {"page": 1, "per_page": self._page_size}
+        params = {}
         next_page = 1
         for url in self.get_urls():
             while next_page:
-                params["page"] = int(next_page)
+                # params["page"] = int(next_page)
                 resp = self.request_with_backoff(url, params)
                 for row in self.parse_response(resp):
                     yield row

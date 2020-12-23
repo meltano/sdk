@@ -96,14 +96,31 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
     """API Authenticator for OAuth 2.0 flows which utilize a JWT refresh token."""
 
     @property
-    def private_key(self) -> str:
+    def private_key(self) -> Optional[str]:
         return self.get_config("private_key")
+
+    @property
+    def private_key_passphrase(self) -> Optional[str]:
+        return self.get_config("private_key_passphrase", None)
 
     # Authentication and refresh
     def update_access_token(self):
         """Update `access_token` along with: `last_refreshed` and `expires_in`."""
         request_time = utc_now()
-        jwt_signing_key = jwt.jwk_from_pem(self.private_key)
+        # jwt_signing_key = jwt.jwk_from_pem(self.private_key)
+
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.backends import default_backend
+
+        if self.private_key_passphrase:
+            private_key = serialization.load_pem_private_key(
+                self.private_key,
+                password=self.private_key_passphrase,
+                backend=default_backend(),
+            )
+        else:
+            private_key = self.private_key
+
         auth_request_body = {
             "iss": self.client_id,
             "scope": self.oauth_scopes,
@@ -113,9 +130,9 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         }
         payload = {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
-            "assertion": jwt.JWT().encode(auth_request_body, jwt_signing_key, "RS256"),
+            "assertion": jwt.encode(auth_request_body, private_key, "RS256"),
         }
-        token_response = requests.post(self.auth_endpoint_url, data=payload)
+        token_response = requests.post(self.auth_endpoint, data=payload)
         token_response.raise_for_status()
         token_json = token_response.json()
         self.access_token = token_json["access_token"]

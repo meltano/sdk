@@ -85,7 +85,9 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         if hasattr(self, "schema_filepath") and self.schema_filepath:
             self.schema_filepath = Path(self.schema_filepath)
             if not self.schema_filepath.exists():
-                raise FileExistsError("Could not find schema file '{filepath}'.")
+                raise FileExistsError(
+                    f"Could not find schema file '{self.schema_filepath}'."
+                )
             self._schema = json.loads(self.schema_filepath.read_text())
         elif not schema:
             raise ValueError("Required parameter 'schema' not provided.")
@@ -108,7 +110,9 @@ class TapStreamBase(metaclass=abc.ABCMeta):
 
     def get_query_params(self) -> Union[List[dict], dict]:
         """By default, return all config values which are not secrets."""
-        return [{k: v for k, v in self._config if not isinstance(v, SecretString)}]
+        return [
+            {k: v for k, v in self._config.items() if not isinstance(v, SecretString)}
+        ]
 
     def get_query_params_list(self) -> List[dict]:
         """By default, return all config values which are not secrets."""
