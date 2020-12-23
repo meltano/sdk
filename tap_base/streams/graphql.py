@@ -2,9 +2,7 @@
 
 import abc
 import jinja2
-from json import dumps
 import requests
-import logging
 
 from datetime import datetime
 from typing import Any, Dict, Iterable, Optional, Union
@@ -52,7 +50,7 @@ class GraphQLStreamBase(RESTStreamBase, metaclass=abc.ABCMeta):
             query = self.graphql_query.render(**self.template_values)
         else:
             query = self.graphql_query
-        query = "query {\n    " + ("\n    ".join(query.splitlines())) + "}"
+        query = "query { " + (" ".join([l.strip() for l in query.splitlines()])) + " }"
         self.logger.info(f"Attempting query:\n{query}")
         return super().prepare_request(
             url=url, params=params, method="POST", json={"query": query}

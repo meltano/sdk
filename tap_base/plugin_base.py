@@ -9,11 +9,9 @@ from jsonschema import ValidationError, SchemaError
 from pathlib import Path, PurePath
 
 from tap_base.helpers import classproperty, is_common_secret_key, SecretString
-from typing import Dict, List, Optional, Type, Tuple, Any, Union
+from typing import Dict, List, Optional, Tuple, Any, Union
 
 import click
-
-from tap_base.streams.core import TapStreamBase
 
 
 class PluginBase(metaclass=abc.ABCMeta):

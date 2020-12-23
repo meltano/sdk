@@ -6,7 +6,7 @@ import datetime
 import json
 import logging
 import sys
-from tap_base.helpers import classproperty
+from tap_base.helpers import SecretString, classproperty
 import time
 from functools import lru_cache
 from os import PathLike
@@ -105,6 +105,10 @@ class TapStreamBase(metaclass=abc.ABCMeta):
     def get_config(self, config_key: str, default: Any = None) -> Any:
         """Return config value or a default value."""
         return self._config.get(config_key, default)
+
+    def get_query_params(self) -> Union[List[dict], dict]:
+        """By default, return all config values which are not secrets."""
+        return [{k: v for k, v in self._config if not isinstance(v, SecretString)}]
 
     def get_stream_version(self):
         """Get stream version from bookmark."""

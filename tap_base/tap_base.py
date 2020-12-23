@@ -6,8 +6,8 @@ import os
 
 from singer.catalog import Catalog
 
-from typing import Any, List, Optional, Type, Dict, Union
-from pathlib import Path, PurePath
+from typing import List, Optional, Type, Dict, Union
+from pathlib import PurePath
 
 import click
 
