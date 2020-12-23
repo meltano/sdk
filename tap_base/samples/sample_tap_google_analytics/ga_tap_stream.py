@@ -1,6 +1,7 @@
 """Sample tap stream test for tap-google-analytics."""
 
 from pathlib import Path
+from typing import Iterable
 
 import requests
 
@@ -36,13 +37,7 @@ class SampleGoogleAnalyticsStream(RESTStreamBase):
     def prepare_request(
         self, url, params=None, method="POST", json=None
     ) -> requests.PreparedRequest:
-        """Prepare GraphQL API request."""
-        if method != "POST":
-            raise ValueError("Argument 'method' must be 'POST' for GraphQL streams.")
-        if not self.dimensions:
-            raise ValueError("Missing value for 'dimensions'.")
-        if not self.metrics:
-            raise ValueError("Missing value for 'metrics'.")
+        """Prepare Google Analytics Report request."""
         json_msg = {
             "reportRequests": [
                 {
@@ -66,6 +61,18 @@ class SampleGoogleAnalyticsStream(RESTStreamBase):
         return super().prepare_request(
             url=url, params=params, method=method, json=json_msg
         )
+
+    def parse_response(self, response) -> Iterable[dict]:
+        self.logger.info(
+            f"Received raw Google Analytics query response: {response.json()}"
+        )
+        report_data = response.json().get("reports", [{}])[0].get("data")
+        if not report_data:
+            self.logger.info(
+                f"Received empty Google Analytics query response: {response.json()}"
+            )
+        for total in report_data["totals"]:
+            yield {"totals": total["values"]}
 
 
 class GASimpleSampleStream(SampleGoogleAnalyticsStream):

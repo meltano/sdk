@@ -380,6 +380,13 @@ class TapStreamBase(metaclass=abc.ABCMeta):
                 return True
         return False
 
+    @lru_cache()
+    def warn_unmapped_property(self, property_name: str):
+        self.logger.warning(
+            f"Property '{property_name}' was present in the result stream but "
+            "not found in catalog schema. Ignoring."
+        )
+
     # pylint: disable=too-many-branches
     def conform_record_data_types(
         self,
@@ -390,11 +397,16 @@ class TapStreamBase(metaclass=abc.ABCMeta):
             datetime.timezone.utc
         ),
     ) -> RecordMessage:
-        """Translate values in record dictionary to singer-compatible data types."""
+        """Translate values in record dictionary to singer-compatible data types.
+
+        Any property names not found in the schema catalog will be removed, and a
+        warning will be logged exactly once per unmapped property name.
+        """
         rec: Dict[str, Any] = {}
         for property_name, elem in row.items():
             property_schema = self.get_property_schema(property_name)
             if not property_schema:
+                self.warn_unmapped_property(property_name)
                 continue
             if isinstance(elem, datetime.datetime):
                 rec[property_name] = elem.isoformat() + "+00:00"
