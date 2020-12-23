@@ -3,7 +3,16 @@
 from typing import Union
 
 
-COMMON_SECRET_KEYS = ["db_password", "password", "access_key", "private_key"]
+COMMON_SECRET_KEYS = [
+    "db_password",
+    "password",
+    "access_key",
+    "private_key",
+    "client_id",
+    "client_secret",
+    "refresh_token",
+    "user_agent",
+]
 COMMON_SECRET_KEY_SUFFIXES = ["access_key_id"]
 
 
