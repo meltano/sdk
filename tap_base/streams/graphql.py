@@ -22,26 +22,10 @@ class GraphQLStreamBase(RESTStreamBase, metaclass=abc.ABCMeta):
     graphql_query: Optional[Union[str, jinja2.Template]] = None
     url_suffix = ""
 
-    def __init__(
-        self,
-        config: dict,
-        state: Dict[str, Any],
-        name: Optional[str] = None,
-        schema: Optional[Union[Dict[str, Any], Schema]] = None,
-    ):
-        super().__init__(
-            name=name,
-            schema=schema,
-            state=state,
-            config=config,
-            url_suffix="",  # use the base URL directly for GraphQL sources.
-        )
-        self._requests_session = requests.Session()
-
     def prepare_request(
         self, url, params=None, method="POST", json=None
     ) -> requests.PreparedRequest:
-        self.logger.info("Preparing GraphQL API request...")
+        """Prepare GraphQL API request."""
         if method != "POST":
             raise ValueError("Argument 'method' must be 'POST' for GraphQL streams.")
         if not self.graphql_query:

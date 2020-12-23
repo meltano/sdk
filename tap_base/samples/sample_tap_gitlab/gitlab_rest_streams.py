@@ -1,6 +1,7 @@
 """Sample tap stream test for tap-gitlab."""
 
 from pathlib import Path
+from tap_base.authenticators import SimpleAuthenticator
 from typing import Any, Dict, List, Union
 
 from tap_base.streams.rest import RESTStreamBase, URLArgMap
@@ -15,12 +16,12 @@ class GitlabStream(RESTStreamBase):
     tap_name = "sample-tap-gitlab"
     site_url_base = "https://gitlab.com/api/v4"
 
-    def get_auth_header(self) -> Dict[str, Any]:
-        """Return an authorization header for REST API requests."""
-        result = {"Private-Token": self.get_config("auth_token")}
+    def get_authenticator(self) -> SimpleAuthenticator:
+        """Return an authenticator for REST API requests."""
+        auth_header = {"Private-Token": self.get_config("auth_token")}
         if self.get_config("user_agent"):
-            result["User-Agent"] = self.get_config("user_agent")
-        return result
+            auth_header["User-Agent"] = self.get_config("user_agent")
+        return SimpleAuthenticator(auth_header=auth_header)
 
     def get_query_params(self) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
         """Expose any needed config values into the URL parameterization process.

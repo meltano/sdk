@@ -8,6 +8,7 @@ See the online explorer and query builder here:
 
 import abc
 from pathlib import Path
+from tap_base.authenticators import SimpleAuthenticator
 from typing import Any, Dict
 
 from tap_base.streams.graphql import GraphQLStreamBase
@@ -19,10 +20,7 @@ class CountriesAPIStreamBase(GraphQLStreamBase, metaclass=abc.ABCMeta):
     """Sample tap test for countries."""
 
     site_url_base = "https://countries.trevorblades.com/"
-
-    def get_auth_header(self) -> Dict[str, Any]:
-        """Return an authorization header for GraphQL request."""
-        return {}  # No auth required
+    authenticator = SimpleAuthenticator(auth_header={})  # No auth needed.
 
 
 class CountriesStream(CountriesAPIStreamBase):

@@ -1,13 +1,14 @@
 """Abstract base class for API-type streams."""
 
 import abc
+from tap_base.authenticators import APIAuthenticatorBase
 import backoff
 import logging
 import jinja2
 import requests
 
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
 from singer.schema import Schema
 
@@ -37,14 +38,18 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         name: Optional[str] = None,
         schema: Optional[Union[Dict[str, Any], Schema]] = None,
         url_suffix: Optional[str] = None,
+        authenticator: Optional[APIAuthenticatorBase] = None,
     ):
         super().__init__(
             name=name, schema=schema, state=state, config=config,
         )
         if url_suffix:
             self.url_suffix = url_suffix
+        if authenticator:
+            self.authenticator = authenticator
+        else:
+            self.authenticator = self.get_authenticator()
         self._requests_session = requests.Session()
-        self._cached_auth_header: Optional[dict] = None
 
     @staticmethod
     def url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
@@ -105,13 +110,11 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     def prepare_request(
         self, url, params=None, method="GET", json=None
     ) -> requests.PreparedRequest:
-        if not self._cached_auth_header:
-            self._cached_auth_header = self.get_auth_header()
         request = requests.Request(
             method=method,
             url=url,
             params=params,
-            headers=self._cached_auth_header,
+            headers=self.authenticator.auth_header,
             json=json,
         ).prepare()
         return request
@@ -143,10 +146,11 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
 
     # Abstract methods:
 
-    @abc.abstractmethod
-    def get_auth_header(self) -> Dict[str, Any]:
+    def get_authenticator(self) -> Optional[APIAuthenticatorBase]:
         """Return an authorization header for REST API requests."""
-        pass
+        if hasattr(self, "authenticator") and self.authenticator:
+            return self.authenticator
+        return None
 
     def get_next_page(self, response):
         return response.headers.get("X-Next-Page", None)

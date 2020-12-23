@@ -6,11 +6,13 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Union
-
-from tap_base.streams.rest import RESTStreamBase
+from typing import Dict, Union
 
 from jinja2 import Template
+
+from tap_base.authenticators import SimpleAuthenticator
+from tap_base.streams.rest import RESTStreamBase
+
 
 SITE_URL = "https://gitlab.com/graphql"
 
@@ -24,9 +26,11 @@ class GitlabGraphQLStreamBase(RESTStreamBase):
 
     site_url_base = SITE_URL
 
-    def get_auth_header(self) -> Dict[str, Any]:
-        """Return an authorization header for GraphQL API requests."""
-        return {"Authorization": f"token {self.get_config('auth_token')}"}
+    def get_authenticator(self) -> SimpleAuthenticator:
+        """Return an authenticator for GraphQL API requests."""
+        return SimpleAuthenticator(
+            auth_header={"Authorization": f"token {self.get_config('auth_token')}"}
+        )
 
 
 class GraphQLCurrentUserStream(GitlabGraphQLStreamBase):
