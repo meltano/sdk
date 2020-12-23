@@ -110,6 +110,13 @@ class TapStreamBase(metaclass=abc.ABCMeta):
         """By default, return all config values which are not secrets."""
         return [{k: v for k, v in self._config if not isinstance(v, SecretString)}]
 
+    def get_query_params_list(self) -> List[dict]:
+        """By default, return all config values which are not secrets."""
+        params = self.get_query_params()
+        if isinstance(params, list):
+            return params
+        return [params]
+
     def get_stream_version(self):
         """Get stream version from bookmark."""
         stream_version = singer.get_bookmark(

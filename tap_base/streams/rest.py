@@ -57,17 +57,14 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     def get_urls(self) -> List[str]:
         url_pattern = "".join([self.site_url_base, self.url_suffix or ""])
         result: List[str] = []
-        param_list = self.get_query_params()
-        if not isinstance(param_list, list):
-            param_list = [param_list]
-        for replacement_map in param_list:
+        for params in self.get_query_params_list():
             url = url_pattern
-            for k, v in replacement_map.items():
+            for k, v in params.items():
                 search_text = "".join(["{", k, "}"])
                 if search_text in url:
                     url = url.replace(search_text, self.url_encode(v))
             self.logger.info(
-                f"Tap '{self.name}' generated URL: {url} from param list {param_list} "
+                f"Tap '{self.name}' generated URL: {url} from param list {params} "
                 f"and url_suffix '{self.url_suffix}'"
             )
             result.append(url)
@@ -105,11 +102,6 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         logging.debug("Response received successfully.")
         return response
 
-    def render(self, input: Union[str, jinja2.Template]) -> str:
-        if isinstance(input, jinja2.Template):
-            return str(input.render(**self.template_values))
-        return str(input)
-
     def prepare_request(
         self, url, params=None, method="GET", json=None
     ) -> requests.PreparedRequest:
@@ -117,7 +109,7 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
             self._cached_auth_header = self.get_auth_header()
         request = requests.Request(
             method=method,
-            url=self.render(url),
+            url=url,
             params=params,
             headers=self._cached_auth_header,
             json=json,
