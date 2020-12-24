@@ -94,9 +94,12 @@ _Depending upon your implementation, you may also want to override one or more o
      `project_id` value.
    - If not provided, the user-provided config dictionary will automatically be scanned for possible
      query parameters.
-2. `post_process` method - (Optional.) This method gives us an opportunity to "clean up" the results prior
-   to returning them to the downstream tap - for instance: cleaning, renaming, or appending the list
-   of properties returned by the API.
+2. `get_request_payload` method - (Optional.) Override this method if your API requires you to use
+   submit a "POST" a query payload along with the request.
+   - This is not needed for REST APIs which use the HTTP GET method.
+3. `post_process` method - (Optional.) This method gives us an opportunity to "clean up" the results
+   prior to returning them to the downstream tap - for instance: cleaning, renaming, or appending
+   the list of properties returned by the API.
    - For our GitLab example, no cleansing was necessary and we passed along the result directly as
      received from the API endpoint.
 
