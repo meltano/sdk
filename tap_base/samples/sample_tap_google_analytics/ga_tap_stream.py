@@ -3,8 +3,6 @@
 from pathlib import Path
 from typing import Iterable, Optional
 
-import requests
-
 from tap_base.streams import RESTStreamBase
 from tap_base.authenticators import OAuthJWTAuthenticator
 

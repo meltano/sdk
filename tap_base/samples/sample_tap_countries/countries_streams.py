@@ -8,10 +8,11 @@ See the online explorer and query builder here:
 
 import abc
 from pathlib import Path
-from tap_base.authenticators import SimpleAuthenticator
-from typing import Any, Dict
 
+from tap_base.authenticators import SimpleAuthenticator
 from tap_base.streams.graphql import GraphQLStreamBase
+
+from tap_base.samples.sample_tap_countries.countries_globals import PLUGIN_NAME
 
 SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_countries/schemas")
 
@@ -19,6 +20,7 @@ SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_countries/schemas")
 class CountriesAPIStreamBase(GraphQLStreamBase, metaclass=abc.ABCMeta):
     """Sample tap test for countries."""
 
+    tap_name = PLUGIN_NAME
     site_url_base = "https://countries.trevorblades.com/"
     authenticator = SimpleAuthenticator(auth_header={})  # No auth needed.
 

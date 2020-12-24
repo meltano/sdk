@@ -13,12 +13,13 @@ from tap_base.samples.sample_tap_countries.countries_streams import (
     CountriesStream,
     ContinentsStream,
 )
+from tap_base.samples.sample_tap_countries.countries_globals import PLUGIN_NAME
 
 
 class SampleTapCountries(TapBase):
     """Sample tap for Countries GraphQL API."""
 
-    name: str = "sample-tap-countries"
+    name: str = PLUGIN_NAME
     accepted_config_keys: List[str] = []
     required_config_options = None
 

@@ -11,6 +11,12 @@ from tap_base.samples.sample_tap_gitlab.gitlab_rest_streams import (
 from tap_base.samples.sample_tap_gitlab.gitlab_graphql_streams import (
     GraphQLCurrentUserStream,
 )
+from tap_base.samples.sample_tap_gitlab.gitlab_globals import (
+    PLUGIN_NAME,
+    ACCEPTED_CONFIG_OPTIONS,
+    REQUIRED_CONFIG_SETS,
+)
+
 
 STREAM_TYPES = [
     ProjectsStream,
@@ -24,9 +30,9 @@ STREAM_TYPES = [
 class SampleTapGitlab(TapBase):
     """Sample tap for Gitlab."""
 
-    name: str = "sample-tap-gitlab"
-    accepted_config_keys = ["auth_token", "project_ids", "start_date"]
-    required_config_options = [["auth_token", "project_ids", "start_date"]]
+    name: str = PLUGIN_NAME
+    accepted_config_keys = ACCEPTED_CONFIG_OPTIONS
+    required_config_options = REQUIRED_CONFIG_SETS
 
     def discover_streams(self) -> List[TapStreamBase]:
         """Return a list of discovered streams."""

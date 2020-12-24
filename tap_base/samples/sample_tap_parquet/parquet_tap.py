@@ -7,16 +7,17 @@ from tap_base import TapBase, TapStreamBase
 from tap_base.samples.sample_tap_parquet.parquet_tap_stream import (
     SampleTapParquetStream,
 )
-
-
-ACCEPTED_CONFIG_OPTIONS = ["filepath"]
-REQUIRED_CONFIG_SETS = [["filepath"]]
+from tap_base.samples.sample_tap_parquet.parquet_globals import (
+    PLUGIN_NAME,
+    ACCEPTED_CONFIG_OPTIONS,
+    REQUIRED_CONFIG_SETS,
+)
 
 
 class SampleTapParquet(TapBase):
     """Sample tap for Parquet."""
 
-    name: str = "sample-tap-parquet"
+    name: str = PLUGIN_NAME
     accepted_config_keys = ACCEPTED_CONFIG_OPTIONS
     required_config_options = REQUIRED_CONFIG_SETS
     default_stream_class = SampleTapParquetStream

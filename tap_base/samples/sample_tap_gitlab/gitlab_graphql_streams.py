@@ -5,13 +5,14 @@
 """
 
 from datetime import datetime
+from jinja2 import Template
 from pathlib import Path
 from typing import Dict, Union
 
-from jinja2 import Template
-
 from tap_base.authenticators import SimpleAuthenticator
 from tap_base.streams import GraphQLStreamBase
+
+from tap_base.samples.sample_tap_google_analytics.ga_globals import PLUGIN_NAME
 
 
 SITE_URL = "https://gitlab.com/graphql"
@@ -24,6 +25,7 @@ SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_gitlab/schemas")
 class GitlabGraphQLStreamBase(GraphQLStreamBase):
     """Sample tap test for gitlab."""
 
+    tap_name = PLUGIN_NAME
     site_url_base = SITE_URL
 
     def get_authenticator(self) -> SimpleAuthenticator:
