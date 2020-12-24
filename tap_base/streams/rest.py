@@ -24,6 +24,7 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
 
     _page_size: int = DEFAULT_PAGE_SIZE
     _requests_session: Optional[requests.Session]
+    rest_method = "GET"
 
     @property
     @abc.abstractmethod
@@ -107,15 +108,21 @@ class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
         logging.debug("Response received successfully.")
         return response
 
+    def prepare_request_payload(self) -> Optional[dict]:
+        """Prepare the data payload for the REST API request."""
+        return None
+
     def prepare_request(
-        self, url, params=None, method="GET", json=None
+        self, url, params=None, method=None, json=None
     ) -> requests.PreparedRequest:
+        request_data = json or self.prepare_request_payload()
+        method = method or self.rest_method
         request = requests.Request(
             method=method,
             url=url,
             params=params,
             headers=self.authenticator.auth_header,
-            json=json,
+            json=request_data,
         ).prepare()
         return request
 

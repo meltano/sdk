@@ -27,17 +27,15 @@ class GitlabStream(RESTStreamBase):
         """Expose any needed config values into the URL parameterization process.
 
         If a list of dictionaries is returned, one call will be made for each item
-        in the list.
+        in the list. For GitLab, this is necessary when each call must reference a
+        specific `project_id`.
         """
         if "{project_id}" not in self.url_suffix:
-            # No need to return multiple calls. Return the default dictionary.
-            return super().get_query_params()
-        result: List[URLArgMap] = []
-        for project_id in listify(self.get_config("project_ids")):
-            result.append(
-                {"project_id": project_id, "start_date": self.get_config("start_date")}
-            )
-        return result
+            return super().get_query_params()  # Default behavior
+        return [
+            {"project_id": project_id, "start_date": self.get_config("start_date")}
+            for project_id in listify(self.get_config("project_ids"))
+        ]
 
 
 class ProjectsStream(GitlabStream):

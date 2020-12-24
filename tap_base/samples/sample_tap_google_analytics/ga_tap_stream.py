@@ -1,7 +1,7 @@
 """Sample tap stream test for tap-google-analytics."""
 
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Optional
 
 import requests
 
@@ -26,22 +26,20 @@ class SampleGoogleAnalyticsStream(RESTStreamBase):
     """Sample tap test for google-analytics."""
 
     tap_name = PLUGIN_NAME
-    rest_method = "POST"
     site_url_base = "https://analyticsreporting.googleapis.com/v4"
     url_suffix = "/reports:batchGet"
+    rest_method = "POST"
 
-    def get_authenticator(self) -> OAuthJWTAuthenticator:
+    def get_authenticator(self) -> GoogleJWTAuthenticator:
         return GoogleJWTAuthenticator(
             config=self._config,
             auth_endpoint=GOOGLE_OAUTH_ENDPOINT,
             oauth_scopes=GA_OAUTH_SCOPES,
         )
 
-    def prepare_request(
-        self, url, params=None, method="POST", json=None
-    ) -> requests.PreparedRequest:
-        """Prepare Google Analytics Report request."""
-        json_msg = {
+    def prepare_request_payload(self) -> Optional[dict]:
+        """Prepare the data payload for the REST API request."""
+        return {
             "reportRequests": [
                 {
                     "viewId": self.get_config("view_id"),
@@ -60,10 +58,6 @@ class SampleGoogleAnalyticsStream(RESTStreamBase):
                 }
             ]
         }
-        self.logger.info(f"Attempting query:\n{json_msg}")
-        return super().prepare_request(
-            url=url, params=params, method=method, json=json_msg
-        )
 
     def parse_response(self, response) -> Iterable[dict]:
         self.logger.info(

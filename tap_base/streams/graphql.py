@@ -21,24 +21,21 @@ class GraphQLStreamBase(RESTStreamBase, metaclass=abc.ABCMeta):
 
     graphql_query: Optional[Union[str, jinja2.Template]] = None
     url_suffix = ""
+    rest_method = "POST"
 
-    def prepare_request(
-        self, url, params=None, method="POST", json=None
-    ) -> requests.PreparedRequest:
-        """Prepare GraphQL API request."""
-        if method != "POST":
-            raise ValueError("Argument 'method' must be 'POST' for GraphQL streams.")
-        if not self.graphql_query:
-            raise ValueError("Missing value for 'graphql_query'.")
+    def prepare_request_payload(self) -> Optional[dict]:
+        """Prepare the data payload for the REST API request."""
         if isinstance(self.graphql_query, jinja2.Template):
             query = self.graphql_query.render(**self.template_values)
         else:
             query = self.graphql_query
-        query = "query { " + (" ".join([l.strip() for l in query.splitlines()])) + " }"
+        request_data = {
+            "query": "query { "
+            + (" ".join([l.strip() for l in query.splitlines()]))
+            + " }"
+        }
         self.logger.info(f"Attempting query:\n{query}")
-        return super().prepare_request(
-            url=url, params=params, method="POST", json={"query": query}
-        )
+        return request_data
 
     def parse_response(self, response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows."""
