@@ -14,7 +14,6 @@ COMMON_SECRET_KEYS = [
     "client_id",
     "client_secret",
     "refresh_token",
-    "user_agent",
     "access_token",
 ]
 COMMON_SECRET_KEY_SUFFIXES = ["access_key_id"]
