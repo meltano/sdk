@@ -5,14 +5,14 @@
 _Create with `tap-base` requires overriding just two classes:_
 
 1. The tap:
-    - `TapBase` - _The core base class for all taps. This class governs configuration, validation,
+    - `Tap` - _The core base class for all taps. This class governs configuration, validation,
       and stream discovery._
 2. The stream. For the stream base class, you have different options depending on the type of data
    source you are working with.
-    - `TapStreamBase` - _The **generic** base class for streams._
-    - `RESTStreamBase` - _The base class for **REST**-type streams._
-    - `GraphQLStreamBase` - _The base class for **GraphQL**-type streams._
-    - `DatabaseStreamBase` - _The base class for **database**-type streams - specifically those
+    - `Stream` - _The **generic** base class for streams._
+    - `RESTStream` - _The base class for **REST**-type streams._
+    - `GraphQLStream` - _The base class for **GraphQL**-type streams._
+    - `DatabaseStream` - _The base class for **database**-type streams - specifically those
       which support the SQL language._
 
 **Detailed Instructions:**
@@ -62,7 +62,7 @@ _Creating the stream class depends upon what type of tap you are creating._
 
 ### 'Generic' stream classes
 
-_Generic (hand-coded) streams inherit from the class `TapStreamBase`. To create a generic
+_Generic (hand-coded) streams inherit from the class `Stream`. To create a generic
 stream class, you only need to override a single method:_
 
 1. **`tap_name`** - The same name used in your tap class (for logging purposes).
@@ -75,7 +75,7 @@ stream class, you only need to override a single method:_
 
 ### 'REST' stream classes
 
-_REST streams inherit from the class `RESTStreamBase`. To create an REST API-based
+_REST streams inherit from the class `RESTStream`. To create an REST API-based
 stream class, you will override one class property and three methods:_
 
 1. **`tap_name`** - The same name used in your tap class (for logging purposes).
@@ -111,7 +111,7 @@ _Depending upon your implementation, you may also want to override one or more o
 
 ### 'GraphQL' stream classes
 
-_GraphQL streams inherit from the class `GraphQLStreamBase`. GraphQL streams are very similar toREST API-based streams, but instead of a `url_suffix`, you will override the GraphQL query text._
+_GraphQL streams inherit from the class `GraphQLStream`. GraphQL streams are very similar toREST API-based streams, but instead of a `url_suffix`, you will override the GraphQL query text._
 
 1. **`tap_name`** - The same name used in your tap class (for logging purposes).
 2. **`site_url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
@@ -140,7 +140,7 @@ _Depending upon your implementation, you may also want to override one or more o
 
 ### 'Database' stream classes
 
-_Database streams inherit from the class `DatabaseStreamBase`. To create a database
+_Database streams inherit from the class `DatabaseStream`. To create a database
 stream class, you will first override the `sql_query()` method. Depending upon how closely your
 source complies with standard `information_schema` conventions, you may also override between
 one and four class properties, in order to override specific metadata queries._

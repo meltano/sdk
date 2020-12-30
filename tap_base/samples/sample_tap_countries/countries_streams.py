@@ -10,14 +10,14 @@ import abc
 from pathlib import Path
 
 from tap_base.authenticators import SimpleAuthenticator
-from tap_base.streams.graphql import GraphQLStreamBase
+from tap_base.streams.graphql import GraphQLStream
 
 from tap_base.samples.sample_tap_countries.countries_globals import PLUGIN_NAME
 
 SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_countries/schemas")
 
 
-class CountriesAPIStreamBase(GraphQLStreamBase, metaclass=abc.ABCMeta):
+class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
     """Sample tap test for countries."""
 
     tap_name = PLUGIN_NAME
@@ -25,7 +25,7 @@ class CountriesAPIStreamBase(GraphQLStreamBase, metaclass=abc.ABCMeta):
     authenticator = SimpleAuthenticator(auth_header={})  # No auth needed.
 
 
-class CountriesStream(CountriesAPIStreamBase):
+class CountriesStream(CountriesAPIStream):
 
     name = "countries"
     schema_filepath = "./tap_base/samples/sample_tap_countries/schemas/countries.json"
@@ -50,7 +50,7 @@ class CountriesStream(CountriesAPIStreamBase):
         """
 
 
-class ContinentsStream(CountriesAPIStreamBase):
+class ContinentsStream(CountriesAPIStream):
 
     name = "continents"
     schema_filepath = SCHEMAS_DIR / "continents.json"

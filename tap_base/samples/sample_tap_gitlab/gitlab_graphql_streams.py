@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, Union
 
 from tap_base.authenticators import SimpleAuthenticator
-from tap_base.streams import GraphQLStreamBase
+from tap_base.streams import GraphQLStream
 
 from tap_base.samples.sample_tap_google_analytics.ga_globals import PLUGIN_NAME
 
@@ -22,7 +22,7 @@ URLArgMap = Dict[str, Union[str, bool, int, datetime]]
 SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_gitlab/schemas")
 
 
-class GitlabGraphQLStreamBase(GraphQLStreamBase):
+class GitlabGraphQLStream(GraphQLStream):
     """Sample tap test for gitlab."""
 
     tap_name = PLUGIN_NAME
@@ -35,7 +35,7 @@ class GitlabGraphQLStreamBase(GraphQLStreamBase):
         )
 
 
-class GraphQLCurrentUserStream(GitlabGraphQLStreamBase):
+class GraphQLCurrentUserStream(GitlabGraphQLStream):
 
     name = "currentuser"
     primary_keys = ["id"]
@@ -48,7 +48,7 @@ class GraphQLCurrentUserStream(GitlabGraphQLStreamBase):
         """
 
 
-class GraphQLProjectsStream(GitlabGraphQLStreamBase):
+class GraphQLProjectsStream(GitlabGraphQLStream):
 
     name = "projects"
     primary_keys = ["id"]

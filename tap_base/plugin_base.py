@@ -1,4 +1,4 @@
-"""Shared parent class for TapBase, TargetBase (future), and TransformBase (future)."""
+"""Shared parent class for Tap, Target (future), and Transform (future)."""
 
 import abc
 import json

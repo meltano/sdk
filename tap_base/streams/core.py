@@ -1,4 +1,4 @@
-"""TapStreamBase abstract class."""
+"""Stream abstract class."""
 
 import abc  # abstract base classes
 import copy
@@ -36,10 +36,10 @@ DEBUG_MODE = True
 STATE_MSG_FREQUENCY = 10 if DEBUG_MODE else 10000
 
 
-FactoryType = TypeVar("FactoryType", bound="TapStreamBase")
+FactoryType = TypeVar("FactoryType", bound="Stream")
 
 
-class TapStreamBase(metaclass=abc.ABCMeta):
+class Stream(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
     MAX_CONNECT_RETRIES = 0

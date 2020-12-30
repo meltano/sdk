@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import List
 
-from tap_base.tap_base import TapBase
+from tap_base.tap_base import Tap
 from tap_base.samples.sample_tap_google_analytics.ga_tap_stream import (
     GASimpleSampleStream,
     SampleGoogleAnalyticsStream,
@@ -19,7 +19,7 @@ REPORT_DEFS_FILE = "tap_base/samples/sample_tap_google_analytics/resources/defau
 REPORT_DEFS = json.loads(Path(REPORT_DEFS_FILE).read_text())
 
 
-class SampleTapGoogleAnalytics(TapBase):
+class SampleTapGoogleAnalytics(Tap):
     """Sample tap for GoogleAnalytics."""
 
     name: str = PLUGIN_NAME

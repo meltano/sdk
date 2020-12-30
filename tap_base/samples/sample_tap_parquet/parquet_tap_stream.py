@@ -4,12 +4,12 @@ from typing import Iterable
 
 import pyarrow.parquet as pq
 
-from tap_base.streams.core import TapStreamBase
+from tap_base.streams.core import Stream
 
 PLUGIN_NAME = "sample-tap-parquet"
 
 
-class SampleTapParquetStream(TapStreamBase):
+class SampleTapParquetStream(Stream):
     """Sample tap test for parquet."""
 
     tap_name = PLUGIN_NAME

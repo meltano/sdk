@@ -1,4 +1,4 @@
-"""TapBase abstract class."""
+"""Tap abstract class."""
 
 import abc
 import json
@@ -12,13 +12,13 @@ from pathlib import PurePath
 import click
 
 from tap_base.plugin_base import PluginBase
-from tap_base.streams.core import TapStreamBase
+from tap_base.streams.core import Stream
 
 
-class TapBase(PluginBase, metaclass=abc.ABCMeta):
+class Tap(PluginBase, metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    default_stream_class: Optional[Type[TapStreamBase]] = None
+    default_stream_class: Optional[Type[Stream]] = None
 
     # Constructor
 
@@ -29,7 +29,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         state: Union[PurePath, str, dict, None] = None,
     ) -> None:
         """Initialize the tap."""
-        self._streams: Dict[str, TapStreamBase] = {}
+        self._streams: Dict[str, Stream] = {}
         if isinstance(state, dict):
             state_dict = state
         else:
@@ -54,7 +54,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     # Class properties
 
     @property
-    def streams(self) -> Dict[str, TapStreamBase]:
+    def streams(self) -> Dict[str, Stream]:
         return self._streams
 
     @property
@@ -68,7 +68,7 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
     # Stream type detection:
 
     @classmethod
-    def get_stream_class(cls, stream_name: str) -> Type[TapStreamBase]:
+    def get_stream_class(cls, stream_name: str) -> Type[Stream]:
         if not cls.default_stream_class:
             raise ValueError(
                 "No stream class detected for '{cls.name}' stream '{stream_name}'"
@@ -141,19 +141,19 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
 
     def load_catalog_streams(
         self, catalog: dict, state: dict, config: dict
-    ) -> List[TapStreamBase]:
+    ) -> List[Stream]:
         """Return a list of streams from the provided catalog."""
-        result: List[TapStreamBase] = []
+        result: List[Stream] = []
         stream_entries: List[Dict] = catalog["streams"]
         for stream_entry in stream_entries:
             stream_name = stream_entry["tap_stream_id"]
-            new_stream: TapStreamBase = self.get_stream_class(
-                stream_name
-            ).from_stream_dict(stream_dict=stream_entry, state=state, config=config)
+            new_stream: Stream = self.get_stream_class(stream_name).from_stream_dict(
+                stream_dict=stream_entry, state=state, config=config
+            )
             result.append(new_stream)
         return result
 
-    def discover_streams(self) -> List[TapStreamBase]:
+    def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
         raise NotImplementedError(
             f"Tap '{self.name}' does not support discovery. "
@@ -161,4 +161,4 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         )
 
 
-cli = TapBase.build_cli()
+cli = Tap.build_cli()

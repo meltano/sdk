@@ -4,13 +4,13 @@ from pathlib import Path
 from tap_base.authenticators import SimpleAuthenticator
 from typing import Any, Dict, List, Union
 
-from tap_base.streams.rest import RESTStreamBase, URLArgMap
+from tap_base.streams.rest import RESTStream, URLArgMap
 from tap_base.helpers import listify
 
 SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_gitlab/schemas")
 
 
-class GitlabStream(RESTStreamBase):
+class GitlabStream(RESTStream):
     """Sample tap test for gitlab."""
 
     tap_name = "sample-tap-gitlab"

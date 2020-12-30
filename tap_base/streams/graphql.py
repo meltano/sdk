@@ -9,14 +9,14 @@ from typing import Any, Dict, Iterable, Optional, Union
 
 from singer.schema import Schema
 
-from tap_base.streams.rest import RESTStreamBase
+from tap_base.streams.rest import RESTStream
 
 URLArgMap = Dict[str, Union[str, bool, int, datetime]]
 
 DEFAULT_PAGE_SIZE = 1000
 
 
-class GraphQLStreamBase(RESTStreamBase, metaclass=abc.ABCMeta):
+class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
     """Abstract base class for API-type streams."""
 
     graphql_query: Optional[Union[str, jinja2.Template]] = None

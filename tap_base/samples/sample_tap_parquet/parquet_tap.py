@@ -3,7 +3,7 @@
 from typing import List
 from singer.schema import Schema
 
-from tap_base import TapBase, TapStreamBase
+from tap_base import Tap, Stream
 from tap_base.samples.sample_tap_parquet.parquet_tap_stream import (
     SampleTapParquetStream,
 )
@@ -14,7 +14,7 @@ from tap_base.samples.sample_tap_parquet.parquet_globals import (
 )
 
 
-class SampleTapParquet(TapBase):
+class SampleTapParquet(Tap):
     """Sample tap for Parquet."""
 
     name: str = PLUGIN_NAME
@@ -22,10 +22,10 @@ class SampleTapParquet(TapBase):
     required_config_options = REQUIRED_CONFIG_SETS
     default_stream_class = SampleTapParquetStream
 
-    def discover_streams(self) -> List[TapStreamBase]:
+    def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
         # TODO: automatically infer this from the parquet schema
-        result: List[TapStreamBase] = []
+        result: List[Stream] = []
         for tap_stream_id in ["ASampleTable"]:
             new_stream = SampleTapParquetStream(
                 config=self._config,

@@ -8,7 +8,7 @@ See the online explorer and query builder here:
 
 from typing import List
 
-from tap_base import TapBase, TapStreamBase
+from tap_base import Tap, Stream
 from tap_base.samples.sample_tap_countries.countries_streams import (
     CountriesStream,
     ContinentsStream,
@@ -16,14 +16,14 @@ from tap_base.samples.sample_tap_countries.countries_streams import (
 from tap_base.samples.sample_tap_countries.countries_globals import PLUGIN_NAME
 
 
-class SampleTapCountries(TapBase):
+class SampleTapCountries(Tap):
     """Sample tap for Countries GraphQL API."""
 
     name: str = PLUGIN_NAME
     accepted_config_keys: List[str] = []
     required_config_options = None
 
-    def discover_streams(self) -> List[TapStreamBase]:
+    def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
         return [
             CountriesStream(config=self._config, state=self._state),

@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Iterable, Optional
 
-from tap_base.streams import RESTStreamBase
+from tap_base.streams import RESTStream
 from tap_base.authenticators import OAuthJWTAuthenticator
 
 from tap_base.samples.sample_tap_google_analytics.ga_globals import PLUGIN_NAME
@@ -20,7 +20,7 @@ class GoogleJWTAuthenticator(OAuthJWTAuthenticator):
     """
 
 
-class SampleGoogleAnalyticsStream(RESTStreamBase):
+class SampleGoogleAnalyticsStream(RESTStream):
     """Sample tap test for google-analytics."""
 
     tap_name = PLUGIN_NAME

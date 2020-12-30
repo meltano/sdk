@@ -1,4 +1,4 @@
-"""Shared parent class for TapBase, TargetBase, and TransformBase."""
+"""Base class for database-type streams."""
 
 import abc
 import backoff
@@ -8,9 +8,9 @@ from tap_base.helpers import classproperty
 from tap_base.exceptions import TapStreamConnectionFailure
 from typing import Any, Dict, Iterable, List, Optional, Tuple, TypeVar, Union, cast
 
-from tap_base.streams.core import TapStreamBase
+from tap_base.streams.core import Stream
 
-FactoryType = TypeVar("FactoryType", bound="DatabaseStreamBase")
+FactoryType = TypeVar("FactoryType", bound="DatabaseStream")
 
 
 SINGER_STRING_TYPE = singer.Schema(type=["string", "null"])
@@ -40,7 +40,7 @@ SINGER_TYPE_LOOKUP = {
 }
 
 
-class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
+class DatabaseStream(Stream, metaclass=abc.ABCMeta):
     """Abstract base class for database-type streams.
 
     This class currently supports databases with 3-part names only. For databases which
@@ -143,7 +143,7 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     def create_singer_schema(columns: Dict[str, str]) -> singer.Schema:
         props: Dict[str, singer.Schema] = {}
         for column, sql_type in columns.items():
-            props[column] = DatabaseStreamBase.get_singer_type(sql_type)
+            props[column] = DatabaseStream.get_singer_type(sql_type)
         return singer.Schema(type="object", properties=props)
 
     @staticmethod
@@ -184,7 +184,7 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     @classmethod
     def from_discovery(cls, config: dict) -> List[FactoryType]:
         """Return a list of all streams (tables)."""
-        result: List[DatabaseStreamBase] = []
+        result: List[DatabaseStream] = []
         table_scan_result: Iterable[List[Any]] = cls.sql_query(
             config=config, sql=cls.table_scan_sql, dict_results=False
         )

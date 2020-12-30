@@ -4,7 +4,7 @@ from tap_base.helpers import classproperty
 from typing import Dict, Iterable, List, Optional, Union
 from snowflake import connector
 
-from tap_base.streams import DatabaseStreamBase
+from tap_base.streams import DatabaseStream
 
 
 from tap_base.samples.sample_tap_snowflake.snowflake_config import PLUGIN_NAME
@@ -12,7 +12,7 @@ from tap_base.samples.sample_tap_snowflake.snowflake_config import PLUGIN_NAME
 DEFAULT_BATCH_SIZE = 10000
 
 
-class SampleTapSnowflakeStream(DatabaseStreamBase):
+class SampleTapSnowflakeStream(DatabaseStream):
     """Sample tap test for snowflake."""
 
     tap_name = PLUGIN_NAME

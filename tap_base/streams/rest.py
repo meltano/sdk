@@ -12,14 +12,14 @@ from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
 from singer.schema import Schema
 
-from tap_base.streams.core import TapStreamBase
+from tap_base.streams.core import Stream
 
 URLArgMap = Dict[str, Union[str, bool, int, datetime]]
 
 DEFAULT_PAGE_SIZE = 1000
 
 
-class RESTStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
+class RESTStream(Stream, metaclass=abc.ABCMeta):
     """Abstract base class for API-type streams."""
 
     _page_size: int = DEFAULT_PAGE_SIZE
