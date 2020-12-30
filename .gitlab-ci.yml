@@ -25,25 +25,4 @@ before_script:
 
 test:
   script:
-    - source $(poetry env info --path)/bin/activate
-    - poetry run pytest -k 'not snowflake'
-    # - poetry run pytest -k 'snowflake'
-    # - tox -e py36,flake8
-
-    # run:
-#   script:
-#     - poetry build
-#   artifacts:
-#     paths:
-#       - dist/*.whl
-
-# pages:
-#   script:
-#     - pip install sphinx sphinx-rtd-theme
-#     - cd doc ; make html
-#     - mv build/html/ ../public/
-#   artifacts:
-#     paths:
-#       - public
-#   # only:
-#   #   - master
+    - poetry run pytest
