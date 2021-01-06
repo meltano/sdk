@@ -27,7 +27,8 @@ class APIAuthenticatorBase(object):
 
     @abc.abstractproperty
     def http_headers(self) -> dict:
-        pass
+        """Return a dictionary of HTTP headers, including any authentication tokens."""
+        raise NotImplementedError("Auth header is not implemented or not initialized.")
 
     @property
     def config(self) -> Dict[str, Any]:
@@ -45,9 +46,8 @@ class SimpleAuthenticator(APIAuthenticatorBase):
 
     @property
     def http_headers(self) -> dict:
-        if self._auth_header is None:
-            raise NotImplementedError("Auth header has not been initialized.")
-        return self._auth_header
+        """Return a dictionary of HTTP headers, including any authentication tokens."""
+        return self._auth_header or super().http_headers
 
 
 class OAuthAuthenticator(APIAuthenticatorBase):
@@ -67,16 +67,6 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         if oauth_scopes or not hasattr(self, "oauth_scopes"):
             self.oauth_scopes: Optional[str] = oauth_scopes
 
-        # Initialize internal auth keys:
-        self.client_id: Optional[str] = None
-        self.client_secret: Optional[str] = None
-        if self.config:
-            # Use client_id, client_email, and/or client_secret by default, if provided.
-            self.client_id = self.config.get(
-                "client_id", self.config.get("client_email", None)
-            )
-            self.client_secret = self.config.get("client_secret", None)
-
         # Initialize internal tracking attributes
         self.access_token: Optional[str] = None
         self.refresh_token: Optional[str] = None
@@ -84,7 +74,22 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         self.expires_in: Optional[int] = None
 
     @property
+    def client_id(self) -> Optional[str]:
+        """Return client ID string to be used in authentication or None if not set."""
+        if self.config:
+            return self.config.get("client_id")
+        return None
+
+    @property
+    def client_secret(self) -> Optional[str]:
+        """Return client secret to be used in authentication or None if not set."""
+        if self.config:
+            return self.config.get("client_secret")
+        return None
+
+    @property
     def http_headers(self) -> dict:
+        """Return a dictionary of HTTP headers, including any authentication tokens."""
         if not self.is_token_valid():
             self.update_access_token()
         return {"Authorization": f"Bearer {self.access_token}"}
