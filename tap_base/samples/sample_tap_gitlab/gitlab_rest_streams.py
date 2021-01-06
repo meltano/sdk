@@ -13,15 +13,15 @@ SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_gitlab/schemas")
 class GitlabStream(RESTStream):
     """Sample tap test for gitlab."""
 
-    tap_name = "sample-tap-gitlab"
-    site_url_base = "https://gitlab.com/api/v4"
+    url_base = "https://gitlab.com/api/v4"
 
-    def get_authenticator(self) -> SimpleAuthenticator:
+    @property
+    def authenticator(self) -> SimpleAuthenticator:
         """Return an authenticator for REST API requests."""
-        auth_header = {"Private-Token": self.get_config("auth_token")}
-        if self.get_config("user_agent"):
-            auth_header["User-Agent"] = self.get_config("user_agent")
-        return SimpleAuthenticator(auth_header=auth_header)
+        http_headers = {"Private-Token": self.config.get("auth_token")}
+        if self.config.get("user_agent"):
+            http_headers["User-Agent"] = self.config.get("user_agent")
+        return SimpleAuthenticator(http_headers=http_headers)
 
     def get_query_params(self) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
         """Expose any needed config values into the URL parameterization process.
@@ -33,8 +33,8 @@ class GitlabStream(RESTStream):
         if "{project_id}" not in self.url_suffix:
             return super().get_query_params()  # Default behavior
         return [
-            {"project_id": project_id, "start_date": self.get_config("start_date")}
-            for project_id in listify(self.get_config("project_ids"))
+            {"project_id": project_id, "start_date": self.config.get("start_date")}
+            for project_id in listify(self.config.get("project_ids"))
         ]
 
 

@@ -15,8 +15,6 @@ DEFAULT_BATCH_SIZE = 10000
 class SampleTapSnowflakeStream(DatabaseStream):
     """Sample tap test for snowflake."""
 
-    tap_name = PLUGIN_NAME
-
     @classproperty
     def primary_key_scan_sql(self) -> Optional[str]:
         """Snowflake does not support primary keys. Return empty result."""

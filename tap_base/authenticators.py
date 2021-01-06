@@ -1,15 +1,17 @@
 """Classes to assist in authenticating to APIs."""
 
 import abc
+from copy import deepcopy
 import logging
 import jwt
 import math
 import requests
 
 from datetime import datetime, timedelta
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 from tap_base.helpers import utc_now
+from tap_base.streams import Stream
 
 from singer import utils
 
@@ -17,46 +19,48 @@ from singer import utils
 class APIAuthenticatorBase(object):
     """Base class for offloading API auth."""
 
-    def __init__(self, config: Optional[dict] = None):
-        self._config = config
-
-    @property
-    def logger(self):
-        return logging.getLogger(type(self).__name__)
+    def __init__(self, stream: Stream):
+        """Init authenticator."""
+        self._config: Dict[str, Any] = stream.config
+        self.tap_name: str = stream.tap_name
+        self.logger: logging.Logger = stream.logger
 
     @abc.abstractproperty
-    def auth_header(self) -> dict:
+    def http_headers(self) -> dict:
         pass
 
-    def get_config(self, config_key: str, default: Any = None) -> Any:
-        """Return config value or a default value."""
-        return (self._config or {}).get(config_key, default)
+    @property
+    def config(self) -> Dict[str, Any]:
+        """Return config dictionary."""
+        return deepcopy(self._config)
 
 
 class SimpleAuthenticator(APIAuthenticatorBase):
     """Base class for offloading API auth."""
 
-    def __init__(self, auth_header: dict = None, config: Optional[dict] = None):
-        self._auth_header = auth_header
-        super().__init__(config=config)
+    def __init__(self, stream: Stream, http_headers: dict = None):
+        """Init authenticator."""
+        self._auth_header = http_headers
+        super().__init__(stream=stream)
 
     @property
-    def auth_header(self) -> dict:
+    def http_headers(self) -> dict:
         if self._auth_header is None:
             raise NotImplementedError("Auth header has not been initialized.")
         return self._auth_header
 
 
 class OAuthAuthenticator(APIAuthenticatorBase):
-    """API Authenticator for OAuth 2.0 flows which utilize a JWT refresh token."""
+    """API Authenticator for OAuth 2.0 flows."""
 
     def __init__(
         self,
-        config: Optional[dict] = None,
+        stream: Stream,
         auth_endpoint: Optional[str] = None,
         oauth_scopes: Optional[str] = None,
     ) -> None:
-        super().__init__(config=config)
+        """Init authenticator."""
+        super().__init__(stream=stream)
         # Preserve class-level defaults if they exist:
         if auth_endpoint or not hasattr(self, "auth_endpoint"):
             self.auth_endpoint: Optional[str] = auth_endpoint
@@ -66,10 +70,12 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         # Initialize internal auth keys:
         self.client_id: Optional[str] = None
         self.client_secret: Optional[str] = None
-        if config:
+        if self.config:
             # Use client_id, client_email, and/or client_secret by default, if provided.
-            self.client_id = config.get("client_id", config.get("client_email", None))
-            self.client_secret = config.get("client_secret", None)
+            self.client_id = self.config.get(
+                "client_id", self.config.get("client_email", None)
+            )
+            self.client_secret = self.config.get("client_secret", None)
 
         # Initialize internal tracking attributes
         self.access_token: Optional[str] = None
@@ -78,7 +84,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         self.expires_in: Optional[int] = None
 
     @property
-    def auth_header(self) -> dict:
+    def http_headers(self) -> dict:
         if not self.is_token_valid():
             self.update_access_token()
         return {"Authorization": f"Bearer {self.access_token}"}
@@ -102,11 +108,11 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
 
     @property
     def private_key(self) -> Optional[str]:
-        return self.get_config("private_key")
+        return self.config.get("private_key", None)
 
     @property
     def private_key_passphrase(self) -> Optional[str]:
-        return self.get_config("private_key_passphrase", None)
+        return self.config.get("private_key_passphrase", None)
 
     # Authentication and refresh
     def update_access_token(self):

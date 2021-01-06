@@ -66,7 +66,7 @@ _Generic (hand-coded) streams inherit from the class `Stream`. To create a gener
 stream class, you only need to override a single method:_
 
 1. **`tap_name`** - The same name used in your tap class (for logging purposes).
-2. `get_record_generator()` - This method should generate rows and return them incrementally with the
+2. `records()` - Property should generate records (rows) and return them incrementally with the
    `yield` python operator.
 
 **More info:**
@@ -79,7 +79,7 @@ _REST streams inherit from the class `RESTStream`. To create an REST API-based
 stream class, you will override one class property and three methods:_
 
 1. **`tap_name`** - The same name used in your tap class (for logging purposes).
-2. **`site_url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
+2. **`url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
    - For example: to connect to the GitLab v4 API, we use `"https://gitlab.com/api/v4"`.
 3. **`get_auth_header` method** - Build and return an authorization header which will be used when
    making calls to your API.
@@ -114,12 +114,12 @@ _Depending upon your implementation, you may also want to override one or more o
 _GraphQL streams inherit from the class `GraphQLStream`. GraphQL streams are very similar toREST API-based streams, but instead of a `url_suffix`, you will override the GraphQL query text._
 
 1. **`tap_name`** - The same name used in your tap class (for logging purposes).
-2. **`site_url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
+2. **`url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
    - For example: to connect to the GitLab v4 API, we use `"https://gitlab.com/graphql"`.
 3. **`get_auth_header` method** - Build and return an authorization header which will be used when
    making calls to your API.
    - For example: to connect to the GitLab API, we pass "Private-Token" and (optionally) "User-Agent".
-4. **`graphql_query` property** - This is where you specify your specific GraphQL query text.
+4. **`query` property** - This is where you specify your specific GraphQL query text.
 
 _Depending upon your implementation, you may also want to override one or more of the following properties:_
 

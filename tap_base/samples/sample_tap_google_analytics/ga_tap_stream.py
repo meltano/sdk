@@ -23,14 +23,14 @@ class GoogleJWTAuthenticator(OAuthJWTAuthenticator):
 class SampleGoogleAnalyticsStream(RESTStream):
     """Sample tap test for google-analytics."""
 
-    tap_name = PLUGIN_NAME
-    site_url_base = "https://analyticsreporting.googleapis.com/v4"
+    url_base = "https://analyticsreporting.googleapis.com/v4"
     url_suffix = "/reports:batchGet"
     rest_method = "POST"
 
-    def get_authenticator(self) -> GoogleJWTAuthenticator:
+    @property
+    def authenticator(self) -> GoogleJWTAuthenticator:
         return GoogleJWTAuthenticator(
-            config=self._config,
+            config=self.config,
             auth_endpoint=GOOGLE_OAUTH_ENDPOINT,
             oauth_scopes=GA_OAUTH_SCOPES,
         )
@@ -40,7 +40,7 @@ class SampleGoogleAnalyticsStream(RESTStream):
         return {
             "reportRequests": [
                 {
-                    "viewId": self.get_config("view_id"),
+                    "viewId": self.config.get("view_id"),
                     "metrics": [{"expression": m} for m in self.metrics],
                     "dimensions": [{"name": d} for d in self.dimensions],
                     # "dateRanges": [

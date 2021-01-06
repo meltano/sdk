@@ -12,11 +12,10 @@ PLUGIN_NAME = "sample-tap-parquet"
 class SampleTapParquetStream(Stream):
     """Sample tap test for parquet."""
 
-    tap_name = PLUGIN_NAME
-
-    def get_record_generator(self) -> Iterable[dict]:
+    @property
+    def records(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
-        filepath = self.get_config("filepath")
+        filepath = self.config.get("filepath")
         if not filepath:
             raise ValueError("Parquet 'filepath' config cannot be blank.")
         try:

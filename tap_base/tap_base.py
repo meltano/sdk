@@ -3,6 +3,7 @@
 import abc
 import json
 import os
+from tap_base.helpers import classproperty
 
 from singer.catalog import Catalog
 
@@ -43,7 +44,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         if catalog:
             self.logger.info("loading catalog streams...")
             list_of_streams = self.load_catalog_streams(
-                catalog=catalog_dict, config=self._config, state=self._state,
+                catalog=catalog_dict, config=self.config, state=self._state,
             )
         else:
             self.logger.info("discovering catalog streams...")
@@ -111,8 +112,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     # Command Line Execution
 
-    @classmethod
-    def build_cli(cls):
+    @classproperty
+    def cli(cls):
         @click.option("--version", is_flag=True)
         @click.option("--discover", is_flag=True)
         @click.option("--config")
@@ -161,4 +162,4 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         )
 
 
-cli = Tap.build_cli()
+cli = Tap.cli

@@ -26,11 +26,11 @@ class SampleTapCountries(Tap):
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
         return [
-            CountriesStream(config=self._config, state=self._state),
-            ContinentsStream(config=self._config, state=self._state),
+            CountriesStream(config=self.config, state=self._state),
+            ContinentsStream(config=self.config, state=self._state),
         ]
 
 
 # CLI Execution:
 
-cli = SampleTapCountries.build_cli()
+cli = SampleTapCountries.cli

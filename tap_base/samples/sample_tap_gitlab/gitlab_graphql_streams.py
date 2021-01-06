@@ -25,13 +25,13 @@ SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_gitlab/schemas")
 class GitlabGraphQLStream(GraphQLStream):
     """Sample tap test for gitlab."""
 
-    tap_name = PLUGIN_NAME
-    site_url_base = SITE_URL
+    url_base = SITE_URL
 
-    def get_authenticator(self) -> SimpleAuthenticator:
+    @property
+    def authenticator(self) -> SimpleAuthenticator:
         """Return an authenticator for GraphQL API requests."""
         return SimpleAuthenticator(
-            auth_header={"Authorization": f"token {self.get_config('auth_token')}"}
+            http_headers={"Authorization": f"token {self.config.get('auth_token')}"}
         )
 
 
@@ -41,7 +41,7 @@ class GraphQLCurrentUserStream(GitlabGraphQLStream):
     primary_keys = ["id"]
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "currentuser.json"
-    graphql_query = """
+    query = """
         currentUser {
             name
         }
@@ -54,7 +54,7 @@ class GraphQLProjectsStream(GitlabGraphQLStream):
     primary_keys = ["id"]
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "projects-graphql.json"
-    graphql_query = Template(
+    query = Template(
         """
         project(fullPath: "{{ project }}") {
             name

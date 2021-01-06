@@ -29,7 +29,7 @@ class SampleTapGoogleAnalytics(Tap):
 
     def discover_streams(self) -> List[SampleGoogleAnalyticsStream]:
         """Return a list of all streams."""
-        return [GASimpleSampleStream(config=self._config, state=self._state)]
+        return [GASimpleSampleStream(config=self.config, state=self._state)]
 
 
-cli = SampleTapGoogleAnalytics.build_cli()
+cli = SampleTapGoogleAnalytics.cli

@@ -53,10 +53,11 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
     DEFAULT_QUOTE_CHAR = '"'
     OTHER_QUOTE_CHARS = ['"', "[", "]", "`"]
 
-    def get_record_generator(self) -> Iterable[dict]:
+    @property
+    def records(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
         for row in self.sql_query(
-            sql=f"SELECT * FROM {self.fully_qualified_name}", config=self._config
+            sql=f"SELECT * FROM {self.fully_qualified_name}", config=self.config
         ):
             yield cast(dict, row)
 

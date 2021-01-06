@@ -28,7 +28,7 @@ class SampleTapParquet(Tap):
         result: List[Stream] = []
         for tap_stream_id in ["ASampleTable"]:
             new_stream = SampleTapParquetStream(
-                config=self._config,
+                config=self.config,
                 state=self._state,
                 name=tap_stream_id,
                 schema=Schema(
@@ -47,4 +47,4 @@ class SampleTapParquet(Tap):
 
 # CLI Execution:
 
-cli = SampleTapParquet.build_cli()
+cli = SampleTapParquet.cli

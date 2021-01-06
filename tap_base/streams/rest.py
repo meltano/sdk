@@ -1,17 +1,17 @@
 """Abstract base class for API-type streams."""
 
 import abc
-from tap_base.authenticators import APIAuthenticatorBase
 import backoff
 import logging
-import jinja2
 import requests
 
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Optional, Type, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 from singer.schema import Schema
 
+from tap_base.authenticators import APIAuthenticatorBase, SimpleAuthenticator
+from tap_base.plugin_base import PluginBase
 from tap_base.streams.core import Stream
 
 URLArgMap = Dict[str, Union[str, bool, int, datetime]]
@@ -28,28 +28,23 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
-    def site_url_base(self) -> str:
+    def url_base(self) -> str:
         """Return the base url, e.g. 'https://api.mysite.com/v3/'."""
         pass
 
     def __init__(
         self,
-        config: dict,
+        tap: PluginBase,
         state: Dict[str, Any],
         name: Optional[str] = None,
         schema: Optional[Union[Dict[str, Any], Schema]] = None,
         url_suffix: Optional[str] = None,
-        authenticator: Optional[APIAuthenticatorBase] = None,
     ):
         super().__init__(
-            name=name, schema=schema, state=state, config=config,
+            name=name, schema=schema, state=state, tap=tap,
         )
         if url_suffix:
             self.url_suffix = url_suffix
-        if authenticator:
-            self.authenticator = authenticator
-        else:
-            self.authenticator = self.get_authenticator()
         self._requests_session = requests.Session()
 
     @staticmethod
@@ -61,7 +56,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return result
 
     def get_urls(self) -> List[str]:
-        url_pattern = "".join([self.site_url_base, self.url_suffix or ""])
+        url_pattern = "".join([self.url_base, self.url_suffix or ""])
         result: List[str] = []
         for params in self.get_query_params_list():
             url = url_pattern
@@ -69,10 +64,6 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
                 search_text = "".join(["{", k, "}"])
                 if search_text in url:
                     url = url.replace(search_text, self.url_encode(v))
-            # self.logger.info(
-            #     f"Tap '{self.name}' generated URL: {url} from param list {params} "
-            #     f"and url_suffix '{self.url_suffix}'"
-            # )
             result.append(url)
         return result
 
@@ -113,15 +104,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return None
 
     def prepare_request(
-        self, url, params=None, method=None, json=None
+        self, url, params=None, http_method=None, json=None
     ) -> requests.PreparedRequest:
         request_data = json or self.prepare_request_payload()
-        method = method or self.rest_method
+        http_method = http_method or self.rest_method
         request = requests.Request(
-            method=method,
+            http_method=http_method,
             url=url,
             params=params,
-            headers=self.authenticator.auth_header,
+            headers=self.authenticator.http_headers,
             json=request_data,
         ).prepare()
         return request
@@ -147,18 +138,18 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             for row in resp_json:
                 yield row
 
-    def get_record_generator(self) -> Iterable[dict]:
+    @property
+    def records(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
         for row in self.request_paginated_get():
             yield row
 
     # Abstract methods:
 
-    def get_authenticator(self) -> Optional[APIAuthenticatorBase]:
+    @property
+    def authenticator(self) -> APIAuthenticatorBase:
         """Return an authorization header for REST API requests."""
-        if hasattr(self, "authenticator") and self.authenticator:
-            return self.authenticator
-        return None
+        return SimpleAuthenticator(stream=self, http_headers={})
 
     def get_next_page(self, response):
         return response.headers.get("X-Next-Page", None)

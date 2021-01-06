@@ -6,6 +6,7 @@ import datetime
 import json
 import logging
 import sys
+from tap_base.plugin_base import PluginBase
 from tap_base.helpers import SecretString, classproperty
 import time
 from functools import lru_cache
@@ -44,38 +45,27 @@ class Stream(metaclass=abc.ABCMeta):
 
     MAX_CONNECT_RETRIES = 0
 
-    tap_name: str = "sample-tap-name"  # For logging purposes
-    discoverable: bool = False
-    __logger: Optional[logging.Logger]
-
-    # name: Optional[str] = None
-    # schema_filepath: Optional[Union[str, PathLike]] = None
-    # primary_keys: List[str] = []
-    # replication_key: Optional[str] = None
-
     def __init__(
         self,
-        config: dict,
+        tap: PluginBase,
         schema: Optional[Union[str, PathLike, Dict[str, Any], Schema]],
         name: Optional[str],
         state: Dict[str, Any],
     ):
-        """Initialize tap stream."""
+        """Init tap stream."""
         if name:
             self.name: str = name
         if not self.name:
             raise ValueError("Missing argument or class variable 'name'.")
-        self._config: dict = config
+        self.logger: logging.Logger = tap.logger
+        self.tap_name: str = tap.name
+        self._config: dict = tap.config
         self._state = state or {}
         self._schema: Optional[dict] = None
         self.forced_replication_method: Optional[str] = None
         self.replication_key: Optional[str] = None
         self.primary_keys: Optional[List[str]] = None
         self.__init_schema(schema)
-
-    @classproperty
-    def logger(self) -> logging.Logger:
-        return logging.getLogger(self.tap_name)
 
     def __init_schema(
         self, schema: Union[str, PathLike, Dict[str, Any], Schema]
@@ -104,14 +94,15 @@ class Stream(metaclass=abc.ABCMeta):
     def schema(self) -> Optional[dict]:
         return self._schema
 
-    def get_config(self, config_key: str, default: Any = None) -> Any:
-        """Return config value or a default value."""
-        return self._config.get(config_key, default)
+    @property
+    def config(self) -> Dict[str, Any]:
+        """Return config dictionary."""
+        return copy.deepcopy(self._config)
 
     def get_query_params(self) -> Union[List[dict], dict]:
         """By default, return all config values which are not secrets."""
         return [
-            {k: v for k, v in self._config.items() if not isinstance(v, SecretString)}
+            {k: v for k, v in self.config.items() if not isinstance(v, SecretString)}
         ]
 
     def get_query_params_list(self) -> List[dict]:
@@ -277,18 +268,18 @@ class Stream(metaclass=abc.ABCMeta):
             version_exists and state_version is None
         ):
             singer.write_message(activate_version_message)
-        self.write_schema_message()
-        self.sync_records(self.get_record_generator, self.replication_method)
+        self._write_schema_message()
+        self._sync_records()
         singer.clear_bookmark(self._state, self.tap_stream_id, "max_pk_values")
         singer.clear_bookmark(self._state, self.tap_stream_id, "last_pk_fetched")
-        singer.write_message(singer.StateMessage(value=copy.deepcopy(self._state)))
+        self._write_state_message()
         singer.write_message(activate_version_message)
 
-    def write_state_message(self):
+    def _write_state_message(self):
         """Write out a STATE message with the latest state."""
         singer.write_message(singer.StateMessage(value=copy.deepcopy(self._state)))
 
-    def write_schema_message(self):
+    def _write_schema_message(self):
         """Write out a SCHEMA message with the stream schema."""
         bookmark_keys = [self.replication_key] if self.replication_key else None
         schema_message = SchemaMessage(
@@ -296,13 +287,13 @@ class Stream(metaclass=abc.ABCMeta):
         )
         singer.write_message(schema_message)
 
-    def sync_records(self, record_generator: Callable, replication_method: str):
+    def _sync_records(self):
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
-        for row_dict in record_generator():
+        for row_dict in self.records:
             row_dict = self.post_process(row_dict)
             if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
-                self.write_state_message()
+                self._write_state_message()
             record = self.conform_record_data_types(row_dict)
             record_message = RecordMessage(
                 stream=self.name,
@@ -314,10 +305,10 @@ class Stream(metaclass=abc.ABCMeta):
             # self.logger.info(row_dict)
             singer.write_message(record_message)
             rows_sent += 1
-            self.update_state(record, replication_method)
-        self.write_state_message()
+            self._update_state(record, self.replication_method)
+        self._write_state_message()
 
-    def update_state(self, latest_record: Dict[str, Any], replication_method: str):
+    def _update_state(self, latest_record: Dict[str, Any], replication_method: str):
         """Update the stream's internal state with data from the provided record."""
         if not self._state:
             self._state = singer.write_bookmark(
@@ -391,7 +382,6 @@ class Stream(metaclass=abc.ABCMeta):
     def conform_record_data_types(
         self,
         row: Dict[str, Any],
-        # columns: List[str],
         version: int = None,
         time_extracted: datetime.datetime = datetime.datetime.now(
             datetime.timezone.utc
@@ -472,23 +462,14 @@ class Stream(metaclass=abc.ABCMeta):
         new_stream.set_custom_metadata(stream_dict.get("metadata"))
         return cast(FactoryType, new_stream)
 
-    # def is_connected(self) -> bool:
-    #     """Return True if connected."""
-    #     return self._conn is not None
-
-    # def ensure_connected(self):
-    #     """Connect if not yet connected."""
-    #     if not self.is_connected():
-    #         self.connect_with_retries()
-
     def fatal(self):
         """Fatal error. Abort stream."""
         sys.exit(1)
 
     # Abstract Methods
 
-    @abc.abstractmethod
-    def get_record_generator(self) -> Iterable[Iterable[Dict[str, Any]]]:
+    @abc.abstractproperty
+    def records(self) -> Iterable[Iterable[Dict[str, Any]]]:
         """Abstract row generator function. Must be overridden by the child class.
 
         Each row emitted should be a dictionary of property names to their values.

@@ -4,8 +4,8 @@ import abc
 import json
 import logging
 import os
-from jsonschema import validate
-from jsonschema import ValidationError, SchemaError
+from copy import deepcopy
+from jsonschema import validate, ValidationError, SchemaError
 from pathlib import Path, PurePath
 
 from tap_base.helpers import classproperty, is_common_secret_key, SecretString
@@ -30,6 +30,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     @classproperty
     def logger(self) -> logging.Logger:
+        """Get logger."""
         return logging.getLogger(self.name)
 
     # Constructor
@@ -107,9 +108,10 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     # Core plugin config:
 
-    def get_config(self, config_key: str, default: Any = None) -> Any:
-        """Return config value or a default value."""
-        return self._config.get(config_key, default)
+    @property
+    def config(self) -> Dict[str, Any]:
+        """Return config dictionary."""
+        return deepcopy(self._config)
 
     def is_secret_config(self, config_key: str) -> bool:
         """Return true if a config value should be treated as a secret.
@@ -127,7 +129,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """Return a tuple: (warnings: List[str], errors: List[str])."""
         warnings: List[str] = []
         errors: List[str] = []
-        for k in self._config:
+        for k in self.config:
             if k not in set(
                 self.accepted_config_keys + self.__always_accepted_config_keys
             ):
@@ -137,11 +139,11 @@ class PluginBase(metaclass=abc.ABCMeta):
             matched_any = False
             missing: List[List[str]] = []
             for required_set in required_set_options:
-                if all([x in self._config.keys() for x in required_set]):
+                if all([x in self.config.keys() for x in required_set]):
                     matched_any = True
                 else:
                     missing.append(
-                        [x for x in required_set if x not in self._config.keys()]
+                        [x for x in required_set if x not in self.config.keys()]
                     )
             if not matched_any:
                 errors.append(
@@ -151,7 +153,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                 )
         if self.config_jsonschema:
             try:
-                validate(self._config, self.config_jsonschema)
+                validate(self.config, self.config_jsonschema)
             except (ValidationError, SchemaError) as ex:
                 errors.append(str(ex))
         if raise_errors and errors:

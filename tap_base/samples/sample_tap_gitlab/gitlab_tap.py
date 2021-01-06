@@ -37,10 +37,10 @@ class SampleTapGitlab(Tap):
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
         return [
-            stream_class(config=self._config, state={}) for stream_class in STREAM_TYPES
+            stream_class(config=self.config, state={}) for stream_class in STREAM_TYPES
         ]
 
 
 # CLI Execution:
 
-cli = SampleTapGitlab.build_cli()
+cli = SampleTapGitlab.cli
