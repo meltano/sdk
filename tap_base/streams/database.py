@@ -56,7 +56,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
     @property
     def records(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
-        for row in self.sql_query(
+        for row in self.execute_query(
             sql=f"SELECT * FROM {self.fully_qualified_name}", config=self.config
         ):
             yield cast(dict, row)
@@ -160,7 +160,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
     def scan_and_collate_columns(
         cls, config
     ) -> Dict[Tuple[str, str, str], Dict[str, str]]:
-        columns_scan_result = cls.sql_query(config=config, sql=cls.column_scan_sql)
+        columns_scan_result = cls.execute_query(config=config, sql=cls.column_scan_sql)
         result: Dict[Tuple[str, str, str], Dict[str, str]] = {}
         for row_dict in columns_scan_result:
             catalog, schema_name, table, column, data_type = row_dict.values()
@@ -174,7 +174,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         result: Dict[Tuple[str, str, str], List[str]] = {}
         if not cls.primary_key_scan_sql:
             return result
-        pk_scan_result = cls.sql_query(config=config, sql=cls.primary_key_scan_sql)
+        pk_scan_result = cls.execute_query(config=config, sql=cls.primary_key_scan_sql)
         for row_dict in pk_scan_result:
             catalog, schema_name, table, pk_column = row_dict.values()
             if (catalog, schema_name, table) not in result:
@@ -186,10 +186,10 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
     def from_discovery(cls, config: dict) -> List[FactoryType]:
         """Return a list of all streams (tables)."""
         result: List[DatabaseStream] = []
-        table_scan_result: Iterable[List[Any]] = cls.sql_query(
+        table_scan_result: Iterable[List[Any]] = cls.execute_query(
             config=config, sql=cls.table_scan_sql, dict_results=False
         )
-        view_scan_result: Iterable[List[Any]] = cls.sql_query(
+        view_scan_result: Iterable[List[Any]] = cls.execute_query(
             config=config, sql=cls.view_scan_sql, dict_results=False
         )
         all_results = [
@@ -220,7 +220,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         return result
 
     @abc.abstractclassmethod
-    def sql_query(
+    def execute_query(
         self, sql: Union[str, List[str]], config, dict_results=True
     ) -> Union[Iterable[dict], Iterable[Tuple]]:
         """Run a SQL query and generate a dict for each returned row."""

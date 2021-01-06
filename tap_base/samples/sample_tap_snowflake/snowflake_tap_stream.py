@@ -21,7 +21,7 @@ class SampleTapSnowflakeStream(DatabaseStream):
         return None
 
     @classmethod
-    def sql_query(
+    def execute_query(
         cls, sql: Union[str, List[str]], config, dict_results=True,
     ) -> Union[Iterable[dict], Iterable[List]]:
         """Run a query in snowflake."""

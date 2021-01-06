@@ -141,14 +141,14 @@ _Depending upon your implementation, you may also want to override one or more o
 ### 'Database' stream classes
 
 _Database streams inherit from the class `DatabaseStream`. To create a database
-stream class, you will first override the `sql_query()` method. Depending upon how closely your
+stream class, you will first override the `execute_query()` method. Depending upon how closely your
 source complies with standard `information_schema` conventions, you may also override between
 one and four class properties, in order to override specific metadata queries._
 
 **All database stream classes override:**
 
 1. **`tap_name`** - The same name used in your tap class (for logging purposes).
-2. **`sql_query()` method** - This method should run a give SQL statement and incrementally return a dictionary
+2. **`execute_query()` method** - This method should run a give SQL statement and incrementally return a dictionary
    object for each resulting row.
 
 _Depending upon your implementation, you may also want to override one or more of the following properties:_
