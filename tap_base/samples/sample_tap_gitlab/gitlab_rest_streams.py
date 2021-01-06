@@ -9,11 +9,15 @@ from tap_base.helpers import listify
 
 SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_gitlab/schemas")
 
+DEFAULT_URL_BASE = "https://gitlab.com/api/v4"
+
 
 class GitlabStream(RESTStream):
     """Sample tap test for gitlab."""
 
-    url_base = "https://gitlab.com/api/v4"
+    @property
+    def url_base(self) -> str:
+        return self.config.get("api_url", DEFAULT_URL_BASE)
 
     @property
     def authenticator(self) -> SimpleAuthenticator:

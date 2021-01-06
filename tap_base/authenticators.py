@@ -41,13 +41,13 @@ class SimpleAuthenticator(APIAuthenticatorBase):
 
     def __init__(self, stream: Stream, http_headers: dict = None):
         """Init authenticator."""
-        self._auth_header = http_headers
+        self._http_headers = http_headers
         super().__init__(stream=stream)
 
     @property
     def http_headers(self) -> dict:
         """Return a dictionary of HTTP headers, including any authentication tokens."""
-        return self._auth_header or super().http_headers
+        return self._http_headers or super().http_headers
 
 
 class OAuthAuthenticator(APIAuthenticatorBase):

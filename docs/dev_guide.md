@@ -81,7 +81,7 @@ stream class, you will override one class property and three methods:_
 1. **`tap_name`** - The same name used in your tap class (for logging purposes).
 2. **`url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
    - For example: to connect to the GitLab v4 API, we use `"https://gitlab.com/api/v4"`.
-3. **`get_auth_header` method** - Build and return an authorization header which will be used when
+3. **`http_headers` property** - Build and return an authorization header which will be used when
    making calls to your API.
    - For example: to connect to the GitLab API, we pass "Private-Token" and (optionally) "User-Agent".
 
@@ -116,7 +116,7 @@ _GraphQL streams inherit from the class `GraphQLStream`. GraphQL streams are ver
 1. **`tap_name`** - The same name used in your tap class (for logging purposes).
 2. **`url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
    - For example: to connect to the GitLab v4 API, we use `"https://gitlab.com/graphql"`.
-3. **`get_auth_header` method** - Build and return an authorization header which will be used when
+3. **`get_http_headers` method** - Build and return an authorization header which will be used when
    making calls to your API.
    - For example: to connect to the GitLab API, we pass "Private-Token" and (optionally) "User-Agent".
 4. **`query` property** - This is where you specify your specific GraphQL query text.

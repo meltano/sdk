@@ -16,14 +16,12 @@ SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_countries/schemas")
 
 
 class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
-    """Sample tap test for countries."""
+    """Sample tap test for countries.
+
+    NOTE: This API does not require authentication.
+    """
 
     url_base = "https://countries.trevorblades.com/"
-
-    @property
-    def authenticator(self):
-        """Return the authenticator for this stream."""
-        return SimpleAuthenticator(stream=self, http_headers={})  # No auth needed.
 
 
 class CountriesStream(CountriesAPIStream):
