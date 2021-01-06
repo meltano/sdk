@@ -47,7 +47,10 @@ class SimpleAuthenticator(APIAuthenticatorBase):
     @property
     def http_headers(self) -> dict:
         """Return a dictionary of HTTP headers, including any authentication tokens."""
-        return self._http_headers or super().http_headers
+        if self._http_headers is not None:
+            return self._http_headers
+        else:
+            return super().http_headers
 
 
 class OAuthAuthenticator(APIAuthenticatorBase):
