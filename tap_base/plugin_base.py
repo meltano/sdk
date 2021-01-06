@@ -24,7 +24,6 @@ class PluginBase(metaclass=abc.ABCMeta):
     config_jsonschema: Optional[dict] = None
 
     _config: dict
-    _logger: Optional[logging.Logger] = None
 
     @classproperty
     def logger(self) -> logging.Logger:
