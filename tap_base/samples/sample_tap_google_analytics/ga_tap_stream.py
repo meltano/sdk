@@ -24,7 +24,7 @@ class SampleGoogleAnalyticsStream(RESTStream):
     """Sample tap test for google-analytics."""
 
     url_base = "https://analyticsreporting.googleapis.com/v4"
-    url_suffix = "/reports:batchGet"
+    path = "/reports:batchGet"
     rest_method = "POST"
 
     @property

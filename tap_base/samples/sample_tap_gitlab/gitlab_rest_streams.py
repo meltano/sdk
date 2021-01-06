@@ -30,7 +30,7 @@ class GitlabStream(RESTStream):
         in the list. For GitLab, this is necessary when each call must reference a
         specific `project_id`.
         """
-        if "{project_id}" not in self.url_suffix:
+        if "{project_id}" not in self.path:
             return super().get_query_params()  # Default behavior
         return [
             {"project_id": project_id, "start_date": self.config.get("start_date")}
@@ -40,7 +40,7 @@ class GitlabStream(RESTStream):
 
 class ProjectsStream(GitlabStream):
     name = "projects"
-    url_suffix = "/projects/{project_id}?statistics=1"
+    path = "/projects/{project_id}?statistics=1"
     primary_keys = ["id"]
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "projects.json"
@@ -48,7 +48,7 @@ class ProjectsStream(GitlabStream):
 
 class ReleasesStream(GitlabStream):
     name = "releases"
-    url_suffix = "/projects/{project_id}/releases"
+    path = "/projects/{project_id}/releases"
     primary_keys = ["project_id", "commit_id", "tag_name"]
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "releases.json"
@@ -56,7 +56,7 @@ class ReleasesStream(GitlabStream):
 
 class IssuesStream(GitlabStream):
     name = "issues"
-    url_suffix = "/projects/{project_id}/issues?scope=all&updated_after={start_date}"
+    path = "/projects/{project_id}/issues?scope=all&updated_after={start_date}"
     primary_keys = ["id"]
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "issues.json"
@@ -64,7 +64,7 @@ class IssuesStream(GitlabStream):
 
 class CommitsStream(GitlabStream):
     name = "commits"
-    url_suffix = (
+    path = (
         "/projects/{project_id}/repository/commits?since={start_date}&with_stats=true"
     )
     primary_keys = ["id"]

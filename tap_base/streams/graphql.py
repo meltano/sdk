@@ -17,7 +17,7 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
     """Abstract base class for API-type streams."""
 
     query: Optional[Union[str, jinja2.Template]] = None
-    url_suffix = ""
+    path = ""
     rest_method = "POST"
 
     def prepare_request_payload(self) -> Optional[dict]:

@@ -26,8 +26,8 @@ class SampleTapCountries(Tap):
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
         return [
-            CountriesStream(config=self.config, state=self._state),
-            ContinentsStream(config=self.config, state=self._state),
+            CountriesStream(tap=self),
+            ContinentsStream(tap=self),
         ]
 
 

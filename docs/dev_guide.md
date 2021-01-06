@@ -111,7 +111,7 @@ _Depending upon your implementation, you may also want to override one or more o
 
 ### 'GraphQL' stream classes
 
-_GraphQL streams inherit from the class `GraphQLStream`. GraphQL streams are very similar toREST API-based streams, but instead of a `url_suffix`, you will override the GraphQL query text._
+_GraphQL streams inherit from the class `GraphQLStream`. GraphQL streams are very similar toREST API-based streams, but instead of a `path`, you will override the GraphQL query text._
 
 1. **`tap_name`** - The same name used in your tap class (for logging purposes).
 2. **`url_base` property** - Returns the base URL, which generally is reflective of a specific API version.

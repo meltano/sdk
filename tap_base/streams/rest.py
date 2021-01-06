@@ -38,13 +38,13 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         state: Dict[str, Any],
         name: Optional[str] = None,
         schema: Optional[Union[Dict[str, Any], Schema]] = None,
-        url_suffix: Optional[str] = None,
+        path: Optional[str] = None,
     ):
         super().__init__(
-            name=name, schema=schema, state=state, tap=tap,
+            name=name, schema=schema, tap=tap, state=state,
         )
-        if url_suffix:
-            self.url_suffix = url_suffix
+        if path:
+            self.path = path
         self._requests_session = requests.Session()
 
     @staticmethod
@@ -56,7 +56,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return result
 
     def get_urls(self) -> List[str]:
-        url_pattern = "".join([self.url_base, self.url_suffix or ""])
+        url_pattern = "".join([self.url_base, self.path or ""])
         result: List[str] = []
         for params in self.get_query_params_list():
             url = url_pattern

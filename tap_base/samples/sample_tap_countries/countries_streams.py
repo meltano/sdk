@@ -19,7 +19,11 @@ class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
     """Sample tap test for countries."""
 
     url_base = "https://countries.trevorblades.com/"
-    authenticator = SimpleAuthenticator(http_headers={})  # No auth needed.
+
+    @property
+    def authenticator(self):
+        """Return the authenticator for this stream."""
+        return SimpleAuthenticator(stream=self, http_headers={})  # No auth needed.
 
 
 class CountriesStream(CountriesAPIStream):
