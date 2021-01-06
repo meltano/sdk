@@ -7,7 +7,7 @@ from tap_base.helpers import classproperty
 
 from singer.catalog import Catalog
 
-from typing import List, Optional, Type, Dict, Union
+from typing import Callable, List, Optional, Type, Dict, Union
 from pathlib import PurePath
 
 import click
@@ -30,7 +30,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         state: Union[PurePath, str, dict, None] = None,
     ) -> None:
         """Initialize the tap."""
-        self._streams: Dict[str, Stream] = {}
         if isinstance(state, dict):
             state_dict = state
         else:
@@ -42,20 +41,27 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         self._state = state_dict or {}
         super().__init__(config=config)
         if catalog:
-            self.logger.info("loading catalog streams...")
-            list_of_streams = self.load_catalog_streams(
+            self.logger.info("Catalog detected. Loading streams from catalog...")
+            self._stream_loader = lambda: self.load_catalog_streams(
                 catalog=catalog_dict, config=self.config, state=self._state,
             )
         else:
-            self.logger.info("discovering catalog streams...")
-            list_of_streams = self.discover_streams()
-        for stream in list_of_streams:
-            self._streams[stream.name] = stream
+            self.logger.info("Catalog not detected. Loading streams from discovery...")
+            self._stream_loader = lambda: self.discover_streams()
+        self._streams: Optional[Dict[str, Stream]] = None
 
     # Class properties
 
     @property
     def streams(self) -> Dict[str, Stream]:
+        """Return a list of streams, using discovery or a provided catalog.
+
+        Results will be cached after first execution.
+        """
+        if self._streams is None:
+            self._streams = {}
+            for stream in self._stream_loader():
+                self._streams[stream.name] = stream
         return self._streams
 
     @property

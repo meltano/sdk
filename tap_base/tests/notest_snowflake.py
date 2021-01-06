@@ -21,7 +21,7 @@ def test_snowflake_tap_init():
 def test_snowflake_sync_one():
     """Test snowflake discovery."""
     tap = SampleTapSnowflake(config=CONFIG_FILE, state=None)
-    tap.sync_one(tap._streams[tap._streams.keys()[0]])
+    tap.sync_one(tap.streams[tap.streams.keys()[0]])
     assert True
 
 
