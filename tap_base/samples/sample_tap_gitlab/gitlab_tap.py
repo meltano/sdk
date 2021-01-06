@@ -1,6 +1,6 @@
 """Sample tap test for tap-gitlab."""
 
-from typing import List
+from typing import List, Type
 from tap_base import Tap, Stream
 from tap_base.samples.sample_tap_gitlab.gitlab_rest_streams import (
     ProjectsStream,
@@ -37,6 +37,13 @@ class SampleTapGitlab(Tap):
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
         return [stream_class(tap=self) for stream_class in STREAM_TYPES]
+
+    @classmethod
+    def get_stream_class(cls, stream_name: str) -> Type[Stream]:
+        stream_type_matches = [t for t in STREAM_TYPES if t.name == stream_name]
+        if len(stream_type_matches) == 1:
+            return stream_type_matches[0]
+        return super().get_stream_class(stream_name)
 
 
 # CLI Execution:
