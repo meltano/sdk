@@ -61,10 +61,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     @property
     def capabilities(self) -> List[str]:
         """Return a list of supported capabilities."""
-        result = ["sync", "catalog", "state"]
-        if self.discoverable:
-            result.append("discover")
-        return result
+        return ["sync", "catalog", "state", "discover"]
 
     # Stream type detection:
 
