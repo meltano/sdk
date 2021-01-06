@@ -23,8 +23,6 @@ class PluginBase(metaclass=abc.ABCMeta):
     required_config_options: Optional[List[List[str]]] = [[]]
     config_jsonschema: Optional[dict] = None
 
-    __always_accepted_config_keys: List[str] = ["start_date", "end_date"]
-
     _config: dict
     _logger: Optional[logging.Logger] = None
 
@@ -130,9 +128,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         warnings: List[str] = []
         errors: List[str] = []
         for k in self.config:
-            if k not in set(
-                self.accepted_config_keys + self.__always_accepted_config_keys
-            ):
+            if k not in self.accepted_config_keys:
                 warnings.append(f"Unexpected config option found: {k}.")
         if self.required_config_options:
             required_set_options = self.required_config_options
