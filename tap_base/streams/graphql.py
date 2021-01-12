@@ -1,35 +1,29 @@
 """Abstract base class for API-type streams."""
 
 import abc
-import jinja2
-
-from datetime import datetime
-from typing import Dict, Iterable, Optional, Union
+from typing import Iterable, Optional
 
 from tap_base.streams.rest import RESTStream
-
-URLArgMap = Dict[str, Union[str, bool, int, datetime]]
-
-DEFAULT_PAGE_SIZE = 1000
 
 
 class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
     """Abstract base class for API-type streams."""
 
-    query: Optional[Union[str, jinja2.Template]] = None
+    query: Optional[str] = None
     path = ""
     rest_method = "POST"
 
     def prepare_request_payload(self) -> Optional[dict]:
-        """Prepare the data payload for the REST API request."""
-        if isinstance(self.query, jinja2.Template):
-            query = self.query.render(**self.template_values)
+        """Prepare the data payload for the GraphQL API request."""
+        if self.query is None:
+            raise ValueError("Graphql `query` property not set.")
         else:
             query = self.query
         request_data = {
             "query": "query { "
             + (" ".join([l.strip() for l in query.splitlines()]))
-            + " }"
+            + " }",
+            "variables": self.get_query_params(),
         }
         self.logger.info(f"Attempting query:\n{query}")
         return request_data
