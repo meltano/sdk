@@ -2,15 +2,12 @@
 
 import abc
 import json
-import os
-from tap_base.helpers import classproperty
-
-from singer.catalog import Catalog
-
-from typing import Callable, List, Optional, Type, Dict, Union
 from pathlib import PurePath
+from tap_base.helpers import classproperty
+from typing import List, Optional, Type, Dict, Union
 
 import click
+from singer.catalog import Catalog
 
 from tap_base.plugin_base import PluginBase
 from tap_base.streams.core import Stream
@@ -69,16 +66,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Return a list of supported capabilities."""
         return ["sync", "catalog", "state", "discover"]
 
-    # Stream type detection:
-
-    @classmethod
-    def get_stream_class(cls, stream_name: str) -> Type[Stream]:
-        if not cls.default_stream_class:
-            raise ValueError(
-                "No stream class detected for '{cls.name}' stream '{stream_name}'"
-                "and no default_stream_class defined."
-            )
-        return cls.default_stream_class
+    # Stream detection:
 
     def run_discovery(self) -> str:
         """Write the catalog json to STDOUT and return the same as a string."""
@@ -143,19 +131,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     # Abstract stream detection methods:
 
-    def load_catalog_streams(
-        self, catalog: dict, state: dict, config: dict
-    ) -> List[Stream]:
-        """Return a list of streams from the provided catalog."""
-        result: List[Stream] = []
-        stream_entries: List[Dict] = catalog["streams"]
-        for stream_entry in stream_entries:
-            stream_name = stream_entry["tap_stream_id"]
-            new_stream: Stream = self.get_stream_class(stream_name).from_stream_dict(
-                stream_dict=stream_entry, state=state, config=config
-            )
-            result.append(new_stream)
-        return result
+    def apply_catalog(self, catalog: dict) -> None:
+        """Update internal streams using provided catalog."""
+        for stream in self.streams.values():
+            stream.apply_catalog(catalog)
 
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""

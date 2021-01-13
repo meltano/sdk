@@ -7,22 +7,20 @@ import json
 import logging
 import sys
 from tap_base.plugin_base import PluginBase
-from tap_base.helpers import SecretString, classproperty
+from tap_base.helpers import SecretString
 import time
 from functools import lru_cache
 from os import PathLike
 from pathlib import Path
 from typing import (
     Dict,
-    Iterable,
     Any,
     List,
+    Iterable,
     Optional,
     Tuple,
-    Callable,
     TypeVar,
     Union,
-    cast,
 )
 
 import singer
@@ -60,7 +58,7 @@ class Stream(metaclass=abc.ABCMeta):
         self.logger: logging.Logger = tap.logger
         self.tap_name: str = tap.name
         self._config: dict = tap.config
-        self._state = state or tap.state or {}
+        self._state = state or {}
         self._schema: Optional[dict] = None
         self.forced_replication_method: Optional[str] = None
         self.replication_key: Optional[str] = None
@@ -433,34 +431,14 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Class Factory Methods
 
-    @classmethod
-    def from_catalog_dict(
-        cls, catalog_dict: dict, state: dict, logger: logging.Logger, config: dict
-    ) -> Dict[str, FactoryType]:
-        """Create a dictionary of stream objects from a catalog dictionary."""
-        catalog = Catalog.from_dict(catalog_dict)
-        result: Dict[str, FactoryType] = {}
-        for catalog_entry in catalog.streams:
-            stream_name = catalog_entry.stream_name
-            result[stream_name] = cls.from_stream_dict(
-                catalog_entry.to_dict(), state=state, config=config
-            )
-        return result
-
-    @classmethod
-    def from_stream_dict(
-        cls, stream_dict: Dict[str, Any], config: dict, state: dict,
-    ) -> FactoryType:
-        """Create a stream object from a catalog's 'stream' dictionary entry."""
-        stream_name = stream_dict.get("tap_stream_id", stream_dict.get("stream"))
-        new_stream = cls(
-            name=stream_name,
-            schema=stream_dict.get("schema"),
-            config=config,
-            state=state,
-        )
-        new_stream.set_custom_metadata(stream_dict.get("metadata"))
-        return cast(FactoryType, new_stream)
+    def apply_catalog(self, catalog_dict: dict,) -> None:
+        """Apply a catalog dictionary, updating any overridden settings."""
+        catalog = Catalog(catalog_dict)
+        catalog_entry: singer.CatalogEntry = catalog.get_stream(self.name)
+        self.primary_keys = catalog_entry.key_properties
+        self.replication_key = catalog_entry.replication_key
+        if catalog_entry.replication_method:
+            self.forced_replication_method = catalog_entry.replication_method
 
     def fatal(self):
         """Fatal error. Abort stream."""
