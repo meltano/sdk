@@ -11,7 +11,7 @@ from tap_base.helpers import SecretString
 import time
 from functools import lru_cache
 from os import PathLike
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import (
     Dict,
     Any,
@@ -63,16 +63,16 @@ class Stream(metaclass=abc.ABCMeta):
         self.forced_replication_method: Optional[str] = None
         self.replication_key: Optional[str] = None
         self.primary_keys: Optional[List[str]] = None
+        self.schema_filepath: Optional[Path] = None
         self.__init_schema(schema)
 
     def __init_schema(
         self, schema: Union[str, PathLike, Dict[str, Any], Schema]
     ) -> None:
         if isinstance(schema, (str, PathLike)) and not self.schema_filepath:
-            self.schema_filepath = schema
-        if hasattr(self, "schema_filepath") and self.schema_filepath:
-            self.schema_filepath = Path(self.schema_filepath)
-            if not self.schema_filepath.exists():
+            self.schema_filepath = Path(schema)
+        if self.schema_filepath:
+            if not self.schema_filepath.is_file():
                 raise FileExistsError(
                     f"Could not find schema file '{self.schema_filepath}'."
                 )
