@@ -5,6 +5,8 @@ import pytz
 from datetime import datetime
 from typing import List, Union, cast
 
+import singer
+
 
 COMMON_SECRET_KEYS = [
     "db_password",

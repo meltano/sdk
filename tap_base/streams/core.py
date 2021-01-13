@@ -112,15 +112,18 @@ class Stream(metaclass=abc.ABCMeta):
 
     def get_stream_version(self):
         """Get stream version from bookmark."""
-        stream_version = singer.get_bookmark(
-            state=self._state, tap_stream_id=self.name, key="version"
-        )
+        stream_version = self.get_bookmark("version")
         if stream_version is None:
             stream_version = int(time.time() * 1000)
         return stream_version
 
     @property
     def tap_stream_id(self) -> str:
+        """Return a unique stream ID.
+
+        Default implementations will return `self.name` but this behavior may be
+        overridden if required by the developer.
+        """
         return self.name
 
     @property
@@ -239,6 +242,14 @@ class Stream(metaclass=abc.ABCMeta):
                 ]
             )
 
+    def get_bookmark(self, key: str, default: Any = None):
+        return singer.get_bookmark(
+            state=self._state,
+            tap_stream_id=self.tap_stream_id,
+            key=key,
+            default=default,
+        )
+
     def sync(self):
         """Sync this stream."""
         self.wipe_bookmarks(
@@ -251,10 +262,8 @@ class Stream(metaclass=abc.ABCMeta):
         )
         bookmark = self._state.get("bookmarks", {}).get(self.tap_stream_id, {})
         version_exists = True if "version" in bookmark else False
-        initial_full_table_complete = singer.get_bookmark(
-            self._state, self.tap_stream_id, "initial_full_table_complete",
-        )
-        state_version = singer.get_bookmark(self._state, self.tap_stream_id, "version")
+        initial_full_table_complete = self.get_bookmark("initial_full_table_complete")
+        state_version = self.get_bookmark("version")
         activate_version_message = singer.ActivateVersionMessage(
             stream=self.tap_stream_id, version=self.get_stream_version()
         )
@@ -315,9 +324,7 @@ class Stream(metaclass=abc.ABCMeta):
         new_state = copy.deepcopy(self._state)
         if latest_record:
             if replication_method == "FULL_TABLE":
-                max_pk_values = singer.get_bookmark(
-                    new_state, self.tap_stream_id, "max_pk_values"
-                )
+                max_pk_values = singer.get_bookmark("max_pk_values")
                 if max_pk_values:
                     last_pk_fetched = {
                         k: v for k, v in latest_record.items() if k in self.primary_keys
