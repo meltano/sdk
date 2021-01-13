@@ -31,11 +31,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             state_dict = state
         else:
             state_dict = self.read_optional_json_file(state) or {}
-        self._custom_catalog: Optional[dict] = None
+        self._input_catalog: Optional[dict] = None
         if isinstance(catalog, dict):
-            self._custom_catalog = catalog
+            self._input_catalog = catalog
         elif catalog is not None:
-            self._custom_catalog = self.read_optional_json_file(catalog)
+            self._input_catalog = self.read_optional_json_file(catalog)
         self._state = state_dict or {}
         self._streams: Optional[Dict[str, Stream]] = None
         super().__init__(config=config)
@@ -49,12 +49,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         Results will be cached after first execution.
         """
         if self._streams is None:
-            self._streams = {}
-            for stream in self.discover_streams():
-                self._streams[stream.name] = stream
-            if self._custom_catalog:
-                self.apply_catalog(self._custom_catalog)
+            self._streams = self.init_streams()
         return self._streams
+
+    @property
+    def input_catalog(self) -> Optional[dict]:
+        """Return the catalog dictionary input, or None if not provided."""
+        return self._input_catalog
 
     @property
     def capabilities(self) -> List[str]:
@@ -78,6 +79,30 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def get_catalog_json(self) -> str:
         return json.dumps(self.get_singer_catalog().to_dict(), indent=2)
+
+    def discover_streams(self) -> List[Stream]:
+        """Return a list of discovered streams."""
+        raise NotImplementedError(
+            f"Tap '{self.name}' does not support discovery. "
+            "Please set the '--catalog' command line argument and try again."
+        )
+
+    def init_streams(self) -> Dict[str, Stream]:
+        """Initialize streams, applying discovery, the input catalog, or both.
+
+        By default, call `self.discover_streams()` to enumerate discovered streams.
+        If a custom catalog is provided, the result will also be appended with a call to
+        each stream's `apply_catalog()` method.
+
+        Developers may override this method if discovery is not supported, or if
+        discovery should not be run by default.
+        """
+        result: Dict[str, Stream] = {}
+        for stream in self.discover_streams():
+            result[stream.name] = stream
+            if self.input_catalog:
+                stream.apply_catalog(self.input_catalog)
+        return result
 
     # Sync methods
 
@@ -123,20 +148,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 tap.sync_all()
 
         return cli
-
-    # Abstract stream detection methods:
-
-    def apply_catalog(self, catalog: dict) -> None:
-        """Update internal streams using provided catalog."""
-        for stream in self.streams.values():
-            stream.apply_catalog(catalog)
-
-    def discover_streams(self) -> List[Stream]:
-        """Return a list of discovered streams."""
-        raise NotImplementedError(
-            f"Tap '{self.name}' does not support discovery. "
-            "Please set the '--catalog' command line argument and try again."
-        )
 
 
 cli = Tap.cli
