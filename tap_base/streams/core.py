@@ -429,10 +429,8 @@ class Stream(metaclass=abc.ABCMeta):
         # rec = dict(zip(columns, row_to_persist))
         return rec
 
-    # Class Factory Methods
-
     def apply_catalog(self, catalog_dict: dict,) -> None:
-        """Apply a catalog dictionary, updating any overridden settings."""
+        """Apply a catalog dict, updating any settings overridden within the catalog."""
         catalog = Catalog(catalog_dict)
         catalog_entry: singer.CatalogEntry = catalog.get_stream(self.name)
         self.primary_keys = catalog_entry.key_properties

@@ -31,21 +31,14 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             state_dict = state
         else:
             state_dict = self.read_optional_json_file(state) or {}
+        self._custom_catalog: Optional[dict] = None
         if isinstance(catalog, dict):
-            catalog_dict = catalog
-        else:
-            catalog_dict = self.read_optional_json_file(catalog) or {}
+            self._custom_catalog = catalog
+        elif catalog is not None:
+            self._custom_catalog = self.read_optional_json_file(catalog)
         self._state = state_dict or {}
-        super().__init__(config=config)
-        if catalog:
-            self.logger.info("Catalog detected. Loading streams from catalog...")
-            self._stream_loader = lambda: self.load_catalog_streams(
-                catalog=catalog_dict, config=self.config, state=self._state,
-            )
-        else:
-            self.logger.info("Catalog not detected. Loading streams from discovery...")
-            self._stream_loader = lambda: self.discover_streams()
         self._streams: Optional[Dict[str, Stream]] = None
+        super().__init__(config=config)
 
     # Class properties
 
@@ -57,8 +50,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """
         if self._streams is None:
             self._streams = {}
-            for stream in self._stream_loader():
+            for stream in self.discover_streams():
                 self._streams[stream.name] = stream
+            if self._custom_catalog:
+                self.apply_catalog(self._custom_catalog)
         return self._streams
 
     @property
