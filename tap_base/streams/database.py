@@ -8,7 +8,9 @@ from tap_base.helpers import classproperty
 from tap_base.exceptions import TapStreamConnectionFailure
 from typing import Any, Dict, Iterable, List, Optional, Tuple, TypeVar, Union, cast
 
+from tap_base.plugin_base import PluginBase
 from tap_base.streams.core import Stream
+from tap_base import helpers
 
 FactoryType = TypeVar("FactoryType", bound="DatabaseStream")
 
@@ -216,6 +218,24 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             # TODO: Expanded metadata support for setting `row_count` and `is_view`.
             # new_stream.is_view = is_view
             # new_stream.row_count = row_count
+            result.append(new_stream)
+        return result
+
+    @classmethod
+    def from_input_catalog(cls, tap: PluginBase) -> List[FactoryType]:
+        result: List[FactoryType] = []
+        catalog = tap.input_catalog
+        for catalog_entry in helpers.get_catalog_entries(catalog):
+            full_name = helpers.get_catalog_entry_name(catalog_entry)
+            new_stream = cast(
+                FactoryType,
+                cls(
+                    tap=tap,
+                    name=full_name,
+                    schema=helpers.get_catalog_entry_schema(catalog_entry),
+                    state={},
+                ),
+            )
             result.append(new_stream)
         return result
 

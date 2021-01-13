@@ -3,7 +3,7 @@
 import pytz
 
 from datetime import datetime
-from typing import Union
+from typing import List, Union, cast
 
 
 COMMON_SECRET_KEYS = [
@@ -68,3 +68,31 @@ class classproperty(property):
 
 def utc_now():
     return datetime.utcnow().replace(tzinfo=pytz.UTC)
+
+
+def get_catalog_entries(catalog_dict: dict) -> List[dict]:
+    if "streams" not in catalog_dict:
+        raise ValueError("Catalog does not contain expected 'streams' collection.")
+    if not catalog_dict.get("streams"):
+        raise ValueError("Catalog does not contain any streams.")
+    return cast(List[dict], catalog_dict.get("streams"))
+
+
+def get_catalog_entry_name(catalog_entry: dict) -> str:
+    result = catalog_entry.get("stream", catalog_entry.get("tap_stream_id", None))
+    if not result:
+        raise ValueError(
+            "Stream name could not be identified due to missing or blank"
+            "'stream' and 'tap_stream_id' values."
+        )
+    return result
+
+
+def get_catalog_entry_schema(catalog_entry: dict) -> dict:
+    result = catalog_entry.get("schema", None)
+    if not result:
+        raise ValueError(
+            "Stream does not have a valid schema. Please check that the catalog file "
+            "is properly formatted."
+        )
+    return result

@@ -1,7 +1,7 @@
 """Sample tap test for tap-snowflake."""
 
 from typing import List
-from tap_base import Tap, Stream
+from tap_base import Tap, Stream, helpers
 from tap_base.samples.sample_tap_snowflake.snowflake_tap_stream import (
     SampleTapSnowflakeStream,
 )
@@ -22,10 +22,14 @@ class SampleTapSnowflake(Tap):
 
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
-        result: List[SampleTapSnowflakeStream] = []
-        for stream in SampleTapSnowflakeStream.from_discovery(config=self.config):
-            result.append(stream)
-        return result
+        return SampleTapSnowflakeStream.from_discovery(tap=self)
+
+    def load_streams(self) -> List[Stream]:
+        """Overrides `load_streams`, skipping discovery if `input_catalog` is provided.
+        """
+        if not self.input_catalog:
+            return self.discover_streams()
+        return SampleTapSnowflakeStream.from_input_catalog(tap=self)
 
 
 # CLI Execution:

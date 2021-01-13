@@ -49,7 +49,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         Results will be cached after first execution.
         """
         if self._streams is None:
-            self._streams = self.init_streams()
+            self._streams = {}
+            for stream in self.load_streams():
+                if self.input_catalog:
+                    stream.apply_catalog(self.input_catalog)
+                self._streams[stream.name] = stream
         return self._streams
 
     @property
@@ -87,22 +91,17 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             "Please set the '--catalog' command line argument and try again."
         )
 
-    def init_streams(self) -> Dict[str, Stream]:
-        """Initialize streams, applying discovery, the input catalog, or both.
+    def load_streams(self) -> List[Stream]:
+        """Load streams, referencing `self.discover_streams()`, `self.input_catalog`,
+        or both.
 
-        By default, call `self.discover_streams()` to enumerate discovered streams.
-        If a custom catalog is provided, the result will also be appended with a call to
-        each stream's `apply_catalog()` method.
+        By default, return the output of `self.discover_streams()` to enumerate
+        discovered streams.
 
         Developers may override this method if discovery is not supported, or if
         discovery should not be run by default.
         """
-        result: Dict[str, Stream] = {}
-        for stream in self.discover_streams():
-            result[stream.name] = stream
-            if self.input_catalog:
-                stream.apply_catalog(self.input_catalog)
-        return result
+        return self.discover_streams()
 
     # Sync methods
 
