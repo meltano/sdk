@@ -1,10 +1,13 @@
 """Tap abstract class."""
 
 import abc
+import copy
 import json
 from pathlib import PurePath
+
+import singer
 from tap_base.helpers import classproperty
-from typing import List, Optional, Type, Dict, Union
+from typing import Any, List, Optional, Type, Dict, Union
 
 import click
 from singer.catalog import Catalog
@@ -102,6 +105,52 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         discovery should not be run by default.
         """
         return self.discover_streams()
+
+    # Bookmarks and state management
+
+    def load_state(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        """Return a properly initalized state given an arbitrary dict input.
+
+        Override this method to perform validation and backwards compatibility updates.
+        """
+        return state
+
+    def merge_bookmarks(self, stream: Stream, new_bookmarks: Dict[str, Any]) -> None:
+        """Apply the provided dictionary of new bookmark values."""
+        for k, v in new_bookmarks.items():
+            self._state = singer.write_bookmark(self._state, stream.tap_stream_id, k, v)
+
+    def update_bookmarks(self, stream: Stream, latest_record: Dict[str, Any]):
+        """Update the stream's internal state with data from the provided record."""
+        if not self._state:
+            self.merge_bookmarks(
+                stream, {"version": stream.get_stream_version()},
+            )
+        if latest_record:
+            if stream.replication_method == "FULL_TABLE":
+                max_pk_values = singer.get_bookmark("max_pk_values")
+                if max_pk_values:
+                    self.merge_bookmarks(
+                        stream,
+                        {
+                            "last_pk_fetched": {
+                                k: v
+                                for k, v in latest_record.items()
+                                if k in (stream.primary_keys or [])
+                            }
+                        },
+                    )
+            elif stream.replication_method in ["INCREMENTAL", "LOG_BASED"]:
+                if stream.replication_key is not None:
+                    self.merge_bookmarks(
+                        stream,
+                        {
+                            "replication_key": stream.replication_key,
+                            "replication_key_value": latest_record[
+                                stream.replication_key
+                            ],
+                        },
+                    )
 
     # Sync methods
 

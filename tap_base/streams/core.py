@@ -11,7 +11,7 @@ from tap_base.helpers import SecretString
 import time
 from functools import lru_cache
 from os import PathLike
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import (
     Dict,
     Any,
@@ -314,44 +314,6 @@ class Stream(metaclass=abc.ABCMeta):
             rows_sent += 1
             self._update_state(record, self.replication_method)
         self._write_state_message()
-
-    def _update_state(self, latest_record: Dict[str, Any], replication_method: str):
-        """Update the stream's internal state with data from the provided record."""
-        if not self._state:
-            self._state = singer.write_bookmark(
-                self._state, self.tap_stream_id, "version", self.get_stream_version(),
-            )
-        new_state = copy.deepcopy(self._state)
-        if latest_record:
-            if replication_method == "FULL_TABLE":
-                max_pk_values = singer.get_bookmark("max_pk_values")
-                if max_pk_values:
-                    last_pk_fetched = {
-                        k: v for k, v in latest_record.items() if k in self.primary_keys
-                    }
-                    new_state = singer.write_bookmark(
-                        new_state,
-                        self.tap_stream_id,
-                        "last_pk_fetched",
-                        last_pk_fetched,
-                    )
-            elif replication_method == "INCREMENTAL":
-                replication_key = self.replication_key
-                if replication_key is not None:
-                    new_state = singer.write_bookmark(
-                        new_state,
-                        self.tap_stream_id,
-                        "replication_key",
-                        replication_key,
-                    )
-                    new_state = singer.write_bookmark(
-                        new_state,
-                        self.tap_stream_id,
-                        "replication_key_value",
-                        latest_record[replication_key],
-                    )
-        self._state = new_state
-        return self._state
 
     def get_property_schema(self, property: str, warn=True) -> Optional[dict]:
         if property not in self.schema["properties"]:
