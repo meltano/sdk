@@ -29,8 +29,5 @@ build-backend = "poetry.core.masonry.rest"
 [tool.poetry.scripts]
 plugin-base = 'tap_base.plugin_base:PluginBase.cli'
 tap-base = 'tap_base.tap_base:cli'
-tap-countries = 'tap_base.samples.sample_tap_countries.countries_tap:cli'
-tap-gitlab = 'tap_base.samples.sample_tap_gitlab.gitlab_tap:cli'
-tap-google-analytics = 'tap_base.samples.sample_tap_google_analytics.ga_tap:cli'
-tap-parquet = 'tap_base.samples.sample_tap_parquet.parquet_tap:cli'
-tap-snowflake = 'tap_base.samples.sample_tap_snowflake.snowflake_tap:cli'
+# Sample CLI declaration:
+# tap-countries = 'tap_base.samples.sample_tap_countries.countries_tap:cli'
