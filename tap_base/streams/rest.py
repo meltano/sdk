@@ -55,7 +55,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     def get_url(self, substream_id: Optional[str] = None) -> str:
         url_pattern = "".join([self.url_base, self.path or ""])
-        params = self.get_query_params(substream_id)
+        params = self.get_params(substream_id)
         url = url_pattern
         for k, v in params.items():
             search_text = "".join(["{", k, "}"])

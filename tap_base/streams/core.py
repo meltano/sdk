@@ -110,7 +110,7 @@ class Stream(metaclass=abc.ABCMeta):
         """Return a frozen (read-only) config dictionary map."""
         return MappingProxyType(self._config)
 
-    def get_query_params(self, substream_id: Optional[str]) -> dict:
+    def get_params(self, substream_id: Optional[str]) -> dict:
         """By default, return all config values which are not secrets."""
         return {k: v for k, v in self.config.items() if not isinstance(v, SecretString)}
 

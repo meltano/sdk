@@ -1,5 +1,6 @@
 """Sample tap stream test for tap-gitlab."""
 
+import copy
 from pathlib import Path
 from tap_base import helpers
 from tap_base.authenticators import SimpleAuthenticator
@@ -27,9 +28,7 @@ class GitlabStream(RESTStream):
             http_headers["User-Agent"] = self.config.get("user_agent")
         return SimpleAuthenticator(stream=self, http_headers=http_headers)
 
-    def get_query_params(
-        self, substream_id: str
-    ) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
+    def get_params(self, substream_id: str) -> Dict[str, Any]:
         """Expose any needed config values into the URL parameterization process.
 
         If a list of dictionaries is returned, one call will be made for each item
@@ -110,10 +109,13 @@ class EpicIssuesStream(GitlabStream):
     schema_filepath = SCHEMAS_DIR / "epic_issues.json"
     parent_stream_types = [EpicsStream]  # Stream should wait for parents to complete.
 
-    def get_params(self, substream_id: Optional[str] = None) -> dict:
+    def get_params(self, substream_id: str) -> dict:
         """Return http params for a stream or substream."""
         substream_state = helpers.read_stream_state(
             self.state, (self.name, substream_id)
         )
         if "epic_id" not in substream_state:
             raise ValueError("Cannot sync epic issues without already known epic IDs.")
+        result = super().get_params(substream_id)
+        result.update(substream_state)
+        return result
