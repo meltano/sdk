@@ -89,6 +89,7 @@ class EpicsStream(ProjectBasedStream):
     schema_filepath = SCHEMAS_DIR / "epics.json"
 
     def post_process(self, row: dict) -> dict:
+        """Perform post processing, including queuing up any child stream types."""
         helpers.ensure_stream_state_exists(
             self.state, "epic_issues", substream=f"epic={row['id']}"
         )
