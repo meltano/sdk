@@ -1,7 +1,6 @@
 """Tap abstract class."""
 
 import abc
-import copy
 import json
 from pathlib import PurePath
 
@@ -128,7 +127,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             )
         if latest_record:
             if stream.replication_method == "FULL_TABLE":
-                max_pk_values = singer.get_bookmark("max_pk_values")
+                max_pk_values = singer._get_bookmark("max_pk_values")
                 if max_pk_values:
                     self.merge_bookmarks(
                         stream,

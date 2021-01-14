@@ -11,7 +11,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 from singer.schema import Schema
 
 from tap_base.authenticators import APIAuthenticatorBase, SimpleAuthenticator
-from tap_base.plugin_base import PluginBase
+from tap_base.plugin_base import TapBase
 from tap_base.streams.core import Stream
 
 URLArgMap = Dict[str, Union[str, bool, int, datetime]]
@@ -34,7 +34,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        tap: PluginBase,
+        tap: TapBase,
         state: Dict[str, Any],
         name: Optional[str] = None,
         schema: Optional[Union[Dict[str, Any], Schema]] = None,

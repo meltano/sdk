@@ -5,9 +5,8 @@ import copy
 import datetime
 import json
 import logging
-import sys
-from tap_base.plugin_base import PluginBase
-from tap_base.helpers import SecretString
+from tap_base.tap_base import TapBase
+from tap_base.helpers import SecretString, get_property_schema, is_boolean_type
 import time
 from functools import lru_cache
 from os import PathLike
@@ -21,6 +20,8 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
+    cast,
+    final,
 )
 
 import singer
@@ -45,7 +46,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        tap: PluginBase,
+        tap: TapBase,
         schema: Optional[Union[str, PathLike, Dict[str, Any], Schema]],
         name: Optional[str],
         state: Dict[str, Any],
@@ -112,7 +113,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     def get_stream_version(self):
         """Get stream version from bookmark."""
-        stream_version = self.get_bookmark("version")
+        stream_version = self._get_bookmark("version")
         if stream_version is None:
             stream_version = int(time.time() * 1000)
         return stream_version
@@ -128,7 +129,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def is_view(self) -> bool:
-        return self.get_metadata("is-view", None)
+        return self._get_metadata("is-view", None)
 
     @property
     def replication_method(self) -> str:
@@ -138,8 +139,12 @@ class Stream(metaclass=abc.ABCMeta):
             return "INCREMENTAL"
         return "FULL_TABLE"
 
+    # Singer spec properties
+
+    @final
     @property
     def singer_metadata(self) -> dict:
+        """Return the metadata dict from the singer spec."""
         self.logger.debug(f"Schema Debug: {self.schema}")
         md = metadata.get_standard_metadata(
             schema=self.schema,
@@ -152,6 +157,7 @@ class Stream(metaclass=abc.ABCMeta):
         )
         return md
 
+    @final
     @property
     def singer_catalog_entry(self) -> CatalogEntry:
         return CatalogEntry(
@@ -169,28 +175,9 @@ class Stream(metaclass=abc.ABCMeta):
             stream_alias=None,
         )
 
-    def set_custom_metadata(self, md: Optional[dict]) -> None:
-        if md:
-            self._custom_metadata = md
-        pk = self.get_metadata("key-properties", from_metadata_dict=md)
-        replication_key = self.get_metadata("replication-key", from_metadata_dict=md)
-        valid_bookmark_key = self.get_metadata(
-            "valid-replication-keys", from_metadata_dict=md
-        )
-        method = self.get_metadata(
-            "forced-replication-method", from_metadata_dict=md
-        ) or self.get_metadata("replication-method", from_metadata_dict=md)
-        if pk:
-            self.primary_keys = pk
-        if replication_key:
-            self.replication_key = replication_key
-        elif valid_bookmark_key:
-            self.replication_key = valid_bookmark_key[0]
-        if method:
-            self.forced_replication_method = method
+    # Private methods
 
-    # @lru_cache
-    def get_metadata(
+    def _get_metadata(
         self,
         key_name,
         default: Any = None,
@@ -211,7 +198,7 @@ class Stream(metaclass=abc.ABCMeta):
         result = md_map.get(breadcrumb, {}).get(key_name, default)
         return result
 
-    def wipe_bookmarks(
+    def _wipe_bookmarks(
         self, wipe_keys: List[str] = None, *, except_keys: List[str] = None,
     ) -> None:
         """Wipe bookmarks.
@@ -232,7 +219,7 @@ class Stream(metaclass=abc.ABCMeta):
                 singer.clear_bookmark(self._state, self.tap_stream_id, wipe_key)
             return
         elif except_keys:
-            return self.wipe_bookmarks(
+            return self._wipe_bookmarks(
                 [
                     found_key
                     for found_key in self._state.get("bookmarks", {})
@@ -242,45 +229,14 @@ class Stream(metaclass=abc.ABCMeta):
                 ]
             )
 
-    def get_bookmark(self, key: str, default: Any = None):
+    def _get_bookmark(self, key: str, default: Any = None):
+        """Return a bookmark key's value, or a default value if key is not set."""
         return singer.get_bookmark(
             state=self._state,
             tap_stream_id=self.tap_stream_id,
             key=key,
             default=default,
         )
-
-    def sync(self):
-        """Sync this stream."""
-        self.wipe_bookmarks(
-            except_keys=[
-                "last_pk_fetched",
-                "max_pk_values",
-                "version",
-                "initial_full_table_complete",
-            ]
-        )
-        bookmark = self._state.get("bookmarks", {}).get(self.tap_stream_id, {})
-        version_exists = True if "version" in bookmark else False
-        initial_full_table_complete = self.get_bookmark("initial_full_table_complete")
-        state_version = self.get_bookmark("version")
-        activate_version_message = singer.ActivateVersionMessage(
-            stream=self.tap_stream_id, version=self.get_stream_version()
-        )
-        self.logger.info(
-            f"Beginning sync of '{self.name}' using "
-            f"'{self.replication_method}' replication..."
-        )
-        if not initial_full_table_complete and not (
-            version_exists and state_version is None
-        ):
-            singer.write_message(activate_version_message)
-        self._write_schema_message()
-        self._sync_records()
-        singer.clear_bookmark(self._state, self.tap_stream_id, "max_pk_values")
-        singer.clear_bookmark(self._state, self.tap_stream_id, "last_pk_fetched")
-        self._write_state_message()
-        singer.write_message(activate_version_message)
 
     def _write_state_message(self):
         """Write out a STATE message with the latest state."""
@@ -301,59 +257,26 @@ class Stream(metaclass=abc.ABCMeta):
             row_dict = self.post_process(row_dict)
             if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
                 self._write_state_message()
-            record = self.conform_record_data_types(row_dict)
+            record = self._conform_record_data_types(row_dict)
             record_message = RecordMessage(
                 stream=self.name,
                 record=record,
                 version=None,
                 time_extracted=datetime.datetime.now(datetime.timezone.utc),
             )
-            # TODO: remove this temporary debug message
-            # self.logger.info(row_dict)
             singer.write_message(record_message)
             rows_sent += 1
             self._update_state(record, self.replication_method)
         self._write_state_message()
 
-    def get_property_schema(self, property: str, warn=True) -> Optional[dict]:
-        if property not in self.schema["properties"]:
-            if warn:
-                self.logger.debug(
-                    f"Could not locate schema mapping for property '{property}'. "
-                    "Any corresponding data will be excluded from the stream..."
-                )
-            return None
-        return self.schema["properties"][property]
-
-    def is_boolean_type(self, property_schema: dict) -> bool:
-        if "anyOf" not in property_schema and "type" not in property_schema:
-            logging.warning(
-                f"Could not detect data type in property schema: {property_schema}"
-            )
-            return False
-        for property_type in property_schema.get(
-            "anyOf", [property_schema.get("type")]
-        ):
-            if "boolean" in property_type or property_type == "boolean":
-                return True
-        return False
-
     @lru_cache()
-    def warn_unmapped_property(self, property_name: str):
+    def _warn_unmapped_property(self, property_name: str):
         self.logger.warning(
             f"Property '{property_name}' was present in the result stream but "
             "not found in catalog schema. Ignoring."
         )
 
-    # pylint: disable=too-many-branches
-    def conform_record_data_types(
-        self,
-        row: Dict[str, Any],
-        version: int = None,
-        time_extracted: datetime.datetime = datetime.datetime.now(
-            datetime.timezone.utc
-        ),
-    ) -> RecordMessage:
+    def _conform_record_data_types(self, row: Dict[str, Any]) -> RecordMessage:
         """Translate values in record dictionary to singer-compatible data types.
 
         Any property names not found in the schema catalog will be removed, and a
@@ -361,9 +284,9 @@ class Stream(metaclass=abc.ABCMeta):
         """
         rec: Dict[str, Any] = {}
         for property_name, elem in row.items():
-            property_schema = self.get_property_schema(property_name)
+            property_schema = get_property_schema(self.schema or {}, property_name)
             if not property_schema:
-                self.warn_unmapped_property(property_name)
+                self._warn_unmapped_property(property_name)
                 continue
             if isinstance(elem, datetime.datetime):
                 rec[property_name] = elem.isoformat() + "+00:00"
@@ -378,12 +301,12 @@ class Stream(metaclass=abc.ABCMeta):
             elif isinstance(elem, bytes):
                 # for BIT value, treat 0 as False and anything else as True
                 bit_representation: bool
-                if self.is_boolean_type(property_schema):
+                if is_boolean_type(property_schema):
                     bit_representation = elem != b"\x00"
                     rec[property_name] = bit_representation
                 else:
                     rec[property_name] = elem.hex()
-            elif self.is_boolean_type(property_schema):
+            elif is_boolean_type(property_schema):
                 boolean_representation: Optional[bool]
                 if elem is None:
                     boolean_representation = None
@@ -394,9 +317,44 @@ class Stream(metaclass=abc.ABCMeta):
                 rec[property_name] = boolean_representation
             else:
                 rec[property_name] = elem
-
-        # rec = dict(zip(columns, row_to_persist))
         return rec
+
+    # Public methods ("final", not recommended to be overriden)
+
+    @final
+    def sync(self):
+        """Sync this stream."""
+        self._wipe_bookmarks(
+            except_keys=[
+                "last_pk_fetched",
+                "max_pk_values",
+                "version",
+                "initial_full_table_complete",
+            ]
+        )
+        bookmark = self._state.get("bookmarks", {}).get(self.tap_stream_id, {})
+        version_exists = True if "version" in bookmark else False
+        initial_full_table_complete = self._get_bookmark("initial_full_table_complete")
+        state_version = self._get_bookmark("version")
+        activate_version_message = singer.ActivateVersionMessage(
+            stream=self.tap_stream_id, version=self.get_stream_version()
+        )
+        self.logger.info(
+            f"Beginning sync of '{self.name}' using "
+            f"'{self.replication_method}' replication..."
+        )
+        if not initial_full_table_complete and not (
+            version_exists and state_version is None
+        ):
+            singer.write_message(activate_version_message)
+        self._write_schema_message()
+        self._sync_records()
+        singer.clear_bookmark(self._state, self.tap_stream_id, "max_pk_values")
+        singer.clear_bookmark(self._state, self.tap_stream_id, "last_pk_fetched")
+        self._write_state_message()
+        singer.write_message(activate_version_message)
+
+    # Overridable Methods
 
     def apply_catalog(self, catalog_dict: dict,) -> None:
         """Apply a catalog dict, updating any settings overridden within the catalog."""
@@ -406,10 +364,6 @@ class Stream(metaclass=abc.ABCMeta):
         self.replication_key = catalog_entry.replication_key
         if catalog_entry.replication_method:
             self.forced_replication_method = catalog_entry.replication_method
-
-    def fatal(self):
-        """Fatal error. Abort stream."""
-        sys.exit(1)
 
     # Abstract Methods
 
@@ -424,3 +378,25 @@ class Stream(metaclass=abc.ABCMeta):
     def post_process(self, row: dict) -> dict:
         """Transform raw data from HTTP GET into the expected property values."""
         return row
+
+    # Deprecated (TODO: DELETE)
+
+    # def set_custom_metadata(self, md: Optional[dict]) -> None:
+    #     if md:
+    #         self._custom_metadata = md
+    #     pk = self.get_metadata("key-properties", from_metadata_dict=md)
+    #     replication_key = self.get_metadata("replication-key", from_metadata_dict=md)
+    #     valid_bookmark_key = self.get_metadata(
+    #         "valid-replication-keys", from_metadata_dict=md
+    #     )
+    #     method = self.get_metadata(
+    #         "forced-replication-method", from_metadata_dict=md
+    #     ) or self.get_metadata("replication-method", from_metadata_dict=md)
+    #     if pk:
+    #         self.primary_keys = pk
+    #     if replication_key:
+    #         self.replication_key = replication_key
+    #     elif valid_bookmark_key:
+    #         self.replication_key = valid_bookmark_key[0]
+    #     if method:
+    #         self.forced_replication_method = method

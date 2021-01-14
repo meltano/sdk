@@ -1,6 +1,5 @@
 """Classes to assist in authenticating to APIs."""
 
-import abc
 from copy import deepcopy
 import logging
 import jwt

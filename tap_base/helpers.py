@@ -3,7 +3,7 @@
 import pytz
 
 from datetime import datetime
-from typing import List, Union, cast
+from typing import List, Optional, Union, cast
 
 import singer
 
@@ -98,3 +98,18 @@ def get_catalog_entry_schema(catalog_entry: dict) -> dict:
             "is properly formatted."
         )
     return result
+
+
+def get_property_schema(schema: dict, property: str, warn=True) -> Optional[dict]:
+    if property not in schema["properties"]:
+        return None
+    return schema["properties"][property]
+
+
+def is_boolean_type(property_schema: dict) -> Optional[bool]:
+    if "anyOf" not in property_schema and "type" not in property_schema:
+        return None  # Could not detect data type
+    for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
+        if "boolean" in property_type or property_type == "boolean":
+            return True
+    return False

@@ -8,7 +8,7 @@ from tap_base.helpers import classproperty
 from tap_base.exceptions import TapStreamConnectionFailure
 from typing import Any, Dict, Iterable, List, Optional, Tuple, TypeVar, Union, cast
 
-from tap_base.plugin_base import PluginBase
+from tap_base.plugin_base import TapBase
 from tap_base.streams.core import Stream
 from tap_base import helpers
 
@@ -222,7 +222,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         return result
 
     @classmethod
-    def from_input_catalog(cls, tap: PluginBase) -> List[FactoryType]:
+    def from_input_catalog(cls, tap: TapBase) -> List[FactoryType]:
         result: List[FactoryType] = []
         catalog = tap.input_catalog
         for catalog_entry in helpers.get_catalog_entries(catalog):
