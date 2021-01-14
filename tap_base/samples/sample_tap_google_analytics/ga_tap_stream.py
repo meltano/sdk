@@ -30,7 +30,7 @@ class SampleGoogleAnalyticsStream(RESTStream):
     @property
     def authenticator(self) -> GoogleJWTAuthenticator:
         return GoogleJWTAuthenticator(
-            config=self.config,
+            stream=self,
             auth_endpoint=GOOGLE_OAUTH_ENDPOINT,
             oauth_scopes=GA_OAUTH_SCOPES,
         )

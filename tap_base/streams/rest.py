@@ -11,7 +11,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 from singer.schema import Schema
 
 from tap_base.authenticators import APIAuthenticatorBase, SimpleAuthenticator
-from tap_base.plugin_base import TapBase
+from tap_base.plugin_base import PluginBase as TapBaseClass
 from tap_base.streams.core import Stream
 
 URLArgMap = Dict[str, Union[str, bool, int, datetime]]
@@ -34,15 +34,12 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        tap: TapBase,
-        state: Dict[str, Any],
+        tap: TapBaseClass,
         name: Optional[str] = None,
         schema: Optional[Union[Dict[str, Any], Schema]] = None,
         path: Optional[str] = None,
     ):
-        super().__init__(
-            name=name, schema=schema, tap=tap, state=state,
-        )
+        super().__init__(name=name, schema=schema, tap=tap)
         if path:
             self.path = path
         self._http_headers: dict = {}
@@ -71,7 +68,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     @property
     def http_headers(self) -> dict:
         """Return headers dict to be used for HTTP requests."""
-        result = {}
+        result = self._http_headers
         if "user_agent" in self.config:
             result["User-Agent"] = self.config.get("user_agent")
         return result
@@ -118,7 +115,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         request_data = json or self.prepare_request_payload()
         http_method = http_method or self.rest_method
         request = requests.Request(
-            http_method=http_method,
+            method=http_method,
             url=url,
             params=params,
             headers=self.authenticator.http_headers,
@@ -158,7 +155,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     @property
     def authenticator(self) -> APIAuthenticatorBase:
         """Return an authorization header for REST API requests."""
-        return SimpleAuthenticator(stream=self, http_headers={})
+        return SimpleAuthenticator(stream=self)
 
     def get_next_page(self, response):
         return response.headers.get("X-Next-Page", None)

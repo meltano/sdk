@@ -1,7 +1,7 @@
 {
     "auth_token": "dummy_key",
     "project_ids": [
-        "meltano/tap-base",
+        "meltano/singer-sdk",
         "meltano/meltano",
     ]
 }

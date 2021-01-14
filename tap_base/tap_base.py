@@ -18,8 +18,6 @@ from tap_base.streams.core import Stream
 class Tap(PluginBase, metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    default_stream_class: Optional[Type[Stream]] = None
-
     # Constructor
 
     def __init__(
@@ -57,6 +55,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     stream.apply_catalog(self.input_catalog)
                 self._streams[stream.name] = stream
         return self._streams
+
+    @property
+    def state(self) -> dict:
+        """Return a state dict."""
+        return self._state
 
     @property
     def input_catalog(self) -> Optional[dict]:

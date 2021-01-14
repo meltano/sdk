@@ -5,7 +5,7 @@ import copy
 import datetime
 import json
 import logging
-from tap_base.tap_base import TapBase
+from tap_base.plugin_base import PluginBase as TapBaseClass
 from tap_base.helpers import SecretString, get_property_schema, is_boolean_type
 import time
 from functools import lru_cache
@@ -17,12 +17,15 @@ from typing import (
     List,
     Iterable,
     Optional,
-    Tuple,
     TypeVar,
     Union,
-    cast,
-    final,
 )
+
+try:
+    from typing import final
+except:
+    # Final not available until Python3.8
+    final = lambda x: x
 
 import singer
 from singer import CatalogEntry, RecordMessage, SchemaMessage
@@ -46,10 +49,9 @@ class Stream(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        tap: TapBase,
+        tap: TapBaseClass,
         schema: Optional[Union[str, PathLike, Dict[str, Any], Schema]],
         name: Optional[str],
-        state: Dict[str, Any],
     ):
         """Init tap stream."""
         if name:
@@ -59,12 +61,13 @@ class Stream(metaclass=abc.ABCMeta):
         self.logger: logging.Logger = tap.logger
         self.tap_name: str = tap.name
         self._config: dict = tap.config
-        self._state = state or {}
+        self._state = tap.state or {}
         self._schema: Optional[dict] = None
         self.forced_replication_method: Optional[str] = None
         self.replication_key: Optional[str] = None
         self.primary_keys: Optional[List[str]] = None
-        self.schema_filepath: Optional[Path] = None
+        if not hasattr(self, "schema_filepath"):  # Skip if set at the class level.
+            self.schema_filepath: Optional[Path] = None
         self.__init_schema(schema)
 
     def __init_schema(
@@ -72,14 +75,16 @@ class Stream(metaclass=abc.ABCMeta):
     ) -> None:
         if isinstance(schema, (str, PathLike)) and not self.schema_filepath:
             self.schema_filepath = Path(schema)
+        if isinstance(self.schema_filepath, str):
+            self.schema_filepath = Path(self.schema_filepath)
         if self.schema_filepath:
-            if not self.schema_filepath.is_file():
+            if not Path(self.schema_filepath).is_file():
                 raise FileExistsError(
                     f"Could not find schema file '{self.schema_filepath}'."
                 )
             self._schema = json.loads(self.schema_filepath.read_text())
         elif not schema:
-            raise ValueError("Required parameter 'schema' not provided.")
+            raise ValueError(f"Required 'schema' not provided for '{self.name}'.")
         elif isinstance(schema, Schema):
             self._schema = schema.to_dict()
         elif isinstance(schema, dict):
@@ -128,10 +133,6 @@ class Stream(metaclass=abc.ABCMeta):
         return self.name
 
     @property
-    def is_view(self) -> bool:
-        return self._get_metadata("is-view", None)
-
-    @property
     def replication_method(self) -> str:
         if self.forced_replication_method:
             return str(self.forced_replication_method)
@@ -176,27 +177,6 @@ class Stream(metaclass=abc.ABCMeta):
         )
 
     # Private methods
-
-    def _get_metadata(
-        self,
-        key_name,
-        default: Any = None,
-        breadcrumb: Tuple = (),
-        from_metadata_dict: dict = None,
-    ):
-        """Return top level metadata (breadcrumb="()")."""
-        if not from_metadata_dict:
-            md_dict = self._custom_metadata
-        else:
-            md_dict = from_metadata_dict
-        if not md_dict:
-            return default
-        md_map = metadata.to_map(md_dict)
-        if not md_map:
-            self.logger.warning(f"Could not find '{key_name}' metadata.")
-            return default
-        result = md_map.get(breadcrumb, {}).get(key_name, default)
-        return result
 
     def _wipe_bookmarks(
         self, wipe_keys: List[str] = None, *, except_keys: List[str] = None,
@@ -266,7 +246,8 @@ class Stream(metaclass=abc.ABCMeta):
             )
             singer.write_message(record_message)
             rows_sent += 1
-            self._update_state(record, self.replication_method)
+            # TODO: Fix bookmark state updates
+            # self.tap._update_state(record, self.replication_method)
         self._write_state_message()
 
     @lru_cache()
@@ -379,7 +360,7 @@ class Stream(metaclass=abc.ABCMeta):
         """Transform raw data from HTTP GET into the expected property values."""
         return row
 
-    # Deprecated (TODO: DELETE)
+    # Deprecated (TODO: Merge `set_custom_metadata()` with `apply_catalog()`)
 
     # def set_custom_metadata(self, md: Optional[dict]) -> None:
     #     if md:
@@ -400,3 +381,26 @@ class Stream(metaclass=abc.ABCMeta):
     #         self.replication_key = valid_bookmark_key[0]
     #     if method:
     #         self.forced_replication_method = method
+
+    # Deprecated (TODO: DELETE)
+
+    # def _get_metadata(
+    #     self,
+    #     key_name,
+    #     default: Any = None,
+    #     breadcrumb: Tuple = (),
+    #     from_metadata_dict: dict = None,
+    # ):
+    #     """Return top level metadata (breadcrumb="()")."""
+    #     if not from_metadata_dict:
+    #         md_dict = self._custom_metadata
+    #     else:
+    #         md_dict = from_metadata_dict
+    #     if not md_dict:
+    #         return default
+    #     md_map = metadata.to_map(md_dict)
+    #     if not md_map:
+    #         self.logger.warning(f"Could not find '{key_name}' metadata.")
+    #         return default
+    #     result = md_map.get(breadcrumb, {}).get(key_name, default)
+    #     return result

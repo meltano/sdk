@@ -25,7 +25,6 @@ class SampleTapGoogleAnalytics(Tap):
     name: str = PLUGIN_NAME
     accepted_config_keys = ACCEPTED_CONFIG_OPTIONS
     required_config_options = REQUIRED_CONFIG_SETS
-    default_stream_class = SampleGoogleAnalyticsStream
 
     def discover_streams(self) -> List[SampleGoogleAnalyticsStream]:
         """Return a list of all streams."""

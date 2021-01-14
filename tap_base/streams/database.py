@@ -1,14 +1,16 @@
 """Base class for database-type streams."""
 
 import abc
+from pathlib import Path
 import backoff
 
 import singer
+from singer.schema import Schema
 from tap_base.helpers import classproperty
 from tap_base.exceptions import TapStreamConnectionFailure
 from typing import Any, Dict, Iterable, List, Optional, Tuple, TypeVar, Union, cast
 
-from tap_base.plugin_base import TapBase
+from tap_base.plugin_base import PluginBase as TapBaseClass
 from tap_base.streams.core import Stream
 from tap_base import helpers
 
@@ -54,6 +56,16 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
 
     DEFAULT_QUOTE_CHAR = '"'
     OTHER_QUOTE_CHARS = ['"', "[", "]", "`"]
+
+    def __init__(
+        self,
+        tap: TapBaseClass,
+        schema: Optional[Union[str, Path, Dict[str, Any], Schema]],
+        name: Optional[str],
+    ):
+        super().__init__(tap=tap, schema=schema, name=name)
+        self.is_view: Optional[bool] = None
+        self.row_count: Optional[int] = None
 
     @property
     def records(self) -> Iterable[dict]:
@@ -185,9 +197,10 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         return result
 
     @classmethod
-    def from_discovery(cls, config: dict) -> List[FactoryType]:
+    def from_discovery(cls, tap: TapBaseClass) -> List[FactoryType]:
         """Return a list of all streams (tables)."""
-        result: List[DatabaseStream] = []
+        result: List[FactoryType] = []
+        config = tap.config
         table_scan_result: Iterable[List[Any]] = cls.execute_query(
             config=config, sql=cls.table_scan_sql, dict_results=False
         )
@@ -211,18 +224,19 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
                 raise RuntimeError(f"Did not find any columns for table '{full_name}'")
             singer_schema: singer.Schema = cls.create_singer_schema(columns)
             primary_keys = primary_keys_lookup.get(name_tuple, None)
-            new_stream = cls(
-                config=config, schema=singer_schema.to_dict(), name=full_name, state={},
+            new_stream = cast(
+                FactoryType,
+                cls(tap=tap, schema=singer_schema.to_dict(), name=full_name),
             )
             new_stream.primary_keys = primary_keys
-            # TODO: Expanded metadata support for setting `row_count` and `is_view`.
-            # new_stream.is_view = is_view
+            new_stream.is_view = is_view
+            # TODO: Expanded metadata support for provided `row_count` estimates.
             # new_stream.row_count = row_count
             result.append(new_stream)
         return result
 
     @classmethod
-    def from_input_catalog(cls, tap: TapBase) -> List[FactoryType]:
+    def from_input_catalog(cls, tap: TapBaseClass) -> List[FactoryType]:
         result: List[FactoryType] = []
         catalog = tap.input_catalog
         for catalog_entry in helpers.get_catalog_entries(catalog):
@@ -233,7 +247,6 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
                     tap=tap,
                     name=full_name,
                     schema=helpers.get_catalog_entry_schema(catalog_entry),
-                    state={},
                 ),
             )
             result.append(new_stream)

@@ -18,7 +18,6 @@ class SampleTapSnowflake(Tap):
     name = PLUGIN_NAME
     accepted_config_keys = ACCEPTED_CONFIG_OPTIONS
     required_config_options = REQUIRED_CONFIG_SETS
-    default_stream_class = SampleTapSnowflakeStream
 
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""

@@ -25,7 +25,7 @@ class GitlabStream(RESTStream):
         http_headers = {"Private-Token": self.config.get("auth_token")}
         if self.config.get("user_agent"):
             http_headers["User-Agent"] = self.config.get("user_agent")
-        return SimpleAuthenticator(http_headers=http_headers)
+        return SimpleAuthenticator(stream=self, http_headers=http_headers)
 
     def get_query_params(self) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
         """Expose any needed config values into the URL parameterization process.

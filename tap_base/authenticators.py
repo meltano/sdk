@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
 from tap_base.helpers import utc_now
-from tap_base.streams import RESTStream
+from tap_base.streams import Stream as RESTStreamBase
 
 from singer import utils
 
@@ -18,11 +18,11 @@ from singer import utils
 class APIAuthenticatorBase(object):
     """Base class for offloading API auth."""
 
-    def __init__(self, stream: RESTStream):
+    def __init__(self, stream: RESTStreamBase):
         """Init authenticator."""
+        self.tap_name: str = stream.tap_name
         self._config: Dict[str, Any] = stream.config
         self._http_headers = stream.http_headers
-        self.tap_name: str = stream.tap_name
         self.logger: logging.Logger = stream.logger
 
     @property
@@ -39,7 +39,7 @@ class APIAuthenticatorBase(object):
 class SimpleAuthenticator(APIAuthenticatorBase):
     """Base class for offloading API auth."""
 
-    def __init__(self, stream: RESTStream, http_headers: dict = None):
+    def __init__(self, stream: RESTStreamBase, http_headers: dict = None):
         """Init authenticator.
 
         If http_headers is provided, it will override the headers specified in `stream`.
@@ -56,7 +56,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: RESTStream,
+        stream: RESTStreamBase,
         auth_endpoint: Optional[str] = None,
         oauth_scopes: Optional[str] = None,
     ) -> None:
@@ -78,7 +78,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
     def client_id(self) -> Optional[str]:
         """Return client ID string to be used in authentication or None if not set."""
         if self.config:
-            return self.config.get("client_id")
+            return self.config.get("client_id", self.config.get("client_email"))
         return None
 
     @property
@@ -151,10 +151,10 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": jwt.encode(auth_request_body, private_key, "RS256"),
         }
-        # self.logger.debug(
-        #     f"Sending JWT token request with body {auth_request_body} "
-        #     f"and payload {payload}"
-        # )
+        self.logger.info(
+            f"Sending JWT token request with body {auth_request_body} "
+            f"and payload {payload}"
+        )
         token_response = requests.post(self.auth_endpoint, data=payload)
         # self.logger.debug(f"Received JWT request response: {token_response}")
         token_response.raise_for_status()
