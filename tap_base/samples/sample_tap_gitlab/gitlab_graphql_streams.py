@@ -56,7 +56,7 @@ class GraphQLProjectsStream(GitlabGraphQLStream):
     schema_filepath = SCHEMAS_DIR / "projects-graphql.json"
     query = Template(
         """
-        project(fullPath: "{{ project }}") {
+        project(fullPath: $project_id") {
             name
         }
         """
