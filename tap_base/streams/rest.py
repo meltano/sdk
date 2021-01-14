@@ -39,6 +39,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         schema: Optional[Union[Dict[str, Any], Schema]] = None,
         path: Optional[str] = None,
     ):
+        """Initialize the REST stream."""
         super().__init__(name=name, schema=schema, tap=tap)
         if path:
             self.path = path
@@ -47,6 +48,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     @staticmethod
     def url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
+        """Encode the val argument as url-compatible string."""
         if isinstance(val, str):
             result = val.replace("/", "%2F")
         else:
@@ -75,6 +77,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     @property
     def requests_session(self) -> requests.Session:
+        """Return the session object for HTTP requests."""
         if not self._requests_session:
             self._requests_session = requests.Session()
         return self._requests_session
@@ -125,7 +128,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     def request_paginated_get(self) -> Iterable[dict]:
         # params = {"page": 1, "per_page": self._page_size}
-        params = {}
+        params: dict = {}
         next_page = 1
         for url in self.get_urls():
             while next_page:

@@ -103,6 +103,13 @@ class PluginBase(metaclass=abc.ABCMeta):
             version = "[could not be detected]"
         return version
 
+    # Abstract methods:
+
+    @property
+    def state(self) -> dict:
+        """Return the state dict for the plugin."""
+        raise NotImplementedError()
+
     # Core plugin config:
 
     @property

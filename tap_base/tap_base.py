@@ -6,7 +6,7 @@ from pathlib import PurePath
 
 import singer
 from tap_base.helpers import classproperty
-from typing import Any, List, Optional, Type, Dict, Union
+from typing import Any, List, Optional, Dict, Union
 
 import click
 from singer.catalog import Catalog
@@ -87,6 +87,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         return Catalog(catalog_entries)
 
     def get_catalog_json(self) -> str:
+        """Return the tap's catalog as formatted json text."""
         return json.dumps(self.get_singer_catalog().to_dict(), indent=2)
 
     def discover_streams(self) -> List[Stream]:
@@ -97,14 +98,14 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         )
 
     def load_streams(self) -> List[Stream]:
-        """Load streams, referencing `self.discover_streams()`, `self.input_catalog`,
-        or both.
+        """Load streams from discovery or input catalog.
 
-        By default, return the output of `self.discover_streams()` to enumerate
-        discovered streams.
-
-        Developers may override this method if discovery is not supported, or if
-        discovery should not be run by default.
+        - Implementations may reference `self.discover_streams()`, `self.input_catalog`,
+          or both.
+        - By default, return the output of `self.discover_streams()` to enumerate
+          discovered streams.
+        - Developers may override this method if discovery is not supported, or if
+          discovery should not be run by default.
         """
         return self.discover_streams()
 
@@ -175,6 +176,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     @classproperty
     def cli(cls):
+        """Execute standard CLI handler for taps."""
+
         @click.option("--version", is_flag=True)
         @click.option("--discover", is_flag=True)
         @click.option("--config")

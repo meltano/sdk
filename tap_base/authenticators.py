@@ -97,7 +97,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         result["Authorization"] = f"Bearer {self.access_token}"
         return result
 
-    def is_token_valid(self):
+    def is_token_valid(self) -> bool:
+        """Return true if token is valid."""
         if self.last_refreshed is None:
             return False
         if not self.expires_in:
@@ -116,10 +117,12 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
 
     @property
     def private_key(self) -> Optional[str]:
+        """Return the private key to use in encryption."""
         return self.config.get("private_key", None)
 
     @property
     def private_key_passphrase(self) -> Optional[str]:
+        """Return the private key passphrase to use in encryption."""
         return self.config.get("private_key_passphrase", None)
 
     # Authentication and refresh

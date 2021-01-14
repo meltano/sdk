@@ -96,6 +96,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def schema(self) -> Optional[dict]:
+        """Return the schema dict for the stream."""
         return self._schema
 
     @property
@@ -134,6 +135,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def replication_method(self) -> str:
+        """Return the replication method to be used."""
         if self.forced_replication_method:
             return str(self.forced_replication_method)
         if self.replication_key:
@@ -161,6 +163,7 @@ class Stream(metaclass=abc.ABCMeta):
     @final
     @property
     def singer_catalog_entry(self) -> CatalogEntry:
+        """Return a singer CatalogEntry object."""
         return CatalogEntry(
             tap_stream_id=self.tap_stream_id,
             stream=self.name,
@@ -300,7 +303,7 @@ class Stream(metaclass=abc.ABCMeta):
                 rec[property_name] = elem
         return rec
 
-    # Public methods ("final", not recommended to be overriden)
+    # Public methods ("final", not recommended to be overridden)
 
     @final
     def sync(self):
@@ -359,6 +362,11 @@ class Stream(metaclass=abc.ABCMeta):
     def post_process(self, row: dict) -> dict:
         """Transform raw data from HTTP GET into the expected property values."""
         return row
+
+    @property
+    def http_headers(self) -> dict:
+        """Return headers to be used by HTTP requests."""
+        return NotImplemented()
 
     # Deprecated (TODO: Merge `set_custom_metadata()` with `apply_catalog()`)
 
