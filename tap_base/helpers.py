@@ -3,7 +3,7 @@
 import pytz
 
 from datetime import datetime
-from typing import List, Optional, Union, cast
+from typing import Any, List, Optional, Tuple, Union, cast
 
 import singer
 
@@ -104,3 +104,81 @@ def is_boolean_type(property_schema: dict) -> Optional[bool]:
         if "boolean" in property_type or property_type == "boolean":
             return True
     return False
+
+
+def ensure_stream_state_exists(
+    state: dict, tap_stream_id: str, substream: str = None
+) -> None:
+    if "bookmarks" not in state:
+        state["bookmarks"] = {}
+    if tap_stream_id not in state["bookmarks"]:
+        state["bookmarks"][tap_stream_id] = {}
+    if substream:
+        if "substreams" not in state["bookmarks"][tap_stream_id]:
+            state["bookmarks"][tap_stream_id]["substreams"] = {}
+        if substream not in state["bookmarks"][tap_stream_id]["substreams"]:
+            state["bookmarks"][tap_stream_id]["substreams"][substream] = {}
+
+
+def write_stream_state(state, stream_id_or_tuple: Union[str, Tuple], key, val) -> None:
+    tap_stream_id, substream = _parse_stream_and_substream(stream_id_or_tuple)
+    ensure_stream_state_exists(state, tap_stream_id, substream)
+    if not substream:
+        state["bookmarks"][tap_stream_id][key] = val
+    else:
+        state["bookmarks"][tap_stream_id]["substreams"][substream][key] = val
+
+
+def get_state_substream_ids(state, stream_id: str) -> Optional[List[str]]:
+    substreams = read_stream_state(state, stream_id, default={}).get("substreams")
+    if not substreams:
+        return None
+    return substreams.keys()
+
+
+def read_stream_state(
+    state, stream_id_or_tuple: Union[str, Tuple], key=None, default: Any = None
+) -> Any:
+    tap_stream_id, substream = _parse_stream_and_substream(stream_id_or_tuple)
+    ensure_stream_state_exists(state, tap_stream_id, substream)
+    if not substream:
+        state_dict = state.get("bookmarks", {}).get(tap_stream_id, {})
+    else:
+        state_dict = (
+            state.get("bookmarks", {})
+            .get(tap_stream_id, {})
+            .get("substreams", {})
+            .get(substream, {})
+        )
+    if key:
+        return state_dict.get(key, default)
+    else:
+        return state_dict or default
+
+
+def wipe_stream_state(state, stream_id_or_tuple: Union[str, Tuple], key):
+    tap_stream_id, substream = _parse_stream_and_substream(stream_id_or_tuple)
+    ensure_stream_state_exists(state, tap_stream_id, substream)
+    if not substream:
+        return state.get("bookmarks", {}).get(tap_stream_id, {}).pop(key)
+    else:
+        return (
+            state.get("bookmarks", {})
+            .get(tap_stream_id, {})
+            .get("substreams", {})
+            .get(substream, {})
+            .pop(key)
+        )
+
+
+def _parse_stream_and_substream(
+    stream_id_or_tuple: Union[str, Tuple]
+) -> Tuple[str, Optional[str]]:
+    substream: Optional[str] = None
+    if isinstance(stream_id_or_tuple, str):
+        tap_stream_id: str = stream_id_or_tuple
+    else:
+        tap_stream_id = stream_id_or_tuple[0]
+        if len(tap_stream_id) > 1:
+            substream = tap_stream_id[1]
+    return tap_stream_id, substream

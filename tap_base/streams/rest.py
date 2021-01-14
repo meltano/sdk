@@ -53,17 +53,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             result = str(val)
         return result
 
-    def get_urls(self) -> List[str]:
+    def get_url(self, substream_id: Optional[str] = None) -> str:
         url_pattern = "".join([self.url_base, self.path or ""])
-        result: List[str] = []
-        for params in self.get_query_params_list():
-            url = url_pattern
-            for k, v in params.items():
-                search_text = "".join(["{", k, "}"])
-                if search_text in url:
-                    url = url.replace(search_text, self.url_encode(v))
-            result.append(url)
-        return result
+        params = self.get_query_params(substream_id)
+        url = url_pattern
+        for k, v in params.items():
+            search_text = "".join(["{", k, "}"])
+            if search_text in url:
+                url = url.replace(search_text, self.url_encode(v))
+        return url
 
     @property
     def http_headers(self) -> dict:
@@ -124,11 +122,11 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         ).prepare()
         return request
 
-    def request_paginated_get(self) -> Iterable[dict]:
+    def request_paginated_get(self, substream_id: Optional[str]) -> Iterable[dict]:
         # params = {"page": 1, "per_page": self._page_size}
         params: dict = {}
         next_page = 1
-        for url in self.get_urls():
+        for url in [self.get_url(substream_id)]:
             while next_page:
                 # params["page"] = int(next_page)
                 resp = self.request_with_backoff(url, params)
@@ -148,8 +146,14 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     @property
     def records(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
-        for row in self.request_paginated_get():
-            yield row
+        substreams = self.get_substream_ids()
+        if substreams:
+            for substream_id in substreams:
+                for row in self.request_paginated_get(substream_id):
+                    yield row
+        else:
+            for row in self.request_paginated_get(None):
+                yield row
 
     # Abstract methods:
 

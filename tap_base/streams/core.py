@@ -8,6 +8,7 @@ import logging
 from types import MappingProxyType
 from tap_base.plugin_base import PluginBase as TapBaseClass
 from tap_base.helpers import SecretString, get_property_schema, is_boolean_type
+from tap_base import helpers
 import time
 from functools import lru_cache
 from os import PathLike
@@ -48,6 +49,8 @@ class Stream(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
     MAX_CONNECT_RETRIES = 0
+
+    parent_stream_types: List[Any] = []  # May be used in sync sequencing
 
     def __init__(
         self,
@@ -107,18 +110,9 @@ class Stream(metaclass=abc.ABCMeta):
         """Return a frozen (read-only) config dictionary map."""
         return MappingProxyType(self._config)
 
-    def get_query_params(self) -> Union[List[dict], dict]:
+    def get_query_params(self, substream_id: Optional[str]) -> dict:
         """By default, return all config values which are not secrets."""
-        return [
-            {k: v for k, v in self.config.items() if not isinstance(v, SecretString)}
-        ]
-
-    def get_query_params_list(self) -> List[dict]:
-        """By default, return all config values which are not secrets."""
-        params = self.get_query_params()
-        if isinstance(params, list):
-            return params
-        return [params]
+        return {k: v for k, v in self.config.items() if not isinstance(v, SecretString)}
 
     def get_stream_version(self):
         """Get stream version from bookmark."""
@@ -181,6 +175,12 @@ class Stream(metaclass=abc.ABCMeta):
             row_count=None,
             stream_alias=None,
         )
+
+    # Substreams
+
+    def get_substream_ids(self) -> Optional[List[str]]:
+        """Return a list of substream IDs (if applicable), otherwise None."""
+        return helpers.get_state_substream_ids(self._state, self.name)
 
     # Private methods
 
