@@ -5,7 +5,8 @@ import json
 import logging
 import os
 from copy import deepcopy
-from jsonschema import validate, ValidationError, SchemaError
+from jsonschema import ValidationError, SchemaError
+from jsonschema import Draft4Validator as JSONSchemaValidator
 from pathlib import Path, PurePath
 
 from tap_base.helpers import classproperty, is_common_secret_key, SecretString
@@ -155,7 +156,9 @@ class PluginBase(metaclass=abc.ABCMeta):
                 )
         if self.config_jsonschema:
             try:
-                validate(self.config, self.config_jsonschema)
+                validator = JSONSchemaValidator(self.config_jsonschema)
+                validator.validate(self.config)
+                raise ValueError(self.config_jsonschema)
             except (ValidationError, SchemaError) as ex:
                 errors.append(str(ex))
         if raise_errors and errors:

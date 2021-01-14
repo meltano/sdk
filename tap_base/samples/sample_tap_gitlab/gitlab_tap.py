@@ -32,7 +32,7 @@ class SampleTapGitlab(Tap):
         StringType("auth_token"),
         ArrayType("project_ids", StringType),
         DateTimeType("start_date"),
-        # StringType("api_url", optional=True), # TODO: Fix bug in optional=True
+        StringType("api_url", optional=True),
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:

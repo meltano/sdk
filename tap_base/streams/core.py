@@ -85,10 +85,10 @@ class Stream(metaclass=abc.ABCMeta):
             self._schema = json.loads(self.schema_filepath.read_text())
         elif not schema:
             raise ValueError(f"Required 'schema' not provided for '{self.name}'.")
-        elif isinstance(schema, Schema):
-            self._schema = schema.to_dict()
         elif isinstance(schema, dict):
             self._schema = schema
+        elif isinstance(schema, Schema):
+            self._schema = schema.to_dict()
         else:
             raise ValueError(
                 f"Unexpected type {type(schema).__name__} for arg 'schema'."
