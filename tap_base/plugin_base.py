@@ -1,6 +1,7 @@
 """Shared parent class for Tap, Target (future), and Transform (future)."""
 
 import abc
+from collections import OrderedDict
 from functools import lru_cache
 import json
 import logging
@@ -178,6 +179,20 @@ class PluginBase(metaclass=abc.ABCMeta):
     def print_version(cls) -> None:
         """Print help text for the tap."""
         print(f"{cls.name} v{cls.plugin_version}")
+
+    @classmethod
+    def print_about(cls, format: str) -> None:
+        """Print capabilities and other tap metadata."""
+        info = OrderedDict({})
+        info["name"] = cls.name
+        info["version"] = cls.plugin_version
+        info["capabilities"] = cls.capabilities
+        info["settings"] = cls.config_jsonschema
+        if format == "json":
+            print(json.dumps(info, indent=2))
+        else:
+            formatted = "\n".join([f"{k.title()}: {v}" for k, v in info])
+            print(formatted)
 
     @classmethod
     @click.command()

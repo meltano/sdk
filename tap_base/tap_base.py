@@ -179,20 +179,27 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Execute standard CLI handler for taps."""
 
         @click.option("--version", is_flag=True)
+        @click.option("--about", is_flag=True)
         @click.option("--discover", is_flag=True)
+        @click.option("--format")
         @click.option("--config")
         @click.option("--catalog")
         @click.command()
         def cli(
             version: bool = False,
+            about: bool = False,
             discover: bool = False,
             config: str = None,
             state: str = None,
             catalog: str = None,
+            format: str = None,
         ):
             """Handle command line execution."""
             if version:
                 cls.print_version()
+                return
+            if about:
+                cls.print_about(format)
                 return
             tap = cls(config=config, state=state, catalog=catalog)
             if discover:
