@@ -7,10 +7,13 @@ from tap_base import Tap, Stream
 from tap_base.samples.sample_tap_parquet.parquet_tap_stream import (
     SampleTapParquetStream,
 )
-from tap_base.samples.sample_tap_parquet.parquet_globals import (
-    PLUGIN_NAME,
-    ACCEPTED_CONFIG_OPTIONS,
-    REQUIRED_CONFIG_SETS,
+from tap_base.samples.sample_tap_parquet.parquet_globals import PLUGIN_NAME
+from tap_base.typehelpers import (
+    PropertiesList,
+    StringType,
+    ComplexType,
+    DateTimeType,
+    BooleanType,
 )
 
 
@@ -18,8 +21,7 @@ class SampleTapParquet(Tap):
     """Sample tap for Parquet."""
 
     name: str = PLUGIN_NAME
-    accepted_config_keys = ACCEPTED_CONFIG_OPTIONS
-    required_config_options = REQUIRED_CONFIG_SETS
+    config_jsonschema = PropertiesList(StringType("filepath")).to_dict()
 
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
@@ -29,13 +31,11 @@ class SampleTapParquet(Tap):
             new_stream = SampleTapParquetStream(
                 tap=self,
                 name=tap_stream_id,
-                schema=Schema(
-                    properties={
-                        "f0": Schema(type=["string", "None"]),
-                        "f1": Schema(type=["string", "None"]),
-                        "f2": Schema(type=["string", "None"]),
-                    }
-                ),
+                schema=PropertiesList(
+                    StringType("f0", optional=False),
+                    StringType("f1", optional=True),
+                    StringType("f2", optional=True),
+                ).to_dict(),
             )
             new_stream.primary_keys = ["f0"]
             new_stream.replication_key = "f0"
