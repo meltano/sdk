@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
 from tap_base.helpers import utc_now
-from tap_base.streams import Stream
+from tap_base.streams import RESTStream
 
 from singer import utils
 
@@ -19,38 +19,37 @@ from singer import utils
 class APIAuthenticatorBase(object):
     """Base class for offloading API auth."""
 
-    def __init__(self, stream: Stream):
+    def __init__(self, stream: RESTStream):
         """Init authenticator."""
         self._config: Dict[str, Any] = stream.config
+        self._http_headers = stream.http_headers
         self.tap_name: str = stream.tap_name
         self.logger: logging.Logger = stream.logger
-
-    @abc.abstractproperty
-    def http_headers(self) -> dict:
-        """Return a dictionary of HTTP headers, including any authentication tokens."""
-        raise NotImplementedError("Auth header is not implemented or not initialized.")
 
     @property
     def config(self) -> Dict[str, Any]:
         """Return config dictionary."""
         return deepcopy(self._config)
 
+    @property
+    def http_headers(self) -> dict:
+        """Return http headers."""
+        return self._http_headers
+
 
 class SimpleAuthenticator(APIAuthenticatorBase):
     """Base class for offloading API auth."""
 
-    def __init__(self, stream: Stream, http_headers: dict = None):
-        """Init authenticator."""
-        self._http_headers = http_headers
-        super().__init__(stream=stream)
+    def __init__(self, stream: RESTStream, http_headers: dict = None):
+        """Init authenticator.
 
-    @property
-    def http_headers(self) -> dict:
-        """Return a dictionary of HTTP headers, including any authentication tokens."""
-        if self._http_headers is not None:
-            return self._http_headers
-        else:
-            return super().http_headers
+        If http_headers is provided, it will override the headers specified in `stream`.
+        """
+        super().__init__(stream=stream)
+        if self._http_headers is None:
+            self._http_headers = {}
+        if http_headers:
+            self._http_headers.update(http_headers)
 
 
 class OAuthAuthenticator(APIAuthenticatorBase):
@@ -58,7 +57,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: Stream,
+        stream: RESTStream,
         auth_endpoint: Optional[str] = None,
         oauth_scopes: Optional[str] = None,
     ) -> None:
@@ -95,7 +94,9 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         """Return a dictionary of HTTP headers, including any authentication tokens."""
         if not self.is_token_valid():
             self.update_access_token()
-        return {"Authorization": f"Bearer {self.access_token}"}
+        result = super().http_headers
+        result["Authorization"] = f"Bearer {self.access_token}"
+        return result
 
     def is_token_valid(self):
         if self.last_refreshed is None:

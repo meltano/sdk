@@ -28,11 +28,16 @@ class GitlabGraphQLStream(GraphQLStream):
     url_base = SITE_URL
 
     @property
+    def http_headers(self) -> dict:
+        """Return headers dict to be used for HTTP requests."""
+        result = super().http_headers
+        result["Authorization"] = f"token {self.config.get('auth_token')}"
+        return result
+
+    @property
     def authenticator(self) -> SimpleAuthenticator:
         """Return an authenticator for GraphQL API requests."""
-        return SimpleAuthenticator(
-            http_headers={"Authorization": f"token {self.config.get('auth_token')}"}
-        )
+        return SimpleAuthenticator(self)
 
 
 class GraphQLCurrentUserStream(GitlabGraphQLStream):

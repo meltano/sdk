@@ -45,6 +45,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         )
         if path:
             self.path = path
+        self._http_headers: dict = {}
         self._requests_session = requests.Session()
 
     @staticmethod
@@ -65,6 +66,14 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
                 if search_text in url:
                     url = url.replace(search_text, self.url_encode(v))
             result.append(url)
+        return result
+
+    @property
+    def http_headers(self) -> dict:
+        """Return headers dict to be used for HTTP requests."""
+        result = {}
+        if "user_agent" in self.config:
+            result["User-Agent"] = self.config.get("user_agent")
         return result
 
     @property
