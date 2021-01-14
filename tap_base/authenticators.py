@@ -1,13 +1,15 @@
 """Classes to assist in authenticating to APIs."""
 
 from copy import deepcopy
+from functools import lru_cache
 import logging
+from types import MappingProxyType
 import jwt
 import math
 import requests
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Mapping, Optional
 
 from tap_base.helpers import utc_now
 from tap_base.streams import Stream as RESTStreamBase
@@ -26,9 +28,10 @@ class APIAuthenticatorBase(object):
         self.logger: logging.Logger = stream.logger
 
     @property
-    def config(self) -> Dict[str, Any]:
-        """Return config dictionary."""
-        return deepcopy(self._config)
+    @lru_cache()
+    def config(self) -> Mapping[str, Any]:
+        """Return a frozen (read-only) config dictionary map."""
+        return MappingProxyType(self._config)
 
     @property
     def http_headers(self) -> dict:

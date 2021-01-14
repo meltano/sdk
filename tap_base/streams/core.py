@@ -5,6 +5,7 @@ import copy
 import datetime
 import json
 import logging
+from types import MappingProxyType
 from tap_base.plugin_base import PluginBase as TapBaseClass
 from tap_base.helpers import SecretString, get_property_schema, is_boolean_type
 import time
@@ -16,6 +17,7 @@ from typing import (
     Any,
     List,
     Iterable,
+    Mapping,
     Optional,
     TypeVar,
     Union,
@@ -100,9 +102,10 @@ class Stream(metaclass=abc.ABCMeta):
         return self._schema
 
     @property
-    def config(self) -> Dict[str, Any]:
-        """Return config dictionary."""
-        return copy.deepcopy(self._config)
+    @lru_cache()
+    def config(self) -> Mapping[str, Any]:
+        """Return a frozen (read-only) config dictionary map."""
+        return MappingProxyType(self._config)
 
     def get_query_params(self) -> Union[List[dict], dict]:
         """By default, return all config values which are not secrets."""

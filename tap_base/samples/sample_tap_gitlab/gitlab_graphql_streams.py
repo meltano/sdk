@@ -17,8 +17,6 @@ from tap_base.samples.sample_tap_google_analytics.ga_globals import PLUGIN_NAME
 
 SITE_URL = "https://gitlab.com/graphql"
 
-URLArgMap = Dict[str, Union[str, bool, int, datetime]]
-
 SCHEMAS_DIR = Path("./tap_base/samples/sample_tap_gitlab/schemas")
 
 

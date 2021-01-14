@@ -14,8 +14,6 @@ from tap_base.authenticators import APIAuthenticatorBase, SimpleAuthenticator
 from tap_base.plugin_base import PluginBase as TapBaseClass
 from tap_base.streams.core import Stream
 
-URLArgMap = Dict[str, Union[str, bool, int, datetime]]
-
 DEFAULT_PAGE_SIZE = 1000
 
 

@@ -1,16 +1,18 @@
 """Shared parent class for Tap, Target (future), and Transform (future)."""
 
 import abc
+from functools import lru_cache
 import json
 import logging
 import os
 from copy import deepcopy
+from types import MappingProxyType
 from jsonschema import ValidationError, SchemaError
 from jsonschema import Draft4Validator as JSONSchemaValidator
 from pathlib import Path, PurePath
 
 from tap_base.helpers import classproperty, is_common_secret_key, SecretString
-from typing import Dict, List, Optional, Tuple, Any, Union
+from typing import Dict, List, Mapping, Optional, Tuple, Any, Union
 
 import click
 
@@ -114,9 +116,10 @@ class PluginBase(metaclass=abc.ABCMeta):
     # Core plugin config:
 
     @property
-    def config(self) -> Dict[str, Any]:
-        """Return config dictionary."""
-        return deepcopy(self._config)
+    @lru_cache()
+    def config(self) -> Mapping[str, Any]:
+        """Return a frozen (read-only) config dictionary map."""
+        return MappingProxyType(self._config)
 
     def is_secret_config(self, config_key: str) -> bool:
         """Return true if a config value should be treated as a secret.
@@ -157,8 +160,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         if self.config_jsonschema:
             try:
                 validator = JSONSchemaValidator(self.config_jsonschema)
-                validator.validate(self.config)
-                raise ValueError(self.config_jsonschema)
+                validator.validate(dict(self.config))
             except (ValidationError, SchemaError) as ex:
                 errors.append(str(ex))
         if raise_errors and errors:
