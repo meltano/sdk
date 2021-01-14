@@ -35,15 +35,6 @@ def is_common_secret_key(key_name: str) -> bool:
     return False
 
 
-def listify(str_or_list: Union[str, list]) -> list:
-    """Take a string or list and return it as a list."""
-    if isinstance(str_or_list, str):
-        result = str_or_list.split(",")
-    else:
-        result = str_or_list
-    return result
-
-
 class SecretString(str):
     """For now, this class wraps a sensitive string to be identified as such later."""
 

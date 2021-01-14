@@ -38,7 +38,7 @@ class GitlabStream(RESTStream):
             return super().get_query_params()  # Default behavior
         return [
             {"project_id": project_id, "start_date": self.config.get("start_date")}
-            for project_id in listify(self.config.get("project_ids"))
+            for project_id in self.config.get("project_ids")
         ]
 
 
