@@ -125,14 +125,16 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     def request_paginated_get(self, substream_id: Optional[str]) -> Iterable[dict]:
         # params = {"page": 1, "per_page": self._page_size}
         params: dict = {}
-        next_page = 1
+        next_page_token = 1
         for url in [self.get_url(substream_id)]:
-            while next_page:
-                # params["page"] = int(next_page)
+            while next_page_token:
+                params = self.insert_next_page_token(
+                    token=next_page_token, params=params
+                )
                 resp = self.request_with_backoff(url, params)
                 for row in self.parse_response(resp):
                     yield row
-                next_page = self.get_next_page(resp)
+                next_page_token = self.get_next_page_token(resp)
 
     def parse_response(self, response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows."""
@@ -162,5 +164,18 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """Return an authorization header for REST API requests."""
         return SimpleAuthenticator(stream=self)
 
-    def get_next_page(self, response):
-        return response.headers.get("X-Next-Page", None)
+    def get_next_page_token(self, response) -> Any:
+        """Return token for identifying next page or None if not applicable."""
+        next_page_token = response.headers.get("X-Next-Page", None)
+        if next_page_token:
+            self.logger.info(f"Next page token retrieved: {next_page_token}")
+        return next_page_token
+
+    def insert_next_page_token(self, next_page_token, params) -> Any:
+        """Inject next page token into http request params."""
+        if not next_page_token:
+            return params
+        if next_page_token == 1:
+            return params
+        params["page"] = next_page_token
+        return params
