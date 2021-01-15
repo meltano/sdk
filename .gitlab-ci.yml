@@ -16,8 +16,9 @@ cache:
     - venv/
 
 before_script:
-  - python -V # Print out python version for debugging
+  - python -V
   - pip install pipx
+  # Force update PATH to include pipx executables
   - export PATH=$PATH:/root/.local/bin
   - pipx install poetry
   - pipx install tox
