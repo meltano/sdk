@@ -1,0 +1,72 @@
+{
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "integer"
+        },
+        "iid": {
+            "type": "integer"
+        },
+        "group_id": {
+            "type": "integer"
+        },
+        "parent_id": {
+            "type": ["null", "integer"]
+        },
+        "title": {
+            "type": ["null", "string"]
+        },
+        "description": {
+            "type": ["null", "string"]
+        },
+        "state": {
+            "type": ["null", "string"]
+        },
+        "author_id": {
+            "type": ["null", "integer"]
+        },
+        "start_date": {
+            "type": ["null", "string"]
+        },
+        "end_date": {
+            "type": ["null", "string"]
+        },
+        "due_date": {
+            "type": ["null", "string"]
+        },
+        "created_at": {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "updated_at": {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "labels": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "upvotes": {
+            "type": ["null", "integer"]
+        },
+        "downvotes": {
+            "type": ["null", "integer"]
+        }
+    }
+}

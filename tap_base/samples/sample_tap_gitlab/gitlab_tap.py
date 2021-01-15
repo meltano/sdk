@@ -8,6 +8,8 @@ from tap_base.samples.sample_tap_gitlab.gitlab_rest_streams import (
     ReleasesStream,
     IssuesStream,
     CommitsStream,
+    EpicsStream,
+    EpicIssuesStream,
 )
 from tap_base.samples.sample_tap_gitlab.gitlab_graphql_streams import (
     GraphQLCurrentUserStream,
@@ -20,7 +22,8 @@ STREAM_TYPES = [
     ReleasesStream,
     IssuesStream,
     CommitsStream,
-    GraphQLCurrentUserStream,
+    EpicsStream,
+    EpicIssuesStream,
 ]
 
 
