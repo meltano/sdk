@@ -82,26 +82,27 @@ class Stream(metaclass=abc.ABCMeta):
             self.schema_filepath = Path(schema)
         if isinstance(self.schema_filepath, str):
             self.schema_filepath = Path(self.schema_filepath)
+        self._schema: Optional[dict] = None
         if self.schema_filepath:
             if not Path(self.schema_filepath).is_file():
                 raise FileExistsError(
                     f"Could not find schema file '{self.schema_filepath}'."
                 )
             self._schema = json.loads(self.schema_filepath.read_text())
-        elif not schema:
-            raise ValueError(f"Required 'schema' not provided for '{self.name}'.")
         elif isinstance(schema, dict):
             self._schema = schema
         elif isinstance(schema, Schema):
             self._schema = schema.to_dict()
-        else:
+        elif schema:
             raise ValueError(
                 f"Unexpected type {type(schema).__name__} for arg 'schema'."
             )
 
     @property
-    def schema(self) -> Optional[dict]:
+    def schema(self) -> dict:
         """Return the schema dict for the stream."""
+        if not self._schema:
+            raise ValueError(f"Required 'schema' not provided for '{self.name}'.")
         return self._schema
 
     @property

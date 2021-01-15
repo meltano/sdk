@@ -2,6 +2,13 @@
 
 import copy
 from pathlib import Path
+from tap_base.typehelpers import (
+    ArrayType,
+    DateTimeType,
+    IntegerType,
+    PropertiesList,
+    StringType,
+)
 from tap_base import helpers
 from tap_base.authenticators import SimpleAuthenticator
 from typing import Any, Dict, List, Optional, Union
@@ -86,7 +93,26 @@ class EpicsStream(ProjectBasedStream):
     path = "/groups/{group_id}/epics?updated_after={start_date}"
     primary_keys = ["id"]
     replication_key = None
-    schema_filepath = SCHEMAS_DIR / "epics.json"
+    schema = PropertiesList(
+        IntegerType("id"),
+        IntegerType("iid"),
+        IntegerType("group_id"),
+        IntegerType("parent_id", optional=True),
+        StringType("title", optional=True),
+        StringType("description", optional=True),
+        StringType("state", optional=True),
+        IntegerType("author_id", optional=True),
+        DateTimeType("start_date", optional=True),
+        DateTimeType("end_date", optional=True),
+        DateTimeType("due_date", optional=True),
+        DateTimeType("created_at", optional=True),
+        DateTimeType("updated_at", optional=True),
+        ArrayType("labels", wrapped_type=StringType),
+        IntegerType("upvotes", optional=True),
+        IntegerType("downvotes", optional=True),
+    ).to_dict()
+
+    # schema_filepath = SCHEMAS_DIR / "epics.json"
 
     def post_process(self, row: dict) -> dict:
         """Perform post processing, including queuing up any child stream types."""
