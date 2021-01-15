@@ -106,7 +106,6 @@ class Stream(metaclass=abc.ABCMeta):
         return self._schema
 
     @property
-    @lru_cache()
     def config(self) -> Mapping[str, Any]:
         """Return a frozen (read-only) config dictionary map."""
         return MappingProxyType(self._config)

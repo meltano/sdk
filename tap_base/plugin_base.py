@@ -2,18 +2,16 @@
 
 import abc
 from collections import OrderedDict
-from functools import lru_cache
 import json
 import logging
 import os
-from copy import deepcopy
 from types import MappingProxyType
 from jsonschema import ValidationError, SchemaError
 from jsonschema import Draft4Validator as JSONSchemaValidator
 from pathlib import Path, PurePath
 
 from tap_base.helpers import classproperty, is_common_secret_key, SecretString
-from typing import Dict, List, Mapping, Optional, Tuple, Any, Union
+from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
 
 import click
 
@@ -117,10 +115,9 @@ class PluginBase(metaclass=abc.ABCMeta):
     # Core plugin config:
 
     @property
-    @lru_cache()
     def config(self) -> Mapping[str, Any]:
         """Return a frozen (read-only) config dictionary map."""
-        return MappingProxyType(self._config)
+        return cast(Dict, MappingProxyType(self._config))
 
     def is_secret_config(self, config_key: str) -> bool:
         """Return true if a config value should be treated as a secret.
@@ -138,7 +135,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """Return a tuple: (warnings: List[str], errors: List[str])."""
         warnings: List[str] = []
         errors: List[str] = []
-        for k in self.config:
+        for k in self.config.values():
             if k not in self.accepted_config_keys:
                 warnings.append(f"Unexpected config option found: {k}.")
         if self.required_config_options:
@@ -181,9 +178,9 @@ class PluginBase(metaclass=abc.ABCMeta):
         print(f"{cls.name} v{cls.plugin_version}")
 
     @classmethod
-    def print_about(cls, format: str) -> None:
+    def print_about(cls, format: Optional[str]) -> None:
         """Print capabilities and other tap metadata."""
-        info = OrderedDict({})
+        info = OrderedDict[str, Any]()
         info["name"] = cls.name
         info["version"] = cls.plugin_version
         info["capabilities"] = cls.capabilities

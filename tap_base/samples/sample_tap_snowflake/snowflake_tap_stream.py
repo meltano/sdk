@@ -1,7 +1,7 @@
 """Sample tap stream test for tap-snowflake."""
 
 from tap_base.helpers import classproperty
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Dict, Iterable, List, Optional, Tuple, Union
 from snowflake import connector
 
 from tap_base.streams import DatabaseStream
@@ -23,7 +23,7 @@ class SampleTapSnowflakeStream(DatabaseStream):
     @classmethod
     def execute_query(
         cls, sql: Union[str, List[str]], config, dict_results=True,
-    ) -> Union[Iterable[dict], Iterable[List]]:
+    ) -> Union[Iterable[dict], Iterable[Tuple]]:
         """Run a query in snowflake."""
         connection = cls.open_connection(config=config)
         with connection.cursor(connector.DictCursor) as cur:

@@ -254,7 +254,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
 
     @abc.abstractclassmethod
     def execute_query(
-        self, sql: Union[str, List[str]], config, dict_results=True
+        cls, sql: Union[str, List[str]], config, dict_results=True
     ) -> Union[Iterable[dict], Iterable[Tuple]]:
         """Run a SQL query and generate a dict for each returned row."""
         pass
