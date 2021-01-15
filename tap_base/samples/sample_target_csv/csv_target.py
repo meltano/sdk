@@ -11,7 +11,7 @@ class SampleTargetCSV(TargetBase):
 
     name = "target-csv"
     config_jsonschema = th.PropertiesList(
-        th.StringType("filepath", optional=True),
+        th.StringType("target_folder", optional=True),
         th.StringType("file_naming_scheme", optional=True),
     ).to_dict()
     default_sink_class = SampleCSVTargetSink

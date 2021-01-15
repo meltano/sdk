@@ -16,7 +16,7 @@ from dateutil import parser
 
 import inflection
 
-from tap_base.streams.core import TapStreamBase
+from tap_base.streams.core import Stream
 
 
 class RecordFlattener:
@@ -89,7 +89,7 @@ class RecordFlattener:
         return False
 
 
-class TargetSinkBase(TapStreamBase, metaclass=abc.ABCMeta):
+class TargetSinkBase(Stream, metaclass=abc.ABCMeta):
     """Abstract base class for target streams."""
 
     DEFAULT_BATCH_SIZE_ROWS = 100000
