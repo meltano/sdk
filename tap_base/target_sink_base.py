@@ -288,7 +288,6 @@ class TargetSinkBase(TapStreamBase, metaclass=abc.ABCMeta):
         self.emit_state()
         return self._flushed_state
 
-
     # Abstract methods:
 
     @abc.abstractmethod

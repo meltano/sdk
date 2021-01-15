@@ -1,11 +1,10 @@
 """TargetBase abstract class."""
 
 import abc
+import copy
 import json
 
-from typing import Any, Dict, Iterable, List, Optional, Type
-
-from singer import Catalog, CatalogEntry
+from typing import Any, Dict, Iterable, Optional, Type
 
 from tap_base.plugin_base import PluginBase
 from tap_base.target_sink_base import TargetSinkBase
@@ -17,28 +16,28 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
     # Constructor
 
     _stream_class: Type[TargetSinkBase]
-    _streams: Dict[str, TargetSinkBase] = {}
+    _sinks: Dict[str, TargetSinkBase] = {}
 
     def __init__(self, config: Optional[Dict[str, Any]] = None,) -> None:
         """Initialize the tap."""
         super().__init__(config=config)
 
-    def get_stream(self, stream_name: str) -> TargetSinkBase:
-        if stream_name in self._streams:
-            return self._streams[stream_name]
+    def get_sink(self, stream_name: str) -> TargetSinkBase:
+        if stream_name in self._sinks:
+            return self._sinks[stream_name]
         raise RuntimeError(
             "Attempted to retrieve stream before initialization. "
             "Please check that the upstream tap has sent the proper SCHEMA message."
         )
 
-    def stream_exists(self, stream_name: str) -> bool:
-        return stream_name in self._streams
+    def sink_exists(self, stream_name: str) -> bool:
+        return stream_name in self._sinks
 
-    def init_stream(self, stream_name: str, schema: dict) -> TargetSinkBase:
-        self._streams[stream_name] = self._stream_class(
+    def init_sink(self, stream_name: str, schema: dict) -> TargetSinkBase:
+        self._sinks[stream_name] = self._stream_class(
             stream_name=stream_name, schema=schema, logger=self.logger, flatten=False
         )
-        return self._streams[stream_name]
+        return self._sinks[stream_name]
 
     def process_lines(self, lines: Iterable[str], table_cache=None) -> None:
         for line in lines:
@@ -65,18 +64,18 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
         if "stream" not in message_dict:
             raise Exception(f"Line is missing required key 'stream': {message_dict}")
         stream_name = message_dict["stream"]
-        if not self.stream_exists(stream_name):
+        if not self.sink_exists(stream_name):
             raise Exception(
                 f"A record for stream '{stream_name}' was encountered before a "
                 "corresponding schema."
             )
-        stream = self.get_stream(stream_name)
+        stream = self.get_sink(stream_name)
         record = message_dict["record"]
         stream.process_record(record, message_dict)
         if stream._num_records_cached >= self._stream_class.DEFAULT_BATCH_SIZE_ROWS:
             # flush all streams, delete records if needed, reset counts and then emit current state
             if self.get_config("flush_all_streams"):
-                streams_to_flush = self._streams
+                streams_to_flush = self._sinks
             else:
                 streams_to_flush = [stream]
             for stream in streams_to_flush:
@@ -92,17 +91,17 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
         # Update and flush only if the the schema is new or different than
         # the previously used version of the schema
         if stream_name not in self._schemas:
-            self.init_stream(stream_name, new_schema)
+            self.init_sink(stream_name, new_schema)
         else:
-            stream = self.get_stream(stream_name)
-            prev_schema = stream.schema
+            sink = self.get_sink(stream_name)
+            prev_schema = sink.schema
             if prev_schema != new_schema:
                 # flush records from previous stream SCHEMA
                 # if same stream has been encountered again, it means the schema might have been altered
                 # so previous records need to be flushed
-                stream.flush_records()
+                sink.flush_records()
                 if self._row_count.get(stream_name, 0) > 0:
-                    flushed_state = self.flush_streams(
+                    flushed_state = self.flush_sinks(
                         self._records_to_load,
                         self._row_count,
                         self._stream_to_sync,
@@ -131,9 +130,8 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
                     and len(message_dict["key_properties"]) == 0
                 ):
                     self.logger.critical(
-                        "Primary key is set to mandatory but not defined in the [{}] stream".format(
-                            stream_name
-                        )
+                        "Primary key is set to mandatory but not defined in "
+                        f"the [{stream_name}] stream"
                     )
                     raise Exception("key_properties field is required")
 
@@ -159,9 +157,7 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
                 self._total_row_count[stream_name] = 0
 
     # pylint: disable=too-many-arguments
-    def flush_streams(
-        stream_to_sync, filter_streams=None,
-    ):
+    def flush_sinks(stream_to_sync, filter_streams=None):
         """
         Flushes all buckets and resets records count to 0 as well as empties records to load list
 

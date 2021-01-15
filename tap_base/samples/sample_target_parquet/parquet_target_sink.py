@@ -5,7 +5,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from tap_base.tests.sample_target_parquet.parquet_target_globals import PLUGIN_NAME
+from tap_base.samples.sample_target_parquet.parquet_target_globals import PLUGIN_NAME
 from tap_base.target_sink_base import TargetSinkBase
 
 
@@ -14,8 +14,8 @@ class SampleParquetTargetSink(TargetSinkBase):
     target_name = PLUGIN_NAME
 
     DEFAULT_BATCH_SIZE_ROWS = 100000
-    DEFAULT_PARALLELISM = 0  # 0 The number of threads used to flush tables
-    DEFAULT_MAX_PARALLELISM = 16  # Don't use more than this number of threads by default when flushing streams in parallel
+    DEFAULT_PARALLELISM = 0  # Num threads used to flush tables, per sink
+    DEFAULT_MAX_PARALLELISM = 16  # Max threads across all sinks
 
     DATETIME_ERROR_TREATMENT = "MAX"
 
@@ -46,7 +46,7 @@ class SampleParquetTargetSink(TargetSinkBase):
     # Target-specific methods
 
     @staticmethod
-    def get_target_data_type(singer_type: Union[str, Dict]) -> Any:
+    def translate_data_type(singer_type: Union[str, Dict]) -> Any:
         if singer_type in ["decimal", "float", "double"]:
             return pa.decimal128
         if singer_type in ["date-time"]:
@@ -59,6 +59,6 @@ class SampleParquetTargetSink(TargetSinkBase):
         col_list: List[Tuple[str, Any]] = []
         for property in self.schema["properties"]:
             col_list.append(
-                (property["name"], self.get_target_data_type(property["type"]))
+                (property["name"], self.translate_data_type(property["type"]))
             )
         return col_list
