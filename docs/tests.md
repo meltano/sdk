@@ -8,15 +8,15 @@ Poetry allows us to test command line in the virtualenv using the prefix `poetry
 
 ```bash
 poetry install && \
-poetry run sample-tap-parquet --help
+poetry run tap-parquet --help
 ```
 
 **Run 'sync' with auto-discovery...**
 
 ```bash
 poetry install && \
-poetry run sample-tap-parquet \
-   --config tap_base/tests/sample_tap_parquet/tests/config.sample.json
+poetry run tap-parquet \
+   --config tap_base/samples/sample_tap_parquet/parquet-config.sample.json
 ```
 
 **Run 'sync' with a catalog file input...**
@@ -24,8 +24,8 @@ poetry run sample-tap-parquet \
 ```bash
 poetry install && \
 poetry run sample-tap-parquet \
-   --config tap_base/tests/sample_tap_parquet/tests/config.sample.json
-   --catalog tap_base/tests/sample_tap_parquet/tests/catalog.sample.json
+   --config tap_base/samples/sample_tap_parquet/parquet-config.sample.json
+   --catalog tap_base/samples/sample_tap_parquet/parquet-catalog.sample.json
 ```
 
 **Run 'discovery'...**
@@ -33,7 +33,7 @@ poetry run sample-tap-parquet \
 ```bash
 poetry install && \
 poetry run sample-tap-parquet --discover \
-   --config tap_base/tests/sample_tap_parquet/tests/config.sample.json
+   --config tap_base/samples/sample_tap_parquet/parquet-config.sample.json
 ```
 
 **Run 'discovery' with a passed catalog file (kind of cheating, but may be valid for some cases)...**
@@ -41,8 +41,8 @@ poetry run sample-tap-parquet --discover \
 ```bash
 poetry install && \
 poetry run sample-tap-parquet --discover \
-   --config tap_base/tests/sample_tap_parquet/tests/config.sample.json \
-   --catalog tap_base/tests/sample_tap_parquet/tests/catalog.sample.json
+   --config tap_base/samples/sample_tap_parquet/parquet-config.sample.json \
+   --catalog tap_base/samples/sample_tap_parquet/parquet-catalog.sample.json
 ```
 
 **Note:**

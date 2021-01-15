@@ -1,5 +1,12 @@
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python/tags/
+#
+# Matrix syntax not correct:
+# .parallel:python_version:
+#   parallel:
+#     matrix:
+#       - PYTHON_VERSION: ["3.6", "3.7", "3.8"]
+
 image: python:3.6
 
 variables:
@@ -11,8 +18,9 @@ cache:
     - venv/
 
 before_script:
-  - python -V # Print out python version for debugging
+  - python -V
   - pip install pipx
+  # Force update PATH to include pipx executables
   - export PATH=$PATH:/root/.local/bin
   - pipx install poetry
   - pipx install tox
@@ -20,24 +28,4 @@ before_script:
 
 test:
   script:
-    - source $(poetry env info --path)/bin/activate
     - poetry run pytest
-    # - tox -e py36,flake8
-
-    # run:
-#   script:
-#     - poetry build
-#   artifacts:
-#     paths:
-#       - dist/*.whl
-
-# pages:
-#   script:
-#     - pip install sphinx sphinx-rtd-theme
-#     - cd doc ; make html
-#     - mv build/html/ ../public/
-#   artifacts:
-#     paths:
-#       - public
-#   # only:
-#   #   - master

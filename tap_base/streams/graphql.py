@@ -1,62 +1,32 @@
 """Abstract base class for API-type streams."""
 
 import abc
-import jinja2
-from json import dumps
-import requests
-import logging
+from typing import Iterable, Optional
 
-from datetime import datetime
-from typing import Any, Dict, Iterable, Optional, Union
-
-from singer.schema import Schema
-
-from tap_base.streams.rest import RESTStreamBase
-
-URLArgMap = Dict[str, Union[str, bool, int, datetime]]
-
-DEFAULT_PAGE_SIZE = 1000
+from tap_base.streams.rest import RESTStream
 
 
-class GraphQLStreamBase(RESTStreamBase, metaclass=abc.ABCMeta):
+class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
     """Abstract base class for API-type streams."""
 
-    graphql_query: Optional[Union[str, jinja2.Template]] = None
-    url_pattern = ""  # use the base URL directly for GraphQL sources.
+    query: Optional[str] = None
+    path = ""
+    rest_method = "POST"
 
-    def __init__(
-        self,
-        config: dict,
-        state: Dict[str, Any],
-        name: Optional[str] = None,
-        schema: Optional[Union[Dict[str, Any], Schema]] = None,
-    ):
-        super().__init__(
-            name=name,
-            schema=schema,
-            state=state,
-            config=config,
-            url_pattern="",
-        )
-        self._requests_session = requests.Session()
-
-    def prepare_request(
-        self, url, params=None, method="POST", json=None
-    ) -> requests.PreparedRequest:
-        self.logger.info("Preparing GraphQL API request...")
-        if method != "POST":
-            raise ValueError("Argument 'method' must be 'POST' for GraphQL streams.")
-        if not self.graphql_query:
-            raise ValueError("Missing value for 'graphql_query'.")
-        if isinstance(self.graphql_query, jinja2.Template):
-            query = self.graphql_query.render(**self.template_values)
+    def prepare_request_payload(self) -> Optional[dict]:
+        """Prepare the data payload for the GraphQL API request."""
+        if self.query is None:
+            raise ValueError("Graphql `query` property not set.")
         else:
-            query = self.graphql_query
-        query = "query {\n    " + ("\n    ".join(query.splitlines())) + "}"
+            query = self.query
+        request_data = {
+            "query": "query { "
+            + (" ".join([l.strip() for l in query.splitlines()]))
+            + " }",
+            "variables": self.get_params(substream_id=None),
+        }
         self.logger.info(f"Attempting query:\n{query}")
-        return super().prepare_request(
-            url=url, params=params, method="POST", json={"query": query}
-        )
+        return request_data
 
     def parse_response(self, response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows."""

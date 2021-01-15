@@ -1,86 +1,77 @@
-"""TapBase abstract class."""
+"""Tap abstract class."""
 
 import abc
 import json
-from logging import Logger
+from pathlib import PurePath
 
-from singer.catalog import Catalog
+import singer
 from tap_base.helpers import classproperty
-
-from typing import Any, List, Optional, Type, Dict
-from pathlib import Path
+from typing import Any, List, Optional, Dict, Union
 
 import click
+from singer.catalog import Catalog
 
 from tap_base.plugin_base import PluginBase
-from tap_base.streams.core import TapStreamBase
+from tap_base.streams.core import Stream
 
 
-class TapBase(PluginBase, metaclass=abc.ABCMeta):
+class Tap(PluginBase, metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    # TODO: Remove (Should be object-level, not class-level)
-    # _streams: Dict[str, TapStreamBase] = {}
-
-    default_stream_class: Optional[Type[TapStreamBase]] = None
     # Constructor
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        catalog: Optional[Dict[str, Any]] = None,
-        state: Optional[Dict[str, Any]] = None,
+        config: Union[PurePath, str, dict, None] = None,
+        catalog: Union[PurePath, str, dict, None] = None,
+        state: Union[PurePath, str, dict, None] = None,
     ) -> None:
         """Initialize the tap."""
-        self._state = state or {}
-        self._streams: Dict[str, TapStreamBase] = {}
-        super().__init__(config=config)
-        if catalog:
-            self.logger.info("loading catalog streams...")
-            self.load_catalog_streams(
-                catalog=catalog, config=self._config, state=self._state,
-            )
+        if isinstance(state, dict):
+            state_dict = state
         else:
-            self.logger.info("discovering catalog streams...")
-            self.discover_catalog_streams()
+            state_dict = self.read_optional_json_file(state) or {}
+        self._input_catalog: Optional[dict] = None
+        if isinstance(catalog, dict):
+            self._input_catalog = catalog
+        elif catalog is not None:
+            self._input_catalog = self.read_optional_json_file(catalog)
+        self._state = state_dict or {}
+        self._streams: Optional[Dict[str, Stream]] = None
+        super().__init__(config=config)
 
-    @classmethod
-    def get_stream_class(cls, stream_name: str) -> Type[TapStreamBase]:
-        if not cls.default_stream_class:
-            raise ValueError(
-                "No stream class detected for '{cls.name}' stream '{stream_name}'"
-                "and no default_stream_class defined."
-            )
-        return cls.default_stream_class
+    # Class properties
 
     @property
-    def streams(self) -> Dict[str, TapStreamBase]:
+    def streams(self) -> Dict[str, Stream]:
+        """Return a list of streams, using discovery or a provided catalog.
+
+        Results will be cached after first execution.
+        """
+        if self._streams is None:
+            self._streams = {}
+            for stream in self.load_streams():
+                if self.input_catalog:
+                    stream.apply_catalog(self.input_catalog)
+                self._streams[stream.name] = stream
         return self._streams
+
+    @property
+    def state(self) -> dict:
+        """Return a state dict."""
+        return self._state
+
+    @property
+    def input_catalog(self) -> Optional[dict]:
+        """Return the catalog dictionary input, or None if not provided."""
+        return self._input_catalog
 
     @property
     def capabilities(self) -> List[str]:
         """Return a list of supported capabilities."""
-        result = ["sync", "catalog", "state"]
-        if self.discoverable:
-            result.append("discover")
-        return result
+        return ["sync", "catalog", "state", "discover"]
 
-    # Abstract stream detection methods:
-
-    def load_catalog_streams(self, catalog: dict, state: dict, config: dict) -> None:
-        streams: List[Dict] = catalog["streams"]
-        for stream in streams:
-            stream_name = stream["tap_stream_id"]
-            new_stream = self.get_stream_class(stream_name).from_stream_dict(
-                stream_dict=stream, state=state, config=config
-            )
-            self._streams[stream_name] = new_stream
-
-    def discover_catalog_streams(self) -> None:
-        raise NotImplementedError(
-            f"Tap '{self.name}' does not support discovery. "
-            "Please set the '--catalog' command line argument and try again."
-        )
+    # Stream detection:
 
     def run_discovery(self) -> str:
         """Write the catalog json to STDOUT and return the same as a string."""
@@ -96,18 +87,84 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
         return Catalog(catalog_entries)
 
     def get_catalog_json(self) -> str:
+        """Return the tap's catalog as formatted json text."""
         return json.dumps(self.get_singer_catalog().to_dict(), indent=2)
+
+    def discover_streams(self) -> List[Stream]:
+        """Return a list of discovered streams."""
+        raise NotImplementedError(
+            f"Tap '{self.name}' does not support discovery. "
+            "Please set the '--catalog' command line argument and try again."
+        )
+
+    def load_streams(self) -> List[Stream]:
+        """Load streams from discovery or input catalog.
+
+        - Implementations may reference `self.discover_streams()`, `self.input_catalog`,
+          or both.
+        - By default, return the output of `self.discover_streams()` to enumerate
+          discovered streams.
+        - Developers may override this method if discovery is not supported, or if
+          discovery should not be run by default.
+        """
+        return self.discover_streams()
+
+    # Bookmarks and state management
+
+    def load_state(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        """Return a properly initalized state given an arbitrary dict input.
+
+        Override this method to perform validation and backwards compatibility updates.
+        """
+        return state
+
+    def merge_bookmarks(self, stream: Stream, new_bookmarks: Dict[str, Any]) -> None:
+        """Apply the provided dictionary of new bookmark values."""
+        for k, v in new_bookmarks.items():
+            self._state = singer.write_bookmark(self._state, stream.tap_stream_id, k, v)
+
+    def update_bookmarks(self, stream: Stream, latest_record: Dict[str, Any]):
+        """Update the stream's internal state with data from the provided record."""
+        if not self._state:
+            self.merge_bookmarks(
+                stream, {"version": stream.get_stream_version()},
+            )
+        if latest_record:
+            if stream.replication_method == "FULL_TABLE":
+                max_pk_values = singer._get_bookmark("max_pk_values")
+                if max_pk_values:
+                    self.merge_bookmarks(
+                        stream,
+                        {
+                            "last_pk_fetched": {
+                                k: v
+                                for k, v in latest_record.items()
+                                if k in (stream.primary_keys or [])
+                            }
+                        },
+                    )
+            elif stream.replication_method in ["INCREMENTAL", "LOG_BASED"]:
+                if stream.replication_key is not None:
+                    self.merge_bookmarks(
+                        stream,
+                        {
+                            "replication_key": stream.replication_key,
+                            "replication_key_value": latest_record[
+                                stream.replication_key
+                            ],
+                        },
+                    )
 
     # Sync methods
 
-    def sync_one(self, tap_stream_id: str):
+    def sync_one(self, stream_name: str):
         """Sync a single stream."""
-        if tap_stream_id not in self.streams:
+        if stream_name not in self.streams:
             raise ValueError(
-                f"Could not find stream '{tap_stream_id}' in streams list: "
+                f"Could not find stream '{stream_name}' in streams list: "
                 f"{sorted(self.streams.keys())}"
             )
-        stream = self.streams[tap_stream_id]
+        stream = self.streams[stream_name]
         stream.sync()
 
     def sync_all(self):
@@ -117,44 +174,40 @@ class TapBase(PluginBase, metaclass=abc.ABCMeta):
 
     # Command Line Execution
 
-    @classmethod
-    def cli(
-        cls,
-        version: bool = False,
-        discover: bool = False,
-        config: str = None,
-        state: str = None,
-        catalog: str = None,
-    ):
-        """Handle command line execution."""
+    @classproperty
+    def cli(cls):
+        """Execute standard CLI handler for taps."""
 
-        def read_optional_json(path: Optional[str]) -> Optional[Dict[str, Any]]:
-            if not path:
-                return None
-            return json.loads(Path(path).read_text())
+        @click.option("--version", is_flag=True)
+        @click.option("--about", is_flag=True)
+        @click.option("--discover", is_flag=True)
+        @click.option("--format")
+        @click.option("--config")
+        @click.option("--catalog")
+        @click.command()
+        def cli(
+            version: bool = False,
+            about: bool = False,
+            discover: bool = False,
+            config: str = None,
+            state: str = None,
+            catalog: str = None,
+            format: str = None,
+        ):
+            """Handle command line execution."""
+            if version:
+                cls.print_version()
+                return
+            if about:
+                cls.print_about(format)
+                return
+            tap = cls(config=config, state=state, catalog=catalog)
+            if discover:
+                tap.run_discovery()
+            else:
+                tap.sync_all()
 
-        if version:
-            cls.print_version()
-            return
-        config_dict = read_optional_json(config)
-        state_dict = read_optional_json(state)
-        catalog_dict = read_optional_json(catalog)
-        tap = cls(config=config_dict, state=state_dict, catalog=catalog_dict)
-        if discover:
-            tap.run_discovery()
-        else:
-            tap.sync_all()
+        return cli
 
 
-@click.option("--version", is_flag=True)
-@click.option("--discover", is_flag=True)
-@click.option("--config")
-@click.option("--catalog")
-@click.command()
-def cli(
-    discover: bool = False,
-    config: str = None,
-    catalog: str = None,
-    version: bool = False,
-):
-    TapBase.cli(version=version, discover=discover, config=config, catalog=catalog)
+cli = Tap.cli

@@ -1,16 +1,20 @@
-"""Shared parent class for TapBase, TargetBase, and TransformBase."""
+"""Base class for database-type streams."""
 
 import abc
+from pathlib import Path
 import backoff
 
 import singer
+from singer.schema import Schema
 from tap_base.helpers import classproperty
 from tap_base.exceptions import TapStreamConnectionFailure
-from typing import Any, Dict, Iterable, List, Tuple, TypeVar, Union, cast
+from typing import Any, Dict, Iterable, List, Optional, Tuple, TypeVar, Union, cast
 
-from tap_base.streams.core import TapStreamBase
+from tap_base.plugin_base import PluginBase as TapBaseClass
+from tap_base.streams.core import Stream
+from tap_base import helpers
 
-FactoryType = TypeVar("FactoryType", bound="DatabaseStreamBase")
+FactoryType = TypeVar("FactoryType", bound="DatabaseStream")
 
 
 SINGER_STRING_TYPE = singer.Schema(type=["string", "null"])
@@ -40,7 +44,7 @@ SINGER_TYPE_LOOKUP = {
 }
 
 
-class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
+class DatabaseStream(Stream, metaclass=abc.ABCMeta):
     """Abstract base class for database-type streams.
 
     This class currently supports databases with 3-part names only. For databases which
@@ -53,10 +57,21 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     DEFAULT_QUOTE_CHAR = '"'
     OTHER_QUOTE_CHARS = ['"', "[", "]", "`"]
 
-    def get_row_generator(self) -> Iterable[dict]:
+    def __init__(
+        self,
+        tap: TapBaseClass,
+        schema: Optional[Union[str, Path, Dict[str, Any], Schema]],
+        name: Optional[str],
+    ):
+        super().__init__(tap=tap, schema=schema, name=name)
+        self.is_view: Optional[bool] = None
+        self.row_count: Optional[int] = None
+
+    @property
+    def records(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
-        for row in self.sql_query(
-            sql=f"SELECT * FROM {self.fully_qualified_name}", config=self._config
+        for row in self.execute_query(
+            sql=f"SELECT * FROM {self.fully_qualified_name}", config=self.config
         ):
             yield cast(dict, row)
 
@@ -66,7 +81,13 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
 
     @classproperty
     def table_scan_sql(cls) -> str:
-        """Return a SQL statement that provides the column."""
+        """Return a SQL statement for syncable tables.
+
+        Result fields should be in this order:
+         - db_name
+         - schema_name
+         - table_name
+        """
         return """
             SELECT table_catalog, table_schema, table_name
             from information_schema.tables
@@ -75,7 +96,13 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
 
     @classproperty
     def view_scan_sql(cls) -> str:
-        """Return a SQL statement that provides the column."""
+        """Return a SQL statement for syncable views.
+
+        Result fields should be in this order:
+         - db_name
+         - schema_name
+         - view_name
+        """
         return """
             SELECT table_catalog, table_schema, table_name
             FROM information_schema.views
@@ -84,18 +111,54 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
 
     @classproperty
     def column_scan_sql(cls) -> str:
-        """Return a SQL statement that provides the column."""
+        """Return a SQL statement that provides the column names and types.
+
+        Result fields should be in this order:
+         - db_name
+         - schema_name
+         - table_name
+         - column_name
+         - column_type
+
+        Optionally, results can be sorted to preserve cardinal ordinaling.
+        """
         return """
             SELECT table_catalog, table_schema, table_name, column_name, data_type
             FROM information_schema.columns
             ORDER BY table_catalog, table_schema, table_name, ordinal_position
             """
 
+    @classproperty
+    def primary_key_scan_sql(cls) -> Optional[str]:
+        """Return a SQL statement that provides the list of primary key columns.
+
+        Result fields should be in this order:
+         - db_name
+         - schema_name
+         - table_name
+         - column_name
+        """
+        return """
+            SELECT cols.table_catalog,
+                   cols.table_schema,
+                   cols.table_name,
+                   cols.column_name as key_column
+            FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS constraint
+            JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE cols
+                 on cols.constraint_name   = constraint.constraint_name
+                and cols.constraint_schema = constraint.constraint_schema
+                and cols.constraint_name   = constraint.constraint_name
+            WHERE constraint.constraint_type = 'PRIMARY KEY'
+            ORDER BY cols.table_schema,
+                     cols.table_name,
+                     cols.ordinal_position;
+            """
+
     @staticmethod
     def create_singer_schema(columns: Dict[str, str]) -> singer.Schema:
         props: Dict[str, singer.Schema] = {}
         for column, sql_type in columns.items():
-            props[column] = DatabaseStreamBase.get_singer_type(sql_type)
+            props[column] = DatabaseStream.get_singer_type(sql_type)
         return singer.Schema(type="object", properties=props)
 
     @staticmethod
@@ -111,7 +174,7 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
     def scan_and_collate_columns(
         cls, config
     ) -> Dict[Tuple[str, str, str], Dict[str, str]]:
-        columns_scan_result = cls.sql_query(config=config, sql=cls.column_scan_sql)
+        columns_scan_result = cls.execute_query(config=config, sql=cls.column_scan_sql)
         result: Dict[Tuple[str, str, str], Dict[str, str]] = {}
         for row_dict in columns_scan_result:
             catalog, schema_name, table, column, data_type = row_dict.values()
@@ -122,23 +185,26 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
 
     @classmethod
     def scan_primary_keys(cls, config) -> Dict[Tuple[str, str, str], List[str]]:
-        columns_scan_result = cls.sql_query(config=config, sql=cls.column_scan_sql)
-        result: Dict[Tuple[str, str, str], Dict[str, str]] = {}
-        for row_dict in columns_scan_result:
-            catalog, schema_name, table, column, data_type = row_dict.values()
+        result: Dict[Tuple[str, str, str], List[str]] = {}
+        if not cls.primary_key_scan_sql:
+            return result
+        pk_scan_result = cls.execute_query(config=config, sql=cls.primary_key_scan_sql)
+        for row_dict in pk_scan_result:
+            catalog, schema_name, table, pk_column = row_dict.values()
             if (catalog, schema_name, table) not in result:
-                result[(catalog, schema_name, table)] = {}
-            result[(catalog, schema_name, table)][column] = data_type
+                result[(catalog, schema_name, table)] = []
+            result[(catalog, schema_name, table)].append(pk_column)
         return result
 
     @classmethod
-    def from_discovery(cls, config: dict) -> List[FactoryType]:
+    def from_discovery(cls, tap: TapBaseClass) -> List[FactoryType]:
         """Return a list of all streams (tables)."""
-        result: List[DatabaseStreamBase] = []
-        table_scan_result: Iterable[List[Any]] = cls.sql_query(
+        result: List[FactoryType] = []
+        config = tap.config
+        table_scan_result: Iterable[List[Any]] = cls.execute_query(
             config=config, sql=cls.table_scan_sql, dict_results=False
         )
-        view_scan_result: Iterable[List[Any]] = cls.sql_query(
+        view_scan_result: Iterable[List[Any]] = cls.execute_query(
             config=config, sql=cls.view_scan_sql, dict_results=False
         )
         all_results = [
@@ -158,19 +224,37 @@ class DatabaseStreamBase(TapStreamBase, metaclass=abc.ABCMeta):
                 raise RuntimeError(f"Did not find any columns for table '{full_name}'")
             singer_schema: singer.Schema = cls.create_singer_schema(columns)
             primary_keys = primary_keys_lookup.get(name_tuple, None)
-            new_stream = cls(
-                config=config, schema=singer_schema.to_dict(), name=full_name, state={},
+            new_stream = cast(
+                FactoryType,
+                cls(tap=tap, schema=singer_schema.to_dict(), name=full_name),
             )
             new_stream.primary_keys = primary_keys
-            # TODO: Expanded metadata support for setting `row_count` and `is_view`.
-            # new_stream.is_view = is_view
+            new_stream.is_view = is_view
+            # TODO: Expanded metadata support for provided `row_count` estimates.
             # new_stream.row_count = row_count
             result.append(new_stream)
         return result
 
+    @classmethod
+    def from_input_catalog(cls, tap: TapBaseClass) -> List[FactoryType]:
+        result: List[FactoryType] = []
+        catalog = tap.input_catalog
+        for catalog_entry in helpers.get_catalog_entries(catalog):
+            full_name = helpers.get_catalog_entry_name(catalog_entry)
+            new_stream = cast(
+                FactoryType,
+                cls(
+                    tap=tap,
+                    name=full_name,
+                    schema=helpers.get_catalog_entry_schema(catalog_entry),
+                ),
+            )
+            result.append(new_stream)
+        return result
+
     @abc.abstractclassmethod
-    def sql_query(
-        self, sql: Union[str, List[str]], config, dict_results=True
+    def execute_query(
+        cls, sql: Union[str, List[str]], config, dict_results=True
     ) -> Union[Iterable[dict], Iterable[Tuple]]:
         """Run a SQL query and generate a dict for each returned row."""
         pass
