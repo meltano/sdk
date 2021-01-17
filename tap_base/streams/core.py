@@ -254,6 +254,7 @@ class Stream(metaclass=abc.ABCMeta):
             rows_sent += 1
             # TODO: Fix bookmark state updates
             # self.tap._update_state(record, self.replication_method)
+        self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
         self._write_state_message()
 
     @lru_cache()
