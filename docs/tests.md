@@ -16,7 +16,7 @@ poetry run tap-parquet --help
 ```bash
 poetry install && \
 poetry run tap-parquet \
-   --config tap_base/samples/sample_tap_parquet/parquet-config.sample.json
+   --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
 ```
 
 **Run 'sync' with a catalog file input...**
@@ -24,8 +24,8 @@ poetry run tap-parquet \
 ```bash
 poetry install && \
 poetry run sample-tap-parquet \
-   --config tap_base/samples/sample_tap_parquet/parquet-config.sample.json
-   --catalog tap_base/samples/sample_tap_parquet/parquet-catalog.sample.json
+   --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
+   --catalog singer_sdk/samples/sample_tap_parquet/parquet-catalog.sample.json
 ```
 
 **Run 'discovery'...**
@@ -33,7 +33,7 @@ poetry run sample-tap-parquet \
 ```bash
 poetry install && \
 poetry run sample-tap-parquet --discover \
-   --config tap_base/samples/sample_tap_parquet/parquet-config.sample.json
+   --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
 ```
 
 **Run 'discovery' with a passed catalog file (kind of cheating, but may be valid for some cases)...**
@@ -41,8 +41,8 @@ poetry run sample-tap-parquet --discover \
 ```bash
 poetry install && \
 poetry run sample-tap-parquet --discover \
-   --config tap_base/samples/sample_tap_parquet/parquet-config.sample.json \
-   --catalog tap_base/samples/sample_tap_parquet/parquet-catalog.sample.json
+   --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json \
+   --catalog singer_sdk/samples/sample_tap_parquet/parquet-catalog.sample.json
 ```
 
 **Note:**
@@ -52,7 +52,7 @@ poetry run sample-tap-parquet --discover \
     ```toml
     ...
     [tool.poetry.scripts]
-    plugin-base = 'tap_base.plugin_base:PluginBase.cli'
-    tap-base = 'tap_base.tap_base:cli'
-    sample-tap-parquet = 'tap_base.tests.sample_tap_parquet.parquet_tap:cli'
+    plugin-base = 'singer_sdk.plugin_base:PluginBase.cli'
+    tap-base = 'singer_sdk.tap_base:cli'
+    sample-tap-parquet = 'singer_sdk.tests.sample_tap_parquet.parquet_tap:cli'
     ```

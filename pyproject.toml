@@ -27,7 +27,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.rest"
 
 [tool.poetry.scripts]
-plugin-base = 'tap_base.plugin_base:PluginBase.cli'
-tap-base = 'tap_base.tap_base:cli'
+plugin-base = 'singer_sdk.plugin_base:PluginBase.cli'
+tap-base = 'singer_sdk.singer_sdk:cli'
 # Sample CLI declaration:
-# tap-countries = 'tap_base.samples.sample_tap_countries.countries_tap:cli'
+# tap-countries = 'singer_sdk.samples.sample_tap_countries.countries_tap:cli'
