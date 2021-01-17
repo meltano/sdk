@@ -17,18 +17,22 @@ SAMPLE_TARGET_PARQUET_CONFIG = {
 SAMPLE_TARGET_CSV_CONFIG = {"target_folder": f"./.output"}
 
 
+def sync_end_to_end(tap, target):
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        tap.sync_all()
+    buf.seek(0)
+    target.process_lines(buf)
+
+
 def test_parquet_to_csv():
     tap = SampleTapParquet(config=SAMPLE_TAP_CONFIG, state=None)
-    with io.StringIO() as buf, redirect_stdout(buf):
-        tap.sync_all()
-        target = SampleTargetCSV(config=SAMPLE_TARGET_CSV_CONFIG)
-        target.process_lines(buf)
+    target = SampleTargetCSV(config=SAMPLE_TARGET_CSV_CONFIG)
+    sync_end_to_end(tap, target)
 
 
 def test_parquet_to_parquet():
     tap = SampleTapParquet(config=SAMPLE_TAP_CONFIG, state=None)
-    with io.StringIO() as buf, redirect_stdout(buf):
-        tap.sync_all()
-        target = SampleTargetParquet(config=SAMPLE_TARGET_PARQUET_CONFIG)
-        target.process_lines(buf)
-    # assert Path(SAMPLE_TARGET_CONFIG["filepath"]).exists()
+    target = SampleTargetParquet(config=SAMPLE_TARGET_PARQUET_CONFIG)
+    sync_end_to_end(tap, target)
+    # assert Path(SAMPLE_TARGET_PARQUET_CONFIG["filepath"]).exists()

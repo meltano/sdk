@@ -6,10 +6,9 @@ import gzip
 import json
 
 from tempfile import mkstemp
-from decimal import Decimal
 
 from tap_base.target_sink_base import TargetSinkBase
-
+from tap_base import helpers
 
 class RecordValidationException(Exception):
     """Exception to raise when record validation failed."""
@@ -38,7 +37,9 @@ class SampleSnowflakeTargetStream(TargetSinkBase):
         super().validate_record(record)
         if self._conn.get_config("validate_records"):
             try:
-                self._validators[self.stream_name].validate(_float_to_decimal(record))
+                self._validators[self.stream_name].validate(
+                    helpers._float_to_decimal(record)
+                )
             except Exception as ex:
                 if type(ex).__name__ == "InvalidOperation":
                     raise InvalidValidationOperationException(

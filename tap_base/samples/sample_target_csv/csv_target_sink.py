@@ -30,12 +30,12 @@ class SampleCSVTargetSink(TargetSinkBase):
         records_written = 0
         newfile = False
         openmode = "a"
-        if not self.target_filepath.is_file():
+        outpath = self.target_filepath.absolute()
+        if not outpath.is_file():
+            self.logger.info(f"Writing to new file: {outpath}")
             newfile = True
             openmode = "w"
-        with open(
-            self.target_filepath, openmode, newline="\n", encoding="utf-8"
-        ) as csvfile:
+        with open(outpath, openmode, newline="\n", encoding="utf-8") as csvfile:
             writer = csv.writer(
                 csvfile, delimiter="\t", quotechar='"', quoting=csv.QUOTE_NONNUMERIC
             )

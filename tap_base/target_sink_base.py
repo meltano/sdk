@@ -4,10 +4,12 @@ import abc
 import datetime
 from decimal import Decimal
 import json
+import logging
 import sys
 import re
 from logging import Logger
 import collections
+from tap_base.plugin_base import PluginBase
 from typing import Dict, Iterable, Optional
 
 from jsonschema import Draft4Validator, FormatChecker
@@ -89,7 +91,7 @@ class RecordFlattener:
         return False
 
 
-class TargetSinkBase(Stream, metaclass=abc.ABCMeta):
+class TargetSinkBase(metaclass=abc.ABCMeta):
     """Abstract base class for target streams."""
 
     DEFAULT_BATCH_SIZE_ROWS = 100000
@@ -122,22 +124,19 @@ class TargetSinkBase(Stream, metaclass=abc.ABCMeta):
     _flushed_state: dict = {}
     _cache_state: dict = {}
 
-    def __init__(self, stream_name: str, schema: Dict, logger: Logger,) -> None:
+    def __init__(self, target: PluginBase, stream_name: str, schema: Dict,) -> None:
         """Initialize target stream."""
-        super().__init__(
-            tap_stream_id=stream_name,
-            connection=connection,
-            catalog_entry=None,
-            state={},
-            logger=logger,
-        )
+        self.logger = target.logger
+        self.logger.info("DEBUG: Initializing target sink...")
         self.schema = schema
         self.stream_name = stream_name
+        # self.logger: logging.Logger = target.logger
         self.flattener = RecordFlattener(max_level=self.MAX_FLATTEN_DEPTH)
         self.validator = Draft4Validator(schema, format_checker=FormatChecker())
 
     def process_record(self, record: Dict, message: Dict):
         """Process record."""
+        self.logger.info("DEBUG: Processing record...")
         self.validate_record(record)
         primary_key_string = self.record_primary_key_string(record)
         if not primary_key_string:
@@ -165,21 +164,18 @@ class TargetSinkBase(Stream, metaclass=abc.ABCMeta):
 
     def record_primary_key_string(self, record):
         """Return a string representing the primary key."""
-        if len(self.stream_schema_message["key_properties"]) == 0:
+        if len(self.schema.get("key_properties", [])) == 0:
             return None
         if self.flattener:
             flattened = self.flattener.flatten_record(
                 record, self.flatten_schema, max_level=self.data_flattening_max_level
             )
             try:
-                key_props = [
-                    str(flattened[p])
-                    for p in self.stream_schema_message["key_properties"]
-                ]
+                key_props = [str(flattened[p]) for p in self.schema["key_properties"]]
             except Exception as exc:
                 self.logger.error(
                     "Cannot find {} primary key(s) in record: {}".format(
-                        self.stream_schema_message["key_properties"], flattened
+                        self.schema["key_properties"], flattened
                     )
                 )
                 raise exc
@@ -192,17 +188,6 @@ class TargetSinkBase(Stream, metaclass=abc.ABCMeta):
             self.logger.info(f"Emitting state {line}")
             sys.stdout.write(f"{line}\n")
             sys.stdout.flush()
-
-    @staticmethod
-    def _float_to_decimal(value):
-        """Walk the given data structure and turn all instances of float into double."""
-        if isinstance(value, float):
-            return Decimal(str(value))
-        if isinstance(value, list):
-            return [TargetSinkBase._float_to_decimal(child) for child in value]
-        if isinstance(value, dict):
-            return {k: TargetSinkBase._float_to_decimal(v) for k, v in value.items()}
-        return value
 
     def _get_datelike_property_type(
         self, property_key: str, property_schema: Dict
@@ -298,3 +283,7 @@ class TargetSinkBase(Stream, metaclass=abc.ABCMeta):
 
         Returns the latest state.
         """
+
+    @property
+    def records(self):
+        raise NotImplementedError("Targets sinks do not support the 'records' property")
