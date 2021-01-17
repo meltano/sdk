@@ -1,5 +1,6 @@
 """Helper functions, helper classes, and decorators."""
 
+from decimal import Decimal
 import pytz
 
 from datetime import datetime
@@ -182,3 +183,14 @@ def _parse_stream_and_substream(
         if len(tap_stream_id) > 1:
             substream = tap_stream_id[1]
     return tap_stream_id, substream
+
+
+def _float_to_decimal(value):
+    """Walk the given data structure and turn all instances of float into double."""
+    if isinstance(value, float):
+        return Decimal(str(value))
+    if isinstance(value, list):
+        return [_float_to_decimal(child) for child in value]
+    if isinstance(value, dict):
+        return {k: _float_to_decimal(v) for k, v in value.items()}
+    return value
