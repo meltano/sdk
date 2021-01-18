@@ -35,22 +35,23 @@ class GitlabStream(RESTStream):
             http_headers["User-Agent"] = self.config.get("user_agent")
         return SimpleAuthenticator(stream=self, http_headers=http_headers)
 
-    def get_params(self, substream_id: str) -> Dict[str, Any]:
+    def get_params(self, context_state: dict) -> Dict[str, Any]:
         """Expose any needed config values into the URL parameterization process.
 
         If a list of dictionaries is returned, one call will be made for each item
         in the list. For GitLab, this is necessary when each call must reference a
         specific `project_id`.
         """
-        project_id = substream_id.split(",")[0].split("=")[1]  # Ex "project_id=foo/bar"
-        return {"project_id": project_id, "start_date": self.config.get("start_date")}
+        result = copy.deepcopy(context_state)
+        result.update({"start_date": self.config.get("start_date")})
+        return result
 
 
 class ProjectBasedStream(GitlabStream):
     """Base class for streams that are keys based on project ID."""
 
-    def get_substream_ids(self) -> List[str]:
-        """Return a list of substream IDs (if applicable), otherwise None."""
+    def get_shards_list(self) -> List[dict]:
+        """Return a list of shard key dicts (if applicable), otherwise None."""
         return [f"project_id={id}" for id in self.config.get("project_ids")]
 
 
@@ -116,8 +117,9 @@ class EpicsStream(ProjectBasedStream):
 
     def post_process(self, row: dict) -> dict:
         """Perform post processing, including queuing up any child stream types."""
-        helpers.ensure_stream_state_exists(
-            self.state, "epic_issues", substream=f"epic={row['id']}"
+        # Ensure child state record(s) are created
+        _ = helpers.get_stream_state_dict(
+            self.state, "epic_issues", shard={"epic_id": row["id"]}
         )
         return super().post_process(row)
 
@@ -136,13 +138,27 @@ class EpicIssuesStream(GitlabStream):
     schema_filepath = SCHEMAS_DIR / "epic_issues.json"
     parent_stream_types = [EpicsStream]  # Stream should wait for parents to complete.
 
-    def get_params(self, substream_id: str) -> dict:
-        """Return http params for a stream or substream."""
-        substream_state = helpers.read_stream_state(
-            self.state, (self.name, substream_id)
-        )
-        if "epic_id" not in substream_state:
+    def get_params(self, context_state: dict) -> dict:
+        """[summary]
+
+        Parameters
+        ----------
+        context_state : dict
+            The initial context state for the current stream or stream shard.
+
+        Returns
+        -------
+        dict
+            The set of parameters to be used in variable substitution for the current
+            query.
+
+        Raises
+        ------
+        ValueError
+            Raises Value error if context_state is missing required values or cannot be
+            read.
+        """
+        result = super().get_params(context_state)
+        if "epic_id" not in context_state:
             raise ValueError("Cannot sync epic issues without already known epic IDs.")
-        result = super().get_params(substream_id)
-        result.update(substream_state)
         return result

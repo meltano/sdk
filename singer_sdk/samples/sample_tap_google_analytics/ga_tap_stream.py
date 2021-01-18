@@ -35,12 +35,12 @@ class SampleGoogleAnalyticsStream(RESTStream):
             oauth_scopes=GA_OAUTH_SCOPES,
         )
 
-    def prepare_request_payload(self) -> Optional[dict]:
+    def prepare_request_payload(self, params: dict) -> Optional[dict]:
         """Prepare the data payload for the REST API request."""
         return {
             "reportRequests": [
                 {
-                    "viewId": self.config.get("view_id"),
+                    "viewId": params.get("view_id"),
                     "metrics": [{"expression": m} for m in self.metrics],
                     "dimensions": [{"name": d} for d in self.dimensions],
                     # "dateRanges": [

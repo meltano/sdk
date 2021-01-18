@@ -110,9 +110,17 @@ class Stream(metaclass=abc.ABCMeta):
         """Return a frozen (read-only) config dictionary map."""
         return MappingProxyType(self._config)
 
-    def get_params(self, substream_id: Optional[str]) -> dict:
-        """By default, return all config values which are not secrets."""
-        return {k: v for k, v in self.config.items() if not isinstance(v, SecretString)}
+    def get_params(self, context_state: dict) -> dict:
+        """Return all values to be used in parameterization.
+
+        By default, this includes all settings which are secrets and any stored values
+        the stream or shard state, as passed via the `context_state` argument.
+        """
+        result = {
+            k: v for k, v in self.config.items() if not isinstance(v, SecretString)
+        }
+        result.update(context_state)
+        return result
 
     def get_stream_version(self):
         """Get stream version from bookmark."""
@@ -176,11 +184,30 @@ class Stream(metaclass=abc.ABCMeta):
             stream_alias=None,
         )
 
-    # Substreams
+    # State properties:
 
-    def get_substream_ids(self) -> Optional[List[str]]:
-        """Return a list of substream IDs (if applicable), otherwise None."""
-        return helpers.get_state_substream_ids(self._state, self.name)
+    @property
+    def state_context(self) -> dict:
+        """Return a writeable state dict for this stream.
+
+        A blank state entry will be created if one doesn't already exist.
+        """
+        return helpers.get_stream_state_dict(self._state, self.name)
+
+    def get_shard_state_context(self, shard_key: dict) -> dict:
+        return helpers.get_stream_state_dict(self._state, self.name, shard=shard_key)
+
+    # Shards
+
+    def get_shards_list(self) -> Optional[List[dict]]:
+        """Return a list of shard key dicts (if applicable), otherwise None."""
+        state = helpers.read_stream_state(self._state, self.name)
+        if "shards" not in state:
+            return None
+        result: List[dict] = []
+        for shard in state["shards"]:
+            result.append(shard)
+        return result
 
     # Private methods
 

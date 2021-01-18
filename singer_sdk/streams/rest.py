@@ -45,7 +45,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         self._requests_session = requests.Session()
 
     @staticmethod
-    def url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
+    def _url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
         """Encode the val argument as url-compatible string."""
         if isinstance(val, str):
             result = val.replace("/", "%2F")
@@ -53,23 +53,17 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             result = str(val)
         return result
 
-    def get_url(self, substream_id: Optional[str] = None) -> str:
+    def _get_url(self, context_state: dict) -> str:
         url_pattern = "".join([self.url_base, self.path or ""])
-        params = self.get_params(substream_id)
+        params = self.get_params(context_state)
         url = url_pattern
         for k, v in params.items():
             search_text = "".join(["{", k, "}"])
             if search_text in url:
-                url = url.replace(search_text, self.url_encode(v))
+                url = url.replace(search_text, self._url_encode(v))
         return url
 
-    @property
-    def http_headers(self) -> dict:
-        """Return headers dict to be used for HTTP requests."""
-        result = self._http_headers
-        if "user_agent" in self.config:
-            result["User-Agent"] = self.config.get("user_agent")
-        return result
+    # HTTP Request functions
 
     @property
     def requests_session(self) -> requests.Session:
@@ -78,8 +72,6 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             self._requests_session = requests.Session()
         return self._requests_session
 
-    # HTTP Request functions
-
     @backoff.on_exception(
         backoff.expo,
         (requests.exceptions.RequestException),
@@ -87,9 +79,9 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         giveup=lambda e: e.response is not None and 400 <= e.response.status_code < 500,
         factor=2,
     )
-    def request_with_backoff(self, url, params=None) -> requests.Response:
+    def _request_with_backoff(self, url, params=None) -> requests.Response:
         params = params or {}
-        request = self.prepare_request(url=url, params=params)
+        request = self._prepare_request(url=url, params=params)
         response = self.requests_session.send(request)
         if response.status_code in [401, 403]:
             self.logger.info("Skipping request to {}".format(request.url))
@@ -105,14 +97,10 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         logging.debug("Response received successfully.")
         return response
 
-    def prepare_request_payload(self) -> Optional[dict]:
-        """Prepare the data payload for the REST API request."""
-        return None
-
-    def prepare_request(
+    def _prepare_request(
         self, url, params=None, http_method=None, json=None
     ) -> requests.PreparedRequest:
-        request_data = json or self.prepare_request_payload()
+        request_data = json or self.prepare_request_payload(params or {})
         http_method = http_method or self.rest_method
         request = requests.Request(
             method=http_method,
@@ -123,19 +111,28 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         ).prepare()
         return request
 
-    def request_paginated_get(self, substream_id: Optional[str]) -> Iterable[dict]:
+    def _request_paginated_get(self, state_context: dict) -> Iterable[dict]:
         # params = {"page": 1, "per_page": self._page_size}
-        params: dict = {}
+        params: dict = self.get_params(state_context)
         next_page_token = 1
-        for url in [self.get_url(substream_id)]:
-            while next_page_token:
-                params = self.insert_next_page_token(
-                    next_page=next_page_token, params=params
-                )
-                resp = self.request_with_backoff(url, params)
-                for row in self.parse_response(resp):
-                    yield row
-                next_page_token = self.get_next_page_token(resp)
+        url = self._get_url(state_context)
+        while next_page_token:
+            params = self.insert_next_page_token(
+                next_page=next_page_token, params=params
+            )
+            resp = self._request_with_backoff(url, params)
+            for row in self.parse_response(resp):
+                yield row
+            next_page_token = self.get_next_page_token(resp)
+
+    # Overridable:
+
+    def prepare_request_payload(self, params: dict) -> Optional[dict]:
+        """Prepare the data payload for the REST API request.
+
+        By default, no payload will be sent (return None).
+        """
+        return None
 
     def get_next_page_token(self, response) -> Any:
         """Return token for identifying next page or None if not applicable."""
@@ -153,18 +150,27 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         params["page"] = next_page
         return params
 
+    @property
+    def http_headers(self) -> dict:
+        """Return headers dict to be used for HTTP requests."""
+        result = self._http_headers
+        if "user_agent" in self.config:
+            result["User-Agent"] = self.config.get("user_agent")
+        return result
+
     # Records iterator
 
     @property
     def records(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
-        substreams = self.get_substream_ids()
-        if substreams:
-            for substream_id in substreams:
-                for row in self.request_paginated_get(substream_id):
+        shards = self.get_shards_list()
+        if shards:
+            for shard in shards:
+                state_context = self.get_shard_state_context(shard)
+                for row in self._request_paginated_get(state_context):
                     yield row
         else:
-            for row in self.request_paginated_get(None):
+            for row in self._request_paginated_get(self.state_context):
                 yield row
 
     def parse_response(self, response) -> Iterable[dict]:

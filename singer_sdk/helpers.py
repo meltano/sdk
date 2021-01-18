@@ -4,9 +4,7 @@ from decimal import Decimal
 import pytz
 
 from datetime import datetime
-from typing import Any, List, Optional, Tuple, Union, cast
-
-import singer
+from typing import Any, List, Optional, cast
 
 
 COMMON_SECRET_KEYS = [
@@ -107,82 +105,79 @@ def is_boolean_type(property_schema: dict) -> Optional[bool]:
     return False
 
 
-def ensure_stream_state_exists(
-    state: dict, tap_stream_id: str, substream: str = None
-) -> None:
+def get_stream_state_dict(
+    state: dict, tap_stream_id: str, shard: Optional[dict] = None
+) -> dict:
+    """Return the stream or shard state, creating a new one if it does not exist.
+
+    Parameters
+    ----------
+    state : dict
+        the existing state dict which contains all streams.
+    tap_stream_id : str
+        the id of the stream
+    shard : Optional[dict], optional
+        keys which identify the shard context, by default None (treat as non-sharded)
+
+    Returns
+    -------
+    dict
+        Returns a writeable dict at the stream or shard level.
+
+    Raises
+    ------
+    ValueError
+        Raise an error if duplicate entries are found.
+    """
     if "bookmarks" not in state:
         state["bookmarks"] = {}
     if tap_stream_id not in state["bookmarks"]:
         state["bookmarks"][tap_stream_id] = {}
-    if substream:
-        if "substreams" not in state["bookmarks"][tap_stream_id]:
-            state["bookmarks"][tap_stream_id]["substreams"] = {}
-        if substream not in state["bookmarks"][tap_stream_id]["substreams"]:
-            state["bookmarks"][tap_stream_id]["substreams"][substream] = {}
-
-
-def write_stream_state(state, stream_id_or_tuple: Union[str, Tuple], key, val) -> None:
-    tap_stream_id, substream = _parse_stream_and_substream(stream_id_or_tuple)
-    ensure_stream_state_exists(state, tap_stream_id, substream)
-    if not substream:
-        state["bookmarks"][tap_stream_id][key] = val
-    else:
-        state["bookmarks"][tap_stream_id]["substreams"][substream][key] = val
-
-
-def get_state_substream_ids(state, stream_id: str) -> Optional[List[str]]:
-    substreams = read_stream_state(state, stream_id, default={}).get("substreams")
-    if not substreams:
-        return None
-    return substreams.keys()
+    if shard:
+        if "shards" not in state["bookmarks"][tap_stream_id]:
+            state["bookmarks"][tap_stream_id]["shards"] = []
+        found = [
+            shard
+            for shard in state["bookmarks"][tap_stream_id]["shards"]
+            if shard.get("context") == shard
+        ]
+        if len(found) > 1:
+            raise ValueError(
+                f"State file contains duplicate entries for shard definition: {shard}"
+            )
+        if not found:
+            new_dict = {"context": shard}
+            state["bookmarks"][tap_stream_id]["shards"].append(new_dict)
+            return new_dict
+        return found[0]
 
 
 def read_stream_state(
-    state, stream_id_or_tuple: Union[str, Tuple], key=None, default: Any = None
+    state,
+    tap_stream_id: str,
+    key=None,
+    default: Any = None,
+    *,
+    shard: Optional[dict] = None,
 ) -> Any:
-    tap_stream_id, substream = _parse_stream_and_substream(stream_id_or_tuple)
-    ensure_stream_state_exists(state, tap_stream_id, substream)
-    if not substream:
-        state_dict = state.get("bookmarks", {}).get(tap_stream_id, {})
-    else:
-        state_dict = (
-            state.get("bookmarks", {})
-            .get(tap_stream_id, {})
-            .get("substreams", {})
-            .get(substream, {})
-        )
+    state_dict = get_stream_state_dict(state, tap_stream_id, shard=shard)
     if key:
         return state_dict.get(key, default)
-    else:
-        return state_dict or default
+    return state_dict or default
 
 
-def wipe_stream_state(state, stream_id_or_tuple: Union[str, Tuple], key):
-    tap_stream_id, substream = _parse_stream_and_substream(stream_id_or_tuple)
-    ensure_stream_state_exists(state, tap_stream_id, substream)
-    if not substream:
-        return state.get("bookmarks", {}).get(tap_stream_id, {}).pop(key)
-    else:
-        return (
-            state.get("bookmarks", {})
-            .get(tap_stream_id, {})
-            .get("substreams", {})
-            .get(substream, {})
-            .pop(key)
-        )
+def write_stream_state(
+    state, tap_stream_id: str, key, val, *, shard: Optional[dict] = None
+) -> None:
+    state_dict = get_stream_state_dict(state, tap_stream_id, shard=shard)
+    state_dict[key] = val
 
 
-def _parse_stream_and_substream(
-    stream_id_or_tuple: Union[str, Tuple]
-) -> Tuple[str, Optional[str]]:
-    substream: Optional[str] = None
-    if isinstance(stream_id_or_tuple, str):
-        tap_stream_id: str = stream_id_or_tuple
-    else:
-        tap_stream_id = stream_id_or_tuple[0]
-        if len(tap_stream_id) > 1:
-            substream = tap_stream_id[1]
-    return tap_stream_id, substream
+def wipe_stream_state(
+    state, tap_stream_id: str, key, *, shard: Optional[dict] = None
+) -> None:
+    state_dict = get_stream_state_dict(state, tap_stream_id, shard=shard)
+    state_dict.pop(key)
 
 
 def _float_to_decimal(value):

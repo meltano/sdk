@@ -13,7 +13,7 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
     path = ""
     rest_method = "POST"
 
-    def prepare_request_payload(self) -> Optional[dict]:
+    def prepare_request_payload(self, params: dict) -> Optional[dict]:
         """Prepare the data payload for the GraphQL API request."""
         if self.query is None:
             raise ValueError("Graphql `query` property not set.")
@@ -23,7 +23,7 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
             "query": "query { "
             + (" ".join([l.strip() for l in query.splitlines()]))
             + " }",
-            "variables": self.get_params(substream_id=None),
+            "variables": params,
         }
         self.logger.info(f"Attempting query:\n{query}")
         return request_data
