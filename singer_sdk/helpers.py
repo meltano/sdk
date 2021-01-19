@@ -133,9 +133,11 @@ def get_stream_state_dict(
         state["bookmarks"] = {}
     if tap_stream_id not in state["bookmarks"]:
         state["bookmarks"][tap_stream_id] = {}
-    if partition_keys:
-        if "partitions" not in state["bookmarks"][tap_stream_id]:
-            state["bookmarks"][tap_stream_id]["partitions"] = []
+    if not partition_keys:
+        return state["bookmarks"][tap_stream_id]
+    if "partitions" not in state["bookmarks"][tap_stream_id]:
+        state["bookmarks"][tap_stream_id]["partitions"] = []
+    else:
         found = [
             partition_state
             for partition_state in state["bookmarks"][tap_stream_id]["partitions"]
@@ -146,11 +148,12 @@ def get_stream_state_dict(
                 "State file contains duplicate entries for partition definition: "
                 f"{partition_keys}"
             )
-        if not found:
-            new_dict = {"context": partition_keys}
-            state["bookmarks"][tap_stream_id]["partitions"].append(new_dict)
-            return new_dict
-        return found[0]
+        if found:
+            return found[0]
+    # Existing partition not found. Creating new state entry in partitions list...
+    new_dict = {"context": partition_keys}
+    state["bookmarks"][tap_stream_id]["partitions"].append(new_dict)
+    return new_dict
 
 
 def read_stream_state(

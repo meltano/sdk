@@ -1,7 +1,6 @@
 """Stream abstract class."""
 
 import abc  # abstract base classes
-import copy
 import datetime
 import json
 import logging
@@ -65,7 +64,7 @@ class Stream(metaclass=abc.ABCMeta):
             raise ValueError("Missing argument or class variable 'name'.")
         self.logger: logging.Logger = tap.logger
         self.tap_name: str = tap.name
-        self._config: dict = tap.config
+        self._config: dict = dict(tap.config)
         self._state = tap.state or {}
         self._schema: Optional[dict] = None
         self.forced_replication_method: Optional[str] = None
@@ -83,7 +82,7 @@ class Stream(metaclass=abc.ABCMeta):
             self.schema_filepath = Path(schema)
         if isinstance(self.schema_filepath, str):
             self.schema_filepath = Path(self.schema_filepath)
-        self._schema: Optional[dict] = None
+        self._schema = None
         if self.schema_filepath:
             if not Path(self.schema_filepath).is_file():
                 raise FileExistsError(
@@ -195,9 +194,9 @@ class Stream(metaclass=abc.ABCMeta):
         """
         return helpers.get_stream_state_dict(self._state, self.name)
 
-    def get_partition_state_context(self, partition_key: dict) -> dict:
+    def get_partition_state_context(self, partition_keys: dict) -> dict:
         return helpers.get_stream_state_dict(
-            self._state, self.name, partition_key=partition_key
+            self._state, self.name, partition_keys=partition_keys
         )
 
     # Partitions
@@ -215,11 +214,11 @@ class Stream(metaclass=abc.ABCMeta):
     # Private bookmarking methods
 
     def _increment_stream_state(
-        self, latest_record: Dict[str, Any], *, partition_key: Optional[dict] = None
+        self, latest_record: Dict[str, Any], *, partition_keys: Optional[dict] = None
     ):
         """Update state of the stream or partition with data from the provided record."""
-        if partition_key:
-            state_dict = self.get_partition_state_context(partition_key)
+        if partition_keys:
+            state_dict = self.get_partition_state_context(partition_keys)
         else:
             state_dict = self.state_context
         if latest_record:
@@ -282,7 +281,7 @@ class Stream(metaclass=abc.ABCMeta):
                 "version",
                 "initial_full_table_complete",
             ],
-            partition_key=self.active_partition,
+            partition_keys=self.active_partition,
         )
         # Iterate through each returned record:
         for row_dict in self.records:
@@ -297,7 +296,7 @@ class Stream(metaclass=abc.ABCMeta):
             )
             singer.write_message(record_message)
             self._increment_stream_state(
-                record, self.replication_method, partition_key=self.active_partition
+                record, self.replication_method, partition_keys=self.active_partition
             )
             rows_sent += 1
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")

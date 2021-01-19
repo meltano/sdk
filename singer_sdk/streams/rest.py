@@ -165,9 +165,9 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """Return a generator of row-type dictionary objects."""
         partitions_list = self.get_partitions_list()
         if partitions_list:
-            for partition_key in partitions_list:
-                self.active_partition = partition_key
-                state_context = self.get_partition_state_context(partition_key)
+            for partition_keys in partitions_list:
+                self.active_partition = partition_keys
+                state_context = self.get_partition_state_context(partition_keys)
                 for row in self._request_paginated_get(state_context):
                     row = self.post_process(row, state_context)
                     yield row
