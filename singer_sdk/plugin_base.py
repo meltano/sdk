@@ -112,6 +112,11 @@ class PluginBase(metaclass=abc.ABCMeta):
         """Return the state dict for the plugin."""
         raise NotImplementedError()
 
+    @property
+    def input_catalog(self) -> Optional[dict]:
+        """Return the catalog dictionary input, or None if not provided."""
+        raise NotImplementedError()
+
     # Core plugin config:
 
     @property

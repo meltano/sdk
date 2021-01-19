@@ -61,8 +61,19 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         self,
         tap: TapBaseClass,
         schema: Optional[Union[str, Path, Dict[str, Any], Schema]],
-        name: Optional[str],
+        name: str,
     ):
+        """Initialize the database stream.
+
+        Parameters
+        ----------
+        tap : TapBaseClass
+            reference to the parent tap
+        schema : Optional[Union[str, Path, Dict[str, Any], Schema]]
+            A schema dict or the path to a valid schema file in json.
+        name : str
+            Required. Name of the stream (generally the same as the table name).
+        """
         super().__init__(tap=tap, schema=schema, name=name)
         self.is_view: Optional[bool] = None
         self.row_count: Optional[int] = None
@@ -77,6 +88,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
 
     @property
     def fully_qualified_name(self):
+        """Return the fully qualified name of the table name."""
         return self.tap_stream_id
 
     @classproperty
@@ -156,6 +168,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
 
     @staticmethod
     def create_singer_schema(columns: Dict[str, str]) -> singer.Schema:
+        """Return a singer 'Schema' object with the specified columns and data types."""
         props: Dict[str, singer.Schema] = {}
         for column, sql_type in columns.items():
             props[column] = DatabaseStream.get_singer_type(sql_type)
@@ -163,6 +176,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
 
     @staticmethod
     def get_singer_type(sql_type: str) -> singer.Schema:
+        """Return a singer type class based on the provided sql-base data type."""
         for matchable in SINGER_TYPE_LOOKUP.keys():
             if matchable.lower() in sql_type.lower():
                 return SINGER_TYPE_LOOKUP[matchable]
@@ -174,9 +188,11 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
     def scan_and_collate_columns(
         cls, config
     ) -> Dict[Tuple[str, str, str], Dict[str, str]]:
+        """Return a mapping of columns and datatypes for each table and view."""
         columns_scan_result = cls.execute_query(config=config, sql=cls.column_scan_sql)
         result: Dict[Tuple[str, str, str], Dict[str, str]] = {}
         for row_dict in columns_scan_result:
+            row_dict = cast(dict, row_dict)
             catalog, schema_name, table, column, data_type = row_dict.values()
             if (catalog, schema_name, table) not in result:
                 result[(catalog, schema_name, table)] = {}
@@ -185,11 +201,13 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
 
     @classmethod
     def scan_primary_keys(cls, config) -> Dict[Tuple[str, str, str], List[str]]:
+        """Return a listing of primary keys for each table and view."""
         result: Dict[Tuple[str, str, str], List[str]] = {}
         if not cls.primary_key_scan_sql:
             return result
         pk_scan_result = cls.execute_query(config=config, sql=cls.primary_key_scan_sql)
         for row_dict in pk_scan_result:
+            row_dict = cast(dict, row_dict)
             catalog, schema_name, table, pk_column = row_dict.values()
             if (catalog, schema_name, table) not in result:
                 result[(catalog, schema_name, table)] = []
@@ -237,8 +255,13 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
 
     @classmethod
     def from_input_catalog(cls, tap: TapBaseClass) -> List[FactoryType]:
+        """Initialize streams from an existing catalog, returning a list of streams."""
         result: List[FactoryType] = []
         catalog = tap.input_catalog
+        if not catalog:
+            raise ValueError(
+                "Could not initialize stream from blank or missing catalog."
+            )
         for catalog_entry in helpers.get_catalog_entries(catalog):
             full_name = helpers.get_catalog_entry_name(catalog_entry)
             new_stream = cast(

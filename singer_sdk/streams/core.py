@@ -204,6 +204,7 @@ class Stream(metaclass=abc.ABCMeta):
         return helpers.get_stream_state_dict(self.tap_state, self.name)
 
     def get_partition_state(self, partition_keys: dict) -> dict:
+        """Return a writable state dict for the given partition."""
         return helpers.get_stream_state_dict(
             self.tap_state, self.name, partition_keys=partition_keys
         )
