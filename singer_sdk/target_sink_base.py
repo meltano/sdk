@@ -2,9 +2,7 @@
 
 import abc
 import datetime
-from decimal import Decimal
 import json
-import logging
 import sys
 import re
 from logging import Logger
@@ -17,8 +15,6 @@ from jsonschema import Draft4Validator, FormatChecker
 from dateutil import parser
 
 import inflection
-
-from singer_sdk.streams.core import Stream
 
 
 class RecordFlattener:
