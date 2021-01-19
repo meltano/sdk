@@ -71,6 +71,7 @@ class Stream(metaclass=abc.ABCMeta):
         self.forced_replication_method: Optional[str] = None
         self.replication_key: Optional[str] = None
         self.primary_keys: Optional[List[str]] = None
+        self.active_partition: Optional[dict] = None
         if not hasattr(self, "schema_filepath"):  # Skip if set at the class level.
             self.schema_filepath: Optional[Path] = None
         self.__init_schema(schema)
@@ -114,7 +115,7 @@ class Stream(metaclass=abc.ABCMeta):
         """Return all values to be used in parameterization.
 
         By default, this includes all settings which are secrets and any stored values
-        the stream or shard state, as passed via the `context_state` argument.
+        the stream or partition state, as passed via the `context_state` argument.
         """
         result = {
             k: v for k, v in self.config.items() if not isinstance(v, SecretString)
@@ -194,53 +195,54 @@ class Stream(metaclass=abc.ABCMeta):
         """
         return helpers.get_stream_state_dict(self._state, self.name)
 
-    def get_shard_state_context(self, shard_key: dict) -> dict:
-        return helpers.get_stream_state_dict(self._state, self.name, shard=shard_key)
+    def get_partition_state_context(self, partition_key: dict) -> dict:
+        return helpers.get_stream_state_dict(
+            self._state, self.name, partition_key=partition_key
+        )
 
-    # Shards
+    # Partitions
 
-    def get_shards_list(self) -> Optional[List[dict]]:
-        """Return a list of shard key dicts (if applicable), otherwise None."""
+    def get_partitions_list(self) -> Optional[List[dict]]:
+        """Return a list of partition key dicts (if applicable), otherwise None."""
         state = helpers.read_stream_state(self._state, self.name)
-        if "shards" not in state:
+        if "partitions" not in state:
             return None
         result: List[dict] = []
-        for shard in state["shards"]:
-            result.append(shard)
+        for partition in state["partitions"]:
+            result.append(partition.get("context"))
         return result
 
-    # Private methods
+    # Private bookmarking methods
 
-    def _wipe_bookmarks(
-        self, wipe_keys: List[str] = None, *, except_keys: List[str] = None,
-    ) -> None:
-        """Wipe bookmarks.
-
-        You may specify a list to wipe or a list to keep, but not both.
-        """
-
-        def _bad_args():
-            raise ValueError(
-                "Incorrect number of arguments. "
-                "Expected `except_keys` or `wipe_keys` but not both."
-            )
-
-        if except_keys and wipe_keys:
-            _bad_args()
-        elif wipe_keys:
-            for wipe_key in wipe_keys:
-                singer.clear_bookmark(self._state, self.tap_stream_id, wipe_key)
-            return
-        elif except_keys:
-            return self._wipe_bookmarks(
-                [
-                    found_key
-                    for found_key in self._state.get("bookmarks", {})
-                    .get(self.tap_stream_id, {})
-                    .keys()
-                    if found_key not in except_keys
-                ]
-            )
+    def _increment_stream_state(
+        self, latest_record: Dict[str, Any], *, partition_key: Optional[dict] = None
+    ):
+        """Update state of the stream or partition with data from the provided record."""
+        if partition_key:
+            state_dict = self.get_partition_state_context(partition_key)
+        else:
+            state_dict = self.state_context
+        if latest_record:
+            if self.replication_method == "FULL_TABLE":
+                max_pk_values = singer._get_bookmark("max_pk_values")
+                if max_pk_values:
+                    state_dict["last_pk_fetched"] = {
+                        k: v
+                        for k, v in latest_record.items()
+                        if k in (self.primary_keys or [])
+                    }
+            elif self.replication_method in ["INCREMENTAL", "LOG_BASED"]:
+                if not self.replication_key:
+                    raise ValueError(
+                        f"Could not detect replication key for '{self.name}' stream"
+                        f"(replication method={self.replication_method})"
+                    )
+                state_dict.update(
+                    {
+                        "replication_key": self.replication_key,
+                        "replication_key_value": latest_record[self.replication_key],
+                    }
+                )
 
     def _get_bookmark(self, key: str, default: Any = None):
         """Return a bookmark key's value, or a default value if key is not set."""
@@ -251,9 +253,11 @@ class Stream(metaclass=abc.ABCMeta):
             default=default,
         )
 
+    # Private message authoring methods:
+
     def _write_state_message(self):
         """Write out a STATE message with the latest state."""
-        singer.write_message(singer.StateMessage(value=copy.deepcopy(self._state)))
+        singer.write_message(singer.StateMessage(value=self._state))
 
     def _write_schema_message(self):
         """Write out a SCHEMA message with the stream schema."""
@@ -263,11 +267,25 @@ class Stream(metaclass=abc.ABCMeta):
         )
         singer.write_message(schema_message)
 
+    # Private sync methods:
+
     def _sync_records(self):
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
+        # Reset interim state keys from prior executions:
+        helpers.wipe_stream_state_keys(
+            self.state,
+            self.name,
+            except_keys=[
+                "last_pk_fetched",
+                "max_pk_values",
+                "version",
+                "initial_full_table_complete",
+            ],
+            partition_key=self.active_partition,
+        )
+        # Iterate through each returned record:
         for row_dict in self.records:
-            row_dict = self.post_process(row_dict)
             if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
                 self._write_state_message()
             record = self._conform_record_data_types(row_dict)
@@ -278,11 +296,18 @@ class Stream(metaclass=abc.ABCMeta):
                 time_extracted=datetime.datetime.now(datetime.timezone.utc),
             )
             singer.write_message(record_message)
+            self._increment_stream_state(
+                record, self.replication_method, partition_key=self.active_partition
+            )
             rows_sent += 1
-            # TODO: Fix bookmark state updates
-            # self.tap._update_state(record, self.replication_method)
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
+        # Reset interim bookmarks before emitting final STATE message:
+        helpers.wipe_stream_state_keys(
+            self.state, self.name, except_keys=["last_pk_fetched", "max_pk_values"],
+        )
         self._write_state_message()
+
+    # Private validation and cleansing methods:
 
     @lru_cache()
     def _warn_unmapped_property(self, property_name: str):
@@ -339,35 +364,13 @@ class Stream(metaclass=abc.ABCMeta):
     @final
     def sync(self):
         """Sync this stream."""
-        self._wipe_bookmarks(
-            except_keys=[
-                "last_pk_fetched",
-                "max_pk_values",
-                "version",
-                "initial_full_table_complete",
-            ]
-        )
-        bookmark = self._state.get("bookmarks", {}).get(self.tap_stream_id, {})
-        version_exists = True if "version" in bookmark else False
-        initial_full_table_complete = self._get_bookmark("initial_full_table_complete")
-        state_version = self._get_bookmark("version")
-        activate_version_message = singer.ActivateVersionMessage(
-            stream=self.tap_stream_id, version=self.get_stream_version()
-        )
         self.logger.info(
-            f"Beginning sync of '{self.name}' using "
-            f"'{self.replication_method}' replication..."
+            f"Beginning {self.replication_method} sync of stream '{self.name}'..."
         )
-        if not initial_full_table_complete and not (
-            version_exists and state_version is None
-        ):
-            singer.write_message(activate_version_message)
+        # Send a SCHEMA message to the downstream target:
         self._write_schema_message()
+        # Sync the records themselves:
         self._sync_records()
-        singer.clear_bookmark(self._state, self.tap_stream_id, "max_pk_values")
-        singer.clear_bookmark(self._state, self.tap_stream_id, "last_pk_fetched")
-        self._write_state_message()
-        singer.write_message(activate_version_message)
 
     # Overridable Methods
 
@@ -390,7 +393,7 @@ class Stream(metaclass=abc.ABCMeta):
         """
         pass
 
-    def post_process(self, row: dict) -> dict:
+    def post_process(self, row: dict, state_context: dict) -> dict:
         """Transform raw data from HTTP GET into the expected property values."""
         return row
 
@@ -398,48 +401,3 @@ class Stream(metaclass=abc.ABCMeta):
     def http_headers(self) -> dict:
         """Return headers to be used by HTTP requests."""
         return NotImplemented()
-
-    # Deprecated (TODO: Merge `set_custom_metadata()` with `apply_catalog()`)
-
-    # def set_custom_metadata(self, md: Optional[dict]) -> None:
-    #     if md:
-    #         self._custom_metadata = md
-    #     pk = self.get_metadata("key-properties", from_metadata_dict=md)
-    #     replication_key = self.get_metadata("replication-key", from_metadata_dict=md)
-    #     valid_bookmark_key = self.get_metadata(
-    #         "valid-replication-keys", from_metadata_dict=md
-    #     )
-    #     method = self.get_metadata(
-    #         "forced-replication-method", from_metadata_dict=md
-    #     ) or self.get_metadata("replication-method", from_metadata_dict=md)
-    #     if pk:
-    #         self.primary_keys = pk
-    #     if replication_key:
-    #         self.replication_key = replication_key
-    #     elif valid_bookmark_key:
-    #         self.replication_key = valid_bookmark_key[0]
-    #     if method:
-    #         self.forced_replication_method = method
-
-    # Deprecated (TODO: DELETE)
-
-    # def _get_metadata(
-    #     self,
-    #     key_name,
-    #     default: Any = None,
-    #     breadcrumb: Tuple = (),
-    #     from_metadata_dict: dict = None,
-    # ):
-    #     """Return top level metadata (breadcrumb="()")."""
-    #     if not from_metadata_dict:
-    #         md_dict = self._custom_metadata
-    #     else:
-    #         md_dict = from_metadata_dict
-    #     if not md_dict:
-    #         return default
-    #     md_map = metadata.to_map(md_dict)
-    #     if not md_map:
-    #         self.logger.warning(f"Could not find '{key_name}' metadata.")
-    #         return default
-    #     result = md_map.get(breadcrumb, {}).get(key_name, default)
-    #     return result

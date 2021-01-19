@@ -118,43 +118,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """
         return state
 
-    def merge_bookmarks(self, stream: Stream, new_bookmarks: Dict[str, Any]) -> None:
-        """Apply the provided dictionary of new bookmark values."""
-        for k, v in new_bookmarks.items():
-            self._state = singer.write_bookmark(self._state, stream.tap_stream_id, k, v)
-
-    def update_bookmarks(self, stream: Stream, latest_record: Dict[str, Any]):
-        """Update the stream's internal state with data from the provided record."""
-        if not self._state:
-            self.merge_bookmarks(
-                stream, {"version": stream.get_stream_version()},
-            )
-        if latest_record:
-            if stream.replication_method == "FULL_TABLE":
-                max_pk_values = singer._get_bookmark("max_pk_values")
-                if max_pk_values:
-                    self.merge_bookmarks(
-                        stream,
-                        {
-                            "last_pk_fetched": {
-                                k: v
-                                for k, v in latest_record.items()
-                                if k in (stream.primary_keys or [])
-                            }
-                        },
-                    )
-            elif stream.replication_method in ["INCREMENTAL", "LOG_BASED"]:
-                if stream.replication_key is not None:
-                    self.merge_bookmarks(
-                        stream,
-                        {
-                            "replication_key": stream.replication_key,
-                            "replication_key_value": latest_record[
-                                stream.replication_key
-                            ],
-                        },
-                    )
-
     # Sync methods
 
     def sync_one(self, stream_name: str):

@@ -50,9 +50,9 @@ class GitlabStream(RESTStream):
 class ProjectBasedStream(GitlabStream):
     """Base class for streams that are keys based on project ID."""
 
-    def get_shards_list(self) -> List[dict]:
-        """Return a list of shard key dicts (if applicable), otherwise None."""
-        return [f"project_id={id}" for id in self.config.get("project_ids")]
+    def get_partitions_list(self) -> List[dict]:
+        """Return a list of partition key dicts (if applicable), otherwise None."""
+        return [{"project_id": id} for id in self.config.get("project_ids")]
 
 
 class ProjectsStream(ProjectBasedStream):
@@ -115,13 +115,15 @@ class EpicsStream(ProjectBasedStream):
 
     # schema_filepath = SCHEMAS_DIR / "epics.json"
 
-    def post_process(self, row: dict) -> dict:
+    def post_process(self, row: dict, context: dict) -> dict:
         """Perform post processing, including queuing up any child stream types."""
         # Ensure child state record(s) are created
         _ = helpers.get_stream_state_dict(
-            self.state, "epic_issues", shard={"epic_id": row["id"]}
+            self.state,
+            "epic_issues",
+            partition_keys={"group_id": context["group_id"], "epic_id": row["id"]},
         )
-        return super().post_process(row)
+        return super().post_process(row, context)
 
 
 class EpicIssuesStream(GitlabStream):
@@ -144,7 +146,7 @@ class EpicIssuesStream(GitlabStream):
         Parameters
         ----------
         context_state : dict
-            The initial context state for the current stream or stream shard.
+            The initial context state for the current stream or stream partition.
 
         Returns
         -------

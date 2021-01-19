@@ -106,9 +106,9 @@ def is_boolean_type(property_schema: dict) -> Optional[bool]:
 
 
 def get_stream_state_dict(
-    state: dict, tap_stream_id: str, shard: Optional[dict] = None
+    state: dict, tap_stream_id: str, partition_keys: Optional[dict] = None
 ) -> dict:
-    """Return the stream or shard state, creating a new one if it does not exist.
+    """Return the stream or partition state, creating a new one if it does not exist.
 
     Parameters
     ----------
@@ -116,13 +116,13 @@ def get_stream_state_dict(
         the existing state dict which contains all streams.
     tap_stream_id : str
         the id of the stream
-    shard : Optional[dict], optional
-        keys which identify the shard context, by default None (treat as non-sharded)
+    partition_keys : Optional[dict], optional
+        keys which identify the partition context, by default None (treat as non-partitioned)
 
     Returns
     -------
     dict
-        Returns a writeable dict at the stream or shard level.
+        Returns a writeable dict at the stream or partition level.
 
     Raises
     ------
@@ -133,21 +133,22 @@ def get_stream_state_dict(
         state["bookmarks"] = {}
     if tap_stream_id not in state["bookmarks"]:
         state["bookmarks"][tap_stream_id] = {}
-    if shard:
-        if "shards" not in state["bookmarks"][tap_stream_id]:
-            state["bookmarks"][tap_stream_id]["shards"] = []
+    if partition_keys:
+        if "partitions" not in state["bookmarks"][tap_stream_id]:
+            state["bookmarks"][tap_stream_id]["partitions"] = []
         found = [
-            shard
-            for shard in state["bookmarks"][tap_stream_id]["shards"]
-            if shard.get("context") == shard
+            partition_state
+            for partition_state in state["bookmarks"][tap_stream_id]["partitions"]
+            if partition_state.get("context") == partition_keys
         ]
         if len(found) > 1:
             raise ValueError(
-                f"State file contains duplicate entries for shard definition: {shard}"
+                "State file contains duplicate entries for partition definition: "
+                f"{partition_keys}"
             )
         if not found:
-            new_dict = {"context": shard}
-            state["bookmarks"][tap_stream_id]["shards"].append(new_dict)
+            new_dict = {"context": partition_keys}
+            state["bookmarks"][tap_stream_id]["partitions"].append(new_dict)
             return new_dict
         return found[0]
 
@@ -158,26 +159,54 @@ def read_stream_state(
     key=None,
     default: Any = None,
     *,
-    shard: Optional[dict] = None,
+    partition_keys: Optional[dict] = None,
 ) -> Any:
-    state_dict = get_stream_state_dict(state, tap_stream_id, shard=shard)
+    state_dict = get_stream_state_dict(
+        state, tap_stream_id, partition_keys=partition_keys
+    )
     if key:
         return state_dict.get(key, default)
     return state_dict or default
 
 
 def write_stream_state(
-    state, tap_stream_id: str, key, val, *, shard: Optional[dict] = None
+    state, tap_stream_id: str, key, val, *, partition_keys: Optional[dict] = None
 ) -> None:
-    state_dict = get_stream_state_dict(state, tap_stream_id, shard=shard)
+    state_dict = get_stream_state_dict(
+        state, tap_stream_id, partition_keys=partition_keys
+    )
     state_dict[key] = val
 
 
-def wipe_stream_state(
-    state, tap_stream_id: str, key, *, shard: Optional[dict] = None
+def wipe_stream_state_keys(
+    state: dict,
+    tap_stream_id: str,
+    wipe_keys: List[str] = None,
+    *,
+    except_keys: List[str] = None,
+    partition_keys: Optional[dict] = None,
 ) -> None:
-    state_dict = get_stream_state_dict(state, tap_stream_id, shard=shard)
-    state_dict.pop(key)
+    """Wipe bookmarks.
+
+    You may specify a list to wipe or a list to keep, but not both.
+    """
+    state_dict = get_stream_state_dict(
+        state, tap_stream_id, partition_keys=partition_keys
+    )
+
+    if except_keys and wipe_keys:
+        raise ValueError(
+            "Incorrect number of arguments. "
+            "Expected `except_keys` or `wipe_keys` but not both."
+        )
+    if except_keys:
+        wipe_keys = [
+            found_key for found_key in state_dict.keys() if found_key not in except_keys
+        ]
+    wipe_keys = wipe_keys or []
+    for wipe_key in wipe_keys:
+        state_dict.pop(wipe_key)
+    return
 
 
 def _float_to_decimal(value):

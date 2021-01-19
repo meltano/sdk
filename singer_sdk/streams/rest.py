@@ -163,14 +163,19 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     @property
     def records(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
-        shards = self.get_shards_list()
-        if shards:
-            for shard in shards:
-                state_context = self.get_shard_state_context(shard)
+        partitions_list = self.get_partitions_list()
+        if partitions_list:
+            for partition_key in partitions_list:
+                self.active_partition = partition_key
+                state_context = self.get_partition_state_context(partition_key)
                 for row in self._request_paginated_get(state_context):
+                    row = self.post_process(row, state_context)
                     yield row
+            self.active_partition = None
         else:
+            self.active_partition = None
             for row in self._request_paginated_get(self.state_context):
+                row = self.post_process(row, self.state_context)
                 yield row
 
     def parse_response(self, response) -> Iterable[dict]:
