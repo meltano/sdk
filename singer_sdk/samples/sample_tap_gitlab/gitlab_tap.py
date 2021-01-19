@@ -11,9 +11,6 @@ from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
     EpicsStream,
     EpicIssuesStream,
 )
-from singer_sdk.samples.sample_tap_gitlab.gitlab_graphql_streams import (
-    GraphQLCurrentUserStream,
-)
 from singer_sdk.samples.sample_tap_gitlab.gitlab_globals import PLUGIN_NAME
 
 

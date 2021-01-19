@@ -92,6 +92,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         return self.tap_stream_id
 
     @classproperty
+    @classmethod
     def table_scan_sql(cls) -> str:
         """Return a SQL statement for syncable tables.
 
@@ -107,6 +108,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             """
 
     @classproperty
+    @classmethod
     def view_scan_sql(cls) -> str:
         """Return a SQL statement for syncable views.
 
@@ -122,6 +124,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             """
 
     @classproperty
+    @classmethod
     def column_scan_sql(cls) -> str:
         """Return a SQL statement that provides the column names and types.
 
@@ -141,6 +144,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             """
 
     @classproperty
+    @classmethod
     def primary_key_scan_sql(cls) -> Optional[str]:
         """Return a SQL statement that provides the list of primary key columns.
 
@@ -219,11 +223,15 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         """Return a list of all streams (tables)."""
         result: List[FactoryType] = []
         config = tap.config
-        table_scan_result: Iterable[List[Any]] = cls.execute_query(
-            config=config, sql=cls.table_scan_sql, dict_results=False
+        table_scan_result = cast(
+            Iterable[List[Any]],
+            cls.execute_query(
+                config=config, sql=cls.table_scan_sql, dict_results=False
+            ),
         )
-        view_scan_result: Iterable[List[Any]] = cls.execute_query(
-            config=config, sql=cls.view_scan_sql, dict_results=False
+        view_scan_result = cast(
+            Iterable[List[Any]],
+            cls.execute_query(config=config, sql=cls.view_scan_sql, dict_results=False),
         )
         all_results = [
             (database, schema_name, table, False)
@@ -276,6 +284,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         return result
 
     @abc.abstractclassmethod
+    @classmethod
     def execute_query(
         cls, sql: Union[str, List[str]], config, dict_results=True
     ) -> Union[Iterable[dict], Iterable[Tuple]]:
@@ -321,6 +330,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         )(cls.open_connection)()
 
     @abc.abstractclassmethod
+    @classmethod
     def open_connection(cls, config) -> Any:
         """Connect to the database source."""
         pass

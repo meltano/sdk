@@ -28,9 +28,10 @@ class PluginBase(metaclass=abc.ABCMeta):
     _config: dict
 
     @classproperty
-    def logger(self) -> logging.Logger:
+    @classmethod
+    def logger(cls) -> logging.Logger:
         """Get logger."""
-        return logging.getLogger(self.name)
+        return logging.getLogger(cls.name)
 
     # Constructor
 
@@ -92,13 +93,14 @@ class PluginBase(metaclass=abc.ABCMeta):
     # Core plugin metadata:
 
     @classproperty
+    @classmethod
     def plugin_version(cls) -> str:
         """Return the package version number."""
         try:
             from importlib import metadata
         except ImportError:
             # Running on pre-3.8 Python; use importlib-metadata package
-            import importlib_metadata as metadata
+            import importlib_metadata as metadata  # type: ignore
         try:
             version = metadata.version(cls.name)
         except metadata.PackageNotFoundError:

@@ -25,9 +25,9 @@ from typing import (
 
 try:
     from typing import final
-except:
+except ImportError:
     # Final not available until Python3.8
-    final = lambda x: x
+    final = lambda f: f  # noqa: E731
 
 import singer
 from singer import CatalogEntry, RecordMessage, SchemaMessage
