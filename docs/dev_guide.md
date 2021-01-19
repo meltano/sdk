@@ -70,7 +70,7 @@ stream class, you only need to override a single method:_
 
 **More info:**
 
-- For more info, see the [Parquet](/tap_base/samples/sample_tap_parquet) sample.
+- For more info, see the [Parquet](/singer_sdk/samples/sample_tap_parquet) sample.
 
 ### 'REST' stream classes
 
@@ -104,9 +104,9 @@ _Depending upon your implementation, you may also want to override one or more o
 
 **More info:**
 
-- For more info, see the [GitLab](/tap_base/samples/sample_tap_gitlab) sample:
-  - [GitLab tap](/tap_base/samples/sample_tap_gitlab/gitlab_tap.py)
-  - [GitLab REST streams](tap_base/samples/sample_tap_gitlab/gitlab_rest_streams.py)
+- For more info, see the [GitLab](/singer_sdk/samples/sample_tap_gitlab) sample:
+  - [GitLab tap](/singer_sdk/samples/sample_tap_gitlab/gitlab_tap.py)
+  - [GitLab REST streams](singer_sdk/samples/sample_tap_gitlab/gitlab_rest_streams.py)
 
 ### 'GraphQL' stream classes
 
@@ -130,12 +130,12 @@ _Depending upon your implementation, you may also want to override one or more o
 
 **More info:**
 
-- For more info, see the [GitLab](/tap_base/samples/sample_tap_gitlab) sample:
-  - [GitLab tap](/tap_base/samples/sample_tap_gitlab/gitlab_tap.py)
-  - [GitLab GraphQL streams](/tap_base/samples/sample_tap_gitlab/gitlab_rest_streams.py)
-- Or the [Countries API](/tap_base/samples/sample_tap_countries) Sample:
-  - [Countries API Tap](/tap_base/samples/sample_tap_countries/countries_tap.py)
-  - [Countries API Streams](/tap_base/samples/sample_tap_countries/countries_streams.py)
+- For more info, see the [GitLab](/singer_sdk/samples/sample_tap_gitlab) sample:
+  - [GitLab tap](/singer_sdk/samples/sample_tap_gitlab/gitlab_tap.py)
+  - [GitLab GraphQL streams](/singer_sdk/samples/sample_tap_gitlab/gitlab_rest_streams.py)
+- Or the [Countries API](/singer_sdk/samples/sample_tap_countries) Sample:
+  - [Countries API Tap](/singer_sdk/samples/sample_tap_countries/countries_tap.py)
+  - [Countries API Streams](/singer_sdk/samples/sample_tap_countries/countries_streams.py)
 
 ### 'Database' stream classes
 
@@ -160,6 +160,6 @@ _Depending upon your implementation, you may also want to override one or more o
 
 **More info:**
 
-- For more info, see the [Snowflake](/tap_base/samples/sample_tap_snowflake) sample:
-  - [Snowflake tap](/tap_base/samples/sample_tap_snowflake/snowflake_tap.py)
-  - [Snowflake streams](/tap_base/samples/sample_tap_snowflake/snowflake_tap_stream.py)
+- For more info, see the [Snowflake](/singer_sdk/samples/sample_tap_snowflake) sample:
+  - [Snowflake tap](/singer_sdk/samples/sample_tap_snowflake/snowflake_tap.py)
+  - [Snowflake streams](/singer_sdk/samples/sample_tap_snowflake/snowflake_tap_stream.py)
