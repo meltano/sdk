@@ -1,9 +1,9 @@
 """Sample target test for target-csv."""
 
-from tap_base.target_base import TargetBase
-from tap_base import typehelpers as th
+from singer_sdk.target_base import TargetBase
+from singer_sdk import typehelpers as th
 
-from tap_base.samples.sample_target_csv.csv_target_sink import SampleCSVTargetSink
+from singer_sdk.samples.sample_target_csv.csv_target_sink import SampleCSVTargetSink
 
 
 class SampleTargetCSV(TargetBase):

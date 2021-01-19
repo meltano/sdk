@@ -5,13 +5,13 @@ import copy
 import json
 
 import click
-from tap_base.helpers import classproperty
-from tap_base import helpers
+from singer_sdk.helpers import classproperty
+from singer_sdk import helpers
 
 from typing import Any, Dict, Iterable, Optional, Type
 
-from tap_base.plugin_base import PluginBase
-from tap_base.target_sink_base import TargetSinkBase
+from singer_sdk.plugin_base import PluginBase
+from singer_sdk.target_sink_base import TargetSinkBase
 
 
 class TargetBase(PluginBase, metaclass=abc.ABCMeta):

@@ -7,8 +7,9 @@ import json
 
 from tempfile import mkstemp
 
-from tap_base.target_sink_base import TargetSinkBase
-from tap_base import helpers
+from singer_sdk.target_sink_base import TargetSinkBase
+from singer_sdk import helpers
+
 
 class RecordValidationException(Exception):
     """Exception to raise when record validation failed."""

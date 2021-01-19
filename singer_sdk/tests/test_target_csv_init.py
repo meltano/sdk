@@ -1,6 +1,6 @@
 """Test class creation."""
 
-from tap_base.samples.sample_target_csv.csv_target import SampleTargetCSV
+from singer_sdk.samples.sample_target_csv.csv_target import SampleTargetCSV
 
 SAMPLE_CONFIG = {"target_folder": "./.output"}
 

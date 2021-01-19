@@ -9,7 +9,7 @@ import sys
 import re
 from logging import Logger
 import collections
-from tap_base.plugin_base import PluginBase
+from singer_sdk.plugin_base import PluginBase
 from typing import Dict, Iterable, Optional
 
 from jsonschema import Draft4Validator, FormatChecker
@@ -18,7 +18,7 @@ from dateutil import parser
 
 import inflection
 
-from tap_base.streams.core import Stream
+from singer_sdk.streams.core import Stream
 
 
 class RecordFlattener:

@@ -5,7 +5,7 @@ from pathlib import Path
 
 from typing import Dict, Iterable, Optional
 
-from tap_base.target_sink_base import TargetSinkBase
+from singer_sdk.target_sink_base import TargetSinkBase
 
 
 class SampleCSVTargetSink(TargetSinkBase):

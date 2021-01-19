@@ -1,12 +1,12 @@
 """Sample target test for target-parquet."""
 
-from tap_base.target_base import TargetBase
-from tap_base import typehelpers as th
+from singer_sdk.target_base import TargetBase
+from singer_sdk import typehelpers as th
 
-from tap_base.samples.sample_target_parquet.parquet_target_sink import (
+from singer_sdk.samples.sample_target_parquet.parquet_target_sink import (
     SampleParquetTargetSink,
 )
-from tap_base.samples.sample_target_parquet.parquet_target_globals import PLUGIN_NAME
+from singer_sdk.samples.sample_target_parquet.parquet_target_globals import PLUGIN_NAME
 
 
 class SampleTargetParquet(TargetBase):

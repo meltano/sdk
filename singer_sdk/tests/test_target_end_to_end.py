@@ -5,9 +5,9 @@ from pathlib import Path
 from contextlib import redirect_stdout
 from datetime import datetime
 
-from tap_base.samples.sample_tap_parquet.parquet_tap import SampleTapParquet
-from tap_base.samples.sample_target_parquet.parquet_target import SampleTargetParquet
-from tap_base.samples.sample_target_csv.csv_target import SampleTargetCSV
+from singer_sdk.samples.sample_tap_parquet.parquet_tap import SampleTapParquet
+from singer_sdk.samples.sample_target_parquet.parquet_target import SampleTargetParquet
+from singer_sdk.samples.sample_target_csv.csv_target import SampleTargetCSV
 
 SAMPLE_FILENAME = "/tmp/testfile.parquet"
 SAMPLE_TAP_CONFIG = {"filepath": SAMPLE_FILENAME}

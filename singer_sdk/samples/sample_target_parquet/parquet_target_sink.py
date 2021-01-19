@@ -5,8 +5,8 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from tap_base.samples.sample_target_parquet.parquet_target_globals import PLUGIN_NAME
-from tap_base.target_sink_base import TargetSinkBase
+from singer_sdk.samples.sample_target_parquet.parquet_target_globals import PLUGIN_NAME
+from singer_sdk.target_sink_base import TargetSinkBase
 
 
 class SampleParquetTargetSink(TargetSinkBase):
