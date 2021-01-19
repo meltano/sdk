@@ -53,9 +53,9 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             result = str(val)
         return result
 
-    def _get_url(self, context_state: dict) -> str:
+    def _get_url(self, stream_or_partition_state: dict) -> str:
         url_pattern = "".join([self.url_base, self.path or ""])
-        params = self.get_params(context_state)
+        params = self.get_params(stream_or_partition_state)
         url = url_pattern
         for k, v in params.items():
             search_text = "".join(["{", k, "}"])
@@ -111,11 +111,11 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         ).prepare()
         return request
 
-    def _request_paginated_get(self, state_context: dict) -> Iterable[dict]:
+    def _request_paginated_get(self, stream_or_partition_state: dict) -> Iterable[dict]:
         # params = {"page": 1, "per_page": self._page_size}
-        params: dict = self.get_params(state_context)
+        params: dict = self.get_params(stream_or_partition_state)
         next_page_token = 1
-        url = self._get_url(state_context)
+        url = self._get_url(stream_or_partition_state)
         while next_page_token:
             params = self.insert_next_page_token(
                 next_page=next_page_token, params=params
@@ -167,15 +167,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         if partitions_list:
             for partition_keys in partitions_list:
                 self.active_partition = partition_keys
-                state_context = self.get_partition_state_context(partition_keys)
-                for row in self._request_paginated_get(state_context):
-                    row = self.post_process(row, state_context)
+                partition_state = self.get_partition_state(partition_keys)
+                for row in self._request_paginated_get(partition_state):
+                    row = self.post_process(row, partition_state)
                     yield row
             self.active_partition = None
         else:
             self.active_partition = None
-            for row in self._request_paginated_get(self.state_context):
-                row = self.post_process(row, self.state_context)
+            for row in self._request_paginated_get(self.stream_state):
+                row = self.post_process(row, self.stream_state)
                 yield row
 
     def parse_response(self, response) -> Iterable[dict]:

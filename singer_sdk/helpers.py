@@ -117,7 +117,7 @@ def get_stream_state_dict(
     tap_stream_id : str
         the id of the stream
     partition_keys : Optional[dict], optional
-        keys which identify the partition context, by default None (treat as non-partitioned)
+        keys which identify the partition context, by default None (not partitioned)
 
     Returns
     -------

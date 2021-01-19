@@ -11,7 +11,7 @@ from singer_sdk.typehelpers import (
 )
 from singer_sdk import helpers
 from singer_sdk.authenticators import SimpleAuthenticator
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, cast
 
 from singer_sdk.streams.rest import RESTStream
 
@@ -25,6 +25,7 @@ class GitlabStream(RESTStream):
 
     @property
     def url_base(self) -> str:
+        """Return the base GitLab URL."""
         return self.config.get("api_url", DEFAULT_URL_BASE)
 
     @property
@@ -35,14 +36,9 @@ class GitlabStream(RESTStream):
             http_headers["User-Agent"] = self.config.get("user_agent")
         return SimpleAuthenticator(stream=self, http_headers=http_headers)
 
-    def get_params(self, context_state: dict) -> Dict[str, Any]:
-        """Expose any needed config values into the URL parameterization process.
-
-        If a list of dictionaries is returned, one call will be made for each item
-        in the list. For GitLab, this is necessary when each call must reference a
-        specific `project_id`.
-        """
-        result = copy.deepcopy(context_state)
+    def get_params(self, stream_or_partition_state: dict) -> Dict[str, Any]:
+        """Return a dictionary of values to be used in parameterization."""
+        result = copy.deepcopy(stream_or_partition_state)
         result.update({"start_date": self.config.get("start_date")})
         return result
 
@@ -52,10 +48,22 @@ class ProjectBasedStream(GitlabStream):
 
     def get_partitions_list(self) -> List[dict]:
         """Return a list of partition key dicts (if applicable), otherwise None."""
-        return [{"project_id": id} for id in self.config.get("project_ids")]
+        if "{project_id}" in self.path:
+            return [
+                {"project_id": id} for id in cast(list, self.config.get("project_ids"))
+            ]
+        if "{group_id}" in self.path:
+            return [{"group_id": id} for id in cast(list, self.config.get("group_ids"))]
+        raise ValueError(
+            "Could not detect partition type for Gitlab stream "
+            f"'{self.name}' ({self.path}). "
+            "Expected a URL path containing '{project_id}' or '{group_id}'. "
+        )
 
 
 class ProjectsStream(ProjectBasedStream):
+    """Gitlab Projects stream."""
+
     name = "projects"
     path = "/projects/{project_id}?statistics=1"
     primary_keys = ["id"]
@@ -64,6 +72,8 @@ class ProjectsStream(ProjectBasedStream):
 
 
 class ReleasesStream(ProjectBasedStream):
+    """Gitlab Releases stream."""
+
     name = "releases"
     path = "/projects/{project_id}/releases"
     primary_keys = ["project_id", "commit_id", "tag_name"]
@@ -72,6 +82,8 @@ class ReleasesStream(ProjectBasedStream):
 
 
 class IssuesStream(ProjectBasedStream):
+    """Gitlab Issues stream."""
+
     name = "issues"
     path = "/projects/{project_id}/issues?scope=all&updated_after={start_date}"
     primary_keys = ["id"]
@@ -80,6 +92,8 @@ class IssuesStream(ProjectBasedStream):
 
 
 class CommitsStream(ProjectBasedStream):
+    """Gitlab Commits stream."""
+
     name = "commits"
     path = (
         "/projects/{project_id}/repository/commits?since={start_date}&with_stats=true"
@@ -90,6 +104,12 @@ class CommitsStream(ProjectBasedStream):
 
 
 class EpicsStream(ProjectBasedStream):
+    """Gitlab Epics stream.
+
+    This class shows an example of inline `schema` declaration rather than referencing
+    a raw json input file.
+    """
+
     name = "epics"
     path = "/groups/{group_id}/epics?updated_after={start_date}"
     primary_keys = ["id"]
@@ -119,7 +139,7 @@ class EpicsStream(ProjectBasedStream):
         """Perform post processing, including queuing up any child stream types."""
         # Ensure child state record(s) are created
         _ = helpers.get_stream_state_dict(
-            self.state,
+            self.tap_state,
             "epic_issues",
             partition_keys={"group_id": context["group_id"], "epic_id": row["id"]},
         )
@@ -140,27 +160,9 @@ class EpicIssuesStream(GitlabStream):
     schema_filepath = SCHEMAS_DIR / "epic_issues.json"
     parent_stream_types = [EpicsStream]  # Stream should wait for parents to complete.
 
-    def get_params(self, context_state: dict) -> dict:
-        """[summary]
-
-        Parameters
-        ----------
-        context_state : dict
-            The initial context state for the current stream or stream partition.
-
-        Returns
-        -------
-        dict
-            The set of parameters to be used in variable substitution for the current
-            query.
-
-        Raises
-        ------
-        ValueError
-            Raises Value error if context_state is missing required values or cannot be
-            read.
-        """
-        result = super().get_params(context_state)
-        if "epic_id" not in context_state:
+    def get_params(self, stream_or_partition_state: dict) -> dict:
+        """Return a dictionary of values to be used in parameterization."""
+        result = super().get_params(stream_or_partition_state)
+        if "epic_id" not in stream_or_partition_state:
             raise ValueError("Cannot sync epic issues without already known epic IDs.")
         return result

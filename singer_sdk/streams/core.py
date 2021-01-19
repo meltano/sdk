@@ -65,7 +65,7 @@ class Stream(metaclass=abc.ABCMeta):
         self.logger: logging.Logger = tap.logger
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
-        self._state = tap.state or {}
+        self._tap_state = tap.state
         self._schema: Optional[dict] = None
         self.forced_replication_method: Optional[str] = None
         self.replication_key: Optional[str] = None
@@ -110,16 +110,17 @@ class Stream(metaclass=abc.ABCMeta):
         """Return a frozen (read-only) config dictionary map."""
         return MappingProxyType(self._config)
 
-    def get_params(self, context_state: dict) -> dict:
-        """Return all values to be used in parameterization.
+    def get_params(self, stream_or_partition_state: dict) -> dict:
+        """Return a dictionary of values to be used in parameterization.
 
         By default, this includes all settings which are secrets and any stored values
-        the stream or partition state, as passed via the `context_state` argument.
+        the stream or partition state, as passed via the `stream_or_partition_state`
+        argument.
         """
         result = {
             k: v for k, v in self.config.items() if not isinstance(v, SecretString)
         }
-        result.update(context_state)
+        result.update(stream_or_partition_state)
         return result
 
     def get_stream_version(self):
@@ -187,28 +188,36 @@ class Stream(metaclass=abc.ABCMeta):
     # State properties:
 
     @property
-    def state_context(self) -> dict:
+    def tap_state(self) -> dict:
+        """Return a writeable state dict for the entire tap.
+
+        Note: This dictionary is shared (and writable) across all streams.
+        """
+        return self._tap_state
+
+    @property
+    def stream_state(self) -> dict:
         """Return a writeable state dict for this stream.
 
         A blank state entry will be created if one doesn't already exist.
         """
-        return helpers.get_stream_state_dict(self._state, self.name)
+        return helpers.get_stream_state_dict(self.tap_state, self.name)
 
-    def get_partition_state_context(self, partition_keys: dict) -> dict:
+    def get_partition_state(self, partition_keys: dict) -> dict:
         return helpers.get_stream_state_dict(
-            self._state, self.name, partition_keys=partition_keys
+            self.tap_state, self.name, partition_keys=partition_keys
         )
 
     # Partitions
 
     def get_partitions_list(self) -> Optional[List[dict]]:
         """Return a list of partition key dicts (if applicable), otherwise None."""
-        state = helpers.read_stream_state(self._state, self.name)
+        state = helpers.read_stream_state(self.tap_state, self.name)
         if "partitions" not in state:
             return None
         result: List[dict] = []
-        for partition in state["partitions"]:
-            result.append(partition.get("context"))
+        for partition_state in state["partitions"]:
+            result.append(partition_state.get("context"))
         return result
 
     # Private bookmarking methods
@@ -218,9 +227,9 @@ class Stream(metaclass=abc.ABCMeta):
     ):
         """Update state of the stream or partition with data from the provided record."""
         if partition_keys:
-            state_dict = self.get_partition_state_context(partition_keys)
+            state_dict = self.get_partition_state(partition_keys)
         else:
-            state_dict = self.state_context
+            state_dict = self.stream_state
         if latest_record:
             if self.replication_method == "FULL_TABLE":
                 max_pk_values = singer._get_bookmark("max_pk_values")
@@ -246,7 +255,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _get_bookmark(self, key: str, default: Any = None):
         """Return a bookmark key's value, or a default value if key is not set."""
         return singer.get_bookmark(
-            state=self._state,
+            state=self.tap_state,
             tap_stream_id=self.tap_stream_id,
             key=key,
             default=default,
@@ -256,7 +265,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _write_state_message(self):
         """Write out a STATE message with the latest state."""
-        singer.write_message(singer.StateMessage(value=self._state))
+        singer.write_message(singer.StateMessage(value=self.tap_state))
 
     def _write_schema_message(self):
         """Write out a SCHEMA message with the stream schema."""
@@ -273,7 +282,7 @@ class Stream(metaclass=abc.ABCMeta):
         rows_sent = 0
         # Reset interim state keys from prior executions:
         helpers.wipe_stream_state_keys(
-            self.state,
+            self.tap_state,
             self.name,
             except_keys=[
                 "last_pk_fetched",
@@ -302,7 +311,7 @@ class Stream(metaclass=abc.ABCMeta):
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
         # Reset interim bookmarks before emitting final STATE message:
         helpers.wipe_stream_state_keys(
-            self.state, self.name, except_keys=["last_pk_fetched", "max_pk_values"],
+            self.tap_state, self.name, except_keys=["last_pk_fetched", "max_pk_values"],
         )
         self._write_state_message()
 
@@ -392,7 +401,7 @@ class Stream(metaclass=abc.ABCMeta):
         """
         pass
 
-    def post_process(self, row: dict, state_context: dict) -> dict:
+    def post_process(self, row: dict, stream_or_partition_state: dict) -> dict:
         """Transform raw data from HTTP GET into the expected property values."""
         return row
 
