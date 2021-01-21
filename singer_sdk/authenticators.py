@@ -9,7 +9,7 @@ import requests
 from datetime import datetime, timedelta
 from typing import Any, Dict, Mapping, Optional
 
-from singer_sdk.helpers import utc_now
+from singer_sdk.helpers.util import utc_now
 from singer_sdk.streams import Stream as RESTStreamBase
 
 from singer import utils

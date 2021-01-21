@@ -1,4 +1,4 @@
-"""Helpers for JSONSchema.
+"""Helpers for JSONSchema typing.
 
 Usage example:
 

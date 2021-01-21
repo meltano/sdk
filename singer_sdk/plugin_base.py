@@ -10,7 +10,8 @@ from jsonschema import ValidationError, SchemaError
 from jsonschema import Draft4Validator as JSONSchemaValidator
 from pathlib import Path, PurePath
 
-from singer_sdk.helpers import classproperty, is_common_secret_key, SecretString
+from singer_sdk.helpers.util import classproperty
+from singer_sdk.helpers.secrets import is_common_secret_key, SecretString
 from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
 
 import click

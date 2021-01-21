@@ -4,7 +4,7 @@ import abc
 import json
 from pathlib import PurePath
 
-from singer_sdk.helpers import classproperty
+from singer_sdk.helpers.util import classproperty
 from typing import Any, List, Optional, Dict, Union
 
 import click

@@ -6,8 +6,13 @@ import json
 import logging
 from types import MappingProxyType
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
-from singer_sdk.helpers import SecretString, get_property_schema, is_boolean_type
-from singer_sdk import helpers
+from singer_sdk.helpers.secrets import SecretString
+from singer_sdk.helpers.util import get_property_schema, is_boolean_type
+from singer_sdk.helpers.state import (
+    get_stream_state_dict,
+    read_stream_state,
+    wipe_stream_state_keys,
+)
 import time
 from functools import lru_cache
 from os import PathLike
@@ -200,11 +205,11 @@ class Stream(metaclass=abc.ABCMeta):
 
         A blank state entry will be created if one doesn't already exist.
         """
-        return helpers.get_stream_state_dict(self.tap_state, self.name)
+        return get_stream_state_dict(self.tap_state, self.name)
 
     def get_partition_state(self, partition_keys: dict) -> dict:
         """Return a writable state dict for the given partition."""
-        return helpers.get_stream_state_dict(
+        return get_stream_state_dict(
             self.tap_state, self.name, partition_keys=partition_keys
         )
 
@@ -212,7 +217,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     def get_partitions_list(self) -> Optional[List[dict]]:
         """Return a list of partition key dicts (if applicable), otherwise None."""
-        state = helpers.read_stream_state(self.tap_state, self.name)
+        state = read_stream_state(self.tap_state, self.name)
         if "partitions" not in state:
             return None
         result: List[dict] = []
@@ -281,7 +286,7 @@ class Stream(metaclass=abc.ABCMeta):
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
         # Reset interim state keys from prior executions:
-        helpers.wipe_stream_state_keys(
+        wipe_stream_state_keys(
             self.tap_state,
             self.name,
             except_keys=[
@@ -309,7 +314,7 @@ class Stream(metaclass=abc.ABCMeta):
             rows_sent += 1
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
         # Reset interim bookmarks before emitting final STATE message:
-        helpers.wipe_stream_state_keys(
+        wipe_stream_state_keys(
             self.tap_state, self.name, except_keys=["last_pk_fetched", "max_pk_values"],
         )
         self._write_state_message()

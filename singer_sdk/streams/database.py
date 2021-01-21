@@ -6,13 +6,17 @@ import backoff
 
 import singer
 from singer.schema import Schema
-from singer_sdk.helpers import classproperty
+from singer_sdk.helpers.util import (
+    classproperty,
+    get_catalog_entries,
+    get_catalog_entry_name,
+    get_catalog_entry_schema,
+)
 from singer_sdk.exceptions import TapStreamConnectionFailure
 from typing import Any, Dict, Iterable, List, Optional, Tuple, TypeVar, Union, cast
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
-from singer_sdk import helpers
 
 FactoryType = TypeVar("FactoryType", bound="DatabaseStream")
 
@@ -276,14 +280,14 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             raise ValueError(
                 "Could not initialize stream from blank or missing catalog."
             )
-        for catalog_entry in helpers.get_catalog_entries(catalog):
-            full_name = helpers.get_catalog_entry_name(catalog_entry)
+        for catalog_entry in get_catalog_entries(catalog):
+            full_name = get_catalog_entry_name(catalog_entry)
             new_stream = cast(
                 FactoryType,
                 cls(
                     tap=tap,
                     name=full_name,
-                    schema=helpers.get_catalog_entry_schema(catalog_entry),
+                    schema=get_catalog_entry_schema(catalog_entry),
                 ),
             )
             result.append(new_stream)

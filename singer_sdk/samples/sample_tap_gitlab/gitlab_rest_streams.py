@@ -9,7 +9,7 @@ from singer_sdk.typehelpers import (
     PropertiesList,
     StringType,
 )
-from singer_sdk import helpers
+from singer_sdk.helpers.state import get_stream_state_dict
 from singer_sdk.authenticators import SimpleAuthenticator
 from typing import Any, Dict, List, cast
 
@@ -138,7 +138,7 @@ class EpicsStream(ProjectBasedStream):
     def post_process(self, row: dict, context: dict) -> dict:
         """Perform post processing, including queuing up any child stream types."""
         # Ensure child state record(s) are created
-        _ = helpers.get_stream_state_dict(
+        _ = get_stream_state_dict(
             self.tap_state,
             "epic_issues",
             partition_keys={"group_id": context["group_id"], "epic_id": row["id"]},
