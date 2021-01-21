@@ -161,13 +161,13 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     # Records iterator
 
     @abc.abstractmethod
-    def get_records(self, partition_keys: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
 
         Each row emitted should be a dictionary of property names to their values.
         """
-        if partition_keys:
-            stream_or_partition_state = self.get_partition_state(partition_keys)
+        if partition:
+            stream_or_partition_state = self.get_partition_state(partition)
         else:
             stream_or_partition_state = self.stream_state
         for row in self._request_paginated_get(stream_or_partition_state):

@@ -141,7 +141,7 @@ class EpicsStream(ProjectBasedStream):
         _ = get_stream_state_dict(
             self.tap_state,
             "epic_issues",
-            partition_keys={"group_id": context["group_id"], "epic_id": row["id"]},
+            partition={"group_id": context["group_id"], "epic_id": row["id"]},
         )
         return super().post_process(row, context)
 

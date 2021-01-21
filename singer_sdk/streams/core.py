@@ -207,11 +207,9 @@ class Stream(metaclass=abc.ABCMeta):
         """
         return get_stream_state_dict(self.tap_state, self.name)
 
-    def get_partition_state(self, partition_keys: dict) -> dict:
+    def get_partition_state(self, partition: dict) -> dict:
         """Return a writable state dict for the given partition."""
-        return get_stream_state_dict(
-            self.tap_state, self.name, partition_keys=partition_keys
-        )
+        return get_stream_state_dict(self.tap_state, self.name, partition=partition)
 
     # Partitions
 
@@ -228,11 +226,11 @@ class Stream(metaclass=abc.ABCMeta):
     # Private bookmarking methods
 
     def _increment_stream_state(
-        self, latest_record: Dict[str, Any], *, partition_keys: Optional[dict] = None
+        self, latest_record: Dict[str, Any], *, partition: Optional[dict] = None
     ):
         """Update state of the stream or partition with data from the provided record."""
-        if partition_keys:
-            state_dict = self.get_partition_state(partition_keys)
+        if partition:
+            state_dict = self.get_partition_state(partition)
         else:
             state_dict = self.stream_state
         if latest_record:
@@ -282,7 +280,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Private sync methods:
 
-    def _sync_records(self, partition_keys: Optional[dict]) -> None:
+    def _sync_records(self, partition: Optional[dict]) -> None:
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
         # Reset interim state keys from prior executions:
@@ -308,9 +306,7 @@ class Stream(metaclass=abc.ABCMeta):
                 time_extracted=datetime.datetime.now(datetime.timezone.utc),
             )
             singer.write_message(record_message)
-            self._increment_stream_state(
-                record, self.replication_method, partition_keys=partition_keys
-            )
+            self._increment_stream_state(record, partition=partition)
             rows_sent += 1
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
         # Reset interim bookmarks before emitting final STATE message:
@@ -400,8 +396,8 @@ class Stream(metaclass=abc.ABCMeta):
         """Return a generator of row-type dictionary objects."""
         partitions_list = self.get_partitions_list()
         if partitions_list:
-            for partition_keys in partitions_list:
-                partition_state = self.get_partition_state(partition_keys)
+            for partition in partitions_list:
+                partition_state = self.get_partition_state(partition)
                 for row in self.get_records(partition_state):
                     row = self.post_process(row, partition_state)
                     yield row
@@ -413,7 +409,7 @@ class Stream(metaclass=abc.ABCMeta):
     # Abstract Methods
 
     @abc.abstractmethod
-    def get_records(self, partition_keys: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
         """Abstract row generator function. Must be overridden by the child class.
 
         Each row emitted should be a dictionary of property names to their values.

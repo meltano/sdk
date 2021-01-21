@@ -82,12 +82,12 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         self.is_view: Optional[bool] = None
         self.row_count: Optional[int] = None
 
-    def get_records(self, partition_keys: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
 
         Each row emitted should be a dictionary of property names to their values.
         """
-        if partition_keys:
+        if partition:
             raise NotImplementedError(
                 f"Stream '{self.name}' does not support partitioning."
             )
