@@ -46,7 +46,8 @@ class GitlabStream(RESTStream):
 class ProjectBasedStream(GitlabStream):
     """Base class for streams that are keys based on project ID."""
 
-    def get_partitions_list(self) -> List[dict]:
+    @property
+    def partitions(self) -> List[dict]:
         """Return a list of partition key dicts (if applicable), otherwise None."""
         if "{project_id}" in self.path:
             return [

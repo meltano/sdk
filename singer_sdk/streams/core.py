@@ -213,7 +213,8 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Partitions
 
-    def get_partitions_list(self) -> Optional[List[dict]]:
+    @property
+    def partitions(self) -> Optional[List[dict]]:
         """Return a list of partition key dicts (if applicable), otherwise None."""
         state = read_stream_state(self.tap_state, self.name)
         if "partitions" not in state:
@@ -394,9 +395,8 @@ class Stream(metaclass=abc.ABCMeta):
     @property
     def records(self) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
-        partitions_list = self.get_partitions_list()
-        if partitions_list:
-            for partition in partitions_list:
+        if self.partitions:
+            for partition in self.partitions:
                 partition_state = self.get_partition_state(partition)
                 for row in self.get_records(partition_state):
                     row = self.post_process(row, partition_state)
