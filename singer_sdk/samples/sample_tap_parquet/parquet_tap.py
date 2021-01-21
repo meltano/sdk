@@ -8,7 +8,7 @@ from singer_sdk.samples.sample_tap_parquet.parquet_tap_stream import (
     SampleTapParquetStream,
 )
 from singer_sdk.samples.sample_tap_parquet.parquet_globals import PLUGIN_NAME
-from singer_sdk.typehelpers import (
+from singer_sdk.helpers.typing import (
     PropertiesList,
     StringType,
     ComplexType,

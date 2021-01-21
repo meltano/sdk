@@ -2,7 +2,7 @@
 
 import copy
 from pathlib import Path
-from singer_sdk.typehelpers import (
+from singer_sdk.helpers.typing import (
     ArrayType,
     DateTimeType,
     IntegerType,

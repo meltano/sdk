@@ -1,6 +1,11 @@
 """Sample tap test for tap-gitlab."""
 
-from singer_sdk.typehelpers import ArrayType, DateTimeType, PropertiesList, StringType
+from singer_sdk.helpers.typing import (
+    ArrayType,
+    DateTimeType,
+    PropertiesList,
+    StringType,
+)
 from typing import List
 from singer_sdk import Tap, Stream
 from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
