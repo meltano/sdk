@@ -70,7 +70,6 @@ class Stream(metaclass=abc.ABCMeta):
         self.forced_replication_method: Optional[str] = None
         self.replication_key: Optional[str] = None
         self.primary_keys: Optional[List[str]] = None
-        self.active_partition: Optional[dict] = None
         if not hasattr(self, "schema_filepath"):  # Skip if set at the class level.
             self.schema_filepath: Optional[Path] = None
         self.__init_schema(schema)
@@ -278,7 +277,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Private sync methods:
 
-    def _sync_records(self):
+    def _sync_records(self, partition_keys: Optional[dict]) -> None:
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
         # Reset interim state keys from prior executions:
@@ -291,7 +290,6 @@ class Stream(metaclass=abc.ABCMeta):
                 "version",
                 "initial_full_table_complete",
             ],
-            partition_keys=self.active_partition,
         )
         # Iterate through each returned record:
         for row_dict in self.records:
@@ -306,7 +304,7 @@ class Stream(metaclass=abc.ABCMeta):
             )
             singer.write_message(record_message)
             self._increment_stream_state(
-                record, self.replication_method, partition_keys=self.active_partition
+                record, self.replication_method, partition_keys=partition_keys
             )
             rows_sent += 1
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
@@ -392,10 +390,25 @@ class Stream(metaclass=abc.ABCMeta):
         if catalog_entry.replication_method:
             self.forced_replication_method = catalog_entry.replication_method
 
+    @property
+    def records(self) -> Iterable[dict]:
+        """Return a generator of row-type dictionary objects."""
+        partitions_list = self.get_partitions_list()
+        if partitions_list:
+            for partition_keys in partitions_list:
+                partition_state = self.get_partition_state(partition_keys)
+                for row in self.get_records(partition_state):
+                    row = self.post_process(row, partition_state)
+                    yield row
+        else:
+            for row in self.get_records(self.stream_state):
+                row = self.post_process(row, self.stream_state)
+                yield row
+
     # Abstract Methods
 
-    @abc.abstractproperty
-    def records(self) -> Iterable[Iterable[Dict[str, Any]]]:
+    @abc.abstractmethod
+    def get_records(self, partition_keys: Optional[dict]) -> Iterable[Dict[str, Any]]:
         """Abstract row generator function. Must be overridden by the child class.
 
         Each row emitted should be a dictionary of property names to their values.
