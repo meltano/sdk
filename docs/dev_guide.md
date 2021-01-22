@@ -1,8 +1,8 @@
-# Tap-Base Development Docs
+# Singer SDK Development Docs
 
 **Development Overview:**
 
-_Create with `tap-base` requires overriding just two classes:_
+_Create with `singer-sdk` requires overriding just two classes:_
 
 1. The tap:
     - `Tap` - _The core base class for all taps. This class governs configuration, validation,

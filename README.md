@@ -1,4 +1,4 @@
-# `tap-base` - an open framework for building Singer-compliant taps
+# `singer-sdk` - an open framework for building Singer-compliant taps
 
 - _Note: This framework is still in early development and planning phases_
 
@@ -37,7 +37,7 @@ pipx install poetry
 Install package dependencies:
 
 ```bash
-cd tap-base
+cd singer-sdk
 ```
 
 ```bash
