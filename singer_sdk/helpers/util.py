@@ -1,21 +1,22 @@
 """General helper functions, helper classes, and decorators."""
 
 from decimal import Decimal
+from typing import TypeVar
 import pytz
 
 from datetime import datetime
-from typing import List, Optional, cast
+from typing import Callable, List, Optional, Type, cast
+
+T = TypeVar("T")
+V = TypeVar("V")
 
 
-class classproperty(property):
-    def __get__(self, obj, objtype=None):
-        return super(classproperty, self).__get__(objtype)
+class classproperty:
+    def __init__(self, getter: Callable[[Type], V]) -> None:
+        self.getter = getter
 
-    def __set__(self, obj, value):
-        super(classproperty, self).__set__(type(obj), value)
-
-    def __delete__(self, obj):
-        super(classproperty, self).__delete__(type(obj))
+    def __get__(self, instance: Optional[T], owner: Type[T]) -> V:
+        return self.getter(owner)
 
 
 def utc_now():

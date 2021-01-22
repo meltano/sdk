@@ -294,7 +294,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         return result
 
     @abc.abstractclassmethod
-    @classmethod
+    # @classmethod
     def execute_query(
         cls, sql: Union[str, List[str]], config, dict_results=True
     ) -> Union[Iterable[dict], Iterable[Tuple]]:
@@ -340,7 +340,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         )(cls.open_connection)()
 
     @abc.abstractclassmethod
-    @classmethod
+    # @classmethod
     def open_connection(cls, config) -> Any:
         """Connect to the database source."""
         pass

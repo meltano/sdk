@@ -29,7 +29,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     _config: dict
 
     @classproperty
-    @classmethod
+    # @classmethod
     def logger(cls) -> logging.Logger:
         """Get logger."""
         return logging.getLogger(cls.name)
@@ -94,7 +94,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     # Core plugin metadata:
 
     @classproperty
-    @classmethod
+    # @classmethod
     def plugin_version(cls) -> str:
         """Return the package version number."""
         try:

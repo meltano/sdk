@@ -14,7 +14,7 @@ class SampleTapSnowflakeStream(DatabaseStream):
     """Sample tap test for snowflake."""
 
     @classproperty
-    @classmethod
+    # @classmethod
     def primary_key_scan_sql(cls) -> Optional[str]:
         """Snowflake does not support primary keys. Return empty result."""
         return None

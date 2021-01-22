@@ -137,7 +137,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Command Line Execution
 
     @classproperty
-    @classmethod
     def cli(cls):
         """Execute standard CLI handler for taps."""
 
