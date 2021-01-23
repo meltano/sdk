@@ -71,42 +71,43 @@ class Stream(metaclass=abc.ABCMeta):
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
         self._tap_state = tap.state
-        self._schema: Optional[dict] = None
         self.forced_replication_method: Optional[str] = None
         self.replication_key: Optional[str] = None
         self.primary_keys: Optional[List[str]] = None
-        if not hasattr(self, "schema_filepath"):  # Skip if set at the class level.
-            self.schema_filepath: Optional[Path] = None
-        self.__init_schema(schema)
-
-    def __init_schema(
-        self, schema: Union[str, PathLike, Dict[str, Any], Schema]
-    ) -> None:
-        if isinstance(schema, (str, PathLike)) and not self.schema_filepath:
-            self.schema_filepath = Path(schema)
-        if isinstance(self.schema_filepath, str):
-            self.schema_filepath = Path(self.schema_filepath)
-        self._schema = None
-        if self.schema_filepath:
-            if not Path(self.schema_filepath).is_file():
-                raise FileExistsError(
-                    f"Could not find schema file '{self.schema_filepath}'."
+        self._schema_filepath: Optional[Path] = None
+        self._schema: Optional[dict] = None
+        if schema:
+            if isinstance(schema, (PathLike, str)):
+                self._schema_filepath = Path(schema)
+            elif isinstance(schema, dict):
+                self._schema = schema
+            elif isinstance(schema, Schema):
+                self._schema = schema.to_dict()
+            elif schema:
+                raise ValueError(
+                    f"Unexpected type {type(schema).__name__} for arg 'schema'."
                 )
-            self._schema = json.loads(self.schema_filepath.read_text())
-        elif isinstance(schema, dict):
-            self._schema = schema
-        elif isinstance(schema, Schema):
-            self._schema = schema.to_dict()
-        elif schema:
-            raise ValueError(
-                f"Unexpected type {type(schema).__name__} for arg 'schema'."
-            )
+
+    @property
+    def schema_filepath(self) -> Optional[Path]:
+        """Return a path to a schema file for the stream or None if n/a."""
+        return self._schema_filepath
 
     @property
     def schema(self) -> dict:
         """Return the schema dict for the stream."""
         if not self._schema:
-            raise ValueError(f"Required 'schema' not provided for '{self.name}'.")
+            if self.schema_filepath:
+                if not Path(self.schema_filepath).is_file():
+                    raise FileExistsError(
+                        f"Could not find schema file '{self.schema_filepath}'."
+                    )
+                self._schema = json.loads(self.schema_filepath.read_text())
+        if not self._schema:
+            raise ValueError(
+                f"Could not initialize schema for stream '{self.name}'. "
+                "A valid schema object or filepath was not provided."
+            )
         return self._schema
 
     @property
