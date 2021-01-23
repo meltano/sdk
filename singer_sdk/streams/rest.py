@@ -111,11 +111,12 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         ).prepare()
         return request
 
-    def _request_paginated_get(self, stream_or_partition_state: dict) -> Iterable[dict]:
-        # params = {"page": 1, "per_page": self._page_size}
-        params: dict = self.get_params(stream_or_partition_state)
+    def request_url(self, url: str, params: dict) -> Iterable[dict]:
+        """Request a URL, returning an iterable Dict of response records.
+
+        If pagination can be detected, pages will be recursed automatically.
+        """
         next_page_token = 1
-        url = self._get_url(stream_or_partition_state)
         while next_page_token:
             params = self.insert_next_page_token(
                 next_page=next_page_token, params=params
@@ -170,7 +171,9 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             stream_or_partition_state = self.get_partition_state(partition)
         else:
             stream_or_partition_state = self.stream_state
-        for row in self._request_paginated_get(stream_or_partition_state):
+        url = self._get_url(stream_or_partition_state)
+        params: dict = self.get_params(stream_or_partition_state)
+        for row in self.request_url(url, params):
             row = self.post_process(row, stream_or_partition_state)
             yield row
 
