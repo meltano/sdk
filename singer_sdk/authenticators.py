@@ -62,17 +62,26 @@ class OAuthAuthenticator(APIAuthenticatorBase):
     ) -> None:
         """Init authenticator."""
         super().__init__(stream=stream)
-        # Preserve class-level defaults if they exist:
-        if auth_endpoint or not hasattr(self, "auth_endpoint"):
-            self.auth_endpoint: Optional[str] = auth_endpoint
-        if oauth_scopes or not hasattr(self, "oauth_scopes"):
-            self.oauth_scopes: Optional[str] = oauth_scopes
+        self._auth_endpoint = auth_endpoint
+        self._oauth_scopes = oauth_scopes
 
         # Initialize internal tracking attributes
         self.access_token: Optional[str] = None
         self.refresh_token: Optional[str] = None
         self.last_refreshed: Optional[datetime] = None
         self.expires_in: Optional[int] = None
+
+    @property
+    def auth_endpoint(self) -> str:
+        """Return the authorization endpoint."""
+        if not self._auth_endpoint:
+            raise ValueError("Authorization endpoint not set.")
+        return self._auth_endpoint
+
+    @property
+    def oauth_scopes(self) -> Optional[str]:
+        """Return a string with the OAuth scopes, or None if not set."""
+        return self._oauth_scopes
 
     @property
     def client_id(self) -> Optional[str]:
