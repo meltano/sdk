@@ -94,7 +94,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         for row in self.execute_query(
             sql=f"SELECT * FROM {self.fully_qualified_name}", config=self.config
         ):
-            yield cast(dict, row)
+            yield row
 
     @property
     def fully_qualified_name(self):
@@ -233,22 +233,14 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         """Return a list of all streams (tables)."""
         result: List[FactoryType] = []
         config = tap.config
-        table_scan_result = cast(
-            Iterable[List[Any]],
-            cls.execute_query(
-                config=config, sql=cls.table_scan_sql, dict_results=False
-            ),
-        )
-        view_scan_result = cast(
-            Iterable[List[Any]],
-            cls.execute_query(config=config, sql=cls.view_scan_sql, dict_results=False),
-        )
+        table_scan_result = cls.execute_query(config=config, sql=cls.table_scan_sql)
+        view_scan_result = cls.execute_query(config=config, sql=cls.view_scan_sql)
         all_results = [
             (database, schema_name, table, False)
-            for database, schema_name, table in table_scan_result
+            for database, schema_name, table in table_scan_result.values()
         ] + [
             (database, schema_name, table, True)
-            for database, schema_name, table in view_scan_result
+            for database, schema_name, table in view_scan_result.values()
         ]
         collated_columns = cls.scan_and_collate_columns(config=config)
         primary_keys_lookup = cls.scan_primary_keys(config=config)
@@ -295,9 +287,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
 
     @abc.abstractclassmethod
     @classmethod
-    def execute_query(
-        cls, sql: Union[str, List[str]], config, dict_results=True
-    ) -> Union[Iterable[dict], Iterable[Tuple]]:
+    def execute_query(cls, sql: Union[str, List[str]], config) -> Iterable[dict]:
         """Run a SQL query and generate a dict for each returned row."""
         pass
 

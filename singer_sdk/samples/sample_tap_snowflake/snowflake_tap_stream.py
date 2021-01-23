@@ -20,9 +20,7 @@ class SampleTapSnowflakeStream(DatabaseStream):
         return None
 
     @classmethod
-    def execute_query(
-        cls, sql: Union[str, List[str]], config, dict_results=True,
-    ) -> Union[Iterable[dict], Iterable[Tuple]]:
+    def execute_query(cls, sql: Union[str, List[str]], config) -> Iterable[dict]:
         """Run a query in snowflake."""
         connection = cls.open_connection(config=config)
         with connection.cursor(connector.DictCursor) as cur:
@@ -39,10 +37,7 @@ class SampleTapSnowflakeStream(DatabaseStream):
                 result_batch = cur.fetchmany(DEFAULT_BATCH_SIZE)
                 while len(result_batch) > 0:
                     for result in result_batch:
-                        if dict_results:
-                            yield result
-                        else:
-                            yield result.values()
+                        yield result
                     result_batch = cur.fetchmany(DEFAULT_BATCH_SIZE)
             cur.close()
 
