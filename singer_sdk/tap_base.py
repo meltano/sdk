@@ -3,13 +3,12 @@
 import abc
 import json
 from pathlib import PurePath
-
-from singer_sdk.helpers.util import classproperty
 from typing import Any, List, Optional, Dict, Union
 
 import click
 from singer.catalog import Catalog
 
+from singer_sdk.helpers.util import classproperty, read_json_file
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams.core import Stream
 
@@ -26,15 +25,17 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         state: Union[PurePath, str, dict, None] = None,
     ) -> None:
         """Initialize the tap."""
-        if isinstance(state, dict):
+        if not state:
+            state_dict = {}
+        elif isinstance(state, dict):
             state_dict = state
         else:
-            state_dict = self.read_optional_json_file(state) or {}
+            state_dict = read_json_file(state)
         self._input_catalog: Optional[dict] = None
         if isinstance(catalog, dict):
             self._input_catalog = catalog
         elif catalog is not None:
-            self._input_catalog = self.read_optional_json_file(catalog)
+            self._input_catalog = read_json_file(catalog)
         self._state = state_dict or {}
         self._streams: Optional[Dict[str, Stream]] = None
         super().__init__(config=config)

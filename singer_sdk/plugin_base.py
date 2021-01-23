@@ -6,13 +6,13 @@ import json
 import logging
 import os
 from types import MappingProxyType
+from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
 from jsonschema import ValidationError, SchemaError
 from jsonschema import Draft4Validator as JSONSchemaValidator
-from pathlib import Path, PurePath
+from pathlib import PurePath
 
-from singer_sdk.helpers.util import classproperty
+from singer_sdk.helpers.util import classproperty, read_json_file
 from singer_sdk.helpers.secrets import is_common_secret_key, SecretString
-from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
 
 import click
 
@@ -41,9 +41,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         if not config:
             config_dict = {}
         elif isinstance(config, str) or isinstance(config, PurePath):
-            config_dict = (
-                self.read_optional_json_file(str(config), warn_missing=True) or {}
-            )
+            config_dict = read_json_file(config)
         else:
             config_dict = config
         config_dict.update(self.get_env_var_config())
@@ -57,23 +55,6 @@ class PluginBase(metaclass=abc.ABCMeta):
     def capabilities(self) -> List[str]:
         """Return a list of supported capabilities."""
         return []
-
-    # Read input files and parse env vars:
-
-    @classmethod
-    def read_optional_json_file(
-        cls, path: Optional[Union[PurePath, str]], warn_missing: bool = False
-    ) -> Optional[Dict[str, Any]]:
-        """If json filepath is specified, read it from disk."""
-        if not path:
-            return None
-        if Path(path).exists():
-            return json.loads(Path(path).read_text())
-        elif warn_missing:
-            cls.logger.warning(f"File at '{path}' was not found.")
-            return None
-        else:
-            raise FileExistsError(f"File at '{path}' was not found.")
 
     @classmethod
     def get_env_var_config(cls) -> Dict[str, Any]:

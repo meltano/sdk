@@ -1,10 +1,12 @@
 """General helper functions, helper classes, and decorators."""
 
 from decimal import Decimal
+import json
+from pathlib import Path, PurePath
 import pytz
 
 from datetime import datetime
-from typing import List, Optional, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 
 class classproperty(property):
@@ -16,6 +18,16 @@ class classproperty(property):
 
     def __delete__(self, obj):
         super(classproperty, self).__delete__(type(obj))
+
+
+def read_json_file(path: Union[PurePath, str]) -> Dict[str, Any]:
+    """Read json file, thowing an error if missing."""
+    if not path:
+        raise RuntimeError("Could not open file. Filepath not provided.")
+    if Path(path).exists():
+        return json.loads(Path(path).read_text())
+    else:
+        raise FileExistsError(f"File at '{path}' was not found.")
 
 
 def utc_now():
