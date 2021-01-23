@@ -118,9 +118,9 @@ class Stream(metaclass=abc.ABCMeta):
     def get_params(self, stream_or_partition_state: dict) -> dict:
         """Return a dictionary of values to be used in parameterization.
 
-        By default, this includes all settings which are secrets and any stored values
-        the stream or partition state, as passed via the `stream_or_partition_state`
-        argument.
+        By default, this includes all settings which are not secrets, along with any
+        stored values the stream or partition state, as passed via the
+        `stream_or_partition_state` argument.
         """
         result = {
             k: v for k, v in self.config.items() if not isinstance(v, SecretString)
