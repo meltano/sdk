@@ -1,0 +1,26 @@
+{
+    "type": "object",
+    "properties": {
+        "group_id": {
+            "type": "integer"
+        },
+        "epic_iid": {
+            "type": "integer"
+        },
+        "epic_issue_id": {
+            "type": "integer"
+        },
+        "issue_id": {
+            "type": "integer"
+        },
+        "issue_iid": {
+            "type": "integer"
+        },
+        "project_id": {
+            "type": ["null", "integer"]
+        },
+        "relative_position": {
+            "type": ["null", "integer"]
+        }
+    }
+}
