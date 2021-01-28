@@ -16,6 +16,15 @@ from singer_sdk.helpers.secrets import is_common_secret_key, SecretString
 
 import click
 
+SDK_PACKAGE_NAME = "singer_sdk"
+
+
+try:
+    from importlib import metadata
+except ImportError:
+    # Running on pre-3.8 Python; use importlib-metadata package
+    import importlib_metadata as metadata  # type: ignore
+
 
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
@@ -79,12 +88,17 @@ class PluginBase(metaclass=abc.ABCMeta):
     def plugin_version(cls) -> str:
         """Return the package version number."""
         try:
-            from importlib import metadata
-        except ImportError:
-            # Running on pre-3.8 Python; use importlib-metadata package
-            import importlib_metadata as metadata  # type: ignore
-        try:
             version = metadata.version(cls.name)
+        except metadata.PackageNotFoundError:
+            version = "[could not be detected]"
+        return version
+
+    @classproperty
+    @classmethod
+    def sdk_version(cls) -> str:
+        """Return the package version number."""
+        try:
+            version = metadata.version(SDK_PACKAGE_NAME)
         except metadata.PackageNotFoundError:
             version = "[could not be detected]"
         return version
