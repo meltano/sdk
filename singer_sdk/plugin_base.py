@@ -186,6 +186,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         info = OrderedDict[str, Any]()
         info["name"] = cls.name
         info["version"] = cls.plugin_version
+        info["sdk_version"] = cls.sdk_version
         info["capabilities"] = cls.capabilities
         info["settings"] = cls.config_jsonschema
         if format == "json":
