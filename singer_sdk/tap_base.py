@@ -79,13 +79,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         print(catalog_json)
         return catalog_json
 
-    def get_singer_catalog(self) -> Catalog:
-        """Return a Catalog object."""
-        catalog_entries = [
-            stream.singer_catalog_entry for stream in self.streams.values()
-        ]
-        return Catalog(catalog_entries)
-
     def get_catalog_json(self) -> str:
         """Return the tap's catalog as formatted json text."""
         return json.dumps(self.get_singer_catalog().to_dict(), indent=2)

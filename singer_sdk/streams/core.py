@@ -35,8 +35,7 @@ except ImportError:
     final = lambda f: f  # noqa: E731
 
 import singer
-from singer import CatalogEntry, RecordMessage, SchemaMessage
-from singer import metadata
+from singer import RecordMessage, SchemaMessage
 from singer.catalog import Catalog
 from singer.schema import Schema
 
@@ -152,43 +151,6 @@ class Stream(metaclass=abc.ABCMeta):
         if self.replication_key:
             return "INCREMENTAL"
         return "FULL_TABLE"
-
-    # Singer spec properties
-
-    @final
-    @property
-    def singer_metadata(self) -> dict:
-        """Return the metadata dict from the singer spec."""
-        self.logger.debug(f"Schema Debug: {self.schema}")
-        md = metadata.get_standard_metadata(
-            schema=self.schema,
-            replication_method=self.replication_method,
-            key_properties=self.primary_keys or None,
-            valid_replication_keys=(
-                [self.replication_key] if self.replication_key else None
-            ),
-            schema_name=None,
-        )
-        return md
-
-    @final
-    @property
-    def singer_catalog_entry(self) -> CatalogEntry:
-        """Return a singer CatalogEntry object."""
-        return CatalogEntry(
-            tap_stream_id=self.tap_stream_id,
-            stream=self.name,
-            schema=Schema.from_dict(self.schema),
-            metadata=self.singer_metadata,
-            key_properties=self.primary_keys or None,
-            replication_key=self.replication_key,
-            replication_method=self.replication_method,
-            is_view=None,
-            database=None,
-            table=None,
-            row_count=None,
-            stream_alias=None,
-        )
 
     # State properties:
 

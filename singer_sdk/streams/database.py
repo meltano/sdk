@@ -258,8 +258,6 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             )
             new_stream.primary_keys = primary_keys
             new_stream.is_view = is_view
-            # TODO: Expanded metadata support for provided `row_count` estimates.
-            # new_stream.row_count = row_count
             result.append(new_stream)
         return result
 
