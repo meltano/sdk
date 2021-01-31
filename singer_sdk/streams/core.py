@@ -127,13 +127,6 @@ class Stream(metaclass=abc.ABCMeta):
         result.update(stream_or_partition_state)
         return result
 
-    def get_stream_version(self):
-        """Get stream version from bookmark."""
-        stream_version = self._get_bookmark("version")
-        if stream_version is None:
-            stream_version = int(time.time() * 1000)
-        return stream_version
-
     @property
     def tap_stream_id(self) -> str:
         """Return a unique stream ID.
