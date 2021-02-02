@@ -1,0 +1,95 @@
+{
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "project_id": {
+            "type": "integer"
+        },
+        "short_id": {
+            "type": "string"
+        },
+        "title": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "author_name": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "author_email": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "authored_date": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "committer_name": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "committer_email": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "committed_date": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "created_at": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "message": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "allow_failure": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "parent_ids": {
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "stats": {
+            "type": "object",
+            "properties": {
+                "additions": {
+                    "type": "integer"
+                },
+                "deletions": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}
