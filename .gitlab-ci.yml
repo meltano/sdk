@@ -26,11 +26,7 @@ before_script:
   - pipx install tox
   - poetry install
 
-stages:
-  - test
-  - deploy
-
-test:
+test_and_deploy:
   script:
     - poetry run pytest
     - |
