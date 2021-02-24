@@ -11,7 +11,8 @@ from jsonschema import ValidationError, SchemaError
 from jsonschema import Draft4Validator as JSONSchemaValidator
 from pathlib import PurePath
 
-from singer_sdk.helpers.util import classproperty, read_json_file
+from singer_sdk.helpers.classproperty import classproperty
+from singer_sdk.helpers.util import read_json_file
 from singer_sdk.helpers.secrets import is_common_secret_key, SecretString
 
 import click
@@ -38,7 +39,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     _config: dict
 
     @classproperty
-    @classmethod
+    # @classmethod
     def logger(cls) -> logging.Logger:
         """Get logger."""
         return logging.getLogger(cls.name)
@@ -84,7 +85,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     # Core plugin metadata:
 
     @classproperty
-    @classmethod
+    # @classmethod
     def plugin_version(cls) -> str:
         """Return the package version number."""
         try:
@@ -94,7 +95,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         return version
 
     @classproperty
-    @classmethod
+    # @classmethod
     def sdk_version(cls) -> str:
         """Return the package version number."""
         try:

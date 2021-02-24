@@ -9,17 +9,6 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Union, cast
 
 
-class classproperty(property):
-    def __get__(self, obj, objtype=None):
-        return super(classproperty, self).__get__(objtype)
-
-    def __set__(self, obj, value):
-        super(classproperty, self).__set__(type(obj), value)
-
-    def __delete__(self, obj):
-        super(classproperty, self).__delete__(type(obj))
-
-
 def read_json_file(path: Union[PurePath, str]) -> Dict[str, Any]:
     """Read json file, thowing an error if missing."""
     if not path:

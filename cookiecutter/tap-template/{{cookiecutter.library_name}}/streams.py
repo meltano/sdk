@@ -16,7 +16,7 @@ class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stre
     tap_name = "{{ cookiecutter.tap_id }}"
     site_url_base = "https://api.mysample.com/"
 
-    # # TODO (optional): If auth is required, implement `get_auth_header()``:
+    # # TODO (optional): If auth is required, implement `get_auth_header()`:
     # def get_auth_header(self) -> Dict[str, Any]:
     #     """Return an authorization header for REST request."""
     #     return {}

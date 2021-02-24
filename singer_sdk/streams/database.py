@@ -7,11 +7,12 @@ import backoff
 import singer
 from singer.schema import Schema
 from singer_sdk.helpers.util import (
-    classproperty,
     get_catalog_entries,
     get_catalog_entry_name,
     get_catalog_entry_schema,
 )
+from singer_sdk.helpers.classproperty import classproperty
+from singer_sdk.helpers.util import read_json_file
 from singer_sdk.exceptions import TapStreamConnectionFailure
 from typing import Any, Dict, Iterable, List, Optional, Tuple, TypeVar, Union, cast
 
@@ -102,7 +103,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         return self.tap_stream_id
 
     @classproperty
-    @classmethod
+    # @classmethod
     def table_scan_sql(cls) -> str:
         """Return a SQL statement for syncable tables.
 
@@ -118,7 +119,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             """
 
     @classproperty
-    @classmethod
+    # @classmethod
     def view_scan_sql(cls) -> str:
         """Return a SQL statement for syncable views.
 
@@ -134,7 +135,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             """
 
     @classproperty
-    @classmethod
+    # @classmethod
     def column_scan_sql(cls) -> str:
         """Return a SQL statement that provides the column names and types.
 
@@ -154,7 +155,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             """
 
     @classproperty
-    @classmethod
+    # @classmethod
     def primary_key_scan_sql(cls) -> Optional[str]:
         """Return a SQL statement that provides the list of primary key columns.
 
@@ -283,7 +284,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             result.append(new_stream)
         return result
 
-    @abc.abstractclassmethod
+    # @abc.abstractclassmethod
     @classmethod
     def execute_query(cls, sql: Union[str, List[str]], config) -> Iterable[dict]:
         """Run a SQL query and generate a dict for each returned row."""
@@ -327,7 +328,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             factor=2,
         )(cls.open_connection)()
 
-    @abc.abstractclassmethod
+    # @abc.abstractclassmethod
     @classmethod
     def open_connection(cls, config) -> Any:
         """Connect to the database source."""

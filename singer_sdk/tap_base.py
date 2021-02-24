@@ -8,7 +8,8 @@ from typing import Any, List, Optional, Dict, Union
 import click
 from singer.catalog import Catalog
 
-from singer_sdk.helpers.util import classproperty, read_json_file
+from singer_sdk.helpers.classproperty import classproperty
+from singer_sdk.helpers.util import read_json_file
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams.core import Stream
 
@@ -131,7 +132,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Command Line Execution
 
     @classproperty
-    @classmethod
+    # @classmethod
     def cli(cls):
         """Execute standard CLI handler for taps."""
 

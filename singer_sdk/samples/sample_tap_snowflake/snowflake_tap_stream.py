@@ -1,9 +1,9 @@
 """Sample tap stream test for tap-snowflake."""
 
-from singer_sdk.helpers.util import classproperty
 from typing import Iterable, List, Optional, Tuple, Union
 from snowflake import connector
 
+from singer_sdk.helpers.classproperty import classproperty
 from singer_sdk.streams import DatabaseStream
 
 
@@ -14,7 +14,7 @@ class SampleTapSnowflakeStream(DatabaseStream):
     """Sample tap test for snowflake."""
 
     @classproperty
-    @classmethod
+    # @classmethod
     def primary_key_scan_sql(cls) -> Optional[str]:
         """Snowflake does not support primary keys. Return empty result."""
         return None
