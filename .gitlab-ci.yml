@@ -52,7 +52,7 @@ deploy:
       echo "Waiting for PyPi availability..."
       pwd
       ls -la
-      export VER=$(cat VERSION)
+      export VER=$(poetry version --short)
       export PIPERR=$(pip install tapdance==$VER 2>&1)
       echo "Checking for PyPi availability of version $VER"
       if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
