@@ -26,6 +26,45 @@ before_script:
   - pipx install tox
   - poetry install
 
+stages:
+  - test
+  - deploy
+
 test:
   script:
     - poetry run pytest
+
+deploy:
+  script:
+    - |
+      echo "Publishing to PyPi..."
+      if [[ "$BRANCH_NAME" == *main ]]
+      then
+        poetry version --short
+      else
+        poetry version $(poetry version --short)-dev.$GITHUB_RUN_NUMBER
+        poetry version --short
+      fi
+      echo -e "\nPublishing to version ref '$(poetry version --short)'...\n\n"
+      poetry config http-basic.pypi $PYPI_USER $PYPI_PASS
+      poetry publish --build
+    - |
+      echo "Waiting for PyPi availability..."
+      pwd
+      ls -la
+      export VER=$(cat VERSION)
+      export PIPERR=$(pip install tapdance==$VER 2>&1)
+      echo "Checking for PyPi availability of version $VER"
+      if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
+      export PIPERR=$(pip install tapdance==$VER 2>&1)
+      if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
+      export PIPERR=$(pip install tapdance==$VER 2>&1)
+      if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
+      export PIPERR=$(pip install tapdance==$VER 2>&1)
+      if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
+      export PIPERR=$(pip install tapdance==$VER 2>&1)
+      if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
+      export PIPERR=$(pip install tapdance==$VER 2>&1)
+      if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
+      export PIPERR=$(pip install tapdance==$VER 2>&1)
+      if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not found. Giving up. Last message from PyPi was $PIPERR"; exit 1; } fi;
