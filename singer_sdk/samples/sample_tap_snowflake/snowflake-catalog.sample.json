@@ -1,0 +1,77 @@
+{
+    "streams": [
+        {
+            "tap_stream_id": "ASampleTable",
+            "replication_key": "f0",
+            "replication_method": "INCREMENTAL",
+            "key_properties": [
+                "f0"
+            ],
+            "schema": {
+                "properties": {
+                    "f0": {
+                        "type": [
+                            "string",
+                            "None"
+                        ]
+                    },
+                    "f1": {
+                        "type": [
+                            "string",
+                            "None"
+                        ]
+                    },
+                    "f2": {
+                        "type": [
+                            "string",
+                            "None"
+                        ]
+                    }
+                }
+            },
+            "stream": "ASampleTable",
+            "metadata": [
+                {
+                    "breadcrumb": [],
+                    "metadata": {
+                        "table-key-properties": [
+                            "f0"
+                        ],
+                        "forced-replication-method": "INCREMENTAL",
+                        "valid-replication-keys": [
+                            "f0"
+                        ],
+                        "inclusion": "available"
+                    }
+                },
+                {
+                    "breadcrumb": [
+                        "properties",
+                        "f0"
+                    ],
+                    "metadata": {
+                        "inclusion": "automatic"
+                    }
+                },
+                {
+                    "breadcrumb": [
+                        "properties",
+                        "f1"
+                    ],
+                    "metadata": {
+                        "inclusion": "available"
+                    }
+                },
+                {
+                    "breadcrumb": [
+                        "properties",
+                        "f2"
+                    ],
+                    "metadata": {
+                        "inclusion": "available"
+                    }
+                }
+            ]
+        }
+    ]
+}
