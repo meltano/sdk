@@ -16,7 +16,11 @@ def read_json_file(path: Union[PurePath, str]) -> Dict[str, Any]:
     if Path(path).exists():
         return json.loads(Path(path).read_text())
     else:
-        raise FileExistsError(f"File at '{path}' was not found.")
+        msg = f"File at '{path}' was not found."
+        for template in [f"{path}.template"]:
+            if Path(template).exists():
+                msg += f"\nFor more info, please see the sample template at: {template}"
+        raise FileExistsError(msg)
 
 
 def utc_now():
