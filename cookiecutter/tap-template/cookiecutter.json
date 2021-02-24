@@ -1,0 +1,11 @@
+{
+    "source_name": "MySourceName",
+    "tap_id": "tap-{{ cookiecutter.source_name.lower() }}",
+    "library_name": "{{ cookiecutter.tap_id.replace('-', '_') }}",
+    "stream_type": [
+        "Database",
+        "REST",
+        "GraphQL",
+        "Other"
+    ]
+}
