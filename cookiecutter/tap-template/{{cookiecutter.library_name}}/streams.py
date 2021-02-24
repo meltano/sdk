@@ -5,8 +5,6 @@ from typing import Any, Dict
 
 from tap_base.streams import {{ cookiecutter.stream_type }}StreamBase
 
-from {{ cookiecutter.library_name }}.globals import PLUGIN_NAME
-
 SCHEMAS_DIR = Path("./schemas")
 
 {% if cookiecutter.stream_type == "GraphQL" %}
@@ -15,7 +13,7 @@ SCHEMAS_DIR = Path("./schemas")
 class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}StreamBase):
     """{{ cookiecutter.source_name }} stream class."""
 
-    tap_name = PLUGIN_NAME
+    tap_name = "{{ cookiecutter.tap_id }}"
     site_url_base = "https://api.mysample.com/"
 
     # # TODO (optional): If auth is required, implement `get_auth_header()``:

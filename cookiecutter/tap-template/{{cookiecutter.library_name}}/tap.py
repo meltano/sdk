@@ -6,11 +6,6 @@ from typing import List
 import click
 
 from tap_base import TapBase
-from {{ cookiecutter.library_name }}.globals import (
-    PLUGIN_NAME,
-    ACCEPTED_CONFIG_KEYS,
-    REQUIRED_CONFIG_OPTIONS,
-)
 from {{ cookiecutter.library_name }}.stream import Tap{{ cookiecutter.source_name }}Stream
 
 
@@ -20,7 +15,7 @@ PLUGIN_NAME = "{{ cookiecutter.tap_id }}"
 class Tap{{ cookiecutter.source_name }}(TapBase):
     """{{ cookiecutter.source_name }} tap class."""
 
-    name = PLUGIN_NAME
+    name = "{{ cookiecutter.tap_id }}"
     accepted_config_keys: ACCEPTED_CONFIG_KEYS
     required_config_options = REQUIRED_CONFIG_OPTIONS
 

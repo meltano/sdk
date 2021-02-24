@@ -1,2 +1,2 @@
-tap-base
+singer-sdk
 singer-python
