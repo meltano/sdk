@@ -13,7 +13,8 @@ from singer_sdk.samples.sample_tap_countries.countries_streams import (
     CountriesStream,
     ContinentsStream,
 )
-from singer_sdk.samples.sample_tap_countries.countries_globals import PLUGIN_NAME
+
+PLUGIN_NAME = "sample-tap-countries"
 
 
 class SampleTapCountries(Tap):

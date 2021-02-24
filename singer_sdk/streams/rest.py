@@ -161,7 +161,6 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     # Records iterator
 
-    @abc.abstractmethod
     def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
 

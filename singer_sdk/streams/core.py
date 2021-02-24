@@ -101,7 +101,7 @@ class Stream(metaclass=abc.ABCMeta):
                     raise FileExistsError(
                         f"Could not find schema file '{self.schema_filepath}'."
                     )
-                self._schema = json.loads(self.schema_filepath.read_text())
+                self._schema = json.loads(Path(self.schema_filepath).read_text())
         if not self._schema:
             raise ValueError(
                 f"Could not initialize schema for stream '{self.name}'. "
@@ -171,9 +171,12 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def partitions(self) -> Optional[List[dict]]:
-        """Return a list of partition key dicts (if applicable), otherwise None."""
+        """Return a list of partition key dicts (if applicable), otherwise None.
+        
+        Developers may override this property to provide a default partitions list.
+        """
         state = read_stream_state(self.tap_state, self.name)
-        if "partitions" not in state:
+        if state is None or "partitions" not in state:
             return None
         result: List[dict] = []
         for partition_state in state["partitions"]:
@@ -192,7 +195,7 @@ class Stream(metaclass=abc.ABCMeta):
             state_dict = self.stream_state
         if latest_record:
             if self.replication_method == "FULL_TABLE":
-                max_pk_values = singer._get_bookmark("max_pk_values")
+                max_pk_values = self._get_bookmark("max_pk_values")
                 if max_pk_values:
                     state_dict["last_pk_fetched"] = {
                         k: v
@@ -237,7 +240,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Private sync methods:
 
-    def _sync_records(self, partition: Optional[dict]) -> None:
+    def _sync_records(self, partition: Optional[dict] = None) -> None:
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
         # Reset interim state keys from prior executions:
@@ -252,19 +255,24 @@ class Stream(metaclass=abc.ABCMeta):
             ],
         )
         # Iterate through each returned record:
-        for row_dict in self.records:
-            if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
-                self._write_state_message()
-            record = self._conform_record_data_types(row_dict)
-            record_message = RecordMessage(
-                stream=self.name,
-                record=record,
-                version=None,
-                time_extracted=datetime.datetime.now(datetime.timezone.utc),
-            )
-            singer.write_message(record_message)
-            self._increment_stream_state(record, partition=partition)
-            rows_sent += 1
+        if partition:
+            partitions = [partition]
+        else:
+            partitions = self.partitions or [None]
+        for partition in partitions:
+            for row_dict in self.get_records(partition=partition):
+                if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
+                    self._write_state_message()
+                record = self._conform_record_data_types(row_dict)
+                record_message = RecordMessage(
+                    stream=self.name,
+                    record=record,
+                    version=None,
+                    time_extracted=datetime.datetime.now(datetime.timezone.utc),
+                )
+                singer.write_message(record_message)
+                self._increment_stream_state(record, partition=partition)
+                rows_sent += 1
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
         # Reset interim bookmarks before emitting final STATE message:
         wipe_stream_state_keys(
