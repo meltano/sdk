@@ -46,7 +46,7 @@ deploy:
         poetry version --short
       fi
       echo -e "\nPublishing to version ref '$(poetry version --short)'...\n\n"
-      poetry config http-basic.pypi $PYPI_USER $PYPI_PASS
+      poetry config http-basic.pypi "__token__" $PYPI_PUBLISH_TOKEN
       poetry publish --build
     - |
       echo "Waiting for PyPi availability..."
