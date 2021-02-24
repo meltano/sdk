@@ -33,9 +33,6 @@ stages:
 test:
   script:
     - poetry run pytest
-
-deploy:
-  script:
     - |
       echo "Publishing to PyPi..."
       if [[ "$BRANCH_NAME" == *main ]]
