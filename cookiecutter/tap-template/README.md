@@ -22,10 +22,10 @@ Initialize Cookiecutter template directly from Git:
 cookiecutter https://gitlab.com/meltano/singer-sdk --directory="cookiecutter/tap-template"
 ```
 
-Or locally from a cloned `singer-sdk` repo:
+Or locally from an already-cloned `singer-sdk` repo:
 
 ```bash
 cookiecutter ./singer-sdk/cookiecutter/tap-template
 ```
 
-See the [dev guide](https://gitlab.com/meltano/tap-base/-/blob/feature/initial-base-classes/docs/dev_guide.md).
+See the [dev guide](../../docs/dev_guide.md).

@@ -28,7 +28,7 @@ _Create with `singer-sdk` requires overriding just two classes:_
 ## Step 1: Initialize a new tap repo
 
 To get started, create a new project from the
-[`tap-template` cookiecutter repo](https://gitlab.com/meltano/tap-template):
+[`tap-template` cookiecutter repo](../cookiecutter/tap-template):
 
 1. Install [CookieCutter](https://cookiecutter.readthedocs.io) and it's dependencies:
 
@@ -41,7 +41,7 @@ To get started, create a new project from the
 2. Start a new project:
 
     ```bash
-    cookiecutter https://gitlab.com/meltano/tap-template
+    cookiecutter https://gitlab.com/meltano/singer-sdk --directory="cookiecutter/tap-template"
     ```
 
 ## Step 2: Write the tap class
