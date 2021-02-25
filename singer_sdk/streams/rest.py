@@ -2,6 +2,7 @@
 
 import abc
 import backoff
+import copy
 import logging
 import requests
 
@@ -53,9 +54,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             result = str(val)
         return result
 
-    def _get_url(self, stream_or_partition_state: dict) -> str:
+    def get_url(self, partition: Optional[dict]) -> str:
+        """Return a URL, optionally targeted to a specific partition.
+        
+        Developers override this method to perform dynamic URL generation.
+        """
         url_pattern = "".join([self.url_base, self.path or ""])
-        params = self.get_params(stream_or_partition_state)
+        params = copy.deepcopy(dict(self.config))
+        if partition:
+            params.update(partition)
         url = url_pattern
         for k, v in params.items():
             search_text = "".join(["{", k, "}"])
@@ -79,29 +86,41 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         giveup=lambda e: e.response is not None and 400 <= e.response.status_code < 500,
         factor=2,
     )
-    def _request_with_backoff(self, url, params=None) -> requests.Response:
-        params = params or {}
-        request = self._prepare_request(url=url, params=params)
-        response = self.requests_session.send(request)
+    def _request_with_backoff(self, prepared_request) -> requests.Response:
+        response = self.requests_session.send(prepared_request)
         if response.status_code in [401, 403]:
-            self.logger.info("Skipping request to {}".format(request.url))
+            self.logger.info("Skipping request to {}".format(prepared_request.url))
             self.logger.info(f"Reason: {response.status_code} - {response.content}")
             raise RuntimeError(
                 "Requested resource was unauthorized, forbidden, or not found."
             )
         elif response.status_code >= 400:
             raise RuntimeError(
-                f"Error making request to API: {request.url} "
+                f"Error making request to API: {prepared_request.url} "
                 f"[{response.status_code} - {response.content}]".replace("\\n", "\n")
             )
         logging.debug("Response received successfully.")
         return response
 
-    def _prepare_request(
-        self, url, params=None, http_method=None, json=None
+    def get_url_params(self, partition: Optional[dict]) -> dict:
+        """Return a dictionary of values to be used in parameterization."""
+        return {}
+
+    def prepare_request(
+        self, partition: Optional[dict], next_page_token: Optional[Any]
     ) -> requests.PreparedRequest:
-        request_data = json or self.prepare_request_payload(params or {})
-        http_method = http_method or self.rest_method
+        http_method = self.rest_method
+        url: str = self.get_url(partition)
+        params: dict = self.get_url_params(partition)
+        params = self.insert_next_page_token(
+            next_page=next_page_token, params=params
+        )
+        request_data = self.prepare_request_payload(partition)
+        self.logger.info({
+            "url": url,
+            "params": params,
+            "request_data": request_data,
+        })
         request = requests.Request(
             method=http_method,
             url=url,
@@ -111,24 +130,22 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         ).prepare()
         return request
 
-    def request_url(self, url: str, params: dict) -> Iterable[dict]:
-        """Request a URL, returning an iterable Dict of response records.
+    def request_records(self, partition: Optional[dict]) -> Iterable[dict]:
+        """Request records from REST endpoint(s), returning an iterable Dict of response records.
 
         If pagination can be detected, pages will be recursed automatically.
         """
         next_page_token = 1
         while next_page_token:
-            params = self.insert_next_page_token(
-                next_page=next_page_token, params=params
-            )
-            resp = self._request_with_backoff(url, params)
+            prepared_request = self.prepare_request(partition, next_page_token=next_page_token)
+            resp = self._request_with_backoff(prepared_request)
             for row in self.parse_response(resp):
                 yield row
             next_page_token = self.get_next_page_token(resp)
 
     # Overridable:
 
-    def prepare_request_payload(self, params: dict) -> Optional[dict]:
+    def prepare_request_payload(self, partition: Optional[dict]) -> Optional[dict]:
         """Prepare the data payload for the REST API request.
 
         By default, no payload will be sent (return None).
@@ -170,9 +187,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             stream_or_partition_state = self.get_partition_state(partition)
         else:
             stream_or_partition_state = self.stream_state
-        url = self._get_url(stream_or_partition_state)
-        params: dict = self.get_params(stream_or_partition_state)
-        for row in self.request_url(url, params):
+        for row in self.request_records(partition):
             row = self.post_process(row, stream_or_partition_state)
             yield row
 

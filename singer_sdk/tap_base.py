@@ -84,6 +84,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Return the tap's catalog as formatted json text."""
         return json.dumps(self.get_singer_catalog().to_dict(), indent=2)
 
+    def get_singer_catalog(self) -> Catalog:
+        """Return a Catalog object."""
+        catalog_entries = [
+            stream.singer_catalog_entry for stream in self.streams.values()
+        ]
+        return Catalog(catalog_entries)
+
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
         raise NotImplementedError(
