@@ -12,22 +12,20 @@ This Singer-compliant tap was created using the [Singer SDK](https://gitlab.com/
 ## Getting Started
 
 - [ ] As a first step, you will want to scan the entire project for the text "`TODO:`" and complete any recommended steps.
-- [ ] Once you have a boilerplate prepped, you'll want to setup Poetry and create the virtual environment for your project:
+- [ ] `TODO:` Once you have a boilerplate prepped, you'll want to setup Poetry and create the virtual environment for your project:
 
     ```bash
     pipx install poetry
     poetry install
-    # Now navigate to your repo root and then run:
-    poetry init
     ```
 
-- [ ] You can test out your new CLI directly with:
+- [ ] `TODO:` You can test out your new CLI directly with:
 
     ```bash
     poetry run {{cookiecutter.tap_id}} --help
     ```
 
-- [ ] Create some tests and then run:
+- [ ] `TODO:` Create some tests and then run:
 
     ```bash
     poetry run pytest
@@ -42,7 +40,7 @@ develop your own taps and targets.
 
 ## Config Guide
 
-`TODO:` Provide instructions here for users of the tap:
+_`TODO:` Provide instructions here for users of the tap:_
 
 ### Accepted Config Options
 

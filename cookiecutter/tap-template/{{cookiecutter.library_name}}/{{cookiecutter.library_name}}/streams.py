@@ -18,21 +18,19 @@ from singer_sdk.helpers.typing import (
 
 SCHEMAS_DIR = Path("./schemas")
 
+
 {% if cookiecutter.stream_type in ["GraphQL", "REST"] %}
-
 {% if cookiecutter.stream_type == "GraphQL" %}
-
 class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}StreamBase):
     """{{ cookiecutter.source_name }} stream class."""
 
-    url_base = "https://api.mysample.com/"
+    url_base = "https://api.mysample.com"
 
 {% elif cookiecutter.stream_type == "REST" %}
-
 class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}StreamBase):
     """{{ cookiecutter.source_name }} stream class."""
 
-    url_base = "https://api.mysample.com/"
+    url_base = "https://api.mysample.com"
 
     def get_url_params(self, partition: Optional[dict]) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization."""
@@ -42,7 +40,6 @@ class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stre
         return result
 
 {% endif %}
-
 {% if cookiecutter.auth_method == "Simple" %}
     @property
     def authenticator(self) -> APIAuthenticatorBase:
@@ -68,8 +65,8 @@ class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stre
         )
 {% endif %}
 
-{% if cookiecutter.stream_type == "GraphQL" %}
 
+{% if cookiecutter.stream_type == "GraphQL" %}
 # TODO: - Override `StreamA` and `StreamB` with your own stream definition.
 #       - Copy-paste as many times as needed to create multiple stream types.
 class StreamA(Tap{{ cookiecutter.source_name }}Stream):
@@ -104,6 +101,7 @@ class StreamA(Tap{{ cookiecutter.source_name }}Stream):
         }
         """
 
+
 class StreamB(Tap{{ cookiecutter.source_name }}Stream):
     name = "groups"
     schema = PropertiesList(
@@ -121,8 +119,8 @@ class StreamB(Tap{{ cookiecutter.source_name }}Stream):
         }
         """
 
-{% elif cookiecutter.stream_type == "REST" %}
 
+{% elif cookiecutter.stream_type == "REST" %}
 # TODO: - Override `StreamA` and `StreamB` with your own stream definition.
 #       - Copy-paste as many times as needed to create multiple stream types.
 class StreamA(Tap{{ cookiecutter.source_name }}Stream):
@@ -152,8 +150,5 @@ class StreamB(Tap{{ cookiecutter.source_name }}Stream):
         StringType("id"),
         DateTimeType("modified"),
     ).to_dict()
-
-
 {% endif %}
-
 {% endif %}
