@@ -175,6 +175,12 @@ class Stream(metaclass=abc.ABCMeta):
         """
         return self._tap_state
 
+    def get_stream_or_partition_state(self, partition: Optional[dict]) -> dict:
+        """If partition is provided, return the partition state. Otherwise, return the stream state."""
+        if partition:
+            return self.get_partition_state(partition)
+        return self.stream_state
+
     @property
     def stream_state(self) -> dict:
         """Return a writeable state dict for this stream.
@@ -209,10 +215,7 @@ class Stream(metaclass=abc.ABCMeta):
         self, latest_record: Dict[str, Any], *, partition: Optional[dict] = None
     ):
         """Update state of the stream or partition with data from the provided record."""
-        if partition:
-            state_dict = self.get_partition_state(partition)
-        else:
-            state_dict = self.stream_state
+        state_dict = self.get_stream_or_partition_state(partition)
         if latest_record:
             if self.replication_method == "FULL_TABLE":
                 max_pk_values = self._get_bookmark("max_pk_values")

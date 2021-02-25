@@ -41,16 +41,8 @@ class SampleTapGitlab(Tap):
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:
-        """Return a list of discovered  in order of execution.
-
-        Streams with parent stream dependencies will be returned last, otherwise
-        streams will be in alphabetical order.
-        """
-        return sorted(
-            [stream_class(tap=self) for stream_class in STREAM_TYPES],
-            key=lambda x: (len(x.parent_stream_types or []), x.name),
-            reverse=True,
-        )
+        """Return a list of discovered streams."""
+        return [stream_class(tap=self) for stream_class in STREAM_TYPES]
 
 
 # CLI Execution:

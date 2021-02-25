@@ -109,7 +109,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         - Developers may override this method if discovery is not supported, or if
           discovery should not be run by default.
         """
-        return self.discover_streams()
+        return sorted(
+            self.discover_streams(),
+            key=lambda x: -1 * (len(x.parent_stream_types or []), x.name),
+            reverse=False,
+        )
 
     # Bookmarks and state management
 

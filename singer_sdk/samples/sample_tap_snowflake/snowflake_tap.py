@@ -26,7 +26,7 @@ class SampleTapSnowflake(Tap):
     def load_streams(self) -> List[Stream]:
         """Load streams, skipping discovery if `input_catalog` is provided."""
         if not self.input_catalog:
-            return self.discover_streams()
+            return sorted(self.discover_streams(),key=lambda x: x.name,)
         return SampleTapSnowflakeStream.from_input_catalog(tap=self)
 
 

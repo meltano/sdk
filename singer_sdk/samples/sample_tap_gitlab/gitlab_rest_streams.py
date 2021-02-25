@@ -38,11 +38,8 @@ class GitlabStream(RESTStream):
 
     def get_url_params(self, partition: Optional[dict]) -> Dict[str, Any]:
         """Return a dictionary of values to be used in parameterization."""
-        if partition:
-            stream_or_partition_state = self.get_partition_state(partition)
-        else:
-            stream_or_partition_state = self.stream_state
-        result = copy.deepcopy(stream_or_partition_state)
+        state = self.get_stream_or_partition_state(partition)
+        result = copy.deepcopy(state)
         result.update({"start_date": self.config.get("start_date")})
         return result
 
