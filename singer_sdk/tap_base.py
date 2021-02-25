@@ -24,8 +24,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         config: Union[PurePath, str, dict, None] = None,
         catalog: Union[PurePath, str, dict, None] = None,
         state: Union[PurePath, str, dict, None] = None,
+        parse_env_config: bool = True,
     ) -> None:
         """Initialize the tap."""
+        super().__init__(config=config, parse_env_config=parse_env_config)
         if not state:
             state_dict = {}
         elif isinstance(state, dict):
@@ -39,7 +41,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             self._input_catalog = read_json_file(catalog)
         self._state = state_dict or {}
         self._streams: Optional[Dict[str, Stream]] = None
-        super().__init__(config=config)
 
     # Class properties
 
