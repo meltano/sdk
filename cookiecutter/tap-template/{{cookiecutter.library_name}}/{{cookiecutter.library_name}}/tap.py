@@ -14,6 +14,7 @@ from singer_sdk.helpers.typing import (
     StringType,
 )
 
+# TODO: Import your custom stream types here:
 from {{ cookiecutter.library_name }}.stream import (
     Tap{{ cookiecutter.source_name }}Stream,
     StreamA,
@@ -21,6 +22,9 @@ from {{ cookiecutter.library_name }}.stream import (
 )
 
 PLUGIN_NAME = "{{ cookiecutter.tap_id }}"
+
+# TODO: Compile a list of custom stream types here
+#       OR rewrite discover_streams() below with your custom logic.
 STREAM_TYPES = [
     StreamA,
     StreamB,
