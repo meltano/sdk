@@ -1,5 +1,6 @@
 """Sample tap stream test for tap-google-analytics."""
 
+import datetime
 from pathlib import Path
 from typing import Iterable, Optional
 
@@ -38,25 +39,23 @@ class SampleGoogleAnalyticsStream(RESTStream):
     def prepare_request_payload(self, partition: Optional[dict]) -> Optional[dict]:
         """Prepare the data payload for the REST API request."""
         params = self.get_url_params(partition)
-        return {
-            "reportRequests": [
+        request_def = {
+            "viewId": self.config["view_id"],
+            "metrics": [{"expression": m} for m in self.metrics],
+            "dimensions": [{"name": d} for d in self.dimensions],
+            # "orderBys": [
+            #     {"fieldName": "ga:sessions", "sortOrder": "DESCENDING"},
+            #     {"fieldName": "ga:pageviews", "sortOrder": "DESCENDING"},
+            # ],
+        }
+        if self.config.get("start_date"):
+            request_def["dateRanges"] = [
                 {
-                    "viewId": self.config["view_id"],
-                    "metrics": [{"expression": m} for m in self.metrics],
-                    "dimensions": [{"name": d} for d in self.dimensions],
-                    # "dateRanges": [
-                    #     {
-                    #         "startDate": report_date_string,
-                    #         "endDate": report_date_string
-                    #     }
-                    # ],
-                    # "orderBys": [
-                    #     {"fieldName": "ga:sessions", "sortOrder": "DESCENDING"},
-                    #     {"fieldName": "ga:pageviews", "sortOrder": "DESCENDING"},
-                    # ],
+                    "startDate": self.config.get("start_date"),
+                    "endDate": datetime.datetime.now(),
                 }
             ]
-        }
+        return {"reportRequests": [request_def]}
 
     def parse_response(self, response) -> Iterable[dict]:
         self.logger.info(
