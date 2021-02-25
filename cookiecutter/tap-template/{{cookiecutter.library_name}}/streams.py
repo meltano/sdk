@@ -13,8 +13,7 @@ SCHEMAS_DIR = Path("./schemas")
 class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}StreamBase):
     """{{ cookiecutter.source_name }} stream class."""
 
-    tap_name = "{{ cookiecutter.tap_id }}"
-    site_url_base = "https://api.mysample.com/"
+    url_base = "https://api.mysample.com/"
 
     # # TODO (optional): If auth is required, implement `get_auth_header()`:
     # def get_auth_header(self) -> Dict[str, Any]:
@@ -65,8 +64,7 @@ class StreamB(Tap{{ cookiecutter.source_name }}Stream):
 class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}StreamBase):
     """{{ cookiecutter.source_name }} stream class."""
 
-    tap_name = PLUGIN_NAME
-    site_url_base = "https://api.mysample.com/"
+    url_base = "https://api.mysample.com/"
 
     # # TODO (optional): If auth is required, implement `get_auth_header()``:
     # def get_auth_header(self) -> Dict[str, Any]:

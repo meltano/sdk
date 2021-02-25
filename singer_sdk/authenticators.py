@@ -163,7 +163,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": jwt.encode(auth_request_body, private_key, "RS256"),
         }
-        self.logger.info(
+        self.logger.debug(
             f"Sending JWT token request with body {auth_request_body} "
             f"and payload {payload}"
         )
