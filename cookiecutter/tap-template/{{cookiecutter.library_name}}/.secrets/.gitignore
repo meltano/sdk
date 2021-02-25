@@ -2,5 +2,5 @@
 # make sure those are never staged for commit into your git repo. You can store them here or another
 # secure location.
 
-*.*
+*
 !.gitignore
