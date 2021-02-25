@@ -5,14 +5,14 @@ information and to be updated on this project, please feel free to subscribe to 
 
 --------------------------------
 
-# {{cookiecutter.tap_name}} Singer Tap
-
+# Singer SDK Tap Template
 
 To use this cookie cutter template:
 
 ```bash
 pip3 install pipx
 pipx ensurepath
+# You may need to reopen your shell at this point
 pipx install cookiecutter
 ```
 

@@ -15,6 +15,12 @@
 4. **Create Future-Proof Plugins.**
     - _Take advantage of new base class capabilities by simply updating your dependency version and retesting with the latest versions._
 
+## Cookie-Cutter Quick Start
+
+`Singer SDK` provides a quickstart `cookiecutter` template for starting new taps.
+
+* [Click here for the **Cookiecutter Tap Template**](cookiecutter/tap-template/README.md)
+
 ## Tap Dev Guide
 
 See the [dev guide](docs/dev_guide.md) for instructions on how to get started building your own
