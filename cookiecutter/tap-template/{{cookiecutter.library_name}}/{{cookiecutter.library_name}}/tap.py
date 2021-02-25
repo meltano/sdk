@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import List
 import click
-from singer_sdk import TapBase
+from singer_sdk import Tap, Stream
 from singer_sdk.helpers.typing import (
     ArrayType,
     BooleanType,
@@ -15,7 +15,7 @@ from singer_sdk.helpers.typing import (
 )
 
 # TODO: Import your custom stream types here:
-from {{ cookiecutter.library_name }}.stream import (
+from {{ cookiecutter.library_name }}.streams import (
     Tap{{ cookiecutter.source_name }}Stream,
     StreamA,
     StreamB,
@@ -30,7 +30,7 @@ STREAM_TYPES = [
     StreamB,
 ]
 
-class Tap{{ cookiecutter.source_name }}(TapBase):
+class Tap{{ cookiecutter.source_name }}(Tap):
     """{{ cookiecutter.source_name }} tap class."""
 
     name = "{{ cookiecutter.tap_id }}"

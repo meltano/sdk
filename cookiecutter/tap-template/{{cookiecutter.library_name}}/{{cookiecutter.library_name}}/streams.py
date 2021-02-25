@@ -2,10 +2,10 @@
 
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
-from tap_base.streams import {{ cookiecutter.stream_type }}StreamBase
-from tap_base.authenticators import APIAuthenticatorBase, SimpleAuthenticator, OAuthAuthenticator, OAuthJWTAuthenticator
+from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator, OAuthAuthenticator, OAuthJWTAuthenticator
 from singer_sdk.helpers.typing import (
     ArrayType,
     BooleanType,
@@ -21,13 +21,13 @@ SCHEMAS_DIR = Path("./schemas")
 
 {% if cookiecutter.stream_type in ["GraphQL", "REST"] %}
 {% if cookiecutter.stream_type == "GraphQL" %}
-class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}StreamBase):
+class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
     url_base = "https://api.mysample.com"
 
 {% elif cookiecutter.stream_type == "REST" %}
-class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}StreamBase):
+class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
     url_base = "https://api.mysample.com"
