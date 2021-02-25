@@ -142,7 +142,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """Return a tuple: (warnings: List[str], errors: List[str])."""
         warnings: List[str] = []
         errors: List[str] = []
-        for k in self.config.values():
+        for k in self.config.keys():
             if k not in self.accepted_config_keys:
                 warnings.append(f"Unexpected config option found: {k}.")
         if self.required_config_options:
@@ -164,6 +164,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                 )
         if self.config_jsonschema:
             try:
+                self.logger.info(f"Running config validation using jsonschema: {self.config_jsonschema}")
                 validator = JSONSchemaValidator(self.config_jsonschema)
                 validator.validate(dict(self.config))
             except (ValidationError, SchemaError) as ex:
@@ -177,6 +178,8 @@ class PluginBase(metaclass=abc.ABCMeta):
                 raise RuntimeError(summary)
         else:
             summary = f"Config validation passed with 0 errors and {len(warnings)} warnings."
+            for warning in warnings:
+                summary += f"\n{warning}"
         if warnings_as_errors and raise_errors and warnings:
             raise RuntimeError(
                 f"One or more warnings ocurred during validation: {warnings}"

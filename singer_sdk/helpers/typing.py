@@ -62,6 +62,8 @@ class JSONTypeHelper(object):
         if self.optional:
             type_dict = _append_type(type_dict, "None")
             type_dict["required"] = False
+        else:
+            type_dict["required"] = True
         return {self.name: type_dict}
 
     def to_json(self) -> str:
@@ -106,9 +108,12 @@ class ComplexType(JSONTypeHelper):
     @property
     def type_dict(self) -> dict:
         merged_props = {}
+        required = []
         for w in self.wrapped:
             merged_props.update(w.to_dict())
-        return {"type": "object", "properties": merged_props}
+            if not w.optional:
+                required.append(w.name)
+        return {"type": "object", "properties": merged_props, "required": required}
 
 
 class ArrayType(JSONTypeHelper):
