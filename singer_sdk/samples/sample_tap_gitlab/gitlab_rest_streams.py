@@ -11,7 +11,7 @@ from singer_sdk.helpers.typing import (
 )
 from singer_sdk.helpers.state import get_stream_state_dict
 from singer_sdk.authenticators import SimpleAuthenticator
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, cast, Optional
 
 from singer_sdk.streams.rest import RESTStream
 
@@ -36,8 +36,12 @@ class GitlabStream(RESTStream):
             http_headers["User-Agent"] = self.config.get("user_agent")
         return SimpleAuthenticator(stream=self, http_headers=http_headers)
 
-    def get_params(self, stream_or_partition_state: dict) -> Dict[str, Any]:
+    def get_url_params(self, partition: Optional[dict]) -> Dict[str, Any]:
         """Return a dictionary of values to be used in parameterization."""
+        if partition:
+            stream_or_partition_state = self.get_partition_state(partition)
+        else:
+            stream_or_partition_state = self.stream_state
         result = copy.deepcopy(stream_or_partition_state)
         result.update({"start_date": self.config.get("start_date")})
         return result
@@ -161,9 +165,9 @@ class EpicIssuesStream(GitlabStream):
     schema_filepath = SCHEMAS_DIR / "epic_issues.json"
     parent_stream_types = [EpicsStream]  # Stream should wait for parents to complete.
 
-    def get_params(self, stream_or_partition_state: dict) -> dict:
+    def get_url_params(self, partition: Optional[dict]) -> dict:
         """Return a dictionary of values to be used in parameterization."""
-        result = super().get_params(stream_or_partition_state)
-        if "epic_id" not in stream_or_partition_state:
+        result = super().get_url_params(partition)
+        if "epic_id" not in partition:
             raise ValueError("Cannot sync epic issues without already known epic IDs.")
         return result

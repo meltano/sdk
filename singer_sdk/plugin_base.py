@@ -46,15 +46,18 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     # Constructor
 
-    def __init__(self, config: Union[PurePath, str, dict, None] = None) -> None:
-        """Initialize the tap."""
+    def __init__(self, config: Union[PurePath, str, dict, None] = None, parse_env_config: bool = True) -> None:
+        """Initialize the tap or target."""
         if not config:
             config_dict = {}
         elif isinstance(config, str) or isinstance(config, PurePath):
             config_dict = read_json_file(config)
-        else:
+        elif isinstance(config, dict):
             config_dict = config
-        config_dict.update(self.get_env_var_config())
+        else:
+            raise ValueError(f"Error parsing config of type '{type(config).__name__}'.")
+        if parse_env_config:
+            config_dict.update(self.get_env_var_config())
         for k, v in config_dict.items():
             if self.is_secret_config(k):
                 config_dict[k] = SecretString(v)
