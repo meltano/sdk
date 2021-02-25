@@ -57,7 +57,10 @@ class PluginBase(metaclass=abc.ABCMeta):
         else:
             raise ValueError(f"Error parsing config of type '{type(config).__name__}'.")
         if parse_env_config:
+            self.logger.info("Parsing env var for settings config...")
             config_dict.update(self.get_env_var_config())
+        else:
+            self.logger.info("Skipping parse of env var settings...")
         for k, v in config_dict.items():
             if self.is_secret_config(k):
                 config_dict[k] = SecretString(v)
@@ -78,11 +81,15 @@ class PluginBase(metaclass=abc.ABCMeta):
         caps, and the setting name in same-case as specified in settings config.
         """
         result: Dict[str, Any] = {}
+        plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
         for k, v in os.environ.items():
-            for key in cls.accepted_config_keys:
-                if k == f"{cls.name.upper()}_{key}".replace("-", "_"):
-                    cls.logger.info(f"Parsing '{key}' config from env variable '{k}'.")
-                    result[key] = v
+            if k.startswith(plugin_env_prefix):
+                config_key = k.split(plugin_env_prefix)[1]
+                cls.logger.info(f"Parsing '{config_key}' config from env variable '{k}'.")
+                if v[0] == "[" and v[-1] == "]":
+                    result[config_key] = v.lstrip("[").rstrip("]").split(",")
+                else:
+                    result[config_key] = v
         return result
 
     # Core plugin metadata:
@@ -164,7 +171,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                 )
         if self.config_jsonschema:
             try:
-                self.logger.info(f"Running config validation using jsonschema: {self.config_jsonschema}")
+                self.logger.debug(f"Running config validation using jsonschema: {self.config_jsonschema}")
                 validator = JSONSchemaValidator(self.config_jsonschema)
                 validator.validate(dict(self.config))
             except (ValidationError, SchemaError) as ex:
