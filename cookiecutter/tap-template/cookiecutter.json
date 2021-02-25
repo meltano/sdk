@@ -7,5 +7,11 @@
         "REST",
         "GraphQL",
         "Other"
+    ],
+    "auth_method": [
+        "Simple",
+        "OAuth2",
+        "JWT",
+        "Custom or N/A"
     ]
 }

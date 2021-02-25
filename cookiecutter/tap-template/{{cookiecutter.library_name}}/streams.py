@@ -1,36 +1,94 @@
 """Stream class for {{ cookiecutter.tap_id }}."""
 
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict
 
 from tap_base.streams import {{ cookiecutter.stream_type }}StreamBase
+from tap_base.authenticators import APIAuthenticatorBase, SimpleAuthenticator, OAuthAuthenticator, OAuthJWTAuthenticator
+from singer_sdk.helpers.typing import (
+    ArrayType,
+    BooleanType,
+    ComplexType,
+    DateTimeType,
+    IntegerType,
+    PropertiesList,
+    StringType,
+)
 
 SCHEMAS_DIR = Path("./schemas")
 
+{% if cookiecutter.stream_type in ["GraphQL", "REST"] %}
+
 {% if cookiecutter.stream_type == "GraphQL" %}
 
-# TODO: - Implement a generic stream type for auth and post-processing (if any):
 class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}StreamBase):
     """{{ cookiecutter.source_name }} stream class."""
 
     url_base = "https://api.mysample.com/"
 
-    # # TODO (optional): If auth is required, implement `get_auth_header()`:
-    # def get_auth_header(self) -> Dict[str, Any]:
-    #     """Return an authorization header for REST request."""
-    #     return {}
+{% elif cookiecutter.stream_type == "REST" %}
 
-    # # TODO (optional): If post-processing is required, implement `post_process()`
-    # def post_process(self, row: dict) -> dict:
-    #     """Transform raw data from HTTP GET into the expected property values."""
-    #     return row
+class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}StreamBase):
+    """{{ cookiecutter.source_name }} stream class."""
 
+    url_base = "https://api.mysample.com/"
+
+    def get_url_params(self, partition: Optional[dict]) -> Dict[str, Any]:
+        """Return a dictionary of values to be used in URL parameterization."""
+        state = self.get_stream_or_partition_state(partition)
+        result = deepcopy(state)
+        result.update({"start_date": self.config.get("start_date")})
+        return result
+
+{% endif %}
+
+{% if cookiecutter.auth_method == "Simple" %}
+    @property
+    def authenticator(self) -> APIAuthenticatorBase:
+        http_headers = {"Private-Token": self.config.get("auth_token")}
+        if self.config.get("user_agent"):
+            http_headers["User-Agent"] = self.config.get("user_agent")
+        return SimpleAuthenticator(stream=self, http_headers=http_headers)
+{% elif cookiecutter.auth_method == "OAuth2" %}
+    @property
+    def authenticator(self) -> APIAuthenticatorBase:
+        return OAuthAuthenticator(
+            stream=self,
+            auth_endpoint="TODO: OAuth Endpoint URL",
+            oauth_scopes="TODO: OAuth Scopes",
+        )
+{% elif cookiecutter.auth_method == "JWT" %}
+    @property
+    def authenticator(self) -> APIAuthenticatorBase:
+        return OAuthJWTAuthenticator(
+            stream=self,
+            auth_endpoint="TODO: OAuth Endpoint URL",
+            oauth_scopes="TODO: OAuth Scopes",
+        )
+{% endif %}
+
+{% if cookiecutter.stream_type == "GraphQL" %}
 
 # TODO: - Override `StreamA` and `StreamB` with your own stream definition.
 #       - Copy-paste as many times as needed to create multiple stream types.
 class StreamA(Tap{{ cookiecutter.source_name }}Stream):
     name = "users"
-    schema_filepath =  SCHEMAS_DIR / "users.json"
+    schema = PropertiesList(
+        StringType("name"),
+        StringType("id"),
+        IntegerType("age"),
+        StringType("email"),
+        ComplexType(
+            "address",
+            StringType("street"),
+            StringType("city"),
+            StringType("state"),
+            StringType("zip"),
+        ),
+    ).to_dict()
+    primary_keys = ["id"]
+    replication_key = None
     graphql_query = """
         users {
             name
@@ -48,7 +106,13 @@ class StreamA(Tap{{ cookiecutter.source_name }}Stream):
 
 class StreamB(Tap{{ cookiecutter.source_name }}Stream):
     name = "groups"
-    schema_filepath =  SCHEMAS_DIR / "groups.json"
+    schema = PropertiesList(
+        StringType("name"),
+        StringType("id"),
+        DateTimeType("modified"),
+    ).to_dict()
+    primary_keys = ["id"]
+    replication_key = "modified"
     graphql_query = """
         groups {
             name
@@ -57,42 +121,39 @@ class StreamB(Tap{{ cookiecutter.source_name }}Stream):
         }
         """
 
-
 {% elif cookiecutter.stream_type == "REST" %}
-
-# TODO: - Implement a generic stream type for auth and post-processing (if any):
-class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}StreamBase):
-    """{{ cookiecutter.source_name }} stream class."""
-
-    url_base = "https://api.mysample.com/"
-
-    # # TODO (optional): If auth is required, implement `get_auth_header()``:
-    # def get_auth_header(self) -> Dict[str, Any]:
-    #     """Return an authorization header for REST request."""
-    #     return {}
-
-    # # TODO (optional): If post-processing is required, implement `post_process()`
-    # def post_process(self, row: dict) -> dict:
-    #     """Transform raw data from HTTP GET into the expected property values."""
-    #     return row
-
 
 # TODO: - Override `StreamA` and `StreamB` with your own stream definition.
 #       - Copy-paste as many times as needed to create multiple stream types.
 class StreamA(Tap{{ cookiecutter.source_name }}Stream):
     stream_name = "users"
-    url_suffix = "/users"
+    path = "/users"
     primary_keys = ["id"]
     replication_key = None
-    schema_filepath = SCHEMAS_DIR / "users.json"
+    schema = PropertiesList(
+        StringType("name"),
+        StringType("id"),
+        IntegerType("age"),
+        StringType("email"),
+        StringType("street"),
+        StringType("city"),
+        StringType("state"),
+        StringType("zip"),
+    ).to_dict()
 
 
 class StreamB(Tap{{ cookiecutter.source_name }}Stream):
     stream_name = "groups"
-    url_suffix = "/groups"
+    path = "/groups"
     primary_keys = ["id"]
     replication_key = "modified"
-    schema_filepath = SCHEMAS_DIR / "groups.json"
+    schema = PropertiesList(
+        StringType("name"),
+        StringType("id"),
+        DateTimeType("modified"),
+    ).to_dict()
 
+
+{% endif %}
 
 {% endif %}
