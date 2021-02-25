@@ -168,15 +168,20 @@ class PluginBase(metaclass=abc.ABCMeta):
                 validator.validate(dict(self.config))
             except (ValidationError, SchemaError) as ex:
                 errors.append(str(ex))
-        if raise_errors and errors:
-            raise RuntimeError(
+        if errors:
+            summary = (
                 f"Config validation failed: {f'; '.join(errors)}\n"
                 f"JSONSchema was: {self.config_jsonschema}"
             )
+            if raise_errors:
+                raise RuntimeError(summary)
+        else:
+            summary = f"Config validation passed with 0 errors and {len(warnings)} warnings."
         if warnings_as_errors and raise_errors and warnings:
             raise RuntimeError(
                 f"One or more warnings ocurred during validation: {warnings}"
             )
+        self.logger.info(summary)        
         return warnings, errors
 
     @classmethod
