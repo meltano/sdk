@@ -134,15 +134,19 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         """Return the private key passphrase to use in encryption."""
         return self.config.get("private_key_passphrase", None)
 
-    # Authentication and refresh
-    def update_access_token(self):
-        """Update `access_token` along with: `last_refreshed` and `expires_in`."""
+    @property
+    def oauth_request_body(self) -> dict:
         request_time = utc_now()
-        # jwt_signing_key = jwt.jwk_from_pem(self.private_key)
+        return {
+            "iss": self.client_id,
+            "scope": self.oauth_scopes,
+            "aud": self.auth_endpoint,
+            "exp": math.floor((request_time + timedelta(hours=1)).timestamp()),
+            "iat": math.floor(request_time.timestamp()),
+        }
 
-        from cryptography.hazmat.primitives import serialization
-        from cryptography.hazmat.backends import default_backend
-
+    @property
+    def oauth_request_payload(self) -> dict:
         if self.private_key_passphrase:
             private_key = serialization.load_pem_private_key(
                 self.private_key,
@@ -151,25 +155,33 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             )
         else:
             private_key = self.private_key
-
-        auth_request_body = {
-            "iss": self.client_id,
-            "scope": self.oauth_scopes,
-            "aud": self.auth_endpoint,
-            "exp": math.floor((request_time + timedelta(hours=1)).timestamp()),
-            "iat": math.floor(request_time.timestamp()),
-        }
-        payload = {
+        return {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
-            "assertion": jwt.encode(auth_request_body, private_key, "RS256"),
+            "assertion": jwt.encode(self.oauth_request_body, self.private_key, "RS256"),
         }
-        self.logger.debug(
-            f"Sending JWT token request with body {auth_request_body} "
-            f"and payload {payload}"
-        )
-        token_response = requests.post(self.auth_endpoint, data=payload)
-        # self.logger.debug(f"Received JWT request response: {token_response}")
-        token_response.raise_for_status()
+
+    # Authentication and refresh
+    def update_access_token(self):
+        """Update `access_token` along with: `last_refreshed` and `expires_in`."""
+        # jwt_signing_key = jwt.jwk_from_pem(self.private_key)
+
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.backends import default_backend
+
+        request_time = utc_now()
+        auth_request_payload = self.oauth_request_payload
+        token_response = requests.post(self.auth_endpoint, data=auth_request_payload)
+        try:
+            token_response.raise_for_status()
+            self.logger.info("OAuth authorization attempt was successful.")
+        except Exception as ex:
+            self.logger.exception(
+                f"Failed OAuth login attempt, response was '{token_response}'. "
+                f"\nJWT token request body is '{self.oauth_request_body}' "
+                f"and payload was '{auth_request_payload}'", ex
+            )
+            raise ex
+
         token_json = token_response.json()
         self.access_token = token_json["access_token"]
         self.expires_in = token_json["expires_in"]
