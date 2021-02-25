@@ -5,6 +5,8 @@ import datetime
 import json
 import logging
 from types import MappingProxyType
+from singer import metadata
+
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.helpers.secrets import SecretString
 from singer_sdk.helpers.util import get_property_schema, is_boolean_type
@@ -101,7 +103,7 @@ class Stream(metaclass=abc.ABCMeta):
                     raise FileExistsError(
                         f"Could not find schema file '{self.schema_filepath}'."
                     )
-                self._schema = json.loads(self.schema_filepath.read_text())
+                self._schema = json.loads(Path(self.schema_filepath).read_text())
         if not self._schema:
             raise ValueError(
                 f"Could not initialize schema for stream '{self.name}'. "
@@ -110,22 +112,40 @@ class Stream(metaclass=abc.ABCMeta):
         return self._schema
 
     @property
+    def singer_metadata(self) -> dict:
+        self.logger.debug(f"Schema Debug: {self.schema}")
+        md = metadata.get_standard_metadata(
+            schema=self.schema,
+            replication_method=self.replication_method,
+            key_properties=self.primary_keys or None,
+            valid_replication_keys=(
+                [self.replication_key] if self.replication_key else None
+            ),
+            schema_name=None,
+        )
+        return md
+
+    @property
+    def singer_catalog_entry(self) -> singer.CatalogEntry:
+        return singer.CatalogEntry(
+            tap_stream_id=self.tap_stream_id,
+            stream=self.name,
+            schema=Schema.from_dict(self.schema),
+            metadata=self.singer_metadata,
+            key_properties=self.primary_keys or None,
+            replication_key=self.replication_key,
+            replication_method=self.replication_method,
+            is_view=None,
+            database=None,
+            table=None,
+            row_count=None,
+            stream_alias=None,
+        )
+
+    @property
     def config(self) -> Mapping[str, Any]:
         """Return a frozen (read-only) config dictionary map."""
         return MappingProxyType(self._config)
-
-    def get_params(self, stream_or_partition_state: dict) -> dict:
-        """Return a dictionary of values to be used in parameterization.
-
-        By default, this includes all settings which are not secrets, along with any
-        stored values the stream or partition state, as passed via the
-        `stream_or_partition_state` argument.
-        """
-        result = {
-            k: v for k, v in self.config.items() if not isinstance(v, SecretString)
-        }
-        result.update(stream_or_partition_state)
-        return result
 
     @property
     def tap_stream_id(self) -> str:
@@ -171,9 +191,12 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def partitions(self) -> Optional[List[dict]]:
-        """Return a list of partition key dicts (if applicable), otherwise None."""
+        """Return a list of partition key dicts (if applicable), otherwise None.
+        
+        Developers may override this property to provide a default partitions list.
+        """
         state = read_stream_state(self.tap_state, self.name)
-        if "partitions" not in state:
+        if state is None or "partitions" not in state:
             return None
         result: List[dict] = []
         for partition_state in state["partitions"]:
@@ -192,7 +215,7 @@ class Stream(metaclass=abc.ABCMeta):
             state_dict = self.stream_state
         if latest_record:
             if self.replication_method == "FULL_TABLE":
-                max_pk_values = singer._get_bookmark("max_pk_values")
+                max_pk_values = self._get_bookmark("max_pk_values")
                 if max_pk_values:
                     state_dict["last_pk_fetched"] = {
                         k: v
@@ -237,7 +260,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Private sync methods:
 
-    def _sync_records(self, partition: Optional[dict]) -> None:
+    def _sync_records(self, partition: Optional[dict] = None) -> None:
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
         # Reset interim state keys from prior executions:
@@ -252,19 +275,24 @@ class Stream(metaclass=abc.ABCMeta):
             ],
         )
         # Iterate through each returned record:
-        for row_dict in self.records:
-            if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
-                self._write_state_message()
-            record = self._conform_record_data_types(row_dict)
-            record_message = RecordMessage(
-                stream=self.name,
-                record=record,
-                version=None,
-                time_extracted=datetime.datetime.now(datetime.timezone.utc),
-            )
-            singer.write_message(record_message)
-            self._increment_stream_state(record, partition=partition)
-            rows_sent += 1
+        if partition:
+            partitions = [partition]
+        else:
+            partitions = self.partitions or [None]
+        for partition in partitions:
+            for row_dict in self.get_records(partition=partition):
+                if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
+                    self._write_state_message()
+                record = self._conform_record_data_types(row_dict)
+                record_message = RecordMessage(
+                    stream=self.name,
+                    record=record,
+                    version=None,
+                    time_extracted=datetime.datetime.now(datetime.timezone.utc),
+                )
+                singer.write_message(record_message)
+                self._increment_stream_state(record, partition=partition)
+                rows_sent += 1
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
         # Reset interim bookmarks before emitting final STATE message:
         wipe_stream_state_keys(

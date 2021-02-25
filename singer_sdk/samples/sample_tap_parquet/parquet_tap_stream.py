@@ -1,6 +1,6 @@
 """Sample tap stream test for tap-parquet."""
 
-from typing import Iterable
+from typing import Iterable, Optional
 
 import pyarrow.parquet as pq
 
@@ -12,8 +12,7 @@ PLUGIN_NAME = "sample-tap-parquet"
 class SampleTapParquetStream(Stream):
     """Sample tap test for parquet."""
 
-    @property
-    def records(self) -> Iterable[dict]:
+    def get_records(self, partition: Optional[dict]) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
         filepath = self.config.get("filepath")
         if not filepath:

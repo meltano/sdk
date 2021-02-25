@@ -1,0 +1,8 @@
+{
+    "auth_token": "****",
+    "project_ids": [
+        "myorg/my-project-a",
+        "myorg/my-project-b"
+    ],
+    "start_date": "2020-02-20"
+}
