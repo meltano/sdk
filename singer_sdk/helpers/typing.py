@@ -49,9 +49,9 @@ def _append_type(type_dict: dict, new_type: str) -> dict:
 class JSONTypeHelper(object):
     """Type helper base class for JSONSchema types."""
 
-    def __init__(self, name: str, optional: bool = False) -> None:
+    def __init__(self, name: str, required: bool = False) -> None:
         self.name = name
-        self.optional = optional
+        self.optional = not optional
 
     @property
     def type_dict(self) -> dict:
@@ -103,7 +103,7 @@ class ComplexType(JSONTypeHelper):
     def __init__(self, name, *wrapped) -> None:
         self.name = name
         self.wrapped = wrapped
-        self.optional = False
+        self.optional = True
 
     @property
     def type_dict(self) -> dict:
