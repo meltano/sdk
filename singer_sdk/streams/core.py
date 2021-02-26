@@ -98,7 +98,7 @@ class Stream(metaclass=abc.ABCMeta):
             return True
         return False
 
-    def get_starting_datetime() -> Optional[datetime.datetime]:
+    def get_starting_datetime(self, partition: Optional[dict]) -> Optional[datetime.datetime]:
         result: Optional[datetime.datetime] = None
         if self.is_timestamp_replication_key:
             state = self.get_stream_or_partition_state(partition)
