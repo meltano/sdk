@@ -152,7 +152,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """
         return None
 
-    def get_next_page_token(self, response) -> Any:
+    def get_next_page_token(self, response: requests.Response) -> Any:
         """Return token for identifying next page or None if not applicable."""
         next_page_token = response.headers.get("X-Next-Page", None)
         if next_page_token:
@@ -188,7 +188,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             row = self.post_process(row, state)
             yield row
 
-    def parse_response(self, response) -> Iterable[dict]:
+    def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows."""
         resp_json = response.json()
         if isinstance(resp_json, dict):

@@ -1,5 +1,7 @@
 """Stream class for {{ cookiecutter.tap_id }}."""
 
+import requests
+
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Optional
