@@ -117,22 +117,22 @@ class EpicsStream(ProjectBasedStream):
     primary_keys = ["id"]
     replication_key = None
     schema = PropertiesList(
-        IntegerType("id"),
-        IntegerType("iid"),
-        IntegerType("group_id"),
-        IntegerType("parent_id", optional=True),
-        StringType("title", optional=True),
-        StringType("description", optional=True),
-        StringType("state", optional=True),
-        IntegerType("author_id", optional=True),
-        DateTimeType("start_date", optional=True),
-        DateTimeType("end_date", optional=True),
-        DateTimeType("due_date", optional=True),
-        DateTimeType("created_at", optional=True),
-        DateTimeType("updated_at", optional=True),
+        IntegerType("id", required=True),
+        IntegerType("iid", required=True),
+        IntegerType("group_id", required=True),
+        IntegerType("parent_id"),
+        StringType("title"),
+        StringType("description"),
+        StringType("state"),
+        IntegerType("author_id"),
+        DateTimeType("start_date"),
+        DateTimeType("end_date"),
+        DateTimeType("due_date"),
+        DateTimeType("created_at"),
+        DateTimeType("updated_at"),
         ArrayType("labels", wrapped_type=StringType),
-        IntegerType("upvotes", optional=True),
-        IntegerType("downvotes", optional=True),
+        IntegerType("upvotes"),
+        IntegerType("downvotes"),
     ).to_dict()
 
     # schema_filepath = SCHEMAS_DIR / "epics.json"

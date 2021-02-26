@@ -34,10 +34,10 @@ class SampleTapGitlab(Tap):
 
     name: str = PLUGIN_NAME
     config_jsonschema = PropertiesList(
-        StringType("auth_token"),
-        ArrayType("project_ids", StringType),
-        DateTimeType("start_date"),
-        StringType("api_url", optional=True),
+        StringType("auth_token", required=True),
+        ArrayType("project_ids", StringType, required=True),
+        DateTimeType("start_date", required=True),
+        StringType("api_url"),
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:

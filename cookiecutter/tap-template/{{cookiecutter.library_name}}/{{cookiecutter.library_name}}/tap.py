@@ -35,10 +35,10 @@ class Tap{{ cookiecutter.source_name }}(Tap):
 
     name = "{{ cookiecutter.tap_id }}"
     config_jsonschema = PropertiesList(
-        StringType("auth_token"),
-        ArrayType("project_ids", StringType),
+        StringType("auth_token", required=True),
+        ArrayType("project_ids", StringType, required=True),
         DateTimeType("start_date"),
-        StringType("api_url", optional=True),
+        StringType("api_url"),
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:

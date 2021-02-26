@@ -32,9 +32,9 @@ class SampleTapParquet(Tap):
                 tap=self,
                 name=tap_stream_id,
                 schema=PropertiesList(
-                    StringType("f0", optional=False),
-                    StringType("f1", optional=True),
-                    StringType("f2", optional=True),
+                    StringType("f0", required=True),
+                    StringType("f1"),
+                    StringType("f2"),
                 ).to_dict(),
             )
             new_stream.primary_keys = ["f0"]

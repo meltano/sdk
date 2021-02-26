@@ -4,10 +4,10 @@ Usage example:
 
 ```py
     jsonschema = PropertiesList(
-        IntegerType("id"),
+        IntegerType("id", required=True),
         StringType("name"),
         ArrayType("tags", StringType),
-        DateTimeType("updated_on", optional=True),
+        DateTimeType("updated_on"),
         BooleanType("is_deleted"),
         ComplexType(
             "author",
@@ -51,7 +51,7 @@ class JSONTypeHelper(object):
 
     def __init__(self, name: str, required: bool = False) -> None:
         self.name = name
-        self.optional = not optional
+        self.optional = not required
 
     @property
     def type_dict(self) -> dict:
@@ -119,10 +119,10 @@ class ComplexType(JSONTypeHelper):
 class ArrayType(JSONTypeHelper):
     """Datetime type."""
 
-    def __init__(self, name, wrapped_type) -> None:
+    def __init__(self, name, wrapped_type, required: bool = False) -> None:
         self.name = name
         self.wrapped_type = wrapped_type
-        self.optional = False
+        self.optional = not required
 
     @property
     def type_dict(self) -> dict:
