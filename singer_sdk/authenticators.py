@@ -155,12 +155,10 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             token_response.raise_for_status()
             self.logger.info("OAuth authorization attempt was successful.")
         except Exception as ex:
-            self.logger.exception(
-                f"Failed OAuth login attempt, response was '{token_response}'. "
-                f"OAuth request payload was '{auth_request_payload}'", ex
+            # self.logging.exception(f"Failed OAuth. Payload was '{auth_request_payload}'")
+            raise RuntimeError(
+                f"Failed OAuth login attempt, response was '{token_response.json()}'. {ex}"
             )
-            raise ex
-
         token_json = token_response.json()
         self.access_token = token_json["access_token"]
         self.expires_in = token_json["expires_in"]

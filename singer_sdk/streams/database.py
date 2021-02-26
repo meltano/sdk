@@ -311,8 +311,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
     @classmethod
     def log_backoff_attempt(cls, details):
         """Log backoff attempts used by stream retry_pattern()."""
-        # self.logger.info(
-        print(
+        self.logger.info(
             "Error communicating with source, "
             f"triggering backoff: {details.get('tries')} try"
         )
