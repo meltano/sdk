@@ -9,6 +9,9 @@ import requests
 from datetime import datetime, timedelta
 from typing import Any, Dict, Mapping, Optional
 
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+
 from singer_sdk.helpers.util import utc_now
 from singer_sdk.streams import Stream as RESTStreamBase
 
@@ -120,6 +123,29 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         """Update `access_token` along with: `last_refreshed` and `expires_in`."""
         raise NotImplementedError
 
+    # Authentication and refresh
+    def update_access_token(self):
+        """Update `access_token` along with: `last_refreshed` and `expires_in`."""
+        # jwt_signing_key = jwt.jwk_from_pem(self.private_key)
+
+        request_time = utc_now()
+        auth_request_payload = self.oauth_request_payload
+        token_response = requests.post(self.auth_endpoint, data=auth_request_payload)
+        try:
+            token_response.raise_for_status()
+            self.logger.info("OAuth authorization attempt was successful.")
+        except Exception as ex:
+            self.logger.exception(
+                f"Failed OAuth login attempt, response was '{token_response}'. "
+                f"OAuth request payload was '{auth_request_payload}'", ex
+            )
+            raise ex
+
+        token_json = token_response.json()
+        self.access_token = token_json["access_token"]
+        self.expires_in = token_json["expires_in"]
+        self.last_refreshed = request_time
+
 
 class OAuthJWTAuthenticator(OAuthAuthenticator):
     """API Authenticator for OAuth 2.0 flows which utilize a JWT refresh token."""
@@ -159,31 +185,3 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": jwt.encode(self.oauth_request_body, self.private_key, "RS256"),
         }
-
-    # Authentication and refresh
-    def update_access_token(self):
-        """Update `access_token` along with: `last_refreshed` and `expires_in`."""
-        # jwt_signing_key = jwt.jwk_from_pem(self.private_key)
-
-        from cryptography.hazmat.primitives import serialization
-        from cryptography.hazmat.backends import default_backend
-
-        request_time = utc_now()
-        auth_request_payload = self.oauth_request_payload
-        token_response = requests.post(self.auth_endpoint, data=auth_request_payload)
-        try:
-            token_response.raise_for_status()
-            self.logger.info("OAuth authorization attempt was successful.")
-        except Exception as ex:
-            self.logger.exception(
-                f"Failed OAuth login attempt, response was '{token_response}'. "
-                f"\nJWT token request body is '{self.oauth_request_body}' "
-                f"and payload was '{auth_request_payload}'", ex
-            )
-            raise ex
-
-        token_json = token_response.json()
-        self.access_token = token_json["access_token"]
-        self.expires_in = token_json["expires_in"]
-        # self.logger.debug(f"Received JWT token: {token_json}")
-        self.last_refreshed = request_time
