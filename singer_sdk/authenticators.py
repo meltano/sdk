@@ -1,14 +1,15 @@
 """Classes to assist in authenticating to APIs."""
 
 import logging
-from types import MappingProxyType
 import jwt
 import math
 import requests
 
-from datetime import datetime, timedelta
+from datetime import timedelta
+from types import MappingProxyType
 from typing import Any, Dict, Mapping, Optional
 
+from pendulum import datetime
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 

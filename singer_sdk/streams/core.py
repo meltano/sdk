@@ -5,6 +5,8 @@ import datetime
 import json
 import logging
 from types import MappingProxyType
+
+import pendulum
 from singer import metadata
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
@@ -103,9 +105,9 @@ class Stream(metaclass=abc.ABCMeta):
         if self.is_timestamp_replication_key:
             state = self.get_stream_or_partition_state(partition)
             if self.replication_key in state:
-                result = datetime.datetime.strptime(state[self.replication_key])
+                result = pendulum.parse(state[self.replication_key])
         if result is None and "start_date" in self.config:
-            result = datetime.datetime.strptime(self.config.get("start_date"))
+            result = pendulum.parse(self.config.get("start_date"))
         return result
 
     @property
@@ -310,7 +312,7 @@ class Stream(metaclass=abc.ABCMeta):
                     stream=self.name,
                     record=record,
                     version=None,
-                    time_extracted=datetime.datetime.now(datetime.timezone.utc),
+                    time_extracted=pendulum.now(),
                 )
                 singer.write_message(record_message)
                 self._increment_stream_state(record, partition=partition)

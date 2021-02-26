@@ -4,10 +4,10 @@
 #  - https://gitlab.com/-/graphql-explorer
 """
 
-from datetime import datetime
-from jinja2 import Template
 from pathlib import Path
 from typing import Dict, Union
+
+from jinja2 import Template
 
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.streams import GraphQLStream

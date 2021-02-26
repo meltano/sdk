@@ -1,8 +1,9 @@
 """Sample tap stream test for tap-google-analytics."""
 
-import datetime
 from pathlib import Path
 from typing import Iterable, Optional
+
+import pendulum
 
 from singer_sdk.streams import RESTStream
 from singer_sdk.authenticators import OAuthJWTAuthenticator
@@ -52,7 +53,7 @@ class SampleGoogleAnalyticsStream(RESTStream):
             request_def["dateRanges"] = [
                 {
                     "startDate": self.config.get("start_date"),
-                    "endDate": datetime.datetime.now(),
+                    "endDate": pendulum.datetime.now(),
                 }
             ]
         return {"reportRequests": [request_def]}

@@ -37,7 +37,7 @@ class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stre
         params = {}
         starting_datetime = self.get_starting_datetime(partition)
         if starting_datetime:
-            params.update({"start_date": starting_datetime})
+            params.update({"updated": starting_datetime})
         return params
 
 {% endif %}

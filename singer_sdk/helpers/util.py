@@ -5,7 +5,7 @@ import json
 from pathlib import Path, PurePath
 import pytz
 
-from datetime import datetime
+import pendulum
 from typing import Any, Dict, List, Optional, Union, cast
 
 
@@ -24,7 +24,7 @@ def read_json_file(path: Union[PurePath, str]) -> Dict[str, Any]:
 
 
 def utc_now():
-    return datetime.utcnow().replace(tzinfo=pytz.UTC)
+    return pendulum.utcnow()
 
 
 def get_catalog_entries(catalog_dict: dict) -> List[dict]:
