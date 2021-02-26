@@ -90,6 +90,25 @@ class Stream(metaclass=abc.ABCMeta):
                 )
 
     @property
+    def is_timestamp_replication_key(self) -> bool:
+        if not self.replication_key:
+            return False
+        type_dict = self.schema.get(self.replication_key)
+        if isinstance(type_dict, dict) and type_dict.get("format") == "date-time":
+            return True
+        return False
+
+    def get_starting_datetime() -> Optional[datetime.datetime]:
+        result: Optional[datetime.datetime] = None
+        if self.is_timestamp_replication_key:
+            state = self.get_stream_or_partition_state(partition)
+            if self.replication_key in state:
+                result = datetime.datetime.strptime(state[self.replication_key])
+        if result is None and "start_date" in self.config:
+            result = datetime.datetime.strptime(self.config.get("start_date"))
+        return result
+
+    @property
     def schema_filepath(self) -> Optional[Path]:
         """Return a path to a schema file for the stream or None if n/a."""
         return self._schema_filepath
