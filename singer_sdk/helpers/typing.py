@@ -94,7 +94,7 @@ class BooleanType(JSONTypeHelper):
 class IntegerType(JSONTypeHelper):
     @property
     def type_dict(self) -> dict:
-        return {"type": ["int"]}
+        return {"type": ["integer"]}
 
 
 class ComplexType(JSONTypeHelper):
