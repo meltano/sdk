@@ -119,15 +119,34 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             return True
         return False
 
-    def update_access_token(self):
-        """Update `access_token` along with: `last_refreshed` and `expires_in`."""
-        raise NotImplementedError
+    @property
+    def oauth_request_payload(self) -> dict:
+        """Returns the request body directly (OAuth) or encrypted (JWT)."""
+        return self.oauth_request_body
+
+    @property
+    def oauth_request_body(self) -> dict:
+        """Formatted body of the OAuth authorization request.
+        
+        Sample implementation:
+
+        ```py
+        @property
+        def oauth_request_body(self) -> dict:
+            return {
+                'grant_type': 'password',
+                'scope': 'https://api.powerbi.com',
+                'resource': 'https://analysis.windows.net/powerbi/api',
+                'client_id': self.config["client_id"],
+                'username': self.config.get("username", self.config["client_id"]),
+                'password': self.config["password"],
+            }
+        """
+        raise NotImplementedError("The `oauth_request_body` property was not defined in the subclass.")
 
     # Authentication and refresh
     def update_access_token(self):
         """Update `access_token` along with: `last_refreshed` and `expires_in`."""
-        # jwt_signing_key = jwt.jwk_from_pem(self.private_key)
-
         request_time = utc_now()
         auth_request_payload = self.oauth_request_payload
         token_response = requests.post(self.auth_endpoint, data=auth_request_payload)
