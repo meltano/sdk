@@ -149,9 +149,10 @@ class PluginBase(metaclass=abc.ABCMeta):
         """Return a tuple: (warnings: List[str], errors: List[str])."""
         warnings: List[str] = []
         errors: List[str] = []
-        for k in self.config.keys():
-            if k not in self.accepted_config_keys:
-                warnings.append(f"Unexpected config option found: {k}.")
+        if self.accepted_config_keys:
+            for k in self.config.keys():
+                if k not in self.accepted_config_keys:
+                    warnings.append(f"Unexpected config option found: {k}.")
         if self.required_config_options:
             required_set_options = self.required_config_options
             matched_any = False
