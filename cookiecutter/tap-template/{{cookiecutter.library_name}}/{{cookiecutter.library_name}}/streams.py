@@ -14,6 +14,7 @@ from singer_sdk.helpers.typing import (
     ComplexType,
     DateTimeType,
     IntegerType,
+    NumberType,
     PropertiesList,
     StringType,
 )

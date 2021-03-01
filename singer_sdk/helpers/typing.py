@@ -60,7 +60,7 @@ class JSONTypeHelper(object):
     def to_dict(self) -> dict:
         type_dict = self.type_dict
         if self.optional:
-            type_dict = _append_type(type_dict, "None")
+            type_dict = _append_type(type_dict, "null")
             type_dict["required"] = False
         else:
             type_dict["required"] = True
@@ -95,6 +95,12 @@ class IntegerType(JSONTypeHelper):
     @property
     def type_dict(self) -> dict:
         return {"type": ["integer"]}
+
+
+class NumberType(JSONTypeHelper):
+    @property
+    def type_dict(self) -> dict:
+        return {"type": ["number"]}
 
 
 class ComplexType(JSONTypeHelper):
