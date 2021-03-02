@@ -61,9 +61,6 @@ class JSONTypeHelper(object):
         type_dict = self.type_dict
         if self.optional:
             type_dict = _append_type(type_dict, "null")
-            type_dict["required"] = False
-        else:
-            type_dict["required"] = True
         return {self.name: type_dict}
 
     def to_json(self) -> str:
