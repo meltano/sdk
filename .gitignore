@@ -4,6 +4,10 @@
 !.secrets/README.md
 !.secrets/*.template
 
+# Ignore local output:
+
+.output
+
 # By default, ignore local IDE configs:
 .vscode
 
