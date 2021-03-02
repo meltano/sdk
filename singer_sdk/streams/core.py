@@ -75,8 +75,8 @@ class Stream(metaclass=abc.ABCMeta):
         self._config: dict = dict(tap.config)
         self._tap_state = tap.state
         self.forced_replication_method: Optional[str] = None
-        self.replication_key: Optional[str] = None
-        self.primary_keys: Optional[List[str]] = None
+        self._replication_key: Optional[str] = None
+        self._primary_keys: Optional[List[str]] = None
         self._schema_filepath: Optional[Path] = None
         self._schema: Optional[dict] = None
         if schema:
@@ -131,6 +131,26 @@ class Stream(metaclass=abc.ABCMeta):
                 "A valid schema object or filepath was not provided."
             )
         return self._schema
+
+    @property
+    def primary_keys(self) -> Optional[dict]:
+        if not self._primary_keys:
+            return None
+        return self._primary_keys
+
+    @primary_keys.setter
+    def primary_keys(self, new_value: List[str]):
+        self._primary_keys = new_value
+
+    @property
+    def replication_key(self) -> Optional[dict]:
+        if not self._replication_key:
+            return None
+        return self._replication_key
+
+    @replication_key.setter
+    def replication_key(self, new_value: List[str]):
+        self._replication_key = new_value
 
     @property
     def singer_metadata(self) -> dict:

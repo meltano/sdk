@@ -89,7 +89,7 @@ class IssuesStream(ProjectBasedStream):
     name = "issues"
     path = "/projects/{project_id}/issues?scope=all&updated_after={start_date}"
     primary_keys = ["id"]
-    replication_key = None
+    replication_key = "updated_at" # TODO: Validate this is valid for replication
     schema_filepath = SCHEMAS_DIR / "issues.json"
 
 

@@ -27,6 +27,7 @@ class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
 class CountriesStream(CountriesAPIStream):
 
     name = "countries"
+    primary_keys = ["code"]
     schema_filepath = "./singer_sdk/samples/sample_tap_countries/schemas/countries.json"
     query = """
         countries {
