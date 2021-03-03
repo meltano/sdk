@@ -3,6 +3,7 @@
 from singer_sdk.helpers.typing import (
     ArrayType,
     DateTimeType,
+    Property,
     PropertiesList,
     StringType,
 )
@@ -35,7 +36,7 @@ class SampleTapGitlab(Tap):
     name: str = PLUGIN_NAME
     config_jsonschema = PropertiesList(
         StringType("auth_token", required=True),
-        ArrayType("project_ids", StringType, required=True),
+        Property("project_ids", ArrayType(StringType), required=True),
         DateTimeType("start_date", required=True),
         StringType("api_url"),
     ).to_dict()
