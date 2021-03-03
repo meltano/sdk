@@ -6,6 +6,7 @@ from singer_sdk.helpers.typing import (
     ArrayType,
     DateTimeType,
     IntegerType,
+    Property,
     PropertiesList,
     StringType,
 )
@@ -130,7 +131,7 @@ class EpicsStream(ProjectBasedStream):
         DateTimeType("due_date"),
         DateTimeType("created_at"),
         DateTimeType("updated_at"),
-        ArrayType("labels", wrapped_type=StringType),
+        Property("labels", ArrayType(StringType)),
         IntegerType("upvotes"),
         IntegerType("downvotes"),
     ).to_dict()

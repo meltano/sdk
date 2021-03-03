@@ -12,6 +12,7 @@ from singer_sdk.helpers.typing import (
     IntegerType,
     NumberType,
     PropertiesList,
+    Property,
     StringType,
 )
 
@@ -37,7 +38,7 @@ class Tap{{ cookiecutter.source_name }}(Tap):
     name = "{{ cookiecutter.tap_id }}"
     config_jsonschema = PropertiesList(
         StringType("auth_token", required=True),
-        ArrayType("project_ids", StringType, required=True),
+        Property("project_ids", ArrayType(StringType), required=True),
         DateTimeType("start_date"),
         StringType("api_url"),
     ).to_dict()
