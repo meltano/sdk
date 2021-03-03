@@ -4,15 +4,17 @@ Usage example:
 
 ```py
     jsonschema = PropertiesList(
-        IntegerType("id", required=True),
-        StringType("name"),
-        ArrayType("tags", StringType),
-        DateTimeType("updated_on"),
-        BooleanType("is_deleted"),
-        ComplexType(
+        Property("id", IntegerType, required=True),
+        Property("name", StringType,
+        Property("tags", ArrayType(StringType)),
+        Property("updated_on", DateTimeType),
+        Property("is_deleted", BooleanType,
+        Property(
             "author",
-            StringType("id"),
-            StringType("name"),
+            ComplexType(
+                Property("id", StringType),
+                Property("name", StringType),
+            )
         ),
     ).to_json()
 ```
@@ -27,6 +29,8 @@ Note:
 import copy
 import json
 from typing import Any, Iterable, Tuple
+
+from singer_sdk.helpers.classproperty import classproperty
 
 
 def _append_type(type_dict: dict, new_type: str) -> dict:
@@ -53,8 +57,8 @@ class JSONTypeHelper(object):
         self.name = name
         self.optional = not required
 
-    @property
-    def type_dict(self) -> dict:
+    @classproperty
+    def type_dict(cls) -> dict:
         raise NotImplementedError()
 
     def to_dict(self) -> dict:
@@ -68,8 +72,8 @@ class JSONTypeHelper(object):
 
 
 class DateTimeType(JSONTypeHelper):
-    @property
-    def type_dict(self) -> dict:
+    @classproperty
+    def type_dict(cls) -> dict:
         return {
             "type": ["string"],
             "format": "date-time",
@@ -77,36 +81,36 @@ class DateTimeType(JSONTypeHelper):
 
 
 class StringType(JSONTypeHelper):
-    @property
-    def type_dict(self) -> dict:
+    @classproperty
+    def type_dict(cls) -> dict:
         return {"type": ["string"]}
 
 
 class BooleanType(JSONTypeHelper):
-    @property
-    def type_dict(self) -> dict:
+    @classproperty
+    def type_dict(cls) -> dict:
         return {"type": ["boolean"]}
 
 
 class IntegerType(JSONTypeHelper):
-    @property
-    def type_dict(self) -> dict:
+    @classproperty
+    def type_dict(cls) -> dict:
         return {"type": ["integer"]}
 
 
 class NumberType(JSONTypeHelper):
-    @property
-    def type_dict(self) -> dict:
+    @classproperty
+    def type_dict(cls) -> dict:
         return {"type": ["number"]}
 
 
 class ComplexType(JSONTypeHelper):
-    """Datetime type."""
+    """ComplexType. This is deprecated in favor of ObjectType."""
 
-    def __init__(self, name, *wrapped) -> None:
+    def __init__(self, name, *wrapped, required: bool = False) -> None:
         self.name = name
         self.wrapped = wrapped
-        self.optional = True
+        self.optional = not required
 
     @property
     def type_dict(self) -> dict:
@@ -122,15 +126,46 @@ class ComplexType(JSONTypeHelper):
 class ArrayType(JSONTypeHelper):
     """Datetime type."""
 
-    def __init__(self, name, wrapped_type, required: bool = False) -> None:
+    def __init__(self, wrapped_type, name: str = None, required: bool = False) -> None:
         self.name = name
         self.wrapped_type = wrapped_type
         self.optional = not required
 
     @property
     def type_dict(self) -> dict:
-        wrapped = self.wrapped_type(name=self.name)
-        return {"type": "array", "items": wrapped.type_dict}
+        return {"type": "array", "items": self.wrapped_type.type_dict}
+
+
+
+class ObjectType(JSONTypeHelper):
+    """Object type. This supercedes ComplexType."""
+
+    def __init__(self, *properties, required: bool = False) -> None:
+        self.wrapped = properties
+        self.optional = not required
+
+    @property
+    def type_dict(self) -> dict:
+        merged_props = {}
+        required = []
+        for w in self.wrapped:
+            merged_props.update(w.to_dict())
+            if not w.optional:
+                required.append(w.name)
+        return {"type": "object", "properties": merged_props, "required": required}
+
+
+class Property(JSONTypeHelper):
+    """Generic Property. Should be nested within a `PropertiesList` or `ComplexType`."""
+
+    def __init__(self, name, wrapped, required: bool = False) -> None:
+        self.name = name
+        self.wrapped = wrapped
+        self.optional = not required
+
+    @property
+    def type_dict(self) -> dict:
+        return self.wrapped.type_dict
 
 
 class PropertiesList(ComplexType):
