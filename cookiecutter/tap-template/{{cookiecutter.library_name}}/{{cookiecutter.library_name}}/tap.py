@@ -7,10 +7,10 @@ from singer_sdk import Tap, Stream
 from singer_sdk.helpers.typing import (
     ArrayType,
     BooleanType,
-    ComplexType,
     DateTimeType,
     IntegerType,
     NumberType,
+    ObjectType,
     PropertiesList,
     Property,
     StringType,
@@ -37,10 +37,10 @@ class Tap{{ cookiecutter.source_name }}(Tap):
 
     name = "{{ cookiecutter.tap_id }}"
     config_jsonschema = PropertiesList(
-        StringType("auth_token", required=True),
+        Property("auth_token", StringType, required=True),
         Property("project_ids", ArrayType(StringType), required=True),
-        DateTimeType("start_date"),
-        StringType("api_url"),
+        Property("start_date", DateTimeType),
+        Property("api_url", StringType),
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:

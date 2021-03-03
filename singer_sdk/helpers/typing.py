@@ -5,12 +5,12 @@ Usage example:
 ```py
     jsonschema = PropertiesList(
         Property("id", IntegerType, required=True),
-        Property("name", StringType,
+        Property("name", StringType),
         Property("tags", ArrayType(StringType)),
         Property("ratio", NumberType),
         Property("days_active", IntegerType),
         Property("updated_on", DateTimeType),
-        Property("is_deleted", BooleanType,
+        Property("is_deleted", BooleanType),
         Property(
             "author",
             Objectype(

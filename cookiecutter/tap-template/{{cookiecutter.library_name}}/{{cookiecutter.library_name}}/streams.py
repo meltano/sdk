@@ -11,11 +11,12 @@ from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator,
 from singer_sdk.helpers.typing import (
     ArrayType,
     BooleanType,
-    ComplexType,
     DateTimeType,
     IntegerType,
     NumberType,
+    ObjectType,
     PropertiesList,
+    Property,
     StringType,
 )
 
@@ -76,16 +77,18 @@ class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stre
 class StreamA(Tap{{ cookiecutter.source_name }}Stream):
     name = "users"
     schema = PropertiesList(
-        StringType("name"),
-        StringType("id"),
-        IntegerType("age"),
-        StringType("email"),
-        ComplexType(
+        Property("name", StringType),
+        Property("id", StringType),
+        Property("age", IntegerType),
+        Property("email", StringType),
+        Property(
             "address",
-            StringType("street"),
-            StringType("city"),
-            StringType("state"),
-            StringType("zip"),
+            ObjectType(
+                Property("street", StringType),
+                Property("city", StringType),
+                Property("state", StringType),
+                Property("zip", StringType),
+            )
         ),
     ).to_dict()
     primary_keys = ["id"]
@@ -109,9 +112,9 @@ class StreamA(Tap{{ cookiecutter.source_name }}Stream):
 class StreamB(Tap{{ cookiecutter.source_name }}Stream):
     name = "groups"
     schema = PropertiesList(
-        StringType("name"),
-        StringType("id"),
-        DateTimeType("modified"),
+        Property("name", StringType),
+        Property("id", StringType),
+        Property("modified", DateTimeType),
     ).to_dict()
     primary_keys = ["id"]
     replication_key = "modified"
@@ -133,14 +136,14 @@ class StreamA(Tap{{ cookiecutter.source_name }}Stream):
     primary_keys = ["id"]
     replication_key = None
     schema = PropertiesList(
-        StringType("name"),
-        StringType("id"),
-        IntegerType("age"),
-        StringType("email"),
-        StringType("street"),
-        StringType("city"),
-        StringType("state"),
-        StringType("zip"),
+        Property("name", StringType),
+        Property("id", StringType),
+        Property("age", IntegerType),
+        Property("email", StringType),
+        Property("street", StringType),
+        Property("city", StringType),
+        Property("state", StringType),
+        Property("zip", StringType),
     ).to_dict()
 
 
@@ -150,9 +153,9 @@ class StreamB(Tap{{ cookiecutter.source_name }}Stream):
     primary_keys = ["id"]
     replication_key = "modified"
     schema = PropertiesList(
-        StringType("name"),
-        StringType("id"),
-        DateTimeType("modified"),
+        Property("name", StringType),
+        Property("id", StringType),
+        Property("modified", DateTimeType),
     ).to_dict()
 {% endif %}
 {% endif %}
