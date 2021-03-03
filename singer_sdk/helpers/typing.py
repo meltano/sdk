@@ -11,9 +11,18 @@ Usage example:
         Property("is_deleted", BooleanType,
         Property(
             "author",
-            ComplexType(
+            Objectype(
                 Property("id", StringType),
                 Property("name", StringType),
+            )
+        ),
+        Property(
+            "groups",
+            ArrayType(
+                ObjectType(
+                    Property("id", StringType),
+                    Property("name", StringType),
+                )
             )
         ),
     ).to_json()
