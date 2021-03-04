@@ -1,7 +1,11 @@
 """Sample tap stream test for tap-gitlab."""
 
 import copy
+import requests
+
 from pathlib import Path
+from typing import Any, Dict, List, cast, Optional
+
 from singer_sdk.helpers.typing import (
     ArrayType,
     DateTimeType,
@@ -12,8 +16,6 @@ from singer_sdk.helpers.typing import (
 )
 from singer_sdk.helpers.state import get_stream_state_dict
 from singer_sdk.authenticators import SimpleAuthenticator
-from typing import Any, Dict, List, cast, Optional
-
 from singer_sdk.streams.rest import RESTStream
 
 SCHEMAS_DIR = Path("./singer_sdk/samples/sample_tap_gitlab/schemas")
