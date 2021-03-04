@@ -37,3 +37,5 @@ def test_gitlab_replication_keys():
         assert key_props_2 == expected_replication_key, (
             f"Incorrect 'replication_key' in catalog: ({key_props_2})\n\nCatalog entry was: {catalog_entry}"
             )
+        assert tap.streams[stream_name].is_timestamp_replication_key, "Failed to detect `is_timestamp_replication_key`"
+        assert tap.streams["commits"].is_timestamp_replication_key == False, "Failed to detect `is_timestamp_replication_key`"

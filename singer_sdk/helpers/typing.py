@@ -61,6 +61,25 @@ def _append_type(type_dict: dict, new_type: str) -> dict:
     return result
 
 
+def is_datetime_type(type_dict: dict) -> bool:
+    """Return True if JSON Schema type definition is a 'date-time' type.
+
+    Also returns True if 'date-time' is nested within an 'anyOf' type Array.
+    """
+    if not type_dict:
+        raise ValueError(f"Could not detect type from empty type_dict param.")
+    if "anyOf" in type_dict:
+        for type_dict in type_dict["anyOf"]:
+            if is_datetime_type(type_dict):
+                return True
+        return False
+    elif "type" in type_dict:
+        if type_dict.get("format") == "date-time":
+            return True
+        return False
+    raise ValueError(f"Could not detect type of replication key using schema '{type_dict}'")
+
+
 class JSONTypeHelper(object):
     """Type helper base class for JSONSchema types."""
 

@@ -42,6 +42,7 @@ import singer
 from singer import RecordMessage, SchemaMessage
 from singer.catalog import Catalog
 from singer.schema import Schema
+from singer_sdk.helpers.typing import is_datetime_type
 
 DEBUG_MODE = True
 
@@ -93,19 +94,24 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def is_timestamp_replication_key(self) -> bool:
+        """Return True if the stream uses a timestamp-based replication key.
+
+        Developers can override with `is_timestamp_replication_key = True` in 
+        order to force this value.
+        """
         if not self.replication_key:
             return False
-        type_dict = self.schema.get(self.replication_key)
-        if isinstance(type_dict, dict) and type_dict.get("format") == "date-time":
-            return True
-        return False
+        type_dict = self.schema.get("properties", {}).get(self.replication_key)
+        return is_datetime_type(type_dict)
 
     def get_starting_datetime(self, partition: Optional[dict]) -> Optional[datetime.datetime]:
+        """Return `start_date` config value, overriden by state if using timestamp replication."""
         result: Optional[datetime.datetime] = None
         if self.is_timestamp_replication_key:
             state = self.get_stream_or_partition_state(partition)
-            if self.replication_key in state:
-                result = pendulum.parse(state[self.replication_key])
+            replication_key = state.get("replication_key")
+            if replication_key and replication_key in state:
+                result = pendulum.parse(state[replication_key])
         if result is None and "start_date" in self.config:
             result = pendulum.parse(self.config.get("start_date"))
         return result
@@ -275,7 +281,7 @@ class Stream(metaclass=abc.ABCMeta):
                 state_dict.update(
                     {
                         "replication_key": self.replication_key,
-                        "replication_key_value": latest_record[self.replication_key],
+                        self.replication_key: latest_record[self.replication_key],
                     }
                 )
 
