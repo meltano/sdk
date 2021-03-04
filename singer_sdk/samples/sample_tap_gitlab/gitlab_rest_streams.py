@@ -40,21 +40,22 @@ class GitlabStream(RESTStream):
         return SimpleAuthenticator(stream=self, http_headers=http_headers)
 
     def get_url_params(self, partition: Optional[dict], next_page_token: Optional[Any] = None) -> Dict[str, Any]:
-        """Return a dictionary of values to be used in URL parameterization.
-        
-        If paging is supported, developers may override this method with specific paging logic.
-        """
+        """Return a dictionary of values to be used in URL parameterization."""
         state = self.get_stream_or_partition_state(partition)
         result = copy.deepcopy(state)
         result.update({"start_date": self.config.get("start_date")})
         result["page"] = next_page_token or 1
         return result
 
-    def get_next_page_token(self, response: requests.Response) -> Any:
+    def get_next_page_token(self, response: requests.Response, previous_token: Optional[Any] = None) -> Optional[Any]:
         """Return token for identifying next page or None if not applicable."""
         next_page_token = response.headers.get("X-Next-Page", None)
         if next_page_token:
             self.logger.info(f"Next page token retrieved: {next_page_token}")
+        if next_page_token and next_page_token == previous_token:
+            raise RuntimeError(
+                f"Loop detected in pagination. Pagination token {next_page_token} is identical to previous run."
+            )
         return next_page_token
 
 

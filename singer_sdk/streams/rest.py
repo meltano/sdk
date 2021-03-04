@@ -143,7 +143,10 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             resp = self._request_with_backoff(prepared_request)
             for row in self.parse_response(resp):
                 yield row
-            next_page_token = self.get_next_page_token(resp)
+            next_page_token = self.get_next_page_token(
+                response=resp,
+                previous_token=copy.deepcopy(next_page_token)
+            )
             # Cycle until get_next_page_token() no longer returns a value
             finished = not next_page_token
 
@@ -156,8 +159,8 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """
         return None
 
-    def get_next_page_token(self, response: requests.Response) -> Any:
-        """Return token for identifying next page or None if not applicable."""
+    def get_next_page_token(self, response: requests.Response, previous_token: Optional[Any] = None) -> Any:
+        """Return token for identifying next page or None if all records have been read."""
         next_page_token = response.headers.get("X-Next-Page", None)
         if next_page_token:
             self.logger.info(f"Next page token retrieved: {next_page_token}")
