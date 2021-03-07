@@ -7,10 +7,9 @@ license = "Apache v2"
 
 [tool.poetry.dependencies]
 python = "^3.6"
-singer-python = "5.9.0"
+pipelinewise-singer-python = "1.2.0"
 backoff = "1.8.0"
 pendulum = "1.2.0"
-pytz = "2018.4"
 python-dateutil = "<2.8.1,>=2.1"
 pyarrow = "^2.0.0"
 click = "^7.1.2"
