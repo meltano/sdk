@@ -8,7 +8,6 @@ license = "Apache v2"
 [tool.poetry.dependencies]
 python = "^3.6"
 requests = "^2.25.1"
-singer-python = "5.9.0"
 # Note: Until we clear the first non-prerelease, `singer-sdk` need to be pinned to a specific version.
 #       For a list of released versions: https://pypi.org/project/singer-sdk/#history
 #       To safely update the version number: `poetry add singer-sdk==0.0.2-dev.1068770959`

@@ -3,7 +3,6 @@
 from decimal import Decimal
 import json
 from pathlib import Path, PurePath
-import pytz
 
 import pendulum
 from typing import Any, Dict, List, Optional, Union, cast
