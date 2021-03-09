@@ -411,9 +411,9 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Overridable Methods
 
-    def apply_catalog(self, catalog_dict: dict,) -> None:
+    def apply_catalog(self, catalog_dict: dict) -> None:
         """Apply a catalog dict, updating any settings overridden within the catalog."""
-        catalog = Catalog(catalog_dict)
+        catalog = Catalog.from_dict(catalog_dict)
         catalog_entry: singer.CatalogEntry = catalog.get_stream(self.name)
         self.primary_keys = catalog_entry.key_properties
         self.replication_key = catalog_entry.replication_key
