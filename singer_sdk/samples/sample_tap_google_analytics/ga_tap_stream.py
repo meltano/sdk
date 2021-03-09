@@ -1,7 +1,7 @@
 """Sample tap stream test for tap-google-analytics."""
 
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Any, Dict
 
 import pendulum
 
@@ -37,9 +37,9 @@ class SampleGoogleAnalyticsStream(RESTStream):
             oauth_scopes=GA_OAUTH_SCOPES,
         )
 
-    def prepare_request_payload(self, partition: Optional[dict]) -> Optional[dict]:
+    def prepare_request_payload(self, partition: Optional[dict], next_page_token: Optional[Any] = None) -> Optional[dict]:
         """Prepare the data payload for the REST API request."""
-        params = self.get_url_params(partition)
+        params = self.get_url_params(partition, next_page_token)
         request_def = {
             "viewId": self.config["view_id"],
             "metrics": [{"expression": m} for m in self.metrics],

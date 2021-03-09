@@ -36,8 +36,11 @@ class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stre
 
     url_base = "https://api.mysample.com"
 
-    def get_url_params(self, partition: Optional[dict]) -> Dict[str, Any]:
-        """Return a dictionary of values to be used in URL parameterization."""
+    def get_url_params(self, partition: Optional[dict], next_page_token: Optional[Any] = None) -> Dict[str, Any]:
+        """Return a dictionary of values to be used in URL parameterization.
+        
+        If paging is supported, developers may override this method with specific paging logic.
+        """
         params = {}
         starting_datetime = self.get_starting_datetime(partition)
         if starting_datetime:
