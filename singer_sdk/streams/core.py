@@ -49,6 +49,10 @@ DEBUG_MODE = True
 # How many records to emit between sending state message updates
 STATE_MSG_FREQUENCY = 10 if DEBUG_MODE else 10000
 
+# Replication methods
+REPLICATION_FULL_TABLE = "FULL_TABLE"
+REPLICATION_INCREMENTAL = "INCREMENTAL"
+REPLICATION_LOG_BASED = "LOG_BASED"
 
 FactoryType = TypeVar("FactoryType", bound="Stream")
 
@@ -209,8 +213,8 @@ class Stream(metaclass=abc.ABCMeta):
         if self.forced_replication_method:
             return str(self.forced_replication_method)
         if self.replication_key:
-            return "INCREMENTAL"
-        return "FULL_TABLE"
+            return REPLICATION_INCREMENTAL
+        return REPLICATION_FULL_TABLE
 
     # State properties:
 
@@ -264,7 +268,7 @@ class Stream(metaclass=abc.ABCMeta):
         """Update state of the stream or partition with data from the provided record."""
         state_dict = self.get_stream_or_partition_state(partition)
         if latest_record:
-            if self.replication_method == "FULL_TABLE":
+            if self.replication_method == REPLICATION_FULL_TABLE:
                 max_pk_values = self._get_bookmark("max_pk_values")
                 if max_pk_values:
                     state_dict["last_pk_fetched"] = {
@@ -272,7 +276,7 @@ class Stream(metaclass=abc.ABCMeta):
                         for k, v in latest_record.items()
                         if k in (self.primary_keys or [])
                     }
-            elif self.replication_method in ["INCREMENTAL", "LOG_BASED"]:
+            elif self.replication_method in [REPLICATION_INCREMENTAL, REPLICATION_LOG_BASED]:
                 if not self.replication_key:
                     raise ValueError(
                         f"Could not detect replication key for '{self.name}' stream"
@@ -417,9 +421,9 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Overridable Methods
 
-    def apply_catalog(self, catalog_dict: dict,) -> None:
+    def apply_catalog(self, catalog_dict: dict) -> None:
         """Apply a catalog dict, updating any settings overridden within the catalog."""
-        catalog = Catalog(catalog_dict)
+        catalog = Catalog.from_dict(catalog_dict)
         catalog_entry: singer.CatalogEntry = catalog.get_stream(self.name)
         self.primary_keys = catalog_entry.key_properties
         self.replication_key = catalog_entry.replication_key
