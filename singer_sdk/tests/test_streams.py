@@ -30,7 +30,7 @@ class SimpleTestStream(Stream):
         yield {"id": 3, "value": "India"}
 
 
-class SimpleTapTest(Tap):
+class SimpleTestTap(Tap):
     """Test tap class."""
 
     state = None
@@ -40,7 +40,7 @@ class SimpleTapTest(Tap):
 
 
 @pytest.fixture
-def tap() -> SimpleTapTest:
+def tap() -> SimpleTestTap:
     """Tap instance."""
 
     catalog_dict = {
@@ -55,7 +55,7 @@ def tap() -> SimpleTapTest:
             }
         ]
     }
-    return SimpleTapTest(
+    return SimpleTestTap(
         config={},
         parse_env_config=False,
         catalog=catalog_dict,
@@ -63,12 +63,12 @@ def tap() -> SimpleTapTest:
 
 
 @pytest.fixture
-def stream(tap: SimpleTapTest) -> SimpleTestStream:
+def stream(tap: SimpleTestTap) -> SimpleTestStream:
     """Stream instance"""
     return tap.load_streams()[0]
 
 
-def test_stream_apply_catalog(tap: SimpleTapTest, stream: SimpleTestStream):
+def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
     """Applying a catalog to a stream should overwrite fields."""
 
     assert stream.primary_keys is None
