@@ -78,3 +78,18 @@ def test_tap_config_default_injection():
     }
 
     assert dict(tap.config) == expected_tap_config
+
+    config_dict = {
+        'host': 'gitlab.com',
+        'username': 'foo',
+        'password': 'bar',
+        'batch_size': 500
+    }
+
+    tap = ConfigTestTap(
+        config=config_dict,
+        parse_env_config=False,
+        catalog={}
+    )
+
+    assert dict(tap.config) == config_dict
