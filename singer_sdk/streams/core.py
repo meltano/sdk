@@ -100,7 +100,7 @@ class Stream(metaclass=abc.ABCMeta):
     def is_timestamp_replication_key(self) -> bool:
         """Return True if the stream uses a timestamp-based replication key.
 
-        Developers can override with `is_timestamp_replication_key = True` in 
+        Developers can override with `is_timestamp_replication_key = True` in
         order to force this value.
         """
         if not self.replication_key:
@@ -249,7 +249,7 @@ class Stream(metaclass=abc.ABCMeta):
     @property
     def partitions(self) -> Optional[List[dict]]:
         """Return a list of partition key dicts (if applicable), otherwise None.
-        
+
         Developers may override this property to provide a default partitions list.
         """
         state = read_stream_state(self.tap_state, self.name)
@@ -349,8 +349,11 @@ class Stream(metaclass=abc.ABCMeta):
                 rows_sent += 1
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
         # Reset interim bookmarks before emitting final STATE message:
+        except_keys = ["last_pk_fetched", "max_pk_values"]
+        if self.replication_method in [REPLICATION_INCREMENTAL, REPLICATION_LOG_BASED]:
+            except_keys.extend(['replication_key', self.replication_key])
         wipe_stream_state_keys(
-            self.tap_state, self.name, except_keys=["last_pk_fetched", "max_pk_values"],
+            self.tap_state, self.name, except_keys=except_keys,
         )
         self._write_state_message()
 
