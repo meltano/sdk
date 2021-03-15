@@ -1,4 +1,3 @@
-from __future__ import annotations
 from os import name
 
 from typing import Any, Dict, Iterable, List
