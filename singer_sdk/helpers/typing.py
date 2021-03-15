@@ -83,10 +83,9 @@ def is_datetime_type(type_dict: dict) -> bool:
 class JSONTypeHelper(object):
     """Type helper base class for JSONSchema types."""
 
-    def __init__(self, name: str, required: bool = False, default=None) -> None:
+    def __init__(self, name: str, required: bool = False) -> None:
         self.name = name
         self.optional = not required
-        self.default = default
 
     @classproperty
     def type_dict(cls) -> dict:
@@ -96,8 +95,6 @@ class JSONTypeHelper(object):
         type_dict = self.type_dict
         if self.optional:
             type_dict = _append_type(type_dict, "null")
-        if self.default:
-            type_dict.update({'default': self.default})
         return {self.name: type_dict}
 
     def to_json(self) -> str:
@@ -140,11 +137,10 @@ class NumberType(JSONTypeHelper):
 class ComplexType(JSONTypeHelper):
     """ComplexType. This is deprecated in favor of ObjectType."""
 
-    def __init__(self, name, *wrapped, required: bool = False, default=None) -> None:
+    def __init__(self, name, *wrapped, required: bool = False) -> None:
         self.name = name
         self.wrapped = wrapped
         self.optional = not required
-        self.default = default
 
     @property
     def type_dict(self) -> dict:
@@ -160,24 +156,23 @@ class ComplexType(JSONTypeHelper):
 class ArrayType(JSONTypeHelper):
     """Datetime type."""
 
-    def __init__(self, wrapped_type, name: str = None, required: bool = False, default=None) -> None:
+    def __init__(self, wrapped_type, name: str = None, required: bool = False) -> None:
         self.name = name
         self.wrapped_type = wrapped_type
         self.optional = not required
-        self.default = default
 
     @property
     def type_dict(self) -> dict:
         return {"type": "array", "items": self.wrapped_type.type_dict}
 
 
+
 class ObjectType(JSONTypeHelper):
     """Object type. This supercedes ComplexType."""
 
-    def __init__(self, *properties, required: bool = False, default=None) -> None:
+    def __init__(self, *properties, required: bool = False) -> None:
         self.wrapped = properties
         self.optional = not required
-        self.default = default
 
     @property
     def type_dict(self) -> dict:
@@ -193,11 +188,10 @@ class ObjectType(JSONTypeHelper):
 class Property(JSONTypeHelper):
     """Generic Property. Should be nested within a `PropertiesList` or `ComplexType`."""
 
-    def __init__(self, name, wrapped, required: bool = False, default = None) -> None:
+    def __init__(self, name, wrapped, required: bool = False) -> None:
         self.name = name
         self.wrapped = wrapped
         self.optional = not required
-        self.default = default
 
     @property
     def type_dict(self) -> dict:

@@ -7,7 +7,8 @@ import logging
 import os
 from types import MappingProxyType
 from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
-from jsonschema import validators, ValidationError, SchemaError, Draft4Validator
+from jsonschema import ValidationError, SchemaError
+from jsonschema import Draft4Validator as JSONSchemaValidator
 from pathlib import PurePath
 
 from singer_sdk.helpers.classproperty import classproperty
@@ -24,32 +25,6 @@ try:
 except ImportError:
     # Running on pre-3.8 Python; use importlib-metadata package
     import importlib_metadata as metadata  # type: ignore
-
-
-def extend_with_default(validator_class):
-    """ Fill in defaults,  before validating.
-
-    See https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance
-    for details.
-    """
-    validate_properties = validator_class.VALIDATORS["properties"]
-
-    def set_defaults(validator, properties, instance, schema):
-        for property, subschema in properties.items():
-            if "default" in subschema:
-                instance.setdefault(property, subschema["default"])
-
-        for error in validate_properties(
-            validator, properties, instance, schema,
-        ):
-            yield error
-
-    return validators.extend(
-        validator_class, {"properties" : set_defaults},
-    )
-
-
-JSONSchemaValidator = extend_with_default(Draft4Validator)
 
 
 class PluginBase(metaclass=abc.ABCMeta):
@@ -199,7 +174,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             try:
                 self.logger.debug(f"Running config validation using jsonschema: {self.config_jsonschema}")
                 validator = JSONSchemaValidator(self.config_jsonschema)
-                validator.validate(self._config)
+                validator.validate(dict(self.config))
             except (ValidationError, SchemaError) as ex:
                 errors.append(str(ex))
         if errors:
@@ -217,7 +192,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             raise RuntimeError(
                 f"One or more warnings ocurred during validation: {warnings}"
             )
-        self.logger.info(summary)
+        self.logger.info(summary)        
         return warnings, errors
 
     @classmethod
