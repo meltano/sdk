@@ -285,7 +285,7 @@ class Stream(metaclass=abc.ABCMeta):
                 state_dict.update(
                     {
                         "replication_key": self.replication_key,
-                        self.replication_key: latest_record[self.replication_key],
+                        self.replication_key: latest_record.get(self.replication_key, None),
                     }
                 )
 
@@ -317,6 +317,10 @@ class Stream(metaclass=abc.ABCMeta):
     def _sync_records(self, partition: Optional[dict] = None) -> None:
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
+        # Get replication key name
+        replication_keys = []
+        if self.replication_method in [REPLICATION_INCREMENTAL, REPLICATION_LOG_BASED]:
+            replication_keys.extend(['replication_key', self.replication_key])
         # Reset interim state keys from prior executions:
         wipe_stream_state_keys(
             self.tap_state,
@@ -326,7 +330,7 @@ class Stream(metaclass=abc.ABCMeta):
                 "max_pk_values",
                 "version",
                 "initial_full_table_complete",
-            ],
+            ] + replication_keys,
         )
         # Iterate through each returned record:
         if partition:
@@ -349,11 +353,11 @@ class Stream(metaclass=abc.ABCMeta):
                 rows_sent += 1
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
         # Reset interim bookmarks before emitting final STATE message:
-        except_keys = ["last_pk_fetched", "max_pk_values"]
-        if self.replication_method in [REPLICATION_INCREMENTAL, REPLICATION_LOG_BASED]:
-            except_keys.extend(['replication_key', self.replication_key])
         wipe_stream_state_keys(
-            self.tap_state, self.name, except_keys=except_keys,
+            self.tap_state, self.name,
+            except_keys=[
+                "last_pk_fetched", "max_pk_values"
+            ] + replication_keys,
         )
         self._write_state_message()
 
