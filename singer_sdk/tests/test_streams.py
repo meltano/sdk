@@ -1,7 +1,6 @@
-from __future__ import annotations
 from os import name
 
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Optional
 
 import pytest
 
@@ -24,7 +23,7 @@ class SimpleTestStream(Stream):
     def __init__(self, tap: Tap):
         super().__init__(tap, schema=self.schema, name=self.name)
 
-    def get_records(self, partition: dict | None) -> Iterable[Dict[str, Any]]:
+    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
         yield {"id": 1, "value": "Egypt"}
         yield {"id": 2, "value": "Germany"}
         yield {"id": 3, "value": "India"}
