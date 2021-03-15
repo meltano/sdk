@@ -2,9 +2,28 @@
 
 import json
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
-from singer_sdk.helpers.typing import ArrayType, ComplexType, ObjectType, StringType, PropertiesList, Property
+from singer_sdk.tap_base import Tap
+from singer_sdk.streams.core import Stream
+from singer_sdk.helpers.typing import (
+    ArrayType, ComplexType, ObjectType, StringType,
+    IntegerType, PropertiesList, Property
+)
+
+
+class ConfigTestTap(Tap):
+    """Test tap class."""
+
+    config_jsonschema = PropertiesList(
+        Property("host", StringType, required=True),
+        Property("username", StringType, required=True),
+        Property("password", StringType, required=True),
+        Property("batch_size", IntegerType, default=-1),
+    ).to_dict()
+
+    def discover_streams(self) -> List[Stream]:
+        return []
 
 
 def test_nested_complex_objects():
@@ -23,3 +42,54 @@ def test_nested_complex_objects():
         )
     )
     test2b = test2a.to_dict()
+
+
+def test_default_value():
+    prop = Property(
+        'test_property', StringType, default="test_property_value"
+    )
+    assert prop.to_dict() == {
+        'test_property': {
+            'type': ['string', 'null'],
+            'default': 'test_property_value'
+        }
+    }
+
+
+def test_tap_config_default_injection():
+
+    config_dict = {
+        'host': 'gitlab.com',
+        'username': 'foo',
+        'password': 'bar'
+    }
+
+    tap = ConfigTestTap(
+        config=config_dict,
+        parse_env_config=False,
+        catalog={}
+    )
+
+    expected_tap_config = {
+        'host': 'gitlab.com',
+        'username': 'foo',
+        'password': 'bar',
+        'batch_size': -1
+    }
+
+    assert dict(tap.config) == expected_tap_config
+
+    config_dict = {
+        'host': 'gitlab.com',
+        'username': 'foo',
+        'password': 'bar',
+        'batch_size': 500
+    }
+
+    tap = ConfigTestTap(
+        config=config_dict,
+        parse_env_config=False,
+        catalog={}
+    )
+
+    assert dict(tap.config) == config_dict
