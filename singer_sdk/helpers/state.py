@@ -101,5 +101,6 @@ def wipe_stream_state_keys(
         ]
     wipe_keys = wipe_keys or []
     for wipe_key in wipe_keys:
-        state_dict.pop(wipe_key)
+        if wipe_key in state:
+            state_dict.pop(wipe_key)
     return

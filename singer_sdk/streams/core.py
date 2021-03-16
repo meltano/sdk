@@ -290,7 +290,9 @@ class Stream(metaclass=abc.ABCMeta):
                 state_dict.update(
                     {
                         "replication_key": self.replication_key,
-                        self.replication_key: latest_record[self.replication_key],
+                        self.replication_key: latest_record.get(
+                            self.replication_key, None
+                        ),
                     }
                 )
 
@@ -326,7 +328,7 @@ class Stream(metaclass=abc.ABCMeta):
         wipe_stream_state_keys(
             self.tap_state,
             self.name,
-            except_keys=[
+            wipe_keys=[
                 "last_pk_fetched",
                 "max_pk_values",
                 "version",
@@ -357,7 +359,7 @@ class Stream(metaclass=abc.ABCMeta):
         wipe_stream_state_keys(
             self.tap_state,
             self.name,
-            except_keys=["last_pk_fetched", "max_pk_values"],
+            wipe_keys=["last_pk_fetched", "max_pk_values"],
         )
         self._write_state_message()
 
