@@ -162,7 +162,7 @@ class ObjectType(JSONTypeHelper):
     """Object type, which wraps one or more named properties."""
 
     def __init__(self, *properties) -> None:
-        self.wrapped: List[Property] = properties
+        self.wrapped: List[Property] = list(properties)
 
     @property
     def type_dict(self) -> dict:
