@@ -37,7 +37,9 @@ class SampleGoogleAnalyticsStream(RESTStream):
             oauth_scopes=GA_OAUTH_SCOPES,
         )
 
-    def prepare_request_payload(self, partition: Optional[dict], next_page_token: Optional[Any] = None) -> Optional[dict]:
+    def prepare_request_payload(
+        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+    ) -> Optional[dict]:
         """Prepare the data payload for the REST API request."""
         params = self.get_url_params(partition, next_page_token)
         request_def = {

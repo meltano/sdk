@@ -28,7 +28,12 @@ before_script:
 
 test_and_deploy:
   script:
-    - poetry run pytest
+    - |
+      echo "Run python tests..."
+      poetry run pytest
+    - |
+      echo "Run pything linter..."
+      poetry run mypy singer_sdk || echo "Ignoring failures..."
     - |
       echo "Publishing to PyPi..."
       if [[ "$BRANCH_NAME" == *main ]]

@@ -1,5 +1,6 @@
 """Defines the `classproperty` decorator."""
 
+
 class classproperty(property):
     def __get__(self, obj, objtype=None):
         return super(classproperty, self).__get__(objtype)

@@ -6,4 +6,10 @@ ACCEPTED_CONFIG_OPTIONS = [
     "client_email",
     "private_key",
 ]
-REQUIRED_CONFIG_SETS = [["view_id", "client_email", "private_key",]]
+REQUIRED_CONFIG_SETS = [
+    [
+        "view_id",
+        "client_email",
+        "private_key",
+    ]
+]

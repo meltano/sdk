@@ -8,13 +8,12 @@ from singer_sdk.samples.sample_tap_google_analytics.ga_tap import (
     SampleTapGoogleAnalytics,
 )
 
-CONFIG_FILE = "singer_sdk/tests/.secrets/google-analytics-config.json"
+CONFIG_FILE = "singer_sdk/tests/external/.secrets/google-analytics-config.json"
 
 
-def test_ga_sync_sample():
+def test_tap_class():
     """Test class creation."""
     config: Optional[dict] = None
     if Path(CONFIG_FILE).exists():
         config = json.loads(Path(CONFIG_FILE).read_text())
-    tap = SampleTapGoogleAnalytics(config=config)
-    tap.sync_all()
+    _ = SampleTapGoogleAnalytics(config=config)

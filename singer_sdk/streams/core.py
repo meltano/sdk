@@ -108,8 +108,10 @@ class Stream(metaclass=abc.ABCMeta):
         type_dict = self.schema.get("properties", {}).get(self.replication_key)
         return is_datetime_type(type_dict)
 
-    def get_starting_datetime(self, partition: Optional[dict]) -> Optional[datetime.datetime]:
-        """Return `start_date` config value, overriden by state if using timestamp replication."""
+    def get_starting_datetime(
+        self, partition: Optional[dict]
+    ) -> Optional[datetime.datetime]:
+        """Return `start_date` config, or state if using timestamp replication."""
         result: Optional[datetime.datetime] = None
         if self.is_timestamp_replication_key:
             state = self.get_stream_or_partition_state(partition)
@@ -227,7 +229,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._tap_state
 
     def get_stream_or_partition_state(self, partition: Optional[dict]) -> dict:
-        """If partition is provided, return the partition state. Otherwise, return the stream state."""
+        """Return partition state if applicable; else return stream state."""
         if partition:
             return self.get_partition_state(partition)
         return self.stream_state
@@ -276,7 +278,10 @@ class Stream(metaclass=abc.ABCMeta):
                         for k, v in latest_record.items()
                         if k in (self.primary_keys or [])
                     }
-            elif self.replication_method in [REPLICATION_INCREMENTAL, REPLICATION_LOG_BASED]:
+            elif self.replication_method in [
+                REPLICATION_INCREMENTAL,
+                REPLICATION_LOG_BASED,
+            ]:
                 if not self.replication_key:
                     raise ValueError(
                         f"Could not detect replication key for '{self.name}' stream"
@@ -285,7 +290,9 @@ class Stream(metaclass=abc.ABCMeta):
                 state_dict.update(
                     {
                         "replication_key": self.replication_key,
-                        self.replication_key: latest_record.get(self.replication_key, None),
+                        self.replication_key: latest_record.get(
+                            self.replication_key, None
+                        ),
                     }
                 )
 
@@ -326,7 +333,7 @@ class Stream(metaclass=abc.ABCMeta):
                 "max_pk_values",
                 "version",
                 "initial_full_table_complete",
-            ]
+            ],
         )
         # Iterate through each returned record:
         if partition:
@@ -350,8 +357,9 @@ class Stream(metaclass=abc.ABCMeta):
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
         # Reset interim bookmarks before emitting final STATE message:
         wipe_stream_state_keys(
-            self.tap_state, self.name,
-            wipe_keys=["last_pk_fetched", "max_pk_values"]
+            self.tap_state,
+            self.name,
+            wipe_keys=["last_pk_fetched", "max_pk_values"],
         )
         self._write_state_message()
 
