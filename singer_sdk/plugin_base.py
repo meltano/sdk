@@ -209,7 +209,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             try:
                 self.logger.debug(
                     f"Running config validation using jsonschema: "
-                    str(self.config_jsonschema)
+                    + str(self.config_jsonschema)
                 )
                 validator = JSONSchemaValidator(self.config_jsonschema)
                 validator.validate(self._config)
