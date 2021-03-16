@@ -1,7 +1,6 @@
 """Sample tap test for tap-parquet."""
 
 from typing import List
-from singer.schema import Schema
 
 from singer_sdk import Tap, Stream
 from singer_sdk.samples.sample_tap_parquet.parquet_tap_stream import (
@@ -12,8 +11,6 @@ from singer_sdk.helpers.typing import (
     PropertiesList,
     Property,
     StringType,
-    DateTimeType,
-    BooleanType,
 )
 
 

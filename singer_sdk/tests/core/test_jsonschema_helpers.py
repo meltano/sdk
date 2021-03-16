@@ -1,8 +1,6 @@
 """Test sample sync."""
 
-import json
-from pathlib import Path
-from typing import Optional, List
+from typing import List
 
 from singer_sdk.tap_base import Tap
 from singer_sdk.streams.core import Stream
@@ -46,6 +44,7 @@ def test_nested_complex_objects():
         ),
     )
     test2b = test2a.to_dict()
+    assert test1a and test1b and test2a and test2b
 
 
 def test_default_value():

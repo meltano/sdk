@@ -34,10 +34,8 @@ class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
     name: str = "sample-plugin-name"
-    accepted_config_keys: List[str] = []
-    protected_config_keys: List[str] = []
-    required_config_options: Optional[List[List[str]]] = [[]]
     config_jsonschema: Optional[dict] = None
+    protected_config_keys: List[str] = []
 
     _config: dict
 
@@ -158,31 +156,10 @@ class PluginBase(metaclass=abc.ABCMeta):
         """Return a tuple: (warnings: List[str], errors: List[str])."""
         warnings: List[str] = []
         errors: List[str] = []
-        if self.accepted_config_keys:
-            for k in self.config.keys():
-                if k not in self.accepted_config_keys:
-                    warnings.append(f"Unexpected config option found: {k}.")
-        if self.required_config_options:
-            required_set_options = self.required_config_options
-            matched_any = False
-            missing: List[List[str]] = []
-            for required_set in required_set_options:
-                if all([x in self.config.keys() for x in required_set]):
-                    matched_any = True
-                else:
-                    missing.append(
-                        [x for x in required_set if x not in self.config.keys()]
-                    )
-            if not matched_any:
-                errors.append(
-                    "One or more required config options are missing. "
-                    "Please complete one or more of the following sets: "
-                    f"{str(missing)}"
-                )
         if self.config_jsonschema:
             try:
                 self.logger.debug(
-                    f"Running config validation using jsonschema: "
+                    "Running config validation using jsonschema: "
                     + str(self.config_jsonschema)
                 )
                 validator = JSONSchemaValidator(self.config_jsonschema)
