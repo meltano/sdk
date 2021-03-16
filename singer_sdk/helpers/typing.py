@@ -38,9 +38,8 @@ Note:
 """
 
 import copy
-import json
 from jsonschema import validators
-from typing import Any, Iterable, Tuple
+from typing import Iterable, List, Tuple
 
 from singer_sdk.helpers.classproperty import classproperty
 
@@ -68,7 +67,7 @@ def is_datetime_type(type_dict: dict) -> bool:
     Also returns True if 'date-time' is nested within an 'anyOf' type Array.
     """
     if not type_dict:
-        raise ValueError(f"Could not detect type from empty type_dict param.")
+        raise ValueError("Could not detect type from empty type_dict param.")
     if "anyOf" in type_dict:
         for type_dict in type_dict["anyOf"]:
             if is_datetime_type(type_dict):
@@ -86,7 +85,7 @@ def is_datetime_type(type_dict: dict) -> bool:
 def extend_with_default(validator_class):
     """Fill in defaults,  before validating.
 
-    See https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance
+    See https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance  # noqa
     for details.
     """
     validate_properties = validator_class.VALIDATORS["properties"]
@@ -191,7 +190,7 @@ class ObjectType(JSONTypeHelper):
     """Object type, which wraps one or more named properties."""
 
     def __init__(self, *properties) -> None:
-        self.wrapped: List[Property] = properties
+        self.wrapped: List[Property] = list(properties)
 
     @property
     def type_dict(self) -> dict:

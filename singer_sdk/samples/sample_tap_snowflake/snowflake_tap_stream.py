@@ -1,6 +1,6 @@
 """Sample tap stream test for tap-snowflake."""
 
-from typing import Iterable, List, Optional, Tuple, Union
+from typing import Iterable, List, Optional, Union
 from snowflake import connector
 
 from singer_sdk.helpers.classproperty import classproperty

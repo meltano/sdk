@@ -9,7 +9,6 @@ See the online explorer and query builder here:
 import abc
 from pathlib import Path
 
-from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.streams.graphql import GraphQLStream
 
 SCHEMAS_DIR = Path("./singer_sdk/samples/sample_tap_countries/schemas")

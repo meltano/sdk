@@ -1,7 +1,7 @@
 """Abstract base class for API-type streams."""
 
 import abc
-from typing import Iterable, Optional, Any, Dict
+from typing import Iterable, Optional, Any
 
 from singer_sdk.streams.rest import RESTStream
 
@@ -24,7 +24,7 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
             query = self.query
         request_data = {
             "query": "query { "
-            + (" ".join([l.strip() for l in query.splitlines()]))
+            + (" ".join([line.strip() for line in query.splitlines()]))
             + " }",
             "variables": params,
         }

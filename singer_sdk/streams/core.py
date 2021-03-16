@@ -10,14 +10,12 @@ import pendulum
 from singer import metadata
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
-from singer_sdk.helpers.secrets import SecretString
 from singer_sdk.helpers.util import get_property_schema, is_boolean_type
 from singer_sdk.helpers.state import (
     get_stream_state_dict,
     read_stream_state,
     wipe_stream_state_keys,
 )
-import time
 from functools import lru_cache
 from os import PathLike
 from pathlib import Path
@@ -267,7 +265,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _increment_stream_state(
         self, latest_record: Dict[str, Any], *, partition: Optional[dict] = None
     ):
-        """Update state of the stream or partition with data from the provided record."""
+        """Update state of stream or partition with data from the provided record."""
         state_dict = self.get_stream_or_partition_state(partition)
         if latest_record:
             if self.replication_method == REPLICATION_FULL_TABLE:
@@ -372,12 +370,15 @@ class Stream(metaclass=abc.ABCMeta):
             "not found in catalog schema. Ignoring."
         )
 
-    def _conform_record_data_types(self, row: Dict[str, Any]) -> RecordMessage:
+    def _conform_record_data_types(  # noqa: C901
+        self, row: Dict[str, Any]
+    ) -> RecordMessage:
         """Translate values in record dictionary to singer-compatible data types.
 
         Any property names not found in the schema catalog will be removed, and a
         warning will be logged exactly once per unmapped property name.
         """
+
         rec: Dict[str, Any] = {}
         for property_name, elem in row.items():
             property_schema = get_property_schema(self.schema or {}, property_name)
