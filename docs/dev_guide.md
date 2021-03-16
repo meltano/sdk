@@ -51,8 +51,7 @@ _To create a tap class, follow these steps:_
 1. Map your Connection class to the `_conn` type.
 2. Override tap config:
    1. `name` - What to call your tap (for example, `tap-best-ever`)
-   2. `accepted_config_keys` - A list of all config options that this tap will accept.
-   3. `required_config_options` - (Optional.) One or more required sets of options.
+   2. `config_jsonschema` - A JSON Schema object defining the config options that this tap will accept.
 3. Override the `discover_streams` method.
 
 ## Step 3: Write the stream class

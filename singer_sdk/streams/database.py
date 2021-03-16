@@ -12,7 +12,6 @@ from singer_sdk.helpers.util import (
     get_catalog_entry_schema,
 )
 from singer_sdk.helpers.classproperty import classproperty
-from singer_sdk.helpers.util import read_json_file
 from singer_sdk.exceptions import TapStreamConnectionFailure
 from typing import Any, Dict, Iterable, List, Optional, Tuple, TypeVar, Union, cast
 
@@ -311,7 +310,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
     @classmethod
     def log_backoff_attempt(cls, details):
         """Log backoff attempts used by stream retry_pattern()."""
-        self.logger.info(
+        cls.logger.info(
             "Error communicating with source, "
             f"triggering backoff: {details.get('tries')} try"
         )

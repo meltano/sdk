@@ -202,5 +202,5 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             private_key = self.private_key
         return {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
-            "assertion": jwt.encode(self.oauth_request_body, self.private_key, "RS256"),
+            "assertion": jwt.encode(self.oauth_request_body, private_key, "RS256"),
         }

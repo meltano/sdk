@@ -5,14 +5,10 @@
 """
 
 from pathlib import Path
-from typing import Dict, Union
-
 from jinja2 import Template
 
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.streams import GraphQLStream
-
-from singer_sdk.samples.sample_tap_google_analytics.ga_globals import PLUGIN_NAME
 
 
 SITE_URL = "https://gitlab.com/graphql"
