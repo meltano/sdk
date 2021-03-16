@@ -7,12 +7,13 @@ import logging
 import os
 from types import MappingProxyType
 from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
-from jsonschema import validators, ValidationError, SchemaError, Draft4Validator
+from jsonschema import ValidationError, SchemaError, Draft4Validator
 from pathlib import PurePath
 
 from singer_sdk.helpers.classproperty import classproperty
 from singer_sdk.helpers.util import read_json_file
 from singer_sdk.helpers.secrets import is_common_secret_key, SecretString
+from singer_sdk.helpers.typing import extend_with_default
 
 import click
 
@@ -24,33 +25,6 @@ try:
 except ImportError:
     # Running on pre-3.8 Python; use importlib-metadata package
     import importlib_metadata as metadata  # type: ignore
-
-
-def extend_with_default(validator_class):
-    """Fill in defaults,  before validating.
-
-    See https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance  # noqa
-    for details.
-    """
-    validate_properties = validator_class.VALIDATORS["properties"]
-
-    def set_defaults(validator, properties, instance, schema):
-        for property, subschema in properties.items():
-            if "default" in subschema:
-                instance.setdefault(property, subschema["default"])
-
-        for error in validate_properties(
-            validator,
-            properties,
-            instance,
-            schema,
-        ):
-            yield error
-
-    return validators.extend(
-        validator_class,
-        {"properties": set_defaults},
-    )
 
 
 JSONSchemaValidator = extend_with_default(Draft4Validator)

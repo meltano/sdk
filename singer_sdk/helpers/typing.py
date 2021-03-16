@@ -38,7 +38,8 @@ Note:
 """
 
 import copy
-from typing import Iterable, Tuple, List
+from jsonschema import validators
+from typing import Iterable, List, Tuple
 
 from singer_sdk.helpers.classproperty import classproperty
 
@@ -78,6 +79,33 @@ def is_datetime_type(type_dict: dict) -> bool:
         return False
     raise ValueError(
         f"Could not detect type of replication key using schema '{type_dict}'"
+    )
+
+
+def extend_with_default(validator_class):
+    """Fill in defaults,  before validating.
+
+    See https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance  # noqa
+    for details.
+    """
+    validate_properties = validator_class.VALIDATORS["properties"]
+
+    def set_defaults(validator, properties, instance, schema):
+        for property, subschema in properties.items():
+            if "default" in subschema:
+                instance.setdefault(property, subschema["default"])
+
+        for error in validate_properties(
+            validator,
+            properties,
+            instance,
+            schema,
+        ):
+            yield error
+
+    return validators.extend(
+        validator_class,
+        {"properties": set_defaults},
     )
 
 
