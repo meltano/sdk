@@ -27,7 +27,7 @@ Usage example:
                 )
             )
         ),
-    ).to_json()
+    ).to_dict()
 ```
 
 Note:
@@ -87,8 +87,8 @@ class JSONTypeHelper(object):
     def type_dict(cls) -> dict:
         raise NotImplementedError()
 
-    def to_json(self) -> str:
-        return json.dumps(self.to_dict(), indent=2)
+    def to_dict(self) -> dict:
+        return self.type_dict
 
 
 class DateTimeType(JSONTypeHelper):
@@ -135,23 +135,6 @@ class ArrayType(JSONTypeHelper):
         return {"type": "array", "items": self.wrapped_type.type_dict}
 
 
-class ObjectType(JSONTypeHelper):
-    """Object type, which wraps one or more named properties."""
-
-    def __init__(self, *properties) -> None:
-        self.wrapped = properties
-
-    @property
-    def type_dict(self) -> dict:
-        merged_props = {}
-        required = []
-        for w in self.wrapped:
-            merged_props.update(w.to_dict())
-            if not w.optional:
-                required.append(w.name)
-        return {"type": "object", "properties": merged_props, "required": required}
-
-
 class Property(JSONTypeHelper):
     """Generic Property. Should be nested within a `PropertiesList`."""
 
@@ -161,6 +144,10 @@ class Property(JSONTypeHelper):
         self.optional = not required
         self.default = default
 
+    @property
+    def type_dict(self) -> dict:
+        return self.wrapped.type_dict
+
     def to_dict(self) -> dict:
         type_dict = self.type_dict
         if self.optional:
@@ -169,15 +156,12 @@ class Property(JSONTypeHelper):
             type_dict.update({'default': self.default})
         return {self.name: type_dict}
 
-    @property
-    def type_dict(self) -> dict:
-        return self.wrapped.type_dict
 
+class ObjectType(JSONTypeHelper):
+    """Object type, which wraps one or more named properties."""
 
-class PropertiesList(ObjectType):
-
-    def __init__(self, *wrapped) -> None:
-        self.wrapped = wrapped
+    def __init__(self, *properties) -> None:
+        self.wrapped: List[Property] = properties
 
     @property
     def type_dict(self) -> dict:
@@ -189,13 +173,9 @@ class PropertiesList(ObjectType):
                 required.append(w.name)
         return {"type": "object", "properties": merged_props, "required": required}
 
-    @property
-    def type_dict(self) -> dict:
-        # return super().type_dict["properties"]
-        return super().type_dict
 
-    def to_dict(self) -> dict:
-        return self.type_dict
+class PropertiesList(ObjectType):
+    """Properties list. A convenience wrapper around the ObjectType class."""
 
-    def items(self) -> Iterable[Tuple[str, Any]]:
-        return self.to_dict().items()
+    def items(self) -> Iterable[Tuple[str, Property]]:
+        return [(p.name, p) for p in self.wrapped]
