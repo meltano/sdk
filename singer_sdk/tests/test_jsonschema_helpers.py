@@ -7,8 +7,12 @@ from typing import Optional, List
 from singer_sdk.tap_base import Tap
 from singer_sdk.streams.core import Stream
 from singer_sdk.helpers.typing import (
-    ArrayType, ComplexType, ObjectType, StringType,
-    IntegerType, PropertiesList, Property
+    ArrayType,
+    ObjectType,
+    StringType,
+    IntegerType,
+    PropertiesList,
+    Property,
 )
 
 
@@ -27,9 +31,9 @@ class ConfigTestTap(Tap):
 
 
 def test_nested_complex_objects():
-    test1a = ArrayType(
-        StringType,
-        name="Datasets",
+    test1a = Property(
+        "Datasets",
+        ArrayType(StringType),
     )
     test1b = test1a.to_dict()
     test2a = Property(

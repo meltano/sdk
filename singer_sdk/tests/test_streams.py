@@ -4,7 +4,7 @@ from typing import Any, Dict, Iterable, List, Optional
 
 import pytest
 
-from singer_sdk.helpers.typing import IntegerType, PropertiesList, StringType
+from singer_sdk.helpers.typing import IntegerType, PropertiesList, Property, StringType
 from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMENTAL, Stream
 from singer_sdk.tap_base import Tap
 
@@ -14,9 +14,9 @@ class SimpleTestStream(Stream):
 
     name = "test"
     schema = PropertiesList(
-        IntegerType("id", required=True),
-        StringType("value", required=True),
-        StringType("updatedAt", required=True),
+        Property("id", IntegerType, required=True),
+        Property("value", StringType, required=True),
+        Property("updatedAt", StringType, required=True),
     ).to_dict()
     replication_key = ["updatedAt"]
 
