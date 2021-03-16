@@ -29,7 +29,7 @@ except ImportError:
 def extend_with_default(validator_class):
     """Fill in defaults,  before validating.
 
-    See https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance
+    See https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance  # noqa
     for details.
     """
     validate_properties = validator_class.VALIDATORS["properties"]
@@ -208,7 +208,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         if self.config_jsonschema:
             try:
                 self.logger.debug(
-                    f"Running config validation using jsonschema: "
+                    "Running config validation using jsonschema: "
                     + str(self.config_jsonschema)
                 )
                 validator = JSONSchemaValidator(self.config_jsonschema)
