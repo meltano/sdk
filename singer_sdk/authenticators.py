@@ -128,7 +128,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
     @property
     def oauth_request_body(self) -> dict:
         """Formatted body of the OAuth authorization request.
-        
+
         Sample implementation:
 
         ```py
@@ -143,7 +143,9 @@ class OAuthAuthenticator(APIAuthenticatorBase):
                 'password': self.config["password"],
             }
         """
-        raise NotImplementedError("The `oauth_request_body` property was not defined in the subclass.")
+        raise NotImplementedError(
+            "The `oauth_request_body` property was not defined in the subclass."
+        )
 
     # Authentication and refresh
     def update_access_token(self):
@@ -155,9 +157,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             token_response.raise_for_status()
             self.logger.info("OAuth authorization attempt was successful.")
         except Exception as ex:
-            # self.logging.exception(f"Failed OAuth. Payload was '{auth_request_payload}'")
             raise RuntimeError(
-                f"Failed OAuth login attempt, response was '{token_response.json()}'. {ex}"
+                f"Failed OAuth login, response was '{token_response.json()}'. {ex}"
             )
         token_json = token_response.json()
         self.access_token = token_json["access_token"]

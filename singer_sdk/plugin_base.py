@@ -27,7 +27,7 @@ except ImportError:
 
 
 def extend_with_default(validator_class):
-    """ Fill in defaults,  before validating.
+    """Fill in defaults,  before validating.
 
     See https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance
     for details.
@@ -40,12 +40,16 @@ def extend_with_default(validator_class):
                 instance.setdefault(property, subschema["default"])
 
         for error in validate_properties(
-            validator, properties, instance, schema,
+            validator,
+            properties,
+            instance,
+            schema,
         ):
             yield error
 
     return validators.extend(
-        validator_class, {"properties" : set_defaults},
+        validator_class,
+        {"properties": set_defaults},
     )
 
 
@@ -71,7 +75,11 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     # Constructor
 
-    def __init__(self, config: Union[PurePath, str, dict, None] = None, parse_env_config: bool = True) -> None:
+    def __init__(
+        self,
+        config: Union[PurePath, str, dict, None] = None,
+        parse_env_config: bool = True,
+    ) -> None:
         """Initialize the tap or target."""
         if not config:
             config_dict = {}
@@ -110,7 +118,9 @@ class PluginBase(metaclass=abc.ABCMeta):
         for k, v in os.environ.items():
             if k.startswith(plugin_env_prefix):
                 config_key = k.split(plugin_env_prefix)[1]
-                cls.logger.info(f"Parsing '{config_key}' config from env variable '{k}'.")
+                cls.logger.info(
+                    f"Parsing '{config_key}' config from env variable '{k}'."
+                )
                 if v[0] == "[" and v[-1] == "]":
                     result[config_key] = v.lstrip("[").rstrip("]").split(",")
                 else:
@@ -197,7 +207,10 @@ class PluginBase(metaclass=abc.ABCMeta):
                 )
         if self.config_jsonschema:
             try:
-                self.logger.debug(f"Running config validation using jsonschema: {self.config_jsonschema}")
+                self.logger.debug(
+                    f"Running config validation using jsonschema: "
+                    + str(self.config_jsonschema)
+                )
                 validator = JSONSchemaValidator(self.config_jsonschema)
                 validator.validate(self._config)
             except (ValidationError, SchemaError) as ex:
@@ -210,7 +223,9 @@ class PluginBase(metaclass=abc.ABCMeta):
             if raise_errors:
                 raise RuntimeError(summary)
         else:
-            summary = f"Config validation passed with 0 errors and {len(warnings)} warnings."
+            summary = (
+                f"Config validation passed with 0 errors and {len(warnings)} warnings."
+            )
             for warning in warnings:
                 summary += f"\n{warning}"
         if warnings_as_errors and raise_errors and warnings:

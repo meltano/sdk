@@ -56,7 +56,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     def get_url(self, partition: Optional[dict]) -> str:
         """Return a URL, optionally targeted to a specific partition.
-        
+
         Developers override this method to perform dynamic URL generation.
         """
         url_pattern = "".join([self.url_base, self.path or ""])
@@ -102,10 +102,12 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         logging.debug("Response received successfully.")
         return response
 
-    def get_url_params(self, partition: Optional[dict], next_page_token: Optional[Any] = None) -> Dict[str, Any]:
+    def get_url_params(
+        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+    ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization.
-        
-        If paging is supported, developers may override this method with specific paging logic.
+
+        If paging is supported, developers may override with specific paging logic.
         """
         return {}
 
@@ -116,12 +118,14 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         url: str = self.get_url(partition)
         params: dict = self.get_url_params(partition, next_page_token)
         request_data = self.prepare_request_payload(partition, next_page_token)
-        self.logger.info({
-            "url": url,
-            "params": params,
-            "request_data": request_data,
-            "next_page_token": next_page_token,
-        })
+        self.logger.info(
+            {
+                "url": url,
+                "params": params,
+                "request_data": request_data,
+                "next_page_token": next_page_token,
+            }
+        )
         request = requests.Request(
             method=http_method,
             url=url,
@@ -132,35 +136,40 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return request
 
     def request_records(self, partition: Optional[dict]) -> Iterable[dict]:
-        """Request records from REST endpoint(s), returning an iterable Dict of response records.
+        """Request records from REST endpoint(s), returning response records.
 
         If pagination is detected, pages will be recursed automatically.
         """
         next_page_token: Any = None
         finished = False
         while not finished:
-            prepared_request = self.prepare_request(partition, next_page_token=next_page_token)
+            prepared_request = self.prepare_request(
+                partition, next_page_token=next_page_token
+            )
             resp = self._request_with_backoff(prepared_request)
             for row in self.parse_response(resp):
                 yield row
             next_page_token = self.get_next_page_token(
-                response=resp,
-                previous_token=copy.deepcopy(next_page_token)
+                response=resp, previous_token=copy.deepcopy(next_page_token)
             )
             # Cycle until get_next_page_token() no longer returns a value
             finished = not next_page_token
 
     # Overridable:
 
-    def prepare_request_payload(self, partition: Optional[dict], next_page_token: Optional[Any] = None) -> Optional[dict]:
+    def prepare_request_payload(
+        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+    ) -> Optional[dict]:
         """Prepare the data payload for the REST API request.
 
         By default, no payload will be sent (return None).
         """
         return None
 
-    def get_next_page_token(self, response: requests.Response, previous_token: Optional[Any] = None) -> Any:
-        """Return token for identifying next page or None if all records have been read."""
+    def get_next_page_token(
+        self, response: requests.Response, previous_token: Optional[Any] = None
+    ) -> Any:
+        """Return token identifying next page or None if all records have been read."""
         next_page_token = response.headers.get("X-Next-Page", None)
         if next_page_token:
             self.logger.info(f"Next page token retrieved: {next_page_token}")
