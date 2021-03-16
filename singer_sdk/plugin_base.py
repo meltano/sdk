@@ -60,10 +60,8 @@ class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
     name: str = "sample-plugin-name"
-    accepted_config_keys: List[str] = []
-    protected_config_keys: List[str] = []
-    required_config_options: Optional[List[List[str]]] = [[]]
     config_jsonschema: Optional[dict] = None
+    protected_config_keys: List[str] = []
 
     _config: dict
 
@@ -98,7 +96,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             if self.is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
-        self.validate_config()
+        self._validate_config()
 
     @property
     def capabilities(self) -> List[str]:
@@ -178,33 +176,12 @@ class PluginBase(metaclass=abc.ABCMeta):
             is_common_secret_key(config_key) or config_key in self.protected_config_keys
         )
 
-    def validate_config(
+    def _validate_config(
         self, raise_errors: bool = True, warnings_as_errors: bool = False
     ) -> Tuple[List[str], List[str]]:
         """Return a tuple: (warnings: List[str], errors: List[str])."""
         warnings: List[str] = []
         errors: List[str] = []
-        if self.accepted_config_keys:
-            for k in self.config.keys():
-                if k not in self.accepted_config_keys:
-                    warnings.append(f"Unexpected config option found: {k}.")
-        if self.required_config_options:
-            required_set_options = self.required_config_options
-            matched_any = False
-            missing: List[List[str]] = []
-            for required_set in required_set_options:
-                if all([x in self.config.keys() for x in required_set]):
-                    matched_any = True
-                else:
-                    missing.append(
-                        [x for x in required_set if x not in self.config.keys()]
-                    )
-            if not matched_any:
-                errors.append(
-                    "One or more required config options are missing. "
-                    "Please complete one or more of the following sets: "
-                    f"{str(missing)}"
-                )
         if self.config_jsonschema:
             try:
                 self.logger.debug(
