@@ -32,8 +32,9 @@ test_and_deploy:
       echo "Run python tests..."
       poetry run pytest
     - |
-      echo "Run pything linter..."
-      poetry run mypy singer_sdk || echo "Ignoring failures..."
+      echo "Run pything linters..."
+      poetry run black --check singer_sdk/
+      poetry run mypy singer_sdk
     - |
       echo "Publishing to PyPi..."
       if [[ "$BRANCH_NAME" == *main ]]
