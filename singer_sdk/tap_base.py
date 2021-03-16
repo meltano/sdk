@@ -154,6 +154,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         @click.option("--format")
         @click.option("--config")
         @click.option("--catalog")
+        @click.option("--state")
         @click.command()
         def cli(
             version: bool = False,
