@@ -9,7 +9,7 @@ from singer_sdk.samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 COUNTER = 0
 
 
-CONFIG_FILE = "singer_sdk/tests/.secrets/gitlab-config.json"
+CONFIG_FILE = "singer_sdk/tests/external/.secrets/gitlab-config.json"
 SAMPLE_CONFIG_BAD = {"not": "correct"}
 
 config: Optional[dict] = None

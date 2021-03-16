@@ -77,7 +77,9 @@ def is_datetime_type(type_dict: dict) -> bool:
         if type_dict.get("format") == "date-time":
             return True
         return False
-    raise ValueError(f"Could not detect type of replication key using schema '{type_dict}'")
+    raise ValueError(
+        f"Could not detect type of replication key using schema '{type_dict}'"
+    )
 
 
 class JSONTypeHelper(object):
@@ -138,7 +140,7 @@ class ArrayType(JSONTypeHelper):
 class Property(JSONTypeHelper):
     """Generic Property. Should be nested within a `PropertiesList`."""
 
-    def __init__(self, name, wrapped, required: bool = False, default = None) -> None:
+    def __init__(self, name, wrapped, required: bool = False, default=None) -> None:
         self.name = name
         self.wrapped = wrapped
         self.optional = not required
@@ -153,7 +155,7 @@ class Property(JSONTypeHelper):
         if self.optional:
             type_dict = _append_type(type_dict, "null")
         if self.default:
-            type_dict.update({'default': self.default})
+            type_dict.update({"default": self.default})
         return {self.name: type_dict}
 
 

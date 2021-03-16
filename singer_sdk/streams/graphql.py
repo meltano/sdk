@@ -13,7 +13,9 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
     path = ""
     rest_method = "POST"
 
-    def prepare_request_payload(self, partition: Optional[dict], next_page_token: Optional[Any] = None) -> Optional[dict]:
+    def prepare_request_payload(
+        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+    ) -> Optional[dict]:
         """Prepare the data payload for the GraphQL API request."""
         params = self.get_url_params(partition, next_page_token)
         if self.query is None:
