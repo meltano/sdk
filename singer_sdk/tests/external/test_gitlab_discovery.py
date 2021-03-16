@@ -6,7 +6,7 @@ from typing import Optional
 
 from singer_sdk.samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 
-CONFIG_FILE = "singer_sdk/tests/.secrets/gitlab-config.json"
+CONFIG_FILE = "singer_sdk/tests/external/.secrets/gitlab-config.json"
 
 
 def test_gitlab_tap_discovery():
