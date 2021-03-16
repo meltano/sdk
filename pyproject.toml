@@ -22,6 +22,7 @@ cryptography = "^3.4.6"
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
 pyarrow = "^2.0.0"
 pytest = "^6.1.2"
+black = {version = "^20.8b1", allow-prereleases = true}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
