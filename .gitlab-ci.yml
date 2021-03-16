@@ -29,8 +29,14 @@ before_script:
 test_and_deploy:
   script:
     - |
-      echo "Run python tests..."
-      poetry run pytest
+      if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
+      then
+        echo "Run full python test suite..."
+        poetry run pytest
+      else
+        echo "Run 'core' python test suite..."
+        poetry run pytest singer_sdk/tests/core
+      fi
     - |
       echo "Run python linters..."
       poetry run black --check singer_sdk/
