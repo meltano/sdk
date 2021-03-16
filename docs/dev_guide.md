@@ -48,11 +48,10 @@ To get started, create a new project from the
 
 _To create a tap class, follow these steps:_
 
-1. Map your Connection class to the `_conn` type.
-2. Override tap config:
+1. Override tap config:
    1. `name` - What to call your tap (for example, `tap-best-ever`)
    2. `config_jsonschema` - A JSON Schema object defining the config options that this tap will accept.
-3. Override the `discover_streams` method.
+2. Override the `discover_streams` method.
 
 ## Step 3: Write the stream class
 
@@ -63,9 +62,10 @@ _Creating the stream class depends upon what type of tap you are creating._
 _Generic (hand-coded) streams inherit from the class `Stream`. To create a generic
 stream class, you only need to override a single method:_
 
-1. **`tap_name`** - The same name used in your tap class (for logging purposes).
-2. `records()` - Property should generate records (rows) and return them incrementally with the
-   `yield` python operator.
+1. `get_records()` - A method which should retrieve data from the source and return records 
+incrementally with the `yield` python operator.
+    - This method takes an optional `partition` argument, which you can safely disregard 
+    unless you require partition handling.
 
 **More info:**
 
@@ -76,25 +76,27 @@ stream class, you only need to override a single method:_
 _REST streams inherit from the class `RESTStream`. To create an REST API-based
 stream class, you will override one class property and three methods:_
 
-1. **`tap_name`** - The same name used in your tap class (for logging purposes).
-2. **`url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
+1. **`url_base` property** - Returns the base URL, which generally is reflective of a 
+specific API version.
    - For example: to connect to the GitLab v4 API, we use `"https://gitlab.com/api/v4"`.
-3. **`http_headers` property** - Build and return an authorization header which will be used when
-   making calls to your API.
+2. **`authenticator` property** - Returns an `Authenticator` class to help with connecting
+to the source API and negotiating access.
+2. **`http_headers` property** - Build and return an authorization header which will be used
+when making calls to your API.
    - For example: to connect to the GitLab API, we pass "Private-Token" and (optionally) "User-Agent".
 
 _Depending upon your implementation, you may also want to override one or more of the following properties:_
 
-1. `get_query_params` method - (Optional.) This method returns a map (or list of maps) whose values can be
+1. `get_url_params` method - (Optional.) This method returns a map (or list of maps) whose values can be
    substituted into the query URLs. A list of maps is returned if multiple calls need to be made.
    - For example: in our GitLab example, we want the use to be able to specify multiple project IDs
      for extraction so we return multiple maps the URL parameters, each with a different
      `project_id` value.
    - If not provided, the user-provided config dictionary will automatically be scanned for possible
      query parameters.
-2. `get_request_payload` method - (Optional.) Override this method if your API requires you to use
-   submit a "POST" a query payload along with the request.
-   - This is not needed for REST APIs which use the HTTP GET method.
+2. `prepare_request_payload` method - (Optional.) Override this method if your API requires you to use
+   submit a payload along with the request.
+   - This is generally not needed for REST APIs which use the HTTP GET method.
 3. `post_process` method - (Optional.) This method gives us an opportunity to "clean up" the results
    prior to returning them to the downstream tap - for instance: cleaning, renaming, or appending
    the list of properties returned by the API.
@@ -109,23 +111,11 @@ _Depending upon your implementation, you may also want to override one or more o
 
 ### 'GraphQL' stream classes
 
-_GraphQL streams inherit from the class `GraphQLStream`. GraphQL streams are very similar toREST API-based streams, but instead of a `path`, you will override the GraphQL query text._
+_GraphQL streams inherit from the class `GraphQLStream`._
 
-1. **`tap_name`** - The same name used in your tap class (for logging purposes).
-2. **`url_base` property** - Returns the base URL, which generally is reflective of a specific API version.
-   - For example: to connect to the GitLab v4 API, we use `"https://gitlab.com/graphql"`.
-3. **`get_http_headers` method** - Build and return an authorization header which will be used when
-   making calls to your API.
-   - For example: to connect to the GitLab API, we pass "Private-Token" and (optionally) "User-Agent".
-4. **`query` property** - This is where you specify your specific GraphQL query text.
+GraphQL streams are very similar to REST API-based streams, but instead of specifying a `path` and `url_params`, you will override the GraphQL query text:
 
-_Depending upon your implementation, you may also want to override one or more of the following properties:_
-
-1. **`post_process` method** - (Optional.) This method gives us an opportunity to "clean up" the results prior
-   to returning them to the downstream tap - for instance: cleaning, renaming, or appending the list
-   of properties returned by the API.
-   - For our GitLab example, no cleansing was necessary and we passed along the result directly as
-     received from the API endpoint.
+1. **`query` property** - This is where you specify your specific GraphQL query text.
 
 **More info:**
 
@@ -138,6 +128,8 @@ _Depending upon your implementation, you may also want to override one or more o
 
 ### 'Database' stream classes
 
+`NOTE: The Database stream class is not fully tested and is less mature than other stream types. For more info: https://gitlab.com/meltano/singer-sdk/-/issues/45`
+
 _Database streams inherit from the class `DatabaseStream`. To create a database
 stream class, you will first override the `execute_query()` method. Depending upon how closely your
 source complies with standard `information_schema` conventions, you may also override between
@@ -145,7 +137,6 @@ one and four class properties, in order to override specific metadata queries._
 
 **All database stream classes override:**
 
-1. **`tap_name`** - The same name used in your tap class (for logging purposes).
 2. **`execute_query()` method** - This method should run a give SQL statement and incrementally return a dictionary
    object for each resulting row.
 
