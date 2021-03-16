@@ -38,8 +38,7 @@ Note:
 """
 
 import copy
-import json
-from typing import Any, Iterable, Tuple
+from typing import Iterable, Tuple, List
 
 from singer_sdk.helpers.classproperty import classproperty
 
@@ -67,7 +66,7 @@ def is_datetime_type(type_dict: dict) -> bool:
     Also returns True if 'date-time' is nested within an 'anyOf' type Array.
     """
     if not type_dict:
-        raise ValueError(f"Could not detect type from empty type_dict param.")
+        raise ValueError("Could not detect type from empty type_dict param.")
     if "anyOf" in type_dict:
         for type_dict in type_dict["anyOf"]:
             if is_datetime_type(type_dict):

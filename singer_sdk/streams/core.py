@@ -370,12 +370,15 @@ class Stream(metaclass=abc.ABCMeta):
             "not found in catalog schema. Ignoring."
         )
 
-    def _conform_record_data_types(self, row: Dict[str, Any]) -> RecordMessage:
+    def _conform_record_data_types(  # noqa: C901
+        self, row: Dict[str, Any]
+    ) -> RecordMessage:
         """Translate values in record dictionary to singer-compatible data types.
 
         Any property names not found in the schema catalog will be removed, and a
         warning will be logged exactly once per unmapped property name.
         """
+
         rec: Dict[str, Any] = {}
         for property_name, elem in row.items():
             property_schema = get_property_schema(self.schema or {}, property_name)

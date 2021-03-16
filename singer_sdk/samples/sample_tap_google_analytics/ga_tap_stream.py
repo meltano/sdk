@@ -1,14 +1,12 @@
 """Sample tap stream test for tap-google-analytics."""
 
 from pathlib import Path
-from typing import Iterable, Optional, Any, Dict
+from typing import Iterable, Optional, Any
 
 import pendulum
 
 from singer_sdk.streams import RESTStream
 from singer_sdk.authenticators import OAuthJWTAuthenticator
-
-from singer_sdk.samples.sample_tap_google_analytics.ga_globals import PLUGIN_NAME
 
 GOOGLE_OAUTH_ENDPOINT = "https://oauth2.googleapis.com/token"
 GA_OAUTH_SCOPES = "https://www.googleapis.com/auth/analytics.readonly"
@@ -41,7 +39,7 @@ class SampleGoogleAnalyticsStream(RESTStream):
         self, partition: Optional[dict], next_page_token: Optional[Any] = None
     ) -> Optional[dict]:
         """Prepare the data payload for the REST API request."""
-        params = self.get_url_params(partition, next_page_token)
+        # params = self.get_url_params(partition, next_page_token)
         request_def = {
             "viewId": self.config["view_id"],
             "metrics": [{"expression": m} for m in self.metrics],

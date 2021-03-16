@@ -1,23 +1,33 @@
 """Sample tap test for tap-snowflake."""
 
 from typing import List
+
 from singer_sdk import Tap, Stream
+from singer_sdk.helpers.typing import (
+    ArrayType,
+    PropertiesList,
+    Property,
+    StringType,
+)
 from singer_sdk.samples.sample_tap_snowflake.snowflake_tap_stream import (
     SampleTapSnowflakeStream,
 )
-from singer_sdk.samples.sample_tap_snowflake.snowflake_globals import (
-    PLUGIN_NAME,
-    ACCEPTED_CONFIG_OPTIONS,
-    REQUIRED_CONFIG_SETS,
-)
+
+PLUGIN_NAME = "sample-tap-snowflake"
 
 
 class SampleTapSnowflake(Tap):
     """Sample tap for Snowflake."""
 
     name = PLUGIN_NAME
-    accepted_config_keys = ACCEPTED_CONFIG_OPTIONS
-    required_config_options = REQUIRED_CONFIG_SETS
+    config_jsonschema = PropertiesList(
+        Property("account", StringType, required=True),
+        Property("dbname", StringType, required=True),
+        Property("warehouse", StringType, required=True),
+        Property("user", StringType, required=True),
+        Property("password", StringType, required=True),
+        Property("tables", ArrayType(StringType)),
+    ).to_dict()
 
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
