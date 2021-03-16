@@ -13,6 +13,7 @@ from pathlib import PurePath
 from singer_sdk.helpers.classproperty import classproperty
 from singer_sdk.helpers.util import read_json_file
 from singer_sdk.helpers.secrets import is_common_secret_key, SecretString
+from singer_sdk.helpers.typing import extend_with_default
 
 import click
 
@@ -24,33 +25,6 @@ try:
 except ImportError:
     # Running on pre-3.8 Python; use importlib-metadata package
     import importlib_metadata as metadata  # type: ignore
-
-
-def extend_with_default(validator_class):
-    """Fill in defaults,  before validating.
-
-    See https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance
-    for details.
-    """
-    validate_properties = validator_class.VALIDATORS["properties"]
-
-    def set_defaults(validator, properties, instance, schema):
-        for property, subschema in properties.items():
-            if "default" in subschema:
-                instance.setdefault(property, subschema["default"])
-
-        for error in validate_properties(
-            validator,
-            properties,
-            instance,
-            schema,
-        ):
-            yield error
-
-    return validators.extend(
-        validator_class,
-        {"properties": set_defaults},
-    )
 
 
 JSONSchemaValidator = extend_with_default(Draft4Validator)
@@ -98,7 +72,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             if self.is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
-        self.validate_config()
+        self._validate_config()
 
     @property
     def capabilities(self) -> List[str]:
@@ -178,7 +152,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             is_common_secret_key(config_key) or config_key in self.protected_config_keys
         )
 
-    def validate_config(
+    def _validate_config(
         self, raise_errors: bool = True, warnings_as_errors: bool = False
     ) -> Tuple[List[str], List[str]]:
         """Return a tuple: (warnings: List[str], errors: List[str])."""
