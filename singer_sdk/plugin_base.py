@@ -7,7 +7,7 @@ import logging
 import os
 from types import MappingProxyType
 from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
-from jsonschema import validators, ValidationError, SchemaError, Draft4Validator
+from jsonschema import ValidationError, SchemaError, Draft4Validator
 from pathlib import PurePath
 
 from singer_sdk.helpers.classproperty import classproperty

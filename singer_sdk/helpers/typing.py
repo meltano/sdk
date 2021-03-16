@@ -39,6 +39,7 @@ Note:
 
 import copy
 import json
+from jsonschema import validators
 from typing import Any, Iterable, Tuple
 
 from singer_sdk.helpers.classproperty import classproperty
