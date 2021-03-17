@@ -114,6 +114,12 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     def prepare_request(
         self, partition: Optional[dict], next_page_token: Optional[Any] = None
     ) -> requests.PreparedRequest:
+        """Preopare a request object.
+
+        If partitioning is supported, the `partition` object will contain the partition
+        definitions. Pagination information can be parsed from `next_page_token` if
+        `next_page_token` is not None.
+        """
         http_method = self.rest_method
         url: str = self.get_url(partition)
         params: dict = self.get_url_params(partition, next_page_token)

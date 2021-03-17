@@ -35,6 +35,7 @@ class GitlabGraphQLStream(GraphQLStream):
 
 
 class GraphQLCurrentUserStream(GitlabGraphQLStream):
+    """Gitlab Current User stream."""
 
     name = "currentuser"
     primary_keys = ["id"]
@@ -48,6 +49,7 @@ class GraphQLCurrentUserStream(GitlabGraphQLStream):
 
 
 class GraphQLProjectsStream(GitlabGraphQLStream):
+    """Gitlab Projects stream."""
 
     name = "projects"
     primary_keys = ["id"]
