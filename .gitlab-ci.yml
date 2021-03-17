@@ -41,6 +41,7 @@ test_and_deploy:
       echo "Run python linters..."
       poetry run black --check singer_sdk/
       poetry run flake8 singer_sdk
+      poetry run pydocstyle singer_sdk
       poetry run mypy singer_sdk || echo "MyPy found issues (ignoring)..."
     - |
       echo "Publishing to PyPi..."
