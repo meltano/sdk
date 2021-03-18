@@ -13,7 +13,7 @@ from singer_sdk.streams import GraphQLStream
 
 SITE_URL = "https://gitlab.com/graphql"
 
-SCHEMAS_DIR = Path("./singer_sdk/samples/sample_tap_gitlab/schemas")
+SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 
 class GitlabGraphQLStream(GraphQLStream):

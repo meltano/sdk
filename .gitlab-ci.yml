@@ -34,8 +34,9 @@ test_and_deploy:
         echo "Run full python test suite..."
         poetry run pytest
       else
-        echo "Run 'core' python test suite..."
+        echo "Run 'core' and 'cookiecutter' python test suites..."
         poetry run pytest singer_sdk/tests/core
+        poetry run pytest singer_sdk/tests/cookiecutter
       fi
     - |
       echo "Run python linters..."
@@ -57,6 +58,8 @@ test_and_deploy:
         echo -e "\nPublishing to version ref '$(poetry version --short)'...\n\n"
         # poetry config pypi-token.pypi "$PYPI_PUBLISH_TOKEN"
         poetry publish --build
+      else
+        echo "Skipped. (Running in fork.)"
       fi
     - |
       echo "Waiting for PyPi availability..."
@@ -80,4 +83,6 @@ test_and_deploy:
         if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
         export PIPERR=$(pip install tapdance==$VER 2>&1)
         if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not found. Giving up. Last message from PyPi was $PIPERR"; exit 1; } fi;
+      else
+        echo "Skipped. (Running in fork.)"
       fi
