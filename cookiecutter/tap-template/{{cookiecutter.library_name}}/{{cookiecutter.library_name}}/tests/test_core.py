@@ -1,4 +1,4 @@
-"""Tests init and discovery features for {{}}."""
+"""Tests init and discovery features for {{ cookiecutter.tap_id }}."""
 
 from singer_sdk.samples.sample_tap_parquet.parquet_tap import SampleTapParquet
 from singer_sdk.helpers.util import utc_now
