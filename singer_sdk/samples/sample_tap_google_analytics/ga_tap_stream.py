@@ -29,6 +29,7 @@ class SampleGoogleAnalyticsStream(RESTStream):
 
     @property
     def authenticator(self) -> GoogleJWTAuthenticator:
+        """Return authenticator for Google Analytics."""
         return GoogleJWTAuthenticator(
             stream=self,
             auth_endpoint=GOOGLE_OAUTH_ENDPOINT,
@@ -59,6 +60,7 @@ class SampleGoogleAnalyticsStream(RESTStream):
         return {"reportRequests": [request_def]}
 
     def parse_response(self, response) -> Iterable[dict]:
+        """Parse Google Analytics API response into individual records."""
         self.logger.info(
             f"Received raw Google Analytics query response: {response.json()}"
         )

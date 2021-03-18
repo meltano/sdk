@@ -143,27 +143,32 @@ class Stream(metaclass=abc.ABCMeta):
         return self._schema
 
     @property
-    def primary_keys(self) -> Optional[dict]:
+    def primary_keys(self) -> Optional[List[str]]:
+        """Return primary key(s) for the stream."""
         if not self._primary_keys:
             return None
         return self._primary_keys
 
     @primary_keys.setter
     def primary_keys(self, new_value: List[str]):
+        """Set primary key(s) for the stream."""
         self._primary_keys = new_value
 
     @property
-    def replication_key(self) -> Optional[dict]:
+    def replication_key(self) -> Optional[str]:
+        """Return replication key for the stream."""
         if not self._replication_key:
             return None
         return self._replication_key
 
     @replication_key.setter
-    def replication_key(self, new_value: List[str]):
+    def replication_key(self, new_value: str) -> None:
+        """Set replication key for the stream."""
         self._replication_key = new_value
 
     @property
     def singer_metadata(self) -> dict:
+        """Return metadata object (dict) as specified in the Singer spec."""
         self.logger.debug(f"Schema Debug: {self.schema}")
         md = metadata.get_standard_metadata(
             schema=self.schema,
@@ -178,6 +183,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def singer_catalog_entry(self) -> singer.CatalogEntry:
+        """Return catalog entry as specified by the Singer catalog spec."""
         return singer.CatalogEntry(
             tap_stream_id=self.tap_stream_id,
             stream=self.name,
@@ -378,7 +384,6 @@ class Stream(metaclass=abc.ABCMeta):
         Any property names not found in the schema catalog will be removed, and a
         warning will be logged exactly once per unmapped property name.
         """
-
         rec: Dict[str, Any] = {}
         for property_name, elem in row.items():
             property_schema = get_property_schema(self.schema or {}, property_name)

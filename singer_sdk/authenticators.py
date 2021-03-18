@@ -122,12 +122,12 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     @property
     def oauth_request_payload(self) -> dict:
-        """Returns the request body directly (OAuth) or encrypted (JWT)."""
+        """Return the request body directly (OAuth) or encrypted (JWT)."""
         return self.oauth_request_body
 
     @property
     def oauth_request_body(self) -> dict:
-        """Formatted body of the OAuth authorization request.
+        """Return formatted body of the OAuth authorization request.
 
         Sample implementation:
 
@@ -181,6 +181,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
 
     @property
     def oauth_request_body(self) -> dict:
+        """Return request body for OAuth request."""
         request_time = utc_now()
         return {
             "iss": self.client_id,
@@ -192,6 +193,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
 
     @property
     def oauth_request_payload(self) -> dict:
+        """Return request paytload for OAuth request."""
         if self.private_key_passphrase:
             private_key = serialization.load_pem_private_key(
                 self.private_key,

@@ -27,6 +27,7 @@ def get_stream_state_dict(
     ------
     ValueError
         Raise an error if duplicate entries are found.
+
     """
     if "bookmarks" not in state:
         state["bookmarks"] = {}
@@ -63,6 +64,7 @@ def read_stream_state(
     *,
     partition: Optional[dict] = None,
 ) -> Any:
+    """Read stream state."""
     state_dict = get_stream_state_dict(state, tap_stream_id, partition=partition)
     if key:
         return state_dict.get(key, default)
@@ -72,6 +74,7 @@ def read_stream_state(
 def write_stream_state(
     state, tap_stream_id: str, key, val, *, partition: Optional[dict] = None
 ) -> None:
+    """Write stream state."""
     state_dict = get_stream_state_dict(state, tap_stream_id, partition=partition)
     state_dict[key] = val
 
