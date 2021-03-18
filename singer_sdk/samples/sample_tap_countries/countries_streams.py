@@ -24,6 +24,7 @@ class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
 
 
 class CountriesStream(CountriesAPIStream):
+    """Countries API stream."""
 
     name = "countries"
     primary_keys = ["code"]
@@ -50,6 +51,7 @@ class CountriesStream(CountriesAPIStream):
 
 
 class ContinentsStream(CountriesAPIStream):
+    """Continents stream from the Countries API."""
 
     name = "continents"
     schema_filepath = SCHEMAS_DIR / "continents.json"

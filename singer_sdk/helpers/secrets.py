@@ -31,10 +31,13 @@ class SecretString(str):
     """For now, this class wraps a sensitive string to be identified as such later."""
 
     def __init__(self, contents):
+        """Initialize secret string."""
         self.contents = contents
 
     def __repr__(self) -> str:
+        """Render secret contents."""
         return self.contents.__repr__()
 
     def __str__(self) -> str:
+        """Render secret contents."""
         return self.contents.__str__()
