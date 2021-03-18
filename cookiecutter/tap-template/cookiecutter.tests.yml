@@ -1,0 +1,30 @@
+tests:
+  - source_name: Database Template Test
+    tap_id: test-tap-database-type
+    stream_type: Database
+    auth_method": Custom or N/A
+
+  - source_name: REST SimpleAuth Template Test
+    tap_id: test-tap-rest-simpleauth-type
+    stream_type: REST
+    auth_method": Simple
+
+  - source_name: REST OAuth Template Test
+    tap_id: test-tap-rest-oath-type
+    stream_type: REST
+    auth_method": OAuth
+
+  - source_name: REST JWT Template Test
+    tap_id: test-tap-rest-simpleauth-type
+    stream_type: REST
+    auth_method": JWT
+
+  - source_name: REST JWT Template Test
+    tap_id: test-tap-rest-simpleauth-type
+    stream_type: REST
+    auth_method": Custom or N/A
+
+  - source_name: GraphQL JWT Template Test
+    tap_id: test-tap-graphql-jwt-type
+    stream_type: GraphQL
+    auth_method": JWT
