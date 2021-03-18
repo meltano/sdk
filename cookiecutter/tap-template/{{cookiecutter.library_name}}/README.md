@@ -25,13 +25,17 @@ This Singer-compliant tap was created using the [Singer SDK](https://gitlab.com/
     poetry run {{cookiecutter.tap_id}} --help
     ```
 
-- [ ] `TODO:` Create some tests and then run:
-
-    ```bash
-    poetry run pytest
-    ```
 
 _`TODO: Remove the above section once complete.`_
+
+## Testing Guide
+
+Create tests within the `{{ cookiecutter.library_name }}/tests` subfolder and
+  then run:
+
+```bash
+poetry run pytest
+```
 
 ## Singer SDK Dev Guide
 

@@ -4,15 +4,22 @@ import requests
 
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union, List, Iterable
 
+{% if cookiecutter.stream_type == "Other" %}
+from singer_sdk.streams import Stream
+{% else %}
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+{% endif %}
+
+{% if cookiecutter.stream_type in ["GraphQL", "REST"] %}
 from singer_sdk.authenticators import (
     APIAuthenticatorBase,
     SimpleAuthenticator,
     OAuthAuthenticator,
     OAuthJWTAuthenticator
 )
+{% endif %}
 from singer_sdk.helpers.typing import (
     ArrayType,
     BooleanType,
@@ -25,29 +32,36 @@ from singer_sdk.helpers.typing import (
     StringType,
 )
 
-SCHEMAS_DIR = Path("./schemas")
+SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 
+{% if cookiecutter.stream_type == "Other" %}
+class {{ cookiecutter.source_name }}Stream(Stream):
+    """Stream class for {{ cookiecutter.source_name }} streams."""
+
+    def get_records(self, partition: Optional[dict]) -> Iterable[dict]:
+        """Return a generator of row-type dictionary objects."""
+        # TODO: Write logic to extract data from the upstream source.
+        # rows = mysource.getall()
+        # for row in rows:
+        #     yield row.to_dict()
+        raise NotImplementedError("The method is not yet implemented (TODO)")
+
+{% endif %}
 {% if cookiecutter.stream_type in ["GraphQL", "REST"] %}
-{% if cookiecutter.stream_type == "GraphQL" %}
-class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
+class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
     url_base = "https://api.mysample.com"
 
-{% elif cookiecutter.stream_type == "REST" %}
-class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
-    """{{ cookiecutter.source_name }} stream class."""
-
-    url_base = "https://api.mysample.com"
-
+{% if cookiecutter.stream_type == "REST" %}
     def get_url_params(
         self,
         partition: Optional[dict],
         next_page_token: Optional[Any] = None
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization.
-        
+
         If paging is supported, developers may override this method with specific paging
         logic.
         """
@@ -82,12 +96,13 @@ class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stre
             oauth_scopes="TODO: OAuth Scopes",
         )
 {% endif %}
+{% endif %}
 
 
 {% if cookiecutter.stream_type == "GraphQL" %}
 # TODO: - Override `StreamA` and `StreamB` with your own stream definition.
 #       - Copy-paste as many times as needed to create multiple stream types.
-class StreamA(Tap{{ cookiecutter.source_name }}Stream):
+class StreamA({{ cookiecutter.source_name }}Stream):
     name = "users"
     schema = PropertiesList(
         Property("name", StringType),
@@ -122,7 +137,7 @@ class StreamA(Tap{{ cookiecutter.source_name }}Stream):
         """
 
 
-class StreamB(Tap{{ cookiecutter.source_name }}Stream):
+class StreamB({{ cookiecutter.source_name }}Stream):
     name = "groups"
     schema = PropertiesList(
         Property("name", StringType),
@@ -140,12 +155,14 @@ class StreamB(Tap{{ cookiecutter.source_name }}Stream):
         """
 
 
-{% elif cookiecutter.stream_type == "REST" %}
+{% elif cookiecutter.stream_type in ["Other", "REST"] %}
 # TODO: - Override `StreamA` and `StreamB` with your own stream definition.
 #       - Copy-paste as many times as needed to create multiple stream types.
-class StreamA(Tap{{ cookiecutter.source_name }}Stream):
-    stream_name = "users"
+class StreamA({{ cookiecutter.source_name }}Stream):
+    name = "users"
+{% if cookiecutter.stream_type in ["REST"] %}
     path = "/users"
+{% endif %}
     primary_keys = ["id"]
     replication_key = None
     schema = PropertiesList(
@@ -160,9 +177,11 @@ class StreamA(Tap{{ cookiecutter.source_name }}Stream):
     ).to_dict()
 
 
-class StreamB(Tap{{ cookiecutter.source_name }}Stream):
-    stream_name = "groups"
+class StreamB({{ cookiecutter.source_name }}Stream):
+    name = "groups"
+{% if cookiecutter.stream_type in ["REST"] %}
     path = "/groups"
+{% endif %}
     primary_keys = ["id"]
     replication_key = "modified"
     schema = PropertiesList(
@@ -171,4 +190,25 @@ class StreamB(Tap{{ cookiecutter.source_name }}Stream):
         Property("modified", DateTimeType),
     ).to_dict()
 {% endif %}
+
+{% if cookiecutter.stream_type == "Database" %}
+class {{ cookiecutter.source_name }}Stream(DatabaseStream):
+    """Stream class for {{ cookiecutter.source_name }} database streams."""
+
+    @classmethod
+    def execute_query(cls, sql: Union[str, List[str]], config) -> Iterable[dict]:
+        """Run a query in snowflake."""
+        connection = cls.open_connection(config=config)
+        """Connect to database."""
+        # TODO: Define the process of executing a query against your database
+        #       and returning a list or other iterable containing the resulting
+        #       rows.
+        raise NotImplementedError("The method is not yet implemented (TODO)")
+
+    @classmethod
+    def open_connection(cls, config) -> Any:
+        """Connect to database."""
+        # TODO: Define the process of connecting to your database and returning
+        #       a connection object.
+        raise NotImplementedError("The method is not yet implemented (TODO)")
 {% endif %}

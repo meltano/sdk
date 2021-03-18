@@ -18,7 +18,7 @@ from singer_sdk.helpers.state import get_stream_state_dict
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.streams.rest import RESTStream
 
-SCHEMAS_DIR = Path("./singer_sdk/samples/sample_tap_gitlab/schemas")
+SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 DEFAULT_URL_BASE = "https://gitlab.com/api/v4"
 

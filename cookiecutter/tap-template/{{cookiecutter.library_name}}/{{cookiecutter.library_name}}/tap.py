@@ -18,24 +18,30 @@ from singer_sdk.helpers.typing import (
 
 # TODO: Import your custom stream types here:
 from {{ cookiecutter.library_name }}.streams import (
-    Tap{{ cookiecutter.source_name }}Stream,
+    {{ cookiecutter.source_name }}Stream,
+{% if cookiecutter.stream_type in ["GraphQL", "REST", "Other"] %}
     StreamA,
     StreamB,
+{% endif %}
 )
 
 PLUGIN_NAME = "{{ cookiecutter.tap_id }}"
 
+{% if cookiecutter.stream_type in ["GraphQL", "REST", "Other"] %}
 # TODO: Compile a list of custom stream types here
 #       OR rewrite discover_streams() below with your custom logic.
 STREAM_TYPES = [
     StreamA,
     StreamB,
 ]
+{% endif %}
 
 class Tap{{ cookiecutter.source_name }}(Tap):
     """{{ cookiecutter.source_name }} tap class."""
 
     name = "{{ cookiecutter.tap_id }}"
+
+    # TODO: Update this section with the actual config values you expect:
     config_jsonschema = PropertiesList(
         Property("auth_token", StringType, required=True),
         Property("project_ids", ArrayType(StringType), required=True),
@@ -43,9 +49,11 @@ class Tap{{ cookiecutter.source_name }}(Tap):
         Property("api_url", StringType),
     ).to_dict()
 
+{% if cookiecutter.stream_type in ["GraphQL", "REST", "Other"] %}
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
         return [stream_class(tap=self) for stream_class in STREAM_TYPES]
+{% endif %}
 
 # CLI Execution:
 
