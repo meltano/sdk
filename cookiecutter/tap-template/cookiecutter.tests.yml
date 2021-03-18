@@ -28,3 +28,8 @@ tests:
     tap_id: test-tap-graphql-jwt-type
     stream_type: GraphQL
     auth_method": JWT
+
+  - source_name: OtherCustomTemplateTest
+    tap_id: test-tap-other-custom-type
+    stream_type: Other
+    auth_method": Custom or N/A

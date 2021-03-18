@@ -65,8 +65,8 @@ class Stream(metaclass=abc.ABCMeta):
     def __init__(
         self,
         tap: TapBaseClass,
-        schema: Optional[Union[str, PathLike, Dict[str, Any], Schema]],
-        name: Optional[str],
+        schema: Optional[Union[str, PathLike, Dict[str, Any], Schema]] = None,
+        name: Optional[str] = None,
     ):
         """Init tap stream."""
         if name:
