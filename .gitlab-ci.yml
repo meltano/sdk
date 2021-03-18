@@ -44,33 +44,39 @@ test_and_deploy:
       poetry run mypy singer_sdk || echo "MyPy found issues (ignoring)..."
     - |
       echo "Publishing to PyPi..."
-      if [[ "$BRANCH_NAME" == *main ]]
+      if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
       then
-        poetry version --short
-      else
-        poetry version $(poetry version --short)-dev.$CI_JOB_ID
-        poetry version --short
+        if [[ "$BRANCH_NAME" == *main ]]
+        then
+          poetry version --short
+        else
+          poetry version $(poetry version --short)-dev.$CI_JOB_ID
+          poetry version --short
+        fi
+        echo -e "\nPublishing to version ref '$(poetry version --short)'...\n\n"
+        # poetry config pypi-token.pypi "$PYPI_PUBLISH_TOKEN"
+        poetry publish --build
       fi
-      echo -e "\nPublishing to version ref '$(poetry version --short)'...\n\n"
-      # poetry config pypi-token.pypi "$PYPI_PUBLISH_TOKEN"
-      poetry publish --build
     - |
       echo "Waiting for PyPi availability..."
-      pwd
-      ls -la
-      export VER=$(poetry version --short)
-      export PIPERR=$(pip install tapdance==$VER 2>&1)
-      echo "Checking for PyPi availability of version $VER"
-      if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-      export PIPERR=$(pip install tapdance==$VER 2>&1)
-      if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-      export PIPERR=$(pip install tapdance==$VER 2>&1)
-      if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-      export PIPERR=$(pip install tapdance==$VER 2>&1)
-      if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-      export PIPERR=$(pip install tapdance==$VER 2>&1)
-      if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-      export PIPERR=$(pip install tapdance==$VER 2>&1)
-      if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-      export PIPERR=$(pip install tapdance==$VER 2>&1)
-      if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not found. Giving up. Last message from PyPi was $PIPERR"; exit 1; } fi;
+      if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
+      then
+        pwd
+        ls -la
+        export VER=$(poetry version --short)
+        export PIPERR=$(pip install tapdance==$VER 2>&1)
+        echo "Checking for PyPi availability of version $VER"
+        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
+        export PIPERR=$(pip install tapdance==$VER 2>&1)
+        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
+        export PIPERR=$(pip install tapdance==$VER 2>&1)
+        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
+        export PIPERR=$(pip install tapdance==$VER 2>&1)
+        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
+        export PIPERR=$(pip install tapdance==$VER 2>&1)
+        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
+        export PIPERR=$(pip install tapdance==$VER 2>&1)
+        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
+        export PIPERR=$(pip install tapdance==$VER 2>&1)
+        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not found. Giving up. Last message from PyPi was $PIPERR"; exit 1; } fi;
+      fi
