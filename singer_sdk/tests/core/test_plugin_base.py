@@ -23,7 +23,7 @@ def test_get_env_var_config():
         {
             "PLUGIN_TEST_prop1": "hello",
             "PLUGIN_TEST_prop3": "not-a-tap-setting",
-        }
+        },
     ):
         env_config = PluginTest.get_env_var_config()
         assert env_config["prop1"] == "hello"

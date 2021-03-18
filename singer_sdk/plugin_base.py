@@ -96,7 +96,9 @@ class PluginBase(metaclass=abc.ABCMeta):
                     f"Parsing '{config_key}' config from env variable '{env_var_name}'."
                 )
                 if env_var_value[0] == "[" and env_var_value[-1] == "]":
-                    result[config_key] = env_var_value.lstrip("[").rstrip("]").split(",")
+                    result[config_key] = (
+                        env_var_value.lstrip("[").rstrip("]").split(",")
+                    )
                 else:
                     result[config_key] = env_var_value
         return result
