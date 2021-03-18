@@ -47,7 +47,7 @@ class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stre
         next_page_token: Optional[Any] = None
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization.
-        
+
         If paging is supported, developers may override this method with specific paging
         logic.
         """
