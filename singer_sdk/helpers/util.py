@@ -23,10 +23,12 @@ def read_json_file(path: Union[PurePath, str]) -> Dict[str, Any]:
 
 
 def utc_now():
+    """Return current time in UTC."""
     return pendulum.utcnow()
 
 
 def get_catalog_entries(catalog_dict: dict) -> List[dict]:
+    """Parse the catalog dict and return a list of catalog entries."""
     if "streams" not in catalog_dict:
         raise ValueError("Catalog does not contain expected 'streams' collection.")
     if not catalog_dict.get("streams"):
@@ -35,6 +37,7 @@ def get_catalog_entries(catalog_dict: dict) -> List[dict]:
 
 
 def get_catalog_entry_name(catalog_entry: dict) -> str:
+    """Return the name of the provided catalog entry dict."""
     result = catalog_entry.get("stream", catalog_entry.get("tap_stream_id", None))
     if not result:
         raise ValueError(
@@ -45,6 +48,7 @@ def get_catalog_entry_name(catalog_entry: dict) -> str:
 
 
 def get_catalog_entry_schema(catalog_entry: dict) -> dict:
+    """Return the JSON Schema dict for the specified catalog entry dict."""
     result = catalog_entry.get("schema", None)
     if not result:
         raise ValueError(
@@ -54,13 +58,18 @@ def get_catalog_entry_schema(catalog_entry: dict) -> dict:
     return result
 
 
-def get_property_schema(schema: dict, property: str, warn=True) -> Optional[dict]:
+def get_property_schema(schema: dict, property: str) -> Optional[dict]:
+    """Given the provided JSON Schema, return the property by name specified.
+
+    If property name does not exist in schema, return None.
+    """
     if property not in schema["properties"]:
         return None
     return schema["properties"][property]
 
 
 def is_boolean_type(property_schema: dict) -> Optional[bool]:
+    """Return true if the JSON Schema type is a boolean or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):

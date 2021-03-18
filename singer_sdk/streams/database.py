@@ -77,6 +77,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             A schema dict or the path to a valid schema file in json.
         name : str
             Required. Name of the stream (generally the same as the table name).
+
         """
         super().__init__(tap=tap, schema=schema, name=name)
         self.is_view: Optional[bool] = None

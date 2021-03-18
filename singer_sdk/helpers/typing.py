@@ -1,7 +1,7 @@
 """Helpers for JSONSchema typing.
 
 Usage example:
-
+----------
 ```py
     jsonschema = PropertiesList(
         Property("id", IntegerType, required=True),
@@ -31,15 +31,17 @@ Usage example:
 ```
 
 Note:
+----
 - These helpers are designed to output json in the traditional Singer dialect.
 - Due to the expansive set of capabilities within the JSONSchema spec, there may be
   other valid implementations which are not syntactically identical to those generated
   here.
+
 """
 
 import copy
 from jsonschema import validators
-from typing import Iterable, List, Tuple
+from typing import List, Tuple
 
 from singer_sdk.helpers.classproperty import classproperty
 
@@ -114,15 +116,20 @@ class JSONTypeHelper(object):
 
     @classproperty
     def type_dict(cls) -> dict:
+        """Return dict describing the type."""
         raise NotImplementedError()
 
     def to_dict(self) -> dict:
+        """Return dict describing the object."""
         return self.type_dict
 
 
 class DateTimeType(JSONTypeHelper):
+    """DateTime type."""
+
     @classproperty
     def type_dict(cls) -> dict:
+        """Return dict describing the type."""
         return {
             "type": ["string"],
             "format": "date-time",
@@ -130,37 +137,51 @@ class DateTimeType(JSONTypeHelper):
 
 
 class StringType(JSONTypeHelper):
+    """String type."""
+
     @classproperty
     def type_dict(cls) -> dict:
+        """Return dict describing the type."""
         return {"type": ["string"]}
 
 
 class BooleanType(JSONTypeHelper):
+    """Boolean type."""
+
     @classproperty
     def type_dict(cls) -> dict:
+        """Return dict describing the type."""
         return {"type": ["boolean"]}
 
 
 class IntegerType(JSONTypeHelper):
+    """Integer type."""
+
     @classproperty
     def type_dict(cls) -> dict:
+        """Return dict describing the type."""
         return {"type": ["integer"]}
 
 
 class NumberType(JSONTypeHelper):
+    """Number type."""
+
     @classproperty
     def type_dict(cls) -> dict:
+        """Return dict describing the type."""
         return {"type": ["number"]}
 
 
 class ArrayType(JSONTypeHelper):
-    """Datetime type."""
+    """Array type."""
 
     def __init__(self, wrapped_type) -> None:
+        """Initialize Array type with wrapped inner type."""
         self.wrapped_type = wrapped_type
 
     @property
     def type_dict(self) -> dict:
+        """Return dict describing the type."""
         return {"type": "array", "items": self.wrapped_type.type_dict}
 
 
@@ -168,6 +189,7 @@ class Property(JSONTypeHelper):
     """Generic Property. Should be nested within a `PropertiesList`."""
 
     def __init__(self, name, wrapped, required: bool = False, default=None) -> None:
+        """Initialize Property object."""
         self.name = name
         self.wrapped = wrapped
         self.optional = not required
@@ -175,9 +197,11 @@ class Property(JSONTypeHelper):
 
     @property
     def type_dict(self) -> dict:
+        """Return dict describing the type."""
         return self.wrapped.type_dict
 
     def to_dict(self) -> dict:
+        """Return a dict mapping the property name to its definition."""
         type_dict = self.type_dict
         if self.optional:
             type_dict = _append_type(type_dict, "null")
@@ -190,10 +214,12 @@ class ObjectType(JSONTypeHelper):
     """Object type, which wraps one or more named properties."""
 
     def __init__(self, *properties) -> None:
+        """Initialize ObjectType from its list of properties."""
         self.wrapped: List[Property] = list(properties)
 
     @property
     def type_dict(self) -> dict:
+        """Return dict describing the type."""
         merged_props = {}
         required = []
         for w in self.wrapped:
@@ -206,5 +232,6 @@ class ObjectType(JSONTypeHelper):
 class PropertiesList(ObjectType):
     """Properties list. A convenience wrapper around the ObjectType class."""
 
-    def items(self) -> Iterable[Tuple[str, Property]]:
+    def items(self) -> List[Tuple[str, Property]]:
+        """Return list of (name, property) tuples."""
         return [(p.name, p) for p in self.wrapped]

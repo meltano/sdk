@@ -1,7 +1,11 @@
 """Defines the `classproperty` decorator."""
 
+# noqa
+
 
 class classproperty(property):
+    """Class property decorator."""
+
     def __get__(self, obj, objtype=None):
         return super(classproperty, self).__get__(objtype)
 
