@@ -4,7 +4,7 @@ import requests
 
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union, List, Iterable
 
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 from singer_sdk.authenticators import (
@@ -30,13 +30,13 @@ SCHEMAS_DIR = Path("./schemas")
 
 {% if cookiecutter.stream_type in ["GraphQL", "REST"] %}
 {% if cookiecutter.stream_type == "GraphQL" %}
-class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
+class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
     url_base = "https://api.mysample.com"
 
 {% elif cookiecutter.stream_type == "REST" %}
-class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
+class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
     url_base = "https://api.mysample.com"
@@ -87,7 +87,7 @@ class Tap{{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stre
 {% if cookiecutter.stream_type == "GraphQL" %}
 # TODO: - Override `StreamA` and `StreamB` with your own stream definition.
 #       - Copy-paste as many times as needed to create multiple stream types.
-class StreamA(Tap{{ cookiecutter.source_name }}Stream):
+class StreamA({{ cookiecutter.source_name }}Stream):
     name = "users"
     schema = PropertiesList(
         Property("name", StringType),
@@ -122,7 +122,7 @@ class StreamA(Tap{{ cookiecutter.source_name }}Stream):
         """
 
 
-class StreamB(Tap{{ cookiecutter.source_name }}Stream):
+class StreamB({{ cookiecutter.source_name }}Stream):
     name = "groups"
     schema = PropertiesList(
         Property("name", StringType),
@@ -143,7 +143,7 @@ class StreamB(Tap{{ cookiecutter.source_name }}Stream):
 {% elif cookiecutter.stream_type == "REST" %}
 # TODO: - Override `StreamA` and `StreamB` with your own stream definition.
 #       - Copy-paste as many times as needed to create multiple stream types.
-class StreamA(Tap{{ cookiecutter.source_name }}Stream):
+class StreamA({{ cookiecutter.source_name }}Stream):
     stream_name = "users"
     path = "/users"
     primary_keys = ["id"]
@@ -160,7 +160,7 @@ class StreamA(Tap{{ cookiecutter.source_name }}Stream):
     ).to_dict()
 
 
-class StreamB(Tap{{ cookiecutter.source_name }}Stream):
+class StreamB({{ cookiecutter.source_name }}Stream):
     stream_name = "groups"
     path = "/groups"
     primary_keys = ["id"]
@@ -171,4 +171,28 @@ class StreamB(Tap{{ cookiecutter.source_name }}Stream):
         Property("modified", DateTimeType),
     ).to_dict()
 {% endif %}
+{% endif %}
+
+{% if cookiecutter.stream_type == "Database" %}
+
+class {{ cookiecutter.source_name }}Stream(DatabaseStream):
+    """Sample tap test for snowflake."""
+
+    @classmethod
+    def execute_query(cls, sql: Union[str, List[str]], config) -> Iterable[dict]:
+        """Run a query in snowflake."""
+        connection = cls.open_connection(config=config)
+        """Connect to database."""
+        # TODO: Define the process of executing a query against your database
+        #       and returning a list or other iterable containing the resulting
+        #       rows.
+        raise NotImplementedError("The method is not yet implemented (TODO)")
+
+    @classmethod
+    def open_connection(cls, config) -> Any:
+        """Connect to database."""
+        # TODO: Define the process of connecting to your database and returning
+        #       a connection object.
+        raise NotImplementedError("The method is not yet implemented (TODO)")
+
 {% endif %}
