@@ -87,16 +87,20 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         result: Dict[str, Any] = {}
         plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
-        for k, v in os.environ.items():
-            if k.startswith(plugin_env_prefix):
-                config_key = k.split(plugin_env_prefix)[1]
+        for config_key in cls.config_jsonschema["properties"].keys():
+            env_var_name = plugin_env_prefix + config_key
+            if env_var_name in os.environ:
+                env_var_value = os.environ[env_var_name]
+                config_key = env_var_name.split(plugin_env_prefix)[1]
                 cls.logger.info(
-                    f"Parsing '{config_key}' config from env variable '{k}'."
+                    f"Parsing '{config_key}' config from env variable '{env_var_name}'."
                 )
-                if v[0] == "[" and v[-1] == "]":
-                    result[config_key] = v.lstrip("[").rstrip("]").split(",")
+                if env_var_value[0] == "[" and env_var_value[-1] == "]":
+                    result[config_key] = (
+                        env_var_value.lstrip("[").rstrip("]").split(",")
+                    )
                 else:
-                    result[config_key] = v
+                    result[config_key] = env_var_value
         return result
 
     # Core plugin metadata:
