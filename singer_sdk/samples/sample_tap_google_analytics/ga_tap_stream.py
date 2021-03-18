@@ -10,7 +10,7 @@ from singer_sdk.authenticators import OAuthJWTAuthenticator
 
 GOOGLE_OAUTH_ENDPOINT = "https://oauth2.googleapis.com/token"
 GA_OAUTH_SCOPES = "https://www.googleapis.com/auth/analytics.readonly"
-SCHEMAS_DIR = Path("./singer_sdk/samples/sample_tap_google_analytics/schemas")
+SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 
 class GoogleJWTAuthenticator(OAuthJWTAuthenticator):

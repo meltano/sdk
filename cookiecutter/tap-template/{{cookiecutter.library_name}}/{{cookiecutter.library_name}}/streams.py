@@ -32,22 +32,29 @@ from singer_sdk.helpers.typing import (
     StringType,
 )
 
-SCHEMAS_DIR = Path("./schemas")
+SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 
+{% if cookiecutter.stream_type == "Other" %}
+class {{ cookiecutter.source_name }}Stream(Stream):
+    """Stream class for {{ cookiecutter.source_name }} streams."""
+
+    def get_records(self, partition: Optional[dict]) -> Iterable[dict]:
+        """Return a generator of row-type dictionary objects."""
+        # TODO: Write logic to extract data from the upstream source.
+        # rows = mysource.getall()
+        # for row in rows:
+        #     yield row.to_dict()
+        raise NotImplementedError("The method is not yet implemented (TODO)")
+
+{% endif %}
 {% if cookiecutter.stream_type in ["GraphQL", "REST"] %}
-{% if cookiecutter.stream_type == "GraphQL" %}
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
     url_base = "https://api.mysample.com"
 
-{% elif cookiecutter.stream_type == "REST" %}
-class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
-    """{{ cookiecutter.source_name }} stream class."""
-
-    url_base = "https://api.mysample.com"
-
+{% if cookiecutter.stream_type == "REST" %}
     def get_url_params(
         self,
         partition: Optional[dict],
@@ -89,9 +96,8 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
             oauth_scopes="TODO: OAuth Scopes",
         )
 {% endif %}
-
-
 {% endif %}
+
 
 {% if cookiecutter.stream_type == "GraphQL" %}
 # TODO: - Override `StreamA` and `StreamB` with your own stream definition.
@@ -205,18 +211,4 @@ class {{ cookiecutter.source_name }}Stream(DatabaseStream):
         # TODO: Define the process of connecting to your database and returning
         #       a connection object.
         raise NotImplementedError("The method is not yet implemented (TODO)")
-
-{% elif cookiecutter.stream_type == "Other" %}
-
-class {{ cookiecutter.source_name }}Stream(Stream):
-    """Stream class for {{ cookiecutter.source_name }} streams."""
-
-    def get_records(self, partition: Optional[dict]) -> Iterable[dict]:
-        """Return a generator of row-type dictionary objects."""
-        # TODO: Write logic to extract data from the upstream source.
-        # rows = mysource.getall()
-        # for row in rows:
-        #     yield row.to_dict()
-        raise NotImplementedError("The method is not yet implemented (TODO)")
-
 {% endif %}

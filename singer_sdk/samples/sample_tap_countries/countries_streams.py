@@ -11,7 +11,7 @@ from pathlib import Path
 
 from singer_sdk.streams.graphql import GraphQLStream
 
-SCHEMAS_DIR = Path("./singer_sdk/samples/sample_tap_countries/schemas")
+SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 
 class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
