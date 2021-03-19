@@ -1,5 +1,6 @@
 """General helper functions, helper classes, and decorators."""
 
+from copy import deepcopy
 from decimal import Decimal
 import json
 from pathlib import Path, PurePath
@@ -58,6 +59,46 @@ def get_catalog_entry_schema(catalog_entry: dict) -> dict:
     return result
 
 
+def get_selected_schema(schema: dict, catalog_entry: dict) -> dict:
+    """Return a copy of the provided JSON schema, dropping any fields not selected."""
+    result = deepcopy(schema)  # we don't want to modify the original
+    _pop_deselected_schema(result, catalog_entry, [])
+    return result
+
+
+def _pop_deselected_schema(
+    schema: dict, catalog_entry: dict, breadcrumb: List[str]
+) -> None:
+    """Pop anything from schema that is not selected.
+
+    Walk through schema, starting at the inde in breadcrumb, recursivley update in
+    place.
+    """
+    for prop, val in schema.items():
+        if not schema.get("selected", True) in [True, "selected"]:
+            schema.pop(prop)
+            continue
+        md = _get_metadata_by_breadcrumb(catalog_entry, breadcrumb + [prop])
+        if md and not md.get("selected", True) in [True, "selected"]:
+            schema.pop(prop)
+            continue
+        if is_object_type(val):
+            # call recursively in case any subproperties are deselected.
+            _pop_deselected_schema(val, catalog_entry, breadcrumb + [prop])
+
+
+def _get_metadata_by_breadcrumb(
+    catalog_entry: dict, breadcrumb: List[str]
+) -> Optional[dict]:
+    md: Optional[dict] = catalog_entry.get("metadata")
+    if not md:
+        return None
+    for md_entry in md:
+        if md_entry.get("breadcrumb", None) == breadcrumb:
+            return md_entry
+    return None
+
+
 def get_property_schema(schema: dict, property: str) -> Optional[dict]:
     """Given the provided JSON Schema, return the property by name specified.
 
@@ -74,6 +115,16 @@ def is_boolean_type(property_schema: dict) -> Optional[bool]:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
         if "boolean" in property_type or property_type == "boolean":
+            return True
+    return False
+
+
+def is_object_type(property_schema: dict) -> Optional[bool]:
+    """Return true if the JSON Schema type is an object or None if detection fails."""
+    if "anyOf" not in property_schema and "type" not in property_schema:
+        return None  # Could not detect data type
+    for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
+        if "object" in property_type or property_type == "object":
             return True
     return False
 

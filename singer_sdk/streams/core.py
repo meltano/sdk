@@ -10,7 +10,11 @@ import pendulum
 from singer import metadata
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
-from singer_sdk.helpers.util import get_property_schema, is_boolean_type
+from singer_sdk.helpers.util import (
+    get_property_schema,
+    is_boolean_type,
+    get_selected_schema,
+)
 from singer_sdk.helpers.state import (
     get_stream_state_dict,
     read_stream_state,
@@ -318,8 +322,11 @@ class Stream(metaclass=abc.ABCMeta):
     def _write_schema_message(self):
         """Write out a SCHEMA message with the stream schema."""
         bookmark_keys = [self.replication_key] if self.replication_key else None
+        selected_schema = get_selected_schema(
+            schema=self.schema, catalog_entry=self.singer_catalog_entry.dict()
+        )
         schema_message = SchemaMessage(
-            self.tap_stream_id, self.schema, self.primary_keys, bookmark_keys
+            self.tap_stream_id, selected_schema, self.primary_keys, bookmark_keys
         )
         singer.write_message(schema_message)
 
