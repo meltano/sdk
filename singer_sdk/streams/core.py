@@ -355,6 +355,7 @@ class Stream(metaclass=abc.ABCMeta):
             for row_dict in self.get_records(partition=partition):
                 if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
                     self._write_state_message()
+                self._conform_record_property_selection(row_dict)
                 record = self._conform_record_data_types(row_dict)
                 record_message = RecordMessage(
                     stream=self.name,
@@ -383,9 +384,20 @@ class Stream(metaclass=abc.ABCMeta):
             "not found in catalog schema. Ignoring."
         )
 
+    def _conform_record_property_selection(self, record: Dict[str, Any]) -> None:
+        """Drop values if deselected in schema or in catalog entry metadata."""
+        # TODO: Call this recursively in order to handle nested properties
+        for property_name, elem in record.items():
+            property_schema = get_property_schema(self.schema, property_name)
+            if not property_schema:
+                self._warn_unmapped_property(property_name)
+                record.pop(property_name)
+            # TODO: Also need to check schema "selected" value if available
+            # TODO: Also need to check catalog entry's metadata rules
+
     def _conform_record_data_types(  # noqa: C901
         self, row: Dict[str, Any]
-    ) -> RecordMessage:
+    ) -> Dict[str, Any]:
         """Translate values in record dictionary to singer-compatible data types.
 
         Any property names not found in the schema catalog will be removed, and a
