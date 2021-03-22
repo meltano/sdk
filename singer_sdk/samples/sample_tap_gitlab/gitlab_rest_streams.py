@@ -75,6 +75,11 @@ class ProjectBasedStream(GitlabStream):
                 {"project_id": id} for id in cast(list, self.config.get("project_ids"))
             ]
         if "{group_id}" in self.path:
+            if "group_ids" not in self.config:
+                raise ValueError(
+                    f"Missing `group_ids` setting which is required for the "
+                    f"'{self.name}' stream."
+                )
             return [{"group_id": id} for id in cast(list, self.config.get("group_ids"))]
         raise ValueError(
             "Could not detect partition type for Gitlab stream "
@@ -157,15 +162,18 @@ class EpicsStream(ProjectBasedStream):
 
     # schema_filepath = SCHEMAS_DIR / "epics.json"
 
-    def post_process(self, row: dict, context: dict) -> dict:
+    def post_process(self, row: dict, stream_or_partition_state: dict) -> dict:
         """Perform post processing, including queuing up any child stream types."""
         # Ensure child state record(s) are created
         _ = get_stream_state_dict(
             self.tap_state,
             "epic_issues",
-            partition={"group_id": context["group_id"], "epic_id": row["id"]},
+            partition={
+                "group_id": row["group_id"],
+                "epic_id": row["id"],
+            },
         )
-        return super().post_process(row, context)
+        return super().post_process(row, stream_or_partition_state)
 
 
 class EpicIssuesStream(GitlabStream):
@@ -182,7 +190,9 @@ class EpicIssuesStream(GitlabStream):
     schema_filepath = SCHEMAS_DIR / "epic_issues.json"
     parent_stream_types = [EpicsStream]  # Stream should wait for parents to complete.
 
-    def get_url_params(self, partition: Optional[dict]) -> dict:
+    def get_url_params(
+        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+    ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in parameterization."""
         result = super().get_url_params(partition)
         if "epic_id" not in partition:
