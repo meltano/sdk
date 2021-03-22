@@ -358,8 +358,8 @@ class Stream(metaclass=abc.ABCMeta):
                     if rows_sent:
                         # Flush state messages if applicable
                         self._write_state_message()
-                    # Abort stream sync for this partition
-                    continue
+                    # Abort stream sync for this partition or stream
+                    break
 
                 if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
                     self._write_state_message()
