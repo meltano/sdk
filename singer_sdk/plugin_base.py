@@ -49,14 +49,25 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Union[PurePath, str, dict, None] = None,
+        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
         parse_env_config: bool = True,
     ) -> None:
-        """Initialize the tap or target."""
+        """Initialize the tap or target.
+
+        - `config` may be one or more paths, either as str or PurePath objects, or
+        it can be a predetermined config dict.
+        - `parse_env_config` - True to parse settings from env vars.
+        """
         if not config:
             config_dict = {}
         elif isinstance(config, str) or isinstance(config, PurePath):
             config_dict = read_json_file(config)
+        elif isinstance(config, list):
+            config_dict = {}
+            for config_path in config:
+                # Read each config file sequentially. Settings from files later in the
+                # list will override those of earlier ones.
+                config_dict.update(read_json_file(config_path))
         elif isinstance(config, dict):
             config_dict = config
         else:
