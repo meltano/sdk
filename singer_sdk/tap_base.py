@@ -73,6 +73,16 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Return a list of supported capabilities."""
         return ["sync", "catalog", "state", "discover"]
 
+    # Connection test:
+
+    def run_connection_test(self) -> bool:
+        """Run connection test and return True if successful."""
+        """Sync all streams."""
+        for stream in self.streams.values():
+            stream.MAX_RECORDS_LIMIT = 0
+            stream.sync()
+        return True
+
     # Stream detection:
 
     def run_discovery(self) -> str:
@@ -151,6 +161,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         @click.option("--version", is_flag=True)
         @click.option("--about", is_flag=True)
         @click.option("--discover", is_flag=True)
+        @click.option("--test", is_flag=True)
         @click.option("--format")
         @click.option("--config")
         @click.option("--catalog")
@@ -160,6 +171,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             version: bool = False,
             about: bool = False,
             discover: bool = False,
+            test: bool = False,
             config: str = None,
             state: str = None,
             catalog: str = None,
@@ -175,6 +187,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             tap = cls(config=config, state=state, catalog=catalog)
             if discover:
                 tap.run_discovery()
+                if test:
+                    tap.run_connection_test()
+            elif test:
+                tap.run_connection_test()
             else:
                 tap.sync_all()
 
