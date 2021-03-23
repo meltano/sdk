@@ -59,7 +59,7 @@ class Stream(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
     MAX_CONNECT_RETRIES = 0
-    MAX_RECORD_LIMIT: Optional[int] = None
+    MAX_RECORDS_LIMIT: Optional[int] = None
 
     parent_stream_types: List[Any] = []  # May be used in sync sequencing
 
@@ -348,12 +348,12 @@ class Stream(metaclass=abc.ABCMeta):
         for partition in partitions:
             for row_dict in self.get_records(partition=partition):
                 if (
-                    self.MAX_RECORD_LIMIT is not None
-                    and rows_sent >= self.MAX_RECORD_LIMIT
+                    self.MAX_RECORDS_LIMIT is not None
+                    and rows_sent >= self.MAX_RECORDS_LIMIT
                 ):
                     logging.info(
                         "Stream prematurely aborted due to the stream's max record "
-                        f"limit ({self.MAX_RECORD_LIMIT}) being reached."
+                        f"limit ({self.MAX_RECORDS_LIMIT}) being reached."
                     )
                     if rows_sent:
                         # Flush state messages if applicable

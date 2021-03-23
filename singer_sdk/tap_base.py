@@ -79,7 +79,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Run connection test and return True if successful."""
         """Sync all streams."""
         for stream in self.streams.values():
-            stream.MAX_RECORD_LIMIT = 0
+            stream.MAX_RECORDS_LIMIT = 0
             stream.sync()
         return True
 
