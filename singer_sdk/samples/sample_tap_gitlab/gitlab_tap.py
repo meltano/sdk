@@ -15,7 +15,7 @@ from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
     IssuesStream,
     CommitsStream,
     EpicsStream,
-    EpicIssuesStream,
+    # EpicIssuesStream,  # Temporarily skipped due to access denied error
 )
 from singer_sdk.samples.sample_tap_gitlab.gitlab_globals import PLUGIN_NAME
 
@@ -26,7 +26,7 @@ STREAM_TYPES = [
     IssuesStream,
     CommitsStream,
     EpicsStream,
-    EpicIssuesStream,
+    # EpicIssuesStream,  # Temporarily skipped due to access denied error
 ]
 
 
@@ -37,6 +37,7 @@ class SampleTapGitlab(Tap):
     config_jsonschema = PropertiesList(
         Property("auth_token", StringType, required=True),
         Property("project_ids", ArrayType(StringType), required=True),
+        Property("group_ids", ArrayType(StringType), required=True),
         Property("start_date", DateTimeType, required=True),
         Property("api_url", StringType),
     ).to_dict()
