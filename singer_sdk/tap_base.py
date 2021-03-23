@@ -24,7 +24,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         config: Union[PurePath, str, dict, None] = None,
         catalog: Union[PurePath, str, dict, None] = None,
         state: Union[PurePath, str, dict, None] = None,
-        parse_env_config: bool = False,
+        parse_env_config: bool = True,
     ) -> None:
         """Initialize the tap."""
         super().__init__(config=config, parse_env_config=parse_env_config)

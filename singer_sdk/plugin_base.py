@@ -50,7 +50,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     def __init__(
         self,
         config: Union[PurePath, str, dict, None] = None,
-        parse_env_config: bool = False,
+        parse_env_config: bool = True,
     ) -> None:
         """Initialize the tap or target."""
         if not config:
