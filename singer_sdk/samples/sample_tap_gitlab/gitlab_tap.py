@@ -37,6 +37,7 @@ class SampleTapGitlab(Tap):
     config_jsonschema = PropertiesList(
         Property("auth_token", StringType, required=True),
         Property("project_ids", ArrayType(StringType), required=True),
+        Property("group_ids", ArrayType(StringType), required=True),
         Property("start_date", DateTimeType, required=True),
         Property("api_url", StringType),
     ).to_dict()
