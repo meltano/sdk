@@ -174,19 +174,18 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 return
             parse_env_config = False
             config_files: List[PurePath] = []
-            if config:
-                for config_path in config:
-                    if "ENV" in config:
-                        # Allow parse from env vars:
-                        parse_env_config = True
-                        continue
-                    # Validate config file paths before adding to list
-                    if not Path(config_path).is_file():
-                        raise FileNotFoundError(
-                            f"Could not locate config file at '{config_path}'."
-                            "Please check that the file exists."
-                        )
-                    config_files.append(Path(config_path))
+            for config_path in config or []:
+                if config_path == "ENV":
+                    # Allow parse from env vars:
+                    parse_env_config = True
+                    continue
+                # Validate config file paths before adding to list
+                if not Path(config_path).is_file():
+                    raise FileNotFoundError(
+                        f"Could not locate config file at '{config_path}'."
+                        "Please check that the file exists."
+                    )
+                config_files.append(Path(config_path))
             tap = cls(
                 config=config_files or None,
                 state=state,
