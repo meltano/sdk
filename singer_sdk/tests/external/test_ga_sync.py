@@ -16,5 +16,5 @@ def test_ga_sync_sample():
     config: Optional[dict] = None
     if Path(CONFIG_FILE).exists():
         config = json.loads(Path(CONFIG_FILE).read_text())
-    tap = SampleTapGoogleAnalytics(config=config)
+    tap = SampleTapGoogleAnalytics(config=config, parse_env_config=True)
     tap.sync_all()
