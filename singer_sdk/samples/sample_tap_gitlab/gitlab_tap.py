@@ -15,7 +15,7 @@ from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
     IssuesStream,
     CommitsStream,
     EpicsStream,
-    EpicIssuesStream,
+    # EpicIssuesStream,  # Temporarily skipped due to access denied error
 )
 from singer_sdk.samples.sample_tap_gitlab.gitlab_globals import PLUGIN_NAME
 
@@ -26,7 +26,7 @@ STREAM_TYPES = [
     IssuesStream,
     CommitsStream,
     EpicsStream,
-    # EpicIssuesStream, # Temporarily removed due to access error
+    # EpicIssuesStream,  # Temporarily skipped due to access denied error
 ]
 
 
