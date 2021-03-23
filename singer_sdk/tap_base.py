@@ -175,14 +175,14 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             parse_env_config = False
             config_files: List[PurePath] = []
             if config:
-                if "ENV" in config:
-                    # Allow parse from env vars:
-                    parse_env_config = True
-                    config.remove("ENV")
                 for config_path in config:
+                    if "ENV" in config:
+                        # Allow parse from env vars:
+                        parse_env_config = True
+                        continue
                     # Validate config file paths before adding to list
                     if not Path(config_path).is_file():
-                        raise FileExistsError(
+                        raise FileNotFoundError(
                             f"Could not locate config file at '{config_path}'."
                             "Please check that the file exists."
                         )
