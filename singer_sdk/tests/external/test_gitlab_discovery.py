@@ -14,7 +14,7 @@ def test_gitlab_tap_discovery():
     config: Optional[dict] = None
     if Path(CONFIG_FILE).exists():
         config = json.loads(Path(CONFIG_FILE).read_text())
-    tap = SampleTapGitlab(config=config, state=None)
+    tap = SampleTapGitlab(config=config, state=None, parse_env_config=True)
     catalog_json = tap.run_discovery()
     assert catalog_json
 
@@ -25,7 +25,7 @@ def test_gitlab_replication_keys():
     config: Optional[dict] = None
     if Path(CONFIG_FILE).exists():
         config = json.loads(Path(CONFIG_FILE).read_text())
-    tap = SampleTapGitlab(config=config, state=None)
+    tap = SampleTapGitlab(config=config, state=None, parse_env_config=True)
     catalog = json.loads(tap.get_catalog_json())
     catalog_entries = catalog["streams"]
     for catalog_entry in [c for c in catalog_entries if c["stream"] == stream_name]:

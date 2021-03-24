@@ -153,3 +153,8 @@ _Depending upon your implementation, you may also want to override one or more o
 - For more info, see the [Snowflake](/singer_sdk/samples/sample_tap_snowflake) sample:
   - [Snowflake tap](/singer_sdk/samples/sample_tap_snowflake/snowflake_tap.py)
   - [Snowflake streams](/singer_sdk/samples/sample_tap_snowflake/snowflake_tap_stream.py)
+
+## Singer SDK Implementation Details
+
+For more detailed information about the Singer SDK implementation, please see the 
+[Singer SDK Implementation Details](./implementation/README.md) section.
