@@ -19,25 +19,25 @@ if Path(CONFIG_FILE).exists():
 
 def test_gitlab_sync_projects():
     """Test sync_one() for gitlab sample."""
-    tap = SampleTapGitlab(config=config)
+    tap = SampleTapGitlab(config=config, parse_env_config=True)
     tap.sync_one("projects")
 
 
 def test_gitlab_sync_commits():
     """Test sync_one() for gitlab sample."""
-    tap = SampleTapGitlab(config=config)
+    tap = SampleTapGitlab(config=config, parse_env_config=True)
     tap.sync_one("commits")
 
 
 def test_gitlab_sync_issues():
     """Test sync_one() for gitlab sample."""
-    tap = SampleTapGitlab(config=config)
+    tap = SampleTapGitlab(config=config, parse_env_config=True)
     tap.sync_one("issues")
 
 
 def test_gitlab_sync_releases():
     """Test sync_one() for gitlab sample."""
-    tap = SampleTapGitlab(config=config)
+    tap = SampleTapGitlab(config=config, parse_env_config=True)
     tap.sync_one("releases")
 
 

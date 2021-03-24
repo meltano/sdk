@@ -2,7 +2,7 @@
 
 import abc
 import json
-from pathlib import PurePath
+from pathlib import PurePath, Path
 from typing import Any, List, Optional, Dict, Union
 
 import click
@@ -21,10 +21,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Union[PurePath, str, dict, None] = None,
+        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
         catalog: Union[PurePath, str, dict, None] = None,
         state: Union[PurePath, str, dict, None] = None,
-        parse_env_config: bool = True,
+        parse_env_config: bool = False,
     ) -> None:
         """Initialize the tap."""
         super().__init__(config=config, parse_env_config=parse_env_config)
@@ -163,7 +163,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         @click.option("--discover", is_flag=True)
         @click.option("--test", is_flag=True)
         @click.option("--format")
-        @click.option("--config")
+        @click.option("--config", multiple=True)
         @click.option("--catalog")
         @click.option("--state")
         @click.command()
@@ -172,7 +172,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             about: bool = False,
             discover: bool = False,
             test: bool = False,
-            config: str = None,
+            config: List[str] = None,
             state: str = None,
             catalog: str = None,
             format: str = None,
@@ -184,7 +184,26 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             if about:
                 cls.print_about(format)
                 return
-            tap = cls(config=config, state=state, catalog=catalog)
+            parse_env_config = False
+            config_files: List[PurePath] = []
+            for config_path in config or []:
+                if config_path == "ENV":
+                    # Allow parse from env vars:
+                    parse_env_config = True
+                    continue
+                # Validate config file paths before adding to list
+                if not Path(config_path).is_file():
+                    raise FileNotFoundError(
+                        f"Could not locate config file at '{config_path}'."
+                        "Please check that the file exists."
+                    )
+                config_files.append(Path(config_path))
+            tap = cls(
+                config=config_files or None,
+                state=state,
+                catalog=catalog,
+                parse_env_config=parse_env_config,
+            )
             if discover:
                 tap.run_discovery()
                 if test:
