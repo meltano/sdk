@@ -26,6 +26,11 @@
 See the [dev guide](docs/dev_guide.md) for instructions on how to get started building your own
 taps.
 
+## Singer SDK Implementation Details
+
+For more detailed information about the Singer SDK implementation, please see the 
+[Singer SDK Implementation Details](./docs/implementation/README.md) section.
+
 ## Working within this repo
 
 First clone, then...
