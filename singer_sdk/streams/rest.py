@@ -124,14 +124,6 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         url: str = self.get_url(partition)
         params: dict = self.get_url_params(partition, next_page_token)
         request_data = self.prepare_request_payload(partition, next_page_token)
-        self.logger.info(
-            {
-                "url": url,
-                "params": params,
-                "request_data": request_data,
-                "next_page_token": next_page_token,
-            }
-        )
         request = requests.Request(
             method=http_method,
             url=url,
