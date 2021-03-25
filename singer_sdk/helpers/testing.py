@@ -9,6 +9,9 @@ def get_basic_tap_test(tap_class: Type[Tap], tap_config=None) -> Callable:
 
     def _test_fn(config=None):
         tap = tap_class(config=config or tap_config, parse_env_config=True)
+        tap.print_version()
+        tap.print_about()
+        tap.print_about(format="json")
         tap.run_discovery()
         tap.run_connection_test()
 
