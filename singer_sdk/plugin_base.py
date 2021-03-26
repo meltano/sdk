@@ -102,7 +102,6 @@ class PluginBase(metaclass=abc.ABCMeta):
             env_var_name = plugin_env_prefix + config_key.upper().replace('-', '_')
             if env_var_name in os.environ:
                 env_var_value = os.environ[env_var_name]
-                config_key = env_var_name.split(plugin_env_prefix)[1]
                 cls.logger.info(
                     f"Parsing '{config_key}' config from env variable '{env_var_name}'."
                 )
