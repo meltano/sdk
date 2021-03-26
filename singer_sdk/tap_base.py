@@ -87,15 +87,22 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def run_discovery(self) -> str:
         """Write the catalog json to STDOUT and return the same as a string."""
-        catalog_json = self.get_catalog_json()
-        print(catalog_json)
-        return catalog_json
+        catalog_text = self.catalog_json_text
+        print(catalog_text)
+        return catalog_text
 
-    def get_catalog_json(self) -> str:
+    @property
+    def catalog_dict(self) -> dict:
+        """Return the tap's catalog as a dict."""
+        return self.singer_catalog.to_dict()
+
+    @property
+    def catalog_json_text(self) -> str:
         """Return the tap's catalog as formatted json text."""
-        return json.dumps(self.get_singer_catalog().to_dict(), indent=2)
+        return json.dumps(self.catalog_dict, indent=2)
 
-    def get_singer_catalog(self) -> Catalog:
+    @property
+    def singer_catalog(self) -> Catalog:
         """Return a Catalog object."""
         catalog_entries = [
             stream.singer_catalog_entry for stream in self.streams.values()
