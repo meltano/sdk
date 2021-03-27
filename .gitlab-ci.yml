@@ -1,13 +1,16 @@
-# Official language image. Look for the different tagged releases at:
-# https://hub.docker.com/r/library/python/tags/
-#
-# Matrix syntax not correct:
-# .parallel:python_version:
-#   parallel:
-#     matrix:
-#       - PYTHON_VERSION: ["3.6", "3.7", "3.8"]
+stages:
+  - test
+  - publish
 
-image: python:3.6
+default:
+  before_script:
+    - python -V
+    - pip install pipx
+    # Force update PATH to include pipx executables
+    - export PATH=$PATH:/root/.local/bin
+    - pipx install poetry
+    - pipx install tox
+    - poetry install
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
@@ -17,16 +20,14 @@ cache:
     - .cache/pip
     - venv/
 
-before_script:
-  - python -V
-  - pip install pipx
-  # Force update PATH to include pipx executables
-  - export PATH=$PATH:/root/.local/bin
-  - pipx install poetry
-  - pipx install tox
-  - poetry install
-
-test_and_deploy:
+build_and_test:
+  stage: test
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.6", "3.7", "3.8"]
+      # Official language image. Look for the different tagged releases at:
+      # https://hub.docker.com/r/library/python/tags/
+  image: python:${PYTHON_VERSION}
   script:
     - |
       if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
@@ -38,12 +39,26 @@ test_and_deploy:
         poetry run pytest singer_sdk/tests/core
         poetry run pytest singer_sdk/tests/cookiecutter
       fi
-    - |
-      echo "Run python linters..."
-      poetry run black --check singer_sdk/
-      poetry run flake8 singer_sdk
-      poetry run pydocstyle singer_sdk
-      poetry run mypy singer_sdk || echo "MyPy found issues (ignoring)..."
+
+lint:
+  stage: test
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.8"]
+  image: python:${PYTHON_VERSION}
+  script:
+    - poetry run black --check singer_sdk/
+    - poetry run flake8 singer_sdk
+    - poetry run pydocstyle singer_sdk
+    - poetry run mypy singer_sdk || echo "MyPy found issues (ignoring)..."
+
+publish_to_pypi:
+  stage: publish
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.8"]
+  image: python:${PYTHON_VERSION}
+  script:
     - |
       echo "Publishing to PyPi..."
       if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
