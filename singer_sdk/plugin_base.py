@@ -205,7 +205,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         print(f"{cls.name} v{cls.plugin_version}")
 
     @classmethod
-    def print_about(cls, format: Optional[str]) -> None:
+    def print_about(cls, format: Optional[str] = None) -> None:
         """Print capabilities and other tap metadata."""
         info = OrderedDict[str, Any]()
         info["name"] = cls.name
