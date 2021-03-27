@@ -1,7 +1,5 @@
 """Test sample sync."""
 
-import json
-
 from singer_sdk.samples.sample_tap_countries.countries_tap import SampleTapCountries
 
 
@@ -16,20 +14,16 @@ def test_countries_sync_all():
 
 def test_countries_primary_key():
     tap = SampleTapCountries(config=None)
-    catalog = json.loads(tap.get_catalog_json())
-    catalog_entries = catalog["streams"]
-    for countries_entry in [c for c in catalog_entries if c["stream"] == "countries"]:
-        metadata_root = [
-            md for md in countries_entry["metadata"] if md["breadcrumb"] == []
-        ][0]
-        key_props_1 = metadata_root["metadata"].get("table-key-properties")
-        key_props_2 = countries_entry.get("key_properties")
-        assert key_props_1 == ["code"], (
-            f"Incorrect 'table-key-properties' in catalog: ({key_props_1})\n\n"
-            f"Root metadata was: {metadata_root}\n\n"
-            f"Catalog entry was: {countries_entry}"
-        )
-        assert key_props_2 == ["code"], (
-            f"Incorrect 'key_properties' in catalog: ({key_props_2})\n\n"
-            "Catalog entry was: {countries_entry}"
-        )
+    countries_entry = tap.streams["countries"].singer_catalog_entry
+    metadata_root = [md for md in countries_entry.metadata if md["breadcrumb"] == ()][0]
+    key_props_1 = metadata_root["metadata"].get("table-key-properties")
+    key_props_2 = countries_entry.key_properties
+    assert key_props_1 == ["code"], (
+        f"Incorrect 'table-key-properties' in catalog: ({key_props_1})\n\n"
+        f"Root metadata was: {metadata_root}\n\n"
+        f"Catalog entry was: {countries_entry}"
+    )
+    assert key_props_2 == ["code"], (
+        f"Incorrect 'key_properties' in catalog: ({key_props_2})\n\n"
+        "Catalog entry was: {countries_entry}"
+    )

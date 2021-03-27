@@ -68,7 +68,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Return the catalog dictionary input, or None if not provided."""
         return self._input_catalog
 
-    @property
+    @classproperty
     def capabilities(self) -> List[str]:
         """Return a list of supported capabilities."""
         return ["sync", "catalog", "state", "discover"]
@@ -87,15 +87,22 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def run_discovery(self) -> str:
         """Write the catalog json to STDOUT and return the same as a string."""
-        catalog_json = self.get_catalog_json()
-        print(catalog_json)
-        return catalog_json
+        catalog_text = self.catalog_json_text
+        print(catalog_text)
+        return catalog_text
 
-    def get_catalog_json(self) -> str:
+    @property
+    def catalog_dict(self) -> dict:
+        """Return the tap's catalog as a dict."""
+        return self.singer_catalog.to_dict()
+
+    @property
+    def catalog_json_text(self) -> str:
         """Return the tap's catalog as formatted json text."""
-        return json.dumps(self.get_singer_catalog().to_dict(), indent=2)
+        return json.dumps(self.catalog_dict, indent=2)
 
-    def get_singer_catalog(self) -> Catalog:
+    @property
+    def singer_catalog(self) -> Catalog:
         """Return a Catalog object."""
         catalog_entries = [
             stream.singer_catalog_entry for stream in self.streams.values()
@@ -154,7 +161,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Command Line Execution
 
     @classproperty
-    # @classmethod
     def cli(cls):
         """Execute standard CLI handler for taps."""
 
@@ -184,6 +190,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             if about:
                 cls.print_about(format)
                 return
+            cls.print_version(print_fn=cls.logger.info)
             parse_env_config = False
             config_files: List[PurePath] = []
             for config_path in config or []:
