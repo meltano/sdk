@@ -68,7 +68,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Return the catalog dictionary input, or None if not provided."""
         return self._input_catalog
 
-    @property
+    @classproperty
     def capabilities(self) -> List[str]:
         """Return a list of supported capabilities."""
         return ["sync", "catalog", "state", "discover"]
@@ -161,7 +161,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Command Line Execution
 
     @classproperty
-    # @classmethod
     def cli(cls):
         """Execute standard CLI handler for taps."""
 
