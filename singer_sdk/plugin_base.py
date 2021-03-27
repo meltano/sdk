@@ -197,9 +197,9 @@ class PluginBase(metaclass=abc.ABCMeta):
         return warnings, errors
 
     @classmethod
-    def print_version(cls) -> None:
+    def print_version(cls, print_fn=print) -> None:
         """Print help text for the tap."""
-        print(f"{cls.name} v{cls.plugin_version}, Singer SDK v{cls.sdk_version})")
+        print_fn(f"{cls.name} v{cls.plugin_version}, Singer SDK v{cls.sdk_version})")
 
     @classmethod
     def print_about(cls, format: Optional[str] = None) -> None:

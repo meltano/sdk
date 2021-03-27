@@ -190,6 +190,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             if about:
                 cls.print_about(format)
                 return
+            cls.print_version(print_fn=cls.logger.info)
             parse_env_config = False
             config_files: List[PurePath] = []
             for config_path in config or []:
