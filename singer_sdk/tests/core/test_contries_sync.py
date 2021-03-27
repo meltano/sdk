@@ -1,7 +1,5 @@
 """Test sample sync."""
 
-import json
-
 from singer_sdk.samples.sample_tap_countries.countries_tap import SampleTapCountries
 
 
