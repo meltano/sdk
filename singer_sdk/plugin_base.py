@@ -99,10 +99,9 @@ class PluginBase(metaclass=abc.ABCMeta):
         result: Dict[str, Any] = {}
         plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
         for config_key in cls.config_jsonschema["properties"].keys():
-            env_var_name = plugin_env_prefix + config_key
+            env_var_name = plugin_env_prefix + config_key.upper().replace("-", "_")
             if env_var_name in os.environ:
                 env_var_value = os.environ[env_var_name]
-                config_key = env_var_name.split(plugin_env_prefix)[1]
                 cls.logger.info(
                     f"Parsing '{config_key}' config from env variable '{env_var_name}'."
                 )
@@ -206,7 +205,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         print(f"{cls.name} v{cls.plugin_version}")
 
     @classmethod
-    def print_about(cls, format: Optional[str]) -> None:
+    def print_about(cls, format: Optional[str] = None) -> None:
         """Print capabilities and other tap metadata."""
         info = OrderedDict[str, Any]()
         info["name"] = cls.name

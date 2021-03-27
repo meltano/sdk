@@ -21,16 +21,17 @@ def test_get_env_var_config():
     with mock.patch.dict(
         os.environ,
         {
-            "PLUGIN_TEST_prop1": "hello",
-            "PLUGIN_TEST_prop3": "not-a-tap-setting",
+            "PLUGIN_TEST_PROP1": "hello",
+            "PLUGIN_TEST_PROP3": "not-a-tap-setting",
         },
     ):
         env_config = PluginTest.get_env_var_config()
         assert env_config["prop1"] == "hello"
-        assert "prop2" not in env_config
-        assert "prop3" not in env_config
+        assert "PROP1" not in env_config
+        assert "prop2" not in env_config and "PROP2" not in env_config
+        assert "prop3" not in env_config and "PROP3" not in env_config
 
     no_env_config = PluginTest.get_env_var_config()
-    assert "prop1" not in no_env_config
-    assert "prop2" not in no_env_config
-    assert "prop3" not in no_env_config
+    assert "prop1" not in no_env_config and "PROP1" not in env_config
+    assert "prop2" not in no_env_config and "PROP2" not in env_config
+    assert "prop3" not in no_env_config and "PROP3" not in env_config
