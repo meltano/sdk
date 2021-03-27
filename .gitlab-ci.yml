@@ -2,6 +2,16 @@ stages:
   - test
   - publish
 
+default:
+  before_script:
+    - python -V
+    - pip install pipx
+    # Force update PATH to include pipx executables
+    - export PATH=$PATH:/root/.local/bin
+    - pipx install poetry
+    - pipx install tox
+    - poetry install
+
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
@@ -18,14 +28,6 @@ build_and_test:
       # Official language image. Look for the different tagged releases at:
       # https://hub.docker.com/r/library/python/tags/
   image: python:${PYTHON_VERSION}
-  before_script:
-    - python -V
-    - pip install pipx
-    # Force update PATH to include pipx executables
-    - export PATH=$PATH:/root/.local/bin
-    - pipx install poetry
-    - pipx install tox
-    - poetry install
   script:
     - |
       if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
@@ -44,14 +46,6 @@ lint:
     matrix:
       - PYTHON_VERSION: ["3.8"]
   image: python:${PYTHON_VERSION}
-  before_script:
-    - python -V
-    - pip install pipx
-    # Force update PATH to include pipx executables
-    - export PATH=$PATH:/root/.local/bin
-    - pipx install poetry
-    - pipx install tox
-    - poetry install
   script:
     - poetry run black --check singer_sdk/
     - poetry run flake8 singer_sdk
@@ -60,6 +54,9 @@ lint:
 
 publish_to_pypi:
   stage: publish
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.8"]
   image: python:${PYTHON_VERSION}
   script:
     - |
