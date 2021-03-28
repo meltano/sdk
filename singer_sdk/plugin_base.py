@@ -1,10 +1,10 @@
 """Shared parent class for Tap, Target (future), and Transform (future)."""
 
 import abc
-from collections import OrderedDict
 import json
 import logging
 import os
+import sys
 from types import MappingProxyType
 from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
 from jsonschema import ValidationError, SchemaError, Draft4Validator
@@ -16,6 +16,11 @@ from singer_sdk.helpers.secrets import is_common_secret_key, SecretString
 from singer_sdk.helpers.typing import extend_with_default
 
 import click
+
+if sys.version_info < (3, 9):
+    from typing import OrderedDict
+else:
+    from collections import OrderedDict
 
 SDK_PACKAGE_NAME = "singer_sdk"
 
