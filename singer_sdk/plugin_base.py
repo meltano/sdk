@@ -221,7 +221,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         if format == "json":
             print(json.dumps(info, indent=2))
         else:
-            formatted = "\n".join([f"{k.title()}: {v}" for k, v in info])
+            formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
             print(formatted)
 
     @classmethod
