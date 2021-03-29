@@ -40,7 +40,6 @@ class PluginBase(metaclass=abc.ABCMeta):
     _config: dict
 
     @classproperty
-    # @classmethod
     def logger(cls) -> logging.Logger:
         """Get logger."""
         return logging.getLogger(cls.name)
@@ -83,7 +82,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         self._config = config_dict
         self._validate_config()
 
-    @property
+    @classproperty
     def capabilities(self) -> List[str]:
         """Return a list of supported capabilities."""
         return []
@@ -116,7 +115,6 @@ class PluginBase(metaclass=abc.ABCMeta):
     # Core plugin metadata:
 
     @classproperty
-    # @classmethod
     def plugin_version(cls) -> str:
         """Return the package version number."""
         try:
@@ -126,7 +124,6 @@ class PluginBase(metaclass=abc.ABCMeta):
         return version
 
     @classproperty
-    # @classmethod
     def sdk_version(cls) -> str:
         """Return the package version number."""
         try:
@@ -200,14 +197,14 @@ class PluginBase(metaclass=abc.ABCMeta):
         return warnings, errors
 
     @classmethod
-    def print_version(cls) -> None:
+    def print_version(cls, print_fn=print) -> None:
         """Print help text for the tap."""
-        print(f"{cls.name} v{cls.plugin_version}")
+        print_fn(f"{cls.name} v{cls.plugin_version}, Singer SDK v{cls.sdk_version})")
 
     @classmethod
     def print_about(cls, format: Optional[str] = None) -> None:
         """Print capabilities and other tap metadata."""
-        info = OrderedDict[str, Any]()
+        info = OrderedDict({})
         info["name"] = cls.name
         info["version"] = cls.plugin_version
         info["sdk_version"] = cls.sdk_version
@@ -216,7 +213,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         if format == "json":
             print(json.dumps(info, indent=2))
         else:
-            formatted = "\n".join([f"{k.title()}: {v}" for k, v in info])
+            formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
             print(formatted)
 
     @classmethod
