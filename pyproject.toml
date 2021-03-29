@@ -6,7 +6,7 @@ authors = ["Meltano Team and Contributors"]
 license = "Apache v2"
 
 [tool.poetry.dependencies]
-python = "<3.9,>=3.6"
+python = "<3.10,>=3.6"
 pipelinewise-singer-python = "1.2.0"
 backoff = "1.8.0"
 pendulum = "1.2.0"
