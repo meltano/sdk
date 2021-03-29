@@ -24,7 +24,7 @@ build_and_test:
   stage: test
   parallel:
     matrix:
-      - PYTHON_VERSION: ["3.6", "3.7", "3.8"]
+      - PYTHON_VERSION: ["3.6", "3.7", "3.8", "3.9"]
       # Official language image. Look for the different tagged releases at:
       # https://hub.docker.com/r/library/python/tags/
   image: python:${PYTHON_VERSION}
