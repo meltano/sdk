@@ -358,7 +358,7 @@ class Stream(metaclass=abc.ABCMeta):
                     # Abort stream sync for this partition or stream
                     break
 
-                if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
+                if rows_sent and ((rows_sent - 1) % self.STATE_MSG_FREQUENCY == 0):
                     self._write_state_message()
                 record = self._conform_record_data_types(row_dict)
                 record_message = RecordMessage(
