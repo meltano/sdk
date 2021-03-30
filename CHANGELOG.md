@@ -19,7 +19,7 @@ The next few lines form the template for unreleased changes.
 ## v0.1.0 [Unreleased]
 
 First official SDK release. Numerous changes and improvements implemented, with the goal of stabilizing
-and making available for the community.
+and making broadly available for the community.
 
 ### Added
 
