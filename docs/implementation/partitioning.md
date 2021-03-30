@@ -1,0 +1,26 @@
+# [Singer SDK Implementation Details](/.README.md) - Stream Partitioning
+
+The Singer SDK supports stream paritioning, which is to say a set of substreams which each
+can have their own STATE and their own distinct queryable domain.
+
+## If you want to utilize partitioning
+
+To take advantage of paritioning, first override the `Stream.partitions` property,
+returning a list of dictionaries, where each dictionary uniquely defines the construct of
+a partition. For instance, a regionally partitioned stream may return the following:
+
+`[{"region": "us-east"}, {"region": "us-west"}, ...]`
+
+For any streams which define the `partitions` property, the individual partitions will be
+passed one at a time through the `partition` argument of methods which reference the 
+partition, such as `Stream.get_records()`. 
+
+## If you do not require partitioning
+
+In general, developers can simply ignore the `partition` arguments in methods like 
+`Stream.get_records()`.
+
+If you are unsure of whether the stream will be partitioned or not, developers may always
+call `Stream.get_stream_or_partition_state(partition)` in order to 
+retreive a readable and writable copy of the state for _either_ the stream (if `partition`
+is `None`) or for the `partition` (if `partition` is not `None`).
