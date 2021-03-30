@@ -1,7 +1,6 @@
 """Shared parent class for Tap, Target (future), and Transform (future)."""
-from __future__ import annotations
-
 import abc
+from collections import OrderedDict
 import json
 import logging
 import os
@@ -207,7 +206,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     @classmethod
     def print_about(cls, format: Optional[str] = None) -> None:
         """Print capabilities and other tap metadata."""
-        info = dict[str, Any] = {}
+        info: Dict[str, Any] = OrderedDict()
         info["name"] = cls.name
         info["version"] = cls.plugin_version
         info["sdk_version"] = cls.sdk_version
