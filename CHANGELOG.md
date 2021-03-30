@@ -28,7 +28,7 @@ and making available for the community.
 - Added SDK testing matrix for python versions 3.6, 3.7, 3.8 (#61, !33)
 - Added support for multiple `--config=` inputs, combining one or more config.json files (#53, !27)
 - Added new CLI `--test` option to perform connection test on all defined streams (#14, !28)
-- Added default value support for plugin configs (!12) - **_Contributed by: Ken Payne_**
+- Added default value support for plugin configs (!12) - **_Contributed by: [Ken Payne](https://gitlab.com/kgpayne)_**
 
 ### Changed
 
@@ -38,9 +38,9 @@ and making available for the community.
 ### Fixed
 
 - Resolved issue on Python 3.6: `cannot import 'metadata' from 'importlib'` (#58)
-- Fixed issue reading from JSON file (!11) - **_Contributed by: Edgar R. Mondragón_**
-- Look only for valid plugin settings in environment variables (!21) - **_Contributed by: Edgar R. Mondragón_**
-- Fixed bug in `STATE` handling (!13) - **_Contributed by: Ken Payne_**
+- Fixed issue reading from JSON file (!11) - **_Contributed by: [Edgar R. Mondragón](https://gitlab.com/edgarrmondragon)_**
+- Look only for valid plugin settings in environment variables (!21) - **_Contributed by: [Edgar R. Mondragón](https://gitlab.com/edgarrmondragon)_**
+- Fixed bug in `STATE` handling (!13) - **_Contributed by: [Ken Payne](https://gitlab.com/kgpayne)_**
 
 ## v0.0.1-devx
 
