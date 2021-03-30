@@ -42,10 +42,6 @@ from singer.catalog import Catalog
 from singer.schema import Schema
 from singer_sdk.helpers.typing import is_datetime_type
 
-DEBUG_MODE = True
-
-# How many records to emit between sending state message updates
-STATE_MSG_FREQUENCY = 10 if DEBUG_MODE else 10000
 
 # Replication methods
 REPLICATION_FULL_TABLE = "FULL_TABLE"
@@ -58,6 +54,7 @@ FactoryType = TypeVar("FactoryType", bound="Stream")
 class Stream(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
+    STATE_MSG_FREQUENCY = 10000  # Number of records between state messages
     MAX_CONNECT_RETRIES = 0
     MAX_RECORDS_LIMIT: Optional[int] = None
 
@@ -168,7 +165,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._replication_key = new_value
 
     @property
-    def singer_metadata(self) -> dict:
+    def _singer_metadata(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec."""
         self.logger.debug(f"Schema Debug: {self.schema}")
         md = metadata.get_standard_metadata(
@@ -183,13 +180,13 @@ class Stream(metaclass=abc.ABCMeta):
         return md
 
     @property
-    def singer_catalog_entry(self) -> singer.CatalogEntry:
+    def _singer_catalog_entry(self) -> singer.CatalogEntry:
         """Return catalog entry as specified by the Singer catalog spec."""
         return singer.CatalogEntry(
             tap_stream_id=self.tap_stream_id,
             stream=self.name,
             schema=Schema.from_dict(self.schema),
-            metadata=self.singer_metadata,
+            metadata=self._singer_metadata,
             key_properties=self.primary_keys or None,
             replication_key=self.replication_key,
             replication_method=self.replication_method,
