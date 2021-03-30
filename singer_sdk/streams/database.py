@@ -182,7 +182,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             """
 
     @staticmethod
-    def create_singer_schema(columns: Dict[str, str]) -> singer.Schema:
+    def _create_singer_schema(columns: Dict[str, str]) -> singer.Schema:
         """Return a singer 'Schema' object with the specified columns and data types."""
         props: Dict[str, singer.Schema] = {}
         for column, sql_type in columns.items():
@@ -190,7 +190,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
         return singer.Schema(type="object", properties=props)
 
     @staticmethod
-    def get_singer_type(sql_type: str) -> singer.Schema:
+    def _get_singer_type(sql_type: str) -> singer.Schema:
         """Return a singer type class based on the provided sql-base data type."""
         for matchable in SINGER_TYPE_LOOKUP.keys():
             if matchable.lower() in sql_type.lower():
@@ -251,7 +251,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             columns = collated_columns.get(name_tuple, None)
             if not columns:
                 raise RuntimeError(f"Did not find any columns for table '{full_name}'")
-            singer_schema: singer.Schema = cls.create_singer_schema(columns)
+            singer_schema: singer.Schema = cls._create_singer_schema(columns)
             primary_keys = primary_keys_lookup.get(name_tuple, None)
             new_stream = cast(
                 FactoryType,
