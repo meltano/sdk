@@ -162,7 +162,7 @@ class EpicsStream(ProjectBasedStream):
 
     # schema_filepath = SCHEMAS_DIR / "epics.json"
 
-    def post_process(self, row: dict, stream_or_partition_state: dict) -> dict:
+    def post_process(self, row: dict, partition: Optional[dict] = None) -> dict:
         """Perform post processing, including queuing up any child stream types."""
         # Ensure child state record(s) are created
         _ = get_writeable_state_dict(
@@ -173,7 +173,7 @@ class EpicsStream(ProjectBasedStream):
                 "epic_id": row["id"],
             },
         )
-        return super().post_process(row, stream_or_partition_state)
+        return super().post_process(row, partition)
 
 
 class EpicIssuesStream(GitlabStream):

@@ -188,9 +188,8 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         Each row emitted should be a dictionary of property names to their values.
         """
-        state = self.get_stream_or_partition_state(partition)
         for row in self.request_records(partition):
-            row = self.post_process(row, state)
+            row = self.post_process(row, partition)
             yield row
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:

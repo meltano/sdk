@@ -465,26 +465,25 @@ class Stream(metaclass=abc.ABCMeta):
         """Return a generator of row-type dictionary objects."""
         if self.partitions:
             for partition in self.partitions:
-                partition_state = self.get_partition_state(partition)
-                for row in self.get_records(partition_state):
-                    row = self.post_process(row, partition_state)
+                for row in self.get_records(partition):
+                    row = self.post_process(row, partition)
                     yield row
         else:
-            for row in self.get_records(self.stream_state):
-                row = self.post_process(row, self.stream_state)
+            for row in self.get_records():
+                row = self.post_process(row)
                 yield row
 
     # Abstract Methods
 
     @abc.abstractmethod
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, partition: Optional[dict] = None) -> Iterable[Dict[str, Any]]:
         """Abstract row generator function. Must be overridden by the child class.
 
         Each row emitted should be a dictionary of property names to their values.
         """
         pass
 
-    def post_process(self, row: dict, stream_or_partition_state: dict) -> dict:
+    def post_process(self, row: dict, partition: Optional[dict] = None) -> dict:
         """Transform raw data from HTTP GET into the expected property values."""
         return row
 
