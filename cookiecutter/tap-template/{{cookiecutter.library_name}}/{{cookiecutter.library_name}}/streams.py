@@ -190,25 +190,3 @@ class StreamB({{ cookiecutter.source_name }}Stream):
         Property("modified", DateTimeType),
     ).to_dict()
 {% endif %}
-
-{% if cookiecutter.stream_type == "Database" %}
-class {{ cookiecutter.source_name }}Stream(DatabaseStream):
-    """Stream class for {{ cookiecutter.source_name }} database streams."""
-
-    @classmethod
-    def execute_query(cls, sql: Union[str, List[str]], config) -> Iterable[dict]:
-        """Run a query in snowflake."""
-        connection = cls.open_connection(config=config)
-        """Connect to database."""
-        # TODO: Define the process of executing a query against your database
-        #       and returning a list or other iterable containing the resulting
-        #       rows.
-        raise NotImplementedError("The method is not yet implemented (TODO)")
-
-    @classmethod
-    def open_connection(cls, config) -> Any:
-        """Connect to database."""
-        # TODO: Define the process of connecting to your database and returning
-        #       a connection object.
-        raise NotImplementedError("The method is not yet implemented (TODO)")
-{% endif %}
