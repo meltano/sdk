@@ -39,18 +39,17 @@ def get_writeable_state_dict(
     if "partitions" not in stream_state:
         stream_state["partitions"] = []
     stream_state_partitions = stream_state["partitions"]
-    else:
-        found = [
-            partition_state
-            for partition_state in stream_state_partitions
-            if partition_state.get("context") == partition
-        ]
-        if len(found) > 1:
-            raise ValueError(
-                f"State file contains duplicate entries for partition: {partition}"
-            )
-        if found:
-            return found[0]
+    found = [
+        partition_state
+        for partition_state in stream_state_partitions
+        if partition_state.get("context") == partition
+    ]
+    if len(found) > 1:
+        raise ValueError(
+            f"State file contains duplicate entries for partition: {partition}"
+        )
+    if found:
+        return found[0]
     # Existing partition not found. Creating new state entry in partitions list...
     new_partition_state = {"context": partition}
     stream_state_partitions.append(new_partition_state)
