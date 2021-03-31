@@ -39,6 +39,7 @@ from singer_sdk.helpers._singer import (
     MetadataMapping,
     SelectionMask,
 )
+from singer_sdk.helpers._flattening import get_flattening_options
 from singer_sdk.helpers._state import (
     finalize_state_progress_markers,
     get_starting_replication_value,
@@ -159,13 +160,14 @@ class Stream(metaclass=abc.ABCMeta):
         else:
             self.logger.info(
                 f"No custom mapper provided for '{self.name}'. "
-                "Using SameRecordTransform as default."
+                "Using SameRecordTransform."
             )
             self._stream_maps = [
                 SameRecordTransform(
                     stream_alias=self.name,
                     raw_schema=self.schema,
                     key_properties=self.primary_keys,
+                    flattening_options=get_flattening_options(self.config),
                 )
             ]
         return self._stream_maps
