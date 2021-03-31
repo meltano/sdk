@@ -1,13 +1,6 @@
-_**NOTE:** The Singer SDK framework is still in early exploration and development phases. For more
-information and to be updated on this project, please feel free to subscribe to our
-[original Meltano thread](https://gitlab.com/meltano/meltano/-/issues/2401) and the
-[initial PR for the underlying framework](https://gitlab.com/meltano/singer-sdk/-/merge_requests/1)._
+# {{cookiecutter.tap_id}}
 
---------------------------------
-
-# Welcome to the {{cookiecutter.tap_id}} Singer Tap!
-
-This Singer-compliant tap was created using the [Singer SDK](https://gitlab.com/meltano/singer-sdk).
+This Singer tap was created using the [Singer SDK](https://gitlab.com/meltano/singer-sdk).
 
 ## Getting Started
 

@@ -12,7 +12,7 @@ from singer_sdk.streams import Stream
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 {% endif %}
 
-{% if cookiecutter.stream_type in ["GraphQL", "REST"] %}
+{% if cookiecutter.stream_type in ("GraphQL", "REST") %}
 from singer_sdk.authenticators import (
     APIAuthenticatorBase,
     SimpleAuthenticator,
@@ -47,12 +47,17 @@ class {{ cookiecutter.source_name }}Stream(Stream):
         #     yield row.to_dict()
         raise NotImplementedError("The method is not yet implemented (TODO)")
 
-{% endif %}
-{% if cookiecutter.stream_type in ["GraphQL", "REST"] %}
+{% elif cookiecutter.stream_type in ("GraphQL", "REST") %}
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
-    url_base = "https://api.mysample.com"
+    @property
+    def url_base(self) -> str:
+        """Return the API URL root, configurable via tap settings."""
+        return self.config["api_url"]
+
+    # Alternatively, use a static string for url_base:
+    # url_base = "https://api.mysample.com"
 
 {% if cookiecutter.stream_type == "REST" %}
     def get_url_params(
@@ -68,7 +73,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         params = {}
         starting_datetime = self.get_starting_datetime(partition)
         if starting_datetime:
-            params.update({"updated": starting_datetime})
+            params["updated"] = starting_datetime
         return params
 
 {% endif %}
@@ -100,10 +105,12 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 
 
 {% if cookiecutter.stream_type == "GraphQL" %}
-# TODO: - Override `StreamA` and `StreamB` with your own stream definition.
+# TODO: - Override `UsersStream` and `GroupsStream` with your own stream definition.
 #       - Copy-paste as many times as needed to create multiple stream types.
-class StreamA({{ cookiecutter.source_name }}Stream):
+class UsersStream({{ cookiecutter.source_name }}Stream):
     name = "users"
+    # Optionally, you may also use `schema_filepath` in place of `schema`:
+    # schema_filepath = SCHEMAS_DIR / "users.json"
     schema = PropertiesList(
         Property("name", StringType),
         Property("id", StringType),
@@ -137,7 +144,7 @@ class StreamA({{ cookiecutter.source_name }}Stream):
         """
 
 
-class StreamB({{ cookiecutter.source_name }}Stream):
+class GroupsStream({{ cookiecutter.source_name }}Stream):
     name = "groups"
     schema = PropertiesList(
         Property("name", StringType),
@@ -155,16 +162,18 @@ class StreamB({{ cookiecutter.source_name }}Stream):
         """
 
 
-{% elif cookiecutter.stream_type in ["Other", "REST"] %}
-# TODO: - Override `StreamA` and `StreamB` with your own stream definition.
+{% elif cookiecutter.stream_type in ("Other", "REST") %}
+# TODO: - Override `UsersStream` and `GroupsStream` with your own stream definition.
 #       - Copy-paste as many times as needed to create multiple stream types.
-class StreamA({{ cookiecutter.source_name }}Stream):
+class UsersStream({{ cookiecutter.source_name }}Stream):
     name = "users"
-{% if cookiecutter.stream_type in ["REST"] %}
+{% if cookiecutter.stream_type == "REST" %}
     path = "/users"
 {% endif %}
     primary_keys = ["id"]
     replication_key = None
+    # Optionally, you may also use `schema_filepath` in place of `schema`:
+    # schema_filepath = SCHEMAS_DIR / "users.json"
     schema = PropertiesList(
         Property("name", StringType),
         Property("id", StringType),
@@ -177,9 +186,9 @@ class StreamA({{ cookiecutter.source_name }}Stream):
     ).to_dict()
 
 
-class StreamB({{ cookiecutter.source_name }}Stream):
+class GroupsStream({{ cookiecutter.source_name }}Stream):
     name = "groups"
-{% if cookiecutter.stream_type in ["REST"] %}
+{% if cookiecutter.stream_type == "REST" %}
     path = "/groups"
 {% endif %}
     primary_keys = ["id"]
