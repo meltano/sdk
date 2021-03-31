@@ -14,7 +14,7 @@ from singer_sdk.helpers.typing import (
     PropertiesList,
     StringType,
 )
-from singer_sdk.helpers.state import get_writeable_state_dict
+from singer_sdk.helpers._state import get_writeable_state_dict
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.streams.rest import RESTStream
 
