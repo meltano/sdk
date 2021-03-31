@@ -38,10 +38,11 @@ def get_writeable_state_dict(
         return stream_state
     if "partitions" not in stream_state:
         stream_state["partitions"] = []
+    stream_state_partitions = stream_state["partitions"]
     else:
         found = [
             partition_state
-            for partition_state in stream_state["partitions"]
+            for partition_state in stream_state_partitions
             if partition_state.get("context") == partition
         ]
         if len(found) > 1:
@@ -51,9 +52,9 @@ def get_writeable_state_dict(
         if found:
             return found[0]
     # Existing partition not found. Creating new state entry in partitions list...
-    new_dict = {"context": partition}
-    stream_state["partitions"].append(new_dict)
-    return new_dict
+    new_partition_state = {"context": partition}
+    stream_state_partitions.append(new_partition_state)
+    return new_partition_state
 
 
 def read_stream_state(
