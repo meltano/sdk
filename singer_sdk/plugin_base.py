@@ -10,10 +10,10 @@ from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
 from jsonschema import ValidationError, SchemaError, Draft4Validator
 from pathlib import PurePath
 
-from singer_sdk.helpers.classproperty import classproperty
-from singer_sdk.helpers.util import read_json_file
-from singer_sdk.helpers.secrets import is_common_secret_key, SecretString
-from singer_sdk.helpers.typing import extend_with_default
+from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._util import read_json_file
+from singer_sdk.helpers._secrets import is_common_secret_key, SecretString
+from singer_sdk.helpers.typing import extend_validator_with_defaults
 
 import click
 
@@ -27,7 +27,7 @@ except ImportError:
     import importlib_metadata as metadata  # type: ignore
 
 
-JSONSchemaValidator = extend_with_default(Draft4Validator)
+JSONSchemaValidator = extend_validator_with_defaults(Draft4Validator)
 
 
 class PluginBase(metaclass=abc.ABCMeta):

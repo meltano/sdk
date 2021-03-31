@@ -13,7 +13,7 @@ from pendulum import datetime
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 
-from singer_sdk.helpers.util import utc_now
+from singer_sdk.helpers._util import utc_now
 from singer_sdk.streams import Stream as RESTStreamBase
 
 from singer import utils

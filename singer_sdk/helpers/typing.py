@@ -43,7 +43,7 @@ import copy
 from jsonschema import validators
 from typing import List, Tuple
 
-from singer_sdk.helpers.classproperty import classproperty
+from singer_sdk.helpers._classproperty import classproperty
 
 
 def _append_type(type_dict: dict, new_type: str) -> dict:
@@ -84,8 +84,8 @@ def is_datetime_type(type_dict: dict) -> bool:
     )
 
 
-def extend_with_default(validator_class):
-    """Fill in defaults,  before validating.
+def extend_validator_with_defaults(validator_class):
+    """Fill in defaults, before validating with the provided JSON Schema Validator.
 
     See https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance  # noqa
     for details.
