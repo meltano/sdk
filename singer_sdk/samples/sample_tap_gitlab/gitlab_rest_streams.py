@@ -14,7 +14,7 @@ from singer_sdk.helpers.typing import (
     PropertiesList,
     StringType,
 )
-from singer_sdk.helpers.state import get_stream_state_dict
+from singer_sdk.helpers.state import get_writeable_state_dict
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.streams.rest import RESTStream
 
@@ -165,7 +165,7 @@ class EpicsStream(ProjectBasedStream):
     def post_process(self, row: dict, stream_or_partition_state: dict) -> dict:
         """Perform post processing, including queuing up any child stream types."""
         # Ensure child state record(s) are created
-        _ = get_stream_state_dict(
+        _ = get_writeable_state_dict(
             self.tap_state,
             "epic_issues",
             partition={

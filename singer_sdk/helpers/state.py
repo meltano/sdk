@@ -4,7 +4,7 @@
 from typing import Any, List, Optional
 
 
-def get_stream_state_dict(
+def get_writeable_state_dict(
     state: dict, tap_stream_id: str, partition: Optional[dict] = None
 ) -> dict:
     """Return the stream or partition state, creating a new one if it does not exist.
@@ -33,26 +33,26 @@ def get_stream_state_dict(
         state["bookmarks"] = {}
     if tap_stream_id not in state["bookmarks"]:
         state["bookmarks"][tap_stream_id] = {}
+    stream_state = state["bookmarks"][tap_stream_id]
     if not partition:
-        return state["bookmarks"][tap_stream_id]
-    if "partitions" not in state["bookmarks"][tap_stream_id]:
-        state["bookmarks"][tap_stream_id]["partitions"] = []
+        return stream_state
+    if "partitions" not in stream_state:
+        stream_state["partitions"] = []
     else:
         found = [
             partition_state
-            for partition_state in state["bookmarks"][tap_stream_id]["partitions"]
+            for partition_state in stream_state["partitions"]
             if partition_state.get("context") == partition
         ]
         if len(found) > 1:
             raise ValueError(
-                "State file contains duplicate entries for partition definition: "
-                f"{partition}"
+                f"State file contains duplicate entries for partition: {partition}"
             )
         if found:
             return found[0]
     # Existing partition not found. Creating new state entry in partitions list...
     new_dict = {"context": partition}
-    state["bookmarks"][tap_stream_id]["partitions"].append(new_dict)
+    stream_state["partitions"].append(new_dict)
     return new_dict
 
 
@@ -65,7 +65,7 @@ def read_stream_state(
     partition: Optional[dict] = None,
 ) -> Any:
     """Read stream state."""
-    state_dict = get_stream_state_dict(state, tap_stream_id, partition=partition)
+    state_dict = get_writeable_state_dict(state, tap_stream_id, partition=partition)
     if key:
         return state_dict.get(key, default)
     return state_dict or default
@@ -75,7 +75,7 @@ def write_stream_state(
     state, tap_stream_id: str, key, val, *, partition: Optional[dict] = None
 ) -> None:
     """Write stream state."""
-    state_dict = get_stream_state_dict(state, tap_stream_id, partition=partition)
+    state_dict = get_writeable_state_dict(state, tap_stream_id, partition=partition)
     state_dict[key] = val
 
 
@@ -91,7 +91,7 @@ def wipe_stream_state_keys(
 
     You may specify a list to wipe or a list to keep, but not both.
     """
-    state_dict = get_stream_state_dict(state, tap_stream_id, partition=partition)
+    state_dict = get_writeable_state_dict(state, tap_stream_id, partition=partition)
 
     if except_keys and wipe_keys:
         raise ValueError(

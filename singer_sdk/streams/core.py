@@ -12,7 +12,7 @@ from singer import metadata
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.helpers.util import get_property_schema, is_boolean_type
 from singer_sdk.helpers.state import (
-    get_stream_state_dict,
+    get_writeable_state_dict,
     read_stream_state,
     wipe_stream_state_keys,
 )
@@ -245,11 +245,11 @@ class Stream(metaclass=abc.ABCMeta):
 
         A blank state entry will be created if one doesn't already exist.
         """
-        return get_stream_state_dict(self.tap_state, self.name)
+        return get_writeable_state_dict(self.tap_state, self.name)
 
     def get_partition_state(self, partition: dict) -> dict:
         """Return a writable state dict for the given partition."""
-        return get_stream_state_dict(self.tap_state, self.name, partition=partition)
+        return get_writeable_state_dict(self.tap_state, self.name, partition=partition)
 
     # Partitions
 
