@@ -28,7 +28,7 @@ class CountriesStream(CountriesAPIStream):
 
     name = "countries"
     primary_keys = ["code"]
-    schema_filepath = "./singer_sdk/samples/sample_tap_countries/schemas/countries.json"
+    schema_filepath = SCHEMAS_DIR / "countries.json"
     query = """
         countries {
             code
