@@ -1,4 +1,7 @@
-"""Base class for database-type streams."""
+# March 31, 2021: Removed from v0.1.0.
+# Below code file should be considered archived and not complete.
+# TODO: Remove this comment before re-introducing
+# """Base class for database-type streams."""
 
 import abc
 from pathlib import Path
