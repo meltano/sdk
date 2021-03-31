@@ -76,14 +76,3 @@ def is_boolean_type(property_schema: dict) -> Optional[bool]:
         if "boolean" in property_type or property_type == "boolean":
             return True
     return False
-
-
-def _float_to_decimal(value):
-    """Walk the given data structure and turn all instances of float into double."""
-    if isinstance(value, float):
-        return Decimal(str(value))
-    if isinstance(value, list):
-        return [_float_to_decimal(child) for child in value]
-    if isinstance(value, dict):
-        return {k: _float_to_decimal(v) for k, v in value.items()}
-    return value
