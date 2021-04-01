@@ -33,10 +33,9 @@ class GitlabStream(RESTStream):
     @property
     def authenticator(self) -> SimpleAuthenticator:
         """Return an authenticator for REST API requests."""
-        http_headers = {"Private-Token": self.config.get("auth_token")}
-        if self.config.get("user_agent"):
-            http_headers["User-Agent"] = self.config.get("user_agent")
-        return SimpleAuthenticator(stream=self, http_headers=http_headers)
+        return SimpleAuthenticator(
+            stream=self, auth_headers={"Private-Token": self.config.get("auth_token")}
+        )
 
     def get_url_params(
         self, partition: Optional[dict], next_page_token: Optional[Any] = None

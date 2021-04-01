@@ -124,12 +124,18 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         url: str = self.get_url(partition)
         params: dict = self.get_url_params(partition, next_page_token)
         request_data = self.prepare_request_payload(partition, next_page_token)
+        headers = self.http_headers
+
+        authenticator = self.authenticator
+        if authenticator:
+            headers.update(authenticator.auth_headers or {})
+
         request = self.requests_session.prepare_request(
             requests.Request(
                 method=http_method,
                 url=url,
                 params=params,
-                headers=self.authenticator.http_headers,
+                headers=headers,
                 json=request_data,
             )
         )
@@ -212,6 +218,6 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     # Abstract methods:
 
     @property
-    def authenticator(self) -> APIAuthenticatorBase:
+    def authenticator(self) -> Optional[APIAuthenticatorBase]:
         """Return an authorization header for REST API requests."""
         return SimpleAuthenticator(stream=self)
