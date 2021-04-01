@@ -2,7 +2,7 @@
 
 import datetime
 
-from singer_sdk.helpers.testing import get_basic_tap_test
+from singer_sdk.testing import get_standard_tap_tests
 
 from {{ cookiecutter.library_name }}.tap import Tap{{ cookiecutter.source_name }}
 
@@ -13,14 +13,11 @@ SAMPLE_CONFIG = {
 
 
 # Get built-in 'generic' tap tester from SDK:
-test_using_generic_test_suite = get_basic_tap_test(Tap{{ cookiecutter.source_name }})
+def test_parquet_tap_standard_tests():
+    """Run standard tap tests against {{ cookiecutter.source_name }}) tap."""
+    tests = get_standard_tap_tests(SampleTapParquet, tap_config=SAMPLE_CONFIG)
+    for test in tests:
+        test()
 
 
-# TODO: Expand additional tests as appropriate for your tap.
-def test_catalog_discovery():
-    """Test stream catalog discovery."""
-    tap = Tap{{ cookiecutter.source_name }}(
-        config=SAMPLE_CONFIG, state=None, parse_env_config=True
-    )
-    catalog_json = tap.run_discovery()
-    assert catalog_json
+# TODO: Create additional tests as appropriate for your tap.
