@@ -1,0 +1,11 @@
+{
+    "auth_token": "****",
+    "project_ids": [
+        "myorg/my-project-a",
+        "myorg/my-project-b"
+    ],
+    "group_ids": [
+        "12345"
+    ]
+    "start_date": "2020-02-20"
+}
