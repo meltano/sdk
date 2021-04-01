@@ -26,7 +26,7 @@ class APIAuthenticatorBase(object):
         """Init authenticator."""
         self.tap_name: str = stream.tap_name
         self._config: Dict[str, Any] = dict(stream.config)
-        self._http_headers = stream.http_headers
+        self._auth_headers = {}
         self.logger: logging.Logger = stream.logger
 
     @property
@@ -35,24 +35,25 @@ class APIAuthenticatorBase(object):
         return MappingProxyType(self._config)
 
     @property
-    def http_headers(self) -> dict:
+    def auth_headers(self) -> dict:
         """Return http headers."""
-        return self._http_headers
+        return self._auth_headers
 
 
 class SimpleAuthenticator(APIAuthenticatorBase):
     """Base class for offloading API auth."""
 
-    def __init__(self, stream: RESTStreamBase, http_headers: dict = None):
+    def __init__(self, stream: RESTStreamBase, auth_headers: Optional[Dict] = None):
         """Init authenticator.
 
-        If http_headers is provided, it will override the headers specified in `stream`.
+        If auth_headers is provided, it will be merged with http_headers specified on
+        the stream.
         """
         super().__init__(stream=stream)
-        if self._http_headers is None:
-            self._http_headers = {}
-        if http_headers:
-            self._http_headers.update(http_headers)
+        if self._auth_headers is None:
+            self._auth_headers = {}
+        if auth_headers:
+            self._auth_headers.update(auth_headers)
 
 
 class OAuthAuthenticator(APIAuthenticatorBase):
@@ -76,11 +77,14 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         self.expires_in: Optional[int] = None
 
     @property
-    def http_headers(self) -> dict:
-        """Return a dictionary of HTTP headers, including any authentication tokens."""
+    def auth_headers(self) -> dict:
+        """Return a dictionary of auth headers to be applied.
+
+        These will be merged with any `http_headers` specified in the stream.
+        """
         if not self.is_token_valid():
             self.update_access_token()
-        result = super().http_headers
+        result = super().auth_headers
         result["Authorization"] = f"Bearer {self.access_token}"
         return result
 
