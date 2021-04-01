@@ -53,4 +53,5 @@ class GraphQLProjectsStream(GitlabGraphQLStream):
 
     @property
     def query(self) -> str:
-        return f"project(fullPath: {self.config(project_id)}" " { name }"
+        """Return dynamic GraphQL query."""
+        return f"project(fullPath: {self.config('project_id')}" " { name }"

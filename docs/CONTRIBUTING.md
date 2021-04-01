@@ -20,3 +20,14 @@
     - Run `poetry install` from the project root.
     - Run `poetry shell` and copy the path from command output.
     - In VS Code, run `Python: Select intepreter` and paste the intepreter path when prompted.
+
+## Workspace Develoment Strategies for Singer SDK
+
+### Universal Code Formatting
+
+- From the [Black](https://black.readthedocs.io) website:
+    > By using Black, you agree to cede control over minutiae of hand-formatting. In return, Black gives you speed, determinism, and freedom from pycodestyle nagging about formatting. You will save time and mental energy for more important matters. **Black makes code review faster by producing the smallest diffs possible.** Blackened code looks the same regardless of the project you’re reading. **Formatting becomes transparent after a while and you can focus on the content instead.**
+
+### Pervasive Python Type Hints
+
+Type hints allow us to spend less time reading documentation.

@@ -5,14 +5,14 @@
 Create taps with `singer-sdk` requires overriding just two or three classes:
 
 1. The `Tap` class. This class governs configuration, validation,
-      and stream discovery.
-2. The stream class. For the stream base class, you have different options depending on the type of data
-   source you are working with:
+   and stream discovery.
+2. The stream class. You have different options for your base class depending on the type
+   of data source you are working with:
     - `Stream` - The **generic** base class for streams.
     - `RESTStream` - The base class for **REST**-type streams.
     - `GraphQLStream` - The base class for **GraphQL**-type streams. This class inherits
       from `RESTStream`, since GraphQL is built upon REST.
-3. The optional authenticator class. You can omit this class entirely if you do not require authentication or if you prefer to write custom authentication logic. The supported authenticator classes are:
+3. An optional authenticator class. You can omit this class entirely if you do not require authentication or if you prefer to write custom authentication logic. The supported authenticator classes are:
     - `SimpleAuthenticator` - This class is functionally equivalent to overriding
       `http_headers` property in the stream class.
     - `OAuthAuthenticator` - This class performs an OAuth 2.0 authentication flow.
