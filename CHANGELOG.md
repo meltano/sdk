@@ -16,7 +16,7 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
-## v0.1.0 [Unreleased]
+## v0.1.0
 
 First official SDK release. Numerous changes and improvements implemented, with the goal of stabilizing the SDK
 and making it broadly available to the community.
