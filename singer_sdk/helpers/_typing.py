@@ -8,6 +8,7 @@ from typing import Optional, Dict, Any
 
 
 def append_type(type_dict: dict, new_type: str) -> dict:
+    """Return a combined type definition using the 'anyOf' JSON Schema construct."""
     result = copy.deepcopy(type_dict)
     if "anyOf" in result:
         if isinstance(result["anyOf"], list) and new_type not in result["anyOf"]:
