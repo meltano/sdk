@@ -186,10 +186,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             if version:
                 cls.print_version()
                 return
+
             if about:
                 cls.print_about(format)
                 return
+
             cls.print_version(print_fn=cls.logger.info)
+
             parse_env_config = False
             config_files: List[PurePath] = []
             for config_path in config or []:
@@ -197,13 +200,16 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     # Allow parse from env vars:
                     parse_env_config = True
                     continue
+
                 # Validate config file paths before adding to list
                 if not Path(config_path).is_file():
                     raise FileNotFoundError(
                         f"Could not locate config file at '{config_path}'."
                         "Please check that the file exists."
                     )
+
                 config_files.append(Path(config_path))
+
             tap = cls(
                 config=config_files or None,
                 state=state,
