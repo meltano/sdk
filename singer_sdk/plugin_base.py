@@ -100,6 +100,12 @@ class PluginBase(metaclass=abc.ABCMeta):
                 if is_string_array_type(
                     cls.config_jsonschema["properties"][config_key]
                 ):
+                    if env_var_value[0] == "[" and env_var_value[-1] == "]":
+                        raise ValueError(
+                            "A bracketed list was detected in environment variable "
+                            f"'{config_key}' but this syntax is no longer supported. "
+                            "Please remove the brackets and try again."
+                        )
                     result[config_key] = env_var_value.split(",")
                 else:
                     result[config_key] = env_var_value

@@ -39,7 +39,6 @@ Note:
 
 """
 
-import copy
 from jsonschema import validators
 from typing import List, Tuple
 
