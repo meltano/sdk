@@ -124,13 +124,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         url: str = self.get_url(partition)
         params: dict = self.get_url_params(partition, next_page_token)
         request_data = self.prepare_request_payload(partition, next_page_token)
-        request = requests.Request(
-            method=http_method,
-            url=url,
-            params=params,
-            headers=self.authenticator.http_headers,
-            json=request_data,
-        ).prepare()
+        request = self.requests_session.prepare_request(
+            requests.Request(
+                method=http_method,
+                url=url,
+                params=params,
+                headers=self.authenticator.http_headers,
+                json=request_data,
+            )
+        )
         return request
 
     def request_records(self, partition: Optional[dict]) -> Iterable[dict]:
