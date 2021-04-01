@@ -27,7 +27,6 @@ The base class for all taps. This class governs configuration, validation,
 
 What to call your tap (for example, `tap-best-ever`).
 
-
 ### `Tap.config_jsonschema` Property
 
 A JSON Schema object defining the config options that this tap will accept.
@@ -56,7 +55,7 @@ stream class.
 
 ### `RESTStream.url_base` Property
 
-Returns the base URL, which generally is reflective of a 
+Returns the base URL, which generally is reflective of a
 specific API version or on-premise deployment.
 
 - For example: to connect to the GitLab v4 API, we use `"https://gitlab.com/api/v4"`.
@@ -89,11 +88,6 @@ Note:
 
 Optional. This method gives us an opportunity to "clean up" the results prior to returning them to the downstream tap - for instance: cleaning, renaming, or appending the list of properties returned by the API.
 
-Examples:
-
-- [GitLab tap](/singer_sdk/samples/sample_tap_gitlab/gitlab_tap.py)
-- [GitLab REST streams](singer_sdk/samples/sample_tap_gitlab/gitlab_rest_streams.py)
-
 ## `GraphQLStream` Class
 
 GraphQL streams inherit from the class `GraphQLStream`, which in turn inherits from the `RESTStream` class. GraphQL streams are very similar to REST API-based streams, but instead of specifying a `path` and `url_params`, you will override the GraphQL query text:
@@ -105,8 +99,6 @@ This is where you specify your specific GraphQL query text.
 Examples:
 
 - For more info, see the [GitLab](/singer_sdk/samples/sample_tap_gitlab) sample:
-  - [GitLab tap](/singer_sdk/samples/sample_tap_gitlab/gitlab_tap.py)
   - [GitLab GraphQL streams](/singer_sdk/samples/sample_tap_gitlab/gitlab_rest_streams.py)
 - Or the [Countries API](/singer_sdk/samples/sample_tap_countries) Sample:
-  - [Countries API Tap](/singer_sdk/samples/sample_tap_countries/countries_tap.py)
   - [Countries API Streams](/singer_sdk/samples/sample_tap_countries/countries_streams.py)
