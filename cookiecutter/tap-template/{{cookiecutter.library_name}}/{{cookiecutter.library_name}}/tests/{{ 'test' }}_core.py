@@ -1,12 +1,13 @@
 """Tests init and discovery features for {{ cookiecutter.tap_id }}."""
 
-from singer_sdk.helpers.util import utc_now
+import datetime
+
 from singer_sdk.helpers.testing import get_basic_tap_test
 
 from {{ cookiecutter.library_name }}.tap import Tap{{ cookiecutter.source_name }}
 
 SAMPLE_CONFIG = {
-    "start_date": utc_now()
+    "start_date": datetime.datetime.now(datetime.timezone.utc)
     # TODO: Initialize minimal tap config and/or register env vars in test harness
 }
 

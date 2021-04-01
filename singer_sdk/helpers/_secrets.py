@@ -17,14 +17,12 @@ def is_common_secret_key(key_name: str) -> bool:
     """Return true if the key_name value matches a known secret name or pattern."""
     if key_name in COMMON_SECRET_KEYS:
         return True
-    if any(
+    return any(
         [
             key_name.lower().endswith(key_suffix)
             for key_suffix in COMMON_SECRET_KEY_SUFFIXES
         ]
-    ):
-        return True
-    return False
+    )
 
 
 class SecretString(str):

@@ -12,8 +12,6 @@ _Create with `singer-sdk` requires overriding just two classes:_
     - `Stream` - _The **generic** base class for streams._
     - `RESTStream` - _The base class for **REST**-type streams._
     - `GraphQLStream` - _The base class for **GraphQL**-type streams._
-    - `DatabaseStream` - _The base class for **database**-type streams - specifically those
-      which support the SQL language._
 
 **Detailed Instructions:**
 
@@ -23,7 +21,6 @@ _Create with `singer-sdk` requires overriding just two classes:_
    1. ['Generic' stream classes](#generic-stream-classes)
    2. ['API' stream classes](#api-stream-classes)
    3. ['GraphQL' stream classes](#graphql-stream-classes)
-   4. ['Database' stream classes](#database-stream-classes)
 
 ## Step 1: Initialize a new tap repo
 
@@ -125,34 +122,6 @@ GraphQL streams are very similar to REST API-based streams, but instead of speci
 - Or the [Countries API](/singer_sdk/samples/sample_tap_countries) Sample:
   - [Countries API Tap](/singer_sdk/samples/sample_tap_countries/countries_tap.py)
   - [Countries API Streams](/singer_sdk/samples/sample_tap_countries/countries_streams.py)
-
-### 'Database' stream classes
-
-`NOTE: The Database stream class is not fully tested and is less mature than other stream types. For more info: https://gitlab.com/meltano/singer-sdk/-/issues/45`
-
-_Database streams inherit from the class `DatabaseStream`. To create a database
-stream class, you will first override the `execute_query()` method. Depending upon how closely your
-source complies with standard `information_schema` conventions, you may also override between
-one and four class properties, in order to override specific metadata queries._
-
-**All database stream classes override:**
-
-2. **`execute_query()` method** - This method should run a give SQL statement and incrementally return a dictionary
-   object for each resulting row.
-
-_Depending upon your implementation, you may also want to override one or more of the following properties:_
-
-1. `open_connection()` method - (Optional.) Open a connection to the database and return a connection object.
-2. `table_scan_sql` - A SQL string which should query for all tables, returning three columns: `database_name`, `schema_name`, and `table_name`.
-3. `view_scan_sql` - A SQL string which should query for all views, returning three columns: `database_name`, `schema_name`, and `view_name`.
-4. `column_scan_sql` - A SQL string which should query for all columns, returning five columns: `database_name`, `schema_name`, `table_or_view_name`, `column_name`, and `data_type`.
-5. `primary_key_scan_sql` - Optional. A SQL string which should query for the list of primary keys, returning five columns: `database_name`, `schema_name`, `table_name`, `pk_column_name`.
-
-**More info:**
-
-- For more info, see the [Snowflake](/singer_sdk/samples/sample_tap_snowflake) sample:
-  - [Snowflake tap](/singer_sdk/samples/sample_tap_snowflake/snowflake_tap.py)
-  - [Snowflake streams](/singer_sdk/samples/sample_tap_snowflake/snowflake_tap_stream.py)
 
 ## Singer SDK Implementation Details
 
