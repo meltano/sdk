@@ -35,7 +35,6 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     name: str = None
     config_jsonschema: Optional[dict] = None
-    protected_config_keys: List[str] = []
 
     _config: dict
 
@@ -73,11 +72,11 @@ class PluginBase(metaclass=abc.ABCMeta):
             raise ValueError(f"Error parsing config of type '{type(config).__name__}'.")
         if parse_env_config:
             self.logger.info("Parsing env var for settings config...")
-            config_dict.update(self.get_env_var_config())
+            config_dict.update(self._env_var_config)
         else:
             self.logger.info("Skipping parse of env var settings...")
         for k, v in config_dict.items():
-            if self.is_secret_config(k):
+            if self._is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
         self._validate_config()
@@ -87,8 +86,8 @@ class PluginBase(metaclass=abc.ABCMeta):
         """Return a list of supported capabilities."""
         return []
 
-    @classmethod
-    def get_env_var_config(cls) -> Dict[str, Any]:
+    @classproperty
+    def _env_var_config(cls) -> Dict[str, Any]:
         """Return any config specified in environment variables.
 
         Variables must match the convention "<PLUGIN_NAME>_<SETTING_NAME>",
@@ -145,15 +144,13 @@ class PluginBase(metaclass=abc.ABCMeta):
         """Return a frozen (read-only) config dictionary map."""
         return cast(Dict, MappingProxyType(self._config))
 
-    def is_secret_config(self, config_key: str) -> bool:
+    @staticmethod
+    def _is_secret_config(config_key: str) -> bool:
         """Return true if a config value should be treated as a secret.
 
-        This avoids accidental printing to logs, and it prevents rendering the secrets
-        in jinja templating functions.
+        This prevents accidental printing to logs.
         """
-        return (
-            is_common_secret_key(config_key) or config_key in self.protected_config_keys
-        )
+        return is_common_secret_key(config_key)
 
     def _validate_config(
         self, raise_errors: bool = True, warnings_as_errors: bool = False

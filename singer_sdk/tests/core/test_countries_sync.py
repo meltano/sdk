@@ -14,7 +14,7 @@ def test_countries_sync_all():
 
 def test_countries_primary_key():
     tap = SampleTapCountries(config=None)
-    countries_entry = tap.streams["countries"].singer_catalog_entry
+    countries_entry = tap.streams["countries"]._singer_catalog_entry
     metadata_root = [md for md in countries_entry.metadata if md["breadcrumb"] == ()][0]
     key_props_1 = metadata_root["metadata"].get("table-key-properties")
     key_props_2 = countries_entry.key_properties

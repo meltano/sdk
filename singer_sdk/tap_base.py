@@ -77,7 +77,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def run_connection_test(self) -> bool:
         """Run connection test and return True if successful."""
-        """Sync all streams."""
         for stream in self.streams.values():
             stream.MAX_RECORDS_LIMIT = 0
             stream.sync()
@@ -94,7 +93,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     @property
     def catalog_dict(self) -> dict:
         """Return the tap's catalog as a dict."""
-        return self.singer_catalog.to_dict()
+        return self._singer_catalog.to_dict()
 
     @property
     def catalog_json_text(self) -> str:
@@ -102,10 +101,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         return json.dumps(self.catalog_dict, indent=2)
 
     @property
-    def singer_catalog(self) -> Catalog:
+    def _singer_catalog(self) -> Catalog:
         """Return a Catalog object."""
         catalog_entries = [
-            stream.singer_catalog_entry for stream in self.streams.values()
+            stream._singer_catalog_entry for stream in self.streams.values()
         ]
         return Catalog(catalog_entries)
 
