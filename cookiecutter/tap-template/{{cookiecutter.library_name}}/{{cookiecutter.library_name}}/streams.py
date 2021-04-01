@@ -80,10 +80,22 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 {% if cookiecutter.auth_method == "Simple" %}
     @property
     def authenticator(self) -> APIAuthenticatorBase:
-        http_headers = {"Private-Token": self.config.get("auth_token")}
-        if self.config.get("user_agent"):
-            http_headers["User-Agent"] = self.config.get("user_agent")
-        return SimpleAuthenticator(stream=self, http_headers=http_headers)
+        return SimpleAuthenticator(
+            stream=self,
+            auth_headers={
+                "Private-Token": self.config.get("auth_token")
+            }
+        )
+
+    # Alternatively, you can pass auth tokens directly within http_headers:
+    # @property
+    # def http_headers(self) -> dict:
+    #     headers = {}
+    #     if "user_agent" in self.config:
+    #         headers["User-Agent"] = self.config.get("user_agent")
+    #     headers["Private-Token"] = self.config.get("auth_token")
+    #     return headers
+
 {% elif cookiecutter.auth_method == "OAuth2" %}
     @property
     def authenticator(self) -> APIAuthenticatorBase:
