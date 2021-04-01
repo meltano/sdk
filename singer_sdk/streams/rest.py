@@ -147,9 +147,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             resp = self._request_with_backoff(prepared_request)
             for row in self.parse_response(resp):
                 yield row
+            previous_token = copy.deepcopy(next_page_token)
             next_page_token = self.get_next_page_token(
-                response=resp, previous_token=copy.deepcopy(next_page_token)
+                response=resp, previous_token=previous_token
             )
+            if next_page_token and next_page_token == previous_token:
+                raise RuntimeError(
+                    f"Loop detected in pagination. "
+                    f"Pagination token {next_page_token} is identical to prior token."
+                )
             # Cycle until get_next_page_token() no longer returns a value
             finished = not next_page_token
 
