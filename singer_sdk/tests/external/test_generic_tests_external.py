@@ -16,7 +16,7 @@ def test_gitlab_tap_standard_tests():
     """Run standard tap tests against Gitlab tap."""
     tests = get_standard_tap_tests(
         SampleTapGitlab,
-        tap_config=GITLAB_CONFIG_FILE if GITLAB_CONFIG_FILE.exists() else None,
+        config=GITLAB_CONFIG_FILE if GITLAB_CONFIG_FILE.exists() else None,
     )
     for test in tests:
         test()
@@ -26,7 +26,7 @@ def test_ga_tap_standard_tests():
     """Run standard tap tests against Google Analytics tap."""
     tests = get_standard_tap_tests(
         SampleTapGoogleAnalytics,
-        tap_config=GA_CONFIG_FILE if GA_CONFIG_FILE.exists() else None,
+        config=GA_CONFIG_FILE if GA_CONFIG_FILE.exists() else None,
     )
     for test in tests:
         test()
