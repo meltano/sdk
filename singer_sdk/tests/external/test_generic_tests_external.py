@@ -1,4 +1,4 @@
-"""Test the generic tests from `singer_sdk.helpers.testing`."""
+"""Run the generic tests from `singer_sdk.testing`."""
 
 from pathlib import Path
 

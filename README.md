@@ -1,6 +1,4 @@
-# `singer-sdk` - an open framework for building Singer-compliant taps
-
-- _Note: This framework is still in early development and planning phases_
+# `singer-sdk` - a framework for building Singer taps
 
 ## Strategies for Optimized Tap Development
 
