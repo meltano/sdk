@@ -1,6 +1,5 @@
 """Sample tap stream test for tap-gitlab."""
 
-import copy
 import requests
 
 from pathlib import Path

@@ -24,7 +24,6 @@ from singer import metadata
 from singer_sdk.helpers._typing import conform_record_data_types
 from singer_sdk.helpers._state import (
     get_writeable_state_dict,
-    read_stream_state,
     wipe_stream_state_keys,
     get_state_partitions_list,
 )
@@ -102,14 +101,15 @@ class Stream(metaclass=abc.ABCMeta):
         self, partition: Optional[dict]
     ) -> Optional[datetime.datetime]:
         """Return `start_date` config, or state if using timestamp replication."""
-        result: Optional[datetime.datetime] = None
         if self.is_timestamp_replication_key:
             state = self.get_stream_or_partition_state(partition)
             replication_key = state.get("replication_key")
             if replication_key and replication_key in state:
                 return pendulum.parse(state[replication_key])
+
         if "start_date" in self.config:
             return pendulum.parse(self.config["start_date"])
+
         return None
 
     @property
