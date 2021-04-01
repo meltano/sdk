@@ -21,7 +21,7 @@ from typing import (
 import pendulum
 from singer import metadata
 
-from singer_sdk.helpers._util import conform_record_data_types
+from singer_sdk.helpers._typing import conform_record_data_types
 from singer_sdk.helpers._state import (
     get_writeable_state_dict,
     read_stream_state,
@@ -35,7 +35,7 @@ import singer
 from singer import RecordMessage, SchemaMessage
 from singer.catalog import Catalog
 from singer.schema import Schema
-from singer_sdk.typing import is_datetime_type
+from singer_sdk.helpers._typing import is_datetime_type, is_string_array_type
 
 
 # Replication methods

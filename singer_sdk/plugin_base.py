@@ -14,6 +14,7 @@ from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers._secrets import is_common_secret_key, SecretString
+from singer_sdk.helpers._typing import is_string_array_type
 from singer_sdk.typing import extend_validator_with_defaults
 
 import click
@@ -96,10 +97,10 @@ class PluginBase(metaclass=abc.ABCMeta):
                 cls.logger.info(
                     f"Parsing '{config_key}' config from env variable '{env_var_name}'."
                 )
-                if env_var_value[0] == "[" and env_var_value[-1] == "]":
-                    result[config_key] = (
-                        env_var_value.lstrip("[").rstrip("]").split(",")
-                    )
+                if is_string_array_type(
+                    cls.config_jsonschema["properties"][config_key]
+                ):
+                    result[config_key] = env_var_value.split(",")
                 else:
                     result[config_key] = env_var_value
         return result
