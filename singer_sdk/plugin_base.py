@@ -33,7 +33,7 @@ JSONSchemaValidator = extend_validator_with_defaults(Draft4Validator)
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    name: str = "sample-plugin-name"
+    name: str = None
     config_jsonschema: Optional[dict] = None
     protected_config_keys: List[str] = []
 
@@ -91,9 +91,8 @@ class PluginBase(metaclass=abc.ABCMeta):
     def get_env_var_config(cls) -> Dict[str, Any]:
         """Return any config specified in environment variables.
 
-        Variables must match the convention "PLUGIN_NAME_setting_name",
-        with dashes converted to underscores, the plugin name converted to all
-        caps, and the setting name in same-case as specified in settings config.
+        Variables must match the convention "<PLUGIN_NAME>_<SETTING_NAME>",
+        all uppercase with dashes converted to underscores.
         """
         result: Dict[str, Any] = {}
         plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
@@ -137,11 +136,6 @@ class PluginBase(metaclass=abc.ABCMeta):
     @property
     def state(self) -> dict:
         """Return the state dict for the plugin."""
-        raise NotImplementedError()
-
-    @property
-    def input_catalog(self) -> Optional[dict]:
-        """Return the catalog dictionary input, or None if not provided."""
         raise NotImplementedError()
 
     # Core plugin config:
