@@ -16,7 +16,6 @@ from singer_sdk.samples.sample_tap_google_analytics.ga_tap_stream import (
     SampleGoogleAnalyticsStream,
 )
 
-PLUGIN_NAME = "sample-tap-google-analytics"
 REPORT_DEFS_FILE = (
     "singer_sdk/samples/sample_tap_google_analytics/resources/"
     "default_report_definitions.json"
@@ -27,7 +26,7 @@ REPORT_DEFS = json.loads(Path(REPORT_DEFS_FILE).read_text())
 class SampleTapGoogleAnalytics(Tap):
     """Sample tap for GoogleAnalytics."""
 
-    name: str = PLUGIN_NAME
+    name: str = "sample-tap-google-analytics"
     config_jsonschema = PropertiesList(
         Property("view_id", StringType(), required=True),
         Property("client_email", StringType(), required=True),
