@@ -78,7 +78,10 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     @property
     def auth_headers(self) -> dict:
-        """Return a dictionary of HTTP headers to be used by the Stream, including any authentication tokens."""
+        """Return a dictionary of auth headers to be applied.
+
+        These will be merged with any `http_headers` specified in the stream.
+        """
         if not self.is_token_valid():
             self.update_access_token()
         result = super().auth_headers
