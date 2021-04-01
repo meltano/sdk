@@ -34,7 +34,7 @@ import singer
 from singer import RecordMessage, SchemaMessage
 from singer.catalog import Catalog
 from singer.schema import Schema
-from singer_sdk.helpers._typing import is_datetime_type, is_string_array_type
+from singer_sdk.helpers._typing import is_datetime_type
 
 
 # Replication methods

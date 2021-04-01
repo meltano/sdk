@@ -1,7 +1,6 @@
 """General helper functions, helper classes, and decorators."""
 
 import json
-from decimal import Decimal
 from pathlib import Path, PurePath
 from typing import Any, Dict, Union
 

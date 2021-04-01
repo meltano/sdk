@@ -67,6 +67,16 @@ def is_boolean_type(property_schema: dict) -> Optional[bool]:
     return False
 
 
+def is_string_type(property_schema: dict) -> Optional[bool]:
+    """Return true if the JSON Schema type is a boolean or None if detection fails."""
+    if "anyOf" not in property_schema and "type" not in property_schema:
+        return None  # Could not detect data type
+    for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
+        if "string" in property_type or property_type == "string":
+            return True
+    return False
+
+
 @lru_cache()
 def _warn_unmapped_property(
     stream_name: str, property_name: str, logger: logging.Logger
