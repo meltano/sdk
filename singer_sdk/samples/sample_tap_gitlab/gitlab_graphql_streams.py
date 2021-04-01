@@ -5,7 +5,6 @@
 """
 
 from pathlib import Path
-from jinja2 import Template
 
 from singer_sdk.streams import GraphQLStream
 
@@ -51,10 +50,7 @@ class GraphQLProjectsStream(GitlabGraphQLStream):
     primary_keys = ["id"]
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "projects-graphql.json"
-    query = Template(
-        """
-        project(fullPath: $project_id) {
-            name
-        }
-        """
-    ).render()
+
+    @property
+    def query(self) -> str:
+        return f"project(fullPath: {self.config(project_id)}" " { name }"

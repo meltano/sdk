@@ -35,7 +35,7 @@ First clone, then...
 
 ### Install
 
-`NOTE: Singer SDK currently works with Python versions 3.6 through 3.8.x. Python 3.9 is not yet supported.`
+_**Note:** Singer SDK currently works with Python versions 3.6 through 3.8.x. Python 3.9 is not yet supported._
 
 Install prereqs:
 

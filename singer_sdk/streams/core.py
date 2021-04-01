@@ -267,15 +267,7 @@ class Stream(metaclass=abc.ABCMeta):
         """Update state of stream or partition with data from the provided record."""
         state_dict = self.get_stream_or_partition_state(partition)
         if latest_record:
-            if self.replication_method == REPLICATION_FULL_TABLE:
-                max_pk_values = self._get_bookmark("max_pk_values")
-                if max_pk_values:
-                    state_dict["last_pk_fetched"] = {
-                        k: v
-                        for k, v in latest_record.items()
-                        if k in (self.primary_keys or [])
-                    }
-            elif self.replication_method in [
+            if self.replication_method in [
                 REPLICATION_INCREMENTAL,
                 REPLICATION_LOG_BASED,
             ]:
@@ -287,20 +279,9 @@ class Stream(metaclass=abc.ABCMeta):
                 state_dict.update(
                     {
                         "replication_key": self.replication_key,
-                        self.replication_key: latest_record.get(
-                            self.replication_key, None
-                        ),
+                        "replication_key_value": latest_record[self.replication_key],
                     }
                 )
-
-    def _get_bookmark(self, key: str, default: Any = None):
-        """Return a bookmark key's value, or a default value if key is not set."""
-        return singer.get_bookmark(
-            state=self.tap_state,
-            tap_stream_id=self.tap_stream_id,
-            key=key,
-            default=default,
-        )
 
     # Private message authoring methods:
 
@@ -325,6 +306,7 @@ class Stream(metaclass=abc.ABCMeta):
         wipe_stream_state_keys(
             self.tap_state,
             self.name,
+            partition=partition,
             wipe_keys=[
                 "last_pk_fetched",
                 "max_pk_values",
@@ -367,13 +349,14 @@ class Stream(metaclass=abc.ABCMeta):
                 singer.write_message(record_message)
                 self._increment_stream_state(record, partition=partition)
                 rows_sent += 1
+            wipe_stream_state_keys(
+                self.tap_state,
+                self.name,
+                partition=partition,
+                wipe_keys=["last_pk_fetched", "max_pk_values"],
+            )
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
         # Reset interim bookmarks before emitting final STATE message:
-        wipe_stream_state_keys(
-            self.tap_state,
-            self.name,
-            wipe_keys=["last_pk_fetched", "max_pk_values"],
-        )
         self._write_state_message()
 
     # Public methods ("final", not recommended to be overridden)
