@@ -20,6 +20,6 @@ def test_countries_tap_standard_tests():
 
 def test_parquet_tap_standard_tests():
     """Run standard tap tests against Parquet tap."""
-    tests = get_standard_tap_tests(SampleTapParquet, tap_config=PARQUET_TEST_CONFIG)
+    tests = get_standard_tap_tests(SampleTapParquet, config=PARQUET_TEST_CONFIG)
     for test in tests:
         test()

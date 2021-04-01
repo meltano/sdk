@@ -15,7 +15,10 @@ SAMPLE_CONFIG = {
 # Get built-in 'generic' tap tester from SDK:
 def test_parquet_tap_standard_tests():
     """Run standard tap tests against {{ cookiecutter.source_name }}) tap."""
-    tests = get_standard_tap_tests(SampleTapParquet, tap_config=SAMPLE_CONFIG)
+    tests = get_standard_tap_tests(
+        Tap{{ cookiecutter.source_name }},
+        config=SAMPLE_CONFIG
+    )
     for test in tests:
         test()
 
