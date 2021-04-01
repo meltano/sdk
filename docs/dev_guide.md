@@ -28,6 +28,10 @@ The best way to get started is by building a new project from the
 
 For a detailed reference, please see the [SDK Reference Guide](./reference.md)
 
+## CLI Samples
+
+For a list of sample CLI commands you can run, [click here](./cli_commands.md).
+
 ## Singer SDK Implementation Details
 
 For more detailed information about the Singer SDK implementation, please see the 

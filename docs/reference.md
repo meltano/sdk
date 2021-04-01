@@ -74,7 +74,7 @@ when making calls to your API.
 
 ### `RESTStream.get_url_params()` Method
 
-Optional. This method returns a map (or list of maps) whose values can be substituted into the query URLs. A list of maps is returned if multiple calls need to be made.
+Optional. This method returns a map whose values should be passed as URL parameters.
 
 ### `RESTStream.prepare_request_payload()` Method
 
