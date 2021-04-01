@@ -1,8 +1,8 @@
-"""Test the generic tests from `singer_sdk.helpers.testing`."""
+"""Test the generic tests from `singer_sdk.testing`."""
 
 from pathlib import Path
 
-from singer_sdk.helpers.testing import get_standard_tap_tests
+from singer_sdk.testing import get_standard_tap_tests
 from singer_sdk.samples.sample_tap_countries.countries_tap import SampleTapCountries
 from singer_sdk.samples.sample_tap_parquet.parquet_tap import SampleTapParquet
 

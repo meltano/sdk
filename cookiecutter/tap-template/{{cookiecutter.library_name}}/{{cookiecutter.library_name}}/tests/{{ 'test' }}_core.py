@@ -2,7 +2,7 @@
 
 import datetime
 
-from singer_sdk.helpers.testing import get_standard_tap_tests
+from singer_sdk.testing import get_standard_tap_tests
 
 from {{ cookiecutter.library_name }}.tap import Tap{{ cookiecutter.source_name }}
 
