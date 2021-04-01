@@ -14,10 +14,12 @@ SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 
 class GoogleJWTAuthenticator(OAuthJWTAuthenticator):
-    """Class responsible for Google Auth via JWT and OAuth.
+    """Class responsible for Google Auth via JWT and OAuth."""
 
-    (Currently this class simply inherits from the base class.)
-    """
+    @property
+    def client_id(self) -> str:
+        """Override since Google auth uses email, not numeric client ID."""
+        return self.config["client_email"]
 
 
 class SampleGoogleAnalyticsStream(RESTStream):

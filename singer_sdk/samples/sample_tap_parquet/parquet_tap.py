@@ -6,8 +6,7 @@ from singer_sdk import Tap, Stream
 from singer_sdk.samples.sample_tap_parquet.parquet_tap_stream import (
     SampleTapParquetStream,
 )
-from singer_sdk.samples.sample_tap_parquet.parquet_globals import PLUGIN_NAME
-from singer_sdk.helpers.typing import (
+from singer_sdk.typing import (
     PropertiesList,
     Property,
     StringType,
@@ -17,7 +16,7 @@ from singer_sdk.helpers.typing import (
 class SampleTapParquet(Tap):
     """Sample tap for Parquet."""
 
-    name: str = PLUGIN_NAME
+    name: str = "sample-tap-parquet"
     config_jsonschema = PropertiesList(Property("filepath", StringType)).to_dict()
 
     def discover_streams(self) -> List[Stream]:

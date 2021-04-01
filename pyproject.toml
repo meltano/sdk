@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "singer-sdk"
 version = "0.0.2"
-description = "An open framework for building singer-compliant taps"
+description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 license = "Apache v2"
 
@@ -10,10 +10,7 @@ python = "<3.9,>=3.6"
 pipelinewise-singer-python = "1.2.0"
 backoff = "1.8.0"
 pendulum = "1.2.0"
-python-dateutil = "<2.8.1,>=2.1"
-pyarrow = "^2.0.0"
 click = "^7.1.2"
-Jinja2 = "^2.11.2"
 PyJWT = "1.7.1"
 requests = "^2.25.1"
 cryptography = "^3.4.6"
