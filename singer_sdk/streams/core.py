@@ -4,7 +4,6 @@ import abc  # abstract base classes
 import datetime
 import json
 import logging
-from functools import lru_cache
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
@@ -22,11 +21,12 @@ from typing import (
 import pendulum
 from singer import metadata
 
-from singer_sdk.helpers._util import get_property_schema, is_boolean_type
+from singer_sdk.helpers._util import conform_record_data_types
 from singer_sdk.helpers._state import (
     get_writeable_state_dict,
     read_stream_state,
     wipe_stream_state_keys,
+    get_state_partitions_list,
 )
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 
@@ -58,7 +58,6 @@ FactoryType = TypeVar("FactoryType", bound="Stream")
 class Stream(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
-    MAX_CONNECT_RETRIES = 0
     MAX_RECORDS_LIMIT: Optional[int] = None
 
     parent_stream_types: List[Any] = []  # May be used in sync sequencing
@@ -90,7 +89,7 @@ class Stream(metaclass=abc.ABCMeta):
                 self._schema = schema
             elif isinstance(schema, Schema):
                 self._schema = schema.to_dict()
-            elif schema:
+            else:
                 raise ValueError(
                     f"Unexpected type {type(schema).__name__} for arg 'schema'."
                 )
@@ -107,7 +106,7 @@ class Stream(metaclass=abc.ABCMeta):
         type_dict = self.schema.get("properties", {}).get(self.replication_key)
         return is_datetime_type(type_dict)
 
-    def get_starting_datetime(
+    def get_starting_timestamp(
         self, partition: Optional[dict]
     ) -> Optional[datetime.datetime]:
         """Return `start_date` config, or state if using timestamp replication."""
@@ -116,10 +115,10 @@ class Stream(metaclass=abc.ABCMeta):
             state = self.get_stream_or_partition_state(partition)
             replication_key = state.get("replication_key")
             if replication_key and replication_key in state:
-                result = pendulum.parse(state[replication_key])
-        if result is None and "start_date" in self.config:
-            result = pendulum.parse(self.config.get("start_date"))
-        return result
+                return pendulum.parse(state[replication_key])
+        if "start_date" in self.config:
+            return pendulum.parse(self.config["start_date"])
+        return None
 
     @property
     def schema_filepath(self) -> Optional[Path]:
@@ -257,15 +256,16 @@ class Stream(metaclass=abc.ABCMeta):
     def partitions(self) -> Optional[List[dict]]:
         """Return a list of partition key dicts (if applicable), otherwise None.
 
+        By default, this method returns a list of any partitions which are already
+        defined in state, otherwise None.
         Developers may override this property to provide a default partitions list.
         """
-        state = read_stream_state(self.tap_state, self.name)
-        if state is None or "partitions" not in state:
-            return None
         result: List[dict] = []
-        for partition_state in state["partitions"]:
-            result.append(partition_state.get("context"))
-        return result
+        for partition_state in (
+            get_state_partitions_list(self.tap_state, self.name) or []
+        ):
+            result.append(partition_state["context"])
+        return result or None
 
     # Private bookmarking methods
 
@@ -355,15 +355,17 @@ class Stream(metaclass=abc.ABCMeta):
                         "Stream prematurely aborted due to the stream's max record "
                         f"limit ({self.MAX_RECORDS_LIMIT}) being reached."
                     )
-                    if rows_sent:
-                        # Flush state messages if applicable
-                        self._write_state_message()
                     # Abort stream sync for this partition or stream
                     break
 
                 if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
                     self._write_state_message()
-                record = self._conform_record_data_types(row_dict)
+                record = conform_record_data_types(
+                    stream_name=self.name,
+                    row=row_dict,
+                    schema=self.schema,
+                    logger=self.logger,
+                )
                 record_message = RecordMessage(
                     stream=self.name,
                     record=record,
@@ -381,60 +383,6 @@ class Stream(metaclass=abc.ABCMeta):
             wipe_keys=["last_pk_fetched", "max_pk_values"],
         )
         self._write_state_message()
-
-    # Private validation and cleansing methods:
-
-    @lru_cache()
-    def _warn_unmapped_property(self, property_name: str):
-        self.logger.warning(
-            f"Property '{property_name}' was present in the result stream but "
-            "not found in catalog schema. Ignoring."
-        )
-
-    def _conform_record_data_types(  # noqa: C901
-        self, row: Dict[str, Any]
-    ) -> RecordMessage:
-        """Translate values in record dictionary to singer-compatible data types.
-
-        Any property names not found in the schema catalog will be removed, and a
-        warning will be logged exactly once per unmapped property name.
-        """
-        rec: Dict[str, Any] = {}
-        for property_name, elem in row.items():
-            property_schema = get_property_schema(self.schema or {}, property_name)
-            if not property_schema:
-                self._warn_unmapped_property(property_name)
-                continue
-            if isinstance(elem, datetime.datetime):
-                rec[property_name] = elem.isoformat() + "+00:00"
-            elif isinstance(elem, datetime.date):
-                rec[property_name] = elem.isoformat() + "T00:00:00+00:00"
-            elif isinstance(elem, datetime.timedelta):
-                epoch = datetime.datetime.utcfromtimestamp(0)
-                timedelta_from_epoch = epoch + elem
-                rec[property_name] = timedelta_from_epoch.isoformat() + "+00:00"
-            elif isinstance(elem, datetime.time):
-                rec[property_name] = str(elem)
-            elif isinstance(elem, bytes):
-                # for BIT value, treat 0 as False and anything else as True
-                bit_representation: bool
-                if is_boolean_type(property_schema):
-                    bit_representation = elem != b"\x00"
-                    rec[property_name] = bit_representation
-                else:
-                    rec[property_name] = elem.hex()
-            elif is_boolean_type(property_schema):
-                boolean_representation: Optional[bool]
-                if elem is None:
-                    boolean_representation = None
-                elif elem == 0:
-                    boolean_representation = False
-                else:
-                    boolean_representation = True
-                rec[property_name] = boolean_representation
-            else:
-                rec[property_name] = elem
-        return rec
 
     # Public methods ("final", not recommended to be overridden)
 
@@ -484,10 +432,5 @@ class Stream(metaclass=abc.ABCMeta):
         pass
 
     def post_process(self, row: dict, partition: Optional[dict] = None) -> dict:
-        """Transform raw data from HTTP GET into the expected property values."""
+        """As needed, append or transform raw data to match expected structure."""
         return row
-
-    @property
-    def http_headers(self) -> dict:
-        """Return headers to be used by HTTP requests."""
-        return NotImplemented()

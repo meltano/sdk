@@ -71,7 +71,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         logic.
         """
         params = {}
-        starting_datetime = self.get_starting_datetime(partition)
+        starting_datetime = self.get_starting_timestamp(partition)
         if starting_datetime:
             params["updated"] = starting_datetime
         return params

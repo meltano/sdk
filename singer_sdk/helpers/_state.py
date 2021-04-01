@@ -4,6 +4,73 @@
 from typing import Any, List, Optional
 
 
+def get_state_if_exists(
+    state: dict,
+    tap_stream_id: str,
+    partition: Optional[dict] = None,
+    key: Optional[str] = None,
+) -> Optional[Any]:
+    """Return the stream or partition state, creating a new one if it does not exist.
+
+    Parameters
+    ----------
+    state : dict
+        the existing state dict which contains all streams.
+    tap_stream_id : str
+        the id of the stream
+    partition : Optional[dict], optional
+        keys which identify the partition context, by default None (not partitioned)
+    key : Optional[str], optional
+        name of the key searched for, by default None (return entire state if found)
+
+    Returns
+    -------
+    Optional[Any]
+        Returns the state if exists, otherwise None
+
+    Raises
+    ------
+    ValueError
+        Raised if state is invalid or cannot be parsed.
+
+    """
+    if "bookmarks" not in state:
+        return None
+    if tap_stream_id not in state["bookmarks"]:
+        return None
+
+    stream_state = state["bookmarks"][tap_stream_id]
+    if not partition:
+        if key:
+            return stream_state.get(key, None)
+        return stream_state
+    if "partitions" not in stream_state:
+        return None
+
+    stream_state_partitions = stream_state["partitions"]
+    found = [
+        partition_state
+        for partition_state in stream_state_partitions
+        if partition_state["context"] == partition
+    ]
+    if not found:
+        return None  # Partition definition not present
+    if len(found) > 1:
+        raise ValueError(
+            f"State file contains duplicate entries for partition: {partition}"
+        )
+
+    matched_partition: dict = found[0]
+    if key:
+        return matched_partition.get(key, None)
+    return matched_partition
+
+
+def get_state_partitions_list(state: dict, tap_stream_id: str) -> Optional[List[dict]]:
+    """Return a list of partitions defined in the state, or None if not defined."""
+    return (get_state_if_exists(state, tap_stream_id) or {}).get("partitions", None)
+
+
 def get_writeable_state_dict(
     state: dict, tap_stream_id: str, partition: Optional[dict] = None
 ) -> dict:
@@ -42,7 +109,7 @@ def get_writeable_state_dict(
     found = [
         partition_state
         for partition_state in stream_state_partitions
-        if partition_state.get("context") == partition
+        if partition_state["context"] == partition
     ]
     if len(found) > 1:
         raise ValueError(

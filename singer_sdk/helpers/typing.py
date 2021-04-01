@@ -76,9 +76,7 @@ def is_datetime_type(type_dict: dict) -> bool:
                 return True
         return False
     elif "type" in type_dict:
-        if type_dict.get("format") == "date-time":
-            return True
-        return False
+        return type_dict.get("format") == "date-time"
     raise ValueError(
         f"Could not detect type of replication key using schema '{type_dict}'"
     )

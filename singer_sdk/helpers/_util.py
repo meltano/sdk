@@ -1,11 +1,14 @@
 """General helper functions, helper classes, and decorators."""
 
-from decimal import Decimal
+import datetime
 import json
+import logging
+from decimal import Decimal
+from functools import lru_cache
 from pathlib import Path, PurePath
+from typing import Any, Dict, List, Optional, Union, cast
 
 import pendulum
-from typing import Any, Dict, List, Optional, Union, cast
 
 
 def read_json_file(path: Union[PurePath, str]) -> Dict[str, Any]:
@@ -27,37 +30,6 @@ def utc_now():
     return pendulum.utcnow()
 
 
-def get_catalog_entries(catalog_dict: dict) -> List[dict]:
-    """Parse the catalog dict and return a list of catalog entries."""
-    if "streams" not in catalog_dict:
-        raise ValueError("Catalog does not contain expected 'streams' collection.")
-    if not catalog_dict.get("streams"):
-        raise ValueError("Catalog does not contain any streams.")
-    return cast(List[dict], catalog_dict.get("streams"))
-
-
-def get_catalog_entry_name(catalog_entry: dict) -> str:
-    """Return the name of the provided catalog entry dict."""
-    result = catalog_entry.get("stream", catalog_entry.get("tap_stream_id", None))
-    if not result:
-        raise ValueError(
-            "Stream name could not be identified due to missing or blank"
-            "'stream' and 'tap_stream_id' values."
-        )
-    return result
-
-
-def get_catalog_entry_schema(catalog_entry: dict) -> dict:
-    """Return the JSON Schema dict for the specified catalog entry dict."""
-    result = catalog_entry.get("schema", None)
-    if not result:
-        raise ValueError(
-            "Stream does not have a valid schema. Please check that the catalog file "
-            "is properly formatted."
-        )
-    return result
-
-
 def get_property_schema(schema: dict, property: str) -> Optional[dict]:
     """Given the provided JSON Schema, return the property by name specified.
 
@@ -76,3 +48,59 @@ def is_boolean_type(property_schema: dict) -> Optional[bool]:
         if "boolean" in property_type or property_type == "boolean":
             return True
     return False
+
+
+@lru_cache()
+def _warn_unmapped_property(
+    stream_name: str, property_name: str, logger: logging.Logger
+):
+    logger.warning(
+        f"Property '{property_name}' was present in the '{stream_name}' stream but "
+        "not found in catalog schema. Ignoring."
+    )
+
+
+def conform_record_data_types(  # noqa: C901
+    stream_name: str, row: Dict[str, Any], schema: dict, logger: logging.Logger
+) -> Dict[str, Any]:
+    """Translate values in record dictionary to singer-compatible data types.
+
+    Any property names not found in the schema catalog will be removed, and a
+    warning will be logged exactly once per unmapped property name.
+    """
+    rec: Dict[str, Any] = {}
+    for property_name, elem in row.items():
+        property_schema = get_property_schema(schema or {}, property_name)
+        if not property_schema:
+            _warn_unmapped_property(stream_name, property_name, logger)
+            continue
+        if isinstance(elem, datetime.datetime):
+            rec[property_name] = elem.isoformat() + "+00:00"
+        elif isinstance(elem, datetime.date):
+            rec[property_name] = elem.isoformat() + "T00:00:00+00:00"
+        elif isinstance(elem, datetime.timedelta):
+            epoch = datetime.datetime.utcfromtimestamp(0)
+            timedelta_from_epoch = epoch + elem
+            rec[property_name] = timedelta_from_epoch.isoformat() + "+00:00"
+        elif isinstance(elem, datetime.time):
+            rec[property_name] = str(elem)
+        elif isinstance(elem, bytes):
+            # for BIT value, treat 0 as False and anything else as True
+            bit_representation: bool
+            if is_boolean_type(property_schema):
+                bit_representation = elem != b"\x00"
+                rec[property_name] = bit_representation
+            else:
+                rec[property_name] = elem.hex()
+        elif is_boolean_type(property_schema):
+            boolean_representation: Optional[bool]
+            if elem is None:
+                boolean_representation = None
+            elif elem == 0:
+                boolean_representation = False
+            else:
+                boolean_representation = True
+            rec[property_name] = boolean_representation
+        else:
+            rec[property_name] = elem
+    return rec
