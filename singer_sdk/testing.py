@@ -26,6 +26,7 @@ def get_standard_tap_tests(tap_class: Type[Tap], tap_config=None) -> Callable:
         tap2: Tap = tap_class(
             config=tap_config, parse_env_config=True, catalog=catalog1
         )
+        assert tap2
 
     def _test_stream_connections():
         # Initialize with basic config
