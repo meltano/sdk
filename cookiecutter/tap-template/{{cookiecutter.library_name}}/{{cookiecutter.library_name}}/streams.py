@@ -39,7 +39,7 @@ SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 class {{ cookiecutter.source_name }}Stream(Stream):
     """Stream class for {{ cookiecutter.source_name }} streams."""
 
-    def get_records(self, partition: Optional[dict]) -> Iterable[dict]:
+    def get_records(self, partition: Optional[dict] = None) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects."""
         # TODO: Write logic to extract data from the upstream source.
         # rows = mysource.getall()

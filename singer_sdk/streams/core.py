@@ -29,12 +29,7 @@ from singer_sdk.helpers._state import (
     get_state_partitions_list,
 )
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
-
-try:
-    from typing import final
-except ImportError:
-    # Final not available until Python3.8
-    final = lambda f: f  # noqa: E731
+from singer_sdk.helpers._compat import final
 
 import singer
 from singer import RecordMessage, SchemaMessage

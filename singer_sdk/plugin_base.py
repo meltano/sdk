@@ -11,6 +11,7 @@ from jsonschema import ValidationError, SchemaError, Draft4Validator
 from pathlib import PurePath
 
 from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._compat import metadata
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers._secrets import is_common_secret_key, SecretString
 from singer_sdk.helpers.typing import extend_validator_with_defaults
@@ -18,13 +19,6 @@ from singer_sdk.helpers.typing import extend_validator_with_defaults
 import click
 
 SDK_PACKAGE_NAME = "singer_sdk"
-
-
-try:
-    from importlib import metadata
-except ImportError:
-    # Running on pre-3.8 Python; use importlib-metadata package
-    import importlib_metadata as metadata  # type: ignore
 
 
 JSONSchemaValidator = extend_validator_with_defaults(Draft4Validator)
