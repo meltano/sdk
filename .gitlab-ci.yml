@@ -76,28 +76,3 @@ publish_to_pypi:
       else
         echo "Skipped. (Running in fork.)"
       fi
-    - |
-      echo "Waiting for PyPi availability..."
-      if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
-      then
-        pwd
-        ls -la
-        export VER=$(poetry version --short)
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        echo "Checking for PyPi availability of version $VER"
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not found. Giving up. Last message from PyPi was $PIPERR"; exit 1; } fi;
-      else
-        echo "Skipped. (Running in fork.)"
-      fi

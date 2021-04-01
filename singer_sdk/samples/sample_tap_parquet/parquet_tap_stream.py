@@ -6,8 +6,6 @@ import pyarrow.parquet as pq
 
 from singer_sdk.streams.core import Stream
 
-PLUGIN_NAME = "sample-tap-parquet"
-
 
 class SampleTapParquetStream(Stream):
     """Sample tap test for parquet."""

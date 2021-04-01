@@ -13,7 +13,7 @@ from pendulum import datetime
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 
-from singer_sdk.helpers.util import utc_now
+from singer_sdk.helpers._util import utc_now
 from singer_sdk.streams import Stream as RESTStreamBase
 
 from singer import utils
@@ -76,6 +76,15 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         self.expires_in: Optional[int] = None
 
     @property
+    def http_headers(self) -> dict:
+        """Return a dictionary of HTTP headers, including any authentication tokens."""
+        if not self.is_token_valid():
+            self.update_access_token()
+        result = super().http_headers
+        result["Authorization"] = f"Bearer {self.access_token}"
+        return result
+
+    @property
     def auth_endpoint(self) -> str:
         """Return the authorization endpoint."""
         if not self._auth_endpoint:
@@ -86,39 +95,6 @@ class OAuthAuthenticator(APIAuthenticatorBase):
     def oauth_scopes(self) -> Optional[str]:
         """Return a string with the OAuth scopes, or None if not set."""
         return self._oauth_scopes
-
-    @property
-    def client_id(self) -> Optional[str]:
-        """Return client ID string to be used in authentication or None if not set."""
-        if self.config:
-            return self.config.get("client_id", self.config.get("client_email"))
-        return None
-
-    @property
-    def client_secret(self) -> Optional[str]:
-        """Return client secret to be used in authentication or None if not set."""
-        if self.config:
-            return self.config.get("client_secret")
-        return None
-
-    @property
-    def http_headers(self) -> dict:
-        """Return a dictionary of HTTP headers, including any authentication tokens."""
-        if not self.is_token_valid():
-            self.update_access_token()
-        result = super().http_headers
-        result["Authorization"] = f"Bearer {self.access_token}"
-        return result
-
-    def is_token_valid(self) -> bool:
-        """Return true if token is valid."""
-        if self.last_refreshed is None:
-            return False
-        if not self.expires_in:
-            return True
-        if self.expires_in > (utils.now() - self.last_refreshed).total_seconds():
-            return True
-        return False
 
     @property
     def oauth_request_payload(self) -> dict:
@@ -142,10 +118,35 @@ class OAuthAuthenticator(APIAuthenticatorBase):
                 'username': self.config.get("username", self.config["client_id"]),
                 'password': self.config["password"],
             }
+        ```
         """
         raise NotImplementedError(
             "The `oauth_request_body` property was not defined in the subclass."
         )
+
+    @property
+    def client_id(self) -> Optional[str]:
+        """Return client ID string to be used in authentication or None if not set."""
+        if self.config:
+            return self.config.get("client_id")
+        return None
+
+    @property
+    def client_secret(self) -> Optional[str]:
+        """Return client secret to be used in authentication or None if not set."""
+        if self.config:
+            return self.config.get("client_secret")
+        return None
+
+    def is_token_valid(self) -> bool:
+        """Return true if token is valid."""
+        if self.last_refreshed is None:
+            return False
+        if not self.expires_in:
+            return True
+        if self.expires_in > (utils.now() - self.last_refreshed).total_seconds():
+            return True
+        return False
 
     # Authentication and refresh
     def update_access_token(self):

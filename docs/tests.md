@@ -11,7 +11,7 @@ poetry install && \
 poetry run tap-parquet --help
 ```
 
-**Run 'sync' with auto-discovery...**
+### Run in sync sync mode with auto-discovery
 
 ```bash
 poetry install && \

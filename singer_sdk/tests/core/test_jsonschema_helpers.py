@@ -4,7 +4,7 @@ from typing import List
 
 from singer_sdk.tap_base import Tap
 from singer_sdk.streams.core import Stream
-from singer_sdk.helpers.typing import (
+from singer_sdk.typing import (
     ArrayType,
     ObjectType,
     StringType,

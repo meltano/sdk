@@ -1,6 +1,6 @@
 """Sample tap test for tap-gitlab."""
 
-from singer_sdk.helpers.typing import (
+from singer_sdk.typing import (
     ArrayType,
     DateTimeType,
     Property,
@@ -17,7 +17,6 @@ from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
     EpicsStream,
     # EpicIssuesStream,  # Temporarily skipped due to access denied error
 )
-from singer_sdk.samples.sample_tap_gitlab.gitlab_globals import PLUGIN_NAME
 
 
 STREAM_TYPES = [
@@ -33,13 +32,12 @@ STREAM_TYPES = [
 class SampleTapGitlab(Tap):
     """Sample tap for Gitlab."""
 
-    name: str = PLUGIN_NAME
+    name: str = "sample-tap-gitlab"
     config_jsonschema = PropertiesList(
         Property("auth_token", StringType, required=True),
         Property("project_ids", ArrayType(StringType), required=True),
         Property("group_ids", ArrayType(StringType), required=True),
         Property("start_date", DateTimeType, required=True),
-        Property("api_url", StringType),
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:
