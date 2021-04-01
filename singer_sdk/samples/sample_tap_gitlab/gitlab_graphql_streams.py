@@ -7,7 +7,6 @@
 from pathlib import Path
 from jinja2 import Template
 
-from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.streams import GraphQLStream
 
 
