@@ -2,7 +2,7 @@ from typing import Any, Dict, Iterable, List, Optional
 
 import pytest
 
-from singer_sdk.helpers.typing import IntegerType, PropertiesList, Property, StringType
+from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 from singer_sdk.streams.core import (
     REPLICATION_FULL_TABLE,
     REPLICATION_INCREMENTAL,

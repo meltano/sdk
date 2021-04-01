@@ -6,7 +6,7 @@ from singer_sdk import Tap, Stream
 from singer_sdk.samples.sample_tap_parquet.parquet_tap_stream import (
     SampleTapParquetStream,
 )
-from singer_sdk.helpers.typing import (
+from singer_sdk.typing import (
     PropertiesList,
     Property,
     StringType,

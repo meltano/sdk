@@ -1,8 +1,8 @@
-"""Test the generic tests from `singer_sdk.helpers.testing`."""
+"""Run the generic tests from `singer_sdk.testing`."""
 
 from pathlib import Path
 
-from singer_sdk.helpers.testing import get_basic_tap_test
+from singer_sdk.testing import get_basic_tap_test
 from singer_sdk.samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 from singer_sdk.samples.sample_tap_google_analytics.ga_tap import (
     SampleTapGoogleAnalytics,

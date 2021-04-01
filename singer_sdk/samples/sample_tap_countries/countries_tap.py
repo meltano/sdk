@@ -13,7 +13,7 @@ from singer_sdk.samples.sample_tap_countries.countries_streams import (
     CountriesStream,
     ContinentsStream,
 )
-from singer_sdk.helpers.typing import PropertiesList
+from singer_sdk.typing import PropertiesList
 
 
 class SampleTapCountries(Tap):

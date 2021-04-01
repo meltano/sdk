@@ -6,7 +6,7 @@ import requests
 from pathlib import Path
 from typing import Any, Dict, List, cast, Optional
 
-from singer_sdk.helpers.typing import (
+from singer_sdk.typing import (
     ArrayType,
     DateTimeType,
     IntegerType,

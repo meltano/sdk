@@ -1,6 +1,6 @@
 """Sample tap test for tap-gitlab."""
 
-from singer_sdk.helpers.typing import (
+from singer_sdk.typing import (
     ArrayType,
     DateTimeType,
     Property,

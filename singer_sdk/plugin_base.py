@@ -14,7 +14,7 @@ from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers._secrets import is_common_secret_key, SecretString
-from singer_sdk.helpers.typing import extend_validator_with_defaults
+from singer_sdk.typing import extend_validator_with_defaults
 
 import click
 

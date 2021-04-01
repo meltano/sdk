@@ -20,7 +20,7 @@ from singer_sdk.authenticators import (
     OAuthJWTAuthenticator
 )
 {% endif %}
-from singer_sdk.helpers.typing import (
+from singer_sdk.typing import (
     ArrayType,
     BooleanType,
     DateTimeType,
