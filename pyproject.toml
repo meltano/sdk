@@ -3,7 +3,7 @@ name = "singer-sdk"
 version = "0.0.2"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
-license = "Apache v2"
+license = "Apache 2.0"
 
 [tool.poetry.dependencies]
 python = "<3.9,>=3.6"
@@ -18,7 +18,6 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [tool.poetry.dev-dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
-pyarrow = "^2.0.0"
 pytest = "^6.1.2"
 black = {version = "^20.8b1", allow-prereleases = true}
 mypy = "^0.812"
