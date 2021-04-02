@@ -63,15 +63,14 @@ publish_to_pypi:
       echo "Publishing to PyPi, Ref='$CI_COMMIT_REF_NAME' and Namespace='$CI_PROJECT_NAMESPACE'..."
       if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
       then
-        if [[ "$CI_COMMIT_REF_NAME" == *main ]]
+        if [[ "$CI_COMMIT_REF_NAME" == main ]]
         then
           poetry version --short
-        else
-          poetry version $(poetry version --short)-dev.$CI_JOB_ID
-          poetry version --short
+        # else
+        #   poetry version $(poetry version --short)-dev.$CI_JOB_ID
+        #   poetry version --short
         fi
         echo -e "\nPublishing to version ref '$(poetry version --short)'...\n\n"
-        # poetry config pypi-token.pypi "$PYPI_PUBLISH_TOKEN"
         poetry publish --build
       else
         echo "Skipped. (Running in fork.)"
