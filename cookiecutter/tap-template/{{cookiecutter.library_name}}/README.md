@@ -30,6 +30,29 @@ Create tests within the `{{ cookiecutter.library_name }}/tests` subfolder and
 poetry run pytest
 ```
 
+## Testing with [Meltano](meltano.com)
+
+_Note: This tap will work in any Singer environment and does not require Meltano.
+Examples here are for convenience and to streamline end-to-end orchestration scenarios._
+
+Your project comes with a custom `meltano.yml` project file already created.
+
+To test using Meltano, first install (if you haven't already):
+
+```bash
+cd {{ cookiecutter.tap_id }}
+# Install meltano
+pipx install meltano
+# Initialize meltano within this directory
+meltano install
+```
+
+And now you can test and orchestrate using Meltano:
+
+```bash
+meltano invoke {{ cookiecutter.tap_id }}
+```
+
 ## Singer SDK Dev Guide
 
 See the [dev guide](../../docs/dev_guide.md) for more instructions on how to use the Singer SDK to 
