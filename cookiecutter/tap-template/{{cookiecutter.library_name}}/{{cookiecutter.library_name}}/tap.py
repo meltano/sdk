@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from typing import List
-import click
+
 from singer_sdk import Tap, Stream
 from singer_sdk.typing import (
     ArrayType,
