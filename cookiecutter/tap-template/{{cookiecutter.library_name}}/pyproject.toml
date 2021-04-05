@@ -2,7 +2,8 @@
 name = "{{cookiecutter.tap_id}}"
 version = "0.0.1"
 description = "`{{cookiecutter.tap_id}}` is Singer tap for {{cookiecutter.source_name}}, built with the Singer SDK."
-authors = ["TODO: Your Name <your.email@sample.com>"]
+# TODO: Add author names, optionally with email in the form "Jane Smith <email@sample.com>"
+authors = ["Your Name Here"]
 license = "Apache 2.0"
 
 [tool.poetry.dependencies]
