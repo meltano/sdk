@@ -16,4 +16,4 @@ def test_tap_class():
     config: Optional[dict] = None
     if Path(CONFIG_FILE).exists():
         config = json.loads(Path(CONFIG_FILE).read_text())
-    _ = SampleTapGoogleAnalytics(config=config)
+    _ = SampleTapGoogleAnalytics(config=config, parse_env_config=True)

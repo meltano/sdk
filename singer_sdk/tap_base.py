@@ -2,14 +2,14 @@
 
 import abc
 import json
-from pathlib import PurePath
+from pathlib import PurePath, Path
 from typing import Any, List, Optional, Dict, Union
 
 import click
 from singer.catalog import Catalog
 
-from singer_sdk.helpers.classproperty import classproperty
-from singer_sdk.helpers.util import read_json_file
+from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._util import read_json_file
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams.core import Stream
 
@@ -21,10 +21,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Union[PurePath, str, dict, None] = None,
+        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
         catalog: Union[PurePath, str, dict, None] = None,
         state: Union[PurePath, str, dict, None] = None,
-        parse_env_config: bool = True,
+        parse_env_config: bool = False,
     ) -> None:
         """Initialize the tap."""
         super().__init__(config=config, parse_env_config=parse_env_config)
@@ -68,27 +68,43 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Return the catalog dictionary input, or None if not provided."""
         return self._input_catalog
 
-    @property
+    @classproperty
     def capabilities(self) -> List[str]:
         """Return a list of supported capabilities."""
         return ["sync", "catalog", "state", "discover"]
+
+    # Connection test:
+
+    def run_connection_test(self) -> bool:
+        """Run connection test and return True if successful."""
+        for stream in self.streams.values():
+            stream.MAX_RECORDS_LIMIT = 0
+            stream.sync()
+        return True
 
     # Stream detection:
 
     def run_discovery(self) -> str:
         """Write the catalog json to STDOUT and return the same as a string."""
-        catalog_json = self.get_catalog_json()
-        print(catalog_json)
-        return catalog_json
+        catalog_text = self.catalog_json_text
+        print(catalog_text)
+        return catalog_text
 
-    def get_catalog_json(self) -> str:
+    @property
+    def catalog_dict(self) -> dict:
+        """Return the tap's catalog as a dict."""
+        return self._singer_catalog.to_dict()
+
+    @property
+    def catalog_json_text(self) -> str:
         """Return the tap's catalog as formatted json text."""
-        return json.dumps(self.get_singer_catalog().to_dict(), indent=2)
+        return json.dumps(self.catalog_dict, indent=2)
 
-    def get_singer_catalog(self) -> Catalog:
+    @property
+    def _singer_catalog(self) -> Catalog:
         """Return a Catalog object."""
         catalog_entries = [
-            stream.singer_catalog_entry for stream in self.streams.values()
+            stream._singer_catalog_entry for stream in self.streams.values()
         ]
         return Catalog(catalog_entries)
 
@@ -144,15 +160,15 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Command Line Execution
 
     @classproperty
-    # @classmethod
     def cli(cls):
         """Execute standard CLI handler for taps."""
 
         @click.option("--version", is_flag=True)
         @click.option("--about", is_flag=True)
         @click.option("--discover", is_flag=True)
+        @click.option("--test", is_flag=True)
         @click.option("--format")
-        @click.option("--config")
+        @click.option("--config", multiple=True)
         @click.option("--catalog")
         @click.option("--state")
         @click.command()
@@ -160,7 +176,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             version: bool = False,
             about: bool = False,
             discover: bool = False,
-            config: str = None,
+            test: bool = False,
+            config: List[str] = None,
             state: str = None,
             catalog: str = None,
             format: str = None,
@@ -169,12 +186,42 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             if version:
                 cls.print_version()
                 return
+
             if about:
                 cls.print_about(format)
                 return
-            tap = cls(config=config, state=state, catalog=catalog)
+
+            cls.print_version(print_fn=cls.logger.info)
+
+            parse_env_config = False
+            config_files: List[PurePath] = []
+            for config_path in config or []:
+                if config_path == "ENV":
+                    # Allow parse from env vars:
+                    parse_env_config = True
+                    continue
+
+                # Validate config file paths before adding to list
+                if not Path(config_path).is_file():
+                    raise FileNotFoundError(
+                        f"Could not locate config file at '{config_path}'."
+                        "Please check that the file exists."
+                    )
+
+                config_files.append(Path(config_path))
+
+            tap = cls(
+                config=config_files or None,
+                state=state,
+                catalog=catalog,
+                parse_env_config=parse_env_config,
+            )
             if discover:
                 tap.run_discovery()
+                if test:
+                    tap.run_connection_test()
+            elif test:
+                tap.run_connection_test()
             else:
                 tap.sync_all()
 

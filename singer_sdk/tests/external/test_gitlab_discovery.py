@@ -14,7 +14,7 @@ def test_gitlab_tap_discovery():
     config: Optional[dict] = None
     if Path(CONFIG_FILE).exists():
         config = json.loads(Path(CONFIG_FILE).read_text())
-    tap = SampleTapGitlab(config=config, state=None)
+    tap = SampleTapGitlab(config=config, state=None, parse_env_config=True)
     catalog_json = tap.run_discovery()
     assert catalog_json
 
@@ -25,12 +25,12 @@ def test_gitlab_replication_keys():
     config: Optional[dict] = None
     if Path(CONFIG_FILE).exists():
         config = json.loads(Path(CONFIG_FILE).read_text())
-    tap = SampleTapGitlab(config=config, state=None)
-    catalog = json.loads(tap.get_catalog_json())
+    tap = SampleTapGitlab(config=config, state=None, parse_env_config=True)
+    catalog = tap.catalog_dict
     catalog_entries = catalog["streams"]
     for catalog_entry in [c for c in catalog_entries if c["stream"] == stream_name]:
         metadata_root = [
-            md for md in catalog_entry["metadata"] if md["breadcrumb"] == []
+            md for md in catalog_entry["metadata"] if md["breadcrumb"] == ()
         ][0]
         key_props_1 = metadata_root["metadata"].get("valid-replication-keys")[0]
         key_props_2 = catalog_entry.get("replication_key")

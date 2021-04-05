@@ -9,6 +9,10 @@ from flake8.api import legacy as flake8
 from mypy import api
 import yaml
 
+from logging import getLogger
+
+getLogger("flake8").propagate = False
+
 COOKIECUTTER_DIR = "cookiecutter/tap-template"
 TESTS_INPUT_FILE = "cookiecutter/tap-template/cookiecutter.tests.yml"
 
