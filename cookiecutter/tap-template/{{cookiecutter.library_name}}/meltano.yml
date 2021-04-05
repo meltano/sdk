@@ -5,5 +5,8 @@ plugins:
   extractors:
   - name: {{cookiecutter.tap_id}}
     namespace: {{cookiecutter.library_name}}
-    pip_url: null
     executable: ./{{cookiecutter.tap_id}}.sh
+  loaders:
+  - name: target-jsonl
+    variant: andyh1203
+    pip_url: target-jsonl
