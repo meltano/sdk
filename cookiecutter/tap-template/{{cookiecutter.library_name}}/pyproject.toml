@@ -2,7 +2,7 @@
 name = "{{cookiecutter.tap_id}}"
 version = "0.0.1"
 description = "`{{cookiecutter.tap_id}}` is Singer-compliant {{cookiecutter.source_name}} tap built with Singer SDK."
-authors = ["{{ cookiecutter.admin_name }} <{{ cookiecutter.admin_email }}>"]
+authors = ["{{ cookiecutter.admin_name }}"]
 license = "Apache 2.0"
 
 [tool.poetry.dependencies]
