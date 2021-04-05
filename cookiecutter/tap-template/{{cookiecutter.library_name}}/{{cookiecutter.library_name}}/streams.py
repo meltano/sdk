@@ -1,8 +1,9 @@
 """Stream class for {{ cookiecutter.tap_id }}."""
 
+{% if cookiecutter.stream_type in ["GraphQL", "REST"] %}
 import requests
+{% endif %}
 
-from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Optional, Union, List, Iterable
 
