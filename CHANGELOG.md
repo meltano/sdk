@@ -16,6 +16,20 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
+## v0.1.1
+
+Documentation and cookiecutter template improvements.
+
+## Added
+
+- Added 'admin_name' field in cookiecutter, streamline poetry setup (!25)
+- Added meltano integration and testing options (#47, !52)
+- Added new cookiecutter `.sh` script to ease testing during development (!52)
+
+### Changes
+
+- Improved cookiecutter readme template with examples (#76, !53)
+
 ## v0.1.0
 
 First official SDK release. Numerous changes and improvements implemented, with the goal of stabilizing the SDK

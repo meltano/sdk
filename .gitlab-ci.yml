@@ -53,6 +53,8 @@ lint:
     - poetry run mypy singer_sdk || echo "MyPy found issues (ignoring)..."
 
 publish_to_pypi:
+  only:
+    - main@meltano/singer-sdk
   stage: publish
   parallel:
     matrix:
@@ -60,19 +62,23 @@ publish_to_pypi:
   image: python:${PYTHON_VERSION}
   script:
     - |
-      echo "Publishing to PyPi..."
-      if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
-      then
-        if [[ "$BRANCH_NAME" == *main ]]
-        then
-          poetry version --short
-        else
-          poetry version $(poetry version --short)-dev.$CI_JOB_ID
-          poetry version --short
-        fi
-        echo -e "\nPublishing to version ref '$(poetry version --short)'...\n\n"
-        # poetry config pypi-token.pypi "$PYPI_PUBLISH_TOKEN"
-        poetry publish --build
-      else
-        echo "Skipped. (Running in fork.)"
-      fi
+      echo "Publishing to PyPi, Ref='$CI_COMMIT_REF_NAME' and Namespace='$CI_PROJECT_NAMESPACE'..."
+      poetry version --short
+      echo -e "\nPublishing to version ref '$(poetry version --short)'...\n\n"
+      poetry publish --build
+
+publish_to_pypi_prerelease:
+  only:
+    - tags
+  stage: publish
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.8"]
+  image: python:${PYTHON_VERSION}
+  script:
+    - |
+      echo "Publishing to PyPi, Ref='$CI_COMMIT_REF_NAME' and Namespace='$CI_PROJECT_NAMESPACE'..."
+      poetry version $(poetry version --short)-dev.$CI_JOB_ID
+      poetry version --short
+      echo -e "\nPublishing to version ref '$(poetry version --short)'...\n\n"
+      poetry publish --build
