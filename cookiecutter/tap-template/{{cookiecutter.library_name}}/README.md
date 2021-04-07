@@ -1,27 +1,58 @@
-# {{cookiecutter.tap_id}}
+# {{ cookiecutter.tap_id }}
 
-This Singer tap was created using the [Singer SDK](https://gitlab.com/meltano/singer-sdk).
+`{{ cookiecutter.tap_id }}` is a Singer tap for {{ cookiecutter.source_name }}.
 
-## Getting Started
+Build with the [Singer SDK](https://gitlab.com/meltano/singer-sdk).
 
-- [ ] As a first step, you will want to scan the entire project for the text "`TODO:`" and complete any recommended steps.
-- [ ] `TODO:` Once you have a boilerplate prepped, you'll want to setup Poetry and create the virtual environment for your project:
+## Installation
 
-    ```bash
-    pipx install poetry
-    poetry install
-    ```
+- [ ] `Developer TODO:` Update the below as needed to correctly describe the install procedure. For instance, if you do not have a PyPi repo, or if you want users to directly install from your git repo, you can modify this step as appropriate.
 
-- [ ] `TODO:` You can test out your new CLI directly with:
+```bash
+pipx install {{ cookiecutter.tap_id }}
+```
 
-    ```bash
-    poetry run {{cookiecutter.tap_id}} --help
-    ```
+## Configuration
 
+### Accepted Config Options
 
-_`TODO: Remove the above section once complete.`_
+- [ ] `Developer TODO:` Provide a list of config options accepted by the tap.
 
-## Testing Guide
+A full list of supported settings and capabilities for this
+tap is available by running:
+
+```bash
+{{ cookiecutter.tap_id }} --about
+```
+
+### Source Authentication and Authorization
+
+- [ ] `Developer TODO:` If your tap requires special access on the source system, or any special authentication requirements, provide those here.
+
+## Usage
+
+You can easily run `{{ cookiecutter.tap_id }}` by itself or in a pipeline using [Meltano](www.meltano.com).
+
+### Executing the Tap Directly
+
+```bash
+{{ cookiecutter.tap_id }} --version
+{{ cookiecutter.tap_id }} --help
+{{ cookiecutter.tap_id }} --config CONFIG --discover > ./catalog.json
+```
+
+## Developer Resources
+
+- [ ] `Developer TODO:` As a first step, scan the entire project for the text "`TODO:`" and complete any recommended steps, deleting the "TODO" references once completed.
+
+### Initialize your Development Environment
+
+```bash
+pipx install poetry
+poetry install
+```
+
+### Create and Run Tests
 
 Create tests within the `{{ cookiecutter.library_name }}/tests` subfolder and
   then run:
@@ -30,7 +61,13 @@ Create tests within the `{{ cookiecutter.library_name }}/tests` subfolder and
 poetry run pytest
 ```
 
-## Testing with [Meltano](meltano.com)
+You can also test the `{{cookiecutter.tap_id}}` CLI interface directly using `poetry run`:
+
+```bash
+poetry run {{cookiecutter.tap_id}} --help
+```
+
+### Testing with [Meltano](meltano.com)
 
 _**Note:** This tap will work in any Singer environment and does not require Meltano.
 Examples here are for convenience and to streamline end-to-end orchestration scenarios._
@@ -57,19 +94,7 @@ meltano invoke {{ cookiecutter.tap_id }} --version
 meltano etl {{ cookiecutter.tap_id }} target-jsonl
 ```
 
-## Singer SDK Dev Guide
+### Singer SDK Dev Guide
 
 See the [dev guide](../../docs/dev_guide.md) for more instructions on how to use the Singer SDK to 
 develop your own taps and targets.
-
-## Config Guide
-
-_`TODO:` Provide instructions here for users of the tap:_
-
-### Accepted Config Options
-
-- [ ] `TODO:` Provide a list of config options accepted by the tap.
-
-### Source Authentication and Authorization
-
-- [ ] `TODO:` If your tap requires special access on the source system, or any special authentication requirements, provide those here.
