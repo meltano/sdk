@@ -18,15 +18,22 @@ pipx install {{ cookiecutter.tap_id }}
 
 - [ ] `Developer TODO:` Provide a list of config options accepted by the tap.
 
+A full list of supported settings and capabilities for this
+tap is available by running:
+
+```bash
+{{ cookiecutter.tap_id }} --about
+```
+
 ### Source Authentication and Authorization
 
 - [ ] `Developer TODO:` If your tap requires special access on the source system, or any special authentication requirements, provide those here.
 
 ## Usage
 
-You can easily run tap-investing by itself or in a pipeline using [Meltano](www.meltano.com).
+You can easily run `{{ cookiecutter.tap_id }}` by itself or in a pipeline using [Meltano](www.meltano.com).
 
-### Running the Tap Directly
+### Executing the Tap Directly
 
 ```bash
 {{ cookiecutter.tap_id }} --version
@@ -54,7 +61,7 @@ Create tests within the `{{ cookiecutter.library_name }}/tests` subfolder and
 poetry run pytest
 ```
 
-You can also test `{{cookiecutter.tap_id}}` directly using `poetry run`:
+You can also test the `{{cookiecutter.tap_id}}` CLI interface directly using `poetry run`:
 
 ```bash
 poetry run {{cookiecutter.tap_id}} --help
