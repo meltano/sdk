@@ -64,6 +64,32 @@ class ContinentsStream(GraphQLStream):
 
 ### Dynamically discovering `schema` for a stream
 
+Here is an example which parses schema from a CSV file:
+
+```
+FAKECSV = """
+Header1,Header2,Header3
+val1,val2,val3
+val1,val2,val3
+val1,val2,val3
+"""
+
+@property
+class ParquetStream(Stream):
+    def schema(self):
+        """Dynamically detect the json schema for the stream.
+        This is evaluated prior to any records being retrieved.
+        """
+        properties: List[Property] = []
+        for header in FAKECSV.split("\n")[0].split(",")
+            # Assume string type for all fields
+            properties.add(header, StringType())
+        return PropertiesList(*properties).to_dict()
+```
+
+Here is another example from the Parquet tap. This sample uses a 
+custom `get_jsonschema_type()` function to return the data type.
+
 ```python
 class ParquetStream(Stream):
     """Stream class for Parquet streams."""
