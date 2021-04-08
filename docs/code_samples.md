@@ -2,7 +2,24 @@
 
 Below you will find a collection of code samples which can be used for inspiration.
 
+
+## Project Samples
+
+Below are full project samples, contributed by members in the community. Use these for inspiration
+or to get more information on what an SDK-based tap will look like.
+
+- [tap-bamboohr by Auto IDM](https://gitlab.com/autoidm/tap-bamboohr)
+- [tap-confluence by @edgarrmondragon](https://github.com/edgarrmondragon/tap-confluence)
+- [tap-investing by @DouweM](https://gitlab.com/DouweM/tap-investing)
+- [tap-parquet by AJ](https://github.com/dataops-tk/tap-parquet)
+- [tap-powerbi-metadata by Slalom](https://github.com/dataops-tk/tap-powerbi-metadata)
+
+To add your project to this list, please 
+[submit an issue](https://gitlab.com/meltano/meltano/-/issues/new?issue%5Bassignee_id%5D=&issue%5Bmilestone_id%5D=).
+
 ## Reusable Code Snippets
+
+These are code samples taken from other projects. Use these as a reference if you get stuck.
 
 ### A simple Tap class definition with two streams
 
@@ -128,16 +145,3 @@ def test_sdk_standard_tap_tests():
     for test in tests:
         test()
 ```
-
-## Project Samples
-
-Below are full project samples, contributed by members in the community.
-
-- [tap-bamboohr by Auto IDM](https://gitlab.com/autoidm/tap-bamboohr)
-- [tap-confluence by @edgarrmondragon](https://github.com/edgarrmondragon/tap-confluence)
-- [tap-investing by @DouweM](https://gitlab.com/DouweM/tap-investing)
-- [tap-parquet by AJ](https://github.com/dataops-tk/tap-parquet)
-- [tap-powerbi-metadata by Slalom](https://github.com/dataops-tk/tap-powerbi-metadata)
-
-To add your project to this list, please 
-[submit an issue](https://gitlab.com/meltano/meltano/-/issues/new?issue%5Bassignee_id%5D=&issue%5Bmilestone_id%5D=).
