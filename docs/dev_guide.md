@@ -43,7 +43,7 @@ For a list of code samples solving a variety of different scenarios, please see 
 
 For a list of sample CLI commands you can run, [click here](./cli_commands.md).
 
-### Python Tip: Two Ways to Define Properties
+## Python Tip: Two Ways to Define Properties
 
 In Python, properties within classes like Stream and Tap can generally be overriden
 in two ways: _statically_ or _dynamically_. For instance, `primary_keys` and 
@@ -51,7 +51,7 @@ in two ways: _statically_ or _dynamically_. For instance, `primary_keys` and
 (during development), and they should be declared dynamically if they vary from one 
 environment to another or if they can change at runtime.
 
-#### Static example
+### Static example
 
 Here's a simple example of static definitions based on the 
 [cookiecutter template](../cookiecutter/tap-template/). This example defines the 
@@ -63,7 +63,7 @@ class SimpleSampleStream(Stream):
     replication_key = None
 ```
 
-#### Dynamic property example
+### Dynamic property example
 
 Here is a similar example except that the same properties are calculated dynamically based
 on user-provided inputs:
@@ -86,7 +86,7 @@ class DynamicSampleStream(Stream):
 
 Note that the first static example was more concise while this second example is more extensible.
 
-#### In summary
+### In summary
 
 - Use the static syntax whenever you are dealing with stream properties that won't change
 and use dynamic syntax whenever you need to calculate the stream's properties or discover them dynamically.
