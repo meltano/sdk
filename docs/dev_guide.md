@@ -24,16 +24,37 @@ Create taps with `singer-sdk` requires overriding just two or three classes:
 The best way to get started is by building a new project from the
 [cookiecutter tap template](../cookiecutter/tap-template).
 
-## Overriding Properties
+## Code Samples
 
-Many class properties required by the SDK can be overriden in two ways: either statically or
-dynamically. For instance, the Stream properties `primary_keys` and `replication_key` can be
-declared _statically_ if known ahead of time or _dynamically_ if they will vary from
-one environment to another.
+For a list of code samples solving a variety of different scenarios, please see our [Code Samples](./code_samples.md) page.
 
-As an example, here's a simple static Stream schema definition based on the 
-[cookiecutter template](../cookiecutter/tap-template/). This example defines the
-stream's column types as well as its primary key and replication key definitions.
+## CLI Samples
+
+For a list of sample CLI commands you can run, [click here](./cli_commands.md).
+
+## Detailed Class Reference
+
+For a detailed reference, please see the [SDK Reference Guide](./reference.md)
+
+## Singer SDK Implementation Details
+
+For more detailed information about the Singer SDK implementation, please see the 
+[Singer SDK Implementation Details](./implementation/README.md) section.
+
+## Python Tip: Two Ways to Define Properties
+
+In Python, properties defined in the Stream and Tap classes can generally be overriden
+in two ways: _statically_ or _dynamically_. For instance, `primary_keys` and 
+`replication_key` should be declared statically if known ahead of time or dynamically
+if they vary from one environment to another. Which option to choose depends on whether
+your tap needs to perform custom behavior at runtime, or if a standard behavior will work
+in all cases.
+
+### Static property example
+
+Here's a simple example of static definitions based on the 
+[cookiecutter template](../cookiecutter/tap-template/). This example defines the 
+primary key and replication key as fixed properties which will not change.
 
 ```python
 class SimpleSampleStream(Stream):
@@ -41,8 +62,10 @@ class SimpleSampleStream(Stream):
     replication_key = None
 ```
 
-And here is a similar example except that the Stream dynamically calculates the
-same properties based on provided inputs:
+### Dynamic property example
+
+Here is a similar example except that the same properties are calculated dynamically based
+on user-provided inputs:
 
 ```python
 class DynamicSampleStream(Stream):
@@ -60,28 +83,15 @@ class DynamicSampleStream(Stream):
         return result
 ```
 
-Note that while both examples are functionally identical, the first static example is more concise
-while the second example is more extensible. Use the static syntax whenever you are dealing with
-stream properties that won't change and use the synamic syntax whenever you need to calculate 
-the stream's properties or discover them dynamically.
+Note that the first static example was more concise while this second example is more extensible.
 
-**Note:** For those new to Python, the dynamic syntax is identical to a typical function or method, with the one difference of having the `@property` decorator directly above the method definition. This one change tells Python that you want to be able to access the method as a property (as in `pk = stream.primary_key`) intead of as a callable function (as in `pk = stream.primary_key()`).
+### In summary
 
-For more examples, please see the following [code samples](#code-samples) section.
+- Use the static syntax whenever you are dealing with stream properties that won't change
+and use dynamic syntax whenever you need to calculate the stream's properties or discover them dynamically.
+- For those new to Python, note that the dynamic syntax is identical to declaring a function or method, with
+the one difference of having the `@property` decorator directly above the method definition. This one change
+tells Python that you want to be able to access the method as a property (as in `pk = stream.primary_key`)
+instead of as a callable function (as in `pk = stream.primary_key()`).
 
-## Code Samples
-
-For a list of code samples solving a variety of different scenarios, please see our [Code Samples](./code_samples.md) page.
-
-## Detailed Class Reference
-
-For a detailed reference, please see the [SDK Reference Guide](./reference.md)
-
-## CLI Samples
-
-For a list of sample CLI commands you can run, [click here](./cli_commands.md).
-
-## Singer SDK Implementation Details
-
-For more detailed information about the Singer SDK implementation, please see the 
-[Singer SDK Implementation Details](./implementation/README.md) section.
+For more examples, please see the [Code Samples](./code_samples.md) page.
