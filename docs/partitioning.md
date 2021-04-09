@@ -1,7 +1,7 @@
-# [Singer SDK Implementation Details](/.README.md) - Stream Partitioning
+# Stream Partitioning
 
 The Singer SDK supports stream partitioning, meaning a set of substreams
-each have their own STATE and their own distinct queryable domain.
+which each have their own state and their own distinct queryable domain.
 
 ## If you do not require partitioning
 
@@ -22,12 +22,15 @@ partition, such as `Stream.get_records()`.
 
 ## If you are unsure if partitioning will be needed
 
-If you are _unsure_ of whether the stream will be partitioned or not, you can always just
-pass along the `partition` argument to any other methods which accept it.
+If you are _unsure_ of whether the stream will be partitioned or not, you can always
+pass along the `partition` argument to any other methods which accept it. This will
+work regardless of whether partition is an actual partition context or `None`, meaning
+no partition is specified.
 
-For example, developers may always call `Stream.get_stream_or_partition_state(partition)`,
-which retrieves a writable copy of the state for _either_ the stream (if `partition`
-is `None`) or for the `partition` (if `partition` is not `None`).
+When dealing with state, for example, developers may always call
+`Stream.get_stream_or_partition_state(partition)` even if partition is not set.
+The method will automatically return the state that is appropriate, either for the partition
+or for the stream.
 
 ## See Also
 

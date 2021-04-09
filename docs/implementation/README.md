@@ -4,8 +4,9 @@ This section documents certain behaviors and expectations of the Singer SDK fram
 
 1. [CLI](./cli.md)
 2. [Discovery](./discovery.md)
-3. [Partitioning](./partitioning.md)
-4. [State](./state.md)
+3. [Metadata](./discovery.md)
+4. [Metrics](./discovery.md)
+5. [State](./state.md)
 
 ## How to use the implementation reference material
 
