@@ -16,12 +16,12 @@
     - The project-wide max line length is `89`.
     - In the future we will add support for linting
       [pre-commit hooks](https://gitlab.com/meltano/singer-sdk/-/issues/12) as well.
-4. Set intepreter to match poetry's virtualenv:
+4. Set interpreter to match poetry's virtualenv:
     - Run `poetry install` from the project root.
     - Run `poetry shell` and copy the path from command output.
-    - In VS Code, run `Python: Select intepreter` and paste the intepreter path when prompted.
+    - In VS Code, run `Python: Select interpreter` and paste the interpreter path when prompted.
 
-## Workspace Develoment Strategies for Singer SDK
+## Workspace Development Strategies for Singer SDK
 
 ### Universal Code Formatting
 

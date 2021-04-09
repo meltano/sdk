@@ -17,16 +17,16 @@ a partition. For instance, a regionally partitioned stream may return the follow
 `[{"region": "us-east"}, {"region": "us-west"}, ...]`
 
 For any streams which define the `partitions` property, the individual partitions will be
-passed one at a time through the `partition` argument of methods which reference the 
+passed one at a time through the `partition` argument of methods which reference the
 partition, such as `Stream.get_records()`.
 
 ## If you are unsure if partitioning will be needed
 
 If you are _unsure_ of whether the stream will be partitioned or not, you can always just
-pass along the `paritition` argument to any other methods which accept it.
+pass along the `partition` argument to any other methods which accept it.
 
 For example, developers may always call `Stream.get_stream_or_partition_state(partition)`,
-which retreives a writable copy of the state for _either_ the stream (if `partition`
+which retrieves a writable copy of the state for _either_ the stream (if `partition`
 is `None`) or for the `partition` (if `partition` is not `None`).
 
 ## See Also

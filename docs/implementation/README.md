@@ -4,12 +4,12 @@ This section documents certain behaviors and expectations of the Singer SDK fram
 
 1. [CLI](./cli.md)
 2. [Discovery](./discovery.md)
-3. [Paritioning](./partitioning.md)
+3. [Partitioning](./partitioning.md)
 4. [State](./state.md)
 
 ## How to use the implementation reference material
 
-_**Note:** You sould not need to master all of the details here in order
+_**Note:** You should not need to master all of the details here in order
 to build your tap, and the behaviors described here should be automatic
 and/or intuitive. For general guidance on tap development, please instead refer to our
 [Dev Guide](../dev_guide.md)._

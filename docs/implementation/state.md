@@ -69,14 +69,14 @@ definition.
 
 ### Partitioned State Example
 
-In this hypothetical example, our upstream Orders API requies `Store ID` as input, and
+In this hypothetical example, our upstream Orders API requires `Store ID` as input, and
 as a result we have partitioned the `orders` stream into two partitions: one for store ID
 `1` and one for store ID `2`. Splitting into two partitions allows us to automatically track
 separate bookmarks for each store, ensuring that we always have proper incremental
 replication key values for each one.
 
 Note that in this example, we have a different `replication_key_value` for each partition
-and each paritition's state contains a unique `context` object to distinguish it from the
+and each partition's state contains a unique `context` object to distinguish it from the
 others.
 
 ```json
@@ -108,7 +108,7 @@ others.
 
 The SDK's implementation of `replication_key` is intentionally within the
 framework of a _singular_ column comparison. Most of those use cases which previously
-required multiple bookmarks can now be handled using the [partitioning](./partitioning.md) 
+required multiple bookmarks can now be handled using the [partitioning](./partitioning.md)
 feature.
 
 While legacy taps have sometimes supported multiple replication key properties,
