@@ -103,9 +103,11 @@ class Stream(metaclass=abc.ABCMeta):
         """Return `start_date` config, or state if using timestamp replication."""
         if self.is_timestamp_replication_key:
             state = self.get_stream_or_partition_state(partition)
-            replication_key = state.get("replication_key")
-            if replication_key and replication_key in state:
-                return pendulum.parse(state[replication_key])
+            replication_key_value = state.get("replication_key_value")
+            if replication_key_value and self.replication_key == state.get(
+                "replication_key"
+            ):
+                return pendulum.parse(replication_key_value)
 
         if "start_date" in self.config:
             return pendulum.parse(self.config["start_date"])

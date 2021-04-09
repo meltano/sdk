@@ -96,6 +96,8 @@ def get_writeable_state_dict(
         Raise an error if duplicate entries are found.
 
     """
+    if state is None:
+        raise ValueError("Cannot write state to missing state dictionary.")
     if "bookmarks" not in state:
         state["bookmarks"] = {}
     if tap_stream_id not in state["bookmarks"]:
