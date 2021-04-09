@@ -48,8 +48,8 @@ While the exact specification of STATE messages may change between versions, it 
 nevertheless important that in production scenarios, any STATE bookmarks from prior versions
 of the tap should still be effective for incremental updates in newer versions.
 
-For purposes of backwards compatibility, developers may override `Tap.load_state(state)` in
-order to translate legacy STATE formats to the updates minimal implementation documented
+For the purposes of backwards compatibility, developers may override `Tap.load_state(state)`
+in order to translate legacy STATE formats to the updated minimal implementation documented
 here.
 
 ## State and Partitions
