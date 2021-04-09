@@ -26,6 +26,7 @@ Fixes bug in state handling, adds improvevements to documentation.
 - Added Code Samples page, including dynamic schema discovery examples (#33, !56)
 - Added links to external sdk-based taps (#32, !56)
 - Added static/dynamic property documentation (#86, !56)
+- Added "implementation" docs for debugging and troubleshooting (#71, !41)
 
 ### Fixed
 
