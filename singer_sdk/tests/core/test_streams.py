@@ -1,8 +1,18 @@
+"""Stream tests."""
+
+import logging
 from typing import Any, Dict, Iterable, List, Optional
 
 import pytest
+import pendulum
 
-from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
+from singer_sdk.typing import (
+    IntegerType,
+    PropertiesList,
+    Property,
+    StringType,
+    DateTimeType,
+)
 from singer_sdk.streams.core import (
     REPLICATION_FULL_TABLE,
     REPLICATION_INCREMENTAL,
@@ -18,9 +28,9 @@ class SimpleTestStream(Stream):
     schema = PropertiesList(
         Property("id", IntegerType, required=True),
         Property("value", StringType, required=True),
-        Property("updatedAt", StringType, required=True),
+        Property("updatedAt", DateTimeType, required=True),
     ).to_dict()
-    replication_key = ["updatedAt"]
+    replication_key = "updatedAt"
 
     def __init__(self, tap: Tap):
         super().__init__(tap, schema=self.schema, name=self.name)
@@ -34,7 +44,7 @@ class SimpleTestStream(Stream):
 class SimpleTestTap(Tap):
     """Test tap class."""
 
-    state = None
+    settings_jsonschema = PropertiesList(Property("start_date", DateTimeType)).to_dict()
 
     def discover_streams(self) -> List[Stream]:
         return [SimpleTestStream(self)]
@@ -57,9 +67,7 @@ def tap() -> SimpleTestTap:
         ]
     }
     return SimpleTestTap(
-        config={
-            "start_date": "2021-01-01"
-        },
+        config={"start_date": "2021-01-01"},
         parse_env_config=False,
         catalog=catalog_dict,
     )
@@ -75,7 +83,7 @@ def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
     """Applying a catalog to a stream should overwrite fields."""
 
     assert stream.primary_keys is None
-    assert stream.replication_key == ["updatedAt"]
+    assert stream.replication_key == "updatedAt"
     assert stream.replication_method == REPLICATION_INCREMENTAL
     assert stream.forced_replication_method is None
 
@@ -87,11 +95,13 @@ def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
     assert stream.forced_replication_method == REPLICATION_FULL_TABLE
 
 
-def test_stream_apply_state(tap: SimpleTestTap, stream: SimpleTestStream):
+def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream):
     """Validate state and start_time setting handling."""
     timestamp_value = "2021-02-01"
 
-    assert stream.get_starting_timestamp() == stream.config.get("start_date")
+    assert stream.get_starting_timestamp(None) == pendulum.parse(
+        stream.config.get("start_date")
+    )
     tap.load_state(
         {
             "bookmarks": {
@@ -102,4 +112,9 @@ def test_stream_apply_state(tap: SimpleTestTap, stream: SimpleTestStream):
             }
         }
     )
-    assert stream.get_starting_timestamp() == timestamp_value
+    assert stream.replication_key == "updatedAt"
+    assert stream.replication_method == REPLICATION_INCREMENTAL
+    assert stream.is_timestamp_replication_key
+    assert stream.get_starting_timestamp(None) == pendulum.parse(
+        timestamp_value
+    ), f"Incorrect starting timestamp. Tap state was {dict(tap.state)}"
