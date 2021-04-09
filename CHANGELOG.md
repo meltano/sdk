@@ -16,9 +16,16 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
-## v0.1.2 [Unreleased]
+## v0.1.2
 
 Fixes bug in state handling, adds improvevements to documentation.
+
+### Documentation
+
+- Streamlined Dev Guide (!56)
+- Added Code Samples page, including dynamic schema discovery examples (#33, !56)
+- Added links to external sdk-based taps (#32, !56)
+- Added static/dynamic property documentation (#86, !56)
 
 ### Fixed
 
