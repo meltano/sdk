@@ -57,7 +57,9 @@ def tap() -> SimpleTestTap:
         ]
     }
     return SimpleTestTap(
-        config={},
+        config={
+            "start_date": "2021-01-01"
+        },
         parse_env_config=False,
         catalog=catalog_dict,
     )
@@ -83,3 +85,21 @@ def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
     assert stream.replication_key is None
     assert stream.replication_method == REPLICATION_FULL_TABLE
     assert stream.forced_replication_method == REPLICATION_FULL_TABLE
+
+
+def test_stream_apply_state(tap: SimpleTestTap, stream: SimpleTestStream):
+    """Validate state and start_time setting handling."""
+    timestamp_value = "2021-02-01"
+
+    assert stream.get_starting_timestamp() == stream.config.get("start_date")
+    tap.load_state(
+        {
+            "bookmarks": {
+                stream.name: {
+                    "replication_key": stream.replication_key,
+                    "replication_key_value": timestamp_value,
+                }
+            }
+        }
+    )
+    assert stream.get_starting_timestamp() == timestamp_value
