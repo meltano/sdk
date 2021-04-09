@@ -25,7 +25,7 @@ For a detailed reference, please see the [SDK Reference Guide](./reference.md)
 
 ### Singer SDK Implementation Details
 
-For more detailed information about the Singer SDK implementation, please see the 
+For more detailed information about the Singer SDK implementation, please see the
 [Singer SDK Implementation Details](./implementation/README.md) section.
 
 ## Building a New Tap
@@ -45,16 +45,16 @@ For a list of sample CLI commands you can run, [click here](./cli_commands.md).
 
 ## Python Tip: Two Ways to Define Properties
 
-In Python, properties within classes like Stream and Tap can generally be overriden
-in two ways: _statically_ or _dynamically_. For instance, `primary_keys` and 
+In Python, properties within classes like Stream and Tap can generally be overridden
+in two ways: _statically_ or _dynamically_. For instance, `primary_keys` and
 `replication_key` should be declared statically if their values are known ahead of time
-(during development), and they should be declared dynamically if they vary from one 
+(during development), and they should be declared dynamically if they vary from one
 environment to another or if they can change at runtime.
 
 ### Static example
 
-Here's a simple example of static definitions based on the 
-[cookiecutter template](../cookiecutter/tap-template/). This example defines the 
+Here's a simple example of static definitions based on the
+[cookiecutter template](../cookiecutter/tap-template/). This example defines the
 primary key and replication key as fixed values which will not change.
 
 ```python

@@ -2,7 +2,7 @@
 
 ## Enabling CLI Execution
 
-Poetry allows you to test command line invokation direction in the virtualenv using the
+Poetry allows you to test command line invocation direction in the virtualenv using the
 prefix `poetry run`.
 
 - Note: CLI mapping is performed in `pyproject.toml` and shims are recreated during `poetry install`:

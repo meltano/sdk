@@ -2,7 +2,6 @@
 
 Below you will find a collection of code samples which can be used for inspiration.
 
-
 ## Project Samples
 
 Below are full project samples, contributed by members in the community. Use these for inspiration
@@ -14,7 +13,7 @@ or to get more information on what an SDK-based tap will look like.
 - [tap-parquet by AJ](https://github.com/dataops-tk/tap-parquet)
 - [tap-powerbi-metadata by Slalom](https://github.com/dataops-tk/tap-powerbi-metadata)
 
-To add your project to this list, please 
+To add your project to this list, please
 [submit an issue](https://gitlab.com/meltano/meltano/-/issues/new?issue%5Bassignee_id%5D=&issue%5Bmilestone_id%5D=).
 
 ## Reusable Code Snippets
@@ -39,7 +38,7 @@ class TapCountries(Tap):
         ]
 ```
 
-### Define a simple GraphQL-based stream with schema defined in a file 
+### Define a simple GraphQL-based stream with schema defined in a file
 
 ```python
 class ContinentsStream(GraphQLStream):
@@ -66,7 +65,7 @@ class ContinentsStream(GraphQLStream):
 
 Here is an example which parses schema from a CSV file:
 
-```
+```python
 FAKECSV = """
 Header1,Header2,Header3
 val1,val2,val3
@@ -87,7 +86,7 @@ class ParquetStream(Stream):
         return PropertiesList(*properties).to_dict()
 ```
 
-Here is another example from the Parquet tap. This sample uses a 
+Here is another example from the Parquet tap. This sample uses a
 custom `get_jsonschema_type()` function to return the data type.
 
 ```python
@@ -115,7 +114,7 @@ class ParquetStream(Stream):
             # Add the new property to our list
             properties.append(Property(name, dtype))
 
-        # Return the list as a JSON Schema dictionay object
+        # Return the list as a JSON Schema dictionary object
         return PropertiesList(*properties).to_dict()
 ```
 
