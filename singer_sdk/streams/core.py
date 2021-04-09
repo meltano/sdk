@@ -4,21 +4,9 @@ import abc  # abstract base classes
 import datetime
 import json
 import logging
-from types import MappingProxyType
-
-import pendulum
-from singer import metadata
-
-from singer_sdk.plugin_base import PluginBase as TapBaseClass
-from singer_sdk.helpers.util import get_property_schema, is_boolean_type
-from singer_sdk.helpers.state import (
-    get_stream_state_dict,
-    read_stream_state,
-    wipe_stream_state_keys,
-)
-from functools import lru_cache
 from os import PathLike
 from pathlib import Path
+from types import MappingProxyType
 from typing import (
     Dict,
     Any,
@@ -30,22 +18,24 @@ from typing import (
     Union,
 )
 
-try:
-    from typing import final
-except ImportError:
-    # Final not available until Python3.8
-    final = lambda f: f  # noqa: E731
+import pendulum
+from singer import metadata
+
+from singer_sdk.helpers._typing import conform_record_data_types
+from singer_sdk.helpers._state import (
+    get_writeable_state_dict,
+    wipe_stream_state_keys,
+    get_state_partitions_list,
+)
+from singer_sdk.plugin_base import PluginBase as TapBaseClass
+from singer_sdk.helpers._compat import final
 
 import singer
 from singer import RecordMessage, SchemaMessage
 from singer.catalog import Catalog
 from singer.schema import Schema
-from singer_sdk.helpers.typing import is_datetime_type
+from singer_sdk.helpers._typing import is_datetime_type
 
-DEBUG_MODE = True
-
-# How many records to emit between sending state message updates
-STATE_MSG_FREQUENCY = 10 if DEBUG_MODE else 10000
 
 # Replication methods
 REPLICATION_FULL_TABLE = "FULL_TABLE"
@@ -58,7 +48,7 @@ FactoryType = TypeVar("FactoryType", bound="Stream")
 class Stream(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
-    MAX_CONNECT_RETRIES = 0
+    STATE_MSG_FREQUENCY = 10000  # Number of records between state messages
     MAX_RECORDS_LIMIT: Optional[int] = None
 
     parent_stream_types: List[Any] = []  # May be used in sync sequencing
@@ -90,7 +80,7 @@ class Stream(metaclass=abc.ABCMeta):
                 self._schema = schema
             elif isinstance(schema, Schema):
                 self._schema = schema.to_dict()
-            elif schema:
+            else:
                 raise ValueError(
                     f"Unexpected type {type(schema).__name__} for arg 'schema'."
                 )
@@ -107,19 +97,22 @@ class Stream(metaclass=abc.ABCMeta):
         type_dict = self.schema.get("properties", {}).get(self.replication_key)
         return is_datetime_type(type_dict)
 
-    def get_starting_datetime(
+    def get_starting_timestamp(
         self, partition: Optional[dict]
     ) -> Optional[datetime.datetime]:
         """Return `start_date` config, or state if using timestamp replication."""
-        result: Optional[datetime.datetime] = None
         if self.is_timestamp_replication_key:
             state = self.get_stream_or_partition_state(partition)
-            replication_key = state.get("replication_key")
-            if replication_key and replication_key in state:
-                result = pendulum.parse(state[replication_key])
-        if result is None and "start_date" in self.config:
-            result = pendulum.parse(self.config.get("start_date"))
-        return result
+            replication_key_value = state.get("replication_key_value")
+            if replication_key_value and self.replication_key == state.get(
+                "replication_key"
+            ):
+                return pendulum.parse(replication_key_value)
+
+        if "start_date" in self.config:
+            return pendulum.parse(self.config["start_date"])
+
+        return None
 
     @property
     def schema_filepath(self) -> Optional[Path]:
@@ -168,7 +161,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._replication_key = new_value
 
     @property
-    def singer_metadata(self) -> dict:
+    def _singer_metadata(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec."""
         self.logger.debug(f"Schema Debug: {self.schema}")
         md = metadata.get_standard_metadata(
@@ -183,13 +176,13 @@ class Stream(metaclass=abc.ABCMeta):
         return md
 
     @property
-    def singer_catalog_entry(self) -> singer.CatalogEntry:
+    def _singer_catalog_entry(self) -> singer.CatalogEntry:
         """Return catalog entry as specified by the Singer catalog spec."""
         return singer.CatalogEntry(
             tap_stream_id=self.tap_stream_id,
             stream=self.name,
             schema=Schema.from_dict(self.schema),
-            metadata=self.singer_metadata,
+            metadata=self._singer_metadata,
             key_properties=self.primary_keys or None,
             replication_key=self.replication_key,
             replication_method=self.replication_method,
@@ -245,11 +238,11 @@ class Stream(metaclass=abc.ABCMeta):
 
         A blank state entry will be created if one doesn't already exist.
         """
-        return get_stream_state_dict(self.tap_state, self.name)
+        return get_writeable_state_dict(self.tap_state, self.name)
 
     def get_partition_state(self, partition: dict) -> dict:
         """Return a writable state dict for the given partition."""
-        return get_stream_state_dict(self.tap_state, self.name, partition=partition)
+        return get_writeable_state_dict(self.tap_state, self.name, partition=partition)
 
     # Partitions
 
@@ -257,15 +250,16 @@ class Stream(metaclass=abc.ABCMeta):
     def partitions(self) -> Optional[List[dict]]:
         """Return a list of partition key dicts (if applicable), otherwise None.
 
+        By default, this method returns a list of any partitions which are already
+        defined in state, otherwise None.
         Developers may override this property to provide a default partitions list.
         """
-        state = read_stream_state(self.tap_state, self.name)
-        if state is None or "partitions" not in state:
-            return None
         result: List[dict] = []
-        for partition_state in state["partitions"]:
-            result.append(partition_state.get("context"))
-        return result
+        for partition_state in (
+            get_state_partitions_list(self.tap_state, self.name) or []
+        ):
+            result.append(partition_state["context"])
+        return result or None
 
     # Private bookmarking methods
 
@@ -275,15 +269,7 @@ class Stream(metaclass=abc.ABCMeta):
         """Update state of stream or partition with data from the provided record."""
         state_dict = self.get_stream_or_partition_state(partition)
         if latest_record:
-            if self.replication_method == REPLICATION_FULL_TABLE:
-                max_pk_values = self._get_bookmark("max_pk_values")
-                if max_pk_values:
-                    state_dict["last_pk_fetched"] = {
-                        k: v
-                        for k, v in latest_record.items()
-                        if k in (self.primary_keys or [])
-                    }
-            elif self.replication_method in [
+            if self.replication_method in [
                 REPLICATION_INCREMENTAL,
                 REPLICATION_LOG_BASED,
             ]:
@@ -295,20 +281,9 @@ class Stream(metaclass=abc.ABCMeta):
                 state_dict.update(
                     {
                         "replication_key": self.replication_key,
-                        self.replication_key: latest_record.get(
-                            self.replication_key, None
-                        ),
+                        "replication_key_value": latest_record[self.replication_key],
                     }
                 )
-
-    def _get_bookmark(self, key: str, default: Any = None):
-        """Return a bookmark key's value, or a default value if key is not set."""
-        return singer.get_bookmark(
-            state=self.tap_state,
-            tap_stream_id=self.tap_stream_id,
-            key=key,
-            default=default,
-        )
 
     # Private message authoring methods:
 
@@ -333,6 +308,7 @@ class Stream(metaclass=abc.ABCMeta):
         wipe_stream_state_keys(
             self.tap_state,
             self.name,
+            partition=partition,
             wipe_keys=[
                 "last_pk_fetched",
                 "max_pk_values",
@@ -355,15 +331,17 @@ class Stream(metaclass=abc.ABCMeta):
                         "Stream prematurely aborted due to the stream's max record "
                         f"limit ({self.MAX_RECORDS_LIMIT}) being reached."
                     )
-                    if rows_sent:
-                        # Flush state messages if applicable
-                        self._write_state_message()
                     # Abort stream sync for this partition or stream
                     break
 
-                if rows_sent and ((rows_sent - 1) % STATE_MSG_FREQUENCY == 0):
+                if rows_sent and ((rows_sent - 1) % self.STATE_MSG_FREQUENCY == 0):
                     self._write_state_message()
-                record = self._conform_record_data_types(row_dict)
+                record = conform_record_data_types(
+                    stream_name=self.name,
+                    row=row_dict,
+                    schema=self.schema,
+                    logger=self.logger,
+                )
                 record_message = RecordMessage(
                     stream=self.name,
                     record=record,
@@ -373,68 +351,15 @@ class Stream(metaclass=abc.ABCMeta):
                 singer.write_message(record_message)
                 self._increment_stream_state(record, partition=partition)
                 rows_sent += 1
+            wipe_stream_state_keys(
+                self.tap_state,
+                self.name,
+                partition=partition,
+                wipe_keys=["last_pk_fetched", "max_pk_values"],
+            )
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
         # Reset interim bookmarks before emitting final STATE message:
-        wipe_stream_state_keys(
-            self.tap_state,
-            self.name,
-            wipe_keys=["last_pk_fetched", "max_pk_values"],
-        )
         self._write_state_message()
-
-    # Private validation and cleansing methods:
-
-    @lru_cache()
-    def _warn_unmapped_property(self, property_name: str):
-        self.logger.warning(
-            f"Property '{property_name}' was present in the result stream but "
-            "not found in catalog schema. Ignoring."
-        )
-
-    def _conform_record_data_types(  # noqa: C901
-        self, row: Dict[str, Any]
-    ) -> RecordMessage:
-        """Translate values in record dictionary to singer-compatible data types.
-
-        Any property names not found in the schema catalog will be removed, and a
-        warning will be logged exactly once per unmapped property name.
-        """
-        rec: Dict[str, Any] = {}
-        for property_name, elem in row.items():
-            property_schema = get_property_schema(self.schema or {}, property_name)
-            if not property_schema:
-                self._warn_unmapped_property(property_name)
-                continue
-            if isinstance(elem, datetime.datetime):
-                rec[property_name] = elem.isoformat() + "+00:00"
-            elif isinstance(elem, datetime.date):
-                rec[property_name] = elem.isoformat() + "T00:00:00+00:00"
-            elif isinstance(elem, datetime.timedelta):
-                epoch = datetime.datetime.utcfromtimestamp(0)
-                timedelta_from_epoch = epoch + elem
-                rec[property_name] = timedelta_from_epoch.isoformat() + "+00:00"
-            elif isinstance(elem, datetime.time):
-                rec[property_name] = str(elem)
-            elif isinstance(elem, bytes):
-                # for BIT value, treat 0 as False and anything else as True
-                bit_representation: bool
-                if is_boolean_type(property_schema):
-                    bit_representation = elem != b"\x00"
-                    rec[property_name] = bit_representation
-                else:
-                    rec[property_name] = elem.hex()
-            elif is_boolean_type(property_schema):
-                boolean_representation: Optional[bool]
-                if elem is None:
-                    boolean_representation = None
-                elif elem == 0:
-                    boolean_representation = False
-                else:
-                    boolean_representation = True
-                rec[property_name] = boolean_representation
-            else:
-                rec[property_name] = elem
-        return rec
 
     # Public methods ("final", not recommended to be overridden)
 
@@ -465,30 +390,24 @@ class Stream(metaclass=abc.ABCMeta):
         """Return a generator of row-type dictionary objects."""
         if self.partitions:
             for partition in self.partitions:
-                partition_state = self.get_partition_state(partition)
-                for row in self.get_records(partition_state):
-                    row = self.post_process(row, partition_state)
+                for row in self.get_records(partition):
+                    row = self.post_process(row, partition)
                     yield row
         else:
-            for row in self.get_records(self.stream_state):
-                row = self.post_process(row, self.stream_state)
+            for row in self.get_records():
+                row = self.post_process(row)
                 yield row
 
     # Abstract Methods
 
     @abc.abstractmethod
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, partition: Optional[dict] = None) -> Iterable[Dict[str, Any]]:
         """Abstract row generator function. Must be overridden by the child class.
 
         Each row emitted should be a dictionary of property names to their values.
         """
         pass
 
-    def post_process(self, row: dict, stream_or_partition_state: dict) -> dict:
-        """Transform raw data from HTTP GET into the expected property values."""
+    def post_process(self, row: dict, partition: Optional[dict] = None) -> dict:
+        """As needed, append or transform raw data to match expected structure."""
         return row
-
-    @property
-    def http_headers(self) -> dict:
-        """Return headers to be used by HTTP requests."""
-        return NotImplemented()

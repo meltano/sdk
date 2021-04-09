@@ -1,8 +1,8 @@
-"""Test the generic tests from `singer_sdk.helpers.testing`."""
+"""Run the generic tests from `singer_sdk.testing`."""
 
 from pathlib import Path
 
-from singer_sdk.helpers.testing import get_basic_tap_test
+from singer_sdk.testing import get_standard_tap_tests
 from singer_sdk.samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 from singer_sdk.samples.sample_tap_google_analytics.ga_tap import (
     SampleTapGoogleAnalytics,
@@ -11,11 +11,22 @@ from singer_sdk.samples.sample_tap_google_analytics.ga_tap import (
 GA_CONFIG_FILE = Path("singer_sdk/tests/external/.secrets/google-analytics-config.json")
 GITLAB_CONFIG_FILE = Path("singer_sdk/tests/external/.secrets/gitlab-config.json")
 
-test_tap_gitlab_basic_test = get_basic_tap_test(
-    SampleTapGitlab,
-    tap_config=GITLAB_CONFIG_FILE if GITLAB_CONFIG_FILE.exists() else None,
-)
-test_tap_ga_basic_test = get_basic_tap_test(
-    SampleTapGoogleAnalytics,
-    tap_config=GA_CONFIG_FILE if GA_CONFIG_FILE.exists() else None,
-)
+
+def test_gitlab_tap_standard_tests():
+    """Run standard tap tests against Gitlab tap."""
+    tests = get_standard_tap_tests(
+        SampleTapGitlab,
+        config=GITLAB_CONFIG_FILE if GITLAB_CONFIG_FILE.exists() else None,
+    )
+    for test in tests:
+        test()
+
+
+def test_ga_tap_standard_tests():
+    """Run standard tap tests against Google Analytics tap."""
+    tests = get_standard_tap_tests(
+        SampleTapGoogleAnalytics,
+        config=GA_CONFIG_FILE if GA_CONFIG_FILE.exists() else None,
+    )
+    for test in tests:
+        test()

@@ -1,25 +1,26 @@
-"""Tests init and discovery features for {{ cookiecutter.tap_id }}."""
+"""Tests standard tap features using the built-in SDK tests library."""
 
-from singer_sdk.helpers.util import utc_now
-from singer_sdk.helpers.testing import get_basic_tap_test
+import datetime
+
+from singer_sdk.testing import get_standard_tap_tests
 
 from {{ cookiecutter.library_name }}.tap import Tap{{ cookiecutter.source_name }}
 
 SAMPLE_CONFIG = {
-    "start_date": utc_now()
-    # TODO: Initialize minimal tap config and/or register env vars in test harness
+    "start_date": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+    # TODO: Initialize minimal tap config
 }
 
 
-# Get built-in 'generic' tap tester from SDK:
-test_using_generic_test_suite = get_basic_tap_test(Tap{{ cookiecutter.source_name }})
-
-
-# TODO: Expand additional tests as appropriate for your tap.
-def test_catalog_discovery():
-    """Test stream catalog discovery."""
-    tap = Tap{{ cookiecutter.source_name }}(
-        config=SAMPLE_CONFIG, state=None, parse_env_config=True
+# Run standard built-in tap tests from the SDK:
+def test_standard_tap_tests():
+    """Run standard tap tests from the SDK."""
+    tests = get_standard_tap_tests(
+        Tap{{ cookiecutter.source_name }},
+        config=SAMPLE_CONFIG
     )
-    catalog_json = tap.run_discovery()
-    assert catalog_json
+    for test in tests:
+        test()
+
+
+# TODO: Create additional tests as appropriate for your tap.

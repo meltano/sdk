@@ -1,12 +1,11 @@
 """Sample tap stream test for tap-gitlab."""
 
-import copy
 import requests
 
 from pathlib import Path
 from typing import Any, Dict, List, cast, Optional
 
-from singer_sdk.helpers.typing import (
+from singer_sdk.typing import (
     ArrayType,
     DateTimeType,
     IntegerType,
@@ -14,7 +13,7 @@ from singer_sdk.helpers.typing import (
     PropertiesList,
     StringType,
 )
-from singer_sdk.helpers.state import get_stream_state_dict
+from singer_sdk.helpers._state import get_writeable_state_dict
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.streams.rest import RESTStream
 
@@ -34,20 +33,18 @@ class GitlabStream(RESTStream):
     @property
     def authenticator(self) -> SimpleAuthenticator:
         """Return an authenticator for REST API requests."""
-        http_headers = {"Private-Token": self.config.get("auth_token")}
-        if self.config.get("user_agent"):
-            http_headers["User-Agent"] = self.config.get("user_agent")
-        return SimpleAuthenticator(stream=self, http_headers=http_headers)
+        return SimpleAuthenticator(
+            stream=self, auth_headers={"Private-Token": self.config.get("auth_token")}
+        )
 
     def get_url_params(
         self, partition: Optional[dict], next_page_token: Optional[Any] = None
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization."""
-        state = self.get_stream_or_partition_state(partition)
-        result = copy.deepcopy(state)
-        result.update({"start_date": self.config.get("start_date")})
-        result["page"] = next_page_token or 1
-        return result
+        return {
+            "start_date": self.get_starting_timestamp(partition),
+            "page": next_page_token or 1,
+        }
 
     def get_next_page_token(
         self, response: requests.Response, previous_token: Optional[Any] = None
@@ -56,11 +53,6 @@ class GitlabStream(RESTStream):
         next_page_token = response.headers.get("X-Next-Page", None)
         if next_page_token:
             self.logger.info(f"Next page token retrieved: {next_page_token}")
-        if next_page_token and next_page_token == previous_token:
-            raise RuntimeError(
-                f"Loop detected in pagination. "
-                f"Pagination token {next_page_token} is identical to previous run."
-            )
         return next_page_token
 
 
@@ -162,10 +154,10 @@ class EpicsStream(ProjectBasedStream):
 
     # schema_filepath = SCHEMAS_DIR / "epics.json"
 
-    def post_process(self, row: dict, stream_or_partition_state: dict) -> dict:
+    def post_process(self, row: dict, partition: Optional[dict] = None) -> dict:
         """Perform post processing, including queuing up any child stream types."""
         # Ensure child state record(s) are created
-        _ = get_stream_state_dict(
+        _ = get_writeable_state_dict(
             self.tap_state,
             "epic_issues",
             partition={
@@ -173,7 +165,7 @@ class EpicsStream(ProjectBasedStream):
                 "epic_id": row["id"],
             },
         )
-        return super().post_process(row, stream_or_partition_state)
+        return super().post_process(row, partition)
 
 
 class EpicIssuesStream(GitlabStream):

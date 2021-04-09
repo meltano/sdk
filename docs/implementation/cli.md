@@ -19,6 +19,6 @@ When `--config=ENV` is specified, the SDK will automatically capture and pass al
 values from environment variables which match the exact name of a setting, along with a
 prefix determined by the plugin name.
 
-> For example: For a sample plugin named `tap-my-example`, the SDK will automatically scrape 
-> the settings from environment variables `TAP_MY_EXAMPLE_username` and 
-> `TAP_MY_EXAMPLE_access_key`, if they exist.
+> For example: For a sample plugin named `tap-my-example` and settings named "username" and "access_key", the SDK will automatically scrape
+> the settings from environment variables `TAP_MY_EXAMPLE_USERNAME` and
+> `TAP_MY_EXAMPLE_ACCESS_KEY`, if they exist.

@@ -124,13 +124,21 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         url: str = self.get_url(partition)
         params: dict = self.get_url_params(partition, next_page_token)
         request_data = self.prepare_request_payload(partition, next_page_token)
-        request = requests.Request(
-            method=http_method,
-            url=url,
-            params=params,
-            headers=self.authenticator.http_headers,
-            json=request_data,
-        ).prepare()
+        headers = self.http_headers
+
+        authenticator = self.authenticator
+        if authenticator:
+            headers.update(authenticator.auth_headers or {})
+
+        request = self.requests_session.prepare_request(
+            requests.Request(
+                method=http_method,
+                url=url,
+                params=params,
+                headers=headers,
+                json=request_data,
+            )
+        )
         return request
 
     def request_records(self, partition: Optional[dict]) -> Iterable[dict]:
@@ -147,9 +155,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             resp = self._request_with_backoff(prepared_request)
             for row in self.parse_response(resp):
                 yield row
+            previous_token = copy.deepcopy(next_page_token)
             next_page_token = self.get_next_page_token(
-                response=resp, previous_token=copy.deepcopy(next_page_token)
+                response=resp, previous_token=previous_token
             )
+            if next_page_token and next_page_token == previous_token:
+                raise RuntimeError(
+                    f"Loop detected in pagination. "
+                    f"Pagination token {next_page_token} is identical to prior token."
+                )
             # Cycle until get_next_page_token() no longer returns a value
             finished = not next_page_token
 
@@ -188,9 +202,8 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         Each row emitted should be a dictionary of property names to their values.
         """
-        state = self.get_stream_or_partition_state(partition)
         for row in self.request_records(partition):
-            row = self.post_process(row, state)
+            row = self.post_process(row, partition)
             yield row
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
@@ -205,6 +218,6 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     # Abstract methods:
 
     @property
-    def authenticator(self) -> APIAuthenticatorBase:
+    def authenticator(self) -> Optional[APIAuthenticatorBase]:
         """Return an authorization header for REST API requests."""
         return SimpleAuthenticator(stream=self)

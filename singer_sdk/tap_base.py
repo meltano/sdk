@@ -8,8 +8,9 @@ from typing import Any, List, Optional, Dict, Union
 import click
 from singer.catalog import Catalog
 
-from singer_sdk.helpers.classproperty import classproperty
-from singer_sdk.helpers.util import read_json_file
+from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._util import read_json_file
+from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams.core import Stream
 
@@ -28,19 +29,25 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     ) -> None:
         """Initialize the tap."""
         super().__init__(config=config, parse_env_config=parse_env_config)
-        if not state:
-            state_dict = {}
-        elif isinstance(state, dict):
-            state_dict = state
-        else:
-            state_dict = read_json_file(state)
+
+        # Declare private members
+        self._streams: Optional[Dict[str, Stream]] = None
         self._input_catalog: Optional[dict] = None
+        self._state: Dict[str, Stream] = {}
+
+        # Process input catalog
         if isinstance(catalog, dict):
             self._input_catalog = catalog
         elif catalog is not None:
             self._input_catalog = read_json_file(catalog)
-        self._state = state_dict or {}
-        self._streams: Optional[Dict[str, Stream]] = None
+
+        # Process state
+        state_dict: dict = {}
+        if isinstance(state, dict):
+            state_dict = state
+        elif state:
+            state_dict = read_json_file(state)
+        self.load_state(state_dict)
 
     # Class properties
 
@@ -61,6 +68,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     @property
     def state(self) -> dict:
         """Return a state dict."""
+        if self._state is None:
+            raise RuntimeError("Could not read from uninitialized state.")
         return self._state
 
     @property
@@ -77,7 +86,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def run_connection_test(self) -> bool:
         """Run connection test and return True if successful."""
-        """Sync all streams."""
         for stream in self.streams.values():
             stream.MAX_RECORDS_LIMIT = 0
             stream.sync()
@@ -94,7 +102,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     @property
     def catalog_dict(self) -> dict:
         """Return the tap's catalog as a dict."""
-        return self.singer_catalog.to_dict()
+        return self._singer_catalog.to_dict()
 
     @property
     def catalog_json_text(self) -> str:
@@ -102,10 +110,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         return json.dumps(self.catalog_dict, indent=2)
 
     @property
-    def singer_catalog(self) -> Catalog:
+    def _singer_catalog(self) -> Catalog:
         """Return a Catalog object."""
         catalog_entries = [
-            stream.singer_catalog_entry for stream in self.streams.values()
+            stream._singer_catalog_entry for stream in self.streams.values()
         ]
         return Catalog(catalog_entries)
 
@@ -134,12 +142,24 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     # Bookmarks and state management
 
-    def load_state(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        """Return a properly initalized state given an arbitrary dict input.
+    def load_state(self, state: Dict[str, Any]) -> None:
+        """Merge or initalize stream state with the provided state dictionary input.
 
-        Override this method to perform validation and backwards compatibility updates.
+        Override this method to perform validation and backwards-compatibility patches
+        on self.state. If overriding, we recommend first running
+        `super().load_state(state)` to ensure compatibility with the SDK.
         """
-        return state
+        if self.state is None:
+            raise ValueError("Cannot write to uninitialized state dictionary.")
+
+        for stream_name, stream_state in state.get("bookmarks", {}).items():
+            for key, val in stream_state.items():
+                write_stream_state(
+                    self.state,
+                    stream_name,
+                    key,
+                    val,
+                )
 
     # Sync methods
 
@@ -187,10 +207,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             if version:
                 cls.print_version()
                 return
+
             if about:
                 cls.print_about(format)
                 return
+
             cls.print_version(print_fn=cls.logger.info)
+
             parse_env_config = False
             config_files: List[PurePath] = []
             for config_path in config or []:
@@ -198,13 +221,16 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     # Allow parse from env vars:
                     parse_env_config = True
                     continue
+
                 # Validate config file paths before adding to list
                 if not Path(config_path).is_file():
                     raise FileNotFoundError(
                         f"Could not locate config file at '{config_path}'."
                         "Please check that the file exists."
                     )
+
                 config_files.append(Path(config_path))
+
             tap = cls(
                 config=config_files or None,
                 state=state,

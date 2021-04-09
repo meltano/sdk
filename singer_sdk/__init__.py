@@ -5,7 +5,6 @@ from singer_sdk.tap_base import Tap
 from singer_sdk import streams
 from singer_sdk.streams import (
     Stream,
-    DatabaseStream,
     RESTStream,
     GraphQLStream,
 )
@@ -15,7 +14,6 @@ __all__ = [
     "Tap",
     "streams",
     "Stream",
-    "DatabaseStream",
     "RESTStream",
     "GraphQLStream",
 ]
