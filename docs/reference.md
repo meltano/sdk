@@ -45,7 +45,8 @@ A method which should retrieve data from the source and return records. To optim
 
 Note:
 
-- This method takes an optional `partition` argument, which you can safely disregard unless you require partition handling.
+- This method takes an optional `partition` argument, which can be safely ignored unless
+the stream requires [partitioning](./partitioning.md).
 - Only custom stream types need to define this method. REST and GraphQL streams do not.
 
 ## `RESTStream` Class
