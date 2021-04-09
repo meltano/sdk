@@ -16,6 +16,14 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
+## v0.1.2 [Unreleased]
+
+Fixes bug in state handling, adds improvevements to documentation.
+
+### Fixed
+
+- Fixes bug in `Stream.get_starting_timestamp()` using incorrect state key (#94, !58)
+
 ## v0.1.1
 
 Documentation and cookiecutter template improvements.
