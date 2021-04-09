@@ -104,9 +104,8 @@ class Stream(metaclass=abc.ABCMeta):
         if self.is_timestamp_replication_key:
             state = self.get_stream_or_partition_state(partition)
             replication_key_value = state.get("replication_key_value")
-            if (
-                replication_key_value and
-                self.replication_key == state.get("replication_key")
+            if replication_key_value and self.replication_key == state.get(
+                "replication_key"
             ):
                 return pendulum.parse(replication_key_value)
 
