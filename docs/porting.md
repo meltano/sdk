@@ -15,7 +15,7 @@ pipx ensurepath
 pipx install poetry
 ```
 
-Initialize [`poetry`](https://python-poetry.org/) inside your exisitng project:
+Initialize [`poetry`](https://python-poetry.org/) inside your existing project:
 
 ```bash
 cd tap-<myproject>
