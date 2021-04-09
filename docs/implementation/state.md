@@ -56,7 +56,7 @@ here.
 
 - _**Preview Feature Notice:** As of version `0.1.0`, the partitioned state feature is in preview status. Implementation details specified here should not be considered final._
 
-The SDK implements a feature called [partitioning](./partitioning.md) which allows the same
+The SDK implements a feature called [partitioning](../partitioning.md) which allows the same
 stream to be segmented by one or more partitioning indexes. The collection of indexes
 which uniquely describe a partition are referred to as the partition's 'context'.
 
@@ -108,16 +108,16 @@ others.
 
 The SDK's implementation of `replication_key` is intentionally within the
 framework of a _singular_ column comparison. Most of those use cases which previously
-required multiple bookmarks can now be handled using the [partitioning](./partitioning.md)
+required multiple bookmarks can now be handled using the [partitioning](../partitioning.md)
 feature.
 
 While legacy taps have sometimes supported multiple replication key properties,
 this is not yet a supported use case within the SDK. If your source requires multiple
-bookmark keys, and if it does not align with the [partitioning](./partitioning.md) feature,
+bookmark keys, and if it does not align with the [partitioning](../partitioning.md) feature,
 please open an issue with a detailed description of the intended use case.
 
 ## See Also
 
-- [Singer SDK Partitioning](./partitioning.md)
+- [Singer SDK Partitioning](../partitioning.md)
 - [Singer Spec: State Overview](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#state)
 - [Singer Spec: Config and State](https://github.com/singer-io/getting-started/blob/master/docs/CONFIG_AND_STATE.md#state-file)
