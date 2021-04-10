@@ -13,6 +13,7 @@ from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams.core import Stream
+from singer_sdk.exceptions import MaxRecordsLimitException
 
 
 class Tap(PluginBase, metaclass=abc.ABCMeta):
@@ -88,7 +89,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Run connection test and return True if successful."""
         for stream in self.streams.values():
             stream.MAX_RECORDS_LIMIT = 0
-            stream.sync()
+            try:
+                stream.sync()
+            except MaxRecordsLimitException:
+                pass
         return True
 
     # Stream detection:

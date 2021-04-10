@@ -1,7 +1,8 @@
 """Helper functions for state and bookmark management."""
 
-
 from typing import Any, List, Optional
+
+from singer_sdk.exceptions import InvalidStreamSortException
 
 
 def get_state_if_exists(
@@ -148,31 +149,70 @@ def write_stream_state(
     state_dict[key] = val
 
 
-def wipe_stream_state_keys(
+def increment_state(
     state: dict,
-    tap_stream_id: str,
-    wipe_keys: List[str] = None,
-    *,
-    except_keys: List[str] = None,
-    partition: Optional[dict] = None,
+    latest_record: dict,
+    replication_key: str,
+    sort_keys: Optional[List[str]],
+    validate_sort: bool = True,
 ) -> None:
-    """Wipe bookmarks.
+    """Update the state using data from the latest record.
 
-    You may specify a list to wipe or a list to keep, but not both.
+    - sort_keys: if `None` or if `sort_keys[0] != replication_key`, the stream will be
+      treated as unsorted and not resumable. The replication key values will only be
+      treated as valid if the entire stream is synced successfully.
+      - If sort keys are provided and the stream is not sorted by replication_key,
+        progressive updates to sort keys will be tracked within the 'progress_markers'
+        object in the state. This is for stream monitoring purposes.
+    - validate_sort: if True, an InvalidStreamSortException will be raised if unsorted
+      data is detected in the stream. Currently only replication_key values are checked,
+      and only if the stream is sorted by replication_key.
     """
-    state_dict = get_writeable_state_dict(state, tap_stream_id, partition=partition)
-
-    if except_keys and wipe_keys:
-        raise ValueError(
-            "Incorrect number of arguments. "
-            "Expected `except_keys` or `wipe_keys` but not both."
+    resumable = replication_key == next(iter(sort_keys or []), "")
+    progress_dict = state
+    if not resumable:
+        if "progress_markers" not in state:
+            state["progress_markers"] = {"Note": "Progress markers are not resumable."}
+        progress_dict = state["progress_markers"]
+        if sort_keys:
+            # Recorded for progress monitoring purposes:
+            progress_dict["latest_sort_key_values"] = {
+                sort_key: latest_record.get(sort_keys, None) for sort_key in sort_keys
+            }
+    old_rk_value = progress_dict.get("replication_key_value")
+    new_rk_value = latest_record[replication_key]
+    if resumable and validate_sort and old_rk_value and old_rk_value > new_rk_value:
+        raise InvalidStreamSortException(
+            f"Unsorted data detected in stream. Latest value '{new_rk_value}' is "
+            f"smaller than previous max '{old_rk_value}'."
         )
-    if except_keys:
-        wipe_keys = [
-            found_key for found_key in state_dict.keys() if found_key not in except_keys
-        ]
-    wipe_keys = wipe_keys or []
-    for wipe_key in wipe_keys:
-        if wipe_key in state:
-            state_dict.pop(wipe_key)
-    return
+
+    progress_dict["replication_key"] = replication_key
+    progress_dict["replication_key_value"] = new_rk_value
+
+
+def finalize_state_progress_markers(state: dict) -> None:
+    """Promote or wipe progress markers once sync is complete."""
+    if "progress_markers" in state:
+        if "replication_key" in state["progress_markers"]:
+            # Replication keys valid (only) after sync is complete
+            progress_markers = state["progress_markers"]
+            state["replication_key"] = progress_markers["replication_key"]
+            state["replication_key_value"] = progress_markers["replication_key_value"]
+
+    # Wipe any markers that have not been promoted
+    wipe_state_progress_markers(state)
+
+
+def wipe_state_progress_markers(state: dict) -> Optional[dict]:
+    """Wipe the state once sync is complete.
+
+    For logging purposes, return the wiped 'progress_markers' object if it existed.
+    """
+    # Remove markers from pre-SDK version of the tap:
+    state.pop("last_pk_fetched", None)
+    state.pop("max_pk_values", None)
+    state.pop("version", None)
+    state.pop("initial_full_table_complete", None)
+    # Remove and return the 'progress_markers' object if it exists:
+    return state.pop("progress_markers", None)
