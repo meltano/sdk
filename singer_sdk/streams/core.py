@@ -24,9 +24,12 @@ from singer import metadata
 from singer_sdk.helpers._typing import conform_record_data_types
 from singer_sdk.helpers._state import (
     get_writeable_state_dict,
-    wipe_stream_state_keys,
     get_state_partitions_list,
+    increment_state,
+    finalize_state_progress_markers,
+    wipe_state_progress_markers,
 )
+from singer_sdk.exceptions import MaxRecordsLimitException
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.helpers._compat import final
 
@@ -161,6 +164,19 @@ class Stream(metaclass=abc.ABCMeta):
         self._replication_key = new_value
 
     @property
+    def sort_keys(self) -> Optional[List[str]]:
+        """Return list of sort keys for the stream.
+
+        The default sort key is the same as the replication key, but this can
+        can be overridden to allow cases where the stream is not pre-sorted
+        by its replication key. If the stream is unsorted, this must be set
+        to None or incremental replication will fail.
+        """
+        if not self._replication_key:
+            return None
+        return [self._replication_key]
+
+    @property
     def _singer_metadata(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec."""
         self.logger.debug(f"Schema Debug: {self.schema}")
@@ -278,11 +294,11 @@ class Stream(metaclass=abc.ABCMeta):
                         f"Could not detect replication key for '{self.name}' stream"
                         f"(replication method={self.replication_method})"
                     )
-                state_dict.update(
-                    {
-                        "replication_key": self.replication_key,
-                        "replication_key_value": latest_record[self.replication_key],
-                    }
+                increment_state(
+                    state_dict,
+                    replication_key=self.replication_key,
+                    sort_keys=self.sort_keys,
+                    latest_record=latest_record,
                 )
 
     # Private message authoring methods:
@@ -304,35 +320,23 @@ class Stream(metaclass=abc.ABCMeta):
     def _sync_records(self, partition: Optional[dict] = None) -> None:
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
-        # Reset interim state keys from prior executions:
-        wipe_stream_state_keys(
-            self.tap_state,
-            self.name,
-            partition=partition,
-            wipe_keys=[
-                "last_pk_fetched",
-                "max_pk_values",
-                "version",
-                "initial_full_table_complete",
-            ],
-        )
         # Iterate through each returned record:
         if partition:
             partitions = [partition]
         else:
             partitions = self.partitions or [None]
         for partition in partitions:
+            state = self.get_stream_or_partition_state(partition)
+            wipe_state_progress_markers(state)
             for row_dict in self.get_records(partition=partition):
                 if (
                     self.MAX_RECORDS_LIMIT is not None
                     and rows_sent >= self.MAX_RECORDS_LIMIT
                 ):
-                    logging.info(
+                    raise MaxRecordsLimitException(
                         "Stream prematurely aborted due to the stream's max record "
                         f"limit ({self.MAX_RECORDS_LIMIT}) being reached."
                     )
-                    # Abort stream sync for this partition or stream
-                    break
 
                 if rows_sent and ((rows_sent - 1) % self.STATE_MSG_FREQUENCY == 0):
                     self._write_state_message()
@@ -351,12 +355,7 @@ class Stream(metaclass=abc.ABCMeta):
                 singer.write_message(record_message)
                 self._increment_stream_state(record, partition=partition)
                 rows_sent += 1
-            wipe_stream_state_keys(
-                self.tap_state,
-                self.name,
-                partition=partition,
-                wipe_keys=["last_pk_fetched", "max_pk_values"],
-            )
+            finalize_state_progress_markers(state)
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
         # Reset interim bookmarks before emitting final STATE message:
         self._write_state_message()
