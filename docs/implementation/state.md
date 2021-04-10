@@ -150,6 +150,47 @@ stream is unsorted, the developer only needs to override `Stream.sort_keys` to b
 names indicating how the stream is expected to be sorted. (For performance reasons the order
 of values specified in `sort_keys` will not be validated.)
 
+#### Usage Warning for Unsorted Incremental Sync
+
+The above method works under the assumption that the source system has access to a cursor
+which can have batch isolation or in some other way freeze the list of records to be
+provided during sync, and which does not inconsistently add records into the stream which
+might be created after the initial call.
+
+Given this scenario:
+
+- The source can be queried by `updatedAt` (the incremental key), but is sorted by `createdOn`.
+- The stream takes approximately 10 minutes to incrementally sync each day, from 6:00 AM
+  to 6:10AM.
+- The source begins emitting at `6:00AM`.
+- An old record is updated at `6:08AM`.
+- A new record is created at `6:09AM`.
+
+The following is valid:
+
+- **Source behavior (valid):** The source iterates through a cursor that is representative of the total records existing at
+  the time of being queried.
+- **Sync behavior:**
+  - Neither the update from `6:08AM` nor the newly created record at `6:09AM` are included in
+    today's sync.
+  - The maximum `updatedAt` value for the day is `5:59AM`.
+  - The records from `6:08AM` and `6:09AM` are both correctly captured the next day.
+
+The following is _**not**_ valid:
+
+- **Source behavior (invalid):** The source _does not maintain isolation_ for records as of the original query request, and
+  as a result the stream may contain rows modified after 6:00AM.
+- **Sync behavior:**
+  - The update at `6:08AM` was missed because it affected a row with a much earlier
+    `createdOn` date. (Its record was streamed around `6:03AM`, before the update occurred.)
+  - The newly created record at `6:09AM` did get included, on the basis that it was the very
+    item based on sort order, and no isolation was performed by the source.
+  - The maximum `updatedAt` value for the day is `6:09AM`.
+  - _**The edit on the `6:08AM` record will be never get captured, unless or until it is
+    modified again.**_
+  - _**The stream's state is now in an invalid state and can only be repaired by performing a full
+    sync.**_
+
 ## See Also
 
 - [Singer SDK Partitioning](../partitioning.md)
