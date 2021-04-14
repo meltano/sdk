@@ -31,7 +31,8 @@ from singer_sdk.helpers._state import (
 )
 from singer_sdk.exceptions import MaxRecordsLimitException
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
-from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._compat import final, cache
+from singer_sdk.helpers._util import utc_now
 
 import singer
 from singer import RecordMessage, SchemaMessage
@@ -115,6 +116,25 @@ class Stream(metaclass=abc.ABCMeta):
 
         if "start_date" in self.config:
             return pendulum.parse(self.config["start_date"])
+
+        return None
+
+    @cache
+    def get_max_replication_key_bookmark(
+        self, partition: Optional[dict]
+    ) -> Optional[datetime.datetime]:
+        """Return the max allowable bookmark value for this stream's replication key.
+
+        For timestamp-based replication keys, this defaults to `utcnow()`. For
+        non-timestamp replication keys, default to `None`. For consistency in subsequent
+        calls, the value will be frozen (cached) at its initially called state, per
+        partition argument if applicable.
+
+        Override this value to prevent bookmarks from being advanced in cases where we
+        may only have a partial set of records.
+        """
+        if self.is_timestamp_replication_key:
+            return utc_now()
 
         return None
 
@@ -303,6 +323,9 @@ class Stream(metaclass=abc.ABCMeta):
                 increment_state(
                     state_dict,
                     replication_key=self.replication_key,
+                    max_replication_key_bookmark=self.get_max_replication_key_bookmark(
+                        partition=partition
+                    ),
                     sort_keys=self.sort_keys,
                     latest_record=latest_record,
                     validate_sort=validate_sort,

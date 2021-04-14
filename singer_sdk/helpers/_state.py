@@ -156,8 +156,9 @@ def increment_state(
     state: dict,
     latest_record: dict,
     replication_key: str,
+    max_replication_key_bookmark: Optional[Any],
     sort_keys: Optional[List[str]],
-    validate_sort: bool = True,
+    validate_sort: bool,
 ) -> None:
     """Update the state using data from the latest record.
 
@@ -191,6 +192,9 @@ def increment_state(
             f"Unsorted data detected in stream. Latest value '{new_rk_value}' is "
             f"smaller than previous max '{old_rk_value}'."
         )
+    if max_replication_key_bookmark and max_replication_key_bookmark > new_rk_value:
+        # Overflowed max bookmark threshold, reset to the max for this key:
+        new_rk_value = max_replication_key_bookmark
 
     progress_dict["replication_key"] = replication_key
     progress_dict["replication_key_value"] = new_rk_value
