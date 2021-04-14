@@ -8,5 +8,8 @@ STARTDIR=$(pwd)
 TOML_DIR=$(dirname "$0")
 
 cd "$TOML_DIR" || exit
-poetry install
+
+unset VIRTUAL_ENV
+
+poetry install 2>&1
 poetry run {{cookiecutter.tap_id}} $*
