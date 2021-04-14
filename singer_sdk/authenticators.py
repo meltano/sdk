@@ -160,7 +160,9 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         token_response = requests.post(self.auth_endpoint, data=auth_request_payload)
         try:
             token_response.raise_for_status()
-            self.logger.info("OAuth authorization attempt was successful.")
+            self.logger.info(
+                f"OAuth authorization attempt was successful for '{self.name}'."
+            )
         except Exception as ex:
             raise RuntimeError(
                 f"Failed OAuth login, response was '{token_response.json()}'. {ex}"
