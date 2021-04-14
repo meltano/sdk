@@ -9,6 +9,7 @@ import click
 from singer.catalog import Catalog
 
 from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.plugin_base import PluginBase
@@ -85,10 +86,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     # Connection test:
 
+    @final
     def run_connection_test(self) -> bool:
         """Run connection test and return True if successful."""
         for stream in self.streams.values():
-            stream.MAX_RECORDS_LIMIT = 0
+            stream._MAX_RECORDS_LIMIT = 0
             try:
                 stream.sync()
             except MaxRecordsLimitException:

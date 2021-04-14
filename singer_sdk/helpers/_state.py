@@ -4,6 +4,9 @@ from typing import Any, List, Optional
 
 from singer_sdk.exceptions import InvalidStreamSortException
 
+PROGRESS_MARKERS = "progress_markers"
+PROGRESS_MARKER_NOTE = "Note"
+
 
 def get_state_if_exists(
     state: dict,
@@ -169,16 +172,18 @@ def increment_state(
       and only if the stream is sorted by replication_key.
     """
     resumable = replication_key == next(iter(sort_keys or []), "")
-    progress_dict = state
     if not resumable:
-        if "progress_markers" not in state:
-            state["progress_markers"] = {"Note": "Progress markers are not resumable."}
-        progress_dict = state["progress_markers"]
+        if PROGRESS_MARKERS not in state:
+            state[PROGRESS_MARKERS] = {
+                PROGRESS_MARKER_NOTE: "Progress is not resumable if failed."
+            }
+        progress_dict = state[PROGRESS_MARKERS]
         if sort_keys:
             # Recorded for progress monitoring purposes:
             progress_dict["latest_sort_key_values"] = {
                 sort_key: latest_record.get(sort_keys, None) for sort_key in sort_keys
             }
+    progress_dict = progress_dict or state
     old_rk_value = progress_dict.get("replication_key_value")
     new_rk_value = latest_record[replication_key]
     if resumable and validate_sort and old_rk_value and old_rk_value > new_rk_value:
@@ -191,17 +196,19 @@ def increment_state(
     progress_dict["replication_key_value"] = new_rk_value
 
 
-def finalize_state_progress_markers(state: dict) -> None:
+def finalize_state_progress_markers(state: dict) -> Optional[dict]:
     """Promote or wipe progress markers once sync is complete."""
     if "progress_markers" in state:
-        if "replication_key" in state["progress_markers"]:
+        if "replication_key" in state[PROGRESS_MARKERS]:
             # Replication keys valid (only) after sync is complete
-            progress_markers = state["progress_markers"]
-            state["replication_key"] = progress_markers["replication_key"]
-            state["replication_key_value"] = progress_markers["replication_key_value"]
+            progress_markers = state[PROGRESS_MARKERS]
+            state["replication_key"] = progress_markers.pop("replication_key")
+            state["replication_key_value"] = progress_markers.pop(
+                "replication_key_value"
+            )
 
-    # Wipe any markers that have not been promoted
-    wipe_state_progress_markers(state)
+    # Wipe and return any markers that have not been promoted
+    return wipe_state_progress_markers(state)
 
 
 def wipe_state_progress_markers(state: dict) -> Optional[dict]:
@@ -214,5 +221,8 @@ def wipe_state_progress_markers(state: dict) -> Optional[dict]:
     state.pop("max_pk_values", None)
     state.pop("version", None)
     state.pop("initial_full_table_complete", None)
-    # Remove and return the 'progress_markers' object if it exists:
-    return state.pop("progress_markers", None)
+    progress_markers = state.get(PROGRESS_MARKERS, {})
+    # Remove auto-generated human-readable note:
+    progress_markers.pop(PROGRESS_MARKER_NOTE)
+    # Return remaining 'progress_markers' if any:
+    return progress_markers or None

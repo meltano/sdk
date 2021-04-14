@@ -52,7 +52,8 @@ class Stream(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
     STATE_MSG_FREQUENCY = 10000  # Number of records between state messages
-    MAX_RECORDS_LIMIT: Optional[int] = None
+    _MAX_RECORDS_LIMIT: Optional[int] = None
+    _VALIDATE_SORT_ORDER = False
 
     parent_stream_types: List[Any] = []  # May be used in sync sequencing
 
@@ -172,9 +173,9 @@ class Stream(metaclass=abc.ABCMeta):
         by its replication key. If the stream is unsorted, this must be set
         to None or incremental replication will fail.
         """
-        if not self._replication_key:
+        if not self.replication_key:
             return None
-        return [self._replication_key]
+        return [self.replication_key]
 
     @property
     def _singer_metadata(self) -> dict:
@@ -294,11 +295,17 @@ class Stream(metaclass=abc.ABCMeta):
                         f"Could not detect replication key for '{self.name}' stream"
                         f"(replication method={self.replication_method})"
                     )
+                validate_sort = self._VALIDATE_SORT_ORDER
+                if validate_sort:
+                    first_sort_key = next(iter(self.sort_keys or []), None)
+                    if first_sort_key != self.replication_key:
+                        validate_sort = False
                 increment_state(
                     state_dict,
                     replication_key=self.replication_key,
                     sort_keys=self.sort_keys,
                     latest_record=latest_record,
+                    validate_sort=validate_sort,
                 )
 
     # Private message authoring methods:
@@ -330,12 +337,12 @@ class Stream(metaclass=abc.ABCMeta):
             wipe_state_progress_markers(state)
             for row_dict in self.get_records(partition=partition):
                 if (
-                    self.MAX_RECORDS_LIMIT is not None
-                    and rows_sent >= self.MAX_RECORDS_LIMIT
+                    self._MAX_RECORDS_LIMIT is not None
+                    and rows_sent >= self._MAX_RECORDS_LIMIT
                 ):
                     raise MaxRecordsLimitException(
                         "Stream prematurely aborted due to the stream's max record "
-                        f"limit ({self.MAX_RECORDS_LIMIT}) being reached."
+                        f"limit ({self._MAX_RECORDS_LIMIT}) being reached."
                     )
 
                 if rows_sent and ((rows_sent - 1) % self.STATE_MSG_FREQUENCY == 0):
