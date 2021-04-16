@@ -19,6 +19,7 @@ from typing import (
 )
 
 import pendulum
+from memoization import cached
 from singer import metadata
 
 from singer_sdk.helpers._typing import conform_record_data_types
@@ -31,7 +32,7 @@ from singer_sdk.helpers._state import (
 )
 from singer_sdk.exceptions import MaxRecordsLimitException
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
-from singer_sdk.helpers._compat import final, cache
+from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._util import utc_now
 
 import singer
@@ -119,7 +120,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         return None
 
-    @cache
+    @cached
     def get_max_replication_key_bookmark(
         self, partition: Optional[dict]
     ) -> Optional[datetime.datetime]:

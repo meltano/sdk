@@ -3,6 +3,7 @@
 from typing import Any, List, Optional
 
 from singer_sdk.exceptions import InvalidStreamSortException
+from singer_sdk.helpers._typing import to_json_compatible
 
 PROGRESS_MARKERS = "progress_markers"
 PROGRESS_MARKER_NOTE = "Note"
@@ -185,8 +186,9 @@ def increment_state(
                 sort_key: latest_record.get(sort_keys, None) for sort_key in sort_keys
             }
     progress_dict = progress_dict or state
-    old_rk_value = progress_dict.get("replication_key_value")
-    new_rk_value = latest_record[replication_key]
+    old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
+    new_rk_value = to_json_compatible(latest_record[replication_key])
+    max_replication_key_bookmark = to_json_compatible(max_replication_key_bookmark)
     if resumable and validate_sort and old_rk_value and old_rk_value > new_rk_value:
         raise InvalidStreamSortException(
             f"Unsorted data detected in stream. Latest value '{new_rk_value}' is "
@@ -227,6 +229,6 @@ def wipe_state_progress_markers(state: dict) -> Optional[dict]:
     state.pop("initial_full_table_complete", None)
     progress_markers = state.get(PROGRESS_MARKERS, {})
     # Remove auto-generated human-readable note:
-    progress_markers.pop(PROGRESS_MARKER_NOTE)
+    progress_markers.pop(PROGRESS_MARKER_NOTE, None)
     # Return remaining 'progress_markers' if any:
     return progress_markers or None
