@@ -174,6 +174,7 @@ def increment_state(
       and only if the stream is sorted by replication_key.
     """
     resumable = replication_key == next(iter(sort_keys or []), "")
+    progress_dict = state
     if not resumable:
         if PROGRESS_MARKERS not in state:
             state[PROGRESS_MARKERS] = {
@@ -185,7 +186,6 @@ def increment_state(
             progress_dict["latest_sort_key_values"] = {
                 sort_key: latest_record.get(sort_keys, None) for sort_key in sort_keys
             }
-    progress_dict = progress_dict or state
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
     new_rk_value = to_json_compatible(latest_record[replication_key])
     max_replication_key_bookmark = to_json_compatible(max_replication_key_bookmark)

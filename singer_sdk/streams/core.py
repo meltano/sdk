@@ -55,7 +55,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     STATE_MSG_FREQUENCY = 10000  # Number of records between state messages
     _MAX_RECORDS_LIMIT: Optional[int] = None
-    _VALIDATE_SORT_ORDER = False
+    _VALIDATE_SORT_ORDER = True
 
     parent_stream_types: List[Any] = []  # May be used in sync sequencing
 
