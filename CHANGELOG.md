@@ -16,15 +16,30 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
-## [Unreleased]
+## v0.2.0 [Unreleased]
 
-### Fixed
+### Added
+
+- Added ability for developer to override `Stream.get_max_replication_key_bookmark()`. When
+  set, the SDK will prevent bookmarks from advancing beyond the specified value.
+
+### Changed
+
+- For timestamp-type replication keys, bookmarks are disallowed to advance ahead of
+  `utcnow` at the time the stream sync begins. This prevents potentially missing records in
+  subsequent executions. (!61)
+- Unsorted streams have special handling which prevents incremental bookmark keys from
+  being incorrectly applied in case of failure. (!61)
+- Unsorted streams will now raise an error during incremental replication. Developers
+  must explicitly declare `Stream.sort_keys = None` to enable incremental sync. (!61)
+
+## v0.1.3 [Unreleased]
 
 - Fixed fatal errors when debugging from the cookiecutter shell script (#102, !64)
 
 ## v0.1.2
 
-Fixes bug in state handling, adds improvevements to documentation.
+Fixes bug in state handling, adds improvements to documentation.
 
 ### Documentation
 

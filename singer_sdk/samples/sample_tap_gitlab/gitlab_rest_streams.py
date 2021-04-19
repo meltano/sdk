@@ -41,10 +41,13 @@ class GitlabStream(RESTStream):
         self, partition: Optional[dict], next_page_token: Optional[Any] = None
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization."""
-        return {
+        params = {
             "start_date": self.get_starting_timestamp(partition),
             "page": next_page_token or 1,
         }
+        if self.replication_key:
+            params["order_by"] = self.replication_key
+        return params
 
     def get_next_page_token(
         self, response: requests.Response, previous_token: Optional[Any] = None
@@ -106,7 +109,8 @@ class IssuesStream(ProjectBasedStream):
     name = "issues"
     path = "/projects/{project_id}/issues?scope=all&updated_after={start_date}"
     primary_keys = ["id"]
-    replication_key = "updated_at"  # TODO: Validate this is valid for replication
+    replication_key = "updated_at"
+    sort_keys = None  # 'updated_at' does not appear to be valid for sorting
     schema_filepath = SCHEMAS_DIR / "issues.json"
 
 

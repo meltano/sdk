@@ -6,6 +6,15 @@ import logging
 from functools import lru_cache
 from typing import Optional, Dict, Any
 
+import pendulum
+
+
+def to_json_compatible(val: Any) -> Any:
+    """Return as string if datetime. JSON does not support proper datetime types."""
+    if isinstance(val, (datetime.datetime, pendulum.Pendulum)):
+        val = val.isoformat() + "+00:00"
+    return val
+
 
 def append_type(type_dict: dict, new_type: str) -> dict:
     """Return a combined type definition using the 'anyOf' JSON Schema construct."""
@@ -55,7 +64,7 @@ def is_string_array_type(type_dict: dict) -> bool:
     if "type" not in type_dict:
         raise ValueError(f"Could not detect type from schema '{type_dict}'")
 
-    return type_dict["type"] == "array" and is_string_type(type_dict["items"])
+    return type_dict["type"] == "array" and bool(is_string_type(type_dict["items"]))
 
 
 def is_boolean_type(property_schema: dict) -> Optional[bool]:
@@ -103,8 +112,8 @@ def conform_record_data_types(  # noqa: C901
             continue
 
         property_schema = schema["properties"][property_name]
-        if isinstance(elem, datetime.datetime):
-            rec[property_name] = elem.isoformat() + "+00:00"
+        if isinstance(elem, (datetime.datetime, pendulum.Pendulum)):
+            rec[property_name] = to_json_compatible(elem)
         elif isinstance(elem, datetime.date):
             rec[property_name] = elem.isoformat() + "T00:00:00+00:00"
         elif isinstance(elem, datetime.timedelta):

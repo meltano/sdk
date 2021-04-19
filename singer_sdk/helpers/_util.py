@@ -22,6 +22,6 @@ def read_json_file(path: Union[PurePath, str]) -> Dict[str, Any]:
     return json.loads(Path(path).read_text())
 
 
-def utc_now():
+def utc_now() -> pendulum.datetime:
     """Return current time in UTC."""
     return pendulum.utcnow()
