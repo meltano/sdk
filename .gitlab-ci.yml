@@ -68,10 +68,11 @@ pypi_publish:
     - |
       echo "Publishing tag '$CI_COMMIT_TAG' to PyPi, Ref='$CI_COMMIT_REF_NAME' and Namespace='$CI_PROJECT_NAMESPACE'..."
       echo "Detected poetry version: v$(poetry version --short)"
-      if [[ "$CI_COMMIT_TAG" == "v$(poetry version --short)" ]]; then
+      if [[ "$CI_COMMIT_TAG" == "v$(poetry version --short)" ]];
+      then
         echo -e "\nPublishing to version ref 'v$(poetry version --short)'...\n\n"
         poetry publish --build
-      elif
+      else
         echo -e "\nERROR - Tag '$CI_COMMIT_TAG' did not match detected version 'v$(poetry version --short)'."
         exit 1
       fi
