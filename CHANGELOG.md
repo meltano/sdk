@@ -16,6 +16,12 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
+## [Unreleased]
+
+### Fixed
+
+- Fixed fatal errors when debugging from the cookiecutter shell script (#102, !64)
+
 ## v0.1.2
 
 Fixes bug in state handling, adds improvevements to documentation.
