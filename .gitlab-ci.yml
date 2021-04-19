@@ -78,6 +78,8 @@ pypi_publish:
 
 pypi_prerelease:
   when: manual
+  except:
+    - tags
   stage: publish
   parallel:
     matrix:
