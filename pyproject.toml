@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.1.2"
+version = "0.2.0"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 license = "Apache 2.0"
