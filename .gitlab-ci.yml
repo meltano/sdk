@@ -74,7 +74,7 @@ pypi_publish:
       elif
         echo -e "\nERROR - Tag '$CI_COMMIT_TAG' did not match detected version 'v$(poetry version --short)'."
         exit 1
-      end
+      fi
 
 pypi_prerelease:
   when: manual
