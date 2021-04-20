@@ -100,7 +100,6 @@ class ReleasesStream(ProjectBasedStream):
     path = "/projects/{project_id}/releases"
     primary_keys = ["project_id", "commit_id", "tag_name"]
     replication_key = None
-    is_sorted = True
     schema_filepath = SCHEMAS_DIR / "releases.json"
 
 
@@ -124,7 +123,6 @@ class CommitsStream(ProjectBasedStream):
     )
     primary_keys = ["id"]
     replication_key = None
-    is_sorted = True
     schema_filepath = SCHEMAS_DIR / "commits.json"
 
 
@@ -139,7 +137,6 @@ class EpicsStream(ProjectBasedStream):
     path = "/groups/{group_id}/epics?updated_after={start_date}"
     primary_keys = ["id"]
     replication_key = None
-    is_sorted = True
     schema = PropertiesList(
         Property("id", IntegerType, required=True),
         Property("iid", IntegerType, required=True),
