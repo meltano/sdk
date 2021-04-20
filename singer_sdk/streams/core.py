@@ -29,6 +29,7 @@ from singer_sdk.helpers._state import (
     increment_state,
     finalize_state_progress_markers,
     wipe_state_progress_markers,
+    write_replication_key_signpost,
 )
 from singer_sdk.exceptions import MaxRecordsLimitException
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
@@ -120,10 +121,21 @@ class Stream(metaclass=abc.ABCMeta):
 
         return None
 
-    @cached
-    def get_max_replication_key_bookmark(
+    def _write_replication_key_signpost(
+        self,
+        partition: Optional[dict],
+        value: Union[datetime.datetime, str, int, float],
+    ):
+        """Write the signpost value, if available."""
+        if not value:
+            return
+
+        state = self.get_stream_or_partition_state(partition)
+        write_replication_key_signpost(state, value)
+
+    def get_replication_key_signpost(
         self, partition: Optional[dict]
-    ) -> Optional[datetime.datetime]:
+    ) -> Optional[Union[datetime.datetime, Any]]:
         """Return the max allowable bookmark value for this stream's replication key.
 
         For timestamp-based replication keys, this defaults to `utcnow()`. For
@@ -186,17 +198,13 @@ class Stream(metaclass=abc.ABCMeta):
         self._replication_key = new_value
 
     @property
-    def sort_keys(self) -> Optional[List[str]]:
-        """Return list of sort keys for the stream.
+    def is_sorted(self) -> bool:
+        """Return True if stream is sorted. Defaults to False.
 
-        The default sort key is the same as the replication key, but this can
-        can be overridden to allow cases where the stream is not pre-sorted
-        by its replication key. If the stream is unsorted, this must be set
-        to None or incremental replication will fail.
-        """
-        if not self.replication_key:
-            return None
-        return [self.replication_key]
+        This setting enables additional checks which may trigger
+        `InvalidStreamSortException` if data is unsorted. Set to True to enable
+        the stream sync to resume if unexpectedly interrupted."""
+        return False
 
     @property
     def _singer_metadata(self) -> dict:
@@ -316,20 +324,14 @@ class Stream(metaclass=abc.ABCMeta):
                         f"Could not detect replication key for '{self.name}' stream"
                         f"(replication method={self.replication_method})"
                     )
-                validate_sort = self._VALIDATE_SORT_ORDER
-                if validate_sort:
-                    first_sort_key = next(iter(self.sort_keys or []), None)
-                    if first_sort_key != self.replication_key:
-                        validate_sort = False
                 increment_state(
                     state_dict,
                     replication_key=self.replication_key,
-                    max_replication_key_bookmark=self.get_max_replication_key_bookmark(
+                    replication_key_signpost=self.get_replication_key_signpost(
                         partition=partition
                     ),
-                    sort_keys=self.sort_keys,
                     latest_record=latest_record,
-                    validate_sort=validate_sort,
+                    is_sorted=self.is_sorted,
                 )
 
     # Private message authoring methods:
