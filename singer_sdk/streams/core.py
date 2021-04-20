@@ -19,7 +19,6 @@ from typing import (
 )
 
 import pendulum
-from memoization import cached
 from singer import metadata
 
 from singer_sdk.helpers._typing import conform_record_data_types
