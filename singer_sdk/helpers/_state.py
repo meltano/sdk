@@ -155,6 +155,23 @@ def write_stream_state(
     state_dict[key] = val
 
 
+def wipe_state_progress_markers(state: dict) -> Optional[dict]:
+    """Wipe the state once sync is complete.
+
+    For logging purposes, return the wiped 'progress_markers' object if it existed.
+    """
+    # Remove markers from pre-SDK version of the tap:
+    state.pop("last_pk_fetched", None)
+    state.pop("max_pk_values", None)
+    state.pop("version", None)
+    state.pop("initial_full_table_complete", None)
+    progress_markers = state.get(PROGRESS_MARKERS, {})
+    # Remove auto-generated human-readable note:
+    progress_markers.pop(PROGRESS_MARKER_NOTE, None)
+    # Return remaining 'progress_markers' if any:
+    return progress_markers or None
+
+
 def write_replication_key_signpost(
     state: dict,
     new_signpost_value: Any,
@@ -220,20 +237,3 @@ def finalize_state_progress_markers(state: dict) -> Optional[dict]:
             state["replication_key_value"] = new_rk_value
     # Wipe and return any markers that have not been promoted
     return wipe_state_progress_markers(state)
-
-
-def wipe_state_progress_markers(state: dict) -> Optional[dict]:
-    """Wipe the state once sync is complete.
-
-    For logging purposes, return the wiped 'progress_markers' object if it existed.
-    """
-    # Remove markers from pre-SDK version of the tap:
-    state.pop("last_pk_fetched", None)
-    state.pop("max_pk_values", None)
-    state.pop("version", None)
-    state.pop("initial_full_table_complete", None)
-    progress_markers = state.get(PROGRESS_MARKERS, {})
-    # Remove auto-generated human-readable note:
-    progress_markers.pop(PROGRESS_MARKER_NOTE, None)
-    # Return remaining 'progress_markers' if any:
-    return progress_markers or None
