@@ -18,18 +18,23 @@ The next few lines form the template for unreleased changes.
 
 ## v0.1.3 [Unreleased]
 
-- Added ability for developer to override `Stream.get_max_replication_key_bookmark()`. When
-  set, the SDK will prevent bookmarks from advancing beyond the specified value.
+### Added
+
+- A new stream property `is_sorted` may optional be set to `True` for incremental streams
+  which are pre-sorted by the replication key (recommended). On the backend, this enables
+  long-running incremental streams to be resumed if interrupted. See the singer spec for
+  more information on resuming interrupted streams.
+- A new signpost feature prevents bookmarks from advancing beyond the point where all
+  records records have been streamed. This prevents potentially missing records in
+  subsequent executions. (!61)
+- New stream method `get_replication_key_signpost()` which defaults to the current time for
+  timestamp-based replication keys. (!61)
+
+### Fixed
 
 ### Changed
 
-- For timestamp-type replication keys, bookmarks are disallowed to advance ahead of
-  `utcnow` at the time the stream sync begins. This prevents potentially missing records in
-  subsequent executions. (!61)
-- Unsorted streams have special handling which prevents incremental bookmark keys from
-  being incorrectly applied in case of failure. (!61)
-- Unsorted streams will now raise an error during incremental replication. Developers
-  must explicitly declare `Stream.sort_keys = None` to enable incremental sync. (!61)
+- Unsorted streams are no longer marked with resumable bookmarks in STATE output. (!61)
 
 ## v0.1.2
 
