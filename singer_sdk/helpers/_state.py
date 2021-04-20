@@ -155,7 +155,7 @@ def write_stream_state(
     state_dict[key] = val
 
 
-def wipe_state_progress_markers(state: dict) -> Optional[dict]:
+def reset_state_progress_markers(state: dict) -> Optional[dict]:
     """Wipe the state once sync is complete.
 
     For logging purposes, return the wiped 'progress_markers' object if it existed.
@@ -226,7 +226,7 @@ def _greater_than_signpost(
 def finalize_state_progress_markers(state: dict) -> Optional[dict]:
     """Promote or wipe progress markers once sync is complete."""
     signpost_value = state.pop(SIGNPOST_MARKER, None)
-    if "progress_markers" in state:
+    if PROGRESS_MARKERS in state:
         if "replication_key" in state[PROGRESS_MARKERS]:
             # Replication keys valid (only) after sync is complete
             progress_markers = state[PROGRESS_MARKERS]
@@ -236,4 +236,4 @@ def finalize_state_progress_markers(state: dict) -> Optional[dict]:
                 new_rk_value = signpost_value
             state["replication_key_value"] = new_rk_value
     # Wipe and return any markers that have not been promoted
-    return wipe_state_progress_markers(state)
+    return reset_state_progress_markers(state)

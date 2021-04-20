@@ -28,7 +28,7 @@ from singer_sdk.helpers._state import (
     get_state_partitions_list,
     increment_state,
     finalize_state_progress_markers,
-    wipe_state_progress_markers,
+    reset_state_progress_markers,
     write_replication_key_signpost,
 )
 from singer_sdk.exceptions import MaxRecordsLimitException
@@ -360,7 +360,7 @@ class Stream(metaclass=abc.ABCMeta):
             partitions = self.partitions or [None]
         for partition in partitions:
             state = self.get_stream_or_partition_state(partition)
-            wipe_state_progress_markers(state)
+            reset_state_progress_markers(state)
             for row_dict in self.get_records(partition=partition):
                 if (
                     self._MAX_RECORDS_LIMIT is not None
