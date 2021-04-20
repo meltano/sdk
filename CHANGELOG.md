@@ -20,17 +20,20 @@ The next few lines form the template for unreleased changes.
 
 ### Added
 
-- A new stream property `is_sorted` may optional be set to `True` for incremental streams
+- A new stream property `is_sorted` may optionally be set to `True` for incremental streams
   which are pre-sorted by the replication key (recommended). On the backend, this enables
   long-running incremental streams to be resumed if interrupted. See the singer spec for
-  more information on resuming interrupted streams.
+  more information on resuming interrupted streams. (!61)
 - A new signpost feature prevents bookmarks from advancing beyond the point where all
   records records have been streamed. This prevents potentially missing records in
-  subsequent executions. (!61)
-- New stream method `get_replication_key_signpost()` which defaults to the current time for
+  subsequent executions, especially relevant for unsorted streams. (!61)
+- New `get_replication_key_signpost()` stream method which defaults to the current time for
   timestamp-based replication keys. (!61)
 
 ### Fixed
+
+- Fixed a scenario where unsorted incremental streams would miss records if interrupted and
+  then resumed using the emitted STATE bookmarks. (!61)
 
 ### Changed
 
