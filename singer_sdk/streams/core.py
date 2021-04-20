@@ -199,11 +199,14 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def is_sorted(self) -> bool:
-        """Return True if stream is sorted. Defaults to False.
+        """Return `True` if stream is sorted. Defaults to `False`.
+
+        When `True`, incremental streams will attempt to resume if unexpectedly
+        interrupted.
 
         This setting enables additional checks which may trigger
-        `InvalidStreamSortException` if data is unsorted. Set to True to enable
-        the stream sync to resume if unexpectedly interrupted."""
+        `InvalidStreamSortException` if records are found which are unsorted.
+        """
         return False
 
     @property

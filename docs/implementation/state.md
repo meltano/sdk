@@ -116,80 +116,32 @@ this is not yet a supported use case within the SDK. If your source requires mul
 bookmark keys, and if it does not align with the [partitioning](../partitioning.md) feature,
 please open an issue with a detailed description of the intended use case.
 
-## The Impact on Sort for Incremental Sync
+## The Impact of Sorting on Incremental Sync
 
-For incremental streams where the replication key is also the same as the sort key (the
-default and expected behavior), replication key values are tracked in the stream state and
+For incremental streams sorted by replication key, the replication key
+values are tracked in the stream state and
 emitted for each batch. Once the state message has been processed and emitted also
 by the target, those records preceding the state message should be assumed to be fully
-written by the target. In practice, this means that if a sorted stream is interrupted, it 
-can always resume from the last successfully processed state message.
+written by the target. In practice, this means that if a sorted stream is interrupted, the
+tap may resume from the last successfully processed state message.
 
-To ensure that incremental streams are always pre-sorted and therefor resumable, the SDK
-will throw an `InvalidStreamSortException` if unsorted records are detected.
+To enable resume after interruption, developers may set `is_sorted = True`
+within the `Stream` class definition. If this is set, the SDK
+will check each record and throw an `InvalidStreamSortException` if unsorted records are
+detected during sync.
 
 ### Dealing with Unsorted and Differently-Sorted Streams
 
 There are some sources which are unable to send records sorted by their replication key,
 even when there is a valid replication key. In these cases, namely in any case where there
 is no sort key or the sort key is different from the incremental replication key, the SDK
-will create a separate `progress_tracking` object within the state dictionary. This will
-be used to track the `max` value seen for the `replication_key` during the current sync.
+creates a separate `progress_tracking` object within the state dictionary. This is used to
+track the `max` value seen for the `replication_key` during the current sync.
 
 Unlike the replication key tracking for pre-sorted streams, however, this bookmark will be
-ignored (wiped) for the purposes of resuming a failed sync operation. Only when the sync
-reaches 100% completion will those progress markers be 'promoted' to a valid replication
-key value for subsequent sync operations.
-
-### Implementing Incremental Replication for Unsorted Streams
-
-In practice, all streams inherit a default `sort_keys` property which is calculated as
-a one-item list containing `self.replication_key`. To enable incremental replication when a
-stream is unsorted, the developer only needs to override `Stream.sort_keys` to be either 
-`None` or (for more detailed progress updates) the developer can provide a list of property
-names indicating how the stream is expected to be sorted. (For performance reasons the order
-of values specified in `sort_keys` will not be validated.)
-
-#### Usage Warning for Unsorted Incremental Sync
-
-The above method works under the assumption that the source system has access to a cursor
-which can have batch isolation or in some other way freeze the list of records to be
-provided during sync, and which does not inconsistently add records into the stream which
-might be created after the initial call.
-
-Given this scenario:
-
-- The source can be queried by `updatedAt` (the incremental key), but is sorted by `createdOn`.
-- The stream takes approximately 10 minutes to incrementally sync each day, from 6:00 AM
-  to 6:10AM.
-- The source begins emitting at `6:00AM`.
-- An old record is updated at `6:08AM`.
-- A new record is created at `6:09AM`.
-
-The following is valid:
-
-- **Source behavior (valid):** The source iterates through a cursor that is representative of the total records existing at
-  the time of being queried.
-- **Sync behavior:**
-  - Neither the update from `6:08AM` nor the newly created record at `6:09AM` are included in
-    today's sync.
-  - The maximum `updatedAt` value for the day is `5:59AM`.
-  - The records from `6:08AM` and `6:09AM` are both correctly captured the next day.
-
-The following is _**not**_ valid:
-
-- **Source behavior (invalid):** The source _does not maintain isolation_ for records as of the original query request, and
-  as a result the stream may contain rows modified after 6:00AM.
-- **Sync behavior:**
-  - The update at `6:08AM` was missed because it affected a row with a much earlier
-    `createdOn` date. (Its record was streamed around `6:03AM`, before the update occurred.)
-  - The newly created record at `6:09AM` did get included, on the basis that it was the very
-    item based on sort order, and no isolation was performed by the source.
-  - The maximum `updatedAt` value for the day is `6:09AM`.
-  - _**The edit on the `6:08AM` record will be never get captured, unless or until it is
-    modified again.**_
-  - _**The stream's state is now in an invalid state and can only be repaired by performing a full
-    sync.**_
+ignored (reset and wiped) for the purposes of resuming a failed sync operation. Only when
+the sync reaches 100% completion will those progress markers be 'promoted' to a valid
+replication key value for subsequent sync operations.
 
 ## See Also
 
