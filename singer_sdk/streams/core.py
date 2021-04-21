@@ -30,7 +30,7 @@ from singer_sdk.helpers._state import (
     reset_state_progress_markers,
     write_replication_key_signpost,
 )
-from singer_sdk.exceptions import MaxRecordsLimitException
+from singer_sdk.exceptions import MaxRecordsLimitException, InvalidStreamSortException
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._util import utc_now
@@ -314,7 +314,11 @@ class Stream(metaclass=abc.ABCMeta):
     def _increment_stream_state(
         self, latest_record: Dict[str, Any], *, partition: Optional[dict] = None
     ):
-        """Update state of stream or partition with data from the provided record."""
+        """Update state of stream or partition with data from the provided record.
+
+        Raises InvalidStreamSortException is self.is_sorted = True and unsorted data is
+        detected.
+        """
         state_dict = self.get_stream_or_partition_state(partition)
         if latest_record:
             if self.replication_method in [
@@ -388,7 +392,15 @@ class Stream(metaclass=abc.ABCMeta):
                     time_extracted=pendulum.now(),
                 )
                 singer.write_message(record_message)
-                self._increment_stream_state(record, partition=partition)
+                try:
+                    self._increment_stream_state(record, partition=partition)
+                except InvalidStreamSortException as ex:
+                    msg = f"Sorting error detected on row #{rows_sent+1}. "
+                    if partition:
+                        msg += f"Partition was {str(partition)}. "
+                    msg += str(ex)
+                    self.logger.error(msg)
+                    raise ex
                 rows_sent += 1
             finalize_state_progress_markers(state)
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")

@@ -189,8 +189,8 @@ def increment_state(
 ) -> None:
     """Update the state using data from the latest record.
 
-    - is_sorted: if True, an InvalidStreamSortException will be raised if unsorted
-      data is detected in the stream.
+    Raises InvalidStreamSortException if is_sorted=True and unsorted
+    data is detected in the stream.
     """
     progress_dict = state
     if not is_sorted:
@@ -207,7 +207,7 @@ def increment_state(
             f"Unsorted data detected in stream. Latest value '{new_rk_value}' is "
             f"smaller than previous max '{old_rk_value}'."
         )
-    if replication_key_signpost and replication_key_signpost > new_rk_value:
+    if replication_key_signpost and replication_key_signpost < new_rk_value:
         # Overflowed max bookmark threshold, reset to the max for this key:
         new_rk_value = replication_key_signpost
 
