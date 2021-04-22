@@ -160,11 +160,6 @@ def reset_state_progress_markers(state: dict) -> Optional[dict]:
 
     For logging purposes, return the wiped 'progress_markers' object if it existed.
     """
-    # Remove markers from pre-SDK version of the tap:
-    state.pop("last_pk_fetched", None)
-    state.pop("max_pk_values", None)
-    state.pop("version", None)
-    state.pop("initial_full_table_complete", None)
     progress_markers = state.get(PROGRESS_MARKERS, {})
     # Remove auto-generated human-readable note:
     progress_markers.pop(PROGRESS_MARKER_NOTE, None)
