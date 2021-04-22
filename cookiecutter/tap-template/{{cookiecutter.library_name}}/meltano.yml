@@ -8,6 +8,19 @@ plugins:
     # TODO: To test using Meltano, replace with absolute path
     #       to the {{cookiecutter.tap_id}}.sh script:
     executable: ./{{cookiecutter.tap_id}}.sh
+    capabilities:
+    - state
+    - catalog
+    - discover
+    settings:
+    # TODO: Optionally specify settings and default value here:
+    - name: username
+      value: me@here.com
+    - name: password
+      kind: password
+      # Set using the env var {{ cookiecutter.library_name.upper() }}_PASSWORD
+    - name: start_date
+      value: '2015-09-21T04:00:00Z'
   loaders:
   - name: target-jsonl
     variant: andyh1203
