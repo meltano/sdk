@@ -41,10 +41,13 @@ class GitlabStream(RESTStream):
         self, partition: Optional[dict], next_page_token: Optional[Any] = None
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization."""
-        return {
-            "start_date": self.get_starting_timestamp(partition),
-            "page": next_page_token or 1,
-        }
+        params: dict = {}
+        if next_page_token:
+            params["page"] = next_page_token
+        if self.replication_key:
+            params["sort"] = "asc"
+            params["order_by"] = self.replication_key
+        return params
 
     def get_next_page_token(
         self, response: requests.Response, previous_token: Optional[Any] = None
@@ -86,7 +89,8 @@ class ProjectsStream(ProjectBasedStream):
     name = "projects"
     path = "/projects/{project_id}?statistics=1"
     primary_keys = ["id"]
-    replication_key = None
+    replication_key = "last_activity_at"
+    is_sorted = True
     schema_filepath = SCHEMAS_DIR / "projects.json"
 
 
@@ -106,7 +110,8 @@ class IssuesStream(ProjectBasedStream):
     name = "issues"
     path = "/projects/{project_id}/issues?scope=all&updated_after={start_date}"
     primary_keys = ["id"]
-    replication_key = "updated_at"  # TODO: Validate this is valid for replication
+    replication_key = "updated_at"
+    is_sorted = True
     schema_filepath = SCHEMAS_DIR / "issues.json"
 
 
@@ -118,7 +123,8 @@ class CommitsStream(ProjectBasedStream):
         "/projects/{project_id}/repository/commits?since={start_date}&with_stats=true"
     )
     primary_keys = ["id"]
-    replication_key = None
+    replication_key = "created_at"
+    is_sorted = False
     schema_filepath = SCHEMAS_DIR / "commits.json"
 
 
@@ -132,7 +138,8 @@ class EpicsStream(ProjectBasedStream):
     name = "epics"
     path = "/groups/{group_id}/epics?updated_after={start_date}"
     primary_keys = ["id"]
-    replication_key = None
+    replication_key = "updated_at"
+    is_sorted = True
     schema = PropertiesList(
         Property("id", IntegerType, required=True),
         Property("iid", IntegerType, required=True),

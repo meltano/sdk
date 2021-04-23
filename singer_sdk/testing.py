@@ -1,10 +1,11 @@
 """Pre-built test functions which can be applied to multiple taps."""
 
+from typing import Type, Callable, List
+
 from singer_sdk.tap_base import Tap
-from typing import Type, Callable
 
 
-def get_standard_tap_tests(tap_class: Type[Tap], config=None) -> Callable:
+def get_standard_tap_tests(tap_class: Type[Tap], config=None) -> List[Callable]:
     """Return callable pytest which executes simple discovery and connection tests."""
 
     def _test_cli_prints():

@@ -39,6 +39,15 @@ Initializes the full collection of available streams and returns them as a list.
 
 As noted above, there are different subclasses of Stream class specialized for specific source types.
 
+### `Stream.is_sorted` Property
+
+Set to `True` if stream is sorted. Defaults to `False`.
+
+When `True`, incremental streams will attempt to resume if unexpectedly interrupted.
+
+This setting enables additional checks which may trigger
+`InvalidStreamSortException` if records are found which are unsorted.
+
 ### `Stream.get_records()` Method
 
 A method which should retrieve data from the source and return records. To optimize performance, should generally returned incrementally using the python `yield` operator. (See the samples or the cookiecutter template for specific examples.)
@@ -48,6 +57,18 @@ Note:
 - This method takes an optional `partition` argument, which can be safely ignored unless
 the stream requires [partitioning](./partitioning.md).
 - Only custom stream types need to define this method. REST and GraphQL streams do not.
+
+### `Stream.get_replication_key_signpost()` Method
+
+Return the max allowable bookmark value for this stream's replication key.
+
+For timestamp-based replication keys, this defaults to `utcnow()`. For
+non-timestamp replication keys, default to `None`. For consistency in subsequent
+calls, the value will be frozen (cached) at its initially called state, per
+partition argument if applicable.
+
+Override this value to prevent bookmarks from being advanced in cases where we
+may only have a partial set of records.
 
 ## `RESTStream` Class
 

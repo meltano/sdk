@@ -286,6 +286,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "memoization"
+version = "0.3.2"
+description = "A powerful caching library for Python, with TTL support and multiple algorithm options. (https://github.com/lonelyenvoy/python-memoization)"
+category = "main"
+optional = false
+python-versions = ">=3, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <4"
+
+[[package]]
 name = "mypy"
 version = "0.812"
 description = "Optional static typing for Python"
@@ -330,16 +338,16 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "pendulum"
-version = "1.2.0"
+version = "1.5.1"
 description = "Python datetimes made easy."
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [package.dependencies]
-python-dateutil = "*"
-pytzdata = "*"
-tzlocal = "*"
+python-dateutil = ">=2.6.0.0,<3.0.0.0"
+pytzdata = ">=2018.3.0.0"
+tzlocal = ">=1.5.0.0,<2.0.0.0"
 
 [[package]]
 name = "pipelinewise-singer-python"
@@ -609,7 +617,7 @@ python-versions = "*"
 
 [[package]]
 name = "tzlocal"
-version = "2.1"
+version = "1.5.1"
 description = "tzinfo object for the local timezone"
 category = "main"
 optional = false
@@ -646,7 +654,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.9,>=3.6"
-content-hash = "348ce63d52a44f85c8664bc70e85ec8889e0a55e06b11e3c79a19168a57bb2d4"
+content-hash = "f5b3f0e5b47ebba35da55e5dbd71ff5e2c6be0983e4cefdf9b8ce5b9d876f521"
 
 [metadata.files]
 appdirs = [
@@ -842,6 +850,10 @@ mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
 ]
+memoization = [
+    {file = "memoization-0.3.2-py3-none-any.whl", hash = "sha256:6109bcfdbd6fc6c33004fcdc5d8e291c1223a7416c5dad61ec777d260f6038d2"},
+    {file = "memoization-0.3.2.tar.gz", hash = "sha256:65d19404b9acc74a764d3e584d8fb17c56bc446d386a28afb93f2247507c99cc"},
+]
 mypy = [
     {file = "mypy-0.812-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:a26f8ec704e5a7423c8824d425086705e381b4f1dfdef6e3a1edab7ba174ec49"},
     {file = "mypy-0.812-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:28fb5479c494b1bab244620685e2eb3c3f988d71fd5d64cc753195e8ed53df7c"},
@@ -879,14 +891,16 @@ pathspec = [
     {file = "pathspec-0.8.1.tar.gz", hash = "sha256:86379d6b86d75816baba717e64b1a3a3469deb93bb76d613c9ce79edc5cb68fd"},
 ]
 pendulum = [
-    {file = "pendulum-1.2.0-cp27-cp27m-manylinux1_i686.whl", hash = "sha256:e467bec4ec56436654499f52789b11d9e15b2bbbb0696a4ee4b6b654fe72d66f"},
-    {file = "pendulum-1.2.0-cp27-cp27m-manylinux1_x86_64.whl", hash = "sha256:ce6c764ba2acaf185a2e4bb02220ac986ad371ea6e7a9d9e42ad882c6d788e0a"},
-    {file = "pendulum-1.2.0-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:925ff1a3094d3517928a5ffca92cf0b0c9016f289133129433c9be0eede937ec"},
-    {file = "pendulum-1.2.0-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:93a5a66cea7222e8388fcb52947ff2e230e7194815baa43b5f85c7e56611b515"},
-    {file = "pendulum-1.2.0-cp36-cp36m-macosx_10_11_x86_64.whl", hash = "sha256:a97e3ed9557ac0c5c3742f21fa4d852d7a050dd9b1b517e993aebef2dd2eea52"},
-    {file = "pendulum-1.2.0-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:ce67c0777a9f7340e5c6884faf19e571772fe0969c978044bbae601bd0f70873"},
-    {file = "pendulum-1.2.0-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:1d7eb559133e3aa0e2f62fe44e143398c05debce6fabca95732225a58700bec3"},
-    {file = "pendulum-1.2.0.tar.gz", hash = "sha256:641140a05f959b37a177866e263f6f53a53b711fae6355336ee832ec1a59da8a"},
+    {file = "pendulum-1.5.1-cp27-cp27m-manylinux1_i686.whl", hash = "sha256:ddaf97a061eb5e2ae37857a8cb548e074125017855690d20e443ad8d9f31e164"},
+    {file = "pendulum-1.5.1-cp27-cp27m-manylinux1_x86_64.whl", hash = "sha256:c04fcf955e622e97e405e5f6d1b1f4a7adc69d79d82f3609643de69283170d6d"},
+    {file = "pendulum-1.5.1-cp34-cp34m-manylinux1_i686.whl", hash = "sha256:dd6500d27bb7ccc029d497da4f9bd09549bd3c0ea276dad894ea2fdf309e83f3"},
+    {file = "pendulum-1.5.1-cp34-cp34m-manylinux1_x86_64.whl", hash = "sha256:95536b33ae152e3c831eb236c1bf9ac9dcfb3b5b98fdbe8e9e601eab6c373897"},
+    {file = "pendulum-1.5.1-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:f4eee1e1735487d9d25cc435c519fd4380cb1f82cde3ebad1efbc2fc30deca5b"},
+    {file = "pendulum-1.5.1-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:4173ce3e81ad0d9d61dbce86f4286c43a26a398270df6a0a89f501f0c28ad27d"},
+    {file = "pendulum-1.5.1-cp36-cp36m-macosx_10_13_x86_64.whl", hash = "sha256:e9732b8bb214fad2c72ddcbfec07542effa8a8b704e174347ede1ff8dc679cce"},
+    {file = "pendulum-1.5.1-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:56a347d0457859c84b8cdba161fc37c7df5db9b3becec7881cd770e9d2058b3c"},
+    {file = "pendulum-1.5.1-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:e7df37447824f9af0b58c7915a4caf349926036afd86ad38e7529a6b2f8fc34b"},
+    {file = "pendulum-1.5.1.tar.gz", hash = "sha256:738878168eb26e5446da5d1f7b3312ae993a542061be8882099c00ef4866b1a2"},
 ]
 pipelinewise-singer-python = [
     {file = "pipelinewise-singer-python-1.2.0.tar.gz", hash = "sha256:8ba501f9092dbd686cd5792ecf6aa97c2d25c225e9d8b2875dcead0f5738898c"},
@@ -1101,8 +1115,7 @@ typing-extensions = [
     {file = "typing_extensions-3.7.4.3.tar.gz", hash = "sha256:99d4073b617d30288f569d3f13d2bd7548c3a7e4c8de87db09a9d29bb3a4a60c"},
 ]
 tzlocal = [
-    {file = "tzlocal-2.1-py2.py3-none-any.whl", hash = "sha256:e2cb6c6b5b604af38597403e9852872d7f534962ae2954c7f35efcb1ccacf4a4"},
-    {file = "tzlocal-2.1.tar.gz", hash = "sha256:643c97c5294aedc737780a49d9df30889321cbe1204eac2c2ec6134035a92e44"},
+    {file = "tzlocal-1.5.1.tar.gz", hash = "sha256:4ebeb848845ac898da6519b9b31879cf13b6626f7184c496037b818e238f2c4e"},
 ]
 urllib3 = [
     {file = "urllib3-1.26.4-py2.py3-none-any.whl", hash = "sha256:2f4da4594db7e1e110a944bb1b551fdf4e6c136ad42e4234131391e21eb5b0df"},
