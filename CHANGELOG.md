@@ -33,10 +33,6 @@ The next few lines form the template for unreleased changes.
 - Fixed a problem where CI pipelines would fail when run from a fork. (!71) -- _Thanks, **[Derek Visch](https://gitlab.com/vischous)**!_
 - Fixed fatal error when running from the cookiecutter shell script (#102, !64)
 
-### Changed
-
-- Unsorted streams are no longer marked with resumable bookmarks in STATE output. (!61)
-
 ## v0.1.2
 
 Fixes bug in state handling, adds improvements to documentation.
