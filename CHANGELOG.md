@@ -20,14 +20,12 @@ The next few lines form the template for unreleased changes.
 
 ### Added
 
-- Added [`is_sorted`](/docs/reference#Stream.is_sorted-property) stream property, which enables
-  long-running incremental streams to be resumed if interrupted. (!61)
-- Added [signpost feature](/docs/implementation/state#replication-key-signposts) to
-  prevent bookmarks from advancing beyond the point where all
+- Added `is_sorted` stream property, which enables long-running incremental streams to be
+  resumed if interrupted. (!61)
+- Added signpost feature to prevent bookmarks from advancing beyond the point where all
   records have been streamed. (!61)
-- Added [`get_replication_key_signpost()`](/docs/reference#Stream.get_replication_key_signpost-method)
-  stream method which defaults to the current time for
-  timestamp-based replication keys. (!61)
+- Added `get_replication_key_signpost()` stream method which defaults to the current time 
+  for timestamp-based replication keys. (!61)
 
 ### Fixed
 
