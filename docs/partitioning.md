@@ -34,6 +34,6 @@ or for the stream.
 
 ## See Also
 
-- [Singer SDK State](./state.md)
+- [Singer SDK State](./implementation/state.md)
 - [Singer Spec: State Overview](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#state)
 - [Singer Spec: Config and State](https://github.com/singer-io/getting-started/blob/master/docs/CONFIG_AND_STATE.md#state-file)
