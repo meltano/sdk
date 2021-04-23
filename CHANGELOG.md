@@ -16,15 +16,30 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
-## [Unreleased]
+## v0.1.3 [Unreleased]
+
+### Added
+
+- Added `is_sorted` stream property, which enables long-running incremental streams to be
+  resumed if interrupted. (!61)
+- Added signpost feature to prevent bookmarks from advancing beyond the point where all
+  records have been streamed. (!61)
+- Added `get_replication_key_signpost()` stream method which defaults to the current time 
+  for timestamp-based replication keys. (!61)
 
 ### Fixed
 
-- Fixed fatal errors when debugging from the cookiecutter shell script (#102, !64)
+- Fixed a scenario where unsorted incremental streams would miss records if interrupted and
+  then resumed using the emitted STATE bookmarks. (!61)
+- Fixed fatal error when debugging from the cookiecutter shell script (#102, !64)
+
+### Changed
+
+- Unsorted streams are no longer marked with resumable bookmarks in STATE output. (!61)
 
 ## v0.1.2
 
-Fixes bug in state handling, adds improvevements to documentation.
+Fixes bug in state handling, adds improvements to documentation.
 
 ### Documentation
 

@@ -116,6 +116,45 @@ this is not yet a supported use case within the SDK. If your source requires mul
 bookmark keys, and if it does not align with the [partitioning](../partitioning.md) feature,
 please open an issue with a detailed description of the intended use case.
 
+## The Impact of Sorting on Incremental Sync
+
+For incremental streams sorted by replication key, the replication key
+values are tracked in the stream state and
+emitted for each batch. Once the state message has been processed and emitted also
+by the target, those records preceding the state message should be assumed to be fully
+written by the target. In practice, this means that if a sorted stream is interrupted, the
+tap may resume from the last successfully processed state message.
+
+To enable resume after interruption, developers may set `is_sorted = True`
+within the `Stream` class definition. If this is set, the SDK
+will check each record and throw an `InvalidStreamSortException` if unsorted records are
+detected during sync.
+
+### Dealing with Unsorted Streams
+
+There are some sources which are unable to send records sorted by their replication key,
+even when there is a valid replication key. In these cases, the SDK
+creates a separate `progress_tracking` object within the state dictionary. This is used to
+track the max value seen for the `replication_key` during the current sync.
+
+Unlike the replication key tracking for pre-sorted streams, the progress trackers will be
+ignored (reset and wiped) for the purposes of resuming a failed sync operation. Only when
+the sync reaches 100% completion will those progress markers be promoted to a valid
+replication key bookmark for future sync operations.
+
+### Replication Key Signposts
+
+Signposts are a feature for incremental streams, where a maximum allowable value or
+"signpost" is used to prevent the replication key bookmark from advancing beyond the
+point where all records have been fully synced. This is especially important when streams
+are unsorted, since the presence of _some_ records with timestamps during the sync operation
+does not imply that we have _all_ records updated during the sync operation.
+
+Signposts are enabled automatically for datetime replication keys, except when
+`Stream.is_sorted` is explicitly set to `True`. Signposts can be created by developers for
+non-timestamp replication keys (e.g. for `binlog` and `event_id` types) by overriding
+`Stream.get_replication_key_signpost()`.
+
 ## See Also
 
 - [Singer SDK Partitioning](../partitioning.md)
