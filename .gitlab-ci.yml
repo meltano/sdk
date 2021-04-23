@@ -37,7 +37,7 @@ build_and_test:
       else
         echo "Run 'core' and 'cookiecutter' python test suites..."
         poetry run pytest singer_sdk/tests/core
-        poetry run pytest singer_sdk/tests/cookiecutter
+        poetry run pytest singer_sdk/tests/cookiecutters
       fi
 
 lint:
