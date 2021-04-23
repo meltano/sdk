@@ -47,6 +47,6 @@ def test_gitlab_replication_keys():
         ].is_timestamp_replication_key, (
             "Failed to detect `is_timestamp_replication_key`"
         )
-        assert (
-            tap.streams["commits"].is_timestamp_replication_key is False
-        ), "Failed to detect `is_timestamp_replication_key`"
+    assert tap.streams[
+        "commits"
+    ].is_timestamp_replication_key, "Failed to detect `is_timestamp_replication_key`"
