@@ -24,11 +24,16 @@ from singer import metadata
 from singer_sdk.helpers._typing import conform_record_data_types
 from singer_sdk.helpers._state import (
     get_writeable_state_dict,
-    wipe_stream_state_keys,
     get_state_partitions_list,
+    increment_state,
+    finalize_state_progress_markers,
+    reset_state_progress_markers,
+    write_replication_key_signpost,
 )
+from singer_sdk.exceptions import MaxRecordsLimitException, InvalidStreamSortException
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._util import utc_now
 
 import singer
 from singer import RecordMessage, SchemaMessage
@@ -49,7 +54,7 @@ class Stream(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
     STATE_MSG_FREQUENCY = 10000  # Number of records between state messages
-    MAX_RECORDS_LIMIT: Optional[int] = None
+    _MAX_RECORDS_LIMIT: Optional[int] = None
 
     parent_stream_types: List[Any] = []  # May be used in sync sequencing
 
@@ -114,6 +119,36 @@ class Stream(metaclass=abc.ABCMeta):
 
         return None
 
+    def _write_replication_key_signpost(
+        self,
+        partition: Optional[dict],
+        value: Union[datetime.datetime, str, int, float],
+    ):
+        """Write the signpost value, if available."""
+        if not value:
+            return
+
+        state = self.get_stream_or_partition_state(partition)
+        write_replication_key_signpost(state, value)
+
+    def get_replication_key_signpost(
+        self, partition: Optional[dict]
+    ) -> Optional[Union[datetime.datetime, Any]]:
+        """Return the max allowable bookmark value for this stream's replication key.
+
+        For timestamp-based replication keys, this defaults to `utcnow()`. For
+        non-timestamp replication keys, default to `None`. For consistency in subsequent
+        calls, the value will be frozen (cached) at its initially called state, per
+        partition argument if applicable.
+
+        Override this value to prevent bookmarks from being advanced in cases where we
+        may only have a partial set of records.
+        """
+        if self.is_timestamp_replication_key:
+            return utc_now()
+
+        return None
+
     @property
     def schema_filepath(self) -> Optional[Path]:
         """Return a path to a schema file for the stream or None if n/a."""
@@ -159,6 +194,18 @@ class Stream(metaclass=abc.ABCMeta):
     def replication_key(self, new_value: str) -> None:
         """Set replication key for the stream."""
         self._replication_key = new_value
+
+    @property
+    def is_sorted(self) -> bool:
+        """Return `True` if stream is sorted. Defaults to `False`.
+
+        When `True`, incremental streams will attempt to resume if unexpectedly
+        interrupted.
+
+        This setting enables additional checks which may trigger
+        `InvalidStreamSortException` if records are found which are unsorted.
+        """
+        return False
 
     @property
     def _singer_metadata(self) -> dict:
@@ -266,7 +313,11 @@ class Stream(metaclass=abc.ABCMeta):
     def _increment_stream_state(
         self, latest_record: Dict[str, Any], *, partition: Optional[dict] = None
     ):
-        """Update state of stream or partition with data from the provided record."""
+        """Update state of stream or partition with data from the provided record.
+
+        Raises InvalidStreamSortException is self.is_sorted = True and unsorted data is
+        detected.
+        """
         state_dict = self.get_stream_or_partition_state(partition)
         if latest_record:
             if self.replication_method in [
@@ -278,11 +329,14 @@ class Stream(metaclass=abc.ABCMeta):
                         f"Could not detect replication key for '{self.name}' stream"
                         f"(replication method={self.replication_method})"
                     )
-                state_dict.update(
-                    {
-                        "replication_key": self.replication_key,
-                        "replication_key_value": latest_record[self.replication_key],
-                    }
+                increment_state(
+                    state_dict,
+                    replication_key=self.replication_key,
+                    replication_key_signpost=self.get_replication_key_signpost(
+                        partition=partition
+                    ),
+                    latest_record=latest_record,
+                    is_sorted=self.is_sorted,
                 )
 
     # Private message authoring methods:
@@ -304,35 +358,23 @@ class Stream(metaclass=abc.ABCMeta):
     def _sync_records(self, partition: Optional[dict] = None) -> None:
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
-        # Reset interim state keys from prior executions:
-        wipe_stream_state_keys(
-            self.tap_state,
-            self.name,
-            partition=partition,
-            wipe_keys=[
-                "last_pk_fetched",
-                "max_pk_values",
-                "version",
-                "initial_full_table_complete",
-            ],
-        )
         # Iterate through each returned record:
         if partition:
             partitions = [partition]
         else:
             partitions = self.partitions or [None]
         for partition in partitions:
+            state = self.get_stream_or_partition_state(partition)
+            reset_state_progress_markers(state)
             for row_dict in self.get_records(partition=partition):
                 if (
-                    self.MAX_RECORDS_LIMIT is not None
-                    and rows_sent >= self.MAX_RECORDS_LIMIT
+                    self._MAX_RECORDS_LIMIT is not None
+                    and rows_sent >= self._MAX_RECORDS_LIMIT
                 ):
-                    logging.info(
+                    raise MaxRecordsLimitException(
                         "Stream prematurely aborted due to the stream's max record "
-                        f"limit ({self.MAX_RECORDS_LIMIT}) being reached."
+                        f"limit ({self._MAX_RECORDS_LIMIT}) being reached."
                     )
-                    # Abort stream sync for this partition or stream
-                    break
 
                 if rows_sent and ((rows_sent - 1) % self.STATE_MSG_FREQUENCY == 0):
                     self._write_state_message()
@@ -349,14 +391,17 @@ class Stream(metaclass=abc.ABCMeta):
                     time_extracted=pendulum.now(),
                 )
                 singer.write_message(record_message)
-                self._increment_stream_state(record, partition=partition)
+                try:
+                    self._increment_stream_state(record, partition=partition)
+                except InvalidStreamSortException as ex:
+                    msg = f"Sorting error detected on row #{rows_sent+1}. "
+                    if partition:
+                        msg += f"Partition was {str(partition)}. "
+                    msg += str(ex)
+                    self.logger.error(msg)
+                    raise ex
                 rows_sent += 1
-            wipe_stream_state_keys(
-                self.tap_state,
-                self.name,
-                partition=partition,
-                wipe_keys=["last_pk_fetched", "max_pk_values"],
-            )
+            finalize_state_progress_markers(state)
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
         # Reset interim bookmarks before emitting final STATE message:
         self._write_state_message()

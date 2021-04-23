@@ -1,7 +1,14 @@
 """Helper functions for state and bookmark management."""
 
+import datetime
+from typing import Any, List, Optional, Union
 
-from typing import Any, List, Optional
+from singer_sdk.exceptions import InvalidStreamSortException
+from singer_sdk.helpers._typing import to_json_compatible
+
+PROGRESS_MARKERS = "progress_markers"
+PROGRESS_MARKER_NOTE = "Note"
+SIGNPOST_MARKER = "replication_key_signpost"
 
 
 def get_state_if_exists(
@@ -148,31 +155,80 @@ def write_stream_state(
     state_dict[key] = val
 
 
-def wipe_stream_state_keys(
-    state: dict,
-    tap_stream_id: str,
-    wipe_keys: List[str] = None,
-    *,
-    except_keys: List[str] = None,
-    partition: Optional[dict] = None,
-) -> None:
-    """Wipe bookmarks.
+def reset_state_progress_markers(state: dict) -> Optional[dict]:
+    """Wipe the state once sync is complete.
 
-    You may specify a list to wipe or a list to keep, but not both.
+    For logging purposes, return the wiped 'progress_markers' object if it existed.
     """
-    state_dict = get_writeable_state_dict(state, tap_stream_id, partition=partition)
+    progress_markers = state.get(PROGRESS_MARKERS, {})
+    # Remove auto-generated human-readable note:
+    progress_markers.pop(PROGRESS_MARKER_NOTE, None)
+    # Return remaining 'progress_markers' if any:
+    return progress_markers or None
 
-    if except_keys and wipe_keys:
-        raise ValueError(
-            "Incorrect number of arguments. "
-            "Expected `except_keys` or `wipe_keys` but not both."
+
+def write_replication_key_signpost(
+    state: dict,
+    new_signpost_value: Any,
+) -> None:
+    """Write signpost value."""
+    state[SIGNPOST_MARKER] = new_signpost_value
+
+
+def increment_state(
+    state: dict,
+    latest_record: dict,
+    replication_key: str,
+    replication_key_signpost: Optional[Any],
+    is_sorted: bool,
+) -> None:
+    """Update the state using data from the latest record.
+
+    Raises InvalidStreamSortException if is_sorted=True and unsorted
+    data is detected in the stream.
+    """
+    progress_dict = state
+    if not is_sorted:
+        if PROGRESS_MARKERS not in state:
+            state[PROGRESS_MARKERS] = {
+                PROGRESS_MARKER_NOTE: "Progress is not resumable if interrupted."
+            }
+        progress_dict = state[PROGRESS_MARKERS]
+    old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
+    new_rk_value = to_json_compatible(latest_record[replication_key])
+    replication_key_signpost = to_json_compatible(replication_key_signpost)
+    if is_sorted and old_rk_value and old_rk_value > new_rk_value:
+        raise InvalidStreamSortException(
+            f"Unsorted data detected in stream. Latest value '{new_rk_value}' is "
+            f"smaller than previous max '{old_rk_value}'."
         )
-    if except_keys:
-        wipe_keys = [
-            found_key for found_key in state_dict.keys() if found_key not in except_keys
-        ]
-    wipe_keys = wipe_keys or []
-    for wipe_key in wipe_keys:
-        if wipe_key in state:
-            state_dict.pop(wipe_key)
-    return
+    if replication_key_signpost and replication_key_signpost < new_rk_value:
+        # Overflowed max bookmark threshold, reset to the max for this key:
+        new_rk_value = replication_key_signpost
+
+    progress_dict["replication_key"] = replication_key
+    progress_dict["replication_key_value"] = new_rk_value
+
+
+def _greater_than_signpost(
+    signpost: Union[datetime.datetime, str, int, float],
+    new_value: Union[datetime.datetime, str, int, float],
+) -> bool:
+    """Compare and return True if new_value is greater than signpost."""
+    return new_value > signpost
+
+
+def finalize_state_progress_markers(state: dict) -> Optional[dict]:
+    """Promote or wipe progress markers once sync is complete."""
+    signpost_value = state.pop(SIGNPOST_MARKER, None)
+    if PROGRESS_MARKERS in state:
+        if "replication_key" in state[PROGRESS_MARKERS]:
+            # Replication keys valid (only) after sync is complete
+            progress_markers = state[PROGRESS_MARKERS]
+            state["replication_key"] = progress_markers.pop("replication_key")
+            new_rk_value = progress_markers.pop("replication_key_value")
+            if signpost_value and _greater_than_signpost(signpost_value, new_rk_value):
+                new_rk_value = signpost_value
+            state["replication_key_value"] = new_rk_value
+    # Wipe and return any markers that have not been promoted
+    return reset_state_progress_markers(state)
