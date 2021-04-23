@@ -32,7 +32,7 @@ The next few lines form the template for unreleased changes.
 - Fixed a scenario where _unsorted_ incremental streams could miss records if interrupted and
   then resumed using partial STATE bookmarks. (!61)
 - Fixed fatal error when running from the cookiecutter shell script (#102, !64)
-- Fixed a problem where CI pipelines would fail when run from a fork. (!71) -- Thanks, **[Derek Visch](https://gitlab.com/vischous)**!
+- Fixed a problem where CI pipelines would fail when run from a fork. (!71) -- _Thanks, **[Derek Visch](https://gitlab.com/vischous)**!_
 
 ### Changed
 
