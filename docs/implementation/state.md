@@ -130,21 +130,21 @@ within the `Stream` class definition. If this is set, the SDK
 will check each record and throw an `InvalidStreamSortException` if unsorted records are
 detected during sync.
 
-### Dealing with Unsorted and Differently-Sorted Streams
+### Dealing with Unsorted Streams
 
 There are some sources which are unable to send records sorted by their replication key,
 even when there is a valid replication key. In these cases, the SDK
 creates a separate `progress_tracking` object within the state dictionary. This is used to
 track the max value seen for the `replication_key` during the current sync.
 
-Unlike the replication key tracking for pre-sorted streams, however, this bookmark will be
+Unlike the replication key tracking for pre-sorted streams, the progress trackers will be
 ignored (reset and wiped) for the purposes of resuming a failed sync operation. Only when
 the sync reaches 100% completion will those progress markers be promoted to a valid
 replication key bookmark for future sync operations.
 
 ### Replication Key Signposts
 
-Signposts are a feature for incremental streams, where a maximum allowable value or 
+Signposts are a feature for incremental streams, where a maximum allowable value or
 "signpost" is used to prevent the replication key bookmark from advancing beyond the
 point where all records have been fully synced. This is especially important when streams
 are unsorted, since the presence of _some_ records with timestamps during the sync operation
@@ -152,7 +152,7 @@ does not imply that we have _all_ records updated during the sync operation.
 
 Signposts are enabled automatically for datetime replication keys, except when
 `Stream.is_sorted` is explicitly set to `True`. Signposts can be created by developers for
-non-timestamp replication keys (example for `binlog` and `event_id` types) by overriding
+non-timestamp replication keys (e.g. for `binlog` and `event_id` types) by overriding
 `Stream.get_replication_key_signpost()`.
 
 ## See Also
