@@ -16,7 +16,7 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
-## v0.1.3 [Unreleased]
+## v0.1.3
 
 ### Added
 
@@ -29,13 +29,9 @@ The next few lines form the template for unreleased changes.
 
 ### Fixed
 
-- Fixed a scenario where unsorted incremental streams would miss records if interrupted and
-  then resumed using the emitted STATE bookmarks. (!61)
-- Fixed fatal error when debugging from the cookiecutter shell script (#102, !64)
-
-### Changed
-
-- Unsorted streams are no longer marked with resumable bookmarks in STATE output. (!61)
+- Fixed a scenario where _unsorted_ incremental streams would generate incorrect STATE bookmarks. (!61) -- _Thanks, **[Egi Gjevori](https://gitlab.com/egi-gjevori)**!_
+- Fixed a problem where CI pipelines would fail when run from a fork. (!71) -- _Thanks, **[Derek Visch](https://gitlab.com/vischous)**!_
+- Fixed fatal error when running from the cookiecutter shell script (#102, !64)
 
 ## v0.1.2
 
