@@ -1,12 +1,12 @@
 """Sample target test for target-csv."""
 
-from singer_sdk.target_base import TargetBase
+from singer_sdk.target_base import Target
 from singer_sdk import typing as th
 
 from singer_sdk.samples.sample_target_csv.csv_target_sink import SampleCSVTargetSink
 
 
-class SampleTargetCSV(TargetBase):
+class SampleTargetCSV(Target):
     """Sample target for CSV."""
 
     name = "target-csv"

@@ -1,4 +1,4 @@
-"""TargetBase abstract class."""
+"""Target abstract class."""
 
 import abc
 import copy
@@ -22,7 +22,7 @@ _PARALLELISM = 4
 _MAX_PARALLELISM = 8
 
 
-class TargetBase(PluginBase, metaclass=abc.ABCMeta):
+class Target(PluginBase, metaclass=abc.ABCMeta):
     """Abstract base class for targets."""
 
     # Constructor
