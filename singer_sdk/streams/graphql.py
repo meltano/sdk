@@ -1,7 +1,7 @@
 """Abstract base class for API-type streams."""
 
 import abc
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Any
 
 from singer_sdk.streams.rest import RESTStream
 
@@ -13,15 +13,18 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
     path = ""
     rest_method = "POST"
 
-    def prepare_request_payload(self, params: dict) -> Optional[dict]:
+    def prepare_request_payload(
+        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+    ) -> Optional[dict]:
         """Prepare the data payload for the GraphQL API request."""
+        params = self.get_url_params(partition, next_page_token)
         if self.query is None:
             raise ValueError("Graphql `query` property not set.")
         else:
             query = self.query
         request_data = {
             "query": "query { "
-            + (" ".join([l.strip() for l in query.splitlines()]))
+            + (" ".join([line.strip() for line in query.splitlines()]))
             + " }",
             "variables": params,
         }

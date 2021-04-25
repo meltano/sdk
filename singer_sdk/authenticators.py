@@ -1,15 +1,19 @@
 """Classes to assist in authenticating to APIs."""
 
 import logging
-from types import MappingProxyType
 import jwt
 import math
 import requests
 
-from datetime import datetime, timedelta
+from datetime import timedelta
+from types import MappingProxyType
 from typing import Any, Dict, Mapping, Optional
 
-from singer_sdk.helpers import utc_now
+from pendulum import datetime
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+
+from singer_sdk.helpers._util import utc_now
 from singer_sdk.streams import Stream as RESTStreamBase
 
 from singer import utils
@@ -22,7 +26,7 @@ class APIAuthenticatorBase(object):
         """Init authenticator."""
         self.tap_name: str = stream.tap_name
         self._config: Dict[str, Any] = dict(stream.config)
-        self._http_headers = stream.http_headers
+        self._auth_headers = {}
         self.logger: logging.Logger = stream.logger
 
     @property
@@ -31,24 +35,25 @@ class APIAuthenticatorBase(object):
         return MappingProxyType(self._config)
 
     @property
-    def http_headers(self) -> dict:
+    def auth_headers(self) -> dict:
         """Return http headers."""
-        return self._http_headers
+        return self._auth_headers
 
 
 class SimpleAuthenticator(APIAuthenticatorBase):
     """Base class for offloading API auth."""
 
-    def __init__(self, stream: RESTStreamBase, http_headers: dict = None):
+    def __init__(self, stream: RESTStreamBase, auth_headers: Optional[Dict] = None):
         """Init authenticator.
 
-        If http_headers is provided, it will override the headers specified in `stream`.
+        If auth_headers is provided, it will be merged with http_headers specified on
+        the stream.
         """
         super().__init__(stream=stream)
-        if self._http_headers is None:
-            self._http_headers = {}
-        if http_headers:
-            self._http_headers.update(http_headers)
+        if self._auth_headers is None:
+            self._auth_headers = {}
+        if auth_headers:
+            self._auth_headers.update(auth_headers)
 
 
 class OAuthAuthenticator(APIAuthenticatorBase):
@@ -62,11 +67,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
     ) -> None:
         """Init authenticator."""
         super().__init__(stream=stream)
-        # Preserve class-level defaults if they exist:
-        if auth_endpoint or not hasattr(self, "auth_endpoint"):
-            self.auth_endpoint: Optional[str] = auth_endpoint
-        if oauth_scopes or not hasattr(self, "oauth_scopes"):
-            self.oauth_scopes: Optional[str] = oauth_scopes
+        self._auth_endpoint = auth_endpoint
+        self._oauth_scopes = oauth_scopes
 
         # Initialize internal tracking attributes
         self.access_token: Optional[str] = None
@@ -75,10 +77,62 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         self.expires_in: Optional[int] = None
 
     @property
+    def auth_headers(self) -> dict:
+        """Return a dictionary of auth headers to be applied.
+
+        These will be merged with any `http_headers` specified in the stream.
+        """
+        if not self.is_token_valid():
+            self.update_access_token()
+        result = super().auth_headers
+        result["Authorization"] = f"Bearer {self.access_token}"
+        return result
+
+    @property
+    def auth_endpoint(self) -> str:
+        """Return the authorization endpoint."""
+        if not self._auth_endpoint:
+            raise ValueError("Authorization endpoint not set.")
+        return self._auth_endpoint
+
+    @property
+    def oauth_scopes(self) -> Optional[str]:
+        """Return a string with the OAuth scopes, or None if not set."""
+        return self._oauth_scopes
+
+    @property
+    def oauth_request_payload(self) -> dict:
+        """Return the request body directly (OAuth) or encrypted (JWT)."""
+        return self.oauth_request_body
+
+    @property
+    def oauth_request_body(self) -> dict:
+        """Return formatted body of the OAuth authorization request.
+
+        Sample implementation:
+
+        ```py
+        @property
+        def oauth_request_body(self) -> dict:
+            return {
+                'grant_type': 'password',
+                'scope': 'https://api.powerbi.com',
+                'resource': 'https://analysis.windows.net/powerbi/api',
+                'client_id': self.config["client_id"],
+                'username': self.config.get("username", self.config["client_id"]),
+                'password': self.config["password"],
+            }
+        ```
+        """
+        raise NotImplementedError(
+            "The `oauth_request_body` property was not defined in the subclass."
+        )
+
+    @property
     def client_id(self) -> Optional[str]:
         """Return client ID string to be used in authentication or None if not set."""
         if self.config:
-            return self.config.get("client_id", self.config.get("client_email"))
+            return self.config.get("client_id")
         return None
 
     @property
@@ -87,15 +141,6 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         if self.config:
             return self.config.get("client_secret")
         return None
-
-    @property
-    def http_headers(self) -> dict:
-        """Return a dictionary of HTTP headers, including any authentication tokens."""
-        if not self.is_token_valid():
-            self.update_access_token()
-        result = super().http_headers
-        result["Authorization"] = f"Bearer {self.access_token}"
-        return result
 
     def is_token_valid(self) -> bool:
         """Return true if token is valid."""
@@ -107,9 +152,23 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             return True
         return False
 
+    # Authentication and refresh
     def update_access_token(self):
         """Update `access_token` along with: `last_refreshed` and `expires_in`."""
-        raise NotImplementedError
+        request_time = utc_now()
+        auth_request_payload = self.oauth_request_payload
+        token_response = requests.post(self.auth_endpoint, data=auth_request_payload)
+        try:
+            token_response.raise_for_status()
+            self.logger.info("OAuth authorization attempt was successful.")
+        except Exception as ex:
+            raise RuntimeError(
+                f"Failed OAuth login, response was '{token_response.json()}'. {ex}"
+            )
+        token_json = token_response.json()
+        self.access_token = token_json["access_token"]
+        self.expires_in = token_json["expires_in"]
+        self.last_refreshed = request_time
 
 
 class OAuthJWTAuthenticator(OAuthAuthenticator):
@@ -125,15 +184,21 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         """Return the private key passphrase to use in encryption."""
         return self.config.get("private_key_passphrase", None)
 
-    # Authentication and refresh
-    def update_access_token(self):
-        """Update `access_token` along with: `last_refreshed` and `expires_in`."""
+    @property
+    def oauth_request_body(self) -> dict:
+        """Return request body for OAuth request."""
         request_time = utc_now()
-        # jwt_signing_key = jwt.jwk_from_pem(self.private_key)
+        return {
+            "iss": self.client_id,
+            "scope": self.oauth_scopes,
+            "aud": self.auth_endpoint,
+            "exp": math.floor((request_time + timedelta(hours=1)).timestamp()),
+            "iat": math.floor(request_time.timestamp()),
+        }
 
-        from cryptography.hazmat.primitives import serialization
-        from cryptography.hazmat.backends import default_backend
-
+    @property
+    def oauth_request_payload(self) -> dict:
+        """Return request paytload for OAuth request."""
         if self.private_key_passphrase:
             private_key = serialization.load_pem_private_key(
                 self.private_key,
@@ -142,27 +207,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             )
         else:
             private_key = self.private_key
-
-        auth_request_body = {
-            "iss": self.client_id,
-            "scope": self.oauth_scopes,
-            "aud": self.auth_endpoint,
-            "exp": math.floor((request_time + timedelta(hours=1)).timestamp()),
-            "iat": math.floor(request_time.timestamp()),
-        }
-        payload = {
+        return {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
-            "assertion": jwt.encode(auth_request_body, private_key, "RS256"),
+            "assertion": jwt.encode(self.oauth_request_body, private_key, "RS256"),
         }
-        self.logger.info(
-            f"Sending JWT token request with body {auth_request_body} "
-            f"and payload {payload}"
-        )
-        token_response = requests.post(self.auth_endpoint, data=payload)
-        # self.logger.debug(f"Received JWT request response: {token_response}")
-        token_response.raise_for_status()
-        token_json = token_response.json()
-        self.access_token = token_json["access_token"]
-        self.expires_in = token_json["expires_in"]
-        # self.logger.debug(f"Received JWT token: {token_json}")
-        self.last_refreshed = request_time

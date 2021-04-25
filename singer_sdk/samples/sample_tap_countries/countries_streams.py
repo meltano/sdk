@@ -9,10 +9,9 @@ See the online explorer and query builder here:
 import abc
 from pathlib import Path
 
-from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.streams.graphql import GraphQLStream
 
-SCHEMAS_DIR = Path("./singer_sdk/samples/sample_tap_countries/schemas")
+SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 
 class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
@@ -25,9 +24,11 @@ class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
 
 
 class CountriesStream(CountriesAPIStream):
+    """Countries API stream."""
 
     name = "countries"
-    schema_filepath = "./singer_sdk/samples/sample_tap_countries/schemas/countries.json"
+    primary_keys = ["code"]
+    schema_filepath = SCHEMAS_DIR / "countries.json"
     query = """
         countries {
             code
@@ -50,8 +51,10 @@ class CountriesStream(CountriesAPIStream):
 
 
 class ContinentsStream(CountriesAPIStream):
+    """Continents stream from the Countries API."""
 
     name = "continents"
+    primary_keys = ["code"]
     schema_filepath = SCHEMAS_DIR / "continents.json"
     query = """
         continents {

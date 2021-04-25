@@ -13,15 +13,14 @@ from singer_sdk.samples.sample_tap_countries.countries_streams import (
     CountriesStream,
     ContinentsStream,
 )
-from singer_sdk.samples.sample_tap_countries.countries_globals import PLUGIN_NAME
+from singer_sdk.typing import PropertiesList
 
 
 class SampleTapCountries(Tap):
     """Sample tap for Countries GraphQL API."""
 
-    name: str = PLUGIN_NAME
-    accepted_config_keys: List[str] = []
-    required_config_options = None
+    name: str = "sample-tap-countries"
+    config_jsonschema = PropertiesList().to_dict()
 
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""

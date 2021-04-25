@@ -1,6 +1,12 @@
 """Sample tap test for tap-gitlab."""
 
-from singer_sdk.typehelpers import ArrayType, DateTimeType, PropertiesList, StringType
+from singer_sdk.typing import (
+    ArrayType,
+    DateTimeType,
+    Property,
+    PropertiesList,
+    StringType,
+)
 from typing import List
 from singer_sdk import Tap, Stream
 from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
@@ -9,9 +15,8 @@ from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
     IssuesStream,
     CommitsStream,
     EpicsStream,
-    EpicIssuesStream,
+    # EpicIssuesStream,  # Temporarily skipped due to access denied error
 )
-from singer_sdk.samples.sample_tap_gitlab.gitlab_globals import PLUGIN_NAME
 
 
 STREAM_TYPES = [
@@ -20,32 +25,24 @@ STREAM_TYPES = [
     IssuesStream,
     CommitsStream,
     EpicsStream,
-    EpicIssuesStream,
+    # EpicIssuesStream,  # Temporarily skipped due to access denied error
 ]
 
 
 class SampleTapGitlab(Tap):
     """Sample tap for Gitlab."""
 
-    name: str = PLUGIN_NAME
+    name: str = "sample-tap-gitlab"
     config_jsonschema = PropertiesList(
-        StringType("auth_token"),
-        ArrayType("project_ids", StringType),
-        DateTimeType("start_date"),
-        StringType("api_url", optional=True),
+        Property("auth_token", StringType, required=True),
+        Property("project_ids", ArrayType(StringType), required=True),
+        Property("group_ids", ArrayType(StringType), required=True),
+        Property("start_date", DateTimeType, required=True),
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:
-        """Return a list of discovered  in order of execution.
-
-        Streams with parent stream dependencies will be returned last, otherwise
-        streams will be in alphabetical order.
-        """
-        return sorted(
-            [stream_class(tap=self) for stream_class in STREAM_TYPES],
-            key=lambda x: (len(x.parent_stream_types or []), x.name),
-            reverse=True,
-        )
+        """Return a list of discovered streams."""
+        return [stream_class(tap=self) for stream_class in STREAM_TYPES]
 
 
 # CLI Execution:

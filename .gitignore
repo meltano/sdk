@@ -1,8 +1,12 @@
 # Ignore secrets folders used in testing (except readme and templates)
 
-.secrets
+.secrets/*
 !.secrets/README.md
 !.secrets/*.template
+
+# Ignore local output:
+
+.output
 
 # By default, ignore local IDE configs:
 .vscode

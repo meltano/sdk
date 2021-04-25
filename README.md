@@ -1,30 +1,36 @@
-# `tap-base` - an open framework for building Singer-compliant taps
+# `singer-sdk` - a framework for building Singer taps
 
-- _Note: This framework is still in early development and planning phases_
+## Less is More
 
-## Strategies for Optimized Tap Development
+Because taps built from the SDK require substantially less code, developers are able to dramatically reduce the time to develop a fully mature Singer tap.
 
-1. **Universal Code Formatting.**
-    - _From the [Black](https://black.readthedocs.io) product description:_
-      > By using Black, you agree to cede control over minutiae of hand-formatting. In return, Black gives you speed, determinism, and freedom from pycodestyle nagging about formatting. You will save time and mental energy for more important matters. **Black makes code review faster by producing the smallest diffs possible.** Blackened code looks the same regardless of the project you’re reading. **Formatting becomes transparent after a while and you can focus on the content instead.**
-    - _If you use our companion cookiecutter template, your project will start out auto-formatted by Black. You can keep this default or change it - the choice is yours._
-2. **Pervasive Python Type Hints.**
-    - _Spend less time reading documentation thanks to pervasive type declarations in our base class._
-3. **Less is More.**
-    - _Because taps built from the template require less code, taking advantage of common base class capabilities, developers are able to dramatically reduce the time to develop a fully mature tap._
-4. **Create Future-Proof Plugins.**
-    - _Take advantage of new base class capabilities by simply updating your dependency version and retesting with the latest versions._
+## Build Future-Proof Data Extractors
+
+We will continue to add new features to the SDK. You can always take advantage of the latest capabilities by simply updating your SDK version and then retesting and republishing with the latest version.
+
+## Cookie-Cutter Quick Start
+
+`Singer SDK` provides a quickstart `cookiecutter` template for starting new taps.
+
+* [Click here for the **Cookiecutter Tap Template**](cookiecutter/tap-template/README.md)
 
 ## Tap Dev Guide
 
 See the [dev guide](docs/dev_guide.md) for instructions on how to get started building your own
 taps.
 
-## Working within this repo
+## Singer SDK Implementation Details
+
+For more detailed information about the Singer SDK implementation, please see the 
+[Singer SDK Implementation Details](./docs/implementation/README.md) section.
+
+## Contributing back to the SDK
 
 First clone, then...
 
 ### Install
+
+_**Note:** Singer SDK currently works with Python versions 3.6 through 3.8.x. Python 3.9 is not yet supported._
 
 Install prereqs:
 
@@ -37,7 +43,7 @@ pipx install poetry
 Install package dependencies:
 
 ```bash
-cd tap-base
+cd singer-sdk
 ```
 
 ```bash
@@ -46,6 +52,8 @@ poetry install
 # OR install in editable mode:
 poetry install --no-root
 ```
+
+- For more information, see our [Contributors Guide](CONTRIBUTING.md).
 
 ### Run tests
 
