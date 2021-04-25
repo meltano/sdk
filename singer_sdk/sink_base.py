@@ -161,7 +161,7 @@ class Sink(metaclass=abc.ABCMeta):
         return record
 
     @abc.abstractmethod
-    async def write_records(self, records_to_load: Iterable[Dict]) -> int:
+    async def load_record(self, record_to_load: Iterable[Dict]) -> int:
         """Flush all queued records to the target.
 
         This method can write permanently or write to a buffer/staging area.
@@ -181,7 +181,7 @@ class Sink(metaclass=abc.ABCMeta):
     def flush(self) -> Optional[int]:
         """Flush all written records, return only after records are loaded/validated.
 
-        Call `tally_record_written()` here or in `write_records()` to confirm total
+        Call `tally_record_written()` here or in `load_record()` to confirm total
         records permanently written.
 
         If duplicates are merged, these can optionally be tracked via

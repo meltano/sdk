@@ -16,9 +16,9 @@ class SampleParquetTargetSink(Sink):
 
     records_to_load: List[dict] = []
 
-    def write_records(self, records_to_load):
-        """Add records to `records_to_load` list, to be written during flush()."""
-        self.records_to_load.append(records_to_load)
+    def load_record(self, record_to_load):
+        """Add record to `records_to_load` list, to be written during flush()."""
+        self.records_to_load.append(record_to_load)
 
     def flush(self):
         """Write any prepped records out and return only once fully written."""

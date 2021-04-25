@@ -187,7 +187,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         sink._validate_record(record)
         record = sink.preprocess_record(record)
         # TODO: make this async so multiple rows can be processed in batch:
-        sink.write_records(iter([record]))
+        sink.load_record(record)
 
     def _process_schema_message(self, message_dict: dict) -> None:
         """Process a SCHEMA messages."""
