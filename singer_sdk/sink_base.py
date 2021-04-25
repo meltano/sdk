@@ -5,7 +5,7 @@ import datetime
 
 from logging import Logger
 from types import MappingProxyType
-from typing import Dict, Iterable, Optional, List, Any, Mapping
+from typing import Dict, Optional, List, Any, Mapping, Union
 
 from singer_sdk.helpers._compat import final
 
@@ -37,6 +37,8 @@ class Sink(metaclass=abc.ABCMeta):
     _total_records_written: int = 0
     _dupe_records_merged: int = 0
 
+    MAX_SIZE_DEFAULT = 10000
+
     # TODO: Re-implement schema validation
     # _validator: Draft4Validator
     # _flattener: Optional[RecordFlattener]
@@ -55,12 +57,28 @@ class Sink(metaclass=abc.ABCMeta):
         self.schema = schema
         self.stream_name = stream_name
         self.logger.info("Initializing target sink for stream '{stream_name}'...")
+        self.records_to_flush: List[Union[dict, Any]] = []
 
         # TODO: Re-implement schema validation
         # self._flattener = RecordFlattener(max_level=self._MAX_FLATTEN_DEPTH)
         # self._validator = Draft4Validator(schema, format_checker=FormatChecker())
 
     # Tally methods
+
+    @property
+    def max_size(self) -> int:
+        """Return the max number of unflushed records before is_full=True."""
+        return self.MAX_SIZE_DEFAULT
+
+    @property
+    def current_size(self) -> int:
+        """Return the number of unflushed records."""
+        return len(self.records_to_flush)
+
+    @property
+    def is_full(self) -> bool:
+        """Return True if the sink needs to be flushed."""
+        return self.current_size >= self.max_size
 
     @final
     def tally_record_read(self, count: int = 1):
@@ -153,33 +171,27 @@ class Sink(metaclass=abc.ABCMeta):
                     )
                 record[key] = date_val
 
-    # Abstract methods:
+    # SDK developer overrides:
 
-    @abc.abstractmethod
     def preprocess_record(self, record: Dict) -> dict:
         """Process incoming record and return the result."""
         return record
 
-    @abc.abstractmethod
-    async def load_record(self, record_to_load: Iterable[Dict]) -> int:
+    async def load_record(self, record: dict) -> None:
         """Flush all queued records to the target.
 
         This method can write permanently or write to a buffer/staging area.
-        If a buffer/staging area is used, the final validation and permanent write may
-        be delegated to Sink.flush().
+
+        By default, append record to `records_to_flush`, to be written during `flush()`.
 
         Call `tally_record_written()` here or in `flush()` to confirm total records
-        permanently written.
-
-        If duplicates are merged, these can be tracked via `tally_duplicates_merged()`
-
-        :return: the number of records written out
+        permanently written. If duplicates are merged, these can be tracked via
+        `tally_duplicates_merged()`
         """
-        raise NotImplementedError()
+        self.records_to_flush.append(record)
 
-    @abc.abstractmethod
-    def flush(self) -> Optional[int]:
-        """Flush all written records, return only after records are loaded/validated.
+    def flush(self) -> None:
+        """Flush all records in self.records_to_flush.
 
         Call `tally_record_written()` here or in `load_record()` to confirm total
         records permanently written.
@@ -187,4 +199,7 @@ class Sink(metaclass=abc.ABCMeta):
         If duplicates are merged, these can optionally be tracked via
         `tally_duplicates_merged()`.
         """
-        return None
+        if self.records_to_flush:
+            raise NotImplementedError(
+                "Unflushed records were detected and no handling exists for flush()."
+            )

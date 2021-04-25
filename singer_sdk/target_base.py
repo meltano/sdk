@@ -186,8 +186,12 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             sink._add_metadata_values_to_record(record, message_dict)
         sink._validate_record(record)
         record = sink.preprocess_record(record)
-        # TODO: make this async so multiple rows can be processed in batch:
         sink.load_record(record)
+        if sink.is_full:
+            self.logger.info(
+                f"Target sink for '{sink.stream_name}' is full. Draining..."
+            )
+            sink.flush()
 
     def _process_schema_message(self, message_dict: dict) -> None:
         """Process a SCHEMA messages."""
