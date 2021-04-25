@@ -5,7 +5,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from singer_sdk.target_sink_base import Sink
+from singer_sdk.sink_base import Sink
 from singer_sdk.helpers._flattening import RecordFlattener
 
 
