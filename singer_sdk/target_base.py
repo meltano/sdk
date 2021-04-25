@@ -48,22 +48,10 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
         """Return a list of supported capabilities."""
         return ["target"]
 
-    def _flush_sink_state(
-        self, stream_name: Optional[str] = None, state: Optional[dict] = None
-    ):
-        """Apply the latest sink state for the stream (or all streams)."""
-        state = state or self._latest_state
-        if not stream_name:
-            # Apply the state for all streams
-            self._flushed_state = copy.deepcopy(state)
-            return
-
-        # Apply just the state for the named stream
-        if "bookmarks" not in self._flushed_state:
-            self._flushed_state["bookmarks"] = {}
-        self._flushed_state["bookmarks"][stream_name] = copy.deepcopy(
-            state["bookmarks"][stream_name]
-        )
+    @property
+    def max_parallelism(self) -> int:
+        """Return max number of sinks that should be flushed in parallel."""
+        return _MAX_PARALLELISM
 
     @final
     def get_sink(
@@ -136,6 +124,16 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
                     f"Line is missing required '{required}' key: {line_dict}"
                 )
 
+    def _assert_sink_exists(self, stream_name) -> None:
+        """Raise a RecordsWitoutSchemaException exception if stream doesn't exist."""
+        if not self.sink_exists(stream_name):
+            raise RecordsWitoutSchemaException(
+                f"A record for stream '{stream_name}' was encountered before a "
+                "corresponding schema."
+            )
+
+    # Message handling
+
     def _process_lines(self, lines: Iterable[str], table_cache=None) -> None:
         self.logger.info(f"Target '{self.name}' is listening for input from tap.")
         line_counter = 0
@@ -153,20 +151,20 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
 
             record_type = line_dict["type"]
             if record_type == "SCHEMA":
-                self.process_schema_message(line_dict)
+                self._process_schema_message(line_dict)
                 continue
 
             if record_type == "RECORD":
-                self.process_record_message(line_dict)
+                self._process_record_message(line_dict)
                 record_counter += 1
                 continue
 
             if record_type == "ACTIVATE_VERSION":
-                self.process_activate_version_message(line_dict)
+                self._process_activate_version_message(line_dict)
                 continue
 
             if record_type == "STATE":
-                self.process_state_message(line_dict)
+                self._process_state_message(line_dict)
                 state_counter += 1
                 continue
 
@@ -177,26 +175,19 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
             f"({record_counter} records, {state_counter} state messages)."
         )
 
-    @final
-    def process_record_message(self, message_dict: dict) -> None:
+    def _process_record_message(self, message_dict: dict) -> None:
         """Process a RECORD message."""
         self._assert_line_requires(message_dict, requires=["stream", "record"])
 
         stream_name = message_dict["stream"]
         record = message_dict["record"]
         sink = self.get_sink(stream_name, record=record)
-        sink.process_record(record, message_dict)
+        if sink.include_sdc_metadata_properties:
+            sink.add_metadata_values_to_record(record, message_dict)
+        sink.validate_record(record)
+        sink.process_record(record)
 
-    def _assert_sink_exists(self, stream_name) -> None:
-        """Raise a RecordsWitoutSchemaException exception if stream doesn't exist."""
-        if not self.sink_exists(stream_name):
-            raise RecordsWitoutSchemaException(
-                f"A record for stream '{stream_name}' was encountered before a "
-                "corresponding schema."
-            )
-
-    @final
-    def process_schema_message(self, message_dict: dict) -> None:
+    def _process_schema_message(self, message_dict: dict) -> None:
         """Process a SCHEMA messages."""
         self._assert_line_requires(message_dict, requires=["stream", "schema"])
 
@@ -208,10 +199,26 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
             key_properties=message_dict.get("key_properties", None),
         )
 
-    @property
-    def max_parallelism(self) -> int:
-        """Return max number of sinks that should be flushed in parallel."""
-        return _MAX_PARALLELISM
+    def _process_state_message(self, message_dict: dict) -> None:
+        """Process a state message. Flush sinks if needed."""
+        self._assert_line_requires(message_dict, requires=["value"])
+        # Initially set flushed state
+        self.flush_sinks()
+        self._write_state_message(message_dict["value"])
+
+    def _process_activate_version_message(self, message_dict: dict) -> None:
+        """Handle the optional ACTIVATE_VERSION message extension."""
+        self.logger.warning(
+            "ACTIVATE_VERSION message received but not supported. Ingnoring."
+        )
+
+    # Sink flush methods
+
+    def flush_sinks(self) -> None:
+        """Flushes all sinks, starting with those cleared due to changed schema."""
+        self._flush_sinks(self._sinks_to_clear, 1)
+        self._flush_sinks(list(self._sinks.values()), self.max_parallelism)
+        self._flush_sink_state()
 
     def _flush_sinks(self, sink_list: List[Sink], parallelism: int) -> None:
         def _flush_sink(sink: Sink):
@@ -220,16 +227,23 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
         with parallel_backend("threading", n_jobs=parallelism):
             Parallel()(delayed(_flush_sink)(sink=sink) for sink in sink_list)
 
-    def flush_sinks(self) -> None:
-        """Flushes all sinks, starting with those cleared due to changed schema."""
-        self._flush_sinks(self._sinks_to_clear, 1)
-        self._flush_sinks(list(self._sinks.values()), self.max_parallelism)
-        self._flush_sink_state()
+    # State handling
 
-    def process_activate_version_message(self, message_dict: dict) -> None:
-        """Handle the optional ACTIVATE_VERSION message extension."""
-        self.logger.warning(
-            "ACTIVATE_VERSION message received but not supported. Ingnoring."
+    def _flush_sink_state(
+        self, stream_name: Optional[str] = None, state: Optional[dict] = None
+    ):
+        """Apply the latest sink state for the stream (or all streams)."""
+        state = state or self._latest_state
+        if not stream_name:
+            # Apply the state for all streams
+            self._flushed_state = copy.deepcopy(state)
+            return
+
+        # Apply just the state for the named stream
+        if "bookmarks" not in self._flushed_state:
+            self._flushed_state["bookmarks"] = {}
+        self._flushed_state["bookmarks"][stream_name] = copy.deepcopy(
+            state["bookmarks"][stream_name]
         )
 
     def _write_state_message(self, state: dict):
@@ -237,13 +251,7 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
         self.logger.info(f"Emitting completed target state {state}")
         singer.write_messsage(singer.StateMessage(state))
 
-    @final
-    def process_state_message(self, message_dict: dict) -> None:
-        """Process a state message. Flush sinks if needed."""
-        self._assert_line_requires(message_dict, requires=["value"])
-        # Initially set flushed state
-        self.flush_sinks()
-        self._write_state_message(message_dict["value"])
+    # CLI handler
 
     @classproperty
     def cli(cls):
