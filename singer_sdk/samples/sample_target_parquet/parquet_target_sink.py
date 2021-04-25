@@ -5,43 +5,46 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from singer_sdk.samples.sample_target_parquet.parquet_target_globals import PLUGIN_NAME
-from singer_sdk.target_sink_base import TargetSinkBase
+from singer_sdk.target_sink_base import Sink
+from singer_sdk.helpers._flattening import RecordFlattener
 
 
-class SampleParquetTargetSink(TargetSinkBase):
-
-    target_name = PLUGIN_NAME
+class SampleParquetTargetSink(Sink):
+    """Parquery target sample class."""
 
     DEFAULT_BATCH_SIZE_ROWS = 100000
-    DEFAULT_PARALLELISM = 0  # Num threads used to flush tables, per sink
-    DEFAULT_MAX_PARALLELISM = 16  # Max threads across all sinks
 
-    DATETIME_ERROR_TREATMENT = "MAX"
+    records_to_load: List[dict] = []
 
-    # Standard method overrides:
+    def write_records(self, records_to_load):
+        """Add records to `records_to_load` list, to be written during flush()."""
+        self.records_to_load.append(records_to_load)
 
-    def flush_records(
-        self, records_to_load: Iterable[Dict], expected_row_count: Optional[int]
-    ):
-        print("Flushing records...")
-        num_written = 0
-        # TODO: This whole section needs rework/rewrite - probably use DEFAULT_BATCH_SIZE_ROWS to batch-save multiple rows at a time
-        for record in records_to_load:
-            # TODO: Replace with actual schema from the SCHEMA message
-            schema = pa.schema([("some_int", pa.int32()), ("some_string", pa.string())])
+    def flush(self):
+        """Write any prepped records out and return only once fully written."""
+        # TODO: Replace with actual schema from the SCHEMA message
+        schema = pa.schema([("some_int", pa.int32()), ("some_string", pa.string())])
 
-            # TODO: Probably we want to use a `file_naming_scheme` rather than a static `filename` config
+        count = 0
+        flattened_records = []
+        flattener = RecordFlattener()
+        for record in self.records_to_load.values():
+            flatten_record = flattener.flatten_record(record, schema, max_level=0)
+            flattened_records.append(flatten_record)
+
+        return pandas.DataFrame(data=flattened_records)
+
+        batch = pa.RecordBatchStreamWriter(sink, schema)
+        for record in self.records_to_load:
             writer = pq.ParquetWriter(self.get_config("filepath"), schema)
-            table = pa.Table.from_batches([sample_batch])
-            writer.write_table(table)
-            writer.close()
-            num_written += 1
-        if num_written != expected_row_count:
-            self.logger.warning(
-                f"Number of rows loaded ({num_written}) "
-                f"did not match expected count ({expected_row_count})."
-            )
+            count += 0
+        table = pa.Table.from_batches([sample_batch])
+        writer.write_table(table)
+        writer.close()
+        self.tally_record_written(count)
+
+        # Reset list after load is completed:
+        self.records_to_load = []
 
     # Target-specific methods
 

@@ -183,9 +183,11 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
         record = message_dict["record"]
         sink = self.get_sink(stream_name, record=record)
         if sink.include_sdc_metadata_properties:
-            sink.add_metadata_values_to_record(record, message_dict)
-        sink.validate_record(record)
-        sink.process_record(record)
+            sink._add_metadata_values_to_record(record, message_dict)
+        sink._validate_record(record)
+        record = sink.preprocess_record(record)
+        # TODO: make this async so multiple rows can be processed in batch:
+        sink.write_records(iter([record]))
 
     def _process_schema_message(self, message_dict: dict) -> None:
         """Process a SCHEMA messages."""
@@ -222,7 +224,7 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
 
     def _flush_sinks(self, sink_list: List[Sink], parallelism: int) -> None:
         def _flush_sink(sink: Sink):
-            sink.flush_all()
+            sink.flush()
 
         with parallel_backend("threading", n_jobs=parallelism):
             Parallel()(delayed(_flush_sink)(sink=sink) for sink in sink_list)

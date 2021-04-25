@@ -5,10 +5,10 @@ from pathlib import Path
 
 from typing import Dict, Iterable, Optional
 
-from singer_sdk.target_sink_base import TargetSinkBase
+from singer_sdk.target_sink_base import Sink
 
 
-class SampleCSVTargetSink(TargetSinkBase):
+class SampleCSVTargetSink(Sink):
 
     target_name = "target-csv"
 
