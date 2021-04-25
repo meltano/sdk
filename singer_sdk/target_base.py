@@ -3,15 +3,23 @@
 import abc
 import copy
 import json
+import sys
 
 import click
-from singer_sdk.helpers import classproperty
-from singer_sdk import helpers
 
-from typing import Any, Dict, Iterable, Optional, Type
+from joblib import Parallel, parallel_backend, delayed
+from typing import Any, Dict, Iterable, Optional, Type, List
 
+import singer
+
+from singer_sdk.exceptions import RecordsWitoutSchemaException
+from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._compat import final
 from singer_sdk.plugin_base import PluginBase
-from singer_sdk.target_sink_base import TargetSinkBase
+from singer_sdk.target_sink_base import Sink
+
+_PARALLELISM = 4
+_MAX_PARALLELISM = 8
 
 
 class TargetBase(PluginBase, metaclass=abc.ABCMeta):
@@ -19,36 +27,116 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
 
     # Constructor
 
-    default_sink_class: Type[TargetSinkBase]
-    _sinks: Dict[str, TargetSinkBase] = {}
+    default_sink_class: Type[Sink]
+    _sinks: Dict[str, Sink] = {}
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None,) -> None:
-        """Initialize the tap."""
-        self.logger.info(f"Initializing '{self.name}' target...")
-        self._state = {}
-        self._flushed_state = {}
-        self._schemas = {}
-        super().__init__(config=config)
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        parse_env_config: bool = False,
+    ) -> None:
+        """Initialize the target."""
+        super().__init__(config=config, parse_env_config=parse_env_config)
 
-    def get_sink(self, stream_name: str) -> TargetSinkBase:
-        if stream_name in self._sinks:
-            return self._sinks[stream_name]
-        raise RuntimeError(
-            "Attempted to retrieve stream before initialization. "
-            "Please check that the upstream tap has sent the proper SCHEMA message."
+        self._latest_state: Dict[str, dict] = {}
+        self._flushed_state: Dict[str, dict] = {}
+        self._sinks_active: Dict[str, Sink] = {}
+        self._sinks_to_clear: List[Sink] = []
+
+    @classproperty
+    def capabilities(self) -> List[str]:
+        """Return a list of supported capabilities."""
+        return ["target"]
+
+    def _flush_sink_state(
+        self, stream_name: Optional[str] = None, state: Optional[dict] = None
+    ):
+        """Apply the latest sink state for the stream (or all streams)."""
+        state = state or self._latest_state
+        if not stream_name:
+            # Apply the state for all streams
+            self._flushed_state = copy.deepcopy(state)
+            return
+
+        # Apply just the state for the named stream
+        if "bookmarks" not in self._flushed_state:
+            self._flushed_state["bookmarks"] = {}
+        self._flushed_state["bookmarks"][stream_name] = copy.deepcopy(
+            state["bookmarks"][stream_name]
+        )
+
+    @final
+    def get_sink(
+        self,
+        stream_name: str,
+        *,
+        record: Optional[dict] = None,
+        schema: Optional[dict] = None,
+        key_properties: Optional[List[str]] = None,
+    ) -> Sink:
+        """Return a sink for the given stream name.
+
+        If schema is provided, a new sink will be created. If the sink already existed,
+        the old sink becomes archived and held until the next flush.
+
+        :raises: RecordsWitoutSchemaException if sink does not exist and schema is not
+                 sent.
+        """
+        if schema:
+            if self.sink_exists(stream_name):
+                self._sinks_to_clear.append(self._sinks.pop(stream_name))
+
+            return self.add_sink(stream_name, schema, key_properties)
+
+        self._assert_sink_exists(stream_name)
+        return self._sinks[stream_name]
+
+    @final
+    def get_sink_class(self, stream_name: str) -> Type[Sink]:
+        """Return a sink for the given stream name.
+
+        :raises: ValueError if no Sink class is defined.
+        """
+        if self.default_sink_class:
+            return self.default_sink_class
+
+        raise ValueError(
+            f"No sink class defined for '{stream_name}' "
+            "and no default sink class available."
         )
 
     def sink_exists(self, stream_name: str) -> bool:
+        """Return True if a sink has been initialized."""
         return stream_name in self._sinks
 
-    def init_sink(self, stream_name: str, schema: dict) -> TargetSinkBase:
-        self.logger.info(f"Initializing '{self.name}' target sink...")
-        self._sinks[stream_name] = self.default_sink_class(
-            target=self, stream_name=stream_name, schema=schema
-        )
-        return self._sinks[stream_name]
+    @final
+    def listen(self) -> None:
+        """Read from STDIN until all messages are processed."""
+        self._process_lines(sys.stdin)
 
-    def process_lines(self, lines: Iterable[str], table_cache=None) -> None:
+    def add_sink(
+        self, stream_name: str, schema: dict, key_properties: Optional[List[str]] = None
+    ) -> Sink:
+        """Create a sink and register it."""
+        self.logger.info(f"Initializing '{self.name}' target sink...")
+        result = self.default_sink_class(
+            target=self,
+            stream_name=stream_name,
+            schema=schema,
+            key_properties=key_properties,
+        )
+        self._sinks[stream_name] = result
+        return result
+
+    @staticmethod
+    def _assert_line_requires(line_dict: dict, requires: List[str]) -> None:
+        for required in requires:
+            if required not in line_dict:
+                raise Exception(
+                    f"Line is missing required '{required}' key: {line_dict}"
+                )
+
+    def _process_lines(self, lines: Iterable[str], table_cache=None) -> None:
         self.logger.info(f"Target '{self.name}' is listening for input from tap.")
         line_counter = 0
         record_counter = 0
@@ -60,196 +148,102 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
             except json.decoder.JSONDecodeError:
                 self.logger.error("Unable to parse:\n{}".format(line))
                 raise
-            if "type" not in line_dict:
-                raise Exception("Line is missing required key 'type': {}".format(line))
+
+            self._assert_line_requires(line_dict, requires=["type"])
+
             record_type = line_dict["type"]
             if record_type == "SCHEMA":
                 self.process_schema_message(line_dict)
-            elif record_type == "RECORD":
+                continue
+
+            if record_type == "RECORD":
                 self.process_record_message(line_dict)
                 record_counter += 1
-            elif record_type == "ACTIVATE_VERSION":
+                continue
+
+            if record_type == "ACTIVATE_VERSION":
                 self.process_activate_version_message(line_dict)
-            elif record_type == "STATE":
+                continue
+
+            if record_type == "STATE":
                 self.process_state_message(line_dict)
                 state_counter += 1
-            else:
-                raise Exception(f"Unknown message type {record_type} in message {o}")
+                continue
+
+            raise Exception(f"Unknown message type {record_type} in message.")
+
         self.logger.info(
             f"Target '{self.name}' completed after {line_counter} lines of input "
             f"({record_counter} records, {state_counter} state messages)."
         )
 
+    @final
     def process_record_message(self, message_dict: dict) -> None:
-        if "stream" not in message_dict:
-            raise Exception(f"Line is missing required key 'stream': {message_dict}")
+        """Process a RECORD message."""
+        self._assert_line_requires(message_dict, requires=["stream", "record"])
+
         stream_name = message_dict["stream"]
+        record = message_dict["record"]
+        sink = self.get_sink(stream_name, record=record)
+        sink.process_record(record, message_dict)
+
+    def _assert_sink_exists(self, stream_name) -> None:
+        """Raise a RecordsWitoutSchemaException exception if stream doesn't exist."""
         if not self.sink_exists(stream_name):
-            raise Exception(
+            raise RecordsWitoutSchemaException(
                 f"A record for stream '{stream_name}' was encountered before a "
                 "corresponding schema."
             )
-        stream = self.get_sink(stream_name)
-        record = message_dict["record"]
-        stream.process_record(record, message_dict)
-        if (
-            stream._num_records_cached
-            >= self.default_sink_class.DEFAULT_BATCH_SIZE_ROWS
-        ):
-            # flush all streams, delete records if needed, reset counts and then emit current state
-            if self.get_config("flush_all_streams"):
-                streams_to_flush = self._sinks
-            else:
-                streams_to_flush = [stream]
-            for stream in streams_to_flush:
-                stream.flush_all()
 
+    @final
     def process_schema_message(self, message_dict: dict) -> None:
-        if "stream" not in message_dict:
-            raise Exception(f"Line is missing required key 'stream': {message_dict}")
-        if "schema" not in message_dict:
-            raise Exception(f"Line is missing required key 'schema': {message_dict}")
+        """Process a SCHEMA messages."""
+        self._assert_line_requires(message_dict, requires=["stream", "schema"])
 
         stream_name = message_dict["stream"]
-        new_schema = helpers._float_to_decimal(message_dict["schema"])
-        new_schema = helpers._float_to_decimal(message_dict["schema"])
+        # new_schema = helpers._float_to_decimal(new_schema)
+        _ = self.get_sink(
+            stream_name,
+            schema=message_dict["schema"],
+            key_properties=message_dict.get("key_properties", None),
+        )
 
-        # Update and flush only if the the schema is new or different than
-        # the previously used version of the schema
-        if stream_name not in self._schemas:
-            self.init_sink(stream_name, new_schema)
-        else:
-            sink = self.get_sink(stream_name)
-            prev_schema = sink.schema
-            if prev_schema != new_schema:
-                # flush records from previous stream SCHEMA
-                # if same stream has been encountered again, it means the schema might have been altered
-                # so previous records need to be flushed
-                sink.flush_records()
-                if self._row_count.get(stream_name, 0) > 0:
-                    self.flushed_state = self.flush_sinks(self._stream_to_sync)
+    @property
+    def max_parallelism(self) -> int:
+        """Return max number of sinks that should be flushed in parallel."""
+        return _MAX_PARALLELISM
 
-                    # emit latest encountered state
-                    self.emit_state(self.flushed_state)
+    def _flush_sinks(self, sink_list: List[Sink], parallelism: int) -> None:
+        def _flush_sink(sink: Sink):
+            sink.flush_all()
 
-                # key_properties key must be available in the SCHEMA message.
-                if "key_properties" not in message_dict:
-                    raise Exception("key_properties field is required")
-
-                # Log based and Incremental replications on tables with no Primary Key
-                # cause duplicates when merging UPDATE events.
-                # Stop loading data by default if no Primary Key.
-                #
-                # If you want to load tables with no Primary Key:
-                #  1) Set ` 'primary_key_required': false ` in the target-snowflake config.json
-                #  or
-                #  2) Use fastsync [postgres-to-snowflake, mysql-to-snowflake, etc.]
-                if (
-                    self.get_config("primary_key_required", True)
-                    and len(message_dict["key_properties"]) == 0
-                ):
-                    self.logger.critical(
-                        "Primary key is set to mandatory but not defined in "
-                        f"the [{stream_name}] stream"
-                    )
-                    raise Exception("key_properties field is required")
-
-                self._key_properties[stream_name] = message_dict["key_properties"]
-
-                if self.get_config("add_metadata_columns") or self.get_config(
-                    "hard_delete"
-                ):
-                    stream_to_sync[stream_name] = DbSync(
-                        config,
-                        add_metadata_columns_to_schema(message_dict),
-                        table_cache,
-                    )
-                else:
-                    stream_to_sync[stream_name] = DbSync(
-                        config, message_dict, table_cache
-                    )
-
-                stream_to_sync[stream_name].create_schema_if_not_exists()
-                stream_to_sync[stream_name].sync_table()
-
-                self._row_count[stream_name] = 0
-                self._total_row_count[stream_name] = 0
-
-    # pylint: disable=too-many-arguments
-    def flush_sinks(stream_to_sync, filter_streams=None):
-        """
-        Flushes all buckets and resets records count to 0 as well as empties records to load list
-
-        :param filter_streams: Keys of streams to flush from the streams dict. Default is every stream
-        :return: State dict with flushed positions
-        """
-        parallelism = self.get_config("parallelism", DEFAULT_PARALLELISM)
-        max_parallelism = self.get_config("max_parallelism", DEFAULT_MAX_PARALLELISM)
-        # Parallelism 0 means auto parallelism:
-        #
-        # Auto parallelism trying to flush streams efficiently with auto defined number
-        # of threads where the number of threads is the number of streams that need to
-        # be loaded but it's not greater than the value of max_parallelism
-        if parallelism == 0:
-            n_streams_to_flush = len(streams.keys())
-            if n_streams_to_flush > max_parallelism:
-                parallelism = max_parallelism
-            else:
-                parallelism = n_streams_to_flush
-        # Select the required streams to flush
-        if filter_streams:
-            streams_to_flush = filter_streams
-        else:
-            streams_to_flush = streams.keys()
-        # Single-host, thread-based parallelism
         with parallel_backend("threading", n_jobs=parallelism):
-            Parallel()(
-                delayed(load_stream_batch)(
-                    stream=stream,
-                    records_to_load=streams[stream],
-                    row_count=row_count,
-                    db_sync=stream_to_sync[stream],
-                    no_compression=self.get_config("no_compression"),
-                    delete_rows=self.get_config("hard_delete"),
-                    temp_dir=self.get_config("temp_dir"),
-                )
-                for stream in streams_to_flush
-            )
-        # reset flushed stream records to empty to avoid flushing same records
-        for stream in streams_to_flush:
-            streams[stream] = {}
-            # Update flushed streams
-            if filter_streams:
-                # update flushed_state position if we have state information for the stream
-                if state is not None and stream in state.get("bookmarks", {}):
-                    # Create bookmark key if not exists
-                    if "bookmarks" not in flushed_state:
-                        flushed_state["bookmarks"] = {}
-                    # Copy the stream bookmark from the latest state
-                    flushed_state["bookmarks"][stream] = copy.deepcopy(
-                        state["bookmarks"][stream]
-                    )
-            # If we flush every bucket use the latest state
-            else:
-                flushed_state = copy.deepcopy(state)
-        # Return with state message with flushed positions
-        return flushed_state
+            Parallel()(delayed(_flush_sink)(sink=sink) for sink in sink_list)
+
+    def flush_sinks(self) -> None:
+        """Flushes all sinks, starting with those cleared due to changed schema."""
+        self._flush_sinks(self._sinks_to_clear, 1)
+        self._flush_sinks(list(self._sinks.values()), self.max_parallelism)
+        self._flush_sink_state()
 
     def process_activate_version_message(self, message_dict: dict) -> None:
-        self.logger.debug("ACTIVATE_VERSION message")
+        """Handle the optional ACTIVATE_VERSION message extension."""
+        self.logger.warning(
+            "ACTIVATE_VERSION message received but not supported. Ingnoring."
+        )
 
+    def _write_state_message(self, state: dict):
+        """Emit the stream's latest state."""
+        self.logger.info(f"Emitting completed target state {state}")
+        singer.write_messsage(singer.StateMessage(state))
+
+    @final
     def process_state_message(self, message_dict: dict) -> None:
-        self.logger.debug(f"Setting state to {message_dict['value']}")
-        state = message_dict["value"]
+        """Process a state message. Flush sinks if needed."""
+        self._assert_line_requires(message_dict, requires=["value"])
         # Initially set flushed state
-        sink = self.get_sink(message_dict["stream"])
-        sink.flush_all()
-        if not self._flushed_state:
-            self._flushed_state = copy.deepcopy(state)
-
-    def handle_cli_args(self, args, cwd, environ) -> None:
-        """Take necessary action in response to a CLI command."""
-        pass
+        self.flush_sinks()
+        self._write_state_message(message_dict["value"])
 
     @classproperty
     def cli(cls):
@@ -263,20 +257,19 @@ class TargetBase(PluginBase, metaclass=abc.ABCMeta):
         def cli(
             version: bool = False,
             about: bool = False,
-            discover: bool = False,
             config: str = None,
-            state: str = None,
-            catalog: str = None,
             format: str = None,
         ):
             """Handle command line execution."""
             if version:
                 cls.print_version()
                 return
+
             if about:
                 cls.print_about(format)
                 return
-            target = cls(config=config, state=state)
-            target.process_lines()
+
+            target = cls(config=config)
+            target.listen()
 
         return cli
