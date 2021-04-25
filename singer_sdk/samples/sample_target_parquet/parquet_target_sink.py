@@ -14,12 +14,6 @@ class SampleParquetTargetSink(Sink):
 
     DEFAULT_BATCH_SIZE_ROWS = 100000
 
-    records_to_load: List[dict] = []
-
-    def load_record(self, record_to_load):
-        """Add record to `records_to_load` list, to be written during flush()."""
-        self.records_to_load.append(record_to_load)
-
     def flush(self):
         """Write any prepped records out and return only once fully written."""
         # TODO: Replace with actual schema from the SCHEMA message
