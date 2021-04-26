@@ -1,4 +1,4 @@
-"""Abstract base class for loading a single singer stream to its target."""
+"""Sink classes load data to a target."""
 
 import abc
 import datetime
@@ -23,7 +23,7 @@ from dateutil import parser
 
 
 class Sink(metaclass=abc.ABCMeta):
-    """Abstract base class for target streams."""
+    """Abstract base class for target sinks."""
 
     # max timestamp/datetime supported, used to reset invalid dates
 
@@ -51,7 +51,7 @@ class Sink(metaclass=abc.ABCMeta):
         schema: Dict,
         key_properties: Optional[List[str]],
     ) -> None:
-        """Initialize target stream."""
+        """Initialize target sink."""
         self.logger = target.logger
         self._config = dict(target.config)
         self.schema = schema
@@ -63,7 +63,7 @@ class Sink(metaclass=abc.ABCMeta):
         # self._flattener = RecordFlattener(max_level=self._MAX_FLATTEN_DEPTH)
         # self._validator = Draft4Validator(schema, format_checker=FormatChecker())
 
-    # Tally methods
+    # Size properties
 
     @property
     def max_size(self) -> int:
@@ -79,6 +79,8 @@ class Sink(metaclass=abc.ABCMeta):
     def is_full(self) -> bool:
         """Return True if the sink needs to be drained."""
         return self.current_size >= self.max_size
+
+    # Tally methods
 
     @final
     def tally_record_read(self, count: int = 1):
