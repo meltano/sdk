@@ -59,6 +59,7 @@ class Sink(metaclass=abc.ABCMeta):
         self.stream_name = stream_name
         self.logger.info("Initializing target sink for stream '{stream_name}'...")
         self.records_to_drain: Union[List[dict], Any] = []
+        self._records_draining: Optional[Any] = None
 
         # TODO: Re-implement schema validation
         # self._flattener = RecordFlattener(max_level=self._MAX_FLATTEN_DEPTH)
@@ -199,6 +200,12 @@ class Sink(metaclass=abc.ABCMeta):
 
         self.records_to_drain.append(record)
 
+    def start_drain(self) -> Union[List[dict], Any]:
+        """Set and return `self.records_draining`. Reset `self.records_to_drain`."""
+        self._records_draining = self.records_to_drain
+        self.records_to_drain = []
+        return self._records_draining
+
     def drain(self, records_to_drain: Union[List[dict], Any]) -> None:
         """Drain all records from `records_to_drain`.
 
@@ -213,12 +220,6 @@ class Sink(metaclass=abc.ABCMeta):
                 "Records were found to be drained and no handling exists for drain()."
             )
 
-    def start_drain(self) -> Union[List[dict], Any]:
-        """Set and return `self.records_draining`. Reset `self.records_to_drain`."""
-        self.records_draining = self.records_to_drain
-        self.records_to_drain = []
-        return self.records_draining
-
     def mark_drained(self) -> None:
         """Reset `records_to_drain` and any other tracking."""
-        self.records_draining = None
+        self._records_draining = None
