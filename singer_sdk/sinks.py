@@ -3,6 +3,7 @@
 import abc
 import datetime
 import copy
+import time
 
 from logging import Logger
 from types import MappingProxyType
@@ -64,6 +65,7 @@ class Sink(metaclass=abc.ABCMeta):
         self.latest_state: Optional[dict] = None
         self._draining_state: Optional[dict] = None
         self.drained_state: Optional[dict] = None
+        self.key_properties = key_properties
 
         # TODO: Re-implement schema validation
         # self._flattener = RecordFlattener(max_level=self._MAX_FLATTEN_DEPTH)
@@ -136,12 +138,15 @@ class Sink(metaclass=abc.ABCMeta):
 
     # Record processing
 
-    @staticmethod
-    def _add_metadata_values_to_record(record: dict, message: dict) -> None:
+    def _add_metadata_values_to_record(self, record: dict, message: dict) -> None:
         """Populate metadata _sdc columns from incoming record message."""
         record["_sdc_extracted_at"] = message.get("time_extracted")
         record["_sdc_batched_at"] = datetime.datetime.now().isoformat()
         record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
+        record["_sdc_received_at"] = datetime.datetime.now().isoformat()
+        record["_sdc_sequence"] = int(round(time.time() * 1000))
+        record["_sdc_table_version"] = message.get("version")
+        record["_sdc_primary_key"] = self.key_properties
 
     # Record validation
 
