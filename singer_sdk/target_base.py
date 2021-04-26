@@ -18,7 +18,6 @@ from singer_sdk.helpers._compat import final
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks import Sink
 
-_PARALLELISM = 4
 _MAX_PARALLELISM = 8
 
 
@@ -53,7 +52,6 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """Return max number of sinks that can be drained in parallel."""
         return _MAX_PARALLELISM
 
-    @final
     def get_sink(
         self,
         stream_name: str,
@@ -79,7 +77,6 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         self._assert_sink_exists(stream_name)
         return self._sinks[stream_name]
 
-    @final
     def get_sink_class(self, stream_name: str) -> Type[Sink]:
         """Return a sink for the given stream name.
 
@@ -102,6 +99,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """Read from STDIN until all messages are processed."""
         self._process_lines(sys.stdin)
 
+    @final
     def add_sink(
         self, stream_name: str, schema: dict, key_properties: Optional[List[str]] = None
     ) -> Sink:
@@ -219,12 +217,14 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     # Sink drain methods
 
+    @final
     def drain_all(self) -> None:
         """Drains all sinks, starting with those cleared due to changed schema."""
         self._drain_all(self._sinks_to_clear, 1)
         self._drain_all(list(self._sinks.values()), self.max_parallelism)
         self._drain_sink_state()
 
+    @final
     def drain_one(self, sink: Sink) -> None:
         """Drain a specific sink."""
         draining = sink.start_drain()
