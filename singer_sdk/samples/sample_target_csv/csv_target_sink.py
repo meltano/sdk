@@ -22,7 +22,7 @@ class SampleCSVTargetSink(Sink):
         return self.target_folder / f"{self.stream_name}.csv"
 
     def drain(self):
-        """Write queued rows out to file."""
+        """Write `self.records_to_drain` out to file."""
         self.logger.info("Draining records...")
         records_written = 0
         newfile = False
@@ -42,3 +42,7 @@ class SampleCSVTargetSink(Sink):
                     writer.writerow(record.keys())
                 writer.writerow(record.values())
                 records_written += 1
+        self.tally_record_written(records_written)
+
+        # Reset list after load is completed:
+        self.records_to_load = []
