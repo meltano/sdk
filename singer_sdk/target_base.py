@@ -16,7 +16,7 @@ from singer_sdk.exceptions import RecordsWitoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
 from singer_sdk.plugin_base import PluginBase
-from singer_sdk.sink_base import Sink
+from singer_sdk.sinks import Sink
 
 _PARALLELISM = 4
 _MAX_PARALLELISM = 8

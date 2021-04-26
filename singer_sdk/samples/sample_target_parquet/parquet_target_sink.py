@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Tuple, Union
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from singer_sdk.sink_base import Sink
+from singer_sdk.sinks import Sink
 from singer_sdk.helpers._flattening import RecordFlattener
 
 import pandas
@@ -41,6 +41,7 @@ class SampleParquetTargetSink(Sink):
 
     @staticmethod
     def translate_data_type(singer_type: Union[str, Dict]) -> Any:
+        """Translate from singer_type to a native type."""
         if singer_type in ["decimal", "float", "double"]:
             return pa.decimal128
         if singer_type in ["date-time"]:

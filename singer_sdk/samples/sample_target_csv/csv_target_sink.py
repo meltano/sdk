@@ -3,10 +3,11 @@
 import csv
 from pathlib import Path
 
-from singer_sdk.sink_base import Sink
+from singer_sdk.sinks import Sink
 
 
 class SampleCSVTargetSink(Sink):
+    """Sample CSV Target."""
 
     target_name = "target-csv"
 
