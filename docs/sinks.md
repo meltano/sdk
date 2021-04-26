@@ -5,10 +5,10 @@ overwritten in the following ways:
 
 - `1:1`: This is the default, where only one sink is active for each incoming stream name.
   - The exception to this rule is when a knew STATE message is received for an
-    already-active stream. In this case, the existing sink will be marked to be flushed
+    already-active stream. In this case, the existing sink will be marked to be drained
     and a new sink will be initialized to receive the next incoming records.
   - In the case that a sink is archived because of a superseding STATE message, all
-    prior version(s) of the stream's sink are guaranteed to be flushed in creation order.
+    prior version(s) of the stream's sink are guaranteed to be drained in creation order.
   - _Example: a database-type target where each stream will land in a dedicated table._
 - `1:many`: In this scenario, the target intentionally creates multiple sinks per stream.
   The developer may override `Target.get_sink()` and use details within the record (or a

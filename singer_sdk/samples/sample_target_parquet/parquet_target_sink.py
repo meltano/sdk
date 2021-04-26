@@ -14,7 +14,7 @@ class SampleParquetTargetSink(Sink):
 
     DEFAULT_BATCH_SIZE_ROWS = 100000
 
-    def flush(self):
+    def drain(self):
         """Write any prepped records out and return only once fully written."""
         # TODO: Replace with actual schema from the SCHEMA message
         schema = pa.schema([("some_int", pa.int32()), ("some_string", pa.string())])

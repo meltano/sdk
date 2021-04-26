@@ -22,9 +22,9 @@ class SampleCSVTargetSink(Sink):
         """Return target filepath."""
         return self.target_folder / f"{self.stream_name}.csv"
 
-    def flush(self):
+    def drain(self):
         """Write queued rows out to file."""
-        self.logger.info("Flushing records...")
+        self.logger.info("Draining records...")
         records_written = 0
         newfile = False
         openmode = "a"

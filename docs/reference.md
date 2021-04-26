@@ -27,7 +27,7 @@ The below reference guide should give an overview of how to use each type of cla
   - [`Sink.tally_record_written()` Method](#sinktally_record_written-method)
   - [`Sink.tally_duplicate_merged()` Method](#sinktally_duplicate_merged-method)
   - [`Sink.load_record()` Method](#sinkload_record-method)
-  - [`Sink.flush()` Method](#sinkflush-method)autoauto<!-- /TOC -->
+  - [`Sink.drain()` Method](#sinkdrain-method)
 
 ## `Tap` Class
 
@@ -165,7 +165,7 @@ a different sink object based on the record data.
 
 The default behavior will return a sink object based upon the name of the stream, unless
 a new schema message is received, in which case a new sink will be initialized based upon
-the updated schema and the old sink will be marked to be flushed according to its
+the updated schema and the old sink will be marked to be drained along with its
 already-received records.
 
 ## `Sink` Class
@@ -181,32 +181,32 @@ Increment the records written tally.
 
 This method should be called directly by the Target implementation whenever a record is
 confirmed permanently written to the target. This may be called from from within
-`Sink.load_record()` or `Sink.flush()`, depending on when the record is permanently written.
+`Sink.load_record()` or `Sink.drain()`, depending on when the record is permanently written.
 
 ### `Sink.tally_duplicate_merged()` Method
 
 If your target merges records based upon duplicates in primary key, you can optionally
 use this tally to help end-users reconcile record tallies. If not implemented, warnings
 may be logged if records written is less than the number of records loaded after
-`Sink.flush()` is completed.
+`Sink.drain()` is completed.
 
 ### `Sink.load_record()` Method
 
 This method will be called once per received record.
 
 Targets which prefer to write records in batches should use `Sink.load_record()` to
-add the record to an internal buffer or queue, then use `Sink.flush()` to write all
+add the record to an internal buffer or queue, then use `Sink.drain()` to write all
 records in the most efficient method.
 
 Targets which prefer to write records one at a time should use `Sink.load_record()` to
-permanently store the record. (`Sink.flush()` is then not needed.)
+permanently store the record. (`Sink.drain()` is then not needed.)
 
 If duplicates are merged, these can optionally be tracked via
 `Sink.tally_duplicates_merged()`.
 
-### `Sink.flush()` Method
+### `Sink.drain()` Method
 
-Flush all loaded records, return only after records are validated and permanently written
+drain all loaded records, return only after records are validated and permanently written
 to the target.
 
 Developers should call `Sink.tally_record_written()` here or in `Sink.load_record()`

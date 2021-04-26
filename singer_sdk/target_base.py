@@ -39,7 +39,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         super().__init__(config=config, parse_env_config=parse_env_config)
 
         self._latest_state: Dict[str, dict] = {}
-        self._flushed_state: Dict[str, dict] = {}
+        self._drained_state: Dict[str, dict] = {}
         self._sinks_active: Dict[str, Sink] = {}
         self._sinks_to_clear: List[Sink] = []
 
@@ -50,7 +50,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     @property
     def max_parallelism(self) -> int:
-        """Return max number of sinks that should be flushed in parallel."""
+        """Return max number of sinks that can be drained in parallel."""
         return _MAX_PARALLELISM
 
     @final
@@ -65,7 +65,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """Return a sink for the given stream name.
 
         If schema is provided, a new sink will be created. If the sink already existed,
-        the old sink becomes archived and held until the next flush.
+        the old sink becomes archived and held until the next drain_all() operation.
 
         :raises: RecordsWitoutSchemaException if sink does not exist and schema is not
                  sent.
@@ -191,7 +191,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             self.logger.info(
                 f"Target sink for '{sink.stream_name}' is full. Draining..."
             )
-            sink.flush()
+            sink.drain()
 
     def _process_schema_message(self, message_dict: dict) -> None:
         """Process a SCHEMA messages."""
@@ -206,10 +206,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         )
 
     def _process_state_message(self, message_dict: dict) -> None:
-        """Process a state message. Flush sinks if needed."""
+        """Process a state message. drain sinks if needed."""
         self._assert_line_requires(message_dict, requires=["value"])
-        # Initially set flushed state
-        self.flush_sinks()
+        self.drain_all()
         self._write_state_message(message_dict["value"])
 
     def _process_activate_version_message(self, message_dict: dict) -> None:
@@ -218,37 +217,37 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             "ACTIVATE_VERSION message received but not supported. Ingnoring."
         )
 
-    # Sink flush methods
+    # Sink drain methods
 
-    def flush_sinks(self) -> None:
-        """Flushes all sinks, starting with those cleared due to changed schema."""
-        self._flush_sinks(self._sinks_to_clear, 1)
-        self._flush_sinks(list(self._sinks.values()), self.max_parallelism)
-        self._flush_sink_state()
+    def drain_all(self) -> None:
+        """Drains all sinks, starting with those cleared due to changed schema."""
+        self._drain_all(self._sinks_to_clear, 1)
+        self._drain_all(list(self._sinks.values()), self.max_parallelism)
+        self._drain_sink_state()
 
-    def _flush_sinks(self, sink_list: List[Sink], parallelism: int) -> None:
-        def _flush_sink(sink: Sink):
-            sink.flush()
+    def _drain_all(self, sink_list: List[Sink], parallelism: int) -> None:
+        def _drain_sink(sink: Sink):
+            sink.drain()
 
         with parallel_backend("threading", n_jobs=parallelism):
-            Parallel()(delayed(_flush_sink)(sink=sink) for sink in sink_list)
+            Parallel()(delayed(_drain_sink)(sink=sink) for sink in sink_list)
 
     # State handling
 
-    def _flush_sink_state(
+    def _drain_sink_state(
         self, stream_name: Optional[str] = None, state: Optional[dict] = None
     ):
         """Apply the latest sink state for the stream (or all streams)."""
         state = state or self._latest_state
         if not stream_name:
             # Apply the state for all streams
-            self._flushed_state = copy.deepcopy(state)
+            self._drained_state = copy.deepcopy(state)
             return
 
         # Apply just the state for the named stream
-        if "bookmarks" not in self._flushed_state:
-            self._flushed_state["bookmarks"] = {}
-        self._flushed_state["bookmarks"][stream_name] = copy.deepcopy(
+        if "bookmarks" not in self._drained_state:
+            self._drained_state["bookmarks"] = {}
+        self._drained_state["bookmarks"][stream_name] = copy.deepcopy(
             state["bookmarks"][stream_name]
         )
 

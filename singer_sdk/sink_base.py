@@ -32,7 +32,7 @@ class Sink(metaclass=abc.ABCMeta):
     stream_name: str
 
     # Tally counters
-    _num_records_since_flush: int = 0
+    _num_records_since_drain: int = 0
     _total_records_read: int = 0
     _total_records_written: int = 0
     _dupe_records_merged: int = 0
@@ -57,7 +57,7 @@ class Sink(metaclass=abc.ABCMeta):
         self.schema = schema
         self.stream_name = stream_name
         self.logger.info("Initializing target sink for stream '{stream_name}'...")
-        self.records_to_flush: List[Union[dict, Any]] = []
+        self.records_to_drain: List[Union[dict, Any]] = []
 
         # TODO: Re-implement schema validation
         # self._flattener = RecordFlattener(max_level=self._MAX_FLATTEN_DEPTH)
@@ -67,17 +67,17 @@ class Sink(metaclass=abc.ABCMeta):
 
     @property
     def max_size(self) -> int:
-        """Return the max number of unflushed records before is_full=True."""
+        """Return the max number of records that can be held before is_full=True."""
         return self.MAX_SIZE_DEFAULT
 
     @property
     def current_size(self) -> int:
-        """Return the number of unflushed records."""
-        return len(self.records_to_flush)
+        """Return the number of records to drain."""
+        return len(self.records_to_drain)
 
     @property
     def is_full(self) -> bool:
-        """Return True if the sink needs to be flushed."""
+        """Return True if the sink needs to be drained."""
         return self.current_size >= self.max_size
 
     @final
@@ -178,20 +178,20 @@ class Sink(metaclass=abc.ABCMeta):
         return record
 
     async def load_record(self, record: dict) -> None:
-        """Flush all queued records to the target.
+        """Drain all queued records to the target.
 
         This method can write permanently or write to a buffer/staging area.
 
-        By default, append record to `records_to_flush`, to be written during `flush()`.
+        By default, append record to `records_to_drain`, to be written during `drain()`.
 
-        Call `tally_record_written()` here or in `flush()` to confirm total records
+        Call `tally_record_written()` here or in `drain()` to confirm total records
         permanently written. If duplicates are merged, these can be tracked via
         `tally_duplicates_merged()`
         """
-        self.records_to_flush.append(record)
+        self.records_to_drain.append(record)
 
-    def flush(self) -> None:
-        """Flush all records in self.records_to_flush.
+    def drain(self) -> None:
+        """Drain all records in self.records_to_drain.
 
         Call `tally_record_written()` here or in `load_record()` to confirm total
         records permanently written.
@@ -199,7 +199,7 @@ class Sink(metaclass=abc.ABCMeta):
         If duplicates are merged, these can optionally be tracked via
         `tally_duplicates_merged()`.
         """
-        if self.records_to_flush:
+        if self.records_to_drain:
             raise NotImplementedError(
-                "Unflushed records were detected and no handling exists for flush()."
+                "Records were found to be drained and no handling exists for drain()."
             )
