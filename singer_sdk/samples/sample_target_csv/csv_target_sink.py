@@ -2,6 +2,7 @@
 
 import csv
 from pathlib import Path
+from typing import List, Any, Union
 
 from singer_sdk.sinks import Sink
 
@@ -21,8 +22,8 @@ class SampleCSVTargetSink(Sink):
         """Return target filepath."""
         return self.target_folder / f"{self.stream_name}.csv"
 
-    def drain(self):
-        """Write `self.records_to_drain` out to file."""
+    def drain(self, records_to_drain: Union[List[dict], Any]) -> None:
+        """Write `records_to_drain` out to file."""
         self.logger.info("Draining records...")
         records_written = 0
         newfile = False
@@ -36,13 +37,10 @@ class SampleCSVTargetSink(Sink):
             writer = csv.writer(
                 csvfile, delimiter="\t", quotechar='"', quoting=csv.QUOTE_NONNUMERIC
             )
-            for record in self.records_to_drain:
+            for record in records_to_drain:
                 if newfile and not records_written:
                     # Write header row if new file
                     writer.writerow(record.keys())
                 writer.writerow(record.values())
                 records_written += 1
         self.tally_record_written(records_written)
-
-        # Reset list after load is completed:
-        self.records_to_load = []

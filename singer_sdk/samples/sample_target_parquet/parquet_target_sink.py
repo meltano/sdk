@@ -16,7 +16,7 @@ class SampleParquetTargetSink(Sink):
 
     DEFAULT_BATCH_SIZE_ROWS = 100000
 
-    def drain(self):
+    def drain(self, records_to_drain: Union[List[dict], Any]) -> None:
         """Write any prepped records out and return only once fully written."""
         # TODO: Replace with actual schema from the SCHEMA message
         schema = pa.schema([("some_int", pa.int32()), ("some_string", pa.string())])
@@ -25,7 +25,7 @@ class SampleParquetTargetSink(Sink):
         count = 0
         flattened_records = []
         flattener = RecordFlattener()
-        for record in self.records_to_drain:
+        for record in records_to_drain:
             flatten_record = flattener.flatten_record(record, schema, max_level=0)
             flattened_records.append(flatten_record)
             count += 1
@@ -35,9 +35,6 @@ class SampleParquetTargetSink(Sink):
         writer.write_table(table)
         writer.close()
         self.tally_record_written(count)
-
-        # Reset list after load is completed:
-        self.records_to_load = []
 
     @staticmethod
     def translate_data_type(singer_type: Union[str, Dict]) -> Any:

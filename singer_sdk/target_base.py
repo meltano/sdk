@@ -191,7 +191,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             self.logger.info(
                 f"Target sink for '{sink.stream_name}' is full. Draining..."
             )
-            sink.drain()
+            self.drain_one(sink)
 
     def _process_schema_message(self, message_dict: dict) -> None:
         """Process a SCHEMA messages."""
@@ -225,9 +225,15 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         self._drain_all(list(self._sinks.values()), self.max_parallelism)
         self._drain_sink_state()
 
+    def drain_one(self, sink: Sink) -> None:
+        """Drain a specific sink."""
+        draining = sink.start_drain()
+        sink.drain(draining)
+        sink.mark_drained()
+
     def _drain_all(self, sink_list: List[Sink], parallelism: int) -> None:
         def _drain_sink(sink: Sink):
-            sink.drain()
+            self.drain_one(sink)
 
         with parallel_backend("threading", n_jobs=parallelism):
             Parallel()(delayed(_drain_sink)(sink=sink) for sink in sink_list)

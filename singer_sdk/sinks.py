@@ -9,6 +9,7 @@ from typing import Dict, Optional, List, Any, Mapping, Union
 
 from singer_sdk.helpers._compat import final
 
+# TODO: Re-implement schema validation
 # from jsonschema import Draft4Validator, FormatChecker
 # from singer_sdk.helpers._flattening import RecordFlattener
 
@@ -57,7 +58,7 @@ class Sink(metaclass=abc.ABCMeta):
         self.schema = schema
         self.stream_name = stream_name
         self.logger.info("Initializing target sink for stream '{stream_name}'...")
-        self.records_to_drain: List[Union[dict, Any]] = []
+        self.records_to_drain: Union[List[dict], Any] = []
 
         # TODO: Re-implement schema validation
         # self._flattener = RecordFlattener(max_level=self._MAX_FLATTEN_DEPTH)
@@ -190,10 +191,16 @@ class Sink(metaclass=abc.ABCMeta):
         permanently written. If duplicates are merged, these can be tracked via
         `tally_duplicates_merged()`
         """
+        if not isinstance(self.records_to_drain, list):
+            raise ValueError(
+                f"Unexpected type '{type(self.records_to_drain).__name__}' "
+                "detected in `records_to_drain`."
+            )
+
         self.records_to_drain.append(record)
 
-    def drain(self) -> None:
-        """Drain all records in self.records_to_drain.
+    def drain(self, records_to_drain: Union[List[dict], Any]) -> None:
+        """Drain all records from `records_to_drain`.
 
         Call `tally_record_written()` here or in `load_record()` to confirm total
         records permanently written.
@@ -201,7 +208,17 @@ class Sink(metaclass=abc.ABCMeta):
         If duplicates are merged, these can optionally be tracked via
         `tally_duplicates_merged()`.
         """
-        if self.records_to_drain:
+        if records_to_drain:
             raise NotImplementedError(
                 "Records were found to be drained and no handling exists for drain()."
             )
+
+    def start_drain(self) -> Union[List[dict], Any]:
+        """Set and return `self.records_draining`. Reset `self.records_to_drain`."""
+        self.records_draining = self.records_to_drain
+        self.records_to_drain = []
+        return self.records_draining
+
+    def mark_drained(self) -> None:
+        """Reset `records_to_drain` and any other tracking."""
+        self.records_draining = None
