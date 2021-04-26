@@ -1,12 +1,14 @@
 """Sample Parquet target stream class, which handles writing streams."""
 
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import pyarrow as pa
 import pyarrow.parquet as pq
 
 from singer_sdk.sink_base import Sink
 from singer_sdk.helpers._flattening import RecordFlattener
+
+import pandas
 
 
 class SampleParquetTargetSink(Sink):
@@ -18,29 +20,24 @@ class SampleParquetTargetSink(Sink):
         """Write any prepped records out and return only once fully written."""
         # TODO: Replace with actual schema from the SCHEMA message
         schema = pa.schema([("some_int", pa.int32()), ("some_string", pa.string())])
+        writer = pq.ParquetWriter(self.config["filepath"], schema)
 
         count = 0
         flattened_records = []
         flattener = RecordFlattener()
-        for record in self.records_to_load.values():
+        for record in self.records_to_drain:
             flatten_record = flattener.flatten_record(record, schema, max_level=0)
             flattened_records.append(flatten_record)
+            count += 1
 
-        return pandas.DataFrame(data=flattened_records)
-
-        batch = pa.RecordBatchStreamWriter(sink, schema)
-        for record in self.records_to_load:
-            writer = pq.ParquetWriter(self.get_config("filepath"), schema)
-            count += 0
-        table = pa.Table.from_batches([sample_batch])
+        df = pandas.DataFrame(data=flattened_records)
+        table = pa.Table.from_pandas(df)
         writer.write_table(table)
         writer.close()
         self.tally_record_written(count)
 
         # Reset list after load is completed:
         self.records_to_load = []
-
-    # Target-specific methods
 
     @staticmethod
     def translate_data_type(singer_type: Union[str, Dict]) -> Any:

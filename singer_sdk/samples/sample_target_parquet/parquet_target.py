@@ -6,13 +6,12 @@ from singer_sdk import typing as th
 from singer_sdk.samples.sample_target_parquet.parquet_target_sink import (
     SampleParquetTargetSink,
 )
-from singer_sdk.samples.sample_target_parquet.parquet_target_globals import PLUGIN_NAME
 
 
 class SampleTargetParquet(Target):
     """Sample target for Parquet."""
 
-    name = PLUGIN_NAME
+    name = "sample-target-parquet"
     config_jsonschema = th.PropertiesList(
         th.Property("filepath", th.StringType),
         th.Property("file_naming_scheme", th.StringType),

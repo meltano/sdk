@@ -182,9 +182,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         stream_name = message_dict["stream"]
         record = message_dict["record"]
         sink = self.get_sink(stream_name, record=record)
+        sink._validate_record(record)
         if sink.include_sdc_metadata_properties:
             sink._add_metadata_values_to_record(record, message_dict)
-        sink._validate_record(record)
         record = sink.preprocess_record(record)
         sink.load_record(record)
         if sink.is_full:
@@ -254,7 +254,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
     def _write_state_message(self, state: dict):
         """Emit the stream's latest state."""
         self.logger.info(f"Emitting completed target state {state}")
-        singer.write_messsage(singer.StateMessage(state))
+        singer.write_message(singer.StateMessage(state))
 
     # CLI handler
 

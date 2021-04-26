@@ -177,7 +177,7 @@ class Sink(metaclass=abc.ABCMeta):
         """Process incoming record and return the result."""
         return record
 
-    async def load_record(self, record: dict) -> None:
+    def load_record(self, record: dict) -> None:
         """Drain all queued records to the target.
 
         This method can write permanently or write to a buffer/staging area.
