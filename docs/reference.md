@@ -206,7 +206,7 @@ If duplicates are merged, these can optionally be tracked via
 
 ### `Sink.drain()` Method
 
-drain all loaded records, return only after records are validated and permanently written
+Drain all loaded records, returning only after records are validated and permanently written
 to the target.
 
 Developers should call `Sink.tally_record_written()` here or in `Sink.load_record()`
