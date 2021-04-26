@@ -2,6 +2,7 @@
 
 import abc
 import datetime
+import copy
 
 from logging import Logger
 from types import MappingProxyType
@@ -60,6 +61,9 @@ class Sink(metaclass=abc.ABCMeta):
         self.logger.info("Initializing target sink for stream '{stream_name}'...")
         self.records_to_drain: Union[List[dict], Any] = []
         self._records_draining: Optional[Any] = None
+        self.latest_state: Optional[dict] = None
+        self._draining_state: Optional[dict] = None
+        self.drained_state: Optional[dict] = None
 
         # TODO: Re-implement schema validation
         # self._flattener = RecordFlattener(max_level=self._MAX_FLATTEN_DEPTH)
@@ -204,6 +208,7 @@ class Sink(metaclass=abc.ABCMeta):
         """Set and return `self.records_draining`. Reset `self.records_to_drain`."""
         self._records_draining = self.records_to_drain
         self.records_to_drain = []
+        self._draining_state = copy.deepcopy(self.latest_state)
         return self._records_draining
 
     def drain(self, records_to_drain: Union[List[dict], Any]) -> None:
@@ -222,4 +227,6 @@ class Sink(metaclass=abc.ABCMeta):
 
     def mark_drained(self) -> None:
         """Reset `records_to_drain` and any other tracking."""
+        self.drained_state = self._draining_state
+        self._draining_state = None
         self._records_draining = None

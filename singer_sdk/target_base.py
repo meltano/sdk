@@ -24,10 +24,11 @@ _MAX_PARALLELISM = 8
 class Target(PluginBase, metaclass=abc.ABCMeta):
     """Abstract base class for targets."""
 
+    _DRAIN_AFTER_STATE_MESSAGES: bool = True
+
     # Constructor
 
     default_sink_class: Type[Sink]
-    _sinks: Dict[str, Sink] = {}
 
     def __init__(
         self,
@@ -70,12 +71,12 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """
         if schema:
             if self.sink_exists(stream_name):
-                self._sinks_to_clear.append(self._sinks.pop(stream_name))
+                self._sinks_to_clear.append(self._sinks_active.pop(stream_name))
 
             return self.add_sink(stream_name, schema, key_properties)
 
         self._assert_sink_exists(stream_name)
-        return self._sinks[stream_name]
+        return self._sinks_active[stream_name]
 
     def get_sink_class(self, stream_name: str) -> Type[Sink]:
         """Return a sink for the given stream name.
@@ -92,7 +93,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     def sink_exists(self, stream_name: str) -> bool:
         """Return True if a sink has been initialized."""
-        return stream_name in self._sinks
+        return stream_name in self._sinks_active
 
     @final
     def listen(self) -> None:
@@ -111,7 +112,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             schema=schema,
             key_properties=key_properties,
         )
-        self._sinks[stream_name] = result
+        self._sinks_active[stream_name] = result
         return result
 
     @staticmethod
@@ -166,8 +167,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 state_counter += 1
                 continue
 
-            raise Exception(f"Unknown message type {record_type} in message.")
+            raise Exception(f"Unknown message type '{record_type}' in message.")
 
+        self.drain_all()
         self.logger.info(
             f"Target '{self.name}' completed after {line_counter} lines of input "
             f"({record_counter} records, {state_counter} state messages)."
@@ -206,8 +208,10 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
     def _process_state_message(self, message_dict: dict) -> None:
         """Process a state message. drain sinks if needed."""
         self._assert_line_requires(message_dict, requires=["value"])
-        self.drain_all()
-        self._write_state_message(message_dict["value"])
+        state = message_dict["value"]
+        self._latest_state = state
+        if self._DRAIN_AFTER_STATE_MESSAGES:
+            self.drain_all()
 
     def _process_activate_version_message(self, message_dict: dict) -> None:
         """Handle the optional ACTIVATE_VERSION message extension."""
@@ -220,13 +224,18 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
     @final
     def drain_all(self) -> None:
         """Drains all sinks, starting with those cleared due to changed schema."""
+        state = copy.deepcopy(self._latest_state)
         self._drain_all(self._sinks_to_clear, 1)
-        self._drain_all(list(self._sinks.values()), self.max_parallelism)
-        self._drain_sink_state()
+        self._sinks_to_clear = []
+        self._drain_all(list(self._sinks_active.values()), self.max_parallelism)
+        self._write_state_message(state)
 
     @final
     def drain_one(self, sink: Sink) -> None:
         """Drain a specific sink."""
+        if sink.current_size == 0:
+            return
+
         draining = sink.start_drain()
         sink.drain(draining)
         sink.mark_drained()
@@ -237,25 +246,6 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
         with parallel_backend("threading", n_jobs=parallelism):
             Parallel()(delayed(_drain_sink)(sink=sink) for sink in sink_list)
-
-    # State handling
-
-    def _drain_sink_state(
-        self, stream_name: Optional[str] = None, state: Optional[dict] = None
-    ):
-        """Apply the latest sink state for the stream (or all streams)."""
-        state = state or self._latest_state
-        if not stream_name:
-            # Apply the state for all streams
-            self._drained_state = copy.deepcopy(state)
-            return
-
-        # Apply just the state for the named stream
-        if "bookmarks" not in self._drained_state:
-            self._drained_state["bookmarks"] = {}
-        self._drained_state["bookmarks"][stream_name] = copy.deepcopy(
-            state["bookmarks"][stream_name]
-        )
 
     def _write_state_message(self, state: dict):
         """Emit the stream's latest state."""
