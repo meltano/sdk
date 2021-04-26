@@ -186,22 +186,19 @@ class Sink(metaclass=abc.ABCMeta):
         return record
 
     def load_record(self, record: dict) -> None:
-        """Drain all queued records to the target.
+        """Load the latest record from the stream.
 
-        This method can write permanently or write to a buffer/staging area.
+        Implementations may either load to the `self.records_to_drain` staging area (the
+        default behavior), or permanently write out to the target.
 
-        By default, append record to `records_to_drain`, to be written during `drain()`.
+        If writing records directly, call `tally_record_written()` here and do not
+        append to `self.records_to_drain`.
 
-        Call `tally_record_written()` here or in `drain()` to confirm total records
-        permanently written. If duplicates are merged, these can be tracked via
-        `tally_duplicates_merged()`
+        Anything appended to `self.records_to_drain` will be automatically passed to
+        `self.drain()` to be permanently written during the drain operation.
+
+        If duplicates are merged, these can be tracked via `tally_duplicates_merged()`.
         """
-        if not isinstance(self.records_to_drain, list):
-            raise ValueError(
-                f"Unexpected type '{type(self.records_to_drain).__name__}' "
-                "detected in `records_to_drain`."
-            )
-
         self.records_to_drain.append(record)
 
     def start_drain(self) -> Union[List[dict], Any]:
