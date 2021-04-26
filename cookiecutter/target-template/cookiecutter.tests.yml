@@ -1,0 +1,3 @@
+tests:
+  - destination_name: TargetTemplateTest
+    target_id: target-template-test

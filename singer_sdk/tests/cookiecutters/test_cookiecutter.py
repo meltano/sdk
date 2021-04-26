@@ -1,6 +1,8 @@
 """Test cookiecutter template."""
 
 import logging
+import os
+
 from pathlib import Path
 
 import black
@@ -13,13 +15,19 @@ from logging import getLogger
 
 getLogger("flake8").propagate = False
 
-COOKIECUTTER_DIR = "cookiecutter/tap-template"
-TESTS_INPUT_FILE = "cookiecutter/tap-template/cookiecutter.tests.yml"
+
+def test_target_cookiecutter():
+    cookiecutter_template_test("cookiecutter/target-template")
 
 
-def test_cookiecutter_templates():
+def test_tap_cookiecutter():
+    cookiecutter_template_test("cookiecutter/tap-template")
+
+
+def cookiecutter_template_test(cookiecutter_dir: str):
     """Test sync_all() for countries sample."""
-    template_inputs = yaml.safe_load(Path(TESTS_INPUT_FILE).read_text())["tests"]
+    test_input_file = os.path.join(cookiecutter_dir, "cookiecutter.tests.yml")
+    template_inputs = yaml.safe_load(Path(test_input_file).read_text())["tests"]
     style_guide_easy = flake8.get_style_guide(
         ignore=["E302", "E303", "E305", "F401", "W391"]
     )
@@ -31,7 +39,7 @@ def test_cookiecutter_templates():
     for input in template_inputs:
         outdir = ".output"
         cookiecutter(
-            template=COOKIECUTTER_DIR,
+            template=cookiecutter_dir,
             output_dir=outdir,
             extra_context=input,
             overwrite_if_exists=True,
