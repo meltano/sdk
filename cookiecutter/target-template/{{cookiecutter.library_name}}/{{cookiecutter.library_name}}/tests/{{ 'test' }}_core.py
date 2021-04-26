@@ -4,7 +4,7 @@ import datetime
 
 from typing import Dict, Any
 
-from singer_sdk.testing import get_standard_target_tests
+from singer_sdk.testing import get_standard_tap_tests as get_standard_target_tests
 
 from {{ cookiecutter.library_name }}.target import Target{{ cookiecutter.destination_name }}
 
