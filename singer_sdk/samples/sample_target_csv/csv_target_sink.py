@@ -3,8 +3,6 @@
 import csv
 from pathlib import Path
 
-from typing import Dict, Iterable, Optional
-
 from singer_sdk.sink_base import Sink
 
 
@@ -15,7 +13,7 @@ class SampleCSVTargetSink(Sink):
     @property
     def target_folder(self) -> Path:
         """Return target folder."""
-        return Path(self.config.get("target_folder"))
+        return Path(str(self.config["target_folder"]))
 
     @property
     def target_filepath(self) -> Path:
@@ -37,7 +35,7 @@ class SampleCSVTargetSink(Sink):
             writer = csv.writer(
                 csvfile, delimiter="\t", quotechar='"', quoting=csv.QUOTE_NONNUMERIC
             )
-            for record in records_to_load:
+            for record in self.records_to_drain:
                 if newfile and not records_written:
                     # Write header row if new file
                     writer.writerow(record.keys())
