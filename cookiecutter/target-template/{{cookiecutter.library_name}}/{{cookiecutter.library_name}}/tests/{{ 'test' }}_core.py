@@ -4,7 +4,7 @@ import datetime
 
 from typing import Dict, Any
 
-from singer_sdk.testing import get_standard_tap_tests as get_standard_target_tests
+from singer_sdk.testing import get_standard_target_tests
 
 from {{ cookiecutter.library_name }}.target import Target{{ cookiecutter.destination_name }}
 
@@ -16,9 +16,9 @@ SAMPLE_CONFIG: Dict[str, Any] = {
 # Run standard built-in tap tests from the SDK:
 def test_standard_tap_tests():
     """Run standard tap tests from the SDK."""
-    tests = get_standard_tap_tests(
+    tests = get_standard_target_tests(
         Target{{ cookiecutter.destination_name }},
-        config=SAMPLE_CONFIG
+        config=SAMPLE_CONFIG,
     )
     for test in tests:
         test()
