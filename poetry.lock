@@ -252,6 +252,14 @@ arrow = "*"
 jinja2 = "*"
 
 [[package]]
+name = "jsonpath-python"
+version = "1.0.5"
+description = "A more powerful JSONPath implementation in modern python"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
 name = "jsonschema"
 version = "3.2.0"
 description = "An implementation of JSON Schema validation for Python"
@@ -654,7 +662,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.9,>=3.6"
-content-hash = "f5b3f0e5b47ebba35da55e5dbd71ff5e2c6be0983e4cefdf9b8ce5b9d876f521"
+content-hash = "e5de835391a09694380da5ba274ab2b49919f84a18fb74ff437204dade183237"
 
 [metadata.files]
 appdirs = [
@@ -787,6 +795,10 @@ jinja2 = [
 jinja2-time = [
     {file = "jinja2-time-0.2.0.tar.gz", hash = "sha256:d14eaa4d315e7688daa4969f616f226614350c48730bfa1692d2caebd8c90d40"},
     {file = "jinja2_time-0.2.0-py2.py3-none-any.whl", hash = "sha256:d3eab6605e3ec8b7a0863df09cc1d23714908fa61aa6986a845c20ba488b4efa"},
+]
+jsonpath-python = [
+    {file = "jsonpath-python-1.0.5.tar.gz", hash = "sha256:bc53936f1c78933e25bbed66d55a86fafaedb9998ae3c70d34eff2c3165f7eb9"},
+    {file = "jsonpath_python-1.0.5-py3-none-any.whl", hash = "sha256:edd41273282fafcd1ba7927548bf068daed9da4da4af3c6206318709dd41befb"},
 ]
 jsonschema = [
     {file = "jsonschema-3.2.0-py2.py3-none-any.whl", hash = "sha256:4e5b3cf8216f577bee9ce139cbe72eca3ea4f292ec60928ff24758ce626cd163"},

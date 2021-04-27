@@ -4,6 +4,7 @@ from typing import Any, Dict, Iterable, List, Optional
 
 import pytest
 import pendulum
+import requests
 
 from singer_sdk.typing import (
     IntegerType,
@@ -17,6 +18,7 @@ from singer_sdk.streams.core import (
     REPLICATION_INCREMENTAL,
     Stream,
 )
+from singer_sdk.streams.rest import RESTStream
 from singer_sdk.tap_base import Tap
 
 
@@ -38,6 +40,19 @@ class SimpleTestStream(Stream):
         yield {"id": 1, "value": "Egypt"}
         yield {"id": 2, "value": "Germany"}
         yield {"id": 3, "value": "India"}
+
+
+class RestTestStream(RESTStream):
+    """Test RESTful stream class."""
+
+    name = "restful"
+    path = "/example"
+    url_base = "https://example.com"
+    schema = PropertiesList(
+        Property("id", IntegerType, required=True),
+        Property("value", StringType, required=True),
+    ).to_dict()
+    replication_key = "updatedAt"
 
 
 class SimpleTestTap(Tap):
@@ -117,3 +132,39 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
     assert stream.get_starting_timestamp(None) == pendulum.parse(
         timestamp_value
     ), f"Incorrect starting timestamp. Tap state was {dict(tap.state)}"
+
+
+@pytest.mark.parametrize(
+    "path,content,result",
+    [
+        (
+            "$[*]",
+            '[{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]',
+            [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}],
+        ),
+        (
+            "$.data[*]",
+            '{"data": [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]}',
+            [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}],
+        ),
+        (
+            "$.data.records[*]",
+            '{"data": {"records": [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]}}',
+            [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}],
+        ),
+    ],
+    ids=["array", "nested_one_level", "nested_two_levels"],
+)
+def test_jsonpath_rest_stream(
+    tap: SimpleTestTap, path: str, content: str, result: List[dict]
+):
+    """Validate records are extracted correctly from the API response."""
+    fake_response = requests.Response()
+    fake_response._content = str.encode(content)
+
+    stream = RestTestStream(tap)
+    stream.response_path = path
+
+    rows = stream.parse_response(fake_response)
+
+    assert list(rows) == result

@@ -9,6 +9,8 @@ import requests
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Union
 
+from jsonpath import JSONPath
+
 from singer.schema import Schema
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
@@ -24,6 +26,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     _page_size: int = DEFAULT_PAGE_SIZE
     _requests_session: Optional[requests.Session]
     rest_method = "GET"
+    response_path: str = "$[*]"
 
     @property
     @abc.abstractmethod
@@ -209,11 +212,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows."""
         resp_json = response.json()
-        if isinstance(resp_json, dict):
-            yield resp_json
-        else:
-            for row in resp_json:
-                yield row
+        yield from JSONPath(self.response_path).parse(resp_json)
 
     # Abstract methods:
 
