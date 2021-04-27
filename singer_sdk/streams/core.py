@@ -5,6 +5,7 @@ import abc  # abstract base classes
 import datetime
 import json
 import logging
+from copy import copy
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
@@ -417,7 +418,9 @@ class Stream(metaclass=abc.ABCMeta):
         """Sync records in batches, emitting BATCH and STATE messages."""
         rows_sent = 0
         batch_size = 0
+        batch_count = 0
         record = {}
+        tmp_dir = tempfile.mkdtemp()
         # Iterate through each returned record:
         if partition:
             partitions = [partition]
@@ -427,7 +430,10 @@ class Stream(metaclass=abc.ABCMeta):
             state = self.get_stream_or_partition_state(partition)
             reset_state_progress_markers(state)
 
-            batch_file = tempfile.TemporaryFile(mode='w+t')
+            batch_file_path = Path(
+                tmp_dir, f'{self.name}-{str(batch_count).zfill(12)}.jsonl'
+            )
+            batch_file = open(batch_file_path, 'w')
             for row_dict in self.get_records(partition=partition):
                 if (
                     self._MAX_RECORDS_LIMIT is not None
@@ -439,7 +445,7 @@ class Stream(metaclass=abc.ABCMeta):
                         f"limit ({self._MAX_RECORDS_LIMIT}) being reached."
                     )
 
-                if rows_sent and ((rows_sent - 1) % self.BATCH_SIZE == 0):
+                if rows_sent and (rows_sent % self.BATCH_SIZE == 0):
                     # When BATCH_SIZE reached:
                     # close file
                     batch_file.close()
@@ -456,14 +462,18 @@ class Stream(metaclass=abc.ABCMeta):
                     # emit BATCH message
                     batch_massage = BatchMessage(
                         stream=self.name,
-                        filepath=batch_file.name,
+                        filepath=str(batch_file_path),
                         batch_size=batch_size
                     )
                     singer.write_message(batch_massage)
                     self._write_state_message()
                     # create new file and reset `batch_size` counter
-                    batch_file = tempfile.TemporaryFile(mode='w+t')
+                    batch_file_path = Path(
+                        tmp_dir, f'{self.name}-{str(batch_count).zfill(9)}.jsonl'
+                    )
+                    batch_file = open(batch_file_path, 'w')
                     batch_size = 0
+                    batch_count += 1
 
                 # Warning - this drops properties not declared in SCHEMA
                 record = conform_record_data_types(
@@ -480,7 +490,7 @@ class Stream(metaclass=abc.ABCMeta):
             batch_file.close()
             batch_massage = BatchMessage(
                 stream=self.name,
-                filepath=str(batch_file),
+                filepath=str(batch_file_path),
                 batch_size=batch_size
             )
             singer.write_message(batch_massage)
