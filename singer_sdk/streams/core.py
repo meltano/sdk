@@ -1,5 +1,6 @@
 """Stream abstract class."""
 
+import tempfile
 import abc  # abstract base classes
 import datetime
 import json
@@ -36,7 +37,7 @@ from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._util import utc_now
 
 import singer
-from singer import RecordMessage, SchemaMessage
+from singer import RecordMessage, SchemaMessage, BatchMessage
 from singer.catalog import Catalog
 from singer.schema import Schema
 from singer_sdk.helpers._typing import is_datetime_type
@@ -54,6 +55,7 @@ class Stream(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
     STATE_MSG_FREQUENCY = 10000  # Number of records between state messages
+    BATCH_SIZE = 10000
     _MAX_RECORDS_LIMIT: Optional[int] = None
 
     parent_stream_types: List[Any] = []  # May be used in sync sequencing
@@ -263,6 +265,11 @@ class Stream(metaclass=abc.ABCMeta):
             return REPLICATION_INCREMENTAL
         return REPLICATION_FULL_TABLE
 
+    @property
+    def batch_enabled(self) -> bool:
+        """True if BATCH messages enabled, else False."""
+        return self.config.get("batch_enabled", False)
+
     # State properties:
 
     @property
@@ -406,6 +413,82 @@ class Stream(metaclass=abc.ABCMeta):
         # Reset interim bookmarks before emitting final STATE message:
         self._write_state_message()
 
+    def _sync_records_batch(self, partition: Optional[dict] = None) -> None:
+        """Sync records in batches, emitting BATCH and STATE messages."""
+        rows_sent = 0
+        batch_size = 0
+        record = {}
+        # Iterate through each returned record:
+        if partition:
+            partitions = [partition]
+        else:
+            partitions = self.partitions or [None]
+        for partition in partitions:
+            state = self.get_stream_or_partition_state(partition)
+            reset_state_progress_markers(state)
+
+            batch_file = open(tempfile.TemporaryFile(), write)
+            for row_dict in self.get_records(partition=partition):
+                if (
+                    self._MAX_RECORDS_LIMIT is not None
+                    and rows_sent >= self._MAX_RECORDS_LIMIT
+                ):
+                    batch_file.close()
+                    raise MaxRecordsLimitException(
+                        "Stream prematurely aborted due to the stream's max record "
+                        f"limit ({self._MAX_RECORDS_LIMIT}) being reached."
+                    )
+
+                if rows_sent and ((rows_sent - 1) % self.BATCH_SIZE == 0):
+                    # When BATCH_SIZE reached:
+                    # close file
+                    batch_file.close()
+                    # increment state using previous record in loop
+                    try:
+                        self._increment_stream_state(record, partition=partition)
+                    except InvalidStreamSortException as ex:
+                        msg = f"Sorting error detected on row #{rows_sent+1}. "
+                        if partition:
+                            msg += f"Partition was {str(partition)}. "
+                        msg += str(ex)
+                        self.logger.error(msg)
+                        raise ex
+                    # emit BATCH message
+                    batch_massage = BatchMessage(
+                        stream=self.name,
+                        filepath=batch_file.name,
+                        batch_size=batch_size
+                    )
+                    singer.write_message(batch_massage)
+                    self._write_state_message()
+                    # create new file and reset `batch_size` counter
+                    batch_file = open(tempfile.TemporaryFile(), write)
+                    batch_size = 0
+
+                # Warning - this drops properties not declared in SCHEMA
+                record = conform_record_data_types(
+                    stream_name=self.name,
+                    row=row_dict,
+                    schema=self.schema,
+                    logger=self.logger,
+                )
+                batch_file.write(json.dumps(record))
+                rows_sent += 1
+                batch_size += 1
+
+            # Close and emit last BATCH message
+            batch_file.close()
+            batch_massage = BatchMessage(
+                stream=self.name,
+                filepath=str(batch_file),
+                batch_size=records_in_batch
+            )
+            singer.write_message(batch_massage)
+            # Emit last State
+            finalize_state_progress_markers(state)
+            self._write_state_message()
+            self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
+
     # Public methods ("final", not recommended to be overridden)
 
     @final
@@ -417,7 +500,10 @@ class Stream(metaclass=abc.ABCMeta):
         # Send a SCHEMA message to the downstream target:
         self._write_schema_message()
         # Sync the records themselves:
-        self._sync_records()
+        if self.batch_enabled:
+            self._sync_records_batch()
+        else:
+            self._sync_records()
 
     # Overridable Methods
 
