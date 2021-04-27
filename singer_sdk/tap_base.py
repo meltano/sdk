@@ -219,7 +219,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             ),
             config: List[str] = typer.Option(
                 None,
-                help="Path to a config file, or the string 'ENV' to use environment variables.",
+                help=(
+                    "Path to a config file, or the string 'ENV' to use environment "
+                    "variables."
+                ),
             ),
             state: str = typer.Option(
                 None,
