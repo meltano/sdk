@@ -149,7 +149,14 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
         ),
         (
             "$.data.records[*]",
-            '{"data": {"records": [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]}}',
+            """{
+                "data": {
+                    "records": [
+                        {"id": 1, "value": "abc"},
+                        {"id": 2, "value": "def"}
+                    ]
+                }
+            }""",
             [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}],
         ),
     ],
