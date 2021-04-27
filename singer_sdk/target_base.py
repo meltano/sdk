@@ -185,6 +185,8 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         sink._validate_record(record)
         if sink.include_sdc_metadata_properties:
             sink._add_metadata_values_to_record(record, message_dict)
+        else:
+            sink._remove_metadata_values_from_record(record)
         record = sink.preprocess_record(record)
         sink.load_record(record)
         if sink.is_full:

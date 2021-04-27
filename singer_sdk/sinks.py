@@ -11,8 +11,9 @@ from typing import Dict, Optional, List, Any, Mapping, Union
 
 from singer_sdk.helpers._compat import final
 
+from jsonschema import Draft4Validator, FormatChecker
+
 # TODO: Re-implement schema validation
-# from jsonschema import Draft4Validator, FormatChecker
 # from singer_sdk.helpers._flattening import RecordFlattener
 
 from singer_sdk.helpers._typing import (
@@ -23,6 +24,8 @@ from singer_sdk.helpers._typing import (
 from singer_sdk.plugin_base import PluginBase
 
 from dateutil import parser
+
+JSONSchemaValidator = Draft4Validator
 
 
 class Sink(metaclass=abc.ABCMeta):
@@ -42,8 +45,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     MAX_SIZE_DEFAULT = 10000
 
-    # TODO: Re-implement schema validation
-    # _validator: Draft4Validator
+    # TODO: Re-implement schema flattening
     # _flattener: Optional[RecordFlattener]
     # _MAX_FLATTEN_DEPTH = 0
 
@@ -67,9 +69,9 @@ class Sink(metaclass=abc.ABCMeta):
         self.drained_state: Optional[dict] = None
         self.key_properties = key_properties
 
-        # TODO: Re-implement schema validation
+        self._validator = Draft4Validator(schema, format_checker=FormatChecker())
+        # TODO: Re-implement schema flattener
         # self._flattener = RecordFlattener(max_level=self._MAX_FLATTEN_DEPTH)
-        # self._validator = Draft4Validator(schema, format_checker=FormatChecker())
 
     # Size properties
 
@@ -148,6 +150,16 @@ class Sink(metaclass=abc.ABCMeta):
         record["_sdc_table_version"] = message.get("version")
         record["_sdc_primary_key"] = self.key_properties
 
+    def _remove_metadata_values_from_record(self, record: dict) -> None:
+        """Remove metadata _sdc columns from incoming record message."""
+        record.pop("_sdc_extracted_at", None)
+        record.pop("_sdc_batched_at", None)
+        record.pop("_sdc_deleted_at", None)
+        record.pop("_sdc_received_at", None)
+        record.pop("_sdc_sequence", None)
+        record.pop("_sdc_table_version", None)
+        record.pop("_sdc_primary_key", None)
+
     # Record validation
 
     def _validate_record(self, record: Dict) -> Dict:
@@ -155,6 +167,7 @@ class Sink(metaclass=abc.ABCMeta):
         self._validate_timestamps_in_record(
             record=record, schema=self.schema, treatment=self.datetime_error_treatment
         )
+        self._validator.validate(record)
         return record
 
     def _validate_timestamps_in_record(
