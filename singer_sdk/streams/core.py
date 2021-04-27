@@ -427,7 +427,7 @@ class Stream(metaclass=abc.ABCMeta):
             state = self.get_stream_or_partition_state(partition)
             reset_state_progress_markers(state)
 
-            batch_file = open(tempfile.TemporaryFile(), write)
+            batch_file = tempfile.TemporaryFile(mode='w+t')
             for row_dict in self.get_records(partition=partition):
                 if (
                     self._MAX_RECORDS_LIMIT is not None
@@ -462,7 +462,7 @@ class Stream(metaclass=abc.ABCMeta):
                     singer.write_message(batch_massage)
                     self._write_state_message()
                     # create new file and reset `batch_size` counter
-                    batch_file = open(tempfile.TemporaryFile(), write)
+                    batch_file = tempfile.TemporaryFile(mode='w+t')
                     batch_size = 0
 
                 # Warning - this drops properties not declared in SCHEMA
@@ -481,7 +481,7 @@ class Stream(metaclass=abc.ABCMeta):
             batch_massage = BatchMessage(
                 stream=self.name,
                 filepath=str(batch_file),
-                batch_size=records_in_batch
+                batch_size=batch_size
             )
             singer.write_message(batch_massage)
             # Emit last State

@@ -12,6 +12,12 @@ def test_countries_sync_all():
     tap.sync_all()
 
 
+def test_countries_sync_all_batch():
+    """Test sync_all() for countries sample."""
+    tap = SampleTapCountries(config={"batch_enabled": True})
+    tap.sync_all()
+
+
 def test_countries_primary_key():
     tap = SampleTapCountries(config=None)
     countries_entry = tap.streams["countries"]._singer_catalog_entry
