@@ -2,26 +2,15 @@
 
 {% if cookiecutter.auth_method not in ("Simple", "OAuth2", "JWT") %}
 # TODO: Delete this file or add custom authentication logic as needed.
-{% else %}
+{% elif cookiecutter.auth_method == "Simple" %}
+from singer_sdk.authenticators import SimpleAuthenticator
 
-from typing import TypeVar, Type
 
-from singer_sdk.authenticators import (
-    APIAuthenticatorBase,
-    SimpleAuthenticator,
-    OAuthAuthenticator,
-    OAuthJWTAuthenticator
-)
-
-# Create a generic variable that can be 'Parent', or any subclass.
-FactoryType = TypeVar('FactoryType', bound='{{ cookiecutter.source_name }}Authenticator')
-
-{% if cookiecutter.auth_method == "Simple" %}
 class {{ cookiecutter.source_name }}Authenticator(SimpleAuthenticator):
     """Authenticator class for {{ cookiecutter.source_name }}."""
 
     @classmethod
-    def create_for_stream(cls: Type[FactoryType], stream) -> FactoryType:
+    def create_for_stream(cls, stream):
         return cls(
             stream=stream,
             auth_headers={
@@ -30,11 +19,14 @@ class {{ cookiecutter.source_name }}Authenticator(SimpleAuthenticator):
         )
 
 {% elif cookiecutter.auth_method == "OAuth2" %}
+from singer_sdk.authenticators import OAuthAuthenticator
+
+
 class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator):
     """Authenticator class for {{ cookiecutter.source_name }}."""
 
     @classmethod
-    def create_for_stream(cls: Type[FactoryType], stream) -> FactoryType:
+    def create_for_stream(cls, stream):
         return cls(
             stream=stream,
             auth_endpoint="TODO: OAuth Endpoint URL",
@@ -42,16 +34,18 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator):
         )
 
 {% elif cookiecutter.auth_method == "JWT" %}
+from singer_sdk.authenticators import OAuthJWTAuthenticator
+
+
 class {{ cookiecutter.source_name }}Authenticator(OAuthJWTAuthenticator):
     """Authenticator class for {{ cookiecutter.source_name }}."""
 
     @classmethod
-    def create_for_stream(cls: Type[FactoryType], stream) -> FactoryType:
+    def create_for_stream(cls, stream):
         return cls(
             stream=stream,
             auth_endpoint="TODO: OAuth Endpoint URL",
             oauth_scopes="TODO: OAuth Scopes",
         )
 
-{% endif %}
 {% endif %}

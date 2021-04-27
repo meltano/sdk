@@ -3,19 +3,9 @@
 from pathlib import Path
 from typing import Any, Dict, Optional, Union, List, Iterable
 
-from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }}Stream
+from singer_sdk import typing as th  # JSON Schema typing helpers
 
-from singer_sdk.typing import (
-    ArrayType,
-    BooleanType,
-    DateTimeType,
-    IntegerType,
-    NumberType,
-    ObjectType,
-    PropertiesList,
-    Property,
-    StringType,
-)
+from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }}Stream
 
 # TODO: Delete this is if not using json files for schema definition
 SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
@@ -28,18 +18,18 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
     name = "users"
     # Optionally, you may also use `schema_filepath` in place of `schema`:
     # schema_filepath = SCHEMAS_DIR / "users.json"
-    schema = PropertiesList(
-        Property("name", StringType),
-        Property("id", StringType),
-        Property("age", IntegerType),
-        Property("email", StringType),
-        Property(
+    schema = th.PropertiesList(
+        th.Property("name", th.StringType),
+        th.Property("id", th.StringType),
+        th.Property("age", th.IntegerType),
+        th.Property("email", th.StringType),
+        th.Property(
             "address",
-            ObjectType(
-                Property("street", StringType),
-                Property("city", StringType),
-                Property("state", StringType),
-                Property("zip", StringType),
+            th.ObjectType(
+                th.Property("street", th.StringType),
+                th.Property("city", th.StringType),
+                th.Property("state", th.StringType),
+                th.Property("zip", th.StringType),
             )
         ),
     ).to_dict()
@@ -63,10 +53,10 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
 
 class GroupsStream({{ cookiecutter.source_name }}Stream):
     name = "groups"
-    schema = PropertiesList(
-        Property("name", StringType),
-        Property("id", StringType),
-        Property("modified", DateTimeType),
+    schema = th.PropertiesList(
+        th.Property("name", th.StringType),
+        th.Property("id", th.StringType),
+        th.Property("modified", th.DateTimeType),
     ).to_dict()
     primary_keys = ["id"]
     replication_key = "modified"
@@ -91,15 +81,15 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
     replication_key = None
     # Optionally, you may also use `schema_filepath` in place of `schema`:
     # schema_filepath = SCHEMAS_DIR / "users.json"
-    schema = PropertiesList(
-        Property("name", StringType),
-        Property("id", StringType),
-        Property("age", IntegerType),
-        Property("email", StringType),
-        Property("street", StringType),
-        Property("city", StringType),
-        Property("state", StringType),
-        Property("zip", StringType),
+    schema = th.PropertiesList(
+        th.Property("name", th.StringType),
+        th.Property("id", th.StringType),
+        th.Property("age", th.IntegerType),
+        th.Property("email", th.StringType),
+        th.Property("street", th.StringType),
+        th.Property("city", th.StringType),
+        th.Property("state", th.StringType),
+        th.Property("zip", th.StringType),
     ).to_dict()
 
 
@@ -110,9 +100,9 @@ class GroupsStream({{ cookiecutter.source_name }}Stream):
 {% endif %}
     primary_keys = ["id"]
     replication_key = "modified"
-    schema = PropertiesList(
-        Property("name", StringType),
-        Property("id", StringType),
-        Property("modified", DateTimeType),
+    schema = th.PropertiesList(
+        th.Property("name", th.StringType),
+        th.Property("id", th.StringType),
+        th.Property("modified", th.DateTimeType),
     ).to_dict()
 {% endif %}

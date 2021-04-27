@@ -4,24 +4,6 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Union, List, Iterable
 
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
-from singer_sdk.authenticators import (
-    APIAuthenticatorBase,
-    SimpleAuthenticator,
-    OAuthAuthenticator,
-    OAuthJWTAuthenticator
-)
-from singer_sdk.typing import (
-    ArrayType,
-    BooleanType,
-    DateTimeType,
-    IntegerType,
-    NumberType,
-    ObjectType,
-    PropertiesList,
-    Property,
-    StringType,
-)
-
 {% if cookiecutter.auth_method in ("Simple", "OAuth2", "JWT") %}
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
 {% endif %}
