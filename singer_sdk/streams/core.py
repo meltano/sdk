@@ -431,9 +431,9 @@ class Stream(metaclass=abc.ABCMeta):
             reset_state_progress_markers(state)
 
             batch_file_path = Path(
-                tmp_dir, f'{self.name}-{str(batch_count).zfill(12)}.jsonl'
+                tmp_dir, f"{self.name}-{str(batch_count).zfill(12)}.jsonl"
             )
-            batch_file = open(batch_file_path, 'w')
+            batch_file = open(batch_file_path, "w")
             for row_dict in self.get_records(partition=partition):
                 if (
                     self._MAX_RECORDS_LIMIT is not None
@@ -463,15 +463,15 @@ class Stream(metaclass=abc.ABCMeta):
                     batch_massage = BatchMessage(
                         stream=self.name,
                         filepath=str(batch_file_path),
-                        batch_size=batch_size
+                        batch_size=batch_size,
                     )
                     singer.write_message(batch_massage)
                     self._write_state_message()
                     # create new file and reset `batch_size` counter
                     batch_file_path = Path(
-                        tmp_dir, f'{self.name}-{str(batch_count).zfill(9)}.jsonl'
+                        tmp_dir, f"{self.name}-{str(batch_count).zfill(9)}.jsonl"
                     )
-                    batch_file = open(batch_file_path, 'w')
+                    batch_file = open(batch_file_path, "w")
                     batch_size = 0
                     batch_count += 1
 
@@ -489,9 +489,7 @@ class Stream(metaclass=abc.ABCMeta):
             # Close and emit last BATCH message
             batch_file.close()
             batch_massage = BatchMessage(
-                stream=self.name,
-                filepath=str(batch_file_path),
-                batch_size=batch_size
+                stream=self.name, filepath=str(batch_file_path), batch_size=batch_size
             )
             singer.write_message(batch_massage)
             # Emit last State
