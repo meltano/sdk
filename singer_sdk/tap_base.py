@@ -5,7 +5,7 @@ import json
 from pathlib import PurePath, Path
 from typing import Any, List, Optional, Dict, Union
 
-import click
+import typer
 from singer.catalog import Catalog
 
 from singer_sdk.helpers._classproperty import classproperty
@@ -189,21 +189,14 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     @classproperty
     def cli(cls):
         """Execute standard CLI handler for taps."""
+        app = typer.Typer(name=cls.name)
 
-        @click.option("--version", is_flag=True)
-        @click.option("--about", is_flag=True)
-        @click.option("--discover", is_flag=True)
-        @click.option("--test", is_flag=True)
-        @click.option("--format")
-        @click.option("--config", multiple=True)
-        @click.option("--catalog")
-        @click.option("--state")
-        @click.command()
+        @app.command()
         def cli(
-            version: bool = False,
-            about: bool = False,
-            discover: bool = False,
-            test: bool = False,
+            version: bool = typer.Option(False, "--version", show_default=False),
+            about: bool = typer.Option(False, "--about", show_default=False),
+            discover: bool = typer.Option(False, "--discover", show_default=False),
+            test: bool = typer.Option(False, "--test", show_default=False),
             config: List[str] = None,
             state: str = None,
             catalog: str = None,
@@ -252,7 +245,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             else:
                 tap.sync_all()
 
-        return cli
+        return app
 
 
 cli = Tap.cli

@@ -10,14 +10,14 @@ from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
 from jsonschema import ValidationError, SchemaError, Draft4Validator
 from pathlib import PurePath
 
+import typer
+
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers._secrets import is_common_secret_key, SecretString
 from singer_sdk.helpers._typing import is_string_array_type
 from singer_sdk.typing import extend_validator_with_defaults
-
-import click
 
 SDK_PACKAGE_NAME = "singer_sdk"
 
@@ -208,8 +208,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
             print(formatted)
 
-    @classmethod
-    @click.command()
-    def cli(cls):
+    @classproperty
+    def cli(cls) -> typer.Typer:
         """Handle command line execution."""
         pass
