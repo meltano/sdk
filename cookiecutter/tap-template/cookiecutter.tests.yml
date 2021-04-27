@@ -10,12 +10,12 @@ tests:
     auth_method: OAuth
 
   - source_name: RESTJWTTemplateTest
-    tap_id: test-tap-rest-simpleauth-type
+    tap_id: test-tap-rest-jwt-type
     stream_type: REST
     auth_method: JWT
 
-  - source_name: RESTJWTTemplateTest
-    tap_id: test-tap-rest-simpleauth-type
+  - source_name: RESTCustomTemplateTest
+    tap_id: test-tap-rest-custom-type
     stream_type: REST
     auth_method: Custom or N/A
 
