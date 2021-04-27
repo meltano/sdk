@@ -483,6 +483,7 @@ class Stream(metaclass=abc.ABCMeta):
                     logger=self.logger,
                 )
                 batch_file.write(json.dumps(record))
+                batch_file.write("\n")
                 rows_sent += 1
                 batch_size += 1
 
