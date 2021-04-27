@@ -193,14 +193,45 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
         @app.command()
         def cli(
-            version: bool = typer.Option(False, "--version", show_default=False),
-            about: bool = typer.Option(False, "--about", show_default=False),
-            discover: bool = typer.Option(False, "--discover", show_default=False),
-            test: bool = typer.Option(False, "--test", show_default=False),
-            config: List[str] = None,
-            state: str = None,
-            catalog: str = None,
-            format: str = None,
+            version: bool = typer.Option(
+                False,
+                "--version",
+                show_default=False,
+                help="Print the application version and exit.",
+            ),
+            about: bool = typer.Option(
+                False,
+                "--about",
+                show_default=False,
+                help="Print the application info and exit.",
+            ),
+            discover: bool = typer.Option(
+                False,
+                "--discover",
+                show_default=False,
+                help="Run the tap in discovery mode.",
+            ),
+            test: bool = typer.Option(
+                False,
+                "--test",
+                show_default=False,
+                help="Run the tap in test mode.",
+            ),
+            config: List[str] = typer.Option(
+                None,
+                help="Path to a config file, or the string 'ENV' to use environment variables.",
+            ),
+            state: str = typer.Option(
+                None,
+                help="Path to a state file for incremental replication.",
+            ),
+            catalog: str = typer.Option(
+                None,
+                help="Path to a catalog file.",
+            ),
+            format: str = typer.Option(
+                None, help="Application info format (used with --about)"
+            ),
         ):
             """Handle command line execution."""
             if version:
