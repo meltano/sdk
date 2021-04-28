@@ -16,6 +16,12 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
+## [Unreleased]
+
+### Changed
+
+- Improved cookiecutter template coverage, resolved whitespace readability issues. (#116, #119, !75)
+
 ## v0.1.3
 
 ### Added
