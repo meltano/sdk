@@ -138,17 +138,17 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
     "path,content,result",
     [
         (
-            "$[*]",
+            ".[]",
             '[{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]',
             [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}],
         ),
         (
-            "$.data[*]",
+            ".data[]",
             '{"data": [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]}',
             [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}],
         ),
         (
-            "$.data.records[*]",
+            ".data.records[]",
             """{
                 "data": {
                     "records": [
@@ -159,8 +159,13 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
             }""",
             [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}],
         ),
+        (
+            ".",
+            '{"id": 1, "value": "abc"}',
+            [{"id": 1, "value": "abc"}],
+        ),
     ],
-    ids=["array", "nested_one_level", "nested_two_levels"],
+    ids=["array", "nested_one_level", "nested_two_levels", "single_object"],
 )
 def test_jsonpath_rest_stream(
     tap: SimpleTestTap, path: str, content: str, result: List[dict]
