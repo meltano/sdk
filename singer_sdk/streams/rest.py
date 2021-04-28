@@ -51,6 +51,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     @property
     def jsonpath(self) -> jsonpath_rw.JSONPath:
+        """Compiled response JSONPath."""
         if not self._compiled_jsonpath:
             self._compiled_jsonpath = jsonpath_rw.parse(self.response_path)
         return self._compiled_jsonpath
