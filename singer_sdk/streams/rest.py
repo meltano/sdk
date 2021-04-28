@@ -9,7 +9,7 @@ import requests
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Union
 
-import jq
+import jsonpath_rw
 
 from singer.schema import Schema
 
@@ -26,7 +26,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     _page_size: int = DEFAULT_PAGE_SIZE
     _requests_session: Optional[requests.Session]
     rest_method = "GET"
-    response_path: str = ".[]"
+    response_path: str = "$[*]"
 
     @property
     @abc.abstractmethod
@@ -47,6 +47,13 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             self.path = path
         self._http_headers: dict = {}
         self._requests_session = requests.Session()
+        self._compiled_jsonpath = None
+
+    @property
+    def jsonpath(self) -> jsonpath_rw.JSONPath:
+        if not self._compiled_jsonpath:
+            self._compiled_jsonpath = jsonpath_rw.parse(self.response_path)
+        return self._compiled_jsonpath
 
     @staticmethod
     def _url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
@@ -212,7 +219,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows."""
         resp_json = response.json()
-        yield from jq.compile(self.response_path).input(resp_json)
+        yield from [match.value for match in self.jsonpath.find(resp_json)]
 
     # Abstract methods:
 

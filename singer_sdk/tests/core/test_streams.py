@@ -138,17 +138,17 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
     "path,content,result",
     [
         (
-            ".[]",
+            "$[*]",
             '[{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]',
             [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}],
         ),
         (
-            ".data[]",
+            "$.data[*]",
             '{"data": [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]}',
             [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}],
         ),
         (
-            ".data.records[]",
+            "$.data.records[*]",
             """{
                 "data": {
                     "records": [
@@ -160,7 +160,7 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
             [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}],
         ),
         (
-            ".",
+            "$",
             '{"id": 1, "value": "abc"}',
             [{"id": 1, "value": "abc"}],
         ),
@@ -174,8 +174,8 @@ def test_jsonpath_rest_stream(
     fake_response = requests.Response()
     fake_response._content = str.encode(content)
 
+    RestTestStream.response_path = path
     stream = RestTestStream(tap)
-    stream.response_path = path
 
     rows = stream.parse_response(fake_response)
 
