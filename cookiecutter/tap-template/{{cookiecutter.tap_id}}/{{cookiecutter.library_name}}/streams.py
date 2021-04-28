@@ -1,4 +1,4 @@
-"""Stream class for {{ cookiecutter.tap_id }}."""
+"""Stream type classes for {{ cookiecutter.tap_id }}."""
 
 from pathlib import Path
 from typing import Any, Dict, Optional, Union, List, Iterable
@@ -11,10 +11,13 @@ from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }
 SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 
-{% if cookiecutter.stream_type == "GraphQL" %}
+{%- if cookiecutter.stream_type == "GraphQL" %}
 # TODO: - Override `UsersStream` and `GroupsStream` with your own stream definition.
 #       - Copy-paste as many times as needed to create multiple stream types.
+
+
 class UsersStream({{ cookiecutter.source_name }}Stream):
+    """Define custom stream."""
     name = "users"
     # Optionally, you may also use `schema_filepath` in place of `schema`:
     # schema_filepath = SCHEMAS_DIR / "users.json"
@@ -52,6 +55,7 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
 
 
 class GroupsStream({{ cookiecutter.source_name }}Stream):
+    """Define custom stream."""
     name = "groups"
     schema = th.PropertiesList(
         th.Property("name", th.StringType),
@@ -69,14 +73,17 @@ class GroupsStream({{ cookiecutter.source_name }}Stream):
         """
 
 
-{% elif cookiecutter.stream_type in ("Other", "REST") %}
+{%- elif cookiecutter.stream_type in ("Other", "REST") %}
 # TODO: - Override `UsersStream` and `GroupsStream` with your own stream definition.
 #       - Copy-paste as many times as needed to create multiple stream types.
+
+
 class UsersStream({{ cookiecutter.source_name }}Stream):
+    """Define custom stream."""
     name = "users"
-{% if cookiecutter.stream_type == "REST" %}
+{%- if cookiecutter.stream_type == "REST" %}
     path = "/users"
-{% endif %}
+{%- endif %}
     primary_keys = ["id"]
     replication_key = None
     # Optionally, you may also use `schema_filepath` in place of `schema`:
@@ -94,10 +101,11 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
 
 
 class GroupsStream({{ cookiecutter.source_name }}Stream):
+    """Define custom stream."""
     name = "groups"
-{% if cookiecutter.stream_type == "REST" %}
+{%- if cookiecutter.stream_type == "REST" %}
     path = "/groups"
-{% endif %}
+{%- endif %}
     primary_keys = ["id"]
     replication_key = "modified"
     schema = th.PropertiesList(
@@ -105,4 +113,4 @@ class GroupsStream({{ cookiecutter.source_name }}Stream):
         th.Property("id", th.StringType),
         th.Property("modified", th.DateTimeType),
     ).to_dict()
-{% endif %}
+{%- endif %}

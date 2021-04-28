@@ -1,4 +1,9 @@
 tests:
+  - source_name: RESTCustomTemplateTest
+    tap_id: test-tap-rest-custom-type
+    stream_type: REST
+    auth_method: Custom or N/A
+
   - source_name: RESTSimpleAuthTemplateTest
     tap_id: test-tap-rest-simpleauth-type
     stream_type: REST
@@ -13,11 +18,6 @@ tests:
     tap_id: test-tap-rest-jwt-type
     stream_type: REST
     auth_method: JWT
-
-  - source_name: RESTCustomTemplateTest
-    tap_id: test-tap-rest-custom-type
-    stream_type: REST
-    auth_method: Custom or N/A
 
   - source_name: GraphQLJWTTemplateTest
     tap_id: test-tap-graphql-jwt-type
