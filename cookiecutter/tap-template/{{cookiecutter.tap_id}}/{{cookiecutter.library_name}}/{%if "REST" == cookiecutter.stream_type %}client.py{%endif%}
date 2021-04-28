@@ -69,8 +69,24 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
             params["order_by"] = self.replication_key
         return params
 
+    def prepare_request_payload(
+        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+    ) -> Optional[dict]:
+        """Prepare the data payload for the REST API request.
+
+        By default, no payload will be sent (return None).
+        """
+        # TODO: Delete this method if no payload is required. (Most REST APIs.)
+        return None
+
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows."""
+        # TODO: Parse response body and return a set of records.
         resp_json = response.json()
-        for row in resp_json.get("<TODO: Parse response body>"):
+        for row in resp_json.get("<TODO>"):
             yield row
+
+    def post_process(self, row: dict, partition: Optional[dict] = None) -> dict:
+        """As needed, append or transform raw data to match expected structure."""
+        # TODO: Delete this method if not needed.
+        return row

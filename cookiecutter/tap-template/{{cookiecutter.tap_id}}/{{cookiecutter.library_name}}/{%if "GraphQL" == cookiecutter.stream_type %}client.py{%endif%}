@@ -20,26 +20,6 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 
     # Alternatively, use a static string for url_base:
     # url_base = "https://api.mysample.com"
-{%- if cookiecutter.stream_type == "REST" %}
-
-    def get_url_params(
-        self,
-        partition: Optional[dict],
-        next_page_token: Optional[Any] = None
-    ) -> Dict[str, Any]:
-        """Return a dictionary of values to be used in URL parameterization.
-
-        If paging is supported, developers may override this method with specific paging
-        logic.
-        """
-        params = {}
-        starting_datetime = self.get_starting_timestamp(partition)
-        if starting_datetime:
-            params["updated"] = starting_datetime
-        return params
-
-{%- endif %}
-
 
 {%- if cookiecutter.auth_method in ("Simple", "OAuth2", "JWT") %}
     @property
@@ -60,3 +40,15 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         # headers["Private-Token"] = self.config.get("auth_token")
 {%- endif %}
         return headers
+
+    def parse_response(self, response: requests.Response) -> Iterable[dict]:
+        """Parse the response and return an iterator of result rows."""
+        # TODO: Parse response body and return a set of records.
+        resp_json = response.json()
+        for row in resp_json.get("<TODO>"):
+            yield row
+
+    def post_process(self, row: dict, partition: Optional[dict] = None) -> dict:
+        """As needed, append or transform raw data to match expected structure."""
+        # TODO: Delete this method if not needed.
+        return row
