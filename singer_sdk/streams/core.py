@@ -59,7 +59,7 @@ class Stream(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
     # Number of records in each batch and between state messages
-    BATCH_SIZE = 6
+    BATCH_SIZE = 10000
     _MAX_RECORDS_LIMIT: Optional[int] = None
 
     parent_stream_types: List[Any] = []  # May be used in sync sequencing
