@@ -1,11 +1,9 @@
 """Stream abstract class."""
 
-import tempfile
 import abc  # abstract base classes
 import datetime
 import json
 import logging
-from copy import copy
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
@@ -356,7 +354,7 @@ class Stream(metaclass=abc.ABCMeta):
                     if rows_sent:
                         msg = f"Sorting error detected on row #{rows_sent+1}. "
                     else:
-                        msg = f"Sorting error detected. "
+                        msg = "Sorting error detected. "
                     if partition:
                         msg += f"Partition was {str(partition)}. "
                     msg += str(ex)
@@ -379,7 +377,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Private sync methods:
 
-    def _sync_records() -> None:
+    def _sync_records(self) -> None:
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
         # Iterate through each returned record:
