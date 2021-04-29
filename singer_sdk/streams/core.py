@@ -26,8 +26,7 @@ from singer.catalog import Catalog
 from singer.schema import Schema
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
-from singer_sdk.helpers.util import (
-    get_property_schema,
+from singer_sdk.helpers._catalog import (
     get_selected_schema,
 )
 
@@ -356,7 +355,7 @@ class Stream(metaclass=abc.ABCMeta):
         """Write out a SCHEMA message with the stream schema."""
         bookmark_keys = [self.replication_key] if self.replication_key else None
         selected_schema = get_selected_schema(
-            schema=self.schema, catalog_entry=self.singer_catalog_entry.dict()
+            schema=self.schema, catalog_entry=self._singer_catalog_entry.dict()
         )
         schema_message = SchemaMessage(
             self.tap_stream_id, selected_schema, self.primary_keys, bookmark_keys
@@ -422,7 +421,7 @@ class Stream(metaclass=abc.ABCMeta):
         """Drop values if deselected in schema or in catalog entry metadata."""
         # TODO: Call this recursively in order to handle nested properties
         for property_name, elem in record.items():
-            property_schema = get_property_schema(self.schema, property_name)
+            property_schema = self.schema["properties"][property_name]
             if not property_schema:
                 _warn_unmapped_property(self.name, property_name, self.logger)
                 record.pop(property_name)

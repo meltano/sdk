@@ -1,7 +1,7 @@
 """Test catalog selection features."""
 
-from singer_sdk.helpers.util import get_selected_schema
-from singer_sdk.helpers.typing import PropertiesList, Property, StringType, ObjectType
+from singer_sdk.helpers._catalog import get_selected_schema
+from singer_sdk.typing import PropertiesList, Property, StringType, ObjectType
 
 
 def test_schema_selection():

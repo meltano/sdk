@@ -117,10 +117,11 @@ def conform_record_data_types(  # noqa: C901
     """
     rec: Dict[str, Any] = {}
     for property_name, elem in row.items():
-        property_schema = get_property_schema(self.schema or {}, property_name)
-        if not property_schema:
-            self._warn_unmapped_property(property_name)
+        if property_name not in schema["properties"]:
+            _warn_unmapped_property(stream_name, property_name, logger)
             continue
+
+        property_schema = schema["properties"][property_name]
         if isinstance(elem, datetime.datetime):
             rec[property_name] = elem.isoformat() + "+00:00"
         elif isinstance(elem, datetime.date):
