@@ -407,12 +407,12 @@ class Stream(metaclass=abc.ABCMeta):
                         # close file
                         batch_file.close()
                         # emit BATCH message
-                        batch_massage = BatchMessage(
+                        batch_message = BatchMessage(
                             stream=self.name,
                             filepath=str(batch_file_path),
                             batch_size=self.BATCH_SIZE
                         )
-                        singer.write_message(batch_massage)
+                        singer.write_message(batch_message)
                         # Get and open new file
                         batch_index = int(rows_sent / self.BATCH_SIZE)
                         batch_file_path = get_batch_file(
@@ -457,12 +457,12 @@ class Stream(metaclass=abc.ABCMeta):
                     last_batch_calc[1] if not last_batch_calc[1] == 0
                     else self.BATCH_SIZE
                 )
-                batch_massage = BatchMessage(
+                batch_message = BatchMessage(
                     stream=self.name,
                     filepath=str(batch_file_path),
                     batch_size=last_batch_size
                 )
-                singer.write_message(batch_massage)
+                singer.write_message(batch_message)
 
             finalize_state_progress_markers(state)
 

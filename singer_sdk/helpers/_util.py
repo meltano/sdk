@@ -43,20 +43,13 @@ def check_max_records_limit(max_records_limit: int, rows_sent: int) -> None:
         )
 
 
-def get_batch_dir(
-    tap_name: Optional[str] = None, stream_name: Optional[str] = None
-) -> Path:
+def get_batch_dir(tap_name: str, stream_name: str) -> Path:
     """Returns a directory path suitable for storing stream batch files."""
-    batch_dir = Path.home() / Path('.singer-sdk')
-    if tap_name:
-        # Add a subdir for this tap
-        batch_dir = batch_dir / Path(tap_name)
-    if stream_name:
-        # Add a subdir for this stream
-        batch_dir = batch_dir / Path(stream_name)
-    # Add a Timestamp to avoid clashes with other runs of the same tap stream.
-    # Only subdir in the case when no tap_name or stream_name is passed.
-    batch_dir = batch_dir / Path(time.strftime("%Y-%m-%d--%H-%M-%S"))
+    batch_dir = (
+        Path.home() / Path('.singer-sdk') /
+        Path(tap_name) / Path(stream_name) /
+        Path(time.strftime("%Y-%m-%d-%H%M%S"))
+    )
     # Create dir and any missing parent dirs.
     batch_dir.mkdir(parents=True, exist_ok=True)
     return batch_dir
