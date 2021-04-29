@@ -462,6 +462,9 @@ class Stream(metaclass=abc.ABCMeta):
                     batch_size=last_batch_size,
                 )
                 singer.write_message(batch_message)
+                self._increment_stream_state(
+                    record_body, partition=partition, rows_sent=rows_sent
+                )
 
             finalize_state_progress_markers(state)
 
