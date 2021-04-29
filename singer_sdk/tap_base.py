@@ -211,7 +211,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             state: str = None,
             catalog: str = None,
             format: str = None,
-            batch: str = None,
+            batch: bool = False,
         ):
             """Handle command line execution."""
             if version:
