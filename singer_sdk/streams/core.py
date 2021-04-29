@@ -411,6 +411,9 @@ class Stream(metaclass=abc.ABCMeta):
                             batch_size=self.BATCH_SIZE,
                         )
                         singer.write_message(batch_message)
+                        self._increment_stream_state(
+                            record_body, partition=partition, rows_sent=rows_sent
+                        )
                         # Get and open new file
                         batch_index = int(rows_sent / self.BATCH_SIZE)
                         batch_file_path = get_batch_file(
