@@ -57,8 +57,8 @@ FactoryType = TypeVar("FactoryType", bound="Stream")
 class Stream(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
-    STATE_MSG_FREQUENCY = 10000  # Number of records between state messages
-    BATCH_SIZE = 10000
+    # Number of records in each batch and between state messages
+    BATCH_SIZE = 6
     _MAX_RECORDS_LIMIT: Optional[int] = None
 
     parent_stream_types: List[Any] = []  # May be used in sync sequencing
@@ -414,7 +414,7 @@ class Stream(metaclass=abc.ABCMeta):
                         )
                         singer.write_message(batch_massage)
                         # Get and open new file
-                        batch_index = rows_sent / self.BATCH_SIZE
+                        batch_index = int(rows_sent / self.BATCH_SIZE)
                         batch_file_path = get_batch_file(
                             batch_dir=batch_dir, file_index=batch_index
                         )
@@ -452,7 +452,7 @@ class Stream(metaclass=abc.ABCMeta):
             if self.is_batch_enabled:
                 # Close file and emit last BATCH message
                 batch_file.close()
-                last_batch_calc = divmod(rows_sent+1, self.BATCH_SIZE)
+                last_batch_calc = divmod(rows_sent, self.BATCH_SIZE)
                 last_batch_size = (
                     last_batch_calc[1] if not last_batch_calc[1] == 0
                     else self.BATCH_SIZE
