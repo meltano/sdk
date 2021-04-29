@@ -379,7 +379,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Private sync methods:
 
-    def _sync_records(self, partition: Optional[dict] = None) -> None:
+    def _sync_records() -> None:
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
         # Iterate through each returned record:
