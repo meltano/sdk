@@ -28,7 +28,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         catalog: Union[PurePath, str, dict, None] = None,
         state: Union[PurePath, str, dict, None] = None,
         parse_env_config: bool = False,
-        batch: bool = False
+        batch: bool = False,
     ) -> None:
         """Initialize the tap."""
         super().__init__(config=config, parse_env_config=parse_env_config)
@@ -211,7 +211,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             state: str = None,
             catalog: str = None,
             format: str = None,
-            batch: str = None
+            batch: str = None,
         ):
             """Handle command line execution."""
             if version:

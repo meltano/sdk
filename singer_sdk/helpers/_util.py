@@ -36,7 +36,7 @@ def check_max_records_limit(max_records_limit: int, rows_sent: int) -> None:
 
     Raises MaxRecordsLimitException if check fails.
     """
-    if (rows_sent >= max_records_limit):
+    if rows_sent >= max_records_limit:
         raise MaxRecordsLimitException(
             "Stream prematurely aborted due to the stream's max record "
             f"limit ({max_records_limit}) being reached."
@@ -46,9 +46,11 @@ def check_max_records_limit(max_records_limit: int, rows_sent: int) -> None:
 def get_batch_dir(tap_name: str, stream_name: str) -> Path:
     """Returns a directory path suitable for storing stream batch files."""
     batch_dir = (
-        Path.home() / Path('.singer-sdk') /
-        Path(tap_name) / Path(stream_name) /
-        Path(time.strftime("%Y-%m-%d-%H%M%S"))
+        Path.home()
+        / Path(".singer-sdk")
+        / Path(tap_name)
+        / Path(stream_name)
+        / Path(time.strftime("%Y-%m-%d-%H%M%S"))
     )
     # Create dir and any missing parent dirs.
     batch_dir.mkdir(parents=True, exist_ok=True)

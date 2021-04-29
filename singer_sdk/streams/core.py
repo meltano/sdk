@@ -36,7 +36,10 @@ from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._util import (
-    utc_now, check_max_records_limit, get_batch_dir, get_batch_file
+    utc_now,
+    check_max_records_limit,
+    get_batch_dir,
+    get_batch_file,
 )
 
 import singer
@@ -317,8 +320,11 @@ class Stream(metaclass=abc.ABCMeta):
     # Private bookmarking methods
 
     def _increment_stream_state(
-        self, latest_record: Dict[str, Any], *, partition: Optional[dict] = None,
-        rows_sent: Optional[int] = None
+        self,
+        latest_record: Dict[str, Any],
+        *,
+        partition: Optional[dict] = None,
+        rows_sent: Optional[int] = None,
     ):
         """Update state of stream or partition with data from the provided record.
 
@@ -384,22 +390,16 @@ class Stream(metaclass=abc.ABCMeta):
 
             if self.is_batch_enabled:
                 # Create batch dir
-                batch_dir = get_batch_dir(
-                    tap_name=self.tap_name,
-                    stream_name=self.name
-                )
+                batch_dir = get_batch_dir(tap_name=self.tap_name, stream_name=self.name)
                 # Get and open first file
-                batch_file_path = get_batch_file(
-                    batch_dir=batch_dir, file_index=0
-                )
+                batch_file_path = get_batch_file(batch_dir=batch_dir, file_index=0)
                 batch_file = batch_file_path.open(mode="w")
 
             for row_dict in self.get_records(partition=partition):
                 # Check max records limit
                 if self._MAX_RECORDS_LIMIT is not None:
                     check_max_records_limit(
-                        max_records_limit=self._MAX_RECORDS_LIMIT,
-                        rows_sent=rows_sent
+                        max_records_limit=self._MAX_RECORDS_LIMIT, rows_sent=rows_sent
                     )
 
                 if rows_sent and (rows_sent % self.BATCH_SIZE == 0):
@@ -410,7 +410,7 @@ class Stream(metaclass=abc.ABCMeta):
                         batch_message = BatchMessage(
                             stream=self.name,
                             filepath=str(batch_file_path),
-                            batch_size=self.BATCH_SIZE
+                            batch_size=self.BATCH_SIZE,
                         )
                         singer.write_message(batch_message)
                         # Get and open new file
@@ -433,7 +433,7 @@ class Stream(metaclass=abc.ABCMeta):
 
                 if self.is_batch_enabled:
                     # Write RECORD body to file
-                    batch_file.write(json.dumps(record_body) + '\n')
+                    batch_file.write(json.dumps(record_body) + "\n")
                 else:
                     # Emit RECORD message
                     record_message = RecordMessage(
@@ -454,13 +454,14 @@ class Stream(metaclass=abc.ABCMeta):
                 batch_file.close()
                 last_batch_calc = divmod(rows_sent, self.BATCH_SIZE)
                 last_batch_size = (
-                    last_batch_calc[1] if not last_batch_calc[1] == 0
+                    last_batch_calc[1]
+                    if not last_batch_calc[1] == 0
                     else self.BATCH_SIZE
                 )
                 batch_message = BatchMessage(
                     stream=self.name,
                     filepath=str(batch_file_path),
-                    batch_size=last_batch_size
+                    batch_size=last_batch_size,
                 )
                 singer.write_message(batch_message)
 
