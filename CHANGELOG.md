@@ -18,6 +18,10 @@ The next few lines form the template for unreleased changes.
 
 ## [Unreleased]
 
+### Added
+
+- Added support for GraphQL query variables (#115, !78)
+
 ### Changed
 
 - Improved cookiecutter template coverage, resolved whitespace readability issues. (#116, #119, !75)
