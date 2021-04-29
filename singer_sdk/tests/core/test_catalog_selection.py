@@ -123,9 +123,7 @@ def test_schema_selection(schema, catalog, stream_name):
     )
 
 
-def test_record_selection(
-    record, catalog_entry_dict, stream_name, selection_test_cases
-):
+def test_record_selection(record, catalog, stream_name, selection_test_cases):
     """Test that record selection rules are correctly applied to SCHEMA messages."""
     for bookmark, expected in selection_test_cases:
         assert (

@@ -16,7 +16,7 @@ def is_stream_selected(
     logger: Logger,
 ):
     """Return True if the stream is selected for extract."""
-    return is_property_selected(catalog, stream_name, breadcrumb=[], logger=logger)
+    return is_property_selected(catalog, stream_name, breadcrumb=(), logger=logger)
 
 
 def is_property_selected(
@@ -56,7 +56,7 @@ def is_property_selected(
     parent_value = None
     if len(breadcrumb) > 0:
         parent_value = is_property_selected(
-            catalog, stream_name, cast(Tuple[str], tuple(list(breadcrumb)[:-1])), logger
+            catalog, stream_name, tuple(list(breadcrumb)[:-1]), logger
         )
     if parent_value is False:
         return parent_value
@@ -122,5 +122,34 @@ def _pop_deselected_schema(
         if is_object_type(val):
             # call recursively in case any subproperties are deselected.
             _pop_deselected_schema(
+                val, catalog, stream_name, property_breadcrumb, logger
+            )
+
+
+def pop_deselected_record_properties(
+    record: dict,
+    catalog: dict,
+    stream_name: str,
+    logger: Logger,
+    breadcrumb: Tuple[str, ...] = (),
+) -> None:
+    """Remove anything schema that is not selected.
+
+    Walk through schema, starting at the index in breadcrumb, recursively update in
+    place.
+    """
+    for property_name, val in list(record.items()):
+        logger.info(f"Checking '{property_name}' under '{breadcrumb}...")
+        property_breadcrumb: Tuple[str, ...] = tuple(list(breadcrumb) + [property_name])
+        selected = is_property_selected(
+            catalog, stream_name, property_breadcrumb, logger
+        )
+        if not selected:
+            record.pop(property_name)
+            continue
+
+        if isinstance(val, dict):
+            # call recursively in case any subproperties are deselected.
+            _pop_deselected_record_properties(
                 val, catalog, stream_name, property_breadcrumb, logger
             )

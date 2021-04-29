@@ -16,6 +16,7 @@ from typing import (
     Optional,
     TypeVar,
     Union,
+    Tuple,
 )
 
 import pendulum
@@ -28,11 +29,13 @@ from singer.schema import Schema
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.helpers._catalog import (
     get_selected_schema,
+    pop_deselected_record_properties,
 )
 
 from singer_sdk.helpers._typing import (
     conform_record_data_types,
     _warn_unmapped_property,
+    is_datetime_type,
 )
 from singer_sdk.helpers._state import (
     get_writeable_state_dict,
@@ -45,7 +48,7 @@ from singer_sdk.helpers._state import (
 from singer_sdk.exceptions import MaxRecordsLimitException, InvalidStreamSortException
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._util import utc_now
-from singer_sdk.helpers._typing import is_datetime_type
+from singer_sdk.helpers import _catalog
 
 
 # Replication methods
@@ -78,7 +81,9 @@ class Stream(metaclass=abc.ABCMeta):
         self.logger: logging.Logger = tap.logger
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
+        self._tap = tap
         self._tap_state = tap.state
+        self._tap_input_catalog: Optional[dict] = None
         self.forced_replication_method: Optional[str] = None
         self._replication_key: Optional[str] = None
         self._primary_keys: Optional[List[str]] = None
@@ -124,6 +129,23 @@ class Stream(metaclass=abc.ABCMeta):
             return pendulum.parse(self.config["start_date"])
 
         return None
+
+    @property
+    def selected(self) -> bool:
+        """Return true if the stream is selected."""
+        return _catalog.is_stream_selected(
+            self._tap_input_catalog, self.name, self.logger
+        )
+
+    def is_property_selected(self, breadcrumb: Tuple[str]) -> bool:
+        """Return True if the property is selected for extract.
+
+        Breadcrumb of `[]` or `None` indicates the stream itself. Otherwise, the
+        breadcrumb is the path to a property within the stream.
+        """
+        return _catalog.is_property_selected(
+            self._singer_catalog_entry.to_dict(), self.name, breadcrumb, self.logger
+        )
 
     def _write_replication_key_signpost(
         self,
@@ -215,8 +237,16 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def _singer_metadata(self) -> dict:
-        """Return metadata object (dict) as specified in the Singer spec."""
-        self.logger.debug(f"Schema Debug: {self.schema}")
+        """Return metadata object (dict) as specified in the Singer spec.
+
+        Metadata from an input catalog will override standard metadata.
+        """
+        if self._tap_input_catalog:
+            catalog = singer.Catalog.from_dict(self._tap_input_catalog)
+            catalog_entry = catalog.get_stream(self.tap_stream_id)
+            if catalog_entry:
+                return catalog_entry.metadata
+
         md = metadata.get_standard_metadata(
             schema=self.schema,
             replication_method=self.replication_method,
@@ -245,6 +275,10 @@ class Stream(metaclass=abc.ABCMeta):
             row_count=None,
             stream_alias=None,
         )
+
+    @property
+    def _singer_catalog(self) -> singer.Catalog:
+        return singer.Catalog([self._singer_catalog_entry])
 
     @property
     def config(self) -> Mapping[str, Any]:
@@ -355,12 +389,31 @@ class Stream(metaclass=abc.ABCMeta):
         """Write out a SCHEMA message with the stream schema."""
         bookmark_keys = [self.replication_key] if self.replication_key else None
         selected_schema = get_selected_schema(
-            schema=self.schema, catalog_entry=self._singer_catalog_entry.dict()
+            self._singer_catalog.to_dict(), self.name, self.logger
         )
         schema_message = SchemaMessage(
             self.tap_stream_id, selected_schema, self.primary_keys, bookmark_keys
         )
         singer.write_message(schema_message)
+
+    def _write_record_message(self, record: dict) -> None:
+        """Write out a RECORD message."""
+        pop_deselected_record_properties(
+            record, self._singer_catalog, self.name, self.logger
+        )
+        record = conform_record_data_types(
+            stream_name=self.name,
+            row=record,
+            schema=self.schema,
+            logger=self.logger,
+        )
+        record_message = RecordMessage(
+            stream=self.name,
+            record=record,
+            version=None,
+            time_extracted=pendulum.now(),
+        )
+        singer.write_message(record_message)
 
     # Private sync methods:
 
@@ -388,20 +441,7 @@ class Stream(metaclass=abc.ABCMeta):
 
                 if rows_sent and ((rows_sent - 1) % self.STATE_MSG_FREQUENCY == 0):
                     self._write_state_message()
-                self._drop_deselected_properties(row_dict)
-                record = conform_record_data_types(
-                    stream_name=self.name,
-                    row=row_dict,
-                    schema=self.schema,
-                    logger=self.logger,
-                )
-                record_message = RecordMessage(
-                    stream=self.name,
-                    record=record,
-                    version=None,
-                    time_extracted=pendulum.now(),
-                )
-                singer.write_message(record_message)
+                self._write_record_message(row_dict)
                 try:
                     self._increment_stream_state(record, partition=partition)
                 except InvalidStreamSortException as ex:
@@ -420,9 +460,9 @@ class Stream(metaclass=abc.ABCMeta):
     def _drop_deselected_properties(self, record: Dict[str, Any]) -> None:
         """Drop values if deselected in schema or in catalog entry metadata."""
         # TODO: Call this recursively in order to handle nested properties
-        for property_name, elem in record.items():
-            property_schema = self.schema["properties"][property_name]
-            if not property_schema:
+        for property_name in list(record.keys()):
+            property_schema = self.schema["properties"].get(property_name, None)
+            if property_schema is None:
                 _warn_unmapped_property(self.name, property_name, self.logger)
                 record.pop(property_name)
             # TODO: Also need to check schema "selected" value if available
@@ -447,23 +487,12 @@ class Stream(metaclass=abc.ABCMeta):
         """Apply a catalog dict, updating any settings overridden within the catalog."""
         catalog = Catalog.from_dict(catalog_dict)
         catalog_entry: singer.CatalogEntry = catalog.get_stream(self.name)
+        self._tap_input_catalog = catalog_dict
         self.primary_keys = catalog_entry.key_properties
         self.replication_key = catalog_entry.replication_key
+        self._singer_metadata = catalog_entry.metadata
         if catalog_entry.replication_method:
             self.forced_replication_method = catalog_entry.replication_method
-
-    @property
-    def records(self) -> Iterable[dict]:
-        """Return a generator of row-type dictionary objects."""
-        if self.partitions:
-            for partition in self.partitions:
-                for row in self.get_records(partition):
-                    row = self.post_process(row, partition)
-                    yield row
-        else:
-            for row in self.get_records():
-                row = self.post_process(row)
-                yield row
 
     # Abstract Methods
 
