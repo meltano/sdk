@@ -1,13 +1,16 @@
-# Official language image. Look for the different tagged releases at:
-# https://hub.docker.com/r/library/python/tags/
-#
-# Matrix syntax not correct:
-# .parallel:python_version:
-#   parallel:
-#     matrix:
-#       - PYTHON_VERSION: ["3.6", "3.7", "3.8"]
+stages:
+  - test
+  - publish
 
-image: python:3.6
+default:
+  before_script:
+    - python -V
+    - pip install pipx
+    # Force update PATH to include pipx executables
+    - export PATH=$PATH:/root/.local/bin
+    - pipx install poetry
+    - pipx install tox
+    - poetry install
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
@@ -17,16 +20,14 @@ cache:
     - .cache/pip
     - venv/
 
-before_script:
-  - python -V
-  - pip install pipx
-  # Force update PATH to include pipx executables
-  - export PATH=$PATH:/root/.local/bin
-  - pipx install poetry
-  - pipx install tox
-  - poetry install
-
-test_and_deploy:
+build_and_test:
+  stage: test
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.6", "3.7", "3.8"]
+      # Official language image. Look for the different tagged releases at:
+      # https://hub.docker.com/r/library/python/tags/
+  image: python:${PYTHON_VERSION}
   script:
     - |
       if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
@@ -36,53 +37,59 @@ test_and_deploy:
       else
         echo "Run 'core' and 'cookiecutter' python test suites..."
         poetry run pytest singer_sdk/tests/core
-        poetry run pytest singer_sdk/tests/cookiecutter
+        poetry run pytest singer_sdk/tests/cookiecutters
       fi
+
+lint:
+  stage: test
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.8"]
+  image: python:${PYTHON_VERSION}
+  script:
+    - poetry run black --check singer_sdk/
+    - poetry run flake8 singer_sdk
+    - poetry run pydocstyle singer_sdk
+    - poetry run mypy singer_sdk || echo "MyPy found issues (ignoring)..."
+
+pypi_publish:
+  release:
+    name: '$CI_COMMIT_TAG'
+    tag_name: '$CI_COMMIT_TAG'
+    description: '$CI_COMMIT_TAG'
+  only:
+    - tags
+  stage: publish
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.8"]
+  image: python:${PYTHON_VERSION}
+  script:
     - |
-      echo "Run python linters..."
-      poetry run black --check singer_sdk/
-      poetry run flake8 singer_sdk
-      poetry run pydocstyle singer_sdk
-      poetry run mypy singer_sdk || echo "MyPy found issues (ignoring)..."
-    - |
-      echo "Publishing to PyPi..."
-      if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
+      echo "Publishing tag '$CI_COMMIT_TAG' to PyPi, Ref='$CI_COMMIT_REF_NAME' and Namespace='$CI_PROJECT_NAMESPACE'..."
+      echo "Detected poetry version: v$(poetry version --short)"
+      if [[ "$CI_COMMIT_TAG" == "v$(poetry version --short)" ]];
       then
-        if [[ "$BRANCH_NAME" == *main ]]
-        then
-          poetry version --short
-        else
-          poetry version $(poetry version --short)-dev.$CI_JOB_ID
-          poetry version --short
-        fi
-        echo -e "\nPublishing to version ref '$(poetry version --short)'...\n\n"
-        # poetry config pypi-token.pypi "$PYPI_PUBLISH_TOKEN"
+        echo -e "\nPublishing to version ref 'v$(poetry version --short)'...\n\n"
         poetry publish --build
       else
-        echo "Skipped. (Running in fork.)"
+        echo -e "\nERROR - Tag '$CI_COMMIT_TAG' did not match detected version 'v$(poetry version --short)'."
+        exit 1
       fi
+
+pypi_prerelease:
+  when: manual
+  except:
+    - tags
+  stage: publish
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.8"]
+  image: python:${PYTHON_VERSION}
+  script:
     - |
-      echo "Waiting for PyPi availability..."
-      if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
-      then
-        pwd
-        ls -la
-        export VER=$(poetry version --short)
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        echo "Checking for PyPi availability of version $VER"
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not found. Giving up. Last message from PyPi was $PIPERR"; exit 1; } fi;
-      else
-        echo "Skipped. (Running in fork.)"
-      fi
+      echo "Publishing to PyPi, Ref='$CI_COMMIT_REF_NAME' and Namespace='$CI_PROJECT_NAMESPACE'..."
+      poetry version $(poetry version --short)-dev.$CI_JOB_ID
+      poetry version --short
+      echo -e "\nPublishing to version ref '$(poetry version --short)'...\n\n"
+      poetry publish --build

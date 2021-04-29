@@ -15,7 +15,7 @@ pipx ensurepath
 pipx install poetry
 ```
 
-Initialize the project with [`poetry`](https://python-poetry.org/):
+Initialize [`poetry`](https://python-poetry.org/) inside your existing project:
 
 ```bash
 cd tap-<myproject>
@@ -34,7 +34,7 @@ Or to use a prerelease version of `singer-sdk` you can modify `pyproject.toml` a
 ```toml
 [tool.poetry.dependencies]
 python = "^3.8"
-singer-sdk = { git = "https://gitlab.com/meltano/singer-sdk.git", branch = "feature/initial-base-classes" }
+singer-sdk = { git = "https://gitlab.com/meltano/singer-sdk.git", branch = "development" }
 ```
 
 Then:
