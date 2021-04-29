@@ -22,11 +22,9 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
             raise ValueError("Graphql `query` property not set.")
         else:
             query = self.query
-        if not query.lstrip().starts_with("query"):
+        if not query.lstrip().startswith("query"):
             # Wrap text in "query { }" if not already wrapped
-            query = (
-                "query { " + query + " }"
-            )
+            query = "query { " + query + " }"
         query = query.lstrip()
         request_data = {
             "query": (" ".join([line.strip() for line in query.splitlines()])),
