@@ -380,6 +380,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _sync_records(self) -> None:
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
+        record_body = {}
         # Iterate through each returned record:
         partitions = self.partitions or [None]
         for partition in partitions:
