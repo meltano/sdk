@@ -32,10 +32,12 @@ from singer_sdk.helpers._state import (
     reset_state_progress_markers,
     write_replication_key_signpost,
 )
-from singer_sdk.exceptions import MaxRecordsLimitException, InvalidStreamSortException
+from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.helpers._compat import final
-from singer_sdk.helpers._util import utc_now
+from singer_sdk.helpers._util import (
+    utc_now, check_max_records_limit, get_batch_dir, get_batch_file
+)
 
 import singer
 from singer import RecordMessage, SchemaMessage, BatchMessage
@@ -74,6 +76,7 @@ class Stream(metaclass=abc.ABCMeta):
             raise ValueError("Missing argument or class variable 'name'.")
         self.logger: logging.Logger = tap.logger
         self.tap_name: str = tap.name
+        self.is_batch_enabled: bool = tap.batch
         self._config: dict = dict(tap.config)
         self._tap_state = tap.state
         self.forced_replication_method: Optional[str] = None
@@ -266,11 +269,6 @@ class Stream(metaclass=abc.ABCMeta):
             return REPLICATION_INCREMENTAL
         return REPLICATION_FULL_TABLE
 
-    @property
-    def batch_enabled(self) -> bool:
-        """True if BATCH messages enabled, else False."""
-        return self.config.get("batch_enabled", False)
-
     # State properties:
 
     @property
@@ -319,7 +317,8 @@ class Stream(metaclass=abc.ABCMeta):
     # Private bookmarking methods
 
     def _increment_stream_state(
-        self, latest_record: Dict[str, Any], *, partition: Optional[dict] = None
+        self, latest_record: Dict[str, Any], *, partition: Optional[dict] = None,
+        rows_sent: Optional[int] = None
     ):
         """Update state of stream or partition with data from the provided record.
 
@@ -337,15 +336,26 @@ class Stream(metaclass=abc.ABCMeta):
                         f"Could not detect replication key for '{self.name}' stream"
                         f"(replication method={self.replication_method})"
                     )
-                increment_state(
-                    state_dict,
-                    replication_key=self.replication_key,
-                    replication_key_signpost=self.get_replication_key_signpost(
-                        partition=partition
-                    ),
-                    latest_record=latest_record,
-                    is_sorted=self.is_sorted,
-                )
+                try:
+                    increment_state(
+                        state_dict,
+                        replication_key=self.replication_key,
+                        replication_key_signpost=self.get_replication_key_signpost(
+                            partition=partition
+                        ),
+                        latest_record=latest_record,
+                        is_sorted=self.is_sorted,
+                    )
+                except InvalidStreamSortException as ex:
+                    if rows_sent:
+                        msg = f"Sorting error detected on row #{rows_sent+1}. "
+                    else:
+                        msg = f"Sorting error detected. "
+                    if partition:
+                        msg += f"Partition was {str(partition)}. "
+                    msg += str(ex)
+                    self.logger.error(msg)
+                    raise ex
 
     # Private message authoring methods:
 
@@ -367,136 +377,98 @@ class Stream(metaclass=abc.ABCMeta):
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
         # Iterate through each returned record:
-        if partition:
-            partitions = [partition]
-        else:
-            partitions = self.partitions or [None]
-        for partition in partitions:
-            state = self.get_stream_or_partition_state(partition)
-            reset_state_progress_markers(state)
-            for row_dict in self.get_records(partition=partition):
-                if (
-                    self._MAX_RECORDS_LIMIT is not None
-                    and rows_sent >= self._MAX_RECORDS_LIMIT
-                ):
-                    raise MaxRecordsLimitException(
-                        "Stream prematurely aborted due to the stream's max record "
-                        f"limit ({self._MAX_RECORDS_LIMIT}) being reached."
-                    )
-
-                if rows_sent and ((rows_sent - 1) % self.STATE_MSG_FREQUENCY == 0):
-                    self._write_state_message()
-                record = conform_record_data_types(
-                    stream_name=self.name,
-                    row=row_dict,
-                    schema=self.schema,
-                    logger=self.logger,
-                )
-                record_message = RecordMessage(
-                    stream=self.name,
-                    record=record,
-                    version=None,
-                    time_extracted=pendulum.now(),
-                )
-                singer.write_message(record_message)
-                try:
-                    self._increment_stream_state(record, partition=partition)
-                except InvalidStreamSortException as ex:
-                    msg = f"Sorting error detected on row #{rows_sent+1}. "
-                    if partition:
-                        msg += f"Partition was {str(partition)}. "
-                    msg += str(ex)
-                    self.logger.error(msg)
-                    raise ex
-                rows_sent += 1
-            finalize_state_progress_markers(state)
-        self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
-        # Reset interim bookmarks before emitting final STATE message:
-        self._write_state_message()
-
-    def _sync_records_batch(self, partition: Optional[dict] = None) -> None:
-        """Sync records in batches, emitting BATCH and STATE messages."""
-        rows_sent = 0
-        batch_size = 0
-        batch_count = 0
-        record = {}
-        tmp_dir = tempfile.mkdtemp()
-        # Iterate through each returned record:
-        if partition:
-            partitions = [partition]
-        else:
-            partitions = self.partitions or [None]
+        partitions = self.partitions or [None]
         for partition in partitions:
             state = self.get_stream_or_partition_state(partition)
             reset_state_progress_markers(state)
 
-            batch_file_path = Path(
-                tmp_dir, f"{self.name}-{str(batch_count).zfill(12)}.jsonl"
-            )
-            batch_file = open(batch_file_path, "w")
+            if self.is_batch_enabled:
+                # Create batch dir
+                batch_dir = get_batch_dir(
+                    tap_name=self.tap_name,
+                    stream_name=self.name
+                )
+                # Get and open first file
+                batch_file_path = get_batch_file(
+                    batch_dir=batch_dir, file_index=0
+                )
+                batch_file = batch_file_path.open(mode="w")
+
             for row_dict in self.get_records(partition=partition):
-                if (
-                    self._MAX_RECORDS_LIMIT is not None
-                    and rows_sent >= self._MAX_RECORDS_LIMIT
-                ):
-                    batch_file.close()
-                    raise MaxRecordsLimitException(
-                        "Stream prematurely aborted due to the stream's max record "
-                        f"limit ({self._MAX_RECORDS_LIMIT}) being reached."
+                # Check max records limit
+                if self._MAX_RECORDS_LIMIT is not None:
+                    check_max_records_limit(
+                        max_records_limit=self._MAX_RECORDS_LIMIT,
+                        rows_sent=rows_sent
                     )
 
                 if rows_sent and (rows_sent % self.BATCH_SIZE == 0):
-                    # When BATCH_SIZE reached:
-                    # close file
-                    batch_file.close()
-                    # increment state using previous record in loop
-                    try:
-                        self._increment_stream_state(record, partition=partition)
-                    except InvalidStreamSortException as ex:
-                        msg = f"Sorting error detected on row #{rows_sent+1}. "
-                        if partition:
-                            msg += f"Partition was {str(partition)}. "
-                        msg += str(ex)
-                        self.logger.error(msg)
-                        raise ex
-                    # emit BATCH message
-                    batch_massage = BatchMessage(
-                        stream=self.name,
-                        filepath=str(batch_file_path),
-                        batch_size=batch_size,
-                    )
-                    singer.write_message(batch_massage)
+                    if self.is_batch_enabled:
+                        # close file
+                        batch_file.close()
+                        # emit BATCH message
+                        batch_massage = BatchMessage(
+                            stream=self.name,
+                            filepath=str(batch_file_path),
+                            batch_size=self.BATCH_SIZE
+                        )
+                        singer.write_message(batch_massage)
+                        # Get and open new file
+                        batch_index = rows_sent / self.BATCH_SIZE
+                        batch_file_path = get_batch_file(
+                            batch_dir=batch_dir, file_index=batch_index
+                        )
+                        batch_file = batch_file_path.open(mode="w")
+
+                    # Write STATE message
                     self._write_state_message()
-                    # create new file and reset `batch_size` counter
-                    batch_file_path = Path(
-                        tmp_dir, f"{self.name}-{str(batch_count).zfill(9)}.jsonl"
-                    )
-                    batch_file = open(batch_file_path, "w")
-                    batch_size = 0
-                    batch_count += 1
 
                 # Warning - this drops properties not declared in SCHEMA
-                record = conform_record_data_types(
+                record_body = conform_record_data_types(
                     stream_name=self.name,
                     row=row_dict,
                     schema=self.schema,
                     logger=self.logger,
                 )
-                batch_file.write(json.dumps(record))
-                batch_file.write("\n")
-                rows_sent += 1
-                batch_size += 1
 
-            # Close and emit last BATCH message
-            batch_file.close()
-            batch_massage = BatchMessage(
-                stream=self.name, filepath=str(batch_file_path), batch_size=batch_size
-            )
-            singer.write_message(batch_massage)
-            # Emit last State
+                if self.is_batch_enabled:
+                    # Write RECORD body to file
+                    batch_file.write(json.dumps(record_body) + '\n')
+                else:
+                    # Emit RECORD message
+                    record_message = RecordMessage(
+                        stream=self.name,
+                        record=record_body,
+                        version=None,
+                        time_extracted=pendulum.now(),
+                    )
+                    singer.write_message(record_message)
+                    self._increment_stream_state(
+                        record_body, partition=partition, rows_sent=rows_sent
+                    )
+                # Increment row counter
+                rows_sent += 1
+
+            if self.is_batch_enabled:
+                # Close file and emit last BATCH message
+                batch_file.close()
+                last_batch_calc = divmod(rows_sent+1, self.BATCH_SIZE)
+                last_batch_size = (
+                    last_batch_calc[1] if not last_batch_calc[1] == 0
+                    else self.BATCH_SIZE
+                )
+                batch_massage = BatchMessage(
+                    stream=self.name,
+                    filepath=str(batch_file_path),
+                    batch_size=last_batch_size
+                )
+                singer.write_message(batch_massage)
+
             finalize_state_progress_markers(state)
-            self._write_state_message()
-            self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
+
+        self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
+        # Reset interim bookmarks before emitting final STATE message:
+        self._write_state_message()
 
     # Public methods ("final", not recommended to be overridden)
 
@@ -509,10 +481,7 @@ class Stream(metaclass=abc.ABCMeta):
         # Send a SCHEMA message to the downstream target:
         self._write_schema_message()
         # Sync the records themselves:
-        if self.batch_enabled:
-            self._sync_records_batch()
-        else:
-            self._sync_records()
+        self._sync_records()
 
     # Overridable Methods
 

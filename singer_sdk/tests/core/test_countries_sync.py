@@ -14,7 +14,7 @@ def test_countries_sync_all():
 
 def test_countries_sync_all_batch():
     """Test sync_all() for countries sample."""
-    tap = SampleTapCountries(config={"batch_enabled": True})
+    tap = SampleTapCountries(batch=True)
     tap.sync_all()
 
 

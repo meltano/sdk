@@ -28,10 +28,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         catalog: Union[PurePath, str, dict, None] = None,
         state: Union[PurePath, str, dict, None] = None,
         parse_env_config: bool = False,
+        batch: bool = False
     ) -> None:
         """Initialize the tap."""
         super().__init__(config=config, parse_env_config=parse_env_config)
-
+        # Declare public members
+        self.batch = batch
         # Declare private members
         self._streams: Optional[Dict[str, Stream]] = None
         self._input_catalog: Optional[dict] = None
@@ -198,6 +200,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         @click.option("--config", multiple=True)
         @click.option("--catalog")
         @click.option("--state")
+        @click.option("--batch", is_flag=True)
         @click.command()
         def cli(
             version: bool = False,
@@ -208,6 +211,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             state: str = None,
             catalog: str = None,
             format: str = None,
+            batch: str = None
         ):
             """Handle command line execution."""
             if version:
@@ -242,6 +246,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 state=state,
                 catalog=catalog,
                 parse_env_config=parse_env_config,
+                batch=batch,
             )
             if discover:
                 tap.run_discovery()
