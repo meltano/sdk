@@ -49,37 +49,42 @@ def schema():
 
 
 @pytest.fixture
-def catalog_entry_obj(schema, stream_name) -> singer.CatalogEntry:
+def selection_metadata():
+    return [
+        {
+            "breadcrumb": (),
+            "metadata": {
+                "selected": True,
+            },
+        },
+        {
+            "breadcrumb": ("properties", "col_a", "col_a_2"),
+            "metadata": {
+                "selected": False,  # Should not be overridden by parent
+            },
+        },
+        {
+            "breadcrumb": ("properties", "col_b"),
+            "metadata": {
+                "selected": False,
+            },
+        },
+        {
+            "breadcrumb": ("properties", "col_b", "col_b_1"),
+            "metadata": {
+                "selected": True,  # Should be overridden by parent
+            },
+        },
+    ]
+
+
+@pytest.fixture
+def catalog_entry_obj(schema, stream_name, selection_metadata) -> singer.CatalogEntry:
     return singer.CatalogEntry(
         tap_stream_id=stream_name,
         stream=stream_name,
         schema=singer.Schema.from_dict(schema),
-        metadata=[
-            {
-                "breadcrumb": (),
-                "metadata": {
-                    "selected": True,
-                },
-            },
-            {
-                "breadcrumb": ("col_a", "col_a_2"),
-                "metadata": {
-                    "selected": False,  # Should not be overridden by parent
-                },
-            },
-            {
-                "breadcrumb": ("col_b",),
-                "metadata": {
-                    "selected": False,
-                },
-            },
-            {
-                "breadcrumb": ("col_b", "col_b_1"),
-                "metadata": {
-                    "selected": True,  # Should be overridden by parent
-                },
-            },
-        ],
+        metadata=selection_metadata,
     )
 
 
@@ -97,16 +102,16 @@ def catalog(catalog_entry_obj):
 def selection_test_cases():
     return [
         ((), True),
-        (("col_a",), True),
-        (("col_a", "col_a_1"), True),
-        (("col_a", "col_a_2"), False),
-        (("col_b",), False),
-        (("col_b", "col_b_1"), False),
-        (("col_b", "col_b_2"), False),
+        (("properties", "col_a"), True),
+        (("properties", "col_a", "col_a_1"), True),
+        (("properties", "col_a", "col_a_2"), False),
+        (("properties", "col_b"), False),
+        (("properties", "col_b", "col_b_1"), False),
+        (("properties", "col_b", "col_b_2"), False),
     ]
 
 
-def test_schema_selection(schema, catalog, stream_name):
+def test_schema_selection(catalog, stream_name):
     """Test that schema selection rules are correctly applied to SCHEMA messages."""
     selected_schema = get_selected_schema(catalog, stream_name, logging.getLogger())
     # selected_schema["properties"]["required"] = []
@@ -123,8 +128,9 @@ def test_schema_selection(schema, catalog, stream_name):
     )
 
 
-def test_record_selection(record, catalog, stream_name, selection_test_cases):
+def test_record_selection(record, catalog, stream_name, selection_test_cases, caplog):
     """Test that record selection rules are correctly applied to SCHEMA messages."""
+    caplog.set_level(logging.DEBUG)
     for bookmark, expected in selection_test_cases:
         assert (
             is_property_selected(

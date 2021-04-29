@@ -30,8 +30,7 @@ def is_property_selected(
     Breadcrumb of `[]` or `None` indicates the stream itself. Otherwise, the
     breadcrumb is the path to a property within the stream.
     """
-    if breadcrumb is None:
-        breadcrumb = cast(Tuple[str], ())
+    breadcrumb = breadcrumb or cast(Tuple[str, ...], ())
     if isinstance(breadcrumb, str):
         breadcrumb = tuple([breadcrumb])
     if not isinstance(breadcrumb, tuple):
@@ -82,9 +81,12 @@ def is_property_selected(
     if "selected" in md_entry:
         return md_entry["selected"]
 
+    if md_entry.get("inclusion") == "available":
+        return True
+
     raise ValueError(
-        f"Could not detect selection status for '{stream_name}' stream property "
-        f"'{':'.join(breadcrumb)}'"
+        f"Could not detect selection status for '{stream_name}' breadcrumb "
+        f"'{breadcrumb}' using metadata: {md_map}"
     )
 
 
@@ -109,6 +111,7 @@ def _pop_deselected_schema(
     Walk through schema, starting at the index in breadcrumb, recursively update in
     place.
     """
+    breadcrumb = breadcrumb or ("properties",)
     for property_name, val in list(schema.get("properties", {}).items()):
         logger.info(f"Checking '{property_name}' under '{breadcrumb}...")
         property_breadcrumb: Tuple[str, ...] = tuple(list(breadcrumb) + [property_name])
@@ -139,7 +142,7 @@ def pop_deselected_record_properties(
     place.
     """
     for property_name, val in list(record.items()):
-        logger.info(f"Checking '{property_name}' under '{breadcrumb}...")
+        logger.info(f"Checking '{property_name}' under '{breadcrumb}'...")
         property_breadcrumb: Tuple[str, ...] = tuple(list(breadcrumb) + [property_name])
         selected = is_property_selected(
             catalog, stream_name, property_breadcrumb, logger
@@ -150,6 +153,6 @@ def pop_deselected_record_properties(
 
         if isinstance(val, dict):
             # call recursively in case any subproperties are deselected.
-            _pop_deselected_record_properties(
-                val, catalog, stream_name, property_breadcrumb, logger
+            pop_deselected_record_properties(
+                val, catalog, stream_name, logger, property_breadcrumb
             )

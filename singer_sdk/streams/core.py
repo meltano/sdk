@@ -249,7 +249,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         md = metadata.get_standard_metadata(
             schema=self.schema,
-            replication_method=self.replication_method,
+            replication_method=self.forced_replication_method,
             key_properties=self.primary_keys or None,
             valid_replication_keys=(
                 [self.replication_key] if self.replication_key else None
@@ -399,7 +399,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _write_record_message(self, record: dict) -> None:
         """Write out a RECORD message."""
         pop_deselected_record_properties(
-            record, self._singer_catalog, self.name, self.logger
+            record, self._singer_catalog.to_dict(), self.name, self.logger
         )
         record = conform_record_data_types(
             stream_name=self.name,
@@ -443,7 +443,7 @@ class Stream(metaclass=abc.ABCMeta):
                     self._write_state_message()
                 self._write_record_message(row_dict)
                 try:
-                    self._increment_stream_state(record, partition=partition)
+                    self._increment_stream_state(row_dict, partition=partition)
                 except InvalidStreamSortException as ex:
                     msg = f"Sorting error detected on row #{rows_sent+1}. "
                     if partition:
@@ -490,7 +490,6 @@ class Stream(metaclass=abc.ABCMeta):
         self._tap_input_catalog = catalog_dict
         self.primary_keys = catalog_entry.key_properties
         self.replication_key = catalog_entry.replication_key
-        self._singer_metadata = catalog_entry.metadata
         if catalog_entry.replication_method:
             self.forced_replication_method = catalog_entry.replication_method
 
