@@ -81,7 +81,6 @@ class Stream(metaclass=abc.ABCMeta):
         self.logger: logging.Logger = tap.logger
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
-        self._tap = tap
         self._tap_state = tap.state
         self._tap_input_catalog: Optional[dict] = None
         self.forced_replication_method: Optional[str] = None
