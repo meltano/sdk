@@ -50,7 +50,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         self._compiled_jsonpath = None
 
     @property
-    def jsonpath(self) -> jsonpath_rw.JSONPath:
+    def _jsonpath(self) -> jsonpath_rw.JSONPath:
         """Compiled response JSONPath."""
         if not self._compiled_jsonpath:
             self._compiled_jsonpath = jsonpath_rw.parse(self.response_path)
@@ -220,7 +220,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows."""
         resp_json = response.json()
-        yield from [match.value for match in self.jsonpath.find(resp_json)]
+        yield from [match.value for match in self._jsonpath.find(resp_json)]
 
     # Abstract methods:
 
