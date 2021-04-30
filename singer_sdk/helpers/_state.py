@@ -196,18 +196,16 @@ def increment_state(
         progress_dict = state[PROGRESS_MARKERS]
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
     new_rk_value = to_json_compatible(latest_record[replication_key])
-    replication_key_signpost = to_json_compatible(replication_key_signpost)
-    if is_sorted and old_rk_value and old_rk_value > new_rk_value:
+    if old_rk_value is None or new_rk_value > old_rk_value:
+        progress_dict["replication_key"] = replication_key
+        progress_dict["replication_key_value"] = new_rk_value
+        return
+
+    if is_sorted:
         raise InvalidStreamSortException(
             f"Unsorted data detected in stream. Latest value '{new_rk_value}' is "
             f"smaller than previous max '{old_rk_value}'."
         )
-    if replication_key_signpost and replication_key_signpost < new_rk_value:
-        # Overflowed max bookmark threshold, reset to the max for this key:
-        new_rk_value = replication_key_signpost
-
-    progress_dict["replication_key"] = replication_key
-    progress_dict["replication_key_value"] = new_rk_value
 
 
 def _greater_than_signpost(
