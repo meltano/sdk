@@ -457,17 +457,6 @@ class Stream(metaclass=abc.ABCMeta):
         # Reset interim bookmarks before emitting final STATE message:
         self._write_state_message()
 
-    def _drop_deselected_properties(self, record: Dict[str, Any]) -> None:
-        """Drop values if deselected in schema or in catalog entry metadata."""
-        # TODO: Call this recursively in order to handle nested properties
-        for property_name in list(record.keys()):
-            property_schema = self.schema["properties"].get(property_name, None)
-            if property_schema is None:
-                _warn_unmapped_property(self.name, property_name, self.logger)
-                record.pop(property_name)
-            # TODO: Also need to check schema "selected" value if available
-            # TODO: Also need to check catalog entry's metadata rules
-
     # Public methods ("final", not recommended to be overridden)
 
     @final

@@ -106,9 +106,9 @@ def _pop_deselected_schema(
     breadcrumb: Tuple[str, ...],
     logger: Logger,
 ) -> None:
-    """Remove anything schema that is not selected.
+    """Remove anything from schema that is not selected.
 
-    Walk through schema, starting at the index in breadcrumb, recursively update in
+    Walk through schema, starting at the index in breadcrumb, recursively updating in
     place.
     """
     breadcrumb = breadcrumb or ("properties",)
@@ -136,10 +136,10 @@ def pop_deselected_record_properties(
     logger: Logger,
     breadcrumb: Tuple[str, ...] = (),
 ) -> None:
-    """Remove anything schema that is not selected.
+    """Remove anything from record properties that is not selected.
 
-    Walk through schema, starting at the index in breadcrumb, recursively update in
-    place.
+    Walk through properties, starting at the index in breadcrumb, recursively
+    updating in place.
     """
     for property_name, val in list(record.items()):
         logger.info(f"Checking '{property_name}' under '{breadcrumb}'...")

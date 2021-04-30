@@ -122,8 +122,8 @@ def conform_record_data_types(  # noqa: C901
             continue
 
         property_schema = schema["properties"][property_name]
-        if isinstance(elem, datetime.datetime):
-            rec[property_name] = elem.isoformat() + "+00:00"
+        if isinstance(elem, (datetime.datetime, pendulum.Pendulum)):
+            rec[property_name] = to_json_compatible(elem)
         elif isinstance(elem, datetime.date):
             rec[property_name] = elem.isoformat() + "T00:00:00+00:00"
         elif isinstance(elem, datetime.timedelta):
