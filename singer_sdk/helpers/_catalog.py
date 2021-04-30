@@ -9,6 +9,11 @@ from singer.catalog import Catalog
 
 from singer_sdk.helpers._typing import is_object_type
 
+from memoization import cached
+
+
+_MAX_LRU_CACHE = 500
+
 
 def is_stream_selected(
     catalog: Optional[dict],
@@ -19,12 +24,13 @@ def is_stream_selected(
     return is_property_selected(catalog, stream_name, breadcrumb=(), logger=logger)
 
 
+@cached(max_size=_MAX_LRU_CACHE)
 def is_property_selected(  # noqa: C901  # ignore 'too complex'
     catalog: Optional[dict],
     stream_name: str,
     breadcrumb: Optional[Tuple[str, ...]],
     logger: Logger,
-):
+) -> bool:
     """Return True if the property is selected for extract.
 
     Breadcrumb of `[]` or `None` indicates the stream itself. Otherwise, the
@@ -66,7 +72,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
             f"Catalog entry missing for '{stream_name}':'{breadcrumb}'. "
             f"Using parent value of selected={parent_value}."
         )
-        return parent_value
+        return parent_value or False
 
     if md_entry.get("inclusion") == "unsupported":
         return False
@@ -91,6 +97,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     )
 
 
+@cached(max_size=_MAX_LRU_CACHE)
 def get_selected_schema(catalog: dict, stream_name: str, logger: Logger) -> dict:
     """Return a copy of the provided JSON schema, dropping any fields not selected."""
     catalog_obj = Catalog.from_dict(catalog)
