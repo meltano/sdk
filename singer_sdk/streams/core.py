@@ -16,7 +16,6 @@ from typing import (
     Optional,
     TypeVar,
     Union,
-    Tuple,
 )
 
 import pendulum
