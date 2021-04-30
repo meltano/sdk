@@ -188,7 +188,10 @@ class ObjectType(JSONTypeHelper):
             merged_props.update(w.to_dict())
             if not w.optional:
                 required.append(w.name)
-        return {"type": "object", "properties": merged_props, "required": required}
+        result = {"type": "object", "properties": merged_props}
+        if required:
+            result["required"] = required
+        return result
 
 
 class PropertiesList(ObjectType):
