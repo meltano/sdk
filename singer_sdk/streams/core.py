@@ -34,7 +34,6 @@ from singer_sdk.helpers._catalog import (
 
 from singer_sdk.helpers._typing import (
     conform_record_data_types,
-    _warn_unmapped_property,
     is_datetime_type,
 )
 from singer_sdk.helpers._state import (
@@ -134,16 +133,6 @@ class Stream(metaclass=abc.ABCMeta):
         """Return true if the stream is selected."""
         return _catalog.is_stream_selected(
             self._tap_input_catalog, self.name, self.logger
-        )
-
-    def is_property_selected(self, breadcrumb: Tuple[str]) -> bool:
-        """Return True if the property is selected for extract.
-
-        Breadcrumb of `[]` or `None` indicates the stream itself. Otherwise, the
-        breadcrumb is the path to a property within the stream.
-        """
-        return _catalog.is_property_selected(
-            self._singer_catalog_entry.to_dict(), self.name, breadcrumb, self.logger
         )
 
     def _write_replication_key_signpost(

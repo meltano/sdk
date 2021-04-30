@@ -1,7 +1,7 @@
 """Private helper functions for catalog and selection logic."""
 
 from copy import deepcopy
-from typing import Optional, List, Tuple, cast
+from typing import Optional, Tuple, cast
 from logging import Logger
 
 from singer import metadata
@@ -19,7 +19,7 @@ def is_stream_selected(
     return is_property_selected(catalog, stream_name, breadcrumb=(), logger=logger)
 
 
-def is_property_selected(
+def is_property_selected(  # noqa: C901  # ignore 'too complex'
     catalog: Optional[dict],
     stream_name: str,
     breadcrumb: Optional[Tuple[str, ...]],
@@ -38,6 +38,7 @@ def is_property_selected(
             f"Expected tuple value for breadcrumb '{breadcrumb}'. "
             f"Got {type(breadcrumb).__name__}"
         )
+
     if not catalog:
         return True
 
