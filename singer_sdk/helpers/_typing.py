@@ -34,6 +34,16 @@ def append_type(type_dict: dict, new_type: str) -> dict:
     return result
 
 
+def is_object_type(property_schema: dict) -> Optional[bool]:
+    """Return true if the JSON Schema type is an object or None if detection fails."""
+    if "anyOf" not in property_schema and "type" not in property_schema:
+        return None  # Could not detect data type
+    for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
+        if "object" in property_type or property_type == "object":
+            return True
+    return False
+
+
 def is_datetime_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition is a 'date-time' type.
 
