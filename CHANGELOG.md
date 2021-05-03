@@ -16,15 +16,21 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
-## [Unreleased]
+## v0.1.4
 
 ### Added
 
 - Added support for GraphQL query variables (#115, !78)
+- Added selection rules support for record and schema messages (#7, !26)
 
 ### Changed
 
-- Improved cookiecutter template coverage, resolved whitespace readability issues. (#116, #119, !75)
+- Improved cookiecutter template coverage, resolved readability issues. (#116, #119, !75)
+
+### Fixed
+
+- Resolved tap failure when a stream is missing from the input catalog. (#105, !80)
+- Resolved bug where unsorted streams did not properly advance state bookmarks for incremental streams. (#118, !74)
 
 ## v0.1.3
 
