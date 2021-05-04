@@ -16,6 +16,12 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
+## Unreleased
+
+### Fixed
+
+- Resolved tap failure when a sorted stream has non-unique replication keys. (#120, !82)
+
 ## v0.1.4
 
 ### Added
