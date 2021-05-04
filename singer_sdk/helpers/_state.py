@@ -196,7 +196,7 @@ def increment_state(
         progress_dict = state[PROGRESS_MARKERS]
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
     new_rk_value = to_json_compatible(latest_record[replication_key])
-    if old_rk_value is None or new_rk_value > old_rk_value:
+    if old_rk_value is None or new_rk_value >= old_rk_value:
         progress_dict["replication_key"] = replication_key
         progress_dict["replication_key_value"] = new_rk_value
         return
