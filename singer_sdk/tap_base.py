@@ -182,7 +182,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     def sync_all(self):
         """Sync all streams."""
         for stream in self.streams.values():
-            stream.sync()
+            if stream.selected:
+                stream.sync()
+            else:
+                self.logger.info(f"Skipping deselected stream '{stream.name}'.")
 
     # Command Line Execution
 

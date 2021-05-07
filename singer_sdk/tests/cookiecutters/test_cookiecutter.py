@@ -34,6 +34,8 @@ def cookiecutter_template_test(cookiecutter_dir: str):
     style_guide_strict = flake8.get_style_guide(
         ignore=[
             "F401",  # "imported but unused"
+            "W292",  # "no newline at end of file"
+            "W391",  # "blank line at end of file"
         ]
     )
     for input in template_inputs:
@@ -53,12 +55,6 @@ def cookiecutter_template_test(cookiecutter_dir: str):
             assert (
                 not errors
             ), f"Flake8 found violations in first pass of {filepath}: {errors}"
-            black.format_file_in_place(
-                Path(filepath),
-                fast=False,
-                mode=black.FileMode(),
-                write_back=black.WriteBack.YES,
-            )
             mypy_out = api.run([filepath])
             mypy_msg = str(mypy_out[0])
             if not mypy_msg.startswith("Success:"):
@@ -69,3 +65,9 @@ def cookiecutter_template_test(cookiecutter_dir: str):
             assert (
                 not errors
             ), f"Flake8 found violations in second pass of {filepath}: {errors}"
+            black.format_file_in_place(
+                Path(filepath),
+                fast=False,
+                mode=black.FileMode(),
+                write_back=black.WriteBack.NO,
+            )
