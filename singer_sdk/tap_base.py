@@ -185,7 +185,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             if stream.selected:
                 stream.sync()
             else:
-                self.logger(f"Skipping deselected stream '{stream.name}'.")
+                self.logger.info(f"Skipping deselected stream '{stream.name}'.")
 
     # Command Line Execution
 
