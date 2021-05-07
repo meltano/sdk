@@ -20,6 +20,12 @@ The next few lines form the template for unreleased changes.
 
 ### Fixed
 
+- Resolve excessive logging during selection filtering. (#125, !83)
+
+## v0.1.5
+
+### Fixed
+
 - Resolved tap failure when a sorted stream has non-unique replication keys. (#120, !82)
 
 ## v0.1.4
