@@ -61,8 +61,9 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     md_entry = md_map.get(breadcrumb)
     parent_value = None
     if len(breadcrumb) > 0:
+        parent_breadcrumb = tuple(list(breadcrumb)[:-2])
         parent_value = is_property_selected(
-            catalog, stream_name, tuple(list(breadcrumb)[:-1]), logger
+            catalog, stream_name, parent_breadcrumb, logger
         )
     if parent_value is False:
         return parent_value
@@ -119,9 +120,8 @@ def _pop_deselected_schema(
     Walk through schema, starting at the index in breadcrumb, recursively updating in
     place.
     """
-    breadcrumb = breadcrumb or ("properties",)
     for property_name, val in list(schema.get("properties", {}).items()):
-        property_breadcrumb: Tuple[str, ...] = tuple(list(breadcrumb) + [property_name])
+        property_breadcrumb: Tuple[str, ...] = tuple(list(breadcrumb) + ['properties', property_name])
         selected = is_property_selected(
             catalog, stream_name, property_breadcrumb, logger
         )
@@ -149,7 +149,7 @@ def pop_deselected_record_properties(
     updating in place.
     """
     for property_name, val in list(record.items()):
-        property_breadcrumb: Tuple[str, ...] = tuple(list(breadcrumb) + [property_name])
+        property_breadcrumb: Tuple[str, ...] = tuple(list(breadcrumb) + ['properties', property_name])
         selected = is_property_selected(
             catalog, stream_name, property_breadcrumb, logger
         )
