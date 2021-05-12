@@ -10,6 +10,8 @@ from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
 from jsonschema import ValidationError, SchemaError, Draft4Validator
 from pathlib import PurePath
 
+from pydantic import BaseSettings
+
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
 from singer_sdk.helpers._util import read_json_file
@@ -20,9 +22,21 @@ from singer_sdk.typing import extend_validator_with_defaults
 import click
 
 SDK_PACKAGE_NAME = "singer_sdk"
+ConfigInput = Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]]
 
 
 JSONSchemaValidator = extend_validator_with_defaults(Draft4Validator)
+
+
+class BasePluginConfig(BaseSettings):
+    """Configuration class for a Singer Plugin.
+
+    Placeholder class in case we want to override.
+
+    TODO: Known undesired behaviour
+        - Environment variables are eagerly parsed
+        - Environment prefix is not derived from PluginBase.name
+    """
 
 
 class PluginBase(metaclass=abc.ABCMeta):
@@ -30,6 +44,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     name: str = None
     config_jsonschema: Optional[dict] = None
+    config_model: Optional[BasePluginConfig] = None
 
     _config: dict
 
@@ -42,7 +57,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        config: ConfigInput = None,
         parse_env_config: bool = False,
     ) -> None:
         """Initialize the tap or target.
@@ -51,6 +66,33 @@ class PluginBase(metaclass=abc.ABCMeta):
         it can be a predetermined config dict.
         - `parse_env_config` - True to parse settings from env vars.
         """
+        if self.config_jsonschema:
+            self._get_config_dict_from_schema(config, parse_env_config)
+        elif self.config_model:
+            self._get_config_dict_from_model(config)
+
+    def _get_config_dict_from_model(self, config: ConfigInput):
+        """Parse and validate configuration using the plugin's config_model."""
+        if not config:
+            config_dict = self.config_model().dict()
+        elif isinstance(config, (str, PurePath)):
+            config_dict = self.config_model.parse_file(config).dict(by_alias=True)
+        elif isinstance(config, list):
+            merged_dict = {}
+            for path in config:
+                merged_dict.update(read_json_file(path))
+            obj = self.config_model.parse_obj(merged_dict)
+            config_dict = obj.dict()
+        elif isinstance(config, dict):
+            config_dict = self.config_model.parse_obj(config).dict()
+        self._config = config_dict
+
+    def _get_config_dict_from_schema(
+        self,
+        config: ConfigInput = None,
+        parse_env_config: bool = False,
+    ) -> None:
+        """Parse and validate configuration using the plugin's config_jsonschema."""
         if not config:
             config_dict = {}
         elif isinstance(config, str) or isinstance(config, PurePath):
