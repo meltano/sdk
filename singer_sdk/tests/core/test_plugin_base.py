@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from pydantic.fields import Field
 
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
-from singer_sdk.plugin_base import BasePluginConfig, PluginBase
+from singer_sdk.plugin_base import PluginBase
 
 
 class PluginTest(PluginBase):
@@ -28,23 +28,21 @@ class NestedConfig(BaseModel):
     start_date: datetime.datetime
 
 
-class PydanticPluginConfig(BasePluginConfig):
-    """Pydantic Plugin config."""
-
-    token: str
-    some_flag: bool = False
-    segments: List[int] = Field(default_factory=list)
-    nested: NestedConfig = None
-
-    class Config(BasePluginConfig.Config):
-        env_prefix = "pydantic_test_"
-
-
 class PydanticPlugin(PluginBase):
     """Example Pydantic Plugin for tests."""
 
     name = "pydantic-test"
-    config_model = PydanticPluginConfig
+
+    class ConfigModel(PluginBase.ConfigModel):
+        """Pydantic Plugin config."""
+
+        token: str
+        some_flag: bool = False
+        segments: List[int] = Field(default_factory=list)
+        nested: NestedConfig = None
+
+        class Config(PluginBase.ConfigModel.Config):
+            env_prefix = "pydantic_test_"
 
 
 def test_get_env_var_config():
