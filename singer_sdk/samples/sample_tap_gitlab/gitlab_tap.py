@@ -3,8 +3,6 @@
 from datetime import datetime
 from typing import List
 
-from pydantic import BaseModel
-
 from singer_sdk import Tap, Stream
 from singer_sdk.plugin_base import BasePluginConfig
 from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
@@ -35,7 +33,7 @@ class TapGitlabConfig(BasePluginConfig):
     group_ids: List[str]
     start_date: datetime
 
-    class Config(BaseSettings.Config):
+    class Config(BasePluginConfig.Config):
         """Pydantic meta config."""
 
         env_prefix = "tap_gitlab_"
