@@ -1,13 +1,10 @@
 """Sample tap test for tap-gitlab."""
 
-from singer_sdk.typing import (
-    ArrayType,
-    DateTimeType,
-    Property,
-    PropertiesList,
-    StringType,
-)
+from datetime import datetime
 from typing import List
+
+from pydantic import BaseModel
+
 from singer_sdk import Tap, Stream
 from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
     ProjectsStream,
@@ -29,16 +26,19 @@ STREAM_TYPES = [
 ]
 
 
+class TapGitlabConfig(BaseModel):
+    """Configuration class for the GitLab API."""
+    auth_token: str
+    project_ids: List[str]
+    group_ids: List[str]
+    start_date: datetime
+
+
 class SampleTapGitlab(Tap):
     """Sample tap for Gitlab."""
 
     name: str = "sample-tap-gitlab"
-    config_jsonschema = PropertiesList(
-        Property("auth_token", StringType, required=True),
-        Property("project_ids", ArrayType(StringType), required=True),
-        Property("group_ids", ArrayType(StringType), required=True),
-        Property("start_date", DateTimeType, required=True),
-    ).to_dict()
+    config_jsonschema = TapGitlabConfig.schema()
 
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
