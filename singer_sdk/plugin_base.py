@@ -44,9 +44,23 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     name: str = None
     config_jsonschema: Optional[dict] = None
-    config_model: Optional[BasePluginConfig] = None
 
     _config: dict
+
+    class ConfigModel(BaseSettings):
+        """Configuration class for a Singer Plugin.
+
+        Placeholder class in case we want to override.
+
+        TODO: Known undesired behaviour
+            - Environment variables are eagerly parsed
+            - Environment prefix is not derived from PluginBase.name
+        """
+
+    @classproperty
+    def config_model(cls):
+        """Plugin's config Pydantic model."""
+        return cls.ConfigModel
 
     @classproperty
     def logger(cls) -> logging.Logger:
@@ -68,7 +82,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         if self.config_jsonschema:
             self._get_config_dict_from_schema(config, parse_env_config)
-        elif self.config_model:
+        else:
             self._get_config_dict_from_model(config)
 
     def _get_config_dict_from_model(self, config: ConfigInput):
