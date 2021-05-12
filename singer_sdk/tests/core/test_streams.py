@@ -43,7 +43,7 @@ class SimpleTestStream(Stream):
 class SimpleTestTap(Tap):
     """Test tap class."""
 
-    settings_jsonschema = PropertiesList(Property("start_date", DateTimeType)).to_dict()
+    config_jsonschema = PropertiesList(Property("start_date", DateTimeType)).to_dict()
 
     def discover_streams(self) -> List[Stream]:
         return [SimpleTestStream(self)]

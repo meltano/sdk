@@ -29,12 +29,15 @@ STREAM_TYPES = [
 
 class TapGitlabConfig(BasePluginConfig):
     """Configuration class for the GitLab API."""
+
     auth_token: str
     project_ids: List[str]
     group_ids: List[str]
     start_date: datetime
 
     class Config(BaseSettings.Config):
+        """Pydantic meta config."""
+
         env_prefix = "tap_gitlab_"
 
 

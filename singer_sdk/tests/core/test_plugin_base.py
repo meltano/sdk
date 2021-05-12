@@ -30,6 +30,7 @@ class NestedConfig(BaseModel):
 
 class PydanticPluginConfig(BasePluginConfig):
     """Pydantic Plugin config."""
+
     token: str
     some_flag: bool = False
     segments: List[int] = Field(default_factory=list)
@@ -85,10 +86,7 @@ def test_parse_env_using_pydantic_config():
         "token": "hello",
         "some_flag": True,
         "segments": [1, 2, 3],
-        "nested": {
-            "id": 1,
-            "start_date": datetime.datetime(2021, 1, 1)
-        }
+        "nested": {"id": 1, "start_date": datetime.datetime(2021, 1, 1)},
     }
 
 
@@ -101,7 +99,7 @@ def test_parse_dict_using_pydantic_config():
         "token": "abc",
         "some_flag": True,
         "segments": [],
-        "nested": None
+        "nested": None,
     }
 
 
@@ -119,7 +117,7 @@ def test_parse_file_using_pydantic_config():
         "token": "abc",
         "some_flag": True,
         "segments": [],
-        "nested": None
+        "nested": None,
     }
 
 
@@ -149,5 +147,5 @@ def test_parse_file_list_using_pydantic_config():
         "token": "def",
         "some_flag": True,
         "segments": [1, 2],
-        "nested": None
+        "nested": None,
     }
