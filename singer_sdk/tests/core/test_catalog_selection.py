@@ -6,7 +6,11 @@ from copy import deepcopy
 
 import singer
 
-from singer_sdk.helpers._catalog import get_selected_schema, is_property_selected, pop_deselected_record_properties
+from singer_sdk.helpers._catalog import (
+    get_selected_schema,
+    is_property_selected,
+    pop_deselected_record_properties,
+)
 from singer_sdk.typing import PropertiesList, Property, StringType, ObjectType
 
 
@@ -68,8 +72,7 @@ def selection_metadata():
             },
         },
         {
-            "breadcrumb": ("properties", "col_a",
-                           "properties", "col_a_2"),
+            "breadcrumb": ("properties", "col_a", "properties", "col_a_2"),
             "metadata": {
                 "selected": False,  # Should not be overridden by parent
             },
@@ -81,8 +84,7 @@ def selection_metadata():
             },
         },
         {
-            "breadcrumb": ("properties", "col_b",
-                           "properties", "col_b_1"),
+            "breadcrumb": ("properties", "col_b", "properties", "col_b_1"),
             "metadata": {
                 "selected": True,  # Should be overridden by parent
             },
@@ -164,7 +166,9 @@ def test_record_property_pop(record, record_selected, catalog, stream_name, capl
         catalog=catalog,
         stream_name=stream_name,
         logger=logging.getLogger(),
-        breadcrumb=()
+        breadcrumb=(),
     )
 
-    assert (record_pop == record_selected), f"Expected record={record_selected}, got {record_pop}"
+    assert (
+        record_pop == record_selected
+    ), f"Expected record={record_selected}, got {record_pop}"
