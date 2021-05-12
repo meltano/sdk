@@ -61,7 +61,7 @@ class Sink(metaclass=abc.ABCMeta):
         self._config = dict(target.config)
         self.schema = schema
         self.stream_name = stream_name
-        self.logger.info("Initializing target sink for stream '{stream_name}'...")
+        self.logger.info(f"Initializing target sink for stream '{stream_name}'...")
         self.records_to_drain: Union[List[dict], Any] = []
         self._records_draining: Optional[Any] = None
         self.latest_state: Optional[dict] = None
@@ -180,7 +180,10 @@ class Sink(metaclass=abc.ABCMeta):
         return value as replacement.
         """
         for key in record.keys():
-            datelike_type = get_datelike_property_type(key, schema["properties"][key])
+            schema_type = get_jsonschema_for_breadcrumb(
+                schema=schema, breadcrumb=(key,)
+            )
+            datelike_type = get_datelike_property_type(key, schema_type)
             if datelike_type:
                 try:
                     date_val = record[key]
