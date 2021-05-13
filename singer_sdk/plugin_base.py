@@ -54,7 +54,6 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         TODO: Known undesired behaviour
             - Environment variables are eagerly parsed
-            - Environment prefix is not derived from PluginBase.name
         """
 
     @classproperty
