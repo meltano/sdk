@@ -158,11 +158,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 streams_by_type[stream_type] = []
             streams_by_type[stream_type].append(stream)
 
-        # # Set `parent_stream_type` on classes (if not set)
-        # for stream_type in streams_by_type.keys():
-        #     for child_type in stream_type.child_stream_types or []:
-        #         child_type.parent_stream_type = stream_type
-
         # Initialize child streams list for parents
         for stream_type, streams in streams_by_type.items():
             if stream_type.parent_stream_type:
@@ -173,8 +168,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                         self.logger.info(
                             f"Added '{stream.name}' as child stream to '{parent.name}'"
                         )
-                    # if stream_type not in parent.child_stream_types:
-                    #     parent.child_stream_types.append(stream_type)
 
         streams = [stream for streams in streams_by_type.values() for stream in streams]
         return sorted(

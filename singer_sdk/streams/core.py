@@ -68,7 +68,6 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Used for nested stream relationships
     parent_stream_type: Optional[Type["Stream"]] = None
-    child_stream_types: List[Type["Stream"]] = []  # Not needed?
 
     def __init__(
         self,
