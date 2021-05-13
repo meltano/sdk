@@ -16,14 +16,18 @@ from typing import (
     Optional,
     TypeVar,
     Union,
+    cast,
 )
 
 import pendulum
-import singer
-from singer import metadata
-from singer import RecordMessage, SchemaMessage
-from singer.catalog import Catalog
-from singer.schema import Schema
+import singer  # type: ignore  # No type hints for library
+from singer import (  # type: ignore  # No type hints for library
+    metadata,
+    RecordMessage,
+    SchemaMessage,
+)
+from singer.catalog import Catalog  # type: ignore  # No type hints for library
+from singer.schema import Schema  # type: ignore  # No type hints for library
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.helpers._catalog import (
@@ -120,10 +124,10 @@ class Stream(metaclass=abc.ABCMeta):
             if replication_key_value and self.replication_key == state.get(
                 "replication_key"
             ):
-                return pendulum.parse(replication_key_value)
+                return cast(datetime.datetime, pendulum.parse(replication_key_value))
 
         if "start_date" in self.config:
-            return pendulum.parse(self.config["start_date"])
+            return cast(datetime.datetime, pendulum.parse(self.config["start_date"]))
 
         return None
 
@@ -408,12 +412,13 @@ class Stream(metaclass=abc.ABCMeta):
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
         # Iterate through each returned record:
-        partitions: List[Optional[dict]] = [None]
+        partitions: List[dict]
         if partition:
             partitions = [partition]
         elif self.partitions:
             partitions = self.partitions
-        for partition in partitions:
+        for partition in partitions or [{}]:
+            partition = partition or None
             state = self.get_stream_or_partition_state(partition)
             reset_state_progress_markers(state)
             for row_dict in self.get_records(partition=partition):

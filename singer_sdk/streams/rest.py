@@ -1,7 +1,7 @@
 """Abstract base class for API-type streams."""
 
 import abc
-import backoff
+import backoff  # type: ignore  # No type hints for library
 import copy
 import logging
 import requests
@@ -9,7 +9,7 @@ import requests
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Union
 
-from singer.schema import Schema
+from singer.schema import Schema  # type: ignore  # No type hints for library
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
@@ -90,14 +90,18 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         response = self.requests_session.send(prepared_request)
         if response.status_code in [401, 403]:
             self.logger.info("Skipping request to {}".format(prepared_request.url))
-            self.logger.info(f"Reason: {response.status_code} - {response.content}")
+            self.logger.info(
+                f"Reason: {response.status_code} - {str(response.content)}"
+            )
             raise RuntimeError(
                 "Requested resource was unauthorized, forbidden, or not found."
             )
         elif response.status_code >= 400:
             raise RuntimeError(
                 f"Error making request to API: {prepared_request.url} "
-                f"[{response.status_code} - {response.content}]".replace("\\n", "\n")
+                f"[{response.status_code} - {str(response.content)}]".replace(
+                    "\\n", "\n"
+                )
             )
         logging.debug("Response received successfully.")
         return response
@@ -197,7 +201,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     # Records iterator
 
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, partition: Optional[dict] = None) -> Iterable[Dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
 
         Each row emitted should be a dictionary of property names to their values.

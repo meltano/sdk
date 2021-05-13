@@ -39,7 +39,7 @@ Note:
 
 """
 
-from jsonschema import validators
+from jsonschema import validators  # type: ignore  # No type hints for library
 from typing import List, Tuple
 
 from singer_sdk.helpers._classproperty import classproperty
@@ -142,7 +142,7 @@ class ArrayType(JSONTypeHelper):
         self.wrapped_type = wrapped_type
 
     @property
-    def type_dict(self) -> dict:
+    def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
         """Return dict describing the type."""
         return {"type": "array", "items": self.wrapped_type.type_dict}
 
@@ -158,7 +158,7 @@ class Property(JSONTypeHelper):
         self.default = default
 
     @property
-    def type_dict(self) -> dict:
+    def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
         """Return dict describing the type."""
         return self.wrapped.type_dict
 
@@ -180,7 +180,7 @@ class ObjectType(JSONTypeHelper):
         self.wrapped: List[Property] = list(properties)
 
     @property
-    def type_dict(self) -> dict:
+    def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
         """Return dict describing the type."""
         merged_props = {}
         required = []

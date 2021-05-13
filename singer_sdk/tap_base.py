@@ -6,7 +6,7 @@ from pathlib import PurePath, Path
 from typing import Any, List, Optional, Dict, Union
 
 import click
-from singer.catalog import Catalog
+from singer.catalog import Catalog  # type: ignore  # No type hints for library
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
@@ -240,7 +240,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
                 config_files.append(Path(config_path))
 
-            tap = cls(
+            tap = cls(  # type: ignore  # Ignore 'type not callable'
                 config=config_files or None,
                 state=state,
                 catalog=catalog,
