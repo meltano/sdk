@@ -27,3 +27,11 @@ def test_countries_primary_key():
         f"Incorrect 'key_properties' in catalog: ({key_props_2})\n\n"
         "Catalog entry was: {countries_entry}"
     )
+
+
+def test_with_catalog_mismatch():
+    """Test catalog apply with no matching stream catalog entries."""
+    tap = SampleTapCountries(config=None, catalog={"streams": {}})
+    for stream in tap.streams.values():
+        # All streams should be deselected:
+        assert not stream.selected

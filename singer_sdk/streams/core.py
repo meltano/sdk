@@ -503,13 +503,15 @@ class Stream(metaclass=abc.ABCMeta):
 
     def apply_catalog(self, catalog_dict: dict) -> None:
         """Apply a catalog dict, updating any settings overridden within the catalog."""
+        self._tap_input_catalog = catalog_dict
+
         catalog = Catalog.from_dict(catalog_dict)
         catalog_entry: singer.CatalogEntry = catalog.get_stream(self.name)
-        self._tap_input_catalog = catalog_dict
-        self.primary_keys = catalog_entry.key_properties
-        self.replication_key = catalog_entry.replication_key
-        if catalog_entry.replication_method:
-            self.forced_replication_method = catalog_entry.replication_method
+        if catalog_entry:
+            self.primary_keys = catalog_entry.key_properties
+            self.replication_key = catalog_entry.replication_key
+            if catalog_entry.replication_method:
+                self.forced_replication_method = catalog_entry.replication_method
 
     # Abstract Methods
 

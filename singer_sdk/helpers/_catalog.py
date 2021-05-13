@@ -121,7 +121,6 @@ def _pop_deselected_schema(
     """
     breadcrumb = breadcrumb or ("properties",)
     for property_name, val in list(schema.get("properties", {}).items()):
-        logger.info(f"Checking '{property_name}' under '{breadcrumb}...")
         property_breadcrumb: Tuple[str, ...] = tuple(list(breadcrumb) + [property_name])
         selected = is_property_selected(
             catalog, stream_name, property_breadcrumb, logger
@@ -150,7 +149,6 @@ def pop_deselected_record_properties(
     updating in place.
     """
     for property_name, val in list(record.items()):
-        logger.info(f"Checking '{property_name}' under '{breadcrumb}'...")
         property_breadcrumb: Tuple[str, ...] = tuple(list(breadcrumb) + [property_name])
         selected = is_property_selected(
             catalog, stream_name, property_breadcrumb, logger

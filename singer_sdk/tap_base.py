@@ -206,6 +206,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     def sync_all(self):
         """Sync all streams."""
         for stream in self.streams.values():
+            if not stream.selected and not stream.has_selected_descendents:
+                self.logger.info(f"Skipping deselected stream '{stream.name}'.")
+                continue
+
             if stream.parent_stream_type:
                 self.logger.debug(
                     f"Child stream '{stream.name}' is expected to be called by "
@@ -213,6 +217,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     "Skipping direct invocation."
                 )
                 continue
+
             stream.sync()
 
     # Command Line Execution
