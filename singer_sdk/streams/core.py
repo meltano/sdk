@@ -458,7 +458,9 @@ class Stream(metaclass=abc.ABCMeta):
                     )
                 else:
                     # Child context is not overridden
-                    child_context = self.get_child_context(record=cast(dict, row_dict))
+                    child_context = self.get_child_context(
+                        record=cast(dict, row_dict), context=partition
+                    )
                 self._sync_children(child_context)
                 if (
                     self._MAX_RECORDS_LIMIT is not None
