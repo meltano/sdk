@@ -101,7 +101,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 )
                 continue
 
-            stream._MAX_RECORDS_LIMIT = 1 if stream.child_stream_types else 0
+            stream._MAX_RECORDS_LIMIT = 1 if stream.child_streams else 0
             try:
                 stream.sync()
             except MaxRecordsLimitException:
@@ -150,6 +150,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """
         # Build the parent-child dependency DAG
 
+        # Index streams by type
         streams_by_type: Dict[Type[Stream], List[Stream]] = {}
         for stream in self.discover_streams():
             stream_type = type(stream)
@@ -157,19 +158,23 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 streams_by_type[stream_type] = []
             streams_by_type[stream_type].append(stream)
 
-        # Set `parent_stream_type` on classes (if not set)
-        for stream_type in streams_by_type.keys():
-            for child_type in stream_type.child_stream_types or []:
-                child_type.parent_stream_type = stream_type
+        # # Set `parent_stream_type` on classes (if not set)
+        # for stream_type in streams_by_type.keys():
+        #     for child_type in stream_type.child_stream_types or []:
+        #         child_type.parent_stream_type = stream_type
 
         # Initialize child streams list for parents
         for stream_type, streams in streams_by_type.items():
             if stream_type.parent_stream_type:
                 parents = streams_by_type[stream_type.parent_stream_type]
                 for parent in parents:
-                    parent.child_streams.append(stream)
-                # if stream_type not in parent.child_stream_types:
-                #     parent.child_stream_types.append(stream_type)
+                    for stream in streams:
+                        parent.child_streams.append(stream)
+                        self.logger.info(
+                            f"Added '{stream.name}' as child stream to '{parent.name}'"
+                        )
+                    # if stream_type not in parent.child_stream_types:
+                    #     parent.child_stream_types.append(stream_type)
 
         streams = [stream for streams in streams_by_type.values() for stream in streams]
         return sorted(
