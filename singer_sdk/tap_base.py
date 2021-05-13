@@ -3,7 +3,7 @@
 import abc
 import json
 from pathlib import PurePath, Path
-from typing import Any, List, Optional, Dict, Union
+from typing import Any, List, Optional, Dict, Type, Union
 
 import click
 from singer.catalog import Catalog
@@ -142,22 +142,30 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """
         # Build the parent-child dependency DAG
 
-        # Set the parent stream type relationship (if not set)
-        streams = {stream.name: stream for stream in self.discover_streams()}
-        for stream_name, stream in streams.items():
-            for child_type in stream.child_stream_types or []:
-                streams[child_type.name].parent_stream_type = type(stream)
+        streams_by_type: Dict[Type[Stream], List[Stream]] = {}
+        for stream in self.discover_streams():
+            stream_type = type(stream)
+            if stream_type not in streams_by_type:
+                streams_by_type[stream_type] = []
+            streams_by_type[stream_type].append(stream)
+
+        # Set `parent_stream_type` on classes (if not set)
+        for stream_type in streams_by_type.keys():
+            for child_type in stream_type.child_stream_types or []:
+                child_type.parent_stream_type = stream_type
 
         # Initialize child streams list for parents
-        for stream_name, stream in streams.items():
-            if stream.parent_stream_type:
-                parent = streams[stream.parent_stream_type.name]
-                parent.child_streams.append(stream)
-                if not type(stream) in parent.child_stream_types:
-                    parent.child_stream_types.append(type(stream))
+        for stream_type, streams in streams_by_type.items():
+            if stream_type.parent_stream_type:
+                parents = streams_by_type[stream_type.parent_stream_type]
+                for parent in parents:
+                    parent.child_streams.append(stream)
+                # if stream_type not in parent.child_stream_types:
+                #     parent.child_stream_types.append(stream_type)
 
+        streams = [stream for streams in streams_by_type.values() for stream in streams]
         return sorted(
-            streams.values(),
+            streams,
             key=lambda x: x.name,
             reverse=False,
         )
