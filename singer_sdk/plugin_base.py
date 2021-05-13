@@ -60,7 +60,11 @@ class PluginBase(metaclass=abc.ABCMeta):
     @classproperty
     def config_model(cls):
         """Plugin's config Pydantic model."""
-        return cls.ConfigModel
+        class ConfigModel(cls.ConfigModel):
+            class Config:
+                env_prefix = cls._get_env_prefix()
+
+        return ConfigModel
 
     @classproperty
     def logger(cls) -> logging.Logger:
@@ -137,6 +141,10 @@ class PluginBase(metaclass=abc.ABCMeta):
         """Return a list of supported capabilities."""
         return []
 
+    @classmethod
+    def _get_env_prefix(cls) -> str:
+        return f"{cls.name.upper().replace('-', '_')}_"
+
     @classproperty
     def _env_var_config(cls) -> Dict[str, Any]:
         """Return any config specified in environment variables.
@@ -145,7 +153,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         all uppercase with dashes converted to underscores.
         """
         result: Dict[str, Any] = {}
-        plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
+        plugin_env_prefix = cls._get_env_prefix()
         for config_key in cls.config_jsonschema["properties"].keys():
             env_var_name = plugin_env_prefix + config_key.upper().replace("-", "_")
             if env_var_name in os.environ:

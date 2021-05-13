@@ -37,10 +37,7 @@ class SampleTapGitlab(Tap):
         group_ids: List[str]
         start_date: datetime
 
-        class Config(Tap.ConfigModel.Config):
-            """Pydantic meta config."""
 
-            env_prefix = "tap_gitlab_"
 
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
