@@ -50,7 +50,10 @@ def is_datetime_type(type_dict: dict) -> bool:
     Also returns True if 'date-time' is nested within an 'anyOf' type Array.
     """
     if not type_dict:
-        raise ValueError("Could not detect type from empty type_dict param.")
+        raise ValueError(
+            "Could not detect type from empty type_dict. "
+            "Did you forget to define a property in the stream schema?"
+        )
     if "anyOf" in type_dict:
         for type_dict in type_dict["anyOf"]:
             if is_datetime_type(type_dict):
@@ -66,7 +69,10 @@ def is_datetime_type(type_dict: dict) -> bool:
 def is_string_array_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition is a string array."""
     if not type_dict:
-        raise ValueError("Could not detect type from empty type_dict param.")
+        raise ValueError(
+            "Could not detect type from empty type_dict. "
+            "Did you forget to define a property in the stream schema?"
+        )
 
     if "anyOf" in type_dict:
         return any([is_string_array_type(t) for t in type_dict["anyOf"]])
