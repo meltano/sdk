@@ -187,13 +187,13 @@ class EpicIssuesStream(GitlabStream):
     primary_keys = ["id"]
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "epic_issues.json"
-    parent_stream_types = [EpicsStream]  # Stream should wait for parents to complete.
+    parent_stream_type = EpicsStream  # Stream should wait for parents to complete.
 
     def get_url_params(
         self, partition: Optional[dict], next_page_token: Optional[Any] = None
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in parameterization."""
         result = super().get_url_params(partition)
-        if "epic_id" not in partition:
+        if not partition or "epic_id" not in partition:
             raise ValueError("Cannot sync epic issues without already known epic IDs.")
         return result

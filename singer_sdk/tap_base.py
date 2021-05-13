@@ -14,7 +14,10 @@ from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams.core import Stream
-from singer_sdk.exceptions import MaxRecordsLimitException
+from singer_sdk.exceptions import (
+    MaxRecordsLimitException,
+    ChildStreamDirectInvocationError,
+)
 
 
 class Tap(PluginBase, metaclass=abc.ABCMeta):
@@ -130,26 +133,39 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             "Please set the '--catalog' command line argument and try again."
         )
 
+    @final
     def load_streams(self) -> List[Stream]:
-        """Load streams from discovery or input catalog.
+        """Load streams from discovery and initialize DAG.
 
-        - Implementations may reference `self.discover_streams()`, `self.input_catalog`,
-          or both.
-        - By default, return the output of `self.discover_streams()` to enumerate
-          discovered streams.
-        - Developers may override this method if discovery is not supported, or if
-          discovery should not be run by default.
+        Return the output of `self.discover_streams()` to enumerate
+        discovered streams.
         """
+        # Build the parent-child dependency DAG
+
+        # Set the parent stream type relationship (if not set)
+        streams = {stream.name: stream for stream in self.discover_streams()}
+        for stream_name, stream in streams.items():
+            for child_type in stream.child_stream_types or []:
+                streams[child_type.name].parent_stream_type = type(stream)
+
+        # Initialize child streams list for parents
+        for stream_name, stream in streams.items():
+            if stream.parent_stream_type:
+                parent = streams[stream.parent_stream_type.name]
+                parent.child_streams.append(stream)
+                if not type(stream) in parent.child_stream_types:
+                    parent.child_stream_types.append(type(stream))
+
         return sorted(
-            self.discover_streams(),
-            key=lambda x: -1 * (len(x.parent_stream_types or []), x.name),
+            streams.values(),
+            key=lambda x: x.name,
             reverse=False,
         )
 
     # Bookmarks and state management
 
     def load_state(self, state: Dict[str, Any]) -> None:
-        """Merge or initalize stream state with the provided state dictionary input.
+        """Merge or initialize stream state with the provided state dictionary input.
 
         Override this method to perform validation and backwards-compatibility patches
         on self.state. If overriding, we recommend first running
@@ -177,11 +193,26 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 f"{sorted(self.streams.keys())}"
             )
         stream = self.streams[stream_name]
+        if stream.parent_stream_type:
+            raise ChildStreamDirectInvocationError(
+                f"Child stream '{stream.name}' is expected to be called by "
+                f"parent stream '{stream.parent_stream_type.name}'. "
+                "Direct invocation is not supported."
+            )
+
         stream.sync()
 
+    @final
     def sync_all(self):
         """Sync all streams."""
         for stream in self.streams.values():
+            if stream.parent_stream_type:
+                self.logger.debug(
+                    f"Child stream '{stream.name}' is expected to be called by "
+                    f"parent stream '{stream.parent_stream_type.name}'. "
+                    "Skipping direct invocation."
+                )
+                continue
             stream.sync()
 
     # Command Line Execution
