@@ -18,6 +18,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
 )
 
 import pendulum
@@ -449,10 +450,14 @@ class Stream(metaclass=abc.ABCMeta):
             for row_dict in self.get_records(partition=partition):
                 if isinstance(row_dict, tuple):
                     # Tuple items should be the record and the child context
+                    child_context: Optional[dict]
                     row_dict, child_context = row_dict
+                    child_context = self.get_child_context(
+                        record=row_dict, context=child_context
+                    )
                 else:
                     # Child context is not overridden
-                    child_context = row_dict
+                    child_context = self.get_child_context(record=cast(dict, row_dict))
                 self._sync_children(child_context)
                 if (
                     self._MAX_RECORDS_LIMIT is not None
@@ -512,6 +517,15 @@ class Stream(metaclass=abc.ABCMeta):
             self.replication_key = catalog_entry.replication_key
             if catalog_entry.replication_method:
                 self.forced_replication_method = catalog_entry.replication_method
+
+    def get_child_context(self, record: dict, context: dict = None) -> Optional[Dict]:
+        """Return a child context object from the record and optional provided context.
+
+        By default, will return context if provided and otherwise the record dict.
+        Developers may override this behavior to send specific information to child
+        streams for context.
+        """
+        return context or record
 
     # Abstract Methods
 
