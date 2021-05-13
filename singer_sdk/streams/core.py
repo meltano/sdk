@@ -68,7 +68,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Used for nested stream relationships
     parent_stream_type: Optional[Type["Stream"]] = None
-    child_stream_types: List[Type["Stream"]] = []
+    child_stream_types: List[Type["Stream"]] = []  # Not needed?
 
     def __init__(
         self,
@@ -146,24 +146,11 @@ class Stream(metaclass=abc.ABCMeta):
     @property
     def has_selected_descendents(self) -> bool:
         """Return True if any child streams are selected, recursively."""
-        for child in self.child_stream_types or []:
+        for child in self.child_streams or []:
             if child.selected or child.has_selected_descendents:
                 return True
 
         return False
-
-    @property
-    def _selected_child_stream_types(self) -> List[Any]:
-        if not self._tap_input_catalog:
-            return self.child_stream_types
-
-        return [
-            child_stream
-            for child_stream in self.child_stream_types or []
-            if _catalog.is_stream_selected(
-                self._tap_input_catalog, child_stream.name, self.logger
-            )
-        ]
 
     def _write_replication_key_signpost(
         self,
