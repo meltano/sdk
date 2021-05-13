@@ -333,8 +333,9 @@ class Stream(metaclass=abc.ABCMeta):
 
     def get_stream_or_partition_state(self, partition: Optional[dict]) -> dict:
         """Return partition state if applicable; else return stream state."""
-        if partition:
-            return self.get_partition_state(partition)
+        state_context = self.get_state_context(partition)
+        if state_context:
+            return self.get_partition_state(state_context)
         return self.stream_state
 
     @property
@@ -517,6 +518,10 @@ class Stream(metaclass=abc.ABCMeta):
             self.replication_key = catalog_entry.replication_key
             if catalog_entry.replication_method:
                 self.forced_replication_method = catalog_entry.replication_method
+
+    def get_state_context(self, context: Optional[dict] = None) -> Optional[Dict]:
+        """Optionally override the context which will be used to index state bookmarks."""
+        return context
 
     def get_child_context(self, record: dict, context: dict = None) -> Optional[Dict]:
         """Return a child context object from the record and optional provided context.
