@@ -60,6 +60,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     @classproperty
     def config_model(cls):
         """Plugin's config Pydantic model."""
+
         class ConfigModel(cls.ConfigModel):
             class Config:
                 env_prefix = cls._get_env_prefix()
