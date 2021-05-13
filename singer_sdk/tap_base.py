@@ -93,7 +93,15 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     def run_connection_test(self) -> bool:
         """Run connection test and return True if successful."""
         for stream in self.streams.values():
-            stream._MAX_RECORDS_LIMIT = 0
+            if stream.parent_stream_type:
+                self.logger.debug(
+                    f"Child stream '{stream.name}' should be called by "
+                    f"parent stream '{stream.parent_stream_type.name}'. "
+                    "Skipping direct invocation."
+                )
+                continue
+
+            stream._MAX_RECORDS_LIMIT = 1 if stream.child_stream_types else 0
             try:
                 stream.sync()
             except MaxRecordsLimitException:
