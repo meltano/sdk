@@ -213,7 +213,9 @@ def _greater_than_signpost(
     new_value: Union[datetime.datetime, str, int, float],
 ) -> bool:
     """Compare and return True if new_value is greater than signpost."""
-    return new_value > signpost
+    return (  # fails if signpost and bookmark are incompatible types
+        new_value > signpost  # type: ignore
+    )
 
 
 def finalize_state_progress_markers(state: dict) -> Optional[dict]:

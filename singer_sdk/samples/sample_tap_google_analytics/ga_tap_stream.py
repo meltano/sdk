@@ -56,7 +56,7 @@ class SampleGoogleAnalyticsStream(RESTStream):
             request_def["dateRanges"] = [
                 {
                     "startDate": self.config.get("start_date"),
-                    "endDate": pendulum.datetime.now(),
+                    "endDate": pendulum.now(tz="UTC"),
                 }
             ]
         return {"reportRequests": [request_def]}
