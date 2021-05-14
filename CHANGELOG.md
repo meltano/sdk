@@ -16,19 +16,30 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
-## Unreleased
+## v0.1.6
+
+Stability and bugfix release. No breaking changes.
 
 ### Fixed
 
-- Resolve excessive logging during selection filtering. (#125, !83)
+- Resolved excessive logging during selection filtering. (#125, !83)
+- Resolved issue where deselected sub-fields were incorrectly included in stream records. (#126, !85) -- _Thanks, **[Alex Levene](https://gitlab.com/alex.levene)**!_
+
+### Improved
+
+- Added improved type hints for developers, mypy code compliance for improved stability. (#125, !83)
 
 ## v0.1.5
+
+Bugfix release. No breaking changes.
 
 ### Fixed
 
 - Resolved tap failure when a sorted stream has non-unique replication keys. (#120, !82)
 
 ## v0.1.4
+
+Significant release with newly added features. No breaking changes.
 
 ### Added
 
@@ -45,6 +56,8 @@ The next few lines form the template for unreleased changes.
 - Resolved bug where unsorted streams did not properly advance state bookmarks for incremental streams. (#118, !74)
 
 ## v0.1.3
+
+Significant release with newly added features. No breaking changes.
 
 ### Added
 
