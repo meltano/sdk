@@ -8,7 +8,7 @@ license = "Apache 2.0"
 [tool.poetry.dependencies]
 python = "<3.9,>=3.6"
 requests = "^2.25.1"
-singer-sdk = "^0.1.5"
+singer-sdk = "^0.1.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.1.2"
