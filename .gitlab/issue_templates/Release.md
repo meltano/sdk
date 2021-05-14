@@ -8,14 +8,16 @@
 ### SDK Release Flow
 
 1. [ ] Manual steps:
-    - [x] Open this Issue
-    - [ ] Create a corresponding MR on a branch named `release-vX.Y.Z`
-    - [ ] The `release-vX.Y.Z` MR is ready when:
-        - [ ] Version is bumped:
-          - [ ] `pyproject.toml`
-          - [ ] `cookiecutter/tap-template/pyproject.toml`
-        - [ ] Changelog is flushed with the appropriate version number
-        - [ ] CI pipeline status is green
+    1. [x] Open this Issue
+    2. [ ] Create a corresponding MR on a branch named `release-vX.Y.Z`
+    3. [ ] The `release-vX.Y.Z` MR is ready when:
+        1. [ ] Changelog includes all meaningful user-facing updates since the last release
+        2. [ ] Version is bumped:
+            - [ ] `pyproject.toml`
+            - [ ] `cookiecutter/tap-template/pyproject.toml`
+        3. [ ] Changelog is flushed with the appropriate version number
+        4. [ ] Changes above are committed and the CI pipeline status is green
+    4. [ ] Merge to `main` with the merge commit message `Release vX.Y.Z`
 2. [ ] Release steps:
    1. [ ] Manual:
       1. [ ] Cut a tag named `vX.Y.Z`, which must match the release version
