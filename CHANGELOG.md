@@ -20,6 +20,63 @@ The next few lines form the template for unreleased changes.
 
 ### Added
 
+- Added support for parent-child hierarchical streams
+- Added support for "Target SDK", including target and sink classes
+
+## v0.1.6
+
+Stability and bugfix release. No breaking changes.
+
+### Fixed
+
+- Resolved excessive logging during selection filtering. (#125, !83)
+- Resolved issue where deselected sub-fields were incorrectly included in stream records. (#126, !85) -- _Thanks, **[Alex Levene](https://gitlab.com/alex.levene)**!_
+
+### Improved
+
+- Added improved type hints for developers, mypy code compliance for improved stability. (#125, !83)
+
+## v0.1.5
+
+Bugfix release. No breaking changes.
+
+### Fixed
+
+- Resolved tap failure when a sorted stream has non-unique replication keys. (#120, !82)
+
+## v0.1.4
+
+Significant release with newly added features. No breaking changes.
+
+### Added
+
+- Added support for GraphQL query variables (#115, !78)
+- Added selection rules support for record and schema messages (#7, !26)
+
+### Changed
+
+- Improved cookiecutter template coverage, resolved readability issues. (#116, #119, !75)
+
+### Fixed
+
+- Resolved tap failure when a stream is missing from the input catalog. (#105, !80)
+- Resolved bug where unsorted streams did not properly advance state bookmarks for incremental streams. (#118, !74)
+
+## v0.1.3
+
+Significant release with newly added features. No breaking changes.
+
+### Added
+
+- Added `is_sorted` stream property, which enables long-running incremental streams to be
+  resumed if interrupted. (!61)
+- Added signpost feature to prevent bookmarks from advancing beyond the point where all
+  records have been streamed. (!61)
+- Added `get_replication_key_signpost()` stream method which defaults to the current time 
+  for timestamp-based replication keys. (!61)
+
+### Added
+
 - Added ability for developer to override `Stream.get_max_replication_key_bookmark()`. When
   set, the SDK will prevent bookmarks from advancing beyond the specified value.
 
@@ -35,7 +92,9 @@ The next few lines form the template for unreleased changes.
 
 ## v0.1.3 [Unreleased]
 
-- Fixed fatal errors when debugging from the cookiecutter shell script (#102, !64)
+- Fixed a scenario where _unsorted_ incremental streams would generate incorrect STATE bookmarks. (!61) -- _Thanks, **[Egi Gjevori](https://gitlab.com/egi-gjevori)**!_
+- Fixed a problem where CI pipelines would fail when run from a fork. (!71) -- _Thanks, **[Derek Visch](https://gitlab.com/vischous)**!_
+- Fixed fatal error when running from the cookiecutter shell script (#102, !64)
 
 ## v0.1.2
 

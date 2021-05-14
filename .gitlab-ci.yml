@@ -37,7 +37,7 @@ build_and_test:
       else
         echo "Run 'core' and 'cookiecutter' python test suites..."
         poetry run pytest singer_sdk/tests/core
-        poetry run pytest singer_sdk/tests/cookiecutter
+        poetry run pytest singer_sdk/tests/cookiecutters
       fi
 
 lint:
@@ -50,7 +50,7 @@ lint:
     - poetry run black --check singer_sdk/
     - poetry run flake8 singer_sdk
     - poetry run pydocstyle singer_sdk
-    - poetry run mypy singer_sdk || echo "MyPy found issues (ignoring)..."
+    - poetry run mypy singer_sdk --exclude='singer_sdk/(tests)'
 
 pypi_publish:
   release:

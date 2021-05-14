@@ -40,7 +40,7 @@ Note:
 """
 
 from jsonschema import validators
-from typing import List, Tuple
+from typing import List, Tuple, Type, Union, cast
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._typing import append_type
@@ -83,7 +83,7 @@ class JSONTypeHelper(object):
 
     def to_dict(self) -> dict:
         """Return dict describing the object."""
-        return self.type_dict
+        return cast(dict, self.type_dict)
 
 
 class DateTimeType(JSONTypeHelper):
@@ -142,7 +142,7 @@ class ArrayType(JSONTypeHelper):
         self.wrapped_type = wrapped_type
 
     @property
-    def type_dict(self) -> dict:
+    def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
         """Return dict describing the type."""
         return {"type": "array", "items": self.wrapped_type.type_dict}
 
@@ -150,7 +150,13 @@ class ArrayType(JSONTypeHelper):
 class Property(JSONTypeHelper):
     """Generic Property. Should be nested within a `PropertiesList`."""
 
-    def __init__(self, name, wrapped, required: bool = False, default=None) -> None:
+    def __init__(
+        self,
+        name: str,
+        wrapped: Union[JSONTypeHelper, Type[JSONTypeHelper]],
+        required: bool = False,
+        default=None,
+    ) -> None:
         """Initialize Property object."""
         self.name = name
         self.wrapped = wrapped
@@ -158,9 +164,9 @@ class Property(JSONTypeHelper):
         self.default = default
 
     @property
-    def type_dict(self) -> dict:
+    def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
         """Return dict describing the type."""
-        return self.wrapped.type_dict
+        return cast(dict, self.wrapped.type_dict)
 
     def to_dict(self) -> dict:
         """Return a dict mapping the property name to its definition."""
@@ -180,7 +186,7 @@ class ObjectType(JSONTypeHelper):
         self.wrapped: List[Property] = list(properties)
 
     @property
-    def type_dict(self) -> dict:
+    def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
         """Return dict describing the type."""
         merged_props = {}
         required = []
@@ -188,7 +194,10 @@ class ObjectType(JSONTypeHelper):
             merged_props.update(w.to_dict())
             if not w.optional:
                 required.append(w.name)
-        return {"type": "object", "properties": merged_props, "required": required}
+        result = {"type": "object", "properties": merged_props}
+        if required:
+            result["required"] = required
+        return result
 
 
 class PropertiesList(ObjectType):

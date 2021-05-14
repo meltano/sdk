@@ -4,9 +4,9 @@ import abc  # abstract base classes
 import datetime
 import json
 import logging
+from types import MappingProxyType
 from os import PathLike
 from pathlib import Path
-from types import MappingProxyType
 from typing import (
     Dict,
     Any,
@@ -16,30 +16,41 @@ from typing import (
     Optional,
     TypeVar,
     Union,
+    cast,
 )
 
 import pendulum
-from memoization import cached
-from singer import metadata
+import singer
+from singer import (
+    metadata,
+    RecordMessage,
+    SchemaMessage,
+)
+from singer.catalog import Catalog
+from singer.schema import Schema
 
-from singer_sdk.helpers._typing import conform_record_data_types
+from singer_sdk.plugin_base import PluginBase as TapBaseClass
+from singer_sdk.helpers._catalog import (
+    get_selected_schema,
+    pop_deselected_record_properties,
+)
+
+from singer_sdk.helpers._typing import (
+    conform_record_data_types,
+    is_datetime_type,
+)
 from singer_sdk.helpers._state import (
     get_writeable_state_dict,
     get_state_partitions_list,
     increment_state,
     finalize_state_progress_markers,
-    wipe_state_progress_markers,
+    reset_state_progress_markers,
+    write_replication_key_signpost,
 )
-from singer_sdk.exceptions import MaxRecordsLimitException
-from singer_sdk.plugin_base import PluginBase as TapBaseClass
+from singer_sdk.exceptions import MaxRecordsLimitException, InvalidStreamSortException
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._util import utc_now
-
-import singer
-from singer import RecordMessage, SchemaMessage
-from singer.catalog import Catalog
-from singer.schema import Schema
-from singer_sdk.helpers._typing import is_datetime_type
+from singer_sdk.helpers import _catalog
 
 
 # Replication methods
@@ -55,7 +66,6 @@ class Stream(metaclass=abc.ABCMeta):
 
     STATE_MSG_FREQUENCY = 10000  # Number of records between state messages
     _MAX_RECORDS_LIMIT: Optional[int] = None
-    _VALIDATE_SORT_ORDER = True
 
     parent_stream_types: List[Any] = []  # May be used in sync sequencing
 
@@ -74,6 +84,7 @@ class Stream(metaclass=abc.ABCMeta):
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
         self._tap_state = tap.state
+        self._tap_input_catalog: Optional[dict] = None
         self.forced_replication_method: Optional[str] = None
         self._replication_key: Optional[str] = None
         self._primary_keys: Optional[List[str]] = None
@@ -113,10 +124,47 @@ class Stream(metaclass=abc.ABCMeta):
             if replication_key_value and self.replication_key == state.get(
                 "replication_key"
             ):
-                return pendulum.parse(replication_key_value)
+                return cast(datetime.datetime, pendulum.parse(replication_key_value))
 
         if "start_date" in self.config:
-            return pendulum.parse(self.config["start_date"])
+            return cast(datetime.datetime, pendulum.parse(self.config["start_date"]))
+
+        return None
+
+    @property
+    def selected(self) -> bool:
+        """Return true if the stream is selected."""
+        return _catalog.is_stream_selected(
+            self._tap_input_catalog, self.name, self.logger
+        )
+
+    def _write_replication_key_signpost(
+        self,
+        partition: Optional[dict],
+        value: Union[datetime.datetime, str, int, float],
+    ):
+        """Write the signpost value, if available."""
+        if not value:
+            return
+
+        state = self.get_stream_or_partition_state(partition)
+        write_replication_key_signpost(state, value)
+
+    def get_replication_key_signpost(
+        self, partition: Optional[dict]
+    ) -> Optional[Union[datetime.datetime, Any]]:
+        """Return the max allowable bookmark value for this stream's replication key.
+
+        For timestamp-based replication keys, this defaults to `utcnow()`. For
+        non-timestamp replication keys, default to `None`. For consistency in subsequent
+        calls, the value will be frozen (cached) at its initially called state, per
+        partition argument if applicable.
+
+        Override this value to prevent bookmarks from being advanced in cases where we
+        may only have a partial set of records.
+        """
+        if self.is_timestamp_replication_key:
+            return utc_now()
 
         return None
 
@@ -186,30 +234,40 @@ class Stream(metaclass=abc.ABCMeta):
         self._replication_key = new_value
 
     @property
-    def sort_keys(self) -> Optional[List[str]]:
-        """Return list of sort keys for the stream.
+    def is_sorted(self) -> bool:
+        """Return `True` if stream is sorted. Defaults to `False`.
 
-        The default sort key is the same as the replication key, but this can
-        can be overridden to allow cases where the stream is not pre-sorted
-        by its replication key. If the stream is unsorted, this must be set
-        to None or incremental replication will fail.
+        When `True`, incremental streams will attempt to resume if unexpectedly
+        interrupted.
+
+        This setting enables additional checks which may trigger
+        `InvalidStreamSortException` if records are found which are unsorted.
         """
-        if not self.replication_key:
-            return None
-        return [self.replication_key]
+        return False
 
     @property
     def _singer_metadata(self) -> dict:
-        """Return metadata object (dict) as specified in the Singer spec."""
-        self.logger.debug(f"Schema Debug: {self.schema}")
-        md = metadata.get_standard_metadata(
-            schema=self.schema,
-            replication_method=self.replication_method,
-            key_properties=self.primary_keys or None,
-            valid_replication_keys=(
-                [self.replication_key] if self.replication_key else None
+        """Return metadata object (dict) as specified in the Singer spec.
+
+        Metadata from an input catalog will override standard metadata.
+        """
+        if self._tap_input_catalog:
+            catalog = singer.Catalog.from_dict(self._tap_input_catalog)
+            catalog_entry = catalog.get_stream(self.tap_stream_id)
+            if catalog_entry:
+                return cast(dict, catalog_entry.metadata)
+
+        md = cast(
+            dict,
+            metadata.get_standard_metadata(
+                schema=self.schema,
+                replication_method=self.forced_replication_method,
+                key_properties=self.primary_keys or None,
+                valid_replication_keys=(
+                    [self.replication_key] if self.replication_key else None
+                ),
+                schema_name=None,
             ),
-            schema_name=None,
         )
         return md
 
@@ -230,6 +288,10 @@ class Stream(metaclass=abc.ABCMeta):
             row_count=None,
             stream_alias=None,
         )
+
+    @property
+    def _singer_catalog(self) -> singer.Catalog:
+        return singer.Catalog([self._singer_catalog_entry])
 
     @property
     def config(self) -> Mapping[str, Any]:
@@ -304,7 +366,11 @@ class Stream(metaclass=abc.ABCMeta):
     def _increment_stream_state(
         self, latest_record: Dict[str, Any], *, partition: Optional[dict] = None
     ):
-        """Update state of stream or partition with data from the provided record."""
+        """Update state of stream or partition with data from the provided record.
+
+        Raises InvalidStreamSortException is self.is_sorted = True and unsorted data is
+        detected.
+        """
         state_dict = self.get_stream_or_partition_state(partition)
         if latest_record:
             if self.replication_method in [
@@ -316,20 +382,14 @@ class Stream(metaclass=abc.ABCMeta):
                         f"Could not detect replication key for '{self.name}' stream"
                         f"(replication method={self.replication_method})"
                     )
-                validate_sort = self._VALIDATE_SORT_ORDER
-                if validate_sort:
-                    first_sort_key = next(iter(self.sort_keys or []), None)
-                    if first_sort_key != self.replication_key:
-                        validate_sort = False
                 increment_state(
                     state_dict,
                     replication_key=self.replication_key,
-                    max_replication_key_bookmark=self.get_max_replication_key_bookmark(
+                    replication_key_signpost=self.get_replication_key_signpost(
                         partition=partition
                     ),
-                    sort_keys=self.sort_keys,
                     latest_record=latest_record,
-                    validate_sort=validate_sort,
+                    is_sorted=self.is_sorted,
                 )
 
     # Private message authoring methods:
@@ -341,24 +401,43 @@ class Stream(metaclass=abc.ABCMeta):
     def _write_schema_message(self):
         """Write out a SCHEMA message with the stream schema."""
         bookmark_keys = [self.replication_key] if self.replication_key else None
+        selected_schema = get_selected_schema(
+            self._singer_catalog.to_dict(), self.name, self.logger
+        )
         schema_message = SchemaMessage(
-            self.tap_stream_id, self.schema, self.primary_keys, bookmark_keys
+            self.tap_stream_id, selected_schema, self.primary_keys, bookmark_keys
         )
         singer.write_message(schema_message)
+
+    def _write_record_message(self, record: dict) -> None:
+        """Write out a RECORD message."""
+        pop_deselected_record_properties(
+            record, self._singer_catalog.to_dict(), self.name, self.logger
+        )
+        record = conform_record_data_types(
+            stream_name=self.name,
+            row=record,
+            schema=self.schema,
+            logger=self.logger,
+        )
+        record_message = RecordMessage(
+            stream=self.name,
+            record=record,
+            version=None,
+            time_extracted=pendulum.now(),
+        )
+        singer.write_message(record_message)
 
     # Private sync methods:
 
     def _sync_records(self, partition: Optional[dict] = None) -> None:
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
-        # Iterate through each returned record:
-        if partition:
-            partitions = [partition]
-        else:
-            partitions = self.partitions or [None]
-        for partition in partitions:
+        partitions = [partition] if partition else self.partitions
+        for partition in partitions or [{}]:
+            partition = partition or None
             state = self.get_stream_or_partition_state(partition)
-            wipe_state_progress_markers(state)
+            reset_state_progress_markers(state)
             for row_dict in self.get_records(partition=partition):
                 if (
                     self._MAX_RECORDS_LIMIT is not None
@@ -371,20 +450,16 @@ class Stream(metaclass=abc.ABCMeta):
 
                 if rows_sent and ((rows_sent - 1) % self.STATE_MSG_FREQUENCY == 0):
                     self._write_state_message()
-                record = conform_record_data_types(
-                    stream_name=self.name,
-                    row=row_dict,
-                    schema=self.schema,
-                    logger=self.logger,
-                )
-                record_message = RecordMessage(
-                    stream=self.name,
-                    record=record,
-                    version=None,
-                    time_extracted=pendulum.now(),
-                )
-                singer.write_message(record_message)
-                self._increment_stream_state(record, partition=partition)
+                self._write_record_message(row_dict)
+                try:
+                    self._increment_stream_state(row_dict, partition=partition)
+                except InvalidStreamSortException as ex:
+                    msg = f"Sorting error detected on row #{rows_sent+1}. "
+                    if partition:
+                        msg += f"Partition was {str(partition)}. "
+                    msg += str(ex)
+                    self.logger.error(msg)
+                    raise ex
                 rows_sent += 1
             finalize_state_progress_markers(state)
         self.logger.info(f"Completed '{self.name}' sync ({rows_sent} records).")
@@ -408,25 +483,15 @@ class Stream(metaclass=abc.ABCMeta):
 
     def apply_catalog(self, catalog_dict: dict) -> None:
         """Apply a catalog dict, updating any settings overridden within the catalog."""
+        self._tap_input_catalog = catalog_dict
+
         catalog = Catalog.from_dict(catalog_dict)
         catalog_entry: singer.CatalogEntry = catalog.get_stream(self.name)
-        self.primary_keys = catalog_entry.key_properties
-        self.replication_key = catalog_entry.replication_key
-        if catalog_entry.replication_method:
-            self.forced_replication_method = catalog_entry.replication_method
-
-    @property
-    def records(self) -> Iterable[dict]:
-        """Return a generator of row-type dictionary objects."""
-        if self.partitions:
-            for partition in self.partitions:
-                for row in self.get_records(partition):
-                    row = self.post_process(row, partition)
-                    yield row
-        else:
-            for row in self.get_records():
-                row = self.post_process(row)
-                yield row
+        if catalog_entry:
+            self.primary_keys = catalog_entry.key_properties
+            self.replication_key = catalog_entry.replication_key
+            if catalog_entry.replication_method:
+                self.forced_replication_method = catalog_entry.replication_method
 
     # Abstract Methods
 

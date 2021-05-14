@@ -11,7 +11,7 @@ import pendulum
 
 def to_json_compatible(val: Any) -> Any:
     """Return as string if datetime. JSON does not support proper datetime types."""
-    if isinstance(val, (datetime.datetime, pendulum.Pendulum)):
+    if isinstance(val, (datetime.datetime, pendulum.DateTime)):
         val = val.isoformat() + "+00:00"
     return val
 
@@ -32,6 +32,16 @@ def append_type(type_dict: dict, new_type: str) -> dict:
     else:
         raise ValueError("Could not append type because type was not detected.")
     return result
+
+
+def is_object_type(property_schema: dict) -> Optional[bool]:
+    """Return true if the JSON Schema type is an object or None if detection fails."""
+    if "anyOf" not in property_schema and "type" not in property_schema:
+        return None  # Could not detect data type
+    for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
+        if "object" in property_type or property_type == "object":
+            return True
+    return False
 
 
 def is_datetime_type(type_dict: dict) -> bool:
@@ -112,7 +122,7 @@ def conform_record_data_types(  # noqa: C901
             continue
 
         property_schema = schema["properties"][property_name]
-        if isinstance(elem, (datetime.datetime, pendulum.Pendulum)):
+        if isinstance(elem, (datetime.datetime, pendulum.DateTime)):
             rec[property_name] = to_json_compatible(elem)
         elif isinstance(elem, datetime.date):
             rec[property_name] = elem.isoformat() + "T00:00:00+00:00"
