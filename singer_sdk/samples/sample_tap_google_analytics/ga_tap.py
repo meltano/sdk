@@ -38,4 +38,4 @@ class SampleTapGoogleAnalytics(Tap):
         return [GASimpleSampleStream(tap=self)]
 
 
-cli = SampleTapGoogleAnalytics.cli
+cli = SampleTapGoogleAnalytics.cli  # type: ignore

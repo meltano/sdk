@@ -3,10 +3,10 @@
 import abc
 import json
 from pathlib import PurePath, Path
-from typing import Any, List, Optional, Dict, Union
+from typing import Any, List, Optional, Dict, Union, cast
 
 import click
-from singer.catalog import Catalog  # type: ignore  # No type hints for library
+from singer.catalog import Catalog
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
@@ -108,7 +108,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     @property
     def catalog_dict(self) -> dict:
         """Return the tap's catalog as a dict."""
-        return self._singer_catalog.to_dict()
+        return cast(dict, self._singer_catalog.to_dict())
 
     @property
     def catalog_json_text(self) -> str:
@@ -211,7 +211,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             state: str = None,
             catalog: str = None,
             format: str = None,
-        ):
+        ) -> None:
             """Handle command line execution."""
             if version:
                 cls.print_version()
@@ -256,6 +256,3 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 tap.sync_all()
 
         return cli
-
-
-cli = Tap.cli
