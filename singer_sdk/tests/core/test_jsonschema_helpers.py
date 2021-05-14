@@ -17,6 +17,7 @@ from singer_sdk.typing import (
 class ConfigTestTap(Tap):
     """Test tap class."""
 
+    name = "config-test"
     config_jsonschema = PropertiesList(
         Property("host", StringType, required=True),
         Property("username", StringType, required=True),

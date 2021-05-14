@@ -34,8 +34,8 @@ class SecretString(str):
 
     def __repr__(self) -> str:
         """Render secret contents."""
-        return self.contents.__repr__()
+        return str(self.contents.__repr__())
 
     def __str__(self) -> str:
         """Render secret contents."""
-        return self.contents.__str__()
+        return str(self.contents.__str__())
