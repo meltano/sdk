@@ -23,7 +23,7 @@ Stability and bugfix release. No breaking changes.
 ### Fixed
 
 - Resolved excessive logging during selection filtering. (#125, !83)
-- Resolved issue where deselected sub-fields were incorrectly included in stream records. (#162, !85) -- _Thanks, **[Alex Levene](https://gitlab.com/alex.levene)**!_
+- Resolved issue where deselected sub-fields were incorrectly included in stream records. (#126, !85) -- _Thanks, **[Alex Levene](https://gitlab.com/alex.levene)**!_
 
 ### Improved
 
