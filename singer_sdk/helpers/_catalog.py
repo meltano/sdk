@@ -4,8 +4,8 @@ from copy import deepcopy
 from typing import Optional, Tuple, cast
 from logging import Logger
 
-from singer import metadata  # type: ignore
-from singer.catalog import Catalog  # type: ignore
+from singer import metadata
+from singer.catalog import Catalog
 
 from singer_sdk.helpers._typing import is_object_type
 
