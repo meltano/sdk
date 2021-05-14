@@ -411,12 +411,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _sync_records(self, partition: Optional[dict] = None) -> None:
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
-        # Iterate through each returned record:
-        partitions: List[dict]
-        if partition:
-            partitions = [partition]
-        elif self.partitions:
-            partitions = self.partitions
+        partitions = [partition] if partition else self.partitions
         for partition in partitions or [{}]:
             partition = partition or None
             state = self.get_stream_or_partition_state(partition)
