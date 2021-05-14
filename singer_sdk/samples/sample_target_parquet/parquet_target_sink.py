@@ -26,7 +26,7 @@ class SampleParquetTargetSink(Sink):
         flattened_records = []
         flattener = RecordFlattener()
         for record in records_to_drain:
-            flatten_record = flattener.flatten_record(record, schema, max_level=0)
+            flatten_record = flattener.flatten_record(record, schema, level=0)
             flattened_records.append(flatten_record)
             count += 1
 
