@@ -20,7 +20,7 @@
     4. [ ] Merge to `main` with the merge commit message `Release vX.Y.Z`
 2. [ ] Release steps:
    1. [ ] Manual:
-      1. [ ] Cut a tag named `vX.Y.Z`, which must match the release version
+      1. [ ] Cut a tag from `main` named `vX.Y.Z`, which must match the release version
    2. [ ] Automated CD pipeline:
        - In response to new tag creation, these steps are performed automatically in Gitlab pipelines:
            - Abort if tag `vX.Y.Z` does not match output from `poetry version --short`
