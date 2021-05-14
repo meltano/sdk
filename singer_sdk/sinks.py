@@ -180,10 +180,7 @@ class Sink(metaclass=abc.ABCMeta):
         return value as replacement.
         """
         for key in record.keys():
-            schema_type = get_jsonschema_for_breadcrumb(
-                schema=schema, breadcrumb=(key,)
-            )
-            datelike_type = get_datelike_property_type(key, schema_type)
+            datelike_type = get_datelike_property_type(key, schema["properties"][key])
             if datelike_type:
                 try:
                     date_val = record[key]
