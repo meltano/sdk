@@ -482,9 +482,10 @@ class Stream(metaclass=abc.ABCMeta):
     @final
     def sync(self, partition: Optional[dict] = None):
         """Sync this stream."""
-        self.logger.info(
-            f"Beginning {self.replication_method} sync of stream '{self.name}'..."
-        )
+        msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
+        if partition:
+            msg += f" partition: {partition}"
+        self.logger.info(f"{msg}...")
         # Send a SCHEMA message to the downstream target:
         self._write_schema_message()
         # Sync the records themselves:
