@@ -280,7 +280,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 cls.print_about(format)
                 return
 
-            target = cls(config=config)
+            target = cls(config=config)  # type: ignore  # Ignore 'type not callable'
             target.listen()
 
         return cli

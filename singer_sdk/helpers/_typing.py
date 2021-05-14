@@ -6,7 +6,7 @@ import logging
 
 from enum import Enum
 from functools import lru_cache
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, cast
 
 import pendulum
 
@@ -90,13 +90,13 @@ def get_datelike_property_type(
                 "time",
                 "date",
             }:
-                return type_dict["format"]
+                return cast(str, type_dict["format"])
     if "string" in property_schema["type"] and property_schema.get("format", None) in {
         "date-time",
         "time",
         "date",
     }:
-        return property_schema["format"]
+        return cast(str, property_schema["format"])
     return None
 
 
