@@ -19,4 +19,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 # CLI declaration
-{{cookiecutter.tap_id}} = '{{cookiecutter.library_name}}.tap:cli'
+{{cookiecutter.tap_id}} = '{{cookiecutter.library_name}}.tap:Tap{{cookiecutter.source_name}}.cli'
