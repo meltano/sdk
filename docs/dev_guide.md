@@ -2,6 +2,8 @@
 
 ## SDK Overview
 
+### Tap Development Overview
+
 Create taps with `singer-sdk` requires overriding just two or three classes:
 
 1. The `Tap` class. This class governs configuration, validation,
@@ -19,6 +21,27 @@ Create taps with `singer-sdk` requires overriding just two or three classes:
     - `OAuthJWTAuthenticator` - This class performs an JWT (Java Web Token) authentication
        flow.
 
+## Target Development Overview
+
+Create targets with `singer-sdk` requires overriding just two classes:
+
+1. The `Target` class. This class governs configuration, validation,
+   and stream discovery.
+2. The `Sink` class. This class is responsible for writing records to the target
+   and keeping tally of written records. Each `Sink` implementation my write
+   records immediately in `Sink.load_record()` or in batches during `Sink.drain()`.
+
+## Building a New Tap
+
+The best way to get started is by building a new project from the
+[cookiecutter tap template](../cookiecutter/tap-template).
+
+## Building a New Target
+
+- [ ] TODO: The target cookiecutter implementation is not yet built.
+
+## Additional Resources
+
 ### Detailed Class Reference
 
 For a detailed reference, please see the [SDK Reference Guide](./reference.md)
@@ -27,13 +50,6 @@ For a detailed reference, please see the [SDK Reference Guide](./reference.md)
 
 For more detailed information about the Singer SDK implementation, please see the
 [Singer SDK Implementation Details](./implementation/README.md) section.
-
-## Building a New Tap
-
-The best way to get started is by building a new project from the
-[cookiecutter tap template](../cookiecutter/tap-template).
-
-## Additional Resources
 
 ### Code Samples
 

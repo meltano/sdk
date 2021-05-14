@@ -3,10 +3,23 @@
 import copy
 import datetime
 import logging
+
+from enum import Enum
 from functools import lru_cache
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List, cast
 
 import pendulum
+
+_MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
+_MAX_TIME = "23:59:59.999999"
+
+
+class DatetimeErrorTreatmentEnum(Enum):
+    """Enum for treatment options for date parsing error."""
+
+    ERROR = "error"
+    MAX = "max"
+    NULL = "null"
 
 
 def to_json_compatible(val: Any) -> Any:
@@ -61,6 +74,59 @@ def is_datetime_type(type_dict: dict) -> bool:
     raise ValueError(
         f"Could not detect type of replication key using schema '{type_dict}'"
     )
+
+
+def get_datelike_property_type(
+    property_key: str, property_schema: Dict
+) -> Optional[str]:
+    """Return one of 'date-time', 'time', or 'date' if property is date-like.
+
+    Otherwise return None.
+    """
+    if "anyOf" in property_schema:
+        for type_dict in property_schema["anyOf"]:
+            if "string" in type_dict["type"] and type_dict.get("format", None) in {
+                "date-time",
+                "time",
+                "date",
+            }:
+                return cast(str, type_dict["format"])
+    if "string" in property_schema["type"] and property_schema.get("format", None) in {
+        "date-time",
+        "time",
+        "date",
+    }:
+        return cast(str, property_schema["format"])
+    return None
+
+
+def handle_invalid_timestamp_in_record(
+    record,
+    key_breadcrumb: List[str],
+    invalid_value: str,
+    datelike_typename: str,
+    ex: Exception,
+    treatment: Optional[DatetimeErrorTreatmentEnum],
+    logger: logging.Logger,
+) -> Any:
+    """Apply treatment or raise an error for invalid time values.
+
+    Override this method to introduce custom timestamp handling.
+    """
+    treatment = treatment or DatetimeErrorTreatmentEnum.ERROR
+    msg = (
+        f"Could not parse value '{invalid_value}' for "
+        f"field '{':'.join(key_breadcrumb)}'."
+    )
+    if treatment == DatetimeErrorTreatmentEnum.MAX:
+        logger.warning(f"{msg}. Replacing with MAX value.\n{ex}\n")
+        return _MAX_TIMESTAMP if datelike_typename != "time" else _MAX_TIME
+
+    if treatment == DatetimeErrorTreatmentEnum.NULL:
+        logger.warning(f"{msg}. Replacing with NULL.\n{ex}\n")
+        return None
+
+    raise ValueError(msg)
 
 
 def is_string_array_type(type_dict: dict) -> bool:

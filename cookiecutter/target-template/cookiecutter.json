@@ -1,0 +1,6 @@
+{
+    "destination_name": "MyDestinationName",
+    "admin_name": "FirstName LastName",
+    "target_id": "target-{{ cookiecutter.destination_name.lower() }}",
+    "library_name": "{{ cookiecutter.target_id.replace('-', '_') }}"
+}

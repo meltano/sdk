@@ -15,3 +15,7 @@ class InvalidStreamSortException(Exception):
 
 class MaxRecordsLimitException(Exception):
     """Exception to raise if the maximum number of allowable records is exceeded."""
+
+
+class RecordsWitoutSchemaException(Exception):
+    """Raised if a target receives RECORD messages prior to a SCHEMA message."""
