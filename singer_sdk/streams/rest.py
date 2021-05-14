@@ -7,7 +7,7 @@ import logging
 import requests
 
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union, cast
 
 from singer.schema import Schema
 
@@ -90,14 +90,18 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         response = self.requests_session.send(prepared_request)
         if response.status_code in [401, 403]:
             self.logger.info("Skipping request to {}".format(prepared_request.url))
-            self.logger.info(f"Reason: {response.status_code} - {response.content}")
+            self.logger.info(
+                f"Reason: {response.status_code} - {str(response.content)}"
+            )
             raise RuntimeError(
                 "Requested resource was unauthorized, forbidden, or not found."
             )
         elif response.status_code >= 400:
             raise RuntimeError(
                 f"Error making request to API: {prepared_request.url} "
-                f"[{response.status_code} - {response.content}]".replace("\\n", "\n")
+                f"[{response.status_code} - {str(response.content)}]".replace(
+                    "\\n", "\n"
+                )
             )
         logging.debug("Response received successfully.")
         return response
@@ -130,14 +134,17 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         if authenticator:
             headers.update(authenticator.auth_headers or {})
 
-        request = self.requests_session.prepare_request(
-            requests.Request(
-                method=http_method,
-                url=url,
-                params=params,
-                headers=headers,
-                json=request_data,
-            )
+        request = cast(
+            requests.PreparedRequest,
+            self.requests_session.prepare_request(
+                requests.Request(
+                    method=http_method,
+                    url=url,
+                    params=params,
+                    headers=headers,
+                    json=request_data,
+                )
+            ),
         )
         return request
 
@@ -197,7 +204,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     # Records iterator
 
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, partition: Optional[dict] = None) -> Iterable[Dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
 
         Each row emitted should be a dictionary of property names to their values.
