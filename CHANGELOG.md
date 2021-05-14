@@ -27,7 +27,7 @@ Stability and bugfix release. No breaking changes.
 
 ### Improved
 
-- Added improved type hints for developers, mypy code compliance for improved stability. (#125, !83)
+- Added improved type hints for developers, including mypy code compliance for improved stability. (#127, !86)
 
 ## v0.1.5
 
