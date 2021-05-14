@@ -226,8 +226,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
             if stream.parent_stream_type:
                 self.logger.debug(
-                    f"Child stream '{type(stream).__name__}' is expected to be called by "
-                    f"parent stream '{stream.parent_stream_type.__name__}'. "
+                    f"Child stream '{type(stream).__name__}' is expected to be called "
+                    f"by parent stream '{stream.parent_stream_type.__name__}'. "
                     "Skipping direct invocation."
                 )
                 continue

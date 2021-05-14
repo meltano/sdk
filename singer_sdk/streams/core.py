@@ -511,7 +511,7 @@ class Stream(metaclass=abc.ABCMeta):
                 self.forced_replication_method = catalog_entry.replication_method
 
     def get_state_context(self, context: Optional[dict] = None) -> Optional[Dict]:
-        """Optionally override the context which will be used to index state bookmarks."""
+        """Optionally override the context to be used to index state bookmarks."""
         return context
 
     def get_child_context(self, record: dict, context: dict = None) -> Optional[Dict]:
