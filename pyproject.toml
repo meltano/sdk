@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.1.5"
+version = "0.1.6"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 license = "Apache 2.0"
@@ -8,8 +8,8 @@ license = "Apache 2.0"
 [tool.poetry.dependencies]
 python = "<3.9,>=3.6.1"
 pipelinewise-singer-python = "1.2.0"
-backoff = "1.8.0"
-pendulum = "^1.2.0"
+backoff = ">=1.8.0,<2.0"
+pendulum = "^2.1.0"
 click = "^7.1.2"
 PyJWT = "1.7.1"
 requests = "^2.25.1"
@@ -30,12 +30,12 @@ pydocstyle = "^5.1.1"
 flake8 = "^3.9.0"
 pyarrow = "^3.0.0"
 pandas = ">1,<=1.2.0"
+tox = "^3.23.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-plugin-base = 'singer_sdk.plugin_base:PluginBase.cli'
 # Sample CLI declaration:
-# tap-countries = 'singer_sdk.samples.sample_tap_countries.countries_tap:cli'
+# singer-sdk-tap-countries-sample = 'singer_sdk.samples.sample_tap_countries.countries_tap:SampleTapCountries.cli'

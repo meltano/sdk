@@ -1,7 +1,7 @@
 """Helper functions for state and bookmark management."""
 
 import datetime
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Union, cast
 
 from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.helpers._typing import to_json_compatible
@@ -109,12 +109,12 @@ def get_writeable_state_dict(
         state["bookmarks"] = {}
     if tap_stream_id not in state["bookmarks"]:
         state["bookmarks"][tap_stream_id] = {}
-    stream_state = state["bookmarks"][tap_stream_id]
+    stream_state = cast(dict, state["bookmarks"][tap_stream_id])
     if not partition:
         return stream_state
     if "partitions" not in stream_state:
         stream_state["partitions"] = []
-    stream_state_partitions = stream_state["partitions"]
+    stream_state_partitions: List[dict] = stream_state["partitions"]
     found = [
         partition_state
         for partition_state in stream_state_partitions
@@ -213,7 +213,9 @@ def _greater_than_signpost(
     new_value: Union[datetime.datetime, str, int, float],
 ) -> bool:
     """Compare and return True if new_value is greater than signpost."""
-    return new_value > signpost
+    return (  # fails if signpost and bookmark are incompatible types
+        new_value > signpost  # type: ignore
+    )
 
 
 def finalize_state_progress_markers(state: dict) -> Optional[dict]:

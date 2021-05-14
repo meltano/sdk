@@ -55,7 +55,9 @@ def cookiecutter_template_test(cookiecutter_dir: str):
             assert (
                 not errors
             ), f"Flake8 found violations in first pass of {filepath}: {errors}"
-            mypy_out = api.run([filepath])
+            mypy_out = api.run(
+                [filepath, "--config", str(Path(outdir) / Path("tox.ini"))]
+            )
             mypy_msg = str(mypy_out[0])
             if not mypy_msg.startswith("Success:"):
                 logging.exception(f"MyPy validation failed: {mypy_msg}")
