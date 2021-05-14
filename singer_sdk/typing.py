@@ -83,7 +83,7 @@ class JSONTypeHelper(object):
 
     def to_dict(self) -> dict:
         """Return dict describing the object."""
-        return self.type_dict
+        return cast(dict, self.type_dict)
 
 
 class DateTimeType(JSONTypeHelper):
