@@ -9,9 +9,13 @@ from singer_sdk.streams.rest import RESTStream
 class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
     """Abstract base class for API-type streams."""
 
-    query: Optional[str] = None
     path = ""
     rest_method = "POST"
+
+    @property
+    def query(self) -> str:
+        """Return dynamic GraphQL query."""
+        raise NotImplementedError("GraphQLStream `query` is not defined.")
 
     def prepare_request_payload(
         self, partition: Optional[dict], next_page_token: Optional[Any] = None

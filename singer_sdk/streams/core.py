@@ -16,12 +16,16 @@ from typing import (
     Optional,
     TypeVar,
     Union,
+    cast,
 )
 
 import pendulum
 import singer
-from singer import metadata
-from singer import RecordMessage, SchemaMessage
+from singer import (
+    metadata,
+    RecordMessage,
+    SchemaMessage,
+)
 from singer.catalog import Catalog
 from singer.schema import Schema
 
@@ -120,10 +124,10 @@ class Stream(metaclass=abc.ABCMeta):
             if replication_key_value and self.replication_key == state.get(
                 "replication_key"
             ):
-                return pendulum.parse(replication_key_value)
+                return cast(datetime.datetime, pendulum.parse(replication_key_value))
 
         if "start_date" in self.config:
-            return pendulum.parse(self.config["start_date"])
+            return cast(datetime.datetime, pendulum.parse(self.config["start_date"]))
 
         return None
 
@@ -232,16 +236,19 @@ class Stream(metaclass=abc.ABCMeta):
             catalog = singer.Catalog.from_dict(self._tap_input_catalog)
             catalog_entry = catalog.get_stream(self.tap_stream_id)
             if catalog_entry:
-                return catalog_entry.metadata
+                return cast(dict, catalog_entry.metadata)
 
-        md = metadata.get_standard_metadata(
-            schema=self.schema,
-            replication_method=self.forced_replication_method,
-            key_properties=self.primary_keys or None,
-            valid_replication_keys=(
-                [self.replication_key] if self.replication_key else None
+        md = cast(
+            dict,
+            metadata.get_standard_metadata(
+                schema=self.schema,
+                replication_method=self.forced_replication_method,
+                key_properties=self.primary_keys or None,
+                valid_replication_keys=(
+                    [self.replication_key] if self.replication_key else None
+                ),
+                schema_name=None,
             ),
-            schema_name=None,
         )
         return md
 
@@ -407,13 +414,9 @@ class Stream(metaclass=abc.ABCMeta):
     def _sync_records(self, partition: Optional[dict] = None) -> None:
         """Sync records, emitting RECORD and STATE messages."""
         rows_sent = 0
-        # Iterate through each returned record:
-        partitions: List[Optional[dict]] = [None]
-        if partition:
-            partitions = [partition]
-        elif self.partitions:
-            partitions = self.partitions
-        for partition in partitions:
+        partitions = [partition] if partition else self.partitions
+        for partition in partitions or [{}]:
+            partition = partition or None
             state = self.get_stream_or_partition_state(partition)
             reset_state_progress_markers(state)
             for row_dict in self.get_records(partition=partition):

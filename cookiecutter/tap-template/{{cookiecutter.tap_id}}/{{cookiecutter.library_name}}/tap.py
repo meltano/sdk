@@ -41,8 +41,3 @@ class Tap{{ cookiecutter.source_name }}(Tap):
         """Return a list of discovered streams."""
         return [stream_class(tap=self) for stream_class in STREAM_TYPES]
 {%- endif %}
-
-
-# CLI Execution:
-
-cli = Tap{{ cookiecutter.source_name }}.cli
