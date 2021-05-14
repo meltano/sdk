@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path, PurePath
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union, cast
 
 import pendulum
 
@@ -19,9 +19,9 @@ def read_json_file(path: Union[PurePath, str]) -> Dict[str, Any]:
                 msg += f"\nFor more info, please see the sample template at: {template}"
         raise FileExistsError(msg)
 
-    return json.loads(Path(path).read_text())
+    return cast(dict, json.loads(Path(path).read_text()))
 
 
-def utc_now() -> pendulum.datetime:
+def utc_now() -> pendulum.DateTime:
     """Return current time in UTC."""
-    return pendulum.utcnow()
+    return pendulum.now(tz="UTC")

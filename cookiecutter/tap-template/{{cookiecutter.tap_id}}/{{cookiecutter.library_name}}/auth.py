@@ -10,7 +10,7 @@ class {{ cookiecutter.source_name }}Authenticator(SimpleAuthenticator):
     """Authenticator class for {{ cookiecutter.source_name }}."""
 
     @classmethod
-    def create_for_stream(cls, stream):
+    def create_for_stream(cls, stream) -> "{{ cookiecutter.source_name }}Authenticator":
         return cls(
             stream=stream,
             auth_headers={
@@ -38,7 +38,7 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator):
         }
 
     @classmethod
-    def create_for_stream(cls, stream):
+    def create_for_stream(cls, stream) -> "{{ cookiecutter.source_name }}Authenticator":
         return cls(
             stream=stream,
             auth_endpoint="TODO: OAuth Endpoint URL",
@@ -52,7 +52,7 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthJWTAuthenticator):
     """Authenticator class for {{ cookiecutter.source_name }}."""
 
     @classmethod
-    def create_for_stream(cls, stream):
+    def create_for_stream(cls, stream) -> "{{ cookiecutter.source_name }}Authenticator":
         return cls(
             stream=stream,
             auth_endpoint="TODO: OAuth Endpoint URL",
