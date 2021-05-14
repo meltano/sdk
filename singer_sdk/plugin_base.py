@@ -9,7 +9,7 @@ from types import MappingProxyType
 from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
 
 
-from jsonschema import (  # type: ignore  # No type hints for library
+from jsonschema import (
     ValidationError,
     SchemaError,
     Draft4Validator,
@@ -35,7 +35,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
     name: str
-    config_jsonschema: dict
+    config_jsonschema: dict = {}
 
     _config: dict
 

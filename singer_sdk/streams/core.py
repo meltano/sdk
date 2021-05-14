@@ -20,14 +20,14 @@ from typing import (
 )
 
 import pendulum
-import singer  # type: ignore  # No type hints for library
-from singer import (  # type: ignore  # No type hints for library
+import singer
+from singer import (
     metadata,
     RecordMessage,
     SchemaMessage,
 )
-from singer.catalog import Catalog  # type: ignore  # No type hints for library
-from singer.schema import Schema  # type: ignore  # No type hints for library
+from singer.catalog import Catalog
+from singer.schema import Schema
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.helpers._catalog import (
@@ -236,16 +236,19 @@ class Stream(metaclass=abc.ABCMeta):
             catalog = singer.Catalog.from_dict(self._tap_input_catalog)
             catalog_entry = catalog.get_stream(self.tap_stream_id)
             if catalog_entry:
-                return catalog_entry.metadata
+                return cast(dict, catalog_entry.metadata)
 
-        md = metadata.get_standard_metadata(
-            schema=self.schema,
-            replication_method=self.forced_replication_method,
-            key_properties=self.primary_keys or None,
-            valid_replication_keys=(
-                [self.replication_key] if self.replication_key else None
+        md = cast(
+            dict,
+            metadata.get_standard_metadata(
+                schema=self.schema,
+                replication_method=self.forced_replication_method,
+                key_properties=self.primary_keys or None,
+                valid_replication_keys=(
+                    [self.replication_key] if self.replication_key else None
+                ),
+                schema_name=None,
             ),
-            schema_name=None,
         )
         return md
 

@@ -15,7 +15,7 @@ from cryptography.hazmat.backends import default_backend
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.streams import Stream as RESTStreamBase
 
-from singer import utils  # type: ignore  # No type hints for library
+from singer import utils
 
 
 class APIAuthenticatorBase(object):

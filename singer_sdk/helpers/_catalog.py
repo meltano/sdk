@@ -19,7 +19,7 @@ def is_stream_selected(
     catalog: Optional[dict],
     stream_name: str,
     logger: Logger,
-):
+) -> bool:
     """Return True if the stream is selected for extract."""
     return is_property_selected(catalog, stream_name, breadcrumb=(), logger=logger)
 
@@ -86,7 +86,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
         return True
 
     if "selected" in md_entry:
-        return md_entry["selected"]
+        return cast(bool, md_entry["selected"])
 
     if md_entry.get("inclusion") == "available":
         return True
@@ -102,7 +102,7 @@ def get_selected_schema(catalog: dict, stream_name: str, logger: Logger) -> dict
     """Return a copy of the provided JSON schema, dropping any fields not selected."""
     catalog_obj = Catalog.from_dict(catalog)
     catalog_entry = catalog_obj.get_stream(stream_name)
-    schema = deepcopy(catalog_entry.schema.to_dict())
+    schema = deepcopy(cast(dict, catalog_entry.schema.to_dict()))
     _pop_deselected_schema(schema, catalog, stream_name, cast(Tuple[str], ()), logger)
     return schema
 

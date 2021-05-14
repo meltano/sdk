@@ -39,8 +39,8 @@ Note:
 
 """
 
-from jsonschema import validators  # type: ignore  # No type hints for library
-from typing import List, Tuple
+from jsonschema import validators
+from typing import List, Tuple, Type, Union, cast
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._typing import append_type
@@ -150,7 +150,13 @@ class ArrayType(JSONTypeHelper):
 class Property(JSONTypeHelper):
     """Generic Property. Should be nested within a `PropertiesList`."""
 
-    def __init__(self, name, wrapped, required: bool = False, default=None) -> None:
+    def __init__(
+        self,
+        name: str,
+        wrapped: Union[JSONTypeHelper, Type[JSONTypeHelper]],
+        required: bool = False,
+        default=None,
+    ) -> None:
         """Initialize Property object."""
         self.name = name
         self.wrapped = wrapped
@@ -160,7 +166,7 @@ class Property(JSONTypeHelper):
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
         """Return dict describing the type."""
-        return self.wrapped.type_dict
+        return cast(dict, self.wrapped.type_dict)
 
     def to_dict(self) -> dict:
         """Return a dict mapping the property name to its definition."""

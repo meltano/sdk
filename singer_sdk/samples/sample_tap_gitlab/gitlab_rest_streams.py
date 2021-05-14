@@ -194,6 +194,6 @@ class EpicIssuesStream(GitlabStream):
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in parameterization."""
         result = super().get_url_params(partition)
-        if "epic_id" not in partition:
+        if not partition or "epic_id" not in partition:
             raise ValueError("Cannot sync epic issues without already known epic IDs.")
         return result

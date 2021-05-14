@@ -1,15 +1,15 @@
 """Abstract base class for API-type streams."""
 
 import abc
-import backoff  # type: ignore  # No type hints for library
+import backoff
 import copy
 import logging
 import requests
 
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union, cast
 
-from singer.schema import Schema  # type: ignore  # No type hints for library
+from singer.schema import Schema
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
@@ -134,14 +134,17 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         if authenticator:
             headers.update(authenticator.auth_headers or {})
 
-        request = self.requests_session.prepare_request(
-            requests.Request(
-                method=http_method,
-                url=url,
-                params=params,
-                headers=headers,
-                json=request_data,
-            )
+        request = cast(
+            requests.PreparedRequest,
+            self.requests_session.prepare_request(
+                requests.Request(
+                    method=http_method,
+                    url=url,
+                    params=params,
+                    headers=headers,
+                    json=request_data,
+                )
+            ),
         )
         return request
 
