@@ -111,6 +111,7 @@ def get_writeable_state_dict(
     """
     if state is None:
         raise ValueError("Cannot write state to missing state dictionary.")
+
     if "bookmarks" not in state:
         state["bookmarks"] = {}
     if tap_stream_id not in state["bookmarks"]:
@@ -118,6 +119,7 @@ def get_writeable_state_dict(
     stream_state = cast(dict, state["bookmarks"][tap_stream_id])
     if not partition:
         return stream_state
+
     if "partitions" not in stream_state:
         stream_state["partitions"] = []
     stream_state_partitions: List[dict] = stream_state["partitions"]
@@ -128,10 +130,12 @@ def get_writeable_state_dict(
     ]
     if len(found) > 1:
         raise ValueError(
-            f"State file contains duplicate entries for partition: {partition}"
+            f"State file contains duplicate entries for partition: {partition}.\n"
+            f"Matching state values were: {str(found)}"
         )
     if found:
         return found[0]
+
     # Existing partition not found. Creating new state entry in partitions list...
     new_partition_state = {"context": partition}
     stream_state_partitions.append(new_partition_state)

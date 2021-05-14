@@ -19,3 +19,7 @@ class MaxRecordsLimitException(Exception):
 
 class RecordsWitoutSchemaException(Exception):
     """Raised if a target receives RECORD messages prior to a SCHEMA message."""
+
+
+class ChildStreamDirectInvocationError(Exception):
+    """Directly invoking a child stream sync is not supported."""

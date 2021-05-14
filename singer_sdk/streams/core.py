@@ -14,6 +14,8 @@ from typing import (
     Iterable,
     Mapping,
     Optional,
+    Tuple,
+    Type,
     TypeVar,
     Union,
     cast,
@@ -67,7 +69,8 @@ class Stream(metaclass=abc.ABCMeta):
     STATE_MSG_FREQUENCY = 10000  # Number of records between state messages
     _MAX_RECORDS_LIMIT: Optional[int] = None
 
-    parent_stream_types: List[Any] = []  # May be used in sync sequencing
+    # Used for nested stream relationships
+    parent_stream_type: Optional[Type["Stream"]] = None
 
     def __init__(
         self,
@@ -83,6 +86,7 @@ class Stream(metaclass=abc.ABCMeta):
         self.logger: logging.Logger = tap.logger
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
+        self._tap = tap
         self._tap_state = tap.state
         self._tap_input_catalog: Optional[dict] = None
         self.forced_replication_method: Optional[str] = None
@@ -90,6 +94,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._primary_keys: Optional[List[str]] = None
         self._schema_filepath: Optional[Path] = None
         self._schema: Optional[dict] = None
+        self.child_streams: List[Stream] = []
         if schema:
             if isinstance(schema, (PathLike, str)):
                 self._schema_filepath = Path(schema)
@@ -131,12 +136,23 @@ class Stream(metaclass=abc.ABCMeta):
 
         return None
 
+    @final
     @property
     def selected(self) -> bool:
         """Return true if the stream is selected."""
         return _catalog.is_stream_selected(
             self._tap_input_catalog, self.name, self.logger
         )
+
+    @final
+    @property
+    def has_selected_descendents(self) -> bool:
+        """Return True if any child streams are selected, recursively."""
+        for child in self.child_streams or []:
+            if child.selected or child.has_selected_descendents:
+                return True
+
+        return False
 
     def _write_replication_key_signpost(
         self,
@@ -328,8 +344,9 @@ class Stream(metaclass=abc.ABCMeta):
 
     def get_stream_or_partition_state(self, partition: Optional[dict]) -> dict:
         """Return partition state if applicable; else return stream state."""
-        if partition:
-            return self.get_partition_state(partition)
+        state_context = self.get_state_context(partition)
+        if state_context:
+            return self.get_partition_state(state_context)
         return self.stream_state
 
     @property
@@ -439,6 +456,19 @@ class Stream(metaclass=abc.ABCMeta):
             state = self.get_stream_or_partition_state(partition)
             reset_state_progress_markers(state)
             for row_dict in self.get_records(partition=partition):
+                if isinstance(row_dict, tuple):
+                    # Tuple items should be the record and the child context
+                    child_context: Optional[dict]
+                    row_dict, child_context = row_dict
+                    child_context = self.get_child_context(
+                        record=row_dict, context=child_context
+                    )
+                else:
+                    # Child context is not overridden
+                    child_context = self.get_child_context(
+                        record=cast(dict, row_dict), context=partition
+                    )
+                self._sync_children(child_context)
                 if (
                     self._MAX_RECORDS_LIMIT is not None
                     and rows_sent >= self._MAX_RECORDS_LIMIT
@@ -469,15 +499,21 @@ class Stream(metaclass=abc.ABCMeta):
     # Public methods ("final", not recommended to be overridden)
 
     @final
-    def sync(self):
+    def sync(self, partition: Optional[dict] = None):
         """Sync this stream."""
-        self.logger.info(
-            f"Beginning {self.replication_method} sync of stream '{self.name}'..."
-        )
+        msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
+        if partition:
+            msg += f" partition: {partition}"
+        self.logger.info(f"{msg}...")
         # Send a SCHEMA message to the downstream target:
         self._write_schema_message()
         # Sync the records themselves:
-        self._sync_records()
+        self._sync_records(partition)
+
+    def _sync_children(self, child_context) -> None:
+        for child_stream in self.child_streams:
+            if child_stream.selected or child_stream.has_selected_descendents:
+                child_stream.sync(partition=child_context)
 
     # Overridable Methods
 
@@ -493,13 +529,29 @@ class Stream(metaclass=abc.ABCMeta):
             if catalog_entry.replication_method:
                 self.forced_replication_method = catalog_entry.replication_method
 
+    def get_state_context(self, context: Optional[dict] = None) -> Optional[Dict]:
+        """Optionally override the context to be used to index state bookmarks."""
+        return context
+
+    def get_child_context(self, record: dict, context: dict = None) -> Optional[Dict]:
+        """Return a child context object from the record and optional provided context.
+
+        By default, will return context if provided and otherwise the record dict.
+        Developers may override this behavior to send specific information to child
+        streams for context.
+        """
+        return context or record
+
     # Abstract Methods
 
     @abc.abstractmethod
-    def get_records(self, partition: Optional[dict] = None) -> Iterable[Dict[str, Any]]:
+    def get_records(
+        self, partition: Optional[dict] = None
+    ) -> Iterable[Union[dict, Tuple[dict, dict]]]:
         """Abstract row generator function. Must be overridden by the child class.
 
         Each row emitted should be a dictionary of property names to their values.
+        Returns either a record dict or a tuple: (record_dict, child_context)
         """
         pass
 

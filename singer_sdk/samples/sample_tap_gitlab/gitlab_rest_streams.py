@@ -187,7 +187,7 @@ class EpicIssuesStream(GitlabStream):
     primary_keys = ["id"]
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "epic_issues.json"
-    parent_stream_types = [EpicsStream]  # Stream should wait for parents to complete.
+    parent_stream_type = EpicsStream  # Stream should wait for parents to complete.
 
     def get_url_params(
         self, partition: Optional[dict], next_page_token: Optional[Any] = None

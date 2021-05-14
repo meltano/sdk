@@ -3,7 +3,7 @@
 import abc
 import json
 from pathlib import PurePath, Path
-from typing import Any, List, Optional, Dict, Union, cast
+from typing import Any, List, Optional, Dict, Type, Union, cast
 
 import click
 from singer.catalog import Catalog
@@ -14,7 +14,10 @@ from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams.core import Stream
-from singer_sdk.exceptions import MaxRecordsLimitException
+from singer_sdk.exceptions import (
+    MaxRecordsLimitException,
+    ChildStreamDirectInvocationError,
+)
 
 
 class Tap(PluginBase, metaclass=abc.ABCMeta):
@@ -90,7 +93,15 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     def run_connection_test(self) -> bool:
         """Run connection test and return True if successful."""
         for stream in self.streams.values():
-            stream._MAX_RECORDS_LIMIT = 0
+            if stream.parent_stream_type:
+                self.logger.debug(
+                    f"Child stream '{type(stream).__name__}' should be called by "
+                    f"parent stream '{stream.parent_stream_type.__name__}'. "
+                    "Skipping direct invocation."
+                )
+                continue
+
+            stream._MAX_RECORDS_LIMIT = 1 if stream.child_streams else 0
             try:
                 stream.sync()
             except MaxRecordsLimitException:
@@ -130,26 +141,45 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             "Please set the '--catalog' command line argument and try again."
         )
 
+    @final
     def load_streams(self) -> List[Stream]:
-        """Load streams from discovery or input catalog.
+        """Load streams from discovery and initialize DAG.
 
-        - Implementations may reference `self.discover_streams()`, `self.input_catalog`,
-          or both.
-        - By default, return the output of `self.discover_streams()` to enumerate
-          discovered streams.
-        - Developers may override this method if discovery is not supported, or if
-          discovery should not be run by default.
+        Return the output of `self.discover_streams()` to enumerate
+        discovered streams.
         """
+        # Build the parent-child dependency DAG
+
+        # Index streams by type
+        streams_by_type: Dict[Type[Stream], List[Stream]] = {}
+        for stream in self.discover_streams():
+            stream_type = type(stream)
+            if stream_type not in streams_by_type:
+                streams_by_type[stream_type] = []
+            streams_by_type[stream_type].append(stream)
+
+        # Initialize child streams list for parents
+        for stream_type, streams in streams_by_type.items():
+            if stream_type.parent_stream_type:
+                parents = streams_by_type[stream_type.parent_stream_type]
+                for parent in parents:
+                    for stream in streams:
+                        parent.child_streams.append(stream)
+                        self.logger.info(
+                            f"Added '{stream.name}' as child stream to '{parent.name}'"
+                        )
+
+        streams = [stream for streams in streams_by_type.values() for stream in streams]
         return sorted(
-            self.discover_streams(),
-            key=lambda x: -1 * (len(x.parent_stream_types or []), x.name),
+            streams,
+            key=lambda x: x.name,
             reverse=False,
         )
 
     # Bookmarks and state management
 
     def load_state(self, state: Dict[str, Any]) -> None:
-        """Merge or initalize stream state with the provided state dictionary input.
+        """Merge or initialize stream state with the provided state dictionary input.
 
         Override this method to perform validation and backwards-compatibility patches
         on self.state. If overriding, we recommend first running
@@ -177,15 +207,32 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 f"{sorted(self.streams.keys())}"
             )
         stream = self.streams[stream_name]
+        if stream.parent_stream_type:
+            raise ChildStreamDirectInvocationError(
+                f"Child stream '{stream.name}' is expected to be called by "
+                f"parent stream '{stream.parent_stream_type.name}'. "
+                "Direct invocation is not supported."
+            )
+
         stream.sync()
 
+    @final
     def sync_all(self):
         """Sync all streams."""
         for stream in self.streams.values():
-            if stream.selected:
-                stream.sync()
-            else:
+            if not stream.selected and not stream.has_selected_descendents:
                 self.logger.info(f"Skipping deselected stream '{stream.name}'.")
+                continue
+
+            if stream.parent_stream_type:
+                self.logger.debug(
+                    f"Child stream '{type(stream).__name__}' is expected to be called "
+                    f"by parent stream '{stream.parent_stream_type.__name__}'. "
+                    "Skipping direct invocation."
+                )
+                continue
+
+            stream.sync()
 
     # Command Line Execution
 
