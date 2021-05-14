@@ -2,10 +2,15 @@
 
 import logging
 import pytest
+from copy import deepcopy
 
 import singer
 
-from singer_sdk.helpers._catalog import get_selected_schema, is_property_selected
+from singer_sdk.helpers._catalog import (
+    get_selected_schema,
+    is_property_selected,
+    pop_deselected_record_properties,
+)
 from singer_sdk.typing import PropertiesList, Property, StringType, ObjectType
 
 
@@ -19,6 +24,15 @@ def record():
         "col_b": {
             "col_b_1": "the answer",
             "col_b_2": "42",
+        },
+    }
+
+
+@pytest.fixture
+def record_selected():
+    return {
+        "col_a": {
+            "col_a_1": "something",
         },
     }
 
@@ -58,7 +72,7 @@ def selection_metadata():
             },
         },
         {
-            "breadcrumb": ("properties", "col_a", "col_a_2"),
+            "breadcrumb": ("properties", "col_a", "properties", "col_a_2"),
             "metadata": {
                 "selected": False,  # Should not be overridden by parent
             },
@@ -70,7 +84,7 @@ def selection_metadata():
             },
         },
         {
-            "breadcrumb": ("properties", "col_b", "col_b_1"),
+            "breadcrumb": ("properties", "col_b", "properties", "col_b_1"),
             "metadata": {
                 "selected": True,  # Should be overridden by parent
             },
@@ -103,11 +117,11 @@ def selection_test_cases():
     return [
         ((), True),
         (("properties", "col_a"), True),
-        (("properties", "col_a", "col_a_1"), True),
-        (("properties", "col_a", "col_a_2"), False),
+        (("properties", "col_a", "properties", "col_a_1"), True),
+        (("properties", "col_a", "properties", "col_a_2"), False),
         (("properties", "col_b"), False),
-        (("properties", "col_b", "col_b_1"), False),
-        (("properties", "col_b", "col_b_2"), False),
+        (("properties", "col_b", "properties", "col_b_1"), False),
+        (("properties", "col_b", "properties", "col_b_2"), False),
     ]
 
 
@@ -141,3 +155,20 @@ def test_record_selection(record, catalog, stream_name, selection_test_cases, ca
             )
             == expected
         ), f"bookmark {bookmark} was expected to be selected={expected}"
+
+
+def test_record_property_pop(record, record_selected, catalog, stream_name, caplog):
+    """Test that properties are correctly selected/deselected on a record."""
+    caplog.set_level(logging.DEBUG)
+    record_pop = deepcopy(record)
+    pop_deselected_record_properties(
+        record=record_pop,
+        catalog=catalog,
+        stream_name=stream_name,
+        logger=logging.getLogger(),
+        breadcrumb=(),
+    )
+
+    assert (
+        record_pop == record_selected
+    ), f"Expected record={record_selected}, got {record_pop}"
