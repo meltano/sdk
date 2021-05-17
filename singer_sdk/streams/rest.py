@@ -25,6 +25,10 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     _requests_session: Optional[requests.Session]
     rest_method = "GET"
 
+    # Private constants. May not be supported in future releases:
+    _LOG_REQUEST_METRICS: bool = True
+    _LOG_REQUEST_METRIC_URLS: bool = False  # Disabled by default for safety
+
     @property
     @abc.abstractmethod
     def url_base(self) -> str:
@@ -88,6 +92,20 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     )
     def _request_with_backoff(self, prepared_request) -> requests.Response:
         response = self.requests_session.send(prepared_request)
+        if self._LOG_REQUEST_METRICS:
+            request_duration_metric: Dict[str, Any] = {
+                "type": "timer",
+                "metric": "http_request_duration",
+                "value": response.elapsed.total_seconds(),
+                "tags": {
+                    "endpoint": self.path,
+                    "http_status_code": response.status_code,
+                    "status": "succeeded" if response.status_code < 400 else "failed",
+                },
+            }
+            if self._LOG_REQUEST_METRIC_URLS:
+                request_duration_metric["tags"]["url"] = cast(str, prepared_request.url)
+            self.logger.info(f"INFO METRIC: {str(request_duration_metric)}")
         if response.status_code in [401, 403]:
             self.logger.info("Skipping request to {}".format(prepared_request.url))
             self.logger.info(
