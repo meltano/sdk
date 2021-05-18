@@ -554,21 +554,22 @@ class Stream(metaclass=abc.ABCMeta):
                     ):
                         self._write_state_message()
                     self._write_record_message(row_dict)
-                    record_count += 1
-                    partition_record_count += 1
                     try:
                         self._increment_stream_state(row_dict, context=current_context)
                     except InvalidStreamSortException as ex:
                         log_sort_error(
                             log_fn=self.logger.error,
                             ex=ex,
-                            record_count=record_count,
-                            partition_record_count=partition_record_count,
+                            record_count=record_count + 1,
+                            partition_record_count=partition_record_count + 1,
                             current_context=current_context,
                             state_partition_context=state_partition_context,
                             stream_name=self.name,
                         )
                         raise ex
+
+                record_count += 1
+                partition_record_count += 1
             if current_context == state_partition_context:
                 # Finalize state only if 1:1 with context
                 finalize_state_progress_markers(state)
