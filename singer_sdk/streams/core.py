@@ -524,6 +524,7 @@ class Stream(metaclass=abc.ABCMeta):
         context_list: Optional[List[dict]]
         context_list = [context] if context is not None else self.partitions
         for current_context in context_list or [{}]:
+            partition_record_count = 0
             current_context = current_context or None
             state = self.get_context_state(current_context)
             state_partition_context = self._get_state_partition_context(current_context)
@@ -552,15 +553,25 @@ class Stream(metaclass=abc.ABCMeta):
                     self._write_record_message(row_dict)
 
                     try:
-                        self._increment_stream_state(row_dict, context=context)
+                        self._increment_stream_state(row_dict, context=current_context)
                     except InvalidStreamSortException as ex:
-                        msg = f"Sorting error detected on row #{record_count+1}. "
+                        msg = (
+                            f"Sorting error detected in '{self.name}'."
+                            f"on record #{record_count+1}. "
+                        )
+                        if partition_record_count != record_count:
+                            msg += (
+                                f"Record was partition record "
+                                f"#{partition_record_count+1} with"
+                                f" state partition context {state_partition_context}. "
+                            )
                         if current_context:
                             msg += f"Context was {str(current_context)}. "
                         msg += str(ex)
                         self.logger.error(msg)
                         raise ex
                     record_count += 1
+                    partition_record_count += 1
             if current_context == state_partition_context:
                 # Finalize state only if 1:1 with context
                 finalize_state_progress_markers(state)
