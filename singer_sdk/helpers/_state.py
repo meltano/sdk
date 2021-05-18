@@ -89,9 +89,11 @@ def _find_in_partitions_list(
     return None
 
 
-def _create_in_partitions_list(partitions: List[dict], context: dict) -> dict:
+def _create_in_partitions_list(
+    partitions: List[dict], state_partition_context: dict
+) -> dict:
     # Existing partition not found. Creating new state entry in partitions list...
-    new_partition_state = {"context": context}
+    new_partition_state = {"context": state_partition_context}
     partitions.append(new_partition_state)
     return new_partition_state
 
