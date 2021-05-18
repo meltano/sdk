@@ -370,11 +370,14 @@ class Stream(metaclass=abc.ABCMeta):
 
         Gives a partitioned context state if applicable; else returns stream state.
         A blank state will be created in none exists.
+        If any
         """
-        state_context = self._get_state_context(context)
-        if state_context:
+        state_partition_context = self._get_state_partition_context(context)
+        if state_partition_context:
             return get_writeable_state_dict(
-                self.tap_state, self.name, state_context=state_context
+                self.tap_state,
+                self.name,
+                state_partition_context=state_partition_context,
             )
         return self.stream_state
 
@@ -523,7 +526,7 @@ class Stream(metaclass=abc.ABCMeta):
         for current_context in context_list or [{}]:
             current_context = current_context or None
             state = self.get_context_state(current_context)
-            state_context = self._get_state_context(current_context)
+            state_partition_context = self._get_state_partition_context(current_context)
             child_context: Optional[dict] = (
                 None if current_context is None else copy.copy(current_context)
             )
@@ -535,7 +538,7 @@ class Stream(metaclass=abc.ABCMeta):
                 child_context = self.get_child_context(
                     record=row_dict, context=child_context
                 )
-                for key, val in (state_context or {}).items():
+                for key, val in (state_partition_context or {}).items():
                     # Add state context to records if not already present
                     if key not in row_dict:
                         row_dict[key] = val
@@ -549,9 +552,7 @@ class Stream(metaclass=abc.ABCMeta):
                     self._write_record_message(row_dict)
 
                     try:
-                        self._increment_stream_state(
-                            row_dict, state_context=state_context
-                        )
+                        self._increment_stream_state(row_dict, context=context)
                     except InvalidStreamSortException as ex:
                         msg = f"Sorting error detected on row #{record_count+1}. "
                         if current_context:
@@ -560,7 +561,7 @@ class Stream(metaclass=abc.ABCMeta):
                         self.logger.error(msg)
                         raise ex
                     record_count += 1
-            if current_context == state_context:
+            if current_context == state_partition_context:
                 # Finalize state only if 1:1 with context
                 finalize_state_progress_markers(state)
 
@@ -609,7 +610,7 @@ class Stream(metaclass=abc.ABCMeta):
             if catalog_entry.replication_method:
                 self.forced_replication_method = catalog_entry.replication_method
 
-    def _get_state_context(self, context: Optional[dict]) -> Optional[Dict]:
+    def _get_state_partition_context(self, context: Optional[dict]) -> Optional[Dict]:
         """Override state handling if Stream.state_partitioning_keys is specified."""
         if context is None:
             return None

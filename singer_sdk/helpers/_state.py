@@ -14,7 +14,7 @@ SIGNPOST_MARKER = "replication_key_signpost"
 def get_state_if_exists(
     state: dict,
     tap_stream_id: str,
-    state_context: Optional[dict] = None,
+    state_partition_context: Optional[dict] = None,
     key: Optional[str] = None,
 ) -> Optional[Any]:
     """Return the stream or partition state, creating a new one if it does not exist.
@@ -25,7 +25,7 @@ def get_state_if_exists(
         the existing state dict which contains all streams.
     tap_stream_id : str
         the id of the stream
-    state_context : Optional[dict], optional
+    state_partition_context : Optional[dict], optional
         keys which identify the partition context, by default None (not partitioned)
     key : Optional[str], optional
         name of the key searched for, by default None (return entire state if found)
@@ -47,7 +47,7 @@ def get_state_if_exists(
         return None
 
     stream_state = state["bookmarks"][tap_stream_id]
-    if not state_context:
+    if not state_partition_context:
         if key:
             return stream_state.get(key, None)
         return stream_state
@@ -55,7 +55,7 @@ def get_state_if_exists(
         return None  # No partitions defined
 
     matched_partition = _find_in_partitions_list(
-        stream_state["partitions"], state_context
+        stream_state["partitions"], state_partition_context
     )
     if matched_partition is None:
         return None  # Partition definition not present
@@ -94,7 +94,7 @@ def _create_in_partitions_list(partitions: List[dict], context: dict) -> dict:
 
 
 def get_writeable_state_dict(
-    state: dict, tap_stream_id: str, state_context: Optional[dict] = None
+    state: dict, tap_stream_id: str, state_partition_context: Optional[dict] = None
 ) -> dict:
     """Return the stream or partition state, creating a new one if it does not exist.
 
@@ -104,7 +104,7 @@ def get_writeable_state_dict(
         the existing state dict which contains all streams.
     tap_stream_id : str
         the id of the stream
-    state_context : Optional[dict], optional
+    state_partition_context : Optional[dict], optional
         keys which identify the partition context, by default None (not partitioned)
 
     Returns
@@ -126,17 +126,17 @@ def get_writeable_state_dict(
     if tap_stream_id not in state["bookmarks"]:
         state["bookmarks"][tap_stream_id] = {}
     stream_state = cast(dict, state["bookmarks"][tap_stream_id])
-    if not state_context:
+    if not state_partition_context:
         return stream_state
 
     if "partitions" not in stream_state:
         stream_state["partitions"] = []
     stream_state_partitions: List[dict] = stream_state["partitions"]
-    found = _find_in_partitions_list(stream_state_partitions, state_context)
+    found = _find_in_partitions_list(stream_state_partitions, state_partition_context)
     if found:
         return found
 
-    return _create_in_partitions_list(stream_state_partitions, state_context)
+    return _create_in_partitions_list(stream_state_partitions, state_partition_context)
 
 
 def read_stream_state(
@@ -145,11 +145,11 @@ def read_stream_state(
     key=None,
     default: Any = None,
     *,
-    state_context: Optional[dict] = None,
+    state_partition_context: Optional[dict] = None,
 ) -> Any:
     """Read stream state."""
     state_dict = get_writeable_state_dict(
-        state, tap_stream_id, state_context=state_context
+        state, tap_stream_id, state_partition_context=state_partition_context
     )
     if key:
         return state_dict.get(key, default)
@@ -157,11 +157,16 @@ def read_stream_state(
 
 
 def write_stream_state(
-    state, tap_stream_id: str, key, val, *, state_context: Optional[dict] = None
+    state,
+    tap_stream_id: str,
+    key,
+    val,
+    *,
+    state_partition_context: Optional[dict] = None,
 ) -> None:
     """Write stream state."""
     state_dict = get_writeable_state_dict(
-        state, tap_stream_id, state_context=state_context
+        state, tap_stream_id, state_partition_context=state_partition_context
     )
     state_dict[key] = val
 

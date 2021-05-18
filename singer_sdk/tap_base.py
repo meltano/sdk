@@ -220,9 +220,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                         f"replication keys. "
                         f"Forcing full table replication for '{stream.name}'."
                     )
-                    if descendent.selected and descendent.ignore_parent_stream_type:
-                        stream.replication_keys = None
-                        stream.replication_method = "FULL_TABLE"
+                    if descendent.selected and descendent.ignore_parent_replication_key:
+                        stream.replication_key = None
+                        stream.forced_replication_method = "FULL_TABLE"
 
     # Sync methods
 
