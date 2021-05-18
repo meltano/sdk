@@ -69,15 +69,18 @@ def get_state_partitions_list(state: dict, tap_stream_id: str) -> Optional[List[
     return (get_state_if_exists(state, tap_stream_id) or {}).get("partitions", None)
 
 
-def _find_in_partitions_list(partitions: List[dict], context: dict) -> Optional[dict]:
+def _find_in_partitions_list(
+    partitions: List[dict], state_partition_context: dict
+) -> Optional[dict]:
     found = [
         partition_state
         for partition_state in partitions
-        if partition_state["context"] == context
+        if partition_state["context"] == state_partition_context
     ]
     if len(found) > 1:
         raise ValueError(
-            f"State file contains duplicate entries for partition: {context}.\n"
+            f"State file contains duplicate entries for partition: "
+            "{state_partition_context}.\n"
             f"Matching state values were: {str(found)}"
         )
     if found:
