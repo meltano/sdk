@@ -252,8 +252,6 @@ class Stream(metaclass=abc.ABCMeta):
     @property
     def state_partitioning_keys(self) -> Optional[List[str]]:
         """Return partition keys for the stream."""
-        if not self._state_partitioning_keys:
-            return None
         return self._state_partitioning_keys
 
     @state_partitioning_keys.setter
