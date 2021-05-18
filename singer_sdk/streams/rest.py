@@ -90,7 +90,9 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         giveup=lambda e: e.response is not None and 400 <= e.response.status_code < 500,
         factor=2,
     )
-    def _request_with_backoff(self, prepared_request) -> requests.Response:
+    def _request_with_backoff(
+        self, prepared_request, context: Optional[dict]
+    ) -> requests.Response:
         response = self.requests_session.send(prepared_request)
         if self._LOG_REQUEST_METRICS:
             request_duration_metric: Dict[str, Any] = {
@@ -103,6 +105,8 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
                     "status": "succeeded" if response.status_code < 400 else "failed",
                 },
             }
+            if context:
+                request_duration_metric["tags"]["context"] = context
             if self._LOG_REQUEST_METRIC_URLS:
                 request_duration_metric["tags"]["url"] = cast(str, prepared_request.url)
             self.logger.info(f"INFO METRIC: {str(request_duration_metric)}")
@@ -177,7 +181,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             prepared_request = self.prepare_request(
                 context, next_page_token=next_page_token
             )
-            resp = self._request_with_backoff(prepared_request)
+            resp = self._request_with_backoff(prepared_request, context)
             for row in self.parse_response(resp):
                 yield row
             previous_token = copy.deepcopy(next_page_token)
