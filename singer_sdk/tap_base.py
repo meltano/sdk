@@ -18,6 +18,7 @@ from singer_sdk.exceptions import (
     MaxRecordsLimitException,
     ChildStreamDirectInvocationError,
 )
+from singer_sdk.helpers import _state
 
 
 class Tap(PluginBase, metaclass=abc.ABCMeta):
@@ -197,6 +198,22 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     val,
                 )
 
+    # State handling
+
+    def _reset_state_progress_markers(self) -> None:
+        """Clear prior jobs' progress markers at beginning of sync."""
+        for stream_name, state in self.state.get("bookmarks", {}).items():
+            _state.reset_state_progress_markers(state)
+            for partition_state in state.get("partitions", []):
+                _state.reset_state_progress_markers(partition_state)
+
+    def _finalize_state_progress_markers(self) -> None:
+        """Finalize prior jobs' progress markers at end of sync."""
+        for stream_name, state in self.state.get("bookmarks", {}).items():
+            _state.finalize_state_progress_markers(state)
+            for partition_state in state.get("partitions", []):
+                _state.finalize_state_progress_markers(partition_state)
+
     # Sync methods
 
     def sync_one(self, stream_name: str):
@@ -207,6 +224,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 f"{sorted(self.streams.keys())}"
             )
         stream = self.streams[stream_name]
+        stream.reset_state_progress_markers()
         if stream.parent_stream_type:
             raise ChildStreamDirectInvocationError(
                 f"Child stream '{stream.name}' is expected to be called by "
@@ -216,9 +234,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
         stream.sync()
 
+        stream.finalize_state_progress_markers()
+
     @final
     def sync_all(self):
         """Sync all streams."""
+        self.reset_state_progress_markers()
         for stream in self.streams.values():
             if not stream.selected and not stream.has_selected_descendents:
                 self.logger.info(f"Skipping deselected stream '{stream.name}'.")
@@ -233,6 +254,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 continue
 
             stream.sync()
+            stream.finalize_state_progress_markers()
 
     # Command Line Execution
 
