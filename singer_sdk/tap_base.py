@@ -213,16 +213,15 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         stream: Stream
         for stream in self.streams.values():
             for descendent in stream.descendent_streams:
-                if descendent.ignore_parent_replication_key:
+                if descendent.selected and descendent.ignore_parent_replication_key:
                     self.logger.warning(
                         f"Stream descendent '{descendent.name}' is selected and "
                         f"its parent '{stream.name}' does not use inclusive "
                         f"replication keys. "
                         f"Forcing full table replication for '{stream.name}'."
                     )
-                    if descendent.selected and descendent.ignore_parent_replication_key:
-                        stream.replication_key = None
-                        stream.forced_replication_method = "FULL_TABLE"
+                    stream.replication_key = None
+                    stream.forced_replication_method = "FULL_TABLE"
 
     # Sync methods
 
