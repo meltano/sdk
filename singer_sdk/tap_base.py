@@ -207,13 +207,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             for partition_state in state.get("partitions", []):
                 _state.reset_state_progress_markers(partition_state)
 
-    def _finalize_state_progress_markers(self) -> None:
-        """Finalize prior jobs' progress markers at end of sync."""
-        for stream_name, state in self.state.get("bookmarks", {}).items():
-            _state.finalize_state_progress_markers(state)
-            for partition_state in state.get("partitions", []):
-                _state.finalize_state_progress_markers(partition_state)
-
     # Sync methods
 
     def sync_one(self, stream_name: str):
@@ -239,7 +232,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     @final
     def sync_all(self):
         """Sync all streams."""
-        self.reset_state_progress_markers()
+        self._reset_state_progress_markers()
         for stream in self.streams.values():
             if not stream.selected and not stream.has_selected_descendents:
                 self.logger.info(f"Skipping deselected stream '{stream.name}'.")
