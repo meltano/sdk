@@ -94,7 +94,7 @@ class Stream(metaclass=abc.ABCMeta):
         self.forced_replication_method: Optional[str] = None
         self._replication_key: Optional[str] = None
         self._primary_keys: Optional[List[str]] = None
-        self._state_context_keys: Optional[List[str]] = None
+        self._state_partitioning_keys: Optional[List[str]] = None
         self._schema_filepath: Optional[Path] = None
         self._schema: Optional[dict] = None
         self.child_streams: List[Stream] = []
@@ -249,16 +249,16 @@ class Stream(metaclass=abc.ABCMeta):
         self._primary_keys = new_value
 
     @property
-    def state_context_keys(self) -> Optional[List[str]]:
+    def state_partitioning_keys(self) -> Optional[List[str]]:
         """Return partition keys for the stream."""
-        if not self._state_context_keys:
+        if not self._state_partitioning_keys:
             return None
-        return self._state_context_keys
+        return self._state_partitioning_keys
 
-    @state_context_keys.setter
-    def state_context_keys(self, new_value: Optional[List[str]]) -> None:
+    @state_partitioning_keys.setter
+    def state_partitioning_keys(self, new_value: Optional[List[str]]) -> None:
         """Set partition keys for the stream."""
-        self._state_context_keys = new_value
+        self._state_partitioning_keys = new_value
 
     @property
     def replication_key(self) -> Optional[str]:
@@ -610,14 +610,14 @@ class Stream(metaclass=abc.ABCMeta):
                 self.forced_replication_method = catalog_entry.replication_method
 
     def _get_state_context(self, context: Optional[dict]) -> Optional[Dict]:
-        """Override state handling if Stream.state_context_keys is specified."""
+        """Override state handling if Stream.state_partitioning_keys is specified."""
         if context is None:
             return None
 
-        if self.state_context_keys is None:
+        if self.state_partitioning_keys is None:
             return context
 
-        return {k: v for k, v in context.items() if k in self.state_context_keys}
+        return {k: v for k, v in context.items() if k in self.state_partitioning_keys}
 
     def get_child_context(self, record: dict, context: dict = None) -> Optional[Dict]:
         """Return a child context object from the record and optional provided context.
