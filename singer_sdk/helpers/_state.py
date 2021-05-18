@@ -1,7 +1,7 @@
 """Helper functions for state and bookmark management."""
 
 import datetime
-from typing import Any, List, Optional, Union, cast
+from typing import Any, Callable, List, Optional, Union, cast
 
 from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.helpers._typing import to_json_compatible
@@ -248,3 +248,26 @@ def finalize_state_progress_markers(state: dict) -> Optional[dict]:
             state["replication_key_value"] = new_rk_value
     # Wipe and return any markers that have not been promoted
     return reset_state_progress_markers(state)
+
+
+def log_sort_error(
+    ex: Exception,
+    log_fn: Callable,
+    stream_name: str,
+    current_context: Optional[dict],
+    state_partition_context: Optional[dict],
+    record_count: int,
+    partition_record_count: int,
+) -> None:
+    """Log a sort error."""
+    msg = f"Sorting error detected in '{stream_name}'." f"on record #{record_count+1}. "
+    if partition_record_count != record_count:
+        msg += (
+            f"Record was partition record "
+            f"#{partition_record_count+1} with"
+            f" state partition context {state_partition_context}. "
+        )
+    if current_context:
+        msg += f"Context was {str(current_context)}. "
+    msg += str(ex)
+    log_fn(msg)

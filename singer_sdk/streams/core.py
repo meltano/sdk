@@ -49,6 +49,7 @@ from singer_sdk.helpers._state import (
     finalize_state_progress_markers,
     reset_state_progress_markers,
     write_replication_key_signpost,
+    log_sort_error,
 )
 from singer_sdk.exceptions import MaxRecordsLimitException, InvalidStreamSortException
 from singer_sdk.helpers._compat import final
@@ -517,7 +518,9 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Private sync methods:
 
-    def _sync_records(self, context: Optional[dict] = None) -> None:
+    def _sync_records(  # noqa C901  # too complex
+        self, context: Optional[dict] = None
+    ) -> None:
         """Sync records, emitting RECORD and STATE messages."""
         record_count = 0
         current_context: Optional[dict]
@@ -551,27 +554,21 @@ class Stream(metaclass=abc.ABCMeta):
                     ):
                         self._write_state_message()
                     self._write_record_message(row_dict)
-
+                    record_count += 1
+                    partition_record_count += 1
                     try:
                         self._increment_stream_state(row_dict, context=current_context)
                     except InvalidStreamSortException as ex:
-                        msg = (
-                            f"Sorting error detected in '{self.name}'."
-                            f"on record #{record_count+1}. "
+                        log_sort_error(
+                            log_fn=self.logger.error,
+                            ex=ex,
+                            record_count=record_count,
+                            partition_record_count=partition_record_count,
+                            current_context=current_context,
+                            state_partition_context=state_partition_context,
+                            stream_name=self.name,
                         )
-                        if partition_record_count != record_count:
-                            msg += (
-                                f"Record was partition record "
-                                f"#{partition_record_count+1} with"
-                                f" state partition context {state_partition_context}. "
-                            )
-                        if current_context:
-                            msg += f"Context was {str(current_context)}. "
-                        msg += str(ex)
-                        self.logger.error(msg)
                         raise ex
-                    record_count += 1
-                    partition_record_count += 1
             if current_context == state_partition_context:
                 # Finalize state only if 1:1 with context
                 finalize_state_progress_markers(state)
