@@ -207,6 +207,23 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             for partition_state in state.get("partitions", []):
                 _state.reset_state_progress_markers(partition_state)
 
+    # Fix sync replication method incompatibilities
+
+    def _set_compatible_replication_methods(self) -> None:
+        stream: Stream
+        for stream in self.streams.values():
+            for descendent in stream.descendent_streams:
+                if descendent.ignore_parent_replication_key:
+                    self.logger.warning(
+                        f"Stream descendent '{descendent.name}' is selected and "
+                        f"its parent '{stream.name}' does not use inclusive "
+                        f"replication keys. "
+                        f"Forcing full table replication for '{stream.name}'."
+                    )
+                    if descendent.selected and descendent.ignore_parent_stream_type:
+                        stream.replication_keys = None
+                        stream.replication_method = "FULL_TABLE"
+
     # Sync methods
 
     def sync_one(self, stream_name: str):
@@ -233,6 +250,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     def sync_all(self):
         """Sync all streams."""
         self._reset_state_progress_markers()
+        self._set_compatible_replication_methods()
+        stream: "Stream"
         for stream in self.streams.values():
             if not stream.selected and not stream.has_selected_descendents:
                 self.logger.info(f"Skipping deselected stream '{stream.name}'.")

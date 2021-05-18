@@ -71,6 +71,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Used for nested stream relationships
     parent_stream_type: Optional[Type["Stream"]] = None
+    ignore_parent_replication_key: bool = False
 
     def __init__(
         self,
@@ -174,6 +175,15 @@ class Stream(metaclass=abc.ABCMeta):
                 return True
 
         return False
+
+    @final
+    @property
+    def descendent_streams(self) -> List["Stream"]:
+        """Return a list of all children recursively."""
+        result: List[Stream] = list(self.child_streams) or []
+        for child in self.child_streams:
+            result += child.descendent_streams or []
+        return result
 
     def _write_replication_key_signpost(
         self,
