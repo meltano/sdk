@@ -1,6 +1,7 @@
 """Stream abstract class."""
 
-import abc  # abstract base classes
+import abc
+import copy  # abstract base classes
 import datetime
 import json
 import logging
@@ -93,7 +94,7 @@ class Stream(metaclass=abc.ABCMeta):
         self.forced_replication_method: Optional[str] = None
         self._replication_key: Optional[str] = None
         self._primary_keys: Optional[List[str]] = None
-        self._partition_keys: Optional[List[str]] = None
+        self._state_context_keys: Optional[List[str]] = None
         self._schema_filepath: Optional[Path] = None
         self._schema: Optional[dict] = None
         self.child_streams: List[Stream] = []
@@ -122,20 +123,20 @@ class Stream(metaclass=abc.ABCMeta):
         return is_datetime_type(type_dict)
 
     def get_starting_replication_key_value(
-        self, partition: Optional[dict]
+        self, context: Optional[dict]
     ) -> Optional[Any]:
         """Return starting replication key."""
         if self.is_timestamp_replication_key:
-            return self.get_starting_timestamp(partition)
+            return self.get_starting_timestamp(context)
 
-        return self._starting_replication_key_value(partition)
+        return self._starting_replication_key_value(context)
 
     def get_starting_timestamp(
-        self, partition: Optional[dict]
+        self, context: Optional[dict]
     ) -> Optional[datetime.datetime]:
         """Return `start_date` config, or state if using timestamp replication."""
         if self.is_timestamp_replication_key:
-            replication_key_value = self._starting_replication_key_value(partition)
+            replication_key_value = self._starting_replication_key_value(context)
             if replication_key_value:
                 return cast(datetime.datetime, pendulum.parse(replication_key_value))
 
@@ -144,12 +145,10 @@ class Stream(metaclass=abc.ABCMeta):
 
         return None
 
-    def _starting_replication_key_value(
-        self, partition: Optional[dict]
-    ) -> Optional[Any]:
+    def _starting_replication_key_value(self, context: Optional[dict]) -> Optional[Any]:
         """Return starting replication key."""
         if self.replication_key:
-            state = self.get_stream_or_partition_state(partition)
+            state = self.get_context_state(context)
             replication_key_value = state.get("replication_key_value")
             if replication_key_value and self.replication_key == state.get(
                 "replication_key"
@@ -187,18 +186,18 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _write_replication_key_signpost(
         self,
-        partition: Optional[dict],
+        context: Optional[dict],
         value: Union[datetime.datetime, str, int, float],
     ):
         """Write the signpost value, if available."""
         if not value:
             return
 
-        state = self.get_stream_or_partition_state(partition)
+        state = self.get_context_state(context)
         write_replication_key_signpost(state, value)
 
     def get_replication_key_signpost(
-        self, partition: Optional[dict]
+        self, context: Optional[dict]
     ) -> Optional[Union[datetime.datetime, Any]]:
         """Return the max allowable bookmark value for this stream's replication key.
 
@@ -250,16 +249,16 @@ class Stream(metaclass=abc.ABCMeta):
         self._primary_keys = new_value
 
     @property
-    def partition_keys(self) -> Optional[List[str]]:
+    def state_context_keys(self) -> Optional[List[str]]:
         """Return partition keys for the stream."""
-        if not self._partition_keys:
+        if not self._state_context_keys:
             return None
-        return self._partition_keys
+        return self._state_context_keys
 
-    @partition_keys.setter
-    def partition_keys(self, new_value: Optional[List[str]]) -> None:
+    @state_context_keys.setter
+    def state_context_keys(self, new_value: Optional[List[str]]) -> None:
         """Set partition keys for the stream."""
-        self._partition_keys = new_value
+        self._state_context_keys = new_value
 
     @property
     def replication_key(self) -> Optional[str]:
@@ -366,11 +365,17 @@ class Stream(metaclass=abc.ABCMeta):
         """
         return self._tap_state
 
-    def get_stream_or_partition_state(self, partition: Optional[dict]) -> dict:
-        """Return partition state if applicable; else return stream state."""
-        state_context = self._get_state_context(partition)
+    def get_context_state(self, context: Optional[dict]) -> dict:
+        """Return a writable state dict for the given context.
+
+        Gives a partitioned context state if applicable; else returns stream state.
+        A blank state will be created in none exists.
+        """
+        state_context = self._get_state_context(context)
         if state_context:
-            return self.get_partition_state(state_context)
+            return get_writeable_state_dict(
+                self.tap_state, self.name, state_context=state_context
+            )
         return self.stream_state
 
     @property
@@ -380,10 +385,6 @@ class Stream(metaclass=abc.ABCMeta):
         A blank state entry will be created if one doesn't already exist.
         """
         return get_writeable_state_dict(self.tap_state, self.name)
-
-    def get_partition_state(self, partition: dict) -> dict:
-        """Return a writable state dict for the given partition."""
-        return get_writeable_state_dict(self.tap_state, self.name, partition=partition)
 
     # Partitions
 
@@ -405,14 +406,14 @@ class Stream(metaclass=abc.ABCMeta):
     # Private bookmarking methods
 
     def _increment_stream_state(
-        self, latest_record: Dict[str, Any], *, partition: Optional[dict] = None
+        self, latest_record: Dict[str, Any], *, context: Optional[dict] = None
     ):
         """Update state of stream or partition with data from the provided record.
 
         Raises InvalidStreamSortException is self.is_sorted = True and unsorted data is
         detected.
         """
-        state_dict = self.get_stream_or_partition_state(partition)
+        state_dict = self.get_context_state(context)
         if latest_record:
             if self.replication_method in [
                 REPLICATION_INCREMENTAL,
@@ -427,7 +428,7 @@ class Stream(metaclass=abc.ABCMeta):
                     state_dict,
                     replication_key=self.replication_key,
                     replication_key_signpost=self.get_replication_key_signpost(
-                        partition=partition
+                        context=context
                     ),
                     latest_record=latest_record,
                     is_sorted=self.is_sorted,
@@ -484,10 +485,10 @@ class Stream(metaclass=abc.ABCMeta):
     def reset_state_progress_markers(self, state: Optional[dict] = None) -> None:
         """Reset progress markers. If all=True, all state contexts will be set."""
         if state is None or state == {}:
-            partition: Optional[dict]
-            for partition in self.partitions or [{}]:
-                partition = partition or None
-                state = self.get_stream_or_partition_state(partition)
+            context: Optional[dict]
+            for context in self.partitions or [{}]:
+                context = context or None
+                state = self.get_context_state(context)
                 reset_state_progress_markers(state)
             return
 
@@ -502,10 +503,10 @@ class Stream(metaclass=abc.ABCMeta):
             for child_stream in self.child_streams or []:
                 child_stream.finalize_state_progress_markers()
 
-            partition: Optional[dict]
-            for partition in self.partitions or [{}]:
-                partition = partition or None
-                state = self.get_stream_or_partition_state(partition)
+            context: Optional[dict]
+            for context in self.partitions or [{}]:
+                context = context or None
+                state = self.get_context_state(context)
                 finalize_state_progress_markers(state)
             return
 
@@ -513,27 +514,27 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Private sync methods:
 
-    def _sync_records(self, partition: Optional[dict] = None) -> None:
+    def _sync_records(self, context: Optional[dict] = None) -> None:
         """Sync records, emitting RECORD and STATE messages."""
         record_count = 0
-        partitions = [partition] if partition else self.partitions
-        for partition in partitions or [{}]:
-            partition = partition or None
-            state = self.get_stream_or_partition_state(partition)
-            state_context = self._get_state_context(partition)
-            for row_dict in self.get_records(partition=partition):
+        current_context: Optional[dict]
+        context_list: Optional[List[dict]]
+        context_list = [context] if context is not None else self.partitions
+        for current_context in context_list or [{}]:
+            current_context = current_context or None
+            state = self.get_context_state(current_context)
+            state_context = self._get_state_context(current_context)
+            child_context: Optional[dict] = (
+                None if current_context is None else copy.copy(current_context)
+            )
+            for row_dict in self.get_records(current_context):
                 if isinstance(row_dict, tuple):
                     # Tuple items should be the record and the child context
-                    child_context: Optional[dict]
                     row_dict, child_context = row_dict
-                    child_context = self.get_child_context(
-                        record=row_dict, context=child_context
-                    )
-                else:
-                    # Child context is not overridden
-                    child_context = self.get_child_context(
-                        record=cast(dict, row_dict), context=partition
-                    )
+                    child_context = copy.copy(child_context)
+                child_context = self.get_child_context(
+                    record=row_dict, context=child_context
+                )
                 for key, val in (state_context or {}).items():
                     # Add state context to records if not already present
                     if key not in row_dict:
@@ -546,18 +547,21 @@ class Stream(metaclass=abc.ABCMeta):
                     ):
                         self._write_state_message()
                     self._write_record_message(row_dict)
+
                     try:
-                        self._increment_stream_state(row_dict, partition=partition)
+                        self._increment_stream_state(
+                            row_dict, state_context=state_context
+                        )
                     except InvalidStreamSortException as ex:
                         msg = f"Sorting error detected on row #{record_count+1}. "
-                        if partition:
-                            msg += f"Partition was {str(partition)}. "
+                        if current_context:
+                            msg += f"Context was {str(current_context)}. "
                         msg += str(ex)
                         self.logger.error(msg)
                         raise ex
                     record_count += 1
-            if partition == state_context:
-                # Finalize partition state only if 1:1 with context
+            if current_context == state_context:
+                # Finalize state only if 1:1 with context
                 finalize_state_progress_markers(state)
 
         counter_metric: Dict[str, Any] = {
@@ -566,8 +570,8 @@ class Stream(metaclass=abc.ABCMeta):
             "value": record_count,
             "tags": {"stream": self.name},
         }
-        if partition:
-            counter_metric["tags"]["partition"] = partition
+        if context:
+            counter_metric["tags"]["context"] = context
         self.logger.info(f"INFO METRIC: {str(counter_metric)}")
         # Reset interim bookmarks before emitting final STATE message:
         self._write_state_message()
@@ -575,21 +579,21 @@ class Stream(metaclass=abc.ABCMeta):
     # Public methods ("final", not recommended to be overridden)
 
     @final
-    def sync(self, partition: Optional[dict] = None):
+    def sync(self, context: Optional[dict] = None):
         """Sync this stream."""
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
-        if partition:
-            msg += f" partition: {partition}"
+        if context:
+            msg += f" with context: {context}"
         self.logger.info(f"{msg}...")
         # Send a SCHEMA message to the downstream target:
         self._write_schema_message()
         # Sync the records themselves:
-        self._sync_records(partition)
+        self._sync_records(context)
 
     def _sync_children(self, child_context) -> None:
         for child_stream in self.child_streams:
             if child_stream.selected or child_stream.has_selected_descendents:
-                child_stream.sync(partition=child_context)
+                child_stream.sync(context=child_context)
 
     # Overridable Methods
 
@@ -606,14 +610,14 @@ class Stream(metaclass=abc.ABCMeta):
                 self.forced_replication_method = catalog_entry.replication_method
 
     def _get_state_context(self, context: Optional[dict]) -> Optional[Dict]:
-        """Override state handling if Stream.partition_keys is specified."""
+        """Override state handling if Stream.state_context_keys is specified."""
         if context is None:
             return None
 
-        if self.partition_keys is None:
+        if self.state_context_keys is None:
             return context
 
-        return {k: v for k, v in context.items() if k in self.partition_keys}
+        return {k: v for k, v in context.items() if k in self.state_context_keys}
 
     def get_child_context(self, record: dict, context: dict = None) -> Optional[Dict]:
         """Return a child context object from the record and optional provided context.
@@ -628,7 +632,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_records(
-        self, partition: Optional[dict] = None
+        self, context: Optional[dict] = None
     ) -> Iterable[Union[dict, Tuple[dict, dict]]]:
         """Abstract row generator function. Must be overridden by the child class.
 
@@ -637,6 +641,6 @@ class Stream(metaclass=abc.ABCMeta):
         """
         pass
 
-    def post_process(self, row: dict, partition: Optional[dict] = None) -> dict:
+    def post_process(self, row: dict, context: Optional[dict] = None) -> dict:
         """As needed, append or transform raw data to match expected structure."""
         return row

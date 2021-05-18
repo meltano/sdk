@@ -28,7 +28,7 @@ work regardless of whether partition is an actual partition context or `None`, m
 no partition is specified.
 
 When dealing with state, for example, developers may always call
-`Stream.get_stream_or_partition_state(partition)` even if partition is not set.
+`Stream.get_context_state(context)` even if `context` is not set.
 The method will automatically return the state that is appropriate, either for the partition
 or for the stream.
 

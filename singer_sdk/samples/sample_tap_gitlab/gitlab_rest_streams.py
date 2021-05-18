@@ -13,7 +13,6 @@ from singer_sdk.typing import (
     PropertiesList,
     StringType,
 )
-from singer_sdk.helpers._state import get_writeable_state_dict
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.streams.rest import RESTStream
 
@@ -38,7 +37,7 @@ class GitlabStream(RESTStream):
         )
 
     def get_url_params(
-        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any] = None
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization."""
         params: dict = {}
@@ -161,18 +160,13 @@ class EpicsStream(ProjectBasedStream):
 
     # schema_filepath = SCHEMAS_DIR / "epics.json"
 
-    def post_process(self, row: dict, partition: Optional[dict] = None) -> dict:
+    def get_child_context(self, record: dict, context: Optional[dict] = None) -> dict:
         """Perform post processing, including queuing up any child stream types."""
         # Ensure child state record(s) are created
-        _ = get_writeable_state_dict(
-            self.tap_state,
-            "epic_issues",
-            partition={
-                "group_id": row["group_id"],
-                "epic_id": row["id"],
-            },
-        )
-        return super().post_process(row, partition)
+        return {
+            "group_id": record["group_id"],
+            "epic_id": record["id"],
+        }
 
 
 class EpicIssuesStream(GitlabStream):
@@ -190,10 +184,10 @@ class EpicIssuesStream(GitlabStream):
     parent_stream_type = EpicsStream  # Stream should wait for parents to complete.
 
     def get_url_params(
-        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any] = None
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in parameterization."""
-        result = super().get_url_params(partition)
-        if not partition or "epic_id" not in partition:
+        result = super().get_url_params(context)
+        if not context or "epic_id" not in context:
             raise ValueError("Cannot sync epic issues without already known epic IDs.")
         return result
