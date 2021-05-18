@@ -638,7 +638,7 @@ class Stream(metaclass=abc.ABCMeta):
         """
         if not context:
             for child_stream in self.child_streams:
-                if not child_stream.state_partitioning_keys:
+                if child_stream.state_partitioning_keys is None:
                     parent_type = type(self).__name__
                     child_type = type(child_stream).__name__
                     raise NotImplementedError(
