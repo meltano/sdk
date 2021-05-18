@@ -636,6 +636,19 @@ class Stream(metaclass=abc.ABCMeta):
         Developers may override this behavior to send specific information to child
         streams for context.
         """
+        if not context:
+            for child_stream in self.child_streams:
+                if not child_stream.state_partitioning_keys:
+                    parent_type = type(self).__name__
+                    child_type = type(child_stream).__name__
+                    raise NotImplementedError(
+                        "No child context behavior was defined between parent stream "
+                        f"'{self.name}' and child stream '{child_stream.name}'."
+                        "The parent stream must define "
+                        f"`{parent_type}.get_child_context()` and/or the child stream "
+                        f"must define `{child_type}.state_partitioning_keys`."
+                    )
+
         return context or record
 
     # Abstract Methods
