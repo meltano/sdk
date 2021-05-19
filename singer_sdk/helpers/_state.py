@@ -12,7 +12,7 @@ SIGNPOST_MARKER = "replication_key_signpost"
 
 
 def get_state_if_exists(
-    state: dict,
+    tap_state: dict,
     tap_stream_id: str,
     state_partition_context: Optional[dict] = None,
     key: Optional[str] = None,
@@ -21,7 +21,7 @@ def get_state_if_exists(
 
     Parameters
     ----------
-    state : dict
+    tap_state : dict
         the existing state dict which contains all streams.
     tap_stream_id : str
         the id of the stream
@@ -41,12 +41,12 @@ def get_state_if_exists(
         Raised if state is invalid or cannot be parsed.
 
     """
-    if "bookmarks" not in state:
+    if "bookmarks" not in tap_state:
         return None
-    if tap_stream_id not in state["bookmarks"]:
+    if tap_stream_id not in tap_state["bookmarks"]:
         return None
 
-    stream_state = state["bookmarks"][tap_stream_id]
+    stream_state = tap_state["bookmarks"][tap_stream_id]
     if not state_partition_context:
         if key:
             return stream_state.get(key, None)
@@ -64,9 +64,11 @@ def get_state_if_exists(
     return matched_partition
 
 
-def get_state_partitions_list(state: dict, tap_stream_id: str) -> Optional[List[dict]]:
+def get_state_partitions_list(
+    tap_state: dict, tap_stream_id: str
+) -> Optional[List[dict]]:
     """Return a list of partitions defined in the state, or None if not defined."""
-    return (get_state_if_exists(state, tap_stream_id) or {}).get("partitions", None)
+    return (get_state_if_exists(tap_state, tap_stream_id) or {}).get("partitions", None)
 
 
 def _find_in_partitions_list(
@@ -99,13 +101,13 @@ def _create_in_partitions_list(
 
 
 def get_writeable_state_dict(
-    state: dict, tap_stream_id: str, state_partition_context: Optional[dict] = None
+    tap_state: dict, tap_stream_id: str, state_partition_context: Optional[dict] = None
 ) -> dict:
     """Return the stream or partition state, creating a new one if it does not exist.
 
     Parameters
     ----------
-    state : dict
+    tap_state : dict
         the existing state dict which contains all streams.
     tap_stream_id : str
         the id of the stream
@@ -123,14 +125,14 @@ def get_writeable_state_dict(
         Raise an error if duplicate entries are found.
 
     """
-    if state is None:
+    if tap_state is None:
         raise ValueError("Cannot write state to missing state dictionary.")
 
-    if "bookmarks" not in state:
-        state["bookmarks"] = {}
-    if tap_stream_id not in state["bookmarks"]:
-        state["bookmarks"][tap_stream_id] = {}
-    stream_state = cast(dict, state["bookmarks"][tap_stream_id])
+    if "bookmarks" not in tap_state:
+        tap_state["bookmarks"] = {}
+    if tap_stream_id not in tap_state["bookmarks"]:
+        tap_state["bookmarks"][tap_stream_id] = {}
+    stream_state = cast(dict, tap_state["bookmarks"][tap_stream_id])
     if not state_partition_context:
         return stream_state
 
@@ -145,7 +147,7 @@ def get_writeable_state_dict(
 
 
 def read_stream_state(
-    state,
+    tap_state,
     tap_stream_id: str,
     key=None,
     default: Any = None,
@@ -154,7 +156,7 @@ def read_stream_state(
 ) -> Any:
     """Read stream state."""
     state_dict = get_writeable_state_dict(
-        state, tap_stream_id, state_partition_context=state_partition_context
+        tap_state, tap_stream_id, state_partition_context=state_partition_context
     )
     if key:
         return state_dict.get(key, default)
@@ -162,7 +164,7 @@ def read_stream_state(
 
 
 def write_stream_state(
-    state,
+    tap_state,
     tap_stream_id: str,
     key,
     val,
@@ -171,17 +173,17 @@ def write_stream_state(
 ) -> None:
     """Write stream state."""
     state_dict = get_writeable_state_dict(
-        state, tap_stream_id, state_partition_context=state_partition_context
+        tap_state, tap_stream_id, state_partition_context=state_partition_context
     )
     state_dict[key] = val
 
 
-def reset_state_progress_markers(state: dict) -> Optional[dict]:
+def reset_state_progress_markers(stream_or_partition_state: dict) -> Optional[dict]:
     """Wipe the state once sync is complete.
 
     For logging purposes, return the wiped 'progress_markers' object if it existed.
     """
-    progress_markers = state.get(PROGRESS_MARKERS, {})
+    progress_markers = stream_or_partition_state.get(PROGRESS_MARKERS, {})
     # Remove auto-generated human-readable note:
     progress_markers.pop(PROGRESS_MARKER_NOTE, None)
     # Return remaining 'progress_markers' if any:
@@ -189,15 +191,15 @@ def reset_state_progress_markers(state: dict) -> Optional[dict]:
 
 
 def write_replication_key_signpost(
-    state: dict,
+    stream_or_partition_state: dict,
     new_signpost_value: Any,
 ) -> None:
     """Write signpost value."""
-    state[SIGNPOST_MARKER] = new_signpost_value
+    stream_or_partition_state[SIGNPOST_MARKER] = new_signpost_value
 
 
 def increment_state(
-    state: dict,
+    stream_or_partition_state: dict,
     latest_record: dict,
     replication_key: str,
     replication_key_signpost: Optional[Any],
@@ -208,13 +210,13 @@ def increment_state(
     Raises InvalidStreamSortException if is_sorted=True and unsorted
     data is detected in the stream.
     """
-    progress_dict = state
+    progress_dict = stream_or_partition_state
     if not is_sorted:
-        if PROGRESS_MARKERS not in state:
-            state[PROGRESS_MARKERS] = {
+        if PROGRESS_MARKERS not in stream_or_partition_state:
+            stream_or_partition_state[PROGRESS_MARKERS] = {
                 PROGRESS_MARKER_NOTE: "Progress is not resumable if interrupted."
             }
-        progress_dict = state[PROGRESS_MARKERS]
+        progress_dict = stream_or_partition_state[PROGRESS_MARKERS]
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
     new_rk_value = to_json_compatible(latest_record[replication_key])
     if old_rk_value is None or new_rk_value >= old_rk_value:
@@ -239,20 +241,22 @@ def _greater_than_signpost(
     )
 
 
-def finalize_state_progress_markers(state: dict) -> Optional[dict]:
+def finalize_state_progress_markers(stream_or_partition_state: dict) -> Optional[dict]:
     """Promote or wipe progress markers once sync is complete."""
-    signpost_value = state.pop(SIGNPOST_MARKER, None)
-    if PROGRESS_MARKERS in state:
-        if "replication_key" in state[PROGRESS_MARKERS]:
+    signpost_value = stream_or_partition_state.pop(SIGNPOST_MARKER, None)
+    if PROGRESS_MARKERS in stream_or_partition_state:
+        if "replication_key" in stream_or_partition_state[PROGRESS_MARKERS]:
             # Replication keys valid (only) after sync is complete
-            progress_markers = state[PROGRESS_MARKERS]
-            state["replication_key"] = progress_markers.pop("replication_key")
+            progress_markers = stream_or_partition_state[PROGRESS_MARKERS]
+            stream_or_partition_state["replication_key"] = progress_markers.pop(
+                "replication_key"
+            )
             new_rk_value = progress_markers.pop("replication_key_value")
             if signpost_value and _greater_than_signpost(signpost_value, new_rk_value):
                 new_rk_value = signpost_value
-            state["replication_key_value"] = new_rk_value
+            stream_or_partition_state["replication_key_value"] = new_rk_value
     # Wipe and return any markers that have not been promoted
-    return reset_state_progress_markers(state)
+    return reset_state_progress_markers(stream_or_partition_state)
 
 
 def log_sort_error(
