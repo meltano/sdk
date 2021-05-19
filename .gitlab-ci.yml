@@ -9,7 +9,7 @@ default:
     # Force update PATH to include pipx executables
     - export PATH=$PATH:/root/.local/bin
     - pipx install poetry
-    - pipx install tox
+    - pipx install tox -e ${PYTHON_VERSION}
     - poetry install
 
 variables:
@@ -32,8 +32,8 @@ build_and_test:
     - |
       if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
       then
-        echo "Run full test suite..."
-        poetry run tox
+        echo "Run full test suite using '${PYTHON_VERSION//./}' tox env config..."
+        poetry run tox -e ${PYTHON_VERSION//./}
       else
         echo "Run 'core' and 'cookiecutter' python test suites..."
         poetry run pytest singer_sdk/tests/core
