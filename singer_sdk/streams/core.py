@@ -5,6 +5,7 @@ import copy  # abstract base classes
 import datetime
 import json
 import logging
+import requests
 from types import MappingProxyType
 from os import PathLike
 from pathlib import Path
@@ -472,6 +473,45 @@ class Stream(metaclass=abc.ABCMeta):
         )
         singer.write_message(record_message)
 
+    def _write_metric_log(self, metric: dict, extra_tags: Optional[dict]) -> None:
+        """Emit a metric log. Optionally with appended tag info."""
+        if extra_tags:
+            metric["tags"].update(extra_tags)
+        self.logger.info(f"INFO METRIC: {str(metric)}")
+
+    def _write_record_count_log(self, record_count, context: Optional[dict]) -> None:
+        """Emit a metric log. Optionally with appended tag info."""
+        extra_tags = {} if not context else {"context": context}
+        counter_metric: Dict[str, Any] = {
+            "type": "counter",
+            "metric": "record_count",
+            "value": record_count,
+            "tags": {"stream": self.name},
+        }
+        self._write_metric_log(counter_metric, extra_tags=extra_tags)
+
+    def _write_request_duration_log(
+        self,
+        endpoint: str,
+        response: requests.Response,
+        context: Optional[dict],
+        extra_tags: Optional[dict],
+    ) -> None:
+        request_duration_metric: Dict[str, Any] = {
+            "type": "timer",
+            "metric": "http_request_duration",
+            "value": response.elapsed.total_seconds(),
+            "tags": {
+                "endpoint": endpoint,
+                "http_status_code": response.status_code,
+                "status": "succeeded" if response.status_code < 400 else "failed",
+            },
+        }
+        extra_tags = extra_tags or {}
+        if context:
+            extra_tags["context"] = context
+        self._write_metric_log(metric=request_duration_metric, extra_tags=extra_tags)
+
     def _check_max_record_limit(self, record_count) -> None:
         if (
             self._MAX_RECORDS_LIMIT is not None
@@ -532,28 +572,27 @@ class Stream(metaclass=abc.ABCMeta):
             child_context: Optional[dict] = (
                 None if current_context is None else copy.copy(current_context)
             )
-            for row_dict in self.get_records(current_context):
-                if isinstance(row_dict, tuple):
+            for record_result in self.get_records(current_context):
+                if isinstance(record_result, tuple):
                     # Tuple items should be the record and the child context
-                    row_dict, child_context = row_dict
-                    child_context = copy.copy(child_context)
-                child_context = self.get_child_context(
-                    record=row_dict, context=child_context
+                    record, child_context = record_result
+                else:
+                    record = record_result
+                child_context = copy.copy(
+                    self.get_child_context(record=record, context=child_context)
                 )
                 for key, val in (state_partition_context or {}).items():
                     # Add state context to records if not already present
-                    if key not in row_dict:
-                        row_dict[key] = val
+                    if key not in record:
+                        record[key] = val
                 self._sync_children(child_context)
                 self._check_max_record_limit(record_count)
                 if self.selected:
-                    if record_count and (
-                        (record_count - 1) % self.STATE_MSG_FREQUENCY == 0
-                    ):
+                    if (record_count - 1) % self.STATE_MSG_FREQUENCY == 0:
                         self._write_state_message()
-                    self._write_record_message(row_dict)
+                    self._write_record_message(record)
                     try:
-                        self._increment_stream_state(row_dict, context=current_context)
+                        self._increment_stream_state(record, context=current_context)
                     except InvalidStreamSortException as ex:
                         log_sort_error(
                             log_fn=self.logger.error,
@@ -571,16 +610,7 @@ class Stream(metaclass=abc.ABCMeta):
             if current_context == state_partition_context:
                 # Finalize state only if 1:1 with context
                 finalize_state_progress_markers(state)
-
-        counter_metric: Dict[str, Any] = {
-            "type": "counter",
-            "metric": "record_count",
-            "value": record_count,
-            "tags": {"stream": self.name},
-        }
-        if context:
-            counter_metric["tags"]["context"] = context
-        self.logger.info(f"INFO METRIC: {str(counter_metric)}")
+        self._write_record_count_log(record_count=record_count, context=context)
         # Reset interim bookmarks before emitting final STATE message:
         self._write_state_message()
 
@@ -634,7 +664,7 @@ class Stream(metaclass=abc.ABCMeta):
         Developers may override this behavior to send specific information to child
         streams for context.
         """
-        if not context:
+        if context is None:
             for child_stream in self.child_streams:
                 if child_stream.state_partitioning_keys is None:
                     parent_type = type(self).__name__

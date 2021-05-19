@@ -95,21 +95,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     ) -> requests.Response:
         response = self.requests_session.send(prepared_request)
         if self._LOG_REQUEST_METRICS:
-            request_duration_metric: Dict[str, Any] = {
-                "type": "timer",
-                "metric": "http_request_duration",
-                "value": response.elapsed.total_seconds(),
-                "tags": {
-                    "endpoint": self.path,
-                    "http_status_code": response.status_code,
-                    "status": "succeeded" if response.status_code < 400 else "failed",
-                },
-            }
-            if context:
-                request_duration_metric["tags"]["context"] = context
+            extra_tags = {}
             if self._LOG_REQUEST_METRIC_URLS:
-                request_duration_metric["tags"]["url"] = cast(str, prepared_request.url)
-            self.logger.info(f"INFO METRIC: {str(request_duration_metric)}")
+                extra_tags["url"] = cast(str, prepared_request.url)
+            self._write_request_duration_log(
+                endpoint=self.path,
+                response=response,
+                context=context,
+                extra_tags=extra_tags,
+            )
         if response.status_code in [401, 403]:
             self.logger.info("Skipping request to {}".format(prepared_request.url))
             self.logger.info(
