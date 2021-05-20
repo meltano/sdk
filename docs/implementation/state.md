@@ -64,7 +64,7 @@ being sent downstream to the same target table.
 For streams which are partitioned, the SDK will automatically store their stream state
 under a `partitions` key which exactly matches their `context`.
 
-For parent-child streams, the SDK will automatically use the parent's context as the default
+For [parent-child streams](../parent_streams.md), the SDK will automatically use the parent's context as the default
 state partition.
 
 ## Advanced Use Cases
