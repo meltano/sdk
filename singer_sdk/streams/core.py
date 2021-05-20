@@ -427,12 +427,16 @@ class Stream(metaclass=abc.ABCMeta):
                         f"Could not detect replication key for '{self.name}' stream"
                         f"(replication method={self.replication_method})"
                     )
+                treat_as_sorted = self.is_sorted
+                if not treat_as_sorted and self.state_partitioning_keys is not None:
+                    # Streams with custom state partitioning are not resumable.
+                    treat_as_sorted = False
                 increment_state(
                     state_dict,
                     replication_key=self.replication_key,
                     replication_key_signpost=self.get_replication_key_signpost(context),
                     latest_record=latest_record,
-                    is_sorted=self.is_sorted,
+                    is_sorted=treat_as_sorted,
                 )
 
     # Private message authoring methods:
