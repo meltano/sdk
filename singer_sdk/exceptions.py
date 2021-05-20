@@ -15,7 +15,3 @@ class InvalidStreamSortException(Exception):
 
 class MaxRecordsLimitException(Exception):
     """Exception to raise if the maximum number of allowable records is exceeded."""
-
-
-class ChildStreamDirectInvocationError(Exception):
-    """Directly invoking a child stream sync is not supported."""

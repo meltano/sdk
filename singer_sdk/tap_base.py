@@ -16,7 +16,6 @@ from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams.core import Stream
 from singer_sdk.exceptions import (
     MaxRecordsLimitException,
-    ChildStreamDirectInvocationError,
 )
 from singer_sdk.helpers import _state
 
