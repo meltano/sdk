@@ -66,7 +66,7 @@ REPLICATION_LOG_BASED = "LOG_BASED"
 
 FactoryType = TypeVar("FactoryType", bound="Stream")
 
-METRICS_LOGGING_LEVEL_SETTING = "metrics_logging_level"
+METRICS_LOG_LEVEL_SETTING = "metrics_log_level"
 
 
 class Stream(metaclass=abc.ABCMeta):
@@ -503,21 +503,21 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def _metric_logging_function(self) -> Optional[Callable]:
-        if METRICS_LOGGING_LEVEL_SETTING not in self.config:
+        if METRICS_LOG_LEVEL_SETTING not in self.config:
             return self.logger.info
 
-        if self.config[METRICS_LOGGING_LEVEL_SETTING].upper() == "INFO":
+        if self.config[METRICS_LOG_LEVEL_SETTING].upper() == "INFO":
             return self.logger.info
 
-        if self.config[METRICS_LOGGING_LEVEL_SETTING].upper() == "DEBUG":
+        if self.config[METRICS_LOG_LEVEL_SETTING].upper() == "DEBUG":
             return self.logger.debug
 
-        if self.config[METRICS_LOGGING_LEVEL_SETTING].upper() == "NONE":
+        if self.config[METRICS_LOG_LEVEL_SETTING].upper() == "NONE":
             return None
 
         assert False, (
             "Unexpected logging level for metrics: "
-            + self.config[METRICS_LOGGING_LEVEL_SETTING]
+            + self.config[METRICS_LOG_LEVEL_SETTING]
         )
 
     def _write_metric_log(self, metric: dict, extra_tags: Optional[dict]) -> None:
