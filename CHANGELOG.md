@@ -16,6 +16,13 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
+## v0.2.0 Unreleased
+
+### Added
+
+- Add support for parent-child streams (#97, !79)
+- Add support for configurable metrics logging (#97, !79)
+
 ## v0.1.6
 
 Stability and bugfix release. No breaking changes.
