@@ -60,6 +60,8 @@ Note:
 - This method takes an optional `context` argument, which can be safely ignored unless
 the stream is a child stream or requires [partitioning](./partitioning.md).
 - Only custom stream types need to define this method. REST and GraphQL streams do not.
+- [Parent streams](./parent_streams.md) can optionally return a tuple, in which case the
+  second item in the tuple being a `child_context` dictionary for the stream's `context`.
 
 ### `Stream.get_replication_key_signpost()` Method
 

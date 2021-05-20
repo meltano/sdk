@@ -173,5 +173,6 @@ non-timestamp replication keys (e.g. for `binlog` and `event_id` types) by overr
 ## See Also
 
 - [Singer SDK Partitioning](../partitioning.md)
+- [Singer SDK Parent-Child Streams](../parent_streams.md)
 - [Singer Spec: State Overview](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#state)
 - [Singer Spec: Config and State](https://github.com/singer-io/getting-started/blob/master/docs/CONFIG_AND_STATE.md#state-file)
