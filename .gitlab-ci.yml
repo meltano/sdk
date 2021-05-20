@@ -10,6 +10,7 @@ default:
     - python -m pipx install poetry
     # Force update PATH to include pipx executables
     - export PATH=$PATH:/root/.local/bin
+    - poetry install --no-root
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
