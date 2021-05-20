@@ -27,7 +27,12 @@ Here is an abbreviated example from the Gitlab sample (also in this repo) which 
 above techniques.
 
 ```py
-class EpicsStream(ProjectBasedStream):
+class GitlabStream(RESTStream):
+    # Base stream definition with auth and pagination logic 
+    # ...
+
+
+class EpicsStream(GitlabStream):
 
     name = "epics"
 
@@ -56,18 +61,6 @@ class EpicIssuesStream(GitlabStream):
     path = "/groups/{group_id}/epics/{epic_iid}/issues"
 
     # ...
-
-    def get_url_params(
-        self, context: Optional[dict], next_page_token: Optional[Any]
-    ) -> Dict[str, Any]:
-        """Return a dictionary of values to be used in parameterization.
-        
-        The `context` dictionary provides the parent context from each iterated `Epic`.
-        """
-        result = super().get_url_params(context, next_page_token)
-        if not context or "epic_id" not in context:
-            raise ValueError("Cannot sync epic issues without already known epic IDs.")
-        return result
 ```
 
 ## See Also
