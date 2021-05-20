@@ -252,12 +252,20 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def state_partitioning_keys(self) -> Optional[List[str]]:
-        """Return partition keys for the stream."""
+        """Return partition keys for the stream state bookmarks.
+
+        If not set, a default partitioning will be inherited from the stream's context.
+        If an empty list is set (`[]`), state will be held in one bookmark per stream.
+        """
         return self._state_partitioning_keys
 
     @state_partitioning_keys.setter
     def state_partitioning_keys(self, new_value: Optional[List[str]]) -> None:
-        """Set partition keys for the stream."""
+        """Set partition keys for the stream state bookmarks.
+
+        If not set, a default partitioning will be inherited from the stream's context.
+        If an empty list is set (`[]`), state will be held in one bookmark per stream.
+        """
         self._state_partitioning_keys = new_value
 
     @property
