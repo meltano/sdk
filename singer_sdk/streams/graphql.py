@@ -18,10 +18,10 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
         raise NotImplementedError("GraphQLStream `query` is not defined.")
 
     def prepare_request_payload(
-        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Optional[dict]:
         """Prepare the data payload for the GraphQL API request."""
-        params = self.get_url_params(partition, next_page_token)
+        params = self.get_url_params(context, next_page_token)
         if self.query is None:
             raise ValueError("Graphql `query` property not set.")
         else:
