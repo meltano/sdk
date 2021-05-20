@@ -52,20 +52,31 @@ For the purposes of backwards compatibility, developers may override `Tap.load_s
 in order to translate legacy STATE formats to the updated minimal implementation documented
 here.
 
-## State and Partitions
+## Partitioned State
 
-- _**Preview Feature Notice:** As of version `0.1.0`, the partitioned state feature is in preview status. Implementation details specified here should not be considered final._
-
-The SDK implements a feature called [partitioning](../partitioning.md) which allows the same
-stream to be segmented by one or more partitioning indexes. The collection of indexes
-which uniquely describe a partition are referred to as the partition's 'context'.
+The SDK implements a feature called [`state partitioning`](../partitioning.md) which allows
+the same stream to be segmented by one or more partitioning indexes and their values. This
+allows multiple bookmarks to be independently tracked for subsets of the total stream.
+For instance, using state partitioning, you can track a separate stream bookmark for
+records out of the `us_east` and `us_west` API endpoints, even if they are utlimately
+being sent downstream to the same target table.
 
 For streams which are partitioned, the SDK will automatically store their stream state
-under a `partitions` key. The `partitions` key should be a list of objects, with
-each partition object containing a `context` key which contains the dictionary of
-keys needed to uniquely identify the partition. Apart from the presences of a `context`
-object, the contents of the partition object should be identical to any other stream state
-definition.
+under a `partitions` key which exactly matches their `context`.
+
+For parent-child streams, the SDK will automatically use the parent's context as the default
+state partition.
+
+## Advanced Use Cases
+
+If some cases, the default behavior would create hundreds or millions of distinct bookmarks,
+which ultimately would slow processing and could cause other averse affects. For child
+streams with very high granularity parent streams (for instance, emoji reactions on
+post comments), the default state partitioning granularity can be overridden by setting
+`Stream.state_partitioning_keys`. By specifying a subset of keys to be used in
+partitioning rather than the entire default context, you could store distinct bookmarks only
+for each post (`[post_id]`) rather than the default parent context of one per post per
+comment (`[post_id, comment_id]`).
 
 ### Partitioned State Example
 
@@ -141,6 +152,10 @@ Unlike the replication key tracking for pre-sorted streams, the progress tracker
 ignored (reset and wiped) for the purposes of resuming a failed sync operation. Only when
 the sync reaches 100% completion will those progress markers be promoted to a valid
 replication key bookmark for future sync operations.
+
+This behavior is also the default for any streams which override `state_partitioning_keys`,
+since iterating through multiple parent contexts or partitions will naturally emit
+records in an unsorted manner.
 
 ### Replication Key Signposts
 
