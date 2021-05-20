@@ -10,6 +10,7 @@ from types import MappingProxyType
 from os import PathLike
 from pathlib import Path
 from typing import (
+    Callable,
     Dict,
     Any,
     List,
@@ -64,6 +65,8 @@ REPLICATION_INCREMENTAL = "INCREMENTAL"
 REPLICATION_LOG_BASED = "LOG_BASED"
 
 FactoryType = TypeVar("FactoryType", bound="Stream")
+
+METRICS_LOGGING_LEVEL_SETTING = "metrics_logging_level"
 
 
 class Stream(metaclass=abc.ABCMeta):
@@ -498,11 +501,33 @@ class Stream(metaclass=abc.ABCMeta):
         )
         singer.write_message(record_message)
 
+    @property
+    def _metric_logging_function(self) -> Optional[Callable]:
+        if METRICS_LOGGING_LEVEL_SETTING not in self.config:
+            return self.logger.info
+
+        if self.config[METRICS_LOGGING_LEVEL_SETTING].upper() == "INFO":
+            return self.logger.info
+
+        if self.config[METRICS_LOGGING_LEVEL_SETTING].upper() == "DEBUG":
+            return self.logger.debug
+
+        if self.config[METRICS_LOGGING_LEVEL_SETTING].upper() == "NONE":
+            return None
+
+        assert False, (
+            "Unexpected logging level for metrics: "
+            + self.config[METRICS_LOGGING_LEVEL_SETTING]
+        )
+
     def _write_metric_log(self, metric: dict, extra_tags: Optional[dict]) -> None:
         """Emit a metric log. Optionally with appended tag info."""
+        if not self._metric_logging_function:
+            return None
+
         if extra_tags:
             metric["tags"].update(extra_tags)
-        self.logger.info(f"INFO METRIC: {str(metric)}")
+        self._metric_logging_function(f"INFO METRIC: {str(metric)}")
 
     def _write_record_count_log(self, record_count, context: Optional[dict]) -> None:
         """Emit a metric log. Optionally with appended tag info."""
