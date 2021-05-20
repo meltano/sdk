@@ -5,7 +5,7 @@ which each have their own state and their own distinct queryable domain.
 
 ## If you do not require partitioning
 
-In general, developers can simply ignore the `partition` arguments in methods like
+In general, developers can simply ignore the `context` arguments in methods like
 `Stream.get_records()` if partitioning is not required.
 
 ## If you do want to utilize partitioning
