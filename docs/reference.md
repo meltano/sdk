@@ -2,21 +2,24 @@
 
 The below reference guide should give an overview of how to use each type of class. **Please note that this is not intended to be a full or exhaustive list of all methods and properties.**
 
-- [`Tap` Class](#tap-class)
-  - [`Tap.name` Property](#tapname-property)
-  - [`Tap.config_jsonschema` Property](#tapconfig_jsonschema-property)
-  - [`Tap.discover_streams()` Method](#tapdiscover_streams-method)
-- [`Stream` Class](#stream-class)
-  - [`Stream.get_records()` Method](#streamget_records-method)
-- [`RESTStream` Class](#reststream-class)
-  - [`RESTStream.url_base` Property](#reststreamurl_base-property)
-  - [`RESTStream.authenticator` Property](#reststreamauthenticator-property)
-  - [`RESTStream.http_headers` Property](#reststreamhttp_headers-property)
-  - [`RESTStream.get_url_params()` Method](#reststreamget_url_params-method)
-  - [`RESTStream.prepare_request_payload()` Method](#reststreamprepare_request_payload-method)
-  - [`RESTStream.post_process()` Method](#reststreampost_process-method)
-- [`GraphQLStream` class](#graphqlstream-class)
-  - [`GraphQL.query` Property](#graphqlquery-property)
+- [SDK Reference Guide](#sdk-reference-guide)
+  - [`Tap` Class](#tap-class)
+    - [`Tap.name` Property](#tapname-property)
+    - [`Tap.config_jsonschema` Property](#tapconfig_jsonschema-property)
+    - [`Tap.discover_streams()` Method](#tapdiscover_streams-method)
+  - [`Stream` Class](#stream-class)
+    - [`Stream.is_sorted` Property](#streamis_sorted-property)
+    - [`Stream.get_records()` Method](#streamget_records-method)
+    - [`Stream.get_replication_key_signpost()` Method](#streamget_replication_key_signpost-method)
+  - [`RESTStream` Class](#reststream-class)
+    - [`RESTStream.url_base` Property](#reststreamurl_base-property)
+    - [`RESTStream.authenticator` Property](#reststreamauthenticator-property)
+    - [`RESTStream.http_headers` Property](#reststreamhttp_headers-property)
+    - [`RESTStream.get_url_params()` Method](#reststreamget_url_params-method)
+    - [`RESTStream.prepare_request_payload()` Method](#reststreamprepare_request_payload-method)
+    - [`RESTStream.post_process()` Method](#reststreampost_process-method)
+  - [`GraphQLStream` Class](#graphqlstream-class)
+    - [`GraphQL.query` Property](#graphqlquery-property)
 
 ## `Tap` Class
 
@@ -54,8 +57,8 @@ A method which should retrieve data from the source and return records. To optim
 
 Note:
 
-- This method takes an optional `partition` argument, which can be safely ignored unless
-the stream requires [partitioning](./partitioning.md).
+- This method takes an optional `context` argument, which can be safely ignored unless
+the stream is a child stream or requires [partitioning](./partitioning.md).
 - Only custom stream types need to define this method. REST and GraphQL streams do not.
 
 ### `Stream.get_replication_key_signpost()` Method
