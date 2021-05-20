@@ -58,7 +58,7 @@ The SDK implements a feature called [`state partitioning`](../partitioning.md) w
 the same stream to be segmented by one or more partitioning indexes and their values. This
 allows multiple bookmarks to be independently tracked for subsets of the total stream.
 For instance, using state partitioning, you can track a separate stream bookmark for
-records out of the `us_east` and `us_west` API endpoints, even if they are utlimately
+records out of the `us_east` and `us_west` API endpoints, even if they are ultimately
 being sent downstream to the same target table.
 
 For streams which are partitioned, the SDK will automatically store their stream state
