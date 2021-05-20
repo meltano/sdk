@@ -378,7 +378,8 @@ class Stream(metaclass=abc.ABCMeta):
 
         Gives a partitioned context state if applicable; else returns stream state.
         A blank state will be created in none exists.
-        If any
+
+        Partition level may be overridden by Stream.state_partitioning_keys if set.
         """
         state_partition_context = self._get_state_partition_context(context)
         if state_partition_context:
