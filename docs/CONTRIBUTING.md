@@ -4,22 +4,47 @@
 
 1. If you are using VS Code, make sure you have also installed the `Python` extension.
 2. Ensure you have the correct test library, formatters, and linters installed:
-    - `pipx install poetry`
-    - `pipx install pytest`
-    - `pipx install black`
-    - `pipx install flake8`
-    - `pipx install pydocstyle`
+    - `poetry install`
 3. Configure Linting and Formatting Settings:
-    - We use `pytest` for testing (`poetry run pytest`)
-    - We use `black`, `flake8`, and `pydocstyle` as CI linting tests.
-    - Linting with `mypy` will become a CI test in the future.
+    - We use `pytest` for testing (`poetry run pytest`).
+    - We use `black`, `flake8`, `mypy`, and `pydocstyle` as CI linting tests.
+    - We use `coverage` for code coverage metrics.
     - The project-wide max line length is `89`.
     - In the future we will add support for linting
       [pre-commit hooks](https://gitlab.com/meltano/singer-sdk/-/issues/12) as well.
 4. Set interpreter to match poetry's virtualenv:
-    - Run `poetry install` from the project root.
-    - Run `poetry shell` and copy the path from command output.
-    - In VS Code, run `Python: Select interpreter` and paste the interpreter path when prompted.
+    - In VS Code, run `Python: Select interpreter` and select the poetry interpreter.
+
+## Testing Locally
+
+To run tests and gather coverage metrics:
+
+```bash
+poetry run pytest
+```
+
+To run tests while gathering coverage metrics:
+
+```bash
+poetry run coverage run -m pytest
+```
+
+To view the code coverage report:
+
+```bash
+# CLI output
+poetry run coverage report
+
+# Or html output:
+poetry run coverage html && open ./htmlcov/index.html
+```
+
+To run all tests:
+
+```bash
+poetry run tox
+```
+
 
 ## Workspace Development Strategies for Singer SDK
 
