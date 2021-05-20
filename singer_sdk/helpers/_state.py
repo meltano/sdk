@@ -183,7 +183,7 @@ def reset_state_progress_markers(stream_or_partition_state: dict) -> Optional[di
 
     For logging purposes, return the wiped 'progress_markers' object if it existed.
     """
-    progress_markers = stream_or_partition_state.get(PROGRESS_MARKERS, {})
+    progress_markers = stream_or_partition_state.pop(PROGRESS_MARKERS, {})
     # Remove auto-generated human-readable note:
     progress_markers.pop(PROGRESS_MARKER_NOTE, None)
     # Return remaining 'progress_markers' if any:
