@@ -633,8 +633,12 @@ class Stream(metaclass=abc.ABCMeta):
                 record_count += 1
                 partition_record_count += 1
             if current_context == state_partition_context:
-                # Finalize state only if 1:1 with context
+                # Finalize per-partition state only if 1:1 with context
                 finalize_state_progress_markers(state)
+        if not context:
+            # Finalize total stream only if we have the full full context.
+            # Otherwise will be finalized by tap at end of sync.
+            finalize_state_progress_markers(self.stream_state)
         self._write_record_count_log(record_count=record_count, context=context)
         # Reset interim bookmarks before emitting final STATE message:
         self._write_state_message()
