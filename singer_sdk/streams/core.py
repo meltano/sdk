@@ -373,6 +373,18 @@ class Stream(metaclass=abc.ABCMeta):
         """
         return self._tap_state
 
+    def get_stream_or_partition_state(self, partition: Optional[dict]) -> dict:
+        """DEPRECATED. Please use get_context_state() instead.
+
+        Return a writable state dict for the given context.
+
+        Gives a partitioned context state if applicable; else returns stream state.
+        A blank state will be created in none exists.
+
+        Partition level may be overridden by Stream.state_partitioning_keys if set.
+        """
+        return self.get_context_state(partition)
+
     def get_context_state(self, context: Optional[dict]) -> dict:
         """Return a writable state dict for the given context.
 
