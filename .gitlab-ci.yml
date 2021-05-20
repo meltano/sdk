@@ -4,6 +4,7 @@ stages:
 
 default:
   before_script:
+    - apt-get install python3-dev
     - python -V
     - python -m pip install pipx
     - python -m pipx ensurepath
