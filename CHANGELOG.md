@@ -16,19 +16,18 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
-## v0.2.0 Unreleased
+## v0.2.0
 
 ### Added
 
 - Added support for parent-child streams (#97, !79)
-- Added support for configurable metrics logging (#97, !79)
-- Added ability to track fewer bookmarks by setting `Stream.state_partitioning_keys` to a
+- Added support for configurable metrics logging (#91, !79)
+- Added ability to use fewer state bookmarks by setting `Stream.state_partitioning_keys` to a
   subset of available context keys (!79)
 
 ### Changed
 
-- Changed method signatures from `partition` in  have been updated to the more generic
-  `context` (!79)
+- Renamed the optional `partition` dictionary arg in method signatures to the more generic `context` (!79)
 
 ### Deprecated
 
