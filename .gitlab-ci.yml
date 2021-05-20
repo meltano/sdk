@@ -5,12 +5,9 @@ stages:
 default:
   before_script:
     - python -V
-    - pip install pipx
-    # Force update PATH to include pipx executables
-    - export PATH=$PATH:/root/.local/bin
-    - pipx install poetry
-    - pipx install tox -e ${PYTHON_VERSION}
-    - poetry install
+    - python -m pip install pipx
+    - python -m pipx ensurepath
+    - python -m pipx install poetry
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
@@ -24,9 +21,7 @@ build_and_test:
   stage: test
   parallel:
     matrix:
-      - PYTHON_VERSION: ["3.6", "3.7", "3.8"]
-      # Official language image. Look for the different tagged releases at:
-      # https://hub.docker.com/r/library/python/tags/
+      - PYTHON_VERSION: ["3.6", "3.7", "3.8", "3.9"]
   image: python:${PYTHON_VERSION}
   script:
     - |
@@ -47,10 +42,7 @@ lint:
       - PYTHON_VERSION: ["3.8"]
   image: python:${PYTHON_VERSION}
   script:
-    - poetry run black --check singer_sdk/
-    - poetry run flake8 singer_sdk
-    - poetry run pydocstyle singer_sdk
-    - poetry run mypy singer_sdk --exclude='singer_sdk/(tests)'
+    - poetry run tox -e lint
 
 pypi_publish:
   release:
