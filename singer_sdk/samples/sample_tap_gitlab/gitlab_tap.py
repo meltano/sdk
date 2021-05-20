@@ -15,7 +15,7 @@ from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
     IssuesStream,
     CommitsStream,
     EpicsStream,
-    # EpicIssuesStream,  # Temporarily skipped due to access denied error
+    EpicIssuesStream,
 )
 
 
@@ -25,7 +25,7 @@ STREAM_TYPES = [
     IssuesStream,
     CommitsStream,
     EpicsStream,
-    # EpicIssuesStream,  # Temporarily skipped due to access denied error
+    EpicIssuesStream,
 ]
 
 

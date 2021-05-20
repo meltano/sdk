@@ -27,7 +27,8 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     # Private constants. May not be supported in future releases:
     _LOG_REQUEST_METRICS: bool = True
-    _LOG_REQUEST_METRIC_URLS: bool = False  # Disabled by default for safety
+    # Disabled by default for safety:
+    _LOG_REQUEST_METRIC_URLS: bool = False
 
     @property
     @abc.abstractmethod
@@ -63,12 +64,10 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         Developers override this method to perform dynamic URL generation.
         """
-        url_pattern = "".join([self.url_base, self.path or ""])
-        params = copy.deepcopy(dict(self.config))
-        if context:
-            params.update(context)
-        url = url_pattern
-        for k, v in params.items():
+        url = "".join([self.url_base, self.path or ""])
+        vals = copy.copy(dict(self.config))
+        vals.update(context or {})
+        for k, v in vals.items():
             search_text = "".join(["{", k, "}"])
             if search_text in url:
                 url = url.replace(search_text, self._url_encode(v))
@@ -97,7 +96,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         if self._LOG_REQUEST_METRICS:
             extra_tags = {}
             if self._LOG_REQUEST_METRIC_URLS:
-                extra_tags["url"] = cast(str, prepared_request.url)
+                extra_tags["url"] = cast(str, prepared_request.path_url)
             self._write_request_duration_log(
                 endpoint=self.path,
                 response=response,
@@ -105,7 +104,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
                 extra_tags=extra_tags,
             )
         if response.status_code in [401, 403]:
-            self.logger.info("Skipping request to {}".format(prepared_request.url))
+            self.logger.info("Failed request for {}".format(prepared_request.url))
             self.logger.info(
                 f"Reason: {response.status_code} - {str(response.content)}"
             )
@@ -123,7 +122,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return response
 
     def get_url_params(
-        self, context: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization.
 
@@ -132,7 +131,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return {}
 
     def prepare_request(
-        self, context: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> requests.PreparedRequest:
         """Prepare a request object.
 
@@ -193,7 +192,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     # Overridable:
 
     def prepare_request_payload(
-        self, context: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Optional[dict]:
         """Prepare the data payload for the REST API request.
 
@@ -202,12 +201,12 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return None
 
     def get_next_page_token(
-        self, response: requests.Response, previous_token: Optional[Any] = None
+        self, response: requests.Response, previous_token: Optional[Any]
     ) -> Any:
         """Return token identifying next page or None if all records have been read."""
         next_page_token = response.headers.get("X-Next-Page", None)
         if next_page_token:
-            self.logger.info(f"Next page token retrieved: {next_page_token}")
+            self.logger.debug(f"Next page token retrieved: {next_page_token}")
         return next_page_token
 
     @property

@@ -225,26 +225,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     # Sync methods
 
-    def sync_one(self, stream_name: str):
-        """Sync a single stream."""
-        if stream_name not in self.streams:
-            raise ValueError(
-                f"Could not find stream '{stream_name}' in streams list: "
-                f"{sorted(self.streams.keys())}"
-            )
-        stream = self.streams[stream_name]
-        stream.reset_state_progress_markers()
-        if stream.parent_stream_type:
-            raise ChildStreamDirectInvocationError(
-                f"Child stream '{stream.name}' is expected to be called by "
-                f"parent stream '{stream.parent_stream_type.name}'. "
-                "Direct invocation is not supported."
-            )
-
-        stream.sync()
-
-        stream.finalize_state_progress_markers()
-
     @final
     def sync_all(self):
         """Sync all streams."""

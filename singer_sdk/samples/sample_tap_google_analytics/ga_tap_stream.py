@@ -43,7 +43,7 @@ class SampleGoogleAnalyticsStream(RESTStream):
         )
 
     def prepare_request_payload(
-        self, context: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Optional[dict]:
         """Prepare the data payload for the REST API request."""
         # params = self.get_url_params(context, next_page_token)

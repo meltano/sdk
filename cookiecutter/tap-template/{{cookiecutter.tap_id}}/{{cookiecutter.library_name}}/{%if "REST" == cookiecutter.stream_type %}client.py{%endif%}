@@ -46,7 +46,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return headers
 
     def get_next_page_token(
-        self, response: requests.Response, previous_token: Optional[Any] = None
+        self, response: requests.Response, previous_token: Optional[Any]
     ) -> Optional[Any]:
         """Return a token for identifying next page or None if no more pages."""
         # TODO: If pagination is required, return a token which can be used to get the
@@ -54,11 +54,11 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         #       pagination loop.
         next_page_token = response.headers.get("X-Next-Page", None)
         if next_page_token:
-            self.logger.info(f"Next page token retrieved: {next_page_token}")
+            self.logger.debug(f"Next page token retrieved: {next_page_token}")
         return next_page_token
 
     def get_url_params(
-        self, context: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization."""
         params: dict = {}
@@ -70,7 +70,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return params
 
     def prepare_request_payload(
-        self, context: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Optional[dict]:
         """Prepare the data payload for the REST API request.
 

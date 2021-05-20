@@ -146,23 +146,6 @@ def get_writeable_state_dict(
     return _create_in_partitions_list(stream_state_partitions, state_partition_context)
 
 
-def read_stream_state(
-    tap_state,
-    tap_stream_id: str,
-    key=None,
-    default: Any = None,
-    *,
-    state_partition_context: Optional[dict] = None,
-) -> Any:
-    """Read stream state."""
-    state_dict = get_writeable_state_dict(
-        tap_state, tap_stream_id, state_partition_context=state_partition_context
-    )
-    if key:
-        return state_dict.get(key, default)
-    return state_dict or default
-
-
 def write_stream_state(
     tap_state,
     tap_stream_id: str,
