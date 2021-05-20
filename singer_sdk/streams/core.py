@@ -1,7 +1,7 @@
 """Stream abstract class."""
 
 import abc
-import copy  # abstract base classes
+import copy
 import datetime
 import json
 import logging
