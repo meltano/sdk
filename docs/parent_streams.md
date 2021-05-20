@@ -68,7 +68,7 @@ class EpicIssuesStream(GitlabStream):
         if not context or "epic_id" not in context:
             raise ValueError("Cannot sync epic issues without already known epic IDs.")
         return result
-
+```
 
 ## See Also
 
