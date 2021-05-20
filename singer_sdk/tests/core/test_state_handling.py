@@ -1,8 +1,6 @@
 """Test catalog selection features."""
 
-import logging
 import pytest
-from copy import deepcopy
 
 from singer_sdk.helpers import _state
 
