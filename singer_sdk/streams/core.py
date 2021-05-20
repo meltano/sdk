@@ -430,9 +430,7 @@ class Stream(metaclass=abc.ABCMeta):
                 increment_state(
                     state_dict,
                     replication_key=self.replication_key,
-                    replication_key_signpost=self.get_replication_key_signpost(
-                        context=context
-                    ),
+                    replication_key_signpost=self.get_replication_key_signpost(context),
                     latest_record=latest_record,
                     is_sorted=self.is_sorted,
                 )
@@ -657,7 +655,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         return {k: v for k, v in context.items() if k in self.state_partitioning_keys}
 
-    def get_child_context(self, record: dict, context: dict = None) -> Optional[Dict]:
+    def get_child_context(self, record: dict, context: Optional[dict]) -> dict:
         """Return a child context object from the record and optional provided context.
 
         By default, will return context if provided and otherwise the record dict.
@@ -683,7 +681,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_records(
-        self, context: Optional[dict] = None
+        self, context: Optional[dict]
     ) -> Iterable[Union[dict, Tuple[dict, dict]]]:
         """Abstract row generator function. Must be overridden by the child class.
 

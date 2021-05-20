@@ -10,7 +10,7 @@ from singer_sdk.streams import Stream
 class {{ cookiecutter.source_name }}Stream(Stream):
     """Stream class for {{ cookiecutter.source_name }} streams."""
 
-    def get_records(self, context: Optional[dict] = None) -> Iterable[dict]:
+    def get_records(self, context: Optional[dict]) -> Iterable[dict]:
         """Return a generator of row-type dictionary objects.
 
         The optional `context` argument is used to identify a specific slice of the
