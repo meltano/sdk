@@ -17,7 +17,7 @@ from a parent record each time the child stream is invoked.
    indicate this by adding `ignore_parent_replication_key = True` in the child stream
    class declaration.
 4. If the number of _parent_ items is very large (thousands or tends of thousands), you can
-   optionally set `state_partitioning_keys` to specify a subset of context keys to be used
+   optionally set `state_partitioning_keys` on the child stream to specify a subset of context keys to use
    in state bookmarks. (When not set, the number of bookmarks will be equal to the number
    of parent items.)
 
