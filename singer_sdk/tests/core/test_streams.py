@@ -34,7 +34,7 @@ class SimpleTestStream(Stream):
     def __init__(self, tap: Tap):
         super().__init__(tap, schema=self.schema, name=self.name)
 
-    def get_records(self, partition: Optional[dict] = None) -> Iterable[Dict[str, Any]]:
+    def get_records(self, context: Optional[dict]) -> Iterable[Dict[str, Any]]:
         yield {"id": 1, "value": "Egypt"}
         yield {"id": 2, "value": "Germany"}
         yield {"id": 3, "value": "India"}
@@ -100,7 +100,7 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
     timestamp_value = "2021-02-01"
 
     assert stream.get_starting_timestamp(None) == pendulum.parse(
-        stream.config.get("start_date")
+        cast(str, stream.config.get("start_date"))
     )
     tap.load_state(
         {
