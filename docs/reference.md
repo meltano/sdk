@@ -126,6 +126,6 @@ This is where you specify your specific GraphQL query text.
 Examples:
 
 - For more info, see the [GitLab](/singer_sdk/samples/sample_tap_gitlab) sample:
-  - [GitLab GraphQL streams](/singer_sdk/samples/sample_tap_gitlab/gitlab_rest_streams.py)
+  - [GitLab GraphQL streams](/singer_sdk/samples/sample_tap_gitlab/gitlab_graphql_streams.py)
 - Or the [Countries API](/singer_sdk/samples/sample_tap_countries) Sample:
   - [Countries API Streams](/singer_sdk/samples/sample_tap_countries/countries_streams.py)
