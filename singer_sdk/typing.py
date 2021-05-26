@@ -13,7 +13,7 @@ Usage example:
         Property("is_deleted", BooleanType),
         Property(
             "author",
-            Objectype(
+            ObjectType(
                 Property("id", StringType),
                 Property("name", StringType),
             )
