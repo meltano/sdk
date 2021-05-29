@@ -1,9 +1,9 @@
 """Test map transformer"""
 
-from hashlib import md5 as _md5
+import json
 import pytest
 
-from singer_sdk.mapper import Mapper
+from singer_sdk.mapper import Mapper, md5
 
 
 @pytest.fixture
@@ -39,41 +39,7 @@ def sample_stream():
                 "description": "Comment D",
             },
         ],
-        "foobars": [  # should be unchanged
-            {"the": "quick"},
-            {"brown": "fox"},
-        ],
-    }
-
-
-# Filter and alias cases
-
-
-@pytest.fixture
-def filter_map():
-    return {
-        "streams": {
-            "repo_names": {
-                "__source__": "repositories",
-                "__filter__": ("'-tap-' in f'-{name}' or '-target-' in f'-{name}'"),
-                "repo_name": "_['name']",
-                "__else__": None,
-            },
-            "repositories": None,
-        },
-    }
-
-
-@pytest.fixture
-def filter_result():
-    return {
-        "repo_names": [
-            {"repo_name": "tap-something"},
-            # {"repo_name": "my-tap-something"},
-            # {"repo_name": "target-something"},
-            # {"repo_name": "not-atap"},
-        ],
-        "foobars": [  # should be unchanged
+        "foobars": [
             {"the": "quick"},
             {"brown": "fox"},
         ],
@@ -87,23 +53,19 @@ def filter_result():
 def transform_map():
     return {
         "streams": {
-            "repo_names": {
-                "__source__": "repositories",
+            "repositories": {
+                # "__source__": "repositories",
                 "repo_name": "_['name']",
-                "email_domain": ["owner_email.split('@')[1]", "'Error parsing.'"],
-                "email_hash": ["md5(config['hash_seed'] + owner_email)"],
+                "email_domain": "owner_email.split('@')[1]",
+                "email_hash": "md5(config['hash_seed'] + owner_email)",
                 "__else__": None,
             },
-            "repositories": None,
         },
     }
 
 
 @pytest.fixture
 def transform_result(config):
-    def md5(x) -> str:
-        return str(_md5(x.encode("utf-8")))
-
     return {
         "repositories": [
             {
@@ -123,7 +85,7 @@ def transform_result(config):
             },
             {
                 "repo_name": "not-atap",
-                "email_domain": "Error parsing.",
+                "email_domain": "example.com",
                 "email_hash": md5(config["hash_seed"] + "sample4@example.com"),
             },
         ],
@@ -134,15 +96,47 @@ def transform_result(config):
     }
 
 
-def test_map_transforms(sample_stream, config, transform_map, transform_result):
-    _test_transform(sample_stream, config, transform_map, transform_result)
+# Filter and alias cases
 
 
-def test_filter_transforms(sample_stream, config, filter_map, filter_result):
-    _test_transform(sample_stream, config, filter_map, filter_result)
+@pytest.fixture
+def filter_map():
+    return {
+        "streams": {
+            "repositories": {
+                "__filter__": ("'tap-' in name or 'target-' in name"),
+                "name": "_['name']",
+                "__else__": None,
+            },
+            # "__else__": None,
+        },
+    }
 
 
-def _test_transform(sample_stream, config, map_dict, result_dict):
+@pytest.fixture
+def filter_result():
+    return {
+        "repositories": [
+            {"name": "tap-something"},
+            {"name": "my-tap-something"},
+            {"name": "target-something"},
+        ],
+        "foobars": [
+            {"the": "quick"},
+            {"brown": "fox"},
+        ],
+    }
+
+
+def test_map_transforms(config, sample_stream, transform_map, transform_result):
+    _test_transform("transform", config, sample_stream, transform_map, transform_result)
+
+
+def test_filter_transforms(config, sample_stream, filter_map, filter_result):
+    _test_transform("filter", config, sample_stream, filter_map, filter_result)
+
+
+def _test_transform(test_name: str, config, sample_stream, map_dict, expected_result):
     output = {}
     for stream_name, stream in sample_stream.items():
         mapper = Mapper(map_dict, config)
@@ -154,4 +148,7 @@ def _test_transform(sample_stream, config, map_dict, result_dict):
                 continue
 
             output[stream_name].append(result)
-    assert output == result_dict
+    assert expected_result == output, (
+        f"Failed '{test_name}' test. "
+        f"Generated output was {json.dumps(output, indent=2)}"
+    )
