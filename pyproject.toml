@@ -28,6 +28,7 @@ pydocstyle = "^5.1.1"
 flake8 = "^3.9.0"
 tox = "^3.23.1"
 codecov = "^2.1.11"
+simpleeval = "^0.9.10"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
