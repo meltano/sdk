@@ -2,8 +2,9 @@
 
 import json
 import pytest
+import logging
 
-from singer_sdk.mapper import Mapper, md5
+from singer_sdk.mapper import Mapper, RemoveRecordTransform, md5
 
 
 @pytest.fixture
@@ -108,7 +109,7 @@ def filter_map():
                 "name": "_['name']",
                 "__else__": None,
             },
-            # "__else__": None,
+            "__else__": None,
         },
     }
 
@@ -120,10 +121,6 @@ def filter_result():
             {"name": "tap-something"},
             {"name": "my-tap-something"},
             {"name": "target-something"},
-        ],
-        "foobars": [
-            {"the": "quick"},
-            {"brown": "fox"},
         ],
     }
 
@@ -138,8 +135,12 @@ def test_filter_transforms(config, sample_stream, filter_map, filter_result):
 
 def _test_transform(test_name: str, config, sample_stream, map_dict, expected_result):
     output = {}
+    mapper = Mapper(map_dict, config)
     for stream_name, stream in sample_stream.items():
-        mapper = Mapper(map_dict, config)
+        if isinstance(mapper.get_default_mapper(stream_name), RemoveRecordTransform):
+            logging.info(f"Skipping ignored stream '{stream_name}'")
+            continue
+
         output[stream_name] = []
         for record in stream:
             result = mapper.apply_default_mapper(stream_name, record)

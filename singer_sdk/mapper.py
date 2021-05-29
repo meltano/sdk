@@ -54,7 +54,7 @@ class StreamMap:
             if stream_map["__else__"] is None:
                 logging.info(
                     "Detected `__else__=None` rule. "
-                    "Only explicitly mapped properties will be included in output."
+                    "Unmapped properties will be excluded from output."
                 )
                 include_by_default = False
             else:
@@ -114,16 +114,26 @@ class Mapper:
         """Initialize mapper."""
         self.stream_maps = cast(Dict[str, List[StreamMap]], {})
         self.config = dict
-        self.default_mapper: StreamMap = SameRecordTransform(config)
+        self.default_mapper: StreamMap
 
         if "__else__" in tap_map["streams"]:
             if tap_map["streams"]["__else__"] is None:
+                logging.info(
+                    "Found '__else__=None' default mapper. "
+                    "Unmapped streams will be excluded from output."
+                )
                 self.default_mapper = RemoveRecordTransform(config)
                 tap_map["streams"].pop("__else__")
             else:
                 raise RuntimeError(
                     f"Undefined transform for '__else__' case: {tap_map['__else__']}"
                 )
+        else:
+            logging.info(
+                "Operator '__else__=None' was not found. "
+                "Unmapped streams will be included in output."
+            )
+            self.default_mapper = SameRecordTransform(config)
 
         for stream_key, stream_def in tap_map["streams"].items():
             stream_name = stream_key
@@ -158,11 +168,15 @@ class Mapper:
             mapper = StreamMap(stream_def, config)
             self.stream_maps[stream_name].append(mapper)
 
-    def apply_default_mapper(self, stream_name: str, record: dict) -> Optional[dict]:
+    def get_default_mapper(self, stream_name: str) -> StreamMap:
         if stream_name not in self.stream_maps:
-            return self.default_mapper.apply(record)
+            logging.info(
+                f"No mapper found for {stream_name}. "
+                f"Using default map: {type(self.default_mapper).__name__}"
+            )
+            return self.default_mapper
 
-        if self.stream_maps.get(stream_name, None):
-            return self.stream_maps[stream_name][0].apply(record)
+        return self.stream_maps[stream_name][0]
 
-        return None
+    def apply_default_mapper(self, stream_name: str, record: dict) -> Optional[dict]:
+        return self.get_default_mapper(stream_name).apply(record)
