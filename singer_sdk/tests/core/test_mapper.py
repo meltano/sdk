@@ -1,8 +1,12 @@
 """Test map transformer"""
 
 import json
+from typing import Dict, List
+from singer_sdk.typing import PropertiesList, Property, StringType
 import pytest
 import logging
+
+from singer import Catalog
 
 from singer_sdk.mapper import Mapper, RemoveRecordTransform, md5
 
@@ -13,6 +17,38 @@ def config() -> dict:
 
 
 # Sample input
+
+
+@pytest.fixture
+def sample_catalog_dict() -> dict:
+    repositories_schema = PropertiesList(
+        Property("name", StringType),
+        Property("owner_email", StringType),
+        Property("description", StringType),
+    ).to_dict()
+    foobars_schema = PropertiesList(
+        Property("the", StringType),
+        Property("brown", StringType),
+    ).to_dict()
+    return {
+        "streams": [
+            {
+                "stream": "repositories",
+                "tap_stream_id": "repositories",
+                "schema": repositories_schema,
+            },
+            {
+                "stream": "foobars",
+                "tap_stream_id": "foobars",
+                "schema": foobars_schema,
+            },
+        ]
+    }
+
+
+@pytest.fixture
+def sample_catalog_obj(sample_catalog_dict) -> Catalog:
+    return Catalog.from_dict(sample_catalog_dict)
 
 
 @pytest.fixture
@@ -66,7 +102,7 @@ def transform_map():
 
 
 @pytest.fixture
-def transform_result(config):
+def transformed_result(config):
     return {
         "repositories": [
             {
@@ -97,6 +133,21 @@ def transform_result(config):
     }
 
 
+@pytest.fixture
+def transformed_schemas():
+    return {
+        "repositories": PropertiesList(
+            Property("repo_name", StringType),
+            Property("email_domain", StringType),
+            Property("email_hash", StringType),
+        ).to_dict(),
+        "foobars": PropertiesList(
+            Property("the", StringType),
+            Property("brown", StringType),
+        ).to_dict(),
+    }
+
+
 # Filter and alias cases
 
 
@@ -115,7 +166,7 @@ def filter_map():
 
 
 @pytest.fixture
-def filter_result():
+def filtered_result():
     return {
         "repositories": [
             {"name": "tap-something"},
@@ -125,25 +176,72 @@ def filter_result():
     }
 
 
-def test_map_transforms(config, sample_stream, transform_map, transform_result):
-    _test_transform("transform", config, sample_stream, transform_map, transform_result)
+@pytest.fixture
+def filtered_schemas():
+    return {"repositories": PropertiesList(Property("name", StringType)).to_dict()}
 
 
-def test_filter_transforms(config, sample_stream, filter_map, filter_result):
-    _test_transform("filter", config, sample_stream, filter_map, filter_result)
+def test_map_transforms(
+    config,
+    sample_stream,
+    sample_catalog_dict,
+    transform_map,
+    transformed_result,
+    transformed_schemas,
+):
+    _test_transform(
+        "transform",
+        config,
+        sample_stream,
+        sample_catalog_dict,
+        transform_map,
+        transformed_result,
+        transformed_schemas,
+    )
 
 
-def _test_transform(test_name: str, config, sample_stream, map_dict, expected_result):
-    output = {}
-    mapper = Mapper(map_dict, config)
+def test_filter_transforms(
+    config,
+    sample_stream,
+    sample_catalog_dict,
+    filter_map,
+    filtered_result,
+    filtered_schemas,
+):
+    _test_transform(
+        "filter",
+        config,
+        sample_stream,
+        sample_catalog_dict,
+        filter_map,
+        filtered_result,
+        filtered_schemas,
+    )
+
+
+def _test_transform(
+    test_name: str,
+    config,
+    sample_stream,
+    sample_catalog_dict,
+    map_dict,
+    expected_result,
+    expected_schemas,
+):
+    output: Dict[str, List[dict]] = {}
+    mapper = Mapper(map_dict, config, sample_catalog_dict)
+
     for stream_name, stream in sample_stream.items():
         if isinstance(mapper.get_default_mapper(stream_name), RemoveRecordTransform):
             logging.info(f"Skipping ignored stream '{stream_name}'")
             continue
 
+        stream_map = mapper.get_default_mapper(stream_name)
+        assert stream_map.schema == expected_schemas[stream_name]
+
         output[stream_name] = []
         for record in stream:
-            result = mapper.apply_default_mapper(stream_name, record)
+            result = stream_map.transform(record)
             if result is None:
                 """Filter out record"""
                 continue
