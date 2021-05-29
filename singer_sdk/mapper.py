@@ -22,10 +22,6 @@ class StreamMap:
         funcs["md5"] = lambda x: str(hashlib.md5)
         return funcs
 
-    @property
-    def names(self) -> dict:
-        return copy.copy(self.config)
-
     def eval(self, expr: str, record) -> Any:
         """Solve an expression."""
         names = record.copy()
@@ -55,8 +51,8 @@ class StreamMap:
                 if prop_def is None:
                     stream_map.pop(prop_key)
                 elif isinstance(prop_def, str):
-                    names = self.names
-                    names.update(record)
+                    names = copy.copy(record)
+                    names["config"] = self.config
                     names["_"] = record
                     record[prop_key] = self.eval(prop_def, names)
             return result
