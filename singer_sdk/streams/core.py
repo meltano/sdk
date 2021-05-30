@@ -5,6 +5,7 @@ import copy
 import datetime
 import json
 import logging
+from singer_sdk.mapper import SameRecordTransform, StreamMap
 import requests
 from types import MappingProxyType
 from os import PathLike
@@ -90,6 +91,7 @@ class Stream(metaclass=abc.ABCMeta):
             self.name: str = name
         if not self.name:
             raise ValueError("Missing argument or class variable 'name'.")
+
         self.logger: logging.Logger = tap.logger
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
@@ -105,6 +107,11 @@ class Stream(metaclass=abc.ABCMeta):
         self.child_streams: List[Stream] = []
         if schema:
             if isinstance(schema, (PathLike, str)):
+                if not Path(schema).is_file():
+                    raise FileExistsError(
+                        f"Could not find schema file '{self.schema_filepath}'."
+                    )
+
                 self._schema_filepath = Path(schema)
             elif isinstance(schema, dict):
                 self._schema = schema
@@ -114,6 +121,22 @@ class Stream(metaclass=abc.ABCMeta):
                 raise ValueError(
                     f"Unexpected type {type(schema).__name__} for arg 'schema'."
                 )
+
+        if self.schema_filepath:
+            self._schema = json.loads(Path(self.schema_filepath).read_text())
+        if not self.schema:
+            raise ValueError(
+                f"Could not initialize schema for stream '{self.name}'. "
+                "A valid schema object or filepath was not provided."
+            )
+
+        self.stream_maps: Optional[List[StreamMap]]
+        if tap.mapper:
+            self.stream_maps = tap.mapper.stream_maps[self.name]
+        else:
+            self.stream_maps = [
+                SameRecordTransform(self.name, dict(self.config), self.schema)
+            ]
 
     @property
     def is_timestamp_replication_key(self) -> bool:
@@ -227,18 +250,6 @@ class Stream(metaclass=abc.ABCMeta):
     @property
     def schema(self) -> dict:
         """Return the schema dict for the stream."""
-        if not self._schema:
-            if self.schema_filepath:
-                if not Path(self.schema_filepath).is_file():
-                    raise FileExistsError(
-                        f"Could not find schema file '{self.schema_filepath}'."
-                    )
-                self._schema = json.loads(Path(self.schema_filepath).read_text())
-        if not self._schema:
-            raise ValueError(
-                f"Could not initialize schema for stream '{self.name}'. "
-                "A valid schema object or filepath was not provided."
-            )
         return self._schema
 
     @property
@@ -477,10 +488,14 @@ class Stream(metaclass=abc.ABCMeta):
         selected_schema = get_selected_schema(
             self._singer_catalog.to_dict(), self.name, self.logger
         )
-        schema_message = SchemaMessage(
-            self.tap_stream_id, selected_schema, self.primary_keys, bookmark_keys
-        )
-        singer.write_message(schema_message)
+        for stream_map in self.stream_maps:
+            schema_message = SchemaMessage(
+                stream_map.stream_alias,
+                stream_map.schema,
+                self.primary_keys,
+                bookmark_keys,
+            )
+            singer.write_message(schema_message)
 
     def _write_record_message(self, record: dict) -> None:
         """Write out a RECORD message."""
@@ -493,13 +508,15 @@ class Stream(metaclass=abc.ABCMeta):
             schema=self.schema,
             logger=self.logger,
         )
-        record_message = RecordMessage(
-            stream=self.name,
-            record=record,
-            version=None,
-            time_extracted=pendulum.now(),
-        )
-        singer.write_message(record_message)
+        for stream_map in self.stream_maps:
+            mapped_record = stream_map.transform(record)
+            record_message = RecordMessage(
+                stream=stream_map.stream_alias,
+                record=mapped_record,
+                version=None,
+                time_extracted=pendulum.now(),
+            )
+            singer.write_message(record_message)
 
     @property
     def _metric_logging_function(self) -> Optional[Callable]:

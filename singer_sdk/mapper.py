@@ -26,9 +26,13 @@ def md5(input: str) -> str:
 class StreamMap:
     """"""
 
-    def __init__(self, map_transform: dict, config: dict, raw_schema: dict) -> None:
+    def __init__(
+        self, alias: str, map_transform: dict, config: dict, raw_schema: dict
+    ) -> None:
         """Initialize mapper."""
         self.config = config
+        self.stream_alias = alias
+        self.schema: Optional[dict]
         self._transform_fn: Callable[[dict], Optional[dict]]
         self._transform_fn, self.schema = self._init_transform_and_schema(
             map_transform, raw_schema
@@ -127,10 +131,11 @@ class StreamMap:
 
 
 class RemoveRecordTransform(StreamMap):
-    def __init__(self, config: dict, raw_schema: dict) -> None:
+    def __init__(self, stream_alias: str, config: dict, raw_schema: dict) -> None:
         """Initialize mapper."""
-        _ = raw_schema
+        self.stream_alias = stream_alias
         self.config = config
+        _ = raw_schema
 
     def transform(self, record: dict) -> Optional[dict]:
         _ = record  # Drop the record
@@ -138,8 +143,9 @@ class RemoveRecordTransform(StreamMap):
 
 
 class SameRecordTransform(StreamMap):
-    def __init__(self, config: dict, raw_schema) -> None:
+    def __init__(self, stream_alias: str, config: dict, raw_schema) -> None:
         """Initialize mapper."""
+        self.stream_alias = stream_alias
         self.config = config
         self.schema = raw_schema
 
@@ -158,7 +164,7 @@ class Mapper:
     ):
         """Initialize mapper."""
         self.stream_maps = cast(Dict[str, List[StreamMap]], {})
-        self.config = dict
+        self.config = config
         self.raw_catalog = raw_catalog
         self.raw_catalog_obj = Catalog.from_dict(raw_catalog)
         self.default_mapper_type: Type[StreamMap]
@@ -188,7 +194,9 @@ class Mapper:
                 # Additional items may be added for aliasing or multi projections.
                 self.stream_maps[catalog_entry.stream] = [
                     self.default_mapper_type(
-                        self.config, catalog_entry.schema.to_dict()
+                        catalog_entry.stream,
+                        dict(self.config),
+                        catalog_entry.schema.to_dict(),
                     )
                 ]
 
@@ -217,7 +225,10 @@ class Mapper:
                 stream_name = cast(str, stream_def.pop("__source__"))
 
             mapper = StreamMap(
-                stream_def, config, self.get_original_stream_schema(stream_name)
+                stream_key,
+                stream_def,
+                config,
+                self.get_original_stream_schema(stream_name),
             )
             if stream_name == stream_key:
                 # Zero-th mapper should be the same-named mapper:
