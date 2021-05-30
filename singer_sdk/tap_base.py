@@ -20,6 +20,8 @@ from singer_sdk.exceptions import (
 )
 from singer_sdk.helpers import _state
 
+STREAM_MAPS_CONFIG = "stream_maps"
+
 
 class Tap(PluginBase, metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
@@ -58,9 +60,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         # Initialize mappers
 
         self.mapper: Optional[Mapper] = None
-        if "stream_maps" in self.config:
+        if STREAM_MAPS_CONFIG in self.config:
             self.mapper = Mapper(
-                self.config["stream_maps"],
+                self.config[STREAM_MAPS_CONFIG],
                 dict(self.config),
                 self.catalog_dict,
             )

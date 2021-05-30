@@ -17,6 +17,10 @@ from singer_sdk.typing import (
 )
 
 SIMPLEEVAL = "simpleeval"
+MAPPER_ELSE_OPTION = "__else__"
+MAPPER_FILTER_OPTION = "__filter__"
+MAPPER_SOURCE_OPTION = "__source__"
+MAPPER_ALIAS_OPTION = "__alias__"
 
 
 def md5(input: str) -> str:
@@ -76,22 +80,23 @@ class StreamMap:
 
         filter_rule: Optional[str] = None
         include_by_default = True
-        if stream_map and "__filter__" in stream_map:
-            filter_rule = stream_map.pop("__filter__")
+        if stream_map and MAPPER_FILTER_OPTION in stream_map:
+            filter_rule = stream_map.pop(MAPPER_FILTER_OPTION)
             logging.info(f"Found filter rule: {filter_rule}")
 
-        if stream_map and "__else__" in stream_map:
-            if stream_map["__else__"] is None:
+        if stream_map and MAPPER_ELSE_OPTION in stream_map:
+            if stream_map[MAPPER_ELSE_OPTION] is None:
                 logging.info(
-                    "Detected `__else__=None` rule. "
+                    f"Detected `{MAPPER_ELSE_OPTION}=None` rule. "
                     "Unmapped properties will be excluded from output."
                 )
                 include_by_default = False
             else:
                 raise NotImplementedError(
-                    f"Option '{stream_map['__else__']}' is not supported for __else__"
+                    f"Option '{MAPPER_ELSE_OPTION}={stream_map[MAPPER_ELSE_OPTION]}' "
+                    "is not supported."
                 )
-            stream_map.pop("__else__")
+            stream_map.pop(MAPPER_ELSE_OPTION)
 
         if not include_by_default:
             transformed_properties_list = PropertiesList()
@@ -169,21 +174,22 @@ class Mapper:
         self.raw_catalog_obj = Catalog.from_dict(raw_catalog)
         self.default_mapper_type: Type[StreamMap]
 
-        if "__else__" in tap_map["streams"]:
-            if tap_map["streams"]["__else__"] is None:
+        if MAPPER_ELSE_OPTION in tap_map["streams"]:
+            if tap_map["streams"][MAPPER_ELSE_OPTION] is None:
                 logging.info(
-                    "Found '__else__=None' default mapper. "
+                    f"Found '{MAPPER_ELSE_OPTION}=None' default mapper. "
                     "Unmapped streams will be excluded from output."
                 )
                 self.default_mapper_type = RemoveRecordTransform
-                tap_map["streams"].pop("__else__")
+                tap_map["streams"].pop(MAPPER_ELSE_OPTION)
             else:
                 raise RuntimeError(
-                    f"Undefined transform for '__else__' case: {tap_map['__else__']}"
+                    f"Undefined transform for '{MAPPER_ELSE_OPTION}'' case: "
+                    f"{tap_map[MAPPER_ELSE_OPTION]}"
                 )
         else:
             logging.info(
-                "Operator '__else__=None' was not found. "
+                "Operator '{MAPPER_ELSE_OPTION}=None' was not found. "
                 "Unmapped streams will be included in output."
             )
             self.default_mapper_type = SameRecordTransform
@@ -221,8 +227,8 @@ class Mapper:
                     f"Option '{stream_key}:{stream_def}' is not expected."
                 )
 
-            if "__source__" in stream_def:
-                stream_name = cast(str, stream_def.pop("__source__"))
+            if MAPPER_SOURCE_OPTION in stream_def:
+                stream_name = cast(str, stream_def.pop(MAPPER_SOURCE_OPTION))
 
             mapper = StreamMap(
                 stream_key,
@@ -246,7 +252,7 @@ class Mapper:
     def get_original_stream_schema(self, stream_name) -> dict:
         catalog = Catalog.from_dict(self.raw_catalog)
         catalog_entry: CatalogEntry = catalog.get_stream(stream_name)
-        return catalog_entry.schema.to_dict()
+        return cast(dict, catalog_entry.schema.to_dict())
 
     def apply_default_mapper(self, stream_name: str, record: dict) -> Optional[dict]:
         return self.get_default_mapper(stream_name).transform(record)
