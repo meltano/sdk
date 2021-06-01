@@ -2,9 +2,7 @@
 
 ## Introduction
 
-SDK-based taps, targets, and mappers automatically support the custom inline mappings.
-
-Stream mappings can be applied to solve the following real-world applications:
+SDK-based taps, targets, and mappers automatically support the custom inline mappings feature. Stream mappings can be applied to solve the following real-world applications:
 
 ### Stream-Level Mapping Applications
 
@@ -15,6 +13,7 @@ Stream mappings can be applied to solve the following real-world applications:
 
 ### Property-Level Mapping Applications
 
+- **Property-level aliasing:** properties can be renamed in the resulting stream.
 - **Property-level transformations:** properties can be transformed inline.
 - **Property-level exclusions:** properties can be removed from the resulting stream.
 - **Property-level additions:** new properties can be created based on inline user-defined
@@ -39,15 +38,15 @@ These capabilities are all out of scope _by design_:
 
 The mapping features described here are create for the **_users_** of SDK-based taps and targets.
 
-Developers simply enable the feature using the instructions below, and then users can benefit from having inline transformation capabilitiies out-of-box on their favorite taps and targets.
+Developers simply enable the feature using the instructions below, and then users can benefit from having inline transformation capabilities out-of-box on their favorite taps and targets.
 
 **Note:** to support non-SDK taps and targets, we are also creating a standalone inline mapper plugin (`meltano-map-transform`), which follows all specifications defined here and can apply mapping transformations between _any_ Singer tap and target, even if they are not built using the SDK.
 
 ## Enabling Stream Maps in SDK-Based Plugins
 
 To support inline mapping functions, the developer only needs to declare two plugin settings,
-called `stream_maps` and `stream_map_settings`, and declare both settings as `object` type. (For example: 
-`Property("stream_maps, ObjectType())` if using the python helper classes or 
+called `stream_maps` and `stream_map_settings`, and declare both settings as `object` type. (For example:
+`Property("stream_maps, ObjectType())` if using the python helper classes or
 `"stream_maps": {"type": "object"}` if using native JSON Schema declarations.)
 
 If the `stream_maps` setting is detected, the following behaviors will be implemented
@@ -56,7 +55,7 @@ by the SDK automatically:
 1. For taps, the SCHEMA and RECORD messages will automatically be transformed,
    duplicated, filtered, or aliased, as per the `stream_maps` config settings _after_
    all other tap-specific logic is executed.
-   - Because this process happens automatically after all other tap logic is executed, the 
+   - Because this process happens automatically after all other tap logic is executed, the
      tap developer does not have to write any custom handling logic.
    - The tap development process is fully insulated from this 'out-of-box' functionality.
 2. Similarly for targets, the received streams are processed by the `stream_maps` config
@@ -67,9 +66,9 @@ by the SDK automatically:
    simply receives input from a tap, transforms all stream and schema messages via the
    `stream_maps` config option, and then emits the resulting stream(s) to a downstream
    target.
-   - A standalone mapper is not needed in cases where either the tap or target is built 
+   - A standalone mapper is not needed in cases where either the tap or target is built
      on the SDK (since either could accept the `stream_maps` config option) but it is useful
-     in cases where using legacy taps or targets which do not yet support this 
+     in cases where using legacy taps or targets which do not yet support this
      functionality - or in cases where you want to run a one-time sync with special logic
      and otherwise keep tap and target config untouched.
 
@@ -140,7 +139,7 @@ can be referenced directly by mapping expressions.
 
 #### Built-in Variable Names
 
-- `config` - a dictionary with the `stram_map_config` values from settings. This can be used
+- `config` - a dictionary with the `stream_map_config` values from settings. This can be used
   to provide a secret hash seed, for instance.
 - `record` - an alias for the record values dictionary in the current stream.
 - `_` - same as `record` but shorter to type
@@ -296,7 +295,7 @@ emitting those parent records that qualify the filter expression.
 
 ## Known Limitations
 
-_The below functionality may be expanded or improved in the future. Please send us an 
+_The below functionality may be expanded or improved in the future. Please send us an
 Issue or MR if you are interested in contributing to these features._
 
 ### No nested property declarations or removals
@@ -317,7 +316,8 @@ requirement for static type evaluation with minimal config complexity.
 While `simpleeval` does provide some isolation and sandboxing capabilities built-in, there
 are always security implications when allowing user-provided code to run on managed servers.
 For this reason, administrators much be sure to not permit arbitrary code injection
-from untrusted users.
+from untrusted users. Tap and target settings should never be permitted to be modified
+by untrusted users.
 
 ### Else behavior currently limited to `null` assignment
 
