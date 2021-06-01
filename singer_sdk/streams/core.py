@@ -485,9 +485,6 @@ class Stream(metaclass=abc.ABCMeta):
     def _write_schema_message(self):
         """Write out a SCHEMA message with the stream schema."""
         bookmark_keys = [self.replication_key] if self.replication_key else None
-        selected_schema = get_selected_schema(
-            self._singer_catalog.to_dict(), self.name, self.logger
-        )
         for stream_map in self.stream_maps:
             schema_message = SchemaMessage(
                 stream_map.stream_alias,

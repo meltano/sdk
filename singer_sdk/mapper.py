@@ -13,6 +13,8 @@ from singer import Catalog, CatalogEntry
 
 import simpleeval
 from simpleeval import simple_eval
+
+from singer_sdk.helpers._catalog import get_selected_schema
 from singer_sdk.typing import (
     IntegerType,
     JSONTypeHelper,
@@ -263,6 +265,7 @@ class Mapper:
         tap_map: Dict[str, Dict[str, Union[str, dict]]],
         map_config: dict,
         raw_catalog: dict,
+        logger: logging.Logger,
     ):
         """Initialize mapper."""
         self.stream_maps = cast(Dict[str, List[StreamMap]], {})
@@ -270,6 +273,7 @@ class Mapper:
         self.raw_catalog = raw_catalog
         self.raw_catalog_obj = Catalog.from_dict(raw_catalog)
         self.default_mapper_type: Type[DefaultStreamMap]
+        self.logger = logger
 
         if MAPPER_ELSE_OPTION in tap_map["streams"]:
             if tap_map["streams"][MAPPER_ELSE_OPTION] is None:
@@ -298,7 +302,7 @@ class Mapper:
                 self.stream_maps[catalog_entry.stream] = [
                     self.default_mapper_type(
                         catalog_entry.stream,
-                        catalog_entry.schema.to_dict(),
+                        self.get_original_stream_schema(catalog_entry.stream),
                     )
                 ]
 
@@ -355,8 +359,13 @@ class Mapper:
 
         return self.stream_maps[stream_name][0]
 
-    def get_original_stream_schema(self, stream_name: str) -> dict:
+    def get_original_stream_schema(
+        self, stream_name: str, with_selection_filter: bool = True
+    ) -> dict:
         """Return the unchanged schema definition for the specified stream name."""
+        if with_selection_filter:
+            return get_selected_schema(self.raw_catalog, stream_name, self.logger)
+
         catalog = Catalog.from_dict(self.raw_catalog)
         catalog_entry: CatalogEntry = catalog.get_stream(stream_name)
         return cast(dict, catalog_entry.schema.to_dict())

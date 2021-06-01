@@ -233,6 +233,7 @@ def _test_transform(
         tap_map=map_dict,
         map_config=map_config,
         raw_catalog=sample_catalog_dict,
+        logger=logging,
     )
 
     for stream_name, stream in sample_stream.items():
