@@ -12,7 +12,7 @@ from singer_sdk.mapper import Mapper, RemoveRecordTransform, md5
 
 
 @pytest.fixture
-def config() -> dict:
+def map_config() -> dict:
     return {"hash_seed": "super_secret_hash_seed"}
 
 
@@ -102,28 +102,28 @@ def transform_map():
 
 
 @pytest.fixture
-def transformed_result(config):
+def transformed_result(map_config):
     return {
         "repositories": [
             {
                 "repo_name": "tap-something",
                 "email_domain": "example.com",
-                "email_hash": md5(config["hash_seed"] + "sample1@example.com"),
+                "email_hash": md5(map_config["hash_seed"] + "sample1@example.com"),
             },
             {
                 "repo_name": "my-tap-something",
                 "email_domain": "example.com",
-                "email_hash": md5(config["hash_seed"] + "sample2@example.com"),
+                "email_hash": md5(map_config["hash_seed"] + "sample2@example.com"),
             },
             {
                 "repo_name": "target-something",
                 "email_domain": "example.com",
-                "email_hash": md5(config["hash_seed"] + "sample3@example.com"),
+                "email_hash": md5(map_config["hash_seed"] + "sample3@example.com"),
             },
             {
                 "repo_name": "not-atap",
                 "email_domain": "example.com",
-                "email_hash": md5(config["hash_seed"] + "sample4@example.com"),
+                "email_hash": md5(map_config["hash_seed"] + "sample4@example.com"),
             },
         ],
         "foobars": [  # should be unchanged
@@ -182,7 +182,7 @@ def filtered_schemas():
 
 
 def test_map_transforms(
-    config,
+    map_config,
     sample_stream,
     sample_catalog_dict,
     transform_map,
@@ -191,17 +191,17 @@ def test_map_transforms(
 ):
     _test_transform(
         "transform",
-        config,
-        sample_stream,
-        sample_catalog_dict,
-        transform_map,
-        transformed_result,
-        transformed_schemas,
+        map_config=map_config,
+        sample_stream=sample_stream,
+        sample_catalog_dict=sample_catalog_dict,
+        map_dict=transform_map,
+        expected_result=transformed_result,
+        expected_schemas=transformed_schemas,
     )
 
 
 def test_filter_transforms(
-    config,
+    map_config,
     sample_stream,
     sample_catalog_dict,
     filter_map,
@@ -210,18 +210,18 @@ def test_filter_transforms(
 ):
     _test_transform(
         "filter",
-        config,
-        sample_stream,
-        sample_catalog_dict,
-        filter_map,
-        filtered_result,
-        filtered_schemas,
+        map_config=map_config,
+        sample_stream=sample_stream,
+        sample_catalog_dict=sample_catalog_dict,
+        map_dict=filter_map,
+        expected_result=filtered_result,
+        expected_schemas=filtered_schemas,
     )
 
 
 def _test_transform(
     test_name: str,
-    config,
+    map_config,
     sample_stream,
     sample_catalog_dict,
     map_dict,
@@ -229,15 +229,22 @@ def _test_transform(
     expected_schemas,
 ):
     output: Dict[str, List[dict]] = {}
-    mapper = Mapper(map_dict, config, sample_catalog_dict)
+    mapper = Mapper(
+        tap_map=map_dict,
+        map_config=map_config,
+        raw_catalog=sample_catalog_dict,
+    )
 
     for stream_name, stream in sample_stream.items():
-        if isinstance(mapper.get_default_mapper(stream_name), RemoveRecordTransform):
+        if isinstance(mapper.get_primary_mapper(stream_name), RemoveRecordTransform):
             logging.info(f"Skipping ignored stream '{stream_name}'")
             continue
 
-        stream_map = mapper.get_default_mapper(stream_name)
-        assert stream_map.schema == expected_schemas[stream_name]
+        stream_map = mapper.get_primary_mapper(stream_name)
+        assert expected_schemas[stream_name] == stream_map.transformed_schema, (
+            f"Failed '{test_name}' schema test. Generated schema was "
+            f"{json.dumps(stream_map.transformed_schema, indent=2)}"
+        )
 
         output[stream_name] = []
         for record in stream:

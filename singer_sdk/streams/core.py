@@ -135,7 +135,7 @@ class Stream(metaclass=abc.ABCMeta):
             self.stream_maps = tap.mapper.stream_maps[self.name]
         else:
             self.stream_maps = [
-                SameRecordTransform(self.name, dict(self.config), self.schema)
+                SameRecordTransform(stream_alias=self.name, raw_schema=self.schema)
             ]
 
     @property
@@ -491,7 +491,7 @@ class Stream(metaclass=abc.ABCMeta):
         for stream_map in self.stream_maps:
             schema_message = SchemaMessage(
                 stream_map.stream_alias,
-                stream_map.schema,
+                stream_map.transformed_schema,
                 self.primary_keys,
                 bookmark_keys,
             )

@@ -34,24 +34,27 @@ def md5(input: str) -> str:
     return hashlib.md5(input.encode("utf-8")).hexdigest()
 
 
-class StreamMap(abc.ABCMeta):
+class StreamMap(metaclass=abc.ABCMeta):
     """Abstract base class for all map classes."""
 
     def __init__(self, stream_alias: str, raw_schema: dict) -> None:
         """Initialize mapper."""
         self.stream_alias = stream_alias
         self.raw_schema = raw_schema
+        self.transformed_schema = raw_schema
 
+    @abc.abstractmethod
     def transform(self, record: dict) -> Optional[dict]:
         """Transform a record and return the result."""
         raise NotImplementedError
 
+    @abc.abstractmethod
     def get_filter_result(self, record: dict) -> bool:
         """Return True to include the record or False to exclude."""
         raise NotImplementedError
 
 
-class DefaultStreamMap(StreamMap, abc.ABCMeta):
+class DefaultStreamMap(StreamMap):
     """Abstract base class for default maps which do not require custom config."""
 
 
@@ -86,21 +89,23 @@ class CustomStreamMap(StreamMap):
     def __init__(
         self,
         alias: str,
-        config: dict,
+        map_config: dict,
         raw_schema: dict,
         map_transform: dict,
     ) -> None:
         """Initialize mapper."""
-        super().__init__(alias, raw_schema)
+        super().__init__(stream_alias=alias, raw_schema=raw_schema)
 
-        self.config = config
+        self.map_config = map_config
         self._transform_fn: Callable[[dict], Optional[dict]]
         self._filter_fn: Callable[[dict], bool]
         (
             self._filter_fn,
             self._transform_fn,
-            self.schema,
-        ) = self._init_functions_and_schema(map_transform, raw_schema)
+            self.transformed_schema,
+        ) = self._init_functions_and_schema(
+            stream_map=map_transform, original_schema=raw_schema
+        )
 
     def transform(self, record: dict) -> Optional[dict]:
         """Return a transformed record."""
@@ -122,7 +127,7 @@ class CustomStreamMap(StreamMap):
         names = record.copy()  # Start with names from record properties
         names["_"] = record  # Add a shorthand alias in case of reserved words in names
         names["record"] = record  # ...and a longhand alias
-        names["config"] = self.config  # Allow config access within transform function
+        names["config"] = self.map_config  # Allow map config access within transform
         if property_name and property_name in record:
             # Allow access to original property value if applicable
             names["self"] = record[property_name]
@@ -168,15 +173,23 @@ class CustomStreamMap(StreamMap):
                 )
             stream_map.pop(MAPPER_ELSE_OPTION)
 
+        # Transform the schema as needed
+
+        transformed_schema = copy.copy(original_schema)
         if not include_by_default:
-            transformed_properties_list = PropertiesList()
+            transformed_schema = PropertiesList().to_dict()
+        if "properties" not in transformed_schema:
+            transformed_schema["properties"] = {}
 
         for prop_key, prop_def in list(stream_map.items()):
             if prop_def is None:
                 stream_map.pop(prop_key)
-            elif isinstance(prop_def, str):
-                transformed_properties_list.append(
-                    Property(prop_key, self._eval_type(prop_def))
+            elif (
+                isinstance(prop_def, str)
+                and prop_key not in transformed_schema["properties"]
+            ):
+                transformed_schema["properties"].update(
+                    Property(prop_key, self._eval_type(prop_def)).to_dict()
                 )
 
         # Declare function variables
@@ -239,7 +252,7 @@ class CustomStreamMap(StreamMap):
 
             return result
 
-        return filter_fn, transform_fn, transformed_properties_list.to_dict()
+        return filter_fn, transform_fn, transformed_schema
 
 
 class Mapper:
@@ -248,12 +261,12 @@ class Mapper:
     def __init__(
         self,
         tap_map: Dict[str, Dict[str, Union[str, dict]]],
-        config: dict,
+        map_config: dict,
         raw_catalog: dict,
     ):
         """Initialize mapper."""
         self.stream_maps = cast(Dict[str, List[StreamMap]], {})
-        self.config = config
+        self.map_config = map_config
         self.raw_catalog = raw_catalog
         self.raw_catalog_obj = Catalog.from_dict(raw_catalog)
         self.default_mapper_type: Type[DefaultStreamMap]
@@ -300,7 +313,12 @@ class Mapper:
                 )
 
             if stream_def is None:
-                self.stream_maps[stream_key].append(RemoveRecordTransform(config))
+                self.stream_maps[stream_key].append(
+                    RemoveRecordTransform(
+                        stream_alias=stream_key,
+                        raw_schema=self.get_original_stream_schema(stream_key),
+                    )
+                )
                 logging.info(f"Add null tansform for {stream_name}")
                 continue
 
@@ -318,10 +336,10 @@ class Mapper:
                 stream_alias = cast(str, stream_def.pop(MAPPER_ALIAS_OPTION))
 
             mapper = CustomStreamMap(
-                stream_alias,
-                stream_def,
-                config,
-                self.get_original_stream_schema(stream_name),
+                alias=stream_alias,
+                map_transform=stream_def,
+                map_config=self.map_config,
+                raw_schema=self.get_original_stream_schema(stream_name),
             )
             if stream_name == stream_key:
                 # Zero-th mapper should be the same-named mapper:
@@ -330,7 +348,7 @@ class Mapper:
                 # Additional mappers for aliasing and multi-projection:
                 self.stream_maps[stream_name].append(mapper)
 
-    def get_default_mapper(self, stream_name: str) -> StreamMap:
+    def get_primary_mapper(self, stream_name: str) -> StreamMap:
         """Return the primary mapper for the specified stream name."""
         if stream_name not in self.stream_maps:
             raise RuntimeError(f"No mapper found for {stream_name}. ")
@@ -343,6 +361,6 @@ class Mapper:
         catalog_entry: CatalogEntry = catalog.get_stream(stream_name)
         return cast(dict, catalog_entry.schema.to_dict())
 
-    def apply_default_mapper(self, stream_name: str, record: dict) -> Optional[dict]:
+    def apply_primary_mapper(self, stream_name: str, record: dict) -> Optional[dict]:
         """Apply the primary mapper for the stream and return the result."""
-        return self.get_default_mapper(stream_name).transform(record)
+        return self.get_primary_mapper(stream_name).transform(record)
