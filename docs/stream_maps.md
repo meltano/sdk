@@ -81,7 +81,7 @@ adds `email_domain` and `email_hash` as new properties:
 
 `config.json`:
 
-```json
+```js
 {
     "stream_maps": {
         "customers": { // Apply these transforms to the stream called 'customers'
@@ -167,7 +167,7 @@ The following logic is applied in determining the SCHEMA of the transformed stre
 To remove a stream, declare the stream within `stream_maps` config and assign it the value
 `null`. For example:
 
-```json
+```js
 {
     "stream_maps": {
         "addresses": null  // don't sync the stream called 'addresses'
@@ -178,7 +178,7 @@ To remove a stream, declare the stream within `stream_maps` config and assign it
 To remove a property, declare the property within the designated stream's map entry and
 assign it the value `null`. For example:
 
-```json
+```js
 {
     "stream_maps": {
         "customers": {
@@ -196,7 +196,7 @@ instruction to only include defined properties or streams.
 
 To remove all streams except the `customers` stream:
 
-```json
+```js
 {
     "stream_maps": {
         "customers": {},
@@ -207,7 +207,7 @@ To remove all streams except the `customers` stream:
 
 To remove all fields from the `customers` stream except `customer_id`:
 
-```json
+```js
 {
     "stream_maps": {
         "customers": {
@@ -224,7 +224,7 @@ To alias a stream, simply add the operation `"__alias__": "new_name"` to the str
 definition. For example, to alias the `customers` stream as `customer_v2`, use the
 following:
 
-```json
+```js
 {
     "stream_maps": {
         "customers": {
@@ -240,7 +240,7 @@ To create a new stream as a copy of the original, specify the operation
 `"__source__": "stream_name"`. For example, you can create a copy of the `customers` stream
 which only contains PII properties using the following:
 
-```json
+```js
 {
     "stream_maps": {
         "customers": {
@@ -268,7 +268,7 @@ The `__filter__` operation accept a string expression which must evaluate to `tr
 
 For example, to only include customers with emails from the `example.com` company domain:
 
-```json
+```js
 {
     "stream_maps": {
         "customers": {
