@@ -1,4 +1,4 @@
-"""Test map transformer"""
+"""Test map transformer."""
 
 import json
 from typing import Dict, List
