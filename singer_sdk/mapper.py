@@ -66,12 +66,15 @@ class StreamMap:
         funcs["md5"] = md5
         return funcs
 
-    def _eval(self, expr: str, record) -> Any:
+    def _eval(self, expr: str, record: dict, property_name: Optional[str]) -> Any:
         """Solve an expression."""
         names = record.copy()  # Start with names from record properties
         names["_"] = record  # Add a shorthand alias in case of reserved words in names
         names["record"] = record  # ...and a longhand alias
         names["config"] = self.config  # Allow config access within transform function
+        if property_name and property_name in record:
+            # Allow access to original property value if applicable
+            names["self"] = record[property_name]
         result = simple_eval(expr, functions=self.functions, names=names)
         logging.info(f"Eval result: {expr} = {result}")
         return result
@@ -130,7 +133,9 @@ class StreamMap:
         def eval_filter(record: dict) -> bool:
             nonlocal filter_rule
 
-            filter_result = self._eval(cast(str, filter_rule), record)
+            filter_result = self._eval(
+                expr=cast(str, filter_rule), record=record, property_name=None
+            )
             logging.debug(f"Filter result: {filter_result}")
             if not filter_result:
                 logging.debug("Excluding record due to filter.")
@@ -171,7 +176,9 @@ class StreamMap:
 
                 if isinstance(prop_def, str):
                     # Apply property transform
-                    result[prop_key] = self._eval(prop_def, record)
+                    result[prop_key] = self._eval(
+                        expr=prop_def, record=record, property_name=prop_key
+                    )
                     continue
 
                 raise ValueError(
