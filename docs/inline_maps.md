@@ -6,14 +6,6 @@ SDK-based taps, targets, and mappers automatically support the custom inline map
 
 Stream mappings can be applied to solve the following real-world applications:
 
-### A feature for tap and target users, enabled by the SDK
-
-The mapping features described here are create for the **_users_** of SDK-based taps and targets.
-
-Developers simply enable the feature using the instructions below, and then users can benefit from having inline transformation capabilitiies out-of-box on their favorite taps and targets.
-
-**Note:** to support non-SDK taps and targets, we are also creating a standalone inline mapper plugin (`meltano-map-transform`), which follows all specifications defined here, but which can sit between _any_ Singer tap and target even if they are not built using the SDK.
-
 ### Stream-Level Mapping Applications
 
 - **Stream aliasing:** streams can be aliased to provide custom naming downstream.
@@ -43,10 +35,18 @@ These capabilities are all out of scope _by design_:
     a transformation tool like [dbt](https://www.getdbt.com), or (b) create a custom mapper
     plugin with inline lookup logic.
 
+### A feature for all Singer users, enabled by the SDK
+
+The mapping features described here are create for the **_users_** of SDK-based taps and targets.
+
+Developers simply enable the feature using the instructions below, and then users can benefit from having inline transformation capabilitiies out-of-box on their favorite taps and targets.
+
+**Note:** to support non-SDK taps and targets, we are also creating a standalone inline mapper plugin (`meltano-map-transform`), which follows all specifications defined here and can apply mapping transformations between _any_ Singer tap and target, even if they are not built using the SDK.
+
 ## Enabling Stream Maps in SDK-Based Plugins
 
-To support inline mapping functions, the developer only needs to declare two plugin settings
-called `stream_maps` and `stream_map_settings` and declare both settings as `object` type. (For example: 
+To support inline mapping functions, the developer only needs to declare two plugin settings,
+called `stream_maps` and `stream_map_settings`, and declare both settings as `object` type. (For example: 
 `Property("stream_maps, ObjectType())` if using the python helper classes or 
 `"stream_maps": {"type": "object"}` if using native JSON Schema declarations.)
 
