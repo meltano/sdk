@@ -332,13 +332,19 @@ testing scenarios).
 
 ### Q: How do stream map operations interact with stream selection via the Singer catalog metadata?
 
-**Answer:** Stream maps are applied only _after_ stream selection rules are applied. This means that if a stream or property is not selected, it will not be available for stream map operations. Stream maps are not intended to be a replacement for catalog-based selection, but they may be used to further refine stream and  beyond the original selection parameters.
+**Answer:** Stream maps are applied only _after_ stream selection rules are applied. This means that if a stream or property is not selected, it will not be available for stream map operations. Stream maps are not intended to be a replacement for catalog-based selection, but they may be used to further refine streams beyond the original selection parameters.
 
 ### Q: If streams are excluded by applying mapping rules, does the tap automatically skip them?
 
-**Answer:** Not yet, no. This is a known limitation which will be resolved in a future release. For now, we highly recommend you only use stream-level exclusions for smaller streams or in cases where overall runtime for those streams is trivial.
+**Answer:** It depends. For SDK-based taps, yes. If an entire stream is specified to be
+excluded at the tap level, then the stream will be skipped exactly as if it were deselected
+in the catalog metadata.
 
-If this is something you would like to contribute towards, please consider sending us an MR.
+If a stream is specified to be excluded at the target level, or in a standalone mapper
+between the tap and target, the filtering occurs downstream from the tap and therefor cannot
+affect the selection rules of the tap itself. Except in special test cases or in cases where
+runtime is trivial, we highly recommend implementing stream-level exclusions at the tap
+level rather than within the downstream target or mapper plugins.
 
 ### Q: Why use a separate `stream_map_config` option instead of granting access to all `config` values?
 
