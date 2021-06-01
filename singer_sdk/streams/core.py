@@ -36,10 +36,7 @@ from singer.catalog import Catalog
 from singer.schema import Schema
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
-from singer_sdk.helpers._catalog import (
-    get_selected_schema,
-    pop_deselected_record_properties,
-)
+from singer_sdk.helpers._catalog import pop_deselected_record_properties
 
 from singer_sdk.helpers._typing import (
     conform_record_data_types,
