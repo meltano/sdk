@@ -282,7 +282,7 @@ For example, to only include customers with emails from the `example.com` compan
 
 Nested child streams iterations will be skipped if their parent stream has a record-level
 filter applied. This applies only to the primary map for a stream, ignoring any filter
-logic on differently-named stream aliases.
+logic on duplicate streams created using `__source__`.
 
 If you want to prevent child streams from being filtered, create a duplicate stream using
 `__source__` and filter the duplicated stream instead of the original. Then, if you do not
@@ -300,7 +300,7 @@ Issue or MR if you are interested in contributing to these features._
 
 ### No nested property declarations or removals
 
-Only first-level properties may be added, removed, or transformed. This means, you can
+Only first-level properties may be added, removed, or transformed. This means, for example, that you can
 add or remove a top-level field called `customer_email`, but you cannot add or remove a
 nested `email` property if embedded in a `customer` json object.
 
@@ -315,8 +315,8 @@ requirement for static type evaluation with minimal config complexity.
 
 While `simpleeval` does provide some isolation and sandboxing capabilities built-in, there
 are always security implications when allowing user-provided code to run on managed servers.
-For this reason, administrators much be sure to not permit arbitrary code injection
-from untrusted users. Tap and target settings should never be permitted to be modified
+For this reason, administrators should not permit arbitrary setting injection
+from untrusted users. As a rule, tap and target settings should never be permitted to be modified
 by untrusted users.
 
 ### Else behavior currently limited to `null` assignment
