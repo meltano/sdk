@@ -265,6 +265,7 @@ class Mapper:
 
         for stream_key, stream_def in tap_map["streams"].items():
             stream_name = stream_key
+            stream_alias = stream_key
             logging.info(stream_name)
 
             if stream_key.startswith("__"):
@@ -287,8 +288,11 @@ class Mapper:
             if MAPPER_SOURCE_OPTION in stream_def:
                 stream_name = cast(str, stream_def.pop(MAPPER_SOURCE_OPTION))
 
+            if MAPPER_ALIAS_OPTION in stream_def:
+                stream_alias = cast(str, stream_def.pop(MAPPER_ALIAS_OPTION))
+
             mapper = StreamMap(
-                stream_key,
+                stream_alias,
                 stream_def,
                 config,
                 self.get_original_stream_schema(stream_name),
