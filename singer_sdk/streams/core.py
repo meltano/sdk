@@ -122,7 +122,7 @@ class Stream(metaclass=abc.ABCMeta):
         if self.schema_filepath:
             self._schema = json.loads(Path(self.schema_filepath).read_text())
 
-        if not self._schema:
+        if not self.schema:
             raise ValueError(
                 f"Could not initialize schema for stream '{self.name}'. "
                 "A valid schema object or filepath was not provided."
