@@ -100,7 +100,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._primary_keys: Optional[List[str]] = None
         self._state_partitioning_keys: Optional[List[str]] = None
         self._schema_filepath: Optional[Path] = None
-        self._schema: Optional[dict] = None
+        self._schema: dict
         self.child_streams: List[Stream] = []
         if schema:
             if isinstance(schema, (PathLike, str)):
@@ -121,13 +121,14 @@ class Stream(metaclass=abc.ABCMeta):
 
         if self.schema_filepath:
             self._schema = json.loads(Path(self.schema_filepath).read_text())
-        if not self.schema:
+
+        if not self._schema:
             raise ValueError(
                 f"Could not initialize schema for stream '{self.name}'. "
                 "A valid schema object or filepath was not provided."
             )
 
-        self.stream_maps: Optional[List[StreamMap]]
+        self.stream_maps: List[StreamMap]
         if tap.mapper:
             self.stream_maps = tap.mapper.stream_maps[self.name]
         else:
@@ -647,10 +648,8 @@ class Stream(metaclass=abc.ABCMeta):
                     if key not in record:
                         record[key] = val
 
-                # Sync children, except when default mapper filters out the record
-                if self.stream_maps is None or self.stream_maps[0].get_filter_result(
-                    record
-                ):
+                # Sync children, except when primary mapper filters out the record
+                if self.stream_maps[0].get_filter_result(record):
                     self._sync_children(child_context)
                 self._check_max_record_limit(record_count)
                 if self.selected:
