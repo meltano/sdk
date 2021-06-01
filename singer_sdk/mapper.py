@@ -1,3 +1,8 @@
+"""Stream Mapper classes.
+
+Mappers allow inline stream transformation, filtering, aliasing, and duplication.
+"""
+
 import copy
 import hashlib
 import logging
@@ -31,19 +36,29 @@ class StreamMap:
     """"""
 
     def __init__(
-        self, alias: str, map_transform: dict, config: dict, raw_schema: dict
+        self,
+        alias: str,
+        config: dict,
+        raw_schema: dict,
+        map_transform: dict,
     ) -> None:
         """Initialize mapper."""
         self.config = config
         self.stream_alias = alias
         self.schema: Optional[dict]
         self._transform_fn: Callable[[dict], Optional[dict]]
-        self._transform_fn, self.schema = self._init_transform_and_schema(
-            map_transform, raw_schema
-        )
+        self._filter_fn: Callable[[dict], bool]
+        (
+            self._filter_fn,
+            self._transform_fn,
+            self.schema,
+        ) = self._init_functions_and_schema(map_transform, raw_schema)
 
     def transform(self, record: dict) -> Optional[dict]:
         return self._transform_fn(record)
+
+    def get_filter_result(self, record: dict) -> bool:
+        return self._filter_fn(record)
 
     @property
     def functions(self) -> Dict[str, Callable]:
@@ -53,11 +68,11 @@ class StreamMap:
 
     def _eval(self, expr: str, record) -> Any:
         """Solve an expression."""
-        names = record.copy()
-        names["_"] = record
-        names["record"] = record
-        names["config"] = self.config
-        result = simple_eval(expr, functions=self.functions, names=record)
+        names = record.copy()  # Start with names from record properties
+        names["_"] = record  # Add a shorthand alias in case of reserved words in names
+        names["record"] = record  # ...and a longhand alias
+        names["config"] = self.config  # Allow config access within transform function
+        result = simple_eval(expr, functions=self.functions, names=names)
         logging.info(f"Eval result: {expr} = {result}")
         return result
 
@@ -73,9 +88,10 @@ class StreamMap:
 
         return StringType()
 
-    def _init_transform_and_schema(
+    def _init_functions_and_schema(
         self, stream_map: dict, original_schema: dict
-    ) -> Tuple[Callable[[dict], Optional[dict]], dict]:
+    ) -> Tuple[Callable[[dict], bool], Callable[[dict], Optional[dict]], dict]:
+        """Return a tuple: filter_fn, transform_fn, transformed_schema."""
         stream_map = copy.copy(stream_map)
 
         filter_rule: Optional[str] = None
@@ -109,13 +125,38 @@ class StreamMap:
                     Property(prop_key, self._eval_type(prop_def))
                 )
 
-        def fn(record: dict) -> Optional[dict]:
-            if isinstance(filter_rule, str):
-                filter_result = self._eval(filter_rule, record)
-                logging.info(f"Filter result: {filter_result}")
-                if not filter_result:
-                    logging.info(f"Excluding record due to filter.")
-                    return None
+        # Declare function variables
+
+        def eval_filter(record: dict) -> bool:
+            nonlocal filter_rule
+
+            filter_result = self._eval(cast(str, filter_rule), record)
+            logging.debug(f"Filter result: {filter_result}")
+            if not filter_result:
+                logging.debug("Excluding record due to filter.")
+                return False
+
+            return True
+
+        def always_true(record: dict) -> bool:
+            _ = record
+            return True
+
+        if isinstance(filter_rule, str):
+            filter_fn = eval_filter
+        elif filter_rule is None:
+            filter_fn = always_true
+        else:
+            raise ValueError(
+                f"Unexpected filter rule type '{type(filter_rule).__name__}' in "
+                f"expression {str(filter_rule)}. Expected 'str' or 'None'."
+            )
+
+        def transform_fn(record: dict) -> Optional[dict]:
+            nonlocal include_by_default, stream_map
+
+            if not self.get_filter_result(record):
+                return None
 
             if include_by_default:
                 result = record.copy()
@@ -124,15 +165,23 @@ class StreamMap:
 
             for prop_key, prop_def in list(stream_map.items()):
                 if prop_def is None:
-                    stream_map.pop(prop_key)
-                elif isinstance(prop_def, str):
-                    names = copy.copy(record)
-                    names["config"] = self.config
-                    names["_"] = record
-                    result[prop_key] = self._eval(prop_def, names)
+                    # Remove property from result
+                    result.pop(prop_key, None)
+                    continue
+
+                if isinstance(prop_def, str):
+                    # Apply property transform
+                    result[prop_key] = self._eval(prop_def, record)
+                    continue
+
+                raise ValueError(
+                    f"Unexpected mapping type '{type(prop_def).__name__}' in "
+                    f"map expression '{prop_def}'. Expected 'str' or 'None'."
+                )
+
             return result
 
-        return fn, transformed_properties_list.to_dict()
+        return filter_fn, transform_fn, transformed_properties_list.to_dict()
 
 
 class RemoveRecordTransform(StreamMap):
@@ -146,6 +195,10 @@ class RemoveRecordTransform(StreamMap):
         _ = record  # Drop the record
         return None
 
+    def get_filter_result(self, record: dict) -> bool:
+        """Always exclude."""
+        return False
+
 
 class SameRecordTransform(StreamMap):
     def __init__(self, stream_alias: str, config: dict, raw_schema) -> None:
@@ -156,6 +209,10 @@ class SameRecordTransform(StreamMap):
 
     def transform(self, record: dict) -> Optional[dict]:
         return record
+
+    def get_filter_result(self, record: dict) -> bool:
+        """Always include."""
+        return True
 
 
 class Mapper:

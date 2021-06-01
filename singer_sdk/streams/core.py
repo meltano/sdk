@@ -652,7 +652,12 @@ class Stream(metaclass=abc.ABCMeta):
                     # Add state context to records if not already present
                     if key not in record:
                         record[key] = val
-                self._sync_children(child_context)
+
+                # Sync children, except when default mapper filters out the record
+                if self.stream_maps is None or self.stream_maps[0].get_filter_result(
+                    record
+                ):
+                    self._sync_children(child_context)
                 self._check_max_record_limit(record_count)
                 if self.selected:
                     if (record_count - 1) % self.STATE_MSG_FREQUENCY == 0:
