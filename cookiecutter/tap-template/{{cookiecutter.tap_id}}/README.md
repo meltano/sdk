@@ -67,7 +67,7 @@ You can also test the `{{cookiecutter.tap_id}}` CLI interface directly using `po
 poetry run {{cookiecutter.tap_id}} --help
 ```
 
-### Testing with [Meltano](meltano.com)
+### Testing with [Meltano](https://www.meltano.com)
 
 _**Note:** This tap will work in any Singer environment and does not require Meltano.
 Examples here are for convenience and to streamline end-to-end orchestration scenarios._
