@@ -29,7 +29,6 @@ class CountriesStream(CountriesAPIStream):
 
     name = "countries"
     primary_keys = ["code"]
-    schema_filepath = SCHEMAS_DIR / "countries.json"
     query = """
         countries {
             code
