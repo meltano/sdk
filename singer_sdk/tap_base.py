@@ -3,6 +3,7 @@
 import abc
 import json
 from pathlib import PurePath, Path
+from singer_sdk.mapper import Mapper
 from typing import Any, List, Optional, Dict, Type, Union, cast
 
 import click
@@ -18,6 +19,8 @@ from singer_sdk.exceptions import (
     MaxRecordsLimitException,
 )
 from singer_sdk.helpers import _state
+
+STREAM_MAPS_CONFIG = "stream_maps"
 
 
 class Tap(PluginBase, metaclass=abc.ABCMeta):
@@ -53,6 +56,17 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         elif state:
             state_dict = read_json_file(state)
         self.load_state(state_dict)
+
+        # Initialize mappers
+
+        self.mapper: Optional[Mapper] = None
+        if STREAM_MAPS_CONFIG in self.config:
+            self.mapper = Mapper(
+                self.config[STREAM_MAPS_CONFIG],
+                map_config=dict(self.config.get("stream_maps_config", {})),
+                raw_catalog=self.catalog_dict,
+                logger=self.logger,
+            )
 
     # Class properties
 
