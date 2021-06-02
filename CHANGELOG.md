@@ -16,6 +16,29 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
+## v0.2.0
+
+### Added
+
+- Added support for parent-child streams (#97, !79)
+- Added support for configurable metrics logging (#91, !79)
+- Added ability to use fewer state bookmarks by setting `Stream.state_partitioning_keys` to a
+  subset of available context keys (!79)
+
+### Changed
+
+- Renamed the optional `partition` dictionary arg in method signatures to the more generic `context` (!79)
+
+### Deprecated
+
+- The methods `Stream.get_partition_state()` and `Stream.get_stream_or_partition_state()`
+  have been deprecated in favor of the new and simpler `get_context_state()` (!79)
+
+### Improved
+
+- Code coverage is now tracked and available as a tool for SDK contributors to further
+  improve overall stability and help prioritize unit test development. (#39, !89)
+
 ## v0.1.6
 
 Stability and bugfix release. No breaking changes.
@@ -27,7 +50,7 @@ Stability and bugfix release. No breaking changes.
 
 ### Improved
 
-- Added improved type hints for developers, mypy code compliance for improved stability. (#125, !83)
+- Added improved type hints for developers, including mypy code compliance for improved stability. (#127, !86)
 
 ## v0.1.5
 

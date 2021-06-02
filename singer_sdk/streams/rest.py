@@ -25,6 +25,11 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     _requests_session: Optional[requests.Session]
     rest_method = "GET"
 
+    # Private constants. May not be supported in future releases:
+    _LOG_REQUEST_METRICS: bool = True
+    # Disabled by default for safety:
+    _LOG_REQUEST_METRIC_URLS: bool = False
+
     @property
     @abc.abstractmethod
     def url_base(self) -> str:
@@ -54,17 +59,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             result = str(val)
         return result
 
-    def get_url(self, partition: Optional[dict]) -> str:
-        """Return a URL, optionally targeted to a specific partition.
+    def get_url(self, context: Optional[dict]) -> str:
+        """Return a URL, optionally targeted to a specific partition or context.
 
         Developers override this method to perform dynamic URL generation.
         """
-        url_pattern = "".join([self.url_base, self.path or ""])
-        params = copy.deepcopy(dict(self.config))
-        if partition:
-            params.update(partition)
-        url = url_pattern
-        for k, v in params.items():
+        url = "".join([self.url_base, self.path or ""])
+        vals = copy.copy(dict(self.config))
+        vals.update(context or {})
+        for k, v in vals.items():
             search_text = "".join(["{", k, "}"])
             if search_text in url:
                 url = url.replace(search_text, self._url_encode(v))
@@ -86,10 +89,22 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         giveup=lambda e: e.response is not None and 400 <= e.response.status_code < 500,
         factor=2,
     )
-    def _request_with_backoff(self, prepared_request) -> requests.Response:
+    def _request_with_backoff(
+        self, prepared_request, context: Optional[dict]
+    ) -> requests.Response:
         response = self.requests_session.send(prepared_request)
+        if self._LOG_REQUEST_METRICS:
+            extra_tags = {}
+            if self._LOG_REQUEST_METRIC_URLS:
+                extra_tags["url"] = cast(str, prepared_request.path_url)
+            self._write_request_duration_log(
+                endpoint=self.path,
+                response=response,
+                context=context,
+                extra_tags=extra_tags,
+            )
         if response.status_code in [401, 403]:
-            self.logger.info("Skipping request to {}".format(prepared_request.url))
+            self.logger.info("Failed request for {}".format(prepared_request.url))
             self.logger.info(
                 f"Reason: {response.status_code} - {str(response.content)}"
             )
@@ -107,7 +122,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return response
 
     def get_url_params(
-        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization.
 
@@ -116,18 +131,18 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return {}
 
     def prepare_request(
-        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> requests.PreparedRequest:
-        """Preopare a request object.
+        """Prepare a request object.
 
-        If partitioning is supported, the `partition` object will contain the partition
+        If partitioning is supported, the `context` object will contain the partition
         definitions. Pagination information can be parsed from `next_page_token` if
         `next_page_token` is not None.
         """
         http_method = self.rest_method
-        url: str = self.get_url(partition)
-        params: dict = self.get_url_params(partition, next_page_token)
-        request_data = self.prepare_request_payload(partition, next_page_token)
+        url: str = self.get_url(context)
+        params: dict = self.get_url_params(context, next_page_token)
+        request_data = self.prepare_request_payload(context, next_page_token)
         headers = self.http_headers
 
         authenticator = self.authenticator
@@ -148,7 +163,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         )
         return request
 
-    def request_records(self, partition: Optional[dict]) -> Iterable[dict]:
+    def request_records(self, context: Optional[dict]) -> Iterable[dict]:
         """Request records from REST endpoint(s), returning response records.
 
         If pagination is detected, pages will be recursed automatically.
@@ -157,9 +172,9 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         finished = False
         while not finished:
             prepared_request = self.prepare_request(
-                partition, next_page_token=next_page_token
+                context, next_page_token=next_page_token
             )
-            resp = self._request_with_backoff(prepared_request)
+            resp = self._request_with_backoff(prepared_request, context)
             for row in self.parse_response(resp):
                 yield row
             previous_token = copy.deepcopy(next_page_token)
@@ -177,7 +192,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     # Overridable:
 
     def prepare_request_payload(
-        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Optional[dict]:
         """Prepare the data payload for the REST API request.
 
@@ -186,12 +201,12 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return None
 
     def get_next_page_token(
-        self, response: requests.Response, previous_token: Optional[Any] = None
+        self, response: requests.Response, previous_token: Optional[Any]
     ) -> Any:
         """Return token identifying next page or None if all records have been read."""
         next_page_token = response.headers.get("X-Next-Page", None)
         if next_page_token:
-            self.logger.info(f"Next page token retrieved: {next_page_token}")
+            self.logger.debug(f"Next page token retrieved: {next_page_token}")
         return next_page_token
 
     @property
@@ -204,13 +219,13 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     # Records iterator
 
-    def get_records(self, partition: Optional[dict] = None) -> Iterable[Dict[str, Any]]:
+    def get_records(self, context: Optional[dict]) -> Iterable[Dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
 
         Each row emitted should be a dictionary of property names to their values.
         """
-        for row in self.request_records(partition):
-            row = self.post_process(row, partition)
+        for row in self.request_records(context):
+            row = self.post_process(row, context)
             yield row
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:

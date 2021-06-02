@@ -1,7 +1,7 @@
 """Private helper functions for catalog and selection logic."""
 
 from copy import deepcopy
-from typing import Optional, Tuple, cast
+from typing import Optional, Tuple, cast, List
 from logging import Logger
 
 from singer import metadata
@@ -166,3 +166,44 @@ def pop_deselected_record_properties(
             pop_deselected_record_properties(
                 val, catalog, stream_name, logger, property_breadcrumb
             )
+
+
+def deselect_all_streams(catalog: dict) -> None:
+    """Deselect all streams in catalog dictionary."""
+    for stream_name in get_catalog_stream_names(catalog):
+        set_catalog_stream_selected(catalog, stream_name, selected=False)
+
+
+def get_catalog_stream_names(catalog: dict) -> List[str]:
+    """Deselect all streams in catalog dictionary."""
+    return [catalog_entry["stream"] for catalog_entry in catalog.get("streams", [])]
+
+
+def set_catalog_stream_selected(
+    catalog: dict,
+    stream_name: str,
+    selected: bool,
+    breadcrumb: Optional[Tuple[str, ...]] = None,
+) -> None:
+    """Return True if the property is selected for extract.
+
+    Breadcrumb of `[]` or `None` indicates the stream itself. Otherwise, the
+    breadcrumb is the path to a property within the stream.
+    """
+    breadcrumb = breadcrumb or cast(Tuple[str, ...], ())
+    if isinstance(breadcrumb, str):
+        breadcrumb = tuple([breadcrumb])
+    if not isinstance(breadcrumb, tuple):
+        raise ValueError(
+            f"Expected tuple value for breadcrumb '{breadcrumb}'. "
+            f"Got {type(breadcrumb).__name__}"
+        )
+
+    catalog_obj = Catalog.from_dict(catalog)
+    catalog_entry = catalog_obj.get_stream(stream_name)
+    if not catalog_entry:
+        raise ValueError(f"Catalog entry missing for '{stream_name}'. Skipping.")
+
+    md_map = metadata.to_map(catalog_entry.metadata)
+    md_entry = md_map.get(breadcrumb)
+    md_entry["selected"] = selected

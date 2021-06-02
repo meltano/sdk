@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.1.6"
+version = "0.2.0"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 license = "Apache 2.0"
@@ -31,6 +31,7 @@ flake8 = "^3.9.0"
 pyarrow = "^3.0.0"
 pandas = ">1,<=1.2.0"
 tox = "^3.23.1"
+codecov = "^2.1.11"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
