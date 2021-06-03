@@ -14,6 +14,7 @@ from singer import Catalog, CatalogEntry
 import simpleeval
 from simpleeval import simple_eval
 
+from singer_sdk.exceptions import MapExpressionError
 from singer_sdk.helpers._catalog import get_selected_schema
 from singer_sdk.typing import (
     IntegerType,
@@ -133,8 +134,13 @@ class CustomStreamMap(StreamMap):
         if property_name and property_name in record:
             # Allow access to original property value if applicable
             names["self"] = record[property_name]
-        result = simple_eval(expr, functions=self.functions, names=names)
-        logging.info(f"Eval result: {expr} = {result}")
+        try:
+            result = simple_eval(expr, functions=self.functions, names=names)
+            logging.info(f"Eval result: {expr} = {result}")
+        except Exception as ex:
+            raise MapExpressionError(
+                f"Failed to evaluate simpleeval expressions {expr}."
+            ) from ex
         return result
 
     def _eval_type(self, expr: str) -> JSONTypeHelper:
@@ -159,7 +165,7 @@ class CustomStreamMap(StreamMap):
         include_by_default = True
         if stream_map and MAPPER_FILTER_OPTION in stream_map:
             filter_rule = stream_map.pop(MAPPER_FILTER_OPTION)
-            logging.info(f"Found filter rule: {filter_rule}")
+            logging.info(f"Found '{self.stream_alias}' filter rule: {filter_rule}")
 
         if stream_map and MAPPER_ELSE_OPTION in stream_map:
             if stream_map[MAPPER_ELSE_OPTION] is None:
@@ -202,7 +208,10 @@ class CustomStreamMap(StreamMap):
             filter_result = self._eval(
                 expr=cast(str, filter_rule), record=record, property_name=None
             )
-            logging.debug(f"Filter result: {filter_result}")
+            logging.debug(
+                f"Filter result for '{filter_rule}' "
+                "in '{self.name}' stream: {filter_result}"
+            )
             if not filter_result:
                 logging.debug("Excluding record due to filter.")
                 return False

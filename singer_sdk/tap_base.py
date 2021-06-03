@@ -62,8 +62,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         self.mapper: Optional[TapMapper] = None
         if STREAM_MAPS_CONFIG in self.config:
             self.mapper = TapMapper(
-                self.config[STREAM_MAPS_CONFIG],
-                map_config=dict(self.config.get("stream_maps_config", {})),
+                plugin_config=dict(self.config),
                 raw_catalog=self.catalog_dict,
                 logger=self.logger,
             )

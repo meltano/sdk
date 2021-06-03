@@ -15,3 +15,7 @@ class InvalidStreamSortException(Exception):
 
 class MaxRecordsLimitException(Exception):
     """Exception to raise if the maximum number of allowable records is exceeded."""
+
+
+class MapExpressionError(Exception):
+    """Failed map expression evaluation."""
