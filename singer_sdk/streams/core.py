@@ -95,6 +95,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._tap = tap
         self._tap_state = tap.state
         self._tap_input_catalog: Optional[dict] = None
+        self._stream_maps: Optional[List[StreamMap]] = None
         self.forced_replication_method: Optional[str] = None
         self._replication_key: Optional[str] = None
         self._primary_keys: Optional[List[str]] = None
@@ -128,13 +129,29 @@ class Stream(metaclass=abc.ABCMeta):
                 "A valid schema object or filepath was not provided."
             )
 
-        self.stream_maps: List[StreamMap]
-        if tap.mapper:
-            self.stream_maps = tap.mapper.stream_maps[self.name]
+    @property
+    def stream_maps(self) -> List[StreamMap]:
+        """Return a list of one or more map transformations for this stream.
+
+        The 0th item is the primary stream map. List should not be empty.
+        """
+        if self._stream_maps:
+            return self._stream_maps
+
+        if self._tap.mapper:
+            self._stream_maps = self._tap.mapper.stream_maps[self.name]
+            self.logger.info(
+                f"Tap has custom mapper. Using {len(self.stream_maps)} provided map(s)."
+            )
         else:
-            self.stream_maps = [
+            self.logger.info(
+                f"No custom mapper provided for '{self.name}'. "
+                "Using SameRecordTransform as default."
+            )
+            self._stream_maps = [
                 SameRecordTransform(stream_alias=self.name, raw_schema=self.schema)
             ]
+        return self.stream_maps
 
     @property
     def is_timestamp_replication_key(self) -> bool:
@@ -505,13 +522,15 @@ class Stream(metaclass=abc.ABCMeta):
         )
         for stream_map in self.stream_maps:
             mapped_record = stream_map.transform(record)
-            record_message = RecordMessage(
-                stream=stream_map.stream_alias,
-                record=mapped_record,
-                version=None,
-                time_extracted=pendulum.now(),
-            )
-            singer.write_message(record_message)
+            # Emit record if not filtered
+            if mapped_record is not None:
+                record_message = RecordMessage(
+                    stream=stream_map.stream_alias,
+                    record=mapped_record,
+                    version=None,
+                    time_extracted=pendulum.now(),
+                )
+                singer.write_message(record_message)
 
     @property
     def _metric_logging_function(self) -> Optional[Callable]:

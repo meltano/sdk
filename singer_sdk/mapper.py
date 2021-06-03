@@ -136,7 +136,7 @@ class CustomStreamMap(StreamMap):
             names["self"] = record[property_name]
         try:
             result = simple_eval(expr, functions=self.functions, names=names)
-            logging.info(f"Eval result: {expr} = {result}")
+            logging.debug(f"Eval result: {expr} = {result}")
         except Exception as ex:
             raise MapExpressionError(
                 f"Failed to evaluate simpleeval expressions {expr}."

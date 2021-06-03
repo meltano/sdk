@@ -82,7 +82,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
         self._validate_config()
-        self.mapper: Optional[TapMapper] = None
+        self.mapper: Optional[TapMapper]
 
     @classproperty
     def capabilities(self) -> List[str]:
