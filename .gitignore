@@ -1,3 +1,7 @@
+# Sphinx documentation
+
+**/_build
+
 # Ignore secrets folders used in testing (except readme and templates)
 
 **/.secrets/*
@@ -74,3 +78,4 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+docs/index.rst

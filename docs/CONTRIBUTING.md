@@ -1,4 +1,4 @@
-# Contributing to the Singer SDK
+# Contributing to the SDK
 
 ## Local Developer Setup
 
