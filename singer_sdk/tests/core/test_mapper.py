@@ -1,5 +1,6 @@
 """Test map transformer."""
 
+import copy
 import json
 from typing import Dict, List
 from singer_sdk.typing import PropertiesList, Property, StringType
@@ -8,6 +9,7 @@ import logging
 
 from singer import Catalog
 
+from singer_sdk.exceptions import MapExpressionError
 from singer_sdk.mapper import TapMapper, RemoveRecordTransform, md5
 
 
@@ -170,6 +172,13 @@ def filter_stream_maps():
 
 
 @pytest.fixture
+def filter_stream_map_w_error(filter_stream_maps):
+    restult = copy.copy(filter_stream_maps)
+    restult["repositories"]["__filter__"] = "this should raise an er!ror"
+    return restult
+
+
+@pytest.fixture
 def filtered_result():
     return {
         "repositories": [
@@ -221,6 +230,26 @@ def test_filter_transforms(
         sample_stream=sample_stream,
         sample_catalog_dict=sample_catalog_dict,
     )
+
+
+def test_filter_transforms_w_error(
+    sample_stream,
+    sample_catalog_dict,
+    filter_stream_map_w_error,
+    stream_map_config,
+    filtered_result,
+    filtered_schemas,
+):
+    with pytest.raises(MapExpressionError):
+        _test_transform(
+            "filter",
+            stream_maps=filter_stream_map_w_error,
+            stream_map_config=stream_map_config,
+            expected_result=filtered_result,
+            expected_schemas=filtered_schemas,
+            sample_stream=sample_stream,
+            sample_catalog_dict=sample_catalog_dict,
+        )
 
 
 def _test_transform(
