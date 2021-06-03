@@ -616,7 +616,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
 name = "simpleeval"
 version = "0.9.10"
 description = "A simple, safe single expression evaluator library."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -747,7 +747,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.9,>=3.6"
-content-hash = "88b9a598343a0fc2f7016513c38ce12be6ce5f6ce684018b3242137b6e533346"
+content-hash = "2823b7254f917ef77c9164d06f3a2f15c30bd5ebae45edb8e9b9af6f7835e149"
 
 [metadata.files]
 appdirs = [
