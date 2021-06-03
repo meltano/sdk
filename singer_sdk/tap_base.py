@@ -3,7 +3,7 @@
 import abc
 import json
 from pathlib import PurePath, Path
-from singer_sdk.mapper import Mapper
+from singer_sdk.mapper import TapMapper
 from typing import Any, List, Optional, Dict, Type, Union, cast
 
 import click
@@ -59,9 +59,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
         # Initialize mappers
 
-        self.mapper: Optional[Mapper] = None
+        self.mapper: Optional[TapMapper] = None
         if STREAM_MAPS_CONFIG in self.config:
-            self.mapper = Mapper(
+            self.mapper = TapMapper(
                 self.config[STREAM_MAPS_CONFIG],
                 map_config=dict(self.config.get("stream_maps_config", {})),
                 raw_catalog=self.catalog_dict,

@@ -257,36 +257,36 @@ class CustomStreamMap(StreamMap):
         return filter_fn, transform_fn, transformed_schema
 
 
-class Mapper:
+class TapMapper:
     """Inline map tranformer."""
 
     def __init__(
         self,
-        tap_map: Dict[str, Dict[str, Union[str, dict]]],
-        map_config: dict,
+        plugin_config: Dict[str, Dict[str, Union[str, dict]]],
         raw_catalog: dict,
         logger: logging.Logger,
     ):
         """Initialize mapper."""
         self.stream_maps = cast(Dict[str, List[StreamMap]], {})
-        self.map_config = map_config
+        self.map_config = plugin_config.get("stream_map_config", {})
         self.raw_catalog = raw_catalog
         self.raw_catalog_obj = Catalog.from_dict(raw_catalog)
         self.default_mapper_type: Type[DefaultStreamMap]
         self.logger = logger
 
-        if MAPPER_ELSE_OPTION in tap_map["streams"]:
-            if tap_map["streams"][MAPPER_ELSE_OPTION] is None:
+        stream_maps_dict = plugin_config.get("stream_maps", {})
+        if MAPPER_ELSE_OPTION in stream_maps_dict:
+            if stream_maps_dict[MAPPER_ELSE_OPTION] is None:
                 logging.info(
                     f"Found '{MAPPER_ELSE_OPTION}=None' default mapper. "
                     "Unmapped streams will be excluded from output."
                 )
                 self.default_mapper_type = RemoveRecordTransform
-                tap_map["streams"].pop(MAPPER_ELSE_OPTION)
+                stream_maps_dict.pop(MAPPER_ELSE_OPTION)
             else:
                 raise RuntimeError(
                     f"Undefined transform for '{MAPPER_ELSE_OPTION}'' case: "
-                    f"{tap_map[MAPPER_ELSE_OPTION]}"
+                    f"{stream_maps_dict[MAPPER_ELSE_OPTION]}"
                 )
         else:
             logging.info(
@@ -306,7 +306,7 @@ class Mapper:
                     )
                 ]
 
-        for stream_key, stream_def in tap_map["streams"].items():
+        for stream_key, stream_def in stream_maps_dict.items():
             stream_name = stream_key
             stream_alias = stream_key
             logging.info(stream_name)
