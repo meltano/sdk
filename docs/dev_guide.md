@@ -1,6 +1,6 @@
 # SDK Dev Guide
 
-## SDK Overview
+## Overview
 
 Create taps with `singer-sdk` requires overriding just two or three classes:
 
