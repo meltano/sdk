@@ -19,6 +19,7 @@ Developer Resources
    :maxdepth: 2
 
    dev_guide
+   python_tips
    code_samples
    cli_commands
 
