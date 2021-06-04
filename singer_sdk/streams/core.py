@@ -497,7 +497,7 @@ class Stream(metaclass=abc.ABCMeta):
             stream=self.name,
             record=record,
             version=None,
-            time_extracted=pendulum.now(),
+            time_extracted=utc_now(),
         )
         singer.write_message(record_message)
 
