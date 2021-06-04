@@ -66,56 +66,6 @@ For a list of code samples solving a variety of different scenarios, please see 
 
 For a list of sample CLI commands you can run, [click here](./cli_commands.md).
 
-## Python Tip: Two Ways to Define Properties
+### Python Tips
 
-In Python, properties within classes like Stream and Tap can generally be overridden
-in two ways: _statically_ or _dynamically_. For instance, `primary_keys` and
-`replication_key` should be declared statically if their values are known ahead of time
-(during development), and they should be declared dynamically if they vary from one
-environment to another or if they can change at runtime.
-
-### Static example
-
-Here's a simple example of static definitions based on the cookiecutter
-[template](https://gitlab.com/meltano/singer-sdk/-/tree/main/cookiecutter/tap-template).
-This example defines the primary key and replication key as fixed values which will not change.
-
-```python
-class SimpleSampleStream(Stream):
-    primary_keys = ["id"]
-    replication_key = None
-```
-
-### Dynamic property example
-
-Here is a similar example except that the same properties are calculated dynamically based
-on user-provided inputs:
-
-```python
-class DynamicSampleStream(Stream):
-    @property
-    def primary_keys(self):
-        """Return primary key dynamically based on user inputs."""
-        return self.config["primary_key"]
-    
-    @property
-    def replication_key(self):
-        """Return replication key dynamically based on user inputs."""
-        result = self.config.get("replication_key")
-        if not result:
-            self.logger.warning("Danger: could not find replication key!")
-        return result
-```
-
-Note that the first static example was more concise while this second example is more extensible.
-
-### In summary
-
-- Use the static syntax whenever you are dealing with stream properties that won't change
-and use dynamic syntax whenever you need to calculate the stream's properties or discover them dynamically.
-- For those new to Python, note that the dynamic syntax is identical to declaring a function or method, with
-the one difference of having the `@property` decorator directly above the method definition. This one change
-tells Python that you want to be able to access the method as a property (as in `pk = stream.primary_key`)
-instead of as a callable function (as in `pk = stream.primary_key()`).
-
-For more examples, please see the [Code Samples](./code_samples.md) page.
+We've collected some [Python tips](python_tips.md) which may be helpful for new SDK users.
