@@ -27,8 +27,9 @@ environments for you so that you don't have to worry about dependency conflicts.
 
 ### If you already know about virtual environments
 
-If you are used to working with virtual environments, the change with pipx and poetry
-is to learn how to let these new tools do the work for you.
+If you are used to working with virtual environments, the challenge with pipx and poetry
+is just to learn how to let these new tools do the work for you. Instead of manually
+creating and managing virtual environments, these two tools automate the process for you.
 
 - **poetry**: Handles package management processes during **development**.
   - Admittedly, there's a learning curve. Instead of `setup.py` and `requirements.txt`,
