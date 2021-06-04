@@ -1,1 +1,1 @@
-"""Helper library for Singer SDK."""
+"""Helper library for the SDK."""

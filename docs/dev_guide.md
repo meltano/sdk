@@ -1,4 +1,4 @@
-# Singer SDK Development Docs
+# SDK Dev Guide
 
 ## SDK Overview
 
@@ -23,10 +23,10 @@ Create taps with `singer-sdk` requires overriding just two or three classes:
 
 For a detailed reference, please see the [SDK Reference Guide](./reference.md)
 
-### Singer SDK Implementation Details
+### SDK Implementation Details
 
-For more detailed information about the Singer SDK implementation, please see the
-[Singer SDK Implementation Details](./implementation/README.md) section.
+For more detailed information about the SDK implementation, please see the
+[SDK Implementation Details](./implementation/README.md) section.
 
 ## Building a New Tap
 

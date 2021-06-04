@@ -46,7 +46,7 @@ poetry run tox
 ```
 
 
-## Workspace Development Strategies for Singer SDK
+## Workspace Development Strategies for the SDK
 
 ### Universal Code Formatting
 

@@ -1,6 +1,6 @@
-# [Singer SDK Implementation Details](/.README.md) - Tap CLI
+# [SDK Implementation Details](/.README.md) - Tap CLI
 
-The Singer SDK automatically adds Tap CLI handling.
+The SDK automatically adds Tap CLI handling.
 
 ## Configuration (`--config`)
 

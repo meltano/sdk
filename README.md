@@ -10,7 +10,7 @@ We will continue to add new features to the SDK. You can always take advantage o
 
 ## Cookie-Cutter Quick Start
 
-`Singer SDK` provides a quickstart `cookiecutter` template for starting new taps.
+The SDK provides a quickstart `cookiecutter` template for starting new taps.
 
 * [Click here for the **Cookiecutter Tap Template**](cookiecutter/tap-template/README.md)
 
@@ -19,10 +19,10 @@ We will continue to add new features to the SDK. You can always take advantage o
 See the [dev guide](docs/dev_guide.md) for instructions on how to get started building your own
 taps.
 
-## Singer SDK Implementation Details
+## SDK Implementation Details
 
-For more detailed information about the Singer SDK implementation, please see the 
-[Singer SDK Implementation Details](./docs/implementation/README.md) section.
+For more detailed information about the SDK implementation, please see the 
+[SDK Implementation Details](./docs/implementation/README.md) section.
 
 ## Contributing back to the SDK
 
@@ -30,7 +30,7 @@ First clone, then...
 
 ### Install
 
-_**Note:** Singer SDK currently works with Python versions 3.6 through 3.8.x. Python 3.9 is not yet supported._
+_**Note:** The SDK currently works with Python versions 3.6 through 3.8.x. Python 3.9 is not yet supported._
 
 Install prereqs:
 
