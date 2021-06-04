@@ -1,4 +1,4 @@
-# [SDK Implementation Details](/.README.md) - Stream State
+# [SDK Implementation Details](./README.md) - Stream State
 
 The SDK automatically handles state management and bookmarks.
 

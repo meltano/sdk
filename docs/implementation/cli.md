@@ -1,4 +1,4 @@
-# [SDK Implementation Details](/.README.md) - Tap CLI
+# [SDK Implementation Details](./README.md) - Tap CLI
 
 The SDK automatically adds Tap CLI handling.
 
