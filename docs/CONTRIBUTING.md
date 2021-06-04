@@ -72,6 +72,36 @@ To run all tests:
 poetry run tox
 ```
 
+## Testing Updates to Docs
+
+Documentation runs on Sphinx, a using ReadtheDocs style template, and hosting from
+ReadtheDocs.org. When a push is detected by readthedocs.org, they automatically rebuild
+and republish the docs. ReadtheDocs is also version aware, so it retains prior and unreleased
+versions of the docs for us.
+
+First, make sure your virtual env has all the right tools and versions:
+
+```bash
+poetry install
+```
+
+To build the docs:
+
+```bash
+cd docs
+# Build docs
+poetry run make html
+# Open in the local browser:
+open _build/html/index.html
+```
+
+To build missing stubs:
+
+```bash
+cd docs
+poetry run sphinx-autogen -o classes *.rst
+```
+
 ## Workspace Development Strategies for the SDK
 
 ### Universal Code Formatting
