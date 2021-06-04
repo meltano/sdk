@@ -31,7 +31,7 @@ For more detailed information about the SDK implementation, please see the
 ## Building a New Tap
 
 The best way to get started is by building a new project from the
-[cookiecutter tap template](../cookiecutter/tap-template).
+[cookiecutter tap template](../cookiecutter/tap-template/README.md).
 
 ## Additional Resources
 
