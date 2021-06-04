@@ -1,1 +1,1 @@
-"""Singer SDK core tests."""
+"""SDK core tests."""
