@@ -1,4 +1,4 @@
-# Singer SDK Tap Template
+# Singer Tap Template
 
 To use this cookie cutter template:
 
