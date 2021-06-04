@@ -1,6 +1,6 @@
 # Parent-Child Streams
 
-The Singer SDK supports parent-child streams, by which one stream type can be declared to
+The Tap SDK supports parent-child streams, by which one stream type can be declared to
 be a parent to another stream, and the child stream will automatically receive `context`
 from a parent record each time the child stream is invoked.
 
@@ -65,4 +65,4 @@ class EpicIssuesStream(GitlabStream):
 
 ## See Also
 
-- [Singer SDK State](./implementation/state.md)
+- [Singer State in SDK Taps](./implementation/state.md)

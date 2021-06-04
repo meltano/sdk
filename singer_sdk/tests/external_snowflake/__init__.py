@@ -1,1 +1,1 @@
-"""Singer SDK Snowflake sample tests."""
+"""SDK Snowflake sample tests."""

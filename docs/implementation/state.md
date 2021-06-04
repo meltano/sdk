@@ -1,6 +1,6 @@
-# [Singer SDK Implementation Details](/.README.md) - Stream State
+# [SDK Implementation Details](./README.md) - Stream State
 
-The Singer SDK automatically handles state management and bookmarks.
+The SDK automatically handles state management and bookmarks.
 
 ## Important Notice Regarding State
 
@@ -172,7 +172,7 @@ non-timestamp replication keys (e.g. for `binlog` and `event_id` types) by overr
 
 ## See Also
 
-- [Singer SDK Partitioning](../partitioning.md)
-- [Singer SDK Parent-Child Streams](../parent_streams.md)
+- [SDK Partitioning](../partitioning.md)
+- [SDK Parent-Child Streams](../parent_streams.md)
 - [Singer Spec: State Overview](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#state)
 - [Singer Spec: Config and State](https://github.com/singer-io/getting-started/blob/master/docs/CONFIG_AND_STATE.md#state-file)

@@ -1,6 +1,6 @@
 # Stream Partitioning
 
-The Singer SDK supports stream partitioning, meaning a set of substreams
+The Tap SDK supports stream partitioning, meaning a set of substreams
 which each have their own state and their own distinct queryable domain.
 
 ## If you do not require partitioning
@@ -34,7 +34,7 @@ or for the stream.
 
 ## See Also
 
-- [Singer SDK State](./implementation/state.md)
-- [Singer SDK Parent-Child Streams](./parent_streams.md)
+- [Tap SDK State](./implementation/state.md)
+- [Tap SDK Parent-Child Streams](./parent_streams.md)
 - [Singer Spec: State Overview](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#state)
 - [Singer Spec: Config and State](https://github.com/singer-io/getting-started/blob/master/docs/CONFIG_AND_STATE.md#state-file)
