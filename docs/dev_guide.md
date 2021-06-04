@@ -76,9 +76,9 @@ environment to another or if they can change at runtime.
 
 ### Static example
 
-Here's a simple example of static definitions based on the
-[cookiecutter template](../cookiecutter/tap-template/). This example defines the
-primary key and replication key as fixed values which will not change.
+Here's a simple example of static definitions based on the cookiecutter
+[template](https://gitlab.com/meltano/singer-sdk/-/tree/main/cookiecutter/tap-template).
+This example defines the primary key and replication key as fixed values which will not change.
 
 ```python
 class SimpleSampleStream(Stream):
