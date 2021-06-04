@@ -3,11 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Meltano SDK's documentation!
+Meltano SDK for Taps and Targets
 =======================================
 
+
+The Tap and Target SDKs are the fastest way to build custom data extractors
+and loaders! Taps and targets built on the SDK are automatically compliant with the `Singer Spec`_,
+the de-facto open source standard for extract and load pipelines.
+
+
 Developer Resources
----------------
+-------------------
 
 .. toctree::
    :maxdepth: 2
@@ -33,9 +39,17 @@ Advanced Topics
    porting
    CONTRIBUTING
 
+The SDK is built with love by Meltano_ team members and contributors, with
+contributions from developers across the Singer_ open source community.
 
+.. _Singer: https://singer.io
+.. _Singer Spec: https://meltano.com/docs/singer-spec.html
+.. _Meltano: https://www.meltano.com
+
+
+   
 Index and Search
----------------
+----------------
 
 * :ref:`genindex`
 * :ref:`search`
