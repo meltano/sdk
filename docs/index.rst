@@ -32,25 +32,21 @@ Advanced Topics
 ---------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    parent_streams
    partitioning
    porting
    CONTRIBUTING
-
-The SDK is built with love by Meltano_ team members and contributors, with
-contributions from developers across the Singer_ open source community.
+   implementation/README
 
 .. _Singer: https://singer.io
 .. _Singer Spec: https://meltano.com/docs/singer-spec.html
 .. _Meltano: https://www.meltano.com
 
 
-   
 Index and Search
 ----------------
 
 * :ref:`genindex`
 * :ref:`search`
-
