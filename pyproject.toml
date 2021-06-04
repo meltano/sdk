@@ -16,6 +16,10 @@ requests = "^2.25.1"
 cryptography = "^3.4.6"
 importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 memoization = "^0.3.2"
+sphinx = {version = "^3.5.4", optional = true}  # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
+
+[tool.poetry.extras]
+docs = ["sphinx"]
 
 [tool.poetry.dev-dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
