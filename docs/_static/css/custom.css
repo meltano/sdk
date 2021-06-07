@@ -29,6 +29,11 @@ a:hover {
 
 .wy-side-nav-search > a {
   color: #fcfcfc;
+  text-decoration: none !important;
+}
+
+.wy-side-nav-search > div.version {
+  color: hsla(0, 0%, 100%, 0.7);
 }
 
 .wy-menu-vertical a:hover {
@@ -41,6 +46,11 @@ a:hover {
   color: white;
 }
 
+.wy-menu-vertical li.current > a,
+.wy-menu-vertical li.on a {
+  background-color: white;
+}
+
 .wy-nav-content-wrap,
 .wy-nav-content {
   background-color: white;
@@ -49,6 +59,10 @@ a:hover {
 .rst-versions,
 .rst-versions .rst-current-version {
   background-color: #464acb;
+}
+
+.rst-versions .rst-current-version {
+  color: rgb(255, 229, 100);
 }
 
 .rst-versions .rst-other-versions {
