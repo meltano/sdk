@@ -23,17 +23,34 @@ a:hover {
   background-color: #464acb;
 }
 
-.wy-side-nav-search input[type="text"] {
-  border-color: #464acb;
-}
-
 .wy-side-nav-search > a {
   color: #fcfcfc;
   text-decoration: none !important;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.wy-side-nav-search > a img.logo {
+  display: inline-block;
+  height: 2.3rem;
+  padding: 0;
+  vertical-align: text-bottom;
+  position: relative;
+  top: 1px;
+}
+
+.wy-side-nav-search > a::after {
+  display: inline-block;
+  content: "SDK";
+  letter-spacing: -1px;
 }
 
 .wy-side-nav-search > div.version {
   color: hsla(0, 0%, 100%, 0.7);
+}
+
+.wy-side-nav-search input[type="text"] {
+  border-color: #464acb;
 }
 
 .wy-menu-vertical a:hover {
