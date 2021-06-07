@@ -509,7 +509,7 @@ class Stream(metaclass=abc.ABCMeta):
                 stream=stream_map.stream_alias,
                 record=mapped_record,
                 version=None,
-                time_extracted=pendulum.now(),
+                time_extracted=utc_now(),
             )
             singer.write_message(record_message)
 

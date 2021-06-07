@@ -1,6 +1,6 @@
-# Singer SDK Implementation Details
+# SDK Implementation Details
 
-This section documents certain behaviors and expectations of the Singer SDK framework.
+This section documents certain behaviors and expectations of the SDK framework.
 
 1. [CLI](./cli.md)
 2. [Discovery](./discovery.md)
