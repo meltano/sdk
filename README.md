@@ -2,7 +2,7 @@
 
 The Tap and Target SDKs are the fastest way to build custom data extractors and loaders!
 Taps and targets built on the SDK are automatically compliant with the
-[Singer Spec](https://meltano.com/docs/singer-spec.html), the
+[Singer Spec](https://hub.meltano.com/singer/spec), the
 de-facto open source standard for extract and load pipelines.
 
 ## Future-proof extractors and loaders, with less code
