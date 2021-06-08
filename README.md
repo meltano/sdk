@@ -14,7 +14,7 @@ capabilities and bug fixes, simply by updating your SDK dependency to the latest
 
 ## Documentation
 
-- See our [online documentation](https://meltano-sdk.readthedocs.io) for instructions on how
+- See our [online documentation](https://sdk.meltanohub.com) for instructions on how
 to get started with the SDK.
 
 ## Contributing back to the SDK
