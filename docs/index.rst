@@ -52,7 +52,7 @@ Advanced Topics
    implementation/README
 
 .. _Singer: https://singer.io
-.. _Singer Spec: https://meltano.com/docs/singer-spec.html
+.. _Singer Spec: https://hub.meltano.com/singer/spec
 .. _Meltano: https://www.meltano.com
 
 

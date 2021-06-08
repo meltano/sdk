@@ -6,4 +6,4 @@ development._
 
 ## See Also
 
-- [Singer Spec: Metadata](https://meltano.com/docs/singer-spec.html#metadata)
+- [Singer Spec: Metadata](https://hub.meltano.com/singer/spec#metadata)
