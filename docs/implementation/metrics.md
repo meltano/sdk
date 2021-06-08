@@ -1,7 +1,7 @@
 # [SDK Implementation Details](./README.md) - Tap Metrics
 
 Metrics logging is specified in the 
-[Singer Spec](https://meltano.com/docs/singer-spec.html#metrics). The SDK will automatically
+[Singer Spec](https://hub.meltano.com/singer/spec#metrics). The SDK will automatically
 emit two types of metrics `record_count` and `http_request_duration`.
 
 Customization options:
@@ -16,4 +16,4 @@ make a large number of REST calls can therefor have very noisy metrics.
 
 ## See Also
 
-- [Singer Spec: Metrics](https://meltano.com/docs/singer-spec.html#metrics)
+- [Singer Spec: Metrics](https://hub.meltano.com/singer/spec#metrics)
