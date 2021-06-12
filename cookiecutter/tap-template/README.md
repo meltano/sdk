@@ -12,7 +12,7 @@ pipx install cookiecutter
 Initialize Cookiecutter template directly from Git:
 
 ```bash
-cookiecutter https://gitlab.com/meltano/singer-sdk --directory="cookiecutter/tap-template"
+cookiecutter https://gitlab.com/meltano/sdk --directory="cookiecutter/tap-template"
 ```
 
 Or locally from an already-cloned `singer-sdk` repo:
@@ -21,4 +21,4 @@ Or locally from an already-cloned `singer-sdk` repo:
 cookiecutter ./singer-sdk/cookiecutter/tap-template
 ```
 
-See the [dev guide](https://gitlab.com/meltano/singer-sdk/-/blob/main/docs/dev_guide.md).
+See the [dev guide](https://gitlab.com/meltano/sdk/-/blob/main/docs/dev_guide.md).

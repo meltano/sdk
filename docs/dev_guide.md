@@ -32,7 +32,7 @@ For more detailed information about the SDK implementation, please see the
 
 The best way to get started is by building a new project from the
 [cookiecutter](https://cookiecutter.readthedocs.io)
-[tap template](https://gitlab.com/meltano/singer-sdk/-/tree/main/cookiecutter/tap-template).
+[tap template](https://gitlab.com/meltano/sdk/-/tree/main/cookiecutter/tap-template).
 
 To use the cookiecutter template:
 
@@ -47,7 +47,7 @@ pipx install cookiecutter
 Initialize Cookiecutter template:
 
 ```bash
-cookiecutter https://gitlab.com/meltano/singer-sdk --directory="cookiecutter/tap-template"
+cookiecutter https://gitlab.com/meltano/sdk --directory="cookiecutter/tap-template"
 ```
 
 Once you've answered the cookiecutter prompts, follow the instructions in the

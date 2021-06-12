@@ -34,7 +34,7 @@ Or to use a prerelease version of `singer-sdk` you can modify `pyproject.toml` a
 ```toml
 [tool.poetry.dependencies]
 python = "^3.8"
-singer-sdk = { git = "https://gitlab.com/meltano/singer-sdk.git", branch = "development" }
+singer-sdk = { git = "https://gitlab.com/meltano/sdk.git", branch = "development" }
 ```
 
 Then:
