@@ -1,3 +1,7 @@
 tests:
-  - destination_name: TargetTemplateTest
-    target_id: target-template-test
+  - destination_name: TargetBatchSinkTest
+    target_id: target-batchsink-test
+    serialization_method: Per batch
+  - destination_name: TargetRecordSinkTest
+    target_id: target-recordsink-test
+    serialization_method: Per record
