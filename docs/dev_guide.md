@@ -18,7 +18,7 @@ Create taps with `singer-sdk` requires overriding just two or three classes:
     - `SimpleAuthenticator` - This class is functionally equivalent to overriding
       `http_headers` property in the stream class.
     - `OAuthAuthenticator` - This class performs an OAuth 2.0 authentication flow.
-    - `OAuthJWTAuthenticator` - This class performs an JWT (Java Web Token) authentication
+    - `OAuthJWTAuthenticator` - This class performs an JWT (JSON Web Token) authentication
        flow.
 
 ## Target Development Overview
