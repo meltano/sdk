@@ -21,7 +21,7 @@ Create taps with `singer-sdk` requires overriding just two or three classes:
     - `OAuthJWTAuthenticator` - This class performs an JWT (JSON Web Token) authentication
        flow.
 
-## Target Development Overview
+### Target Development Overview
 
 Create targets with `singer-sdk` requires overriding just two classes:
 
