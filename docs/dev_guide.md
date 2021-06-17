@@ -41,15 +41,35 @@ Create targets with `singer-sdk` requires overriding just two classes:
 For more detailed information about the SDK implementation, please see the
 [SDK Implementation Details](./implementation/README.md) section.
 
-## Building a New Tap
+## Building a New Tap or Target
 
-The best way to get started is by building a new project from the
-[cookiecutter](https://cookiecutter.readthedocs.io)
-[tap template](https://gitlab.com/meltano/singer-sdk/-/tree/main/cookiecutter/tap-template).
+First, install [cookiecutter](https://cookiecutter.readthedocs.io) if you haven't
+done so already:
 
-## Building a New Target
+```bash
+# Install pipx if you haven't already
+pip3 install pipx
+pipx ensurepath
+# Restart your terminal here, if needed, to get the updated PATH
+pipx install cookiecutter
+```
 
-- [ ] TODO: The target cookiecutter implementation is not yet built.
+Now you can initialize your new project with the Cookiecutter template for taps:
+
+```bash
+cookiecutter https://gitlab.com/meltano/singer-sdk --directory="cookiecutter/tap-template"
+```
+
+...or for targets:
+
+```bash
+cookiecutter https://gitlab.com/meltano/singer-sdk --directory="cookiecutter/target-template"
+```
+
+Once you've answered the cookiecutter prompts, follow the instructions in the
+generated `README.md` file to complete your new tap or target. You can also reference the
+[Meltano Tutorial](https://meltano.com/tutorials/create-a-custom-extractor.html) for a more
+detailed guide.
 
 ## Additional Resources
 
@@ -65,26 +85,6 @@ For more detailed information about the Singer SDK implementation, please see th
 ### Code Samples
 
 For a list of code samples solving a variety of different scenarios, please see our [Code Samples](./code_samples.md) page.
-To use the cookiecutter template:
-
-```bash
-# Install pipx if you haven't already
-pip3 install pipx
-pipx ensurepath
-# Restart your terminal here, if needed, to get the updated PATH
-pipx install cookiecutter
-```
-
-Initialize Cookiecutter template:
-
-```bash
-cookiecutter https://gitlab.com/meltano/singer-sdk --directory="cookiecutter/tap-template"
-```
-
-Once you've answered the cookiecutter prompts, follow the instructions in the
-generated `README.md` file to complete your new tap. You can also reference the
-[Meltano Tutorial](https://meltano.com/tutorials/create-a-custom-extractor.html) for a more
-detailed guide.
 
 ## Additional Resources
 
