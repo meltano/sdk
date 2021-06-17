@@ -1,3 +1,7 @@
+# Sphinx documentation
+
+**/_build
+
 # Ignore secrets folders used in testing (except readme and templates)
 
 **/.secrets/*

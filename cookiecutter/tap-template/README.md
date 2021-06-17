@@ -1,4 +1,4 @@
-# Singer SDK Tap Template
+# Singer Tap Template
 
 To use this cookie cutter template:
 
@@ -21,4 +21,4 @@ Or locally from an already-cloned `singer-sdk` repo:
 cookiecutter ./singer-sdk/cookiecutter/tap-template
 ```
 
-See the [dev guide](../../docs/dev_guide.md).
+See the [dev guide](https://gitlab.com/meltano/singer-sdk/-/blob/main/docs/dev_guide.md).

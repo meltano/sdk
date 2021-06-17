@@ -1,6 +1,33 @@
-# Contributing to the Singer SDK
+# Contributing to the SDK
+
+_**Note:** The SDK currently works with Python versions 3.6 through 3.8.x. Python 3.9 is not yet supported._
+
+## Setting up Prereqs
+
+If poetry and pipx are not already installed:
+
+```bash
+pip3 install pipx
+pipx ensurepath
+pipx install poetry
+```
+
+Now you can use Poetry to install package dependencies:
+
+```bash
+cd singer-sdk
+```
+
+```bash
+# Install package and dependencies:
+poetry install
+# OR install in editable mode:
+poetry install --no-root
+```
 
 ## Local Developer Setup
+
+First clone, then...
 
 1. If you are using VS Code, make sure you have also installed the `Python` extension.
 2. Ensure you have the correct test library, formatters, and linters installed:
@@ -45,8 +72,37 @@ To run all tests:
 poetry run tox
 ```
 
+## Testing Updates to Docs
 
-## Workspace Development Strategies for Singer SDK
+Documentation runs on Sphinx, a using ReadtheDocs style template, and hosting from
+ReadtheDocs.org. When a push is detected by readthedocs.org, they automatically rebuild
+and republish the docs. ReadtheDocs is also version aware, so it retains prior and unreleased
+versions of the docs for us.
+
+First, make sure your virtual env has all the right tools and versions:
+
+```bash
+poetry install
+```
+
+To build the docs:
+
+```bash
+cd docs
+# Build docs
+poetry run make html
+# Open in the local browser:
+open _build/html/index.html
+```
+
+To build missing stubs:
+
+```bash
+cd docs
+poetry run sphinx-autogen -o classes *.rst
+```
+
+## Workspace Development Strategies for the SDK
 
 ### Universal Code Formatting
 
@@ -56,3 +112,8 @@ poetry run tox
 ### Pervasive Python Type Hints
 
 Type hints allow us to spend less time reading documentation.
+
+### What is Poetry and why do we need it?
+
+For more info on `Poetry` and `Pipx`, please see the topic in our
+[python tips](python_tips.md) guide.

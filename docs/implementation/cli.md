@@ -1,6 +1,6 @@
-# [Singer SDK Implementation Details](/.README.md) - Tap CLI
+# [SDK Implementation Details](./README.md) - Tap CLI
 
-The Singer SDK automatically adds Tap CLI handling.
+The SDK automatically adds Tap CLI handling.
 
 ## Configuration (`--config`)
 
@@ -34,7 +34,7 @@ override this method to achieve custom handling.
 ### Input Catalog Stream Selection
 
 The SDK automatically applies selection logic as described by the
-[Singer Spec](https://meltano.com/docs/singer-spec.html#metadata).
+[Singer Spec](https://hub.meltano.com/singer/spec#metadata).
 
 Selection rules are applied at three levels:
 

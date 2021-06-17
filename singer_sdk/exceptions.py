@@ -19,3 +19,7 @@ class MaxRecordsLimitException(Exception):
 
 class MapExpressionError(Exception):
     """Failed map expression evaluation."""
+
+
+class RecordsWitoutSchemaException(Exception):
+    """Raised if a target receives RECORD messages prior to a SCHEMA message."""

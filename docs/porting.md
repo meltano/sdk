@@ -1,6 +1,6 @@
 # Project Porting Guide
 
-_This guide walks you through the process of migrating an existing project to the Singer SDK._
+_This guide walks you through the process of migrating an existing project to the SDK._
 
 ## Poetry Setup (Optional)
 
