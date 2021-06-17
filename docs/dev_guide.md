@@ -1,8 +1,6 @@
 # SDK Dev Guide
 
-## Overview
-
-### Tap Development Overview
+## Tap Development Overview
 
 Create taps with `singer-sdk` requires overriding just two or three classes:
 
@@ -21,7 +19,7 @@ Create taps with `singer-sdk` requires overriding just two or three classes:
     - `OAuthJWTAuthenticator` - This class performs an JWT (JSON Web Token) authentication
        flow.
 
-### Target Development Overview
+## Target Development Overview
 
 Create targets with `singer-sdk` requires overriding just two classes:
 
@@ -35,7 +33,6 @@ Create targets with `singer-sdk` requires overriding just two classes:
       - `start_batch()` to (optionally) initialize a new batch.
       - `process_record()` to enqueue a record to be written.
       - `process_batch()` to write any queued records and cleanup local resources.
-
 
 ## Building a New Tap or Target
 
