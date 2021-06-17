@@ -8,24 +8,42 @@ from singer_sdk.sinks import {{ sinkclass }}
 
 class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
     """{{ cookiecutter.destination_name }} target sink class."""
-    {% if sinkclass == "BatchSink" %}
-    DEFAULT_BATCH_SIZE_ROWS = 10000
-    {%- endif %}
 
-    def process_record(self, record: dict) -> None:
+    {% if sinkclass == "RecordSink" -%}
+    def process_record(self, record: dict, context: dict) -> None:
         """Process the record."""
         # Sample:
-        # for record in records_to_drain:
-        #     write(record)
-        #     count += 1
-        # self.tally_record_written(count)
+        # ------
+        # client.write(record)
+    {%- else -%}
+    DEFAULT_BATCH_SIZE_ROWS = 10000
 
-    {% if sinkclass == "BatchSink" -%}
-    def process_batch(self, records_to_drain: Union[List[dict], Any]) -> None:
+    def start_batch(self, context: dict) -> None:
+        """Start a batch.
+        
+        Developers may optionally add additional markers to the `context` dict,
+        which is unique to this batch.
+        """
+        # Sample:
+        # ------
+        # batch_key = context["batch_id"]
+        # context["file_path"] = f"{batch_key}.csv"
+
+    def process_record(self, record: dict, context: dict) -> None:
+        """Process the record.
+
+        Developers may optionally read or write additional markers within the
+        passed `context` dict from the current batch.
+        """
+        # Sample:
+        # ------
+        # with open(context["file_path"], "a") as csvfile:
+        #     csvfile.write(record)
+
+    def process_batch(self, context: dict) -> None:
         """Write out any prepped records and return once fully written."""
         # Sample:
-        # for record in records_to_drain:
-        #     write(record)
-        #     count += 1
-        # self.tally_record_written(count)
+        # ------
+        # client.upload(context["file_path"])  # Upload file
+        # Path(context["file_path"]).unlink()  # Delete local copy
     {%- endif %}
