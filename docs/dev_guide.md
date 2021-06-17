@@ -36,10 +36,6 @@ Create targets with `singer-sdk` requires overriding just two classes:
       - `process_record()` to enqueue a record to be written.
       - `process_batch()` to write any queued records and cleanup local resources.
 
-### SDK Implementation Details
-
-For more detailed information about the SDK implementation, please see the
-[SDK Implementation Details](./implementation/README.md) section.
 
 ## Building a New Tap or Target
 
@@ -77,20 +73,14 @@ detailed guide.
 
 For a detailed reference, please see the [SDK Reference Guide](./reference.md)
 
-### Singer SDK Implementation Details
+### SDK Implementation Details
 
-For more detailed information about the Singer SDK implementation, please see the
-[Singer SDK Implementation Details](./implementation/README.md) section.
-
-### Code Samples
-
-For a list of code samples solving a variety of different scenarios, please see our [Code Samples](./code_samples.md) page.
-
-## Additional Resources
+For more information about the SDK's' Singer implementation details, please see the
+[SDK Implementation Details](./implementation/README.md) section.
 
 ### Code Samples
 
-For a list of code samples solving a variety of different scenarios, please see our
+For a list of code samples solving a variety of different scenarios, please see our 
 [Code Samples](./code_samples.md) page.
 
 ### CLI Samples
