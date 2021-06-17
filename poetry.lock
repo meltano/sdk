@@ -767,7 +767,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
 name = "simpleeval"
 version = "0.9.10"
 description = "A simple, safe single expression evaluator library."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1032,7 +1032,7 @@ docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser"]
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.9,>=3.6.1"
-content-hash = "18581c1f2e113d3a7b87c9f1fbc3efed776a0867dca2a32e62d4cf842c184af3"
+content-hash = "d7cb2bef3d6ee81540bc39aa099a3f32bc8082f6d4462d373c2e2094db43d7e4"
 
 [metadata.files]
 alabaster = [
