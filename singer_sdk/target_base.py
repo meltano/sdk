@@ -187,8 +187,13 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             sink._add_metadata_values_to_record(record, message_dict)
         else:
             sink._remove_metadata_values_from_record(record)
-        record = sink.preprocess_record(record)
-        sink.load_record(record)
+
+        context = sink._get_context(record)
+        sink.tally_record_read()
+        record = sink.preprocess_record(record, context)
+        sink.process_record(record, context)
+        sink._after_process_record(context)
+
         if sink.is_full:
             self.logger.info(
                 f"Target sink for '{sink.stream_name}' is full. Draining..."
@@ -239,7 +244,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             return
 
         draining = sink.start_drain()
-        sink.drain(draining)
+        sink.process_batch(draining)
         sink.mark_drained()
 
     def _drain_all(self, sink_list: List[Sink], parallelism: int) -> None:

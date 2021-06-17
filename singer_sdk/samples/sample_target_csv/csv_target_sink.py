@@ -4,10 +4,10 @@ import csv
 from pathlib import Path
 from typing import List, Any, Union
 
-from singer_sdk.sinks import Sink
+from singer_sdk.sinks import BatchSink
 
 
-class SampleCSVTargetSink(Sink):
+class SampleCSVTargetSink(BatchSink):
     """Sample CSV Target."""
 
     target_name = "target-csv"
@@ -22,8 +22,9 @@ class SampleCSVTargetSink(Sink):
         """Return target filepath."""
         return self.target_folder / f"{self.stream_name}.csv"
 
-    def drain(self, records_to_drain: Union[List[dict], Any]) -> None:
+    def process_batch(self, context: dict) -> None:
         """Write `records_to_drain` out to file."""
+        records_to_drain = context["records"]
         self.logger.info("Draining records...")
         records_written = 0
         newfile = False
@@ -43,4 +44,3 @@ class SampleCSVTargetSink(Sink):
                     writer.writerow(record.keys())
                 writer.writerow(record.values())
                 records_written += 1
-        self.tally_record_written(records_written)

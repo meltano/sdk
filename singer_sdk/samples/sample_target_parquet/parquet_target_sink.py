@@ -5,19 +5,20 @@ from typing import Any, Dict, List, Tuple, Union
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from singer_sdk.sinks import Sink
+from singer_sdk.sinks import BatchSink
 from singer_sdk.helpers._flattening import RecordFlattener
 
 import pandas
 
 
-class SampleParquetTargetSink(Sink):
+class SampleParquetTargetSink(BatchSink):
     """Parquery target sample class."""
 
     DEFAULT_BATCH_SIZE_ROWS = 100000
 
-    def drain(self, records_to_drain: Union[List[dict], Any]) -> None:
+    def process_batch(self, context: dict) -> None:
         """Write any prepped records out and return only once fully written."""
+        records_to_drain = context["records"]
         # TODO: Replace with actual schema from the SCHEMA message
         schema = pa.schema([("some_int", pa.int32()), ("some_string", pa.string())])
         writer = pq.ParquetWriter(self.config["filepath"], schema)
@@ -34,7 +35,6 @@ class SampleParquetTargetSink(Sink):
         table = pa.Table.from_pandas(df)
         writer.write_table(table)
         writer.close()
-        self.tally_record_written(count)
 
     @staticmethod
     def translate_data_type(singer_type: Union[str, Dict]) -> Any:

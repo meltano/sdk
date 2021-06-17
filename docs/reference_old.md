@@ -27,7 +27,7 @@ The below reference guide should give an overview of how to use each type of cla
   - [`Sink` Class](#sink-class)
     - [`Sink.tally_record_written()` Method](#sinktally_record_written-method)
     - [`Sink.tally_duplicate_merged()` Method](#sinktally_duplicate_merged-method)
-    - [`Sink.load_record()` Method](#sinkload_record-method)
+    - [`Sink.process_record()` Method](#sinkprocess_record-method)
     - [`Sink.drain()` Method](#sinkdrain-method)
 
 ## `Tap` Class
@@ -184,7 +184,7 @@ Increment the records written tally.
 
 This method should be called directly by the Target implementation whenever a record is
 confirmed permanently written to the target. This may be called from from within
-`Sink.load_record()` or `Sink.drain()`, depending on when the record is permanently written.
+`Sink.process_record()` or `Sink.drain()`, depending on when the record is permanently written.
 
 ### `Sink.tally_duplicate_merged()` Method
 
@@ -193,15 +193,15 @@ use this tally to help end-users reconcile record tallies. If not implemented, w
 may be logged if records written is less than the number of records loaded after
 `Sink.drain()` is completed.
 
-### `Sink.load_record()` Method
+### `Sink.process_record()` Method
 
 This method will be called once per received record.
 
-Targets which prefer to write records in batches should use `Sink.load_record()` to
+Targets which prefer to write records in batches should use `Sink.process_record()` to
 add the record to an internal buffer or queue, then use `Sink.drain()` to write all
 records in the most efficient method.
 
-Targets which prefer to write records one at a time should use `Sink.load_record()` to
+Targets which prefer to write records one at a time should use `Sink.process_record()` to
 permanently store the record. (`Sink.drain()` is then not needed.)
 
 If duplicates are merged, these can optionally be tracked via
@@ -212,7 +212,7 @@ If duplicates are merged, these can optionally be tracked via
 Drain all loaded records, returning only after records are validated and permanently written
 to the target.
 
-Developers should call `Sink.tally_record_written()` here or in `Sink.load_record()`
+Developers should call `Sink.tally_record_written()` here or in `Sink.process_record()`
 to confirm total number of records permanently written.
 
 If duplicates are merged, these can optionally be tracked via

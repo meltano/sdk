@@ -27,9 +27,14 @@ Create targets with `singer-sdk` requires overriding just two classes:
 
 1. The `Target` class. This class governs configuration, validation,
    and stream discovery.
-2. The `Sink` class. This class is responsible for writing records to the target
-   and keeping tally of written records. Each `Sink` implementation my write
-   records immediately in `Sink.load_record()` or in batches during `Sink.drain()`.
+2. The `Sink` class. You have two different options depending on whether your target
+   prefers writing one record at a time versus writing in batches:
+    - `RecordSink` writes one record at a time, via the `process_record()`
+      method.
+    - `BatchSink` writes one batch at a time. Important class members include:
+      - `start_batch()` to (optionally) initialize a new batch.
+      - `process_record()` to enqueue a record to be written.
+      - `process_batch()` to write any queued records and cleanup local resources.
 
 ### SDK Implementation Details
 
