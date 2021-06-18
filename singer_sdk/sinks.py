@@ -2,7 +2,6 @@
 
 import abc
 import datetime
-import copy
 import time
 
 from logging import Logger

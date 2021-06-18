@@ -2,7 +2,6 @@
 
 import csv
 from pathlib import Path
-from typing import List, Any, Union
 
 from singer_sdk.sinks import BatchSink
 
