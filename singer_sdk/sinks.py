@@ -244,10 +244,8 @@ class Sink(metaclass=abc.ABCMeta):
         pass
 
     def start_drain(self) -> Union[List[dict], Any]:
-        """Set and return `self.records_draining`. Reset `self.records_to_drain`."""
-        self._context_draining = self.records_to_drain
-        self.records_to_drain = []
-        self._draining_state = copy.deepcopy(self.latest_state)
+        """Set and return `self._context_draining`."""
+        self._context_draining = self._active_batch
         return self._context_draining
 
     def start_batch(self, context: dict) -> None:
