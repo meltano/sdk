@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.2.0"
+version = "0.2.1"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 license = "Apache 2.0"
 
 [tool.poetry.dependencies]
-python = "<3.9,>=3.6"
+python = "<3.9,>=3.6.1"
 pipelinewise-singer-python = "1.2.0"
 backoff = ">=1.8.0,<2.0"
 pendulum = "^2.1.0"
@@ -16,6 +16,8 @@ requests = "^2.25.1"
 cryptography = "^3.4.6"
 importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 memoization = "^0.3.2"
+joblib = "^1.0.1"
+inflection = "^0.5.1"
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
@@ -36,12 +38,10 @@ cookiecutter = "^1.7.2"
 PyYAML = "^5.4.1"
 pydocstyle = "^5.1.1"
 flake8 = "^3.9.0"
+pyarrow = "^3.0.0"
+pandas = ">1,<=1.2.0"
 tox = "^3.23.1"
 codecov = "^2.1.11"
-Sphinx = "^3.5.4"
-sphinx-rtd-theme = "^0.5.2"
-sphinx-copybutton = "^0.3.1"
-myst-parser = "^0.14.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

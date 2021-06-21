@@ -20,6 +20,15 @@ The below reference guide should give an overview of how to use each type of cla
     - [`RESTStream.post_process()` Method](#reststreampost_process-method)
   - [`GraphQLStream` Class](#graphqlstream-class)
     - [`GraphQL.query` Property](#graphqlquery-property)
+  - [`Target` Class](#target-class)
+    - [`Target.default_sink_class` Property](#targetdefault_sink_class-property)
+    - [`Target.get_sink_class` Method](#targetget_sink_class-method)
+    - [`Target.get_sink` Method](#targetget_sink-method)
+  - [`Sink` Class](#sink-class)
+    - [`Sink.tally_record_written()` Method](#sinktally_record_written-method)
+    - [`Sink.tally_duplicate_merged()` Method](#sinktally_duplicate_merged-method)
+    - [`Sink.process_record()` Method](#sinkprocess_record-method)
+    - [`Sink.drain()` Method](#sinkdrain-method)
 
 ## `Tap` Class
 
@@ -125,6 +134,89 @@ This is where you specify your specific GraphQL query text.
 
 Examples:
 
+- For more info, see the [GitLab](/singer_sdk/samples/sample_tap_gitlab) sample:
+  - [GitLab GraphQL streams](/singer_sdk/samples/sample_tap_gitlab/gitlab_graphql_streams.py)
+- Or the [Countries API](/singer_sdk/samples/sample_tap_countries) Sample:
+  - [Countries API Streams](/singer_sdk/samples/sample_tap_countries/countries_streams.py)
+
+## `Target` Class
+
+The `Target` class inherits from PluginBase and is analogous to the `Tap` class.
+
+The `Target` class manages config information and is responsible for processing the
+incoming Singer data stream and orchestrating any needed target `Sink` objects. As messages
+are received, the `Target` class will automatically create any needed target `Sink` objects
+and send records along to the appropriate `Sink` object for that record.
+
+### `Target.default_sink_class` Property
+
+Optionally set a default `Sink` class for this target. This is required if `Target.get_sink_class()` is not defined.
+
+### `Target.get_sink_class` Method
+
+Return the appropriate sink class for the given stream name. This is required if
+`Target.default_sink_class` is not defined.
+
+Raises: ValueError if no Sink class is defined.
+
+### `Target.get_sink` Method
+
+For most implementations, this can be left as the default behavior.
+
+In advanced implementations, developers may optionally override this method to return
+a different sink object based on the record data.
+
+The default behavior will return a sink object based upon the name of the stream, unless
+a new schema message is received, in which case a new sink will be initialized based upon
+the updated schema and the old sink will be marked to be drained along with its
+already-received records.
+
+## `Sink` Class
+
+The `Sink` class receives records from one or more streams.
+
+See the [Sink documentation](./sinks.md) for more information on differences between a
+target's `Sink` class versus a tap's `Stream` class.
+
+### `Sink.tally_record_written()` Method
+
+Increment the records written tally.
+
+This method should be called directly by the Target implementation whenever a record is
+confirmed permanently written to the target. This may be called from from within
+`Sink.process_record()` or `Sink.drain()`, depending on when the record is permanently written.
+
+### `Sink.tally_duplicate_merged()` Method
+
+If your target merges records based upon duplicates in primary key, you can optionally
+use this tally to help end-users reconcile record tallies. If not implemented, warnings
+may be logged if records written is less than the number of records loaded after
+`Sink.drain()` is completed.
+
+### `Sink.process_record()` Method
+
+This method will be called once per received record.
+
+Targets which prefer to write records in batches should use `Sink.process_record()` to
+add the record to an internal buffer or queue, then use `Sink.drain()` to write all
+records in the most efficient method.
+
+Targets which prefer to write records one at a time should use `Sink.process_record()` to
+permanently store the record. (`Sink.drain()` is then not needed.)
+
+If duplicates are merged, these can optionally be tracked via
+`Sink.tally_duplicates_merged()`.
+
+### `Sink.drain()` Method
+
+Drain all loaded records, returning only after records are validated and permanently written
+to the target.
+
+Developers should call `Sink.tally_record_written()` here or in `Sink.process_record()`
+to confirm total number of records permanently written.
+
+If duplicates are merged, these can optionally be tracked via
+`Sink.tally_duplicates_merged()`.
 - For more info, see the [GitLab](../singer_sdk/samples/sample_tap_gitlab) sample:
   - [GitLab GraphQL streams](../singer_sdk/samples/sample_tap_gitlab/gitlab_graphql_streams.py)
 - Or the [Countries API](../singer_sdk/samples/sample_tap_countries) Sample:

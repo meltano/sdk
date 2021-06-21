@@ -16,6 +16,10 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
+## Unreleased
+
+- Add stream map inline transform and filter capabilities (#63)
+
 ## v0.2.0
 
 ### Added

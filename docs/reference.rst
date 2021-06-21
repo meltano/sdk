@@ -11,6 +11,7 @@ Plugin Classes
     :template: class.rst
 
     Tap
+    Target
 
 Stream Classes
 --------------
@@ -23,6 +24,17 @@ Stream Classes
     RESTStream
     GraphQLStream
 
+Sink Classes
+--------------
+
+.. autosummary::
+    :toctree: _autosummary
+    :template: class.rst
+
+    Sink
+    RecordSink
+    BatchSink
+
 Authenticator Classes
 ---------------------
 
@@ -33,7 +45,6 @@ Authenticator Classes
     authenticators.SimpleAuthenticator
     authenticators.OAuthAuthenticator
     authenticators.OAuthJWTAuthenticator
-
 
 Exception Types
 ---------------

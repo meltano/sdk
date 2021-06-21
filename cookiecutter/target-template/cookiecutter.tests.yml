@@ -1,0 +1,7 @@
+tests:
+  - destination_name: TargetBatchSinkTest
+    target_id: target-batchsink-test
+    serialization_method: Per batch
+  - destination_name: TargetRecordSinkTest
+    target_id: target-recordsink-test
+    serialization_method: Per record
