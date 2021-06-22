@@ -274,17 +274,25 @@ class RecordSink(Sink):
 
     @final
     def process_batch(self, context: dict) -> None:
-        """The RecordSink class does no batching, returns immediately."""
+        """The RecordSink class does no batching, returns immediately.
+
+        This method may not be overridden.
+        """
         pass
 
     @final
     def start_batch(self, context: dict) -> None:
-        """The RecordSink class does no batching, returns immediately."""
+        """The RecordSink class does no batching, returns immediately.
+
+        This method may not be overridden.
+        """
         pass
 
     @abc.abstractmethod
     def process_record(self, record: dict, context: dict) -> None:
         """Load the latest record from the stream.
+
+        This method must be overridden.
 
         Implementations should permanently serialize each record to the target
         prior to returning.
@@ -345,6 +353,8 @@ class BatchSink(Sink):
     @abc.abstractmethod
     def process_batch(self, context: dict) -> None:
         """Process a batch with the given batch context.
+
+        This method must be overridden.
 
         If `process_record()` is not overridden, the `context["records"]` list
         will contain all records from the given batch context.
