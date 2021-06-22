@@ -1,4 +1,4 @@
-"""Tests standard tap features using the built-in SDK tests library."""
+"""Tests standard target features using the built-in SDK tests library."""
 
 import datetime
 
@@ -13,9 +13,9 @@ SAMPLE_CONFIG: Dict[str, Any] = {
 }
 
 
-# Run standard built-in tap tests from the SDK:
-def test_standard_tap_tests():
-    """Run standard tap tests from the SDK."""
+# Run standard built-in target tests from the SDK:
+def test_standard_target_tests():
+    """Run standard target tests from the SDK."""
     tests = get_standard_target_tests(
         Target{{ cookiecutter.destination_name }},
         config=SAMPLE_CONFIG,
@@ -24,4 +24,4 @@ def test_standard_tap_tests():
         test()
 
 
-# TODO: Create additional tests as appropriate for your tap.
+# TODO: Create additional tests as appropriate for your target.

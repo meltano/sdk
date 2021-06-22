@@ -2,7 +2,7 @@
 
 `{{ cookiecutter.target_id }}` is a Singer target for {{ cookiecutter.destination_name }}.
 
-Build with the [Singer SDK](https://gitlab.com/meltano/singer-sdk).
+Build with the [Meltano Target SDK](https://sdk.meltano.com).
 
 ## Installation
 
@@ -38,7 +38,8 @@ You can easily run `{{ cookiecutter.target_id }}` by itself or in a pipeline usi
 ```bash
 {{ cookiecutter.target_id }} --version
 {{ cookiecutter.target_id }} --help
-{{ cookiecutter.target_id }} --config CONFIG --discover > ./catalog.json
+# Test using the "Carbon Intensity" sample:
+tap-carbon-intensity | {{ cookiecutter.target_id }} --config /path/to/{{ cookiecutter.target_id }}-config.json
 ```
 
 ## Developer Resources
@@ -90,8 +91,8 @@ Now you can test and orchestrate using Meltano:
 ```bash
 # Test invocation:
 meltano invoke {{ cookiecutter.target_id }} --version
-# OR run a test `elt` pipeline:
-meltano elt {{ cookiecutter.target_id }} target-jsonl
+# OR run a test `elt` pipeline with the Carbon Intensity sample tap:
+meltano elt tap-carbon-intensity {{ cookiecutter.target_id }}
 ```
 
 ### Singer SDK Dev Guide

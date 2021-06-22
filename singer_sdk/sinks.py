@@ -74,9 +74,7 @@ class Sink(metaclass=abc.ABCMeta):
         # self._flattener = RecordFlattener(max_level=self._MAX_FLATTEN_DEPTH)
 
     def _get_context(self, record: dict) -> dict:
-        """RecordSink does not use batching.
-
-        Context returned is an empty dictionary by default.
+        """Return an empty dictionary by default.
 
         NOTE: Future versions of the SDK may expand the available context attributes.
         """
@@ -274,7 +272,9 @@ class RecordSink(Sink):
 
     @final
     def process_batch(self, context: dict) -> None:
-        """The RecordSink class does no batching, returns immediately.
+        """Do nothing and return immediately.
+
+        The RecordSink class does not support batching.
 
         This method may not be overridden.
         """
@@ -282,7 +282,9 @@ class RecordSink(Sink):
 
     @final
     def start_batch(self, context: dict) -> None:
-        """The RecordSink class does no batching, returns immediately.
+        """Do nothing and return immediately.
+
+        The RecordSink class does not support batching.
 
         This method may not be overridden.
         """

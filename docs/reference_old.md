@@ -173,10 +173,6 @@ already-received records.
 
 ## `Sink` Class
 
-The `Sink` class receives records from one or more streams.
-
-See the [Sink documentation](./sinks.md) for more information on differences between a
-target's `Sink` class versus a tap's `Stream` class.
 
 ### `Sink.tally_record_written()` Method
 

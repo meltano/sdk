@@ -11,4 +11,4 @@ TOML_DIR=$(dirname "$0")
 
 cd "$TOML_DIR" || exit
 poetry install 1>&2
-poetry run {{cookiecutter.target_id}} $*
+poetry run {{cookiecutter.target_id}} $* < /dev/stdin

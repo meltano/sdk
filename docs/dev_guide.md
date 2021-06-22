@@ -34,6 +34,9 @@ Create targets with `singer-sdk` requires overriding just two classes:
       - `process_record()` to enqueue a record to be written.
       - `process_batch()` to write any queued records and cleanup local resources.
 
+Note: The `Sink` class can receive records from one stream or from many. See the [Sink documentation](./sinks.md)
+for more information on differences between a target's `Sink` class versus a tap's `Stream` class.
+
 ## Building a New Tap or Target
 
 First, install [cookiecutter](https://cookiecutter.readthedocs.io) if you haven't
