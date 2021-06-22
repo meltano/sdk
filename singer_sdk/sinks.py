@@ -114,8 +114,8 @@ class Sink(metaclass=abc.ABCMeta):
     def tally_record_written(self, count: int = 1):
         """Increment the records written tally.
 
-        This method is called automatically by the SDK after process_record()
-        or process_batch().
+        This method is called automatically by the SDK after `process_record()`
+        or `process_batch()`.
         """
         self._total_records_written += count
 
@@ -282,6 +282,7 @@ class RecordSink(Sink):
         """The RecordSink class does no batching, returns immediately."""
         pass
 
+    @abc.abstractmethod
     def process_record(self, record: dict, context: dict) -> None:
         """Load the latest record from the stream.
 
@@ -315,8 +316,12 @@ class BatchSink(Sink):
     def start_batch(self, context: dict) -> None:
         """Start a new batch with the given context.
 
-        Developers may optionally add custom markers to the `context` dict,
-        which will be unique to this batch.
+        The initial generated context will have a single `batch_id` entry, which
+        a, SDK-generated GUID string which uniquely identifies this batch.
+
+        Developers may optionally override this method to add custom markers to the
+        `context` dict and/or to initialize batch resources - such as creating a local
+        temp file to store records.
         """
         pass
 
@@ -337,6 +342,7 @@ class BatchSink(Sink):
 
         context["records"].append(record)
 
+    @abc.abstractmethod
     def process_batch(self, context: dict) -> None:
         """Process a batch with the given batch context.
 
