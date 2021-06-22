@@ -243,8 +243,8 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         if sink.current_size == 0:
             return
 
-        draining = sink.start_drain()
-        sink.process_batch(draining)
+        draining_status = sink.start_drain()
+        sink.process_batch(draining_status)
         sink.mark_drained()
 
     def _drain_all(self, sink_list: List[Sink], parallelism: int) -> None:

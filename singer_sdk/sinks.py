@@ -34,8 +34,6 @@ class Sink(metaclass=abc.ABCMeta):
     # max timestamp/datetime supported, used to reset invalid dates
 
     logger: Logger
-    schema: Dict
-    stream_name: str
 
     MAX_SIZE_DEFAULT = 10000
 
@@ -76,19 +74,13 @@ class Sink(metaclass=abc.ABCMeta):
         # self._flattener = RecordFlattener(max_level=self._MAX_FLATTEN_DEPTH)
 
     def _get_context(self, record: dict) -> dict:
-        """Return a batch context. If no batch is active, return a new batch context.
+        """RecordSink does not use batching.
 
-        Batch contexts by default are always created with a single "batch_id"
-        containing a unique GUID string.
+        Context returned is an empty dictionary by default.
 
         NOTE: Future versions of the SDK may expand the available context attributes.
         """
-        if self._active_batch is None:
-            new_context = {"batch_id": str(uuid.uuid4())}
-            self.start_batch(new_context)
-            self._active_batch = new_context
-
-        return self._active_batch
+        return {}
 
     # Size properties
 
@@ -242,18 +234,10 @@ class Sink(metaclass=abc.ABCMeta):
         """
         pass
 
-    def start_drain(self) -> Union[List[dict], Any]:
+    def start_drain(self) -> dict:
         """Set and return `self._context_draining`."""
-        self._context_draining = self._active_batch
+        self._context_draining = self._active_batch or {}
         return self._context_draining
-
-    def start_batch(self, context: dict) -> None:
-        """Start a new batch with the given context.
-
-        Developers may optionally add additional markers to the `context` dict,
-        which is unique to this batch.
-        """
-        pass
 
     @abc.abstractmethod
     def process_batch(self, context: dict) -> None:
@@ -269,9 +253,10 @@ class Sink(metaclass=abc.ABCMeta):
         self.drained_state = self._draining_state
         self._draining_state = None
         self._context_draining = None
-        self.tally_record_written(
-            self._batch_records_read - self._batch_dupe_records_merged
-        )
+        if self._batch_records_read:
+            self.tally_record_written(
+                self._batch_records_read - self._batch_dupe_records_merged
+            )
         self._batch_records_read = 0
 
 
@@ -297,24 +282,53 @@ class RecordSink(Sink):
         """The RecordSink class does no batching, returns immediately."""
         pass
 
-    def _get_context(self, record: dict) -> dict:
-        """RecordSink does not use batching.
+    def process_record(self, record: dict, context: dict) -> None:
+        """Load the latest record from the stream.
 
-        Context returned is an empty dictionary by default.
+        Implementations should permanently serialize each record to the target
+        prior to returning.
 
-        NOTE: Future versions of the SDK may expand the available context attributes.
+        If duplicates are merged/skipped instead of being loaded, merges can be
+        tracked via `tally_duplicates_merged()`.
         """
-        return {}
+        pass
 
 
 class BatchSink(Sink):
     """Base class for batched record writers."""
 
+    def _get_context(self, record: dict) -> dict:
+        """Return a batch context. If no batch is active, return a new batch context.
+
+        Batch contexts by default are always created with a single "batch_id"
+        containing a unique GUID string.
+
+        NOTE: Future versions of the SDK may expand the available context attributes.
+        """
+        if self._active_batch is None:
+            new_context = {"batch_id": str(uuid.uuid4())}
+            self.start_batch(new_context)
+            self._active_batch = new_context
+
+        return self._active_batch
+
+    def start_batch(self, context: dict) -> None:
+        """Start a new batch with the given context.
+
+        Developers may optionally add custom markers to the `context` dict,
+        which will be unique to this batch.
+        """
+        pass
+
     def process_record(self, record: dict, context: dict) -> None:
         """Load the latest record from the stream.
 
-        Implementations may either load to the `context` dict for staging (the
+        Developers may either load to the `context` dict for staging (the
         default behavior for Batch types), or permanently write out to the target.
+
+        If this method is not overridden, the default implementation will create a
+        `context["records"]` list and append all records for processing during
+        `process_batch()`.
 
         If duplicates are merged, these can be tracked via `tally_duplicates_merged()`.
         """
@@ -322,3 +336,13 @@ class BatchSink(Sink):
             context["records"] = []
 
         context["records"].append(record)
+
+    def process_batch(self, context: dict) -> None:
+        """Process a batch with the given batch context.
+
+        If `process_record()` is not overridden, the `context["records"]` list
+        will contain all records from the given batch context.
+
+        If duplicates are merged, these can be tracked via `tally_duplicates_merged()`.
+        """
+        pass
