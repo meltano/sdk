@@ -168,7 +168,15 @@ class Stream(metaclass=abc.ABCMeta):
     def get_starting_replication_key_value(
         self, context: Optional[dict]
     ) -> Optional[Any]:
-        """Return starting replication key."""
+        """Return starting replication key.
+
+        Will return the value of the stream's replication key when `--state` is passed.
+        If no prior state exists, will return `None`.
+
+        Developers should use this method to seed incremental processing for
+        non-datetime replication keys. For datetime and date replication keys, use
+        `get_starting_timestamp()`
+        """
         if self.is_timestamp_replication_key:
             return self.get_starting_timestamp(context)
 
@@ -177,7 +185,16 @@ class Stream(metaclass=abc.ABCMeta):
     def get_starting_timestamp(
         self, context: Optional[dict]
     ) -> Optional[datetime.datetime]:
-        """Return `start_date` config, or state if using timestamp replication."""
+        """Return `start_date` config, or state if using timestamp replication.
+
+        Will return the value of the stream's replication key when `--state` is passed.
+        If no state exists, will return `start_date` if set, or `None` if neither
+        the stream state nor `start_date` is set.
+
+        Developers should use this method to seed incremental processing for date
+        and datetime replication keys. For non-datetime replication keys, use
+        `get_starting_replication_key_value()`
+        """
         if self.is_timestamp_replication_key:
             replication_key_value = self._starting_replication_key_value(context)
             if replication_key_value:
