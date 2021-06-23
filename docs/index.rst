@@ -24,14 +24,14 @@ Built by Meltano and the Singer Community
 The SDK is built with love by the Meltano_ core
 team and contributors, with contributions from developers across the Singer_ 
 open source community. SDK-based plugins can easily be `integrated with Meltano`_,
-but they can also be used in any Singer data pipeline tool which supports the
+but they can also be used in any data pipeline tool that supports the
 `Singer Spec`_.
 
 The SDK project is 100% open source, licensed under the `Apache 2.0`_
 permissive license. Please visit our code repo `here in Gitlab`_, where you can
 read the `source code`_, `log an issue or feature request`_, and `contribute back`_
 to the SDK. We also regularly discuss SDK topics in our `Meltano Slack`_ community,
-under the dedicated `#singer-sdk`_ Slack channel.
+within the dedicated `#singer-sdk`_ Slack channel.
 
 Developer Resources
 -------------------
