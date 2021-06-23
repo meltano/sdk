@@ -784,15 +784,14 @@ class Stream(metaclass=abc.ABCMeta):
         Only custom stream types need to define this method. REST and GraphQL streams
         should instead use the class-specific methods for REST or GraphQL, respectively.
 
-        Note:
+        This method takes an optional `context` argument, which can be safely ignored
+        unless the stream is a child stream or requires partitioning.
+        More info: https://sdk.meltano.com/en/latest/partitioning.html
 
-        - This method takes an optional `context` argument, which can be safely ignored
-          unless the stream is a child stream or requires partitioning.
-          More info: https://sdk.meltano.com/en/latest/partitioning.html
-        - Parent streams can optionally return a tuple, in which
-          case the second item in the tuple being a `child_context` dictionary for the
-          stream's `context`.
-          More info: https://sdk.meltano.com/en/latest/parent_streams.html
+        Parent streams can optionally return a tuple, in which
+        case the second item in the tuple being a `child_context` dictionary for the
+        stream's `context`.
+        More info: https://sdk.meltano.com/en/latest/parent_streams.html
         """
         pass
 
