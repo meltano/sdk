@@ -6,7 +6,7 @@
 Meltano SDK for Taps and Targets
 =======================================
 
-The [Meltano](https://www.meltano.com) SDK for Taps and Targets is the fastest way to build custom 
+The Meltano_ SDK for Taps and Targets is the fastest way to build custom 
 data extractors and loaders! Taps and targets built on the SDK are automatically compliant with the 
 `Singer Spec`_, the de-facto open source standard for extract and load pipelines.
 
@@ -21,18 +21,15 @@ bug fixes, simply by updating your SDK dependency to the latest version.
 Build by Meltano and the Singer Community
 -----------------------------------------
 
-The SDK is built with love by the <a href="https://meltano.com">Meltano</a> core
-team and contributors, with contributions from developers across the <a href="https://singer.io">Singer</a> 
-open source community. SDK-based plugins will work great with
-[Meltano](https://meltano.com/tutorials/create-a-custom-extractor.html#add-the-plugin-to-your-meltano-project),
+The SDK is built with love by the Meltano_ core
+team and contributors, with contributions from developers across the Singer_ 
+open source community. SDK-based plugins can easily be `integrated with Meltano`_,
 but they can also be used in any Singer data pipeline tool which supports the
-[Singer Spec](https://hub.meltano.com/singer/spec).
+`Singer Spec`_.
 
-The SDK project is 100% open source, licensed under the [Apache 2.0](https://en.wikipedia.org/wiki/Apache_License)
-permissive license. Please visit our code repo [here in Gitlab](https://gitlab.com/meltano/sdk) if you are interested in
-[contributing back](https://gitlab.com/meltano/sdk/-/merge_requests?scope=all&state=opened&label_name[]=Accepting%20Merge%20Requests)
-reading the [source code](https://gitlab.com/meltano/sdk), or 
-[logging an issue or feature request](https://gitlab.com/meltano/sdk/-/issues).
+The SDK project is 100% open source, licensed under the `Apache 2.0`_
+permissive license. Please visit our code repo `here in Gitlab` if you are interested in
+`contributing back`_ reading the `source code`_, or `logging an issue or feature request`_.
 
 Developer Resources
 -------------------
@@ -70,7 +67,12 @@ Advanced Topics
 .. _Singer: https://singer.io
 .. _Singer Spec: https://hub.meltano.com/singer/spec
 .. _Meltano: https://www.meltano.com
-
+.. _integrated with Meltano: https://meltano.com/tutorials/create-a-custom-extractor.html#add-the-plugin-to-your-meltano-project
+.. _contributing back: https://gitlab.com/meltano/sdk/-/merge_requests?scope=all&state=opened&label_name[]=Accepting%20Merge%20Requests
+.. _source code: https://gitlab.com/meltano/sdk
+.. _logging an issue or feature request: https://gitlab.com/meltano/sdk/-/issues
+.. _Apache 2.0: https://en.wikipedia.org/wiki/Apache_License
+.. _here in Gitlab: https://gitlab.com/meltano/sdk
 
 Index and Search
 ----------------
