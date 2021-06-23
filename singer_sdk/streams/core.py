@@ -777,9 +777,31 @@ class Stream(metaclass=abc.ABCMeta):
 
         Each row emitted should be a dictionary of property names to their values.
         Returns either a record dict or a tuple: (record_dict, child_context)
+
+        A method which should retrieve data from the source and return records
+        incrementally using the python `yield` operator.
+
+        Only custom stream types need to define this method. REST and GraphQL streams
+        should instead use the class-specific methods for REST or GraphQL, respectively.
+
+        Note:
+
+        - This method takes an optional `context` argument, which can be safely ignored
+          unless the stream is a child stream or requires partitioning.
+          More info: https://sdk.meltano.com/en/latest/partitioning.html
+        - Parent streams can optionally return a tuple, in which
+          case the second item in the tuple being a `child_context` dictionary for the
+          stream's `context`.
+          More info: https://sdk.meltano.com/en/latest/parent_streams.html
         """
         pass
 
     def post_process(self, row: dict, context: Optional[dict] = None) -> dict:
-        """As needed, append or transform raw data to match expected structure."""
+        """As needed, append or transform raw data to match expected structure.
+
+        Optional. This method gives developers an opportunity to "clean up" the results
+        prior to returning records to the downstream tap - for instance: cleaning,
+        renaming, or appending properties to the raw record result returned from the
+        API.
+        """
         return row

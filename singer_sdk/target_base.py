@@ -22,11 +22,19 @@ _MAX_PARALLELISM = 8
 
 
 class Target(PluginBase, metaclass=abc.ABCMeta):
-    """Abstract base class for targets."""
+    """Abstract base class for targets.
+
+    The `Target` class manages config information and is responsible for processing the
+    incoming Singer data stream and orchestrating any needed target `Sink` objects. As
+    messages are received from the tap, the `Target` class will automatically create
+    any needed target `Sink` objects and send records along to the appropriate `Sink`
+    object for that record.
+    """
 
     _DRAIN_AFTER_STATE_MESSAGES: bool = True
 
     # Default class to use for creating new sink objects.
+    # Required if `Target.get_sink_class()` is not defined.
     default_sink_class: Type[Sink]
 
     def __init__(

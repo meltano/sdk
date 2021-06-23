@@ -35,8 +35,10 @@ JSONSchemaValidator = extend_validator_with_defaults(Draft4Validator)
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    name: str
+    name: str  # The executable name of the tap or target plugin.
+
     config_jsonschema: dict = {}
+    # A JSON Schema object defining the config options that this tap will accept.
 
     _config: dict
 

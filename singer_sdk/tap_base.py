@@ -24,7 +24,11 @@ STREAM_MAPS_CONFIG = "stream_maps"
 
 
 class Tap(PluginBase, metaclass=abc.ABCMeta):
-    """Abstract base class for taps."""
+    """Abstract base class for taps.
+
+    The Tap class governs configuration, validation, and stream discovery for tap
+    plugins.
+    """
 
     # Constructor
 
@@ -154,7 +158,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         return Catalog(catalog_entries)
 
     def discover_streams(self) -> List[Stream]:
-        """Return a list of discovered streams."""
+        """Initialize all available streams and return them as a list."""
         raise NotImplementedError(
             f"Tap '{self.name}' does not support discovery. "
             "Please set the '--catalog' command line argument and try again."
