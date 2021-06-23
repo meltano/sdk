@@ -29,7 +29,7 @@ but they can also be used in any Singer data pipeline tool which supports the
 
 The SDK project is 100% open source, licensed under the `Apache 2.0`_
 permissive license. Please visit our code repo `here in Gitlab`_, where you can
-read the `source code`_, `log an issue or feature request`_, and `contribute back`_ .
+read the `source code`_, `log an issue or feature request`_, and `contribute back`_.
 We also regularly discuss SDK topics in our `Meltano Slack`_ community, under the
 dedicated `#singer-sdk`_ Slack channel.
 
@@ -75,7 +75,7 @@ Advanced Topics
 .. _logging an issue or feature request: https://gitlab.com/meltano/sdk/-/issues
 .. _Apache 2.0: https://en.wikipedia.org/wiki/Apache_License
 .. _here in Gitlab: https://gitlab.com/meltano/sdk
-.. #Meltano Slack: https://join.slack.com/t/meltano/shared_invite/zt-obgpdeba-7yrqKhwyMBfdHDXsZY8G7Q
+.. _Meltano Slack: https://join.slack.com/t/meltano/shared_invite/zt-obgpdeba-7yrqKhwyMBfdHDXsZY8G7Q
 .. _#singer-sdk: https://meltano.slack.com/archives/C01PKLU5D1R
 
 Index and Search
