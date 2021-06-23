@@ -26,8 +26,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     _DRAIN_AFTER_STATE_MESSAGES: bool = True
 
-    # Constructor
-
+    # Default class to use for creating new sink objects.
     default_sink_class: Type[Sink]
 
     def __init__(
@@ -66,6 +65,10 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         If schema is provided, a new sink will be created. If the sink already existed,
         the old sink becomes archived and held until the next drain_all() operation.
 
+        Developers only need to override this method if they want to provide a different
+        sink depending on the values within the `record` object. Otherwise, please see
+        `default_sink_class` property and/or the `get_sink_class()` method.
+
         :raises: RecordsWitoutSchemaException if sink does not exist and schema is not
                  sent.
         """
@@ -81,6 +84,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
     def get_sink_class(self, stream_name: str) -> Type[Sink]:
         """Return a sink for the given stream name.
 
+        Developers can override this method to return a custom Sink type depending
+        on the value of `stream_name`. Optional when `default_sink_class` is set.
+
         :raises: ValueError if no Sink class is defined.
         """
         if self.default_sink_class:
@@ -92,19 +98,28 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         )
 
     def sink_exists(self, stream_name: str) -> bool:
-        """Return True if a sink has been initialized."""
+        """Return True if a sink has been initialized.
+
+        This method is internal to the SDK and should not need to be overridden.
+        """
         return stream_name in self._sinks_active
 
     @final
     def listen(self) -> None:
-        """Read from STDIN until all messages are processed."""
+        """Read from STDIN until all messages are processed.
+
+        This method is internal to the SDK and should not need to be overridden.
+        """
         self._process_lines(sys.stdin)
 
     @final
     def add_sink(
         self, stream_name: str, schema: dict, key_properties: Optional[List[str]] = None
     ) -> Sink:
-        """Create a sink and register it."""
+        """Create a sink and register it.
+
+        This method is internal to the SDK and should not need to be overridden.
+        """
         self.logger.info(f"Initializing '{self.name}' target sink...")
         result = self.default_sink_class(
             target=self,
@@ -223,14 +238,18 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
     def _process_activate_version_message(self, message_dict: dict) -> None:
         """Handle the optional ACTIVATE_VERSION message extension."""
         self.logger.warning(
-            "ACTIVATE_VERSION message received but not supported. Ingnoring."
+            "ACTIVATE_VERSION message received but not supported. Ignoring."
+            "For more information: https://gitlab.com/meltano/sdk/-/issues/18"
         )
 
     # Sink drain methods
 
     @final
     def drain_all(self) -> None:
-        """Drains all sinks, starting with those cleared due to changed schema."""
+        """Drains all sinks, starting with those cleared due to changed schema.
+
+        This method is internal to the SDK and should not need to be overridden.
+        """
         state = copy.deepcopy(self._latest_state)
         self._drain_all(self._sinks_to_clear, 1)
         self._sinks_to_clear = []
@@ -239,7 +258,10 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     @final
     def drain_one(self, sink: Sink) -> None:
-        """Drain a specific sink."""
+        """Drain a specific sink.
+
+        This method is internal to the SDK and should not need to be overridden.
+        """
         if sink.current_size == 0:
             return
 

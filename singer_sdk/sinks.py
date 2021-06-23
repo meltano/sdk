@@ -37,7 +37,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     MAX_SIZE_DEFAULT = 10000
 
-    # TODO: Re-implement schema flattening
+    # TODO: Implement schema flattening: https://gitlab.com/meltano/sdk/-/issues/133
     # _flattener: Optional[RecordFlattener]
     # _MAX_FLATTEN_DEPTH = 0
 
@@ -70,7 +70,7 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_dupe_records_merged: int = 0
 
         self._validator = Draft4Validator(schema, format_checker=FormatChecker())
-        # TODO: Re-implement schema flattener
+        # TODO: Implement schema flattener: https://gitlab.com/meltano/sdk/-/issues/133
         # self._flattener = RecordFlattener(max_level=self._MAX_FLATTEN_DEPTH)
 
     def _get_context(self, record: dict) -> dict:
@@ -327,11 +327,11 @@ class BatchSink(Sink):
         """Start a new batch with the given context.
 
         The initial generated context will have a single `batch_id` entry, which
-        a, SDK-generated GUID string which uniquely identifies this batch.
+        contains an SDK-generated GUID string uniquely identifying this batch.
 
         Developers may optionally override this method to add custom markers to the
-        `context` dict and/or to initialize batch resources - such as creating a local
-        temp file to store records.
+        `context` dict and/or to initialize batch resources - such as initializing a
+        local temp file to hold batch records before uploading.
         """
         pass
 
