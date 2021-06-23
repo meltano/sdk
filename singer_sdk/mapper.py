@@ -14,6 +14,7 @@ from singer import Catalog, CatalogEntry
 import simpleeval
 from simpleeval import simple_eval
 
+from singer_sdk.exceptions import MapExpressionError
 from singer_sdk.helpers._catalog import get_selected_schema
 from singer_sdk.typing import (
     IntegerType,
@@ -133,8 +134,13 @@ class CustomStreamMap(StreamMap):
         if property_name and property_name in record:
             # Allow access to original property value if applicable
             names["self"] = record[property_name]
-        result = simple_eval(expr, functions=self.functions, names=names)
-        logging.info(f"Eval result: {expr} = {result}")
+        try:
+            result = simple_eval(expr, functions=self.functions, names=names)
+            logging.debug(f"Eval result: {expr} = {result}")
+        except Exception as ex:
+            raise MapExpressionError(
+                f"Failed to evaluate simpleeval expressions {expr}."
+            ) from ex
         return result
 
     def _eval_type(self, expr: str) -> JSONTypeHelper:
@@ -159,7 +165,7 @@ class CustomStreamMap(StreamMap):
         include_by_default = True
         if stream_map and MAPPER_FILTER_OPTION in stream_map:
             filter_rule = stream_map.pop(MAPPER_FILTER_OPTION)
-            logging.info(f"Found filter rule: {filter_rule}")
+            logging.info(f"Found '{self.stream_alias}' filter rule: {filter_rule}")
 
         if stream_map and MAPPER_ELSE_OPTION in stream_map:
             if stream_map[MAPPER_ELSE_OPTION] is None:
@@ -202,7 +208,10 @@ class CustomStreamMap(StreamMap):
             filter_result = self._eval(
                 expr=cast(str, filter_rule), record=record, property_name=None
             )
-            logging.debug(f"Filter result: {filter_result}")
+            logging.debug(
+                f"Filter result for '{filter_rule}' "
+                "in '{self.name}' stream: {filter_result}"
+            )
             if not filter_result:
                 logging.debug("Excluding record due to filter.")
                 return False
@@ -257,36 +266,36 @@ class CustomStreamMap(StreamMap):
         return filter_fn, transform_fn, transformed_schema
 
 
-class Mapper:
+class TapMapper:
     """Inline map tranformer."""
 
     def __init__(
         self,
-        tap_map: Dict[str, Dict[str, Union[str, dict]]],
-        map_config: dict,
+        plugin_config: Dict[str, Dict[str, Union[str, dict]]],
         raw_catalog: dict,
         logger: logging.Logger,
     ):
         """Initialize mapper."""
         self.stream_maps = cast(Dict[str, List[StreamMap]], {})
-        self.map_config = map_config
+        self.map_config = plugin_config.get("stream_map_config", {})
         self.raw_catalog = raw_catalog
         self.raw_catalog_obj = Catalog.from_dict(raw_catalog)
         self.default_mapper_type: Type[DefaultStreamMap]
         self.logger = logger
 
-        if MAPPER_ELSE_OPTION in tap_map["streams"]:
-            if tap_map["streams"][MAPPER_ELSE_OPTION] is None:
+        stream_maps_dict = plugin_config.get("stream_maps", {})
+        if MAPPER_ELSE_OPTION in stream_maps_dict:
+            if stream_maps_dict[MAPPER_ELSE_OPTION] is None:
                 logging.info(
                     f"Found '{MAPPER_ELSE_OPTION}=None' default mapper. "
                     "Unmapped streams will be excluded from output."
                 )
                 self.default_mapper_type = RemoveRecordTransform
-                tap_map["streams"].pop(MAPPER_ELSE_OPTION)
+                stream_maps_dict.pop(MAPPER_ELSE_OPTION)
             else:
                 raise RuntimeError(
                     f"Undefined transform for '{MAPPER_ELSE_OPTION}'' case: "
-                    f"{tap_map[MAPPER_ELSE_OPTION]}"
+                    f"{stream_maps_dict[MAPPER_ELSE_OPTION]}"
                 )
         else:
             logging.info(
@@ -306,7 +315,7 @@ class Mapper:
                     )
                 ]
 
-        for stream_key, stream_def in tap_map["streams"].items():
+        for stream_key, stream_def in stream_maps_dict.items():
             stream_name = stream_key
             stream_alias = stream_key
             logging.info(stream_name)

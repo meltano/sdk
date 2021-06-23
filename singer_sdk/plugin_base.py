@@ -5,7 +5,7 @@ from collections import OrderedDict
 import json
 import logging
 import os
-from singer_sdk.mapper import Mapper
+from singer_sdk.mapper import TapMapper
 from types import MappingProxyType
 from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
 
@@ -82,7 +82,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
         self._validate_config()
-        self.mapper: Optional[Mapper] = None
+        self.mapper: Optional[TapMapper]
 
     @classproperty
     def capabilities(self) -> List[str]:

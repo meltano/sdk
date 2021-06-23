@@ -3,7 +3,7 @@
 import abc
 import json
 from pathlib import PurePath, Path
-from singer_sdk.mapper import Mapper
+from singer_sdk.mapper import TapMapper
 from typing import Any, List, Optional, Dict, Type, Union, cast
 
 import click
@@ -43,6 +43,22 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         self._input_catalog: Optional[dict] = None
         self._state: Dict[str, Stream] = {}
 
+        # Initialize mappers
+
+        self.mapper: Optional[TapMapper]
+        if STREAM_MAPS_CONFIG in self.config:
+            self.mapper = TapMapper(
+                plugin_config=dict(self.config),
+                raw_catalog=self.catalog_dict,
+                logger=self.logger,
+            )
+        else:
+            self.mapper = None
+            self.logger.info(
+                "Could not find '{STREAM_MAPS_CONFIG}' in tap config keys "
+                f"[{', '.join(self.config.keys())}]"
+            )
+
         # Process input catalog
         if isinstance(catalog, dict):
             self._input_catalog = catalog
@@ -56,17 +72,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         elif state:
             state_dict = read_json_file(state)
         self.load_state(state_dict)
-
-        # Initialize mappers
-
-        self.mapper: Optional[Mapper] = None
-        if STREAM_MAPS_CONFIG in self.config:
-            self.mapper = Mapper(
-                self.config[STREAM_MAPS_CONFIG],
-                map_config=dict(self.config.get("stream_maps_config", {})),
-                raw_catalog=self.catalog_dict,
-                logger=self.logger,
-            )
 
     # Class properties
 

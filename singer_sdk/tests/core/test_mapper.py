@@ -1,5 +1,6 @@
 """Test map transformer."""
 
+import copy
 import json
 from typing import Dict, List
 from singer_sdk.typing import PropertiesList, Property, StringType
@@ -8,11 +9,12 @@ import logging
 
 from singer import Catalog
 
-from singer_sdk.mapper import Mapper, RemoveRecordTransform, md5
+from singer_sdk.exceptions import MapExpressionError
+from singer_sdk.mapper import TapMapper, RemoveRecordTransform, md5
 
 
 @pytest.fixture
-def map_config() -> dict:
+def stream_map_config() -> dict:
     return {"hash_seed": "super_secret_hash_seed"}
 
 
@@ -87,43 +89,49 @@ def sample_stream():
 
 
 @pytest.fixture
-def transform_map():
+def transform_stream_maps():
     return {
-        "streams": {
-            "repositories": {
-                # "__source__": "repositories",
-                "repo_name": "_['name']",
-                "email_domain": "owner_email.split('@')[1]",
-                "email_hash": "md5(config['hash_seed'] + owner_email)",
-                "__else__": None,
-            },
+        "repositories": {
+            # "__source__": "repositories",
+            "repo_name": "_['name']",
+            "email_domain": "owner_email.split('@')[1]",
+            "email_hash": "md5(config['hash_seed'] + owner_email)",
+            "__else__": None,
         },
     }
 
 
 @pytest.fixture
-def transformed_result(map_config):
+def transformed_result(stream_map_config):
     return {
         "repositories": [
             {
                 "repo_name": "tap-something",
                 "email_domain": "example.com",
-                "email_hash": md5(map_config["hash_seed"] + "sample1@example.com"),
+                "email_hash": md5(
+                    stream_map_config["hash_seed"] + "sample1@example.com"
+                ),
             },
             {
                 "repo_name": "my-tap-something",
                 "email_domain": "example.com",
-                "email_hash": md5(map_config["hash_seed"] + "sample2@example.com"),
+                "email_hash": md5(
+                    stream_map_config["hash_seed"] + "sample2@example.com"
+                ),
             },
             {
                 "repo_name": "target-something",
                 "email_domain": "example.com",
-                "email_hash": md5(map_config["hash_seed"] + "sample3@example.com"),
+                "email_hash": md5(
+                    stream_map_config["hash_seed"] + "sample3@example.com"
+                ),
             },
             {
                 "repo_name": "not-atap",
                 "email_domain": "example.com",
-                "email_hash": md5(map_config["hash_seed"] + "sample4@example.com"),
+                "email_hash": md5(
+                    stream_map_config["hash_seed"] + "sample4@example.com"
+                ),
             },
         ],
         "foobars": [  # should be unchanged
@@ -152,17 +160,22 @@ def transformed_schemas():
 
 
 @pytest.fixture
-def filter_map():
+def filter_stream_maps():
     return {
-        "streams": {
-            "repositories": {
-                "__filter__": ("'tap-' in name or 'target-' in name"),
-                "name": "_['name']",
-                "__else__": None,
-            },
+        "repositories": {
+            "__filter__": ("'tap-' in name or 'target-' in name"),
+            "name": "_['name']",
             "__else__": None,
         },
+        "__else__": None,
     }
+
+
+@pytest.fixture
+def filter_stream_map_w_error(filter_stream_maps):
+    restult = copy.copy(filter_stream_maps)
+    restult["repositories"]["__filter__"] = "this should raise an er!ror"
+    return restult
 
 
 @pytest.fixture
@@ -182,56 +195,78 @@ def filtered_schemas():
 
 
 def test_map_transforms(
-    map_config,
     sample_stream,
     sample_catalog_dict,
-    transform_map,
+    transform_stream_maps,
+    stream_map_config,
     transformed_result,
     transformed_schemas,
 ):
     _test_transform(
         "transform",
-        map_config=map_config,
-        sample_stream=sample_stream,
-        sample_catalog_dict=sample_catalog_dict,
-        map_dict=transform_map,
+        stream_maps=transform_stream_maps,
+        stream_map_config=stream_map_config,
         expected_result=transformed_result,
         expected_schemas=transformed_schemas,
+        sample_stream=sample_stream,
+        sample_catalog_dict=sample_catalog_dict,
     )
 
 
 def test_filter_transforms(
-    map_config,
     sample_stream,
     sample_catalog_dict,
-    filter_map,
+    filter_stream_maps,
+    stream_map_config,
     filtered_result,
     filtered_schemas,
 ):
     _test_transform(
         "filter",
-        map_config=map_config,
-        sample_stream=sample_stream,
-        sample_catalog_dict=sample_catalog_dict,
-        map_dict=filter_map,
+        stream_maps=filter_stream_maps,
+        stream_map_config=stream_map_config,
         expected_result=filtered_result,
         expected_schemas=filtered_schemas,
+        sample_stream=sample_stream,
+        sample_catalog_dict=sample_catalog_dict,
     )
+
+
+def test_filter_transforms_w_error(
+    sample_stream,
+    sample_catalog_dict,
+    filter_stream_map_w_error,
+    stream_map_config,
+    filtered_result,
+    filtered_schemas,
+):
+    with pytest.raises(MapExpressionError):
+        _test_transform(
+            "filter",
+            stream_maps=filter_stream_map_w_error,
+            stream_map_config=stream_map_config,
+            expected_result=filtered_result,
+            expected_schemas=filtered_schemas,
+            sample_stream=sample_stream,
+            sample_catalog_dict=sample_catalog_dict,
+        )
 
 
 def _test_transform(
     test_name: str,
-    map_config,
-    sample_stream,
-    sample_catalog_dict,
-    map_dict,
+    stream_maps,
+    stream_map_config,
     expected_result,
     expected_schemas,
+    sample_stream,
+    sample_catalog_dict,
 ):
     output: Dict[str, List[dict]] = {}
-    mapper = Mapper(
-        tap_map=map_dict,
-        map_config=map_config,
+    mapper = TapMapper(
+        plugin_config={
+            "stream_maps": stream_maps,
+            "stream_map_config": stream_map_config,
+        },
         raw_catalog=sample_catalog_dict,
         logger=logging,
     )
