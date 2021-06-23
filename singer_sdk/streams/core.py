@@ -157,8 +157,9 @@ class Stream(metaclass=abc.ABCMeta):
     def is_timestamp_replication_key(self) -> bool:
         """Return True if the stream uses a timestamp-based replication key.
 
-        Developers can override with `is_timestamp_replication_key = True` in
-        order to force this value.
+        Developers can override to `True` in order to force this value, although this
+        should not be required in most use cases since the type can generally be
+        accurately detected from the JSON Schema.
         """
         if not self.replication_key:
             return False
@@ -168,7 +169,15 @@ class Stream(metaclass=abc.ABCMeta):
     def get_starting_replication_key_value(
         self, context: Optional[dict]
     ) -> Optional[Any]:
-        """Return starting replication key."""
+        """Return starting replication key.
+
+        Will return the value of the stream's replication key when `--state` is passed.
+        If no prior state exists, will return `None`.
+
+        Developers should use this method to seed incremental processing for
+        non-datetime replication keys. For datetime and date replication keys, use
+        `get_starting_timestamp()`
+        """
         if self.is_timestamp_replication_key:
             return self.get_starting_timestamp(context)
 
@@ -177,7 +186,16 @@ class Stream(metaclass=abc.ABCMeta):
     def get_starting_timestamp(
         self, context: Optional[dict]
     ) -> Optional[datetime.datetime]:
-        """Return `start_date` config, or state if using timestamp replication."""
+        """Return `start_date` config, or state if using timestamp replication.
+
+        Will return the value of the stream's replication key when `--state` is passed.
+        If no state exists, will return `start_date` if set, or `None` if neither
+        the stream state nor `start_date` is set.
+
+        Developers should use this method to seed incremental processing for date
+        and datetime replication keys. For non-datetime replication keys, use
+        `get_starting_replication_key_value()`
+        """
         if self.is_timestamp_replication_key:
             replication_key_value = self._starting_replication_key_value(context)
             if replication_key_value:
@@ -244,13 +262,14 @@ class Stream(metaclass=abc.ABCMeta):
     ) -> Optional[Union[datetime.datetime, Any]]:
         """Return the max allowable bookmark value for this stream's replication key.
 
-        For timestamp-based replication keys, this defaults to `utcnow()`. For
+        For timestamp-based replication keys, this defaults to `utc_now()`. For
         non-timestamp replication keys, default to `None`. For consistency in subsequent
         calls, the value will be frozen (cached) at its initially called state, per
         partition argument if applicable.
 
-        Override this value to prevent bookmarks from being advanced in cases where we
-        may only have a partial set of records.
+        Developers may optionally override this method in advanced use cases such
+        as unsorted incremental streams or complex hierarchical stream scenarios.
+        For more info: https://sdk.meltano.com/en/latest/implementation/state.html
         """
         if self.is_timestamp_replication_key:
             return utc_now()
@@ -399,6 +418,12 @@ class Stream(metaclass=abc.ABCMeta):
         """Return a writeable state dict for the entire tap.
 
         Note: This dictionary is shared (and writable) across all streams.
+
+        This method is internal to the SDK and should not need to be overridden.
+        Developers may access this property but this is not recommended except in
+        advanced use cases. Instead, developers should access the latest stream
+        replication key values using `Stream.get_starting_timestamp()` for timestamp
+        keys, or `Stream.get_starting_replication_key_value()` for non-timestamp keys.
         """
         return self._tap_state
 
@@ -415,6 +440,12 @@ class Stream(metaclass=abc.ABCMeta):
         Gives a partitioned context state if applicable; else returns stream state.
         A blank state will be created in none exists.
 
+        This method is internal to the SDK and should not need to be overridden.
+        Developers may access this property but this is not recommended except in
+        advanced use cases. Instead, developers should access the latest stream
+        replication key values using `Stream.get_starting_timestamp()` for timestamp
+        keys, or `Stream.get_starting_replication_key_value()` for non-timestamp keys.
+
         Partition level may be overridden by Stream.state_partitioning_keys if set.
         """
         state_partition_context = self._get_state_partition_context(context)
@@ -429,6 +460,12 @@ class Stream(metaclass=abc.ABCMeta):
     @property
     def stream_state(self) -> dict:
         """Return a writeable state dict for this stream.
+
+        This method is internal to the SDK and should not need to be overridden.
+        Developers may access this property but this is not recommended except in
+        advanced use cases. Instead, developers should access the latest stream
+        replication key values using `Stream.get_starting_timestamp()` for timestamp
+        keys, or `Stream.get_starting_replication_key_value()` for non-timestamp keys.
 
         A blank state entry will be created if one doesn't already exist.
         """
@@ -447,9 +484,10 @@ class Stream(metaclass=abc.ABCMeta):
     def partitions(self) -> Optional[List[dict]]:
         """Return a list of partition key dicts (if applicable), otherwise None.
 
+        Developers may override this property to provide a default partitions list.
+
         By default, this method returns a list of any partitions which are already
         defined in state, otherwise None.
-        Developers may override this property to provide a default partitions list.
         """
         result: List[dict] = []
         for partition_state in (
@@ -606,7 +644,10 @@ class Stream(metaclass=abc.ABCMeta):
     # Handle interim stream state
 
     def reset_state_progress_markers(self, state: Optional[dict] = None) -> None:
-        """Reset progress markers. If all=True, all state contexts will be set."""
+        """Reset progress markers. If all=True, all state contexts will be set.
+
+        This method is internal to the SDK and should not need to be overridden.
+        """
         if state is None or state == {}:
             context: Optional[dict]
             for context in self.partitions or [{}]:
@@ -619,6 +660,8 @@ class Stream(metaclass=abc.ABCMeta):
 
     def finalize_state_progress_markers(self, state: Optional[dict] = None) -> None:
         """Reset progress markers. If all=True, all state contexts will be finalized.
+
+        This method is internal to the SDK and should not need to be overridden.
 
         If all=True and the stream has children, child streams will also be finalized.
         """
@@ -706,7 +749,10 @@ class Stream(metaclass=abc.ABCMeta):
 
     @final
     def sync(self, context: Optional[dict] = None):
-        """Sync this stream."""
+        """Sync this stream.
+
+        This method is internal to the SDK and should not need to be overridden.
+        """
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
             msg += f" with context: {context}"
@@ -724,7 +770,12 @@ class Stream(metaclass=abc.ABCMeta):
     # Overridable Methods
 
     def apply_catalog(self, catalog_dict: dict) -> None:
-        """Apply a catalog dict, updating any settings overridden within the catalog."""
+        """Apply a catalog dict, updating any settings overridden within the catalog.
+
+        Developers may override this method in order to introduce advanced catalog
+        parsing, or to explicitly fail on advanced catalog customizations which
+        are not supported by the tap.
+        """
         self._tap_input_catalog = catalog_dict
 
         catalog = Catalog.from_dict(catalog_dict)
@@ -749,6 +800,7 @@ class Stream(metaclass=abc.ABCMeta):
         """Return a child context object from the record and optional provided context.
 
         By default, will return context if provided and otherwise the record dict.
+
         Developers may override this behavior to send specific information to child
         streams for context.
         """
