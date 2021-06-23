@@ -16,6 +16,11 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
+## Unreleased
+
+- Added Target SDK implementation for Singer targets (#96, !4)
+- Add stream map inline transform and filter capabilities (#63, !4, !92)
+
 ## v0.2.0
 
 ### Added

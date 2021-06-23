@@ -7,20 +7,31 @@ from singer_sdk.streams.rest import RESTStream
 
 
 class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
-    """Abstract base class for API-type streams."""
+    """Abstract base class for API-type streams.
+
+    GraphQL streams inherit from the class `GraphQLStream`, which in turn inherits from
+    the `RESTStream` class. GraphQL streams are very similar to REST API-based streams,
+    but instead of specifying a `path` and `url_params`, developers override the
+    GraphQL query text.
+    """
 
     path = ""
     rest_method = "POST"
 
     @property
     def query(self) -> str:
-        """Return dynamic GraphQL query."""
+        """Set or return the GraphQL query string."""
         raise NotImplementedError("GraphQLStream `query` is not defined.")
 
     def prepare_request_payload(
         self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Optional[dict]:
-        """Prepare the data payload for the GraphQL API request."""
+        """Prepare the data payload for the GraphQL API request.
+
+        Developers generally should generally not need to override this method.
+        Instead, developers set the payload by properly configuring the `query`
+        attribute.
+        """
         params = self.get_url_params(context, next_page_token)
         if self.query is None:
             raise ValueError("Graphql `query` property not set.")

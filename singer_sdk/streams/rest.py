@@ -19,7 +19,7 @@ DEFAULT_PAGE_SIZE = 1000
 
 
 class RESTStream(Stream, metaclass=abc.ABCMeta):
-    """Abstract base class for API-type streams."""
+    """Abstract base class for REST API streams."""
 
     _page_size: int = DEFAULT_PAGE_SIZE
     _requests_session: Optional[requests.Session]
@@ -197,6 +197,10 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """Prepare the data payload for the REST API request.
 
         By default, no payload will be sent (return None).
+
+        Developers may override this method if the API requires a custom payload along
+        with the request. (This is generally not required for APIs which use the
+        HTTP 'GET' method.)
         """
         return None
 
@@ -211,7 +215,11 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     @property
     def http_headers(self) -> dict:
-        """Return headers dict to be used for HTTP requests."""
+        """Return headers dict to be used for HTTP requests.
+
+        If an authenticator is also specified, the authenticator's headers will be
+        combined with `http_headers` when making HTTP requests.
+        """
         result = self._http_headers
         if "user_agent" in self.config:
             result["User-Agent"] = self.config.get("user_agent")
@@ -241,5 +249,9 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     @property
     def authenticator(self) -> Optional[APIAuthenticatorBase]:
-        """Return an authorization header for REST API requests."""
+        """Return or set the authenticator for managing HTTP auth headers.
+
+        If an authenticator is not specified, REST-based taps will simply pass
+        `http_headers` as defined in the stream class.
+        """
         return SimpleAuthenticator(stream=self)

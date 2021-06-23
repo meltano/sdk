@@ -33,3 +33,8 @@ def get_standard_tap_tests(tap_class: Type[Tap], config=None) -> List[Callable]:
         tap1.run_connection_test()
 
     return [_test_cli_prints, _test_discovery, _test_stream_connections]
+
+
+def get_standard_target_tests(target_class: Type[Tap], config=None) -> List[Callable]:
+    """Return callable pytest which executes simple discovery and connection tests."""
+    return []
