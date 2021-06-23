@@ -70,7 +70,7 @@ Advanced Topics
 .. _Singer Spec: https://hub.meltano.com/singer/spec
 .. _Meltano: https://www.meltano.com
 .. _integrated with Meltano: https://meltano.com/tutorials/create-a-custom-extractor.html#add-the-plugin-to-your-meltano-project
-.. _contribute back: https://gitlab.com/meltano/sdk/-/merge_requests?scope=all&state=opened&label_name[]=Accepting%20Merge%20Requests
+.. _contribute back: https://gitlab.com/meltano/sdk/-/issues?scope=all&state=opened&label_name[]=Accepting%20Merge%20Requests
 .. _source code: https://gitlab.com/meltano/sdk
 .. _log an issue or feature request: https://gitlab.com/meltano/sdk/-/issues
 .. _Apache 2.0: https://en.wikipedia.org/wiki/Apache_License
