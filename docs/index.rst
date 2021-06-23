@@ -6,9 +6,9 @@
 Meltano SDK for Taps and Targets
 =======================================
 
-The Tap and Target SDKs are the fastest way to build custom data extractors
-and loaders! Taps and targets built on the SDK are automatically compliant with the `Singer Spec`_,
-the de-facto open source standard for extract and load pipelines.
+The [Meltano](https://www.meltano.com) SDK for Taps and Targets is the fastest way to build custom 
+data extractors and loaders! Taps and targets built on the SDK are automatically compliant with the 
+`Singer Spec`_, the de-facto open source standard for extract and load pipelines.
 
 Future-proof extractors and loaders, with less code
 ---------------------------------------------------
@@ -18,6 +18,21 @@ learning the SDK a great investment. Furthermore, as new features and capabiliti
 to the SDK, your taps and targets can always take advantage of the latest capabilities and
 bug fixes, simply by updating your SDK dependency to the latest version.
 
+Build by Meltano and the Singer Community
+-----------------------------------------
+
+The SDK is built with love by the <a href="https://meltano.com">Meltano</a> core
+team and contributors, with contributions from developers across the <a href="https://singer.io">Singer</a> 
+open source community. SDK-based plugins will work great with
+[Meltano](https://meltano.com/tutorials/create-a-custom-extractor.html#add-the-plugin-to-your-meltano-project),
+but they can also be used in any Singer data pipeline tool which supports the
+[Singer Spec](https://hub.meltano.com/singer/spec).
+
+The SDK project is 100% open source, licensed under the [Apache 2.0](https://en.wikipedia.org/wiki/Apache_License)
+permissive license. Please visit our code repo [here in Gitlab](https://gitlab.com/meltano/sdk) if you are interested in
+[contributing back](https://gitlab.com/meltano/sdk/-/merge_requests?scope=all&state=opened&label_name[]=Accepting%20Merge%20Requests)
+reading the [source code](https://gitlab.com/meltano/sdk), or 
+[logging an issue or feature request](https://gitlab.com/meltano/sdk/-/issues).
 
 Developer Resources
 -------------------
