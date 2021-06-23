@@ -18,7 +18,7 @@ learning the SDK a great investment. Furthermore, as new features and capabiliti
 to the SDK, your taps and targets can always take advantage of the latest capabilities and
 bug fixes, simply by updating your SDK dependency to the latest version.
 
-Build by Meltano and the Singer Community
+Built by Meltano and the Singer Community
 -----------------------------------------
 
 The SDK is built with love by the Meltano_ core
@@ -29,9 +29,9 @@ but they can also be used in any Singer data pipeline tool which supports the
 
 The SDK project is 100% open source, licensed under the `Apache 2.0`_
 permissive license. Please visit our code repo `here in Gitlab`_, where you can
-read the `source code`_, `log an issue or feature request`_, and `contribute back`_.
-We also regularly discuss SDK topics in our `Meltano Slack`_ community, under the
-dedicated `#singer-sdk`_ Slack channel.
+read the `source code`_, `log an issue or feature request`_, and `contribute back`_
+to the SDK. We also regularly discuss SDK topics in our `Meltano Slack`_ community,
+under the dedicated `#singer-sdk`_ Slack channel.
 
 Developer Resources
 -------------------
@@ -70,9 +70,9 @@ Advanced Topics
 .. _Singer Spec: https://hub.meltano.com/singer/spec
 .. _Meltano: https://www.meltano.com
 .. _integrated with Meltano: https://meltano.com/tutorials/create-a-custom-extractor.html#add-the-plugin-to-your-meltano-project
-.. _contributing back: https://gitlab.com/meltano/sdk/-/merge_requests?scope=all&state=opened&label_name[]=Accepting%20Merge%20Requests
+.. _contribute back: https://gitlab.com/meltano/sdk/-/merge_requests?scope=all&state=opened&label_name[]=Accepting%20Merge%20Requests
 .. _source code: https://gitlab.com/meltano/sdk
-.. _logging an issue or feature request: https://gitlab.com/meltano/sdk/-/issues
+.. _log an issue or feature request: https://gitlab.com/meltano/sdk/-/issues
 .. _Apache 2.0: https://en.wikipedia.org/wiki/Apache_License
 .. _here in Gitlab: https://gitlab.com/meltano/sdk
 .. _Meltano Slack: https://join.slack.com/t/meltano/shared_invite/zt-obgpdeba-7yrqKhwyMBfdHDXsZY8G7Q
