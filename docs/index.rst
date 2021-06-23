@@ -47,6 +47,7 @@ Advanced Topics
 
    parent_streams
    partitioning
+   stream_maps
    porting
    CONTRIBUTING
    implementation/README

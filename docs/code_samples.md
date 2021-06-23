@@ -5,13 +5,14 @@ Below you will find a collection of code samples which can be used for inspirati
 ## Project Samples
 
 Below are full project samples, contributed by members in the community. Use these for inspiration
-or to get more information on what an SDK-based tap will look like.
+or to get more information on what an SDK-based tap or target will look like.
 
 - [tap-bamboohr by Auto IDM](https://gitlab.com/autoidm/tap-bamboohr)
 - [tap-confluence by @edgarrmondragon](https://github.com/edgarrmondragon/tap-confluence)
 - [tap-investing by @DouweM](https://gitlab.com/DouweM/tap-investing)
 - [tap-parquet by AJ](https://github.com/dataops-tk/tap-parquet)
 - [tap-powerbi-metadata by Slalom](https://github.com/dataops-tk/tap-powerbi-metadata)
+- [target-athena, Community Project led by Andrew Stewart](https://github.com/dataops-tk/target-athena)
 
 To add your project to this list, please
 [submit an issue](https://gitlab.com/meltano/meltano/-/issues/new?issue%5Bassignee_id%5D=&issue%5Bmilestone_id%5D=).

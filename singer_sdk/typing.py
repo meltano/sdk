@@ -206,3 +206,7 @@ class PropertiesList(ObjectType):
     def items(self) -> List[Tuple[str, Property]]:
         """Return list of (name, property) tuples."""
         return [(p.name, p) for p in self.wrapped]
+
+    def append(self, property: Property) -> None:
+        """Append a property to the property list."""
+        self.wrapped.append(property)

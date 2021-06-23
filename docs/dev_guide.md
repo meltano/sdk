@@ -1,6 +1,6 @@
 # SDK Dev Guide
 
-## Overview
+## Tap Development Overview
 
 Create taps with `singer-sdk` requires overriding just two or three classes:
 
@@ -19,22 +19,28 @@ Create taps with `singer-sdk` requires overriding just two or three classes:
     - `OAuthJWTAuthenticator` - This class performs an JWT (JSON Web Token) authentication
        flow.
 
-### Detailed Class Reference
+## Target Development Overview
 
-For a detailed reference, please see the [SDK Reference Guide](./reference.md)
+Create targets with `singer-sdk` requires overriding just two classes:
 
-### SDK Implementation Details
+1. The `Target` class. This class governs configuration, validation,
+   and stream discovery.
+2. The `Sink` class. You have two different options depending on whether your target
+   prefers writing one record at a time versus writing in batches:
+    - `RecordSink` writes one record at a time, via the `process_record()`
+      method.
+    - `BatchSink` writes one batch at a time. Important class members include:
+      - `start_batch()` to (optionally) initialize a new batch.
+      - `process_record()` to enqueue a record to be written.
+      - `process_batch()` to write any queued records and cleanup local resources.
 
-For more detailed information about the SDK implementation, please see the
-[SDK Implementation Details](./implementation/README.md) section.
+Note: The `Sink` class can receive records from one stream or from many. See the [Sink documentation](./sinks.md)
+for more information on differences between a target's `Sink` class versus a tap's `Stream` class.
 
-## Building a New Tap
+## Building a New Tap or Target
 
-The best way to get started is by building a new project from the
-[cookiecutter](https://cookiecutter.readthedocs.io)
-[tap template](https://gitlab.com/meltano/singer-sdk/-/tree/main/cookiecutter/tap-template).
-
-To use the cookiecutter template:
+First, install [cookiecutter](https://cookiecutter.readthedocs.io) if you haven't
+done so already:
 
 ```bash
 # Install pipx if you haven't already
@@ -44,22 +50,37 @@ pipx ensurepath
 pipx install cookiecutter
 ```
 
-Initialize Cookiecutter template:
+Now you can initialize your new project with the Cookiecutter template for taps:
 
 ```bash
 cookiecutter https://gitlab.com/meltano/singer-sdk --directory="cookiecutter/tap-template"
 ```
 
+...or for targets:
+
+```bash
+cookiecutter https://gitlab.com/meltano/singer-sdk --directory="cookiecutter/target-template"
+```
+
 Once you've answered the cookiecutter prompts, follow the instructions in the
-generated `README.md` file to complete your new tap. You can also reference the
+generated `README.md` file to complete your new tap or target. You can also reference the
 [Meltano Tutorial](https://meltano.com/tutorials/create-a-custom-extractor.html) for a more
 detailed guide.
 
 ## Additional Resources
 
+### Detailed Class Reference
+
+For a detailed reference, please see the [SDK Reference Guide](./reference.md)
+
+### SDK Implementation Details
+
+For more information about the SDK's' Singer implementation details, please see the
+[SDK Implementation Details](./implementation/README.md) section.
+
 ### Code Samples
 
-For a list of code samples solving a variety of different scenarios, please see our
+For a list of code samples solving a variety of different scenarios, please see our 
 [Code Samples](./code_samples.md) page.
 
 ### CLI Samples

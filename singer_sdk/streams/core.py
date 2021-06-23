@@ -5,6 +5,7 @@ import copy
 import datetime
 import json
 import logging
+from singer_sdk.mapper import SameRecordTransform, StreamMap
 import requests
 from types import MappingProxyType
 from os import PathLike
@@ -35,10 +36,7 @@ from singer.catalog import Catalog
 from singer.schema import Schema
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
-from singer_sdk.helpers._catalog import (
-    get_selected_schema,
-    pop_deselected_record_properties,
-)
+from singer_sdk.helpers._catalog import pop_deselected_record_properties
 
 from singer_sdk.helpers._typing import (
     conform_record_data_types,
@@ -90,21 +88,28 @@ class Stream(metaclass=abc.ABCMeta):
             self.name: str = name
         if not self.name:
             raise ValueError("Missing argument or class variable 'name'.")
+
         self.logger: logging.Logger = tap.logger
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
         self._tap = tap
         self._tap_state = tap.state
         self._tap_input_catalog: Optional[dict] = None
+        self._stream_maps: Optional[List[StreamMap]] = None
         self.forced_replication_method: Optional[str] = None
         self._replication_key: Optional[str] = None
         self._primary_keys: Optional[List[str]] = None
         self._state_partitioning_keys: Optional[List[str]] = None
         self._schema_filepath: Optional[Path] = None
-        self._schema: Optional[dict] = None
+        self._schema: dict
         self.child_streams: List[Stream] = []
         if schema:
             if isinstance(schema, (PathLike, str)):
+                if not Path(schema).is_file():
+                    raise FileExistsError(
+                        f"Could not find schema file '{self.schema_filepath}'."
+                    )
+
                 self._schema_filepath = Path(schema)
             elif isinstance(schema, dict):
                 self._schema = schema
@@ -114,6 +119,39 @@ class Stream(metaclass=abc.ABCMeta):
                 raise ValueError(
                     f"Unexpected type {type(schema).__name__} for arg 'schema'."
                 )
+
+        if self.schema_filepath:
+            self._schema = json.loads(Path(self.schema_filepath).read_text())
+
+        if not self.schema:
+            raise ValueError(
+                f"Could not initialize schema for stream '{self.name}'. "
+                "A valid schema object or filepath was not provided."
+            )
+
+    @property
+    def stream_maps(self) -> List[StreamMap]:
+        """Return a list of one or more map transformations for this stream.
+
+        The 0th item is the primary stream map. List should not be empty.
+        """
+        if self._stream_maps:
+            return self._stream_maps
+
+        if self._tap.mapper:
+            self._stream_maps = self._tap.mapper.stream_maps[self.name]
+            self.logger.info(
+                f"Tap has custom mapper. Using {len(self.stream_maps)} provided map(s)."
+            )
+        else:
+            self.logger.info(
+                f"No custom mapper provided for '{self.name}'. "
+                "Using SameRecordTransform as default."
+            )
+            self._stream_maps = [
+                SameRecordTransform(stream_alias=self.name, raw_schema=self.schema)
+            ]
+        return self.stream_maps
 
     @property
     def is_timestamp_replication_key(self) -> bool:
@@ -227,18 +265,6 @@ class Stream(metaclass=abc.ABCMeta):
     @property
     def schema(self) -> dict:
         """Return the schema dict for the stream."""
-        if not self._schema:
-            if self.schema_filepath:
-                if not Path(self.schema_filepath).is_file():
-                    raise FileExistsError(
-                        f"Could not find schema file '{self.schema_filepath}'."
-                    )
-                self._schema = json.loads(Path(self.schema_filepath).read_text())
-        if not self._schema:
-            raise ValueError(
-                f"Could not initialize schema for stream '{self.name}'. "
-                "A valid schema object or filepath was not provided."
-            )
         return self._schema
 
     @property
@@ -474,13 +500,14 @@ class Stream(metaclass=abc.ABCMeta):
     def _write_schema_message(self):
         """Write out a SCHEMA message with the stream schema."""
         bookmark_keys = [self.replication_key] if self.replication_key else None
-        selected_schema = get_selected_schema(
-            self._singer_catalog.to_dict(), self.name, self.logger
-        )
-        schema_message = SchemaMessage(
-            self.tap_stream_id, selected_schema, self.primary_keys, bookmark_keys
-        )
-        singer.write_message(schema_message)
+        for stream_map in self.stream_maps:
+            schema_message = SchemaMessage(
+                stream_map.stream_alias,
+                stream_map.transformed_schema,
+                self.primary_keys,
+                bookmark_keys,
+            )
+            singer.write_message(schema_message)
 
     def _write_record_message(self, record: dict) -> None:
         """Write out a RECORD message."""
@@ -493,13 +520,17 @@ class Stream(metaclass=abc.ABCMeta):
             schema=self.schema,
             logger=self.logger,
         )
-        record_message = RecordMessage(
-            stream=self.name,
-            record=record,
-            version=None,
-            time_extracted=utc_now(),
-        )
-        singer.write_message(record_message)
+        for stream_map in self.stream_maps:
+            mapped_record = stream_map.transform(record)
+            # Emit record if not filtered
+            if mapped_record is not None:
+                record_message = RecordMessage(
+                    stream=stream_map.stream_alias,
+                    record=mapped_record,
+                    version=None,
+                    time_extracted=utc_now(),
+                )
+                singer.write_message(record_message)
 
     @property
     def _metric_logging_function(self) -> Optional[Callable]:
@@ -635,7 +666,10 @@ class Stream(metaclass=abc.ABCMeta):
                     # Add state context to records if not already present
                     if key not in record:
                         record[key] = val
-                self._sync_children(child_context)
+
+                # Sync children, except when primary mapper filters out the record
+                if self.stream_maps[0].get_filter_result(record):
+                    self._sync_children(child_context)
                 self._check_max_record_limit(record_count)
                 if self.selected:
                     if (record_count - 1) % self.STATE_MSG_FREQUENCY == 0:
@@ -743,9 +777,30 @@ class Stream(metaclass=abc.ABCMeta):
 
         Each row emitted should be a dictionary of property names to their values.
         Returns either a record dict or a tuple: (record_dict, child_context)
+
+        A method which should retrieve data from the source and return records
+        incrementally using the python `yield` operator.
+
+        Only custom stream types need to define this method. REST and GraphQL streams
+        should instead use the class-specific methods for REST or GraphQL, respectively.
+
+        This method takes an optional `context` argument, which can be safely ignored
+        unless the stream is a child stream or requires partitioning.
+        More info: https://sdk.meltano.com/en/latest/partitioning.html
+
+        Parent streams can optionally return a tuple, in which
+        case the second item in the tuple being a `child_context` dictionary for the
+        stream's `context`.
+        More info: https://sdk.meltano.com/en/latest/parent_streams.html
         """
         pass
 
     def post_process(self, row: dict, context: Optional[dict] = None) -> dict:
-        """As needed, append or transform raw data to match expected structure."""
+        """As needed, append or transform raw data to match expected structure.
+
+        Optional. This method gives developers an opportunity to "clean up" the results
+        prior to returning records to the downstream tap - for instance: cleaning,
+        renaming, or appending properties to the raw record result returned from the
+        API.
+        """
         return row
