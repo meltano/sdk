@@ -15,3 +15,11 @@ class InvalidStreamSortException(Exception):
 
 class MaxRecordsLimitException(Exception):
     """Exception to raise if the maximum number of allowable records is exceeded."""
+
+
+class MapExpressionError(Exception):
+    """Failed map expression evaluation."""
+
+
+class RecordsWitoutSchemaException(Exception):
+    """Raised if a target receives RECORD messages prior to a SCHEMA message."""

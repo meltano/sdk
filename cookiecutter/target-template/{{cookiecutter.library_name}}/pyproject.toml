@@ -1,14 +1,14 @@
 [tool.poetry]
-name = "{{cookiecutter.tap_id}}"
+name = "{{cookiecutter.target_id}}"
 version = "0.0.1"
-description = "`{{cookiecutter.tap_id}}` is a Singer tap for {{cookiecutter.source_name}}, built with the Meltano SDK for Singer Taps."
+description = "`{{cookiecutter.target_id}}` is a Singer target for {{cookiecutter.destination_name}}, built with the Meltano SDK for Singer Targets."
 authors = ["{{ cookiecutter.admin_name }}"]
 license = "Apache 2.0"
 
 [tool.poetry.dependencies]
 python = "<3.9,>=3.6.1"
 requests = "^2.25.1"
-singer-sdk = "^0.2.0"
+singer-sdk = "^0.2.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.1.2"
@@ -19,4 +19,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 # CLI declaration
-{{cookiecutter.tap_id}} = '{{cookiecutter.library_name}}.tap:Tap{{cookiecutter.source_name}}.cli'
+{{cookiecutter.target_id}} = '{{cookiecutter.library_name}}.tap:cli'

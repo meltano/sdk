@@ -5,6 +5,7 @@ from collections import OrderedDict
 import json
 import logging
 import os
+from singer_sdk.mapper import TapMapper
 from types import MappingProxyType
 from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
 
@@ -34,8 +35,10 @@ JSONSchemaValidator = extend_validator_with_defaults(Draft4Validator)
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    name: str
+    name: str  # The executable name of the tap or target plugin.
+
     config_jsonschema: dict = {}
+    # A JSON Schema object defining the config options that this tap will accept.
 
     _config: dict
 
@@ -81,6 +84,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
         self._validate_config()
+        self.mapper: Optional[TapMapper]
 
     @classproperty
     def capabilities(self) -> List[str]:

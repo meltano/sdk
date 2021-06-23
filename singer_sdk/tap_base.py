@@ -3,6 +3,7 @@
 import abc
 import json
 from pathlib import PurePath, Path
+from singer_sdk.mapper import TapMapper
 from typing import Any, List, Optional, Dict, Type, Union, cast
 
 import click
@@ -19,9 +20,15 @@ from singer_sdk.exceptions import (
 )
 from singer_sdk.helpers import _state
 
+STREAM_MAPS_CONFIG = "stream_maps"
+
 
 class Tap(PluginBase, metaclass=abc.ABCMeta):
-    """Abstract base class for taps."""
+    """Abstract base class for taps.
+
+    The Tap class governs configuration, validation, and stream discovery for tap
+    plugins.
+    """
 
     # Constructor
 
@@ -39,6 +46,22 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         self._streams: Optional[Dict[str, Stream]] = None
         self._input_catalog: Optional[dict] = None
         self._state: Dict[str, Stream] = {}
+
+        # Initialize mappers
+
+        self.mapper: Optional[TapMapper]
+        if STREAM_MAPS_CONFIG in self.config:
+            self.mapper = TapMapper(
+                plugin_config=dict(self.config),
+                raw_catalog=self.catalog_dict,
+                logger=self.logger,
+            )
+        else:
+            self.mapper = None
+            self.logger.info(
+                "Could not find '{STREAM_MAPS_CONFIG}' in tap config keys "
+                f"[{', '.join(self.config.keys())}]"
+            )
 
         # Process input catalog
         if isinstance(catalog, dict):
@@ -135,7 +158,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         return Catalog(catalog_entries)
 
     def discover_streams(self) -> List[Stream]:
-        """Return a list of discovered streams."""
+        """Initialize all available streams and return them as a list."""
         raise NotImplementedError(
             f"Tap '{self.name}' does not support discovery. "
             "Please set the '--catalog' command line argument and try again."
