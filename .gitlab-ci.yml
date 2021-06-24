@@ -48,10 +48,10 @@ lint:
     - poetry run tox -e lint
 
 pypi_publish:
-  release:
-    name: '$CI_COMMIT_TAG'
-    tag_name: '$CI_COMMIT_TAG'
-    description: '$CI_COMMIT_TAG'
+  # release:
+  #   name: '$CI_COMMIT_TAG'
+  #   tag_name: '$CI_COMMIT_TAG'
+  #   description: '$CI_COMMIT_TAG'
   only:
     - tags
   stage: publish
