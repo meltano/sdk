@@ -17,6 +17,7 @@ from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks import Sink
+from singer_sdk.mapper import PluginMapper
 
 _MAX_PARALLELISM = 8
 
@@ -49,6 +50,13 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         self._drained_state: Dict[str, dict] = {}
         self._sinks_active: Dict[str, Sink] = {}
         self._sinks_to_clear: List[Sink] = []
+
+        # Initialize mapper
+        self.mapper: PluginMapper
+        self.mapper = PluginMapper(
+            plugin_config=dict(self.config),
+            logger=self.logger,
+        )
 
     @classproperty
     def capabilities(self) -> List[str]:
@@ -203,37 +211,52 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         self._assert_line_requires(message_dict, requires=["stream", "record"])
 
         stream_name = message_dict["stream"]
-        record = message_dict["record"]
-        sink = self.get_sink(stream_name, record=record)
-        sink._validate_record(record)
-        if sink.include_sdc_metadata_properties:
-            sink._add_metadata_values_to_record(record, message_dict)
-        else:
-            sink._remove_metadata_values_from_record(record)
+        raw_record = message_dict["record"]
+        for stream_map in self.mapper.stream_maps[stream_name]:
+            # new_schema = helpers._float_to_decimal(new_schema)
+            transformed_record = stream_map.transform(raw_record)
+            if transformed_record is None:
+                # Record was filtered out by the map transform
+                continue
 
-        context = sink._get_context(record)
-        sink.tally_record_read()
-        record = sink.preprocess_record(record, context)
-        sink.process_record(record, context)
-        sink._after_process_record(context)
+            sink = self.get_sink(stream_map.stream_alias, record=transformed_record)
+            sink._validate_record(transformed_record)
+            if sink.include_sdc_metadata_properties:
+                sink._add_metadata_values_to_record(transformed_record, message_dict)
+            else:
+                sink._remove_metadata_values_from_record(transformed_record)
 
-        if sink.is_full:
-            self.logger.info(
-                f"Target sink for '{sink.stream_name}' is full. Draining..."
-            )
-            self.drain_one(sink)
+            context = sink._get_context(transformed_record)
+            sink.tally_record_read()
+            transformed_record = sink.preprocess_record(transformed_record, context)
+            sink.process_record(transformed_record, context)
+            sink._after_process_record(context)
+
+            if sink.is_full:
+                self.logger.info(
+                    f"Target sink for '{sink.stream_name}' is full. Draining..."
+                )
+                self.drain_one(sink)
 
     def _process_schema_message(self, message_dict: dict) -> None:
         """Process a SCHEMA messages."""
         self._assert_line_requires(message_dict, requires=["stream", "schema"])
 
         stream_name = message_dict["stream"]
-        # new_schema = helpers._float_to_decimal(new_schema)
-        _ = self.get_sink(
-            stream_name,
-            schema=message_dict["schema"],
-            key_properties=message_dict.get("key_properties", None),
-        )
+        schema = message_dict["schema"]
+        key_properties = message_dict.get("key_properties", None)
+        if stream_name not in self.mapper.stream_maps:
+            self.mapper.register_raw_stream_schema(
+                stream_name,
+                schema,
+            )
+        for stream_map in self.mapper.stream_maps[stream_name]:
+            # new_schema = helpers._float_to_decimal(new_schema)
+            _ = self.get_sink(
+                stream_map.stream_alias,
+                schema=stream_map.transformed_schema,
+                key_properties=key_properties,
+            )
 
     def _process_state_message(self, message_dict: dict) -> None:
         """Process a state message. drain sinks if needed."""
