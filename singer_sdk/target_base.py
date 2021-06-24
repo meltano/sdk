@@ -249,13 +249,14 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             self.mapper.register_raw_stream_schema(
                 stream_name,
                 schema,
+                key_properties,
             )
         for stream_map in self.mapper.stream_maps[stream_name]:
             # new_schema = helpers._float_to_decimal(new_schema)
             _ = self.get_sink(
                 stream_map.stream_alias,
                 schema=stream_map.transformed_schema,
-                key_properties=key_properties,
+                key_properties=stream_map.transformed_key_properties,
             )
 
     def _process_state_message(self, message_dict: dict) -> None:
