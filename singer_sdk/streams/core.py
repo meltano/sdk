@@ -436,13 +436,6 @@ class Stream(metaclass=abc.ABCMeta):
         """
         return self._tap_state
 
-    def get_stream_or_partition_state(self, partition: Optional[dict]) -> dict:
-        """Return a writable state dict for the given context.
-
-        DEPRECATED. Please use `get_context_state()` instead.
-        """
-        return self.get_context_state(partition)
-
     def get_context_state(self, context: Optional[dict]) -> dict:
         """Return a writable state dict for the given context.
 
@@ -479,13 +472,6 @@ class Stream(metaclass=abc.ABCMeta):
         A blank state entry will be created if one doesn't already exist.
         """
         return get_writeable_state_dict(self.tap_state, self.name)
-
-    def get_partition_state(self, partition: dict) -> dict:
-        """Return a writable state dict for the given partition.
-
-        DEPRECATED. Please use `get_context_state()` instead.
-        """
-        return self.get_context_state(partition)
 
     # Partitions
 
