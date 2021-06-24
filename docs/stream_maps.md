@@ -241,7 +241,7 @@ To override the stream's default primary key properties, add the `__key_properti
 Notes:
 
 - To sync the stream as if it did not contain a primary key, simply set `__key_properties__` to `null`.
-- Primary key columns _must_ be present in the transformed stream result. Otherwise, an error will be raised.
+- Key properties _must_ be present in the transformed stream result. Otherwise, an error will be raised.
 
 #### Q: What is the difference between `primary_keys` and `key_properties`?
 
