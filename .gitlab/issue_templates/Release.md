@@ -16,9 +16,11 @@
         2. [ ] Version is bumped:
             - [ ] `pyproject.toml`
             - [ ] `cookiecutter/tap-template/pyproject.toml`
+            - [ ] `cookiecutter/target-template/pyproject.toml`
         3. [ ] Changelog is flushed with the appropriate version number
         4. [ ] Changes above are committed as `changelog and version bump`
         5. [ ] Open the Changelog in preview mode, mouse over each link and ensure tooltip descriptions match the resolved issue. Check contributor profile links to make sure they are correct.
+        6. [ ] Update `.gitlab/issue_templates_/Release.md` with any missing or changed steps in this checklist.
     4. [ ] Check this box when the CI pipeline status is **green** :white_check_mark:
     5. [ ] Merge to `main` with the merge commit message `Release vX.Y.Z`
 2. [ ] Release steps:
