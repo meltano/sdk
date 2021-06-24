@@ -204,6 +204,7 @@ class CustomType(JSONTypeHelper):
     """Accepts an arbitrary JSON Schema dictionary."""
 
     def __init__(self, jsonschema_type_dict: dict) -> None:
+        """Initialize JSONTypeHelper by importing an existing JSON Schema type."""
         self._jsonschema_type_dict = jsonschema_type_dict
 
     @property
