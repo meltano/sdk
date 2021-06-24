@@ -115,9 +115,7 @@ class CustomStreamMap(StreamMap):
             self._filter_fn,
             self._transform_fn,
             self.transformed_schema,
-        ) = self._init_functions_and_schema(
-            stream_map=map_transform, original_schema=raw_schema
-        )
+        ) = self._init_functions_and_schema(stream_map=map_transform)
 
     def transform(self, record: dict) -> Optional[dict]:
         """Return a transformed record."""
@@ -169,7 +167,7 @@ class CustomStreamMap(StreamMap):
         return default
 
     def _init_functions_and_schema(
-        self, stream_map: dict, original_schema: dict
+        self, stream_map: dict
     ) -> Tuple[Callable[[dict], bool], Callable[[dict], Optional[dict]], dict]:
         """Return a tuple: filter_fn, transform_fn, transformed_schema."""
         stream_map = copy.copy(stream_map)
@@ -205,9 +203,14 @@ class CustomStreamMap(StreamMap):
 
         # Transform the schema as needed
 
-        transformed_schema = copy.copy(original_schema)
+        transformed_schema = copy.copy(self.raw_schema)
         if not include_by_default:
+            # Start with only the defined (or transformed) key properties
             transformed_schema = PropertiesList().to_dict()
+            for key_property in self.transformed_key_properties or []:
+                transformed_schema["properties"][key_property] = self.raw_schema[
+                    "properties"
+                ][key_property]
 
         if "properties" not in transformed_schema:
             transformed_schema["properties"] = {}
@@ -238,7 +241,7 @@ class CustomStreamMap(StreamMap):
             else:
                 raise StreamMapConfigError(
                     f"Unexpected type '{type(prop_def).__name__}' in stream map "
-                    f"for '{self.stream_alias}:{prop_key}'"
+                    f"for '{self.stream_alias}:{prop_key}'."
                 )
 
         # Declare function variables
@@ -282,7 +285,10 @@ class CustomStreamMap(StreamMap):
             if include_by_default:
                 result = record.copy()
             else:
+                # Start with only the defined (or transformed) key properties
                 result = {}
+                for key_property in self.transformed_key_properties or []:
+                    result[key_property] = record[key_property]
 
             for prop_key, prop_def in list(stream_map.items()):
                 if prop_def is None:
