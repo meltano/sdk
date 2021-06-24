@@ -150,7 +150,11 @@ class Stream(metaclass=abc.ABCMeta):
                 "Using SameRecordTransform as default."
             )
             self._stream_maps = [
-                SameRecordTransform(stream_alias=self.name, raw_schema=self.schema)
+                SameRecordTransform(
+                    stream_alias=self.name,
+                    raw_schema=self.schema,
+                    key_properties=self.primary_keys,
+                )
             ]
         return self.stream_maps
 
