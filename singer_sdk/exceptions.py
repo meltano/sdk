@@ -23,3 +23,7 @@ class MapExpressionError(Exception):
 
 class RecordsWitoutSchemaException(Exception):
     """Raised if a target receives RECORD messages prior to a SCHEMA message."""
+
+
+class StreamMapConfigError(Exception):
+    """Raised when a stream map has an invalid configuration."""

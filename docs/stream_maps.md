@@ -1,4 +1,4 @@
-# Inline Stream Mappers
+# Inline Stream Maps
 
 ## Introduction
 
@@ -194,6 +194,10 @@ By default, all streams and stream properties will be included in the output unl
 specifically excluded. However, you can reverse this behavior using the `"__else__": null`
 instruction to only include defined properties or streams.
 
+**Note:** the primary key properties of the stream will still be included by default, to ensure proper deduping and
+record identification at the target. To also remove primary keys from the stream, see the `__key_properties__` override
+below.
+
 To remove all streams except the `customers` stream:
 
 ```js
@@ -217,6 +221,41 @@ To remove all fields from the `customers` stream except `customer_id`:
     },
 }
 ```
+
+### Unset or modify the stream's primary key behavior
+
+To override the stream's default primary key properties, add the `__key_properties__` operation within the stream map definition.
+
+```js
+{
+    "stream_maps": {
+        "customers": {
+            "customer_id": null,                          // Remove the original Customer ID column
+            "customer_id_hashed": "md5(customer_id)",     // Add a new (and still unique) ID column
+            "__key_properties__": ["customer_id_hashed"]  // Updated key to reflect the new name
+        },
+    },
+}
+```
+
+Notes:
+
+- To sync the stream as if it did not contain a primary key, simply set `__key_properties__` to `null`.
+- Key properties _must_ be present in the transformed stream result. Otherwise, an error will be raised.
+
+#### Q: What is the difference between `primary_keys` and `key_properties`?
+
+**A:** These two are _generally_ identical - and will only differ in cases like the above where `key_properties` is manually
+overridden or nullified by the user of the tap. Developers will specify `primary_keys` for each stream in the tap,
+but they do not control if the user will override `key_properties` behavior when initializing the stream. Primary keys
+describe the nature of the upstream data as known by the source system. However, either through manual catalog manipulation and/or by
+setting stream map transformations, the in-flight dedupe keys (`key_properties`) may be overridden or nullified by the user at any time.
+
+Additionally, some targets do not support primary key distinctions, and there are valid use cases to intentionally unset
+the `key_properties` in an extract-load pipeline. For instance, it is common to intentionally nullify key properties to trigger
+"append-only" loading behavior in certain targets, as may be required for historical reporting. This does not change the
+underlying nature of the `primary_key` configuration in the upstream source data, only how it will be landed or deduped
+in the downstream source.
 
 ## Aliasing a stream using `__alias__`
 
