@@ -1,4 +1,4 @@
-# Inline Stream Mappers
+# Inline Stream Maps
 
 ## Introduction
 
