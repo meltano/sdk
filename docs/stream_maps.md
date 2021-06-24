@@ -247,14 +247,14 @@ Notes:
 
 **A:** These two are _generally_ identical - and will only differ in cases like the above where the key_properties is manually
 overridden or nullified by the user of the tap. Tap developers configures the `primary_keys` for each tap where applicable,
-but they do not control if the user will override `key_properties` behavior when initializing the stream. Primary keys 
-describes the nature of the upstream data as known by the source system. However, either through manual catalog manipulation and/or by
+but they do not control if the user will override `key_properties` behavior when initializing the stream. Primary keys
+describe the nature of the upstream data as known by the source system. However, either through manual catalog manipulation and/or by
 setting stream map transformations, the in-flight dedupe keys (`key_properties`) may be overridden or nullified by the user at any time.
 
 Additionally, some targets do not support primary key distinctions, and there are valid use cases to intentionally unset
 the `key_properties` in an extract-load pipeline. For instance, it is common to intentionally nullify key properties to triggering
-"append-only" loading behavior in the target, as is required for certain types of historical reporting. This does not change the
-underlying nature of the upstream `primary_key` configuration in the upstream data, only how it will be landed or deduped
+"append-only" loading behavior in certain targets, as may be required for historical reporting. This does not change the
+underlying nature of the `primary_key` configuration in the upstream source data, only how it will be landed or deduped
 in the downstream source.
 
 ## Aliasing a stream using `__alias__`
