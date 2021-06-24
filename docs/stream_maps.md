@@ -252,7 +252,7 @@ describe the nature of the upstream data as known by the source system. However,
 setting stream map transformations, the in-flight dedupe keys (`key_properties`) may be overridden or nullified by the user at any time.
 
 Additionally, some targets do not support primary key distinctions, and there are valid use cases to intentionally unset
-the `key_properties` in an extract-load pipeline. For instance, it is common to intentionally nullify key properties to triggering
+the `key_properties` in an extract-load pipeline. For instance, it is common to intentionally nullify key properties to trigger
 "append-only" loading behavior in certain targets, as may be required for historical reporting. This does not change the
 underlying nature of the `primary_key` configuration in the upstream source data, only how it will be landed or deduped
 in the downstream source.
