@@ -4,7 +4,7 @@ from copy import deepcopy
 from typing import Optional, Tuple, cast, List
 from logging import Logger
 
-from singer import metadata
+from singer.metadata import to_map as metadata_to_map
 from singer.catalog import Catalog
 
 from singer_sdk.helpers._typing import is_object_type
@@ -20,14 +20,36 @@ def is_stream_selected(
     stream_name: str,
     logger: Logger,
 ) -> bool:
-    """Return True if the stream is selected for extract."""
-    return is_property_selected(catalog, stream_name, breadcrumb=(), logger=logger)
+    """Return True if the stream is selected for extract.
+
+    If catalog is None, this function will always return True.
+    """
+    if catalog is None:
+        return True
+
+    catalog_obj = Catalog.from_dict(catalog)
+    catalog_entry = catalog_obj.get_stream(stream_name)
+    if not catalog_entry:
+        logger.warning(f"Catalog entry missing for '{stream_name}'. Skipping.")
+        return False
+
+    if not catalog_entry.metadata:
+        return True
+
+    return is_property_selected(
+        stream_name,
+        catalog_entry.schema,
+        catalog_entry.metadata,
+        breadcrumb=(),
+        logger=logger,
+    )
 
 
 @cached(max_size=_MAX_LRU_CACHE)
 def is_property_selected(  # noqa: C901  # ignore 'too complex'
-    catalog: Optional[dict],
     stream_name: str,
+    schema: dict,
+    metadata: dict,
     breadcrumb: Optional[Tuple[str, ...]],
     logger: Logger,
 ) -> bool:
@@ -45,25 +67,17 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
             f"Got {type(breadcrumb).__name__}"
         )
 
-    if not catalog:
+    if not metadata:
+        # Default to true if no metadata to say otherwise
         return True
 
-    catalog_obj = Catalog.from_dict(catalog)
-    catalog_entry = catalog_obj.get_stream(stream_name)
-    if not catalog_entry:
-        logger.warning(f"Catalog entry missing for '{stream_name}'. Skipping.")
-        return False
-
-    if not catalog_entry.metadata:
-        return True
-
-    md_map = metadata.to_map(catalog_entry.metadata)
+    md_map = metadata_to_map(metadata)
     md_entry = md_map.get(breadcrumb)
     parent_value = None
     if len(breadcrumb) > 0:
         parent_breadcrumb = tuple(list(breadcrumb)[:-2])
         parent_value = is_property_selected(
-            catalog, stream_name, parent_breadcrumb, logger
+            stream_name, schema, metadata, parent_breadcrumb, logger
         )
     if parent_value is False:
         return parent_value
@@ -99,18 +113,20 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
 
 
 @cached(max_size=_MAX_LRU_CACHE)
-def get_selected_schema(catalog: dict, stream_name: str, logger: Logger) -> dict:
+def get_selected_schema(
+    stream_name: str, schema: dict, metadata: dict, logger: Logger
+) -> dict:
     """Return a copy of the provided JSON schema, dropping any fields not selected."""
-    catalog_obj = Catalog.from_dict(catalog)
-    catalog_entry = catalog_obj.get_stream(stream_name)
-    schema = deepcopy(cast(dict, catalog_entry.schema.to_dict()))
-    _pop_deselected_schema(schema, catalog, stream_name, cast(Tuple[str], ()), logger)
-    return schema
+    new_schema = deepcopy(schema)
+    _pop_deselected_schema(
+        new_schema, metadata, stream_name, cast(Tuple[str], ()), logger
+    )
+    return new_schema
 
 
 def _pop_deselected_schema(
     schema: dict,
-    catalog: dict,
+    metadata: dict,
     stream_name: str,
     breadcrumb: Tuple[str, ...],
     logger: Logger,
@@ -120,27 +136,38 @@ def _pop_deselected_schema(
     Walk through schema, starting at the index in breadcrumb, recursively updating in
     place.
     """
-    for property_name, val in list(schema.get("properties", {}).items()):
+    schema_at_breadcrumb = schema
+    for crumb in breadcrumb:
+        schema_at_breadcrumb = schema_at_breadcrumb.get(crumb, {})
+
+    if not isinstance(schema_at_breadcrumb, dict):
+        raise ValueError(
+            f"Expected dictionary type instead of "
+            f"'{type(schema_at_breadcrumb).__name__}' '{schema_at_breadcrumb}' "
+            f"for '{stream_name}' bookmark '{str(breadcrumb)}' in '{schema}'"
+        )
+    for property_name, property_def in list(schema_at_breadcrumb["properties"].items()):
         property_breadcrumb: Tuple[str, ...] = tuple(
             list(breadcrumb) + ["properties", property_name]
         )
         selected = is_property_selected(
-            catalog, stream_name, property_breadcrumb, logger
+            stream_name, schema, metadata, property_breadcrumb, logger
         )
         if not selected:
-            schema["properties"].pop(property_name)
+            schema_at_breadcrumb["properties"].pop(property_name, None)
             continue
 
-        if is_object_type(val):
+        if is_object_type(property_def):
             # call recursively in case any subproperties are deselected.
             _pop_deselected_schema(
-                val, catalog, stream_name, property_breadcrumb, logger
+                schema, metadata, stream_name, property_breadcrumb, logger
             )
 
 
 def pop_deselected_record_properties(
     record: dict,
-    catalog: dict,
+    schema: dict,
+    metadata: dict,
     stream_name: str,
     logger: Logger,
     breadcrumb: Tuple[str, ...] = (),
@@ -155,7 +182,7 @@ def pop_deselected_record_properties(
             list(breadcrumb) + ["properties", property_name]
         )
         selected = is_property_selected(
-            catalog, stream_name, property_breadcrumb, logger
+            stream_name, schema, metadata, property_breadcrumb, logger
         )
         if not selected:
             record.pop(property_name)
@@ -164,7 +191,7 @@ def pop_deselected_record_properties(
         if isinstance(val, dict):
             # call recursively in case any subproperties are deselected.
             pop_deselected_record_properties(
-                val, catalog, stream_name, logger, property_breadcrumb
+                val, schema, metadata, stream_name, logger, property_breadcrumb
             )
 
 
@@ -204,6 +231,6 @@ def set_catalog_stream_selected(
     if not catalog_entry:
         raise ValueError(f"Catalog entry missing for '{stream_name}'. Skipping.")
 
-    md_map = metadata.to_map(catalog_entry.metadata)
+    md_map = metadata_to_map(catalog_entry.metadata)
     md_entry = md_map.get(breadcrumb)
     md_entry["selected"] = selected

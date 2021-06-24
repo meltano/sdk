@@ -101,6 +101,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._primary_keys: Optional[List[str]] = None
         self._state_partitioning_keys: Optional[List[str]] = None
         self._schema_filepath: Optional[Path] = None
+        self._metadata: Optional[dict] = None
         self._schema: dict
         self.child_streams: List[Stream] = []
         if schema:
@@ -341,18 +342,22 @@ class Stream(metaclass=abc.ABCMeta):
         return False
 
     @property
-    def _singer_metadata(self) -> dict:
+    def metadata(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
         Metadata from an input catalog will override standard metadata.
         """
+        if self._metadata:
+            return self._metadata
+
         if self._tap_input_catalog:
             catalog = singer.Catalog.from_dict(self._tap_input_catalog)
             catalog_entry = catalog.get_stream(self.tap_stream_id)
             if catalog_entry:
-                return cast(dict, catalog_entry.metadata)
+                self._metadata = cast(dict, catalog_entry.metadata)
+                return self._metadata
 
-        md = cast(
+        self._metadata = cast(
             dict,
             metadata.get_standard_metadata(
                 schema=self.schema,
@@ -364,7 +369,7 @@ class Stream(metaclass=abc.ABCMeta):
                 schema_name=None,
             ),
         )
-        return md
+        return self._metadata
 
     @property
     def _singer_catalog_entry(self) -> singer.CatalogEntry:
@@ -373,7 +378,7 @@ class Stream(metaclass=abc.ABCMeta):
             tap_stream_id=self.tap_stream_id,
             stream=self.name,
             schema=Schema.from_dict(self.schema),
-            metadata=self._singer_metadata,
+            metadata=self.metadata,
             key_properties=self.primary_keys or None,
             replication_key=self.replication_key,
             replication_method=self.replication_method,
@@ -550,7 +555,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _write_record_message(self, record: dict) -> None:
         """Write out a RECORD message."""
         pop_deselected_record_properties(
-            record, self._singer_catalog.to_dict(), self.name, self.logger
+            record, self.schema, self.metadata, self.name, self.logger
         )
         record = conform_record_data_types(
             stream_name=self.name,

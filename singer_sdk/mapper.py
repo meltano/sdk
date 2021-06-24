@@ -9,13 +9,13 @@ import hashlib
 import logging
 from typing import Dict, Callable, Any, Tuple, Type, Union, cast, Optional, List
 
-from singer import Catalog, CatalogEntry
-
 import simpleeval
 from simpleeval import simple_eval
 
-from singer_sdk.exceptions import MapExpressionError
+from singer.catalog import Catalog, CatalogEntry
+
 from singer_sdk.helpers._catalog import get_selected_schema
+from singer_sdk.exceptions import MapExpressionError
 from singer_sdk.typing import (
     IntegerType,
     JSONTypeHelper,
@@ -266,96 +266,121 @@ class CustomStreamMap(StreamMap):
         return filter_fn, transform_fn, transformed_schema
 
 
-class TapMapper:
+class PluginMapper:
     """Inline map tranformer."""
 
     def __init__(
         self,
         plugin_config: Dict[str, Dict[str, Union[str, dict]]],
-        raw_catalog: dict,
         logger: logging.Logger,
     ):
         """Initialize mapper."""
         self.stream_maps = cast(Dict[str, List[StreamMap]], {})
         self.map_config = plugin_config.get("stream_map_config", {})
-        self.raw_catalog = raw_catalog
-        self.raw_catalog_obj = Catalog.from_dict(raw_catalog)
-        self.default_mapper_type: Type[DefaultStreamMap]
+        self.default_mapper_type: Type[DefaultStreamMap] = SameRecordTransform
         self.logger = logger
 
-        stream_maps_dict = plugin_config.get("stream_maps", {})
-        if MAPPER_ELSE_OPTION in stream_maps_dict:
-            if stream_maps_dict[MAPPER_ELSE_OPTION] is None:
+        self.stream_maps_dict = cast(
+            Dict[str, Union[str, dict, None]], plugin_config.get("stream_maps", {})
+        )
+        if MAPPER_ELSE_OPTION in self.stream_maps_dict:
+            if self.stream_maps_dict[MAPPER_ELSE_OPTION] is None:
                 logging.info(
                     f"Found '{MAPPER_ELSE_OPTION}=None' default mapper. "
                     "Unmapped streams will be excluded from output."
                 )
                 self.default_mapper_type = RemoveRecordTransform
-                stream_maps_dict.pop(MAPPER_ELSE_OPTION)
+                self.stream_maps_dict.pop(MAPPER_ELSE_OPTION)
             else:
                 raise RuntimeError(
                     f"Undefined transform for '{MAPPER_ELSE_OPTION}'' case: "
-                    f"{stream_maps_dict[MAPPER_ELSE_OPTION]}"
+                    f"{self.stream_maps_dict[MAPPER_ELSE_OPTION]}"
                 )
         else:
             logging.info(
                 "Operator '{MAPPER_ELSE_OPTION}=None' was not found. "
                 "Unmapped streams will be included in output."
             )
-            self.default_mapper_type = SameRecordTransform
-
-        for catalog_entry in self.raw_catalog_obj.streams:
-            if catalog_entry.stream not in self.stream_maps:
-                # The 0th mapper should be the same-named treatment.
-                # Additional items may be added for aliasing or multi projections.
-                self.stream_maps[catalog_entry.stream] = [
-                    self.default_mapper_type(
-                        catalog_entry.stream,
-                        self.get_original_stream_schema(catalog_entry.stream),
-                    )
-                ]
-
-        for stream_key, stream_def in stream_maps_dict.items():
-            stream_name = stream_key
-            stream_alias = stream_key
-            logging.info(stream_name)
-
-            if stream_key.startswith("__"):
+        for stream_map_key, stream_def in self.stream_maps_dict.items():
+            if stream_map_key.startswith("__"):
                 raise NotImplementedError(
-                    f"Option '{stream_key}:{stream_def}' is not expected."
+                    f"Option '{stream_map_key}:{stream_def}' is not expected."
+                )
+
+    def register_raw_streams_from_catalog(self, catalog_dict: dict) -> None:
+        catalog = Catalog.from_dict(catalog_dict)
+        catalog_entry: CatalogEntry
+        for catalog_entry in catalog.streams:
+            self.register_raw_stream_schema(
+                catalog_entry.stream or catalog_entry.tap_stream_id,
+                get_selected_schema(
+                    catalog_entry.stream or catalog_entry.tap_stream_id,
+                    catalog_entry.schema.to_dict(),
+                    catalog_entry.metadata,
+                    self.logger,
+                ),
+            )
+
+    def register_raw_stream_schema(self, stream_name: str, schema: dict) -> None:
+        if stream_name not in self.stream_maps:
+            # The 0th mapper should be the same-named treatment.
+            # Additional items may be added for aliasing or multi projections.
+            self.stream_maps[stream_name] = [
+                self.default_mapper_type(
+                    stream_name,
+                    schema,
+                )
+            ]
+
+        for stream_map_key, stream_def in self.stream_maps_dict.items():
+            stream_alias: str = stream_name
+            if isinstance(stream_def, str):
+                if stream_name == stream_map_key:
+                    # TODO: Add any expected cases for str expressions (currently none)
+                    pass
+
+                raise NotImplementedError(
+                    f"Option '{stream_map_key}:{stream_def}' is not expected."
                 )
 
             if stream_def is None:
-                self.stream_maps[stream_key].append(
-                    RemoveRecordTransform(
-                        stream_alias=stream_key,
-                        raw_schema=self.get_original_stream_schema(stream_key),
-                    )
+                if stream_name != stream_map_key:
+                    continue
+
+                self.stream_maps[stream_map_key][0] = RemoveRecordTransform(
+                    stream_alias=stream_map_key,
+                    raw_schema=schema,
                 )
-                logging.info(f"Add null tansform for {stream_name}")
+                logging.info(f"Set null tansform as default for '{stream_name}'")
                 continue
 
-            if isinstance(stream_def, str):
-                # Handle expected cases
-
-                raise NotImplementedError(
-                    f"Option '{stream_key}:{stream_def}' is not expected."
+            if not isinstance(stream_def, dict):
+                raise ValueError(
+                    "Unexpected stream definition type. Expected str, dict, or None. "
+                    f"Got '{type(stream_def).__name__}'."
                 )
 
             if MAPPER_SOURCE_OPTION in stream_def:
-                stream_name = cast(str, stream_def.pop(MAPPER_SOURCE_OPTION))
+                if stream_name != cast(str, stream_def.pop(MAPPER_SOURCE_OPTION)):
+                    # Not a match
+                    continue
 
-            if MAPPER_ALIAS_OPTION in stream_def:
-                stream_alias = cast(str, stream_def.pop(MAPPER_ALIAS_OPTION))
+                if MAPPER_ALIAS_OPTION in stream_def:
+                    stream_alias = cast(str, stream_def.pop(MAPPER_ALIAS_OPTION))
+
+            elif stream_name != stream_map_key:
+                # Not a match
+                continue
 
             mapper = CustomStreamMap(
                 alias=stream_alias,
                 map_transform=stream_def,
                 map_config=self.map_config,
-                raw_schema=self.get_original_stream_schema(stream_name),
+                raw_schema=schema,
             )
-            if stream_name == stream_key:
-                # Zero-th mapper should be the same-named mapper:
+            if stream_name == stream_alias:
+                # Zero-th mapper should be the same-named mapper.
+                # Override the default mapper with this custom map
                 self.stream_maps[stream_name][0] = mapper
             else:
                 # Additional mappers for aliasing and multi-projection:
@@ -367,17 +392,6 @@ class TapMapper:
             raise RuntimeError(f"No mapper found for {stream_name}. ")
 
         return self.stream_maps[stream_name][0]
-
-    def get_original_stream_schema(
-        self, stream_name: str, with_selection_filter: bool = True
-    ) -> dict:
-        """Return the unchanged schema definition for the specified stream name."""
-        if with_selection_filter:
-            return get_selected_schema(self.raw_catalog, stream_name, self.logger)
-
-        catalog = Catalog.from_dict(self.raw_catalog)
-        catalog_entry: CatalogEntry = catalog.get_stream(stream_name)
-        return cast(dict, catalog_entry.schema.to_dict())
 
     def apply_primary_mapper(self, stream_name: str, record: dict) -> Optional[dict]:
         """Apply the primary mapper for the stream and return the result."""
