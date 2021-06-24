@@ -18,8 +18,14 @@ The next few lines form the template for unreleased changes.
 
 ## v0.3.0
 
+### Added
+
 - Added Stream Map feature for inline transformation and filtering capabilities (#63, !4, !92, !103)
 - Added Target SDK, components and templates for building Singer targets (#96, !4)
+
+### Removed
+
+- Removed methods deprecated in `v0.2.0`: `Stream.get_partition_state()` and `Stream.get_stream_or_partition_state()`. Developers should replace these with references to `Stream.get_context_state()`.
 
 ## v0.2.0
 
