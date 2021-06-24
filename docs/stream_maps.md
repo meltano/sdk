@@ -230,9 +230,9 @@ To override the stream's default primary key properties, add the `__key_properti
 {
     "stream_maps": {
         "customers": {
-            "customer_id": null,                      // Remove the original Customer ID column
-            "customer_id_hashed": "md5(customer_id)", // Add a new (and still unique) ID column
-            "__key_properties__": ["customer_id_hashed"]
+            "customer_id": null,                          // Remove the original Customer ID column
+            "customer_id_hashed": "md5(customer_id)",     // Add a new (and still unique) ID column
+            "__key_properties__": ["customer_id_hashed"]  // Updated key to reflect the new name
         },
     },
 }
@@ -245,8 +245,8 @@ Notes:
 
 #### Q: What is the difference between `primary_keys` and `key_properties`?
 
-**A:** These two are _generally_ identical - and will only differ in cases like the above where the key_properties is manually
-overridden or nullified by the user of the tap. Tap developers configures the `primary_keys` for each tap where applicable,
+**A:** These two are _generally_ identical - and will only differ in cases like the above where `key_properties` is manually
+overridden or nullified by the user of the tap. Developers will specify `primary_keys` for each stream in the tap,
 but they do not control if the user will override `key_properties` behavior when initializing the stream. Primary keys
 describe the nature of the upstream data as known by the source system. However, either through manual catalog manipulation and/or by
 setting stream map transformations, the in-flight dedupe keys (`key_properties`) may be overridden or nullified by the user at any time.
