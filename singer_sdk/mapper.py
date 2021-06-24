@@ -308,6 +308,7 @@ class PluginMapper:
                 )
 
     def register_raw_streams_from_catalog(self, catalog_dict: dict) -> None:
+        """Register all streams as described in the catalog dict."""
         catalog = Catalog.from_dict(catalog_dict)
         catalog_entry: CatalogEntry
         for catalog_entry in catalog.streams:
@@ -322,6 +323,7 @@ class PluginMapper:
             )
 
     def register_raw_stream_schema(self, stream_name: str, schema: dict) -> None:
+        """Register a new stream as described by its name and schema."""
         if stream_name not in self.stream_maps:
             # The 0th mapper should be the same-named treatment.
             # Additional items may be added for aliasing or multi projections.
