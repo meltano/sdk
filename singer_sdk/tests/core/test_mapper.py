@@ -10,7 +10,7 @@ import logging
 from singer import Catalog
 
 from singer_sdk.exceptions import MapExpressionError
-from singer_sdk.mapper import TapMapper, RemoveRecordTransform, md5
+from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
 
 
 @pytest.fixture
@@ -262,14 +262,14 @@ def _test_transform(
     sample_catalog_dict,
 ):
     output: Dict[str, List[dict]] = {}
-    mapper = TapMapper(
+    mapper = PluginMapper(
         plugin_config={
             "stream_maps": stream_maps,
             "stream_map_config": stream_map_config,
         },
-        raw_catalog=sample_catalog_dict,
         logger=logging,
     )
+    mapper.register_raw_streams_from_catalog(sample_catalog_dict)
 
     for stream_name, stream in sample_stream.items():
         if isinstance(mapper.get_primary_mapper(stream_name), RemoveRecordTransform):
