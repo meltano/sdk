@@ -25,7 +25,7 @@ The next few lines form the template for unreleased changes.
 
 ### Removed
 
-- Removed methods deprecated in `v0.2.0`: `Stream.get_partition_state()` and `Stream.get_stream_or_partition_state()`. Developers should replace these with references to `Stream.get_context_state()`.
+- Removed methods deprecated in v0.2.0: `get_partition_state()` and `get_stream_or_partition_state()`. Affected developers should replace these with references to `get_context_state()`. (#152, !107)
 
 ## v0.2.0
 
