@@ -112,10 +112,7 @@ def handle_invalid_timestamp_in_record(
     treatment: Optional[DatetimeErrorTreatmentEnum],
     logger: logging.Logger,
 ) -> Any:
-    """Apply treatment or raise an error for invalid time values.
-
-    Override this method to introduce custom timestamp handling.
-    """
+    """Apply treatment or raise an error for invalid time values."""
     treatment = treatment or DatetimeErrorTreatmentEnum.ERROR
     msg = (
         f"Could not parse value '{invalid_value}' for "
