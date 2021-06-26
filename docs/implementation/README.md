@@ -4,9 +4,10 @@ This section documents certain behaviors and expectations of the SDK framework.
 
 1. [CLI](./cli.md)
 2. [Discovery](./discovery.md)
-3. [Metadata](./discovery.md)
-4. [Metrics](./discovery.md)
-5. [State](./state.md)
+3. [Catalog Metadata](./catalog_metadata.md)
+4. [Record Metadata](./record_metadata.md)
+5. [Metrics](./discovery.md)
+6. [State](./state.md)
 
 ## How to use the implementation reference material
 
