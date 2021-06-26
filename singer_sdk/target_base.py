@@ -36,7 +36,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     # Default class to use for creating new sink objects.
     # Required if `Target.get_sink_class()` is not defined.
-    default_sink_class: Type[Sink]
+    default_sink_class: Optional[Type[Sink]] = None
 
     def __init__(
         self,
@@ -137,7 +137,8 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         This method is internal to the SDK and should not need to be overridden.
         """
         self.logger.info(f"Initializing '{self.name}' target sink...")
-        result = self.default_sink_class(
+        sink_class = self.get_sink_class(stream_name=stream_name)
+        result = sink_class(
             target=self,
             stream_name=stream_name,
             schema=schema,
