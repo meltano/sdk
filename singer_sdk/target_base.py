@@ -221,7 +221,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 continue
 
             sink = self.get_sink(stream_map.stream_alias, record=transformed_record)
-            sink._validate_record(transformed_record)
+            sink._validate_and_parse(transformed_record)
             if sink.include_sdc_metadata_properties:
                 sink._add_metadata_values_to_record(transformed_record, message_dict)
             else:
