@@ -69,8 +69,8 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
         return parent_value
 
     if not md_entry:
-        logger.warning(
-            f"Catalog entry missing for '{stream_name}':'{breadcrumb}'. "
+        logger.info(
+            f"Selection metadata omitted for '{stream_name}':'{breadcrumb}'. "
             f"Using parent value of selected={parent_value}."
         )
         return parent_value or False
