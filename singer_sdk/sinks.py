@@ -140,7 +140,7 @@ class Sink(metaclass=abc.ABCMeta):
     @property
     def include_sdc_metadata_properties(self) -> bool:
         """Return True if metadata columns should be added."""
-        return self.config.get("add_metadata_properties", False)
+        return self.config.get("add_record_metadata", False)
 
     @property
     def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:
@@ -184,7 +184,7 @@ class Sink(metaclass=abc.ABCMeta):
                 "format": "date-time",
             }
         for col in {"_sdc_sequence", "_sdc_table_version"}:
-            properties_dict[col] = {"type": ["null", "int"]}
+            properties_dict[col] = {"type": ["null", "integer"]}
 
     def _remove_sdc_metadata_from_schema(self) -> None:
         """Remove _sdc metadata columns.
@@ -240,7 +240,8 @@ class Sink(metaclass=abc.ABCMeta):
             if datelike_type:
                 try:
                     date_val = record[key]
-                    date_val = parser.parse(date_val)
+                    if record[key] is not None:
+                        date_val = parser.parse(date_val)
                 except Exception as ex:
                     date_val = handle_invalid_timestamp_in_record(
                         record,
