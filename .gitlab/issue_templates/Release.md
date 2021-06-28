@@ -15,6 +15,7 @@
             - [ ] Compare against `main` branch [commit history](https://gitlab.com/meltano/singer-sdk/-/commits/main)
         2. [ ] Version is bumped:
             - [ ] `pyproject.toml`
+            - [ ] `docs/conf.py`
             - [ ] `cookiecutter/tap-template/pyproject.toml`
             - [ ] `cookiecutter/target-template/pyproject.toml`
         3. [ ] Changelog is flushed with the appropriate version number
