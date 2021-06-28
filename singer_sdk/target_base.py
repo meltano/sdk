@@ -229,7 +229,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             else:
                 sink._remove_sdc_metadata_from_record(transformed_record)
 
-            sink._validate_record(transformed_record)
+            sink._validate_and_parse(transformed_record)
 
             sink.tally_record_read()
             transformed_record = sink.preprocess_record(transformed_record, context)

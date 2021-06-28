@@ -218,22 +218,22 @@ class Sink(metaclass=abc.ABCMeta):
 
     # Record validation
 
-    def _validate_record(self, record: Dict) -> Dict:
-        """Validate or repair the record."""
-        self._validate_timestamps_in_record(
+    def _validate_and_parse(self, record: Dict) -> Dict:
+        """Validate or repair the record, parsing to python-native types as needed."""
+        self._validator.validate(record)
+        self._parse_timestamps_in_record(
             record=record, schema=self.schema, treatment=self.datetime_error_treatment
         )
-        self._validator.validate(record)
         return record
 
-    def _validate_timestamps_in_record(
+    def _parse_timestamps_in_record(
         self, record: Dict, schema: Dict, treatment: DatetimeErrorTreatmentEnum
     ) -> None:
-        """Confirm or repair date or timestamp values in record.
+        """Parse strings to datetime.datetime values, repairing or erroring on failure.
 
-        Goes through every field that is of type date/datetime/time and if its value is
-        out of range, send it to self._handle_invalid_timestamp_in_record() and use the
-        return value as replacement.
+        Attempts to parse every field that is of type date/datetime/time. If its value
+        is out of range, repair logic will be driven by the `treatment` input arg:
+        MAX, NULL, or ERROR.
         """
         for key in record.keys():
             datelike_type = get_datelike_property_type(key, schema["properties"][key])
