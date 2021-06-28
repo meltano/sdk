@@ -52,9 +52,13 @@ class Sink(metaclass=abc.ABCMeta):
         self.logger = target.logger
         self._config = dict(target.config)
         self._active_batch: Optional[dict] = None
-        self.schema = schema
         self.stream_name = stream_name
         self.logger.info(f"Initializing target sink for stream '{stream_name}'...")
+        self.schema = schema
+        if self.include_sdc_metadata_properties:
+            self._add_sdc_metadata_to_schema()
+        else:
+            self._remove_sdc_metadata_from_schema()
         self.records_to_drain: Union[List[dict], Any] = []
         self._context_draining: Optional[dict] = None
         self.latest_state: Optional[dict] = None
@@ -136,12 +140,7 @@ class Sink(metaclass=abc.ABCMeta):
     @property
     def include_sdc_metadata_properties(self) -> bool:
         """Return True if metadata columns should be added."""
-        return True
-
-    @property
-    def primary_keys_required(self) -> bool:
-        """Return True if primary keys are required."""
-        return self.config.get("primary_keys_required", False)
+        return self.config.get("add_record_metadata", False)
 
     @property
     def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:
@@ -150,25 +149,72 @@ class Sink(metaclass=abc.ABCMeta):
 
     # Record processing
 
-    def _add_metadata_values_to_record(self, record: dict, message: dict) -> None:
-        """Populate metadata _sdc columns from incoming record message."""
+    def _add_sdc_metadata_to_record(
+        self, record: dict, message: dict, context: dict
+    ) -> None:
+        """Populate metadata _sdc columns from incoming record message.
+
+        Record metadata specs documented at:
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+        """
         record["_sdc_extracted_at"] = message.get("time_extracted")
-        record["_sdc_batched_at"] = datetime.datetime.now().isoformat()
-        record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
         record["_sdc_received_at"] = datetime.datetime.now().isoformat()
+        record["_sdc_batched_at"] = (
+            context.get("batch_start_time", None) or datetime.datetime.now()
+        ).isoformat()
+        record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
         record["_sdc_sequence"] = int(round(time.time() * 1000))
         record["_sdc_table_version"] = message.get("version")
-        record["_sdc_primary_key"] = self.key_properties
 
-    def _remove_metadata_values_from_record(self, record: dict) -> None:
-        """Remove metadata _sdc columns from incoming record message."""
+    def _add_sdc_metadata_to_schema(self) -> None:
+        """Add _sdc metadata columns.
+
+        Record metadata specs documented at:
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+        """
+        properties_dict = self.schema["properties"]
+        for col in {
+            "_sdc_extracted_at",
+            "_sdc_received_at",
+            "_sdc_batched_at",
+            "_sdc_deleted_at",
+        }:
+            properties_dict[col] = {
+                "type": ["null", "string"],
+                "format": "date-time",
+            }
+        for col in {"_sdc_sequence", "_sdc_table_version"}:
+            properties_dict[col] = {"type": ["null", "integer"]}
+
+    def _remove_sdc_metadata_from_schema(self) -> None:
+        """Remove _sdc metadata columns.
+
+        Record metadata specs documented at:
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+        """
+        properties_dict = self.schema["properties"]
+        for col in {
+            "_sdc_extracted_at",
+            "_sdc_received_at",
+            "_sdc_batched_at",
+            "_sdc_deleted_at",
+            "_sdc_sequence",
+            "_sdc_table_version",
+        }:
+            properties_dict.pop(col, None)
+
+    def _remove_sdc_metadata_from_record(self, record: dict) -> None:
+        """Remove metadata _sdc columns from incoming record message.
+
+        Record metadata specs documented at:
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+        """
         record.pop("_sdc_extracted_at", None)
+        record.pop("_sdc_received_at", None)
         record.pop("_sdc_batched_at", None)
         record.pop("_sdc_deleted_at", None)
-        record.pop("_sdc_received_at", None)
         record.pop("_sdc_sequence", None)
         record.pop("_sdc_table_version", None)
-        record.pop("_sdc_primary_key", None)
 
     # Record validation
 
@@ -194,7 +240,8 @@ class Sink(metaclass=abc.ABCMeta):
             if datelike_type:
                 try:
                     date_val = record[key]
-                    date_val = parser.parse(date_val)
+                    if record[key] is not None:
+                        date_val = parser.parse(date_val)
                 except Exception as ex:
                     date_val = handle_invalid_timestamp_in_record(
                         record,
@@ -311,13 +358,16 @@ class BatchSink(Sink):
     def _get_context(self, record: dict) -> dict:
         """Return a batch context. If no batch is active, return a new batch context.
 
-        Batch contexts by default are always created with a single "batch_id"
-        containing a unique GUID string.
+        The SDK-generated context will contain `batch_id` (GUID string) and
+        `batch_start_time` (datetime).
 
         NOTE: Future versions of the SDK may expand the available context attributes.
         """
         if self._active_batch is None:
-            new_context = {"batch_id": str(uuid.uuid4())}
+            new_context = {
+                "batch_id": str(uuid.uuid4()),
+                "batch_start_time": datetime.datetime.now(),
+            }
             self.start_batch(new_context)
             self._active_batch = new_context
 
@@ -326,8 +376,8 @@ class BatchSink(Sink):
     def start_batch(self, context: dict) -> None:
         """Start a new batch with the given context.
 
-        The initial generated context will have a single `batch_id` entry, which
-        contains an SDK-generated GUID string uniquely identifying this batch.
+        The SDK-generated context will contain `batch_id` (GUID string) and
+        `batch_start_time` (datetime).
 
         Developers may optionally override this method to add custom markers to the
         `context` dict and/or to initialize batch resources - such as initializing a

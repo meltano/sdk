@@ -221,13 +221,16 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 continue
 
             sink = self.get_sink(stream_map.stream_alias, record=transformed_record)
-            sink._validate_and_parse(transformed_record)
-            if sink.include_sdc_metadata_properties:
-                sink._add_metadata_values_to_record(transformed_record, message_dict)
-            else:
-                sink._remove_metadata_values_from_record(transformed_record)
-
             context = sink._get_context(transformed_record)
+            if sink.include_sdc_metadata_properties:
+                sink._add_sdc_metadata_to_record(
+                    transformed_record, message_dict, context
+                )
+            else:
+                sink._remove_sdc_metadata_from_record(transformed_record)
+
+            sink._validate_and_parse(transformed_record)
+
             sink.tally_record_read()
             transformed_record = sink.preprocess_record(transformed_record, context)
             sink.process_record(transformed_record, context)
