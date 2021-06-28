@@ -16,6 +16,18 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
+## v0.3.1
+
+### Added
+
+- Added target support for `add_record_metadata` config (#157, !111)
+
+### Fixed
+
+- Resolve target failures when dates are parsed prior to JSON Schema validation (#156, !110)
+- Resolve target failures when `default_sink_class` is not used (#153, !109)
+- Improved tap log messages when child property's selection metadata defaults to the parent's (#131, !91)
+
 ## v0.3.0
 
 ### Added
