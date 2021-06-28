@@ -152,7 +152,11 @@ class Sink(metaclass=abc.ABCMeta):
     def _add_sdc_metadata_to_record(
         self, record: dict, message: dict, context: dict
     ) -> None:
-        """Populate metadata _sdc columns from incoming record message."""
+        """Populate metadata _sdc columns from incoming record message.
+
+        Record metadata specs documented at:
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+        """
         record["_sdc_extracted_at"] = message.get("time_extracted")
         record["_sdc_received_at"] = datetime.datetime.now().isoformat()
         record["_sdc_batched_at"] = (
@@ -163,10 +167,10 @@ class Sink(metaclass=abc.ABCMeta):
         record["_sdc_table_version"] = message.get("version")
 
     def _add_sdc_metadata_to_schema(self) -> None:
-        """Metadata _sdc columns according to the stitch documentation at
-        https://www.stitchdata.com/docs/data-structure/integration-schemas#sdc-columns
+        """Add _sdc metadata columns.
 
-        Metadata columns gives information about data injections
+        Record metadata specs documented at:
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
         """
         properties_dict = self.schema["properties"]
         for col in {
@@ -183,10 +187,10 @@ class Sink(metaclass=abc.ABCMeta):
             properties_dict[col] = {"type": ["null", "int"]}
 
     def _remove_sdc_metadata_from_schema(self) -> None:
-        """Metadata _sdc columns according to the stitch documentation at
-        https://www.stitchdata.com/docs/data-structure/integration-schemas#sdc-columns
+        """Remove _sdc metadata columns.
 
-        Metadata columns gives information about data injections
+        Record metadata specs documented at:
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
         """
         properties_dict = self.schema["properties"]
         for col in {
@@ -200,7 +204,11 @@ class Sink(metaclass=abc.ABCMeta):
             properties_dict.pop(col, None)
 
     def _remove_sdc_metadata_from_record(self, record: dict) -> None:
-        """Remove metadata _sdc columns from incoming record message."""
+        """Remove metadata _sdc columns from incoming record message.
+
+        Record metadata specs documented at:
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+        """
         record.pop("_sdc_extracted_at", None)
         record.pop("_sdc_received_at", None)
         record.pop("_sdc_batched_at", None)
