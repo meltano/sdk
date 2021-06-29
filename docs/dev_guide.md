@@ -2,7 +2,7 @@
 
 ## Tap Development Overview
 
-Create taps with `singer-sdk` requires overriding just two or three classes:
+Create taps with the SDK requires overriding just two or three classes:
 
 1. The `Tap` class. This class governs configuration, validation,
    and stream discovery.
@@ -21,7 +21,7 @@ Create taps with `singer-sdk` requires overriding just two or three classes:
 
 ## Target Development Overview
 
-Create targets with `singer-sdk` requires overriding just two classes:
+Create targets with the SDK requires overriding just two classes:
 
 1. The `Target` class. This class governs configuration, validation,
    and stream discovery.
@@ -53,13 +53,13 @@ pipx install cookiecutter
 Now you can initialize your new project with the Cookiecutter template for taps:
 
 ```bash
-cookiecutter https://gitlab.com/meltano/singer-sdk --directory="cookiecutter/tap-template"
+cookiecutter https://gitlab.com/meltano/sdk --directory="cookiecutter/tap-template"
 ```
 
 ...or for targets:
 
 ```bash
-cookiecutter https://gitlab.com/meltano/singer-sdk --directory="cookiecutter/target-template"
+cookiecutter https://gitlab.com/meltano/sdk --directory="cookiecutter/target-template"
 ```
 
 Once you've answered the cookiecutter prompts, follow the instructions in the

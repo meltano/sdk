@@ -31,7 +31,7 @@ The SDK project is 100% open source, licensed under the `Apache 2.0`_
 permissive license. Please visit our code repo `here in Gitlab`_, where you can
 read the `source code`_, `log an issue or feature request`_, and `contribute back`_
 to the SDK. We also regularly discuss SDK topics in our `Meltano Slack`_ community,
-within the dedicated `#singer-sdk`_ Slack channel.
+within the `#singer-tap-development`_ and `#singer-target-development`_ Slack channels.
 
 Developer Resources
 -------------------
@@ -76,7 +76,8 @@ Advanced Topics
 .. _Apache 2.0: https://en.wikipedia.org/wiki/Apache_License
 .. _here in Gitlab: https://gitlab.com/meltano/sdk
 .. _Meltano Slack: https://join.slack.com/t/meltano/shared_invite/zt-obgpdeba-7yrqKhwyMBfdHDXsZY8G7Q
-.. _#singer-sdk: https://meltano.slack.com/archives/C01PKLU5D1R
+.. _#singer-tap-development: https://meltano.slack.com/archives/C01PKLU5D1R
+.. _#singer-target-development: https://meltano.slack.com/archives/C01RKUVUG4S
 
 Index and Search
 ----------------

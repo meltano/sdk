@@ -1,4 +1,4 @@
-# Singer SDK Target Template
+# SDK Target Template
 
 To use this cookie cutter template:
 
@@ -12,13 +12,13 @@ pipx install cookiecutter
 Initialize Cookiecutter template directly from Git:
 
 ```bash
-cookiecutter https://gitlab.com/meltano/singer-sdk --directory="cookiecutter/target-template"
+cookiecutter https://gitlab.com/meltano/sdk --directory="cookiecutter/target-template"
 ```
 
-Or locally from an already-cloned `singer-sdk` repo:
+Or locally from an already-cloned `sdk` repo:
 
 ```bash
-cookiecutter ./singer-sdk/cookiecutter/target-template
+cookiecutter ./sdk/cookiecutter/target-template
 ```
 
 See the [dev guide](../../docs/dev_guide.md).

@@ -12,7 +12,7 @@
     2. [ ] Create a corresponding MR on a branch named `<issue>-release-vX-Y-Z` (the default name if your issue is titled correctly)
     3. [ ] The `release-vX.Y.Z` MR is ready when:
         1. [ ] Changelog includes all meaningful user-facing updates since the last release
-            - [ ] Compare against `main` branch [commit history](https://gitlab.com/meltano/singer-sdk/-/commits/main)
+            - [ ] Compare against `main` branch [commit history](https://gitlab.com/meltano/sdk/-/commits/main)
         2. [ ] Version is bumped:
             - [ ] `pyproject.toml`
             - [ ] `docs/conf.py`
@@ -26,12 +26,12 @@
     5. [ ] Merge to `main` with the merge commit message `Release vX.Y.Z`
 2. [ ] Release steps:
    1. [ ] Manual:
-      1. [ ] [Cut a tag](https://gitlab.com/meltano/singer-sdk/-/tags/new) from `main` named `vX.Y.Z` with Message=`Release vX.Y.Z`
+      1. [ ] [Cut a tag](https://gitlab.com/meltano/sdk/-/tags/new) from `main` named `vX.Y.Z` with Message=`Release vX.Y.Z`
            - _Note: tag name must exactly match poetry version text_
-   2. [ ] Automated [CD pipeline](https://gitlab.com/meltano/singer-sdk/-/pipelines?scope=tags):
+   2. [ ] Automated [CD pipeline](https://gitlab.com/meltano/sdk/-/pipelines?scope=tags):
        - In response to new tag creation, these steps are performed automatically in Gitlab pipelines:
            - Abort if tag `vX.Y.Z` does not match output from `poetry version --short`
-           - Publish to [PyPi](https://pypi.org/project/singer-sdk/#history)
+           - Publish to [PyPi](https://pypi.org/project/sdk/#history)
                - [ ] Check this box when confirmed
            - Create a Gitlab 'Release' from the specified tag
 
