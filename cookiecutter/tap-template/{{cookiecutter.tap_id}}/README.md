@@ -2,7 +2,7 @@
 
 `{{ cookiecutter.tap_id }}` is a Singer tap for {{ cookiecutter.source_name }}.
 
-Built with the Meltano [SDK](https://gitlab.com/meltano/singer-sdk) for Singer Taps.
+Built with the Meltano [SDK](https://gitlab.com/meltano/sdk) for Singer Taps.
 
 ## Installation
 
@@ -96,5 +96,5 @@ meltano elt {{ cookiecutter.tap_id }} target-jsonl
 
 ### SDK Dev Guide
 
-See the [dev guide](https://gitlab.com/meltano/singer-sdk/-/blob/main/docs/dev_guide.md) for more instructions on how to use the SDK to 
+See the [dev guide](https://sdk.meltano.com/en/latest/dev_guide.html) for more instructions on how to use the SDK to 
 develop your own taps and targets.

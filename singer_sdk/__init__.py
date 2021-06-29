@@ -1,4 +1,4 @@
-"""singer-sdk library for building singer-compliant taps."""
+"""SDK for building singer-compliant Singer taps."""
 
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.tap_base import Tap

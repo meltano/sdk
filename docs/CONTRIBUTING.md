@@ -15,7 +15,7 @@ pipx install poetry
 Now you can use Poetry to install package dependencies:
 
 ```bash
-cd singer-sdk
+cd sdk
 ```
 
 ```bash
@@ -38,7 +38,7 @@ First clone, then...
     - We use `coverage` for code coverage metrics.
     - The project-wide max line length is `89`.
     - In the future we will add support for linting
-      [pre-commit hooks](https://gitlab.com/meltano/singer-sdk/-/issues/12) as well.
+      [pre-commit hooks](https://gitlab.com/meltano/sdk/-/issues/12) as well.
 4. Set interpreter to match poetry's virtualenv:
     - In VS Code, run `Python: Select interpreter` and select the poetry interpreter.
 
