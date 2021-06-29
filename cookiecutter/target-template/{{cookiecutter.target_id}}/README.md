@@ -95,7 +95,7 @@ meltano invoke {{ cookiecutter.target_id }} --version
 meltano elt tap-carbon-intensity {{ cookiecutter.target_id }}
 ```
 
-### Singer SDK Dev Guide
+### SDK Dev Guide
 
-See the [dev guide](../../docs/dev_guide.md) for more instructions on how to use the Singer SDK to 
-develop your own taps and targets.
+See the [dev guide](../../docs/dev_guide.md) for more instructions on how to use the Meltano SDK to
+develop your own Singer taps and targets.
