@@ -16,6 +16,12 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
+## v0.3.2
+
+### Fixed
+
+- Resolve stream map duplicates not aliased correctly (#154, !114)
+
 ## v0.3.1
 
 ### Added
