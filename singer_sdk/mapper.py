@@ -97,7 +97,7 @@ class CustomStreamMap(StreamMap):
 
     def __init__(
         self,
-        alias: str,
+        stream_alias: str,
         map_config: dict,
         raw_schema: dict,
         key_properties: Optional[List[str]],
@@ -105,7 +105,9 @@ class CustomStreamMap(StreamMap):
     ) -> None:
         """Initialize mapper."""
         super().__init__(
-            stream_alias=alias, raw_schema=raw_schema, key_properties=key_properties
+            stream_alias=stream_alias,
+            raw_schema=raw_schema,
+            key_properties=key_properties,
         )
 
         self.map_config = map_config
@@ -382,7 +384,7 @@ class PluginMapper:
             ]
 
         for stream_map_key, stream_def in self.stream_maps_dict.items():
-            stream_alias: str = stream_name
+            stream_alias: str = stream_map_key
             if isinstance(stream_def, str):
                 if stream_name == stream_map_key:
                     # TODO: Add any expected cases for str expressions (currently none)
@@ -415,15 +417,15 @@ class PluginMapper:
                     # Not a match
                     continue
 
-                if MAPPER_ALIAS_OPTION in stream_def:
-                    stream_alias = cast(str, stream_def.pop(MAPPER_ALIAS_OPTION))
-
             elif stream_name != stream_map_key:
                 # Not a match
                 continue
 
+            if MAPPER_ALIAS_OPTION in stream_def:
+                stream_alias = cast(str, stream_def.pop(MAPPER_ALIAS_OPTION))
+
             mapper = CustomStreamMap(
-                alias=stream_alias,
+                stream_alias=stream_alias,
                 map_transform=stream_def,
                 map_config=self.map_config,
                 raw_schema=schema,
