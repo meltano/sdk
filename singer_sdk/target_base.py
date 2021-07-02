@@ -212,9 +212,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         self._assert_line_requires(message_dict, requires=["stream", "record"])
 
         stream_name = message_dict["stream"]
-        raw_record = message_dict["record"]
         for stream_map in self.mapper.stream_maps[stream_name]:
             # new_schema = helpers._float_to_decimal(new_schema)
+            raw_record = copy.copy(message_dict["record"])
             transformed_record = stream_map.transform(raw_record)
             if transformed_record is None:
                 # Record was filtered out by the map transform

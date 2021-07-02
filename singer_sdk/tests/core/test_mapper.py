@@ -156,6 +156,42 @@ def transformed_schemas():
     }
 
 
+# Clone and alias case
+
+
+@pytest.fixture
+def clone_and_alias_stream_maps():
+    return {
+        "repositories": {"__alias__": "repositories_aliased"},
+        "repositories_clone_1": {"__source__": "repositories"},
+        "repositories_clone_2": {"__source__": "repositories"},
+        "__else__": None,
+    }
+
+
+@pytest.fixture
+def cloned_and_aliased_result(stream_map_config, sample_stream):
+    return {
+        "repositories_aliased": sample_stream["repositories"],
+        "repositories_clone_1": sample_stream["repositories"],
+        "repositories_clone_2": sample_stream["repositories"],
+    }
+
+
+@pytest.fixture
+def cloned_and_aliased_schemas():
+    properties = PropertiesList(
+        Property("name", StringType),
+        Property("owner_email", StringType),
+        Property("description", StringType),
+    ).to_dict()
+    return {
+        "repositories_aliased": properties,
+        "repositories_clone_1": properties,
+        "repositories_clone_2": properties,
+    }
+
+
 # Filter and alias cases
 
 
@@ -208,6 +244,25 @@ def test_map_transforms(
         stream_map_config=stream_map_config,
         expected_result=transformed_result,
         expected_schemas=transformed_schemas,
+        sample_stream=sample_stream,
+        sample_catalog_dict=sample_catalog_dict,
+    )
+
+
+def test_clone_and_alias_transforms(
+    sample_stream,
+    sample_catalog_dict,
+    clone_and_alias_stream_maps,
+    stream_map_config,
+    cloned_and_aliased_result,
+    cloned_and_aliased_schemas,
+):
+    _test_transform(
+        "clone_and_alias",
+        stream_maps=clone_and_alias_stream_maps,
+        stream_map_config=stream_map_config,
+        expected_result=cloned_and_aliased_result,
+        expected_schemas=cloned_and_aliased_schemas,
         sample_stream=sample_stream,
         sample_catalog_dict=sample_catalog_dict,
     )
@@ -272,25 +327,29 @@ def _test_transform(
     mapper.register_raw_streams_from_catalog(sample_catalog_dict)
 
     for stream_name, stream in sample_stream.items():
-        if isinstance(mapper.get_primary_mapper(stream_name), RemoveRecordTransform):
-            logging.info(f"Skipping ignored stream '{stream_name}'")
-            continue
-
-        stream_map = mapper.get_primary_mapper(stream_name)
-        assert expected_schemas[stream_name] == stream_map.transformed_schema, (
-            f"Failed '{test_name}' schema test. Generated schema was "
-            f"{json.dumps(stream_map.transformed_schema, indent=2)}"
-        )
-
-        output[stream_name] = []
-        for record in stream:
-            result = stream_map.transform(record)
-            if result is None:
-                """Filter out record"""
+        for stream_map in mapper.stream_maps[stream_name]:
+            if isinstance(stream_map, RemoveRecordTransform):
+                logging.info(f"Skipping ignored stream '{stream_name}'")
                 continue
 
-            output[stream_name].append(result)
+            assert (
+                expected_schemas[stream_map.stream_alias]
+                == stream_map.transformed_schema
+            ), (
+                f"Failed '{test_name}' schema test. Generated schema was "
+                f"{json.dumps(stream_map.transformed_schema, indent=2)}"
+            )
+
+            output[stream_map.stream_alias] = []
+            for record in stream:
+                result = stream_map.transform(record)
+                if result is None:
+                    """Filter out record"""
+                    continue
+
+                output[stream_map.stream_alias].append(result)
+
     assert expected_result == output, (
-        f"Failed '{test_name}' test. "
+        f"Failed '{test_name}' record result test. "
         f"Generated output was {json.dumps(output, indent=2)}"
     )
