@@ -61,6 +61,22 @@ class ContinentsStream(GraphQLStream):
         """
 ```
 
+### Define a REST-based stream with a JSONPath expression
+
+```python
+class LOTRCharactersStream(RESTStream):
+    """Characters stream from the Lord of the Rings 'The One' API."""
+
+    # Base REST API configuration
+    url_base = "https://the-one-api.dev/v2"
+    primary_keys = ["_id"]
+
+    # Endpoint configuration
+    path = "/character"
+    name = "characters"
+    records_jsonpath = "$.docs[*]"
+```
+
 ### Dynamically discovering `schema` for a stream
 
 Here is an example which parses schema from a CSV file:

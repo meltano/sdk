@@ -86,6 +86,76 @@ class DynamicSampleStream(Stream):
 
 Note that the first static example was more concise while this second example is more extensible.
 
+### RESTful JSONPaths
+
+By default, the Singer SDK for REST streams assumes the API responds with a JSON array or records, but you can easily override this behaviour by specifying the `records_jsonpath` expression in your `RESTStream` implementation:
+
+```python
+class EntityStream(RESTStream):
+    """Entity stream from a generic REST API."""
+    records_jsonpath = "$.data.records[*]"
+```
+
+#### Nested array example
+
+Many APIs return the records in an array nested inside an JSON object key.
+
+- Object:
+
+    ```json
+    {
+      "data": {
+        "records": [
+          {"id": 1, "value": "abc"},
+          {"id": 2, "value": "def"}
+        ]
+      }
+    }
+    ```
+
+- Expression: `$.data.records[*]`
+
+- Result:
+
+    ```json
+    [
+      {"id": 1, "value": "abc"},
+      {"id": 2, "value": "def"}
+    ]
+    ```
+
+#### Nested object values example
+
+Some APIs instead return the records as values inside an object where each key is some form of identifier.
+
+- Object:
+
+    ```json
+    {
+      "data": {
+        "1": {
+          "id": 1,
+          "value": "abc"
+        },
+        "2": {
+          "id": 2,
+          "value": "def"
+        }
+      }
+    }
+    ```
+
+- Expression: `$.data.*`
+
+- Result:
+
+    ```json
+    [
+      {"id": 1, "value": "abc"},
+      {"id": 2, "value": "def"}
+    ]
+    ```
+
 ### In summary
 
 - Use the static syntax whenever you are dealing with stream properties that won't change
