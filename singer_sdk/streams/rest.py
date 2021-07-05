@@ -26,7 +26,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     _page_size: int = DEFAULT_PAGE_SIZE
     _requests_session: Optional[requests.Session]
     rest_method = "GET"
-    response_records_jsonpath: str = "$[*]"
+    records_jsonpath: str = "$[*]"
 
     @property
     @abc.abstractmethod
@@ -53,7 +53,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     def _jsonpath(self) -> jsonpath_rw.JSONPath:
         """Compiled response JSONPath."""
         if not self._compiled_jsonpath:
-            self._compiled_jsonpath = jsonpath_rw.parse(self.response_records_jsonpath)
+            self._compiled_jsonpath = jsonpath_rw.parse(self.records_jsonpath)
         return self._compiled_jsonpath
 
     @staticmethod

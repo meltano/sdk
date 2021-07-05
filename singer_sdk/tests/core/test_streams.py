@@ -174,7 +174,7 @@ def test_jsonpath_rest_stream(
     fake_response = requests.Response()
     fake_response._content = str.encode(content)
 
-    RestTestStream.response_records_jsonpath = path
+    RestTestStream.records_jsonpath = path
     stream = RestTestStream(tap)
 
     rows = stream.parse_response(fake_response)
