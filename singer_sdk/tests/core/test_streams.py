@@ -164,8 +164,13 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
             '{"id": 1, "value": "abc"}',
             [{"id": 1, "value": "abc"}],
         ),
+        (
+            "$.data.*",
+            '{"data": {"1": {"id": 1, "value": "abc"}, "2": {"id": 2, "value": "def"}}}',
+            [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}],
+        ),
     ],
-    ids=["array", "nested_one_level", "nested_two_levels", "single_object"],
+    ids=["array", "nested_one_level", "nested_two_levels", "single_object", "nested_values"],
 )
 def test_jsonpath_rest_stream(
     tap: SimpleTestTap, path: str, content: str, result: List[dict]
