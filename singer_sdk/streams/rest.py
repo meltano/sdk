@@ -29,6 +29,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     #: JSONPath expression to extract records from the API response.
     records_jsonpath: str = "$[*]"
+
     # Private constants. May not be supported in future releases:
     _LOG_REQUEST_METRICS: bool = True
     # Disabled by default for safety:

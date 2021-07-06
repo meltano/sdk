@@ -76,6 +76,15 @@ class LOTRCharactersStream(RESTStream):
     path = "/character"
     name = "characters"
     records_jsonpath = "$.docs[*]"
+
+    @property
+    def authenticator(self):
+        return SimpleAuthenticator(
+            stream=self,
+            auth_headers={
+                "Authorization": f"Bearer {self.config.get('api_key')}",
+            },
+        )
 ```
 
 ### Dynamically discovering `schema` for a stream

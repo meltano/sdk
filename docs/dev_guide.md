@@ -78,13 +78,13 @@ class EntityStream(RESTStream):
     records_jsonpath = "$.data.records[*]"
 ```
 
-You can test your JSONPath expressions with the [JSONPath Online Evaluator](https://jsonpath.com/):
+You can test your JSONPath expressions with the [JSONPath Online Evaluator](https://jsonpath.com/).
 
 #### Nested array example
 
 Many APIs return the records in an array nested inside an JSON object key.
 
-- Object:
+- Response:
 
     ```json
     {
@@ -112,7 +112,7 @@ Many APIs return the records in an array nested inside an JSON object key.
 
 Some APIs instead return the records as values inside an object where each key is some form of identifier.
 
-- Object:
+- Response:
 
     ```json
     {
