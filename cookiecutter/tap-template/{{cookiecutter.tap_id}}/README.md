@@ -2,7 +2,7 @@
 
 `{{ cookiecutter.tap_id }}` is a Singer tap for {{ cookiecutter.source_name }}.
 
-Built with the Meltano [SDK](https://gitlab.com/meltano/sdk) for Singer Taps.
+Built with the [Meltano Tap SDK](https://sdk.meltano.com) for Singer Taps.
 
 ## Installation
 
@@ -31,7 +31,7 @@ tap is available by running:
 
 ## Usage
 
-You can easily run `{{ cookiecutter.tap_id }}` by itself or in a pipeline using [Meltano](www.meltano.com).
+You can easily run `{{ cookiecutter.tap_id }}` by itself or in a pipeline using [Meltano](https://meltano.com/).
 
 ### Executing the Tap Directly
 

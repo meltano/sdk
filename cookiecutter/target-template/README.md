@@ -21,4 +21,4 @@ Or locally from an already-cloned `sdk` repo:
 cookiecutter ./sdk/cookiecutter/target-template
 ```
 
-See the [dev guide](../../docs/dev_guide.md).
+See the [dev guide](https://sdk.meltano.com/en/latest/dev_guide.html).
