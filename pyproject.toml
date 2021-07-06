@@ -16,7 +16,7 @@ requests = "^2.25.1"
 cryptography = "^3.4.6"
 importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 memoization = "^0.3.2"
-jsonpath-rw = "^1.4.0"
+jsonpath-ng = "^1.5.3"
 joblib = "^1.0.1"
 inflection = "^0.5.1"
 

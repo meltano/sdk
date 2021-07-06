@@ -9,7 +9,7 @@ import requests
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Union, cast
 
-import jsonpath_rw
+import jsonpath_ng
 
 from singer.schema import Schema
 
@@ -56,10 +56,10 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         self._compiled_jsonpath = None
 
     @property
-    def _jsonpath(self) -> jsonpath_rw.JSONPath:
+    def _jsonpath(self) -> jsonpath_ng.JSONPath:
         """Compiled response JSONPath."""
         if not self._compiled_jsonpath:
-            self._compiled_jsonpath = jsonpath_rw.parse(self.records_jsonpath)
+            self._compiled_jsonpath = jsonpath_ng.parse(self.records_jsonpath)
         return self._compiled_jsonpath
 
     @staticmethod
