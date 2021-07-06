@@ -1,6 +1,6 @@
-# [Singer SDK Implementation Details](/.README.md) - Tap CLI
+# [SDK Implementation Details](./README.md) - Tap CLI
 
-The Singer SDK automatically adds Tap CLI handling.
+The SDK automatically adds Tap CLI handling.
 
 ## Configuration (`--config`)
 
@@ -33,6 +33,11 @@ override this method to achieve custom handling.
 
 ### Input Catalog Stream Selection
 
-The most common use case for providing a catalog input is for field selection.
-_**The SDK does not yet implement the stream selection feature**_ and we are tracking that
-future development work [here](https://gitlab.com/meltano/singer-sdk/-/issues/7).
+The SDK automatically applies selection logic as described by the
+[Singer Spec](https://hub.meltano.com/singer/spec#metadata).
+
+Selection rules are applied at three levels:
+
+1. **Streams** are filtered out if they are deselected or ommitted in the input catalog.
+2. **RECORD messages** are filtered based upon selection rules in the input catalog.
+3. **SCHEMA messages** are filtered based upon selection rules in the input catalog.

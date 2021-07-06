@@ -1,8 +1,8 @@
-# Singer SDK Development Docs
+# SDK Dev Guide
 
-## SDK Overview
+## Tap Development Overview
 
-Create taps with `singer-sdk` requires overriding just two or three classes:
+Create taps with the SDK requires overriding just two or three classes:
 
 1. The `Tap` class. This class governs configuration, validation,
    and stream discovery.
@@ -16,75 +16,57 @@ Create taps with `singer-sdk` requires overriding just two or three classes:
     - `SimpleAuthenticator` - This class is functionally equivalent to overriding
       `http_headers` property in the stream class.
     - `OAuthAuthenticator` - This class performs an OAuth 2.0 authentication flow.
-    - `OAuthJWTAuthenticator` - This class performs an JWT (Java Web Token) authentication
+    - `OAuthJWTAuthenticator` - This class performs an JWT (JSON Web Token) authentication
        flow.
 
-### Detailed Class Reference
+## Target Development Overview
 
-For a detailed reference, please see the [SDK Reference Guide](./reference.md)
+Create targets with the SDK requires overriding just two classes:
 
-### Singer SDK Implementation Details
+1. The `Target` class. This class governs configuration, validation,
+   and stream discovery.
+2. The `Sink` class. You have two different options depending on whether your target
+   prefers writing one record at a time versus writing in batches:
+    - `RecordSink` writes one record at a time, via the `process_record()`
+      method.
+    - `BatchSink` writes one batch at a time. Important class members include:
+      - `start_batch()` to (optionally) initialize a new batch.
+      - `process_record()` to enqueue a record to be written.
+      - `process_batch()` to write any queued records and cleanup local resources.
 
-For more detailed information about the Singer SDK implementation, please see the
-[Singer SDK Implementation Details](./implementation/README.md) section.
+Note: The `Sink` class can receive records from one stream or from many. See the [Sink documentation](./sinks.md)
+for more information on differences between a target's `Sink` class versus a tap's `Stream` class.
 
-## Building a New Tap
+## Building a New Tap or Target
 
-The best way to get started is by building a new project from the
-[cookiecutter tap template](../cookiecutter/tap-template).
+First, install [cookiecutter](https://cookiecutter.readthedocs.io) if you haven't
+done so already:
 
-## Additional Resources
-
-### Code Samples
-
-For a list of code samples solving a variety of different scenarios, please see our [Code Samples](./code_samples.md) page.
-
-### CLI Samples
-
-For a list of sample CLI commands you can run, [click here](./cli_commands.md).
-
-## Python Tip: Two Ways to Define Properties
-
-In Python, properties within classes like Stream and Tap can generally be overridden
-in two ways: _statically_ or _dynamically_. For instance, `primary_keys` and
-`replication_key` should be declared statically if their values are known ahead of time
-(during development), and they should be declared dynamically if they vary from one
-environment to another or if they can change at runtime.
-
-### Static example
-
-Here's a simple example of static definitions based on the
-[cookiecutter template](../cookiecutter/tap-template/). This example defines the
-primary key and replication key as fixed values which will not change.
-
-```python
-class SimpleSampleStream(Stream):
-    primary_keys = ["id"]
-    replication_key = None
+```bash
+# Install pipx if you haven't already
+pip3 install pipx
+pipx ensurepath
+# Restart your terminal here, if needed, to get the updated PATH
+pipx install cookiecutter
 ```
 
-### Dynamic property example
+Now you can initialize your new project with the Cookiecutter template for taps:
 
-Here is a similar example except that the same properties are calculated dynamically based
-on user-provided inputs:
-
-```python
-class DynamicSampleStream(Stream):
-    @property
-    def primary_keys(self):
-        """Return primary key dynamically based on user inputs."""
-        return self.config["primary_key"]
-    
-    @property
-    def replication_key(self):
-        """Return replication key dynamically based on user inputs."""
-        result = self.config.get("replication_key")
-        if not result:
-            self.logger.warning("Danger: could not find replication key!")
-        return result
+```bash
+cookiecutter https://gitlab.com/meltano/sdk --directory="cookiecutter/tap-template"
 ```
 
-Note that the first static example was more concise while this second example is more extensible.
+...or for targets:
+
+```bash
+cookiecutter https://gitlab.com/meltano/sdk --directory="cookiecutter/target-template"
+```
+
+Once you've answered the cookiecutter prompts, follow the instructions in the
+generated `README.md` file to complete your new tap or target. You can also reference the
+[Meltano Tutorial](https://meltano.com/tutorials/create-a-custom-extractor.html) for a more
+detailed guide.
+
 
 ### RESTful JSONPaths
 
@@ -158,13 +140,26 @@ Some APIs instead return the records as values inside an object where each key i
     ]
     ```
 
-### In summary
+## Additional Resources
 
-- Use the static syntax whenever you are dealing with stream properties that won't change
-and use dynamic syntax whenever you need to calculate the stream's properties or discover them dynamically.
-- For those new to Python, note that the dynamic syntax is identical to declaring a function or method, with
-the one difference of having the `@property` decorator directly above the method definition. This one change
-tells Python that you want to be able to access the method as a property (as in `pk = stream.primary_key`)
-instead of as a callable function (as in `pk = stream.primary_key()`).
+### Detailed Class Reference
 
-For more examples, please see the [Code Samples](./code_samples.md) page.
+For a detailed reference, please see the [SDK Reference Guide](./reference.md)
+
+### SDK Implementation Details
+
+For more information about the SDK's' Singer implementation details, please see the
+[SDK Implementation Details](./implementation/README.md) section.
+
+### Code Samples
+
+For a list of code samples solving a variety of different scenarios, please see our 
+[Code Samples](./code_samples.md) page.
+
+### CLI Samples
+
+For a list of sample CLI commands you can run, [click here](./cli_commands.md).
+
+### Python Tips
+
+We've collected some [Python tips](python_tips.md) which may be helpful for new SDK users.

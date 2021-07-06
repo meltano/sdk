@@ -1,6 +1,6 @@
 """Stream tests."""
 
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, cast
 
 import pytest
 import pendulum
@@ -36,7 +36,7 @@ class SimpleTestStream(Stream):
     def __init__(self, tap: Tap):
         super().__init__(tap, schema=self.schema, name=self.name)
 
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, context: Optional[dict]) -> Iterable[Dict[str, Any]]:
         yield {"id": 1, "value": "Egypt"}
         yield {"id": 2, "value": "Germany"}
         yield {"id": 3, "value": "India"}
@@ -58,6 +58,7 @@ class RestTestStream(RESTStream):
 class SimpleTestTap(Tap):
     """Test tap class."""
 
+    name = "test-tap"
     settings_jsonschema = PropertiesList(Property("start_date", DateTimeType)).to_dict()
 
     def discover_streams(self) -> List[Stream]:
@@ -90,7 +91,7 @@ def tap() -> SimpleTestTap:
 @pytest.fixture
 def stream(tap: SimpleTestTap) -> SimpleTestStream:
     """Stream instance"""
-    return tap.load_streams()[0]
+    return cast(SimpleTestStream, tap.load_streams()[0])
 
 
 def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
@@ -114,7 +115,7 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
     timestamp_value = "2021-02-01"
 
     assert stream.get_starting_timestamp(None) == pendulum.parse(
-        stream.config.get("start_date")
+        cast(str, stream.config.get("start_date"))
     )
     tap.load_state(
         {

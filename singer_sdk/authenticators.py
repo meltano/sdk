@@ -5,11 +5,10 @@ import jwt
 import math
 import requests
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 from types import MappingProxyType
-from typing import Any, Dict, Mapping, Optional
+from typing import Any, Dict, Mapping, Optional, Union
 
-from pendulum import datetime
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 
@@ -26,7 +25,7 @@ class APIAuthenticatorBase(object):
         """Init authenticator."""
         self.tap_name: str = stream.tap_name
         self._config: Dict[str, Any] = dict(stream.config)
-        self._auth_headers = {}
+        self._auth_headers: Dict[str, Any] = {}
         self.logger: logging.Logger = stream.logger
 
     @property
@@ -199,14 +198,17 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
     @property
     def oauth_request_payload(self) -> dict:
         """Return request paytload for OAuth request."""
+        if not self.private_key:
+            raise ValueError("Missing 'private_key' property for OAuth payload.")
+
+        private_key: Union[bytes, Any] = bytes(self.private_key, "UTF-8")
         if self.private_key_passphrase:
+            passphrase = bytes(self.private_key_passphrase, "UTF-8")
             private_key = serialization.load_pem_private_key(
-                self.private_key,
-                password=self.private_key_passphrase,
+                private_key,
+                password=passphrase,
                 backend=default_backend(),
             )
-        else:
-            private_key = self.private_key
         return {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": jwt.encode(self.oauth_request_body, private_key, "RS256"),

@@ -1,11 +1,11 @@
 # Stream Partitioning
 
-The Singer SDK supports stream partitioning, meaning a set of substreams
+The Tap SDK supports stream partitioning, meaning a set of substreams
 which each have their own state and their own distinct queryable domain.
 
 ## If you do not require partitioning
 
-In general, developers can simply ignore the `partition` arguments in methods like
+In general, developers can simply ignore the `context` arguments in methods like
 `Stream.get_records()` if partitioning is not required.
 
 ## If you do want to utilize partitioning
@@ -28,12 +28,13 @@ work regardless of whether partition is an actual partition context or `None`, m
 no partition is specified.
 
 When dealing with state, for example, developers may always call
-`Stream.get_stream_or_partition_state(partition)` even if partition is not set.
+`Stream.get_context_state(context)` even if `context` is not set.
 The method will automatically return the state that is appropriate, either for the partition
 or for the stream.
 
 ## See Also
 
-- [Singer SDK State](./implementation/state.md)
+- [Tap SDK State](./implementation/state.md)
+- [Tap SDK Parent-Child Streams](./parent_streams.md)
 - [Singer Spec: State Overview](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#state)
 - [Singer Spec: Config and State](https://github.com/singer-io/getting-started/blob/master/docs/CONFIG_AND_STATE.md#state-file)

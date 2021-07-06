@@ -28,8 +28,3 @@ class SampleTapCountries(Tap):
             CountriesStream(tap=self),
             ContinentsStream(tap=self),
         ]
-
-
-# CLI Execution:
-
-cli = SampleTapCountries.cli

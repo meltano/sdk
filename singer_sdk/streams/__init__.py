@@ -1,4 +1,4 @@
-"""singer-sdk library for building singer-compliant taps."""
+"""SDK for building singer-compliant taps."""
 
 from singer_sdk.streams.core import Stream
 from singer_sdk.streams.rest import RESTStream

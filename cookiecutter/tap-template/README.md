@@ -1,4 +1,4 @@
-# Singer SDK Tap Template
+# Singer Tap Template
 
 To use this cookie cutter template:
 
@@ -12,13 +12,13 @@ pipx install cookiecutter
 Initialize Cookiecutter template directly from Git:
 
 ```bash
-cookiecutter https://gitlab.com/meltano/singer-sdk --directory="cookiecutter/tap-template"
+cookiecutter https://gitlab.com/meltano/sdk --directory="cookiecutter/tap-template"
 ```
 
-Or locally from an already-cloned `singer-sdk` repo:
+Or locally from an already-cloned `sdk` repo:
 
 ```bash
-cookiecutter ./singer-sdk/cookiecutter/tap-template
+cookiecutter ./sdk/cookiecutter/tap-template
 ```
 
-See the [dev guide](../../docs/dev_guide.md).
+See the [dev guide](https://gitlab.com/meltano/sdk/-/blob/main/docs/dev_guide.md).

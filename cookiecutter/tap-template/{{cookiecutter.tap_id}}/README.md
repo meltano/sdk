@@ -2,7 +2,7 @@
 
 `{{ cookiecutter.tap_id }}` is a Singer tap for {{ cookiecutter.source_name }}.
 
-Build with the [Singer SDK](https://gitlab.com/meltano/singer-sdk).
+Built with the Meltano [SDK](https://gitlab.com/meltano/sdk) for Singer Taps.
 
 ## Installation
 
@@ -67,7 +67,7 @@ You can also test the `{{cookiecutter.tap_id}}` CLI interface directly using `po
 poetry run {{cookiecutter.tap_id}} --help
 ```
 
-### Testing with [Meltano](meltano.com)
+### Testing with [Meltano](https://www.meltano.com)
 
 _**Note:** This tap will work in any Singer environment and does not require Meltano.
 Examples here are for convenience and to streamline end-to-end orchestration scenarios._
@@ -94,7 +94,7 @@ meltano invoke {{ cookiecutter.tap_id }} --version
 meltano elt {{ cookiecutter.tap_id }} target-jsonl
 ```
 
-### Singer SDK Dev Guide
+### SDK Dev Guide
 
-See the [dev guide](../../docs/dev_guide.md) for more instructions on how to use the Singer SDK to 
+See the [dev guide](https://sdk.meltano.com/en/latest/dev_guide.html) for more instructions on how to use the SDK to 
 develop your own taps and targets.

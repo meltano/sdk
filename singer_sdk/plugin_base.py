@@ -5,9 +5,16 @@ from collections import OrderedDict
 import json
 import logging
 import os
+from singer_sdk.mapper import PluginMapper
 from types import MappingProxyType
 from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
-from jsonschema import ValidationError, SchemaError, Draft4Validator
+
+
+from jsonschema import (
+    ValidationError,
+    SchemaError,
+    Draft4Validator,
+)
 from pathlib import PurePath
 
 from singer_sdk.helpers._classproperty import classproperty
@@ -28,8 +35,10 @@ JSONSchemaValidator = extend_validator_with_defaults(Draft4Validator)
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    name: str = None
-    config_jsonschema: Optional[dict] = None
+    name: str  # The executable name of the tap or target plugin.
+
+    config_jsonschema: dict = {}
+    # A JSON Schema object defining the config options that this tap will accept.
 
     _config: dict
 
@@ -75,6 +84,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
         self._validate_config()
+        self.mapper: PluginMapper
 
     @classproperty
     def capabilities(self) -> List[str]:
@@ -191,12 +201,12 @@ class PluginBase(metaclass=abc.ABCMeta):
     @classmethod
     def print_version(cls, print_fn=print) -> None:
         """Print help text for the tap."""
-        print_fn(f"{cls.name} v{cls.plugin_version}, Singer SDK v{cls.sdk_version})")
+        print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version})")
 
     @classmethod
     def print_about(cls, format: Optional[str] = None) -> None:
         """Print capabilities and other tap metadata."""
-        info = OrderedDict({})
+        info: Dict[str, Any] = OrderedDict({})
         info["name"] = cls.name
         info["version"] = cls.plugin_version
         info["sdk_version"] = cls.sdk_version

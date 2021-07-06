@@ -15,7 +15,7 @@ from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
     IssuesStream,
     CommitsStream,
     EpicsStream,
-    # EpicIssuesStream,  # Temporarily skipped due to access denied error
+    EpicIssuesStream,
 )
 
 
@@ -25,7 +25,7 @@ STREAM_TYPES = [
     IssuesStream,
     CommitsStream,
     EpicsStream,
-    # EpicIssuesStream,  # Temporarily skipped due to access denied error
+    EpicIssuesStream,
 ]
 
 
@@ -43,8 +43,3 @@ class SampleTapGitlab(Tap):
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
         return [stream_class(tap=self) for stream_class in STREAM_TYPES]
-
-
-# CLI Execution:
-
-cli = SampleTapGitlab.cli

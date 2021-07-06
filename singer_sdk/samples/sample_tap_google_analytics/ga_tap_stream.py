@@ -1,7 +1,7 @@
 """Sample tap stream test for tap-google-analytics."""
 
 from pathlib import Path
-from typing import Iterable, Optional, Any
+from typing import Iterable, List, Optional, Any, cast
 
 import pendulum
 
@@ -19,7 +19,7 @@ class GoogleJWTAuthenticator(OAuthJWTAuthenticator):
     @property
     def client_id(self) -> str:
         """Override since Google auth uses email, not numeric client ID."""
-        return self.config["client_email"]
+        return cast(str, self.config["client_email"])
 
 
 class SampleGoogleAnalyticsStream(RESTStream):
@@ -28,6 +28,10 @@ class SampleGoogleAnalyticsStream(RESTStream):
     url_base = "https://analyticsreporting.googleapis.com/v4"
     path = "/reports:batchGet"
     rest_method = "POST"
+
+    # Child class overrides:
+    dimensions: List[str] = []
+    metrics: List[str] = []
 
     @property
     def authenticator(self) -> GoogleJWTAuthenticator:
@@ -39,10 +43,10 @@ class SampleGoogleAnalyticsStream(RESTStream):
         )
 
     def prepare_request_payload(
-        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Optional[dict]:
         """Prepare the data payload for the REST API request."""
-        # params = self.get_url_params(partition, next_page_token)
+        # params = self.get_url_params(context, next_page_token)
         request_def = {
             "viewId": self.config["view_id"],
             "metrics": [{"expression": m} for m in self.metrics],
@@ -56,7 +60,7 @@ class SampleGoogleAnalyticsStream(RESTStream):
             request_def["dateRanges"] = [
                 {
                     "startDate": self.config.get("start_date"),
-                    "endDate": pendulum.datetime.now(),
+                    "endDate": pendulum.now(tz="UTC"),
                 }
             ]
         return {"reportRequests": [request_def]}

@@ -1,62 +1,22 @@
-# `singer-sdk` - a framework for building Singer taps
+# Meltano SDK for Taps and Targets
 
-## Less is More
+The Tap and Target SDKs are the fastest way to build custom data extractors and loaders!
+Taps and targets built on the SDK are automatically compliant with the
+[Singer Spec](https://hub.meltano.com/singer/spec), the
+de-facto open source standard for extract and load pipelines.
 
-Because taps built from the SDK require substantially less code, developers are able to dramatically reduce the time to develop a fully mature Singer tap.
+## Future-proof extractors and loaders, with less code
 
-## Build Future-Proof Data Extractors
+On average, developers tell us that they write about 70% less code by using the SDK, which
+makes learning the SDK a great investment. Furthermore, as new features and capabilities
+are added to the SDK, your taps and targets can always take advantage of the latest
+capabilities and bug fixes, simply by updating your SDK dependency to the latest version.
 
-We will continue to add new features to the SDK. You can always take advantage of the latest capabilities by simply updating your SDK version and then retesting and republishing with the latest version.
+## Documentation
 
-## Cookie-Cutter Quick Start
-
-`Singer SDK` provides a quickstart `cookiecutter` template for starting new taps.
-
-* [Click here for the **Cookiecutter Tap Template**](cookiecutter/tap-template/README.md)
-
-## Tap Dev Guide
-
-See the [dev guide](docs/dev_guide.md) for instructions on how to get started building your own
-taps.
-
-## Singer SDK Implementation Details
-
-For more detailed information about the Singer SDK implementation, please see the 
-[Singer SDK Implementation Details](./docs/implementation/README.md) section.
+- See our [online documentation](https://sdk.meltano.com) for instructions on how
+to get started with the SDK.
 
 ## Contributing back to the SDK
 
-First clone, then...
-
-### Install
-
-_**Note:** Singer SDK currently works with Python versions 3.6 through 3.8.x. Python 3.9 is not yet supported._
-
-Install prereqs:
-
-```bash
-pip3 install pipx
-pipx ensurepath
-pipx install poetry
-```
-
-Install package dependencies:
-
-```bash
-cd singer-sdk
-```
-
-```bash
-# Install package and dependencies:
-poetry install
-# OR install in editable mode:
-poetry install --no-root
-```
-
-- For more information, see our [Contributors Guide](CONTRIBUTING.md).
-
-### Run tests
-
-```bash
-poetry run pytest
-```
+- For more information on how to contribute, see our [Contributors Guide](CONTRIBUTING.md).
