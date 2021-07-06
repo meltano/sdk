@@ -205,3 +205,49 @@ def test_jsonpath_rest_stream(
     rows = stream.parse_response(fake_response)
 
     assert list(rows) == result
+
+
+@pytest.mark.parametrize(
+    "path,content,headers,result",
+    [
+        (
+            "$.next_page",
+            '{"data": [], "next_page": "xyz123"}',
+            {},
+            "xyz123",
+        ),
+        (
+            "$.next_page",
+            '{"data": [], "next_page": null}',
+            {},
+            None,
+        ),
+        (
+            "$.next_page",
+            '{"data": []}',
+            {},
+            None,
+        ),
+        (
+            None,
+            '[{"id": 1, "value": "abc"}',
+            {"X-Next-Page": "xyz123"},
+            "xyz123",
+        ),
+    ],
+    ids=["has_next_page", "null_next_page", "no_next_page_key", "use_header"],
+)
+def test_next_page_token_jsonpath(
+    tap: SimpleTestTap, path: str, content: str, headers: dict, result: str
+):
+    """Validate pagination token is extracted correctly from API response."""
+    fake_response = requests.Response()
+    fake_response.headers.update(headers)
+    fake_response._content = str.encode(content)
+
+    RestTestStream.next_page_token_jsonpath = path
+    stream = RestTestStream(tap)
+
+    next_page = stream.get_next_page_token(fake_response, previous_token=None)
+
+    assert next_page == result

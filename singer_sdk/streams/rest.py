@@ -30,6 +30,10 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     #: JSONPath expression to extract records from the API response.
     records_jsonpath: str = "$[*]"
 
+    #: Optional JSONPath expression to extract a pagination token from the API response.
+    #: Example: `"$.next_page"`
+    next_page_token_jsonpath: Optional[str] = None
+
     # Private constants. May not be supported in future releases:
     _LOG_REQUEST_METRICS: bool = True
     # Disabled by default for safety:
@@ -55,6 +59,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         self._http_headers: dict = {}
         self._requests_session = requests.Session()
         self._compiled_jsonpath = None
+        self._next_page_token_compiled_jsonpath = None
 
     @property
     def _jsonpath(self) -> jsonpath_ng.JSONPath:
@@ -62,6 +67,17 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         if not self._compiled_jsonpath:
             self._compiled_jsonpath = jsonpath_ng.parse(self.records_jsonpath)
         return self._compiled_jsonpath
+
+    @property
+    def _next_page_token_jsonpath(self) -> Optional[jsonpath_ng.JSONPath]:
+        """Compiled response JSONPath."""
+        if self.next_page_token_jsonpath:
+            if not self._next_page_token_compiled_jsonpath:
+                self._next_page_token_compiled_jsonpath = jsonpath_ng.parse(
+                    self.next_page_token_jsonpath,
+                )
+            return self._next_page_token_compiled_jsonpath
+        return None
 
     @staticmethod
     def _url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
@@ -221,9 +237,14 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         self, response: requests.Response, previous_token: Optional[Any]
     ) -> Any:
         """Return token identifying next page or None if all records have been read."""
-        next_page_token = response.headers.get("X-Next-Page", None)
-        if next_page_token:
-            self.logger.debug(f"Next page token retrieved: {next_page_token}")
+        if self._next_page_token_jsonpath:
+            all_matches = self._next_page_token_jsonpath.find(response.json())
+            first_match = next(iter(all_matches), None)
+            next_page_token = first_match.value if first_match else None
+        else:
+            next_page_token = response.headers.get("X-Next-Page", None)
+            if next_page_token:
+                self.logger.debug(f"Next page token retrieved: {next_page_token}")
         return next_page_token
 
     @property
