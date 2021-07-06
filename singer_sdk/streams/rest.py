@@ -9,7 +9,7 @@ import requests
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Union, cast
 
-import jsonpath_ng  # type: ignore
+import jsonpath_ng
 
 from singer.schema import Schema
 
