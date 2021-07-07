@@ -10,8 +10,6 @@ from singer_sdk.samples.sample_target_csv.csv_target import SampleTargetCSV
 
 SAMPLE_FILENAME = "/tmp/testfile.countries"
 SAMPLE_TAP_CONFIG: Dict[str, Any] = {}
-SAMPLE_TARGET_CSV_CONFIG = {"target_folder": "./.output"}
-
 
 def sync_end_to_end(tap, target):
     """Test and end-to-end sink from the tap to the target."""
@@ -22,7 +20,7 @@ def sync_end_to_end(tap, target):
     target._process_lines(buf)
 
 
-def test_countries_to_csv():
+def test_countries_to_csv(csv_config: dict):
     tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
-    target = SampleTargetCSV(config=SAMPLE_TARGET_CSV_CONFIG)
+    target = SampleTargetCSV(config=csv_config)
     sync_end_to_end(tap, target)
