@@ -11,6 +11,7 @@ from singer_sdk.samples.sample_target_csv.csv_target import SampleTargetCSV
 SAMPLE_FILENAME = "/tmp/testfile.countries"
 SAMPLE_TAP_CONFIG: Dict[str, Any] = {}
 
+
 def sync_end_to_end(tap, target):
     """Test and end-to-end sink from the tap to the target."""
     buf = io.StringIO()
