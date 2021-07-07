@@ -29,6 +29,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     next_page_token_jsonpath = "$.next_page"  # Or override `get_next_page_token`.
 
 {%- if cookiecutter.auth_method in ("Simple", "OAuth2", "JWT") %}
+
     @property
     def authenticator(self) -> {{ cookiecutter.source_name }}Authenticator:
         """Return a new authenticator object."""
