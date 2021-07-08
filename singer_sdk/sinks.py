@@ -51,7 +51,7 @@ class Sink(metaclass=abc.ABCMeta):
         """Initialize target sink."""
         self.logger = target.logger
         self._config = dict(target.config)
-        self._active_batch: Optional[dict] = None
+        self._pending_batch: Optional[dict] = None
         self.stream_name = stream_name
         self.logger.info(f"Initializing target sink for stream '{stream_name}'...")
         self.schema = schema
@@ -281,7 +281,8 @@ class Sink(metaclass=abc.ABCMeta):
 
     def start_drain(self) -> dict:
         """Set and return `self._context_draining`."""
-        self._context_draining = self._active_batch or {}
+        self._context_draining = self._pending_batch or {}
+        self._pending_batch = None
         return self._context_draining
 
     @abc.abstractmethod
@@ -363,15 +364,15 @@ class BatchSink(Sink):
 
         NOTE: Future versions of the SDK may expand the available context attributes.
         """
-        if self._active_batch is None:
+        if self._pending_batch is None:
             new_context = {
                 "batch_id": str(uuid.uuid4()),
                 "batch_start_time": datetime.datetime.now(),
             }
             self.start_batch(new_context)
-            self._active_batch = new_context
+            self._pending_batch = new_context
 
-        return self._active_batch
+        return self._pending_batch
 
     def start_batch(self, context: dict) -> None:
         """Start a new batch with the given context.
