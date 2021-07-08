@@ -282,6 +282,7 @@ class Sink(metaclass=abc.ABCMeta):
     def start_drain(self) -> dict:
         """Set and return `self._context_draining`."""
         self._context_draining = self._active_batch or {}
+        self._active_batch = None
         return self._context_draining
 
     @abc.abstractmethod
