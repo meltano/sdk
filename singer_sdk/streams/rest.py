@@ -12,6 +12,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union, cast
 from singer.schema import Schema
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
+from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 
@@ -24,6 +25,13 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     _page_size: int = DEFAULT_PAGE_SIZE
     _requests_session: Optional[requests.Session]
     rest_method = "GET"
+
+    #: JSONPath expression to extract records from the API response.
+    records_jsonpath: str = "$[*]"
+
+    #: Optional JSONPath expression to extract a pagination token from the API response.
+    #: Example: `"$.next_page"`
+    next_page_token_jsonpath: Optional[str] = None
 
     # Private constants. May not be supported in future releases:
     _LOG_REQUEST_METRICS: bool = True
@@ -49,6 +57,8 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             self.path = path
         self._http_headers: dict = {}
         self._requests_session = requests.Session()
+        self._compiled_jsonpath = None
+        self._next_page_token_compiled_jsonpath = None
 
     @staticmethod
     def _url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
@@ -208,9 +218,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         self, response: requests.Response, previous_token: Optional[Any]
     ) -> Any:
         """Return token identifying next page or None if all records have been read."""
-        next_page_token = response.headers.get("X-Next-Page", None)
-        if next_page_token:
-            self.logger.debug(f"Next page token retrieved: {next_page_token}")
+        if self.next_page_token_jsonpath:
+            all_matches = extract_jsonpath(
+                self.next_page_token_jsonpath, response.json()
+            )
+            first_match = next(iter(all_matches), None)
+            next_page_token = first_match
+        else:
+            next_page_token = response.headers.get("X-Next-Page", None)
+
         return next_page_token
 
     @property
@@ -238,12 +254,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows."""
-        resp_json = response.json()
-        if isinstance(resp_json, dict):
-            yield resp_json
-        else:
-            for row in resp_json:
-                yield row
+        yield from extract_jsonpath(self.records_jsonpath, input=response.json())
 
     # Abstract methods:
 

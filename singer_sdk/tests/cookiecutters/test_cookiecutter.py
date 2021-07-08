@@ -9,6 +9,7 @@ import black
 from cookiecutter.main import cookiecutter
 from flake8.api import legacy as flake8
 from mypy import api
+import pytest
 import yaml
 
 from logging import getLogger
@@ -16,15 +17,15 @@ from logging import getLogger
 getLogger("flake8").propagate = False
 
 
-def test_target_cookiecutter():
-    cookiecutter_template_test("cookiecutter/target-template")
-
-
-def test_tap_cookiecutter():
-    cookiecutter_template_test("cookiecutter/tap-template")
-
-
-def cookiecutter_template_test(cookiecutter_dir: str):
+@pytest.mark.parametrize(
+    "cookiecutter_dir",
+    [
+        "cookiecutter/target-template",
+        "cookiecutter/tap-template",
+    ],
+    ids=["target", "tap"],
+)
+def test_cookiecutter(outdir: str, cookiecutter_dir: str):
     """Test sync_all() for countries sample."""
     test_input_file = os.path.join(cookiecutter_dir, "cookiecutter.tests.yml")
     template_inputs = yaml.safe_load(Path(test_input_file).read_text())["tests"]
@@ -39,7 +40,6 @@ def cookiecutter_template_test(cookiecutter_dir: str):
         ]
     )
     for input in template_inputs:
-        outdir = ".output"
         cookiecutter(
             template=cookiecutter_dir,
             output_dir=outdir,
@@ -47,8 +47,7 @@ def cookiecutter_template_test(cookiecutter_dir: str):
             overwrite_if_exists=True,
             no_input=True,
         )
-        outputfiles = list(Path(outdir).glob("**/*.py"))
-        for outfile in outputfiles:
+        for outfile in Path(outdir).glob("**/*.py"):
             filepath = str(outfile.absolute())
             report = style_guide_easy.check_files([filepath])
             errors = report.get_statistics("E")

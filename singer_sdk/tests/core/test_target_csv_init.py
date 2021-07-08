@@ -2,9 +2,7 @@
 
 from singer_sdk.samples.sample_target_csv.csv_target import SampleTargetCSV
 
-SAMPLE_CONFIG = {"target_folder": "./.output"}
 
-
-def test_target_class():
+def test_target_class(csv_config: dict):
     """Test class creation."""
-    _ = SampleTargetCSV(config=SAMPLE_CONFIG)
+    _ = SampleTargetCSV(config=csv_config)
