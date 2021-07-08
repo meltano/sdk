@@ -88,7 +88,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     @property
     def max_size(self) -> int:
-        """Return the max number of records that can be held before is_full=True."""
+        """Return or set the max number of records to batch before `is_full=True`."""
         return self.MAX_SIZE_DEFAULT
 
     @property

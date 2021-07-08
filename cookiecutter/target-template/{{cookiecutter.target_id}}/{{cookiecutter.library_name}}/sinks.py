@@ -16,7 +16,7 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
         # ------
         # client.write(record)
     {%- else -%}
-    DEFAULT_BATCH_SIZE_ROWS = 10000
+    max_size = 10000  # Max records to write in one batch
 
     def start_batch(self, context: dict) -> None:
         """Start a batch.
