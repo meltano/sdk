@@ -67,6 +67,79 @@ generated `README.md` file to complete your new tap or target. You can also refe
 [Meltano Tutorial](https://meltano.com/tutorials/create-a-custom-extractor.html) for a more
 detailed guide.
 
+
+### RESTful JSONPaths
+
+By default, the Singer SDK for REST streams assumes the API responds with a JSON array or records, but you can easily override this behaviour by specifying the `records_jsonpath` expression in your `RESTStream` implementation:
+
+```python
+class EntityStream(RESTStream):
+    """Entity stream from a generic REST API."""
+    records_jsonpath = "$.data.records[*]"
+```
+
+You can test your JSONPath expressions with the [JSONPath Online Evaluator](https://jsonpath.com/).
+
+#### Nested array example
+
+Many APIs return the records in an array nested inside an JSON object key.
+
+- Response:
+
+    ```json
+    {
+      "data": {
+        "records": [
+          {"id": 1, "value": "abc"},
+          {"id": 2, "value": "def"}
+        ]
+      }
+    }
+    ```
+
+- Expression: `$.data.records[*]`
+
+- Result:
+
+    ```json
+    [
+      {"id": 1, "value": "abc"},
+      {"id": 2, "value": "def"}
+    ]
+    ```
+
+#### Nested object values example
+
+Some APIs instead return the records as values inside an object where each key is some form of identifier.
+
+- Response:
+
+    ```json
+    {
+      "data": {
+        "1": {
+          "id": 1,
+          "value": "abc"
+        },
+        "2": {
+          "id": 2,
+          "value": "def"
+        }
+      }
+    }
+    ```
+
+- Expression: `$.data.*`
+
+- Result:
+
+    ```json
+    [
+      {"id": 1, "value": "abc"},
+      {"id": 2, "value": "def"}
+    ]
+    ```
+
 ## Additional Resources
 
 ### Detailed Class Reference
