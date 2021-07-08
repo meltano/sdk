@@ -243,8 +243,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             next_page_token = first_match.value if first_match else None
         else:
             next_page_token = response.headers.get("X-Next-Page", None)
-            if next_page_token:
-                self.logger.debug(f"Next page token retrieved: {next_page_token}")
+
         return next_page_token
 
     @property
