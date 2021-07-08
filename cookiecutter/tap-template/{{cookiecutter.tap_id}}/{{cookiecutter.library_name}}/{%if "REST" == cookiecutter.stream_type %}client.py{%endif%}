@@ -92,7 +92,8 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """Parse the response and return an iterator of result rows."""
         # TODO: Parse response body and return a set of records.
         resp_json = response.json()
-        yield from [match.value for match in self._jsonpath.find(resp_json)]
+        for match in self._jsonpath.find(resp_json):
+            yield match.value
 
     def post_process(self, row: dict, context: Optional[dict]) -> dict:
         """As needed, append or transform raw data to match expected structure."""

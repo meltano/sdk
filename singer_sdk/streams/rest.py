@@ -273,7 +273,8 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows."""
         resp_json = response.json()
-        yield from [match.value for match in self._jsonpath.find(resp_json)]
+        for match in self._jsonpath.find(resp_json):
+            yield match.value
 
     # Abstract methods:
 
