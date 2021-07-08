@@ -6,6 +6,7 @@ import pytest
 import pendulum
 import requests
 
+from singer_sdk.helpers.jsonpath import _compile_jsonpath
 from singer_sdk.typing import (
     IntegerType,
     PropertiesList,
@@ -251,3 +252,13 @@ def test_next_page_token_jsonpath(
     next_page = stream.get_next_page_token(fake_response, previous_token=None)
 
     assert next_page == result
+
+
+def test_cached_jsonpath():
+    """Test compiled JSONPath is cached."""
+    expression = "$[*]"
+    compiled = _compile_jsonpath(expression)
+    recompiled = _compile_jsonpath(expression)
+
+    # cached objects should point to the same memory location
+    assert recompiled is compiled
