@@ -14,7 +14,7 @@ import pandas
 class SampleParquetTargetSink(BatchSink):
     """Parquery target sample class."""
 
-    DEFAULT_BATCH_SIZE_ROWS = 100000
+    max_size = 100000  # Max records to write in any batch
 
     def process_batch(self, context: dict) -> None:
         """Write any prepped records out and return only once fully written."""
