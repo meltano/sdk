@@ -57,7 +57,7 @@ def is_stream_selected(
 def is_property_selected(  # noqa: C901  # ignore 'too complex'
     stream_name: str,
     schema: dict,
-    metadata: dict,
+    metadata: List[dict],
     breadcrumb: Optional[Tuple[str, ...]],
     logger: Logger,
 ) -> bool:
