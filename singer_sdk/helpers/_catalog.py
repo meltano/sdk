@@ -101,7 +101,11 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
         return parent_value or False
 
     selected: Optional[bool] = md_entry.get("selected")
+    selected_by_default: Optional[bool] = md_entry.get("selected-by-default")
     inclusion: Optional[str] = md_entry.get("inclusion")
+
+    if selected_by_default is not None and selected is None:
+        return selected_by_default
 
     if inclusion == InclusionType.UNSUPPORTED:
         if selected is True:

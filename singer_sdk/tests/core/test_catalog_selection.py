@@ -26,6 +26,7 @@ def record():
             "col_b_1": "the answer",
             "col_b_2": "42",
         },
+        "col_d": "by-default",
     }
 
 
@@ -35,6 +36,7 @@ def record_selected():
         "col_a": {
             "col_a_1": "something",
         },
+        "col_d": "by-default",
     }
 
 
@@ -101,6 +103,12 @@ def selection_metadata():
                 "selected": True  # Should be overridden by 'inclusion'
             },
         },
+        {
+            "breadcrumb": ("properties", "col_d"),
+            "metadata": {
+                "selected-by-default": True
+            },
+        },
     ]
 
 
@@ -134,6 +142,8 @@ def selection_test_cases():
         (("properties", "col_b"), False),
         (("properties", "col_b", "properties", "col_b_1"), False),
         (("properties", "col_b", "properties", "col_b_2"), False),
+        (("properties", "col_c"), False),
+        (("properties", "col_d"), True),
     ]
 
 
@@ -154,7 +164,8 @@ def test_schema_selection(catalog_entry_obj, stream_name):
                 ObjectType(
                     Property("col_a_1", StringType),
                 ),
-            )
+            ),
+            Property("col_d", StringType),
         ).to_dict()["properties"]
     )
 
