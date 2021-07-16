@@ -2,10 +2,11 @@
 
 import logging
 from typing import cast
-import pytest
 from copy import deepcopy
 
 import singer
+
+import pytest
 
 from singer_sdk.helpers._catalog import (
     get_selected_schema,
@@ -210,3 +211,34 @@ def test_record_property_pop(
     assert (
         record_pop == record_selected
     ), f"Expected record={record_selected}, got {record_pop}"
+
+
+def test_no_selection_metadata():
+    """Test an exception is raised when no selection status is detected."""
+    metadata = [
+        {
+            "breadcrumb": [],
+            "metadata": {
+                "selected": True,
+                "replication-method": "FULL_TABLE",
+            },
+        },
+        {
+            "breadcrumb": ("properties", "field_one"),
+            "metadata": {
+                # Some metadata, but not for selection
+                "some-other-metadata": "whatever"
+            },
+        },
+    ]
+
+    schema = {"type": "object", "properties": {"field_one": {"type": "string"}}}
+
+    with pytest.raises(ValueError, match="Could not detect selection status .*"):
+        is_property_selected(
+            stream_name="test",
+            schema=schema,
+            metadata=metadata,
+            breadcrumb=("properties", "field_one"),
+            logger=logging.getLogger(),
+        )
