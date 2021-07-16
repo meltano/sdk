@@ -97,20 +97,21 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
         )
         return parent_value or False
 
+    selected: Optional[bool] = md_entry.get("selected")
     inclusion: Optional[str] = md_entry.get("inclusion")
 
     if inclusion == InclusionType.UNSUPPORTED:
         return False
 
     if inclusion == InclusionType.AUTOMATIC:
-        if md_entry.get("selected") is False:
+        if selected is False:
             logger.warning(
                 f"Property '{':'.join(breadcrumb)}' was deselected while also set"
                 "for automatic inclusion. Ignoring selected==False input."
             )
         return True
 
-    if "selected" in md_entry:
+    if selected is not None:
         return cast(bool, md_entry["selected"])
 
     if inclusion == InclusionType.AVAILABLE:
