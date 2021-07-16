@@ -66,6 +66,10 @@ def schema():
             "col_c",
             StringType,
         ),
+        Property(
+            "col_d",
+            StringType,
+        ),
     ).to_dict()
 
 
