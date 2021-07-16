@@ -1,6 +1,7 @@
 """Private helper functions for catalog and selection logic."""
 
 from copy import deepcopy
+from enum import Enum
 from typing import Optional, Tuple, cast, List
 from logging import Logger
 
@@ -13,6 +14,13 @@ from memoization import cached
 
 
 _MAX_LRU_CACHE = 500
+
+class InclusionType(str, Enum):
+    """Singer catalog inclusion types."""
+
+    AVAILABLE = "available"
+    AUTOMATIC = "automatic"
+    UNSUPPORTED = "unsupported"
 
 
 def is_stream_selected(
@@ -89,10 +97,10 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
         )
         return parent_value or False
 
-    if md_entry.get("inclusion") == "unsupported":
+    if md_entry.get("inclusion") == InclusionType.UNSUPPORTED:
         return False
 
-    if md_entry.get("inclusion") == "automatic":
+    if md_entry.get("inclusion") == InclusionType.AUTOMATIC:
         if md_entry.get("selected") is False:
             logger.warning(
                 f"Property '{':'.join(breadcrumb)}' was deselected while also set"
@@ -103,7 +111,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     if "selected" in md_entry:
         return cast(bool, md_entry["selected"])
 
-    if md_entry.get("inclusion") == "available":
+    if md_entry.get("inclusion") == InclusionType.AVAILABLE:
         return True
 
     raise ValueError(
