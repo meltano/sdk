@@ -92,8 +92,11 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
 
     if not md_entry:
         logger.info(
-            f"Selection metadata omitted for '{stream_name}':'{breadcrumb}'. "
-            f"Using parent value of selected={parent_value}."
+            "Selection metadata omitted for '%s':'%s'. "
+            "Using parent value of selected=%s.",
+            stream_name,
+            breadcrumb,
+            parent_value,
         )
         return parent_value or False
 
@@ -106,8 +109,9 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     if inclusion == InclusionType.AUTOMATIC:
         if selected is False:
             logger.warning(
-                f"Property '{':'.join(breadcrumb)}' was deselected while also set"
-                "for automatic inclusion. Ignoring selected==False input."
+                "Property '%s' was deselected while also set"
+                "for automatic inclusion. Ignoring selected==False input.",
+                ":".join(breadcrumb),
             )
         return True
 
