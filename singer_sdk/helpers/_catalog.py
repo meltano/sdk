@@ -104,6 +104,12 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     inclusion: Optional[str] = md_entry.get("inclusion")
 
     if inclusion == InclusionType.UNSUPPORTED:
+        if selected is True:
+            logger.warning(
+                "Property '%s' was selected but is not supported. "
+                "Ignoring selected==True input.",
+                ":".join(breadcrumb),
+            )
         return False
 
     if inclusion == InclusionType.AUTOMATIC:
