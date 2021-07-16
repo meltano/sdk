@@ -97,10 +97,12 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
         )
         return parent_value or False
 
-    if md_entry.get("inclusion") == InclusionType.UNSUPPORTED:
+    inclusion: Optional[str] = md_entry.get("inclusion")
+
+    if inclusion == InclusionType.UNSUPPORTED:
         return False
 
-    if md_entry.get("inclusion") == InclusionType.AUTOMATIC:
+    if inclusion == InclusionType.AUTOMATIC:
         if md_entry.get("selected") is False:
             logger.warning(
                 f"Property '{':'.join(breadcrumb)}' was deselected while also set"
@@ -111,7 +113,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     if "selected" in md_entry:
         return cast(bool, md_entry["selected"])
 
-    if md_entry.get("inclusion") == InclusionType.AVAILABLE:
+    if inclusion == InclusionType.AVAILABLE:
         return True
 
     raise ValueError(
