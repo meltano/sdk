@@ -60,6 +60,10 @@ def schema():
                 Property("col_b_2", StringType),
             ),
         ),
+        Property(
+            "col_c",
+            StringType,
+        ),
     ).to_dict()
 
 
@@ -88,6 +92,13 @@ def selection_metadata():
             "breadcrumb": ("properties", "col_b", "properties", "col_b_1"),
             "metadata": {
                 "selected": True,  # Should be overridden by parent
+            },
+        },
+        {
+            "breadcrumb": ("properties", "col_c"),
+            "metadata": {
+                "inclusion": "unsupported",
+                "selected": True  # Should be overridden by 'inclusion'
             },
         },
     ]
