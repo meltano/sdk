@@ -139,7 +139,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
 
 @cached(max_size=_MAX_LRU_CACHE)
 def get_selected_schema(
-    stream_name: str, schema: dict, metadata: dict, logger: Logger
+    stream_name: str, schema: dict, metadata: List[dict], logger: Logger
 ) -> dict:
     """Return a copy of the provided JSON schema, dropping any fields not selected."""
     new_schema = deepcopy(schema)
@@ -151,7 +151,7 @@ def get_selected_schema(
 
 def _pop_deselected_schema(
     schema: dict,
-    metadata: dict,
+    metadata: List[dict],
     stream_name: str,
     breadcrumb: Tuple[str, ...],
     logger: Logger,
@@ -192,7 +192,7 @@ def _pop_deselected_schema(
 def pop_deselected_record_properties(
     record: dict,
     schema: dict,
-    metadata: dict,
+    metadata: List[dict],
     stream_name: str,
     logger: Logger,
     breadcrumb: Tuple[str, ...] = (),
