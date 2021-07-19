@@ -56,6 +56,7 @@ def is_stream_selected(
 @cached(max_size=_MAX_LRU_CACHE)
 def is_property_selected(  # noqa: C901  # ignore 'too complex'
     stream_name: str,
+    # TODO: Remove this? Doesn't seem to be used anywhere in the function.
     schema: dict,
     metadata: List[dict],
     breadcrumb: Optional[Tuple[str, ...]],
@@ -79,6 +80,8 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
         # Default to true if no metadata to say otherwise
         return True
 
+    # TODO: Is this cached? This seems to be computed on every call,
+    # though it seems to be lightweight
     md_map = metadata_to_map(metadata)
     md_entry = md_map.get(breadcrumb)
     parent_value = None
@@ -90,6 +93,8 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     if parent_value is False:
         return parent_value
 
+    # TODO: Should this be moved to the bottom?
+    # i.e. if none of the selection keywords are found, use the parent's
     if not md_entry:
         logger.info(
             "Selection metadata omitted for '%s':'%s'. "
