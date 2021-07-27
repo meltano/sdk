@@ -267,6 +267,8 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """Process a state message. drain sinks if needed."""
         self._assert_line_requires(message_dict, requires=["value"])
         state = message_dict["value"]
+        if self._latest_state == state:
+            return
         self._latest_state = state
         if self._DRAIN_AFTER_STATE_MESSAGES:
             self.drain_all()
