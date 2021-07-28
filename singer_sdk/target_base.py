@@ -264,7 +264,10 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             )
 
     def _process_state_message(self, message_dict: dict) -> None:
-        """Process a state message. drain sinks if needed."""
+        """Process a state message. drain sinks if needed.
+
+        If state is unchanged, no actions will be taken.
+        """
         self._assert_line_requires(message_dict, requires=["value"])
         state = message_dict["value"]
         if self._latest_state == state:
