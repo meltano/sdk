@@ -1,5 +1,6 @@
 """Classes to assist in authenticating to APIs."""
 
+import base64
 import logging
 import jwt
 import math
@@ -53,6 +54,31 @@ class SimpleAuthenticator(APIAuthenticatorBase):
             self._auth_headers = {}
         if auth_headers:
             self._auth_headers.update(auth_headers)
+
+
+class BasicAuthenticator(APIAuthenticatorBase):
+    """Base class for offloading API auth."""
+
+    def __init__(
+        self,
+        stream: RESTStreamBase,
+        username: str,
+        password: str,
+    ):
+        """Basic authenticator for REST Streams.
+
+        This Authenticator implements Basic authentication by concatinating a
+        user name and password, then base64 encoding the string. The resulting 
+        token will be merged with http_headers specified on the stream.
+        """
+        credentials = f"{username}:{password}"
+        auth_token = base64.b64encode(credentials.encode()).decode("ascii")
+        auth_headers = {"Authorization": f"Basic {auth_token}"}
+        
+        super().__init__(stream=stream)
+        if self._auth_headers is None:
+            self._auth_headers = {}
+        self._auth_headers.update(auth_headers)
 
 
 class OAuthAuthenticator(APIAuthenticatorBase):
