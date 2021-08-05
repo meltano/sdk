@@ -1,14 +1,38 @@
 [//]: # (NOTE: This Release template is for Admin-Use only. If you've reached this template in error, please select another template from the list.)
 
+## Evergreen Releases - Prep Steps:
 
-## SDK Release Checklist
+An `Evergreen` release process means we are _always_ releasing. We open a new release ticket as soon as we've completed the prior release. (It's therefore the final step in this checklist.)
 
-- [0] Indicate the `vX.Y.Z` version to be released here in the issue title and here: `v<>`
+## "Evergreen Prep" Checklist
 
-### SDK Release Flow
+- [x] Open this Issue
+- [ ] Indicate the version to be released here in the issue's title and here: `vX.Y.Z`
+    - If the release number changes (from minor to major or patch, for instance), update the version here and in the issue description.
+- [ ] Provide the _planned_ release date: `yyyy-mm-dd` 
+
+### Release Readiness Checklist:
+
+`Engineering` team, the Monday prior to the release:
+
+1. [ ] Ensure all already-merged commits since the last release have changelog entries (excepting non-user-impacting commits, such as docs fixes).
+2. [ ] Create a comment in this issue with pending-but-not-merged MRs potentially shipping.
+    - Otherwise a comment that all known merge candidates are already merged.
+3. [ ] Link issues to this issue which have already merged, or are expected to merge.
+
+### Release Checklist
+
+`Marketing` and `Product`, on the day prior to the release:
+
+Leveraging the combination of linked issues
+
+1. [ ] Review the changelog for [grokability](https://en.wikipedia.org/wiki/Grok), merging an update for clarity/readability/typos if needed.
+2. [ ] Create summary readouts for any planned blog posts, optionally requesting clarification or additional exposition in the `#engineering-team` channel.
+
+Rotating `assignee`, on the morning of the release:
 
 1. [ ] Manual steps:
-    1. [x] Open this Issue
+    1. [ ] Unlink any 'slipped' issues which are not being included in this release.
     2. [ ] Create a corresponding MR on a branch named `<issue>-release-vX-Y-Z` (the default name if your issue is titled correctly)
     3. [ ] The `release-vX.Y.Z` MR is ready when:
         1. [ ] Changelog includes all meaningful user-facing updates since the last release
@@ -21,7 +45,6 @@
         3. [ ] Changelog is flushed with the appropriate version number
         4. [ ] Changes above are committed as `changelog and version bump`
         5. [ ] Open the Changelog in preview mode, mouse over each link and ensure tooltip descriptions match the resolved issue. Check contributor profile links to make sure they are correct.
-        6. [ ] Update `.gitlab/issue_templates_/Release.md` with any missing or changed steps in this checklist.
     4. [ ] Check this box when the CI pipeline status is **green** :white_check_mark:
     5. [ ] Merge to `main` with the merge commit message `Release vX.Y.Z`
 2. [ ] Release steps:
@@ -34,14 +57,19 @@
            - Publish to [PyPi](https://pypi.org/project/sdk/#history)
                - [ ] Check this box when confirmed
            - Create a Gitlab 'Release' from the specified tag
+3. [ ] Open the next `Release` issue, assign as appropriate, and provide that link here: `___`
 
-### SDK Post-Release Flow
+### Announcements, Marketing, and Promotion
+
+`Marketing` or `Product` team:
 
 1. [ ] Post-release announcement steps:
-    1. [ ] Post announcement to Meltano slack: `#announcements`, cross-post (share) to `#sdk`
-    2. [ ] Copy-paste with minor contextual edits to Singer slack (with link to original Meltano slack)
-    3. [ ] Blog post
-    4. [ ] Tweet the blog post
-
+    1. [ ] Post announcement to Meltano slack: `#announcements`
+    2. [ ] Cross-post (share) to `#sdk`
+    3. Copy-paste to:
+       - [ ] `Singer` slack: `#meltano`, `#singer-sdk`
+       - [ ] `dbt` slack: `#tools-meltano`
+    4. [ ] Blog post
+    5. [ ] Tweet the blog post
 
 ----------------
