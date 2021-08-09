@@ -130,7 +130,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
         return True
 
     if selected is not None:
-        return cast(bool, md_entry["selected"])
+        return selected
 
     if inclusion == InclusionType.AVAILABLE:
         return True
