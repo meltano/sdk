@@ -28,6 +28,7 @@ def record():
             "col_b_2": "42",
         },
         "col_d": "by-default",
+        "col_e": "automatic",
     }
 
 
@@ -38,6 +39,7 @@ def record_selected():
             "col_a_1": "something",
         },
         "col_d": "by-default",
+        "col_e": "automatic",
     }
 
 
@@ -69,6 +71,10 @@ def schema():
         ),
         Property(
             "col_d",
+            StringType,
+        ),
+        Property(
+            "col_e",
             StringType,
         ),
     ).to_dict()
@@ -105,14 +111,23 @@ def selection_metadata():
             "breadcrumb": ("properties", "col_c"),
             "metadata": {
                 "inclusion": "unsupported",
-                "selected": True  # Should be overridden by 'inclusion'
+                "selected": True,  # Should be overridden by 'inclusion'
             },
         },
         {
             "breadcrumb": ("properties", "col_d"),
+            "metadata": {"selected-by-default": True},
+        },
+        {
+            "breadcrumb": ("properties", "col_e"),
             "metadata": {
-                "selected-by-default": True
+                "inclusion": "automatic",
+                "selected": False,  # Should be overridden by 'inclusion'
             },
+        },
+        {
+            "breadcrumb": ("properties", "missing"),
+            "metadata": {"selected": True},
         },
     ]
 
@@ -149,6 +164,7 @@ def selection_test_cases():
         (("properties", "col_b", "properties", "col_b_2"), False),
         (("properties", "col_c"), False),
         (("properties", "col_d"), True),
+        (("properties", "col_e"), True),
     ]
 
 
@@ -171,6 +187,7 @@ def test_schema_selection(catalog_entry_obj, stream_name):
                 ),
             ),
             Property("col_d", StringType),
+            Property("col_e", StringType),
         ).to_dict()["properties"]
     )
 

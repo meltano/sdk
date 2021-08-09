@@ -125,7 +125,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     if inclusion == InclusionType.AUTOMATIC:
         if selected is False:
             logger.debug(
-                "Property '%s' was deselected while also set"
+                "Property '%s' was deselected while also set "
                 "for automatic inclusion. Ignoring selected==False input.",
                 ":".join(breadcrumb),
             )
