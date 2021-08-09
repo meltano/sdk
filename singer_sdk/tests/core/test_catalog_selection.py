@@ -2,7 +2,6 @@
 
 import logging
 from copy import deepcopy
-from typing import List, Tuple
 
 import singer
 
@@ -247,8 +246,6 @@ def test_no_selection_metadata():
             },
         },
     ]
-
-    schema = {"type": "object", "properties": {"field_one": {"type": "string"}}}
 
     with pytest.raises(ValueError, match="Could not detect selection status .*"):
         is_property_selected(
