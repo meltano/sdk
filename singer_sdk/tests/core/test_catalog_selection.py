@@ -1,8 +1,8 @@
 """Test catalog selection features."""
 
 import logging
-from typing import cast
 from copy import deepcopy
+from typing import List, Tuple
 
 import singer
 
@@ -144,7 +144,7 @@ def catalog_entry_obj(schema, stream_name, selection_metadata) -> singer.Catalog
 
 @pytest.fixture
 def catalog_entry_dict(catalog_entry_obj: singer.CatalogEntry) -> dict:
-    return cast(dict, catalog_entry_obj.to_dict())
+    return catalog_entry_obj.to_dict()
 
 
 @pytest.fixture

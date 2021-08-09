@@ -2,11 +2,11 @@
 
 from copy import deepcopy
 from enum import Enum
-from typing import Optional, Tuple, cast, List
 from logging import Logger
+from typing import Any, Dict, Optional, Tuple, List
 
 from singer.metadata import to_map as metadata_to_map
-from singer.catalog import Catalog
+from singer.catalog import Catalog, CatalogEntry
 
 from singer_sdk.helpers._typing import is_object_type
 
@@ -37,7 +37,7 @@ def is_stream_selected(
         return True
 
     catalog_obj = Catalog.from_dict(catalog)
-    catalog_entry = catalog_obj.get_stream(stream_name)
+    catalog_entry: CatalogEntry = catalog_obj.get_stream(stream_name)
     if not catalog_entry:
         logger.debug("Catalog entry missing for '%s'. Skipping.", stream_name)
         return False
@@ -65,7 +65,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     Breadcrumb of `[]` or `None` indicates the stream itself. Otherwise, the
     breadcrumb is the path to a property within the stream.
     """
-    breadcrumb = breadcrumb or cast(Tuple[str, ...], ())
+    breadcrumb = breadcrumb or ()
     if isinstance(breadcrumb, str):
         breadcrumb = tuple([breadcrumb])
     if not isinstance(breadcrumb, tuple):
@@ -103,6 +103,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
         )
         return parent_value or False
 
+    # Property has a metadata entry, we'll check it's inclusion parameters
     selected: Optional[bool] = md_entry.get("selected")
     selected_by_default: Optional[bool] = md_entry.get("selected-by-default")
     inclusion: Optional[str] = md_entry.get("inclusion")
@@ -191,7 +192,7 @@ def _pop_deselected_schema(
 
 
 def pop_deselected_record_properties(
-    record: dict,
+    record: Dict[str, Any],
     schema: dict,
     metadata: List[dict],
     stream_name: str,
@@ -204,9 +205,7 @@ def pop_deselected_record_properties(
     updating in place.
     """
     for property_name, val in list(record.items()):
-        property_breadcrumb: Tuple[str, ...] = tuple(
-            list(breadcrumb) + ["properties", property_name]
-        )
+        property_breadcrumb = breadcrumb + ("properties", property_name)
         selected = is_property_selected(
             stream_name, metadata, property_breadcrumb, logger
         )
@@ -243,7 +242,7 @@ def set_catalog_stream_selected(
     Breadcrumb of `[]` or `None` indicates the stream itself. Otherwise, the
     breadcrumb is the path to a property within the stream.
     """
-    breadcrumb = breadcrumb or cast(Tuple[str, ...], ())
+    breadcrumb = breadcrumb or ()
     if isinstance(breadcrumb, str):
         breadcrumb = tuple([breadcrumb])
     if not isinstance(breadcrumb, tuple):
@@ -253,7 +252,7 @@ def set_catalog_stream_selected(
         )
 
     catalog_obj = Catalog.from_dict(catalog)
-    catalog_entry = catalog_obj.get_stream(stream_name)
+    catalog_entry: CatalogEntry = catalog_obj.get_stream(stream_name)
     if not catalog_entry:
         raise ValueError(f"Catalog entry missing for '{stream_name}'. Skipping.")
 
