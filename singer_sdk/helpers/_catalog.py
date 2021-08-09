@@ -47,7 +47,6 @@ def is_stream_selected(
 
     return is_property_selected(
         stream_name,
-        catalog_entry.schema,
         catalog_entry.metadata,
         breadcrumb=(),
         logger=logger,
@@ -57,8 +56,6 @@ def is_stream_selected(
 @cached(max_size=_MAX_LRU_CACHE)
 def is_property_selected(  # noqa: C901  # ignore 'too complex'
     stream_name: str,
-    # TODO: Remove this? Doesn't seem to be used anywhere in the function.
-    schema: dict,
     metadata: List[dict],
     breadcrumb: Optional[Tuple[str, ...]],
     logger: Logger,
@@ -89,7 +86,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     if len(breadcrumb) > 0:
         parent_breadcrumb = tuple(list(breadcrumb)[:-2])
         parent_value = is_property_selected(
-            stream_name, schema, metadata, parent_breadcrumb, logger
+            stream_name, metadata, parent_breadcrumb, logger
         )
     if parent_value is False:
         return parent_value
@@ -149,9 +146,7 @@ def get_selected_schema(
 ) -> dict:
     """Return a copy of the provided JSON schema, dropping any fields not selected."""
     new_schema = deepcopy(schema)
-    _pop_deselected_schema(
-        new_schema, metadata, stream_name, cast(Tuple[str], ()), logger
-    )
+    _pop_deselected_schema(new_schema, metadata, stream_name, (), logger)
     return new_schema
 
 
@@ -182,7 +177,7 @@ def _pop_deselected_schema(
             list(breadcrumb) + ["properties", property_name]
         )
         selected = is_property_selected(
-            stream_name, schema, metadata, property_breadcrumb, logger
+            stream_name, metadata, property_breadcrumb, logger
         )
         if not selected:
             schema_at_breadcrumb["properties"].pop(property_name, None)
@@ -213,7 +208,7 @@ def pop_deselected_record_properties(
             list(breadcrumb) + ["properties", property_name]
         )
         selected = is_property_selected(
-            stream_name, schema, metadata, property_breadcrumb, logger
+            stream_name, metadata, property_breadcrumb, logger
         )
         if not selected:
             record.pop(property_name)

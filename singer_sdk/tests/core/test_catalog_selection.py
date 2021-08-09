@@ -201,7 +201,6 @@ def test_record_selection(
         assert (
             is_property_selected(
                 stream_name,
-                catalog_entry_obj.schema,
                 catalog_entry_obj.metadata,
                 breadcrumb=bookmark,
                 logger=logging.getLogger(),
@@ -254,7 +253,6 @@ def test_no_selection_metadata():
     with pytest.raises(ValueError, match="Could not detect selection status .*"):
         is_property_selected(
             stream_name="test",
-            schema=schema,
             metadata=metadata,
             breadcrumb=("properties", "field_one"),
             logger=logging.getLogger(),
