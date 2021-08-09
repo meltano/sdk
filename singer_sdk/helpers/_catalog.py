@@ -15,6 +15,7 @@ from memoization import cached
 
 _MAX_LRU_CACHE = 500
 
+
 class InclusionType(str, Enum):
     """Singer catalog inclusion types."""
 
@@ -38,7 +39,7 @@ def is_stream_selected(
     catalog_obj = Catalog.from_dict(catalog)
     catalog_entry = catalog_obj.get_stream(stream_name)
     if not catalog_entry:
-        logger.warning(f"Catalog entry missing for '{stream_name}'. Skipping.")
+        logger.debug("Catalog entry missing for '%s'. Skipping.", stream_name)
         return False
 
     if not catalog_entry.metadata:
@@ -114,7 +115,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
 
     if inclusion == InclusionType.UNSUPPORTED:
         if selected is True:
-            logger.warning(
+            logger.debug(
                 "Property '%s' was selected but is not supported. "
                 "Ignoring selected==True input.",
                 ":".join(breadcrumb),
@@ -123,7 +124,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
 
     if inclusion == InclusionType.AUTOMATIC:
         if selected is False:
-            logger.warning(
+            logger.debug(
                 "Property '%s' was deselected while also set"
                 "for automatic inclusion. Ignoring selected==False input.",
                 ":".join(breadcrumb),
