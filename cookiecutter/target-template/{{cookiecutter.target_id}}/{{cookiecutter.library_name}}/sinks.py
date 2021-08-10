@@ -1,6 +1,4 @@
-"""Sample Parquet target stream class, which handles writing streams."""
-
-from typing import Any, Dict, List, Tuple, Union
+"""{{ cookiecutter.destination_name }} target sink class, which handles writing streams."""
 
 {% set sinkclass = "BatchSink" if cookiecutter.serialization_method == "Per batch" else "RecordSink" %}
 from singer_sdk.sinks import {{ sinkclass }}

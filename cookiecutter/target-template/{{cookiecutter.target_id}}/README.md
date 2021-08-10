@@ -31,7 +31,7 @@ target is available by running:
 
 ## Usage
 
-You can easily run `{{ cookiecutter.target_id }}` by itself or in a pipeline using [Meltano](www.meltano.com).
+You can easily run `{{ cookiecutter.target_id }}` by itself or in a pipeline using [Meltano](https://meltano.com/).
 
 ### Executing the Target Directly
 
@@ -68,7 +68,7 @@ You can also test the `{{cookiecutter.target_id}}` CLI interface directly using 
 poetry run {{cookiecutter.target_id}} --help
 ```
 
-### Testing with [Meltano](meltano.com)
+### Testing with [Meltano](https://meltano.com/)
 
 _**Note:** This target will work in any Singer environment and does not require Meltano.
 Examples here are for convenience and to streamline end-to-end orchestration scenarios._
@@ -97,5 +97,5 @@ meltano elt tap-carbon-intensity {{ cookiecutter.target_id }}
 
 ### SDK Dev Guide
 
-See the [dev guide](../../docs/dev_guide.md) for more instructions on how to use the Meltano SDK to
+See the [dev guide](https://sdk.meltano.com/en/latest/dev_guide.html) for more instructions on how to use the Meltano SDK to
 develop your own Singer taps and targets.

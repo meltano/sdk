@@ -1,10 +1,6 @@
 """{{ cookiecutter.destination_name }} target class."""
 
-from pathlib import Path
-from typing import List
-
 from singer_sdk.target_base import Target
-from singer_sdk.sinks import Sink
 from singer_sdk import typing as th
 
 from {{ cookiecutter.library_name }}.sinks import (
