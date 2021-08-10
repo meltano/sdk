@@ -19,4 +19,4 @@ to get started with the SDK.
 
 ## Contributing back to the SDK
 
-- For more information on how to contribute, see our [Contributors Guide](./docs/CONTRIBUTING.md).
+- For more information on how to contribute, see our [Contributors Guide](https://sdk.meltano.com/en/latest/CONTRIBUTING.html).
