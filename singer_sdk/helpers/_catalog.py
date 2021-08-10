@@ -81,7 +81,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     # TODO: Is this cached? This seems to be computed on every call,
     # though it seems to be lightweight
     md_map = metadata_to_map(metadata)
-    md_entry = md_map.get(breadcrumb)
+    md_entry = md_map.get(breadcrumb, {})
     parent_value = None
     if len(breadcrumb) > 0:
         parent_breadcrumb = tuple(list(breadcrumb)[:-2])
@@ -91,25 +91,9 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     if parent_value is False:
         return parent_value
 
-    # TODO: Should this be moved to the bottom?
-    # i.e. if none of the selection keywords are found, use the parent's
-    if not md_entry:
-        logger.info(
-            "Selection metadata omitted for '%s':'%s'. "
-            "Using parent value of selected=%s.",
-            stream_name,
-            breadcrumb,
-            parent_value,
-        )
-        return parent_value or False
-
-    # Property has a metadata entry, we'll check it's inclusion parameters
     selected: Optional[bool] = md_entry.get("selected")
     selected_by_default: Optional[bool] = md_entry.get("selected-by-default")
     inclusion: Optional[str] = md_entry.get("inclusion")
-
-    if selected_by_default is not None and selected is None:
-        return selected_by_default
 
     if inclusion == InclusionType.UNSUPPORTED:
         if selected is True:
@@ -132,13 +116,17 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     if selected is not None:
         return selected
 
-    if inclusion == InclusionType.AVAILABLE:
-        return True
+    if selected_by_default is not None:
+        return selected_by_default
 
-    raise ValueError(
-        f"Could not detect selection status for '{stream_name}' breadcrumb "
-        f"'{breadcrumb}' using metadata: {md_map}"
+    logger.info(
+        "Selection metadata omitted for '%s':'%s'. "
+        "Using parent value of selected=%s.",
+        stream_name,
+        breadcrumb,
+        parent_value,
     )
+    return parent_value or False
 
 
 @cached(max_size=_MAX_LRU_CACHE)

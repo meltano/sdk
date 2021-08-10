@@ -21,6 +21,7 @@ def record():
         "col_a": {
             "col_a_1": "something",
             "col_a_2": "else",
+            "col_a_3": "altogether",
         },
         "col_b": {
             "col_b_1": "the answer",
@@ -28,6 +29,7 @@ def record():
         },
         "col_d": "by-default",
         "col_e": "automatic",
+        "col_f": "available",
     }
 
 
@@ -36,9 +38,11 @@ def record_selected():
     return {
         "col_a": {
             "col_a_1": "something",
+            "col_a_3": "altogether",
         },
         "col_d": "by-default",
         "col_e": "automatic",
+        "col_f": "available",
     }
 
 
@@ -55,6 +59,7 @@ def schema():
             ObjectType(
                 Property("col_a_1", StringType),
                 Property("col_a_2", StringType),
+                Property("col_a_3", StringType),
             ),
         ),
         Property(
@@ -76,6 +81,10 @@ def schema():
             "col_e",
             StringType,
         ),
+        Property(
+            "col_f",
+            StringType,
+        ),
     ).to_dict()
 
 
@@ -93,6 +102,10 @@ def selection_metadata():
             "metadata": {
                 "selected": False,  # Should not be overridden by parent
             },
+        },
+        {
+            "breadcrumb": ("properties", "col_a", "properties", "col_a_3"),
+            "metadata": {},  # No metadata means parent selection is used
         },
         {
             "breadcrumb": ("properties", "col_b"),
@@ -123,6 +136,10 @@ def selection_metadata():
                 "inclusion": "automatic",
                 "selected": False,  # Should be overridden by 'inclusion'
             },
+        },
+        {
+            "breadcrumb": ("properties", "col_f"),
+            "metadata": {"inclusion": "available"},
         },
         {
             "breadcrumb": ("properties", "missing"),
@@ -158,12 +175,14 @@ def selection_test_cases():
         (("properties", "col_a"), True),
         (("properties", "col_a", "properties", "col_a_1"), True),
         (("properties", "col_a", "properties", "col_a_2"), False),
+        (("properties", "col_a", "properties", "col_a_3"), True),
         (("properties", "col_b"), False),
         (("properties", "col_b", "properties", "col_b_1"), False),
         (("properties", "col_b", "properties", "col_b_2"), False),
         (("properties", "col_c"), False),
         (("properties", "col_d"), True),
         (("properties", "col_e"), True),
+        (("properties", "col_f"), True),
     ]
 
 
@@ -183,10 +202,12 @@ def test_schema_selection(catalog_entry_obj, stream_name):
                 "col_a",
                 ObjectType(
                     Property("col_a_1", StringType),
+                    Property("col_a_3", StringType),
                 ),
             ),
             Property("col_d", StringType),
             Property("col_e", StringType),
+            Property("col_f", StringType),
         ).to_dict()["properties"]
     )
 
@@ -226,31 +247,3 @@ def test_record_property_pop(
     assert (
         record_pop == record_selected
     ), f"Expected record={record_selected}, got {record_pop}"
-
-
-def test_no_selection_metadata():
-    """Test an exception is raised when no selection status is detected."""
-    metadata = [
-        {
-            "breadcrumb": [],
-            "metadata": {
-                "selected": True,
-                "replication-method": "FULL_TABLE",
-            },
-        },
-        {
-            "breadcrumb": ("properties", "field_one"),
-            "metadata": {
-                # Some metadata, but not for selection
-                "some-other-metadata": "whatever"
-            },
-        },
-    ]
-
-    with pytest.raises(ValueError, match="Could not detect selection status .*"):
-        is_property_selected(
-            stream_name="test",
-            metadata=metadata,
-            breadcrumb=("properties", "field_one"),
-            logger=logging.getLogger(),
-        )
