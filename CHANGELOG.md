@@ -16,6 +16,20 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
+## v0.3.3
+
+### Added
+
+- Added JSONPath for taps to handle record extraction from API responses (!77)
+
+### Fixed
+
+- Resolve batch `context` not being reset between batches (#164, !117)
+
+### Removed
+
+- Removed unused `DEFAULT_BATCH_SIZE_ROWS` in favor of `max_size` for `BatchSink` implementations (#163, !118)
+
 ## v0.3.2
 
 ### Fixed
