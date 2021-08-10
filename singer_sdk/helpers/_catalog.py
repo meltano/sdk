@@ -5,7 +5,7 @@ from enum import Enum
 from logging import Logger
 from typing import Any, Dict, Optional, Tuple, List
 
-from singer.metadata import to_map as metadata_to_map
+from singer.metadata import to_map
 from singer.catalog import Catalog, CatalogEntry
 
 from singer_sdk.helpers._typing import is_object_type
@@ -14,6 +14,12 @@ from memoization import cached
 
 
 _MAX_LRU_CACHE = 500
+
+
+@cached(max_size=_MAX_LRU_CACHE)
+def metadata_to_map(metadata: List[dict]):
+    """Cache and return the Singer metadata mapping."""
+    return to_map(metadata)
 
 
 class InclusionType(str, Enum):
@@ -78,8 +84,6 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
         # Default to true if no metadata to say otherwise
         return True
 
-    # TODO: Is this cached? This seems to be computed on every call,
-    # though it seems to be lightweight
     md_map = metadata_to_map(metadata)
     md_entry = md_map.get(breadcrumb, {})
     parent_value = None
