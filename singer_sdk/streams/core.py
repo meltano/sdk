@@ -519,9 +519,12 @@ class Stream(metaclass=abc.ABCMeta):
                 increment_state(
                     state_dict,
                     replication_key=self.replication_key,
-                    replication_key_signpost=self.get_replication_key_signpost(context),
                     latest_record=latest_record,
                     is_sorted=treat_as_sorted,
+                )
+                self._write_replication_key_signpost(
+                    context,
+                    self.get_replication_key_signpost(context),
                 )
 
     # Private message authoring methods:

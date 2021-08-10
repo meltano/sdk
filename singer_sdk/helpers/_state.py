@@ -178,14 +178,13 @@ def write_replication_key_signpost(
     new_signpost_value: Any,
 ) -> None:
     """Write signpost value."""
-    stream_or_partition_state[SIGNPOST_MARKER] = new_signpost_value
+    stream_or_partition_state[SIGNPOST_MARKER] = to_json_compatible(new_signpost_value)
 
 
 def increment_state(
     stream_or_partition_state: dict,
     latest_record: dict,
     replication_key: str,
-    replication_key_signpost: Optional[Any],
     is_sorted: bool,
 ) -> None:
     """Update the state using data from the latest record.
