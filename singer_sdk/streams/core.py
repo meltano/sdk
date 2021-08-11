@@ -522,10 +522,10 @@ class Stream(metaclass=abc.ABCMeta):
                     latest_record=latest_record,
                     is_sorted=treat_as_sorted,
                 )
-                self._write_replication_key_signpost(
-                    context,
-                    self.get_replication_key_signpost(context),
-                )
+
+                signpost = self.get_replication_key_signpost(context)
+                if signpost:
+                    self._write_replication_key_signpost(context, signpost)
 
     # Private message authoring methods:
 
