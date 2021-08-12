@@ -519,7 +519,6 @@ class Stream(metaclass=abc.ABCMeta):
                 increment_state(
                     state_dict,
                     replication_key=self.replication_key,
-                    replication_key_signpost=self.get_replication_key_signpost(context),
                     latest_record=latest_record,
                     is_sorted=treat_as_sorted,
                 )
@@ -752,6 +751,12 @@ class Stream(metaclass=abc.ABCMeta):
         if context:
             msg += f" with context: {context}"
         self.logger.info(f"{msg}...")
+
+        # Use a replication signpost, if available
+        signpost = self.get_replication_key_signpost(context)
+        if signpost:
+            self._write_replication_key_signpost(context, signpost)
+
         # Send a SCHEMA message to the downstream target:
         self._write_schema_message()
         # Sync the records themselves:
