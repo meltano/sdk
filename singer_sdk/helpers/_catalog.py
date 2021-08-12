@@ -123,7 +123,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     if selected_by_default is not None:
         return selected_by_default
 
-    logger.info(
+    logger.debug(
         "Selection metadata omitted for '%s':'%s'. "
         "Using parent value of selected=%s.",
         stream_name,
