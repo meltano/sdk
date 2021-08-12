@@ -1,11 +1,12 @@
 """Private helper functions for catalog and selection logic."""
 
 from copy import deepcopy
-from typing import Optional, Tuple, cast, List
+from enum import Enum
 from logging import Logger
+from typing import Any, Dict, Optional, Tuple, List
 
-from singer.metadata import to_map as metadata_to_map
-from singer.catalog import Catalog
+from singer.metadata import to_map
+from singer.catalog import Catalog, CatalogEntry
 
 from singer_sdk.helpers._typing import is_object_type
 
@@ -13,6 +14,20 @@ from memoization import cached
 
 
 _MAX_LRU_CACHE = 500
+
+
+@cached(max_size=_MAX_LRU_CACHE)
+def metadata_to_map(metadata: List[dict]):
+    """Cache and return the Singer metadata mapping."""
+    return to_map(metadata)
+
+
+class InclusionType(str, Enum):
+    """Singer catalog inclusion types."""
+
+    AVAILABLE = "available"
+    AUTOMATIC = "automatic"
+    UNSUPPORTED = "unsupported"
 
 
 def is_stream_selected(
@@ -28,9 +43,9 @@ def is_stream_selected(
         return True
 
     catalog_obj = Catalog.from_dict(catalog)
-    catalog_entry = catalog_obj.get_stream(stream_name)
+    catalog_entry: CatalogEntry = catalog_obj.get_stream(stream_name)
     if not catalog_entry:
-        logger.warning(f"Catalog entry missing for '{stream_name}'. Skipping.")
+        logger.debug("Catalog entry missing for '%s'. Skipping.", stream_name)
         return False
 
     if not catalog_entry.metadata:
@@ -38,7 +53,6 @@ def is_stream_selected(
 
     return is_property_selected(
         stream_name,
-        catalog_entry.schema,
         catalog_entry.metadata,
         breadcrumb=(),
         logger=logger,
@@ -48,8 +62,7 @@ def is_stream_selected(
 @cached(max_size=_MAX_LRU_CACHE)
 def is_property_selected(  # noqa: C901  # ignore 'too complex'
     stream_name: str,
-    schema: dict,
-    metadata: dict,
+    metadata: List[dict],
     breadcrumb: Optional[Tuple[str, ...]],
     logger: Logger,
 ) -> bool:
@@ -58,7 +71,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     Breadcrumb of `[]` or `None` indicates the stream itself. Otherwise, the
     breadcrumb is the path to a property within the stream.
     """
-    breadcrumb = breadcrumb or cast(Tuple[str, ...], ())
+    breadcrumb = breadcrumb or ()
     if isinstance(breadcrumb, str):
         breadcrumb = tuple([breadcrumb])
     if not isinstance(breadcrumb, tuple):
@@ -72,61 +85,67 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
         return True
 
     md_map = metadata_to_map(metadata)
-    md_entry = md_map.get(breadcrumb)
+    md_entry = md_map.get(breadcrumb, {})
     parent_value = None
     if len(breadcrumb) > 0:
         parent_breadcrumb = tuple(list(breadcrumb)[:-2])
         parent_value = is_property_selected(
-            stream_name, schema, metadata, parent_breadcrumb, logger
+            stream_name, metadata, parent_breadcrumb, logger
         )
     if parent_value is False:
         return parent_value
 
-    if not md_entry:
-        logger.info(
-            f"Selection metadata omitted for '{stream_name}':'{breadcrumb}'. "
-            f"Using parent value of selected={parent_value}."
-        )
-        return parent_value or False
+    selected: Optional[bool] = md_entry.get("selected")
+    selected_by_default: Optional[bool] = md_entry.get("selected-by-default")
+    inclusion: Optional[str] = md_entry.get("inclusion")
 
-    if md_entry.get("inclusion") == "unsupported":
+    if inclusion == InclusionType.UNSUPPORTED:
+        if selected is True:
+            logger.debug(
+                "Property '%s' was selected but is not supported. "
+                "Ignoring selected==True input.",
+                ":".join(breadcrumb),
+            )
         return False
 
-    if md_entry.get("inclusion") == "automatic":
-        if md_entry.get("selected") is False:
-            logger.warning(
-                f"Property '{':'.join(breadcrumb)}' was deselected while also set"
-                "for automatic inclusion. Ignoring selected==False input."
+    if inclusion == InclusionType.AUTOMATIC:
+        if selected is False:
+            logger.debug(
+                "Property '%s' was deselected while also set "
+                "for automatic inclusion. Ignoring selected==False input.",
+                ":".join(breadcrumb),
             )
         return True
 
-    if "selected" in md_entry:
-        return cast(bool, md_entry["selected"])
+    if selected is not None:
+        return selected
 
-    if md_entry.get("inclusion") == "available":
-        return True
+    if selected_by_default is not None:
+        return selected_by_default
 
-    raise ValueError(
-        f"Could not detect selection status for '{stream_name}' breadcrumb "
-        f"'{breadcrumb}' using metadata: {md_map}"
+    logger.debug(
+        "Selection metadata omitted for '%s':'%s'. "
+        "Using parent value of selected=%s.",
+        stream_name,
+        breadcrumb,
+        parent_value,
     )
+    return parent_value or False
 
 
 @cached(max_size=_MAX_LRU_CACHE)
 def get_selected_schema(
-    stream_name: str, schema: dict, metadata: dict, logger: Logger
+    stream_name: str, schema: dict, metadata: List[dict], logger: Logger
 ) -> dict:
     """Return a copy of the provided JSON schema, dropping any fields not selected."""
     new_schema = deepcopy(schema)
-    _pop_deselected_schema(
-        new_schema, metadata, stream_name, cast(Tuple[str], ()), logger
-    )
+    _pop_deselected_schema(new_schema, metadata, stream_name, (), logger)
     return new_schema
 
 
 def _pop_deselected_schema(
     schema: dict,
-    metadata: dict,
+    metadata: List[dict],
     stream_name: str,
     breadcrumb: Tuple[str, ...],
     logger: Logger,
@@ -151,7 +170,7 @@ def _pop_deselected_schema(
             list(breadcrumb) + ["properties", property_name]
         )
         selected = is_property_selected(
-            stream_name, schema, metadata, property_breadcrumb, logger
+            stream_name, metadata, property_breadcrumb, logger
         )
         if not selected:
             schema_at_breadcrumb["properties"].pop(property_name, None)
@@ -165,9 +184,9 @@ def _pop_deselected_schema(
 
 
 def pop_deselected_record_properties(
-    record: dict,
+    record: Dict[str, Any],
     schema: dict,
-    metadata: dict,
+    metadata: List[dict],
     stream_name: str,
     logger: Logger,
     breadcrumb: Tuple[str, ...] = (),
@@ -178,11 +197,9 @@ def pop_deselected_record_properties(
     updating in place.
     """
     for property_name, val in list(record.items()):
-        property_breadcrumb: Tuple[str, ...] = tuple(
-            list(breadcrumb) + ["properties", property_name]
-        )
+        property_breadcrumb = breadcrumb + ("properties", property_name)
         selected = is_property_selected(
-            stream_name, schema, metadata, property_breadcrumb, logger
+            stream_name, metadata, property_breadcrumb, logger
         )
         if not selected:
             record.pop(property_name)
@@ -217,7 +234,7 @@ def set_catalog_stream_selected(
     Breadcrumb of `[]` or `None` indicates the stream itself. Otherwise, the
     breadcrumb is the path to a property within the stream.
     """
-    breadcrumb = breadcrumb or cast(Tuple[str, ...], ())
+    breadcrumb = breadcrumb or ()
     if isinstance(breadcrumb, str):
         breadcrumb = tuple([breadcrumb])
     if not isinstance(breadcrumb, tuple):
@@ -227,7 +244,7 @@ def set_catalog_stream_selected(
         )
 
     catalog_obj = Catalog.from_dict(catalog)
-    catalog_entry = catalog_obj.get_stream(stream_name)
+    catalog_entry: CatalogEntry = catalog_obj.get_stream(stream_name)
     if not catalog_entry:
         raise ValueError(f"Catalog entry missing for '{stream_name}'. Skipping.")
 

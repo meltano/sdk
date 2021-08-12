@@ -101,7 +101,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._primary_keys: Optional[List[str]] = None
         self._state_partitioning_keys: Optional[List[str]] = None
         self._schema_filepath: Optional[Path] = None
-        self._metadata: Optional[dict] = None
+        self._metadata: Optional[List[dict]] = None
         self._schema: dict
         self.child_streams: List[Stream] = []
         if schema:
@@ -346,7 +346,7 @@ class Stream(metaclass=abc.ABCMeta):
         return False
 
     @property
-    def metadata(self) -> dict:
+    def metadata(self) -> List[dict]:
         """Return metadata object (dict) as specified in the Singer spec.
 
         Metadata from an input catalog will override standard metadata.
@@ -358,11 +358,11 @@ class Stream(metaclass=abc.ABCMeta):
             catalog = singer.Catalog.from_dict(self._tap_input_catalog)
             catalog_entry = catalog.get_stream(self.tap_stream_id)
             if catalog_entry:
-                self._metadata = cast(dict, catalog_entry.metadata)
+                self._metadata = cast(List[dict], catalog_entry.metadata)
                 return self._metadata
 
         self._metadata = cast(
-            dict,
+            List[dict],
             metadata.get_standard_metadata(
                 schema=self.schema,
                 replication_method=self.forced_replication_method,
