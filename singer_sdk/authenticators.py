@@ -70,7 +70,7 @@ class BasicAuthenticator(APIAuthenticatorBase):
         username: str,
         password: str,
     ):
-
+        """Init authenticator."""
         credentials = f"{username}:{password}".encode()
         auth_token = base64.b64encode(credentials).decode("ascii")
         auth_headers = {"Authorization": f"Basic {auth_token}"}
