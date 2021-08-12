@@ -57,7 +57,12 @@ class SimpleAuthenticator(APIAuthenticatorBase):
 
 
 class BasicAuthenticator(APIAuthenticatorBase):
-    """Base class for offloading API auth."""
+    """Basic authenticator for REST Streams.
+
+    This Authenticator implements basic authentication by concatinating a
+    username and password then base64 encoding the string. The resulting
+    token will be merged with any http_headers specified on the stream.
+    """
 
     def __init__(
         self,
@@ -65,16 +70,11 @@ class BasicAuthenticator(APIAuthenticatorBase):
         username: str,
         password: str,
     ):
-        """Basic authenticator for REST Streams.
 
-        This Authenticator implements Basic authentication by concatinating a
-        user name and password, then base64 encoding the string. The resulting 
-        token will be merged with http_headers specified on the stream.
-        """
-        credentials = f"{username}:{password}"
-        auth_token = base64.b64encode(credentials.encode()).decode("ascii")
+        credentials = f"{username}:{password}".encode()
+        auth_token = base64.b64encode(credentials).decode("ascii")
         auth_headers = {"Authorization": f"Basic {auth_token}"}
-        
+
         super().__init__(stream=stream)
         if self._auth_headers is None:
             self._auth_headers = {}
