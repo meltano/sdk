@@ -1,11 +1,11 @@
 """Test catalog selection features."""
 
 import logging
-from typing import cast
-import pytest
 from copy import deepcopy
 
 import singer
+
+import pytest
 
 from singer_sdk.helpers._catalog import (
     get_selected_schema,
@@ -21,11 +21,15 @@ def record():
         "col_a": {
             "col_a_1": "something",
             "col_a_2": "else",
+            "col_a_3": "altogether",
         },
         "col_b": {
             "col_b_1": "the answer",
             "col_b_2": "42",
         },
+        "col_d": "by-default",
+        "col_e": "automatic",
+        "col_f": "available",
     }
 
 
@@ -34,7 +38,11 @@ def record_selected():
     return {
         "col_a": {
             "col_a_1": "something",
+            "col_a_3": "altogether",
         },
+        "col_d": "by-default",
+        "col_e": "automatic",
+        "col_f": "available",
     }
 
 
@@ -51,6 +59,7 @@ def schema():
             ObjectType(
                 Property("col_a_1", StringType),
                 Property("col_a_2", StringType),
+                Property("col_a_3", StringType),
             ),
         ),
         Property(
@@ -59,6 +68,22 @@ def schema():
                 Property("col_b_1", StringType),
                 Property("col_b_2", StringType),
             ),
+        ),
+        Property(
+            "col_c",
+            StringType,
+        ),
+        Property(
+            "col_d",
+            StringType,
+        ),
+        Property(
+            "col_e",
+            StringType,
+        ),
+        Property(
+            "col_f",
+            StringType,
         ),
     ).to_dict()
 
@@ -79,6 +104,10 @@ def selection_metadata():
             },
         },
         {
+            "breadcrumb": ("properties", "col_a", "properties", "col_a_3"),
+            "metadata": {},  # No metadata means parent selection is used
+        },
+        {
             "breadcrumb": ("properties", "col_b"),
             "metadata": {
                 "selected": False,
@@ -89,6 +118,32 @@ def selection_metadata():
             "metadata": {
                 "selected": True,  # Should be overridden by parent
             },
+        },
+        {
+            "breadcrumb": ("properties", "col_c"),
+            "metadata": {
+                "inclusion": "unsupported",
+                "selected": True,  # Should be overridden by 'inclusion'
+            },
+        },
+        {
+            "breadcrumb": ("properties", "col_d"),
+            "metadata": {"selected-by-default": True},
+        },
+        {
+            "breadcrumb": ("properties", "col_e"),
+            "metadata": {
+                "inclusion": "automatic",
+                "selected": False,  # Should be overridden by 'inclusion'
+            },
+        },
+        {
+            "breadcrumb": ("properties", "col_f"),
+            "metadata": {"inclusion": "available"},
+        },
+        {
+            "breadcrumb": ("properties", "missing"),
+            "metadata": {"selected": True},
         },
     ]
 
@@ -105,7 +160,7 @@ def catalog_entry_obj(schema, stream_name, selection_metadata) -> singer.Catalog
 
 @pytest.fixture
 def catalog_entry_dict(catalog_entry_obj: singer.CatalogEntry) -> dict:
-    return cast(dict, catalog_entry_obj.to_dict())
+    return catalog_entry_obj.to_dict()
 
 
 @pytest.fixture
@@ -120,9 +175,14 @@ def selection_test_cases():
         (("properties", "col_a"), True),
         (("properties", "col_a", "properties", "col_a_1"), True),
         (("properties", "col_a", "properties", "col_a_2"), False),
+        (("properties", "col_a", "properties", "col_a_3"), True),
         (("properties", "col_b"), False),
         (("properties", "col_b", "properties", "col_b_1"), False),
         (("properties", "col_b", "properties", "col_b_2"), False),
+        (("properties", "col_c"), False),
+        (("properties", "col_d"), True),
+        (("properties", "col_e"), True),
+        (("properties", "col_f"), True),
     ]
 
 
@@ -142,8 +202,12 @@ def test_schema_selection(catalog_entry_obj, stream_name):
                 "col_a",
                 ObjectType(
                     Property("col_a_1", StringType),
+                    Property("col_a_3", StringType),
                 ),
-            )
+            ),
+            Property("col_d", StringType),
+            Property("col_e", StringType),
+            Property("col_f", StringType),
         ).to_dict()["properties"]
     )
 
@@ -157,7 +221,6 @@ def test_record_selection(
         assert (
             is_property_selected(
                 stream_name,
-                catalog_entry_obj.schema,
                 catalog_entry_obj.metadata,
                 breadcrumb=bookmark,
                 logger=logging.getLogger(),
