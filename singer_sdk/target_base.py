@@ -319,8 +319,10 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     def _write_state_message(self, state: dict):
         """Emit the stream's latest state."""
-        self.logger.info(f"Emitting completed target state {state}")
-        singer.write_message(singer.StateMessage(state))
+        state_json = json.dumps(state)
+        self.logger.info(f"Emitting completed target state {state_json}")
+        sys.stdout.write("{}\n".format(state_json))
+        sys.stdout.flush()
 
     # CLI handler
 
