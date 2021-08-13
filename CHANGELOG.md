@@ -26,12 +26,6 @@ The next few lines form the template for unreleased changes.
 
 - Target SDK: Improved performance for Batch Sinks by skipping extra drain operations when newly recieved STATE messages are unchanged from the prior received STATE (#172, !125) -- _Thanks, **[Pat Nadolny](https://gitlab.com/pnadolny13)**!_
 
-### Deprecated
-
-
-### Removed
-
-
 ### Fixed
 
 - Target SDK: Fixed a bug where would emit an invalid STATE payload (#188, !130) -- _Thanks, **[Pat Nadolny](https://gitlab.com/pnadolny13)**!_
