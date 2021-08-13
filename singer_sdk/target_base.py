@@ -10,8 +10,6 @@ import click
 from joblib import Parallel, parallel_backend, delayed
 from typing import Any, Dict, Iterable, Optional, Type, List
 
-import singer
-
 from singer_sdk.exceptions import RecordsWitoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
