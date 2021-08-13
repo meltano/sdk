@@ -16,6 +16,27 @@ The next few lines form the template for unreleased changes.
 ### Fixed
 -->
 
+## v0.3.4
+
+### Added
+
+- Tap SDK: Added full support for selection metadata as specified by the [Singer Spec](https://hub.meltano.com/singer/spec#metadata), including metadata for `selected`, `selected-by-default`, and `inclusion`
+
+### Changed
+
+- Target SDK: Improved performance for Batch Sinks by skipping extra drain operations when newly recieved STATE messages are unchanged from the prior received STATE (#172, !125) -- _Thanks, **[Pat Nadolny](https://gitlab.com/pnadolny13)**!_
+
+### Deprecated
+
+
+### Removed
+
+
+### Fixed
+
+- Target SDK: Fixed a bug where would emit an invalid STATE payload (#188, !130) -- _Thanks, **[Pat Nadolny](https://gitlab.com/pnadolny13)**!_
+- Tap SDK: Fixed a bug where replication key signposts were not correctly applied for streams which defined them (#180, !129)
+
 ## v0.3.3
 
 ### Added
