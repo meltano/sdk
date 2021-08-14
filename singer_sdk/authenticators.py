@@ -61,7 +61,7 @@ class BasicAuthenticator(APIAuthenticatorBase):
 
     This Authenticator implements basic authentication by concatinating a
     username and password then base64 encoding the string. The resulting
-    token will be merged with any http_headers specified on the stream.
+    token will be merged with any HTTP headers specified on the stream.
     """
 
     def __init__(
