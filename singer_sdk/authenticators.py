@@ -56,8 +56,51 @@ class SimpleAuthenticator(APIAuthenticatorBase):
             self._auth_headers.update(auth_headers)
 
 
+class ApiKeyAuthenticator(APIAuthenticatorBase):
+    """Implements API key authentication for REST Streams.
+
+    This authenticator will merge a key-value pair to the stream
+    in either the request headers or query parameters.
+    """
+
+    def __init__(
+        self,
+        stream: RESTStreamBase,
+        header_key: str,
+        header_value: str,
+        add_to_params: bool = False,
+    ):
+        """Init authenticator."""
+        super().__init__(stream=stream)
+        auth_credentials = {header_key: header_value}
+        if add_to_params:
+            self.auth_params = auth_credentials
+        else:
+            if self._auth_headers is None:
+                self._auth_headers = {}
+            self._auth_headers.update(auth_credentials)
+
+
+class BearerTokenAuthenticator(APIAuthenticatorBase):
+    """Implements bearer token authentication for REST Streams.
+
+    This Authenticator implements basic authentication by concatinating a
+    username and password then base64 encoding the string. The resulting
+    token will be merged with any http_headers specified on the stream.
+    """
+
+    def __init__(self, stream: RESTStreamBase, token: str):
+        """Init authenticator."""
+        auth_credentials = {"Authorization": f"Bearer {token}"}
+
+        super().__init__(stream=stream)
+        if self._auth_headers is None:
+            self._auth_headers = {}
+        self._auth_headers.update(auth_credentials)
+
+
 class BasicAuthenticator(APIAuthenticatorBase):
-    """Basic authenticator for REST Streams.
+    """Implements basic authentication for REST Streams.
 
     This Authenticator implements basic authentication by concatinating a
     username and password then base64 encoding the string. The resulting
