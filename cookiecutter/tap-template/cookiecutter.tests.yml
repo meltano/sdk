@@ -9,6 +9,11 @@ tests:
     stream_type: REST
     auth_method: Simple
 
+  - source_name: RESTBasicAuthTemplateTest
+    tap_id: test-tap-rest-basicauth-type
+    stream_type: REST
+    auth_method: Basic Auth
+
   - source_name: RESTOAuthTemplateTest
     tap_id: test-tap-rest-oath-type
     stream_type: REST
