@@ -1,6 +1,6 @@
 """{{ cookiecutter.source_name }} Authentication."""
 
-{% if cookiecutter.auth_method not in ("Simple", "OAuth2", "JWT") %}
+{% if cookiecutter.auth_method not in ("Simple", "Basic Auth", "OAuth2", "JWT") %}
 # TODO: Delete this file or add custom authentication logic as needed.
 {%- elif cookiecutter.auth_method == "Simple" %}
 from singer_sdk.authenticators import SimpleAuthenticator
@@ -16,6 +16,20 @@ class {{ cookiecutter.source_name }}Authenticator(SimpleAuthenticator):
             auth_headers={
                 "Private-Token": stream.config.get("auth_token")
             }
+        )
+{%- elif cookiecutter.auth_method == "Basic Auth" %}
+from singer_sdk.authenticators import BasicAuthenticator
+
+
+class {{ cookiecutter.source_name }}Authenticator(BasicAuthenticator):
+    """Authenticator class for {{ cookiecutter.source_name }}."""
+
+    @classmethod
+    def create_for_stream(cls, stream) -> "{{ cookiecutter.source_name }}Authenticator":
+        return cls(
+            stream=stream,
+            username=stream.config.get("username"),
+            password=stream.config.get("password")
         )
 {%- elif cookiecutter.auth_method == "OAuth2" %}
 from singer_sdk.authenticators import OAuthAuthenticator
