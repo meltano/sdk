@@ -41,7 +41,11 @@ class APIAuthenticatorBase(object):
 
 
 class SimpleAuthenticator(APIAuthenticatorBase):
-    """Base class for offloading API auth."""
+    """Implements API key authentication for REST Streams.
+
+    This authenticator will merge a key-value pair to the stream
+    in either the request headers or query parameters.
+    """
 
     def __init__(self, stream: RESTStreamBase, auth_headers: Optional[Dict] = None):
         """Init authenticator.
@@ -59,7 +63,7 @@ class SimpleAuthenticator(APIAuthenticatorBase):
 class ApiKeyAuthenticator(APIAuthenticatorBase):
     """Implements API key authentication for REST Streams.
 
-    This authenticator will merge a key-value pair to the stream
+    This authenticator will merge a key-value pair into the stream
     in either the request headers or query parameters.
     """
 
