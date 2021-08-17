@@ -57,7 +57,8 @@ version_bump_trigger:
       - /^release\/v.*$/
   except:
     - tags
-  stage: docs
+  stage: .pre
+  image: python:3.8
   before_script:
     # - git config --global user.name "${GITLAB_USER_NAME}"
     # - git config --global user.email "${GITLAB_USER_EMAIL}"
