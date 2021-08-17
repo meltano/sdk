@@ -28,35 +28,23 @@ Leveraging the combination of linked issues
 
 1. [ ] Review the changelog for [grokability](https://en.wikipedia.org/wiki/Grok), merging an update for clarity/readability/typos if needed.
 2. [ ] Create summary readouts for any planned blog posts, optionally requesting clarification or additional exposition in the `#engineering-team` channel.
+3. [ ] Unlink any 'slipped' issues which are not being included in this release.
 
 Rotating `assignee`, on the morning of the release:
 
-1. [ ] Manual steps:
-    1. [ ] Unlink any 'slipped' issues which are not being included in this release.
-    2. [ ] Create a corresponding MR on a branch named `<issue>-release-vX-Y-Z` (the default name if your issue is titled correctly)
-    3. [ ] The `release-vX.Y.Z` MR is ready when:
-        1. [ ] Changelog includes all meaningful user-facing updates since the last release
-            - [ ] Compare against `main` branch [commit history](https://gitlab.com/meltano/sdk/-/commits/main)
-        2. [ ] Version is bumped:
-            - [ ] `pyproject.toml`
-            - [ ] `docs/conf.py`
-            - [ ] `cookiecutter/tap-template/pyproject.toml`
-            - [ ] `cookiecutter/target-template/pyproject.toml`
-        3. [ ] Changelog is flushed with the appropriate version number
-        4. [ ] Changes above are committed as `changelog and version bump`
-        5. [ ] Open the Changelog in preview mode, mouse over each link and ensure tooltip descriptions match the resolved issue. Check contributor profile links to make sure they are correct.
-    4. [ ] Check this box when the CI pipeline status is **green** :white_check_mark:
-    5. [ ] Merge to `main` with the merge commit message `Release vX.Y.Z`
-2. [ ] Release steps:
-   1. [ ] Manual:
-      1. [ ] [Cut a tag](https://gitlab.com/meltano/sdk/-/tags/new) from `main` named `vX.Y.Z` with Message=`Release vX.Y.Z`
-           - _Note: tag name must exactly match poetry version text_
-   2. [ ] Automated [CD pipeline](https://gitlab.com/meltano/sdk/-/pipelines?scope=tags):
-       - In response to new tag creation, these steps are performed automatically in Gitlab pipelines:
-           - Abort if tag `vX.Y.Z` does not match output from `poetry version --short`
-           - Publish to [PyPi](https://pypi.org/project/sdk/#history)
-               - [ ] Check this box when confirmed
-           - Create a Gitlab 'Release' from the specified tag
+1. [ ] Changelog updates and version bump:
+    1. [ ] Create a new branch named `release/vX.Y.Z` and a corresponding MR.
+    2. An automated pipeline (linked to the branch prefix `release/v*`) will
+    automatically bump the version and flush the changelog.
+        - [ ] Check this box to confirm the automated changelog flush and version bump are complete.
+    3. [ ] Review the changelog, committing an update for clarity/readability/typos if needed.
+    4. [ ] Compare against `main` branch [commit history](https://gitlab.com/meltano/meltano/-/commits/main) and add any significant user-impacting updates, excluding docs.
+    5. [ ] Open the Changelog in preview mode, mouse over each link and ensure tooltip descriptions match the resolved issue. Check contributor profile links to make sure they are correct.
+    6. [ ] Merge the resulting MR to `main` with the merge commit message `Release vX.Y.Z`
+2. [ ] [Cut a release tag](https://gitlab.com/meltano/sdk/-/tags/new) from `main` named `vX.Y.Z` with Message=`Release vX.Y.Z`
+    - In response to new tag creation, these steps are performed automatically in Gitlab pipelines:
+        - Abort if tag `vX.Y.Z` does not match output from `poetry version --short`
+        - [ ] Publish to [PyPi](https://pypi.org/project/singer-sdk/#history)
 3. [ ] Open the next `Release` issue, assign as appropriate, and provide that link here: `___`
 
 ### Announcements, Marketing, and Promotion

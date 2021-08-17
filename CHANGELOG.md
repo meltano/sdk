@@ -5,59 +5,61 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-<!---
-DO NOT DELETE
-The next few lines form the template for unreleased changes.
-## [Unreleased]
-### Added
-### Changed
-### Deprecated
-### Removed
-### Fixed
--->
+## Unreleased
+---
+
+### New
+
+### Changes
+
+### Fixes
+
+### Breaks
 
 ## v0.3.4
+---
 
-### Added
+### New
 
 - Tap SDK: Added full support for selection metadata as specified by the [Singer Spec](https://hub.meltano.com/singer/spec#metadata), including metadata for `selected`, `selected-by-default`, and `inclusion` (!121)
 
-### Changed
+### Changes
 
 - Target SDK: Improved performance for Batch Sinks by skipping extra drain operations when newly recieved STATE messages are unchanged from the prior received STATE (#172, !125) -- _Thanks, **[Pat Nadolny](https://gitlab.com/pnadolny13)**!_
 
-### Fixed
+### Fixes
 
 - Target SDK: Fixed a bug where would emit an invalid STATE payload (#188, !130) -- _Thanks, **[Pat Nadolny](https://gitlab.com/pnadolny13)**!_
 - Tap SDK: Fixed a bug where replication key signposts were not correctly applied for streams which defined them (#180, !129)
 
 ## v0.3.3
+---
 
-### Added
+### New
 
 - Added JSONPath for taps to handle record extraction from API responses (!77)
 
-### Fixed
+### Fixes
 
 - Resolve batch `context` not being reset between batches (#164, !117)
 
-### Removed
+### Removes
 
 - Removed unused `DEFAULT_BATCH_SIZE_ROWS` in favor of `max_size` for `BatchSink` implementations (#163, !118)
 
 ## v0.3.2
 
-### Fixed
+### Fixes
 
 - Resolve stream map duplicates not aliased correctly (#154, !114)
 
 ## v0.3.1
 
-### Added
+### New
 
 - Added target support for `add_record_metadata` config (#157, !111)
 
-### Fixed
+### Fixes
 
 - Resolve target failures when dates are parsed prior to JSON Schema validation (#156, !110)
 - Resolve target failures when `default_sink_class` is not used (#153, !109)
@@ -65,34 +67,34 @@ The next few lines form the template for unreleased changes.
 
 ## v0.3.0
 
-### Added
+### New
 
 - Added Stream Map feature for inline transformation and filtering capabilities (#63, !4, !92, !103)
 - Added Target SDK, components and templates for building Singer targets (#96, !4)
 
-### Removed
+### Breaks
 
 - Removed methods deprecated in v0.2.0: `get_partition_state()` and `get_stream_or_partition_state()`. Affected developers should replace these with references to `get_context_state()`. (#152, !107)
 
 ## v0.2.0
 
-### Added
+### New
 
 - Added support for parent-child streams (#97, !79)
 - Added support for configurable metrics logging (#91, !79)
 - Added ability to use fewer state bookmarks by setting `Stream.state_partitioning_keys` to a
   subset of available context keys (!79)
 
-### Changed
+### Changes
 
 - Renamed the optional `partition` dictionary arg in method signatures to the more generic `context` (!79)
 
-### Deprecated
+### Deprecates
 
 - The methods `Stream.get_partition_state()` and `Stream.get_stream_or_partition_state()`
   have been deprecated in favor of the new and simpler `get_context_state()` (!79)
 
-### Improved
+### Improves
 
 - Code coverage is now tracked and available as a tool for SDK contributors to further
   improve overall stability and help prioritize unit test development. (#39, !89)
@@ -101,12 +103,12 @@ The next few lines form the template for unreleased changes.
 
 Stability and bugfix release. No breaking changes.
 
-### Fixed
+### Fixes
 
 - Resolved excessive logging during selection filtering. (#125, !83)
 - Resolved issue where deselected sub-fields were incorrectly included in stream records. (#126, !85) -- _Thanks, **[Alex Levene](https://gitlab.com/alex.levene)**!_
 
-### Improved
+### Improves
 
 - Added improved type hints for developers, including mypy code compliance for improved stability. (#127, !86)
 
@@ -114,7 +116,7 @@ Stability and bugfix release. No breaking changes.
 
 Bugfix release. No breaking changes.
 
-### Fixed
+### Fixes
 
 - Resolved tap failure when a sorted stream has non-unique replication keys. (#120, !82)
 
@@ -122,16 +124,16 @@ Bugfix release. No breaking changes.
 
 Significant release with newly added features. No breaking changes.
 
-### Added
+### New
 
 - Added support for GraphQL query variables (#115, !78)
 - Added selection rules support for record and schema messages (#7, !26)
 
-### Changed
+### Changes
 
 - Improved cookiecutter template coverage, resolved readability issues. (#116, #119, !75)
 
-### Fixed
+### Fixes
 
 - Resolved tap failure when a stream is missing from the input catalog. (#105, !80)
 - Resolved bug where unsorted streams did not properly advance state bookmarks for incremental streams. (#118, !74)
@@ -140,7 +142,7 @@ Significant release with newly added features. No breaking changes.
 
 Significant release with newly added features. No breaking changes.
 
-### Added
+### New
 
 - Added `is_sorted` stream property, which enables long-running incremental streams to be
   resumed if interrupted. (!61)
@@ -149,7 +151,7 @@ Significant release with newly added features. No breaking changes.
 - Added `get_replication_key_signpost()` stream method which defaults to the current time 
   for timestamp-based replication keys. (!61)
 
-### Fixed
+### Fixes
 
 - Fixed a scenario where _unsorted_ incremental streams would generate incorrect STATE bookmarks. (!61) -- _Thanks, **[Egi Gjevori](https://gitlab.com/egi-gjevori)**!_
 - Fixed a problem where CI pipelines would fail when run from a fork. (!71) -- _Thanks, **[Derek Visch](https://gitlab.com/vischous)**!_
@@ -167,7 +169,7 @@ Fixes bug in state handling, adds improvements to documentation.
 - Added static/dynamic property documentation (#86, !56)
 - Added "implementation" docs for debugging and troubleshooting (#71, !41)
 
-### Fixed
+### Fixes
 
 - Fixes bug in `Stream.get_starting_timestamp()` using incorrect state key (#94, !58)
 
@@ -175,7 +177,7 @@ Fixes bug in state handling, adds improvements to documentation.
 
 Documentation and cookiecutter template improvements.
 
-## Added
+## New
 
 - Added 'admin_name' field in cookiecutter, streamline poetry setup (!25)
 - Added meltano integration and testing options (#47, !52)
@@ -190,7 +192,7 @@ Documentation and cookiecutter template improvements.
 First official SDK release. Numerous changes and improvements implemented, with the goal of stabilizing the SDK
 and making it broadly available to the community.
 
-### Added
+### New
 
 - Added this CHANGELOG.md file (#68, !43)
 - Added standardized tap tests (!36, #78, !46)
@@ -199,7 +201,7 @@ and making it broadly available to the community.
 - Added new CLI `--test` option to perform connection test on all defined streams (#14, !28)
 - Added default value support for plugin configs (!12) -- _Contributed by: **[Ken Payne](https://gitlab.com/kgpayne)**_
 
-### Changed
+### Changes
 
 - Promote `singer_sdk.helpers.typing` to `singer_sdk.typing` (#84)
 - Modified environment variable parsing logic for arrays (#82)
@@ -207,7 +209,7 @@ and making it broadly available to the community.
 - Expect environment variables in all caps (`<PLUGIN>_<SETTING>`) (#59, !34)
 - Parse environment variables only if `--config=ENV` is passed (#53, !27)
 
-### Fixed
+### Fixes
 
 - OAuth no longer applies `client_email` automatically if `client_id` is missing (#83)
 - Resolved issue on Python 3.6: `cannot import 'metadata' from 'importlib'` (#58)
@@ -215,7 +217,7 @@ and making it broadly available to the community.
 - Look only for valid plugin settings in environment variables (!21) -- _Contributed by: **[Edgar R. Mondragón](https://gitlab.com/edgarrmondragon)**_
 - Fixed bug in `STATE` handling (!13) -- _Contributed by: **[Ken Payne](https://gitlab.com/kgpayne)**_
 
-### Removed
+### Removes
 
 - Remove parquet sample (#81,!48)
 
