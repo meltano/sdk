@@ -227,8 +227,11 @@ class Stream(metaclass=abc.ABCMeta):
     @property
     def selected(self) -> bool:
         """Return true if the stream is selected."""
-        return _catalog.is_stream_selected(
-            self._tap_input_catalog, self.name, self.logger
+        return _catalog.is_property_selected(
+            stream_name=self.name,
+            metadata=self.metadata,
+            breadcrumb=(),
+            logger=self.logger,
         )
 
     @final
@@ -351,7 +354,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         Metadata from an input catalog will override standard metadata.
         """
-        if self._metadata:
+        if self._metadata is not None:
             return self._metadata
 
         if self._tap_input_catalog:
@@ -373,6 +376,13 @@ class Stream(metaclass=abc.ABCMeta):
                 schema_name=None,
             ),
         )
+
+        # If there's no input catalog, select all streams
+        if not self._tap_input_catalog:
+            for entry in self._metadata:
+                if entry["breadcrumb"] == ():
+                    entry["metadata"]["selected"] = True
+
         return self._metadata
 
     @property
