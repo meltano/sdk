@@ -9,6 +9,16 @@ tests:
     stream_type: REST
     auth_method: Simple
 
+  - source_name: RESTSimpleAuthTemplateTest
+    tap_id: test-tap-rest-apikeyauth-type
+    stream_type: REST
+    auth_method: API Key
+
+  - source_name: RESTSimpleAuthTemplateTest
+    tap_id: test-tap-rest-bearertokenauth-type
+    stream_type: REST
+    auth_method: Bearer Token
+
   - source_name: RESTBasicAuthTemplateTest
     tap_id: test-tap-rest-basicauth-type
     stream_type: REST
