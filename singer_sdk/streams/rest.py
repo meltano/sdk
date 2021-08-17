@@ -158,6 +158,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         authenticator = self.authenticator
         if authenticator:
             headers.update(authenticator.auth_headers or {})
+            params.update(authenticator.auth_params or {})
 
         request = cast(
             requests.PreparedRequest,
