@@ -9,7 +9,8 @@
         "Other"
     ],
     "auth_method": [
-        "Simple",
+        "API Key",
+        "Bearer Token",
         "Basic Auth",
         "OAuth2",
         "JWT",

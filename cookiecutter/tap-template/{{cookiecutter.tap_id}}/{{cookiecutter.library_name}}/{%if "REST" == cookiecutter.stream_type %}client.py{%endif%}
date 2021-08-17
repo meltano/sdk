@@ -6,8 +6,14 @@ from typing import Any, Dict, Optional, Union, List, Iterable
 
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+{%- if cookiecutter.auth_method  == "API Key" %}
+from singer_sdk.authenticators import ApiKeyAuthenticator
+{%- elif cookiecutter.auth_method  == "Bearer Token" %}
+from singer_sdk.authenticators import BearerTokenAuthenticator
+{%- elif cookiecutter.auth_method == "Basic Auth" %}
+from singer_sdk.authenticators import BasicAuthenticator
+{%- elif cookiecutter.auth_method in ("OAuth2", "JWT") %}
 
-{%- if cookiecutter.auth_method in ("Simple", "OAuth2", "JWT") %}
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
 {%- endif %}
 
@@ -29,12 +35,45 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     records_jsonpath = "$[*]"  # Or override `parse_response`.
     next_page_token_jsonpath = "$.next_page"  # Or override `get_next_page_token`.
 
-{%- if cookiecutter.auth_method in ("Simple", "OAuth2", "JWT") %}
+{%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
 
     @property
     def authenticator(self) -> {{ cookiecutter.source_name }}Authenticator:
         """Return a new authenticator object."""
         return {{ cookiecutter.source_name }}Authenticator.create_for_stream(self)
+
+{%- elif cookiecutter.auth_method == "API Key" %}
+
+    @property
+    def authenticator(self) -> ApiKeyAuthenticator:
+        """Return a new authenticator object."""
+        return ApiKeyAuthenticator.create_for_stream(
+            self,
+            key="x-api-key",
+            value=self.config.get("api_key"),
+            location="header"
+        )
+
+{%- elif cookiecutter.auth_method == "Bearer Token" %}
+
+    @property
+    def authenticator(self) -> BearerTokenAuthenticator:
+        """Return a new authenticator object."""
+        return BearerTokenAuthenticator.create_for_stream(
+            self,
+            token=self.config.get("api_key")
+        )
+
+{%- elif cookiecutter.auth_method == "Basic Auth" %}
+
+    @property
+    def authenticator(self) -> BasicAuthenticator:
+        """Return a new authenticator object."""
+        return BasicAuthenticator.create_for_stream(
+            self,
+            username=self.config.get("username"),
+            password=self.config.get("password"),
+        )
 
 {%- endif %}
 
