@@ -2,8 +2,9 @@
 
 import copy
 import logging
+from os import sched_get_priority_max
 
-from singer_sdk.helpers._catalog import pop_deselected_record_properties
+from singer_sdk.helpers._catalog import get_selected_schema, pop_deselected_record_properties
 from singer_sdk.samples.sample_tap_countries.countries_tap import SampleTapCountries
 
 
@@ -72,5 +73,12 @@ def test_with_catalog_entry():
         stream_name=stream.name,
         logger=logging.getLogger(),
     )
-
     assert copied_record == record
+
+    new_schema = get_selected_schema(
+        stream_name=stream.name,
+        schema=stream.schema,
+        metadata=stream.metadata,
+        logger=logging.getLogger(),
+    )
+    assert new_schema == stream.schema
