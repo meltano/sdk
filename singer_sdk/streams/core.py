@@ -354,7 +354,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         Metadata from an input catalog will override standard metadata.
         """
-        if self._metadata:
+        if self._metadata is not None:
             return self._metadata
 
         if self._tap_input_catalog:
