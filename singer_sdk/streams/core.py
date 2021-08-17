@@ -378,9 +378,10 @@ class Stream(metaclass=abc.ABCMeta):
         )
 
         # If there's no input catalog, select all streams
-        for entry in self._metadata:
-            if entry["breadcrumb"] == ():
-                entry["metadata"]["selected"] = True
+        if not self._tap_input_catalog:
+            for entry in self._metadata:
+                if entry["breadcrumb"] == ():
+                    entry["metadata"]["selected"] = True
 
         return self._metadata
 
