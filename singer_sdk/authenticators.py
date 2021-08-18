@@ -106,6 +106,7 @@ class ApiKeyAuthenticator(APIAuthenticatorBase):
         value: str,
         location: str,
     ) -> "ApiKeyAuthenticator":
+        """Create an Authenticator object specific to the Stream class."""
         return cls(stream=stream, key=key, value=value, location=location)
 
 
@@ -130,6 +131,7 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
     def create_for_stream(
         cls, stream: RESTStreamBase, token: str
     ) -> "BearerTokenAuthenticator":
+        """Create an Authenticator object specific to the Stream class."""
         return cls(stream=stream, token=token)
 
 
@@ -161,7 +163,8 @@ class BasicAuthenticator(APIAuthenticatorBase):
     def create_for_stream(
         cls, stream: RESTStreamBase, username: str, password: str
     ) -> "BasicAuthenticator":
-        return cls(stream=stream, username=username, pasword=password)
+        """Create an Authenticator object specific to the Stream class."""
+        return cls(stream=stream, username=username, password=password)
 
 
 class OAuthAuthenticator(APIAuthenticatorBase):
