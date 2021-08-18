@@ -8,7 +8,7 @@ import requests
 
 from datetime import timedelta, datetime
 from types import MappingProxyType
-from typing import Any, Dict, Mapping, Optional, Union, Literal
+from typing import Any, Dict, Mapping, Optional, Union
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
@@ -38,12 +38,12 @@ class APIAuthenticatorBase(object):
     @property
     def auth_headers(self) -> dict:
         """Return http headers."""
-        return self._auth_headers
+        return self._auth_headers or {}
 
     @property
     def auth_params(self) -> dict:
         """Return query parameters."""
-        return self._auth_params
+        return self._auth_params or {}
 
 
 class SimpleAuthenticator(APIAuthenticatorBase):
@@ -80,11 +80,14 @@ class ApiKeyAuthenticator(APIAuthenticatorBase):
         stream: RESTStreamBase,
         key: str,
         value: str,
-        location: Literal["header", "params"] = "header",
+        location: str = "header",
     ):
         """Init authenticator."""
         super().__init__(stream=stream)
         auth_credentials = {key: value}
+
+        if location not in ["header", "params"]:
+            raise ValueError("`type` must be one of 'header' or 'params'.")
 
         if location == "header":
             if self._auth_headers is None:
@@ -94,8 +97,6 @@ class ApiKeyAuthenticator(APIAuthenticatorBase):
             if self._auth_params is None:
                 self._auth_params = {}
             self._auth_params.update(auth_credentials)
-        else:
-            raise ValueError("`type` must be one of 'header' or 'params'.")
 
     @classmethod
     def create_for_stream(
@@ -103,7 +104,7 @@ class ApiKeyAuthenticator(APIAuthenticatorBase):
         stream: RESTStreamBase,
         key: str,
         value: str,
-        location: Literal["header", "params"],
+        location: str,
     ) -> "ApiKeyAuthenticator":
         return cls(stream=stream, key=key, value=value, location=location)
 
