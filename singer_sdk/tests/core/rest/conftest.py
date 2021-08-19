@@ -20,7 +20,8 @@ class SimpleTap(Tap):
     def discover_streams(self):
         """Get collection of streams."""
         return [
-            SimpleRESTStream(self, name="example"),
+            SimpleRESTStream(self, name="some_stream"),
+            SimpleRESTStream(self, name="other_stream"),
         ]
 
 
