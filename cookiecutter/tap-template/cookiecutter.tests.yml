@@ -4,17 +4,12 @@ tests:
     stream_type: REST
     auth_method: Custom or N/A
 
-  - source_name: RESTSimpleAuthTemplateTest
-    tap_id: test-tap-rest-simpleauth-type
-    stream_type: REST
-    auth_method: Simple
-
-  - source_name: RESTSimpleAuthTemplateTest
+  - source_name: RESTApiKeyAuthTemplateTest
     tap_id: test-tap-rest-apikeyauth-type
     stream_type: REST
     auth_method: API Key
 
-  - source_name: RESTSimpleAuthTemplateTest
+  - source_name: RESTBearerTokenAuthTemplateTest
     tap_id: test-tap-rest-bearertokenauth-type
     stream_type: REST
     auth_method: Bearer Token
