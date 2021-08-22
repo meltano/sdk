@@ -9,8 +9,8 @@ tests:
     stream_type: REST
     auth_method: API Key
 
-  - source_name: RESTBearerTokenAuthTemplateTest
-    tap_id: test-tap-rest-bearertokenauth-type
+  - source_name: RESTBearerAuthTemplateTest
+    tap_id: test-tap-rest-bearerauth-type
     stream_type: REST
     auth_method: Bearer Token
 
