@@ -1,0 +1,134 @@
+body {
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  color: #2c3e50;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a,
+a:visited {
+  color: #464acb;
+}
+a:hover {
+  color: #464acb;
+  text-decoration: underline;
+}
+
+.wy-nav-top {
+  background-color: #464acb;
+}
+
+.wy-nav-top a {
+  color: white;
+  text-decoration: none !important;
+}
+
+.wy-nav-side {
+  background-color: #595cd0;
+}
+
+.wy-side-nav-search {
+  background-color: #464acb;
+}
+
+.wy-side-nav-search > a {
+  color: #fcfcfc;
+  text-decoration: none !important;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.wy-side-nav-search > a img.logo {
+  display: inline-block;
+  height: 2.3rem;
+  padding: 0;
+  vertical-align: text-bottom;
+  position: relative;
+  top: 1px;
+}
+
+.wy-side-nav-search > a::after {
+  display: inline-block;
+  content: "SDK";
+  letter-spacing: -1px;
+}
+
+.wy-side-nav-search > div.version {
+  color: hsla(0, 0%, 100%, 0.7);
+}
+
+.wy-side-nav-search input[type="text"] {
+  border-color: #464acb;
+}
+
+.wy-menu-vertical a:hover {
+  background-color: #464acb;
+}
+
+.wy-menu-vertical a,
+.wy-menu-vertical a:hover,
+.wy-menu-vertical a:visited {
+  color: white;
+}
+
+.wy-menu-vertical li.current > a,
+.wy-menu-vertical li.on a {
+  background-color: white;
+}
+
+.wy-nav-content-wrap,
+.wy-nav-content {
+  background-color: white;
+}
+
+.rst-versions,
+.rst-versions .rst-current-version {
+  background-color: #464acb;
+}
+
+.rst-versions .rst-current-version {
+  color: rgb(255, 229, 100);
+}
+
+.rst-versions .rst-other-versions {
+  color: white;
+}
+
+.rst-versions a {
+  color: white;
+  text-decoration: underline;
+}
+
+.rst-versions .rst-other-versions dl {
+  margin: 5px 0;
+}
+
+.rst-versions .rst-other-versions dt {
+  margin-bottom: 3px;
+}
+
+.rst-versions .rst-other-versions dd a {
+  border: 1px solid white;
+  border-radius: 5px;
+  padding: 3px 6px;
+  text-decoration: none;
+}
+
+.rst-versions .rst-other-versions dd a:hover {
+  color: #464acb;
+  background-color: white;
+}
+
+.rst-content code.literal {
+  color: #476582;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: inherit;
+}

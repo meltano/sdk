@@ -5,12 +5,12 @@ stages:
 default:
   before_script:
     - python -V
-    - pip install pipx
+    - python -m pip install pipx
+    - python -m pipx ensurepath
+    - python -m pipx install poetry
     # Force update PATH to include pipx executables
     - export PATH=$PATH:/root/.local/bin
-    - pipx install poetry
-    - pipx install tox
-    - poetry install
+    - poetry install --no-root
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
@@ -25,19 +25,17 @@ build_and_test:
   parallel:
     matrix:
       - PYTHON_VERSION: ["3.6", "3.7", "3.8", "3.9"]
-      # Official language image. Look for the different tagged releases at:
-      # https://hub.docker.com/r/library/python/tags/
   image: python:${PYTHON_VERSION}
   script:
     - |
       if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
       then
-        echo "Run full python test suite..."
-        poetry run pytest
+        echo "Run full test suite using 'py${PYTHON_VERSION//./}' tox env config..."
+        poetry run tox -e py
       else
         echo "Run 'core' and 'cookiecutter' python test suites..."
         poetry run pytest singer_sdk/tests/core
-        poetry run pytest singer_sdk/tests/cookiecutter
+        poetry run pytest singer_sdk/tests/cookiecutters
       fi
 
 lint:
@@ -47,12 +45,63 @@ lint:
       - PYTHON_VERSION: ["3.8"]
   image: python:${PYTHON_VERSION}
   script:
-    - poetry run black --check singer_sdk/
-    - poetry run flake8 singer_sdk
-    - poetry run pydocstyle singer_sdk
-    - poetry run mypy singer_sdk || echo "MyPy found issues (ignoring)..."
+    - poetry run tox -e lint
 
-publish_to_pypi:
+
+version_bump_trigger:
+  # This job triggers for any branches named like `release/vX.Y.Z`
+  # The job will automatically flush the changelog, bump version refs,
+  # and commit and push the result back to the branch.
+  only:
+    refs:
+      - /^release\/v.*$/
+  except:
+    - tags
+  stage: .pre
+  image: python:3.8
+  before_script:
+    # - git config --global user.name "${GITLAB_USER_NAME}"
+    # - git config --global user.email "${GITLAB_USER_EMAIL}"
+    - git config --global user.email "hello@meltano.com"
+    - git config --global user.name "Gitlab CI (bot)"
+    - pip install changelog-cli bumpversion
+    # - poetry install 
+  script:
+    - |
+      echo "Setting up 'discovery.yml' sync from 'hub.meltano.com'..."
+      echo "Current location: Ref='$CI_COMMIT_REF_NAME' and Namespace='$CI_PROJECT_NAMESPACE'..."
+    - |
+      echo "Detecting and validating version number..."
+      CURR_VER="$(bumpversion major --allow-dirty --dry-run --list | grep current_version= | cut -d'=' -f2)"
+      NEW_VER="${CI_COMMIT_REF_NAME#release/v}"
+      echo "Detected current version '$CURR_VER' and new version '$NEW_VER'"
+      [[ "$CURR_VER" == "" ]] && echo "Could not detect current version" && exit 1
+      [[ "$NEW_VER" == "" ]] && echo "Could not detect new version" && exit 1
+      [[ "$NEW_VER" == "$CURR_VER" ]] && echo "Version is already bumped. Aborting job." && exit 0
+      MAJOR_BUMP="$(bumpversion major --allow-dirty --dry-run --list | grep new_version= | cut -d'=' -f2)"
+      MINOR_BUMP="$(bumpversion minor --allow-dirty --dry-run --list | grep new_version= | cut -d'=' -f2)"
+      PATCH_BUMP="$(bumpversion patch --allow-dirty --dry-run --list | grep new_version= | cut -d'=' -f2)"
+      [[ $NEW_VER = $MAJOR_BUMP ]] && BUMP_TYPE="major"
+      [[ $NEW_VER = $MINOR_BUMP ]] && BUMP_TYPE="minor"
+      [[ $NEW_VER = $PATCH_BUMP ]] && BUMP_TYPE="patch"
+      [[ "$BUMP_TYPE" == "" ]] && echo "Could not detect version bump type from version text '$NEW_VER'" && exit 1
+      echo "Detected bump type '$BUMP_TYPE' from '$CURR_VER' to '$NEW_VER'"
+      echo "Flushing changelog entries with '--$BUMP_TYPE' flag..."
+      changelog release --$BUMP_TYPE --yes
+      echo "Adding changelog to git..."
+      git add CHANGELOG.md
+      echo "Bumping version entries..."
+      bumpversion $BUMP_TYPE --tag --allow-dirty --new-version=$NEW_VER
+      echo "Pushing branch updates..."
+      git push http://root:$CI_COMMITS_GITLAB_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git HEAD:$CI_COMMIT_REF_NAME
+
+pypi_publish:
+  # release:
+  #   name: '$CI_COMMIT_TAG'
+  #   tag_name: '$CI_COMMIT_TAG'
+  #   description: '$CI_COMMIT_TAG'
+  only:
+    - tags
   stage: publish
   parallel:
     matrix:
@@ -60,44 +109,30 @@ publish_to_pypi:
   image: python:${PYTHON_VERSION}
   script:
     - |
-      echo "Publishing to PyPi..."
-      if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
+      echo "Publishing tag '$CI_COMMIT_TAG' to PyPi, Ref='$CI_COMMIT_REF_NAME' and Namespace='$CI_PROJECT_NAMESPACE'..."
+      echo "Detected poetry version: v$(poetry version --short)"
+      if [[ "$CI_COMMIT_TAG" == "v$(poetry version --short)" ]];
       then
-        if [[ "$BRANCH_NAME" == *main ]]
-        then
-          poetry version --short
-        else
-          poetry version $(poetry version --short)-dev.$CI_JOB_ID
-          poetry version --short
-        fi
-        echo -e "\nPublishing to version ref '$(poetry version --short)'...\n\n"
-        # poetry config pypi-token.pypi "$PYPI_PUBLISH_TOKEN"
+        echo -e "\nPublishing to version ref 'v$(poetry version --short)'...\n\n"
         poetry publish --build
       else
-        echo "Skipped. (Running in fork.)"
+        echo -e "\nERROR - Tag '$CI_COMMIT_TAG' did not match detected version 'v$(poetry version --short)'."
+        exit 1
       fi
+
+pypi_prerelease:
+  when: manual
+  except:
+    - tags
+  stage: publish
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.8"]
+  image: python:${PYTHON_VERSION}
+  script:
     - |
-      echo "Waiting for PyPi availability..."
-      if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
-      then
-        pwd
-        ls -la
-        export VER=$(poetry version --short)
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        echo "Checking for PyPi availability of version $VER"
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not yet found..."; sleep 30; } fi;
-        export PIPERR=$(pip install tapdance==$VER 2>&1)
-        if [[ $PIPERR == *"$VER"* ]]; then { echo "Yes"; } else { echo "Not found. Giving up. Last message from PyPi was $PIPERR"; exit 1; } fi;
-      else
-        echo "Skipped. (Running in fork.)"
-      fi
+      echo "Publishing to PyPi, Ref='$CI_COMMIT_REF_NAME' and Namespace='$CI_PROJECT_NAMESPACE'..."
+      poetry version $(poetry version --short)-dev.$CI_JOB_ID
+      poetry version --short
+      echo -e "\nPublishing to version ref '$(poetry version --short)'...\n\n"
+      poetry publish --build

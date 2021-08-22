@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from typing import Optional
 
+from singer_sdk.helpers import _catalog
+
 from singer_sdk.samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 
 COUNTER = 0
@@ -17,31 +19,25 @@ if Path(CONFIG_FILE).exists():
     config = json.loads(Path(CONFIG_FILE).read_text())
 
 
-def test_gitlab_sync_projects():
-    """Test sync_one() for gitlab sample."""
+def test_gitlab_sync_all():
+    """Test sync_all() for gitlab sample."""
     tap = SampleTapGitlab(config=config, parse_env_config=True)
-    tap.sync_one("projects")
+    tap.sync_all()
 
 
-def test_gitlab_sync_commits():
-    """Test sync_one() for gitlab sample."""
-    tap = SampleTapGitlab(config=config, parse_env_config=True)
-    tap.sync_one("commits")
-
-
-def test_gitlab_sync_issues():
-    """Test sync_one() for gitlab sample."""
-    tap = SampleTapGitlab(config=config, parse_env_config=True)
-    tap.sync_one("issues")
-
-
-def test_gitlab_sync_releases():
-    """Test sync_one() for gitlab sample."""
-    tap = SampleTapGitlab(config=config, parse_env_config=True)
-    tap.sync_one("releases")
-
-
-# def test_gitlab_sync_all():
-#     """Test sync_all() for gitlab sample."""
-#     tap = SampleTapGitlab(config=SAMPLE_CONFIG)
-#     tap.sync_all()
+def test_gitlab_sync_epic_issues():
+    """Test sync for just the 'epic_issues' child stream."""
+    # Initialize with basic config
+    stream_name = "epic_issues"
+    tap1 = SampleTapGitlab(config=config, parse_env_config=True)
+    # Test discovery
+    tap1.run_discovery()
+    catalog1 = tap1.catalog_dict
+    # Reset and re-initialize with an input catalog
+    _catalog.deselect_all_streams(catalog=catalog1)
+    _catalog.set_catalog_stream_selected(
+        catalog=catalog1, stream_name=stream_name, selected=True
+    )
+    tap1 = None
+    tap2 = SampleTapGitlab(config=config, parse_env_config=True, catalog=catalog1)
+    tap2.sync_all()

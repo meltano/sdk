@@ -4,7 +4,7 @@ from typing import List
 
 from singer_sdk.tap_base import Tap
 from singer_sdk.streams.core import Stream
-from singer_sdk.helpers.typing import (
+from singer_sdk.typing import (
     ArrayType,
     ObjectType,
     StringType,
@@ -17,6 +17,7 @@ from singer_sdk.helpers.typing import (
 class ConfigTestTap(Tap):
     """Test tap class."""
 
+    name = "config-test"
     config_jsonschema = PropertiesList(
         Property("host", StringType, required=True),
         Property("username", StringType, required=True),

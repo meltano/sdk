@@ -1,12 +1,11 @@
 """Sample tap stream test for tap-gitlab."""
 
-import copy
 import requests
 
 from pathlib import Path
 from typing import Any, Dict, List, cast, Optional
 
-from singer_sdk.helpers.typing import (
+from singer_sdk.typing import (
     ArrayType,
     DateTimeType,
     IntegerType,
@@ -14,7 +13,6 @@ from singer_sdk.helpers.typing import (
     PropertiesList,
     StringType,
 )
-from singer_sdk.helpers.state import get_stream_state_dict
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.streams.rest import RESTStream
 
@@ -26,6 +24,8 @@ DEFAULT_URL_BASE = "https://gitlab.com/api/v4"
 class GitlabStream(RESTStream):
     """Sample tap test for gitlab."""
 
+    _LOG_REQUEST_METRIC_URLS = True
+
     @property
     def url_base(self) -> str:
         """Return the base GitLab URL."""
@@ -34,33 +34,29 @@ class GitlabStream(RESTStream):
     @property
     def authenticator(self) -> SimpleAuthenticator:
         """Return an authenticator for REST API requests."""
-        http_headers = {"Private-Token": self.config.get("auth_token")}
-        if self.config.get("user_agent"):
-            http_headers["User-Agent"] = self.config.get("user_agent")
-        return SimpleAuthenticator(stream=self, http_headers=http_headers)
+        return SimpleAuthenticator(
+            stream=self, auth_headers={"Private-Token": self.config.get("auth_token")}
+        )
 
     def get_url_params(
-        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization."""
-        state = self.get_stream_or_partition_state(partition)
-        result = copy.deepcopy(state)
-        result.update({"start_date": self.config.get("start_date")})
-        result["page"] = next_page_token or 1
-        return result
+        params: dict = {}
+        if next_page_token:
+            params["page"] = next_page_token
+        if self.replication_key:
+            params["sort"] = "asc"
+            params["order_by"] = self.replication_key
+        return params
 
     def get_next_page_token(
-        self, response: requests.Response, previous_token: Optional[Any] = None
+        self, response: requests.Response, previous_token: Optional[Any]
     ) -> Optional[Any]:
         """Return token for identifying next page or None if not applicable."""
         next_page_token = response.headers.get("X-Next-Page", None)
         if next_page_token:
-            self.logger.info(f"Next page token retrieved: {next_page_token}")
-        if next_page_token and next_page_token == previous_token:
-            raise RuntimeError(
-                f"Loop detected in pagination. "
-                f"Pagination token {next_page_token} is identical to previous run."
-            )
+            self.logger.debug(f"Next page token retrieved: {next_page_token}")
         return next_page_token
 
 
@@ -94,7 +90,8 @@ class ProjectsStream(ProjectBasedStream):
     name = "projects"
     path = "/projects/{project_id}?statistics=1"
     primary_keys = ["id"]
-    replication_key = None
+    replication_key = "last_activity_at"
+    is_sorted = True
     schema_filepath = SCHEMAS_DIR / "projects.json"
 
 
@@ -114,7 +111,8 @@ class IssuesStream(ProjectBasedStream):
     name = "issues"
     path = "/projects/{project_id}/issues?scope=all&updated_after={start_date}"
     primary_keys = ["id"]
-    replication_key = "updated_at"  # TODO: Validate this is valid for replication
+    replication_key = "updated_at"
+    is_sorted = True
     schema_filepath = SCHEMAS_DIR / "issues.json"
 
 
@@ -126,7 +124,8 @@ class CommitsStream(ProjectBasedStream):
         "/projects/{project_id}/repository/commits?since={start_date}&with_stats=true"
     )
     primary_keys = ["id"]
-    replication_key = None
+    replication_key = "created_at"
+    is_sorted = False
     schema_filepath = SCHEMAS_DIR / "commits.json"
 
 
@@ -140,7 +139,8 @@ class EpicsStream(ProjectBasedStream):
     name = "epics"
     path = "/groups/{group_id}/epics?updated_after={start_date}"
     primary_keys = ["id"]
-    replication_key = None
+    replication_key = "updated_at"
+    is_sorted = True
     schema = PropertiesList(
         Property("id", IntegerType, required=True),
         Property("iid", IntegerType, required=True),
@@ -162,39 +162,31 @@ class EpicsStream(ProjectBasedStream):
 
     # schema_filepath = SCHEMAS_DIR / "epics.json"
 
-    def post_process(self, row: dict, stream_or_partition_state: dict) -> dict:
+    def get_child_context(self, record: dict, context: Optional[dict]) -> dict:
         """Perform post processing, including queuing up any child stream types."""
         # Ensure child state record(s) are created
-        _ = get_stream_state_dict(
-            self.tap_state,
-            "epic_issues",
-            partition={
-                "group_id": row["group_id"],
-                "epic_id": row["id"],
-            },
-        )
-        return super().post_process(row, stream_or_partition_state)
+        return {
+            "group_id": record["group_id"],
+            "epic_id": record["id"],
+            "epic_iid": record["iid"],
+        }
 
 
 class EpicIssuesStream(GitlabStream):
-    """EpicIssues stream class.
-
-    NOTE: This should only be run after epics have been synced, since epic streams
-          have a dependency on the state generated by epics.
-    """
+    """EpicIssues stream class."""
 
     name = "epic_issues"
-    path = "/groups/{group_id}/epics/{epic_id}/issues"
+    path = "/groups/{group_id}/epics/{epic_iid}/issues"
     primary_keys = ["id"]
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "epic_issues.json"
-    parent_stream_types = [EpicsStream]  # Stream should wait for parents to complete.
+    parent_stream_type = EpicsStream  # Stream should wait for parents to complete.
 
     def get_url_params(
-        self, partition: Optional[dict], next_page_token: Optional[Any] = None
+        self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in parameterization."""
-        result = super().get_url_params(partition)
-        if "epic_id" not in partition:
+        result = super().get_url_params(context, next_page_token)
+        if not context or "epic_id" not in context:
             raise ValueError("Cannot sync epic issues without already known epic IDs.")
         return result

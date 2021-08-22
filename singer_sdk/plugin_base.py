@@ -5,37 +5,40 @@ from collections import OrderedDict
 import json
 import logging
 import os
+from singer_sdk.mapper import PluginMapper
 from types import MappingProxyType
 from typing import Dict, List, Mapping, Optional, Tuple, Any, Union, cast
-from jsonschema import ValidationError, SchemaError, Draft4Validator
+
+
+from jsonschema import (
+    ValidationError,
+    SchemaError,
+    Draft4Validator,
+)
 from pathlib import PurePath
 
-from singer_sdk.helpers.classproperty import classproperty
-from singer_sdk.helpers.util import read_json_file
-from singer_sdk.helpers.secrets import is_common_secret_key, SecretString
-from singer_sdk.helpers.typing import extend_with_default
+from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._compat import metadata
+from singer_sdk.helpers._util import read_json_file
+from singer_sdk.helpers._secrets import is_common_secret_key, SecretString
+from singer_sdk.helpers._typing import is_string_array_type
+from singer_sdk.typing import extend_validator_with_defaults
 
 import click
 
 SDK_PACKAGE_NAME = "singer_sdk"
 
 
-try:
-    from importlib import metadata
-except ImportError:
-    # Running on pre-3.8 Python; use importlib-metadata package
-    import importlib_metadata as metadata  # type: ignore
-
-
-JSONSchemaValidator = extend_with_default(Draft4Validator)
+JSONSchemaValidator = extend_validator_with_defaults(Draft4Validator)
 
 
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    name: str = "sample-plugin-name"
-    config_jsonschema: Optional[dict] = None
-    protected_config_keys: List[str] = []
+    name: str  # The executable name of the tap or target plugin.
+
+    config_jsonschema: dict = {}
+    # A JSON Schema object defining the config options that this tap will accept.
 
     _config: dict
 
@@ -73,27 +76,27 @@ class PluginBase(metaclass=abc.ABCMeta):
             raise ValueError(f"Error parsing config of type '{type(config).__name__}'.")
         if parse_env_config:
             self.logger.info("Parsing env var for settings config...")
-            config_dict.update(self.get_env_var_config())
+            config_dict.update(self._env_var_config)
         else:
             self.logger.info("Skipping parse of env var settings...")
         for k, v in config_dict.items():
-            if self.is_secret_config(k):
+            if self._is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
         self._validate_config()
+        self.mapper: PluginMapper
 
     @classproperty
     def capabilities(self) -> List[str]:
         """Return a list of supported capabilities."""
         return []
 
-    @classmethod
-    def get_env_var_config(cls) -> Dict[str, Any]:
+    @classproperty
+    def _env_var_config(cls) -> Dict[str, Any]:
         """Return any config specified in environment variables.
 
-        Variables must match the convention "PLUGIN_NAME_setting_name",
-        with dashes converted to underscores, the plugin name converted to all
-        caps, and the setting name in same-case as specified in settings config.
+        Variables must match the convention "<PLUGIN_NAME>_<SETTING_NAME>",
+        all uppercase with dashes converted to underscores.
         """
         result: Dict[str, Any] = {}
         plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
@@ -104,10 +107,16 @@ class PluginBase(metaclass=abc.ABCMeta):
                 cls.logger.info(
                     f"Parsing '{config_key}' config from env variable '{env_var_name}'."
                 )
-                if env_var_value[0] == "[" and env_var_value[-1] == "]":
-                    result[config_key] = (
-                        env_var_value.lstrip("[").rstrip("]").split(",")
-                    )
+                if is_string_array_type(
+                    cls.config_jsonschema["properties"][config_key]
+                ):
+                    if env_var_value[0] == "[" and env_var_value[-1] == "]":
+                        raise ValueError(
+                            "A bracketed list was detected in the environment variable "
+                            f"'{env_var_name}'. This syntax is no longer supported. "
+                            "Please remove the brackets and try again."
+                        )
+                    result[config_key] = env_var_value.split(",")
                 else:
                     result[config_key] = env_var_value
         return result
@@ -139,11 +148,6 @@ class PluginBase(metaclass=abc.ABCMeta):
         """Return the state dict for the plugin."""
         raise NotImplementedError()
 
-    @property
-    def input_catalog(self) -> Optional[dict]:
-        """Return the catalog dictionary input, or None if not provided."""
-        raise NotImplementedError()
-
     # Core plugin config:
 
     @property
@@ -151,15 +155,13 @@ class PluginBase(metaclass=abc.ABCMeta):
         """Return a frozen (read-only) config dictionary map."""
         return cast(Dict, MappingProxyType(self._config))
 
-    def is_secret_config(self, config_key: str) -> bool:
+    @staticmethod
+    def _is_secret_config(config_key: str) -> bool:
         """Return true if a config value should be treated as a secret.
 
-        This avoids accidental printing to logs, and it prevents rendering the secrets
-        in jinja templating functions.
+        This prevents accidental printing to logs.
         """
-        return (
-            is_common_secret_key(config_key) or config_key in self.protected_config_keys
-        )
+        return is_common_secret_key(config_key)
 
     def _validate_config(
         self, raise_errors: bool = True, warnings_as_errors: bool = False
@@ -199,12 +201,12 @@ class PluginBase(metaclass=abc.ABCMeta):
     @classmethod
     def print_version(cls, print_fn=print) -> None:
         """Print help text for the tap."""
-        print_fn(f"{cls.name} v{cls.plugin_version}, Singer SDK v{cls.sdk_version})")
+        print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version})")
 
     @classmethod
     def print_about(cls, format: Optional[str] = None) -> None:
         """Print capabilities and other tap metadata."""
-        info = OrderedDict({})
+        info: Dict[str, Any] = OrderedDict({})
         info["name"] = cls.name
         info["version"] = cls.plugin_version
         info["sdk_version"] = cls.sdk_version

@@ -1,35 +1,30 @@
 tests:
-  - source_name: DatabaseTemplateTest
-    tap_id: test-tap-database-type
-    stream_type: Database
-    auth_method": Custom or N/A
+  - source_name: RESTCustomTemplateTest
+    tap_id: test-tap-rest-custom-type
+    stream_type: REST
+    auth_method: Custom or N/A
 
   - source_name: RESTSimpleAuthTemplateTest
     tap_id: test-tap-rest-simpleauth-type
     stream_type: REST
-    auth_method": Simple
+    auth_method: Simple
 
   - source_name: RESTOAuthTemplateTest
     tap_id: test-tap-rest-oath-type
     stream_type: REST
-    auth_method": OAuth
+    auth_method: OAuth
 
   - source_name: RESTJWTTemplateTest
-    tap_id: test-tap-rest-simpleauth-type
+    tap_id: test-tap-rest-jwt-type
     stream_type: REST
-    auth_method": JWT
-
-  - source_name: RESTJWTTemplateTest
-    tap_id: test-tap-rest-simpleauth-type
-    stream_type: REST
-    auth_method": Custom or N/A
+    auth_method: JWT
 
   - source_name: GraphQLJWTTemplateTest
     tap_id: test-tap-graphql-jwt-type
     stream_type: GraphQL
-    auth_method": JWT
+    auth_method: JWT
 
   - source_name: OtherCustomTemplateTest
     tap_id: test-tap-other-custom-type
     stream_type: Other
-    auth_method": Custom or N/A
+    auth_method: Custom or N/A
