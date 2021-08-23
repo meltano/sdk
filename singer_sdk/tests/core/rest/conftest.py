@@ -7,6 +7,8 @@ from singer_sdk.tap_base import Tap
 
 
 class SimpleRESTStream(RESTStream):
+    """A REST stream for testing."""
+
     url_base = "https://example.com"
     schema = {
         "type": "object",
@@ -15,6 +17,8 @@ class SimpleRESTStream(RESTStream):
 
 
 class SimpleTap(Tap):
+    """A REST tap for testing."""
+
     name = "tappy"
 
     def discover_streams(self):
@@ -27,4 +31,5 @@ class SimpleTap(Tap):
 
 @pytest.fixture
 def rest_tap():
+    """A RESTful tap instance fixture."""
     return SimpleTap()
