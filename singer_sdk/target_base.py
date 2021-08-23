@@ -81,8 +81,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
     ) -> Sink:
         """Return a sink for the given stream name.
 
-        If schema is provided, a new sink will be created. If the sink already existed,
-        the old sink becomes archived and held until the next drain_all() operation.
+        A new sink will be created if `schema` is provided and if either `schema` or
+        `key_properties` has changed. If so, the old sink becomes archived and held
+        until the next drain_all() operation.
 
         Developers only need to override this method if they want to provide a different
         sink depending on the values within the `record` object. Otherwise, please see
@@ -91,14 +92,27 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         :raises: RecordsWitoutSchemaException if sink does not exist and schema is not
                  sent.
         """
-        if schema:
-            if self.sink_exists(stream_name):
-                self._sinks_to_clear.append(self._sinks_active.pop(stream_name))
+        _ = record  # Custom implementations may use record in sink selection.
+        if schema is None:
+            self._assert_sink_exists(stream_name)
+            return self._sinks_active[stream_name]
 
+        existing_sink = self._sinks_active.get(stream_name, None)
+        if not existing_sink:
             return self.add_sink(stream_name, schema, key_properties)
 
-        self._assert_sink_exists(stream_name)
-        return self._sinks_active[stream_name]
+        if (
+            existing_sink.schema != schema
+            or existing_sink.key_properties != key_properties
+        ):
+            self.logger.info(
+                f"Schema or key properties for '{stream_name}' stream have changed. "
+                f"Initializing a new '{stream_name}' sink..."
+            )
+            self._sinks_to_clear.append(self._sinks_active.pop(stream_name))
+            return self.add_sink(stream_name, schema, key_properties)
+
+        return existing_sink
 
     def get_sink_class(self, stream_name: str) -> Type[Sink]:
         """Return a sink for the given stream name.
