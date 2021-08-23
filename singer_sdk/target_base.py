@@ -4,6 +4,7 @@ import abc
 import copy
 import json
 import sys
+import time
 
 import click
 
@@ -30,7 +31,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
     object for that record.
     """
 
-    _DRAIN_AFTER_STATE_MESSAGES: bool = True
+    _MAX_RECORD_AGE_IN_MINUTES: float = 30.0
 
     # Default class to use for creating new sink objects.
     # Required if `Target.get_sink_class()` is not defined.
@@ -48,6 +49,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         self._drained_state: Dict[str, dict] = {}
         self._sinks_active: Dict[str, Sink] = {}
         self._sinks_to_clear: List[Sink] = []
+
+        # Approximated for max record age enforcement
+        self._last_full_drain_at: float = time.time()
 
         # Initialize mapper
         self.mapper: PluginMapper
@@ -76,8 +80,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
     ) -> Sink:
         """Return a sink for the given stream name.
 
-        If schema is provided, a new sink will be created. If the sink already existed,
-        the old sink becomes archived and held until the next drain_all() operation.
+        A new sink will be created if `schema` is provided and if either `schema` or
+        `key_properties` has changed. If so, the old sink becomes archived and held
+        until the next drain_all() operation.
 
         Developers only need to override this method if they want to provide a different
         sink depending on the values within the `record` object. Otherwise, please see
@@ -86,14 +91,27 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         :raises: RecordsWitoutSchemaException if sink does not exist and schema is not
                  sent.
         """
-        if schema:
-            if self.sink_exists(stream_name):
-                self._sinks_to_clear.append(self._sinks_active.pop(stream_name))
+        _ = record  # Custom implementations may use record in sink selection.
+        if schema is None:
+            self._assert_sink_exists(stream_name)
+            return self._sinks_active[stream_name]
 
+        existing_sink = self._sinks_active.get(stream_name, None)
+        if not existing_sink:
             return self.add_sink(stream_name, schema, key_properties)
 
-        self._assert_sink_exists(stream_name)
-        return self._sinks_active[stream_name]
+        if (
+            existing_sink.schema != schema
+            or existing_sink.key_properties != key_properties
+        ):
+            self.logger.info(
+                f"Schema or key properties for '{stream_name}' stream have changed. "
+                f"Initializing a new '{stream_name}' sink..."
+            )
+            self._sinks_to_clear.append(self._sinks_active.pop(stream_name))
+            return self.add_sink(stream_name, schema, key_properties)
+
+        return existing_sink
 
     def get_sink_class(self, stream_name: str) -> Type[Sink]:
         """Return a sink for the given stream name.
@@ -261,6 +279,13 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 key_properties=stream_map.transformed_key_properties,
             )
 
+    @property
+    def _max_record_age_in_minutes(self) -> float:
+        return (time.time() - self._last_full_drain_at) / 60
+
+    def _reset_max_record_age(self) -> None:
+        self._last_full_drain_at = time.time()
+
     def _process_state_message(self, message_dict: dict) -> None:
         """Process a state message. drain sinks if needed.
 
@@ -271,7 +296,11 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         if self._latest_state == state:
             return
         self._latest_state = state
-        if self._DRAIN_AFTER_STATE_MESSAGES:
+        if self._max_record_age_in_minutes > self._MAX_RECORD_AGE_IN_MINUTES:
+            self.logger.info(
+                "One or more records have exceeded the max age of "
+                f"{self._MAX_RECORD_AGE_IN_MINUTES} minutes. Draining all sinks."
+            )
             self.drain_all()
 
     def _process_activate_version_message(self, message_dict: dict) -> None:
@@ -294,6 +323,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         self._sinks_to_clear = []
         self._drain_all(list(self._sinks_active.values()), self.max_parallelism)
         self._write_state_message(state)
+        self._reset_max_record_age()
 
     @final
     def drain_one(self, sink: Sink) -> None:
