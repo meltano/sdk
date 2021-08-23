@@ -2,16 +2,17 @@
 
 import io
 from contextlib import redirect_stdout
+from freezegun import freeze_time
 
 from typing import Dict, Any, List, Optional
 
 from singer_sdk import typing as th
 from singer_sdk.target_base import Target
-from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks import BatchSink
 
 from singer_sdk.samples.sample_tap_countries.countries_tap import SampleTapCountries
 from singer_sdk.samples.sample_target_csv.csv_target import SampleTargetCSV
+
 
 SAMPLE_FILENAME = "/tmp/testfile.countries"
 SAMPLE_TAP_CONFIG: Dict[str, Any] = {}
@@ -77,6 +78,9 @@ def test_countries_to_csv(csv_config: dict):
 
 # TODO: Add pytest.parametrize here
 def test_target_batching():
+
+    freezer = freeze_time("2012-01-01 12:00:00")
+    freezer.start()
     target = TargetMock()
 
     # TODO: Use a sample row generator or a Mock Tap instead of TapCountries:
@@ -88,22 +92,30 @@ def test_target_batching():
     # `buf` now contains the output of a full tap sync
     buf.seek(0)
     target._process_lines(buf)
+    sample_record_msg = buf[1]
 
     sync_end_to_end(tap, target)
 
     # TODO: Set these to real checks (currently arbitrary/sample)
     assert len(target.records_written) == 100
     assert len(target.state_messages_written) == 2
-    assert target.state_messages_written[-1] == {"expected": "final state"}
 
-    buf.seek(0)
-    target._process_lines(buf[0:1])  # Should force a drain of the sink
+    freezer.move_to("2012-01-01 12:31:00")  # Advance 31 minutes
+    target._process_lines([sample_record_msg])  # Should force a drain of the sink
 
     # Should have forced an additional state and record message
     assert len(target.records_written) == 101
     assert len(target.state_messages_written) == 3
+    target._process_lines([sample_record_msg])  # Ensure one 'old' record
+
+    freezer.move_to("2012-01-01 13:02:00")  # Advance 31 minutes
+    target._process_lines([sample_record_msg])  # Should force a drain of the sink
+
+    # Should have forced an additional state and record message
+    assert len(target.records_written) == 103
+    assert len(target.state_messages_written) == 4
 
     target._process_endofpipe()  # Should force a final STATE message
 
-    assert len(target.state_messages_written) == 4
+    assert len(target.state_messages_written) == 5
     assert target.state_messages_written[-1] == {"expected": "final state"}
