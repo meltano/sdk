@@ -143,6 +143,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         This method is internal to the SDK and should not need to be overridden.
         """
         self._process_lines(sys.stdin)
+        self._process_endofpipe()
 
     @final
     def add_sink(
@@ -217,11 +218,14 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
             raise Exception(f"Unknown message type '{record_type}' in message.")
 
-        self.drain_all()
         self.logger.info(
-            f"Target '{self.name}' completed after {line_counter} lines of input "
+            f"Target '{self.name}' completed reading {line_counter} lines of input "
             f"({record_counter} records, {state_counter} state messages)."
         )
+
+    def _process_endofpipe(self, lines: Iterable[str], table_cache=None) -> None:
+        """Called after all input lines have been read."""
+        self.drain_all()
 
     def _process_record_message(self, message_dict: dict) -> None:
         """Process a RECORD message."""
