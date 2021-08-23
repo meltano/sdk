@@ -31,5 +31,5 @@ class SimpleTap(Tap):
 
 @pytest.fixture
 def rest_tap():
-    """A RESTful tap instance fixture."""
+    """Create a RESTful tap instance."""
     return SimpleTap()
