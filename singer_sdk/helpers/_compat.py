@@ -12,4 +12,9 @@ except ImportError:
     # Running on pre-3.8 Python; use importlib-metadata package
     import importlib_metadata as metadata  # type: ignore
 
-__all__ = ["metadata", "final"]
+try:
+    from functools import cached_property
+except ImportError:
+    from backports.cached_property import cached_property
+
+__all__ = ["metadata", "final", "cached_property"]

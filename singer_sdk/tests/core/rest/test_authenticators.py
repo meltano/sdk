@@ -11,4 +11,4 @@ def test_authenticator_is_reused(rest_tap: Tap):
 
     assert stream.authenticator is stream.authenticator
     assert other_stream.authenticator is other_stream.authenticator
-    assert stream.authenticator is other_stream.authenticator
+    assert stream.authenticator is not other_stream.authenticator
