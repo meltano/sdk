@@ -5,6 +5,7 @@ import requests
 from pathlib import Path
 from typing import Any, Dict, List, cast, Optional
 
+from singer_sdk.helpers._compat import cached_property
 from singer_sdk.typing import (
     ArrayType,
     DateTimeType,
@@ -31,8 +32,8 @@ class GitlabStream(RESTStream):
         """Return the base GitLab URL."""
         return self.config.get("api_url", DEFAULT_URL_BASE)
 
-    @property
-    def authenticator(self) -> SimpleAuthenticator:
+    @cached_property
+    def authenticator(self):
         """Return an authenticator for REST API requests."""
         return SimpleAuthenticator(
             stream=self, auth_headers={"Private-Token": self.config.get("auth_token")}
