@@ -15,6 +15,6 @@ except ImportError:
 try:
     from functools import cached_property
 except ImportError:
-    from backports.cached_property import cached_property
+    from backports.cached_property import cached_property  # type: ignore
 
 __all__ = ["metadata", "final", "cached_property"]
