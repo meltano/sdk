@@ -55,3 +55,27 @@ poetry run tap-mysource --discover \
    --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json \
    --catalog singer_sdk/samples/sample_tap_parquet/parquet-catalog.sample.json
 ```
+
+## Test connectivity
+
+The `--test` option allows the user to validate configuration and assess connectivity.
+
+```bash
+poetry install && \
+poetry run tap-mysource --test \
+   --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
+```
+
+## Package Information
+
+The `--about` displays metadata about the package.
+
+```bash
+poetry install && \
+poetry run tap-mysource --about
+```
+
+```bash
+poetry install && \
+poetry run tap-mysource --about --format json
+```
