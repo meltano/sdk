@@ -289,7 +289,6 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 f"{self._MAX_RECORD_AGE_IN_MINUTES} minutes. Draining all sinks."
             )
             self.drain_all()
-            self._reset_max_record_age()
 
     def _process_activate_version_message(self, message_dict: dict) -> None:
         """Handle the optional ACTIVATE_VERSION message extension."""
@@ -311,6 +310,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         self._sinks_to_clear = []
         self._drain_all(list(self._sinks_active.values()), self.max_parallelism)
         self._write_state_message(state)
+        self._reset_max_record_age()
 
     @final
     def drain_one(self, sink: Sink) -> None:
