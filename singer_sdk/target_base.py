@@ -268,7 +268,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     @property
     def _max_record_age_in_minutes(self) -> float:
-        return (self._last_full_drain_at - time.time()) / 60
+        return (time.time() - self._last_full_drain_at) / 60
 
     def _reset_max_record_age(self) -> None:
         self._last_full_drain_at = time.time()
