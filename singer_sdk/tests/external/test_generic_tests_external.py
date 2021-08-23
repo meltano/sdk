@@ -19,11 +19,8 @@ def test_gitlab_tap_standard_tests(gitlab_config: Optional[dict]):
         test()
 
 
-def test_ga_tap_standard_tests():
+def test_ga_tap_standard_tests(ga_config: Optional[dict]):
     """Run standard tap tests against Google Analytics tap."""
-    tests = get_standard_tap_tests(
-        SampleTapGoogleAnalytics,
-        config=GA_CONFIG_FILE if GA_CONFIG_FILE.exists() else None,
-    )
+    tests = get_standard_tap_tests(SampleTapGoogleAnalytics, config=ga_config)
     for test in tests:
         test()
