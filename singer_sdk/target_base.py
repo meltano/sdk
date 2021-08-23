@@ -4,6 +4,7 @@ import abc
 import copy
 import json
 import sys
+import time
 
 import click
 
@@ -31,6 +32,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
     """
 
     _DRAIN_AFTER_STATE_MESSAGES: bool = True
+    _MAX_RECORD_AGE_IN_MINUTES: float = 30.0
 
     # Default class to use for creating new sink objects.
     # Required if `Target.get_sink_class()` is not defined.
@@ -48,6 +50,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         self._drained_state: Dict[str, dict] = {}
         self._sinks_active: Dict[str, Sink] = {}
         self._sinks_to_clear: List[Sink] = []
+
+        # Approximated for max record age enforcement
+        self._last_full_drain_at: float = time.time()
 
         # Initialize mapper
         self.mapper: PluginMapper
@@ -261,6 +266,13 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 key_properties=stream_map.transformed_key_properties,
             )
 
+    @property
+    def _max_record_age_in_minutes(self) -> float:
+        return (self._last_full_drain_at - time.time()) / 60
+
+    def _reset_max_record_age(self) -> None:
+        self._last_full_drain_at = time.time()
+
     def _process_state_message(self, message_dict: dict) -> None:
         """Process a state message. drain sinks if needed.
 
@@ -271,8 +283,13 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         if self._latest_state == state:
             return
         self._latest_state = state
-        if self._DRAIN_AFTER_STATE_MESSAGES:
+        if self._max_record_age_in_minutes > self._MAX_RECORD_AGE_IN_MINUTES:
+            self.logger.info(
+                "One or more records have exceeded the max age of "
+                f"{self._MAX_RECORD_AGE_IN_MINUTES} minutes. Draining all sinks."
+            )
             self.drain_all()
+            self._reset_max_record_age()
 
     def _process_activate_version_message(self, message_dict: dict) -> None:
         """Handle the optional ACTIVATE_VERSION message extension."""
