@@ -31,7 +31,6 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
     object for that record.
     """
 
-    _DRAIN_AFTER_STATE_MESSAGES: bool = True
     _MAX_RECORD_AGE_IN_MINUTES: float = 30.0
 
     # Default class to use for creating new sink objects.
