@@ -77,11 +77,33 @@ def test_countries_to_csv(csv_config: dict):
 
 # TODO: Add pytest.parametrize here
 def test_target_batching():
-    tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
     target = TargetMock()
+
+    # TODO: Use a sample row generator or a Mock Tap instead of TapCountries:
+    tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        tap.sync_all()
+
+    # `buf` now contains the output of a full tap sync
+    buf.seek(0)
+    target._process_lines(buf)
+
     sync_end_to_end(tap, target)
 
     # TODO: Set these to real checks (currently arbitrary/sample)
     assert len(target.records_written) == 100
     assert len(target.state_messages_written) == 2
+    assert target.state_messages_written[-1] == {"expected": "final state"}
+
+    buf.seek(0)
+    target._process_lines(buf[0:1])  # Should force a drain of the sink
+
+    # Should have forced an additional state and record message
+    assert len(target.records_written) == 101
+    assert len(target.state_messages_written) == 3
+
+    target._process_endofpipe()  # Should force a final STATE message
+
+    assert len(target.state_messages_written) == 4
     assert target.state_messages_written[-1] == {"expected": "final state"}
