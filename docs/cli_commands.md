@@ -68,14 +68,34 @@ poetry run tap-mysource --test \
 
 ## Package Information
 
-The `--about` displays metadata about the package.
+The `--about` option displays metadata about the package.
 
-```bash
-poetry install && \
-poetry run tap-mysource --about
+```console
+$ poetry run sdk-tap-countries-sample --about
+Name: sample-tap-countries
+Version: [could not be detected]
+Sdk_Version: 0.3.5
+Capabilities: ['sync', 'catalog', 'state', 'discover']
+Settings: {'type': 'object', 'properties': {}}
 ```
 
-```bash
-poetry install && \
-poetry run tap-mysource --about --format json
+This information can also be printed in JSON format for consumption by other applications
+
+```console
+$ poetry run sdk-tap-countries-sample --about --format json
+{
+  "name": "sample-tap-countries",
+  "version": "[could not be detected]",
+  "sdk_version": "0.3.5",
+  "capabilities": [
+    "sync",
+    "catalog",
+    "state",
+    "discover"
+  ],
+  "settings": {
+    "type": "object",
+    "properties": {}
+  }
+}
 ```
