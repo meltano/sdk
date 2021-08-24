@@ -55,3 +55,47 @@ poetry run tap-mysource --discover \
    --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json \
    --catalog singer_sdk/samples/sample_tap_parquet/parquet-catalog.sample.json
 ```
+
+## Test connectivity
+
+The `--test` option allows the user to validate configuration and assess connectivity.
+
+```bash
+poetry install && \
+poetry run tap-mysource --test \
+   --config singer_sdk/samples/sample_tap_parquet/parquet-config.sample.json
+```
+
+## Package Information
+
+The `--about` option displays metadata about the package.
+
+```console
+$ poetry run sdk-tap-countries-sample --about
+Name: sample-tap-countries
+Version: [could not be detected]
+Sdk_Version: 0.3.5
+Capabilities: ['sync', 'catalog', 'state', 'discover']
+Settings: {'type': 'object', 'properties': {}}
+```
+
+This information can also be printed in JSON format for consumption by other applications
+
+```console
+$ poetry run sdk-tap-countries-sample --about --format json
+{
+  "name": "sample-tap-countries",
+  "version": "[could not be detected]",
+  "sdk_version": "0.3.5",
+  "capabilities": [
+    "sync",
+    "catalog",
+    "state",
+    "discover"
+  ],
+  "settings": {
+    "type": "object",
+    "properties": {}
+  }
+}
+```
