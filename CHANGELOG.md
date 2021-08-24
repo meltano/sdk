@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changes
 
+- Bump minimum version of `click` to 8.0 (#178, !140).
+
 ### Fixes
 
 - Tap SDK: Improve CLI `--help` output (#177, !140).
