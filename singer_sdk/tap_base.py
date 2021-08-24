@@ -4,7 +4,7 @@ import abc
 import json
 from pathlib import PurePath, Path
 from singer_sdk.mapper import PluginMapper
-from typing import Any, List, Optional, Dict, Type, Union, cast
+from typing import Any, List, Optional, Dict, Tuple, Type, Union, cast
 
 import click
 from singer.catalog import Catalog
@@ -299,6 +299,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             "--config",
             multiple=True,
             help="Configuration file location or 'ENV' to use environment variables.",
+            default=(),
         )
         @click.option(
             "--catalog",
@@ -319,7 +320,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             about: bool = False,
             discover: bool = False,
             test: bool = False,
-            config: List[str] = None,
+            config: Tuple[str] = (),
             state: str = None,
             catalog: str = None,
             format: str = None,
@@ -337,7 +338,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
             parse_env_config = False
             config_files: List[PurePath] = []
-            for config_path in config or []:
+            for config_path in config:
                 if config_path == "ENV":
                     # Allow parse from env vars:
                     parse_env_config = True
