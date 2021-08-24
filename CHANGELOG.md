@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixes
 
+- Tap SDK: Improve CLI `--help` output (#177, !140).
+
 ### Breaks
 
 
