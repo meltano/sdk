@@ -4,7 +4,7 @@ import abc
 import json
 from pathlib import PurePath, Path
 from singer_sdk.mapper import PluginMapper
-from typing import Any, List, Optional, Dict, Type, Union, cast
+from typing import Any, List, Optional, Dict, Tuple, Type, Union, cast
 
 import click
 from singer.catalog import Catalog
@@ -269,21 +269,59 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     def cli(cls):
         """Execute standard CLI handler for taps."""
 
-        @click.option("--version", is_flag=True)
-        @click.option("--about", is_flag=True)
-        @click.option("--discover", is_flag=True)
-        @click.option("--test", is_flag=True)
-        @click.option("--format")
-        @click.option("--config", multiple=True)
-        @click.option("--catalog")
-        @click.option("--state")
-        @click.command()
+        @click.option(
+            "--version",
+            is_flag=True,
+            help="Display the package version.",
+        )
+        @click.option(
+            "--about",
+            is_flag=True,
+            help="Display package metadata and settings.",
+        )
+        @click.option(
+            "--discover",
+            is_flag=True,
+            help="Run the tap in discovery mode.",
+        )
+        @click.option(
+            "--test",
+            is_flag=True,
+            help="Test connectivity by syncing a single record and exiting.",
+        )
+        @click.option(
+            "--format",
+            help="Specify output style for --about",
+            type=click.Choice(["json"], case_sensitive=False),
+            default=None,
+        )
+        @click.option(
+            "--config",
+            multiple=True,
+            help="Configuration file location or 'ENV' to use environment variables.",
+            type=click.STRING,
+            default=(),
+        )
+        @click.option(
+            "--catalog",
+            help="Use a Singer catalog file with the tap.",
+            type=click.Path(),
+        )
+        @click.option(
+            "--state",
+            help="Use a bookmarks file for incremental replication.",
+            type=click.Path(),
+        )
+        @click.command(
+            help="Execute the Singer tap.",
+            context_settings={"help_option_names": ["--help"]},
+        )
         def cli(
             version: bool = False,
             about: bool = False,
             discover: bool = False,
             test: bool = False,
-            config: List[str] = None,
+            config: Tuple[str, ...] = (),
             state: str = None,
             catalog: str = None,
             format: str = None,
@@ -301,7 +339,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
             parse_env_config = False
             config_files: List[PurePath] = []
-            for config_path in config or []:
+            for config_path in config:
                 if config_path == "ENV":
                     # Allow parse from env vars:
                     parse_env_config = True
