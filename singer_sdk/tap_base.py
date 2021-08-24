@@ -272,12 +272,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         @click.option(
             "--version",
             is_flag=True,
-            help="Print the package version.",
+            help="Display the package version.",
         )
         @click.option(
             "--about",
             is_flag=True,
-            help="Display package metadata and expected settings.",
+            help="Display package metadata and settings.",
         )
         @click.option(
             "--discover",
@@ -299,6 +299,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             "--config",
             multiple=True,
             help="Configuration file location or 'ENV' to use environment variables.",
+            type=click.STRING,
             default=(),
         )
         @click.option(
