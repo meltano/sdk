@@ -19,12 +19,14 @@ class TapCapabilities(PluginCapabilities, Enum):
 
     # Supported by default:
     CATALOG = "catalog"
-    PROPERTIES = "properties"
     DISCOVER = "discover"
     STATE = "state"
 
     # Not supported by default:
     LOG_BASED = "log-based"
+
+    # Deprecated. Please use 'catalog' instead:
+    PROPERTIES = "properties"
 
 
 class TargetCapabilities(PluginCapabilities, Enum):
