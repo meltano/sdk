@@ -316,7 +316,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             help="Use a bookmarks file for incremental replication.",
             type=click.Path(),
         )
-        @click.command(help="Execute the Singer tap.")
+        @click.command(
+            help="Execute the Singer tap.",
+            context_settings={"help_option_names": ["-h", "--help"]},
+        )
         def cli(
             version: bool = False,
             about: bool = False,
