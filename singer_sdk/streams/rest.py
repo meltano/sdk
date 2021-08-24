@@ -11,7 +11,6 @@ from typing import Any, Dict, Iterable, List, Optional, Union, cast
 
 from singer.schema import Schema
 
-from singer_sdk.helpers._compat import cached_property
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
@@ -260,7 +259,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     # Abstract methods:
 
-    @cached_property
+    @property
     def authenticator(self) -> Optional[APIAuthenticatorBase]:
         """Return or set the authenticator for managing HTTP auth headers.
 

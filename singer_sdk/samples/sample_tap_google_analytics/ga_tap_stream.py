@@ -5,7 +5,6 @@ from typing import Iterable, List, Optional, Any, cast
 
 import pendulum
 
-from singer_sdk.helpers._compat import cached_property
 from singer_sdk.streams import RESTStream
 from singer_sdk.authenticators import OAuthJWTAuthenticator
 
@@ -34,8 +33,8 @@ class SampleGoogleAnalyticsStream(RESTStream):
     dimensions: List[str] = []
     metrics: List[str] = []
 
-    @cached_property
-    def authenticator(self):
+    @property
+    def authenticator(self) -> GoogleJWTAuthenticator:
         """Return authenticator for Google Analytics."""
         return GoogleJWTAuthenticator(
             stream=self,
