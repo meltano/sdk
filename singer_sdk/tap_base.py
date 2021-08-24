@@ -269,15 +269,54 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     def cli(cls):
         """Execute standard CLI handler for taps."""
 
-        @click.option("--version", is_flag=True)
-        @click.option("--about", is_flag=True)
-        @click.option("--discover", is_flag=True)
-        @click.option("--test", is_flag=True)
-        @click.option("--format")
-        @click.option("--config", multiple=True)
-        @click.option("--catalog")
-        @click.option("--state")
-        @click.command()
+        @click.option(
+            "--version",
+            "-v",
+            is_flag=True,
+            help="Print the package version.",
+        )
+        @click.option(
+            "--about",
+            is_flag=True,
+            help="Display package metadata and expected settings.",
+        )
+        @click.option(
+            "--discover",
+            "-d",
+            is_flag=True,
+            help="Run the tap in discovery mode.",
+        )
+        @click.option(
+            "--test",
+            "-t",
+            is_flag=True,
+            help="Test connectivity by syncing a single record and exiting.",
+        )
+        @click.option(
+            "--format",
+            help="Specify output style for --about",
+            type=click.Choice(["json"], case_sensitive=False),
+            default=None,
+        )
+        @click.option(
+            "--config",
+            "-c",
+            multiple=True,
+            help="Configuration file location or 'ENV' to use environment variables.",
+        )
+        @click.option(
+            "--catalog",
+            "-p",
+            help="Use a Singer catalog file with the tap.",
+            type=click.Path(),
+        )
+        @click.option(
+            "--state",
+            "-s",
+            help="Use a bookmarks file for incremental replication.",
+            type=click.Path(),
+        )
+        @click.command(help="Execute the Singer tap.")
         def cli(
             version: bool = False,
             about: bool = False,
