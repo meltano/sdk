@@ -1,5 +1,8 @@
 """Test sample sync."""
 from typing import Optional
+
+from singer.catalog import Catalog
+
 from singer_sdk.helpers import _catalog
 from singer_sdk.samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 
@@ -20,14 +23,16 @@ def test_gitlab_sync_epic_issues(gitlab_config: Optional[dict]):
     tap1 = SampleTapGitlab(config=gitlab_config, parse_env_config=True)
     # Test discovery
     tap1.run_discovery()
-    catalog1 = tap1.catalog_dict
+    catalog1 = Catalog.from_dict(tap1.catalog_dict)
     # Reset and re-initialize with an input catalog
     _catalog.deselect_all_streams(catalog=catalog1)
     _catalog.set_catalog_stream_selected(
-        catalog=catalog1, stream_name=stream_name, selected=True
+        catalog=catalog1,
+        stream_name=stream_name,
+        selected=True,
     )
     tap1 = None
     tap2 = SampleTapGitlab(
-        config=gitlab_config, parse_env_config=True, catalog=catalog1
+        config=gitlab_config, parse_env_config=True, catalog=catalog1.to_dict()
     )
     tap2.sync_all()

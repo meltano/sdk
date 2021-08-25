@@ -79,11 +79,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
         Results will be cached after first execution.
         """
+        catalog = self.input_catalog
+
         if self._streams is None:
             self._streams = {}
             for stream in self.load_streams():
-                if self.input_catalog:
-                    stream.apply_catalog(self.input_catalog)
+                if catalog:
+                    stream.apply_catalog(catalog)
                 self._streams[stream.name] = stream
         return self._streams
 
@@ -95,9 +97,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         return self._state
 
     @property
-    def input_catalog(self) -> Optional[dict]:
+    def input_catalog(self) -> Optional[Catalog]:
         """Return the catalog dictionary input, or None if not provided."""
-        return self._input_catalog
+        return Catalog.from_dict(self._input_catalog) if self._input_catalog else None
 
     @classproperty
     def capabilities(self) -> List[str]:

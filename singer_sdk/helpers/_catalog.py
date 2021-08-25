@@ -6,7 +6,7 @@ from logging import Logger
 from typing import Any, Dict, Optional, Tuple, List
 
 from singer.metadata import to_map
-from singer.catalog import Catalog, CatalogEntry
+from singer.catalog import Catalog
 
 from singer_sdk.helpers._typing import is_object_type
 
@@ -31,7 +31,7 @@ class InclusionType(str, Enum):
 
 
 def is_stream_selected(
-    catalog: Optional[dict],
+    catalog: Optional[Catalog],
     stream_name: str,
     logger: Logger,
 ) -> bool:
@@ -42,8 +42,7 @@ def is_stream_selected(
     if catalog is None:
         return True
 
-    catalog_obj = Catalog.from_dict(catalog)
-    catalog_entry: CatalogEntry = catalog_obj.get_stream(stream_name)
+    catalog_entry = catalog.get_stream(stream_name)
     if not catalog_entry:
         logger.debug("Catalog entry missing for '%s'. Skipping.", stream_name)
         return False
@@ -212,19 +211,14 @@ def pop_deselected_record_properties(
             )
 
 
-def deselect_all_streams(catalog: dict) -> None:
+def deselect_all_streams(catalog: Catalog) -> None:
     """Deselect all streams in catalog dictionary."""
-    for stream_name in get_catalog_stream_names(catalog):
-        set_catalog_stream_selected(catalog, stream_name, selected=False)
-
-
-def get_catalog_stream_names(catalog: dict) -> List[str]:
-    """Deselect all streams in catalog dictionary."""
-    return [catalog_entry["stream"] for catalog_entry in catalog.get("streams", [])]
+    for entry in catalog.streams:
+        set_catalog_stream_selected(catalog, entry.stream, selected=False)
 
 
 def set_catalog_stream_selected(
-    catalog: dict,
+    catalog: Catalog,
     stream_name: str,
     selected: bool,
     breadcrumb: Optional[Tuple[str, ...]] = None,
@@ -243,8 +237,7 @@ def set_catalog_stream_selected(
             f"Got {type(breadcrumb).__name__}"
         )
 
-    catalog_obj = Catalog.from_dict(catalog)
-    catalog_entry: CatalogEntry = catalog_obj.get_stream(stream_name)
+    catalog_entry = catalog.get_stream(stream_name)
     if not catalog_entry:
         raise ValueError(f"Catalog entry missing for '{stream_name}'. Skipping.")
 

@@ -32,7 +32,6 @@ from singer import (
     RecordMessage,
     SchemaMessage,
 )
-from singer.catalog import Catalog
 from singer.schema import Schema
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
@@ -94,7 +93,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._config: dict = dict(tap.config)
         self._tap = tap
         self._tap_state = tap.state
-        self._tap_input_catalog: Optional[dict] = None
+        self._tap_input_catalog: Optional[singer.Catalog] = None
         self._stream_maps: Optional[List[StreamMap]] = None
         self.forced_replication_method: Optional[str] = None
         self._replication_key: Optional[str] = None
@@ -358,8 +357,7 @@ class Stream(metaclass=abc.ABCMeta):
             return self._metadata
 
         if self._tap_input_catalog:
-            catalog = singer.Catalog.from_dict(self._tap_input_catalog)
-            catalog_entry = catalog.get_stream(self.tap_stream_id)
+            catalog_entry = self._tap_input_catalog.get_stream(self.tap_stream_id)
             if catalog_entry:
                 self._metadata = cast(List[dict], catalog_entry.metadata)
                 return self._metadata
@@ -779,16 +777,15 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Overridable Methods
 
-    def apply_catalog(self, catalog_dict: dict) -> None:
+    def apply_catalog(self, catalog: singer.Catalog) -> None:
         """Apply a catalog dict, updating any settings overridden within the catalog.
 
         Developers may override this method in order to introduce advanced catalog
         parsing, or to explicitly fail on advanced catalog customizations which
         are not supported by the tap.
         """
-        self._tap_input_catalog = catalog_dict
+        self._tap_input_catalog = catalog
 
-        catalog = Catalog.from_dict(catalog_dict)
         catalog_entry: singer.CatalogEntry = catalog.get_stream(self.name)
         if catalog_entry:
             self.primary_keys = catalog_entry.key_properties
