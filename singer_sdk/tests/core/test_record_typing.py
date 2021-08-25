@@ -1,4 +1,4 @@
-"""Stream tests."""
+"""Typing tests."""
 
 from typing import Any, Dict
 import logging
