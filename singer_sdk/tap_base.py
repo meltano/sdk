@@ -14,7 +14,7 @@ from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._singer import Catalog
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import read_json_file
-from singer_sdk.helpers.about import TapCapabilities
+from singer_sdk.helpers.capabilities import PluginCapabilities, TapCapabilities
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams.core import Stream
@@ -138,11 +138,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             A list of capabilities supported by this tap.
         """
         return [
-            TapCapabilities.ABOUT,
             TapCapabilities.CATALOG,
             TapCapabilities.STATE,
             TapCapabilities.DISCOVER,
-            TapCapabilities.STREAM_MAPS,
+            PluginCapabilities.ABOUT,
+            PluginCapabilities.STREAM_MAPS,
         ]
 
     # Connection test:

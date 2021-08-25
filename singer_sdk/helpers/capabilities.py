@@ -14,7 +14,7 @@ class PluginCapabilities(str, Enum):
     ACTIVATE_VERSION = "activate-version"  # Support the ACTIVATE_VERSION extension
 
 
-class TapCapabilities(PluginCapabilities, Enum):
+class TapCapabilities(str, Enum):
     """Tap-specific capabilities."""
 
     # Supported by default:
@@ -29,7 +29,7 @@ class TapCapabilities(PluginCapabilities, Enum):
     PROPERTIES = "properties"  # Deprecated. Please use 'catalog' instead
 
 
-class TargetCapabilities(PluginCapabilities, Enum):
+class TargetCapabilities(str, Enum):
     """Target-specific capabilities."""
 
     # Not supported by default:

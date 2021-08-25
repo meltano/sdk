@@ -14,7 +14,7 @@ from joblib import Parallel, delayed, parallel_backend
 from singer_sdk.exceptions import RecordsWitoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
-from singer_sdk.helpers.about import TargetCapabilities
+from singer_sdk.helpers.capabilities import PluginCapabilities
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks import Sink
@@ -84,8 +84,8 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             A list of capabilities supported by this target.
         """
         return [
-            TargetCapabilities.ABOUT,
-            TargetCapabilities.STREAM_MAPS,
+            PluginCapabilities.ABOUT,
+            PluginCapabilities.STREAM_MAPS,
         ]
 
     @property
