@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 
 - Tap SDK: Improve CLI `--help` output (#177, !140).
+- Fixes a bug in state tracking where timezone-aware timestamps are appended again with `+0:00` (!142) -- _Thanks, **[Joshua Adeyemi](https://gitlab.com/joshua.a.adeyemi)**!_
 
 ### Breaks
 
