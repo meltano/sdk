@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Tap SDK: Improves CLI `--help` output (#177, !140).
 - Tap SDK: Fixes a bug in state tracking where timezone-aware timestamps are appended again with `+0:00` (!142) -- _Thanks, **[Joshua Adeyemi](https://gitlab.com/joshua.a.adeyemi)**!_
+- Tap SDK: Improve performance by reusing a single authenticator instance (#168, #173, !136)
 
 ### Breaks
 
