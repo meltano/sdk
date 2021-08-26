@@ -4,6 +4,7 @@ import copy
 import logging
 
 from singer_sdk.helpers._catalog import (
+    InclusionType,
     get_selected_schema,
     pop_deselected_record_properties,
 )
@@ -34,6 +35,16 @@ def test_countries_primary_key():
         f"Incorrect 'key_properties' in catalog: ({key_props_2})\n\n"
         "Catalog entry was: {countries_entry}"
     )
+
+
+def test_countries_discoverable_selection():
+    """Test discovered catalog includes declared metadata in the stream."""
+    tap = SampleTapCountries(config=None)
+    countries_entry = tap.streams["countries"]._singer_catalog_entry
+
+    assert countries_entry.metadata[("properties", "code")]["selected-by-default"]
+    assert countries_entry.metadata[("properties", "name")]["selected-by-default"]
+    assert countries_entry.metadata[("properties", "emoji")]["inclusion"] == InclusionType.UNSUPPORTED
 
 
 def test_with_catalog_mismatch():

@@ -36,7 +36,7 @@ from singer import (
 from singer.schema import Schema
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
-from singer_sdk.helpers._catalog import pop_deselected_record_properties
+from singer_sdk.helpers._catalog import InclusionType, pop_deselected_record_properties
 from singer_sdk.helpers._singer import Catalog, CatalogEntry, MetadataMapping
 from singer_sdk.helpers._typing import (
     conform_record_data_types,
@@ -378,6 +378,12 @@ class Stream(metaclass=abc.ABCMeta):
         # If there's no input catalog, select all streams
         if self._tap_input_catalog is None:
             self._metadata[()]["selected"] = True
+
+        for breadcrumb in self.selected_by_default_fields:
+            self._metadata[breadcrumb]["selected-by-default"] = True
+
+        for breadcrumb in self.unsupported_fields:
+            self._metadata[breadcrumb]["inclusion"] = InclusionType.UNSUPPORTED
 
         return self._metadata
 
@@ -861,3 +867,13 @@ class Stream(metaclass=abc.ABCMeta):
         API.
         """
         return row
+
+    @property
+    def selected_by_default_fields(self) -> List[Tuple[str, ...]]:
+        """Get field breadcrumbs that should marked as selected by default in the catalog."""
+        return []
+
+    @property
+    def unsupported_fields(self) -> List[Tuple[str, ...]]:
+        """Get field breadcrumbs that should marked as unsupported in the catalog."""
+        return []

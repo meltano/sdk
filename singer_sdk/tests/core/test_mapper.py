@@ -231,7 +231,7 @@ def filtered_schemas():
 
 def test_map_transforms(
     sample_stream,
-    sample_catalog_dict,
+    sample_catalog_obj,
     transform_stream_maps,
     stream_map_config,
     transformed_result,
@@ -244,13 +244,13 @@ def test_map_transforms(
         expected_result=transformed_result,
         expected_schemas=transformed_schemas,
         sample_stream=sample_stream,
-        sample_catalog_dict=sample_catalog_dict,
+        sample_catalog_obj=sample_catalog_obj,
     )
 
 
 def test_clone_and_alias_transforms(
     sample_stream,
-    sample_catalog_dict,
+    sample_catalog_obj,
     clone_and_alias_stream_maps,
     stream_map_config,
     cloned_and_aliased_result,
@@ -263,13 +263,13 @@ def test_clone_and_alias_transforms(
         expected_result=cloned_and_aliased_result,
         expected_schemas=cloned_and_aliased_schemas,
         sample_stream=sample_stream,
-        sample_catalog_dict=sample_catalog_dict,
+        sample_catalog_obj=sample_catalog_obj,
     )
 
 
 def test_filter_transforms(
     sample_stream,
-    sample_catalog_dict,
+    sample_catalog_obj,
     filter_stream_maps,
     stream_map_config,
     filtered_result,
@@ -282,13 +282,13 @@ def test_filter_transforms(
         expected_result=filtered_result,
         expected_schemas=filtered_schemas,
         sample_stream=sample_stream,
-        sample_catalog_dict=sample_catalog_dict,
+        sample_catalog_obj=sample_catalog_obj,
     )
 
 
 def test_filter_transforms_w_error(
     sample_stream,
-    sample_catalog_dict,
+    sample_catalog_obj,
     filter_stream_map_w_error,
     stream_map_config,
     filtered_result,
@@ -302,7 +302,7 @@ def test_filter_transforms_w_error(
             expected_result=filtered_result,
             expected_schemas=filtered_schemas,
             sample_stream=sample_stream,
-            sample_catalog_dict=sample_catalog_dict,
+            sample_catalog_obj=sample_catalog_obj,
         )
 
 
@@ -313,7 +313,7 @@ def _test_transform(
     expected_result,
     expected_schemas,
     sample_stream,
-    sample_catalog_dict,
+    sample_catalog_obj,
 ):
     output: Dict[str, List[dict]] = {}
     mapper = PluginMapper(
@@ -323,7 +323,7 @@ def _test_transform(
         },
         logger=logging,
     )
-    mapper.register_raw_streams_from_catalog(sample_catalog_dict)
+    mapper.register_raw_streams_from_catalog(sample_catalog_obj)
 
     for stream_name, stream in sample_stream.items():
         for stream_map in mapper.stream_maps[stream_name]:

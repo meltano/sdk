@@ -60,7 +60,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             logger=self.logger,
         )
         self.mapper.register_raw_streams_from_catalog(
-            self._input_catalog or self.catalog_dict
+            self.input_catalog or self._singer_catalog
         )
 
         # Process state

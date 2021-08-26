@@ -355,9 +355,8 @@ class PluginMapper:
                     f"Option '{stream_map_key}:{stream_def}' is not expected."
                 )
 
-    def register_raw_streams_from_catalog(self, catalog_dict: dict) -> None:
+    def register_raw_streams_from_catalog(self, catalog: Catalog) -> None:
         """Register all streams as described in the catalog dict."""
-        catalog = Catalog.from_dict(catalog_dict)
         for catalog_entry in catalog.streams:
             self.register_raw_stream_schema(
                 catalog_entry.stream or catalog_entry.tap_stream_id,
