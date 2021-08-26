@@ -261,7 +261,6 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     # Abstract methods:
 
     @property
-    @cached
     def authenticator(self) -> Optional[APIAuthenticatorBase]:
         """Return or set the authenticator for managing HTTP auth headers.
 
