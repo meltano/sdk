@@ -1,31 +1,21 @@
 """Tests discovery features for Parquet."""
 
-import json
-from pathlib import Path
 from typing import Optional
 
 from singer_sdk.samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 
-CONFIG_FILE = "singer_sdk/tests/external/.secrets/gitlab-config.json"
 
-
-def test_gitlab_tap_discovery():
+def test_gitlab_tap_discovery(gitlab_config: Optional[dict]):
     """Test class creation."""
-    config: Optional[dict] = None
-    if Path(CONFIG_FILE).exists():
-        config = json.loads(Path(CONFIG_FILE).read_text())
-    tap = SampleTapGitlab(config=config, state=None, parse_env_config=True)
+    tap = SampleTapGitlab(config=gitlab_config, state=None, parse_env_config=True)
     catalog_json = tap.run_discovery()
     assert catalog_json
 
 
-def test_gitlab_replication_keys():
+def test_gitlab_replication_keys(gitlab_config: Optional[dict]):
     stream_name = "issues"
     expected_replication_key = "updated_at"
-    config: Optional[dict] = None
-    if Path(CONFIG_FILE).exists():
-        config = json.loads(Path(CONFIG_FILE).read_text())
-    tap = SampleTapGitlab(config=config, state=None, parse_env_config=True)
+    tap = SampleTapGitlab(config=gitlab_config, state=None, parse_env_config=True)
     catalog = tap.catalog_dict
     catalog_entries = catalog["streams"]
     for catalog_entry in [c for c in catalog_entries if c["stream"] == stream_name]:
