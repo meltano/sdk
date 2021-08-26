@@ -4,10 +4,12 @@
 # TODO: Delete this file or add custom authentication logic as needed.
 
 {%- elif cookiecutter.auth_method == "OAuth2" %}
-from singer_sdk.authenticators import OAuthAuthenticator
+from singer_sdk.authenticators import OAuthAuthenticator, SingletonMeta
 
 
-class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator):
+# The SingletonMeta metaclass makes your streams reuse the same authenticator instance.
+# If this behaviour interferes with your use-case, you can remove the metaclass.
+class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator, metaclass=SingletonMeta):
     """Authenticator class for {{ cookiecutter.source_name }}."""
 
     @property
