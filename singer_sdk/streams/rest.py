@@ -9,6 +9,7 @@ import requests
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Union, cast
 
+from memoization import cached
 from singer.schema import Schema
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
@@ -260,6 +261,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     # Abstract methods:
 
     @property
+    @cached
     def authenticator(self) -> Optional[APIAuthenticatorBase]:
         """Return or set the authenticator for managing HTTP auth headers.
 

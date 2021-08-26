@@ -21,12 +21,6 @@ SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 DEFAULT_URL_BASE = "https://gitlab.com/api/v4"
 
 
-class GitlabAuthenticator(SimpleAuthenticator):
-    """Gitlab authenticator."""
-
-    pass
-
-
 class GitlabStream(RESTStream):
     """Sample tap test for gitlab."""
 
@@ -38,9 +32,9 @@ class GitlabStream(RESTStream):
         return self.config.get("api_url", DEFAULT_URL_BASE)
 
     @property
-    def authenticator(self) -> GitlabAuthenticator:
+    def authenticator(self) -> SimpleAuthenticator:
         """Return an authenticator for REST API requests."""
-        return GitlabAuthenticator(
+        return SimpleAuthenticator(
             stream=self, auth_headers={"Private-Token": self.config.get("auth_token")}
         )
 

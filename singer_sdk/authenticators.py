@@ -40,7 +40,7 @@ class SingletonMeta(type):
         return single_obj
 
 
-class APIAuthenticatorBase(metaclass=SingletonMeta):
+class APIAuthenticatorBase:
     """Base class for offloading API auth."""
 
     def __init__(self, stream: RESTStreamBase):
