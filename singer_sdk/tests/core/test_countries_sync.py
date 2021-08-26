@@ -3,7 +3,10 @@
 import copy
 import logging
 
-from singer_sdk.helpers._catalog import get_selected_schema, pop_deselected_record_properties
+from singer_sdk.helpers._catalog import (
+    get_selected_schema,
+    pop_deselected_record_properties,
+)
 from singer_sdk.samples.sample_tap_countries.countries_tap import SampleTapCountries
 
 
