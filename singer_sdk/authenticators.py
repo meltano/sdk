@@ -19,7 +19,28 @@ from singer_sdk.streams import Stream as RESTStreamBase
 from singer import utils
 
 
-class APIAuthenticatorBase(object):
+class SingletonMeta(type):
+    """A general purpose singleton metaclass."""
+
+    def __init__(cls, name, bases, dic):
+        """Init metaclass.
+
+        The single instance is saved as an attribute of the the metaclass.
+        """
+        cls.__single_instance = None
+        super().__init__(name, bases, dic)
+
+    def __call__(cls, *args, **kwargs):
+        """Create or reuse the singleton."""
+        if cls.__single_instance:
+            return cls.__single_instance
+        single_obj = cls.__new__(cls)
+        single_obj.__init__(*args, **kwargs)
+        cls.__single_instance = single_obj
+        return single_obj
+
+
+class APIAuthenticatorBase:
     """Base class for offloading API auth."""
 
     def __init__(self, stream: RESTStreamBase):

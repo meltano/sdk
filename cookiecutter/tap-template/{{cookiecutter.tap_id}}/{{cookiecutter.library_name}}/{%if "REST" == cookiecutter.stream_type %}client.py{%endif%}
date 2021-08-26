@@ -4,6 +4,8 @@ import requests
 from pathlib import Path
 from typing import Any, Dict, Optional, Union, List, Iterable
 
+from memoization import cached
+
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 {%- if cookiecutter.auth_method  == "API Key" %}
@@ -38,6 +40,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
 
     @property
+    @cached
     def authenticator(self) -> {{ cookiecutter.source_name }}Authenticator:
         """Return a new authenticator object."""
         return {{ cookiecutter.source_name }}Authenticator.create_for_stream(self)
