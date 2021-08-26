@@ -1,5 +1,6 @@
 """Classes to assist in authenticating to APIs."""
 
+import base64
 import logging
 import jwt
 import math
@@ -26,6 +27,7 @@ class APIAuthenticatorBase(object):
         self.tap_name: str = stream.tap_name
         self._config: Dict[str, Any] = dict(stream.config)
         self._auth_headers: Dict[str, Any] = {}
+        self._auth_params: Dict[str, Any] = {}
         self.logger: logging.Logger = stream.logger
 
     @property
@@ -36,11 +38,20 @@ class APIAuthenticatorBase(object):
     @property
     def auth_headers(self) -> dict:
         """Return http headers."""
-        return self._auth_headers
+        return self._auth_headers or {}
+
+    @property
+    def auth_params(self) -> dict:
+        """Return query parameters."""
+        return self._auth_params or {}
 
 
 class SimpleAuthenticator(APIAuthenticatorBase):
-    """Base class for offloading API auth."""
+    """DEPRECATED: Please use a more specific authenticator.
+
+    This authenticator will merge a key-value pair to the stream
+    in either the request headers or query parameters.
+    """
 
     def __init__(self, stream: RESTStreamBase, auth_headers: Optional[Dict] = None):
         """Init authenticator.
@@ -53,6 +64,107 @@ class SimpleAuthenticator(APIAuthenticatorBase):
             self._auth_headers = {}
         if auth_headers:
             self._auth_headers.update(auth_headers)
+
+
+class ApiKeyAuthenticator(APIAuthenticatorBase):
+    """Implements API key authentication for REST Streams.
+
+    This authenticator will merge a key-value pair with either the
+    HTTP headers or query parameters specified on the stream. Common
+    examples of key names are "x-api-key" and "Authorization" but
+    any key-value pair may be used for this authenticator.
+    """
+
+    def __init__(
+        self,
+        stream: RESTStreamBase,
+        key: str,
+        value: str,
+        location: str = "header",
+    ):
+        """Init authenticator."""
+        super().__init__(stream=stream)
+        auth_credentials = {key: value}
+
+        if location not in ["header", "params"]:
+            raise ValueError("`type` must be one of 'header' or 'params'.")
+
+        if location == "header":
+            if self._auth_headers is None:
+                self._auth_headers = {}
+            self._auth_headers.update(auth_credentials)
+        elif location == "params":
+            if self._auth_params is None:
+                self._auth_params = {}
+            self._auth_params.update(auth_credentials)
+
+    @classmethod
+    def create_for_stream(
+        cls,
+        stream: RESTStreamBase,
+        key: str,
+        value: str,
+        location: str,
+    ) -> "ApiKeyAuthenticator":
+        """Create an Authenticator object specific to the Stream class."""
+        return cls(stream=stream, key=key, value=value, location=location)
+
+
+class BearerTokenAuthenticator(APIAuthenticatorBase):
+    """Implements bearer token authentication for REST Streams.
+
+    This Authenticator implements Bearer Token authentication. The token
+    is a text string, included in the request header and prefixed with
+    'Bearer '. The token will be merged with HTTP headers on the stream.
+    """
+
+    def __init__(self, stream: RESTStreamBase, token: str):
+        """Init authenticator."""
+        super().__init__(stream=stream)
+        auth_credentials = {"Authorization": f"Bearer {token}"}
+
+        if self._auth_headers is None:
+            self._auth_headers = {}
+        self._auth_headers.update(auth_credentials)
+
+    @classmethod
+    def create_for_stream(
+        cls, stream: RESTStreamBase, token: str
+    ) -> "BearerTokenAuthenticator":
+        """Create an Authenticator object specific to the Stream class."""
+        return cls(stream=stream, token=token)
+
+
+class BasicAuthenticator(APIAuthenticatorBase):
+    """Implements basic authentication for REST Streams.
+
+    This Authenticator implements basic authentication by concatinating a
+    username and password then base64 encoding the string. The resulting
+    token will be merged with any HTTP headers specified on the stream.
+    """
+
+    def __init__(
+        self,
+        stream: RESTStreamBase,
+        username: str,
+        password: str,
+    ):
+        """Init authenticator."""
+        super().__init__(stream=stream)
+        credentials = f"{username}:{password}".encode()
+        auth_token = base64.b64encode(credentials).decode("ascii")
+        auth_credentials = {"Authorization": f"Basic {auth_token}"}
+
+        if self._auth_headers is None:
+            self._auth_headers = {}
+        self._auth_headers.update(auth_credentials)
+
+    @classmethod
+    def create_for_stream(
+        cls, stream: RESTStreamBase, username: str, password: str
+    ) -> "BasicAuthenticator":
+        """Create an Authenticator object specific to the Stream class."""
+        return cls(stream=stream, username=username, password=password)
 
 
 class OAuthAuthenticator(APIAuthenticatorBase):
