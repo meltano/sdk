@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional, Union, List, Iterable
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 {%- if cookiecutter.auth_method  == "API Key" %}
-from singer_sdk.authenticators import ApiKeyAuthenticator
+from singer_sdk.authenticators import APIKeyAuthenticator
 {%- elif cookiecutter.auth_method  == "Bearer Token" %}
 from singer_sdk.authenticators import BearerTokenAuthenticator
 {%- elif cookiecutter.auth_method == "Basic Auth" %}
@@ -45,9 +45,9 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 {%- elif cookiecutter.auth_method == "API Key" %}
 
     @property
-    def authenticator(self) -> ApiKeyAuthenticator:
+    def authenticator(self) -> APIKeyAuthenticator:
         """Return a new authenticator object."""
-        return ApiKeyAuthenticator.create_for_stream(
+        return APIKeyAuthenticator.create_for_stream(
             self,
             key="x-api-key",
             value=self.config.get("api_key"),
