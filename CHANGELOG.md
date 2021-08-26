@@ -6,7 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+
 ## Unreleased
+---
+
+### New
+
+### Changes
+
+### Fixes
+
+### Breaks
+
+
+## 0.3.6 - (2021-08-26)
 ---
 
 ### New
@@ -22,9 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 
 - Tap SDK: Improves CLI `--help` output (#177, !140).
-- Tap SDK: Fixes a bug in state tracking where timezone-aware timestamps are appended again with `+0:00` (!142) -- _Thanks, **[Joshua Adeyemi](https://gitlab.com/joshua.a.adeyemi)**!_
-
-### Breaks
+- Tap SDK: Fixes a bug in state tracking where timezone-aware timestamps are appended again with `+0:00` (#176, !142) -- _Thanks, **[Joshua Adeyemi](https://gitlab.com/joshua.a.adeyemi)**!_
+- Tap SDK: Improve performance by reusing a single authenticator instance (#168, #173, !136)
 
 
 ## 0.3.5 - (2021-08-17)
