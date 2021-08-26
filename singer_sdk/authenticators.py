@@ -66,7 +66,7 @@ class SimpleAuthenticator(APIAuthenticatorBase):
             self._auth_headers.update(auth_headers)
 
 
-class ApiKeyAuthenticator(APIAuthenticatorBase):
+class APIKeyAuthenticator(APIAuthenticatorBase):
     """Implements API key authentication for REST Streams.
 
     This authenticator will merge a key-value pair with either the
@@ -105,7 +105,7 @@ class ApiKeyAuthenticator(APIAuthenticatorBase):
         key: str,
         value: str,
         location: str,
-    ) -> "ApiKeyAuthenticator":
+    ) -> "APIKeyAuthenticator":
         """Create an Authenticator object specific to the Stream class."""
         return cls(stream=stream, key=key, value=value, location=location)
 
