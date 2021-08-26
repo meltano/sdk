@@ -9,7 +9,6 @@ import requests
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Union, cast
 
-from memoization import cached
 from singer.schema import Schema
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
