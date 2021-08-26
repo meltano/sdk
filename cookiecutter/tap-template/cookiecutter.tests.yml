@@ -4,7 +4,7 @@ tests:
     stream_type: REST
     auth_method: Custom or N/A
 
-  - source_name: RESTApiKeyAuthTemplateTest
+  - source_name: RESTAPIKeyAuthTemplateTest
     tap_id: test-tap-rest-apikeyauth-type
     stream_type: REST
     auth_method: API Key
