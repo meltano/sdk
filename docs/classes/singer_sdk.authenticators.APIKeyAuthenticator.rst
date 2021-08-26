@@ -1,7 +1,7 @@
-singer\_sdk.authenticators.APIKeyAuthenticator
+singer\_sdk.authenticators.ApiKeyAuthenticator
 =============================================
 
 .. currentmodule:: singer_sdk.authenticators
 
-.. autoclass:: APIKeyAuthenticator
+.. autoclass:: ApiKeyAuthenticator
     :members:
