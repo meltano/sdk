@@ -42,9 +42,12 @@ Authenticator Classes
     :toctree: _autosummary
     :template: class.rst
 
-    authenticators.SimpleAuthenticator
+    authenticators.APIKeyAuthenticator
+    authenticators.BasicAuthenticator
+    authenticators.BearerTokenAuthenticator
     authenticators.OAuthAuthenticator
     authenticators.OAuthJWTAuthenticator
+    authenticators.SimpleAuthenticator
 
 Exception Types
 ---------------
