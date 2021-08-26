@@ -22,8 +22,8 @@ def test_countries_sync_all():
 def test_countries_primary_key():
     tap = SampleTapCountries(config=None)
     countries_entry = tap.streams["countries"]._singer_catalog_entry
-    metadata_root = [md for md in countries_entry.metadata if md["breadcrumb"] == ()][0]
-    key_props_1 = metadata_root["metadata"].get("table-key-properties")
+    metadata_root = countries_entry.metadata[()]
+    key_props_1 = metadata_root.get("table-key-properties")
     key_props_2 = countries_entry.key_properties
     assert key_props_1 == ["code"], (
         f"Incorrect 'table-key-properties' in catalog: ({key_props_1})\n\n"

@@ -7,8 +7,7 @@ from singer_sdk.typing import PropertiesList, Property, StringType
 import pytest
 import logging
 
-from singer import Catalog
-
+from singer_sdk.helpers._singer import Catalog
 from singer_sdk.exceptions import MapExpressionError
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
 

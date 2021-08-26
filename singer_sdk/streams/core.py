@@ -31,12 +31,13 @@ from singer import (
     metadata,
     RecordMessage,
     SchemaMessage,
+    StateMessage,
 )
 from singer.schema import Schema
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
-
+from singer_sdk.helpers._singer import Catalog, CatalogEntry, MetadataMapping
 from singer_sdk.helpers._typing import (
     conform_record_data_types,
     is_datetime_type,
@@ -93,14 +94,14 @@ class Stream(metaclass=abc.ABCMeta):
         self._config: dict = dict(tap.config)
         self._tap = tap
         self._tap_state = tap.state
-        self._tap_input_catalog: Optional[singer.Catalog] = None
+        self._tap_input_catalog: Optional[Catalog] = None
         self._stream_maps: Optional[List[StreamMap]] = None
         self.forced_replication_method: Optional[str] = None
         self._replication_key: Optional[str] = None
         self._primary_keys: Optional[List[str]] = None
         self._state_partitioning_keys: Optional[List[str]] = None
         self._schema_filepath: Optional[Path] = None
-        self._metadata: Optional[List[dict]] = None
+        self._metadata: Optional[MetadataMapping] = None
         self._schema: dict
         self.child_streams: List[Stream] = []
         if schema:
@@ -348,7 +349,7 @@ class Stream(metaclass=abc.ABCMeta):
         return False
 
     @property
-    def metadata(self) -> List[dict]:
+    def metadata(self) -> MetadataMapping:
         """Return metadata object (dict) as specified in the Singer spec.
 
         Metadata from an input catalog will override standard metadata.
@@ -359,11 +360,10 @@ class Stream(metaclass=abc.ABCMeta):
         if self._tap_input_catalog:
             catalog_entry = self._tap_input_catalog.get_stream(self.tap_stream_id)
             if catalog_entry:
-                self._metadata = cast(List[dict], catalog_entry.metadata)
+                self._metadata = catalog_entry.metadata
                 return self._metadata
 
-        self._metadata = cast(
-            List[dict],
+        self._metadata = MetadataMapping.from_iterable(
             metadata.get_standard_metadata(
                 schema=self.schema,
                 replication_method=self.forced_replication_method,
@@ -376,17 +376,15 @@ class Stream(metaclass=abc.ABCMeta):
         )
 
         # If there's no input catalog, select all streams
-        if not self._tap_input_catalog:
-            for entry in self._metadata:
-                if entry["breadcrumb"] == ():
-                    entry["metadata"]["selected"] = True
+        if self._tap_input_catalog is None:
+            self._metadata[()]["selected"] = True
 
         return self._metadata
 
     @property
-    def _singer_catalog_entry(self) -> singer.CatalogEntry:
+    def _singer_catalog_entry(self) -> CatalogEntry:
         """Return catalog entry as specified by the Singer catalog spec."""
-        return singer.CatalogEntry(
+        return CatalogEntry(
             tap_stream_id=self.tap_stream_id,
             stream=self.name,
             schema=Schema.from_dict(self.schema),
@@ -402,8 +400,8 @@ class Stream(metaclass=abc.ABCMeta):
         )
 
     @property
-    def _singer_catalog(self) -> singer.Catalog:
-        return singer.Catalog([self._singer_catalog_entry])
+    def _singer_catalog(self) -> Catalog:
+        return Catalog([(self.tap_stream_id, self._singer_catalog_entry)])
 
     @property
     def config(self) -> Mapping[str, Any]:
@@ -535,7 +533,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _write_state_message(self):
         """Write out a STATE message with the latest state."""
-        singer.write_message(singer.StateMessage(value=self.tap_state))
+        singer.write_message(StateMessage(value=self.tap_state))
 
     def _write_schema_message(self):
         """Write out a SCHEMA message with the stream schema."""
@@ -777,7 +775,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Overridable Methods
 
-    def apply_catalog(self, catalog: singer.Catalog) -> None:
+    def apply_catalog(self, catalog: Catalog) -> None:
         """Apply a catalog dict, updating any settings overridden within the catalog.
 
         Developers may override this method in order to introduce advanced catalog
@@ -786,7 +784,7 @@ class Stream(metaclass=abc.ABCMeta):
         """
         self._tap_input_catalog = catalog
 
-        catalog_entry: singer.CatalogEntry = catalog.get_stream(self.name)
+        catalog_entry: CatalogEntry = catalog.get_stream(self.name)
         if catalog_entry:
             self.primary_keys = catalog_entry.key_properties
             self.replication_key = catalog_entry.replication_key

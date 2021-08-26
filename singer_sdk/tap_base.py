@@ -7,11 +7,11 @@ from singer_sdk.mapper import PluginMapper
 from typing import Any, List, Optional, Dict, Tuple, Type, Union, cast
 
 import click
-from singer.catalog import Catalog
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._util import read_json_file
+from singer_sdk.helpers._singer import Catalog
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams.core import Stream
@@ -84,7 +84,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         if self._streams is None:
             self._streams = {}
             for stream in self.load_streams():
-                if catalog:
+                if catalog is not None:
                     stream.apply_catalog(catalog)
                 self._streams[stream.name] = stream
         return self._streams
@@ -148,10 +148,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     @property
     def _singer_catalog(self) -> Catalog:
         """Return a Catalog object."""
-        catalog_entries = [
-            stream._singer_catalog_entry for stream in self.streams.values()
-        ]
-        return Catalog(catalog_entries)
+        return Catalog(
+            (stream.tap_stream_id, stream._singer_catalog_entry)
+            for stream in self.streams.values()
+        )
 
     def discover_streams(self) -> List[Stream]:
         """Initialize all available streams and return them as a list."""
