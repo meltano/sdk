@@ -11,14 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New
 
+- Tap and Target SDK: Adds support for Python 3.9 (#66, !38)
+
 ### Changes
 
-- Bump minimum version of `click` to 8.0 (#178, !140).
+- Tap and Target SDK: Bumps `click` library version to 8.0 (#178, !140).
+- Target SDK: Improves `BatchSink` performance by reducing the frequency by which batches are processed. (#172, !137)
 
 ### Fixes
 
-- Tap SDK: Improve CLI `--help` output (#177, !140).
-- Fixes a bug in state tracking where timezone-aware timestamps are appended again with `+0:00` (!142) -- _Thanks, **[Joshua Adeyemi](https://gitlab.com/joshua.a.adeyemi)**!_
+- Tap SDK: Improves CLI `--help` output (#177, !140).
+- Tap SDK: Fixes a bug in state tracking where timezone-aware timestamps are appended again with `+0:00` (!142) -- _Thanks, **[Joshua Adeyemi](https://gitlab.com/joshua.a.adeyemi)**!_
 
 ### Breaks
 
