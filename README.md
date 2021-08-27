@@ -1,67 +1,22 @@
-# `singer-sdk` - an open framework for building Singer-compliant taps
+# Meltano SDK for Taps and Targets
 
-- _Note: This framework is still in early development and planning phases_
+The Tap and Target SDKs are the fastest way to build custom data extractors and loaders!
+Taps and targets built on the SDK are automatically compliant with the
+[Singer Spec](https://hub.meltano.com/singer/spec), the
+de-facto open source standard for extract and load pipelines.
 
-## Strategies for Optimized Tap Development
+## Future-proof extractors and loaders, with less code
 
-1. **Universal Code Formatting.**
-    - _From the [Black](https://black.readthedocs.io) product description:_
-      > By using Black, you agree to cede control over minutiae of hand-formatting. In return, Black gives you speed, determinism, and freedom from pycodestyle nagging about formatting. You will save time and mental energy for more important matters. **Black makes code review faster by producing the smallest diffs possible.** Blackened code looks the same regardless of the project you’re reading. **Formatting becomes transparent after a while and you can focus on the content instead.**
-    - _If you use our companion cookiecutter template, your project will start out auto-formatted by Black. You can keep this default or change it - the choice is yours._
-2. **Pervasive Python Type Hints.**
-    - _Spend less time reading documentation thanks to pervasive type declarations in our base class._
-3. **Less is More.**
-    - _Because taps built from the template require less code, taking advantage of common base class capabilities, developers are able to dramatically reduce the time to develop a fully mature tap._
-4. **Create Future-Proof Plugins.**
-    - _Take advantage of new base class capabilities by simply updating your dependency version and retesting with the latest versions._
+On average, developers tell us that they write about 70% less code by using the SDK, which
+makes learning the SDK a great investment. Furthermore, as new features and capabilities
+are added to the SDK, your taps and targets can always take advantage of the latest
+capabilities and bug fixes, simply by updating your SDK dependency to the latest version.
 
-## Cookie-Cutter Quick Start
+## Documentation
 
-`Singer SDK` provides a quickstart `cookiecutter` template for starting new taps.
+- See our [online documentation](https://sdk.meltano.com) for instructions on how
+to get started with the SDK.
 
-* [Click here for the **Cookiecutter Tap Template**](cookiecutter/tap-template/README.md)
+## Contributing back to the SDK
 
-## Tap Dev Guide
-
-See the [dev guide](docs/dev_guide.md) for instructions on how to get started building your own
-taps.
-
-## Singer SDK Implementation Details
-
-For more detailed information about the Singer SDK implementation, please see the 
-[Singer SDK Implementation Details](./docs/implementation/README.md) section.
-
-## Working within this repo
-
-First clone, then...
-
-### Install
-
-`NOTE: Singer SDK currently works with Python versions 3.6 through 3.8.x. Python 3.9 is not yet supported.`
-
-Install prereqs:
-
-```bash
-pip3 install pipx
-pipx ensurepath
-pipx install poetry
-```
-
-Install package dependencies:
-
-```bash
-cd singer-sdk
-```
-
-```bash
-# Install package and dependencies:
-poetry install
-# OR install in editable mode:
-poetry install --no-root
-```
-
-### Run tests
-
-```bash
-poetry run pytest
-```
+- For more information on how to contribute, see our [Contributors Guide](https://sdk.meltano.com/en/latest/CONTRIBUTING.html).

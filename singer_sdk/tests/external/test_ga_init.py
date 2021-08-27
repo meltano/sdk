@@ -1,7 +1,5 @@
 """Test class creation."""
 
-import json
-from pathlib import Path
 from typing import Optional
 
 from singer_sdk.samples.sample_tap_google_analytics.ga_tap import (
@@ -11,9 +9,6 @@ from singer_sdk.samples.sample_tap_google_analytics.ga_tap import (
 CONFIG_FILE = "singer_sdk/tests/external/.secrets/google-analytics-config.json"
 
 
-def test_tap_class():
+def test_tap_class(ga_config: Optional[dict]):
     """Test class creation."""
-    config: Optional[dict] = None
-    if Path(CONFIG_FILE).exists():
-        config = json.loads(Path(CONFIG_FILE).read_text())
-    _ = SampleTapGoogleAnalytics(config=config, parse_env_config=True)
+    _ = SampleTapGoogleAnalytics(config=ga_config, parse_env_config=True)

@@ -1,6 +1,6 @@
 # Project Porting Guide
 
-_This guide walks you through the process of migrating an existing project to the Singer SDK._
+_This guide walks you through the process of migrating an existing project to the SDK._
 
 ## Poetry Setup (Optional)
 
@@ -15,7 +15,7 @@ pipx ensurepath
 pipx install poetry
 ```
 
-Initialize the project with [`poetry`](https://python-poetry.org/):
+Initialize [`poetry`](https://python-poetry.org/) inside your existing project:
 
 ```bash
 cd tap-<myproject>
@@ -23,18 +23,18 @@ poetry init
 # poetry will setup your project interactively
 ```
 
-Add `singer-sdk` as a dependency:
+Add the SDK as a dependency:
 
 ```bash
 poetry add singer-sdk
 ```
 
-Or to use a prerelease version of `singer-sdk` you can modify `pyproject.toml` as follows:
+Or to use a prerelease version of the SDK you can modify `pyproject.toml` as follows:
 
 ```toml
 [tool.poetry.dependencies]
 python = "^3.8"
-singer-sdk = { git = "https://gitlab.com/meltano/singer-sdk.git", branch = "feature/initial-base-classes" }
+singer-sdk = { git = "https://gitlab.com/meltano/sdk.git", branch = "development" }
 ```
 
 Then:

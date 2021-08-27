@@ -1,160 +1,165 @@
-# Singer SDK Development Docs
+# SDK Dev Guide
 
-**Development Overview:**
+## Tap Development Overview
 
-_Create with `singer-sdk` requires overriding just two classes:_
+Create taps with the SDK requires overriding just two or three classes:
 
-1. The tap:
-    - `Tap` - _The core base class for all taps. This class governs configuration, validation,
-      and stream discovery._
-2. The stream. For the stream base class, you have different options depending on the type of data
-   source you are working with.
-    - `Stream` - _The **generic** base class for streams._
-    - `RESTStream` - _The base class for **REST**-type streams._
-    - `GraphQLStream` - _The base class for **GraphQL**-type streams._
-    - `DatabaseStream` - _The base class for **database**-type streams - specifically those
-      which support the SQL language._
+1. The `Tap` class. This class governs configuration, validation,
+   and stream discovery.
+2. The stream class. You have different options for your base class depending on the type
+   of data source you are working with:
+    - `Stream` - The **generic** base class for streams.
+    - `RESTStream` - The base class for **REST**-type streams.
+    - `GraphQLStream` - The base class for **GraphQL**-type streams. This class inherits
+      from `RESTStream`, since GraphQL is built upon REST.
+3. An optional authenticator class. You can omit this class entirely if you do not require authentication or if you prefer to write custom authentication logic. The supported authenticator classes are:
+    - `SimpleAuthenticator` - This class is functionally equivalent to overriding
+      `http_headers` property in the stream class.
+    - `OAuthAuthenticator` - This class performs an OAuth 2.0 authentication flow.
+    - `OAuthJWTAuthenticator` - This class performs an JWT (JSON Web Token) authentication
+       flow.
 
-**Detailed Instructions:**
+## Target Development Overview
 
-1. [Step 1: Initialize a new tap repo](#step-1-initialize-a-new-tap-repo)
-2. [Step 2: Write the tap class](#step-2-write-the-tap-class)
-3. [Step 3: Write the stream class](#step-3-write-the-stream-class)
-   1. ['Generic' stream classes](#generic-stream-classes)
-   2. ['API' stream classes](#api-stream-classes)
-   3. ['GraphQL' stream classes](#graphql-stream-classes)
-   4. ['Database' stream classes](#database-stream-classes)
+Create targets with the SDK requires overriding just two classes:
 
-## Step 1: Initialize a new tap repo
+1. The `Target` class. This class governs configuration, validation,
+   and stream discovery.
+2. The `Sink` class. You have two different options depending on whether your target
+   prefers writing one record at a time versus writing in batches:
+    - `RecordSink` writes one record at a time, via the `process_record()`
+      method.
+    - `BatchSink` writes one batch at a time. Important class members include:
+      - `start_batch()` to (optionally) initialize a new batch.
+      - `process_record()` to enqueue a record to be written.
+      - `process_batch()` to write any queued records and cleanup local resources.
 
-To get started, create a new project from the
-[`tap-template` cookiecutter repo](../cookiecutter/tap-template):
+Note: The `Sink` class can receive records from one stream or from many. See the [Sink documentation](./sinks.md)
+for more information on differences between a target's `Sink` class versus a tap's `Stream` class.
 
-1. Install [CookieCutter](https://cookiecutter.readthedocs.io) and it's dependencies:
+## Building a New Tap or Target
 
-    ```bash
-    pip3 install pipx
-    pipx ensurepath
-    pipx install cookiecutter
+First, install [cookiecutter](https://cookiecutter.readthedocs.io) if you haven't
+done so already:
+
+```bash
+# Install pipx if you haven't already
+pip3 install pipx
+pipx ensurepath
+# Restart your terminal here, if needed, to get the updated PATH
+pipx install cookiecutter
+```
+
+Now you can initialize your new project with the Cookiecutter template for taps:
+
+```bash
+cookiecutter https://gitlab.com/meltano/sdk --directory="cookiecutter/tap-template"
+```
+
+...or for targets:
+
+```bash
+cookiecutter https://gitlab.com/meltano/sdk --directory="cookiecutter/target-template"
+```
+
+Once you've answered the cookiecutter prompts, follow the instructions in the
+generated `README.md` file to complete your new tap or target. You can also reference the
+[Meltano Tutorial](https://meltano.com/tutorials/create-a-custom-extractor.html) for a more
+detailed guide.
+
+
+### RESTful JSONPaths
+
+By default, the Singer SDK for REST streams assumes the API responds with a JSON array or records, but you can easily override this behaviour by specifying the `records_jsonpath` expression in your `RESTStream` implementation:
+
+```python
+class EntityStream(RESTStream):
+    """Entity stream from a generic REST API."""
+    records_jsonpath = "$.data.records[*]"
+```
+
+You can test your JSONPath expressions with the [JSONPath Online Evaluator](https://jsonpath.com/).
+
+#### Nested array example
+
+Many APIs return the records in an array nested inside an JSON object key.
+
+- Response:
+
+    ```json
+    {
+      "data": {
+        "records": [
+          {"id": 1, "value": "abc"},
+          {"id": 2, "value": "def"}
+        ]
+      }
+    }
     ```
 
-2. Start a new project:
+- Expression: `$.data.records[*]`
 
-    ```bash
-    cookiecutter https://gitlab.com/meltano/singer-sdk --directory="cookiecutter/tap-template"
+- Result:
+
+    ```json
+    [
+      {"id": 1, "value": "abc"},
+      {"id": 2, "value": "def"}
+    ]
     ```
 
-## Step 2: Write the tap class
+#### Nested object values example
 
-_To create a tap class, follow these steps:_
+Some APIs instead return the records as values inside an object where each key is some form of identifier.
 
-1. Override tap config:
-   1. `name` - What to call your tap (for example, `tap-best-ever`)
-   2. `config_jsonschema` - A JSON Schema object defining the config options that this tap will accept.
-2. Override the `discover_streams` method.
+- Response:
 
-## Step 3: Write the stream class
+    ```json
+    {
+      "data": {
+        "1": {
+          "id": 1,
+          "value": "abc"
+        },
+        "2": {
+          "id": 2,
+          "value": "def"
+        }
+      }
+    }
+    ```
 
-_Creating the stream class depends upon what type of tap you are creating._
+- Expression: `$.data.*`
 
-### 'Generic' stream classes
+- Result:
 
-_Generic (hand-coded) streams inherit from the class `Stream`. To create a generic
-stream class, you only need to override a single method:_
+    ```json
+    [
+      {"id": 1, "value": "abc"},
+      {"id": 2, "value": "def"}
+    ]
+    ```
 
-1. `get_records()` - A method which should retrieve data from the source and return records 
-incrementally with the `yield` python operator.
-    - This method takes an optional `partition` argument, which you can safely disregard 
-    unless you require partition handling.
+## Additional Resources
 
-**More info:**
+### Detailed Class Reference
 
-- For more info, see the [Parquet](/singer_sdk/samples/sample_tap_parquet) sample.
+For a detailed reference, please see the [SDK Reference Guide](./reference.md)
 
-### 'REST' stream classes
+### SDK Implementation Details
 
-_REST streams inherit from the class `RESTStream`. To create an REST API-based
-stream class, you will override one class property and three methods:_
+For more information about the SDK's' Singer implementation details, please see the
+[SDK Implementation Details](./implementation/README.md) section.
 
-1. **`url_base` property** - Returns the base URL, which generally is reflective of a 
-specific API version.
-   - For example: to connect to the GitLab v4 API, we use `"https://gitlab.com/api/v4"`.
-2. **`authenticator` property** - Returns an `Authenticator` class to help with connecting
-to the source API and negotiating access.
-2. **`http_headers` property** - Build and return an authorization header which will be used
-when making calls to your API.
-   - For example: to connect to the GitLab API, we pass "Private-Token" and (optionally) "User-Agent".
+### Code Samples
 
-_Depending upon your implementation, you may also want to override one or more of the following properties:_
+For a list of code samples solving a variety of different scenarios, please see our 
+[Code Samples](./code_samples.md) page.
 
-1. `get_url_params` method - (Optional.) This method returns a map (or list of maps) whose values can be
-   substituted into the query URLs. A list of maps is returned if multiple calls need to be made.
-   - For example: in our GitLab example, we want the use to be able to specify multiple project IDs
-     for extraction so we return multiple maps the URL parameters, each with a different
-     `project_id` value.
-   - If not provided, the user-provided config dictionary will automatically be scanned for possible
-     query parameters.
-2. `prepare_request_payload` method - (Optional.) Override this method if your API requires you to use
-   submit a payload along with the request.
-   - This is generally not needed for REST APIs which use the HTTP GET method.
-3. `post_process` method - (Optional.) This method gives us an opportunity to "clean up" the results
-   prior to returning them to the downstream tap - for instance: cleaning, renaming, or appending
-   the list of properties returned by the API.
-   - For our GitLab example, no cleansing was necessary and we passed along the result directly as
-     received from the API endpoint.
+### CLI Samples
 
-**More info:**
+For a list of sample CLI commands you can run, [click here](./cli_commands.md).
 
-- For more info, see the [GitLab](/singer_sdk/samples/sample_tap_gitlab) sample:
-  - [GitLab tap](/singer_sdk/samples/sample_tap_gitlab/gitlab_tap.py)
-  - [GitLab REST streams](singer_sdk/samples/sample_tap_gitlab/gitlab_rest_streams.py)
+### Python Tips
 
-### 'GraphQL' stream classes
-
-_GraphQL streams inherit from the class `GraphQLStream`._
-
-GraphQL streams are very similar to REST API-based streams, but instead of specifying a `path` and `url_params`, you will override the GraphQL query text:
-
-1. **`query` property** - This is where you specify your specific GraphQL query text.
-
-**More info:**
-
-- For more info, see the [GitLab](/singer_sdk/samples/sample_tap_gitlab) sample:
-  - [GitLab tap](/singer_sdk/samples/sample_tap_gitlab/gitlab_tap.py)
-  - [GitLab GraphQL streams](/singer_sdk/samples/sample_tap_gitlab/gitlab_rest_streams.py)
-- Or the [Countries API](/singer_sdk/samples/sample_tap_countries) Sample:
-  - [Countries API Tap](/singer_sdk/samples/sample_tap_countries/countries_tap.py)
-  - [Countries API Streams](/singer_sdk/samples/sample_tap_countries/countries_streams.py)
-
-### 'Database' stream classes
-
-`NOTE: The Database stream class is not fully tested and is less mature than other stream types. For more info: https://gitlab.com/meltano/singer-sdk/-/issues/45`
-
-_Database streams inherit from the class `DatabaseStream`. To create a database
-stream class, you will first override the `execute_query()` method. Depending upon how closely your
-source complies with standard `information_schema` conventions, you may also override between
-one and four class properties, in order to override specific metadata queries._
-
-**All database stream classes override:**
-
-2. **`execute_query()` method** - This method should run a give SQL statement and incrementally return a dictionary
-   object for each resulting row.
-
-_Depending upon your implementation, you may also want to override one or more of the following properties:_
-
-1. `open_connection()` method - (Optional.) Open a connection to the database and return a connection object.
-2. `table_scan_sql` - A SQL string which should query for all tables, returning three columns: `database_name`, `schema_name`, and `table_name`.
-3. `view_scan_sql` - A SQL string which should query for all views, returning three columns: `database_name`, `schema_name`, and `view_name`.
-4. `column_scan_sql` - A SQL string which should query for all columns, returning five columns: `database_name`, `schema_name`, `table_or_view_name`, `column_name`, and `data_type`.
-5. `primary_key_scan_sql` - Optional. A SQL string which should query for the list of primary keys, returning five columns: `database_name`, `schema_name`, `table_name`, `pk_column_name`.
-
-**More info:**
-
-- For more info, see the [Snowflake](/singer_sdk/samples/sample_tap_snowflake) sample:
-  - [Snowflake tap](/singer_sdk/samples/sample_tap_snowflake/snowflake_tap.py)
-  - [Snowflake streams](/singer_sdk/samples/sample_tap_snowflake/snowflake_tap_stream.py)
-
-## Singer SDK Implementation Details
-
-For more detailed information about the Singer SDK implementation, please see the 
-[Singer SDK Implementation Details](./implementation/README.md) section.
+We've collected some [Python tips](python_tips.md) which may be helpful for new SDK users.

@@ -1,32 +1,54 @@
 """Classes to assist in authenticating to APIs."""
 
+import base64
 import logging
 import jwt
 import math
 import requests
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 from types import MappingProxyType
-from typing import Any, Dict, Mapping, Optional
+from typing import Any, Dict, Mapping, Optional, Union
 
-from pendulum import datetime
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 
-from singer_sdk.helpers.util import utc_now
+from singer_sdk.helpers._util import utc_now
 from singer_sdk.streams import Stream as RESTStreamBase
 
 from singer import utils
 
 
-class APIAuthenticatorBase(object):
+class SingletonMeta(type):
+    """A general purpose singleton metaclass."""
+
+    def __init__(cls, name, bases, dic):
+        """Init metaclass.
+
+        The single instance is saved as an attribute of the the metaclass.
+        """
+        cls.__single_instance = None
+        super().__init__(name, bases, dic)
+
+    def __call__(cls, *args, **kwargs):
+        """Create or reuse the singleton."""
+        if cls.__single_instance:
+            return cls.__single_instance
+        single_obj = cls.__new__(cls)
+        single_obj.__init__(*args, **kwargs)
+        cls.__single_instance = single_obj
+        return single_obj
+
+
+class APIAuthenticatorBase:
     """Base class for offloading API auth."""
 
     def __init__(self, stream: RESTStreamBase):
         """Init authenticator."""
         self.tap_name: str = stream.tap_name
         self._config: Dict[str, Any] = dict(stream.config)
-        self._http_headers = stream.http_headers
+        self._auth_headers: Dict[str, Any] = {}
+        self._auth_params: Dict[str, Any] = {}
         self.logger: logging.Logger = stream.logger
 
     @property
@@ -35,24 +57,135 @@ class APIAuthenticatorBase(object):
         return MappingProxyType(self._config)
 
     @property
-    def http_headers(self) -> dict:
+    def auth_headers(self) -> dict:
         """Return http headers."""
-        return self._http_headers
+        return self._auth_headers or {}
+
+    @property
+    def auth_params(self) -> dict:
+        """Return query parameters."""
+        return self._auth_params or {}
 
 
 class SimpleAuthenticator(APIAuthenticatorBase):
-    """Base class for offloading API auth."""
+    """DEPRECATED: Please use a more specific authenticator.
 
-    def __init__(self, stream: RESTStreamBase, http_headers: dict = None):
+    This authenticator will merge a key-value pair to the stream
+    in either the request headers or query parameters.
+    """
+
+    def __init__(self, stream: RESTStreamBase, auth_headers: Optional[Dict] = None):
         """Init authenticator.
 
-        If http_headers is provided, it will override the headers specified in `stream`.
+        If auth_headers is provided, it will be merged with http_headers specified on
+        the stream.
         """
         super().__init__(stream=stream)
-        if self._http_headers is None:
-            self._http_headers = {}
-        if http_headers:
-            self._http_headers.update(http_headers)
+        if self._auth_headers is None:
+            self._auth_headers = {}
+        if auth_headers:
+            self._auth_headers.update(auth_headers)
+
+
+class APIKeyAuthenticator(APIAuthenticatorBase):
+    """Implements API key authentication for REST Streams.
+
+    This authenticator will merge a key-value pair with either the
+    HTTP headers or query parameters specified on the stream. Common
+    examples of key names are "x-api-key" and "Authorization" but
+    any key-value pair may be used for this authenticator.
+    """
+
+    def __init__(
+        self,
+        stream: RESTStreamBase,
+        key: str,
+        value: str,
+        location: str = "header",
+    ):
+        """Init authenticator."""
+        super().__init__(stream=stream)
+        auth_credentials = {key: value}
+
+        if location not in ["header", "params"]:
+            raise ValueError("`type` must be one of 'header' or 'params'.")
+
+        if location == "header":
+            if self._auth_headers is None:
+                self._auth_headers = {}
+            self._auth_headers.update(auth_credentials)
+        elif location == "params":
+            if self._auth_params is None:
+                self._auth_params = {}
+            self._auth_params.update(auth_credentials)
+
+    @classmethod
+    def create_for_stream(
+        cls,
+        stream: RESTStreamBase,
+        key: str,
+        value: str,
+        location: str,
+    ) -> "APIKeyAuthenticator":
+        """Create an Authenticator object specific to the Stream class."""
+        return cls(stream=stream, key=key, value=value, location=location)
+
+
+class BearerTokenAuthenticator(APIAuthenticatorBase):
+    """Implements bearer token authentication for REST Streams.
+
+    This Authenticator implements Bearer Token authentication. The token
+    is a text string, included in the request header and prefixed with
+    'Bearer '. The token will be merged with HTTP headers on the stream.
+    """
+
+    def __init__(self, stream: RESTStreamBase, token: str):
+        """Init authenticator."""
+        super().__init__(stream=stream)
+        auth_credentials = {"Authorization": f"Bearer {token}"}
+
+        if self._auth_headers is None:
+            self._auth_headers = {}
+        self._auth_headers.update(auth_credentials)
+
+    @classmethod
+    def create_for_stream(
+        cls, stream: RESTStreamBase, token: str
+    ) -> "BearerTokenAuthenticator":
+        """Create an Authenticator object specific to the Stream class."""
+        return cls(stream=stream, token=token)
+
+
+class BasicAuthenticator(APIAuthenticatorBase):
+    """Implements basic authentication for REST Streams.
+
+    This Authenticator implements basic authentication by concatinating a
+    username and password then base64 encoding the string. The resulting
+    token will be merged with any HTTP headers specified on the stream.
+    """
+
+    def __init__(
+        self,
+        stream: RESTStreamBase,
+        username: str,
+        password: str,
+    ):
+        """Init authenticator."""
+        super().__init__(stream=stream)
+        credentials = f"{username}:{password}".encode()
+        auth_token = base64.b64encode(credentials).decode("ascii")
+        auth_credentials = {"Authorization": f"Basic {auth_token}"}
+
+        if self._auth_headers is None:
+            self._auth_headers = {}
+        self._auth_headers.update(auth_credentials)
+
+    @classmethod
+    def create_for_stream(
+        cls, stream: RESTStreamBase, username: str, password: str
+    ) -> "BasicAuthenticator":
+        """Create an Authenticator object specific to the Stream class."""
+        return cls(stream=stream, username=username, password=password)
 
 
 class OAuthAuthenticator(APIAuthenticatorBase):
@@ -76,6 +209,18 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         self.expires_in: Optional[int] = None
 
     @property
+    def auth_headers(self) -> dict:
+        """Return a dictionary of auth headers to be applied.
+
+        These will be merged with any `http_headers` specified in the stream.
+        """
+        if not self.is_token_valid():
+            self.update_access_token()
+        result = super().auth_headers
+        result["Authorization"] = f"Bearer {self.access_token}"
+        return result
+
+    @property
     def auth_endpoint(self) -> str:
         """Return the authorization endpoint."""
         if not self._auth_endpoint:
@@ -86,39 +231,6 @@ class OAuthAuthenticator(APIAuthenticatorBase):
     def oauth_scopes(self) -> Optional[str]:
         """Return a string with the OAuth scopes, or None if not set."""
         return self._oauth_scopes
-
-    @property
-    def client_id(self) -> Optional[str]:
-        """Return client ID string to be used in authentication or None if not set."""
-        if self.config:
-            return self.config.get("client_id", self.config.get("client_email"))
-        return None
-
-    @property
-    def client_secret(self) -> Optional[str]:
-        """Return client secret to be used in authentication or None if not set."""
-        if self.config:
-            return self.config.get("client_secret")
-        return None
-
-    @property
-    def http_headers(self) -> dict:
-        """Return a dictionary of HTTP headers, including any authentication tokens."""
-        if not self.is_token_valid():
-            self.update_access_token()
-        result = super().http_headers
-        result["Authorization"] = f"Bearer {self.access_token}"
-        return result
-
-    def is_token_valid(self) -> bool:
-        """Return true if token is valid."""
-        if self.last_refreshed is None:
-            return False
-        if not self.expires_in:
-            return True
-        if self.expires_in > (utils.now() - self.last_refreshed).total_seconds():
-            return True
-        return False
 
     @property
     def oauth_request_payload(self) -> dict:
@@ -142,10 +254,35 @@ class OAuthAuthenticator(APIAuthenticatorBase):
                 'username': self.config.get("username", self.config["client_id"]),
                 'password': self.config["password"],
             }
+        ```
         """
         raise NotImplementedError(
             "The `oauth_request_body` property was not defined in the subclass."
         )
+
+    @property
+    def client_id(self) -> Optional[str]:
+        """Return client ID string to be used in authentication or None if not set."""
+        if self.config:
+            return self.config.get("client_id")
+        return None
+
+    @property
+    def client_secret(self) -> Optional[str]:
+        """Return client secret to be used in authentication or None if not set."""
+        if self.config:
+            return self.config.get("client_secret")
+        return None
+
+    def is_token_valid(self) -> bool:
+        """Return true if token is valid."""
+        if self.last_refreshed is None:
+            return False
+        if not self.expires_in:
+            return True
+        if self.expires_in > (utils.now() - self.last_refreshed).total_seconds():
+            return True
+        return False
 
     # Authentication and refresh
     def update_access_token(self):
@@ -194,14 +331,17 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
     @property
     def oauth_request_payload(self) -> dict:
         """Return request paytload for OAuth request."""
+        if not self.private_key:
+            raise ValueError("Missing 'private_key' property for OAuth payload.")
+
+        private_key: Union[bytes, Any] = bytes(self.private_key, "UTF-8")
         if self.private_key_passphrase:
+            passphrase = bytes(self.private_key_passphrase, "UTF-8")
             private_key = serialization.load_pem_private_key(
-                self.private_key,
-                password=self.private_key_passphrase,
+                private_key,
+                password=passphrase,
                 backend=default_backend(),
             )
-        else:
-            private_key = self.private_key
         return {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": jwt.encode(self.oauth_request_body, private_key, "RS256"),

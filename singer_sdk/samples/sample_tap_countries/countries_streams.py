@@ -10,6 +10,7 @@ import abc
 from pathlib import Path
 
 from singer_sdk.streams.graphql import GraphQLStream
+from singer_sdk import typing as th
 
 SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
@@ -28,7 +29,6 @@ class CountriesStream(CountriesAPIStream):
 
     name = "countries"
     primary_keys = ["code"]
-    schema_filepath = "./singer_sdk/samples/sample_tap_countries/schemas/countries.json"
     query = """
         countries {
             code
@@ -48,12 +48,38 @@ class CountriesStream(CountriesAPIStream):
             emoji
         }
         """
+    schema = th.PropertiesList(
+        th.Property("code", th.StringType),
+        th.Property("name", th.StringType),
+        th.Property("native", th.StringType),
+        th.Property("phone", th.StringType),
+        th.Property("capital", th.StringType),
+        th.Property("currency", th.StringType),
+        th.Property("emoji", th.StringType),
+        th.Property(
+            "continent",
+            th.ObjectType(
+                th.Property("code", th.StringType),
+                th.Property("name", th.StringType),
+            ),
+        ),
+        th.Property(
+            "languages",
+            th.ArrayType(
+                th.ObjectType(
+                    th.Property("code", th.StringType),
+                    th.Property("name", th.StringType),
+                )
+            ),
+        ),
+    ).to_dict()
 
 
 class ContinentsStream(CountriesAPIStream):
     """Continents stream from the Countries API."""
 
     name = "continents"
+    primary_keys = ["code"]
     schema_filepath = SCHEMAS_DIR / "continents.json"
     query = """
         continents {

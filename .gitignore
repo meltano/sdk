@@ -1,8 +1,12 @@
+# Sphinx documentation
+
+**/_build
+
 # Ignore secrets folders used in testing (except readme and templates)
 
-.secrets/*
-!.secrets/README.md
-!.secrets/*.template
+**/.secrets/*
+!**/.secrets/README.md
+!**/.secrets/*.template
 
 # Ignore local output:
 
