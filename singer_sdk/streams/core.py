@@ -790,7 +790,7 @@ class Stream(metaclass=abc.ABCMeta):
         """
         self._tap_input_catalog = catalog
 
-        catalog_entry: CatalogEntry = catalog.get_stream(self.name)
+        catalog_entry = catalog.get_stream(self.name)
         if catalog_entry:
             self.primary_keys = catalog_entry.key_properties
             self.replication_key = catalog_entry.replication_key
