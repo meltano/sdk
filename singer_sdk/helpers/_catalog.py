@@ -44,7 +44,7 @@ def is_stream_selected(
 
     return is_property_selected(
         stream_name,
-        MetadataMapping.from_iterable(catalog_entry.metadata),
+        catalog_entry.metadata,
         breadcrumb=(),
         logger=logger,
     )
@@ -205,7 +205,7 @@ def pop_deselected_record_properties(
 def deselect_all_streams(catalog: Catalog) -> None:
     """Deselect all streams in catalog dictionary."""
     for entry in catalog.streams:
-        set_catalog_stream_selected(catalog, entry.stream, selected=False)
+        set_catalog_stream_selected(catalog, entry.tap_stream_id, selected=False)
 
 
 def set_catalog_stream_selected(
@@ -220,8 +220,6 @@ def set_catalog_stream_selected(
     breadcrumb is the path to a property within the stream.
     """
     breadcrumb = breadcrumb or ()
-    if isinstance(breadcrumb, str):
-        breadcrumb = tuple([breadcrumb])
     if not isinstance(breadcrumb, tuple):
         raise ValueError(
             f"Expected tuple value for breadcrumb '{breadcrumb}'. "
@@ -232,5 +230,5 @@ def set_catalog_stream_selected(
     if not catalog_entry:
         raise ValueError(f"Catalog entry missing for '{stream_name}'. Skipping.")
 
-    md_entry = catalog_entry.metadata.get(breadcrumb)
+    md_entry = catalog_entry.metadata[breadcrumb]
     md_entry["selected"] = selected

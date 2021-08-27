@@ -870,10 +870,10 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def selected_by_default_fields(self) -> List[Tuple[str, ...]]:
-        """Get field breadcrumbs that should marked as selected by default in the catalog."""
+        """Get breadcrumbs that should marked as selected by default in the catalog."""
         return []
 
     @property
     def unsupported_fields(self) -> List[Tuple[str, ...]]:
-        """Get field breadcrumbs that should marked as unsupported in the catalog."""
+        """Get breadcrumbs that should marked as unsupported in the catalog."""
         return []

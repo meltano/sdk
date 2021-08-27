@@ -25,16 +25,16 @@ class CatalogEntry(BaseCatalogEntry):
     """Singer catalog entry."""
 
     tap_stream_id: str
+    metadata: MetadataMapping
+    schema: Schema
     stream: Optional[str] = None
     key_properties: Optional[List[str]] = None
-    schema: Optional[Schema] = None
     replication_key: Optional[str] = None
     is_view: Optional[bool] = None
     database: Optional[str] = None
     table: Optional[str] = None
     row_count: Optional[int] = None
     stream_alias: Optional[str] = None
-    metadata: Optional[MetadataMapping] = None
     replication_method: Optional[str] = None
 
     @classmethod
@@ -47,7 +47,7 @@ class CatalogEntry(BaseCatalogEntry):
             key_properties=stream.get("key_properties"),
             database=stream.get("database_name"),
             table=stream.get("table_name"),
-            schema=Schema.from_dict(stream.get("schema")),
+            schema=Schema.from_dict(stream.get("schema", {})),
             is_view=stream.get("is_view"),
             stream_alias=stream.get("stream_alias"),
             metadata=MetadataMapping.from_iterable(stream.get("metadata", [])),
