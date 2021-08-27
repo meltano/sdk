@@ -4,19 +4,28 @@
 # """Base class for database-type streams."""
 
 import abc
-from pathlib import Path
 import backoff
 
 import singer
-from singer.schema import Schema
-from singer_sdk.helpers.classproperty import classproperty
 from singer_sdk.exceptions import TapStreamConnectionFailure
-from typing import Any, Dict, Iterable, List, Optional, Tuple, TypeVar, Union, cast
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 
-FactoryType = TypeVar("FactoryType", bound="DatabaseStream")
+CatalogFactoryType = TypeVar("CatalogFactoryType", bound="DatabaseCatalogFactory")
+StreamFactoryType = TypeVar("StreamFactoryType", bound="DatabaseStream")
 
 
 SINGER_STRING_TYPE = singer.Schema(type=["string", "null"])
@@ -46,7 +55,7 @@ SINGER_TYPE_LOOKUP = {
 }
 
 
-def get_catalog_entries(catalog_dict: dict) -> List[dict]:
+def _get_catalog_entries(catalog_dict: dict) -> List[dict]:
     """Parse the catalog dict and return a list of catalog entries."""
     if "streams" not in catalog_dict:
         raise ValueError("Catalog does not contain expected 'streams' collection.")
@@ -57,7 +66,9 @@ def get_catalog_entries(catalog_dict: dict) -> List[dict]:
 
 def get_catalog_entry_name(catalog_entry: dict) -> str:
     """Return the name of the provided catalog entry dict."""
-    result = catalog_entry.get("stream", catalog_entry.get("tap_stream_id", None))
+    result = cast(
+        str, catalog_entry.get("stream", catalog_entry.get("tap_stream_id", None))
+    )
     if not result:
         raise ValueError(
             "Stream name could not be identified due to missing or blank"
@@ -68,7 +79,7 @@ def get_catalog_entry_name(catalog_entry: dict) -> str:
 
 def get_catalog_entry_schema(catalog_entry: dict) -> dict:
     """Return the JSON Schema dict for the specified catalog entry dict."""
-    result = catalog_entry.get("schema", None)
+    result = cast(dict, catalog_entry.get("schema", None))
     if not result:
         raise ValueError(
             "Stream does not have a valid schema. Please check that the catalog file "
@@ -77,63 +88,98 @@ def get_catalog_entry_schema(catalog_entry: dict) -> dict:
     return result
 
 
-class DatabaseStream(Stream, metaclass=abc.ABCMeta):
-    """Abstract base class for database-type streams.
-
-    This class currently supports databases with 3-part names only. For databases which
-    use two-part names, further modification to certain methods may be necessary.
-    """
-
-    MAX_CONNECT_RETRIES = 5
-    THREE_PART_NAMES = True  # For backwards compatibility reasons
+class DatabaseQueryService(metaclass=abc.ABCMeta):
+    """Executes SQL queries and commands."""
 
     DEFAULT_QUOTE_CHAR = '"'
     OTHER_QUOTE_CHARS = ['"', "[", "]", "`"]
+    MAX_CONNECT_RETRIES = 5
 
-    def __init__(
-        self,
-        tap: TapBaseClass,
-        schema: Optional[Union[str, Path, Dict[str, Any], Schema]],
-        name: str,
-    ):
-        """Initialize the database stream.
+    def __init__(self, tap_config: dict) -> None:
+        """Initialize the query service using the provided tap config."""
+        pass
 
-        Parameters
-        ----------
-        tap : TapBaseClass
-            reference to the parent tap
-        schema : Optional[Union[str, Path, Dict[str, Any], Schema]]
-            A schema dict or the path to a valid schema file in json.
-        name : str
-            Required. Name of the stream (generally the same as the table name).
+    @abc.abstractmethod
+    def open_connection(self, config) -> Any:
+        """Connect to the database source."""
+        pass
 
-        """
-        super().__init__(tap=tap, schema=schema, name=name)
-        self.is_view: Optional[bool] = None
-        self.row_count: Optional[int] = None
+    @abc.abstractmethod
+    def execute_query(self, sql: Union[str, List[str]], config) -> Iterable[dict]:
+        """Run a SQL query and generate a dict for each returned row."""
+        pass
 
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
-        """Return a generator of row-type dictionary objects.
+    def enquote(self, identifier: str):
+        """Escape identifier to be SQL safe."""
+        for quotechar in [self.DEFAULT_QUOTE_CHAR] + self.OTHER_QUOTE_CHARS:
+            if quotechar in identifier:
+                raise Exception(
+                    f"Can't escape identifier `{identifier}` because it contains a "
+                    f"quote character ({quotechar})."
+                )
+        return f"{self.DEFAULT_QUOTE_CHAR}{identifier.upper()}{self.DEFAULT_QUOTE_CHAR}"
 
-        Each row emitted should be a dictionary of property names to their values.
-        """
-        if partition:
-            raise NotImplementedError(
-                f"Stream '{self.name}' does not support partitioning."
-            )
-        for row in self.execute_query(
-            sql=f"SELECT * FROM {self.fully_qualified_name}", config=self.config
-        ):
-            yield row
+    def dequote(self, identifier: str):
+        """Dequote identifier from quoted version."""
+        for quotechar in [self.DEFAULT_QUOTE_CHAR] + self.OTHER_QUOTE_CHARS:
+            if identifier.startswith(quotechar):
+                return identifier.lstrip(quotechar).rstrip(quotechar)
+
+    def connect_with_retries(self) -> Any:
+        """Run open_stream_connection(), retry automatically a few times if failed."""
+        return backoff.on_exception(
+            backoff.expo,
+            exception=TapStreamConnectionFailure,
+            max_tries=self.MAX_CONNECT_RETRIES,
+            on_backoff=self.log_backoff_attempt,
+            factor=2,
+        )(self.open_connection)()
+
+    def log_backoff_attempt(cls, details):
+        """Log backoff attempts used by stream retry_pattern()."""
+        cls.logger.info(
+            "Error communicating with source, "
+            f"triggering backoff: {details.get('tries')} try"
+        )
+
+
+class DatabaseCatalogFactory(metaclass=abc.ABCMeta):
+    """Generates the database catalog."""
+
+    query_service_class: Type[DatabaseQueryService]
+
+    def __init__(self, tap: TapBaseClass) -> None:
+        self._query_service: Optional[DatabaseQueryService] = self.query_service_class(
+            dict(tap.config)
+        )
 
     @property
-    def fully_qualified_name(self):
-        """Return the fully qualified name of the table name."""
-        return self.tap_stream_id
+    def query_service(self) -> DatabaseQueryService:
+        if not self._query_service:
+            raise ValueError("Query service is not initialized.")
 
-    @classproperty
-    # @classmethod
-    def table_scan_sql(cls) -> str:
+        return self._query_service
+
+    @classmethod
+    def _create_singer_schema(cls, columns: Dict[str, str]) -> singer.Schema:
+        """Return a singer 'Schema' object with the specified columns and data types."""
+        props: Dict[str, singer.Schema] = {}
+        for column, sql_type in columns.items():
+            props[column] = cls.get_singer_type(sql_type)
+        return singer.Schema(type="object", properties=props)
+
+    @classmethod
+    def get_singer_type(cls, sql_type: str) -> singer.Schema:
+        """Return a singer type class based on the provided sql-base data type."""
+        for matchable in SINGER_TYPE_LOOKUP.keys():
+            if matchable.lower() in sql_type.lower():
+                return SINGER_TYPE_LOOKUP[matchable]
+        raise RuntimeError(
+            f"Could not infer a Singer data type from type '{sql_type}'."
+        )
+
+    @property
+    def table_scan_sql(self) -> str:
         """Return a SQL statement for syncable tables.
 
         Result fields should be in this order:
@@ -147,8 +193,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             WHERE UPPER(table_type) not like '%VIEW%'
             """
 
-    @classproperty
-    # @classmethod
+    @property
     def view_scan_sql(cls) -> str:
         """Return a SQL statement for syncable views.
 
@@ -163,8 +208,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             where upper(table_schema) <> 'INFORMATION_SCHEMA'
             """
 
-    @classproperty
-    # @classmethod
+    @property
     def column_scan_sql(cls) -> str:
         """Return a SQL statement that provides the column names and types.
 
@@ -183,8 +227,7 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             ORDER BY table_catalog, table_schema, table_name, ordinal_position
             """
 
-    @classproperty
-    # @classmethod
+    @property
     def primary_key_scan_sql(cls) -> Optional[str]:
         """Return a SQL statement that provides the list of primary key columns.
 
@@ -210,30 +253,13 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
                      cols.ordinal_position;
             """
 
-    @staticmethod
-    def _create_singer_schema(columns: Dict[str, str]) -> singer.Schema:
-        """Return a singer 'Schema' object with the specified columns and data types."""
-        props: Dict[str, singer.Schema] = {}
-        for column, sql_type in columns.items():
-            props[column] = DatabaseStream.get_singer_type(sql_type)
-        return singer.Schema(type="object", properties=props)
-
-    @staticmethod
-    def _get_singer_type(sql_type: str) -> singer.Schema:
-        """Return a singer type class based on the provided sql-base data type."""
-        for matchable in SINGER_TYPE_LOOKUP.keys():
-            if matchable.lower() in sql_type.lower():
-                return SINGER_TYPE_LOOKUP[matchable]
-        raise RuntimeError(
-            f"Could not infer a Singer data type from type '{sql_type}'."
-        )
-
-    @classmethod
     def scan_and_collate_columns(
-        cls, config
+        self, config
     ) -> Dict[Tuple[str, str, str], Dict[str, str]]:
         """Return a mapping of columns and datatypes for each table and view."""
-        columns_scan_result = cls.execute_query(config=config, sql=cls.column_scan_sql)
+        columns_scan_result = self.query_service.execute_query(
+            config=config, sql=self.column_scan_sql
+        )
         result: Dict[Tuple[str, str, str], Dict[str, str]] = {}
         for row_dict in columns_scan_result:
             row_dict = cast(dict, row_dict)
@@ -243,13 +269,15 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             result[(catalog, schema_name, table)][column] = data_type
         return result
 
-    @classmethod
-    def scan_primary_keys(cls, config) -> Dict[Tuple[str, str, str], List[str]]:
+    def scan_primary_keys(self, config) -> Dict[Tuple[str, str, str], List[str]]:
         """Return a listing of primary keys for each table and view."""
         result: Dict[Tuple[str, str, str], List[str]] = {}
-        if not cls.primary_key_scan_sql:
+        if not self.primary_key_scan_sql:
             return result
-        pk_scan_result = cls.execute_query(config=config, sql=cls.primary_key_scan_sql)
+
+        pk_scan_result = self.query_service.execute_query(
+            config=config, sql=self.primary_key_scan_sql
+        )
         for row_dict in pk_scan_result:
             row_dict = cast(dict, row_dict)
             catalog, schema_name, table, pk_column = row_dict.values()
@@ -258,106 +286,125 @@ class DatabaseStream(Stream, metaclass=abc.ABCMeta):
             result[(catalog, schema_name, table)].append(pk_column)
         return result
 
-    @classmethod
-    def from_discovery(cls, tap: TapBaseClass) -> List[FactoryType]:
-        """Return a list of all streams (tables)."""
-        result: List[FactoryType] = []
+    def run_discovery(self, tap: TapBaseClass) -> singer.Catalog:
+        """Return a list of catalog entry objects."""
+        result: List[dict] = []
         config = tap.config
-        table_scan_result = cls.execute_query(config=config, sql=cls.table_scan_sql)
-        view_scan_result = cls.execute_query(config=config, sql=cls.view_scan_sql)
+        table_scan_results = self.query_service.execute_query(
+            config=config, sql=self.table_scan_sql
+        )
+        view_scan_results = self.query_service.execute_query(
+            config=config, sql=self.view_scan_sql
+        )
         all_results = [
             (database, schema_name, table, False)
-            for database, schema_name, table in table_scan_result.values()
+            for database, schema_name, table in table_scan_results
         ] + [
             (database, schema_name, table, True)
-            for database, schema_name, table in view_scan_result.values()
+            for database, schema_name, table in view_scan_results
         ]
-        collated_columns = cls.scan_and_collate_columns(config=config)
-        primary_keys_lookup = cls.scan_primary_keys(config=config)
+        collated_columns = self.scan_and_collate_columns(config=config)
+        primary_keys_lookup = self.scan_primary_keys(config=config)
         for database, schema_name, table, is_view in all_results:
             name_tuple = (database, schema_name, table)
             full_name = ".".join(name_tuple)
             columns = collated_columns.get(name_tuple, None)
             if not columns:
                 raise RuntimeError(f"Did not find any columns for table '{full_name}'")
-            singer_schema: singer.Schema = cls._create_singer_schema(columns)
+            singer_schema: singer.Schema = self._create_singer_schema(columns)
             primary_keys = primary_keys_lookup.get(name_tuple, None)
-            new_stream = cast(
-                FactoryType,
-                cls(tap=tap, schema=singer_schema.to_dict(), name=full_name),
+            metadata = cast(
+                List[dict],
+                singer.metadata.get_standard_metadata(
+                    schema=singer_schema,
+                    # replication_method=self.forced_replication_method,
+                    key_properties=primary_keys,
+                    # valid_replication_keys=(
+                    #     [self.replication_key] if self.replication_key else None
+                    # ),
+                    schema_name=None,
+                ),
             )
-            new_stream.primary_keys = primary_keys
-            new_stream.is_view = is_view
-            result.append(new_stream)
+            new_catalog_entry = singer.CatalogEntry(
+                tap_stream_id=full_name,
+                name=full_name,
+                key_properties=primary_keys,
+                is_view=is_view,
+                metadata=metadata,
+            )
+            result.append(new_catalog_entry)
         return result
 
+
+class DatabaseStream(Stream, metaclass=abc.ABCMeta):
+    """Abstract base class for database-type streams.
+
+    This class currently supports databases with 3-part names only. For databases which
+    use two-part names, further modification to certain methods may be necessary.
+    """
+
+    THREE_PART_NAMES = True  # For backwards compatibility reasons
+
+    query_service_class: Type[DatabaseQueryService]
+
+    def __init__(
+        self,
+        tap: TapBaseClass,
+        catalog_entry: Dict[str, Any],
+    ):
+        """Initialize the database stream.
+
+        Parameters
+        ----------
+        tap : TapBaseClass
+            reference to the parent tap
+        catalog_entry : Dict[str, Any]
+            A schema dict or the path to a valid schema file in json.
+        """
+        self.query_service = self.query_service_class(dict(tap.config))
+        self.is_view: Optional[bool] = catalog_entry.get("is-view", False)
+        self.row_count: Optional[int] = None
+        name = catalog_entry.get("tap_stream_id", catalog_entry.get("stream"))
+        super().__init__(
+            tap=tap,
+            schema=catalog_entry["schema"],
+            name=name,
+        )
+
+    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
+        """Return a generator of row-type dictionary objects.
+
+        Each row emitted should be a dictionary of property names to their values.
+        """
+        if partition:
+            raise NotImplementedError(
+                f"Stream '{self.name}' does not support partitioning."
+            )
+        for row in self.query_service.execute_query(
+            sql=f"SELECT * FROM {self.fully_qualified_name}", config=self.config
+        ):
+            yield row
+
+    @property
+    def fully_qualified_name(self):
+        """Return the fully qualified name of the table name."""
+        return self.tap_stream_id
+
     @classmethod
-    def from_input_catalog(cls, tap: TapBaseClass) -> List[FactoryType]:
+    def from_catalog(cls, tap: TapBaseClass, catalog: dict) -> List[StreamFactoryType]:
         """Initialize streams from an existing catalog, returning a list of streams."""
-        result: List[FactoryType] = []
-        catalog = tap.input_catalog
+        result: List[StreamFactoryType] = []
         if not catalog:
             raise ValueError(
                 "Could not initialize stream from blank or missing catalog."
             )
-        for catalog_entry in get_catalog_entries(catalog):
-            full_name = get_catalog_entry_name(catalog_entry)
+        for catalog_entry in _get_catalog_entries(catalog):
             new_stream = cast(
-                FactoryType,
+                StreamFactoryType,
                 cls(
                     tap=tap,
-                    name=full_name,
-                    schema=get_catalog_entry_schema(catalog_entry),
+                    catalog_entry=catalog_entry,
                 ),
             )
             result.append(new_stream)
         return result
-
-    # @abc.abstractclassmethod
-    @classmethod
-    def execute_query(cls, sql: Union[str, List[str]], config) -> Iterable[dict]:
-        """Run a SQL query and generate a dict for each returned row."""
-        pass
-
-    @classmethod
-    def enquote(cls, identifier: str):
-        """Escape identifier to be SQL safe."""
-        for quotechar in [cls.DEFAULT_QUOTE_CHAR] + cls.OTHER_QUOTE_CHARS:
-            if quotechar in identifier:
-                raise Exception(
-                    f"Can't escape identifier `{identifier}` because it contains a "
-                    f"quote character ({quotechar})."
-                )
-        return f"{cls.DEFAULT_QUOTE_CHAR}{identifier.upper()}{cls.DEFAULT_QUOTE_CHAR}"
-
-    @classmethod
-    def dequote(cls, identifier: str):
-        """Dequote identifier from quoted version."""
-        for quotechar in [cls.DEFAULT_QUOTE_CHAR] + cls.OTHER_QUOTE_CHARS:
-            if identifier.startswith(quotechar):
-                return identifier.lstrip(quotechar).rstrip(quotechar)
-
-    @classmethod
-    def log_backoff_attempt(cls, details):
-        """Log backoff attempts used by stream retry_pattern()."""
-        cls.logger.info(
-            "Error communicating with source, "
-            f"triggering backoff: {details.get('tries')} try"
-        )
-
-    @classmethod
-    def connect_with_retries(cls) -> Any:
-        """Run open_stream_connection(), retry automatically a few times if failed."""
-        return backoff.on_exception(
-            backoff.expo,
-            exception=TapStreamConnectionFailure,
-            max_tries=cls.MAX_CONNECT_RETRIES,
-            on_backoff=cls.log_backoff_attempt,
-            factor=2,
-        )(cls.open_connection)()
-
-    # @abc.abstractclassmethod
-    @classmethod
-    def open_connection(cls, config) -> Any:
-        """Connect to the database source."""
-        pass
