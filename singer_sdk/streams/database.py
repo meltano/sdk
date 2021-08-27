@@ -4,7 +4,6 @@ import abc
 import backoff
 
 import singer
-from singer_sdk.exceptions import TapStreamConnectionFailure
 from typing import (
     Any,
     Dict,
@@ -18,37 +17,32 @@ from typing import (
     cast,
 )
 
+from singer_sdk.exceptions import TapStreamConnectionFailure
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
+from singer_sdk import typing as th
 
 CatalogFactoryType = TypeVar("CatalogFactoryType", bound="DatabaseCatalogFactory")
 StreamFactoryType = TypeVar("StreamFactoryType", bound="DatabaseStream")
 
 
-SINGER_STRING_TYPE = singer.Schema(type=["string", "null"])
-SINGER_FLOAT_TYPE = singer.Schema(type=["double", "null"])
-SINGER_INT_TYPE = singer.Schema(type=["int", "null"])
-SINGER_DECIMAL_TYPE = singer.Schema(type=["decimal", "null"])
-SINGER_DATETIME_TYPE = singer.Schema(type=["string", "null"], format="date-time")
-SINGER_BOOLEAN_TYPE = singer.Schema(type=["boolean", "null"])
-SINGER_OBJECT_TYPE = singer.Schema(type=["string", "object", "null"])
-SINGER_TYPE_LOOKUP = {
+SQL_TYPE_LOOKUP: Dict[str, dict] = {
     # NOTE: This is an ordered mapping, with earlier mappings taking precedence.
     #       If the SQL-provided type contains the type name on the left, the mapping
     #       will return the respective singer type.
-    "timestamp": SINGER_DATETIME_TYPE,
-    "datetime": SINGER_DATETIME_TYPE,
-    "date": SINGER_DATETIME_TYPE,
-    "int": SINGER_INT_TYPE,
-    "number": SINGER_DECIMAL_TYPE,
-    "decimal": SINGER_DECIMAL_TYPE,
-    "double": SINGER_FLOAT_TYPE,
-    "float": SINGER_FLOAT_TYPE,
-    "string": SINGER_STRING_TYPE,
-    "text": SINGER_STRING_TYPE,
-    "char": SINGER_STRING_TYPE,
-    "bool": SINGER_BOOLEAN_TYPE,
-    "variant": SINGER_STRING_TYPE,  # TODO: Support nested objects.
+    "timestamp": th.DateTimeType.type_dict(),
+    "datetime": th.DateTimeType.type_dict(),
+    "date": th.DateTimeType.type_dict(),
+    "int": th.IntegerType.type_dict(),
+    "number": th.NumberType.type_dict(),
+    "decimal": th.NumberType.type_dict(),
+    "double": th.NumberType.type_dict(),
+    "float": th.NumberType.type_dict(),
+    "string": th.StringType.type_dict(),
+    "text": th.StringType.type_dict(),
+    "char": th.StringType.type_dict(),
+    "bool": th.BooleanType.type_dict(),
+    "variant": th.StringType.type_dict(),
 }
 
 
@@ -56,33 +50,11 @@ def _get_catalog_entries(catalog_dict: dict) -> List[dict]:
     """Parse the catalog dict and return a list of catalog entries."""
     if "streams" not in catalog_dict:
         raise ValueError("Catalog does not contain expected 'streams' collection.")
+
     if not catalog_dict.get("streams"):
         raise ValueError("Catalog does not contain any streams.")
+
     return cast(List[dict], catalog_dict.get("streams"))
-
-
-def get_catalog_entry_name(catalog_entry: dict) -> str:
-    """Return the name of the provided catalog entry dict."""
-    result = cast(
-        str, catalog_entry.get("stream", catalog_entry.get("tap_stream_id", None))
-    )
-    if not result:
-        raise ValueError(
-            "Stream name could not be identified due to missing or blank"
-            "'stream' and 'tap_stream_id' values."
-        )
-    return result
-
-
-def get_catalog_entry_schema(catalog_entry: dict) -> dict:
-    """Return the JSON Schema dict for the specified catalog entry dict."""
-    result = cast(dict, catalog_entry.get("schema", None))
-    if not result:
-        raise ValueError(
-            "Stream does not have a valid schema. Please check that the catalog file "
-            "is properly formatted."
-        )
-    return result
 
 
 class DatabaseQueryService(metaclass=abc.ABCMeta):
@@ -158,19 +130,22 @@ class DatabaseCatalogFactory(metaclass=abc.ABCMeta):
         return self._query_service
 
     @classmethod
-    def _create_singer_schema(cls, columns: Dict[str, str]) -> singer.Schema:
+    def _get_jsonschema(cls, columns: Dict[str, str]) -> dict:
         """Return a singer 'Schema' object with the specified columns and data types."""
-        props: Dict[str, singer.Schema] = {}
+        props: List[th.Property] = []
         for column, sql_type in columns.items():
-            props[column] = cls.get_singer_type(sql_type)
-        return singer.Schema(type="object", properties=props)
+            props.append(
+                th.Property(column, th.CustomType(cls.to_jsonschema_type(sql_type)))
+            )
+        return th.PropertiesList(*props).to_dict()
 
     @classmethod
-    def get_singer_type(cls, sql_type: str) -> singer.Schema:
+    def to_jsonschema_type(cls, sql_type: str) -> dict:
         """Return a singer type class based on the provided sql-base data type."""
-        for matchable in SINGER_TYPE_LOOKUP.keys():
+        for matchable in SQL_TYPE_LOOKUP.keys():
             if matchable.lower() in sql_type.lower():
-                return SINGER_TYPE_LOOKUP[matchable]
+                return SQL_TYPE_LOOKUP[matchable]
+
         raise RuntimeError(
             f"Could not infer a Singer data type from type '{sql_type}'."
         )
@@ -308,18 +283,19 @@ class DatabaseCatalogFactory(metaclass=abc.ABCMeta):
             columns = collated_columns.get(name_tuple, None)
             if not columns:
                 raise RuntimeError(f"Did not find any columns for table '{full_name}'")
-            singer_schema: singer.Schema = self._create_singer_schema(columns)
+
+            jsonschema: dict = self._get_jsonschema(columns)
             primary_keys = primary_keys_lookup.get(name_tuple, None)
             metadata = cast(
                 List[dict],
                 singer.metadata.get_standard_metadata(
-                    schema=singer_schema,
-                    # replication_method=self.forced_replication_method,
+                    schema=jsonschema,
                     key_properties=primary_keys,
+                    schema_name=None,
+                    # replication_method=self.forced_replication_method,
                     # valid_replication_keys=(
                     #     [self.replication_key] if self.replication_key else None
                     # ),
-                    schema_name=None,
                 ),
             )
             new_catalog_entry = singer.CatalogEntry(
