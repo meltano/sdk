@@ -41,7 +41,6 @@ def is_stream_selected(
     )
 
 
-@cached(max_size=_MAX_LRU_CACHE)
 def is_property_selected(  # noqa: C901  # ignore 'too complex'
     stream_name: str,
     metadata: MetadataMapping,
