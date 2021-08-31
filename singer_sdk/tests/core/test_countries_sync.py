@@ -44,7 +44,10 @@ def test_countries_discoverable_selection():
 
     assert countries_entry.metadata[("properties", "code")].selected_by_default
     assert countries_entry.metadata[("properties", "name")].selected_by_default
-    assert countries_entry.metadata[("properties", "emoji")].inclusion == Metadata.InclusionType.UNSUPPORTED
+    assert (
+        countries_entry.metadata[("properties", "emoji")].inclusion
+        == Metadata.InclusionType.UNSUPPORTED
+    )
 
 
 def test_with_catalog_mismatch():
@@ -82,8 +85,7 @@ def test_with_catalog_entry():
     pop_deselected_record_properties(
         record=copied_record,
         schema=stream.schema,
-        metadata=stream.metadata,
-        stream_name=stream.name,
+        mask=stream.mask,
         logger=logging.getLogger(),
     )
     assert copied_record == record
@@ -91,7 +93,7 @@ def test_with_catalog_entry():
     new_schema = get_selected_schema(
         stream_name=stream.name,
         schema=stream.schema,
-        metadata=stream.metadata,
+        mask=stream.metadata.resolve_selection(),
         logger=logging.getLogger(),
     )
     assert new_schema == stream.schema

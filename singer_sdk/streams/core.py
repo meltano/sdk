@@ -36,7 +36,13 @@ from singer.schema import Schema
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
-from singer_sdk.helpers._singer import Catalog, CatalogEntry, Metadata, MetadataMapping
+from singer_sdk.helpers._singer import (
+    Catalog,
+    CatalogEntry,
+    Metadata,
+    MetadataMapping,
+    SelectionMask,
+)
 from singer_sdk.helpers._typing import (
     conform_record_data_types,
     is_datetime_type,
@@ -53,7 +59,6 @@ from singer_sdk.helpers._state import (
 from singer_sdk.exceptions import MaxRecordsLimitException, InvalidStreamSortException
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._util import utc_now
-from singer_sdk.helpers import _catalog
 
 
 # Replication methods
@@ -101,6 +106,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._state_partitioning_keys: Optional[List[str]] = None
         self._schema_filepath: Optional[Path] = None
         self._metadata: Optional[MetadataMapping] = None
+        self._mask: Optional[SelectionMask] = None
         self._schema: dict
         self.child_streams: List[Stream] = []
         if schema:
@@ -226,12 +232,7 @@ class Stream(metaclass=abc.ABCMeta):
     @property
     def selected(self) -> bool:
         """Return true if the stream is selected."""
-        return _catalog.is_property_selected(
-            stream_name=self.name,
-            metadata=self.metadata,
-            breadcrumb=(),
-            logger=self.logger,
-        )
+        return self.mask.get((), True)
 
     @final
     @property
@@ -550,11 +551,16 @@ class Stream(metaclass=abc.ABCMeta):
             )
             singer.write_message(schema_message)
 
+    @property
+    def mask(self) -> SelectionMask:
+        """Get a boolean mask for stream and property selection."""
+        if self._mask is None:
+            self._mask = self.metadata.resolve_selection()
+        return self._mask
+
     def _write_record_message(self, record: dict) -> None:
         """Write out a RECORD message."""
-        pop_deselected_record_properties(
-            record, self.schema, self.metadata, self.name, self.logger
-        )
+        pop_deselected_record_properties(record, self.schema, self.mask, self.logger)
         record = conform_record_data_types(
             stream_name=self.name,
             row=record,

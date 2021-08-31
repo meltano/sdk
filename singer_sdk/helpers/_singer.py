@@ -1,9 +1,15 @@
 from dataclasses import dataclass, fields
 from enum import Enum
 from typing import Any, Dict, Iterable, List, Optional, Tuple
+import logging
 
 from singer.catalog import Catalog as BaseCatalog, CatalogEntry as BaseCatalogEntry
 from singer.schema import Schema
+
+Breadcrumb = Tuple[str, ...]
+SelectionMask = Dict[Breadcrumb, bool]
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -47,7 +53,7 @@ class Metadata:
         return result
 
 
-class MetadataMapping(Dict[Tuple[str, ...], Metadata]):
+class MetadataMapping(Dict[Breadcrumb, Metadata]):
     """Stream metadata mapping."""
 
     @classmethod
@@ -100,6 +106,65 @@ class MetadataMapping(Dict[Tuple[str, ...], Metadata]):
         mapping[()] = root
 
         return mapping
+    
+    def resolve_selection(self) -> SelectionMask:
+        """Resolve selection for all metadata breadcrumbs and store them in a mapping."""
+        return {
+            breadcrumb: self._breadcrumb_is_selected(breadcrumb)
+            for breadcrumb in self
+        }
+
+    def _breadcrumb_is_selected(self, breadcrumb: Breadcrumb) -> bool:
+        """Determine if a property breadcrumb is selected based on existing metadata.
+
+        An empty breadcrumb (empty tuple) indicates the stream itself. Otherwise, the
+        breadcrumb is the path to a property within the stream.
+        """
+        if not self:
+            # Default to true if no metadata to say otherwise
+            return True
+
+        md_entry = self.get(breadcrumb, Metadata())
+        parent_value = None
+
+        if len(breadcrumb) > 0:
+            parent_breadcrumb = breadcrumb[:-2]
+            parent_value = self._breadcrumb_is_selected(parent_breadcrumb)
+
+        if parent_value is False:
+            return parent_value
+
+        if md_entry.inclusion == Metadata.InclusionType.UNSUPPORTED:
+            if md_entry.selected is True:
+                logger.debug(
+                    "Property '%s' was selected but is not supported. "
+                    "Ignoring selected==True input.",
+                    ":".join(breadcrumb),
+                )
+            return False
+
+        if md_entry.inclusion == Metadata.InclusionType.AUTOMATIC:
+            if md_entry.selected is False:
+                logger.debug(
+                    "Property '%s' was deselected while also set "
+                    "for automatic inclusion. Ignoring selected==False input.",
+                    ":".join(breadcrumb),
+                )
+            return True
+
+        if md_entry.selected is not None:
+            return md_entry.selected
+
+        if md_entry.selected_by_default is not None:
+            return md_entry.selected_by_default
+
+        logger.debug(
+            "Selection metadata omitted for '%s'. "
+            "Using parent value of selected=%s.",
+            breadcrumb,
+            parent_value,
+        )
+        return parent_value or False
 
 
 @dataclass
