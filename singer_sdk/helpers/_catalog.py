@@ -4,7 +4,7 @@ from copy import deepcopy
 from logging import Logger
 from typing import Any, Dict, Optional, Tuple
 
-from singer_sdk.helpers._singer import Catalog, Metadata, MetadataMapping, SelectionMask
+from singer_sdk.helpers._singer import Catalog, SelectionMask
 from singer_sdk.helpers._typing import is_object_type
 
 from memoization import cached

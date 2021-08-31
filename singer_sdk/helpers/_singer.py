@@ -106,12 +106,11 @@ class MetadataMapping(Dict[Breadcrumb, Metadata]):
         mapping[()] = root
 
         return mapping
-    
+
     def resolve_selection(self) -> SelectionMask:
-        """Resolve selection for all metadata breadcrumbs and store them in a mapping."""
+        """Resolve selection for metadata breadcrumbs and store them in a mapping."""
         return {
-            breadcrumb: self._breadcrumb_is_selected(breadcrumb)
-            for breadcrumb in self
+            breadcrumb: self._breadcrumb_is_selected(breadcrumb) for breadcrumb in self
         }
 
     def _breadcrumb_is_selected(self, breadcrumb: Breadcrumb) -> bool:

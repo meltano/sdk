@@ -2,12 +2,10 @@
 
 import logging
 from copy import deepcopy
-from typing import Dict
 
 import pytest
 
 from singer_sdk.helpers._catalog import (
-    MetadataMapping,
     get_selected_schema,
     pop_deselected_record_properties,
 )
@@ -154,7 +152,7 @@ def catalog_entry_obj(schema, stream_name, selection_metadata) -> singer.Catalog
         tap_stream_id=stream_name,
         stream=stream_name,
         schema=singer.Schema.from_dict(schema),
-        metadata=MetadataMapping.from_iterable(selection_metadata),
+        metadata=singer.MetadataMapping.from_iterable(selection_metadata),
     )
 
 
