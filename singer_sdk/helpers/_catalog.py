@@ -1,25 +1,16 @@
 """Private helper functions for catalog and selection logic."""
 
 from copy import deepcopy
-from enum import Enum
 from logging import Logger
 from typing import Any, Dict, Optional, Tuple
 
-from singer_sdk.helpers._singer import Catalog, MetadataMapping
+from singer_sdk.helpers._singer import Catalog, Metadata, MetadataMapping
 from singer_sdk.helpers._typing import is_object_type
 
 from memoization import cached
 
 
 _MAX_LRU_CACHE = 500
-
-
-class InclusionType(str, Enum):
-    """Singer catalog inclusion types."""
-
-    AVAILABLE = "available"
-    AUTOMATIC = "automatic"
-    UNSUPPORTED = "unsupported"
 
 
 def is_stream_selected(
@@ -75,7 +66,7 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
         # Default to true if no metadata to say otherwise
         return True
 
-    md_entry = metadata.get(breadcrumb, {})
+    md_entry = metadata.get(breadcrumb, Metadata())
     parent_value = None
     if len(breadcrumb) > 0:
         parent_breadcrumb = tuple(list(breadcrumb)[:-2])
@@ -85,12 +76,8 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
     if parent_value is False:
         return parent_value
 
-    selected: Optional[bool] = md_entry.get("selected")
-    selected_by_default: Optional[bool] = md_entry.get("selected-by-default")
-    inclusion: Optional[str] = md_entry.get("inclusion")
-
-    if inclusion == InclusionType.UNSUPPORTED:
-        if selected is True:
+    if md_entry.inclusion == Metadata.InclusionType.UNSUPPORTED:
+        if md_entry.selected is True:
             logger.debug(
                 "Property '%s' was selected but is not supported. "
                 "Ignoring selected==True input.",
@@ -98,8 +85,8 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
             )
         return False
 
-    if inclusion == InclusionType.AUTOMATIC:
-        if selected is False:
+    if md_entry.inclusion == Metadata.InclusionType.AUTOMATIC:
+        if md_entry.selected is False:
             logger.debug(
                 "Property '%s' was deselected while also set "
                 "for automatic inclusion. Ignoring selected==False input.",
@@ -107,11 +94,11 @@ def is_property_selected(  # noqa: C901  # ignore 'too complex'
             )
         return True
 
-    if selected is not None:
-        return selected
+    if md_entry.selected is not None:
+        return md_entry.selected
 
-    if selected_by_default is not None:
-        return selected_by_default
+    if md_entry.selected_by_default is not None:
+        return md_entry.selected_by_default
 
     logger.debug(
         "Selection metadata omitted for '%s':'%s'. "
@@ -231,4 +218,4 @@ def set_catalog_stream_selected(
         raise ValueError(f"Catalog entry missing for '{stream_name}'. Skipping.")
 
     md_entry = catalog_entry.metadata[breadcrumb]
-    md_entry["selected"] = selected
+    md_entry.selected = selected

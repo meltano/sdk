@@ -4,10 +4,10 @@ import copy
 import logging
 
 from singer_sdk.helpers._catalog import (
-    InclusionType,
     get_selected_schema,
     pop_deselected_record_properties,
 )
+from singer_sdk.helpers._singer import Metadata
 from singer_sdk.samples.sample_tap_countries.countries_tap import SampleTapCountries
 
 
@@ -24,7 +24,7 @@ def test_countries_primary_key():
     tap = SampleTapCountries(config=None)
     countries_entry = tap.streams["countries"]._singer_catalog_entry
     metadata_root = countries_entry.metadata[()]
-    key_props_1 = metadata_root.get("table-key-properties")
+    key_props_1 = metadata_root.table_key_properties
     key_props_2 = countries_entry.key_properties
     assert key_props_1 == ["code"], (
         f"Incorrect 'table-key-properties' in catalog: ({key_props_1})\n\n"
@@ -42,9 +42,9 @@ def test_countries_discoverable_selection():
     tap = SampleTapCountries(config=None)
     countries_entry = tap.streams["countries"]._singer_catalog_entry
 
-    assert countries_entry.metadata[("properties", "code")]["selected-by-default"]
-    assert countries_entry.metadata[("properties", "name")]["selected-by-default"]
-    assert countries_entry.metadata[("properties", "emoji")]["inclusion"] == InclusionType.UNSUPPORTED
+    assert countries_entry.metadata[("properties", "code")].selected_by_default
+    assert countries_entry.metadata[("properties", "name")].selected_by_default
+    assert countries_entry.metadata[("properties", "emoji")].inclusion == Metadata.InclusionType.UNSUPPORTED
 
 
 def test_with_catalog_mismatch():

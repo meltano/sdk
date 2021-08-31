@@ -44,14 +44,14 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
         # Declare private members
         self._streams: Optional[Dict[str, Stream]] = None
-        self._input_catalog: Optional[dict] = None
+        self._input_catalog: Optional[Catalog] = None
         self._state: Dict[str, Stream] = {}
 
         # Process input catalog
         if isinstance(catalog, dict):
-            self._input_catalog = catalog
+            self._input_catalog = Catalog.from_dict(catalog)
         elif catalog is not None:
-            self._input_catalog = read_json_file(catalog)
+            self._input_catalog = Catalog.from_dict(read_json_file(catalog))
 
         # Initialize mapper
         self.mapper: PluginMapper
@@ -99,7 +99,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     @property
     def input_catalog(self) -> Optional[Catalog]:
         """Return the catalog dictionary input, or None if not provided."""
-        return Catalog.from_dict(self._input_catalog) if self._input_catalog else None
+        return self._input_catalog
 
     @classproperty
     def capabilities(self) -> List[str]:

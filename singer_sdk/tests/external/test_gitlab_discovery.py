@@ -21,7 +21,7 @@ def test_gitlab_replication_keys(gitlab_config: Optional[dict]):
     catalog_entry = catalog.get_stream(stream_name)
     metadata_root = catalog_entry.metadata[()]
 
-    key_props_1 = metadata_root.get("valid-replication-keys")[0]
+    key_props_1 = metadata_root.valid_replication_keys[0]
     key_props_2 = catalog_entry.replication_key
     assert key_props_1 == expected_replication_key, (
         f"Incorrect 'valid-replication-keys' in catalog: ({key_props_1})\n\n"

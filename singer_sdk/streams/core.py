@@ -36,8 +36,8 @@ from singer import (
 from singer.schema import Schema
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
-from singer_sdk.helpers._catalog import InclusionType, pop_deselected_record_properties
-from singer_sdk.helpers._singer import Catalog, CatalogEntry, MetadataMapping
+from singer_sdk.helpers._catalog import pop_deselected_record_properties
+from singer_sdk.helpers._singer import Catalog, CatalogEntry, Metadata, MetadataMapping
 from singer_sdk.helpers._typing import (
     conform_record_data_types,
     is_datetime_type,
@@ -363,27 +363,25 @@ class Stream(metaclass=abc.ABCMeta):
                 self._metadata = catalog_entry.metadata
                 return self._metadata
 
-        self._metadata = MetadataMapping.from_iterable(
-            metadata.get_standard_metadata(
-                schema=self.schema,
-                replication_method=self.forced_replication_method,
-                key_properties=self.primary_keys or None,
-                valid_replication_keys=(
-                    [self.replication_key] if self.replication_key else None
-                ),
-                schema_name=None,
+        self._metadata = MetadataMapping.get_standard_metadata(
+            schema=self.schema,
+            replication_method=self.forced_replication_method,
+            key_properties=self.primary_keys or None,
+            valid_replication_keys=(
+                [self.replication_key] if self.replication_key else None
             ),
+            schema_name=None,
         )
 
         # If there's no input catalog, select all streams
         if self._tap_input_catalog is None:
-            self._metadata[()]["selected"] = True
+            self._metadata[()].selected = True
 
         for breadcrumb in self.selected_by_default_fields:
-            self._metadata[breadcrumb]["selected-by-default"] = True
+            self._metadata[breadcrumb].selected_by_default = True
 
         for breadcrumb in self.unsupported_fields:
-            self._metadata[breadcrumb]["inclusion"] = InclusionType.UNSUPPORTED
+            self._metadata[breadcrumb].inclusion = Metadata.InclusionType.UNSUPPORTED
 
         return self._metadata
 
