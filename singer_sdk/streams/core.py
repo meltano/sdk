@@ -28,7 +28,6 @@ from typing import (
 import pendulum
 import singer
 from singer import (
-    metadata,
     RecordMessage,
     SchemaMessage,
     StateMessage,
