@@ -691,6 +691,8 @@ class Stream(metaclass=abc.ABCMeta):
         current_context: Optional[dict]
         context_list: Optional[List[dict]]
         context_list = [context] if context is not None else self.partitions
+        selected = self.selected
+
         for current_context in context_list or [{}]:
             partition_record_count = 0
             current_context = current_context or None
@@ -717,7 +719,7 @@ class Stream(metaclass=abc.ABCMeta):
                 if self.stream_maps[0].get_filter_result(record):
                     self._sync_children(child_context)
                 self._check_max_record_limit(record_count)
-                if self.selected:
+                if selected:
                     if (record_count - 1) % self.STATE_MSG_FREQUENCY == 0:
                         self._write_state_message()
                     self._write_record_message(record)
