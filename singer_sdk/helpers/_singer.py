@@ -8,6 +8,8 @@ from singer.schema import Schema
 
 @dataclass
 class Metadata:
+    """Stream or property metadata."""
+
     class InclusionType(str, Enum):
         """Catalog inclusion types."""
 
