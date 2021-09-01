@@ -40,7 +40,7 @@ Note:
 """
 
 from jsonschema import validators
-from typing import Dict, List, Tuple, Type, Union, cast, Integer, Double, Float
+from typing import Dict, List, Tuple, Type, Union, cast
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._typing import append_type
@@ -253,10 +253,10 @@ def to_jsonschema_type(from_type: Union[str, Type]) -> dict:
 
         return sqltype_lookup["string"]  # safe failover to str
 
-    if from_type is Integer:
+    if from_type is int:
         return sqltype_lookup["int"]
 
-    if from_type in {Float, Double}:
+    if from_type is float:
         return sqltype_lookup["double"]
 
     return sqltype_lookup["string"]  # safe failover to str
