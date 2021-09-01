@@ -40,7 +40,7 @@ Note:
 """
 
 from jsonschema import validators
-from typing import List, Tuple, Type, Union, cast
+from typing import Dict, List, Tuple, Type, Union, cast, Integer, Double, Float
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._typing import append_type
@@ -223,3 +223,40 @@ class PropertiesList(ObjectType):
     def append(self, property: Property) -> None:
         """Append a property to the property list."""
         self.wrapped.append(property)
+
+
+def to_jsonschema_type(from_type: Union[str, Type]) -> dict:
+    """Return the JSON Schema dict that describes the sql type (str) or Python type"""
+    sqltype_lookup: Dict[str, dict] = {
+        # NOTE: This is an ordered mapping, with earlier mappings taking precedence.
+        #       If the SQL-provided type contains the type name on the left, the mapping
+        #       will return the respective singer type.
+        "timestamp": DateTimeType.type_dict(),
+        "datetime": DateTimeType.type_dict(),
+        "date": DateTimeType.type_dict(),
+        "int": IntegerType.type_dict(),
+        "number": NumberType.type_dict(),
+        "decimal": NumberType.type_dict(),
+        "double": NumberType.type_dict(),
+        "float": NumberType.type_dict(),
+        "string": StringType.type_dict(),
+        "text": StringType.type_dict(),
+        "char": StringType.type_dict(),
+        "bool": BooleanType.type_dict(),
+        "variant": StringType.type_dict(),
+    }
+
+    if isinstance(from_type, str):
+        for sqltype, jsonschema_type in sqltype_lookup.items():
+            if sqltype.lower() in from_type.lower():
+                return jsonschema_type
+
+        return sqltype_lookup["string"]  # safe failover to str
+
+    if from_type is Integer:
+        return sqltype_lookup["int"]
+
+    if from_type in {Float, Double}:
+        return sqltype_lookup["double"]
+
+    return sqltype_lookup["string"]  # safe failover to str
