@@ -10,58 +10,13 @@ from typing import (
     Iterable,
     List,
     Optional,
-    Type,
-    TypeVar,
     cast,
+    Union,
 )
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 from singer_sdk import typing as th
-
-# CatalogFactoryType = TypeVar("CatalogFactoryType", bound="DatabaseCatalogFactory")
-SQLStreamFactoryType = TypeVar("SQLStreamFactoryType", bound="SQLStream")
-
-
-def _get_catalog_entries(catalog_dict: dict) -> List[dict]:
-    """Parse the catalog dict and return a list of catalog entries."""
-    if "streams" not in catalog_dict:
-        raise ValueError("Catalog does not contain expected 'streams' collection.")
-
-    if not catalog_dict.get("streams"):
-        raise ValueError("Catalog does not contain any streams.")
-
-    return cast(List[dict], catalog_dict.get("streams"))
-
-
-class CatalogFactory(abc.ABCMeta):
-    """Abstract Catalog Factory Class."""
-
-    @classmethod
-    def to_jsonschema_type(cls, from_type: Any) -> dict:
-        """Return a JSON Schema representation of the provided type.
-
-        By default will call `typing.to_jsonschema_type()` for strings and Python types.
-        Developers may override this method to accept additional input argument types,
-        to support non-standard types, or to provide custom typing logic.
-        """
-        if isinstance(from_type, (type, str)):
-            return th.to_jsonschema_type(from_type)
-
-        raise ValueError(f"Unexpected type received: '{type(from_type).__name__}'")
-
-    @abc.abstractmethod
-    def run_discovery(self) -> Dict[str, List[dict]]:
-        """Return a catalog dict from discovery."""
-        pass
-
-
-class SQLAlchemyCatalogFactory(CatalogFactory):
-    """Catalog factory for SQLAlchemy sources."""
-
-    def __init__(self, sqlalchemy_url: str):
-        """Initialize the catalog factory."""
-        self.engine = sqlalchemy.create_engine(sqlalchemy_url)
 
 
 class SQLStream(Stream, metaclass=abc.ABCMeta):
@@ -121,24 +76,6 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         return self._sqlalchemy_engine
 
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
-        """Return a generator of row-type dictionary objects.
-
-        Each row emitted should be a dictionary of property names to their values.
-        """
-        conn: sqlalchemy.Connection = self.sqlalchemy_engine.connect()
-        if partition:
-            raise NotImplementedError(
-                f"Stream '{self.name}' does not support partitioning."
-            )
-
-        for row in conn.execute(
-            sqlalchemy.text(f"SELECT * FROM {self.fully_qualified_name}")
-        ):
-            yield dict(row)
-
-        conn.close()
-
     @property
     def tap_stream_id(self) -> str:
         return self.catalog_entry.get("tap_stream_id", self.catalog_entry.get("stream"))
@@ -163,6 +100,26 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         return result
 
+    # Get records from stream
+
+    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
+        """Return a generator of row-type dictionary objects.
+
+        Each row emitted should be a dictionary of property names to their values.
+        """
+        conn: sqlalchemy.Connection = self.sqlalchemy_engine.connect()
+        if partition:
+            raise NotImplementedError(
+                f"Stream '{self.name}' does not support partitioning."
+            )
+
+        for row in conn.execute(
+            sqlalchemy.text(f"SELECT * FROM {self.fully_qualified_name}")
+        ):
+            yield dict(row)
+
+        conn.close()
+
     # Class Methods
 
     @classmethod
@@ -183,6 +140,20 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         url = cls.get_sqlalchemy_url(tap_config)
         return sqlalchemy.create_engine(url)
+
+    @classmethod
+    def to_jsonschema_type(cls, from_type: Union[type, str, Any]) -> dict:
+        """Return a JSON Schema representation of the provided type.
+
+        By default will call `typing.to_jsonschema_type()` for strings and Python types.
+
+        Developers may override this method to accept additional input argument types,
+        to support non-standard types, or to provide custom typing logic.
+        """
+        if isinstance(from_type, (type, str)):
+            return th.to_jsonschema_type(from_type)
+
+        raise ValueError(f"Unexpected type received: '{type(from_type).__name__}'")
 
     @classmethod
     def run_discovery(cls, tap_config) -> Dict[str, List[dict]]:
@@ -223,7 +194,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 for column_def in inspected.get_columns(table_name, schema=schema_name):
                     column_name = column_def["name"]
                     is_nullable = column_def.get("nullable", False)
-                    jsonschema_type: dict = th.to_jsonschema_type(
+                    jsonschema_type: dict = cls.to_jsonschema_type(
                         cast(
                             sqlalchemy.types.TypeEngine, column_def["type"]
                         ).python_type
