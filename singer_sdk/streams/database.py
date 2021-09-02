@@ -63,10 +63,114 @@ class SQLAlchemyCatalogFactory(CatalogFactory):
         """Initialize the catalog factory."""
         self.engine = sqlalchemy.create_engine(sqlalchemy_url)
 
-    def run_discovery(self) -> Dict[str, List[dict]]:
+
+class SQLStream(Stream, metaclass=abc.ABCMeta):
+    """Base class for SQLAlchemy-based streams."""
+
+    def __init__(
+        self,
+        tap: TapBaseClass,
+        catalog_entry: Dict[str, Any],
+        # TODO: consider inclusion in constructor:
+        # sqlalchemy_engine: sqlalchemy.Engine
+    ):
+        """Initialize the database stream.
+
+        Parameters
+        ----------
+        tap : TapBaseClass
+            reference to the parent tap
+        catalog_entry : Dict[str, Any]
+            A schema dict or the path to a valid schema file in json.
+        """
+        self._sqlalchemy_engine = self.get_sqlalchemy_engine(dict(tap.config))
+        # self.is_view: Optional[bool] = catalog_entry.get("is-view", False)
+        # self.row_count: Optional[int] = None
+        self.catalog_entry = catalog_entry
+        super().__init__(
+            tap=tap,
+            schema=catalog_entry["schema"],
+            name=self.tap_stream_id,
+        )
+
+    @property
+    def sqlalchemy_engine(self) -> sqlalchemy.Engine:
+        """Return or set the SQLAlchemy engine object.
+
+        Developers may optionally override `sqlalchemy_engine` property
+        for purposes of caching and/or reuse.
+        """
+        if not self._sqlalchemy_engine:
+            raise ValueError("SQLAlchemy engine object does not exist.")
+
+        return self._sqlalchemy_engine
+
+    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
+        """Return a generator of row-type dictionary objects.
+
+        Each row emitted should be a dictionary of property names to their values.
+        """
+        conn: sqlalchemy.Connection = self.sqlalchemy_engine.connect()
+        if partition:
+            raise NotImplementedError(
+                f"Stream '{self.name}' does not support partitioning."
+            )
+        for row in conn.execute(
+            sql=f"SELECT * FROM {self.fully_qualified_name}", config=self.config
+        ):
+            yield row
+
+        conn.close()
+
+    @property
+    def tap_stream_id(self) -> str:
+        return self.catalog_entry.get("tap_stream_id", self.catalog_entry.get("stream"))
+
+    @property
+    def fully_qualified_name(self):
+        """Return the fully qualified name of the table name.
+
+        TODO: Needs handling for dialect-specific quoting logic
+        TODO: Consider rewriting to use SQLAlchemy
+        """
+        table_name = self.catalog_entry.get("table", self.catalog_entry.get("stream"))
+        schema_name = self.catalog_entry.get("schema_name")
+        db_name = self.catalog_entry.get("database")
+        result = table_name
+
+        if schema_name:
+            result = f"{schema_name}.{result}"
+        if db_name:
+            result = f"{db_name}.{result}"
+
+        return result
+
+    # Class Methods
+
+    @classmethod
+    def get_sqlalchemy_url(cls, tap_config: dict) -> str:
+        """Return the SQLAlchemy URL string.
+
+        Developers can generally override just one of the following:
+        `get_sqlalchemy_engine()`, `get_sqlalchemy_url()`.
+        """
+        return cast(str, tap_config["sqlalchemy_url"])
+
+    @classmethod
+    def get_sqlalchemy_engine(cls, tap_config: dict) -> sqlalchemy.Engine:
+        """Return a new SQLAlchemy engine using the provided config.
+
+        Developers can generally override just one of the following:
+        `get_sqlalchemy_engine()`, `get_sqlalchemy_url()`.
+        """
+        sqlalchemy.create_engine(cls.get_sqlalchemy_url(tap_config))
+
+    @classmethod
+    def run_discovery(cls, tap_config) -> Dict[str, List[dict]]:
         """Return a catalog dict from discovery."""
+        engine = cls.get_sqlalchemy_engine(tap_config)
         result: dict = {"streams": []}
-        inspected = sqlalchemy.inspect(self.engine)
+        inspected = sqlalchemy.inspect(engine)
         for schema_name in inspected.get_schema_names():
             for table_name in inspected.get_table_names(schema=schema_name):
                 table_obj: sqlalchemy.Table = sqlalchemy.Table(
@@ -125,103 +229,5 @@ class SQLAlchemyCatalogFactory(CatalogFactory):
                     replication_key=None,  # Must be defined by user
                 )
                 result["streams"].append(catalog_entry.to_dict())
-
-        return result
-
-
-class SQLStream(Stream, metaclass=abc.ABCMeta):
-    """Base class for SQLAlchemy-based streams."""
-
-    def __init__(
-        self,
-        tap: TapBaseClass,
-        catalog_entry: Dict[str, Any],
-        # TODO: consider inclusion in constructor:
-        # sqlalchemy_engine: sqlalchemy.Engine
-    ):
-        """Initialize the database stream.
-
-        Parameters
-        ----------
-        tap : TapBaseClass
-            reference to the parent tap
-        catalog_entry : Dict[str, Any]
-            A schema dict or the path to a valid schema file in json.
-        """
-        self._sqlalchemy_engine = self.get_sqlalchemy_engine(dict(tap.config))
-        # self.is_view: Optional[bool] = catalog_entry.get("is-view", False)
-        # self.row_count: Optional[int] = None
-        self.catalog_entry = catalog_entry
-        super().__init__(
-            tap=tap,
-            schema=catalog_entry["schema"],
-            name=self.tap_stream_id,
-        )
-
-    @property
-    def sqlalchemy_engine(self) -> sqlalchemy.Engine:
-        """Return or set the SQLAlchemy engine object.
-
-        Developers can generally override just one of the following:
-        `get_sqlalchemy_engine()`, `get_sqlalchemy_url()`, and/or `sqlalchemy_engine`
-        """
-        if not self._sqlalchemy_engine:
-            raise ValueError("SQLAlchemy engine object does not exist.")
-
-        return self._sqlalchemy_engine
-
-    def get_sqlalchemy_url(self, tap_config: dict) -> str:
-        """Return the SQLAlchemy URL string.
-
-        Developers can generally override just one of the following:
-        `get_sqlalchemy_engine()`, `get_sqlalchemy_url()`, and/or `sqlalchemy_engine`
-        """
-        return cast(str, tap_config["sqlalchemy_url"])
-
-    def get_sqlalchemy_engine(self, tap_config: dict) -> sqlalchemy.Engine:
-        """Return a new SQLAlchemy engine using the provided config.
-
-        Developers can generally override just one of the following:
-        `get_sqlalchemy_engine()`, `get_sqlalchemy_url()`, and/or `sqlalchemy_engine`
-        """
-        sqlalchemy.create_engine(self.get_sqlalchemy_url(tap_config))
-
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
-        """Return a generator of row-type dictionary objects.
-
-        Each row emitted should be a dictionary of property names to their values.
-        """
-        conn: sqlalchemy.Connection = self.sqlalchemy_engine.connect()
-        if partition:
-            raise NotImplementedError(
-                f"Stream '{self.name}' does not support partitioning."
-            )
-        for row in conn.execute(
-            sql=f"SELECT * FROM {self.fully_qualified_name}", config=self.config
-        ):
-            yield row
-
-        conn.close()
-
-    @property
-    def tap_stream_id(self) -> str:
-        return self.catalog_entry.get("tap_stream_id", self.catalog_entry.get("stream"))
-
-    @property
-    def fully_qualified_name(self):
-        """Return the fully qualified name of the table name.
-
-        TODO: Needs handling for dialect-specific quoting logic
-        TODO: Consider rewriting to use SQLAlchemy
-        """
-        table_name = self.catalog_entry.get("table", self.catalog_entry.get("stream"))
-        schema_name = self.catalog_entry.get("schema_name")
-        db_name = self.catalog_entry.get("database")
-        result = table_name
-
-        if schema_name:
-            result = f"{schema_name}.{result}"
-        if db_name:
-            result = f"{db_name}.{result}"
 
         return result
