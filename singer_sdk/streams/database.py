@@ -165,7 +165,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             table_names = inspected.get_table_names(schema=schema_name)
             try:
                 view_names = inspected.get_view_names(schema=schema_name)
-            except NotImplementedError as ex:
+            except NotImplementedError:
                 # TODO: Handle `get_view_names()`` not implemented
                 # self.logger.warning(
                 #     "Provider does not support get_view_names(). "
