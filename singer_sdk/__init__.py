@@ -8,6 +8,7 @@ from singer_sdk.streams import (
     Stream,
     RESTStream,
     GraphQLStream,
+    SQLStream,
 )
 from singer_sdk.sinks import (
     Sink,
@@ -23,6 +24,7 @@ __all__ = [
     "Stream",
     "RESTStream",
     "GraphQLStream",
+    "SQLStream",
     "Sink",
     "RecordSink",
     "BatchSink",
