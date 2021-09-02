@@ -94,7 +94,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         )
 
     @property
-    def sqlalchemy_engine(self) -> sqlalchemy.Engine:
+    def sqlalchemy_engine(self) -> sqlalchemy.engine.Engine:
         """Return or set the SQLAlchemy engine object.
 
         Developers may optionally override `sqlalchemy_engine` property
@@ -157,7 +157,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return cast(str, tap_config["sqlalchemy_url"])
 
     @classmethod
-    def get_sqlalchemy_engine(cls, tap_config: dict) -> sqlalchemy.Engine:
+    def get_sqlalchemy_engine(cls, tap_config: dict) -> sqlalchemy.engine.Engine:
         """Return a new SQLAlchemy engine using the provided config.
 
         Developers can generally override just one of the following:
