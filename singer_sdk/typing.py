@@ -231,19 +231,19 @@ def to_jsonschema_type(from_type: Union[str, Type]) -> dict:
         # NOTE: This is an ordered mapping, with earlier mappings taking precedence.
         #       If the SQL-provided type contains the type name on the left, the mapping
         #       will return the respective singer type.
-        "timestamp": DateTimeType.type_dict(),
-        "datetime": DateTimeType.type_dict(),
-        "date": DateTimeType.type_dict(),
-        "int": IntegerType.type_dict(),
-        "number": NumberType.type_dict(),
-        "decimal": NumberType.type_dict(),
-        "double": NumberType.type_dict(),
-        "float": NumberType.type_dict(),
-        "string": StringType.type_dict(),
-        "text": StringType.type_dict(),
-        "char": StringType.type_dict(),
-        "bool": BooleanType.type_dict(),
-        "variant": StringType.type_dict(),
+        "timestamp": DateTimeType.type_dict,
+        "datetime": DateTimeType.type_dict,
+        "date": DateTimeType.type_dict,
+        "int": IntegerType.type_dict,
+        "number": NumberType.type_dict,
+        "decimal": NumberType.type_dict,
+        "double": NumberType.type_dict,
+        "float": NumberType.type_dict,
+        "string": StringType.type_dict,
+        "text": StringType.type_dict,
+        "char": StringType.type_dict,
+        "bool": BooleanType.type_dict,
+        "variant": StringType.type_dict,
     }
 
     if isinstance(from_type, str):
