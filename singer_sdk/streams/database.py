@@ -169,7 +169,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 # TODO: Handle `get_view_names()`` not implemented
                 # self.logger.warning(
                 #     "Provider does not support get_view_names(). "
-                #     "Catalog streams list may be incomplete."
+                #     "Streams list may be incomplete or `is_view` may be unpopulated."
                 # )
                 view_names = []
             object_names = [(t, False) for t in table_names] + [
