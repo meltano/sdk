@@ -134,7 +134,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         TODO: Consider rewriting to use SQLAlchemy
         """
         table_name = self.catalog_entry.get("table", self.catalog_entry.get("stream"))
-        schema_name = self.catalog_entry.get("schema_name")
+        md_map = singer.metadata.to_map(self.catalog_entry.get("metadata"))
+        schema_name = md_map[()]["schema-name"]
         db_name = self.catalog_entry.get("database")
         result = table_name
 
@@ -197,12 +198,12 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 if pk_def:
                     possible_primary_keys.append(pk_def)
 
-                for index_def in inspected.get_indexes(table_name):
+                for index_def in inspected.get_indexes(table_name, schema=schema_name):
                     if index_def.get("unique", False):
                         possible_primary_keys.append(index_def["column_names"])
 
                 table_schema = th.PropertiesList()
-                for column_def in inspected.get_columns(table_name):
+                for column_def in inspected.get_columns(table_name, schema=schema_name):
                     column_name = column_def["name"]
                     is_nullable = column_def.get("nullable", False)
                     jsonschema_type: dict = th.to_jsonschema_type(
