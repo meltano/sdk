@@ -81,7 +81,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         tap : TapBaseClass
             reference to the parent tap
         catalog_entry : Dict[str, Any]
-            A schema dict or the path to a valid schema file in json.
+            catalog entry dict
         """
         self._sqlalchemy_engine = self.get_sqlalchemy_engine(dict(tap.config))
         # self.is_view: Optional[bool] = catalog_entry.get("is-view", False)
@@ -89,9 +89,25 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         self.catalog_entry = catalog_entry
         super().__init__(
             tap=tap,
-            schema=catalog_entry["schema"],
+            schema=self.schema,
             name=self.tap_stream_id,
         )
+
+    @property
+    def metadata(self) -> List[dict]:
+        """Return metadata object (dict) as specified in the Singer spec.
+
+        Metadata from an input catalog will override standard metadata.
+        """
+        return cast(List[dict], self.catalog_entry["metadata"])
+
+    @property
+    def schema(self) -> dict:
+        """Return metadata object (dict) as specified in the Singer spec.
+
+        Metadata from an input catalog will override standard metadata.
+        """
+        return cast(dict, self.catalog_entry["schema"])
 
     @property
     def sqlalchemy_engine(self) -> sqlalchemy.engine.Engine:
@@ -115,10 +131,11 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             raise NotImplementedError(
                 f"Stream '{self.name}' does not support partitioning."
             )
+
         for row in conn.execute(
             sqlalchemy.text(f"SELECT * FROM {self.fully_qualified_name}")
         ):
-            yield row
+            yield dict(row)
 
         conn.close()
 
