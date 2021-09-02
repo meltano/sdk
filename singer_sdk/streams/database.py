@@ -1,4 +1,4 @@
-# """Base class for database-type streams."""
+"""Base class for database-type streams."""
 
 import abc
 import sqlalchemy
@@ -37,6 +37,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             reference to the parent tap
         catalog_entry : Dict[str, Any]
             catalog entry dict
+
         """
         self._sqlalchemy_engine = self.get_sqlalchemy_engine(dict(tap.config))
         # self.is_view: Optional[bool] = catalog_entry.get("is-view", False)
@@ -78,6 +79,13 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
     @property
     def tap_stream_id(self) -> str:
+        """Return the unique ID used by the tap to identify this stream.
+
+        Generally, this is the same value as in `Stream.name`.
+
+        In rare cases, such as for database types with multi-part names,
+        this may be slightly different from `Stream.name`.
+        """
         return self.catalog_entry.get("tap_stream_id", self.catalog_entry.get("stream"))
 
     @property
