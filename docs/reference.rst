@@ -23,6 +23,7 @@ Stream Classes
     Stream
     RESTStream
     GraphQLStream
+    SQLStream
 
 Sink Classes
 --------------
