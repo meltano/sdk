@@ -116,7 +116,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 f"Stream '{self.name}' does not support partitioning."
             )
         for row in conn.execute(
-            sql=f"SELECT * FROM {self.fully_qualified_name}", config=self.config
+            sqlalchemy.text(f"SELECT * FROM {self.fully_qualified_name}")
         ):
             yield row
 
@@ -163,7 +163,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Developers can generally override just one of the following:
         `get_sqlalchemy_engine()`, `get_sqlalchemy_url()`.
         """
-        sqlalchemy.create_engine(cls.get_sqlalchemy_url(tap_config))
+        url = cls.get_sqlalchemy_url(tap_config)
+        return sqlalchemy.create_engine(url)
 
     @classmethod
     def run_discovery(cls, tap_config) -> Dict[str, List[dict]]:
@@ -172,14 +173,27 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         result: dict = {"streams": []}
         inspected = sqlalchemy.inspect(engine)
         for schema_name in inspected.get_schema_names():
-            for table_name in inspected.get_table_names(schema=schema_name):
-                table_obj: sqlalchemy.Table = sqlalchemy.Table(
-                    table_name, schema=schema_name
-                )
-                inspected.reflect_table(table=table_obj)
+            table_names = inspected.get_table_names(schema=schema_name)
+            try:
+                view_names = inspected.get_view_names(schema=schema_name)
+            except NotImplementedError as ex:
+                # TODO: Handle `get_view_names()`` not implemented
+                # self.logger.warning(
+                #     "Provider does not support get_view_names(). "
+                #     "Catalog streams list may be incomplete."
+                # )
+                view_names = []
+            object_names = [(t, False) for t in table_names] + [
+                (v, True) for v in view_names
+            ]
+            for table_name, is_view in object_names:
+                # table_obj: sqlalchemy.Table = sqlalchemy.Table(
+                #     table_name, schema=schema_name
+                # )
+                # inspected.reflect_table(table=table_obj)
                 possible_primary_keys: List[List[str]] = []
 
-                pk_def = inspected.get_pk_constraint(table_name)
+                pk_def = inspected.get_pk_constraint(table_name, schema=schema_name)
                 if pk_def:
                     possible_primary_keys.append(pk_def)
 
@@ -192,7 +206,9 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                     column_name = column_def["name"]
                     is_nullable = column_def.get("nullable", False)
                     jsonschema_type: dict = th.to_jsonschema_type(
-                        cast(sqlalchemy.TypeEngine, column_def["type"]).python_type
+                        cast(
+                            sqlalchemy.types.TypeEngine, column_def["type"]
+                        ).python_type
                     )
                     table_schema.append(
                         th.Property(
@@ -204,18 +220,17 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
                 schema = table_schema.to_dict()
                 addl_replication_methods: List[str] = []
-                key_properties = next(iter(possible_primary_keys)) or None
+                key_properties = next(iter(possible_primary_keys), None)
                 replication_method = next(
                     reversed(["FULL_TABLE"] + addl_replication_methods)
                 )
                 catalog_entry = singer.CatalogEntry(
                     tap_stream_id=table_name,  # TODO: resolve dupes in multiple schemas
                     stream=table_name,
-                    key_properties=key_properties,
-                    schema=schema,
-                    is_view=table_obj.is_view,
-                    database=table_obj.database,
                     table=table_name,
+                    key_properties=key_properties,
+                    schema=singer.Schema.from_dict(schema),
+                    is_view=is_view,
                     replication_method=replication_method,
                     metadata=singer.metadata.get_standard_metadata(
                         schema_name=schema_name,
@@ -224,6 +239,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                         key_properties=key_properties,
                         valid_replication_keys=None,  # Must be defined by user
                     ),
+                    database=None,  # TODO: Detect database name
                     row_count=None,
                     stream_alias=None,
                     replication_key=None,  # Must be defined by user
