@@ -350,7 +350,9 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def metadata(self) -> MetadataMapping:
-        """Return metadata object (dict) as specified in the Singer spec.
+        """Return a mapping from property breadcrumbs to metadata objects.
+
+        Metadata attributes (`inclusion`, `selected`, etc.) are part of the Singer spec.
 
         Metadata from an input catalog will override standard metadata.
         """
