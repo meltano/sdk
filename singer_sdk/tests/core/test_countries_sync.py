@@ -23,7 +23,7 @@ def test_countries_sync_all():
 def test_countries_primary_key():
     tap = SampleTapCountries(config=None)
     countries_entry = tap.streams["countries"]._singer_catalog_entry
-    metadata_root = countries_entry.metadata[()]
+    metadata_root = countries_entry.metadata.root
     key_props_1 = metadata_root.table_key_properties
     key_props_2 = countries_entry.key_properties
     assert key_props_1 == ["code"], (

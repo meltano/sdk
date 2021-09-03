@@ -19,7 +19,7 @@ def test_gitlab_replication_keys(gitlab_config: Optional[dict]):
 
     catalog = tap._singer_catalog
     catalog_entry = catalog.get_stream(stream_name)
-    metadata_root = catalog_entry.metadata[()]
+    metadata_root = catalog_entry.metadata.root
 
     key_props_1 = metadata_root.valid_replication_keys[0]
     key_props_2 = catalog_entry.replication_key

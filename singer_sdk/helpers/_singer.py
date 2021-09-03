@@ -1,6 +1,6 @@
 from dataclasses import dataclass, fields
 from enum import Enum
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import logging
 
 from singer.catalog import Catalog as BaseCatalog, CatalogEntry as BaseCatalogEntry
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class Metadata:
-    """Stream or property metadata."""
+    """Base stream or property metadata."""
 
     class InclusionType(str, Enum):
         """Catalog inclusion types."""
@@ -26,10 +26,6 @@ class Metadata:
     inclusion: Optional[InclusionType] = None
     selected: Optional[bool] = None
     selected_by_default: Optional[bool] = None
-    table_key_properties: Optional[List[str]] = None
-    forced_replication_method: Optional[str] = None
-    valid_replication_keys: Optional[List[str]] = None
-    schema_name: Optional[str] = None
 
     @classmethod
     def from_dict(cls, value: Dict[str, Any]):
@@ -53,22 +49,49 @@ class Metadata:
         return result
 
 
-class MetadataMapping(Dict[Breadcrumb, Metadata]):
+@dataclass
+class StreamMetadata(Metadata):
+    """Stream metadata."""
+
+    table_key_properties: Optional[List[str]] = None
+    forced_replication_method: Optional[str] = None
+    valid_replication_keys: Optional[List[str]] = None
+    schema_name: Optional[str] = None
+
+
+class MetadataMapping(Dict[Breadcrumb, Union[Metadata, StreamMetadata]]):
     """Stream metadata mapping."""
 
     @classmethod
     def from_iterable(cls, iterable: Iterable[Dict[str, Any]]):
         """Create a metadata mapping from an iterable of metadata dictionaries."""
-        return cls(
-            (tuple(d["breadcrumb"]), Metadata.from_dict(d["metadata"]))
-            for d in iterable
-        )
+        mapping = cls()
+        for d in iterable:
+            breadcrumb = tuple(d["breadcrumb"])
+            metadata = d["metadata"]
+            if breadcrumb:
+                mapping[breadcrumb] = Metadata.from_dict(metadata)
+            else:
+                mapping[breadcrumb] = StreamMetadata.from_dict(metadata)
+
+        return mapping
 
     def to_list(self) -> List[Dict[str, Any]]:
         """Convert mapping to a JSON-encodable list."""
         return [
             {"breadcrumb": list(k), "metadata": v.to_dict()} for k, v in self.items()
         ]
+
+    def __missing__(self, breadcrumb: Breadcrumb):
+        """Handle missing metadata entries."""
+        self[breadcrumb] = Metadata() if breadcrumb else StreamMetadata()
+        return self[breadcrumb]
+
+    @property
+    def root(self):
+        """Get stream (root) metadata from this mapping."""
+        meta: StreamMetadata = self[()]
+        return meta
 
     @classmethod
     def get_standard_metadata(
@@ -81,7 +104,7 @@ class MetadataMapping(Dict[Breadcrumb, Metadata]):
     ):
         """Get default metadata for a stream."""
         mapping = cls()
-        root = Metadata(
+        root = StreamMetadata(
             table_key_properties=key_properties,
             forced_replication_method=replication_method,
             valid_replication_keys=valid_replication_keys,
