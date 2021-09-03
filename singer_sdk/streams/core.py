@@ -39,7 +39,6 @@ from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._singer import (
     Catalog,
     CatalogEntry,
-    Metadata,
     MetadataMapping,
     SelectionMask,
 )
