@@ -79,13 +79,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
         Results will be cached after first execution.
         """
-        catalog = self.input_catalog
+        input_catalog = self.input_catalog
 
         if self._streams is None:
             self._streams = {}
             for stream in self.load_streams():
-                if catalog is not None:
-                    stream.apply_catalog(catalog)
+                if input_catalog is not None:
+                    stream.apply_catalog(input_catalog)
                 self._streams[stream.name] = stream
         return self._streams
 
