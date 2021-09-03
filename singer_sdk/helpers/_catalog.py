@@ -49,7 +49,7 @@ def _pop_deselected_schema(
         property_breadcrumb: Tuple[str, ...] = tuple(
             list(breadcrumb) + ["properties", property_name]
         )
-        selected = mask.get(property_breadcrumb, True)
+        selected = mask[property_breadcrumb]
         if not selected:
             schema_at_breadcrumb["properties"].pop(property_name, None)
             continue
@@ -75,7 +75,7 @@ def pop_deselected_record_properties(
     """
     for property_name, val in list(record.items()):
         property_breadcrumb = breadcrumb + ("properties", property_name)
-        selected = mask.get(property_breadcrumb, True)
+        selected = mask[property_breadcrumb]
         if not selected:
             record.pop(property_name)
             continue

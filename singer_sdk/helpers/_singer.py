@@ -7,9 +7,24 @@ from singer.catalog import Catalog as BaseCatalog, CatalogEntry as BaseCatalogEn
 from singer.schema import Schema
 
 Breadcrumb = Tuple[str, ...]
-SelectionMask = Dict[Breadcrumb, bool]
 
 logger = logging.getLogger(__name__)
+
+
+class SelectionMask(Dict[Breadcrumb, bool]):
+    """Boolean mask for property selection in schemas and records."""
+
+    def __missing__(self, breadcrumb: Breadcrumb) -> bool:
+        """Handle missing breadcrumbs.
+
+        - Properties default to parent value if available.
+        - Root (stream) defaults to True.
+        """
+        if len(breadcrumb) >= 2:
+            parent = breadcrumb[:-2]
+            return self[parent]
+        else:
+            return True
 
 
 @dataclass
@@ -130,9 +145,10 @@ class MetadataMapping(Dict[Breadcrumb, Union[Metadata, StreamMetadata]]):
 
     def resolve_selection(self) -> SelectionMask:
         """Resolve selection for metadata breadcrumbs and store them in a mapping."""
-        return {
-            breadcrumb: self._breadcrumb_is_selected(breadcrumb) for breadcrumb in self
-        }
+        return SelectionMask(
+            (breadcrumb, self._breadcrumb_is_selected(breadcrumb))
+            for breadcrumb in self
+        )
 
     def _breadcrumb_is_selected(self, breadcrumb: Breadcrumb) -> bool:
         """Determine if a property breadcrumb is selected based on existing metadata.
