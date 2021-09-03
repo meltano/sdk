@@ -37,19 +37,6 @@ def test_countries_primary_key():
     )
 
 
-def test_countries_discoverable_selection():
-    """Test discovered catalog includes declared metadata in the stream."""
-    tap = SampleTapCountries(config=None)
-    countries_entry = tap.streams["countries"]._singer_catalog_entry
-
-    assert countries_entry.metadata[("properties", "code")].selected_by_default
-    assert countries_entry.metadata[("properties", "name")].selected_by_default
-    assert (
-        countries_entry.metadata[("properties", "emoji")].inclusion
-        == Metadata.InclusionType.UNSUPPORTED
-    )
-
-
 def test_with_catalog_mismatch():
     """Test catalog apply with no matching stream catalog entries."""
     tap = SampleTapCountries(config=None, catalog={"streams": []})

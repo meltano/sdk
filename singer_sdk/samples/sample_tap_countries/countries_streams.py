@@ -74,15 +74,6 @@ class CountriesStream(CountriesAPIStream):
         ),
     ).to_dict()
 
-    selected_by_default_fields = [
-        ("properties", "code"),
-        ("properties", "name"),
-    ]
-
-    unsupported_fields = [
-        ("properties", "emoji"),
-    ]
-
 
 class ContinentsStream(CountriesAPIStream):
     """Continents stream from the Countries API."""
