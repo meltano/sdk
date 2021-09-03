@@ -59,8 +59,6 @@ class MetadataMapping(Dict[Breadcrumb, Metadata]):
     @classmethod
     def from_iterable(cls, iterable: Iterable[Dict[str, Any]]):
         """Create a metadata mapping from an iterable of metadata dictionaries."""
-        if not iterable:
-            return cls()
         return cls(
             (tuple(d["breadcrumb"]), Metadata.from_dict(d["metadata"]))
             for d in iterable
