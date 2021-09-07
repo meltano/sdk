@@ -13,7 +13,7 @@ prefix `poetry run`.
     tap-mysource = 'singer_sdk.tests.sample_tap_parquet.parquet_tap:cli'
     ```
 
-The CLI commands defined here will be configured automatically when th python library is installed by a user.
+The CLI commands defined here will be configured automatically when the python library is installed by a user.
 
 ## For example, to run `--help`
 
