@@ -3,15 +3,13 @@
 import logging
 from copy import deepcopy
 
-import singer
-
 import pytest
 
 from singer_sdk.helpers._catalog import (
     get_selected_schema,
-    is_property_selected,
     pop_deselected_record_properties,
 )
+import singer_sdk.helpers._singer as singer
 from singer_sdk.typing import PropertiesList, Property, StringType, ObjectType
 
 
@@ -154,13 +152,18 @@ def catalog_entry_obj(schema, stream_name, selection_metadata) -> singer.Catalog
         tap_stream_id=stream_name,
         stream=stream_name,
         schema=singer.Schema.from_dict(schema),
-        metadata=selection_metadata,
+        metadata=singer.MetadataMapping.from_iterable(selection_metadata),
     )
 
 
 @pytest.fixture
 def catalog_entry_dict(catalog_entry_obj: singer.CatalogEntry) -> dict:
     return catalog_entry_obj.to_dict()
+
+
+@pytest.fixture
+def mask(catalog_entry_obj: singer.CatalogEntry) -> singer.SelectionMask:
+    return catalog_entry_obj.metadata.resolve_selection()
 
 
 @pytest.fixture
@@ -186,12 +189,16 @@ def selection_test_cases():
     ]
 
 
-def test_schema_selection(catalog_entry_obj, stream_name):
+def test_schema_selection(
+    schema: dict,
+    mask: singer.SelectionMask,
+    stream_name: str,
+):
     """Test that schema selection rules are correctly applied to SCHEMA messages."""
     selected_schema = get_selected_schema(
         stream_name,
-        catalog_entry_obj.schema.to_dict(),
-        catalog_entry_obj.metadata,
+        schema,
+        mask,
         logging.getLogger(),
     )
     # selected_schema["properties"]["required"] = []
@@ -213,33 +220,30 @@ def test_schema_selection(catalog_entry_obj, stream_name):
 
 
 def test_record_selection(
-    record, catalog_entry_obj, stream_name, selection_test_cases, caplog
+    catalog_entry_obj: singer.CatalogEntry, selection_test_cases, caplog
 ):
     """Test that record selection rules are correctly applied to SCHEMA messages."""
     caplog.set_level(logging.DEBUG)
     for bookmark, expected in selection_test_cases:
         assert (
-            is_property_selected(
-                stream_name,
-                catalog_entry_obj.metadata,
-                breadcrumb=bookmark,
-                logger=logging.getLogger(),
-            )
-            == expected
+            catalog_entry_obj.metadata._breadcrumb_is_selected(bookmark) == expected
         ), f"bookmark {bookmark} was expected to be selected={expected}"
 
 
 def test_record_property_pop(
-    record, record_selected, catalog_entry_obj, stream_name, caplog
+    record: dict,
+    record_selected: dict,
+    schema: dict,
+    mask: singer.SelectionMask,
+    caplog,
 ):
     """Test that properties are correctly selected/deselected on a record."""
     caplog.set_level(logging.DEBUG)
     record_pop = deepcopy(record)
     pop_deselected_record_properties(
         record=record_pop,
-        schema=catalog_entry_obj.schema,
-        metadata=catalog_entry_obj.metadata,
-        stream_name=stream_name,
+        schema=schema,
+        mask=mask,
         logger=logging.getLogger(),
         breadcrumb=(),
     )

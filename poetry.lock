@@ -1088,6 +1088,17 @@ docs = ["proselint (>=0.10.2)", "sphinx (>=3)", "sphinx-argparse (>=0.2.5)", "sp
 testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", "pytest (>=4)", "pytest-env (>=0.6.2)", "pytest-freezegun (>=0.4.1)", "pytest-mock (>=2)", "pytest-randomly (>=1)", "pytest-timeout (>=1)", "packaging (>=20.0)"]
 
 [[package]]
+name = "viztracer"
+version = "0.14.0"
+description = "A debugging and profiling tool that can trace and visualize python code execution"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.extras]
+full = ["rich", "orjson"]
+
+[[package]]
 name = "zipp"
 version = "3.5.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
@@ -1105,7 +1116,7 @@ docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser"]
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.10,>=3.6.1"
-content-hash = "fc1f835157714455cb75afae89778966e52af38edff326a1b69bd4c12cec58a9"
+content-hash = "ef959784b90ff75dbffda803ffc25f72609c2bad14dd7241c045af513d5a03a6"
 
 [metadata.files]
 alabaster = [
@@ -1880,6 +1891,25 @@ urllib3 = [
 virtualenv = [
     {file = "virtualenv-20.7.2-py2.py3-none-any.whl", hash = "sha256:e4670891b3a03eb071748c569a87cceaefbf643c5bac46d996c5a45c34aa0f06"},
     {file = "virtualenv-20.7.2.tar.gz", hash = "sha256:9ef4e8ee4710826e98ff3075c9a4739e2cb1040de6a2a8d35db0055840dc96a0"},
+]
+viztracer = [
+    {file = "viztracer-0.14.0-cp36-cp36m-macosx_10_14_x86_64.whl", hash = "sha256:7a54a6886043825586bfdc0a879758e44e5ab5fc8a743b23427dc162b7b4173e"},
+    {file = "viztracer-0.14.0-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:571fd540a92f346663403cadf763e4ccf62e51a1d6bf8680d2327a77866296f9"},
+    {file = "viztracer-0.14.0-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:c06a7e5f7b23d28b34164d8828f9fa6cde0820cde1cbf576a28efe20f10c3980"},
+    {file = "viztracer-0.14.0-cp36-cp36m-win_amd64.whl", hash = "sha256:ca6c926ab395748542695f0891f7c600aeaaf3a7b19f147bfa2f5be2e9766943"},
+    {file = "viztracer-0.14.0-cp37-cp37m-macosx_10_14_x86_64.whl", hash = "sha256:73ba94ad3462e552a00a5b9e620d38fc6dcfba45a261f4987576fa49b77b0d0b"},
+    {file = "viztracer-0.14.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:30f349e91d21a52c0e9b37de9298d61dfe8f3b9fb429be912df69e491762334c"},
+    {file = "viztracer-0.14.0-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:3b114140fe9944972bd7d1a4dd38759774084592edb9435d1800e0a833a3b98e"},
+    {file = "viztracer-0.14.0-cp37-cp37m-win_amd64.whl", hash = "sha256:27e2b9071d30d5bb02e905c6e11e7488230d879e3c7061dca9194290fedcdf46"},
+    {file = "viztracer-0.14.0-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:44f3ef805f2e34400400c0d38a4759399a5e5a11f3ed513895e4db225247c731"},
+    {file = "viztracer-0.14.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3fd914d640938d6681e2412169f8240ac5f3955e94a6f77648bcdce1bc0d1c88"},
+    {file = "viztracer-0.14.0-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:1ec8db8c2dba3ffa4cc726b7307c73223dbdf5d02cc18f5e6dddad801e222dc9"},
+    {file = "viztracer-0.14.0-cp38-cp38-win_amd64.whl", hash = "sha256:fa3aa9da7cfc7fc69feda692cf0c9f31f9d2c94d2233df6abac9f322612895a4"},
+    {file = "viztracer-0.14.0-cp39-cp39-macosx_10_14_x86_64.whl", hash = "sha256:8fc60182191c74d8158069834d8a07b1353767898de501e10844b28e17962507"},
+    {file = "viztracer-0.14.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:07bc365c86ea7670692631196bf4becb5f905e6d48795e74a40afa83e3ea7c12"},
+    {file = "viztracer-0.14.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:34b371196bf144926587488ba5d3ce7613e72bcbd755975941f289e6185e68be"},
+    {file = "viztracer-0.14.0-cp39-cp39-win_amd64.whl", hash = "sha256:4f2bd83486ad0363c72cb5a9b38a8ee58389a0d1d032d6f5b08aa220bff5a8b2"},
+    {file = "viztracer-0.14.0.tar.gz", hash = "sha256:80a8968e179679e012fdc510b339dcc092074d2a1edd2f8b18db3c8a61dae531"},
 ]
 zipp = [
     {file = "zipp-3.5.0-py3-none-any.whl", hash = "sha256:957cfda87797e389580cb8b9e3870841ca991e2125350677b2ca83a0e99390a3"},

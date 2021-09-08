@@ -7,11 +7,11 @@ from singer_sdk.mapper import PluginMapper
 from typing import Any, List, Optional, Dict, Tuple, Type, Union, cast
 
 import click
-from singer.catalog import Catalog
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._util import read_json_file
+from singer_sdk.helpers._singer import Catalog
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams.core import Stream
@@ -44,14 +44,14 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
         # Declare private members
         self._streams: Optional[Dict[str, Stream]] = None
-        self._input_catalog: Optional[dict] = None
+        self._input_catalog: Optional[Catalog] = None
         self._state: Dict[str, Stream] = {}
 
         # Process input catalog
         if isinstance(catalog, dict):
-            self._input_catalog = catalog
+            self._input_catalog = Catalog.from_dict(catalog)
         elif catalog is not None:
-            self._input_catalog = read_json_file(catalog)
+            self._input_catalog = Catalog.from_dict(read_json_file(catalog))
 
         # Initialize mapper
         self.mapper: PluginMapper
@@ -60,7 +60,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             logger=self.logger,
         )
         self.mapper.register_raw_streams_from_catalog(
-            self._input_catalog or self.catalog_dict
+            self.input_catalog or self._singer_catalog
         )
 
         # Process state
@@ -79,11 +79,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
         Results will be cached after first execution.
         """
+        input_catalog = self.input_catalog
+
         if self._streams is None:
             self._streams = {}
             for stream in self.load_streams():
-                if self.input_catalog:
-                    stream.apply_catalog(self.input_catalog)
+                if input_catalog is not None:
+                    stream.apply_catalog(input_catalog)
                 self._streams[stream.name] = stream
         return self._streams
 
@@ -95,7 +97,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         return self._state
 
     @property
-    def input_catalog(self) -> Optional[dict]:
+    def input_catalog(self) -> Optional[Catalog]:
         """Return the catalog dictionary input, or None if not provided."""
         return self._input_catalog
 
@@ -146,10 +148,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     @property
     def _singer_catalog(self) -> Catalog:
         """Return a Catalog object."""
-        catalog_entries = [
-            stream._singer_catalog_entry for stream in self.streams.values()
-        ]
-        return Catalog(catalog_entries)
+        return Catalog(
+            (stream.tap_stream_id, stream._singer_catalog_entry)
+            for stream in self.streams.values()
+        )
 
     def discover_streams(self) -> List[Stream]:
         """Initialize all available streams and return them as a list."""
