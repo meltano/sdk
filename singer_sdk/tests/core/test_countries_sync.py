@@ -22,8 +22,8 @@ def test_countries_sync_all():
 def test_countries_primary_key():
     tap = SampleTapCountries(config=None)
     countries_entry = tap.streams["countries"]._singer_catalog_entry
-    metadata_root = [md for md in countries_entry.metadata if md["breadcrumb"] == ()][0]
-    key_props_1 = metadata_root["metadata"].get("table-key-properties")
+    metadata_root = countries_entry.metadata.root
+    key_props_1 = metadata_root.table_key_properties
     key_props_2 = countries_entry.key_properties
     assert key_props_1 == ["code"], (
         f"Incorrect 'table-key-properties' in catalog: ({key_props_1})\n\n"
@@ -71,8 +71,7 @@ def test_with_catalog_entry():
     pop_deselected_record_properties(
         record=copied_record,
         schema=stream.schema,
-        metadata=stream.metadata,
-        stream_name=stream.name,
+        mask=stream.mask,
         logger=logging.getLogger(),
     )
     assert copied_record == record
@@ -80,7 +79,7 @@ def test_with_catalog_entry():
     new_schema = get_selected_schema(
         stream_name=stream.name,
         schema=stream.schema,
-        metadata=stream.metadata,
+        mask=stream.metadata.resolve_selection(),
         logger=logging.getLogger(),
     )
     assert new_schema == stream.schema
