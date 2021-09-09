@@ -12,8 +12,7 @@ from typing import Dict, Callable, Any, Tuple, Type, Union, cast, Optional, List
 import simpleeval
 from simpleeval import simple_eval
 
-from singer.catalog import Catalog, CatalogEntry
-
+from singer_sdk.helpers._singer import Catalog
 from singer_sdk.helpers._catalog import get_selected_schema
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
 from singer_sdk.typing import (
@@ -356,17 +355,15 @@ class PluginMapper:
                     f"Option '{stream_map_key}:{stream_def}' is not expected."
                 )
 
-    def register_raw_streams_from_catalog(self, catalog_dict: dict) -> None:
+    def register_raw_streams_from_catalog(self, catalog: Catalog) -> None:
         """Register all streams as described in the catalog dict."""
-        catalog = Catalog.from_dict(catalog_dict)
-        catalog_entry: CatalogEntry
         for catalog_entry in catalog.streams:
             self.register_raw_stream_schema(
                 catalog_entry.stream or catalog_entry.tap_stream_id,
                 get_selected_schema(
                     catalog_entry.stream or catalog_entry.tap_stream_id,
                     catalog_entry.schema.to_dict(),
-                    catalog_entry.metadata,
+                    catalog_entry.metadata.resolve_selection(),
                     self.logger,
                 ),
                 catalog_entry.key_properties,

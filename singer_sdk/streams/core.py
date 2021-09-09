@@ -28,16 +28,20 @@ from typing import (
 import pendulum
 import singer
 from singer import (
-    metadata,
     RecordMessage,
     SchemaMessage,
+    StateMessage,
 )
-from singer.catalog import Catalog
 from singer.schema import Schema
 
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
-
+from singer_sdk.helpers._singer import (
+    Catalog,
+    CatalogEntry,
+    MetadataMapping,
+    SelectionMask,
+)
 from singer_sdk.helpers._typing import (
     conform_record_data_types,
     is_datetime_type,
@@ -54,7 +58,6 @@ from singer_sdk.helpers._state import (
 from singer_sdk.exceptions import MaxRecordsLimitException, InvalidStreamSortException
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._util import utc_now
-from singer_sdk.helpers import _catalog
 
 
 # Replication methods
@@ -94,14 +97,15 @@ class Stream(metaclass=abc.ABCMeta):
         self._config: dict = dict(tap.config)
         self._tap = tap
         self._tap_state = tap.state
-        self._tap_input_catalog: Optional[dict] = None
+        self._tap_input_catalog: Optional[Catalog] = None
         self._stream_maps: Optional[List[StreamMap]] = None
         self.forced_replication_method: Optional[str] = None
         self._replication_key: Optional[str] = None
         self._primary_keys: Optional[List[str]] = None
         self._state_partitioning_keys: Optional[List[str]] = None
         self._schema_filepath: Optional[Path] = None
-        self._metadata: Optional[List[dict]] = None
+        self._metadata: Optional[MetadataMapping] = None
+        self._mask: Optional[SelectionMask] = None
         self._schema: dict
         self.child_streams: List[Stream] = []
         if schema:
@@ -227,12 +231,7 @@ class Stream(metaclass=abc.ABCMeta):
     @property
     def selected(self) -> bool:
         """Return true if the stream is selected."""
-        return _catalog.is_property_selected(
-            stream_name=self.name,
-            metadata=self.metadata,
-            breadcrumb=(),
-            logger=self.logger,
-        )
+        return self.mask.get((), True)
 
     @final
     @property
@@ -349,8 +348,10 @@ class Stream(metaclass=abc.ABCMeta):
         return False
 
     @property
-    def metadata(self) -> List[dict]:
-        """Return metadata object (dict) as specified in the Singer spec.
+    def metadata(self) -> MetadataMapping:
+        """Return a mapping from property breadcrumbs to metadata objects.
+
+        Metadata attributes (`inclusion`, `selected`, etc.) are part of the Singer spec.
 
         Metadata from an input catalog will override standard metadata.
         """
@@ -358,37 +359,31 @@ class Stream(metaclass=abc.ABCMeta):
             return self._metadata
 
         if self._tap_input_catalog:
-            catalog = singer.Catalog.from_dict(self._tap_input_catalog)
-            catalog_entry = catalog.get_stream(self.tap_stream_id)
+            catalog_entry = self._tap_input_catalog.get_stream(self.tap_stream_id)
             if catalog_entry:
-                self._metadata = cast(List[dict], catalog_entry.metadata)
+                self._metadata = catalog_entry.metadata
                 return self._metadata
 
-        self._metadata = cast(
-            List[dict],
-            metadata.get_standard_metadata(
-                schema=self.schema,
-                replication_method=self.forced_replication_method,
-                key_properties=self.primary_keys or None,
-                valid_replication_keys=(
-                    [self.replication_key] if self.replication_key else None
-                ),
-                schema_name=None,
+        self._metadata = MetadataMapping.get_standard_metadata(
+            schema=self.schema,
+            replication_method=self.forced_replication_method,
+            key_properties=self.primary_keys or None,
+            valid_replication_keys=(
+                [self.replication_key] if self.replication_key else None
             ),
+            schema_name=None,
         )
 
         # If there's no input catalog, select all streams
-        if not self._tap_input_catalog:
-            for entry in self._metadata:
-                if entry["breadcrumb"] == ():
-                    entry["metadata"]["selected"] = True
+        if self._tap_input_catalog is None:
+            self._metadata.root.selected = True
 
         return self._metadata
 
     @property
-    def _singer_catalog_entry(self) -> singer.CatalogEntry:
+    def _singer_catalog_entry(self) -> CatalogEntry:
         """Return catalog entry as specified by the Singer catalog spec."""
-        return singer.CatalogEntry(
+        return CatalogEntry(
             tap_stream_id=self.tap_stream_id,
             stream=self.name,
             schema=Schema.from_dict(self.schema),
@@ -404,8 +399,8 @@ class Stream(metaclass=abc.ABCMeta):
         )
 
     @property
-    def _singer_catalog(self) -> singer.Catalog:
-        return singer.Catalog([self._singer_catalog_entry])
+    def _singer_catalog(self) -> Catalog:
+        return Catalog([(self.tap_stream_id, self._singer_catalog_entry)])
 
     @property
     def config(self) -> Mapping[str, Any]:
@@ -537,7 +532,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _write_state_message(self):
         """Write out a STATE message with the latest state."""
-        singer.write_message(singer.StateMessage(value=self.tap_state))
+        singer.write_message(StateMessage(value=self.tap_state))
 
     def _write_schema_message(self):
         """Write out a SCHEMA message with the stream schema."""
@@ -551,11 +546,16 @@ class Stream(metaclass=abc.ABCMeta):
             )
             singer.write_message(schema_message)
 
+    @property
+    def mask(self) -> SelectionMask:
+        """Get a boolean mask for stream and property selection."""
+        if self._mask is None:
+            self._mask = self.metadata.resolve_selection()
+        return self._mask
+
     def _write_record_message(self, record: dict) -> None:
         """Write out a RECORD message."""
-        pop_deselected_record_properties(
-            record, self.schema, self.metadata, self.name, self.logger
-        )
+        pop_deselected_record_properties(record, self.schema, self.mask, self.logger)
         record = conform_record_data_types(
             stream_name=self.name,
             row=record,
@@ -692,6 +692,8 @@ class Stream(metaclass=abc.ABCMeta):
         current_context: Optional[dict]
         context_list: Optional[List[dict]]
         context_list = [context] if context is not None else self.partitions
+        selected = self.selected
+
         for current_context in context_list or [{}]:
             partition_record_count = 0
             current_context = current_context or None
@@ -718,7 +720,7 @@ class Stream(metaclass=abc.ABCMeta):
                 if self.stream_maps[0].get_filter_result(record):
                     self._sync_children(child_context)
                 self._check_max_record_limit(record_count)
-                if self.selected:
+                if selected:
                     if (record_count - 1) % self.STATE_MSG_FREQUENCY == 0:
                         self._write_state_message()
                     self._write_record_message(record)
@@ -779,17 +781,16 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Overridable Methods
 
-    def apply_catalog(self, catalog_dict: dict) -> None:
+    def apply_catalog(self, catalog: Catalog) -> None:
         """Apply a catalog dict, updating any settings overridden within the catalog.
 
         Developers may override this method in order to introduce advanced catalog
         parsing, or to explicitly fail on advanced catalog customizations which
         are not supported by the tap.
         """
-        self._tap_input_catalog = catalog_dict
+        self._tap_input_catalog = catalog
 
-        catalog = Catalog.from_dict(catalog_dict)
-        catalog_entry: singer.CatalogEntry = catalog.get_stream(self.name)
+        catalog_entry = catalog.get_stream(self.name)
         if catalog_entry:
             self.primary_keys = catalog_entry.key_properties
             self.replication_key = catalog_entry.replication_key

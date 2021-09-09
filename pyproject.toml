@@ -44,6 +44,7 @@ pyarrow = "^3.0.0"
 pandas = ">1,<=1.2.0"
 tox = "^3.23.1"
 codecov = "^2.1.11"
+viztracer = "^0.14.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
