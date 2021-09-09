@@ -29,22 +29,24 @@ Rotating `assignee`, on the morning of the release:
     immediately and automatically bump the version and flush the changelog.
         - [ ] Check this box to confirm the automated changelog flush and version bump are correct.
         - You _do not_ need to wait for the CI pipeline. (An identical CI pipeline is already included in the below.)
-    3. [ ] Review the changelog, committing an update for clarity/readability/typos if needed.
-    4. [ ] Check the [pending MRs](https://gitlab.com/meltano/sdk/-/merge_requests?sort=updated_desc) to make sure nothing is missing from `main` branch.
+from `main` branch.
 2. [ ] [Cut a release tag](https://gitlab.com/meltano/sdk/-/tags/new) from your `release/vX.Y.Z` branch named `vX.Y.Z` with Message=`Release vX.Y.Z`
     1. In response to new tag creation, these steps are performed automatically in Gitlab pipelines:
         1. Abort if tag `vX.Y.Z` does not match output from `poetry version --short`
         2. Test _everything_.
         3. Publish to PyPi <!-- Meltano-only: and Docker -->.
-    2. While the process is running, you can continue with next steps, such as changelog grooming.
-    3. [ ] Check this box when the tag's pipeline has completed (eta 40-60 minutes).
-    4. [ ] Check this box when [PyPi publish](https://pypi.org/project/singer-sdk/#history) is confirmed.
-    <!-- Meltano-only: 5. [ ] Check this box when [Docker publish]() is confirmed. -->
+    2. Validate publish once the pipeline finishes. (While the process is running, you can continue with next steps, such as changelog grooming.)
+        1. [ ] Check this box when the tag's [pipeline](https://gitlab.com/meltano/sdk/-/pipelines) has completed (eta 40-60 minutes).
+        2. [ ] Check this box when [PyPi publish](https://pypi.org/project/singer-sdk/#history) is confirmed.
+        <!-- Meltano-only: 5. [ ] Check this box when [Docker publish]() is confirmed. -->
 3. Groom the changelog:
     1. [ ] Compare the [Changelog](https://gitlab.com/meltano/sdk/-/blob/main/CHANGELOG.md) against the `main` branch [commit history](https://gitlab.com/meltano/sdk/-/commits/main) and add any significant user-impacting updates (excluding docs and website updates, for instance).
-    2. [ ] Open the [Changelog](https://gitlab.com/meltano/sdk/-/blob/main/CHANGELOG.md) in preview mode, mouse over each link and ensure tooltip descriptions match the resolved issue. Check contributor profile links to make sure they are correct.
+    3. [ ] Review the Changelog for readability and typoes, committing fixes or updates if needed.
+    2. [ ] Final changelog review:
+        - Open the Changelog in preview mode, mouse over each link and ensure tooltip descriptions match the resolved issue.
+        - Check contributor profile links to make sure they are correct.
     3. [ ] Merge the resulting MR to `main` with the merge commit message `Release vX.Y.Z`
-4. [ ] Open the next `Release` issue, assign as appropriate, and provide that link here: `___`
+    4. [ ] Check the [pending MRs](https://gitlab.com/meltano/sdk/-/merge_requests?sort=updated_desc) to make sure nothing is missing 4. [ ] [Open the next `Release` issue](https://gitlab.com/meltano/sdk/-/issues/new?issue) using the `Release` template.
 
 ### Announcements, Marketing, and Promotion
 
