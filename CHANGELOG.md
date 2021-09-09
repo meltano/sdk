@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixes
 
+- Tap and Target SDK: Make the SDK compatible with [PEP 561](https://www.python.org/dev/peps/pep-0561/) by adding `py.typed`, to use `mypy` on SDK-based packages ([#212](https://gitlab.com/meltano/sdk/-/issues/212), [!150](https://gitlab.com/meltano/sdk/-/merge_requests/150)) -- _Thanks, **[Laurent Savaëte](https://gitlab.com/LaurentS)**!_
+
 ### Breaks
 
 
