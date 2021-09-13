@@ -10,6 +10,9 @@ default:
     - python -m pipx install poetry
     # Force update PATH to include pipx executables
     - export PATH=$PATH:/root/.local/bin
+    # Create virtual environment and make sure pip and setuptools are up-to-date
+    - poetry env use python
+    - poetry run pip install --upgrade pip setuptools
     - poetry install --no-root
 
 variables:
