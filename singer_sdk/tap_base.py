@@ -14,7 +14,7 @@ from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.plugin_base import PluginBase
-from singer_sdk.streams.core import Stream
+from singer_sdk.streams import Stream, SQLStream
 from singer_sdk.exceptions import (
     MaxRecordsLimitException,
 )
@@ -29,6 +29,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     The Tap class governs configuration, validation, and stream discovery for tap
     plugins.
     """
+
+    # Default class to use for creating new stream objects.
+    # If stream class inherits from `SQLStream`, this class will provide
+    # a default implementation for discovery and catalog creation.
+    default_stream_class: Optional[Type["Stream"]] = None
 
     # Constructor
 
@@ -135,7 +140,21 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     @property
     def catalog_dict(self) -> dict:
-        """Return the tap's catalog as a dict."""
+        """Return the tap's catalog as a dict.
+
+        If `self.default_stream_class` is set and inherits from SQLStream,
+        catalog_dict will be detected from run_discovery() on the stream class.
+
+        Otherwise, the catalog will be aggregated from the list of known streams.
+        """
+        if self.default_stream_class and isinstance(
+            self.default_stream_class, SQLStream
+        ):
+            if self.input_catalog:
+                return self.input_catalog
+
+            return self.default_stream_class.run_discovery(self.config)
+
         return cast(dict, self._singer_catalog.to_dict())
 
     @property
@@ -153,6 +172,15 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def discover_streams(self) -> List[Stream]:
         """Initialize all available streams and return them as a list."""
+        if self.default_stream_class and isinstance(
+            self.default_stream_class, SQLStream
+        ):
+            result: List[SQLStream] = []
+            for catalog_entry in self.catalog_dict["streams"]:
+                result.append(SQLStream(self, catalog_entry))
+
+            return result
+
         raise NotImplementedError(
             f"Tap '{self.name}' does not support discovery. "
             "Please set the '--catalog' command line argument and try again."
