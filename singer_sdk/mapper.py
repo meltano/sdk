@@ -9,11 +9,9 @@ import hashlib
 import logging
 from typing import Dict, Callable, Any, Tuple, Type, Union, cast, Optional, List
 
-import simpleeval
-from simpleeval import simple_eval
-
 from singer_sdk.helpers._singer import Catalog
 from singer_sdk.helpers._catalog import get_selected_schema
+from singer_sdk.helpers import _simpleeval as simpleeval
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
 from singer_sdk.typing import (
     CustomType,
@@ -25,7 +23,6 @@ from singer_sdk.typing import (
     StringType,
 )
 
-SIMPLEEVAL = "simpleeval"
 MAPPER_ELSE_OPTION = "__else__"
 MAPPER_FILTER_OPTION = "__filter__"
 MAPPER_SOURCE_OPTION = "__source__"
@@ -143,7 +140,7 @@ class CustomStreamMap(StreamMap):
             # Allow access to original property value if applicable
             names["self"] = record[property_name]
         try:
-            result = simple_eval(expr, functions=self.functions, names=names)
+            result = simpleeval.simple_eval(expr, functions=self.functions, names=names)
             logging.debug(f"Eval result: {expr} = {result}")
         except Exception as ex:
             raise MapExpressionError(
