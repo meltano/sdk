@@ -2,10 +2,11 @@
 Simpleeval tests originally imported on 2021-09-16 from:
 - https://github.com/danthedeckie/simpleeval
 
-For more information: 
+For more information:
 - https://gitlab.com/meltano/sdk/-/issues/213
 
 """
+# flake8: noqa  # Ignoring flake errors in imported module
 # pylint: disable=too-many-public-methods, missing-docstring
 import sys
 import unittest

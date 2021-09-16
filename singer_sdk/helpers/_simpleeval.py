@@ -97,6 +97,7 @@ well:
 42
 
 """
+# flake8: noqa  # Ignoring flake errors in imported module
 
 import ast
 import operator as op
