@@ -11,10 +11,11 @@ import sys
 import unittest
 import operator
 import ast
-import simpleeval
 import os
 import warnings
-from simpleeval import (
+
+from singer_sdk.helpers import _simpleeval as simpleeval
+from singer_sdk.helpers._simpleeval import (
     SimpleEval,
     EvalWithCompoundTypes,
     FeatureNotAvailable,
