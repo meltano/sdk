@@ -24,7 +24,7 @@ class DatetimeErrorTreatmentEnum(Enum):
 
 def to_json_compatible(val: Any) -> Any:
     """Return as string if datetime. JSON does not support proper datetime types.
-    
+
     If given a naive datetime object, pendulum automatically makes it utc
     """
     if isinstance(val, (datetime.datetime, pendulum.DateTime)):
