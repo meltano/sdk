@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixes
 
+- Tap and Target SDK: Resolves `2to3` compatibility issues when installed with `setuptools>=58.0`.
+
 ### Breaks
 
 
