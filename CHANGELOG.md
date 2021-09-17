@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### New
 
 ### Changes
+- Tap SDK: Set key_properties = [] vs null per the Singer spec ([#160](https://gitlab.com/meltano/sdk/-/merge_requests/160)
 
 ### Fixes
 
@@ -201,7 +202,7 @@ Significant release with newly added features. No breaking changes.
   resumed if interrupted. (!61)
 - Added signpost feature to prevent bookmarks from advancing beyond the point where all
   records have been streamed. (!61)
-- Added `get_replication_key_signpost()` stream method which defaults to the current time 
+- Added `get_replication_key_signpost()` stream method which defaults to the current time
   for timestamp-based replication keys. (!61)
 
 ### Fixes
