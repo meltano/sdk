@@ -16,7 +16,7 @@ from a parent record each time the child stream is invoked.
 3. If the parent stream's replication key won't get updated when child items are changed,
    indicate this by adding `ignore_parent_replication_key = True` in the child stream
    class declaration.
-4. If the number of _parent_ items is very large (thousands or tends of thousands), you can
+4. If the number of _parent_ items is very large (thousands or tens of thousands), you can
    optionally set `state_partitioning_keys` on the child stream to specify a subset of context keys to use
    in state bookmarks. (When not set, the number of bookmarks will be equal to the number
    of parent items.)
