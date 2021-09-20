@@ -1,8 +1,11 @@
 # [SDK Implementation Details](./README.md) - Record Metadata
 
-The SDK supports record extract and load metadata. If `add_record_metadata` is defined as
+The SDK can automatically generate `_sdc_` ("Singer Data Capture") metadata properties when
+performing data loads in SDK-based targets.
+
+If `add_record_metadata` is defined as
 a config option by the developer, and if the user sets `add_record_metadata=True` within
-their own configuration, the following columns will be added to the stream:
+their own configuration, the following columns will be automatically added to each record:
 
 - `_sdc_extracted_at` - Timestamp indicating when the record was extracted the record from the source.
 - `_sdc_received_at` - Timestamp indicating when the record was received by the target for loading.
