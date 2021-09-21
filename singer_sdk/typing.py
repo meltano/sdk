@@ -156,12 +156,14 @@ class Property(JSONTypeHelper):
         wrapped: Union[JSONTypeHelper, Type[JSONTypeHelper]],
         required: bool = False,
         default=None,
+        description:str = None
     ) -> None:
         """Initialize Property object."""
         self.name = name
         self.wrapped = wrapped
         self.optional = not required
         self.default = default
+        self.description = description
 
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
@@ -175,6 +177,8 @@ class Property(JSONTypeHelper):
             type_dict = append_type(type_dict, "null")
         if self.default:
             type_dict.update({"default": self.default})
+        if self.description:
+            type_dict.update({"description": self.description})
         return {self.name: type_dict}
 
 
