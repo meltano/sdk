@@ -23,15 +23,15 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
     # schema_filepath = SCHEMAS_DIR / "users.json"
     schema = th.PropertiesList(
         th.Property("name", th.StringType),
-        th.Property("id", th.StringType),
-        th.Property("age", th.IntegerType),
-        th.Property("email", th.StringType),
+        th.Property("id", th.StringType, description="The user's system ID"),
+        th.Property("age", th.IntegerType, description="The user's age in years"),
+        th.Property("email", th.StringType, description="The user's email address"),
         th.Property(
             "address",
             th.ObjectType(
                 th.Property("street", th.StringType),
                 th.Property("city", th.StringType),
-                th.Property("state", th.StringType),
+                th.Property("state", th.StringType, description="State name in ISO 3166-2 format"),
                 th.Property("zip", th.StringType),
             )
         ),
@@ -90,12 +90,12 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
     # schema_filepath = SCHEMAS_DIR / "users.json"
     schema = th.PropertiesList(
         th.Property("name", th.StringType),
-        th.Property("id", th.StringType),
-        th.Property("age", th.IntegerType),
-        th.Property("email", th.StringType),
+        th.Property("id", th.StringType, description="The user's system ID"),
+        th.Property("age", th.IntegerType, description="The user's age in years"),
+        th.Property("email", th.StringType, description="The user's email address"),
         th.Property("street", th.StringType),
         th.Property("city", th.StringType),
-        th.Property("state", th.StringType),
+        th.Property("state", th.StringType, description="State name in ISO 3166-2 format"),
         th.Property("zip", th.StringType),
     ).to_dict()
 
