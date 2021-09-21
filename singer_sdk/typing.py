@@ -156,7 +156,7 @@ class Property(JSONTypeHelper):
         wrapped: Union[JSONTypeHelper, Type[JSONTypeHelper]],
         required: bool = False,
         default=None,
-        description:str = None
+        description: str = None,
     ) -> None:
         """Initialize Property object."""
         self.name = name
