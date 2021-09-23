@@ -297,7 +297,7 @@ class Stream(metaclass=abc.ABCMeta):
     def primary_keys(self) -> Optional[List[str]]:
         """Return primary key(s) for the stream."""
         if not self._primary_keys:
-            return None
+            return []
         return self._primary_keys
 
     @primary_keys.setter
@@ -367,7 +367,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._metadata = MetadataMapping.get_standard_metadata(
             schema=self.schema,
             replication_method=self.forced_replication_method,
-            key_properties=self.primary_keys or None,
+            key_properties=self.primary_keys or [],
             valid_replication_keys=(
                 [self.replication_key] if self.replication_key else None
             ),
@@ -388,7 +388,7 @@ class Stream(metaclass=abc.ABCMeta):
             stream=self.name,
             schema=Schema.from_dict(self.schema),
             metadata=self.metadata,
-            key_properties=self.primary_keys or None,
+            key_properties=self.primary_keys or [],
             replication_key=self.replication_key,
             replication_method=self.replication_method,
             is_view=None,
