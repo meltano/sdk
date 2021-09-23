@@ -162,6 +162,12 @@ class CustomStreamMap(StreamMap):
         if expr.startswith("int("):
             return IntegerType()
 
+        if expr.startswith("str("):
+            return StringType()
+
+        if expr[0] == "'" and expr[-1] == "'":
+            return StringType()
+
         return default
 
     def _init_functions_and_schema(
@@ -227,10 +233,13 @@ class CustomStreamMap(StreamMap):
                 stream_map.pop(prop_key)
             elif isinstance(prop_def, str):
                 default_type: JSONTypeHelper = StringType()  # Fallback to string
-                existing_def: dict = transformed_schema["properties"].get(prop_key, {})
-                if "type" in existing_def:
-                    # Set default type if property exists with valid JSON Schema
-                    default_type = CustomType(existing_def["type"])
+                existing_schema: dict = transformed_schema["properties"].get(
+                    prop_key, {}
+                )
+                if existing_schema:
+                    # Set default type if property exists already in JSON Schema
+                    default_type = CustomType(existing_schema)
+
                 transformed_schema["properties"].update(
                     Property(
                         prop_key, self._eval_type(prop_def, default=default_type)
