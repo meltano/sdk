@@ -99,7 +99,7 @@ def stream(tap: SimpleTestTap) -> SimpleTestStream:
 
 def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
     """Applying a catalog to a stream should overwrite fields."""
-    assert stream.primary_keys is None
+    assert stream.primary_keys == []
     assert stream.replication_key == "updatedAt"
     assert stream.replication_method == REPLICATION_INCREMENTAL
     assert stream.forced_replication_method is None
