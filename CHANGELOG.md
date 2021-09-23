@@ -24,10 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.3.9 - (2021-09-23)
 ---
 
+### New
+
+- Add description attribute to `Property` class for JSON schemas  ([#159](https://gitlab.com/meltano/sdk/-/issues/159), [!164](https://gitlab.com/meltano/sdk/-/merge_requests/164)) -- _Thanks, **[Stephen Bailey](https://gitlab.com/stkbailey)**!_
+
 ### Changes
 
 - Tap SDK: Set `key_properties = []` instead of `null` per the Singer spec ([!160](https://gitlab.com/meltano/sdk/-/merge_requests/160)) -- _Thanks, **[Niall Woodward](https://gitlab.com/NiallRees)**!_
-- Add description attribute to `Property` class for JSON schemas  ([#159](https://gitlab.com/meltano/sdk/-/issues/159), [!164](https://gitlab.com/meltano/sdk/-/merge_requests/164)) -- _Thanks, **[Stephen Bailey](https://gitlab.com/stkbailey)**!_
 
 ## 0.3.8 - (2021-09-16)
 ---
