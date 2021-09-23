@@ -3,7 +3,7 @@
 import copy
 import json
 from typing import Dict, List
-from singer_sdk.typing import PropertiesList, Property, StringType
+from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 import pytest
 import logging
 
@@ -95,6 +95,9 @@ def transform_stream_maps():
             "repo_name": "_['name']",
             "email_domain": "owner_email.split('@')[1]",
             "email_hash": "md5(config['hash_seed'] + owner_email)",
+            "description": "'[masked]'",
+            "description2": "str('[masked]')",
+            "int_test": "int('0')",
             "__else__": None,
         },
     }
@@ -110,6 +113,9 @@ def transformed_result(stream_map_config):
                 "email_hash": md5(
                     stream_map_config["hash_seed"] + "sample1@example.com"
                 ),
+                "description": "[masked]",
+                "description2": "[masked]",
+                "int_test": 0,
             },
             {
                 "repo_name": "my-tap-something",
@@ -117,6 +123,9 @@ def transformed_result(stream_map_config):
                 "email_hash": md5(
                     stream_map_config["hash_seed"] + "sample2@example.com"
                 ),
+                "description": "[masked]",
+                "description2": "[masked]",
+                "int_test": 0,
             },
             {
                 "repo_name": "target-something",
@@ -124,6 +133,9 @@ def transformed_result(stream_map_config):
                 "email_hash": md5(
                     stream_map_config["hash_seed"] + "sample3@example.com"
                 ),
+                "description": "[masked]",
+                "description2": "[masked]",
+                "int_test": 0,
             },
             {
                 "repo_name": "not-atap",
@@ -131,6 +143,9 @@ def transformed_result(stream_map_config):
                 "email_hash": md5(
                     stream_map_config["hash_seed"] + "sample4@example.com"
                 ),
+                "description": "[masked]",
+                "description2": "[masked]",
+                "int_test": 0,
             },
         ],
         "foobars": [  # should be unchanged
@@ -147,6 +162,9 @@ def transformed_schemas():
             Property("repo_name", StringType),
             Property("email_domain", StringType),
             Property("email_hash", StringType),
+            Property("description", StringType),
+            Property("description2", StringType),
+            Property("int_test", IntegerType),
         ).to_dict(),
         "foobars": PropertiesList(
             Property("the", StringType),
