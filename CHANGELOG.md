@@ -13,13 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### New
 
 ### Changes
-- Tap SDK: Set key_properties = [] vs null per the Singer spec ([#160](https://gitlab.com/meltano/sdk/-/merge_requests/160)
 
 ### Fixes
 
 - Tap SDK: Fixes issue where stream map schema generation fails when overriding the value of an existing property. ([#196](https://gitlab.com/meltano/sdk/-/issues/196), [!165](https://gitlab.com/meltano/sdk/-/merge_requests/165))
 
 ### Breaks
+
+
+## 0.3.9 - (2021-09-23)
+---
+
+### Changes
+- Tap SDK: Set key_properties = [] vs null per the Singer spec ([#160](https://gitlab.com/meltano/sdk/-/merge_requests/160)
 
 
 ## 0.3.8 - (2021-09-16)
