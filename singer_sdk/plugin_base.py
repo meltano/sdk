@@ -292,8 +292,16 @@ class PluginBase(metaclass=abc.ABCMeta):
             formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
             print(formatted)
 
-    @classmethod
-    @click.command()
-    def cli(cls: Type["PluginBase"]) -> None:
-        """Handle command line execution."""
-        pass
+    @classproperty
+    def cli(cls) -> Callable:
+        """Handle command line execution.
+
+        Returns:
+            A callable CLI object.
+        """
+
+        @click.command()
+        def cli() -> None:
+            pass
+
+        return cli

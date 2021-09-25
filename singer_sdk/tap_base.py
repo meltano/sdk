@@ -3,8 +3,19 @@
 import abc
 import json
 from pathlib import PurePath, Path
+
 from singer_sdk.mapper import PluginMapper
-from typing import Any, List, Optional, Dict, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Callable,
+    List,
+    Optional,
+    Dict,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import click
 
@@ -39,7 +50,14 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         state: Union[PurePath, str, dict, None] = None,
         parse_env_config: bool = False,
     ) -> None:
-        """Initialize the tap."""
+        """Initialize the tap.
+
+        Args:
+            config: TODO
+            catalog: TODO
+            state: TODO
+            parse_env_config: TODO
+        """
         super().__init__(config=config, parse_env_config=parse_env_config)
 
         # Declare private members
@@ -78,6 +96,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Return a list of streams, using discovery or a provided catalog.
 
         Results will be cached after first execution.
+
+        Returns:
+            TODO
         """
         input_catalog = self.input_catalog
 
@@ -91,26 +112,45 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     @property
     def state(self) -> dict:
-        """Return a state dict."""
+        """Return a state dict.
+
+        Returns:
+            TODO
+
+        Raises:
+            RuntimeError: TODO
+        """
         if self._state is None:
             raise RuntimeError("Could not read from uninitialized state.")
         return self._state
 
     @property
     def input_catalog(self) -> Optional[Catalog]:
-        """Return the catalog dictionary input, or None if not provided."""
+        """Return the catalog dictionary input, or None if not provided.
+
+        Returns:
+            TODO
+        """
         return self._input_catalog
 
     @classproperty
     def capabilities(self) -> List[str]:
-        """Return a list of supported capabilities."""
+        """Return a list of supported capabilities.
+
+        Returns:
+            TODO
+        """
         return ["sync", "catalog", "state", "discover"]
 
     # Connection test:
 
     @final
     def run_connection_test(self) -> bool:
-        """Run connection test and return True if successful."""
+        """Run connection test and return True if successful.
+
+        Returns:
+            TODO
+        """
         for stream in self.streams.values():
             if stream.parent_stream_type:
                 self.logger.debug(
@@ -130,31 +170,51 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Stream detection:
 
     def run_discovery(self) -> str:
-        """Write the catalog json to STDOUT and return the same as a string."""
+        """Write the catalog json to STDOUT and return the same as a string.
+
+        Returns:
+            TODO
+        """
         catalog_text = self.catalog_json_text
         print(catalog_text)
         return catalog_text
 
     @property
     def catalog_dict(self) -> dict:
-        """Return the tap's catalog as a dict."""
+        """Return the tap's catalog as a dict.
+
+        Returns:
+            TODO
+        """
         return cast(dict, self._singer_catalog.to_dict())
 
     @property
     def catalog_json_text(self) -> str:
-        """Return the tap's catalog as formatted json text."""
+        """Return the tap's catalog as formatted json text.
+
+        Returns:
+            TODO
+        """
         return json.dumps(self.catalog_dict, indent=2)
 
     @property
     def _singer_catalog(self) -> Catalog:
-        """Return a Catalog object."""
+        """Return a Catalog object.
+
+        Returns:
+            TODO
+        """
         return Catalog(
             (stream.tap_stream_id, stream._singer_catalog_entry)
             for stream in self.streams.values()
         )
 
     def discover_streams(self) -> List[Stream]:
-        """Initialize all available streams and return them as a list."""
+        """Initialize all available streams and return them as a list.
+
+        Raises:
+            NotImplementedError: TODO
+        """
         raise NotImplementedError(
             f"Tap '{self.name}' does not support discovery. "
             "Please set the '--catalog' command line argument and try again."
@@ -166,6 +226,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
         Return the output of `self.discover_streams()` to enumerate
         discovered streams.
+
+        Returns:
+            TODO
         """
         # Build the parent-child dependency DAG
 
@@ -203,6 +266,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         Override this method to perform validation and backwards-compatibility patches
         on self.state. If overriding, we recommend first running
         `super().load_state(state)` to ensure compatibility with the SDK.
+
+        Args:
+            state: TODO
+
+        Raises:
+            ValueError: TODO
         """
         if self.state is None:
             raise ValueError("Cannot write to uninitialized state dictionary.")
@@ -244,7 +313,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Sync methods
 
     @final
-    def sync_all(self):
+    def sync_all(self) -> None:
         """Sync all streams."""
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
@@ -268,8 +337,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Command Line Execution
 
     @classproperty
-    def cli(cls):
-        """Execute standard CLI handler for taps."""
+    def cli(cls) -> Callable:
+        """Execute standard CLI handler for taps.
+
+        Returns:
+            A callable CLI object.
+        """
 
         @click.option(
             "--version",
@@ -328,7 +401,22 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             catalog: str = None,
             format: str = None,
         ) -> None:
-            """Handle command line execution."""
+            """Handle command line execution.
+
+            Args:
+                version: Display the package version.
+                about: Display package metadata and settings.
+                discover: Run the tap in discovery mode.
+                test: Test connectivity by syncing a single record and exiting.
+                format: Specify output style for `--about`.
+                config: Configuration file location or 'ENV' to use environment
+                    variables.
+                catalog: Use a Singer catalog file with the tap.",
+                state: Use a bookmarks file for incremental replication.
+
+            Raises:
+                FileNotFoundError: If the config file does not exist.
+            """
             if version:
                 cls.print_version()
                 return
