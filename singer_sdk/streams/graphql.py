@@ -3,6 +3,8 @@
 import abc
 from typing import Iterable, Optional, Any
 
+import requests
+
 from singer_sdk.streams.rest import RESTStream
 
 
@@ -20,7 +22,11 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
 
     @property
     def query(self) -> str:
-        """Set or return the GraphQL query string."""
+        """Set or return the GraphQL query string.
+
+        Raises:
+            NotImplementedError: TODO
+        """
         raise NotImplementedError("GraphQLStream `query` is not defined.")
 
     def prepare_request_payload(
@@ -31,6 +37,16 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
         Developers generally should generally not need to override this method.
         Instead, developers set the payload by properly configuring the `query`
         attribute.
+
+        Args:
+            context: TODO
+            next_page_token: TODO
+
+        Returns:
+            TODO
+
+        Raises:
+            ValueError: TODO
         """
         params = self.get_url_params(context, next_page_token)
         if self.query is None:
@@ -48,8 +64,15 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
         self.logger.debug(f"Attempting query:\n{query}")
         return request_data
 
-    def parse_response(self, response) -> Iterable[dict]:
-        """Parse the response and return an iterator of result rows."""
+    def parse_response(self, response: requests.Response) -> Iterable[dict]:
+        """Parse the response and return an iterator of result rows.
+
+        Args:
+            response: TODO
+
+        Yields:
+            TODO
+        """
         resp_json = response.json()
         for row in resp_json["data"][self.name]:
             yield row
