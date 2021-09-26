@@ -5,18 +5,17 @@ import copy
 import json
 import sys
 import time
+from typing import Any, Callable, Dict, Iterable, List, Optional, Type
 
 import click
-
-from joblib import Parallel, parallel_backend, delayed
-from typing import Any, Callable, Dict, Iterable, Optional, Type, List
+from joblib import Parallel, delayed, parallel_backend
 
 from singer_sdk.exceptions import RecordsWitoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
+from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks import Sink
-from singer_sdk.mapper import PluginMapper
 
 _MAX_PARALLELISM = 8
 
@@ -45,8 +44,11 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """Initialize the target.
 
         Args:
-            config: TODO
-            parse_env_config: TODO
+            config: Target configuration. Can be a dictionary, a single path to a
+                configuration file, or a list of paths to multiple configuration
+                files.
+            parse_env_config: Whether to look for configuration values in environment
+                variables.
         """
         super().__init__(config=config, parse_env_config=parse_env_config)
 
@@ -67,19 +69,19 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     @classproperty
     def capabilities(self) -> List[str]:
-        """Return a list of supported capabilities.
+        """Get target capabilites.
 
         Returns:
-            TODO
+            A list of capabilities supported by this target.
         """
         return ["target"]
 
     @property
     def max_parallelism(self) -> int:
-        """Return max number of sinks that can be drained in parallel.
+        """Get max parallel sinks.
 
         Returns:
-            TODO
+            Max number of sinks that can be drained in parallel.
         """
         return _MAX_PARALLELISM
 
@@ -101,17 +103,17 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         sink depending on the values within the `record` object. Otherwise, please see
         `default_sink_class` property and/or the `get_sink_class()` method.
 
-        :raises: RecordsWitoutSchemaException if sink does not exist and schema is not
-                 sent.
+        Raises :class:`singer_sdk.exceptions.RecordsWitoutSchemaException` if sink does
+        not exist and schema is not sent.
 
         Args:
-            stream_name: TODO
-            record: TODO
-            schema: TODO
-            key_properties: TODO
+            stream_name: Name of the stream.
+            record: Record being processed.
+            schema: Stream schema.
+            key_properties: Primary key of the stream.
 
         Returns:
-            TODO
+            The sink used for this target.
         """
         _ = record  # Custom implementations may use record in sink selection.
         if schema is None:
@@ -136,19 +138,19 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         return existing_sink
 
     def get_sink_class(self, stream_name: str) -> Type[Sink]:
-        """Return a sink for the given stream name.
+        """Get sink for a stream.
 
         Developers can override this method to return a custom Sink type depending
         on the value of `stream_name`. Optional when `default_sink_class` is set.
 
         Args:
-            stream_name: TODO
+            stream_name: Name of the stream.
 
         Raises:
-            ValueError: If no Sink class is defined.
+            ValueError: If no :class:`singer_sdk.sinks.Sink` class is defined.
 
         Returns:
-            TODO
+            The sink class to be used with the stream.
         """
         if self.default_sink_class:
             return self.default_sink_class
@@ -159,15 +161,15 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         )
 
     def sink_exists(self, stream_name: str) -> bool:
-        """Return True if a sink has been initialized.
+        """Check sink for a stream.
 
         This method is internal to the SDK and should not need to be overridden.
 
         Args:
-            stream_name: TODO
+            stream_name: Name of the stream
 
         Returns:
-            TODO
+            True if a sink has been initialized.
         """
         return stream_name in self._sinks_active
 
@@ -188,12 +190,12 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         This method is internal to the SDK and should not need to be overridden.
 
         Args:
-            stream_name: TODO
-            schema: TODO
-            key_properties: TODO
+            stream_name: Name of the stream.
+            schema: Schema of the stream.
+            key_properties: Primary key of the stream.
 
         Returns:
-            TODO
+            A new sink for the stream.
         """
         self.logger.info(f"Initializing '{self.name}' target sink...")
         sink_class = self.get_sink_class(stream_name=stream_name)
@@ -416,7 +418,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         This method is internal to the SDK and should not need to be overridden.
 
         Args:
-            sink: TODO
+            sink: Sink to be drained.
         """
         if sink.current_size == 0:
             return
