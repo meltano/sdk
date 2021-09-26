@@ -50,8 +50,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         name: Optional[str] = None,
         schema: Optional[Union[Dict[str, Any], Schema]] = None,
         path: Optional[str] = None,
-    ):
-        """Initialize the REST stream."""
+    ) -> None:
+        """Initialize the REST stream.
+
+        Args:
+            tap: TODO
+            name: TODO
+            schema: TODO
+            path: TODO
+        """
         super().__init__(name=name, schema=schema, tap=tap)
         if path:
             self.path = path
@@ -62,7 +69,14 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     @staticmethod
     def _url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
-        """Encode the val argument as url-compatible string."""
+        """Encode the val argument as url-compatible string.
+
+        Args:
+            val: TODO
+
+        Returns:
+            TODO
+        """
         if isinstance(val, str):
             result = val.replace("/", "%2F")
         else:
@@ -73,6 +87,12 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """Return a URL, optionally targeted to a specific partition or context.
 
         Developers override this method to perform dynamic URL generation.
+
+        Args:
+            context: TODO
+
+        Returns:
+            TODO
         """
         url = "".join([self.url_base, self.path or ""])
         vals = copy.copy(dict(self.config))
@@ -87,7 +107,11 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     @property
     def requests_session(self) -> requests.Session:
-        """Return the session object for HTTP requests."""
+        """Return the session object for HTTP requests.
+
+        Returns:
+            TODO
+        """
         if not self._requests_session:
             self._requests_session = requests.Session()
         return self._requests_session
@@ -100,8 +124,20 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         factor=2,
     )
     def _request_with_backoff(
-        self, prepared_request, context: Optional[dict]
+        self, prepared_request: requests.PreparedRequest, context: Optional[dict]
     ) -> requests.Response:
+        """TODO.
+
+        Args:
+            prepared_request: TODO
+            context: TODO
+
+        Returns:
+            TODO
+
+        Raises:
+            RuntimeError: TODO
+        """
         response = self.requests_session.send(prepared_request)
         if self._LOG_REQUEST_METRICS:
             extra_tags = {}
@@ -137,6 +173,13 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """Return a dictionary of values to be used in URL parameterization.
 
         If paging is supported, developers may override with specific paging logic.
+
+        Args:
+            context: TODO
+            next_page_token: TODO
+
+        Returns:
+            TODO
         """
         return {}
 
@@ -148,6 +191,13 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         If partitioning is supported, the `context` object will contain the partition
         definitions. Pagination information can be parsed from `next_page_token` if
         `next_page_token` is not None.
+
+        Args:
+            context: TODO
+            next_page_token: TODO
+
+        Returns:
+            TODO
         """
         http_method = self.rest_method
         url: str = self.get_url(context)
@@ -178,6 +228,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """Request records from REST endpoint(s), returning response records.
 
         If pagination is detected, pages will be recursed automatically.
+
+        Args:
+            context: TODO
+
+        Yields:
+            TODO
+
+        Raises:
+            RuntimeError: TODO
         """
         next_page_token: Any = None
         finished = False
@@ -212,13 +271,28 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         Developers may override this method if the API requires a custom payload along
         with the request. (This is generally not required for APIs which use the
         HTTP 'GET' method.)
+
+        Args:
+            context: TODO
+            next_page_token: TODO
+
+        Returns:
+            TODO
         """
         return None
 
     def get_next_page_token(
         self, response: requests.Response, previous_token: Optional[Any]
     ) -> Any:
-        """Return token identifying next page or None if all records have been read."""
+        """Return token identifying next page or None if all records have been read.
+
+        Args:
+            response: TODO
+            previous_token: TODO
+
+        Returns:
+            TODO
+        """
         if self.next_page_token_jsonpath:
             all_matches = extract_jsonpath(
                 self.next_page_token_jsonpath, response.json()
@@ -236,6 +310,9 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         If an authenticator is also specified, the authenticator's headers will be
         combined with `http_headers` when making HTTP requests.
+
+        Returns:
+            TODO
         """
         result = self._http_headers
         if "user_agent" in self.config:
@@ -248,13 +325,26 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """Return a generator of row-type dictionary objects.
 
         Each row emitted should be a dictionary of property names to their values.
+
+        Args:
+            context: TODO
+
+        Yields:
+            TODO
         """
         for row in self.request_records(context):
             row = self.post_process(row, context)
             yield row
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
-        """Parse the response and return an iterator of result rows."""
+        """Parse the response and return an iterator of result rows.
+
+        Args:
+            response: TODO
+
+        Yields:
+            TODO
+        """
         yield from extract_jsonpath(self.records_jsonpath, input=response.json())
 
     # Abstract methods:
@@ -265,5 +355,8 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         If an authenticator is not specified, REST-based taps will simply pass
         `http_headers` as defined in the stream class.
+
+        Returns:
+            TODO
         """
         return SimpleAuthenticator(stream=self)
