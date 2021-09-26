@@ -46,6 +46,12 @@ codecov = "^2.1.11"
 viztracer = "^0.14.0"
 flake8-annotations = "^2.6.2"
 darglint = "^1.8.0"
+isort = "^5.9.3"
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3 # Vertical Hanging Indent
+src_paths = "singer_sdk"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
