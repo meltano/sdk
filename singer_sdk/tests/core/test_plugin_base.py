@@ -17,7 +17,6 @@ class PluginTest(PluginBase):
 
 def test_get_env_var_config():
     """Test settings parsing from environment variables."""
-
     with mock.patch.dict(
         os.environ,
         {
