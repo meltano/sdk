@@ -2,34 +2,21 @@
 
 import abc
 import json
-from pathlib import PurePath, Path
-
-from singer_sdk.mapper import PluginMapper
-from typing import (
-    Any,
-    Callable,
-    List,
-    Optional,
-    Dict,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from pathlib import Path, PurePath
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 import click
 
+from singer_sdk.exceptions import MaxRecordsLimitException
+from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
-from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers._singer import Catalog
 from singer_sdk.helpers._state import write_stream_state
+from singer_sdk.helpers._util import read_json_file
+from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams.core import Stream
-from singer_sdk.exceptions import (
-    MaxRecordsLimitException,
-)
-from singer_sdk.helpers import _state
 
 STREAM_MAPS_CONFIG = "stream_maps"
 
@@ -53,10 +40,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Initialize the tap.
 
         Args:
-            config: TODO
-            catalog: TODO
-            state: TODO
-            parse_env_config: TODO
+            config: Tap configuration. Can be a dictionary, a single path to a
+                configuration file, or a list of paths to multiple configuration
+                files.
+            catalog: Tap catalog. Can be a dictionary or a path to the catalog file.
+            state: Tap state. Can be dictionary or a path to the state file.
+            parse_env_config: Whether to look for configuration values in environment
+                variables.
         """
         super().__init__(config=config, parse_env_config=parse_env_config)
 
@@ -93,12 +83,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     @property
     def streams(self) -> Dict[str, Stream]:
-        """Return a list of streams, using discovery or a provided catalog.
+        """Get streams discovered or catalogued for this tap.
 
         Results will be cached after first execution.
 
         Returns:
-            TODO
+            A mapping of names to streams, using discovery or a provided catalog.
         """
         input_catalog = self.input_catalog
 
@@ -112,13 +102,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     @property
     def state(self) -> dict:
-        """Return a state dict.
+        """Get tap state.
 
         Returns:
-            TODO
+            The tap's state dictionary
 
         Raises:
-            RuntimeError: TODO
+            RuntimeError: If state has not been initialized.
         """
         if self._state is None:
             raise RuntimeError("Could not read from uninitialized state.")
@@ -126,19 +116,19 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     @property
     def input_catalog(self) -> Optional[Catalog]:
-        """Return the catalog dictionary input, or None if not provided.
+        """Get the catalog passed to the tap.
 
         Returns:
-            TODO
+            Catalog dictionary input, or None if not provided.
         """
         return self._input_catalog
 
     @classproperty
     def capabilities(self) -> List[str]:
-        """Return a list of supported capabilities.
+        """Get tap capabilites.
 
         Returns:
-            TODO
+            A list of capabilities supported by this tap.
         """
         return ["sync", "catalog", "state", "discover"]
 
@@ -146,10 +136,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     @final
     def run_connection_test(self) -> bool:
-        """Run connection test and return True if successful.
+        """Run connection test.
 
         Returns:
-            TODO
+            True if the test succeeded.
         """
         for stream in self.streams.values():
             if stream.parent_stream_type:
@@ -170,10 +160,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Stream detection:
 
     def run_discovery(self) -> str:
-        """Write the catalog json to STDOUT and return the same as a string.
+        """Write the catalog json to STDOUT and return as a string.
 
         Returns:
-            TODO
+            The catalog as a string of JSON.
         """
         catalog_text = self.catalog_json_text
         print(catalog_text)
@@ -181,19 +171,19 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     @property
     def catalog_dict(self) -> dict:
-        """Return the tap's catalog as a dict.
+        """Get catalog dictionary.
 
         Returns:
-            TODO
+            The tap's catalog as a dict
         """
         return cast(dict, self._singer_catalog.to_dict())
 
     @property
     def catalog_json_text(self) -> str:
-        """Return the tap's catalog as formatted json text.
+        """Get catalog JSON.
 
         Returns:
-            TODO
+            The tap's catalog as formatted JSON text.
         """
         return json.dumps(self.catalog_dict, indent=2)
 
@@ -202,7 +192,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Return a Catalog object.
 
         Returns:
-            TODO
+            :class:`singer_sdk.helpers._singer.Catalog`.
         """
         return Catalog(
             (stream.tap_stream_id, stream._singer_catalog_entry)
@@ -213,7 +203,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Initialize all available streams and return them as a list.
 
         Raises:
-            NotImplementedError: TODO
+            NotImplementedError: If the tap implementation does not override this
+                method.
         """
         raise NotImplementedError(
             f"Tap '{self.name}' does not support discovery. "
@@ -228,7 +219,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         discovered streams.
 
         Returns:
-            TODO
+            A list of discovered streams, ordered by name.
         """
         # Build the parent-child dependency DAG
 
@@ -268,10 +259,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         `super().load_state(state)` to ensure compatibility with the SDK.
 
         Args:
-            state: TODO
+            state: Initialize the tap'ss state with this value.
 
         Raises:
-            ValueError: TODO
+            ValueError: If the tap's own state is None, meaning it has not been
+                initialized.
         """
         if self.state is None:
             raise ValueError("Cannot write to uninitialized state dictionary.")
