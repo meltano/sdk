@@ -5,17 +5,15 @@ import copy
 import datetime
 import json
 import logging
-from singer_sdk.mapper import SameRecordTransform, StreamMap
-import requests
-from types import MappingProxyType
 from os import PathLike
 from pathlib import Path
+from types import MappingProxyType
 from typing import (
+    Any,
     Callable,
     Dict,
-    Any,
-    List,
     Iterable,
+    List,
     Mapping,
     Optional,
     Tuple,
@@ -26,39 +24,33 @@ from typing import (
 )
 
 import pendulum
+import requests
 import singer
-from singer import (
-    RecordMessage,
-    SchemaMessage,
-    StateMessage,
-)
+from singer import RecordMessage, SchemaMessage, StateMessage
 from singer.schema import Schema
 
-from singer_sdk.plugin_base import PluginBase as TapBaseClass
+from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
+from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._singer import (
     Catalog,
     CatalogEntry,
     MetadataMapping,
     SelectionMask,
 )
-from singer_sdk.helpers._typing import (
-    conform_record_data_types,
-    is_datetime_type,
-)
 from singer_sdk.helpers._state import (
-    get_writeable_state_dict,
-    get_state_partitions_list,
-    increment_state,
     finalize_state_progress_markers,
+    get_state_partitions_list,
+    get_writeable_state_dict,
+    increment_state,
+    log_sort_error,
     reset_state_progress_markers,
     write_replication_key_signpost,
-    log_sort_error,
 )
-from singer_sdk.exceptions import MaxRecordsLimitException, InvalidStreamSortException
-from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type
 from singer_sdk.helpers._util import utc_now
-
+from singer_sdk.mapper import SameRecordTransform, StreamMap
+from singer_sdk.plugin_base import PluginBase as TapBaseClass
 
 # Replication methods
 REPLICATION_FULL_TABLE = "FULL_TABLE"
@@ -89,9 +81,9 @@ class Stream(metaclass=abc.ABCMeta):
         """Init tap stream.
 
         Args:
-            tap: TODO
-            schema: TODO
-            name: TODO
+            tap: Singer Tap this stream belongs to.
+            schema: JSON schema for records in this stream.
+            name: Name of this stream.
 
         Raises:
             ValueError: TODO
@@ -146,12 +138,12 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def stream_maps(self) -> List[StreamMap]:
-        """Return a list of one or more map transformations for this stream.
+        """Get stream transformation maps.
 
         The 0th item is the primary stream map. List should not be empty.
 
         Returns:
-            TODO
+            A list of one or more map transformations for this stream.
         """
         if self._stream_maps:
             return self._stream_maps
@@ -177,14 +169,14 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def is_timestamp_replication_key(self) -> bool:
-        """Return True if the stream uses a timestamp-based replication key.
+        """Check is replication key is a timestamp.
 
         Developers can override to `True` in order to force this value, although this
         should not be required in most use cases since the type can generally be
         accurately detected from the JSON Schema.
 
         Returns:
-            TODO
+            True if the stream uses a timestamp-based replication key.
         """
         if not self.replication_key:
             return False
@@ -194,20 +186,20 @@ class Stream(metaclass=abc.ABCMeta):
     def get_starting_replication_key_value(
         self, context: Optional[dict]
     ) -> Optional[Any]:
-        """Return starting replication key.
+        """Get starting replication key.
 
         Will return the value of the stream's replication key when `--state` is passed.
         If no prior state exists, will return `None`.
 
         Developers should use this method to seed incremental processing for
         non-datetime replication keys. For datetime and date replication keys, use
-        `get_starting_timestamp()`
+        :meth:`~singer_sdk.Stream.get_starting_timestamp()`
 
         Args:
-            context: TODO
+            context: Stream partition or context dictionary.
 
         Returns:
-            TODO
+            Starting replication value.
         """
         if self.is_timestamp_replication_key:
             return self.get_starting_timestamp(context)
@@ -217,7 +209,7 @@ class Stream(metaclass=abc.ABCMeta):
     def get_starting_timestamp(
         self, context: Optional[dict]
     ) -> Optional[datetime.datetime]:
-        """Return `start_date` config, or state if using timestamp replication.
+        """Get starting replication timestamp.
 
         Will return the value of the stream's replication key when `--state` is passed.
         If no state exists, will return `start_date` if set, or `None` if neither
@@ -225,13 +217,13 @@ class Stream(metaclass=abc.ABCMeta):
 
         Developers should use this method to seed incremental processing for date
         and datetime replication keys. For non-datetime replication keys, use
-        `get_starting_replication_key_value()`
+        :meth:`~singer_sdk.Stream.get_starting_replication_key_value()`
 
         Args:
-            context: TODO
+            context: Stream partition or context dictionary.
 
         Returns:
-            TODO
+            `start_date` from config, or state value if using timestamp replication.
         """
         if self.is_timestamp_replication_key:
             replication_key_value = self._starting_replication_key_value(context)
@@ -247,7 +239,7 @@ class Stream(metaclass=abc.ABCMeta):
         """Return starting replication key.
 
         Args:
-            context: TODO
+            context: Stream partition or context dictionary.
 
         Returns:
             TODO
@@ -265,20 +257,20 @@ class Stream(metaclass=abc.ABCMeta):
     @final
     @property
     def selected(self) -> bool:
-        """Return true if the stream is selected.
+        """Check isf stream is selected.
 
         Returns:
-            TODO
+            True if the stream is selected.
         """
         return self.mask.get((), True)
 
     @final
     @property
     def has_selected_descendents(self) -> bool:
-        """Return True if any child streams are selected, recursively.
+        """Check descendents.
 
         Returns:
-            TODO
+            True if any child streams are selected, recursively.
         """
         for child in self.child_streams or []:
             if child.selected or child.has_selected_descendents:
@@ -289,10 +281,10 @@ class Stream(metaclass=abc.ABCMeta):
     @final
     @property
     def descendent_streams(self) -> List["Stream"]:
-        """Return a list of all children recursively.
+        """Get child streams.
 
         Returns:
-            TODO
+            A list of all children, recursively.
         """
         result: List[Stream] = list(self.child_streams) or []
         for child in self.child_streams:
@@ -307,7 +299,7 @@ class Stream(metaclass=abc.ABCMeta):
         """Write the signpost value, if available.
 
         Args:
-            context: TODO
+            context: Stream partition or context dictionary.
             value: TODO
 
         Returns:
@@ -322,7 +314,7 @@ class Stream(metaclass=abc.ABCMeta):
     def get_replication_key_signpost(
         self, context: Optional[dict]
     ) -> Optional[Union[datetime.datetime, Any]]:
-        """Return the max allowable bookmark value for this stream's replication key.
+        """Get the replication signpost.
 
         For timestamp-based replication keys, this defaults to `utc_now()`. For
         non-timestamp replication keys, default to `None`. For consistency in subsequent
@@ -331,13 +323,13 @@ class Stream(metaclass=abc.ABCMeta):
 
         Developers may optionally override this method in advanced use cases such
         as unsorted incremental streams or complex hierarchical stream scenarios.
-        For more info: https://sdk.meltano.com/en/latest/implementation/state.html
+        For more info: :doc:`/implementation/state`
 
         Args:
-            context: TODO
+            context: Stream partition or context dictionary.
 
         Returns:
-            TODO
+            Max allowable bookmark value for this stream's replication key.
         """
         if self.is_timestamp_replication_key:
             return utc_now()
@@ -346,28 +338,28 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def schema_filepath(self) -> Optional[Path]:
-        """Return a path to a schema file for the stream or None if n/a.
+        """Get path to schema file.
 
         Returns:
-            TODO
+            Path to a schema file for the stream or `None` if n/a.
         """
         return self._schema_filepath
 
     @property
     def schema(self) -> dict:
-        """Return the schema dict for the stream.
+        """Get schema.
 
         Returns:
-            TODO
+            JSON Schema dictionary for this stream.
         """
         return self._schema
 
     @property
     def primary_keys(self) -> Optional[List[str]]:
-        """Return primary key(s) for the stream.
+        """Get primary keys.
 
         Returns:
-            TODO
+            A list of primary key(s) for the stream.
         """
         if not self._primary_keys:
             return []
@@ -384,13 +376,13 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def state_partitioning_keys(self) -> Optional[List[str]]:
-        """Return partition keys for the stream state bookmarks.
+        """Get state partition keys.
 
         If not set, a default partitioning will be inherited from the stream's context.
         If an empty list is set (`[]`), state will be held in one bookmark per stream.
 
         Returns:
-            TODO
+            Partition keys for the stream state bookmarks.
         """
         return self._state_partitioning_keys
 
@@ -408,10 +400,10 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def replication_key(self) -> Optional[str]:
-        """Return replication key for the stream.
+        """Get replication key.
 
         Returns:
-            TODO
+            Replication key for the stream.
         """
         if not self._replication_key:
             return None
@@ -428,7 +420,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def is_sorted(self) -> bool:
-        """Return `True` if stream is sorted. Defaults to `False`.
+        """Check if stream is sorted.
 
         When `True`, incremental streams will attempt to resume if unexpectedly
         interrupted.
@@ -437,20 +429,20 @@ class Stream(metaclass=abc.ABCMeta):
         `InvalidStreamSortException` if records are found which are unsorted.
 
         Returns:
-            TODO
+            `True` if stream is sorted. Defaults to `False`.
         """
         return False
 
     @property
     def metadata(self) -> MetadataMapping:
-        """Return a mapping from property breadcrumbs to metadata objects.
+        """Get stream metadata.
 
         Metadata attributes (`inclusion`, `selected`, etc.) are part of the Singer spec.
 
         Metadata from an input catalog will override standard metadata.
 
         Returns:
-            TODO
+            A mapping from property breadcrumbs to metadata objects.
         """
         if self._metadata is not None:
             return self._metadata
@@ -510,10 +502,10 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def config(self) -> Mapping[str, Any]:
-        """Return a frozen (read-only) config dictionary map.
+        """Get stream configuration.
 
         Returns:
-            TODO
+            A frozen (read-only) config dictionary map.
         """
         return MappingProxyType(self._config)
 
@@ -525,16 +517,16 @@ class Stream(metaclass=abc.ABCMeta):
         overridden if required by the developer.
 
         Returns:
-            TODO
+            Unique stream ID.
         """
         return self.name
 
     @property
     def replication_method(self) -> str:
-        """Return the replication method to be used.
+        """Get replication method.
 
         Returns:
-            TODO
+            Replication method to be used for this stream.
         """
         if self.forced_replication_method:
             return str(self.forced_replication_method)
@@ -553,11 +545,13 @@ class Stream(metaclass=abc.ABCMeta):
         This method is internal to the SDK and should not need to be overridden.
         Developers may access this property but this is not recommended except in
         advanced use cases. Instead, developers should access the latest stream
-        replication key values using `Stream.get_starting_timestamp()` for timestamp
-        keys, or `Stream.get_starting_replication_key_value()` for non-timestamp keys.
+        replication key values using :meth:`~singer_sdk.Stream.get_starting_timestamp()`
+        for timestamp keys, or
+        :meth:`~singer_sdk.Stream.get_starting_replication_key_value()` for
+        non-timestamp keys.
 
         Returns:
-            TODO
+            A writeable state dict for the entire tap.
         """
         return self._tap_state
 
@@ -570,16 +564,20 @@ class Stream(metaclass=abc.ABCMeta):
         This method is internal to the SDK and should not need to be overridden.
         Developers may access this property but this is not recommended except in
         advanced use cases. Instead, developers should access the latest stream
-        replication key values using `Stream.get_starting_timestamp()` for timestamp
-        keys, or `Stream.get_starting_replication_key_value()` for non-timestamp keys.
+        replication key values using
+        :meth:`~singer_sdk.Stream.get_starting_timestamp()` for timestamp keys, or
+        :meth:`~singer_sdk.Stream.get_starting_replication_key_value()` for
+        non-timestamp keys.
 
-        Partition level may be overridden by Stream.state_partitioning_keys if set.
+        Partition level may be overridden by
+        :attr:`~singer_sdk.Stream.state_partitioning_keys` if set.
 
         Args:
-            context: TODO
+            context: Stream partition or context dictionary.
 
         Returns:
-            TODO
+            A partitioned context state if applicable; else returns stream state.
+            A blank state will be created in none exists.
         """
         state_partition_context = self._get_state_partition_context(context)
         if state_partition_context:
@@ -592,18 +590,20 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def stream_state(self) -> dict:
-        """Return a writeable state dict for this stream.
+        """Get writable state.
 
         This method is internal to the SDK and should not need to be overridden.
         Developers may access this property but this is not recommended except in
         advanced use cases. Instead, developers should access the latest stream
-        replication key values using `Stream.get_starting_timestamp()` for timestamp
-        keys, or `Stream.get_starting_replication_key_value()` for non-timestamp keys.
+        replication key values using :meth:`~singer_sdk.Stream.get_starting_timestamp()`
+        for timestamp keys, or
+        :meth:`~singer_sdk.Stream.get_starting_replication_key_value()` for
+        non-timestamp keys.
 
         A blank state entry will be created if one doesn't already exist.
 
         Returns:
-            TODO
+            A writable state dict for this stream.
         """
         return get_writeable_state_dict(self.tap_state, self.name)
 
@@ -611,7 +611,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def partitions(self) -> Optional[List[dict]]:
-        """Return a list of partition key dicts (if applicable), otherwise None.
+        """Get stream partitions.
 
         Developers may override this property to provide a default partitions list.
 
@@ -619,7 +619,7 @@ class Stream(metaclass=abc.ABCMeta):
         defined in state, otherwise None.
 
         Returns:
-            TODO
+            A list of partition key dicts (if applicable), otherwise `None`.
         """
         result: List[dict] = []
         for partition_state in (
@@ -640,7 +640,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         Args:
             latest_record: TODO
-            context: TODO
+            context: Stream partition or context dictionary.
 
         Raises:
             ValueError: TODO
@@ -690,7 +690,8 @@ class Stream(metaclass=abc.ABCMeta):
         """Get a boolean mask for stream and property selection.
 
         Returns:
-            TODO
+            A mapping of breadcrumbs to boolean values, representing stream and field
+            selection.
         """
         if self._mask is None:
             self._mask = self.metadata.resolve_selection()
@@ -769,7 +770,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         Args:
             record_count: TODO
-            context: TODO
+            context: Stream partition or context dictionary.
         """
         extra_tags = {} if not context else {"context": context}
         counter_metric: Dict[str, Any] = {
@@ -792,7 +793,7 @@ class Stream(metaclass=abc.ABCMeta):
         Args:
             endpoint: TODO
             response: TODO
-            context: TODO
+            context: Stream partition or context dictionary.
             extra_tags: TODO
         """
         request_duration_metric: Dict[str, Any] = {
@@ -836,7 +837,7 @@ class Stream(metaclass=abc.ABCMeta):
         This method is internal to the SDK and should not need to be overridden.
 
         Args:
-            state: TODO
+            state: State object to promote progress markers with.
         """
         if state is None or state == {}:
             context: Optional[dict]
@@ -856,7 +857,7 @@ class Stream(metaclass=abc.ABCMeta):
         If all=True and the stream has children, child streams will also be finalized.
 
         Args:
-            state: TODO
+            state: State object to promote progress markers with.
         """
         if state is None or state == {}:
             for child_stream in self.child_streams or []:
@@ -879,7 +880,7 @@ class Stream(metaclass=abc.ABCMeta):
         """Sync records, emitting RECORD and STATE messages.
 
         Args:
-            context: TODO
+            context: Stream partition or context dictionary.
 
         Raises:
             InvalidStreamSortException: TODO
@@ -956,7 +957,7 @@ class Stream(metaclass=abc.ABCMeta):
         This method is internal to the SDK and should not need to be overridden.
 
         Args:
-            context: TODO
+            context: Stream partition or context dictionary.
         """
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
@@ -988,7 +989,8 @@ class Stream(metaclass=abc.ABCMeta):
         are not supported by the tap.
 
         Args:
-            catalog: TODO
+            catalog: Catalog object passed to the tap. Defines schema, primary and
+                replication keys, as well as selection metadata.
         """
         self._tap_input_catalog = catalog
 
@@ -1003,7 +1005,7 @@ class Stream(metaclass=abc.ABCMeta):
         """Override state handling if Stream.state_partitioning_keys is specified.
 
         Args:
-            context: TODO
+            context: Stream partition or context dictionary.
 
         Returns:
             TODO
@@ -1025,14 +1027,15 @@ class Stream(metaclass=abc.ABCMeta):
         streams for context.
 
         Args:
-            record: TODO
-            context: TODO
+            record: Individual record in the stream.
+            context: Stream partition or context dictionary.
 
         Returns:
-            TODO
+            A dictionary with context values for a child stream.
 
         Raises:
-            NotImplementedError: TODO
+            NotImplementedError: If the stream has children but this method is not
+                overriden.
         """
         if context is None:
             for child_stream in self.child_streams:
@@ -1068,17 +1071,15 @@ class Stream(metaclass=abc.ABCMeta):
 
         This method takes an optional `context` argument, which can be safely ignored
         unless the stream is a child stream or requires partitioning.
-        More info: https://sdk.meltano.com/en/latest/partitioning.html
+        More info: :doc:`/partitioning`.
 
         Parent streams can optionally return a tuple, in which
         case the second item in the tuple being a `child_context` dictionary for the
         stream's `context`.
-        More info: https://sdk.meltano.com/en/latest/parent_streams.html
+        More info: :doc:`/parent_streams`
 
         Args:
-            context: TODO
-
-        Returns: TODO
+            context: Stream partition or context dictionary.
         """
         pass
 
@@ -1091,10 +1092,10 @@ class Stream(metaclass=abc.ABCMeta):
         API.
 
         Args:
-            row: TODO
-            context: TODO
+            row: Individual record in the stream.
+            context: Stream partition or context dictionary.
 
         Returns:
-            TODO
+            A new, processed record.
         """
         return row
