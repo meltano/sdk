@@ -41,12 +41,13 @@ from `main` branch.
         <!-- Meltano-only: 5. [ ] Check this box when [Docker publish]() is confirmed. -->
 3. Groom the changelog:
     1. [ ] Compare the [Changelog](https://gitlab.com/meltano/sdk/-/blob/main/CHANGELOG.md) against the `main` branch [commit history](https://gitlab.com/meltano/sdk/-/commits/main) and add any significant user-impacting updates (excluding docs and website updates, for instance).
-    3. [ ] Review the Changelog for readability and typoes, committing fixes or updates if needed.
-    2. [ ] Final changelog review:
+    2. [ ] Review the Changelog for readability and typoes, committing fixes or updates if needed.
+    3. [ ] Final changelog review:
         - Open the Changelog in preview mode, mouse over each link and ensure tooltip descriptions match the resolved issue.
         - Check contributor profile links to make sure they are correct.
-    3. [ ] Merge the resulting MR to `main` with the merge commit message `Release vX.Y.Z`
-    4. [ ] Check the [pending MRs](https://gitlab.com/meltano/sdk/-/merge_requests?sort=updated_desc) to make sure nothing is missing 4. [ ] [Open the next `Release` issue](https://gitlab.com/meltano/sdk/-/issues/new?issue) using the `Release` template.
+    4. [ ] Merge the resulting MR to `main` with the merge commit message `Release vX.Y.Z`
+    5. [ ] Check the [pending MRs](https://gitlab.com/meltano/sdk/-/merge_requests?sort=updated_desc) to make sure nothing is missing
+    6. [ ] [Open the next `Release` issue](https://gitlab.com/meltano/sdk/-/issues/new?issue) using the `Release` template.
 
 ### Announcements, Marketing, and Promotion
 
