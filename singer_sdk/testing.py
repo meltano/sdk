@@ -1,6 +1,6 @@
 """Pre-built test functions which can be applied to multiple taps."""
 
-from typing import Type, Callable, List
+from typing import Callable, List, Type
 
 from singer_sdk.tap_base import Tap
 
@@ -24,14 +24,14 @@ def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Ca
         tap1.print_about()
         tap1.print_about(format="json")
 
-    def _test_discovery() -> tap_class:
+    def _test_discovery() -> None:
         # Initialize with basic config
         tap1: Tap = tap_class(config=config, parse_env_config=True)
         # Test discovery
         tap1.run_discovery()
         catalog1 = tap1.catalog_dict
         # Reset and re-initialize with an input catalog
-        tap1 = None
+        tap1 = None  # type: ignore
         tap2: Tap = tap_class(config=config, parse_env_config=True, catalog=catalog1)
         assert tap2
 

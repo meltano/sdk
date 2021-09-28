@@ -2,21 +2,19 @@
 
 import base64
 import logging
-import jwt
 import math
-import requests
-
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 from types import MappingProxyType
 from typing import Any, Dict, Mapping, Optional, Tuple, Type, Union
 
-from cryptography.hazmat.primitives import serialization
+import jwt
+import requests
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from singer import utils
 
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.streams import Stream as RESTStreamBase
-
-from singer import utils
 
 
 class SingletonMeta(type):
@@ -47,7 +45,7 @@ class SingletonMeta(type):
         """
         if cls.__single_instance:
             return cls.__single_instance
-        single_obj = cls.__new__(cls)
+        single_obj = cls.__new__(cls, None)  # type: ignore
         single_obj.__init__(*args, **kwargs)
         cls.__single_instance = single_obj
         return single_obj
