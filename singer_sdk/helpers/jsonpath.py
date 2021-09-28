@@ -1,9 +1,9 @@
 """JSONPath helpers."""
 
 from typing import Any, Generator, Union
-import memoization
 
 import jsonpath_ng
+import memoization
 
 
 def extract_jsonpath(

@@ -1,8 +1,8 @@
 import os
 from unittest import mock
 
-from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 from singer_sdk.plugin_base import PluginBase
+from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 
 
 class PluginTest(PluginBase):

@@ -8,7 +8,6 @@ from pathlib import Path
 
 from singer_sdk.streams import GraphQLStream
 
-
 SITE_URL = "https://gitlab.com/graphql"
 
 SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")

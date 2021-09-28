@@ -1,41 +1,35 @@
 """Shared parent class for Tap, Target (future), and Transform (future)."""
 
 import abc
-from collections import OrderedDict
 import json
 import logging
 import os
-from singer_sdk.mapper import PluginMapper
+from collections import OrderedDict
+from pathlib import PurePath
 from types import MappingProxyType
 from typing import (
+    Any,
     Callable,
     Dict,
     List,
     Mapping,
     Optional,
     Tuple,
-    Any,
     Type,
     Union,
     cast,
 )
 
-
-from jsonschema import (
-    ValidationError,
-    SchemaError,
-    Draft4Validator,
-)
-from pathlib import PurePath
+import click
+from jsonschema import Draft4Validator, SchemaError, ValidationError
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
-from singer_sdk.helpers._util import read_json_file
-from singer_sdk.helpers._secrets import is_common_secret_key, SecretString
+from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._typing import is_string_array_type
+from singer_sdk.helpers._util import read_json_file
+from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import extend_validator_with_defaults
-
-import click
 
 SDK_PACKAGE_NAME = "singer_sdk"
 

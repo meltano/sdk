@@ -7,12 +7,12 @@ import abc
 import copy
 import hashlib
 import logging
-from typing import Dict, Callable, Any, Tuple, Type, Union, cast, Optional, List
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
-from singer_sdk.helpers._singer import Catalog
-from singer_sdk.helpers._catalog import get_selected_schema
-from singer_sdk.helpers import _simpleeval as simpleeval
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
+from singer_sdk.helpers import _simpleeval as simpleeval
+from singer_sdk.helpers._catalog import get_selected_schema
+from singer_sdk.helpers._singer import Catalog
 from singer_sdk.typing import (
     CustomType,
     IntegerType,
