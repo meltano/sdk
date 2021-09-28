@@ -38,16 +38,7 @@ Note:
   here.
 
 """
-from typing import (
-    Any,
-    Generic,
-    List,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Generic, List, Tuple, Type, TypeVar, Union, cast
 
 from jsonschema import validators
 
@@ -55,7 +46,7 @@ from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._typing import append_type
 
 
-def extend_validator_with_defaults(validator_class):
+def extend_validator_with_defaults(validator_class):  # noqa
     """Fill in defaults, before validating with the provided JSON Schema Validator.
 
     See https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance  # noqa
@@ -63,7 +54,7 @@ def extend_validator_with_defaults(validator_class):
     """
     validate_properties = validator_class.VALIDATORS["properties"]
 
-    def set_defaults(validator, properties, instance, schema):
+    def set_defaults(validator, properties, instance, schema):  # noqa
         for property, subschema in properties.items():
             if "default" in subschema:
                 instance.setdefault(property, subschema["default"])

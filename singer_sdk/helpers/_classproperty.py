@@ -1,3 +1,5 @@
+# flake8: noqa
+
 """Defines the `classproperty` decorator."""
 
 # noqa

@@ -18,6 +18,7 @@ repos:
         entry: poetry run flake8
         language: system
         types: [python]
+        files: 'singer_sdk/.*'
 
       - id: mypy
         name: mypy
