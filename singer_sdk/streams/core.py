@@ -289,7 +289,7 @@ class Stream(metaclass=abc.ABCMeta):
         state = self.get_context_state(context)
         write_replication_key_signpost(state, value)
 
-    def _write_starting_replication_value(self, context: dict) -> None:
+    def _write_starting_replication_value(self, context: Optional[dict]) -> None:
         """Write the starting replication value, if available.
 
         Args:
