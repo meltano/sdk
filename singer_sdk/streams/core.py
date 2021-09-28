@@ -296,9 +296,9 @@ class Stream(metaclass=abc.ABCMeta):
             context: Stream partition or context dictionary.
         """
         value = None
+        state = self.get_context_state(context)
 
         if self.replication_key:
-            state = self.get_context_state(context)
             replication_key_value = state.get("replication_key_value")
             if replication_key_value and self.replication_key == state.get(
                 "replication_key"
