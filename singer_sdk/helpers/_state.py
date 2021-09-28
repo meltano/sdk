@@ -9,6 +9,7 @@ from singer_sdk.helpers._typing import to_json_compatible
 PROGRESS_MARKERS = "progress_markers"
 PROGRESS_MARKER_NOTE = "Note"
 SIGNPOST_MARKER = "replication_key_signpost"
+STARTING_MARKER = "starting_replication_value"
 
 
 def get_state_if_exists(
@@ -179,6 +180,21 @@ def write_replication_key_signpost(
 ) -> None:
     """Write signpost value."""
     stream_or_partition_state[SIGNPOST_MARKER] = to_json_compatible(new_signpost_value)
+
+
+def write_starting_replication_value(
+    stream_or_partition_state: dict,
+    initial_value: Any,
+) -> None:
+    """Write initial replication value to state."""
+    stream_or_partition_state[STARTING_MARKER] = to_json_compatible(initial_value)
+
+
+def get_starting_replication_value(stream_or_partition_state: dict):
+    """Retrieve initial replication marker value from state."""
+    if not stream_or_partition_state:
+        return None
+    return stream_or_partition_state.get(STARTING_MARKER)
 
 
 def increment_state(
