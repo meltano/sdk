@@ -204,6 +204,7 @@ class Property(JSONTypeHelper, Generic[W]):
             wrapped: JSON Schema type of the property.
             required: Whether this is a required property.
             default: Default value in the JSON Schema.
+            description: Long-text property description.
         """
         self.name = name
         self.wrapped = wrapped
