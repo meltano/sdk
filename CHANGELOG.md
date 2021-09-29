@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changes
 
+- Tap and Target SDK: Prevents the leaking of sensitive configuration values when JSON schema validation fails.
+
 ### Fixes
 
 ### Breaks
