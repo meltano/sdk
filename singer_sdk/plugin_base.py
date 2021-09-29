@@ -214,6 +214,39 @@ class PluginBase(metaclass=abc.ABCMeta):
         info["settings"] = cls.config_jsonschema
         if format == "json":
             print(json.dumps(info, indent=2))
+        elif format == "markdown":
+            # Set table base for markdown
+            table_base = f"""
+            | Setting | Required | Default | Description  |
+            |:-------:|:--------:|:-------:|:------------:|
+            """
+
+            # Empty List for string parts
+            md_list = []
+            # Get required settings for table
+            required_settings = info.get("settings", {}).get('required', {})
+
+            for key, value in info.items():
+                if key == "name" or key == 'version' or key == 'sdk_version':
+                    values = f"##{key}\n"
+                    values += f"{value}\n"
+                    md_list.append(values)
+
+                elif key == 'capabilities':
+                    capabilities = f"##{key}\n"
+                    capabilities += "\n".join([f"* {v}\n" for v in value])
+                    md_list.append(capabilities)
+
+                elif key == 'settings':
+                    setting = f"##{key}\n"
+                    for k, v in info.get("settings").get('properties').items():
+                        table_base += f"{k}|{True if k in required_settings else False}|{v.get('default', 'None')}|{v.get('description', '')}|\n"
+                    setting += table_base
+                    md_list.append(setting)
+
+            file = open(f"{cls.name}.md", "w")
+            file.write("".join(md_list))
+            file.close()
         else:
             formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
             print(formatted)
