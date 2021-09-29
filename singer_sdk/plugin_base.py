@@ -177,7 +177,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                 validator = JSONSchemaValidator(self.config_jsonschema)
                 validator.validate(self._config)
             except (ValidationError, SchemaError) as ex:
-                errors.append(str(ex))
+                errors.append(str(ex.message))
         if errors:
             summary = (
                 f"Config validation failed: {f'; '.join(errors)}\n"
