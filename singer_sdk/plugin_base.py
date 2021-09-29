@@ -226,6 +226,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             # Get required settings for table
             required_settings = info.get("settings", {}).get('required', {})
 
+            # Iterate over dict to set md
             for key, value in info.items():
                 if key == "name" or key == 'version' or key == 'sdk_version':
                     values = f"##{key}\n"
