@@ -168,6 +168,20 @@ class Property(JSONTypeHelper):
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
         """Return dict describing the type."""
+    @property
+    def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
+        """Return dict describing the type.
+        
+        Raises `TypeError` if `self.wrapped` is a class which does not have a
+        `classproperty` implemention of `type_dict`.
+        """
+        if isinstance(self.wrapped.type_dict, property):
+            typename = self.wrapped.__name__
+            raise TypeError(
+                f"Expected wrapped object of type '{typename}'. "
+                "Received a class. "
+                f"(Try `{typename}()` instead of `{typename}`.)"
+            )
         return cast(dict, self.wrapped.type_dict)
 
     def to_dict(self) -> dict:
