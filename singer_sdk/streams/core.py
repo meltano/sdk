@@ -394,7 +394,7 @@ class Stream(metaclass=abc.ABCMeta):
         If an empty list is set (`[]`), state will be held in one bookmark per stream.
 
         Args:
-            new_value: TODO
+            new_value: the new list of keys
         """
         self._state_partitioning_keys = new_value
 
