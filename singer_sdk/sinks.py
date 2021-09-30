@@ -3,27 +3,23 @@
 import abc
 import datetime
 import time
-
+import uuid
 from logging import Logger
 from types import MappingProxyType
-from typing import Dict, Optional, List, Any, Mapping, Union
-import uuid
+from typing import Any, Dict, List, Mapping, Optional, Union
 
-from singer_sdk.helpers._compat import final
-
+from dateutil import parser
 from jsonschema import Draft4Validator, FormatChecker
 
 # TODO: Re-implement schema validation
 # from singer_sdk.helpers._flattening import RecordFlattener
-
+from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._typing import (
+    DatetimeErrorTreatmentEnum,
     get_datelike_property_type,
     handle_invalid_timestamp_in_record,
-    DatetimeErrorTreatmentEnum,
 )
 from singer_sdk.plugin_base import PluginBase
-
-from dateutil import parser
 
 JSONSchemaValidator = Draft4Validator
 
@@ -48,7 +44,14 @@ class Sink(metaclass=abc.ABCMeta):
         schema: Dict,
         key_properties: Optional[List[str]],
     ) -> None:
-        """Initialize target sink."""
+        """Initialize target sink.
+
+        Args:
+            target: Target instance.
+            stream_name: Name of the stream to sink.
+            schema: Schema of the stream to sink.
+            key_properties: Primary key of the stream to sink.
+        """
         self.logger = target.logger
         self._config = dict(target.config)
         self._pending_batch: Optional[dict] = None
@@ -81,6 +84,12 @@ class Sink(metaclass=abc.ABCMeta):
         """Return an empty dictionary by default.
 
         NOTE: Future versions of the SDK may expand the available context attributes.
+
+        Args:
+            record: Individual record in the stream.
+
+        Returns:
+            TODO
         """
         return {}
 
@@ -88,44 +97,66 @@ class Sink(metaclass=abc.ABCMeta):
 
     @property
     def max_size(self) -> int:
-        """Return or set the max number of records to batch before `is_full=True`."""
+        """Get max batch size.
+
+        Returns:
+            Max number of records to batch before `is_full=True`
+        """
         return self.MAX_SIZE_DEFAULT
 
     @property
     def current_size(self) -> int:
-        """Return the number of records to drain."""
+        """Get current batch size.
+
+        Returns:
+            The number of records to drain.
+        """
         return self._batch_records_read
 
     @property
     def is_full(self) -> bool:
-        """Return True if the sink needs to be drained."""
+        """Check against size limit.
+
+        Returns:
+            True if the sink needs to be drained.
+        """
         return self.current_size >= self.max_size
 
     # Tally methods
 
     @final
-    def tally_record_read(self, count: int = 1):
+    def tally_record_read(self, count: int = 1) -> None:
         """Increment the records read tally.
 
         This method is called automatically by the SDK when records are read.
+
+        Args:
+            count: Number to increase record count by.
         """
         self._total_records_read += count
         self._batch_records_read += count
 
     @final
-    def tally_record_written(self, count: int = 1):
+    def tally_record_written(self, count: int = 1) -> None:
         """Increment the records written tally.
 
-        This method is called automatically by the SDK after `process_record()`
-        or `process_batch()`.
+        This method is called automatically by the SDK after
+        :meth:`~singer_sdk.Sink.process_record()`
+        or :meth:`~singer_sdk.Sink.process_batch()`.
+
+        Args:
+            count: Number to increase record count by.
         """
         self._total_records_written += count
 
     @final
-    def tally_duplicate_merged(self, count: int = 1):
+    def tally_duplicate_merged(self, count: int = 1) -> None:
         """Increment the records merged tally.
 
         This method should be called directly by the Target implementation.
+
+        Args:
+            count: Number to increase record count by.
         """
         self._total_dupe_records_merged += count
         self._batch_dupe_records_merged += count
@@ -134,17 +165,29 @@ class Sink(metaclass=abc.ABCMeta):
 
     @property
     def config(self) -> Mapping[str, Any]:
-        """Return a frozen (read-only) config dictionary map."""
+        """Get plugin configuration.
+
+        Returns:
+            A frozen (read-only) config dictionary map.
+        """
         return MappingProxyType(self._config)
 
     @property
     def include_sdc_metadata_properties(self) -> bool:
-        """Return True if metadata columns should be added."""
+        """Check if metadata columns should be added.
+
+        Returns:
+            True if metadata columns should be added.
+        """
         return self.config.get("add_record_metadata", False)
 
     @property
     def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:
-        """Return a treatment to use for datetime parse errors: ERROR. MAX, or NULL."""
+        """Return a treatment to use for datetime parse errors: ERROR. MAX, or NULL.
+
+        Returns:
+            TODO
+        """
         return DatetimeErrorTreatmentEnum.ERROR
 
     # Record processing
@@ -156,6 +199,11 @@ class Sink(metaclass=abc.ABCMeta):
 
         Record metadata specs documented at:
         https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+
+        Args:
+            record: Individual record in the stream.
+            message: TODO
+            context: Stream partition or context dictionary.
         """
         record["_sdc_extracted_at"] = message.get("time_extracted")
         record["_sdc_received_at"] = datetime.datetime.now().isoformat()
@@ -208,6 +256,9 @@ class Sink(metaclass=abc.ABCMeta):
 
         Record metadata specs documented at:
         https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+
+        Args:
+            record: Individual record in the stream.
         """
         record.pop("_sdc_extracted_at", None)
         record.pop("_sdc_received_at", None)
@@ -219,7 +270,14 @@ class Sink(metaclass=abc.ABCMeta):
     # Record validation
 
     def _validate_and_parse(self, record: Dict) -> Dict:
-        """Validate or repair the record, parsing to python-native types as needed."""
+        """Validate or repair the record, parsing to python-native types as needed.
+
+        Args:
+            record: Individual record in the stream.
+
+        Returns:
+            TODO
+        """
         self._validator.validate(record)
         self._parse_timestamps_in_record(
             record=record, schema=self.schema, treatment=self.datetime_error_treatment
@@ -234,6 +292,11 @@ class Sink(metaclass=abc.ABCMeta):
         Attempts to parse every field that is of type date/datetime/time. If its value
         is out of range, repair logic will be driven by the `treatment` input arg:
         MAX, NULL, or ERROR.
+
+        Args:
+            record: Individual record in the stream.
+            schema: TODO
+            treatment: TODO
         """
         for key in record.keys():
             datelike_type = get_datelike_property_type(key, schema["properties"][key])
@@ -254,14 +317,26 @@ class Sink(metaclass=abc.ABCMeta):
                     )
                 record[key] = date_val
 
-    def _after_process_record(self, context) -> None:
-        """Perform post-processing and record keeping. Internal hook."""
+    def _after_process_record(self, context: dict) -> None:
+        """Perform post-processing and record keeping. Internal hook.
+
+        Args:
+            context: Stream partition or context dictionary.
+        """
         pass
 
     # SDK developer overrides:
 
     def preprocess_record(self, record: Dict, context: dict) -> dict:
-        """Process incoming record and return a modified result."""
+        """Process incoming record and return a modified result.
+
+        Args:
+            record: Individual record in the stream.
+            context: Stream partition or context dictionary.
+
+        Returns:
+            A new, processed record.
+        """
         return record
 
     @abc.abstractmethod
@@ -271,16 +346,26 @@ class Sink(metaclass=abc.ABCMeta):
         Implementations may either load to the `context` dict for staging (the
         default behavior for Batch types), or permanently write out to the target.
 
-        Anything appended to `self.records_to_drain` will be automatically passed to
-        `self.process_batch()` to be permanently written during the process_batch
-        operation.
+        Anything appended to :attr:`singer_sdk.Sink.records_to_drain` will be
+        automatically passed to
+        :meth:`~singer_sdk.Sink.process_batch()` to be permanently written during the
+        process_batch operation.
 
-        If duplicates are merged, these can be tracked via `tally_duplicates_merged()`.
+        If duplicates are merged, these can be tracked via
+        :meth:`~singer_sdk.Sink.tally_duplicate_merged()`.
+
+        Args:
+            record: Individual record in the stream.
+            context: Stream partition or context dictionary.
         """
         pass
 
     def start_drain(self) -> dict:
-        """Set and return `self._context_draining`."""
+        """Set and return `self._context_draining`.
+
+        Returns:
+            TODO
+        """
         self._context_draining = self._pending_batch or {}
         self._pending_batch = None
         return self._context_draining
@@ -290,7 +375,13 @@ class Sink(metaclass=abc.ABCMeta):
         """Process all records per the batch's `context` dictionary.
 
         If duplicates are merged, these can optionally be tracked via
-        `tally_duplicates_merged()`.
+        `tally_duplicate_merged()`.
+
+        Args:
+            context: Stream partition or context dictionary.
+
+        Raises:
+            NotImplementedError: If derived class does not override this method.
         """
         raise NotImplementedError("No handling exists for process_batch().")
 
@@ -311,10 +402,13 @@ class RecordSink(Sink):
 
     current_size = 0  # Records are always written directly
 
-    def _after_process_record(self, context) -> None:
+    def _after_process_record(self, context: dict) -> None:
         """Perform post-processing and record keeping. Internal hook.
 
         The RecordSink class uses this method to tally each record written.
+
+        Args:
+            context: Stream partition or context dictionary.
         """
         self.tally_record_written()
 
@@ -325,6 +419,9 @@ class RecordSink(Sink):
         The RecordSink class does not support batching.
 
         This method may not be overridden.
+
+        Args:
+            context: Stream partition or context dictionary.
         """
         pass
 
@@ -335,6 +432,9 @@ class RecordSink(Sink):
         The RecordSink class does not support batching.
 
         This method may not be overridden.
+
+        Args:
+            context: Stream partition or context dictionary.
         """
         pass
 
@@ -348,7 +448,11 @@ class RecordSink(Sink):
         prior to returning.
 
         If duplicates are merged/skipped instead of being loaded, merges can be
-        tracked via `tally_duplicates_merged()`.
+        tracked via :meth:`~singer_sdk.Sink.tally_duplicate_merged()`.
+
+        Args:
+            record: Individual record in the stream.
+            context: Stream partition or context dictionary.
         """
         pass
 
@@ -363,6 +467,12 @@ class BatchSink(Sink):
         `batch_start_time` (datetime).
 
         NOTE: Future versions of the SDK may expand the available context attributes.
+
+        Args:
+            record: Individual record in the stream.
+
+        Returns:
+            TODO
         """
         if self._pending_batch is None:
             new_context = {
@@ -383,6 +493,9 @@ class BatchSink(Sink):
         Developers may optionally override this method to add custom markers to the
         `context` dict and/or to initialize batch resources - such as initializing a
         local temp file to hold batch records before uploading.
+
+        Args:
+            context: Stream partition or context dictionary.
         """
         pass
 
@@ -394,9 +507,14 @@ class BatchSink(Sink):
 
         If this method is not overridden, the default implementation will create a
         `context["records"]` list and append all records for processing during
-        `process_batch()`.
+        :meth:`~singer_sdk.BatchSink.process_batch()`.
 
-        If duplicates are merged, these can be tracked via `tally_duplicates_merged()`.
+        If duplicates are merged, these can be tracked via
+        :meth:`~singer_sdk.Sink.tally_duplicate_merged()`.
+
+        Args:
+            record: Individual record in the stream.
+            context: Stream partition or context dictionary.
         """
         if "records" not in context:
             context["records"] = []
@@ -409,9 +527,14 @@ class BatchSink(Sink):
 
         This method must be overridden.
 
-        If `process_record()` is not overridden, the `context["records"]` list
-        will contain all records from the given batch context.
+        If :meth:`~singer_sdk.BatchSink.process_record()` is not overridden,
+        the `context["records"]` list will contain all records from the given batch
+        context.
 
-        If duplicates are merged, these can be tracked via `tally_duplicates_merged()`.
+        If duplicates are merged, these can be tracked via
+        :meth:`~singer_sdk.Sink.tally_duplicate_merged()`.
+
+        Args:
+            context: Stream partition or context dictionary.
         """
         pass

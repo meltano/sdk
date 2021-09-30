@@ -3,10 +3,9 @@
 import copy
 import datetime
 import logging
-
 from enum import Enum
 from functools import lru_cache
-from typing import Optional, Dict, Any, List, cast
+from typing import Any, Dict, List, Optional, cast
 
 import pendulum
 

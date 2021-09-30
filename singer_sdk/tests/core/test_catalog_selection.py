@@ -5,12 +5,12 @@ from copy import deepcopy
 
 import pytest
 
+import singer_sdk.helpers._singer as singer
 from singer_sdk.helpers._catalog import (
     get_selected_schema,
     pop_deselected_record_properties,
 )
-import singer_sdk.helpers._singer as singer
-from singer_sdk.typing import PropertiesList, Property, StringType, ObjectType
+from singer_sdk.typing import ObjectType, PropertiesList, Property, StringType
 
 
 @pytest.fixture
