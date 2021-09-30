@@ -2,18 +2,11 @@
 
 from typing import Any, Dict, Iterable, List, Optional, cast
 
-import pytest
 import pendulum
+import pytest
 import requests
 
 from singer_sdk.helpers.jsonpath import _compile_jsonpath
-from singer_sdk.typing import (
-    IntegerType,
-    PropertiesList,
-    Property,
-    StringType,
-    DateTimeType,
-)
 from singer_sdk.streams.core import (
     REPLICATION_FULL_TABLE,
     REPLICATION_INCREMENTAL,
@@ -21,6 +14,13 @@ from singer_sdk.streams.core import (
 )
 from singer_sdk.streams.rest import RESTStream
 from singer_sdk.tap_base import Tap
+from singer_sdk.typing import (
+    DateTimeType,
+    IntegerType,
+    PropertiesList,
+    Property,
+    StringType,
+)
 
 
 class SimpleTestStream(Stream):

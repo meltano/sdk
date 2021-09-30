@@ -2,8 +2,7 @@
 
 import io
 from contextlib import redirect_stdout
-
-from typing import Dict, Any
+from typing import Any, Dict
 
 from singer_sdk.samples.sample_tap_countries.countries_tap import SampleTapCountries
 from singer_sdk.samples.sample_target_csv.csv_target import SampleTargetCSV

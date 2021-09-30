@@ -1,8 +1,8 @@
 import os
 from unittest import mock
 
-from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 from singer_sdk.plugin_base import PluginBase
+from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 
 
 class PluginTest(PluginBase):
@@ -17,7 +17,6 @@ class PluginTest(PluginBase):
 
 def test_get_env_var_config():
     """Test settings parsing from environment variables."""
-
     with mock.patch.dict(
         os.environ,
         {

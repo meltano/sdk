@@ -1,20 +1,20 @@
 """Sample tap stream test for tap-gitlab."""
 
+from pathlib import Path
+from typing import Any, Dict, List, Optional, cast
+
 import requests
 
-from pathlib import Path
-from typing import Any, Dict, List, cast, Optional
-
+from singer_sdk.authenticators import SimpleAuthenticator
+from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import (
     ArrayType,
     DateTimeType,
     IntegerType,
-    Property,
     PropertiesList,
+    Property,
     StringType,
 )
-from singer_sdk.authenticators import SimpleAuthenticator
-from singer_sdk.streams.rest import RESTStream
 
 SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 

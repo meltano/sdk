@@ -60,3 +60,4 @@ Exception Types
     exceptions.TapStreamConnectionFailure
     exceptions.InvalidStreamSortException
     exceptions.MaxRecordsLimitException
+    exceptions.RecordsWitoutSchemaException

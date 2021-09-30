@@ -3,7 +3,6 @@ from typing import Optional
 
 from singer_sdk.helpers import _catalog
 from singer_sdk.helpers._singer import Catalog
-
 from singer_sdk.samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 
 COUNTER = 0

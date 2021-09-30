@@ -2,14 +2,15 @@
 
 import copy
 import json
-from typing import Dict, List
-from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
-import pytest
 import logging
+from typing import Dict, List
 
-from singer_sdk.helpers._singer import Catalog
+import pytest
+
 from singer_sdk.exceptions import MapExpressionError
+from singer_sdk.helpers._singer import Catalog
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
+from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 
 
 @pytest.fixture
