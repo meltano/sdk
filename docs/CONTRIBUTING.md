@@ -37,8 +37,8 @@ First clone, then...
     - We use `black`, `flake8`, `mypy`, and `pydocstyle` as CI linting tests.
     - We use `coverage` for code coverage metrics.
     - The project-wide max line length is `89`.
-    - In the future we will add support for linting
-      [pre-commit hooks](https://gitlab.com/meltano/sdk/-/issues/12) as well.
+    - The project has pre-commit hooks. Just run `pre-commit install` and the next time
+      you make a commit, the changes will be linted.
 4. Set interpreter to match poetry's virtualenv:
     - In VS Code, run `Python: Select interpreter` and select the poetry interpreter.
 
@@ -111,7 +111,12 @@ poetry run sphinx-autogen -o classes *.rst
 
 ### Pervasive Python Type Hints
 
-Type hints allow us to spend less time reading documentation.
+Type hints allow us to spend less time reading documentation. Public modules are checked in CI for type annotations on all methods and functions.
+
+### Docstring convention
+
+All public modules in the SDK are checked for the presence of docstrings in classes and functions. We follow the [Google Style convention](https://www.sphinx-doc.org/en/master/usage/extensions/example_google.html) for Python docstrings so functions are required to have a description of every argument and the return value, if applicable.
+
 
 ### What is Poetry and why do we need it?
 

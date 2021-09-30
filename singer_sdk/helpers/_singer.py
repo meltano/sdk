@@ -1,9 +1,10 @@
+import logging
 from dataclasses import dataclass, fields
 from enum import Enum
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
-import logging
 
-from singer.catalog import Catalog as BaseCatalog, CatalogEntry as BaseCatalogEntry
+from singer.catalog import Catalog as BaseCatalog
+from singer.catalog import CatalogEntry as BaseCatalogEntry
 from singer.schema import Schema
 
 Breadcrumb = Tuple[str, ...]

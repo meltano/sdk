@@ -9,8 +9,8 @@ See the online explorer and query builder here:
 import abc
 from pathlib import Path
 
-from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk import typing as th
+from singer_sdk.streams.graphql import GraphQLStream
 
 SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
