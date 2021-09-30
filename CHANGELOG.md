@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changes
 
+- Tap and Target SDK: Prevents the leaking of sensitive configuration values when JSON schema validation fails.
 - Tap and Target SDK: Support Black by default by bumping min Python version to 3.6.2. (#224, !169)
 
 ### Fixes
