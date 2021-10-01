@@ -6,24 +6,25 @@ For more information:
 - https://gitlab.com/meltano/sdk/-/issues/213
 
 """
+import ast
+import operator
+import os
+
 # flake8: noqa  # Ignoring flake errors in imported module
 # pylint: disable=too-many-public-methods, missing-docstring
 import sys
 import unittest
-import operator
-import ast
-import os
 import warnings
 
 from singer_sdk.helpers import _simpleeval as simpleeval
 from singer_sdk.helpers._simpleeval import (
-    SimpleEval,
+    AttributeDoesNotExist,
     EvalWithCompoundTypes,
     FeatureNotAvailable,
     FunctionNotDefined,
-    NameNotDefined,
     InvalidExpression,
-    AttributeDoesNotExist,
+    NameNotDefined,
+    SimpleEval,
     simple_eval,
 )
 

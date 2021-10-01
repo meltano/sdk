@@ -25,7 +25,7 @@ copyright = "2021, Meltano Core Team and Contributors"
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.3.9"
+release = "0.3.10"
 
 
 # -- General configuration ---------------------------------------------------
@@ -35,6 +35,7 @@ release = "0.3.9"
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
     "sphinx_rtd_theme",
     "sphinx_copybutton",
@@ -49,6 +50,9 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
+# Show typehints in the signature
+# https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_typehints
+autodoc_typehints = "signature"
 
 # -- Options for HTML output -------------------------------------------------
 

@@ -9,7 +9,6 @@ from singer_sdk.helpers._catalog import (
 )
 from singer_sdk.samples.sample_tap_countries.countries_tap import SampleTapCountries
 
-
 SAMPLE_CONFIG_BAD = {"not": "correct"}
 
 

@@ -2,17 +2,15 @@
 
 import logging
 import os
-
+from logging import getLogger
 from pathlib import Path
 
 import black
+import pytest
+import yaml
 from cookiecutter.main import cookiecutter
 from flake8.api import legacy as flake8
 from mypy import api
-import pytest
-import yaml
-
-from logging import getLogger
 
 getLogger("flake8").propagate = False
 

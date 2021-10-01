@@ -2,13 +2,12 @@
 
 from typing import Any, Dict, List, Tuple, Union
 
+import pandas
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from singer_sdk.sinks import BatchSink
 from singer_sdk.helpers._flattening import RecordFlattener
-
-import pandas
+from singer_sdk.sinks import BatchSink
 
 
 class SampleParquetTargetSink(BatchSink):

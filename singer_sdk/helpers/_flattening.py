@@ -1,10 +1,11 @@
 """Internal helper library for record flatteting functions."""
 
+import collections
 import json
 import re
-import collections
-import inflection
 from typing import Optional
+
+import inflection
 
 
 class RecordFlattener:

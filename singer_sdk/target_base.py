@@ -5,18 +5,17 @@ import copy
 import json
 import sys
 import time
+from typing import Any, Callable, Dict, Iterable, List, Optional, Type
 
 import click
-
-from joblib import Parallel, parallel_backend, delayed
-from typing import Any, Dict, Iterable, Optional, Type, List
+from joblib import Parallel, delayed, parallel_backend
 
 from singer_sdk.exceptions import RecordsWitoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
+from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks import Sink
-from singer_sdk.mapper import PluginMapper
 
 _MAX_PARALLELISM = 8
 
@@ -42,7 +41,15 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         config: Optional[Dict[str, Any]] = None,
         parse_env_config: bool = False,
     ) -> None:
-        """Initialize the target."""
+        """Initialize the target.
+
+        Args:
+            config: Target configuration. Can be a dictionary, a single path to a
+                configuration file, or a list of paths to multiple configuration
+                files.
+            parse_env_config: Whether to look for configuration values in environment
+                variables.
+        """
         super().__init__(config=config, parse_env_config=parse_env_config)
 
         self._latest_state: Dict[str, dict] = {}
@@ -62,12 +69,20 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     @classproperty
     def capabilities(self) -> List[str]:
-        """Return a list of supported capabilities."""
+        """Get target capabilites.
+
+        Returns:
+            A list of capabilities supported by this target.
+        """
         return ["target"]
 
     @property
     def max_parallelism(self) -> int:
-        """Return max number of sinks that can be drained in parallel."""
+        """Get max parallel sinks.
+
+        Returns:
+            Max number of sinks that can be drained in parallel.
+        """
         return _MAX_PARALLELISM
 
     def get_sink(
@@ -88,8 +103,17 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         sink depending on the values within the `record` object. Otherwise, please see
         `default_sink_class` property and/or the `get_sink_class()` method.
 
-        :raises: RecordsWitoutSchemaException if sink does not exist and schema is not
-                 sent.
+        Raises :class:`singer_sdk.exceptions.RecordsWitoutSchemaException` if sink does
+        not exist and schema is not sent.
+
+        Args:
+            stream_name: Name of the stream.
+            record: Record being processed.
+            schema: Stream schema.
+            key_properties: Primary key of the stream.
+
+        Returns:
+            The sink used for this target.
         """
         _ = record  # Custom implementations may use record in sink selection.
         if schema is None:
@@ -114,12 +138,19 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         return existing_sink
 
     def get_sink_class(self, stream_name: str) -> Type[Sink]:
-        """Return a sink for the given stream name.
+        """Get sink for a stream.
 
         Developers can override this method to return a custom Sink type depending
         on the value of `stream_name`. Optional when `default_sink_class` is set.
 
-        :raises: ValueError if no Sink class is defined.
+        Args:
+            stream_name: Name of the stream.
+
+        Raises:
+            ValueError: If no :class:`singer_sdk.sinks.Sink` class is defined.
+
+        Returns:
+            The sink class to be used with the stream.
         """
         if self.default_sink_class:
             return self.default_sink_class
@@ -130,9 +161,15 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         )
 
     def sink_exists(self, stream_name: str) -> bool:
-        """Return True if a sink has been initialized.
+        """Check sink for a stream.
 
         This method is internal to the SDK and should not need to be overridden.
+
+        Args:
+            stream_name: Name of the stream
+
+        Returns:
+            True if a sink has been initialized.
         """
         return stream_name in self._sinks_active
 
@@ -151,6 +188,14 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """Create a sink and register it.
 
         This method is internal to the SDK and should not need to be overridden.
+
+        Args:
+            stream_name: Name of the stream.
+            schema: Schema of the stream.
+            key_properties: Primary key of the stream.
+
+        Returns:
+            A new sink for the stream.
         """
         self.logger.info(f"Initializing '{self.name}' target sink...")
         sink_class = self.get_sink_class(stream_name=stream_name)
@@ -165,14 +210,30 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     @staticmethod
     def _assert_line_requires(line_dict: dict, requires: List[str]) -> None:
+        """TODO.
+
+        Args:
+            line_dict: TODO
+            requires: TODO
+
+        Raises:
+            Exception: TODO
+        """
         for required in requires:
             if required not in line_dict:
                 raise Exception(
                     f"Line is missing required '{required}' key: {line_dict}"
                 )
 
-    def _assert_sink_exists(self, stream_name) -> None:
-        """Raise a RecordsWitoutSchemaException exception if stream doesn't exist."""
+    def _assert_sink_exists(self, stream_name: str) -> None:
+        """Raise a RecordsWitoutSchemaException exception if stream doesn't exist.
+
+        Args:
+            stream_name: TODO
+
+        Raises:
+            RecordsWitoutSchemaException: If sink does not exist and schema is not sent.
+        """
         if not self.sink_exists(stream_name):
             raise RecordsWitoutSchemaException(
                 f"A record for stream '{stream_name}' was encountered before a "
@@ -181,7 +242,17 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     # Message handling
 
-    def _process_lines(self, lines: Iterable[str], table_cache=None) -> None:
+    def _process_lines(self, lines: Iterable[str], table_cache: Any = None) -> None:
+        """TODO.
+
+        Args:
+            lines: TODO.
+            table_cache: TODO. Defaults to None.
+
+        Raises:
+            json.decoder.JSONDecodeError: TODO
+            Exception: TODO
+        """
         self.logger.info(f"Target '{self.name}' is listening for input from tap.")
         line_counter = 0
         record_counter = 0
@@ -224,7 +295,11 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         )
 
     def _process_record_message(self, message_dict: dict) -> None:
-        """Process a RECORD message."""
+        """Process a RECORD message.
+
+        Args:
+            message_dict: TODO
+        """
         self._assert_line_requires(message_dict, requires=["stream", "record"])
 
         stream_name = message_dict["stream"]
@@ -259,7 +334,11 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 self.drain_one(sink)
 
     def _process_schema_message(self, message_dict: dict) -> None:
-        """Process a SCHEMA messages."""
+        """Process a SCHEMA messages.
+
+        Args:
+            message_dict: TODO
+        """
         self._assert_line_requires(message_dict, requires=["stream", "schema"])
 
         stream_name = message_dict["stream"]
@@ -290,6 +369,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """Process a state message. drain sinks if needed.
 
         If state is unchanged, no actions will be taken.
+
+        Args:
+            message_dict: TODO
         """
         self._assert_line_requires(message_dict, requires=["value"])
         state = message_dict["value"]
@@ -304,7 +386,11 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             self.drain_all()
 
     def _process_activate_version_message(self, message_dict: dict) -> None:
-        """Handle the optional ACTIVATE_VERSION message extension."""
+        """Handle the optional ACTIVATE_VERSION message extension.
+
+        Args:
+            message_dict: TODO
+        """
         self.logger.warning(
             "ACTIVATE_VERSION message received but not supported. Ignoring."
             "For more information: https://gitlab.com/meltano/sdk/-/issues/18"
@@ -330,6 +416,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """Drain a specific sink.
 
         This method is internal to the SDK and should not need to be overridden.
+
+        Args:
+            sink: Sink to be drained.
         """
         if sink.current_size == 0:
             return
@@ -339,14 +428,18 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         sink.mark_drained()
 
     def _drain_all(self, sink_list: List[Sink], parallelism: int) -> None:
-        def _drain_sink(sink: Sink):
+        def _drain_sink(sink: Sink) -> None:
             self.drain_one(sink)
 
         with parallel_backend("threading", n_jobs=parallelism):
             Parallel()(delayed(_drain_sink)(sink=sink) for sink in sink_list)
 
-    def _write_state_message(self, state: dict):
-        """Emit the stream's latest state."""
+    def _write_state_message(self, state: dict) -> None:
+        """Emit the stream's latest state.
+
+        Args:
+            state: TODO
+        """
         state_json = json.dumps(state)
         self.logger.info(f"Emitting completed target state {state_json}")
         sys.stdout.write("{}\n".format(state_json))
@@ -355,8 +448,12 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
     # CLI handler
 
     @classproperty
-    def cli(cls):
-        """Execute standard CLI handler for taps."""
+    def cli(cls) -> Callable:
+        """Execute standard CLI handler for taps.
+
+        Returns:
+            A callable CLI object.
+        """
 
         @click.option("--version", is_flag=True)
         @click.option("--about", is_flag=True)
@@ -368,8 +465,16 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             about: bool = False,
             config: str = None,
             format: str = None,
-        ):
-            """Handle command line execution."""
+        ) -> None:
+            """Handle command line execution.
+
+            Args:
+                version: Display the package version.
+                about: Display package metadata and settings.
+                format: Specify output style for `--about`.
+                config: Configuration file location or 'ENV' to use environment
+                    variables.
+            """
             if version:
                 cls.print_version()
                 return
