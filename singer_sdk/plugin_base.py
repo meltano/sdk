@@ -221,7 +221,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                 |:-------:|:--------:|:-------:|:------------:|
                 """
 
-            # Empty List for string parts
+            # Empty list for string parts
             md_list = []
             # Get required settings for table
             required_settings = info.get("settings", {}).get('required', {})
