@@ -44,7 +44,7 @@ def _pop_deselected_schema(
             f"'{type(schema_at_breadcrumb).__name__}' '{schema_at_breadcrumb}' "
             f"for '{stream_name}' bookmark '{str(breadcrumb)}' in '{schema}'"
         )
-        
+
     if "properties" not in schema_at_breadcrumb:
         return
 
