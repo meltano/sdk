@@ -216,7 +216,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             print(json.dumps(info, indent=2))
         elif format == "markdown":
             # Set table base for markdown
-            table_base = f"""
+            table_base = """
                 | Setting | Required | Default | Description  |
                 |:-------:|:--------:|:-------:|:------------:|
                 """
@@ -241,7 +241,9 @@ class PluginBase(metaclass=abc.ABCMeta):
                 elif key == 'settings':
                     setting = f"##{key}\n"
                     for k, v in info.get("settings").get('properties').items():
-                        table_base += f"{k}|{True if k in required_settings else False}|{v.get('default', 'None')}|{v.get('description', '')}|\n"
+                        table_base += f"{k}|{True if k in required_settings else False}|" \
+                                      f"{v.get('default', 'None')}|" \
+                                      f"{v.get('description', '')}|\n"
                     setting += table_base
                     md_list.append(setting)
 
