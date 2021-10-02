@@ -240,7 +240,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
                 if key == 'settings':
                     setting = f"##{key}\n"
-                    for k, v in info["settings"].get('properties').items():
+                    for k, v in info["settings"].get('properties', {}).items():
                         table_base += f"{k}|{True if k in required_settings else False}|" \
                                       f"{v.get('default', 'None')}|" \
                                       f"{v.get('description', '')}|\n"
