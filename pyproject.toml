@@ -3,7 +3,28 @@ name = "singer-sdk"
 version = "0.3.10"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
+maintainers = ["Meltano Team and Contributors"]
+readme = "README.md"
+homepage = "https://sdk.meltano.com/en/latest/"
+repository = "https://gitlab.com/meltano/sdk"
+documentation = "https://sdk.meltano.com/en/latest/"
+keywords = [
+    "Meltano",
+    "Meltano SDK",
+    "ELT",
+]
+classifiers = [
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
 license = "Apache 2.0"
+
+[tool.poetry.urls]
+"Issue Tracker" = "https://gitlab.com/meltano/sdk/-/issues"
+"Twitter" = "https://twitter.com/meltanodata/"
+"Changelog" = "https://gitlab.com/meltano/sdk/-/blob/main/CHANGELOG.md"
+"Slack" = "https://meltano.com/slack"
+"GitHub Mirror" = "https://github.com/meltano/sdk"
+"Youtube" = "https://www.youtube.com/meltano"
 
 [tool.poetry.dependencies]
 python = "<3.10,>=3.6.1"
