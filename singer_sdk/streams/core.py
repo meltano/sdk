@@ -204,12 +204,8 @@ class Stream(metaclass=abc.ABCMeta):
             Starting replication value.
         """
         state = self.get_context_state(context)
-        value = get_starting_replication_value(state)
 
-        if value and self.is_timestamp_replication_key:
-            return cast(datetime.datetime, pendulum.parse(value))
-
-        return value
+        return get_starting_replication_value(state)
 
     def get_starting_timestamp(
         self, context: Optional[dict]
@@ -230,7 +226,17 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             `start_date` from config, or state value if using timestamp replication.
         """
-        return self.get_starting_replication_key_value(context)
+        value = self.get_starting_replication_key_value(context)
+
+        if value is None:
+            return None
+
+        if not self.is_timestamp_replication_key:
+            raise ValueError(
+                f"The replication key {self.replication_key} is not of timestamp type"
+            )
+
+        return cast(datetime.datetime, pendulum.parse(value))
 
     @final
     @property
