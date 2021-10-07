@@ -3,10 +3,9 @@
 import copy
 import datetime
 import logging
-
 from enum import Enum
 from functools import lru_cache
-from typing import Optional, Dict, Any, List, cast
+from typing import Any, Dict, List, Optional, cast
 
 import pendulum
 
@@ -40,14 +39,19 @@ def append_type(type_dict: dict, new_type: str) -> dict:
             result["anyOf"].append(new_type)
         elif new_type != result["anyOf"]:
             result["anyOf"] = [result["anyOf"], new_type]
+        return result
+
     elif "type" in result:
         if isinstance(result["type"], list) and new_type not in result["type"]:
             result["type"].append(new_type)
         elif new_type != result["type"]:
             result["type"] = [result["type"], new_type]
-    else:
-        raise ValueError("Could not append type because type was not detected.")
-    return result
+        return result
+
+    raise ValueError(
+        "Could not append type because the JSON schema for the dictionary "
+        f"`{type_dict}` appears to be invalid."
+    )
 
 
 def is_object_type(property_schema: dict) -> Optional[bool]:

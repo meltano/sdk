@@ -2,15 +2,15 @@
 
 import copy
 import json
-from typing import Dict, List
-from singer_sdk.typing import PropertiesList, Property, StringType
-import pytest
 import logging
+from typing import Dict, List
 
-from singer import Catalog
+import pytest
 
 from singer_sdk.exceptions import MapExpressionError
+from singer_sdk.helpers._singer import Catalog
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
+from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 
 
 @pytest.fixture
@@ -96,6 +96,9 @@ def transform_stream_maps():
             "repo_name": "_['name']",
             "email_domain": "owner_email.split('@')[1]",
             "email_hash": "md5(config['hash_seed'] + owner_email)",
+            "description": "'[masked]'",
+            "description2": "str('[masked]')",
+            "int_test": "int('0')",
             "__else__": None,
         },
     }
@@ -111,6 +114,9 @@ def transformed_result(stream_map_config):
                 "email_hash": md5(
                     stream_map_config["hash_seed"] + "sample1@example.com"
                 ),
+                "description": "[masked]",
+                "description2": "[masked]",
+                "int_test": 0,
             },
             {
                 "repo_name": "my-tap-something",
@@ -118,6 +124,9 @@ def transformed_result(stream_map_config):
                 "email_hash": md5(
                     stream_map_config["hash_seed"] + "sample2@example.com"
                 ),
+                "description": "[masked]",
+                "description2": "[masked]",
+                "int_test": 0,
             },
             {
                 "repo_name": "target-something",
@@ -125,6 +134,9 @@ def transformed_result(stream_map_config):
                 "email_hash": md5(
                     stream_map_config["hash_seed"] + "sample3@example.com"
                 ),
+                "description": "[masked]",
+                "description2": "[masked]",
+                "int_test": 0,
             },
             {
                 "repo_name": "not-atap",
@@ -132,6 +144,9 @@ def transformed_result(stream_map_config):
                 "email_hash": md5(
                     stream_map_config["hash_seed"] + "sample4@example.com"
                 ),
+                "description": "[masked]",
+                "description2": "[masked]",
+                "int_test": 0,
             },
         ],
         "foobars": [  # should be unchanged
@@ -148,6 +163,9 @@ def transformed_schemas():
             Property("repo_name", StringType),
             Property("email_domain", StringType),
             Property("email_hash", StringType),
+            Property("description", StringType),
+            Property("description2", StringType),
+            Property("int_test", IntegerType),
         ).to_dict(),
         "foobars": PropertiesList(
             Property("the", StringType),
@@ -232,7 +250,7 @@ def filtered_schemas():
 
 def test_map_transforms(
     sample_stream,
-    sample_catalog_dict,
+    sample_catalog_obj,
     transform_stream_maps,
     stream_map_config,
     transformed_result,
@@ -245,13 +263,13 @@ def test_map_transforms(
         expected_result=transformed_result,
         expected_schemas=transformed_schemas,
         sample_stream=sample_stream,
-        sample_catalog_dict=sample_catalog_dict,
+        sample_catalog_obj=sample_catalog_obj,
     )
 
 
 def test_clone_and_alias_transforms(
     sample_stream,
-    sample_catalog_dict,
+    sample_catalog_obj,
     clone_and_alias_stream_maps,
     stream_map_config,
     cloned_and_aliased_result,
@@ -264,13 +282,13 @@ def test_clone_and_alias_transforms(
         expected_result=cloned_and_aliased_result,
         expected_schemas=cloned_and_aliased_schemas,
         sample_stream=sample_stream,
-        sample_catalog_dict=sample_catalog_dict,
+        sample_catalog_obj=sample_catalog_obj,
     )
 
 
 def test_filter_transforms(
     sample_stream,
-    sample_catalog_dict,
+    sample_catalog_obj,
     filter_stream_maps,
     stream_map_config,
     filtered_result,
@@ -283,13 +301,13 @@ def test_filter_transforms(
         expected_result=filtered_result,
         expected_schemas=filtered_schemas,
         sample_stream=sample_stream,
-        sample_catalog_dict=sample_catalog_dict,
+        sample_catalog_obj=sample_catalog_obj,
     )
 
 
 def test_filter_transforms_w_error(
     sample_stream,
-    sample_catalog_dict,
+    sample_catalog_obj,
     filter_stream_map_w_error,
     stream_map_config,
     filtered_result,
@@ -303,7 +321,7 @@ def test_filter_transforms_w_error(
             expected_result=filtered_result,
             expected_schemas=filtered_schemas,
             sample_stream=sample_stream,
-            sample_catalog_dict=sample_catalog_dict,
+            sample_catalog_obj=sample_catalog_obj,
         )
 
 
@@ -314,7 +332,7 @@ def _test_transform(
     expected_result,
     expected_schemas,
     sample_stream,
-    sample_catalog_dict,
+    sample_catalog_obj,
 ):
     output: Dict[str, List[dict]] = {}
     mapper = PluginMapper(
@@ -324,7 +342,7 @@ def _test_transform(
         },
         logger=logging,
     )
-    mapper.register_raw_streams_from_catalog(sample_catalog_dict)
+    mapper.register_raw_streams_from_catalog(sample_catalog_obj)
 
     for stream_name, stream in sample_stream.items():
         for stream_map in mapper.stream_maps[stream_name]:

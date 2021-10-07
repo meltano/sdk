@@ -2,23 +2,21 @@
 
 import abc
 import json
-from pathlib import PurePath, Path
-from singer_sdk.mapper import PluginMapper
-from typing import Any, List, Optional, Dict, Tuple, Type, Union, cast
+from pathlib import Path, PurePath
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 import click
-from singer.catalog import Catalog
 
+from singer_sdk.exceptions import MaxRecordsLimitException
+from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
-from singer_sdk.helpers._util import read_json_file
+from singer_sdk.helpers._singer import Catalog
 from singer_sdk.helpers._state import write_stream_state
+from singer_sdk.helpers._util import read_json_file
+from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams import Stream, SQLStream
-from singer_sdk.exceptions import (
-    MaxRecordsLimitException,
-)
-from singer_sdk.helpers import _state
 
 STREAM_MAPS_CONFIG = "stream_maps"
 
@@ -44,19 +42,29 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         state: Union[PurePath, str, dict, None] = None,
         parse_env_config: bool = False,
     ) -> None:
-        """Initialize the tap."""
+        """Initialize the tap.
+
+        Args:
+            config: Tap configuration. Can be a dictionary, a single path to a
+                configuration file, or a list of paths to multiple configuration
+                files.
+            catalog: Tap catalog. Can be a dictionary or a path to the catalog file.
+            state: Tap state. Can be dictionary or a path to the state file.
+            parse_env_config: Whether to look for configuration values in environment
+                variables.
+        """
         super().__init__(config=config, parse_env_config=parse_env_config)
 
         # Declare private members
         self._streams: Optional[Dict[str, Stream]] = None
-        self._input_catalog: Optional[dict] = None
+        self._input_catalog: Optional[Catalog] = None
         self._state: Dict[str, Stream] = {}
 
         # Process input catalog
         if isinstance(catalog, dict):
-            self._input_catalog = catalog
+            self._input_catalog = Catalog.from_dict(catalog)
         elif catalog is not None:
-            self._input_catalog = read_json_file(catalog)
+            self._input_catalog = Catalog.from_dict(read_json_file(catalog))
 
         # Initialize mapper
         self.mapper: PluginMapper
@@ -65,7 +73,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             logger=self.logger,
         )
         self.mapper.register_raw_streams_from_catalog(
-            self._input_catalog or self.catalog_dict
+            self.input_catalog or self._singer_catalog
         )
 
         # Process state
@@ -80,40 +88,64 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     @property
     def streams(self) -> Dict[str, Stream]:
-        """Return a list of streams, using discovery or a provided catalog.
+        """Get streams discovered or catalogued for this tap.
 
         Results will be cached after first execution.
+
+        Returns:
+            A mapping of names to streams, using discovery or a provided catalog.
         """
+        input_catalog = self.input_catalog
+
         if self._streams is None:
             self._streams = {}
             for stream in self.load_streams():
-                if self.input_catalog:
-                    stream.apply_catalog(self.input_catalog)
+                if input_catalog is not None:
+                    stream.apply_catalog(input_catalog)
                 self._streams[stream.name] = stream
         return self._streams
 
     @property
     def state(self) -> dict:
-        """Return a state dict."""
+        """Get tap state.
+
+        Returns:
+            The tap's state dictionary
+
+        Raises:
+            RuntimeError: If state has not been initialized.
+        """
         if self._state is None:
             raise RuntimeError("Could not read from uninitialized state.")
         return self._state
 
     @property
-    def input_catalog(self) -> Optional[dict]:
-        """Return the catalog dictionary input, or None if not provided."""
+    def input_catalog(self) -> Optional[Catalog]:
+        """Get the catalog passed to the tap.
+
+        Returns:
+            Catalog dictionary input, or None if not provided.
+        """
         return self._input_catalog
 
     @classproperty
     def capabilities(self) -> List[str]:
-        """Return a list of supported capabilities."""
+        """Get tap capabilities.
+
+        Returns:
+            A list of capabilities supported by this tap.
+        """
         return ["sync", "catalog", "state", "discover"]
 
     # Connection test:
 
     @final
     def run_connection_test(self) -> bool:
-        """Run connection test and return True if successful."""
+        """Run connection test.
+
+        Returns:
+            True if the test succeeded.
+        """
         for stream in self.streams.values():
             if stream.parent_stream_type:
                 self.logger.debug(
@@ -133,19 +165,25 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Stream detection:
 
     def run_discovery(self) -> str:
-        """Write the catalog json to STDOUT and return the same as a string."""
+        """Write the catalog json to STDOUT and return as a string.
+
+        Returns:
+            The catalog as a string of JSON.
+        """
         catalog_text = self.catalog_json_text
         print(catalog_text)
         return catalog_text
 
     @property
     def catalog_dict(self) -> dict:
-        """Return the tap's catalog as a dict.
+        """Get catalog dictionary.
 
         If `self.default_stream_class` is set and inherits from SQLStream,
         catalog_dict will be detected from run_discovery() on the stream class.
-
         Otherwise, the catalog will be aggregated from the list of known streams.
+
+        Returns:
+            The tap's catalog as a dict
         """
         if self.default_stream_class and isinstance(
             self.default_stream_class, SQLStream
@@ -159,19 +197,32 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     @property
     def catalog_json_text(self) -> str:
-        """Return the tap's catalog as formatted json text."""
+        """Get catalog JSON.
+
+        Returns:
+            The tap's catalog as formatted JSON text.
+        """
         return json.dumps(self.catalog_dict, indent=2)
 
     @property
     def _singer_catalog(self) -> Catalog:
-        """Return a Catalog object."""
-        catalog_entries = [
-            stream._singer_catalog_entry for stream in self.streams.values()
-        ]
-        return Catalog(catalog_entries)
+        """Return a Catalog object.
+
+        Returns:
+            :class:`singer_sdk.helpers._singer.Catalog`.
+        """
+        return Catalog(
+            (stream.tap_stream_id, stream._singer_catalog_entry)
+            for stream in self.streams.values()
+        )
 
     def discover_streams(self) -> List[Stream]:
-        """Initialize all available streams and return them as a list."""
+        """Initialize all available streams and return them as a list.
+
+        Raises:
+            NotImplementedError: If the tap implementation does not override this
+                method.
+        """
         if self.default_stream_class and isinstance(
             self.default_stream_class, SQLStream
         ):
@@ -192,6 +243,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
         Return the output of `self.discover_streams()` to enumerate
         discovered streams.
+
+        Returns:
+            A list of discovered streams, ordered by name.
         """
         # Build the parent-child dependency DAG
 
@@ -229,6 +283,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         Override this method to perform validation and backwards-compatibility patches
         on self.state. If overriding, we recommend first running
         `super().load_state(state)` to ensure compatibility with the SDK.
+
+        Args:
+            state: Initialize the tap'ss state with this value.
+
+        Raises:
+            ValueError: If the tap's own state is None, meaning it has not been
+                initialized.
         """
         if self.state is None:
             raise ValueError("Cannot write to uninitialized state dictionary.")
@@ -270,7 +331,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Sync methods
 
     @final
-    def sync_all(self):
+    def sync_all(self) -> None:
         """Sync all streams."""
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
@@ -294,8 +355,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Command Line Execution
 
     @classproperty
-    def cli(cls):
-        """Execute standard CLI handler for taps."""
+    def cli(cls) -> Callable:
+        """Execute standard CLI handler for taps.
+
+        Returns:
+            A callable CLI object.
+        """
 
         @click.option(
             "--version",
@@ -354,7 +419,22 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             catalog: str = None,
             format: str = None,
         ) -> None:
-            """Handle command line execution."""
+            """Handle command line execution.
+
+            Args:
+                version: Display the package version.
+                about: Display package metadata and settings.
+                discover: Run the tap in discovery mode.
+                test: Test connectivity by syncing a single record and exiting.
+                format: Specify output style for `--about`.
+                config: Configuration file location or 'ENV' to use environment
+                    variables.
+                catalog: Use a Singer catalog file with the tap.",
+                state: Use a bookmarks file for incremental replication.
+
+            Raises:
+                FileNotFoundError: If the config file does not exist.
+            """
             if version:
                 cls.print_version()
                 return

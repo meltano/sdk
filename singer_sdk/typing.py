@@ -38,15 +38,15 @@ Note:
   here.
 
 """
+from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union, cast
 
 from jsonschema import validators
-from typing import Dict, List, Tuple, Type, Union, cast
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._typing import append_type
 
 
-def extend_validator_with_defaults(validator_class):
+def extend_validator_with_defaults(validator_class):  # noqa
     """Fill in defaults, before validating with the provided JSON Schema Validator.
 
     See https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance  # noqa
@@ -54,7 +54,7 @@ def extend_validator_with_defaults(validator_class):
     """
     validate_properties = validator_class.VALIDATORS["properties"]
 
-    def set_defaults(validator, properties, instance, schema):
+    def set_defaults(validator, properties, instance, schema):  # noqa
         for property, subschema in properties.items():
             if "default" in subschema:
                 instance.setdefault(property, subschema["default"])
@@ -78,11 +78,19 @@ class JSONTypeHelper(object):
 
     @classproperty
     def type_dict(cls) -> dict:
-        """Return dict describing the type."""
+        """Return dict describing the type.
+
+        Raises:
+            NotImplementedError: If the derived class does not override this method.
+        """
         raise NotImplementedError()
 
     def to_dict(self) -> dict:
-        """Return dict describing the object."""
+        """Convert to dictionary.
+
+        Returns:
+            A JSON Schema dictionary describing the object.
+        """
         return cast(dict, self.type_dict)
 
 
@@ -91,7 +99,11 @@ class DateTimeType(JSONTypeHelper):
 
     @classproperty
     def type_dict(cls) -> dict:
-        """Return dict describing the type."""
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
         return {
             "type": ["string"],
             "format": "date-time",
@@ -103,7 +115,11 @@ class StringType(JSONTypeHelper):
 
     @classproperty
     def type_dict(cls) -> dict:
-        """Return dict describing the type."""
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
         return {"type": ["string"]}
 
 
@@ -112,7 +128,11 @@ class BooleanType(JSONTypeHelper):
 
     @classproperty
     def type_dict(cls) -> dict:
-        """Return dict describing the type."""
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
         return {"type": ["boolean"]}
 
 
@@ -121,7 +141,11 @@ class IntegerType(JSONTypeHelper):
 
     @classproperty
     def type_dict(cls) -> dict:
-        """Return dict describing the type."""
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
         return {"type": ["integer"]}
 
 
@@ -130,64 +154,107 @@ class NumberType(JSONTypeHelper):
 
     @classproperty
     def type_dict(cls) -> dict:
-        """Return dict describing the type."""
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
         return {"type": ["number"]}
 
 
-class ArrayType(JSONTypeHelper):
+W = TypeVar("W", bound=JSONTypeHelper)
+
+
+class ArrayType(JSONTypeHelper, Generic[W]):
     """Array type."""
 
-    def __init__(self, wrapped_type) -> None:
-        """Initialize Array type with wrapped inner type."""
+    def __init__(self, wrapped_type: W) -> None:
+        """Initialize Array type with wrapped inner type.
+
+        Args:
+            wrapped_type: JSON Schema item type inside the array.
+        """
         self.wrapped_type = wrapped_type
 
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
-        """Return dict describing the type."""
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
         return {"type": "array", "items": self.wrapped_type.type_dict}
 
 
-class Property(JSONTypeHelper):
+class Property(JSONTypeHelper, Generic[W]):
     """Generic Property. Should be nested within a `PropertiesList`."""
 
     def __init__(
         self,
         name: str,
-        wrapped: Union[JSONTypeHelper, Type[JSONTypeHelper]],
+        wrapped: Union[W, Type[W]],
         required: bool = False,
-        default=None,
+        default: Any = None,
+        description: str = None,
     ) -> None:
-        """Initialize Property object."""
+        """Initialize Property object.
+
+        Args:
+            name: Property name.
+            wrapped: JSON Schema type of the property.
+            required: Whether this is a required property.
+            default: Default value in the JSON Schema.
+            description: Long-text property description.
+        """
         self.name = name
         self.wrapped = wrapped
         self.optional = not required
         self.default = default
+        self.description = description
 
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
-        """Return dict describing the type."""
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
         return cast(dict, self.wrapped.type_dict)
 
     def to_dict(self) -> dict:
-        """Return a dict mapping the property name to its definition."""
+        """Return a dict mapping the property name to its definition.
+
+        Returns:
+            A JSON Schema dictionary describing the object.
+        """
         type_dict = self.type_dict
         if self.optional:
             type_dict = append_type(type_dict, "null")
         if self.default:
             type_dict.update({"default": self.default})
+        if self.description:
+            type_dict.update({"description": self.description})
         return {self.name: type_dict}
 
 
 class ObjectType(JSONTypeHelper):
     """Object type, which wraps one or more named properties."""
 
-    def __init__(self, *properties) -> None:
-        """Initialize ObjectType from its list of properties."""
+    def __init__(self, *properties: Property) -> None:
+        """Initialize ObjectType from its list of properties.
+
+        Args:
+            properties: TODO
+        """
         self.wrapped: List[Property] = list(properties)
 
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
-        """Return dict describing the type."""
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
         merged_props = {}
         required = []
         for w in self.wrapped:
@@ -204,12 +271,20 @@ class CustomType(JSONTypeHelper):
     """Accepts an arbitrary JSON Schema dictionary."""
 
     def __init__(self, jsonschema_type_dict: dict) -> None:
-        """Initialize JSONTypeHelper by importing an existing JSON Schema type."""
+        """Initialize JSONTypeHelper by importing an existing JSON Schema type.
+
+        Args:
+            jsonschema_type_dict: TODO
+        """
         self._jsonschema_type_dict = jsonschema_type_dict
 
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
-        """Return dict describing the type."""
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
         return self._jsonschema_type_dict
 
 
@@ -217,11 +292,19 @@ class PropertiesList(ObjectType):
     """Properties list. A convenience wrapper around the ObjectType class."""
 
     def items(self) -> List[Tuple[str, Property]]:
-        """Return list of (name, property) tuples."""
+        """Get wrapped properties.
+
+        Returns:
+            List of (name, property) tuples.
+        """
         return [(p.name, p) for p in self.wrapped]
 
     def append(self, property: Property) -> None:
-        """Append a property to the property list."""
+        """Append a property to the property list.
+
+        Args:
+            property: Property to add
+        """
         self.wrapped.append(property)
 
 

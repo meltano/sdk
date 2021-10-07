@@ -1,8 +1,7 @@
 """REST fixtures."""
 
-from memoization.memoization import cached
-
 import pytest
+from memoization.memoization import cached
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SingletonMeta
 from singer_sdk.streams import RESTStream

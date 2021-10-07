@@ -232,3 +232,10 @@ class CachedAuthStream(RESTStream):
         """Stream authenticator."""
         return APIAuthenticatorBase(stream=self)
 ```
+
+## Additional Resources
+
+More links, resources, and example solutions are available from community
+members in the [`#singer-tap-development`](https://meltano.slack.com/archives/C01PKLU5D1R)
+and [`#singer-target-development`](https://meltano.slack.com/archives/C01RKUVUG4S)
+channels on [Meltano Slack](https://meltano.com/slack).

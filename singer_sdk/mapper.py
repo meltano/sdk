@@ -7,15 +7,12 @@ import abc
 import copy
 import hashlib
 import logging
-from typing import Dict, Callable, Any, Tuple, Type, Union, cast, Optional, List
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
-import simpleeval
-from simpleeval import simple_eval
-
-from singer.catalog import Catalog, CatalogEntry
-
-from singer_sdk.helpers._catalog import get_selected_schema
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
+from singer_sdk.helpers import _simpleeval as simpleeval
+from singer_sdk.helpers._catalog import get_selected_schema
+from singer_sdk.helpers._singer import Catalog
 from singer_sdk.typing import (
     CustomType,
     IntegerType,
@@ -26,7 +23,6 @@ from singer_sdk.typing import (
     StringType,
 )
 
-SIMPLEEVAL = "simpleeval"
 MAPPER_ELSE_OPTION = "__else__"
 MAPPER_FILTER_OPTION = "__filter__"
 MAPPER_SOURCE_OPTION = "__source__"
@@ -35,7 +31,14 @@ MAPPER_KEY_PROPERTIES_OPTION = "__key_properties__"
 
 
 def md5(input: str) -> str:
-    """Return the md5 as a string. This is a function for inline calculations."""
+    """Digest a string using MD5. This is a function for inline calculations.
+
+    Args:
+        input: String to digest.
+
+    Returns:
+        A string digested into MD5.
+    """
     return hashlib.md5(input.encode("utf-8")).hexdigest()
 
 
@@ -45,7 +48,13 @@ class StreamMap(metaclass=abc.ABCMeta):
     def __init__(
         self, stream_alias: str, raw_schema: dict, key_properties: Optional[List[str]]
     ) -> None:
-        """Initialize mapper."""
+        """Initialize mapper.
+
+        Args:
+            stream_alias: Stream name.
+            raw_schema: Original strem JSON schema.
+            key_properties: Primary key of the source stream.
+        """
         self.stream_alias = stream_alias
         self.raw_schema = raw_schema
         self.raw_key_properties = key_properties
@@ -54,12 +63,32 @@ class StreamMap(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def transform(self, record: dict) -> Optional[dict]:
-        """Transform a record and return the result."""
+        """Transform a record and return the result.
+
+        Args:
+            record: An individual record dictionary in a stream.
+
+        Return:
+            A new dictionary representing a transformed record.
+
+        Raises:
+            NotImplementedError: If the derived class doesn't override this method.
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def get_filter_result(self, record: dict) -> bool:
-        """Return True to include the record or False to exclude."""
+        """Exclude records from a stream.
+
+        Args:
+            record: An individual record dictionary in a stream.
+
+        Return:
+            True to include the record or False to exclude.
+
+        Raises:
+            NotImplementedError: If the derived class doesn't override this method.
+        """
         raise NotImplementedError
 
 
@@ -70,25 +99,53 @@ class DefaultStreamMap(StreamMap):
 class RemoveRecordTransform(DefaultStreamMap):
     """Default mapper which simply excludes any records."""
 
-    def transform(self, record: dict) -> Optional[dict]:
-        """Return None (always exclude)."""
+    def transform(self, record: dict) -> None:
+        """Return None (always exclude).
+
+        Args:
+            record: An individual record dictionary in a stream.
+
+        Returns:
+            None
+        """
         _ = record  # Drop the record
         return None
 
     def get_filter_result(self, record: dict) -> bool:
-        """Return False (always exclude)."""
+        """Exclude all records.
+
+        Args:
+            record: An individual record dictionary in a stream.
+
+        Returns:
+            Always `False`.
+        """
         return False
 
 
 class SameRecordTransform(DefaultStreamMap):
     """Default mapper which simply returns the original records."""
 
-    def transform(self, record: dict) -> Optional[dict]:
-        """Return original record unchanged."""
+    def transform(self, record: dict) -> dict:
+        """Return original record unchanged.
+
+        Args:
+            record: An individual record dictionary in a stream.
+
+        Returns:
+            The original record unchanged.
+        """
         return record
 
     def get_filter_result(self, record: dict) -> bool:
-        """Return True (always include)."""
+        """Return True (always include).
+
+        Args:
+            record: An individual record dictionary in a stream.
+
+        Returns:
+            Always `True`.
+        """
         return True
 
 
@@ -103,7 +160,15 @@ class CustomStreamMap(StreamMap):
         key_properties: Optional[List[str]],
         map_transform: dict,
     ) -> None:
-        """Initialize mapper."""
+        """Initialize mapper.
+
+        Args:
+            stream_alias: Stream name.
+            map_config: Stream map configuration.
+            raw_schema: Original strem JSON schema.
+            key_properties: Primary key of the source stream.
+            map_transform: Dictionary of transformations to apply to the stream.
+        """
         super().__init__(
             stream_alias=stream_alias,
             raw_schema=raw_schema,
@@ -120,22 +185,52 @@ class CustomStreamMap(StreamMap):
         ) = self._init_functions_and_schema(stream_map=map_transform)
 
     def transform(self, record: dict) -> Optional[dict]:
-        """Return a transformed record."""
+        """Return a transformed record.
+
+        Args:
+            record: An individual record dictionary in a stream.
+
+        Returns:
+            The transformed record.
+        """
         return self._transform_fn(record)
 
     def get_filter_result(self, record: dict) -> bool:
-        """Return True to include or False to exclude."""
+        """Return True to include or False to exclude.
+
+        Args:
+            record: An individual record dictionary in a stream.
+
+        Returns:
+            Boolean flag for record selection.
+        """
         return self._filter_fn(record)
 
     @property
     def functions(self) -> Dict[str, Callable]:
-        """Return the functions which should be available for expression evaluation."""
+        """Get avaibale transformation functions.
+
+        Returns:
+            Functions which should be available for expression evaluation.
+        """
         funcs: Dict[str, Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
         funcs["md5"] = md5
         return funcs
 
     def _eval(self, expr: str, record: dict, property_name: Optional[str]) -> Any:
-        """Solve an expression."""
+        """Solve an expression.
+
+        Args:
+            expr: String expression to evaluate.
+            record: Individual stream record.
+            property_name: Name of property to transform in the record.
+
+        Returns:
+            Evaluated expression.
+
+        Raises:
+            MapExpressionError: If the mapping expression failed to evaluate.
+        """
         names = record.copy()  # Start with names from record properties
         names["_"] = record  # Add a shorthand alias in case of reserved words in names
         names["record"] = record  # ...and a longhand alias
@@ -144,7 +239,7 @@ class CustomStreamMap(StreamMap):
             # Allow access to original property value if applicable
             names["self"] = record[property_name]
         try:
-            result = simple_eval(expr, functions=self.functions, names=names)
+            result = simpleeval.simple_eval(expr, functions=self.functions, names=names)
             logging.debug(f"Eval result: {expr} = {result}")
         except Exception as ex:
             raise MapExpressionError(
@@ -155,7 +250,15 @@ class CustomStreamMap(StreamMap):
     def _eval_type(
         self, expr: str, default: Optional[JSONTypeHelper] = None
     ) -> JSONTypeHelper:
-        """Evaluate an expression's type."""
+        """Evaluate an expression's type.
+
+        Args:
+            expr: String expression to evaluate.
+            default: TODO.
+
+        Returns:
+            TODO
+        """
         assert expr is not None, "Expression should be str, not None"
 
         default = default or StringType()
@@ -166,12 +269,29 @@ class CustomStreamMap(StreamMap):
         if expr.startswith("int("):
             return IntegerType()
 
+        if expr.startswith("str("):
+            return StringType()
+
+        if expr[0] == "'" and expr[-1] == "'":
+            return StringType()
+
         return default
 
     def _init_functions_and_schema(
         self, stream_map: dict
     ) -> Tuple[Callable[[dict], bool], Callable[[dict], Optional[dict]], dict]:
-        """Return a tuple: filter_fn, transform_fn, transformed_schema."""
+        """Return a tuple: filter_fn, transform_fn, transformed_schema.
+
+        Args:
+            stream_map: TODO
+
+        Returns:
+            TODO.
+
+        Raises:
+            NotImplementedError: TODO
+            StreamMapConfigError: TODO
+        """
         stream_map = copy.copy(stream_map)
 
         filter_rule: Optional[str] = None
@@ -231,10 +351,13 @@ class CustomStreamMap(StreamMap):
                 stream_map.pop(prop_key)
             elif isinstance(prop_def, str):
                 default_type: JSONTypeHelper = StringType()  # Fallback to string
-                existing_def: dict = transformed_schema["properties"].get(prop_key, {})
-                if "type" in existing_def:
-                    # Set default type if property exists with valid JSON Schema
-                    default_type = CustomType(existing_def["type"])
+                existing_schema: dict = transformed_schema["properties"].get(
+                    prop_key, {}
+                )
+                if existing_schema:
+                    # Set default type if property exists already in JSON Schema
+                    default_type = CustomType(existing_schema)
+
                 transformed_schema["properties"].update(
                     Property(
                         prop_key, self._eval_type(prop_def, default=default_type)
@@ -322,8 +445,16 @@ class PluginMapper:
         self,
         plugin_config: Dict[str, Dict[str, Union[str, dict]]],
         logger: logging.Logger,
-    ):
-        """Initialize mapper."""
+    ) -> None:
+        """Initialize mapper.
+
+        Args:
+            plugin_config: TODO
+            logger: TODO
+
+        Raises:
+            StreamMapConfigError: TODO
+        """
         self.stream_maps = cast(Dict[str, List[StreamMap]], {})
         self.map_config = plugin_config.get("stream_map_config", {})
         self.default_mapper_type: Type[DefaultStreamMap] = SameRecordTransform
@@ -356,17 +487,19 @@ class PluginMapper:
                     f"Option '{stream_map_key}:{stream_def}' is not expected."
                 )
 
-    def register_raw_streams_from_catalog(self, catalog_dict: dict) -> None:
-        """Register all streams as described in the catalog dict."""
-        catalog = Catalog.from_dict(catalog_dict)
-        catalog_entry: CatalogEntry
+    def register_raw_streams_from_catalog(self, catalog: Catalog) -> None:
+        """Register all streams as described in the catalog dict.
+
+        Args:
+            catalog: TODO
+        """
         for catalog_entry in catalog.streams:
             self.register_raw_stream_schema(
                 catalog_entry.stream or catalog_entry.tap_stream_id,
                 get_selected_schema(
                     catalog_entry.stream or catalog_entry.tap_stream_id,
                     catalog_entry.schema.to_dict(),
-                    catalog_entry.metadata,
+                    catalog_entry.metadata.resolve_selection(),
                     self.logger,
                 ),
                 catalog_entry.key_properties,
@@ -375,7 +508,16 @@ class PluginMapper:
     def register_raw_stream_schema(
         self, stream_name: str, schema: dict, key_properties: Optional[List[str]]
     ) -> None:
-        """Register a new stream as described by its name and schema."""
+        """Register a new stream as described by its name and schema.
+
+        Args:
+            stream_name: TODO
+            schema: TODO
+            key_properties: TODO
+
+        Raises:
+            StreamMapConfigError: TODO
+        """
         if stream_name not in self.stream_maps:
             # The 0th mapper should be the same-named treatment.
             # Additional items may be added for aliasing or multi projections.
@@ -440,12 +582,30 @@ class PluginMapper:
                 self.stream_maps[stream_name].append(mapper)
 
     def get_primary_mapper(self, stream_name: str) -> StreamMap:
-        """Return the primary mapper for the specified stream name."""
+        """Return the primary mapper for the specified stream name.
+
+        Args:
+            stream_name: TODO
+
+        Returns:
+            TODO
+
+        Raises:
+            StreamMapConfigError: TODO
+        """
         if stream_name not in self.stream_maps:
             raise StreamMapConfigError(f"No mapper found for {stream_name}. ")
 
         return self.stream_maps[stream_name][0]
 
     def apply_primary_mapper(self, stream_name: str, record: dict) -> Optional[dict]:
-        """Apply the primary mapper for the stream and return the result."""
+        """Apply the primary mapper for the stream and return the result.
+
+        Args:
+            stream_name: TODO
+            record: TODO
+
+        Returns:
+            TODO
+        """
         return self.get_primary_mapper(stream_name).transform(record)

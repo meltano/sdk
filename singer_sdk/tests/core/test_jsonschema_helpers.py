@@ -2,15 +2,15 @@
 
 from typing import List
 
-from singer_sdk.tap_base import Tap
 from singer_sdk.streams.core import Stream
+from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
     ArrayType,
-    ObjectType,
-    StringType,
     IntegerType,
+    ObjectType,
     PropertiesList,
     Property,
+    StringType,
 )
 
 
@@ -80,3 +80,14 @@ def test_tap_config_default_injection():
     tap = ConfigTestTap(config=config_dict, parse_env_config=False, catalog={})
 
     assert dict(tap.config) == config_dict
+
+
+def test_property_description():
+    text = "A test property"
+    prop = Property("test_property", StringType, description=text)
+    assert prop.to_dict() == {
+        "test_property": {
+            "type": ["string", "null"],
+            "description": text,
+        }
+    }

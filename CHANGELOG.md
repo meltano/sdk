@@ -19,6 +19,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Breaks
 
 
+## 0.3.10 - (2021-09-30)
+---
+
+### Changes
+
+- Tap and Target SDK: Prevents the leaking of sensitive configuration values when JSON schema validation fails ([!173](https://gitlab.com/meltano/sdk/-/merge_requests/173)) -- _Thanks, **[Kevin Mullins](https://gitlab.com/zyzil)**!_.
+
+
+## 0.3.9 - (2021-09-23)
+---
+
+### New
+
+- Add description attribute to `Property` class for JSON schemas  ([#159](https://gitlab.com/meltano/sdk/-/issues/159), [!164](https://gitlab.com/meltano/sdk/-/merge_requests/164)) -- _Thanks, **[Stephen Bailey](https://gitlab.com/stkbailey)**!_
+
+### Changes
+
+- Tap SDK: Set `key_properties = []` instead of `null` per the Singer spec ([!160](https://gitlab.com/meltano/sdk/-/merge_requests/160)) -- _Thanks, **[Niall Woodward](https://gitlab.com/NiallRees)**!_
+
+### Fixes
+
+- Tap SDK: Fixes issue where stream map schema generation fails when overriding the value of an existing property. ([#196](https://gitlab.com/meltano/sdk/-/issues/196), [!165](https://gitlab.com/meltano/sdk/-/merge_requests/165))
+
+## 0.3.8 - (2021-09-16)
+---
+
+### Fixes
+
+- Tap and Target SDK: Resolves `2to3` compatibility issues when installed with `setuptools>=58.0`.
+- Resolve issue preventing repo from being cloned on Windows.
+
+
+## 0.3.7 - (2021-09-09)
+---
+
+### New
+
+- Tap and Target SDK: Added compatibility with [PEP 561](https://www.python.org/dev/peps/pep-0561/) and `mypy` type checking ([#212](https://gitlab.com/meltano/sdk/-/issues/212), [!150](https://gitlab.com/meltano/sdk/-/merge_requests/150)) -- _Thanks, **[Laurent Savaëte](https://gitlab.com/LaurentS)**!_
+
+### Changes
+
+- Tap SDK: Improved record parsing and validation performance, especially with large record objects ([#161](https://gitlab.com/meltano/sdk/-/issues/161), [!146](https://gitlab.com/meltano/sdk/-/merge_requests/146))
+- Tap SDK: Changed the signature of `Stream.apply_catalog` to reflect new catalog parsing flow ([#161](https://gitlab.com/meltano/sdk/-/issues/161), [!146](https://gitlab.com/meltano/sdk/-/merge_requests/146))
+
+
 ## 0.3.6 - (2021-08-26)
 ---
 
@@ -179,7 +224,7 @@ Significant release with newly added features. No breaking changes.
   resumed if interrupted. (!61)
 - Added signpost feature to prevent bookmarks from advancing beyond the point where all
   records have been streamed. (!61)
-- Added `get_replication_key_signpost()` stream method which defaults to the current time 
+- Added `get_replication_key_signpost()` stream method which defaults to the current time
   for timestamp-based replication keys. (!61)
 
 ### Fixes
