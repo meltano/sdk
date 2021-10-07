@@ -455,11 +455,33 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             A callable CLI object.
         """
 
-        @click.option("--version", is_flag=True)
-        @click.option("--about", is_flag=True)
-        @click.option("--format")
-        @click.option("--config")
-        @click.command()
+        @click.option(
+            "--version",
+            is_flag=True,
+            help="Display the package version.",
+        )
+        @click.option(
+            "--about",
+            is_flag=True,
+            help="Display package metadata and settings.",
+        )
+        @click.option(
+            "--format",
+            help="Specify output style for --about",
+            type=click.Choice(["json", "markdown"], case_sensitive=False),
+            default=None,
+        )
+        @click.option(
+            "--config",
+            multiple=True,
+            help="Configuration file location or 'ENV' to use environment variables.",
+            type=click.STRING,
+            default=(),
+        )
+        @click.command(
+            help="Execute the Singer target.",
+            context_settings={"help_option_names": ["--help"]},
+        )
         def cli(
             version: bool = False,
             about: bool = False,

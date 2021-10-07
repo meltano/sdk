@@ -347,6 +347,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             help="Display package metadata and settings.",
         )
         @click.option(
+            "--format",
+            help="Specify output style for --about",
+            type=click.Choice(["json", "markdown"], case_sensitive=False),
+            default=None,
+        )
+        @click.option(
             "--discover",
             is_flag=True,
             help="Run the tap in discovery mode.",
@@ -355,12 +361,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             "--test",
             is_flag=True,
             help="Test connectivity by syncing a single record and exiting.",
-        )
-        @click.option(
-            "--format",
-            help="Specify output style for --about",
-            type=click.Choice(["json", "markdown"], case_sensitive=False),
-            default=None,
         )
         @click.option(
             "--config",
