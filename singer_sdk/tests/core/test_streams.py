@@ -81,9 +81,19 @@ def tap() -> SimpleTestTap:
                 "schema": SimpleTestStream.schema,
                 "replication_method": REPLICATION_FULL_TABLE,
                 "replication_key": None,
+                "metadata": [
+                    {
+                        "breadcrumb": (),
+                        "metadata": {
+                            "initial_replication_key_value": -9999,
+                            "inclusion": "available",
+                        },
+                    }
+                ],
             }
         ]
     }
+
     return SimpleTestTap(
         config={"start_date": "2021-01-01"},
         parse_env_config=False,
@@ -135,6 +145,21 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
     assert stream.get_starting_timestamp(None) == pendulum.parse(
         timestamp_value
     ), f"Incorrect starting timestamp. Tap state was {dict(tap.state)}"
+
+
+def test_stream_initial_replication_key_value(
+    tap: SimpleTestTap, stream: SimpleTestStream
+):
+    """Validate state and initial_replication_key_value setting handling."""
+
+    stream.apply_catalog(
+        tap.input_catalog
+    )  # includes the initial_replication_key_value
+    stream.replication_key = "id"  # Previous line sets this None
+
+    assert (
+        stream.get_starting_replication_key_value(None) == -9999
+    ), f"Incorrect initial replication key value. Stream metadata was {stream.metadata}"
 
 
 @pytest.mark.parametrize(

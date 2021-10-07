@@ -247,10 +247,25 @@ class Stream(metaclass=abc.ABCMeta):
         if self.replication_key:
             state = self.get_context_state(context)
             replication_key_value = state.get("replication_key_value")
-            if replication_key_value and self.replication_key == state.get(
-                "replication_key"
-            ):
-                return replication_key_value
+
+            if replication_key_value:
+                """Return the replication_key_value from the state"""
+                state_replication_key = state.get("replication_key")
+
+                if self.replication_key == state_replication_key:
+                    return replication_key_value
+
+                self.logger.warning(
+                    f"{self.name} replication_key changed from "
+                    f"'{state_replication_key}' to '{self.replication_key}'."
+                )
+                return None
+
+            """Return the initial_replication_key_value if defined"""
+            md_map = singer.metadata.to_map(self.metadata)
+            md_entry = md_map.get(())
+            if "initial_replication_key_value" in md_entry:
+                return md_entry.get("initial_replication_key_value")
 
         return None
 
