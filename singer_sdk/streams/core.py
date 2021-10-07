@@ -40,12 +40,14 @@ from singer_sdk.helpers._singer import (
 )
 from singer_sdk.helpers._state import (
     finalize_state_progress_markers,
+    get_starting_replication_value,
     get_state_partitions_list,
     get_writeable_state_dict,
     increment_state,
     log_sort_error,
     reset_state_progress_markers,
     write_replication_key_signpost,
+    write_starting_replication_value,
 )
 from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type
 from singer_sdk.helpers._util import utc_now
@@ -201,10 +203,9 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             Starting replication value.
         """
-        if self.is_timestamp_replication_key:
-            return self.get_starting_timestamp(context)
+        state = self.get_context_state(context)
 
-        return self._starting_replication_key_value(context)
+        return get_starting_replication_value(state)
 
     def get_starting_timestamp(
         self, context: Optional[dict]
@@ -224,35 +225,21 @@ class Stream(metaclass=abc.ABCMeta):
 
         Returns:
             `start_date` from config, or state value if using timestamp replication.
+
+        Raises:
+            ValueError: If the replication value is not a valid timestamp.
         """
-        if self.is_timestamp_replication_key:
-            replication_key_value = self._starting_replication_key_value(context)
-            if replication_key_value:
-                return cast(datetime.datetime, pendulum.parse(replication_key_value))
+        value = self.get_starting_replication_key_value(context)
 
-        if "start_date" in self.config:
-            return cast(datetime.datetime, pendulum.parse(self.config["start_date"]))
+        if value is None:
+            return None
 
-        return None
+        if not self.is_timestamp_replication_key:
+            raise ValueError(
+                f"The replication key {self.replication_key} is not of timestamp type"
+            )
 
-    def _starting_replication_key_value(self, context: Optional[dict]) -> Optional[Any]:
-        """Return starting replication key.
-
-        Args:
-            context: Stream partition or context dictionary.
-
-        Returns:
-            TODO
-        """
-        if self.replication_key:
-            state = self.get_context_state(context)
-            replication_key_value = state.get("replication_key_value")
-            if replication_key_value and self.replication_key == state.get(
-                "replication_key"
-            ):
-                return replication_key_value
-
-        return None
+        return cast(datetime.datetime, pendulum.parse(value))
 
     @final
     @property
@@ -310,6 +297,27 @@ class Stream(metaclass=abc.ABCMeta):
 
         state = self.get_context_state(context)
         write_replication_key_signpost(state, value)
+
+    def _write_starting_replication_value(self, context: Optional[dict]) -> None:
+        """Write the starting replication value, if available.
+
+        Args:
+            context: Stream partition or context dictionary.
+        """
+        value = None
+        state = self.get_context_state(context)
+
+        if self.replication_key:
+            replication_key_value = state.get("replication_key_value")
+            if replication_key_value and self.replication_key == state.get(
+                "replication_key"
+            ):
+                value = replication_key_value
+
+            elif "start_date" in self.config:
+                value = self.config["start_date"]
+
+        write_starting_replication_value(state, value)
 
     def get_replication_key_signpost(
         self, context: Optional[dict]
@@ -896,6 +904,7 @@ class Stream(metaclass=abc.ABCMeta):
             current_context = current_context or None
             state = self.get_context_state(current_context)
             state_partition_context = self._get_state_partition_context(current_context)
+            self._write_starting_replication_value(current_context)
             child_context: Optional[dict] = (
                 None if current_context is None else copy.copy(current_context)
             )
