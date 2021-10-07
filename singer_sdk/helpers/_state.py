@@ -242,6 +242,7 @@ def _greater_than_signpost(
 def finalize_state_progress_markers(stream_or_partition_state: dict) -> Optional[dict]:
     """Promote or wipe progress markers once sync is complete."""
     signpost_value = stream_or_partition_state.pop(SIGNPOST_MARKER, None)
+    stream_or_partition_state.pop(STARTING_MARKER, None)
     if PROGRESS_MARKERS in stream_or_partition_state:
         if "replication_key" in stream_or_partition_state[PROGRESS_MARKERS]:
             # Replication keys valid (only) after sync is complete

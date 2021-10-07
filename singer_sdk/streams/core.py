@@ -901,7 +901,7 @@ class Stream(metaclass=abc.ABCMeta):
             current_context = current_context or None
             state = self.get_context_state(current_context)
             state_partition_context = self._get_state_partition_context(current_context)
-            self._write_starting_replication_value(context)
+            self._write_starting_replication_value(current_context)
             child_context: Optional[dict] = (
                 None if current_context is None else copy.copy(current_context)
             )
