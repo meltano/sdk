@@ -276,50 +276,69 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         info: Dict[str, Any] = OrderedDict({})
         info["name"] = cls.name
+        info["description"] = cls.__doc__
         info["version"] = cls.plugin_version
         info["sdk_version"] = cls.sdk_version
         info["capabilities"] = cls.capabilities
         info["settings"] = cls.config_jsonschema
+
         if format == "json":
             print(json.dumps(info, indent=2))
+
         elif format == "markdown":
+            max_setting_len = cast(
+                int, max([len(k) for k in info["settings"]["properties"].keys()])
+            )
+
             # Set table base for markdown
-            table_base = """
-                | Setting | Required | Default | Description  |
-                |:-------:|:--------:|:-------:|:------------:|
-                """
+            table_base = (
+                f"| {'Setting':{max_setting_len}}| Required | Default | Description |\n"
+                f"|:{'-' * max_setting_len}|:--------:|:-------:|:------------|\n"
+            )
 
             # Empty list for string parts
             md_list = []
             # Get required settings for table
-            required_settings = info.get("settings", {}).get("required", {})
+            required_settings = info["settings"].get("required", [])
 
             # Iterate over Dict to set md
+            md_list.append(
+                f"# `{info['name']}`\n\n"
+                f"{info['description']}\n\n"
+                f"Built with the [Meltano SDK](https://sdk.meltano.com) for "
+                "Singer Taps and Targets.\n\n"
+            )
             for key, value in info.items():
-                if key == "name" or key == "version" or key == "sdk_version":
-                    values = f"##{key}\n"
-                    values += f"{value}\n"
-                    md_list.append(values)
 
                 if key == "capabilities":
-                    capabilities = f"##{key}\n"
-                    capabilities += "\n".join([f"* {v}\n" for v in value])
+                    capabilities = f"## {key.title()}\n\n"
+                    capabilities += "\n".join([f"* `{v}`" for v in value])
+                    capabilities += "\n\n"
                     md_list.append(capabilities)
 
                 if key == "settings":
-                    setting = f"##{key}\n"
+                    setting = f"## {key.title()}\n\n"
                     for k, v in info["settings"].get("properties", {}).items():
                         table_base += (
-                            f"{k}|{True if k in required_settings else False}|"
-                            f"{v.get('default', 'None')}|"
-                            f"{v.get('description', '')}|\n"
+                            f"| {k}{' ' * (max_setting_len - len(k))}"
+                            f"| {'True' if k in required_settings else 'False':8} | "
+                            f"{v.get('default', 'None'):7} | "
+                            f"{v.get('description', ''):11} |\n"
                         )
                     setting += table_base
+                    setting += (
+                        "\n"
+                        + "\n".join(
+                            [
+                                "A full list of supported settings and capabilities "
+                                f"is available by running: `{info['name']} --about`"
+                            ]
+                        )
+                        + "\n"
+                    )
                     md_list.append(setting)
 
-            file = open(f"{cls.name}.md", "w")
-            file.write("".join(md_list))
-            file.close()
+            print("".join(md_list))
         else:
             formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
             print(formatted)

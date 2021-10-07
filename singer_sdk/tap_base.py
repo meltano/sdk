@@ -359,7 +359,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         @click.option(
             "--format",
             help="Specify output style for --about",
-            type=click.Choice(["json"], case_sensitive=False),
+            type=click.Choice(["json", "markdown"], case_sensitive=False),
             default=None,
         )
         @click.option(
