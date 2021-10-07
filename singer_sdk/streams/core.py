@@ -225,6 +225,9 @@ class Stream(metaclass=abc.ABCMeta):
 
         Returns:
             `start_date` from config, or state value if using timestamp replication.
+
+        Raises:
+            ValueError: If the replication value is not a valid timestamp.
         """
         value = self.get_starting_replication_key_value(context)
 
