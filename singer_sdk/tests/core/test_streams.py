@@ -116,6 +116,7 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
     """Validate state and start_time setting handling."""
     timestamp_value = "2021-02-01"
 
+    stream._write_starting_replication_value(None)
     assert stream.get_starting_timestamp(None) == pendulum.parse(
         cast(str, stream.config.get("start_date"))
     )
@@ -129,6 +130,7 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
             }
         }
     )
+    stream._write_starting_replication_value(None)
     assert stream.replication_key == "updatedAt"
     assert stream.replication_method == REPLICATION_INCREMENTAL
     assert stream.is_timestamp_replication_key
