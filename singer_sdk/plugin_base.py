@@ -292,26 +292,28 @@ class PluginBase(metaclass=abc.ABCMeta):
             # Empty list for string parts
             md_list = []
             # Get required settings for table
-            required_settings = info.get("settings", {}).get('required', {})
+            required_settings = info.get("settings", {}).get("required", {})
 
             # Iterate over Dict to set md
             for key, value in info.items():
-                if key == "name" or key == 'version' or key == 'sdk_version':
+                if key == "name" or key == "version" or key == "sdk_version":
                     values = f"##{key}\n"
                     values += f"{value}\n"
                     md_list.append(values)
 
-                if key == 'capabilities':
+                if key == "capabilities":
                     capabilities = f"##{key}\n"
                     capabilities += "\n".join([f"* {v}\n" for v in value])
                     md_list.append(capabilities)
 
-                if key == 'settings':
+                if key == "settings":
                     setting = f"##{key}\n"
-                    for k, v in info["settings"].get('properties', {}).items():
-                        table_base += f"{k}|{True if k in required_settings else False}|" \
-                                      f"{v.get('default', 'None')}|" \
-                                      f"{v.get('description', '')}|\n"
+                    for k, v in info["settings"].get("properties", {}).items():
+                        table_base += (
+                            f"{k}|{True if k in required_settings else False}|"
+                            f"{v.get('default', 'None')}|"
+                            f"{v.get('description', '')}|\n"
+                        )
                     setting += table_base
                     md_list.append(setting)
 
