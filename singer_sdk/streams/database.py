@@ -27,7 +27,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         self,
         tap: TapBaseClass,
         catalog_entry: CatalogEntry,
-        connection: Optional[sqlalchemy.Connection],
+        connection: Optional[sqlalchemy.engine.Connection],
     ):
         """Initialize the database stream.
 
@@ -38,7 +38,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             catalog_entry: Catalog entry dict.
             connection: Optional connection to reuse.
         """
-        self._sqlalchemy_connection: Optional[sqlalchemy.Connection] = None
+        self._sqlalchemy_connection: Optional[sqlalchemy.engine.Connection] = None
         if connection:
             self._sqlalchemy_connection = connection
 
@@ -66,7 +66,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self.catalog_entry.schema
 
     @property
-    def sqlalchemy_connection(self) -> sqlalchemy.Connection:
+    def sqlalchemy_connection(self) -> sqlalchemy.engine.Connection:
         """Return or set the SQLAlchemy connection object."""
         if not self._sqlalchemy_connection:
             self._sqlalchemy_connection = self.get_sqlalchemy_connection(
@@ -122,7 +122,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         Each row emitted should be a dictionary of property names to their values.
         """
-        conn: sqlalchemy.Connection = self.sqlalchemy_connection
+        conn: sqlalchemy.engine.Connection = self.sqlalchemy_connection
         if partition:
             raise NotImplementedError(
                 f"Stream '{self.name}' does not support partitioning."
@@ -155,7 +155,9 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return sqlalchemy.create_engine(url)
 
     @classmethod
-    def get_sqlalchemy_connection(cls, tap_config: dict) -> sqlalchemy.Connection:
+    def get_sqlalchemy_connection(
+        cls, tap_config: dict
+    ) -> sqlalchemy.engine.Connection:
         """Return or set the SQLAlchemy connection object."""
         cls.get_sqlalchemy_engine(tap_config).connect().execution_options(
             stream_results=True
