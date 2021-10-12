@@ -93,12 +93,25 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         md_map = singer.metadata.to_map(self.catalog_entry.get("metadata"))
         schema_name = md_map[()]["schema-name"]
         db_name = self.catalog_entry.get("database")
-        result = table_name
 
-        if schema_name:
-            result = f"{schema_name}.{result}"
-        if db_name:
-            result = f"{db_name}.{result}"
+        return self.get_fully_qualified_name(
+            table_name=table_name, schema_name=schema_name, db_name=db_name
+        )
+
+    @staticmethod
+    def get_fully_qualified_name(
+        table_name: Optional[str],
+        schema_name: Optional[str] = None,
+        db_name: Optional[str] = None,
+        delimiter: str = ".",
+    ):
+        """Return a fully qualified table name."""
+        if db_name and schema_name:
+            result = f"{db_name}{delimiter}{schema_name}{delimiter}{table_name}"
+        elif db_name:
+            result = f"{db_name}{delimiter}{table_name}"
+        elif schema_name:
+            result = f"{schema_name}{delimiter}{table_name}"
 
         return result
 
@@ -220,9 +233,15 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 replication_method = next(
                     reversed(["FULL_TABLE"] + addl_replication_methods)
                 )
+                unique_stream_id = cls.get_fully_qualified_name(
+                    db_name=None,
+                    schema_name=schema_name,
+                    table_name=table_name,
+                    delimiter="-",
+                )
                 catalog_entry = singer.CatalogEntry(
-                    tap_stream_id=table_name,  # TODO: resolve dupes in multiple schemas
-                    stream=table_name,
+                    tap_stream_id=unique_stream_id,
+                    stream=unique_stream_id,
                     table=table_name,
                     key_properties=key_properties,
                     schema=singer.Schema.from_dict(schema),
@@ -235,7 +254,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                         key_properties=key_properties,
                         valid_replication_keys=None,  # Must be defined by user
                     ),
-                    database=None,  # TODO: Detect database name
+                    database=None,
                     row_count=None,
                     stream_alias=None,
                     replication_key=None,  # Must be defined by user
