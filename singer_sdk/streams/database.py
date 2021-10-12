@@ -14,6 +14,7 @@ from typing import (
     Union,
 )
 
+from singer_sdk.helpers._singer import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 from singer_sdk import typing as th
@@ -25,7 +26,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
     def __init__(
         self,
         tap: TapBaseClass,
-        catalog_entry: Dict[str, Any],
+        catalog_entry: CatalogEntry,
         connection: Optional[sqlalchemy.Connection],
     ):
         """Initialize the database stream.
@@ -37,50 +38,40 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             catalog_entry: Catalog entry dict.
             connection: Optional connection to reuse.
         """
-        self._sqlalchemy_engine = self.get_sqlalchemy_engine(dict(tap.config))
-        # self.is_view: Optional[bool] = catalog_entry.get("is-view", False)
-        # self.row_count: Optional[int] = None
+        self._sqlalchemy_connection: Optional[sqlalchemy.Connection] = None
+        if connection:
+            self._sqlalchemy_connection = connection
+
         self.catalog_entry = catalog_entry
         super().__init__(
             tap=tap,
             schema=self.schema,
             name=self.tap_stream_id,
         )
-        self._sqlalchemy_connection = connection
 
     @property
-    def metadata(self) -> List[dict]:
+    def metadata(self) -> MetadataMapping:
         """Return metadata object (dict) as specified in the Singer spec.
 
         Metadata from an input catalog will override standard metadata.
         """
-        return cast(List[dict], self.catalog_entry["metadata"])
+        return self.catalog_entry.metadata
 
     @property
-    def schema(self) -> dict:
+    def schema(self) -> Schema:
         """Return metadata object (dict) as specified in the Singer spec.
 
         Metadata from an input catalog will override standard metadata.
         """
-        return cast(dict, self.catalog_entry["schema"])
-
-    @property
-    def sqlalchemy_engine(self) -> sqlalchemy.engine.Engine:
-        """Return or set the SQLAlchemy engine object.
-
-        Developers may optionally override `sqlalchemy_engine` property
-        for purposes of caching and/or reuse.
-        """
-        if not self._sqlalchemy_engine:
-            raise ValueError("SQLAlchemy engine object does not exist.")
-
-        return self._sqlalchemy_engine
+        return self.catalog_entry.schema
 
     @property
     def sqlalchemy_connection(self) -> sqlalchemy.Connection:
         """Return or set the SQLAlchemy connection object."""
         if not self._sqlalchemy_connection:
-            self._sqlalchemy_connection = self.sqlalchemy_engine.connect()
+            self._sqlalchemy_connection = self.get_sqlalchemy_connection(
+                dict(self.config)
+            )
 
         return self._sqlalchemy_connection
 
@@ -93,15 +84,11 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         In rare cases, such as for database types with multi-part names,
         this may be slightly different from `Stream.name`.
         """
-        return self.catalog_entry.get("tap_stream_id", self.catalog_entry.get("stream"))
+        return self.catalog_entry.tap_stream_id
 
     @property
     def fully_qualified_name(self):
-        """Return the fully qualified name of the table name.
-
-        TODO: Needs handling for dialect-specific quoting logic
-        TODO: Consider rewriting to use SQLAlchemy
-        """
+        """Return the fully qualified name of the table name."""
         table_name = self.catalog_entry.get("table", self.catalog_entry.get("stream"))
         md_map = singer.metadata.to_map(self.catalog_entry.get("metadata"))
         schema_name = md_map[()]["schema-name"]
@@ -153,6 +140,13 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         url = cls.get_sqlalchemy_url(tap_config)
         return sqlalchemy.create_engine(url)
+
+    @classmethod
+    def get_sqlalchemy_connection(cls, tap_config: dict) -> sqlalchemy.Connection:
+        """Return or set the SQLAlchemy connection object."""
+        cls.get_sqlalchemy_engine(tap_config).connect().execution_options(
+            stream_results=True
+        )
 
     @classmethod
     def to_jsonschema_type(cls, from_type: Union[type, str, Any]) -> dict:
