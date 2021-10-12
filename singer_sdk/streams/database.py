@@ -26,18 +26,16 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         self,
         tap: TapBaseClass,
         catalog_entry: Dict[str, Any],
-        # TODO: consider inclusion in constructor:
-        # sqlalchemy_engine: sqlalchemy.Engine
+        connection: Optional[sqlalchemy.Connection],
     ):
         """Initialize the database stream.
 
-        Parameters
-        ----------
-        tap : TapBaseClass
-            reference to the parent tap
-        catalog_entry : Dict[str, Any]
-            catalog entry dict
+        If `connection` is omitted or lost, a new connection will be made.
 
+        Args:
+            tap: The parent tap object.
+            catalog_entry: Catalog entry dict.
+            connection: Optional connection to reuse.
         """
         self._sqlalchemy_engine = self.get_sqlalchemy_engine(dict(tap.config))
         # self.is_view: Optional[bool] = catalog_entry.get("is-view", False)
@@ -48,6 +46,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             schema=self.schema,
             name=self.tap_stream_id,
         )
+        self._sqlalchemy_connection = connection
 
     @property
     def metadata(self) -> List[dict]:
@@ -76,6 +75,14 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             raise ValueError("SQLAlchemy engine object does not exist.")
 
         return self._sqlalchemy_engine
+
+    @property
+    def sqlalchemy_connection(self) -> sqlalchemy.Connection:
+        """Return or set the SQLAlchemy connection object."""
+        if not self._sqlalchemy_connection:
+            self._sqlalchemy_connection = self.sqlalchemy_engine.connect()
+
+        return self._sqlalchemy_connection
 
     @property
     def tap_stream_id(self) -> str:
@@ -115,7 +122,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         Each row emitted should be a dictionary of property names to their values.
         """
-        conn: sqlalchemy.Connection = self.sqlalchemy_engine.connect()
+        conn: sqlalchemy.Connection = self.sqlalchemy_connection
         if partition:
             raise NotImplementedError(
                 f"Stream '{self.name}' does not support partitioning."
@@ -125,8 +132,6 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             sqlalchemy.text(f"SELECT * FROM {self.fully_qualified_name}")
         ):
             yield dict(row)
-
-        conn.close()
 
     # Class Methods
 
