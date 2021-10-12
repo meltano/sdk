@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.3.10"
+version = "0.3.11"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 maintainers = ["Meltano Team and Contributors"]
@@ -27,7 +27,7 @@ license = "Apache 2.0"
 "Youtube" = "https://www.youtube.com/meltano"
 
 [tool.poetry.dependencies]
-python = "<3.10,>=3.6.1"
+python = "<3.10,>=3.6.2"
 pipelinewise-singer-python = "1.2.0"
 backoff = ">=1.8.0,<2.0"
 pendulum = "^2.1.0"
