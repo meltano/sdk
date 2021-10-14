@@ -323,7 +323,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                             f"| {k}{' ' * (max_setting_len - len(k))}"
                             f"| {'True' if k in required_settings else 'False':8} | "
                             f"{v.get('default', 'None'):7} | "
-                            f"{v.get('description', ''):11} |\n"
+                            f"{v.get('description', '').replace('\n', '<BR/>'):11} |\n"
                         )
                     setting += table_base
                     setting += (
