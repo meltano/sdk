@@ -319,11 +319,12 @@ class PluginBase(metaclass=abc.ABCMeta):
                 if key == "settings":
                     setting = f"## {key.title()}\n\n"
                     for k, v in info["settings"].get("properties", {}).items():
+                        md_description = v.get("description", "").replace("\n", "<BR/>")
                         table_base += (
                             f"| {k}{' ' * (max_setting_len - len(k))}"
                             f"| {'True' if k in required_settings else 'False':8} | "
                             f"{v.get('default', 'None'):7} | "
-                            f"{v.get('description', ''):11} |\n"
+                            f"{md_description:11} |\n"
                         )
                     setting += table_base
                     setting += (
