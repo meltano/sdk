@@ -3,9 +3,10 @@
 import abc
 import copy
 import json
+from pathlib import Path, PurePath
 import sys
 import time
-from typing import Any, Callable, Dict, Iterable, List, Optional, Type
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 import click
 from joblib import Parallel, delayed, parallel_backend
@@ -38,7 +39,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
+        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
         parse_env_config: bool = False,
     ) -> None:
         """Initialize the target.
@@ -485,7 +486,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         def cli(
             version: bool = False,
             about: bool = False,
-            config: str = None,
+            config: Tuple[str, ...] = (),
             format: str = None,
         ) -> None:
             """Handle command line execution.
@@ -495,7 +496,10 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 about: Display package metadata and settings.
                 format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
-                    variables.
+                    variables. Accepts multiple inputs as a tuple.
+
+            Raises:
+                FileNotFoundError: If the config file does not exist.
             """
             if version:
                 cls.print_version()
@@ -505,7 +509,29 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 cls.print_about(format)
                 return
 
-            target = cls(config=config)  # type: ignore  # Ignore 'type not callable'
+            cls.print_version(print_fn=cls.logger.info)
+
+            parse_env_config = False
+            config_files: List[PurePath] = []
+            for config_path in config:
+                if config_path == "ENV":
+                    # Allow parse from env vars:
+                    parse_env_config = True
+                    continue
+
+                # Validate config file paths before adding to list
+                if not Path(config_path).is_file():
+                    raise FileNotFoundError(
+                        f"Could not locate config file at '{config_path}'."
+                        "Please check that the file exists."
+                    )
+
+                config_files.append(Path(config_path))
+
+            target = cls(  # type: ignore  # Ignore 'type not callable'
+                config=config_files or None,
+                parse_env_config=parse_env_config,
+            )
             target.listen()
 
         return cli

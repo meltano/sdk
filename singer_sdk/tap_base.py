@@ -402,7 +402,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 test: Test connectivity by syncing a single record and exiting.
                 format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
-                    variables.
+                    variables. Accepts multiple inputs as a tuple.
                 catalog: Use a Singer catalog file with the tap.",
                 state: Use a bookmarks file for incremental replication.
 
