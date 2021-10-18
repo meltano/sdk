@@ -347,7 +347,6 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             if record is None:
                 # Record filtered out during post_process()
                 continue
-            
             yield record
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
