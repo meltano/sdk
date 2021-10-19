@@ -1092,7 +1092,7 @@ class Stream(metaclass=abc.ABCMeta):
         """
         pass
 
-    def post_process(self, row: dict, context: Optional[dict] = None) -> dict:
+    def post_process(self, row: dict, context: Optional[dict] = None) -> Optional[dict]:
         """As needed, append or transform raw data to match expected structure.
 
         Optional. This method gives developers an opportunity to "clean up" the results
@@ -1100,11 +1100,14 @@ class Stream(metaclass=abc.ABCMeta):
         renaming, or appending properties to the raw record result returned from the
         API.
 
+        Developers may also return `None` from this method to filter out
+        invalid or not-applicable records from the stream.
+
         Args:
             row: Individual record in the stream.
             context: Stream partition or context dictionary.
 
         Returns:
-            A new, processed record.
+            The resulting record dict, or `None` if the record should be excluded.
         """
         return row
