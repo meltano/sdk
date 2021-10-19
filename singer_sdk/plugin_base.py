@@ -62,6 +62,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         self,
         config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
         parse_env_config: bool = False,
+        validate_config: bool = True,
     ) -> None:
         """Create the tap or target.
 
@@ -96,7 +97,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             if self._is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
-        self._validate_config()
+        self._validate_config(raise_errors=validate_config)
         self.mapper: PluginMapper
 
     @classproperty
@@ -225,6 +226,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         warnings: List[str] = []
         errors: List[str] = []
+        log_fn = self.logger.info
         if self.config_jsonschema:
             try:
                 self.logger.debug(
@@ -241,6 +243,8 @@ class PluginBase(metaclass=abc.ABCMeta):
             )
             if raise_errors:
                 raise RuntimeError(summary)
+
+            log_fn = self.logger.warning
         else:
             summary = (
                 f"Config validation passed with 0 errors and {len(warnings)} warnings."
@@ -251,7 +255,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             raise RuntimeError(
                 f"One or more warnings ocurred during validation: {warnings}"
             )
-        self.logger.info(summary)
+        log_fn(summary)
         return warnings, errors
 
     @classmethod
@@ -267,20 +271,29 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version})")
 
-    @classmethod
-    def print_about(cls: Type["PluginBase"], format: Optional[str] = None) -> None:
+    @property
+    def about(self) -> Dict[str, Any]:
+        """Print capabilities and other tap metadata.
+
+        Returns:
+            A dictionary containing the relevant 'about' information.
+        """
+        info: Dict[str, Any] = OrderedDict({})
+        info["name"] = self.name
+        info["description"] = self.__doc__
+        info["version"] = self.plugin_version
+        info["sdk_version"] = self.sdk_version
+        info["capabilities"] = self.capabilities
+        info["settings"] = self.config_jsonschema
+        return info
+
+    def print_about(self, format: Optional[str] = None) -> None:
         """Print capabilities and other tap metadata.
 
         Args:
             format: Render option for the plugin information.
         """
-        info: Dict[str, Any] = OrderedDict({})
-        info["name"] = cls.name
-        info["description"] = cls.__doc__
-        info["version"] = cls.plugin_version
-        info["sdk_version"] = cls.sdk_version
-        info["capabilities"] = cls.capabilities
-        info["settings"] = cls.config_jsonschema
+        info = self.about
 
         if format == "json":
             print(json.dumps(info, indent=2))
@@ -337,6 +350,17 @@ class PluginBase(metaclass=abc.ABCMeta):
                         )
                         + "\n"
                     )
+                    md_list.append(setting)
+
+                if key == "streams" and value:
+                    setting = f"## {key.title()}\n\n"
+                    for stream, stream_schema in value.items():
+                        if "description" in stream_schema:
+                            desc = stream_schema["description"].replace("\n", "  ")
+                            setting += f"- `{stream}`: {desc}\n"
+                        else:
+                            setting += f"- `{stream}`\n"
+
                     md_list.append(setting)
 
             print("".join(md_list))
