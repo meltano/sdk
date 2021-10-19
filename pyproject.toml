@@ -40,6 +40,7 @@ memoization = "^0.3.2"
 jsonpath-ng = "^1.5.3"
 joblib = "^1.0.1"
 inflection = "^0.5.1"
+dataclasses = {version = "*", markers = "python_version < \"3.7\""}
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
