@@ -343,11 +343,11 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             One item per (possibly processed) record in the API.
         """
         for record in self.request_records(context):
-            record = self.post_process(record, context)
-            if record is None:
+            transformed_record = self.post_process(record, context)
+            if transformed_record is None:
                 # Record filtered out during post_process()
                 continue
-            yield record
+            yield transformed_record
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows.
