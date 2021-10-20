@@ -13,8 +13,23 @@ Plugin Classes
     Tap
     Target
 
+Plugin Capabilities
+-------------------
+
+.. currentmodule:: singer_sdk.helpers
+
+.. autosummary::
+    :toctree: _autosummary
+    :template: class.rst
+
+    capabilities.PluginCapabilities
+    capabilities.TapCapabilities
+    capabilities.TargetCapabilities
+
 Stream Classes
 --------------
+
+.. currentmodule:: singer_sdk
 
 .. autosummary::
     :toctree: _autosummary
