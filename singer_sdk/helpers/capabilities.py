@@ -144,7 +144,8 @@ class TapCapabilities(CapabilitiesEnum):
     #: Automatic connectivity and stream init test via :ref:`--test<Test connectivity>`.
     TEST = "test"
 
-    #: Support for `replication_method='LOG_BASED'`
+    #: Support for ``replication_method: LOG_BASED``. You can read more about this
+    #: feature in `MeltanoHub <https://hub.meltano.com/singer/docs#log-based>`_.
     LOG_BASED = "log-based"
 
     #: Deprecated. Please use :attr:`~TapCapabilities.CATALOG` instead.
