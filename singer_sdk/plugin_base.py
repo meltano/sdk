@@ -273,9 +273,8 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version})")
 
-    @property
-    def _about(self) -> Dict[str, Any]:
-        """Print capabilities and other tap metadata.
+    def _get_about_info(self) -> Dict[str, Any]:
+        """Returns capabilities and other tap metadata.
 
         Returns:
             A dictionary containing the relevant 'about' information.
@@ -295,7 +294,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         Args:
             format: Render option for the plugin information.
         """
-        info = self._about
+        info = self._get_about_info()
 
         if format == "json":
             print(json.dumps(info, indent=2))
