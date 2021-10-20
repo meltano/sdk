@@ -16,8 +16,6 @@ Plugin Classes
 Stream Classes
 --------------
 
-.. currentmodule:: singer_sdk
-
 .. autosummary::
     :toctree: _autosummary
     :template: class.rst
