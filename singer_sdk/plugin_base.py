@@ -22,6 +22,7 @@ from typing import (
 
 import click
 from jsonschema import Draft4Validator, SchemaError, ValidationError
+from singer_sdk.exceptions import ConfigValidationError
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
@@ -97,7 +98,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             if self._is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
-        self._validate_config(raise_errors=validate_config)
+        self.validate_config(raise_errors=validate_config)
         self.mapper: PluginMapper
 
     @classproperty
@@ -209,20 +210,21 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         return is_common_secret_key(config_key)
 
-    def _validate_config(
+    def validate_config(
         self, raise_errors: bool = True, warnings_as_errors: bool = False
     ) -> Tuple[List[str], List[str]]:
         """Validate configuration input against the plugin configuration JSON schema.
 
         Args:
             raise_errors: Flag to throw an exception if any validation errors are found.
-            warnings_as_errors: Flag to throw an exception if any warnings were emitter.
+            warnings_as_errors: Flag to throw an exception if any warnings were emitted.
 
         Returns:
             A tuple of configuration validation warnings and errors.
 
         Raises:
-            RuntimeError: If errors or warnings were found during validation.
+            ConfigValidationError: If raise_errors is True and errors are found during
+            validation.
         """
         warnings: List[str] = []
         errors: List[str] = []
@@ -242,7 +244,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                 f"JSONSchema was: {self.config_jsonschema}"
             )
             if raise_errors:
-                raise RuntimeError(summary)
+                raise ConfigValidationError(summary)
 
             log_fn = self.logger.warning
         else:
@@ -252,7 +254,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             for warning in warnings:
                 summary += f"\n{warning}"
         if warnings_as_errors and raise_errors and warnings:
-            raise RuntimeError(
+            raise ConfigValidationError(
                 f"One or more warnings ocurred during validation: {warnings}"
             )
         log_fn(summary)
