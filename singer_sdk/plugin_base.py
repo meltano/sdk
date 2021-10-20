@@ -272,7 +272,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version})")
 
     @property
-    def about(self) -> Dict[str, Any]:
+    def _about(self) -> Dict[str, Any]:
         """Print capabilities and other tap metadata.
 
         Returns:
@@ -293,7 +293,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         Args:
             format: Render option for the plugin information.
         """
-        info = self.about
+        info = self._about
 
         if format == "json":
             print(json.dumps(info, indent=2))
@@ -350,17 +350,6 @@ class PluginBase(metaclass=abc.ABCMeta):
                         )
                         + "\n"
                     )
-                    md_list.append(setting)
-
-                if key == "streams" and value:
-                    setting = f"## {key.title()}\n\n"
-                    for stream, stream_schema in value.items():
-                        if "description" in stream_schema:
-                            desc = stream_schema["description"].replace("\n", "  ")
-                            setting += f"- `{stream}`: {desc}\n"
-                        else:
-                            setting += f"- `{stream}`\n"
-
                     md_list.append(setting)
 
             print("".join(md_list))

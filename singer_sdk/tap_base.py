@@ -331,21 +331,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             stream.sync()
             stream.finalize_state_progress_markers()
 
-    @property
-    def about(self) -> Dict[str, Any]:
-        """Print capabilities and other tap metadata.
-
-        Returns:
-            A dictionary containing the relevant 'about' information.
-        """
-        info = super().about
-        try:
-            info["streams"] = {k: v.schema for k, v in self.streams.items()}
-        except Exception as ex:
-            self.logger.warning(f"Could not detect streams. {ex}")
-
-        return info
-
     # Command Line Execution
 
     @classproperty
