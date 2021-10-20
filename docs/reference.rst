@@ -56,8 +56,11 @@ Exception Types
     :toctree: _autosummary
     :template: class.rst
 
-    exceptions.TooManyRecordsException
-    exceptions.TapStreamConnectionFailure
+    exceptions.ConfigValidationError
     exceptions.InvalidStreamSortException
+    exceptions.MapExpressionError
     exceptions.MaxRecordsLimitException
     exceptions.RecordsWitoutSchemaException
+    exceptions.StreamMapConfigError
+    exceptions.TapStreamConnectionFailure
+    exceptions.TooManyRecordsException
