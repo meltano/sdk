@@ -98,7 +98,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             if self._is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
-        self.validate_config(raise_errors=validate_config)
+        self._validate_config(raise_errors=validate_config)
         self.mapper: PluginMapper
 
     @classproperty
@@ -210,7 +210,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         return is_common_secret_key(config_key)
 
-    def validate_config(
+    def _validate_config(
         self, raise_errors: bool = True, warnings_as_errors: bool = False
     ) -> Tuple[List[str], List[str]]:
         """Validate configuration input against the plugin configuration JSON schema.
