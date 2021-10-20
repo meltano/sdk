@@ -22,8 +22,8 @@ from typing import (
 
 import click
 from jsonschema import Draft4Validator, SchemaError, ValidationError
-from singer_sdk.exceptions import ConfigValidationError
 
+from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
