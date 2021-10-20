@@ -48,6 +48,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             state: Tap state. Can be dictionary or a path to the state file.
             parse_env_config: Whether to look for configuration values in environment
                 variables.
+            validate_config: True to require validation of config settings.
         """
         super().__init__(
             config=config,

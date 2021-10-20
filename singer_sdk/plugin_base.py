@@ -71,6 +71,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             config: May be one or more paths, either as str or PurePath objects, or
                 it can be a predetermined config dict.
             parse_env_config: True to parse settings from env vars.
+            validate_config: True to require validation of config settings.
 
         Raises:
             ValueError: If config is not a dict or path string.
@@ -223,8 +224,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             A tuple of configuration validation warnings and errors.
 
         Raises:
-            ConfigValidationError: If raise_errors is True and errors are found during
-            validation.
+            ConfigValidationError: If raise_errors is True and validation fails.
         """
         warnings: List[str] = []
         errors: List[str] = []
