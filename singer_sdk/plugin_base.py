@@ -4,7 +4,6 @@ import abc
 import json
 import logging
 import os
-import warnings
 from collections import OrderedDict
 from pathlib import PurePath
 from types import MappingProxyType
