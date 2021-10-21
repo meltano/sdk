@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tap and Target SDK: Fix markdown table formatting in `--about` for multi-line settings descriptions ([#240](https://gitlab.com/meltano/sdk/-/issues/240), [!185](https://gitlab.com/meltano/sdk/-/merge_requests/185))
 - Tap SDK: Clarify undocumented feature of filtering `None` from `post_process()` ([#233](https://gitlab.com/meltano/sdk/-/issues/233), [!187](https://gitlab.com/meltano/sdk/-/merge_requests/187))
 - Tap and Target SDK: Add `dataclasses` as an explicit third-party dependency for Python 3.6 ([#245](https://gitlab.com/meltano/sdk/-/issues/245), [!189](https://gitlab.com/meltano/sdk/-/merge_requests/189))
+- Tap and Target SDK: Allows `--discover` and `--about` execution without requiring settings validation ([#235](https://gitlab.com/meltano/sdk/-/issues/235), [!188](https://gitlab.com/meltano/sdk/-/merge_requests/188))
 
 
 ## 0.3.11 - (2021-10-07)
