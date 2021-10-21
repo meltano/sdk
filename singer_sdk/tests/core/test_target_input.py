@@ -1,8 +1,11 @@
 """Test target reading from file."""
 
+import json
+import os
 from pathlib import Path
 
 import pytest
+from click.testing import CliRunner
 
 from singer_sdk.samples.sample_target_csv.csv_target import SampleTargetCSV
 
@@ -18,8 +21,34 @@ def target(csv_config: dict):
     return SampleTargetCSV(config=csv_config)
 
 
-def test_input_arg(target):
-    target.listen(SAMPLE_FILENAME)
+@pytest.fixture
+def cli_runner():
+    return CliRunner()
+
+
+@pytest.fixture
+def config_file_path(target):
+    try:
+        path = Path(target.config["target_folder"]) / "./config.json"
+        with open(path, "w") as f:
+            f.write(json.dumps(dict(target.config)))
+        yield path
+    finally:
+        os.remove(path)
+
+
+def test_input_arg(cli_runner, config_file_path, target):
+    result = cli_runner.invoke(
+        target.cli,
+        [
+            "--config",
+            config_file_path,
+            "--input",
+            SAMPLE_FILENAME,
+        ],
+    )
+
+    assert result.exit_code == 0
 
     output = Path(target.config["target_folder"]) / "./users.csv"
     with open(output, "r") as f:

@@ -5,7 +5,8 @@ import copy
 import json
 import sys
 import time
-from typing import Any, Callable, Dict, Iterable, List, Optional, Type
+from io import FileIO
+from typing import IO, Any, Callable, Dict, Iterable, List, Optional, Type
 
 import click
 from joblib import Parallel, delayed, parallel_backend
@@ -174,16 +175,17 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         return stream_name in self._sinks_active
 
     @final
-    def listen(self, input: Optional[str] = None) -> None:
-        """Read from STDIN until all messages are processed.
+    def listen(self, input: Optional[IO[str]] = None) -> None:
+        """Read from input until all messages are processed.
+
+        Args:
+            input: Readable stream of messages. Defaults to standard in.
 
         This method is internal to the SDK and should not need to be overridden.
         """
         if not input:
-            self._process_lines(sys.stdin)
-        else:
-            with open(input, "r") as f:
-                self._process_lines(f)
+            input = sys.stdin
+        self._process_lines(input)
 
     @final
     def add_sink(
@@ -464,7 +466,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         @click.option("--format")
         @click.option("--config")
         @click.option(
-            "--input", help="A path to read messages from instead of from standard in."
+            "--input",
+            help="A path to read messages from instead of from standard in.",
+            type=click.File("r"),
         )
         @click.command()
         def cli(
@@ -472,7 +476,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             about: bool = False,
             config: str = None,
             format: str = None,
-            input: str = None,
+            input: FileIO = None,
         ) -> None:
             """Handle command line execution.
 
@@ -494,6 +498,6 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 return
 
             target = cls(config=config)  # type: ignore  # Ignore 'type not callable'
-            target.listen(input=input)
+            target.listen(input)
 
         return cli
