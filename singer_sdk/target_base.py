@@ -40,6 +40,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         self,
         config: Optional[Dict[str, Any]] = None,
         parse_env_config: bool = False,
+        validate_config: bool = True,
     ) -> None:
         """Initialize the target.
 
@@ -49,8 +50,13 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 files.
             parse_env_config: Whether to look for configuration values in environment
                 variables.
+            validate_config: True to require validation of config settings.
         """
-        super().__init__(config=config, parse_env_config=parse_env_config)
+        super().__init__(
+            config=config,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
 
         self._latest_state: Dict[str, dict] = {}
         self._drained_state: Dict[str, dict] = {}
