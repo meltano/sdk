@@ -5,7 +5,8 @@ import copy
 import json
 import sys
 import time
-from typing import Any, Callable, Dict, Iterable, List, Optional, Type
+from io import FileIO
+from typing import IO, Any, Callable, Dict, Iterable, List, Optional, Type
 
 import click
 from joblib import Parallel, delayed, parallel_backend
@@ -174,12 +175,17 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         return stream_name in self._sinks_active
 
     @final
-    def listen(self) -> None:
-        """Read from STDIN until all messages are processed.
+    def listen(self, input: Optional[IO[str]] = None) -> None:
+        """Read from input until all messages are processed.
+
+        Args:
+            input: Readable stream of messages. Defaults to standard in.
 
         This method is internal to the SDK and should not need to be overridden.
         """
-        self._process_lines(sys.stdin)
+        if not input:
+            input = sys.stdin
+        self._process_lines(input)
 
     @final
     def add_sink(
@@ -459,12 +465,18 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         @click.option("--about", is_flag=True)
         @click.option("--format")
         @click.option("--config")
+        @click.option(
+            "--input",
+            help="A path to read messages from instead of from standard in.",
+            type=click.File("r"),
+        )
         @click.command()
         def cli(
             version: bool = False,
             about: bool = False,
             config: str = None,
             format: str = None,
+            input: FileIO = None,
         ) -> None:
             """Handle command line execution.
 
@@ -474,6 +486,8 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
                     variables.
+                input: Specify a path to an input file to read messages from.
+                    Defaults to standard in if unspecified.
             """
             if version:
                 cls.print_version()
@@ -484,6 +498,6 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 return
 
             target = cls(config=config)  # type: ignore  # Ignore 'type not callable'
-            target.listen()
+            target.listen(input)
 
         return cli
