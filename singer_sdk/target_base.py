@@ -182,12 +182,12 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     # Message handling
 
-    def _process_lines(self, lines: Iterable[str], table_cache=None) -> None:
+    def _process_lines(self, input: Iterable[str]) -> None:
         self.logger.info(f"Target '{self.name}' is listening for input from tap.")
         line_counter = 0
         record_counter = 0
         state_counter = 0
-        for line in lines:
+        for line in input:
             line_counter += 1
             try:
                 line_dict = json.loads(line)
@@ -223,7 +223,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             f"({record_counter} records, {state_counter} state messages)."
         )
 
-    def _process_endofpipe(self, lines: Iterable[str], table_cache=None) -> None:
+    def _process_endofpipe(self) -> None:
         """Called after all input lines have been read."""
         self.drain_all()
 
