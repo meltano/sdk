@@ -1,14 +1,13 @@
 """Abstract base class for API-type streams."""
 
 import abc
-import backoff
 import copy
 import logging
-import requests
-
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Union, cast
 
+import backoff
+import requests
 from singer.schema import Schema
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
@@ -50,8 +49,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         name: Optional[str] = None,
         schema: Optional[Union[Dict[str, Any], Schema]] = None,
         path: Optional[str] = None,
-    ):
-        """Initialize the REST stream."""
+    ) -> None:
+        """Initialize the REST stream.
+
+        Args:
+            tap: Singer Tap this stream belongs to.
+            schema: JSON schema for records in this stream.
+            name: Name of this stream.
+            path: URL path for this entity stream.
+        """
         super().__init__(name=name, schema=schema, tap=tap)
         if path:
             self.path = path
@@ -62,7 +68,14 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     @staticmethod
     def _url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
-        """Encode the val argument as url-compatible string."""
+        """Encode the val argument as url-compatible string.
+
+        Args:
+            val: TODO
+
+        Returns:
+            TODO
+        """
         if isinstance(val, str):
             result = val.replace("/", "%2F")
         else:
@@ -70,9 +83,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return result
 
     def get_url(self, context: Optional[dict]) -> str:
-        """Return a URL, optionally targeted to a specific partition or context.
+        """Get stream entity URL.
 
         Developers override this method to perform dynamic URL generation.
+
+        Args:
+            context: Stream partition or context dictionary.
+
+        Returns:
+            A URL, optionally targeted to a specific partition or context.
         """
         url = "".join([self.url_base, self.path or ""])
         vals = copy.copy(dict(self.config))
@@ -87,7 +106,14 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     @property
     def requests_session(self) -> requests.Session:
-        """Return the session object for HTTP requests."""
+        """Get requests session.
+
+        Returns:
+            The `requests.Session`_ object for HTTP requests.
+
+        .. _requests.Session:
+            https://docs.python-requests.org/en/latest/api/#request-sessions
+        """
         if not self._requests_session:
             self._requests_session = requests.Session()
         return self._requests_session
@@ -100,8 +126,20 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         factor=2,
     )
     def _request_with_backoff(
-        self, prepared_request, context: Optional[dict]
+        self, prepared_request: requests.PreparedRequest, context: Optional[dict]
     ) -> requests.Response:
+        """TODO.
+
+        Args:
+            prepared_request: TODO
+            context: Stream partition or context dictionary.
+
+        Returns:
+            TODO
+
+        Raises:
+            RuntimeError: TODO
+        """
         response = self.requests_session.send(prepared_request)
         if self._LOG_REQUEST_METRICS:
             extra_tags = {}
@@ -137,6 +175,14 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """Return a dictionary of values to be used in URL parameterization.
 
         If paging is supported, developers may override with specific paging logic.
+
+        Args:
+            context: Stream partition or context dictionary.
+            next_page_token: Token, page number or any request argument to request the
+                next page of data.
+
+        Returns:
+            Dictionary of URL query parameters to use in the request.
         """
         return {}
 
@@ -148,6 +194,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         If partitioning is supported, the `context` object will contain the partition
         definitions. Pagination information can be parsed from `next_page_token` if
         `next_page_token` is not None.
+
+        Args:
+            context: Stream partition or context dictionary.
+            next_page_token: Token, page number or any request argument to request the
+                next page of data.
+
+        Returns:
+            Build a request with the stream's URL, path, query parameters,
+            HTTP headers and authenticator.
         """
         http_method = self.rest_method
         url: str = self.get_url(context)
@@ -158,6 +213,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         authenticator = self.authenticator
         if authenticator:
             headers.update(authenticator.auth_headers or {})
+            params.update(authenticator.auth_params or {})
 
         request = cast(
             requests.PreparedRequest,
@@ -177,6 +233,16 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """Request records from REST endpoint(s), returning response records.
 
         If pagination is detected, pages will be recursed automatically.
+
+        Args:
+            context: Stream partition or context dictionary.
+
+        Yields:
+            An item for every record in the response.
+
+        Raises:
+            RuntimeError: If a loop in pagination is detected. That is, when two
+                consecutive pagination tokens are identical.
         """
         next_page_token: Any = None
         finished = False
@@ -211,13 +277,32 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         Developers may override this method if the API requires a custom payload along
         with the request. (This is generally not required for APIs which use the
         HTTP 'GET' method.)
+
+        Args:
+            context: Stream partition or context dictionary.
+            next_page_token: Token, page number or any request argument to request the
+                next page of data.
+
+        Returns:
+            Dictionary with the body to use for the request.
         """
         return None
 
     def get_next_page_token(
         self, response: requests.Response, previous_token: Optional[Any]
     ) -> Any:
-        """Return token identifying next page or None if all records have been read."""
+        """Return token identifying next page or None if all records have been read.
+
+        Args:
+            response: A raw `requests.Response`_ object.
+            previous_token: Previous pagination reference.
+
+        Returns:
+            Reference value to retrieve next page.
+
+        .. _requests.Response:
+            https://docs.python-requests.org/en/latest/api/#requests.Response
+        """
         if self.next_page_token_jsonpath:
             all_matches = extract_jsonpath(
                 self.next_page_token_jsonpath, response.json()
@@ -235,6 +320,9 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         If an authenticator is also specified, the authenticator's headers will be
         combined with `http_headers` when making HTTP requests.
+
+        Returns:
+            Dictionary of HTTP headers to use as a base for every request.
         """
         result = self._http_headers
         if "user_agent" in self.config:
@@ -247,13 +335,32 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """Return a generator of row-type dictionary objects.
 
         Each row emitted should be a dictionary of property names to their values.
+
+        Args:
+            context: Stream partition or context dictionary.
+
+        Yields:
+            One item per (possibly processed) record in the API.
         """
-        for row in self.request_records(context):
-            row = self.post_process(row, context)
-            yield row
+        for record in self.request_records(context):
+            transformed_record = self.post_process(record, context)
+            if transformed_record is None:
+                # Record filtered out during post_process()
+                continue
+            yield transformed_record
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
-        """Parse the response and return an iterator of result rows."""
+        """Parse the response and return an iterator of result rows.
+
+        Args:
+            response: A raw `requests.Response`_ object.
+
+        Yields:
+            One item for every item found in the response.
+
+        .. _requests.Response:
+            https://docs.python-requests.org/en/latest/api/#requests.Response
+        """
         yield from extract_jsonpath(self.records_jsonpath, input=response.json())
 
     # Abstract methods:
@@ -264,5 +371,9 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         If an authenticator is not specified, REST-based taps will simply pass
         `http_headers` as defined in the stream class.
+
+        Returns:
+            Authenticator instance that will be used to authenticate all outgoing
+            requests.
         """
         return SimpleAuthenticator(stream=self)

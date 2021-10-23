@@ -1,23 +1,23 @@
 """Sample tap test for tap-gitlab."""
 
+from typing import List
+
+from singer_sdk import Stream, Tap
+from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
+    CommitsStream,
+    EpicIssuesStream,
+    EpicsStream,
+    IssuesStream,
+    ProjectsStream,
+    ReleasesStream,
+)
 from singer_sdk.typing import (
     ArrayType,
     DateTimeType,
-    Property,
     PropertiesList,
+    Property,
     StringType,
 )
-from typing import List
-from singer_sdk import Tap, Stream
-from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
-    ProjectsStream,
-    ReleasesStream,
-    IssuesStream,
-    CommitsStream,
-    EpicsStream,
-    EpicIssuesStream,
-)
-
 
 STREAM_TYPES = [
     ProjectsStream,

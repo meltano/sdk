@@ -196,3 +196,46 @@ def test_sdk_standard_tap_tests():
     for test in tests:
         test()
 ```
+
+### Make all streams reuse the same authenticator instance
+
+```python
+from singer_sdk.authenticators import OAuthAuthenticator, SingletonMeta
+from singer_sdk.streams import RESTStream
+
+class SingletonAuthenticator(OAuthAuthenticator, metaclass=SingletonMeta):
+    """A singleton authenticator."""
+
+class SingletonAuthStream(RESTStream):
+    """A stream with singleton authenticator."""
+
+    @property
+    def authenticator(self) -> SingletonAuthenticator:
+        """Stream authenticator."""
+        return SingletonAuthenticator(stream=self)
+```
+
+### Make a stream reuse the same authenticator instance for all requests
+
+```python
+from memoization import cached
+
+from singer_sdk.authenticators import APIAuthenticatorBase
+from singer_sdk.streams import RESTStream
+
+class CachedAuthStream(RESTStream):
+    """A stream with singleton authenticator."""
+
+    @property
+    @cached
+    def authenticator(self) -> APIAuthenticatorBase:
+        """Stream authenticator."""
+        return APIAuthenticatorBase(stream=self)
+```
+
+## Additional Resources
+
+More links, resources, and example solutions are available from community
+members in the [`#singer-tap-development`](https://meltano.slack.com/archives/C01PKLU5D1R)
+and [`#singer-target-development`](https://meltano.slack.com/archives/C01RKUVUG4S)
+channels on [Meltano Slack](https://meltano.com/slack).

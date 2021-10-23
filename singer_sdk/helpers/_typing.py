@@ -3,10 +3,9 @@
 import copy
 import datetime
 import logging
-
 from enum import Enum
 from functools import lru_cache
-from typing import Optional, Dict, Any, List, cast
+from typing import Any, Dict, List, Optional, cast
 
 import pendulum
 
@@ -23,9 +22,12 @@ class DatetimeErrorTreatmentEnum(Enum):
 
 
 def to_json_compatible(val: Any) -> Any:
-    """Return as string if datetime. JSON does not support proper datetime types."""
+    """Return as string if datetime. JSON does not support proper datetime types.
+
+    If given a naive datetime object, pendulum automatically makes it utc
+    """
     if isinstance(val, (datetime.datetime, pendulum.DateTime)):
-        val = val.isoformat() + "+00:00"
+        val = pendulum.instance(val).isoformat()
     return val
 
 
@@ -37,14 +39,19 @@ def append_type(type_dict: dict, new_type: str) -> dict:
             result["anyOf"].append(new_type)
         elif new_type != result["anyOf"]:
             result["anyOf"] = [result["anyOf"], new_type]
+        return result
+
     elif "type" in result:
         if isinstance(result["type"], list) and new_type not in result["type"]:
             result["type"].append(new_type)
         elif new_type != result["type"]:
             result["type"] = [result["type"], new_type]
-    else:
-        raise ValueError("Could not append type because type was not detected.")
-    return result
+        return result
+
+    raise ValueError(
+        "Could not append type because the JSON schema for the dictionary "
+        f"`{type_dict}` appears to be invalid."
+    )
 
 
 def is_object_type(property_schema: dict) -> Optional[bool]:

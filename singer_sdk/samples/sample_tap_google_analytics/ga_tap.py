@@ -4,17 +4,12 @@ import json
 from pathlib import Path
 from typing import List
 
-from singer_sdk.tap_base import Tap
-from singer_sdk.typing import (
-    PropertiesList,
-    Property,
-    StringType,
-)
-
 from singer_sdk.samples.sample_tap_google_analytics.ga_tap_stream import (
     GASimpleSampleStream,
     SampleGoogleAnalyticsStream,
 )
+from singer_sdk.tap_base import Tap
+from singer_sdk.typing import PropertiesList, Property, StringType
 
 REPORT_DEFS_FILE = (
     "singer_sdk/samples/sample_tap_google_analytics/resources/"

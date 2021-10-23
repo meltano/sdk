@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Union, List, Iterable
 
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
-{%- if cookiecutter.auth_method in ("Simple", "OAuth2", "JWT") %}
+{%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
 {%- endif %}
 
@@ -21,7 +21,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     # Alternatively, use a static string for url_base:
     # url_base = "https://api.mysample.com"
 
-{%- if cookiecutter.auth_method in ("Simple", "OAuth2", "JWT") %}
+{%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
     @property
     def authenticator(self) -> {{ cookiecutter.source_name }}Authenticator:
         """Return a new authenticator object."""

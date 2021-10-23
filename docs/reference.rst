@@ -42,9 +42,12 @@ Authenticator Classes
     :toctree: _autosummary
     :template: class.rst
 
-    authenticators.SimpleAuthenticator
+    authenticators.APIKeyAuthenticator
+    authenticators.BasicAuthenticator
+    authenticators.BearerTokenAuthenticator
     authenticators.OAuthAuthenticator
     authenticators.OAuthJWTAuthenticator
+    authenticators.SimpleAuthenticator
 
 Exception Types
 ---------------
@@ -53,7 +56,11 @@ Exception Types
     :toctree: _autosummary
     :template: class.rst
 
-    exceptions.TooManyRecordsException
-    exceptions.TapStreamConnectionFailure
+    exceptions.ConfigValidationError
     exceptions.InvalidStreamSortException
+    exceptions.MapExpressionError
     exceptions.MaxRecordsLimitException
+    exceptions.RecordsWitoutSchemaException
+    exceptions.StreamMapConfigError
+    exceptions.TapStreamConnectionFailure
+    exceptions.TooManyRecordsException

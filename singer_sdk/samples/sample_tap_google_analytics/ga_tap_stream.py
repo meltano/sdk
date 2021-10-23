@@ -1,12 +1,12 @@
 """Sample tap stream test for tap-google-analytics."""
 
 from pathlib import Path
-from typing import Iterable, List, Optional, Any, cast
+from typing import Any, Iterable, List, Optional, cast
 
 import pendulum
 
-from singer_sdk.streams import RESTStream
 from singer_sdk.authenticators import OAuthJWTAuthenticator
+from singer_sdk.streams import RESTStream
 
 GOOGLE_OAUTH_ENDPOINT = "https://oauth2.googleapis.com/token"
 GA_OAUTH_SCOPES = "https://www.googleapis.com/auth/analytics.readonly"
