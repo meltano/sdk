@@ -64,6 +64,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         self._drained_state: Dict[str, dict] = {}
         self._sinks_active: Dict[str, Sink] = {}
         self._sinks_to_clear: List[Sink] = []
+        self._max_parallelism: Optional[int] = _MAX_PARALLELISM
 
         # Approximated for max record age enforcement
         self._last_full_drain_at: float = time.time()
@@ -91,7 +92,14 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         Returns:
             Max number of sinks that can be drained in parallel.
         """
+        if self._max_parallelism is not None:
+            return self._max_parallelism
+
         return _MAX_PARALLELISM
+
+    @max_parallelism.setter
+    def max_parallelism(self, new_value: int) -> None:
+        self._max_parallelism = new_value
 
     def get_sink(
         self,
@@ -272,6 +280,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         record_counter = 0
         state_counter = 0
         for line in input:
+            if not line:
+                continue
+
             line_counter += 1
             try:
                 line_dict = json.loads(line)
@@ -445,6 +456,11 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         sink.mark_drained()
 
     def _drain_all(self, sink_list: List[Sink], parallelism: int) -> None:
+        if parallelism == 1:
+            for sink in sink_list:
+                self.drain_one(sink)
+            return
+
         def _drain_sink(sink: Sink) -> None:
             self.drain_one(sink)
 

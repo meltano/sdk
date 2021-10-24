@@ -79,7 +79,11 @@ def test_countries_to_csv(csv_config: dict):
 # TODO: Add pytest.parametrize here
 def test_target_batching():
 
-    freezer = freeze_time("2012-01-01 12:00:00")
+    mocked_starttime = "2012-01-01 12:00:00"
+    mocked_jumptotime2 = "2012-01-01 12:31:00"
+    mocked_jumptotime3 = "2012-01-01 13:02:00"
+
+    freezer = freeze_time(mocked_starttime)
     freezer.start()
     target = TargetMock()
 
@@ -89,33 +93,40 @@ def test_target_batching():
     with redirect_stdout(buf):
         tap.sync_all()
 
-    # `buf` now contains the output of a full tap sync
+    # `buf` now contains the output of the full tap sync
     buf.seek(0)
     target._process_lines(buf)
-    sample_record_msg = buf[1]
+
+    target.max_parallelism = 1  # Limit unit test to 1 process
 
     sync_end_to_end(tap, target)
 
-    # TODO: Set these to real checks (currently arbitrary/sample)
-    assert len(target.records_written) == 100
+    assert len(target.records_written) == 514  # Records from countries tap
+    assert len(target.state_messages_written) == 1
+
+    freezer = freeze_time(mocked_jumptotime2)
+    freezer.start()
+
+    buf.seek(0)
+    target._process_lines(buf)
+
+    # Should have forced an additional state and record message
+    assert len(target.records_written) == 515
     assert len(target.state_messages_written) == 2
 
-    freezer.move_to("2012-01-01 12:31:00")  # Advance 31 minutes
-    target._process_lines([sample_record_msg])  # Should force a drain of the sink
+    freezer = freeze_time(mocked_jumptotime3)
+    freezer.start()
+
+    buf.seek(0)
+    target._process_lines(buf)
 
     # Should have forced an additional state and record message
-    assert len(target.records_written) == 101
+    assert len(target.records_written) == 772
     assert len(target.state_messages_written) == 3
-    target._process_lines([sample_record_msg])  # Ensure one 'old' record
-
-    freezer.move_to("2012-01-01 13:02:00")  # Advance 31 minutes
-    target._process_lines([sample_record_msg])  # Should force a drain of the sink
-
-    # Should have forced an additional state and record message
-    assert len(target.records_written) == 103
-    assert len(target.state_messages_written) == 4
 
     target._process_endofpipe()  # Should force a final STATE message
 
-    assert len(target.state_messages_written) == 5
-    assert target.state_messages_written[-1] == {"expected": "final state"}
+    assert len(target.state_messages_written) == 4
+    assert target.state_messages_written[-1] == {
+        "bookmarks": {"continents": {}, "countries": {}}
+    }
