@@ -2,17 +2,15 @@
 
 import io
 from contextlib import redirect_stdout
+from typing import Any, Dict, List, Optional
+
 from freezegun import freeze_time
 
-from typing import Dict, Any, List, Optional
-
 from singer_sdk import typing as th
-from singer_sdk.target_base import Target
-from singer_sdk.sinks import BatchSink
-
 from singer_sdk.samples.sample_tap_countries.countries_tap import SampleTapCountries
 from singer_sdk.samples.sample_target_csv.csv_target import SampleTargetCSV
-
+from singer_sdk.sinks import BatchSink
+from singer_sdk.target_base import Target
 
 SAMPLE_FILENAME = "/tmp/testfile.countries"
 SAMPLE_TAP_CONFIG: Dict[str, Any] = {}
