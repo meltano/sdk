@@ -279,9 +279,6 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         record_counter = 0
         state_counter = 0
         for line in input:
-            if not line:
-                continue
-
             line_counter += 1
             try:
                 line_dict = json.loads(line)
