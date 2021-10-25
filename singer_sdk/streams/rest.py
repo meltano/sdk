@@ -9,7 +9,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union, cast
 import backoff
 import requests
 from singer.schema import Schema
-from genson import SchemaBuilder
+from genson import SchemaBuilder  # type: ignore
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
@@ -50,7 +50,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         name: Optional[str] = None,
         schema: Optional[Union[Dict[str, Any], Schema]] = None,
         path: Optional[str] = None,
-        max_inf_records: Optional[int] = 50,
+        max_inf_records: int = 50,
     ) -> None:
         """Initialize the REST stream.
 
@@ -59,6 +59,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             schema: JSON schema for records in this stream.
             name: Name of this stream.
             path: URL path for this entity stream.
+            max_inf_records: number of records used to infer schema.
         """
         if path:
             self.path = path
@@ -382,7 +383,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return SimpleAuthenticator(stream=self)
 
     def infer_schema(self) -> dict:
-        """Generates a schema based on records returned from the endpoint.
+        """Generate a schema based on records returned from the endpoint.
 
         Optional. This method gives developers a quickstart into developing or
         bypassing the schema development process by using the stream's actual data
@@ -392,12 +393,18 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         If flattening of the response data is required, it must be applied in the
         `post_process` method.
+
+        Returns:
+            A valid JSON schema applicable to the stream.
+
+        Raises:
+            ValueError: if the parsed records returned from the API do not consist
+                of valid JSON objects.
         """
-        context = {}
+        context: dict = {}
 
         builder = SchemaBuilder()
         for i, record in enumerate(self.request_records(context)):
-            self.logger.info(f"{i}: {record}: {self._max_inf_records}")
             if type(record) is not dict:
                 raise ValueError("Records must be a dict object.")
 
@@ -406,7 +413,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             if i + 1 >= self._max_inf_records:
                 break
 
-        schema = builder.to_schema()
+        schema: dict = builder.to_schema()
         del schema["$schema"]
 
         self.logger.debug(f"Schema inferred from records: {schema}")

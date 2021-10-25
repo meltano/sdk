@@ -1,5 +1,4 @@
 """Infer schema tests."""
-import os
 from typing import List, Optional
 
 import requests
@@ -21,9 +20,10 @@ class RestTestStreamNoSchema(RESTStream):
     path = "/example"
     url_base = "https://example.com"
     primary_keys = ["col1"]
-    schema = None
+    schema = {}
 
     def __init__(self, tap: TapBaseClass, max_inf_records=50):
+        """Initialize the class and pass on the max_inf_records."""
         super().__init__(tap, max_inf_records=max_inf_records)
 
     def _request_with_backoff(

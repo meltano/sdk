@@ -1124,8 +1124,8 @@ class Stream(metaclass=abc.ABCMeta):
         """
         return row
 
-    def infer_schema(self) -> Optional[dict]:
-        """Generates a schema based on records returned from the endpoint.
+    def infer_schema(self) -> dict:
+        """Generate a schema based on records returned from the endpoint.
 
         Optional. This method gives developers a quickstart into developing or
         bypassing the schema development process by using the stream's actual data
@@ -1136,5 +1136,8 @@ class Stream(metaclass=abc.ABCMeta):
 
         If flattening of the response data is required, it must be applied in the
         `post_process` method.
+
+        Returns:
+            A valid JSON schema applicable to the stream
         """
-        return None
+        return {}
