@@ -407,7 +407,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
                 break
 
         schema = builder.to_schema()
-        del schema['$schema']
+        del schema["$schema"]
 
         self.logger.debug(f"Schema inferred from records: {schema}")
         return schema
