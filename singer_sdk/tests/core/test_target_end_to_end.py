@@ -31,9 +31,6 @@ class BatchSinkMock(BatchSink):
         """Create the Mock batch-based sink."""
         super().__init__(target, stream_name, schema, key_properties)
         self.target = target
-        # self.target.records_written: List[dict] = []
-        # self.target.num_records_processed: int = 0
-        # self.target.num_batches_processed: int = 0
 
     def process_record(self, record: dict, context: dict) -> Optional[dict]:
         """Tracks the count of processed records."""
@@ -121,7 +118,7 @@ def test_target_batching():
         buf.seek(0)
         target._process_lines(buf)
 
-        # The first next record should force an batch drain
+        # The first next record should force a batch drain
         assert target.num_records_processed == countries_record_count * 2
         assert len(target.records_written) == countries_record_count + 1
         assert len(target.state_messages_written) == 1
@@ -130,7 +127,7 @@ def test_target_batching():
         buf.seek(0)
         target._process_lines(buf)
 
-        # The first next record should force an batch drain
+        # The first next record should force a batch drain
         assert target.num_records_processed == countries_record_count * 3
         assert len(target.records_written) == (countries_record_count * 2) + 1
         assert len(target.state_messages_written) == 2

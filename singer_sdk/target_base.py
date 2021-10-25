@@ -88,6 +88,8 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
     def max_parallelism(self) -> int:
         """Get max parallel sinks.
 
+        The default is 8 if not overridden.
+
         Returns:
             Max number of sinks that can be drained in parallel.
         """
@@ -98,6 +100,10 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     @max_parallelism.setter
     def max_parallelism(self, new_value: int) -> None:
+        """Override the default (max) parallelism.
+
+        The default is 8 if not overridden.
+        """
         self._max_parallelism = new_value
 
     def get_sink(
