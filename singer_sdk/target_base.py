@@ -266,14 +266,14 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
     # Message handling
 
     def _process_lines(self, input: IO[str]) -> None:
-        """TODO.
+        """Internal method to process jsonl lines from a Singer tap.
 
         Args:
-            lines: TODO.
+            input: Readable stream of messages, each on a separate line.
 
         Raises:
-            json.decoder.JSONDecodeError: TODO
-            Exception: TODO
+            json.decoder.JSONDecodeError: raised if any lines are not valid json
+            ValueError: raised if a message type is not recognized
         """
         self.logger.info(f"Target '{self.name}' is listening for input from tap.")
         line_counter = 0
@@ -311,7 +311,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 state_counter += 1
                 continue
 
-            raise Exception(f"Unknown message type '{record_type}' in message.")
+            raise ValueError(f"Unknown message type '{record_type}' in message.")
 
         self.logger.info(
             f"Target '{self.name}' completed reading {line_counter} lines of input "
