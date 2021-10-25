@@ -133,10 +133,13 @@ class Stream(metaclass=abc.ABCMeta):
             self._schema = json.loads(Path(self.schema_filepath).read_text())
 
         if not self.schema:
-            raise ValueError(
-                f"Could not initialize schema for stream '{self.name}'. "
-                "A valid schema object or filepath was not provided."
-            )
+            self.schema = self.infer_schema()
+            if not self.schema:
+                raise ValueError(
+                    f"Could not initialize schema for stream '{self.name}'. "
+                    "A valid schema object or filepath was not provided,"
+                    "and the 'infer_schema' method has not been implemented."
+                )
 
     @property
     def stream_maps(self) -> List[StreamMap]:
@@ -361,6 +364,15 @@ class Stream(metaclass=abc.ABCMeta):
             JSON Schema dictionary for this stream.
         """
         return self._schema
+
+    @schema.setter
+    def schema(self, new_schema: dict) -> None:
+        """Set the stream's schema.
+
+        Args:
+            new_schema: JSON schema for the stream.
+        """
+        self._schema = new_schema
 
     @property
     def primary_keys(self) -> Optional[List[str]]:
@@ -1111,3 +1123,18 @@ class Stream(metaclass=abc.ABCMeta):
             The resulting record dict, or `None` if the record should be excluded.
         """
         return row
+
+    def infer_schema(self) -> Optional[dict]:
+        """Generates a schema based on records returned from the endpoint.
+
+        Optional. This method gives developers a quickstart into developing or
+        bypassing the schema development process by using the stream's actual data
+        to generate a true look at the stream's schema. This is expensive in terms of
+        API calls and extraction time, so while useful for rapid development, it is
+        best to provide a static schema for production pipelines.
+
+
+        If flattening of the response data is required, it must be applied in the
+        `post_process` method.
+        """
+        return None
