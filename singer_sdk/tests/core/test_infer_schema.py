@@ -1,4 +1,5 @@
 """Infer schema tests."""
+
 from typing import List, Optional
 
 import requests
@@ -6,11 +7,7 @@ import requests
 from singer_sdk.streams.core import Stream, TapBaseClass
 from singer_sdk.streams.rest import RESTStream
 from singer_sdk.tap_base import Tap
-from singer_sdk.typing import (
-    DateTimeType,
-    PropertiesList,
-    Property,
-)
+from singer_sdk.typing import DateTimeType, PropertiesList, Property
 
 
 class RestTestStreamNoSchema(RESTStream):

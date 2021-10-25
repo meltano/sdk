@@ -8,8 +8,8 @@ from typing import Any, Dict, Iterable, List, Optional, Union, cast
 
 import backoff
 import requests
-from singer.schema import Schema
 from genson import SchemaBuilder  # type: ignore
+from singer.schema import Schema
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
