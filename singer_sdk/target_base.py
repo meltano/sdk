@@ -6,7 +6,7 @@ import json
 import sys
 import time
 from io import FileIO
-from typing import IO, Any, Callable, Dict, Iterable, List, Optional, Type
+from typing import IO, Any, Callable, Dict, List, Optional, Type
 
 import click
 from joblib import Parallel, delayed, parallel_backend

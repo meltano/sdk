@@ -28,6 +28,7 @@ class BatchSinkMock(BatchSink):
         schema: Dict,
         key_properties: Optional[List[str]],
     ):
+        """Create the Mock batch-based sink."""
         super().__init__(target, stream_name, schema, key_properties)
         self.target = target
         # self.target.records_written: List[dict] = []
@@ -53,6 +54,7 @@ class TargetMock(Target):
     default_sink_class = BatchSinkMock
 
     def __init__(self):
+        """Create the Mock target sync."""
         super().__init__(config={})
         self.state_messages_written: List[dict] = []
         self.records_written: List[dict] = []
