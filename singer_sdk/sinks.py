@@ -93,6 +93,27 @@ class Sink(metaclass=abc.ABCMeta):
         """
         return {}
 
+    def prepare_sink(self) -> None:
+        """Set up the sink before running.
+
+        This method is called before any messages are processed. It can be used
+        to configure the sink, open connections, etc.
+
+        The default implementation of this method is a no-op.
+        """
+        pass
+
+    def cleanup_sink(self) -> None:
+        """Clean up resources after running.
+
+        This method is called at the end of processing messages, including
+        after exceptions are thrown. It can be used to clean up resources
+        opened during `prepare_sink` such as connections.
+
+        The default implementation of this method is a no-op.
+        """
+        pass
+
     # Size properties
 
     @property

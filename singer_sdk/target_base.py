@@ -191,7 +191,11 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """
         if not input:
             input = sys.stdin
-        self._process_lines(input)
+        self.prepare_target()
+        try:
+            self._process_lines(input)
+        finally:
+            self.cleanup_target()
 
     @final
     def add_sink(
@@ -217,6 +221,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             schema=schema,
             key_properties=key_properties,
         )
+        result.prepare_sink()
         self._sinks_active[stream_name] = result
         return result
 
@@ -251,6 +256,29 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 f"A record for stream '{stream_name}' was encountered before a "
                 "corresponding schema."
             )
+
+    # Hooks
+
+    def prepare_target(self) -> None:
+        """Set up the target before running.
+
+        This method is called before any messages are processed. It can be used
+        to configure the target, open connections, etc.
+
+        The default implementation of this method is a no-op.
+        """
+        pass
+
+    def cleanup_target(self) -> None:
+        """Clean up resources after running.
+
+        This method is called at the end of processing messages, including
+        after exceptions are thrown. It can be used to clean up resources
+        opened during `prepare_target` such as connections.
+
+        The default implementation of this method is a no-op.
+        """
+        pass
 
     # Message handling
 
@@ -438,6 +466,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         draining_status = sink.start_drain()
         sink.process_batch(draining_status)
         sink.mark_drained()
+        sink.cleanup_sink()
 
     def _drain_all(self, sink_list: List[Sink], parallelism: int) -> None:
         def _drain_sink(sink: Sink) -> None:

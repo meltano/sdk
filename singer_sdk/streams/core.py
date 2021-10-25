@@ -973,15 +973,20 @@ class Stream(metaclass=abc.ABCMeta):
             msg += f" with context: {context}"
         self.logger.info(f"{msg}...")
 
-        # Use a replication signpost, if available
-        signpost = self.get_replication_key_signpost(context)
-        if signpost:
-            self._write_replication_key_signpost(context, signpost)
+        self.prepare_stream()
 
-        # Send a SCHEMA message to the downstream target:
-        self._write_schema_message()
-        # Sync the records themselves:
-        self._sync_records(context)
+        try:
+            # Use a replication signpost, if available
+            signpost = self.get_replication_key_signpost(context)
+            if signpost:
+                self._write_replication_key_signpost(context, signpost)
+
+            # Send a SCHEMA message to the downstream target:
+            self._write_schema_message()
+            # Sync the records themselves:
+            self._sync_records(context)
+        finally:
+            self.cleanup_stream()
 
     def _sync_children(self, child_context: dict) -> None:
         for child_stream in self.child_streams:
@@ -1060,6 +1065,29 @@ class Stream(metaclass=abc.ABCMeta):
                     )
 
         return context or record
+
+    # Hooks
+
+    def prepare_stream(self) -> None:
+        """Set up the tap before running.
+
+        This method is called before any message are output. It can be used
+        to configure the stream, open connections, etc.
+
+        The default implementation of this method is a no-op.
+        """
+        pass
+
+    def cleanup_stream(self) -> None:
+        """Clean up resources after running.
+
+        This method is called at the end of the stream, including
+        after exceptions are thrown. It can be used to clean up resources
+        opened during `prepare_stream` such as connections.
+
+        The default implementation of this method is a no-op.
+        """
+        pass
 
     # Abstract Methods
 

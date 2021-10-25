@@ -308,6 +308,29 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     stream.replication_key = None
                     stream.forced_replication_method = "FULL_TABLE"
 
+    # Hooks
+
+    def prepare_tap(self) -> None:
+        """Set up the tap before running.
+
+        This method is called before any streams are started. It can be used
+        to configure the tap, open connections, etc.
+
+        The default implementation of this method is a no-op.
+        """
+        pass
+
+    def cleanup_tap(self) -> None:
+        """Clean up resources after running.
+
+        This method is called at the end of all streams messages, including
+        after exceptions are thrown. It can be used to clean up resources
+        opened during `prepare_tap` such as connections.
+
+        The default implementation of this method is a no-op.
+        """
+        pass
+
     # Sync methods
 
     @final
@@ -316,21 +339,26 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
         stream: "Stream"
-        for stream in self.streams.values():
-            if not stream.selected and not stream.has_selected_descendents:
-                self.logger.info(f"Skipping deselected stream '{stream.name}'.")
-                continue
+        self.prepare_tap()
+        try:
+            for stream in self.streams.values():
+                if not stream.selected and not stream.has_selected_descendents:
+                    self.logger.info(f"Skipping deselected stream '{stream.name}'.")
+                    continue
 
-            if stream.parent_stream_type:
-                self.logger.debug(
-                    f"Child stream '{type(stream).__name__}' is expected to be called "
-                    f"by parent stream '{stream.parent_stream_type.__name__}'. "
-                    "Skipping direct invocation."
-                )
-                continue
+                if stream.parent_stream_type:
+                    self.logger.debug(
+                        f"Child stream '{type(stream).__name__}' is expected to be "
+                        "called by parent stream "
+                        f"'{stream.parent_stream_type.__name__}'. "
+                        "Skipping direct invocation."
+                    )
+                    continue
 
-            stream.sync()
-            stream.finalize_state_progress_markers()
+                stream.sync()
+                stream.finalize_state_progress_markers()
+        finally:
+            self.cleanup_tap()
 
     # Command Line Execution
 
