@@ -83,8 +83,13 @@ def test_countries_to_csv(csv_config: dict):
     sync_end_to_end(tap, target)
 
 
-# TODO: Add pytest.parametrize here
 def test_target_batching():
+    """Test batch writing behaviors.
+
+    Batch-based target should only drain records after specific threshold
+    of time elapsed. Currently this is set to 30 minutes, so we test after 31
+    minutes elapsed between checkpoints.
+    """
 
     mocked_starttime = "2012-01-01 12:00:00"
     mocked_jumptotime2 = "2012-01-01 12:31:00"
