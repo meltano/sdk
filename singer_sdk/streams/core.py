@@ -1069,7 +1069,7 @@ class Stream(metaclass=abc.ABCMeta):
     # Hooks
 
     def prepare_stream(self) -> None:
-        """Set up the tap before running.
+        """Set up the stream before running.
 
         This method is called before any message are output. It can be used
         to configure the stream, open connections, etc.

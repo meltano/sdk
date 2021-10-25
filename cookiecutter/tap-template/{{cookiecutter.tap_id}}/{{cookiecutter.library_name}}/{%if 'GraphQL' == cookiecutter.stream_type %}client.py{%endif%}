@@ -41,6 +41,14 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 {%- endif %}
         return headers
 
+    def prepare_stream(self) -> None:
+        """Set up the stream before running.
+
+        This method is called before any message are output. It can be used
+        to configure the stream, open connections, etc.
+        """
+        pass # TODO: Delete this method if not needed.
+
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows."""
         # TODO: Parse response body and return a set of records.
@@ -52,3 +60,12 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """As needed, append or transform raw data to match expected structure."""
         # TODO: Delete this method if not needed.
         return row
+
+    def cleanup_stream(self) -> None:
+        """Clean up resources after running.
+
+        This method is called at the end of the stream, including
+        after exceptions are thrown. It can be used to clean up resources
+        opened during `prepare_stream` such as connections.
+        """
+        pass # TODO: Delete this method if not needed.
