@@ -88,60 +88,52 @@ def test_target_batching():
     of time elapsed. Currently this is set to 30 minutes, so we test after 31
     minutes elapsed between checkpoints.
     """
+    tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        tap.sync_all()
 
     mocked_starttime = "2012-01-01 12:00:00"
     mocked_jumptotime2 = "2012-01-01 12:31:00"
     mocked_jumptotime3 = "2012-01-01 13:02:00"
     countries_record_count = 257
 
-    freezer = freeze_time(mocked_starttime)
-    freezer.start()
-    target = TargetMock()
-    target.max_parallelism = 1  # Limit unit test to 1 process
+    with freeze_time(mocked_starttime):
+        target = TargetMock()
+        target.max_parallelism = 1  # Limit unit test to 1 process
+        assert target.num_records_processed == 0
+        assert len(target.records_written) == 0
+        assert len(target.state_messages_written) == 0
 
-    # TODO: Use a sample row generator or a Mock Tap instead of TapCountries:
-    tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
-    buf = io.StringIO()
-    with redirect_stdout(buf):
-        tap.sync_all()
+        # `buf` now contains the output of the full tap sync
+        buf.seek(0)
+        target._process_lines(buf)
 
-    assert target.num_records_processed == 0
-    assert len(target.records_written) == 0
-    assert len(target.state_messages_written) == 0
+        # sync_end_to_end(tap, target)
 
-    # `buf` now contains the output of the full tap sync
-    buf.seek(0)
-    target._process_lines(buf)
+        assert target.num_records_processed == countries_record_count
+        assert len(target.records_written) == 0  # Drain not yet called
+        assert len(target.state_messages_written) == 0  # Drain not yet called
 
-    # sync_end_to_end(tap, target)
+    with freeze_time(mocked_jumptotime2):
+        buf.seek(0)
+        target._process_lines(buf)
 
-    assert target.num_records_processed == countries_record_count
-    assert len(target.records_written) == 0  # Drain not yet called
-    assert len(target.state_messages_written) == 0  # Drain not yet called
+        # The first next record should force an batch drain
+        assert target.num_records_processed == countries_record_count * 2
+        assert len(target.records_written) == countries_record_count + 1
+        assert len(target.state_messages_written) == 1
 
-    freezer = freeze_time(mocked_jumptotime2)
-    freezer.start()
+    with freeze_time(mocked_jumptotime3):
+        buf.seek(0)
+        target._process_lines(buf)
 
-    buf.seek(0)
-    target._process_lines(buf)
+        # The first next record should force an batch drain
+        assert target.num_records_processed == countries_record_count * 3
+        assert len(target.records_written) == (countries_record_count * 2) + 1
+        assert len(target.state_messages_written) == 2
 
-    # The first next record should force an batch drain
-    assert target.num_records_processed == countries_record_count * 2
-    assert len(target.records_written) == countries_record_count + 1
-    assert len(target.state_messages_written) == 1
-
-    freezer = freeze_time(mocked_jumptotime3)
-    freezer.start()
-
-    buf.seek(0)
-    target._process_lines(buf)
-
-    # The first next record should force an batch drain
-    assert target.num_records_processed == countries_record_count * 3
-    assert len(target.records_written) == (countries_record_count * 2) + 1
-    assert len(target.state_messages_written) == 2
-
-    target._process_endofpipe()  # Should force a final STATE message
+        target._process_endofpipe()  # Should force a final STATE message
 
     assert target.num_records_processed == countries_record_count * 3
     assert len(target.state_messages_written) == 3
