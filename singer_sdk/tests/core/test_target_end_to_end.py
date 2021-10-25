@@ -32,8 +32,14 @@ class BatchSinkMock(BatchSink):
     ):
         super().__init__(target, stream_name, schema, key_properties)
         self.target = target
-        self.records_written: List[dict] = []
-        self.num_batches_processed: int = 0
+        # self.target.records_written: List[dict] = []
+        # self.target.num_records_processed: int = 0
+        # self.target.num_batches_processed: int = 0
+
+    def process_record(self, record: dict, context: dict) -> Optional[dict]:
+        """Tracks the count of processed records."""
+        self.target.num_records_processed += 1
+        return super().process_record(record, context)
 
     def process_batch(self, context: dict) -> None:
         """Write to mock trackers."""
@@ -52,6 +58,7 @@ class TargetMock(Target):
         super().__init__(config={})
         self.state_messages_written: List[dict] = []
         self.records_written: List[dict] = []
+        self.num_records_processed: int = 0
         self.num_batches_processed: int = 0
 
     def _write_state_message(self, state: dict):
@@ -82,10 +89,12 @@ def test_target_batching():
     mocked_starttime = "2012-01-01 12:00:00"
     mocked_jumptotime2 = "2012-01-01 12:31:00"
     mocked_jumptotime3 = "2012-01-01 13:02:00"
+    countries_record_count = 257
 
     freezer = freeze_time(mocked_starttime)
     freezer.start()
     target = TargetMock()
+    target.max_parallelism = 1  # Limit unit test to 1 process
 
     # TODO: Use a sample row generator or a Mock Tap instead of TapCountries:
     tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
@@ -93,16 +102,19 @@ def test_target_batching():
     with redirect_stdout(buf):
         tap.sync_all()
 
+    assert target.num_records_processed == 0
+    assert len(target.records_written) == 0
+    assert len(target.state_messages_written) == 0
+
     # `buf` now contains the output of the full tap sync
     buf.seek(0)
     target._process_lines(buf)
 
-    target.max_parallelism = 1  # Limit unit test to 1 process
+    # sync_end_to_end(tap, target)
 
-    sync_end_to_end(tap, target)
-
-    assert len(target.records_written) == 514  # Records from countries tap
-    assert len(target.state_messages_written) == 1
+    assert target.num_records_processed == countries_record_count
+    assert len(target.records_written) == 0  # Drain not yet called
+    assert len(target.state_messages_written) == 0  # Drain not yet called
 
     freezer = freeze_time(mocked_jumptotime2)
     freezer.start()
@@ -110,9 +122,10 @@ def test_target_batching():
     buf.seek(0)
     target._process_lines(buf)
 
-    # Should have forced an additional state and record message
-    assert len(target.records_written) == 515
-    assert len(target.state_messages_written) == 2
+    # The first next record should force an batch drain
+    assert target.num_records_processed == countries_record_count * 2
+    assert len(target.records_written) == countries_record_count + 1
+    assert len(target.state_messages_written) == 1
 
     freezer = freeze_time(mocked_jumptotime3)
     freezer.start()
@@ -120,13 +133,15 @@ def test_target_batching():
     buf.seek(0)
     target._process_lines(buf)
 
-    # Should have forced an additional state and record message
-    assert len(target.records_written) == 772
-    assert len(target.state_messages_written) == 3
+    # The first next record should force an batch drain
+    assert target.num_records_processed == countries_record_count * 3
+    assert len(target.records_written) == (countries_record_count * 2) + 1
+    assert len(target.state_messages_written) == 2
 
     target._process_endofpipe()  # Should force a final STATE message
 
-    assert len(target.state_messages_written) == 4
+    assert target.num_records_processed == countries_record_count * 3
+    assert len(target.state_messages_written) == 3
     assert target.state_messages_written[-1] == {
         "bookmarks": {"continents": {}, "countries": {}}
     }
