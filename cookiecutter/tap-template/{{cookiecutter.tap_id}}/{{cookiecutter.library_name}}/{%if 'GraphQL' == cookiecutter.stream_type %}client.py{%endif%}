@@ -47,7 +47,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         This method is called before any message are output. It can be used
         to configure the stream, open connections, etc.
         """
-        pass # TODO: Delete this method if not needed.
+        pass  # TODO: Delete this method if not needed.
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return an iterator of result rows."""
@@ -68,4 +68,4 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         after exceptions are thrown. It can be used to clean up resources
         opened during `prepare_stream` such as connections.
         """
-        pass # TODO: Delete this method if not needed.
+        pass  # TODO: Delete this method if not needed.

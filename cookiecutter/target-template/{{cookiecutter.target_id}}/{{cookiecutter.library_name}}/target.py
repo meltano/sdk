@@ -32,7 +32,7 @@ class Target{{ cookiecutter.destination_name }}(Target):
         This method is called before any messages are processed. It can be used
         to configure the target, open connections, etc.
         """
-        pass # TODO: Delete this method if not needed.
+        pass  # TODO: Delete this method if not needed.
 
     def cleanup_target(self) -> None:
         """Clean up resources after running.
@@ -41,4 +41,4 @@ class Target{{ cookiecutter.destination_name }}(Target):
         after exceptions are thrown. It can be used to clean up resources
         opened during `prepare_target` such as connections.
         """
-        pass # TODO: Delete this method if not needed.
+        pass  # TODO: Delete this method if not needed.

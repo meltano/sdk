@@ -61,7 +61,7 @@ class Tap{{ cookiecutter.source_name }}(Tap):
         This method is called before any streams are started. It can be used
         to configure the tap, open connections, etc.
         """
-        pass # TODO: Delete this method if not needed.
+        pass  # TODO: Delete this method if not needed.
 
 {%- if cookiecutter.stream_type in ("GraphQL", "REST", "Other") %}
 
@@ -77,4 +77,4 @@ class Tap{{ cookiecutter.source_name }}(Tap):
         after exceptions are thrown. It can be used to clean up resources
         opened during `prepare_tap` such as connections.
         """
-        pass # TODO: Delete this method if not needed.
+        pass  # TODO: Delete this method if not needed.

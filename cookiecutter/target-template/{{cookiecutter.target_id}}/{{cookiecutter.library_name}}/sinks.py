@@ -6,8 +6,7 @@ from singer_sdk.sinks import {{ sinkclass }}
 
 class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
     """{{ cookiecutter.destination_name }} target sink class."""
-
-    {% if sinkclass != "RecordSink" -%}
+    {%- if sinkclass != "RecordSink" %}
     max_size = 10000  # Max records to write in one batch
     {%- endif %}
 
@@ -17,7 +16,7 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
         This method is called before any messages are processed. It can be used
         to configure the sink, open connections, etc.
         """
-        pass # TODO: Delete this method if not needed.
+        pass  # TODO: Delete this method if not needed.
 
     {% if sinkclass == "RecordSink" -%}
     def process_record(self, record: dict, context: dict) -> None:
@@ -26,10 +25,9 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
         # ------
         # client.write(record)
     {%- else -%}
-
     def start_batch(self, context: dict) -> None:
         """Start a batch.
-        
+
         Developers may optionally add additional markers to the `context` dict,
         which is unique to this batch.
         """
@@ -64,4 +62,4 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
         after exceptions are thrown. It can be used to clean up resources
         opened during `prepare_sink` such as connections.
         """
-        pass # TODO: Delete this method if not needed.
+        pass  # TODO: Delete this method if not needed.
