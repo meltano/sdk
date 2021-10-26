@@ -163,4 +163,6 @@ class AutoInferredStream({{ cookiecutter.source_name }}Stream):
     schema_inference_record_count = 50
     # TODO: - (Optional) Set in order to output the inferred schema to a file.
     #       - This overwrites existing files.
-    schema_filepath = SCHEMAS_DIR / Path(f"{name}.json")
+    @property
+    def schema_filepath(self):
+        return SCHEMAS_DIR / Path(f"{self.name}.json")
