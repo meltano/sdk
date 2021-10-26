@@ -50,7 +50,6 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         name: Optional[str] = None,
         schema: Optional[Union[Dict[str, Any], Schema]] = None,
         path: Optional[str] = None,
-        max_inf_records: int = 50,
     ) -> None:
         """Initialize the REST stream.
 
@@ -59,7 +58,6 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             schema: JSON schema for records in this stream.
             name: Name of this stream.
             path: URL path for this entity stream.
-            max_inf_records: number of records used to infer schema.
         """
         if path:
             self.path = path
@@ -67,7 +65,6 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         self._requests_session = requests.Session()
         self._compiled_jsonpath = None
         self._next_page_token_compiled_jsonpath = None
-        self._max_inf_records = max_inf_records
         super().__init__(name=name, schema=schema, tap=tap)
 
     @staticmethod
@@ -401,6 +398,11 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             ValueError: if the parsed records returned from the API do not consist
                 of valid JSON objects.
         """
+        self.logger.info(
+            f"Schema inference running with "
+            f"{self.schema_inference_record_count} records."
+        )
+
         context: dict = {}
 
         builder = SchemaBuilder()
@@ -410,7 +412,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
             builder.add_object(self.post_process(record, context))
 
-            if i + 1 >= self._max_inf_records:
+            if i + 1 >= self.schema_inference_record_count:
                 break
 
         schema: dict = builder.to_schema()

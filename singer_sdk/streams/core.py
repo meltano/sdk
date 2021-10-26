@@ -74,6 +74,9 @@ class Stream(metaclass=abc.ABCMeta):
     parent_stream_type: Optional[Type["Stream"]] = None
     ignore_parent_replication_key: bool = False
 
+    #: Optional number of records to use for schema inference
+    schema_inference_record_count: int = 0
+
     def __init__(
         self,
         tap: TapBaseClass,
@@ -112,34 +115,47 @@ class Stream(metaclass=abc.ABCMeta):
         self._mask: Optional[SelectionMask] = None
         self._schema: dict
         self.child_streams: List[Stream] = []
-        if schema:
-            if isinstance(schema, (PathLike, str)):
-                if not Path(schema).is_file():
-                    raise FileNotFoundError(
-                        f"Could not find schema file '{self.schema_filepath}'."
+
+        config_record_count = tap.config.get("schema_inference_record_count")
+        if config_record_count:
+            if isinstance(config_record_count, int):
+                self.schema_inference_record_count = config_record_count
+            elif isinstance(config_record_count, str):
+                self.schema_inference_record_count = int(config_record_count)
+
+        if self.schema_inference_record_count > 0:
+            self.schema = self.infer_schema()
+
+            if self.schema_filepath:
+                file = Path(self.schema_filepath) / f"{self.name}.json"
+                file.write_text(json.dumps(self.schema))
+        else:
+            if schema:
+                if isinstance(schema, (PathLike, str)):
+                    if not Path(schema).is_file():
+                        raise FileNotFoundError(
+                            f"Could not find schema file '{self.schema_filepath}'."
+                        )
+
+                    self._schema_filepath = Path(schema)
+                elif isinstance(schema, dict):
+                    self.schema = schema
+                elif isinstance(schema, Schema):
+                    self.schema = schema.to_dict()
+                else:
+                    raise ValueError(
+                        f"Unexpected type {type(schema).__name__} for arg 'schema'."
                     )
 
-                self._schema_filepath = Path(schema)
-            elif isinstance(schema, dict):
-                self._schema = schema
-            elif isinstance(schema, Schema):
-                self._schema = schema.to_dict()
-            else:
-                raise ValueError(
-                    f"Unexpected type {type(schema).__name__} for arg 'schema'."
-                )
-
-        if self.schema_filepath:
-            self._schema = json.loads(Path(self.schema_filepath).read_text())
+            if self.schema_filepath:
+                self.schema = json.loads(Path(self.schema_filepath).read_text())
 
         if not self.schema:
-            self.schema = self.infer_schema()
-            if not self.schema:
-                raise ValueError(
-                    f"Could not initialize schema for stream '{self.name}'. "
-                    "A valid schema object or filepath was not provided,"
-                    "and the 'infer_schema' method has not been implemented."
-                )
+            raise ValueError(
+                f"Could not initialize schema for stream '{self.name}'. "
+                "A valid schema object or filepath was not provided,"
+                "and the 'infer_schema' method has not been implemented."
+            )
 
     @property
     def stream_maps(self) -> List[StreamMap]:
