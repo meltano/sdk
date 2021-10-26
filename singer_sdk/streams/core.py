@@ -116,13 +116,17 @@ class Stream(metaclass=abc.ABCMeta):
         self._schema: dict
         self.child_streams: List[Stream] = []
 
-        config_record_count = tap.config.get("schema_inference_record_count")
-        if config_record_count:
-            if isinstance(config_record_count, int):
-                self.schema_inference_record_count = config_record_count
-            elif isinstance(config_record_count, str):
-                self.schema_inference_record_count = int(config_record_count)
+        # resolve schema_inference_record_count with config
+        stream_cnt = tap.config.get(f"schema_inference_record_count_{self.name}")
+        all_cnt = tap.config.get("schema_inference_record_count")
+        final_cnt = stream_cnt if stream_cnt else all_cnt
+        if final_cnt:
+            if isinstance(final_cnt, int):
+                self.schema_inference_record_count = final_cnt
+            elif isinstance(final_cnt, str):
+                self.schema_inference_record_count = int(final_cnt)
 
+        # use schema inference if set, otherwise use provided schema
         if self.schema_inference_record_count > 0:
             self.schema = self.infer_schema()
 

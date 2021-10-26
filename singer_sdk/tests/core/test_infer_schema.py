@@ -269,3 +269,50 @@ def test_infer_schema_rest_records_by_config():
         "required": ["col1"],
         "type": "object",
     }
+
+
+def test_infer_schema_rest_records_by_config_stream():
+    """Validate providing count in config produces same result as other scenarios."""
+
+    class InferSchemaStream(RESTStream):
+        """Test RESTful stream class."""
+
+        name = "records_only"
+        path = "/example"
+        url_base = "https://example.com"
+        primary_keys = ["col1"]
+        schema = {}
+
+        def _request_with_backoff(
+            self, prepared_request: requests.PreparedRequest, context: Optional[dict]
+        ) -> requests.Response:
+            return request_with_backoff()
+
+    class InferSchemaTap(Tap):
+        """Test tap class."""
+
+        name = "test-tap"
+
+        settings_jsonschema = PropertiesList(
+            Property("schema_inference_record_count_records_only", NumberType),
+            Property("schema_inference_record_count", NumberType),
+        ).to_dict()
+
+        config = {
+            "schema_inference_record_count_records_only": 1,
+            "schema_inference_record_count": 50,
+        }
+
+        def discover_streams(self) -> List[Stream]:
+            """List all streams."""
+            return [InferSchemaStream(self)]
+
+    tap = InferSchemaTap()
+    stream = tap.streams["records_only"]
+
+    print(stream.schema)
+    assert stream.schema == {
+        "properties": {"col1": {"type": "string"}},
+        "required": ["col1"],
+        "type": "object",
+    }

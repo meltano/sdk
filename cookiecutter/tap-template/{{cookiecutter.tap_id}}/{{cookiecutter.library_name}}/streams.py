@@ -159,6 +159,7 @@ class AutoInferredStream({{ cookiecutter.source_name }}Stream):
     schema = {}  # leave as is, unless disabling auto-inference
     # TODO: - Remove or set to 0 to disable schema inference. Only need to
     #       - run this once with enough records if outputting to schema file.
+    #       - Tap config overrides this setting.
     schema_inference_record_count = 50
     # TODO: - (Optional) Set in order to output the inferred schema to a file.
     #       - This overwrites existing files.

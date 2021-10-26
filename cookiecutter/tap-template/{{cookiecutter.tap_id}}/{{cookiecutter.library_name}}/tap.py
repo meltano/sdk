@@ -53,6 +53,14 @@ class Tap{{ cookiecutter.source_name }}(Tap):
             default="https://api.mysample.com",
             description="The url for the API service"
         ),
+        th.Property(
+            "schema_inference_record_count",
+            th.NumberType,
+            default=0,
+            description="The number of records to use in inferring any stream's "
+                        "schema. Append `_<stream_name>` to property name for "
+                        "individual stream settings."
+        ),
     ).to_dict()
 {%- if cookiecutter.stream_type in ("GraphQL", "REST", "Other") %}
 
