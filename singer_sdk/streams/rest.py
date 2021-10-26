@@ -8,6 +8,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union, cast
 
 import backoff
 import requests
+from genson import SchemaBuilder  # type: ignore
 from singer.schema import Schema
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
@@ -58,13 +59,13 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             name: Name of this stream.
             path: URL path for this entity stream.
         """
-        super().__init__(name=name, schema=schema, tap=tap)
         if path:
             self.path = path
         self._http_headers: dict = {}
         self._requests_session = requests.Session()
         self._compiled_jsonpath = None
         self._next_page_token_compiled_jsonpath = None
+        super().__init__(name=name, schema=schema, tap=tap)
 
     @staticmethod
     def _url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
@@ -377,3 +378,45 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             requests.
         """
         return SimpleAuthenticator(stream=self)
+
+    def infer_schema(self) -> dict:
+        """Generate a schema based on records returned from the endpoint.
+
+        Optional. This method gives developers a quickstart into developing or
+        bypassing the schema development process by using the stream's actual data
+        to generate a true look at the stream's schema. This is expensive in terms of
+        API calls and extraction time, so while useful for rapid development, it is
+        best to provide a static schema for production pipelines.
+
+        If flattening of the response data is required, it must be applied in the
+        `post_process` method.
+
+        Returns:
+            A valid JSON schema applicable to the stream.
+
+        Raises:
+            ValueError: if the parsed records returned from the API do not consist
+                of valid JSON objects.
+        """
+        self.logger.info(
+            f"Schema inference running with "
+            f"{self.schema_inference_record_count} records."
+        )
+
+        context: dict = {}
+
+        builder = SchemaBuilder()
+        for i, record in enumerate(self.request_records(context)):
+            if type(record) is not dict:
+                raise ValueError("Records must be a dict object.")
+
+            builder.add_object(self.post_process(record, context))
+
+            if i + 1 >= self.schema_inference_record_count:
+                break
+
+        schema: dict = builder.to_schema()
+        del schema["$schema"]
+
+        self.logger.debug(f"Schema inferred from records: {schema}")
+        return schema

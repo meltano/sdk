@@ -74,6 +74,9 @@ class Stream(metaclass=abc.ABCMeta):
     parent_stream_type: Optional[Type["Stream"]] = None
     ignore_parent_replication_key: bool = False
 
+    #: Optional number of records to use for schema inference
+    schema_inference_record_count: int = 0
+
     def __init__(
         self,
         tap: TapBaseClass,
@@ -112,30 +115,50 @@ class Stream(metaclass=abc.ABCMeta):
         self._mask: Optional[SelectionMask] = None
         self._schema: dict
         self.child_streams: List[Stream] = []
-        if schema:
-            if isinstance(schema, (PathLike, str)):
-                if not Path(schema).is_file():
-                    raise FileNotFoundError(
-                        f"Could not find schema file '{self.schema_filepath}'."
+
+        # resolve schema_inference_record_count with config
+        stream_cnt = tap.config.get(f"schema_inference_record_count_{self.name}")
+        all_cnt = tap.config.get("schema_inference_record_count")
+        final_cnt = stream_cnt if stream_cnt else all_cnt
+        if final_cnt:
+            if isinstance(final_cnt, int):
+                self.schema_inference_record_count = final_cnt
+            elif isinstance(final_cnt, str):
+                self.schema_inference_record_count = int(final_cnt)
+
+        # use schema inference if set, otherwise use provided schema
+        if self.schema_inference_record_count > 0:
+            self.schema = self.infer_schema()
+
+            if self.schema_filepath:
+                file = Path(self.schema_filepath) / f"{self.name}.json"
+                file.write_text(json.dumps(self.schema))
+        else:
+            if schema:
+                if isinstance(schema, (PathLike, str)):
+                    if not Path(schema).is_file():
+                        raise FileNotFoundError(
+                            f"Could not find schema file '{self.schema_filepath}'."
+                        )
+
+                    self._schema_filepath = Path(schema)
+                elif isinstance(schema, dict):
+                    self.schema = schema
+                elif isinstance(schema, Schema):
+                    self.schema = schema.to_dict()
+                else:
+                    raise ValueError(
+                        f"Unexpected type {type(schema).__name__} for arg 'schema'."
                     )
 
-                self._schema_filepath = Path(schema)
-            elif isinstance(schema, dict):
-                self._schema = schema
-            elif isinstance(schema, Schema):
-                self._schema = schema.to_dict()
-            else:
-                raise ValueError(
-                    f"Unexpected type {type(schema).__name__} for arg 'schema'."
-                )
-
-        if self.schema_filepath:
-            self._schema = json.loads(Path(self.schema_filepath).read_text())
+            if self.schema_filepath:
+                self.schema = json.loads(Path(self.schema_filepath).read_text())
 
         if not self.schema:
             raise ValueError(
                 f"Could not initialize schema for stream '{self.name}'. "
-                "A valid schema object or filepath was not provided."
+                "A valid schema object or filepath was not provided,"
+                "and the 'infer_schema' method has not been implemented."
             )
 
     @property
@@ -361,6 +384,15 @@ class Stream(metaclass=abc.ABCMeta):
             JSON Schema dictionary for this stream.
         """
         return self._schema
+
+    @schema.setter
+    def schema(self, new_schema: dict) -> None:
+        """Set the stream's schema.
+
+        Args:
+            new_schema: JSON schema for the stream.
+        """
+        self._schema = new_schema
 
     @property
     def primary_keys(self) -> Optional[List[str]]:
@@ -1111,3 +1143,21 @@ class Stream(metaclass=abc.ABCMeta):
             The resulting record dict, or `None` if the record should be excluded.
         """
         return row
+
+    def infer_schema(self) -> dict:
+        """Generate a schema based on records returned from the endpoint.
+
+        Optional. This method gives developers a quickstart into developing or
+        bypassing the schema development process by using the stream's actual data
+        to generate a true look at the stream's schema. This is expensive in terms of
+        API calls and extraction time, so while useful for rapid development, it is
+        best to provide a static schema for production pipelines.
+
+
+        If flattening of the response data is required, it must be applied in the
+        `post_process` method.
+
+        Returns:
+            A valid JSON schema applicable to the stream
+        """
+        return {}
