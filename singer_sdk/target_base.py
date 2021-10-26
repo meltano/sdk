@@ -105,7 +105,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         The default is 8 if not overridden.
 
         Args:
-            new_max: The new max degree of parallelism for this target.
+            new_value: The new max degree of parallelism for this target.
         """
         self._max_parallelism = new_value
 
