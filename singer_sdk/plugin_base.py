@@ -29,6 +29,7 @@ from singer_sdk.helpers._compat import metadata
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._typing import is_string_array_type
 from singer_sdk.helpers._util import read_json_file
+from singer_sdk.helpers.capabilities import CapabilitiesEnum
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import extend_validator_with_defaults
 
@@ -103,7 +104,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         self.mapper: PluginMapper
 
     @classproperty
-    def capabilities(self) -> List[str]:
+    def capabilities(self) -> List[CapabilitiesEnum]:
         """Get capabilities.
 
         Returns:
@@ -297,7 +298,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         info = self._get_about_info()
 
         if format == "json":
-            print(json.dumps(info, indent=2))
+            print(json.dumps(info, indent=2, default=str))
 
         elif format == "markdown":
             max_setting_len = cast(

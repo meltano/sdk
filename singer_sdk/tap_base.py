@@ -14,6 +14,11 @@ from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._singer import Catalog
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import read_json_file
+from singer_sdk.helpers.capabilities import (
+    CapabilitiesEnum,
+    PluginCapabilities,
+    TapCapabilities,
+)
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams.core import Stream
@@ -130,13 +135,19 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         return self._input_catalog
 
     @classproperty
-    def capabilities(self) -> List[str]:
+    def capabilities(self) -> List[CapabilitiesEnum]:
         """Get tap capabilities.
 
         Returns:
             A list of capabilities supported by this tap.
         """
-        return ["sync", "catalog", "state", "discover"]
+        return [
+            TapCapabilities.CATALOG,
+            TapCapabilities.STATE,
+            TapCapabilities.DISCOVER,
+            PluginCapabilities.ABOUT,
+            PluginCapabilities.STREAM_MAPS,
+        ]
 
     # Connection test:
 
@@ -452,7 +463,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 validate_config=validate_config,
             )
             if about:
-                tap.print_about()
+                tap.print_about(format)
             elif discover:
                 tap.run_discovery()
                 if test:
