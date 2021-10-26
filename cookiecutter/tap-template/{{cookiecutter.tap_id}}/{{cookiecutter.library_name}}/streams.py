@@ -146,3 +146,20 @@ class GroupsStream({{ cookiecutter.source_name }}Stream):
         th.Property("modified", th.DateTimeType),
     ).to_dict()
 {%- endif %}
+
+
+class AutoInferredStream({{ cookiecutter.source_name }}Stream):
+    """Define stream that uses schema inference."""
+    name = "inferred"
+{%- if cookiecutter.stream_type == "REST" %}
+    path = "/inferred"
+{%- endif %}
+    primary_keys = ["id"]
+    replication_key = "modified"
+    schema = {}  # leave as is, unless disabling auto-inference
+    # TODO: - Remove or set to 0 to disable schema inference. Only need to
+    #       - run this once with enough records if outputting to schema file.
+    schema_inference_record_count = 50
+    # TODO: - (Optional) Set in order to output the inferred schema to a file.
+    #       - This overwrites existing files.
+    schema_filepath = SCHEMAS_DIR / Path(f"{name}.json")
