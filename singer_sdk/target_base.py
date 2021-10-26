@@ -14,6 +14,7 @@ from joblib import Parallel, delayed, parallel_backend
 from singer_sdk.exceptions import RecordsWitoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks import Sink
@@ -76,13 +77,16 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         )
 
     @classproperty
-    def capabilities(self) -> List[str]:
+    def capabilities(self) -> List[CapabilitiesEnum]:
         """Get target capabilites.
 
         Returns:
             A list of capabilities supported by this target.
         """
-        return ["target"]
+        return [
+            PluginCapabilities.ABOUT,
+            PluginCapabilities.STREAM_MAPS,
+        ]
 
     @property
     def max_parallelism(self) -> int:
