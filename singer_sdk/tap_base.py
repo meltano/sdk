@@ -463,7 +463,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 validate_config=validate_config,
             )
             if about:
-                tap.print_about()
+                tap.print_about(format)
             elif discover:
                 tap.run_discovery()
                 if test:
