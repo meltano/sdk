@@ -11,6 +11,7 @@ from {{ cookiecutter.library_name }}.streams import (
 {%- if cookiecutter.stream_type in ("GraphQL", "REST", "Other") %}
     UsersStream,
     GroupsStream,
+    AutoInferredStream,
 {%- endif %}
 )
 
@@ -20,6 +21,7 @@ from {{ cookiecutter.library_name }}.streams import (
 STREAM_TYPES = [
     UsersStream,
     GroupsStream,
+    AutoInferredStream,
 ]
 {%- endif %}
 
