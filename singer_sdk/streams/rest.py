@@ -11,19 +11,12 @@ import requests
 from singer.schema import Schema
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
+from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 
 DEFAULT_PAGE_SIZE = 1000
-
-
-class FatalAPIError(Exception):
-    """Exception raised when a failed request should not be considered retriable."""
-
-
-class RetriableAPIError(Exception):
-    """Exception raised when a failed request can be safely retried."""
 
 
 class RESTStream(Stream, metaclass=abc.ABCMeta):
@@ -130,7 +123,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """Validate HTTP response.
 
         By default, executes `requests.Response.raise_for_status()`_ and raises a
-        :class:`singer_sdk.streams.rest.FatalAPIError` if an `requests.HTTPError`_ is
+        :class:`singer_sdk.exceptions.FatalAPIError` if an `requests.HTTPError`_ is
         caught.
 
         Tap developers are encouraged to override this method if their APIs use HTTP
@@ -140,8 +133,8 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         .. image:: ../images/200.png
 
 
-        In case an error should be retried, then this method should raise an
-        :class:`singer_sdk.streams.rest.RetriableAPIError`.
+        In case an error is deemed transient and can be safely retried, then this
+        method should raise an :class:`singer_sdk.exceptions.RetriableAPIError`.
 
         Args:
             response: A `requests.Response`_ object.

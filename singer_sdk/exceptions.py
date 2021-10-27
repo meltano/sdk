@@ -5,6 +5,10 @@ class ConfigValidationError(Exception):
     """Raised when a user's config settings fail validation."""
 
 
+class FatalAPIError(Exception):
+    """Exception raised when a failed request should not be considered retriable."""
+
+
 class InvalidStreamSortException(Exception):
     """Exception to raise if sorting errors are found while syncing the records."""
 
@@ -19,6 +23,10 @@ class MaxRecordsLimitException(Exception):
 
 class RecordsWitoutSchemaException(Exception):
     """Raised if a target receives RECORD messages prior to a SCHEMA message."""
+
+
+class RetriableAPIError(Exception):
+    """Exception raised when a failed request can be safely retried."""
 
 
 class StreamMapConfigError(Exception):

@@ -4,7 +4,8 @@ import pytest
 import requests
 from requests.exceptions import HTTPError
 
-from singer_sdk.streams.rest import FatalAPIError, RESTStream
+from singer_sdk.exceptions import FatalAPIError
+from singer_sdk.streams.rest import RESTStream
 
 
 class CustomResponseValidationStream(RESTStream):
