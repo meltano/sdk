@@ -4,7 +4,7 @@ import json
 import sys
 import io
 
-from pytest import CaptureFixture
+from collections import defaultdict
 from typing import Callable, List, Type
 
 from singer_sdk.tap_base import Tap
@@ -65,7 +65,7 @@ def get_standard_target_tests(
     return []
 
 
-class TapIntegrationTestingUtility(object):
+class StreamTestUtility(object):
     """
     This utility class enables developers to more easily test taps against
     live integrations. It provides some out-of-the-box tests that can be run
@@ -73,12 +73,15 @@ class TapIntegrationTestingUtility(object):
     custom tests.
     """
 
+    schema_messages = []
+    state_messages = []
+    records = defaultdict(list)
+
     def __init__(
         self, tap_class: Type[Tap], config: dict = {}, stream_record_limit: int = 10
     ) -> None:
         self.tap = tap_class(config=config)
         self.stream_record_limit = stream_record_limit
-        self.run_sync()
 
     @property
     def available_tests(self):
@@ -89,27 +92,22 @@ class TapIntegrationTestingUtility(object):
         ]
 
     def run_sync(self):
-        stdout = self._capture_sync_output()
+        stdout = self._exec_sync()
         records = self._clean_sync_output(stdout)
         self._parse_records(records)
 
-    def _capture_sync_output(self) -> List[dict]:
+    def _exec_sync(self) -> List[dict]:
         """
         Run the tap sync and capture the records printed to stdout, either through
         a PyTest fixture (capsys) or through the standard `sys` utility.
         """
         output_buffer = io.StringIO()
         sys.stdout = output_buffer
-        self.run_sync_all()
+        self._sync_all_streams()
         sys.stdout = sys.__stdout__
         return output_buffer.getvalue()
 
-    def _run_sync_all(self) -> bool:
-        """Run connection test.
-
-        Returns:
-            True if the sync succeeded.
-        """
+    def _sync_all_streams(self) -> bool:
         for stream in self.tap.streams.values():
             stream._MAX_RECORDS_LIMIT = self.stream_record_limit
             try:
@@ -124,15 +122,17 @@ class TapIntegrationTestingUtility(object):
 
     def _parse_records(self, records: List[dict]) -> None:
         self.raw_messages = records
-        self.state_messages = [r for r in records if r["type"] == "STATE"]
-        self.schema_messages = [r for r in records if r["type"] == "SCHEMA"]
-
-        record_dict = {}
-        for stream in self.tap.streams:
-            record_dict[stream] = [
-                r for r in records if r["type"] == "RECORD" and r["stream"] == stream
-            ]
-        self.records = record_dict
+        for record in records:
+            if record["type"] == "STATE":
+                self.state_messages.append(record)
+                continue
+            if record["type"] == "SCHEMA":
+                self.schema_messages.append(record)
+                continue
+            if record["type"] == "RECORD":
+                stream_name = record["stream"]
+                self.records[stream_name].append(record)
+                continue
         return
 
     def _test_stream_returns_at_least_one_record(self, stream_name):
