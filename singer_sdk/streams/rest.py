@@ -18,6 +18,14 @@ from singer_sdk.streams.core import Stream
 DEFAULT_PAGE_SIZE = 1000
 
 
+class FatalAPIError(Exception):
+    """Exception raised when a failed request should not be considered retriable."""
+
+
+class RetriableAPIError(Exception):
+    """Exception raised when a failed request can be safely retried."""
+
+
 class RESTStream(Stream, metaclass=abc.ABCMeta):
     """Abstract base class for REST API streams."""
 
@@ -118,11 +126,46 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             self._requests_session = requests.Session()
         return self._requests_session
 
+    def validate_response(self, response: requests.Response) -> None:
+        """Validate HTTP response.
+
+        By default, executes `requests.Response.raise_for_status()`_ and raises a
+        :class:`singer_sdk.streams.rest.FatalAPIError` if an `requests.HTTPError`_ is
+        caught.
+
+        Tap developers are encouraged to override this method if their APIs use HTTP
+        status codes in non-conventional ways, or if they communicate errors
+        differently (e.g. in the response body).
+
+        .. image:: ../images/200.png
+
+
+        In case an error should be retried, then this method should raise an
+        :class:`singer_sdk.streams.rest.RetriableAPIError`.
+
+        Args:
+            response: A `requests.Response`_ object.
+
+        Raises:
+            FatalAPIError: If the request is not retriable.
+
+        .. _requests.Response:
+            https://docs.python-requests.org/en/latest/api/#requests.Response
+        .. _requests.Response.raise_for_status():
+            https://docs.python-requests.org/en/latest/_modules/requests/models/#Response.raise_for_status
+        .. _requests.HTTPError:
+            https://docs.python-requests.org/en/latest/api/#requests.HTTPError
+        """
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as exc:
+            self.logger.exception("Failed request for %s", response.url, exc_info=exc)
+            raise FatalAPIError from exc
+
     @backoff.on_exception(
         backoff.expo,
-        (requests.exceptions.RequestException),
+        (RetriableAPIError),
         max_tries=5,
-        giveup=lambda e: e.response is not None and 400 <= e.response.status_code < 500,
         factor=2,
     )
     def _request_with_backoff(
@@ -136,9 +179,6 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         Returns:
             TODO
-
-        Raises:
-            RuntimeError: TODO
         """
         response = self.requests_session.send(prepared_request)
         if self._LOG_REQUEST_METRICS:
@@ -151,21 +191,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
                 context=context,
                 extra_tags=extra_tags,
             )
-        if response.status_code in [401, 403]:
-            self.logger.info("Failed request for {}".format(prepared_request.url))
-            self.logger.info(
-                f"Reason: {response.status_code} - {str(response.content)}"
-            )
-            raise RuntimeError(
-                "Requested resource was unauthorized, forbidden, or not found."
-            )
-        elif response.status_code >= 400:
-            raise RuntimeError(
-                f"Error making request to API: {prepared_request.url} "
-                f"[{response.status_code} - {str(response.content)}]".replace(
-                    "\\n", "\n"
-                )
-            )
+        self.validate_response(response)
         logging.debug("Response received successfully.")
         return response
 
