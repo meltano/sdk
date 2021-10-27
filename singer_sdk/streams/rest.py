@@ -119,12 +119,11 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             self._requests_session = requests.Session()
         return self._requests_session
 
-    def validate_response(self, response: requests.Response) -> None:
+    def validate_response(self, response: requests.Response):
         """Validate HTTP response.
 
-        By default, executes `requests.Response.raise_for_status()`_ and raises a
-        :class:`singer_sdk.exceptions.FatalAPIError` if an `requests.HTTPError`_ is
-        caught.
+        By default, checks for error status codes (>400) and raises a
+        :class:`singer_sdk.exceptions.FatalAPIError`.
 
         Tap developers are encouraged to override this method if their APIs use HTTP
         status codes in non-conventional ways, or if they communicate errors
@@ -144,16 +143,17 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         .. _requests.Response:
             https://docs.python-requests.org/en/latest/api/#requests.Response
-        .. _requests.Response.raise_for_status():
-            https://docs.python-requests.org/en/latest/_modules/requests/models/#Response.raise_for_status
-        .. _requests.HTTPError:
-            https://docs.python-requests.org/en/latest/api/#requests.HTTPError
         """
-        try:
-            response.raise_for_status()
-        except requests.HTTPError as exc:
-            self.logger.exception("Failed request for %s", response.url, exc_info=exc)
-            raise FatalAPIError from exc
+        msg = ""
+
+        if 400 <= response.status_code < 500:
+            msg = f"{response.status_code} Client Error: {response.reason} for path: {self.path}"
+
+        elif 500 <= response.status_code < 600:
+            msg = f"{response.status_code} Server Error: {response.reason} for path: {self.path}"
+
+        if msg:
+            raise FatalAPIError(msg)
 
     @backoff.on_exception(
         backoff.expo,
