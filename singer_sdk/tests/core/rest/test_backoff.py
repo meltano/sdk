@@ -1,5 +1,10 @@
 import json
-from contextlib import nullcontext
+
+try:
+    from contextlib import nullcontext
+except ModuleNotFoundError:
+    from contextlib2 import nullcontext
+
 from enum import Enum
 
 import pytest
