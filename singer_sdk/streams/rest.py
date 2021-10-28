@@ -119,7 +119,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             self._requests_session = requests.Session()
         return self._requests_session
 
-    def validate_response(self, response: requests.Response):
+    def validate_response(self, response: requests.Response) -> None:
         """Validate HTTP response.
 
         By default, checks for error status codes (>400) and raises a
@@ -147,10 +147,16 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         msg = ""
 
         if 400 <= response.status_code < 500:
-            msg = f"{response.status_code} Client Error: {response.reason} for path: {self.path}"
+            msg = (
+                f"{response.status_code} Client Error: "
+                f"{response.reason} for path: {self.path}"
+            )
 
         elif 500 <= response.status_code < 600:
-            msg = f"{response.status_code} Server Error: {response.reason} for path: {self.path}"
+            msg = (
+                f"{response.status_code} Server Error: "
+                f"{response.reason} for path: {self.path}"
+            )
 
         if msg:
             raise FatalAPIError(msg)
