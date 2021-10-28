@@ -50,22 +50,35 @@ def custom_validation_stream(rest_tap):
     return CustomResponseValidationStream(rest_tap)
 
 
-def test_good_status_code_api(basic_rest_stream):
+@pytest.mark.parametrize(
+    "status_code,reason,expectation",
+    [
+        (
+            400,
+            "Bad request",
+            pytest.raises(
+                FatalAPIError,
+                match=r"400 Client Error: Bad request for path: /dummy",
+            ),
+        ),
+        (
+            503,
+            "Service Unavailable",
+            pytest.raises(
+                FatalAPIError,
+                match=r"503 Server Error: Service Unavailable for path: /dummy",
+            ),
+        ),
+        (200, "OK", nullcontext()),
+    ],
+    ids=["client-error", "server-error", "ok"],
+)
+def test_status_code_api(basic_rest_stream, status_code, reason, expectation):
     fake_response = requests.Response()
-    fake_response.status_code = 200
+    fake_response.status_code = status_code
+    fake_response.reason = reason
 
-    basic_rest_stream.validate_response(fake_response)
-
-
-def test_bad_status_code_api(basic_rest_stream):
-    fake_response = requests.Response()
-    fake_response.status_code = 400
-    fake_response.reason = "Bad request"
-
-    with pytest.raises(
-        FatalAPIError,
-        match=r"400 Client Error: Bad request for path: /dummy",
-    ):
+    with expectation:
         basic_rest_stream.validate_response(fake_response)
 
 
