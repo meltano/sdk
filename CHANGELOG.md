@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Breaks
 
 
+## 0.3.13 - (2021-10-28)
+---
+
 ## 0.3.12 - (2021-10-21)
 ---
 
