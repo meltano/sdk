@@ -41,7 +41,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def url_base(self) -> str:
-        """Return the base url, e.g. 'https://api.mysite.com/v3/'."""
+        """Return the base url, e.g. ``https://api.mysite.com/v3/``."""
         pass
 
     def __init__(
