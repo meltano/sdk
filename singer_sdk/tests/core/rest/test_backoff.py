@@ -2,7 +2,7 @@ import json
 
 try:
     from contextlib import nullcontext
-except ModuleNotFoundError:
+except ImportError:
     from contextlib2 import nullcontext
 
 from enum import Enum
