@@ -3,9 +3,9 @@
 import abc
 import copy
 import json
-from pathlib import Path, PurePath
 import sys
 import time
+from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 import click
