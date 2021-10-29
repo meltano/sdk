@@ -8,6 +8,7 @@ import pytest
 
 from singer_sdk import SQLStream, SQLConnector
 from singer_sdk.tap_base import SQLTap
+from singer_sdk.helpers._singer import Metadata, StreamMetadata, MetadataMapping
 
 
 @pytest.fixture
@@ -53,6 +54,18 @@ def sqlite_sampletap(sqlite_connector):
     return SQLiteTap(config={"sqlalchemy_url": sqlite_connector.sqlalchemy_url})
 
 
+def test_sql_metadata(sqlite_sampletap: SQLTap):
+    stream = cast(SQLStream, sqlite_sampletap.streams["main-t1"])
+    detected_metadata = stream.catalog_entry["metadata"]
+    detected_root_md = [md for md in detected_metadata if md["breadcrumb"] == []][0]
+    detected_root_md = detected_root_md["metadata"]
+    translated_metadata = StreamMetadata.from_dict(detected_root_md)
+    assert detected_root_md["schema-name"] == translated_metadata.schema_name
+    assert detected_root_md == translated_metadata.to_dict()
+    md_map = MetadataMapping.from_iterable(stream.catalog_entry["metadata"])
+    assert md_map[()].schema_name == "main"
+
+
 def test_sqlite_discovery(sqlite_sampletap: SQLTap):
     sqlite_sampletap.run_discovery()
     sqlite_sampletap.sync_all()
@@ -60,6 +73,11 @@ def test_sqlite_discovery(sqlite_sampletap: SQLTap):
     schema = stream.schema
     assert len(schema["properties"]) == 2
     assert stream.name == stream.tap_stream_id == "main-t1"
+
+    md_map = MetadataMapping.from_iterable(stream.catalog_entry["metadata"])
+    assert md_map[()] is not None
+    assert md_map[()] is md_map.root
+    assert md_map[()].schema_name == "main"
 
     # Fails here (schema is None):
     assert stream.metadata.root.schema_name == "main"
