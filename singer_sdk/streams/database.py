@@ -1,102 +1,145 @@
 """Base class for database-type streams."""
 
 import abc
-import sqlalchemy
+from typing import Any, Dict, Iterable, List, Optional, Type, Union, cast
 
 import singer
-from typing import (
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    cast,
-    Union,
-)
+import sqlalchemy
 
+from singer_sdk import typing as th
+from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._singer import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
-from singer_sdk import typing as th
 
 
-class SQLStream(Stream, metaclass=abc.ABCMeta):
-    """Base class for SQLAlchemy-based streams."""
+class SQLConnector:
+    """Base class for SQLAlchemy-based connectors.
+
+    The connector class serves as a wrapper around the SQL connection.
+
+    The functions of the connector are:
+
+    - connecting to the source
+    - generating SQLAlchemy connection and engine objects
+    - discovering schema catalog entries
+    - performing type conversions to/from JSONSchema types
+    - dialect-specific functions, such as escaping and fully qualified names
+    """
 
     def __init__(
-        self,
-        tap: TapBaseClass,
-        catalog_entry: CatalogEntry,
-        connection: Optional[sqlalchemy.engine.Connection],
-    ):
-        """Initialize the database stream.
-
-        If `connection` is omitted or lost, a new connection will be made.
+        self, config: Optional[dict] = None, sql_alchemy_url: Optional[str] = None
+    ) -> None:
+        """Initialize the SQL connector.
 
         Args:
-            tap: The parent tap object.
-            catalog_entry: Catalog entry dict.
-            connection: Optional connection to reuse.
+            config: The parent tap or target object's config.
+            sql_alchemy_url: Optional URL for the connection.
         """
-        self._sqlalchemy_connection: Optional[sqlalchemy.engine.Connection] = None
-        if connection:
-            self._sqlalchemy_connection = connection
+        self._config: Dict[str, Any] = config or {}
+        self._sql_alchemy_url: Optional[str] = sql_alchemy_url or None
+        self._connection: Optional[sqlalchemy.engine.Connection] = None
 
-        self.catalog_entry = catalog_entry
-        super().__init__(
-            tap=tap,
-            schema=self.schema,
-            name=self.tap_stream_id,
+    @property
+    def config(self) -> dict:
+        """If set, provides access to the tap or target config.
+
+        Returns:
+            The settings as a dict.
+        """
+        return self._config
+
+    def create_sqlalchemy_connection(self) -> sqlalchemy.engine.Connection:
+        """Return a new SQLAlchemy connection using the provided config.
+
+        Returns:
+            A newly created SQLAlchemy engine object.
+        """
+        return (
+            self.create_sqlalchemy_engine()
+            .connect()
+            .execution_options(stream_results=True)
         )
 
-    @property
-    def metadata(self) -> MetadataMapping:
-        """Return metadata object (dict) as specified in the Singer spec.
+    def create_sqlalchemy_engine(self) -> sqlalchemy.engine.Engine:
+        """Return a new SQLAlchemy engine using the provided config.
 
-        Metadata from an input catalog will override standard metadata.
+        Developers can generally override just one of the following:
+        `sqlalchemy_engine`, sqlalchemy_url`.
+
+        Returns:
+            A newly created SQLAlchemy engine object.
         """
-        return self.catalog_entry.metadata
+        return sqlalchemy.create_engine(self.sqlalchemy_url)
 
     @property
-    def schema(self) -> Schema:
-        """Return metadata object (dict) as specified in the Singer spec.
+    def connection(self) -> sqlalchemy.engine.Connection:
+        """Return or set the SQLAlchemy connection object.
 
-        Metadata from an input catalog will override standard metadata.
+        Returns:
+            The active SQLAlchemy connection object.
         """
-        return self.catalog_entry.schema
+        if not self._connection:
+            self._connection = self.create_sqlalchemy_connection()
+
+        return self._connection
 
     @property
-    def sqlalchemy_connection(self) -> sqlalchemy.engine.Connection:
-        """Return or set the SQLAlchemy connection object."""
-        if not self._sqlalchemy_connection:
-            self._sqlalchemy_connection = self.get_sqlalchemy_connection(
-                dict(self.config)
+    def sqlalchemy_url(self) -> str:
+        """Return the SQLAlchemy URL string.
+
+        Returns:
+            The URL as a string.
+        """
+        if not self._sql_alchemy_url:
+            self._sql_alchemy_url = self.create_sqlalchemy_url(self.config)
+
+        return self._sql_alchemy_url
+
+    def create_sqlalchemy_url(self, config: Dict[str, Any]) -> str:
+        """Return the SQLAlchemy URL string.
+
+        Developers can generally override just one of the following:
+        `sqlalchemy_engine`, `get_sqlalchemy_url`.
+
+        Args:
+            config: A dictionary of settings from the tap or target config.
+
+        Returns:
+            The URL as a string.
+
+        Raises:
+            ConfigValidationError: If no valid sqlalchemy_url can be found.
+        """
+        if "sqlalchemy_url" not in config:
+            raise ConfigValidationError(
+                "Could not find or create 'sqlalchemy_url' for connection."
             )
 
-        return self._sqlalchemy_connection
+        return cast(str, config["sqlalchemy_url"])
 
-    @property
-    def tap_stream_id(self) -> str:
-        """Return the unique ID used by the tap to identify this stream.
+    def to_jsonschema_type(cls, sql_type: Union[type, str, Any]) -> dict:
+        """Return a JSON Schema representation of the provided type.
 
-        Generally, this is the same value as in `Stream.name`.
+        By default will call `typing.to_jsonschema_type()` for strings and Python types.
 
-        In rare cases, such as for database types with multi-part names,
-        this may be slightly different from `Stream.name`.
+        Developers may override this method to accept additional input argument types,
+        to support non-standard types, or to provide custom typing logic.
+
+        Args:
+            sql_type (Union[type, str, Any]): The string representation of the SQL type,
+                or a Python class, or a custom-specified object.
+
+        Raises:
+            ValueError: If the type received could not be translated to jsonschema.
+
+        Returns:
+            The JSON Schema representation of the provided type.
         """
-        return self.catalog_entry.tap_stream_id
+        if isinstance(sql_type, (type, str)):
+            return th.to_jsonschema_type(sql_type)
 
-    @property
-    def fully_qualified_name(self):
-        """Return the fully qualified name of the table name."""
-        table_name = self.catalog_entry.get("table", self.catalog_entry.get("stream"))
-        md_map = singer.metadata.to_map(self.catalog_entry.get("metadata"))
-        schema_name = md_map[()]["schema-name"]
-        db_name = self.catalog_entry.get("database")
-
-        return self.get_fully_qualified_name(
-            table_name=table_name, schema_name=schema_name, db_name=db_name
-        )
+        raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
 
     @staticmethod
     def get_fully_qualified_name(
@@ -104,8 +147,18 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         schema_name: Optional[str] = None,
         db_name: Optional[str] = None,
         delimiter: str = ".",
-    ):
-        """Return a fully qualified table name."""
+    ) -> str:
+        """Concatenates a fully qualified name from the parts.
+
+        Args:
+            table_name: The name of the table.
+            schema_name: The name of the schema. Defaults to None.
+            db_name: The name of the database. Defaults to None.
+            delimiter: Generally: '.' for SQL names and '-' for Singer names.
+
+        Returns:
+            The fully qualified name as a string.
+        """
         if db_name and schema_name:
             result = f"{db_name}{delimiter}{schema_name}{delimiter}{table_name}"
         elif db_name:
@@ -115,73 +168,14 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         return result
 
-    # Get records from stream
+    def discover_catalog_entries(self) -> List[dict]:
+        """Return a catalog dict from discovery.
 
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
-        """Return a generator of row-type dictionary objects.
-
-        Each row emitted should be a dictionary of property names to their values.
+        Returns:
+            Generated catalog.
         """
-        conn: sqlalchemy.engine.Connection = self.sqlalchemy_connection
-        if partition:
-            raise NotImplementedError(
-                f"Stream '{self.name}' does not support partitioning."
-            )
-
-        for row in conn.execute(
-            sqlalchemy.text(f"SELECT * FROM {self.fully_qualified_name}")
-        ):
-            yield dict(row)
-
-    # Class Methods
-
-    @classmethod
-    def get_sqlalchemy_url(cls, tap_config: dict) -> str:
-        """Return the SQLAlchemy URL string.
-
-        Developers can generally override just one of the following:
-        `get_sqlalchemy_engine()`, `get_sqlalchemy_url()`.
-        """
-        return cast(str, tap_config["sqlalchemy_url"])
-
-    @classmethod
-    def get_sqlalchemy_engine(cls, tap_config: dict) -> sqlalchemy.engine.Engine:
-        """Return a new SQLAlchemy engine using the provided config.
-
-        Developers can generally override just one of the following:
-        `get_sqlalchemy_engine()`, `get_sqlalchemy_url()`.
-        """
-        url = cls.get_sqlalchemy_url(tap_config)
-        return sqlalchemy.create_engine(url)
-
-    @classmethod
-    def get_sqlalchemy_connection(
-        cls, tap_config: dict
-    ) -> sqlalchemy.engine.Connection:
-        """Return or set the SQLAlchemy connection object."""
-        cls.get_sqlalchemy_engine(tap_config).connect().execution_options(
-            stream_results=True
-        )
-
-    @classmethod
-    def to_jsonschema_type(cls, from_type: Union[type, str, Any]) -> dict:
-        """Return a JSON Schema representation of the provided type.
-
-        By default will call `typing.to_jsonschema_type()` for strings and Python types.
-
-        Developers may override this method to accept additional input argument types,
-        to support non-standard types, or to provide custom typing logic.
-        """
-        if isinstance(from_type, (type, str)):
-            return th.to_jsonschema_type(from_type)
-
-        raise ValueError(f"Unexpected type received: '{type(from_type).__name__}'")
-
-    @classmethod
-    def run_discovery(cls, tap_config) -> Dict[str, List[dict]]:
-        """Return a catalog dict from discovery."""
-        engine = cls.get_sqlalchemy_engine(tap_config)
-        result: dict = {"streams": []}
+        result: List[dict] = []
+        engine = self.create_sqlalchemy_engine()
         inspected = sqlalchemy.inspect(engine)
         for schema_name in inspected.get_schema_names():
             table_names = inspected.get_table_names(schema=schema_name)
@@ -216,7 +210,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 for column_def in inspected.get_columns(table_name, schema=schema_name):
                     column_name = column_def["name"]
                     is_nullable = column_def.get("nullable", False)
-                    jsonschema_type: dict = cls.to_jsonschema_type(
+                    jsonschema_type: dict = self.to_jsonschema_type(
                         cast(
                             sqlalchemy.types.TypeEngine, column_def["type"]
                         ).python_type
@@ -235,7 +229,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 replication_method = next(
                     reversed(["FULL_TABLE"] + addl_replication_methods)
                 )
-                unique_stream_id = cls.get_fully_qualified_name(
+                unique_stream_id = self.get_fully_qualified_name(
                     db_name=None,
                     schema_name=schema_name,
                     table_name=table_name,
@@ -261,6 +255,141 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                     stream_alias=None,
                     replication_key=None,  # Must be defined by user
                 )
-                result["streams"].append(catalog_entry.to_dict())
+                result.append(catalog_entry.to_dict())
 
         return result
+
+
+class SQLStream(Stream, metaclass=abc.ABCMeta):
+    """Base class for SQLAlchemy-based streams."""
+
+    connector_class = SQLConnector
+
+    def __init__(
+        self,
+        tap: TapBaseClass,
+        catalog_entry: CatalogEntry,
+        connector: Optional[SQLConnector] = None,
+    ) -> None:
+        """Initialize the database stream.
+
+        If `connector` is omitted, a new connector will be created.
+
+        Args:
+            tap: The parent tap object.
+            catalog_entry: Catalog entry dict.
+            connector: Optional connector to reuse.
+        """
+        self._connector: SQLConnector
+        if connector:
+            self._connector = connector
+        else:
+            self._connector = self.connector_class(dict(tap.config))
+
+        self.catalog_entry = catalog_entry
+        super().__init__(
+            tap=tap,
+            schema=self.schema,
+            name=self.tap_stream_id,
+        )
+
+    @property
+    def connector(self) -> SQLConnector:
+        """The connector object.
+
+        Returns:
+            The connector object.
+        """
+        return self._connector
+
+    @property
+    def metadata(self) -> MetadataMapping:
+        """The Singer metadata.
+
+        Metadata from an input catalog will override standard metadata.
+
+        Returns:
+            Metadata object as specified in the Singer spec.
+        """
+        return self.catalog_entry.metadata
+
+    @property
+    def schema(self) -> Schema:
+        """Return metadata object (dict) as specified in the Singer spec.
+
+        Metadata from an input catalog will override standard metadata.
+
+        Returns:
+            The schema object.
+        """
+        return self.catalog_entry.schema
+
+    @property
+    def tap_stream_id(self) -> str:
+        """Return the unique ID used by the tap to identify this stream.
+
+        Generally, this is the same value as in `Stream.name`.
+
+        In rare cases, such as for database types with multi-part names,
+        this may be slightly different from `Stream.name`.
+
+        Returns:
+            The unique tap stream ID as a string.
+        """
+        return self.catalog_entry.tap_stream_id
+
+    @property
+    def fully_qualified_name(self) -> str:
+        """Generate the fully qualified version of the table name.
+
+        Returns:
+            The fully qualified name.
+        """
+        table_name = self.catalog_entry.get("table", self.catalog_entry.get("stream"))
+        md_map = singer.metadata.to_map(self.catalog_entry.get("metadata"))
+        schema_name = md_map[()]["schema-name"]
+        db_name = self.catalog_entry.get("database")
+
+        return self.connector.get_fully_qualified_name(
+            table_name=table_name, schema_name=schema_name, db_name=db_name
+        )
+
+    # Get records from stream
+
+    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
+        """Return a generator of row-type dictionary objects.
+
+        Args:
+            partition: If provided, will read specifically from this data slice.
+
+        Yields:
+            One dict per record.
+
+        Raises:
+            NotImplementedError: If partition is passed and the stream does not
+                support partitioning.
+        """
+        if partition:
+            raise NotImplementedError(
+                f"Stream '{self.name}' does not support partitioning."
+            )
+
+        for row in self.connector.connection.execute(
+            sqlalchemy.text(f"SELECT * FROM {self.fully_qualified_name}")
+        ):
+            yield dict(row)
+
+    @classmethod
+    def discover_catalog_entries(
+        cls: Type["SQLStream"], tap_config: dict
+    ) -> List[dict]:
+        """Return a catalog dict from discovery.
+
+        Args:
+            tap_config: The config dict from the parent tap.
+
+        Returns:
+            A list of discovered catalog entries.
+        """
+        connector = cls.connector_class(tap_config)
+        return connector.discover_catalog_entries()
