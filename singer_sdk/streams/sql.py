@@ -1,4 +1,4 @@
-"""Base class for database-type streams."""
+"""Base class for SQL-type streams."""
 
 import abc
 from typing import Any, Dict, Iterable, List, Optional, Type, Union, cast
@@ -169,10 +169,10 @@ class SQLConnector:
         return result
 
     def discover_catalog_entries(self) -> List[dict]:
-        """Return a catalog dict from discovery.
+        """Return a list of catalog entries from discovery.
 
         Returns:
-            Generated catalog.
+            The discovered catalog entries as a list.
         """
         result: List[dict] = []
         engine = self.create_sqlalchemy_engine()
@@ -235,7 +235,7 @@ class SQLConnector:
                     table_name=table_name,
                     delimiter="-",
                 )
-                catalog_entry = singer.CatalogEntry(
+                catalog_entry = CatalogEntry(
                     tap_stream_id=unique_stream_id,
                     stream=unique_stream_id,
                     table=table_name,
@@ -243,14 +243,14 @@ class SQLConnector:
                     schema=singer.Schema.from_dict(schema),
                     is_view=is_view,
                     replication_method=replication_method,
-                    metadata=singer.metadata.get_standard_metadata(
+                    metadata=MetadataMapping.get_standard_metadata(
                         schema_name=schema_name,
                         schema=schema,
                         replication_method=replication_method,
                         key_properties=key_properties,
                         valid_replication_keys=None,  # Must be defined by user
                     ),
-                    database=None,
+                    database=None,  # Expects single-database context
                     row_count=None,
                     stream_alias=None,
                     replication_key=None,  # Must be defined by user
@@ -268,7 +268,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
     def __init__(
         self,
         tap: TapBaseClass,
-        catalog_entry: CatalogEntry,
+        catalog_entry: dict,
         connector: Optional[SQLConnector] = None,
     ) -> None:
         """Initialize the database stream.
@@ -294,6 +294,15 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         )
 
     @property
+    def _singer_catalog_entry(self) -> CatalogEntry:
+        """Return catalog entry as specified by the Singer catalog spec.
+
+        Returns:
+            A CatalogEntry object.
+        """
+        return cast(CatalogEntry, CatalogEntry.from_dict(self.catalog_entry))
+
+    @property
     def connector(self) -> SQLConnector:
         """The connector object.
 
@@ -311,7 +320,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             Metadata object as specified in the Singer spec.
         """
-        return self.catalog_entry.metadata
+        return self._singer_catalog_entry.metadata
 
     @property
     def schema(self) -> Schema:
@@ -322,7 +331,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             The schema object.
         """
-        return self.catalog_entry.schema
+        return self._singer_catalog_entry.schema
 
     @property
     def tap_stream_id(self) -> str:
@@ -336,7 +345,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             The unique tap stream ID as a string.
         """
-        return self.catalog_entry.tap_stream_id
+        return self._singer_catalog_entry.tap_stream_id
 
     @property
     def fully_qualified_name(self) -> str:
@@ -345,13 +354,12 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             The fully qualified name.
         """
-        table_name = self.catalog_entry.get("table", self.catalog_entry.get("stream"))
-        md_map = singer.metadata.to_map(self.catalog_entry.get("metadata"))
-        schema_name = md_map[()]["schema-name"]
-        db_name = self.catalog_entry.get("database")
+        catalog_entry = self._singer_catalog_entry
 
         return self.connector.get_fully_qualified_name(
-            table_name=table_name, schema_name=schema_name, db_name=db_name
+            table_name=catalog_entry.table,
+            schema_name=catalog_entry.metadata.root.schema_name,
+            db_name=catalog_entry.database,
         )
 
     # Get records from stream
@@ -378,18 +386,3 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             sqlalchemy.text(f"SELECT * FROM {self.fully_qualified_name}")
         ):
             yield dict(row)
-
-    @classmethod
-    def discover_catalog_entries(
-        cls: Type["SQLStream"], tap_config: dict
-    ) -> List[dict]:
-        """Return a catalog dict from discovery.
-
-        Args:
-            tap_config: The config dict from the parent tap.
-
-        Returns:
-            A list of discovered catalog entries.
-        """
-        connector = cls.connector_class(tap_config)
-        return connector.discover_catalog_entries()
