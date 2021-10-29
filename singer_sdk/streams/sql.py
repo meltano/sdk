@@ -28,7 +28,7 @@ class SQLConnector:
     """
 
     def __init__(
-        self, config: Optional[dict] = None, sql_alchemy_url: Optional[str] = None
+        self, config: Optional[dict] = None, sqlalchemy_url: Optional[str] = None
     ) -> None:
         """Initialize the SQL connector.
 
@@ -37,7 +37,7 @@ class SQLConnector:
             sql_alchemy_url: Optional URL for the connection.
         """
         self._config: Dict[str, Any] = config or {}
-        self._sql_alchemy_url: Optional[str] = sql_alchemy_url or None
+        self._sqlalchemy_url: Optional[str] = sqlalchemy_url or None
         self._connection: Optional[sqlalchemy.engine.Connection] = None
 
     @property
@@ -91,10 +91,10 @@ class SQLConnector:
         Returns:
             The URL as a string.
         """
-        if not self._sql_alchemy_url:
-            self._sql_alchemy_url = self.create_sqlalchemy_url(self.config)
+        if not self._sqlalchemy_url:
+            self._sqlalchemy_url = self.create_sqlalchemy_url(self.config)
 
-        return self._sql_alchemy_url
+        return self._sqlalchemy_url
 
     def create_sqlalchemy_url(self, config: Dict[str, Any]) -> str:
         """Return the SQLAlchemy URL string.
@@ -143,7 +143,7 @@ class SQLConnector:
 
     @staticmethod
     def get_fully_qualified_name(
-        table_name: Optional[str],
+        table_name: str,
         schema_name: Optional[str] = None,
         db_name: Optional[str] = None,
         delimiter: str = ".",
@@ -160,11 +160,22 @@ class SQLConnector:
             The fully qualified name as a string.
         """
         if db_name and schema_name:
-            result = f"{db_name}{delimiter}{schema_name}{delimiter}{table_name}"
+            result = delimiter.join([db_name, schema_name, table_name])
         elif db_name:
-            result = f"{db_name}{delimiter}{table_name}"
+            result = delimiter.join([db_name, table_name])
         elif schema_name:
-            result = f"{schema_name}{delimiter}{table_name}"
+            result = delimiter.join([schema_name, table_name])
+        else:
+            raise ValueError(
+                "Schema name or database name was expected for stream: "
+                + ":".join(
+                    [
+                        db_name or "(unknown-db)",
+                        schema_name or "(unknown-schema)",
+                        table_name,
+                    ]
+                )
+            )
 
         return result
 
@@ -323,7 +334,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self._singer_catalog_entry.metadata
 
     @property
-    def schema(self) -> Schema:
+    def schema(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
         Metadata from an input catalog will override standard metadata.
@@ -331,7 +342,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             The schema object.
         """
-        return self._singer_catalog_entry.schema
+        return cast(dict, self._singer_catalog_entry.schema.to_dict())
 
     @property
     def tap_stream_id(self) -> str:
@@ -355,6 +366,10 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             The fully qualified name.
         """
         catalog_entry = self._singer_catalog_entry
+        if not catalog_entry.table:
+            raise ValueError(
+                f"Missing table name in catalog entry: {catalog_entry.to_dict()}"
+            )
 
         return self.connector.get_fully_qualified_name(
             table_name=catalog_entry.table,
