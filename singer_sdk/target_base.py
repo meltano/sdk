@@ -5,7 +5,8 @@ import copy
 import json
 import sys
 import time
-from typing import Any, Callable, Dict, Iterable, List, Optional, Type
+from io import FileIO
+from typing import IO, Any, Callable, Dict, List, Optional, Type
 
 import click
 from joblib import Parallel, delayed, parallel_backend
@@ -13,6 +14,7 @@ from joblib import Parallel, delayed, parallel_backend
 from singer_sdk.exceptions import RecordsWitoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks import Sink
@@ -40,6 +42,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         self,
         config: Optional[Dict[str, Any]] = None,
         parse_env_config: bool = False,
+        validate_config: bool = True,
     ) -> None:
         """Initialize the target.
 
@@ -49,13 +52,19 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 files.
             parse_env_config: Whether to look for configuration values in environment
                 variables.
+            validate_config: True to require validation of config settings.
         """
-        super().__init__(config=config, parse_env_config=parse_env_config)
+        super().__init__(
+            config=config,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
 
         self._latest_state: Dict[str, dict] = {}
         self._drained_state: Dict[str, dict] = {}
         self._sinks_active: Dict[str, Sink] = {}
         self._sinks_to_clear: List[Sink] = []
+        self._max_parallelism: Optional[int] = _MAX_PARALLELISM
 
         # Approximated for max record age enforcement
         self._last_full_drain_at: float = time.time()
@@ -68,22 +77,41 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         )
 
     @classproperty
-    def capabilities(self) -> List[str]:
+    def capabilities(self) -> List[CapabilitiesEnum]:
         """Get target capabilites.
 
         Returns:
             A list of capabilities supported by this target.
         """
-        return ["target"]
+        return [
+            PluginCapabilities.ABOUT,
+            PluginCapabilities.STREAM_MAPS,
+        ]
 
     @property
     def max_parallelism(self) -> int:
         """Get max parallel sinks.
 
+        The default is 8 if not overridden.
+
         Returns:
             Max number of sinks that can be drained in parallel.
         """
+        if self._max_parallelism is not None:
+            return self._max_parallelism
+
         return _MAX_PARALLELISM
+
+    @max_parallelism.setter
+    def max_parallelism(self, new_value: int) -> None:
+        """Override the default (max) parallelism.
+
+        The default is 8 if not overridden.
+
+        Args:
+            new_value: The new max degree of parallelism for this target.
+        """
+        self._max_parallelism = new_value
 
     def get_sink(
         self,
@@ -174,12 +202,19 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         return stream_name in self._sinks_active
 
     @final
-    def listen(self) -> None:
-        """Read from STDIN until all messages are processed.
+    def listen(self, input: Optional[IO[str]] = None) -> None:
+        """Read from input until all messages are processed.
+
+        Args:
+            input: Readable stream of messages. Defaults to standard in.
 
         This method is internal to the SDK and should not need to be overridden.
         """
-        self._process_lines(sys.stdin)
+        if not input:
+            input = sys.stdin
+
+        self._process_lines(input)
+        self._process_endofpipe()
 
     @final
     def add_sink(
@@ -242,22 +277,21 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     # Message handling
 
-    def _process_lines(self, lines: Iterable[str], table_cache: Any = None) -> None:
-        """TODO.
+    def _process_lines(self, input: IO[str]) -> None:
+        """Internal method to process jsonl lines from a Singer tap.
 
         Args:
-            lines: TODO.
-            table_cache: TODO. Defaults to None.
+            input: Readable stream of messages, each on a separate line.
 
         Raises:
-            json.decoder.JSONDecodeError: TODO
-            Exception: TODO
+            json.decoder.JSONDecodeError: raised if any lines are not valid json
+            ValueError: raised if a message type is not recognized
         """
         self.logger.info(f"Target '{self.name}' is listening for input from tap.")
         line_counter = 0
         record_counter = 0
         state_counter = 0
-        for line in lines:
+        for line in input:
             line_counter += 1
             try:
                 line_dict = json.loads(line)
@@ -286,13 +320,16 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 state_counter += 1
                 continue
 
-            raise Exception(f"Unknown message type '{record_type}' in message.")
+            raise ValueError(f"Unknown message type '{record_type}' in message.")
 
-        self.drain_all()
         self.logger.info(
-            f"Target '{self.name}' completed after {line_counter} lines of input "
+            f"Target '{self.name}' completed reading {line_counter} lines of input "
             f"({record_counter} records, {state_counter} state messages)."
         )
+
+    def _process_endofpipe(self) -> None:
+        """Called after all input lines have been read."""
+        self.drain_all()
 
     def _process_record_message(self, message_dict: dict) -> None:
         """Process a RECORD message.
@@ -428,6 +465,11 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         sink.mark_drained()
 
     def _drain_all(self, sink_list: List[Sink], parallelism: int) -> None:
+        if parallelism == 1:
+            for sink in sink_list:
+                self.drain_one(sink)
+            return
+
         def _drain_sink(sink: Sink) -> None:
             self.drain_one(sink)
 
@@ -459,12 +501,18 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         @click.option("--about", is_flag=True)
         @click.option("--format")
         @click.option("--config")
+        @click.option(
+            "--input",
+            help="A path to read messages from instead of from standard in.",
+            type=click.File("r"),
+        )
         @click.command()
         def cli(
             version: bool = False,
             about: bool = False,
             config: str = None,
             format: str = None,
+            input: FileIO = None,
         ) -> None:
             """Handle command line execution.
 
@@ -474,6 +522,8 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
                     variables.
+                input: Specify a path to an input file to read messages from.
+                    Defaults to standard in if unspecified.
             """
             if version:
                 cls.print_version()
@@ -484,6 +534,6 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 return
 
             target = cls(config=config)  # type: ignore  # Ignore 'type not callable'
-            target.listen()
+            target.listen(input)
 
         return cli

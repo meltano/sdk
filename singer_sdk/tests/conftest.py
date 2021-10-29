@@ -10,6 +10,12 @@ import pytest
 def outdir() -> str:
     """Create a temporary directory for cookiecutters and target output."""
     name = ".output/"
-    os.mkdir(name)
+    try:
+        os.mkdir(name)
+    except FileExistsError:
+        # Directory already exists
+        shutil.rmtree(name)
+        os.mkdir(name)
+
     yield name
     shutil.rmtree(name)

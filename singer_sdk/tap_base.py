@@ -14,6 +14,11 @@ from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._singer import Catalog
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import read_json_file
+from singer_sdk.helpers.capabilities import (
+    CapabilitiesEnum,
+    PluginCapabilities,
+    TapCapabilities,
+)
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams import Stream, SQLStream
@@ -41,6 +46,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         catalog: Union[PurePath, str, dict, None] = None,
         state: Union[PurePath, str, dict, None] = None,
         parse_env_config: bool = False,
+        validate_config: bool = True,
     ) -> None:
         """Initialize the tap.
 
@@ -52,8 +58,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             state: Tap state. Can be dictionary or a path to the state file.
             parse_env_config: Whether to look for configuration values in environment
                 variables.
+            validate_config: True to require validation of config settings.
         """
-        super().__init__(config=config, parse_env_config=parse_env_config)
+        super().__init__(
+            config=config,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
 
         # Declare private members
         self._streams: Optional[Dict[str, Stream]] = None
@@ -129,13 +140,19 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         return self._input_catalog
 
     @classproperty
-    def capabilities(self) -> List[str]:
+    def capabilities(self) -> List[CapabilitiesEnum]:
         """Get tap capabilities.
 
         Returns:
             A list of capabilities supported by this tap.
         """
-        return ["sync", "catalog", "state", "discover"]
+        return [
+            TapCapabilities.CATALOG,
+            TapCapabilities.STATE,
+            TapCapabilities.DISCOVER,
+            PluginCapabilities.ABOUT,
+            PluginCapabilities.STREAM_MAPS,
+        ]
 
     # Connection test:
 
@@ -439,11 +456,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 cls.print_version()
                 return
 
-            if about:
-                cls.print_about(format)
-                return
+            if not about:
+                cls.print_version(print_fn=cls.logger.info)
 
-            cls.print_version(print_fn=cls.logger.info)
+            validate_config: bool = True
+            if about or discover:
+                # Don't abort on validation failures
+                validate_config = False
 
             parse_env_config = False
             config_files: List[PurePath] = []
@@ -467,8 +486,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 state=state,
                 catalog=catalog,
                 parse_env_config=parse_env_config,
+                validate_config=validate_config,
             )
-            if discover:
+            if about:
+                tap.print_about(format)
+            elif discover:
                 tap.run_discovery()
                 if test:
                     tap.run_connection_test()
