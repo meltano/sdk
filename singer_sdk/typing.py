@@ -309,7 +309,14 @@ class PropertiesList(ObjectType):
 
 
 def to_jsonschema_type(from_type: Union[str, Type]) -> dict:
-    """Return the JSON Schema dict that describes the sql type (str) or Python type."""
+    """Return the JSON Schema dict that describes the sql type (str) or Python type.
+
+    Args:
+        from_type: The SQL type as a string, or a Python type.
+
+    Returns:
+        A compatible JSON Schema type definition.
+    """
     sqltype_lookup: Dict[str, dict] = {
         # NOTE: This is an ordered mapping, with earlier mappings taking precedence.
         #       If the SQL-provided type contains the type name on the left, the mapping
