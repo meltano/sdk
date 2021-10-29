@@ -10,20 +10,21 @@ from singer_sdk.streams import (
     SQLStream,
     Stream,
 )
-from singer_sdk.tap_base import Tap
+from singer_sdk.tap_base import Tap, SQLTap
 from singer_sdk.target_base import Target
 
 __all__ = [
+    "BatchSink",
+    "GraphQLStream",
     "PluginBase",
+    "RecordSink",
+    "RESTStream",
+    "Sink",
+    "SQLConnector",
+    "SQLStream",
+    "SQLTap",
+    "Stream",
+    "streams",
     "Tap",
     "Target",
-    "streams",
-    "Stream",
-    "RESTStream",
-    "GraphQLStream",
-    "SQLStream",
-    "SQLConnector",
-    "Sink",
-    "RecordSink",
-    "BatchSink",
 ]
