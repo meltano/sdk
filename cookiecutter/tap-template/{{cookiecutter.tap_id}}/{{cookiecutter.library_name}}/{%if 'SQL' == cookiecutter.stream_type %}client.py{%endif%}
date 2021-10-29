@@ -1,0 +1,27 @@
+"""SQL client handling.
+
+This includes {{ cookiecutter.source_name }}Stream and {{ cookiecutter.source_name }}Connector.
+"""
+
+from singer_sdk import SQLConnector, SQLStream
+
+
+class {{ cookiecutter.source_name }}Connector(SQLConnector):
+    """Connects to the {{ cookiecutter.source_name }} SQL source."""
+
+    def create_sqlalchemy_url(cls, config: dict) -> str:
+        """Concatenate a SQLAlchemy URL for use in connecting to the source."""
+        # TODO: Replace this with a valid connection string for your source:
+        return (
+            f"awsathena+rest://{config['aws_access_key_id']}:"
+            f"{config['aws_secret_access_key']}@athena"
+            f".{config['aws_region']}.amazonaws.com:443/"
+            f"{config['schema_name']}?"
+            f"s3_staging_dir={config['s3_staging_dir']}"
+        )
+
+
+class {{ cookiecutter.source_name }}Stream(SQLStream):
+    """Stream class for {{ cookiecutter.source_name }} streams."""
+
+    connector_class = {{ cookiecutter.source_name }}Connector
