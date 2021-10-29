@@ -1,7 +1,7 @@
 """Base class for SQL-type streams."""
 
 import abc
-from typing import Any, Dict, Iterable, List, Optional, Type, Union, cast
+from typing import Any, Dict, Iterable, List, Optional, Union, cast
 
 import singer
 import sqlalchemy
