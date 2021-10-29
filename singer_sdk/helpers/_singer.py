@@ -48,7 +48,7 @@ class Metadata:
         """Parse metadata dictionary."""
         return cls(
             **{
-                field.name.replace("-", "_"): value.get(field.name)
+                field.name: value.get(field.name.replace("_", "-"))
                 for field in fields(cls)
             }
         )
