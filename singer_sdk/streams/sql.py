@@ -92,11 +92,11 @@ class SQLConnector:
             The URL as a string.
         """
         if not self._sqlalchemy_url:
-            self._sqlalchemy_url = self.create_sqlalchemy_url(self.config)
+            self._sqlalchemy_url = self.get_sqlalchemy_url(self.config)
 
         return self._sqlalchemy_url
 
-    def create_sqlalchemy_url(self, config: Dict[str, Any]) -> str:
+    def get_sqlalchemy_url(self, config: Dict[str, Any]) -> str:
         """Return the SQLAlchemy URL string.
 
         Developers can generally override just one of the following:

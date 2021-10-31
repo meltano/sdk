@@ -9,7 +9,7 @@ from singer_sdk import SQLConnector, SQLStream
 class {{ cookiecutter.source_name }}Connector(SQLConnector):
     """Connects to the {{ cookiecutter.source_name }} SQL source."""
 
-    def create_sqlalchemy_url(cls, config: dict) -> str:
+    def get_sqlalchemy_url(cls, config: dict) -> str:
         """Concatenate a SQLAlchemy URL for use in connecting to the source."""
         # TODO: Replace this with a valid connection string for your source:
         return (

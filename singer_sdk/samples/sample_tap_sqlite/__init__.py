@@ -10,7 +10,7 @@ DB_PATH = "path_to_db"
 class SQLiteConnector(SQLConnector):
     """The connector for SQLite."""
 
-    def create_sqlalchemy_url(self, config: Dict[str, Any]) -> str:
+    def get_sqlalchemy_url(self, config: Dict[str, Any]) -> str:
         """Generates a SQLAlchemy URL for SQLite."""
         return f"sqlite:///{config[DB_PATH]}"
 
