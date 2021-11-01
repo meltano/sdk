@@ -8,7 +8,7 @@ import sqlalchemy
 
 from singer_sdk import typing as th
 from singer_sdk.exceptions import ConfigValidationError
-from singer_sdk.helpers._singer import CatalogEntry, MetadataMapping, Schema
+from singer_sdk.helpers._singer import CatalogEntry, MetadataMapping
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 
@@ -34,7 +34,7 @@ class SQLConnector:
 
         Args:
             config: The parent tap or target object's config.
-            sql_alchemy_url: Optional URL for the connection.
+            sqlalchemy_url: Optional URL for the connection.
         """
         self._config: Dict[str, Any] = config or {}
         self._sqlalchemy_url: Optional[str] = sqlalchemy_url or None
@@ -155,6 +155,9 @@ class SQLConnector:
             schema_name: The name of the schema. Defaults to None.
             db_name: The name of the database. Defaults to None.
             delimiter: Generally: '.' for SQL names and '-' for Singer names.
+
+        Raises:
+            ValueError: If neither schema_name or db_name are provided.
 
         Returns:
             The fully qualified name as a string.
@@ -361,6 +364,9 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
     @property
     def fully_qualified_name(self) -> str:
         """Generate the fully qualified version of the table name.
+
+        Raises:
+            ValueError: If table_name is not able to be detected.
 
         Returns:
             The fully qualified name.
