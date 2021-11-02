@@ -55,11 +55,15 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
         # Path(context["file_path"]).unlink()  # Delete local copy
     {%- endif %}
 
-    def cleanup_sink(self) -> None:
+    def cleanup_sink(self, error: Optional[Exception] = None) -> None:
         """Clean up resources after running.
 
         This method is called at the end of processing messages, including
         after exceptions are thrown. It can be used to clean up resources
         opened during `prepare_sink` such as connections.
+
+        Args:
+            error: The error that interrupted the sink, if any.
+                Will be `None` if the sink completed successfully.
         """
         pass  # TODO: Delete this method if not needed.

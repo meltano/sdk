@@ -61,11 +61,15 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         # TODO: Delete this method if not needed.
         return row
 
-    def cleanup_stream(self) -> None:
+    def cleanup_stream(self, error: Optional[Exception] = None) -> None:
         """Clean up resources after running.
 
         This method is called at the end of the stream, including
         after exceptions are thrown. It can be used to clean up resources
         opened during `prepare_stream` such as connections.
+
+        Args:
+            error: The error that interrupted the stream, if any.
+                Will be `None` if the stream completed successfully.
         """
         pass  # TODO: Delete this method if not needed.

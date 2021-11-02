@@ -1078,7 +1078,7 @@ class Stream(metaclass=abc.ABCMeta):
         """
         pass
 
-    def cleanup_stream(self) -> None:
+    def cleanup_stream(self, error: Optional[Exception] = None) -> None:
         """Clean up resources after running.
 
         This method is called at the end of the stream, including
@@ -1086,6 +1086,10 @@ class Stream(metaclass=abc.ABCMeta):
         opened during `prepare_stream` such as connections.
 
         The default implementation of this method is a no-op.
+
+        Args:
+            error: The error that interrupted the stream, if any.
+                Will be `None` if the stream completed successfully.
         """
         pass
 

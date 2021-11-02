@@ -320,7 +320,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """
         pass
 
-    def cleanup_tap(self) -> None:
+    def cleanup_tap(self, error: Optional[Exception] = None) -> None:
         """Clean up resources after running.
 
         This method is called at the end of all streams messages, including
@@ -328,6 +328,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         opened during `prepare_tap` such as connections.
 
         The default implementation of this method is a no-op.
+
+        Args:
+            error: The error that interrupted the tap, if any.
+                Will be `None` if the tap completed successfully.
         """
         pass
 

@@ -269,7 +269,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """
         pass
 
-    def cleanup_target(self) -> None:
+    def cleanup_target(self, error: Optional[Exception] = None) -> None:
         """Clean up resources after running.
 
         This method is called at the end of processing messages, including
@@ -277,6 +277,10 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         opened during `prepare_target` such as connections.
 
         The default implementation of this method is a no-op.
+
+        Args:
+            error: The error that interrupted the target, if any.
+                Will be `None` if the target completed successfully.
         """
         pass
 

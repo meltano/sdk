@@ -103,7 +103,7 @@ class Sink(metaclass=abc.ABCMeta):
         """
         pass
 
-    def cleanup_sink(self) -> None:
+    def cleanup_sink(self, error: Optional[Exception] = None) -> None:
         """Clean up resources after running.
 
         This method is called at the end of processing messages, including
@@ -111,6 +111,10 @@ class Sink(metaclass=abc.ABCMeta):
         opened during `prepare_sink` such as connections.
 
         The default implementation of this method is a no-op.
+
+        Args:
+            error: The error that interrupted the sink, if any.
+                Will be `None` if the sink completed successfully.
         """
         pass
 

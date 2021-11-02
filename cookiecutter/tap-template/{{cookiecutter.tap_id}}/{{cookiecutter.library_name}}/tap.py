@@ -70,11 +70,15 @@ class Tap{{ cookiecutter.source_name }}(Tap):
         return [stream_class(tap=self) for stream_class in STREAM_TYPES]
 {%- endif %}
 
-    def cleanup_tap(self) -> None:
+    def cleanup_tap(self, error: Optional[Exception] = None) -> None:
         """Clean up resources after running.
     
         This method is called at the end of all streams messages, including
         after exceptions are thrown. It can be used to clean up resources
         opened during `prepare_tap` such as connections.
+
+        Args:
+            error: The error that interrupted the tap, if any.
+                Will be `None` if the tap completed successfully.
         """
         pass  # TODO: Delete this method if not needed.

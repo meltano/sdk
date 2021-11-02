@@ -34,11 +34,15 @@ class Target{{ cookiecutter.destination_name }}(Target):
         """
         pass  # TODO: Delete this method if not needed.
 
-    def cleanup_target(self) -> None:
+    def cleanup_target(self, error: Optional[Exception] = None) -> None:
         """Clean up resources after running.
 
         This method is called at the end of processing messages, including
         after exceptions are thrown. It can be used to clean up resources
         opened during `prepare_target` such as connections.
+
+        Args:
+            error: The error that interrupted the target, if any.
+                Will be `None` if the target completed successfully.
         """
         pass  # TODO: Delete this method if not needed.
