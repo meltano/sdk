@@ -191,11 +191,15 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """
         if not input:
             input = sys.stdin
+        error = None
         self.prepare_target()
         try:
             self._process_lines(input)
+        except Exception as e:
+            error = e
+            raise e
         finally:
-            self.cleanup_target()
+            self.cleanup_target(error)
 
     @final
     def add_sink(
@@ -221,7 +225,6 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             schema=schema,
             key_properties=key_properties,
         )
-        result.prepare_sink()
         self._sinks_active[stream_name] = result
         return result
 
@@ -464,13 +467,20 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         Args:
             sink: Sink to be drained.
         """
-        if sink.current_size == 0:
-            return
+        error = None
+        sink.prepare_sink()
+        try:
+            if sink.current_size == 0:
+                return
 
-        draining_status = sink.start_drain()
-        sink.process_batch(draining_status)
-        sink.mark_drained()
-        sink.cleanup_sink()
+            draining_status = sink.start_drain()
+            sink.process_batch(draining_status)
+            sink.mark_drained()
+        except Exception as e:
+            error = e
+            raise e
+        finally:
+            sink.cleanup_sink(error)
 
     def _drain_all(self, sink_list: List[Sink], parallelism: int) -> None:
         def _drain_sink(sink: Sink) -> None:

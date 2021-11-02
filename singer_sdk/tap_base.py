@@ -343,6 +343,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
         stream: "Stream"
+        error = None
         self.prepare_tap()
         try:
             for stream in self.streams.values():
@@ -361,8 +362,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
                 stream.sync()
                 stream.finalize_state_progress_markers()
+        except Exception as e:
+            error = e
+            raise e
         finally:
-            self.cleanup_tap()
+            self.cleanup_tap(error)
 
     # Command Line Execution
 

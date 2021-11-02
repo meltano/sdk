@@ -973,8 +973,8 @@ class Stream(metaclass=abc.ABCMeta):
             msg += f" with context: {context}"
         self.logger.info(f"{msg}...")
 
+        error = None
         self.prepare_stream()
-
         try:
             # Use a replication signpost, if available
             signpost = self.get_replication_key_signpost(context)
@@ -985,8 +985,11 @@ class Stream(metaclass=abc.ABCMeta):
             self._write_schema_message()
             # Sync the records themselves:
             self._sync_records(context)
+        except Exception as e:
+            error = e
+            raise e
         finally:
-            self.cleanup_stream()
+            self.cleanup_stream(error)
 
     def _sync_children(self, child_context: dict) -> None:
         for child_stream in self.child_streams:
