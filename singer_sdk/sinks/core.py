@@ -66,7 +66,7 @@ class Sink(metaclass=abc.ABCMeta):
         self.latest_state: Optional[dict] = None
         self._draining_state: Optional[dict] = None
         self.drained_state: Optional[dict] = None
-        self.key_properties = key_properties
+        self.key_properties = key_properties or []
 
         # Tally counters
         self._total_records_written: int = 0
