@@ -44,6 +44,7 @@ Developer Resources
    code_samples
    cli_commands
    capabilities
+   faq
 
 Reference
 ---------
