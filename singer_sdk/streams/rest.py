@@ -4,7 +4,7 @@ import abc
 import copy
 import logging
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Optional, Union, cast
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union, cast
 
 import backoff
 import requests
@@ -159,12 +159,23 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             )
             raise RetriableAPIError(msg)
 
-    @backoff.on_exception(
-        backoff.expo,
-        (RetriableAPIError,),
-        max_tries=5,
-        factor=2,
-    )
+    def request_decorator(self, func: Callable) -> Callable:
+        """Instantiate a decorator for handling request failures.
+
+        Args:
+            func: Function to decorate.
+
+        Returns:
+            A decorated method.
+        """
+        decorator: Callable = backoff.on_exception(
+            backoff.expo,
+            (RetriableAPIError,),
+            max_tries=5,
+            factor=2,
+        )(func)
+        return decorator
+
     def _request_with_backoff(
         self, prepared_request: requests.PreparedRequest, context: Optional[dict]
     ) -> requests.Response:
@@ -269,11 +280,13 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """
         next_page_token: Any = None
         finished = False
+        decorated_request = self.request_decorator(self._request_with_backoff)
+
         while not finished:
             prepared_request = self.prepare_request(
                 context, next_page_token=next_page_token
             )
-            resp = self._request_with_backoff(prepared_request, context)
+            resp = decorated_request(prepared_request, context)
             for row in self.parse_response(resp):
                 yield row
             previous_token = copy.deepcopy(next_page_token)
