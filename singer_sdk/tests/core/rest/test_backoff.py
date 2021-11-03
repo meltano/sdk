@@ -65,7 +65,7 @@ def custom_validation_stream(rest_tap):
             503,
             "Service Unavailable",
             pytest.raises(
-                FatalAPIError,
+                RetriableAPIError,
                 match=r"503 Server Error: Service Unavailable for path: /dummy",
             ),
         ),

@@ -140,30 +140,28 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         Raises:
             FatalAPIError: If the request is not retriable.
+            RetriableAPIError: If the request is retriable.
 
         .. _requests.Response:
             https://docs.python-requests.org/en/latest/api/#requests.Response
         """
-        msg = ""
-
         if 400 <= response.status_code < 500:
             msg = (
                 f"{response.status_code} Client Error: "
                 f"{response.reason} for path: {self.path}"
             )
+            raise FatalAPIError(msg)
 
         elif 500 <= response.status_code < 600:
             msg = (
                 f"{response.status_code} Server Error: "
                 f"{response.reason} for path: {self.path}"
             )
-
-        if msg:
-            raise FatalAPIError(msg)
+            raise RetriableAPIError(msg)
 
     @backoff.on_exception(
         backoff.expo,
-        (RetriableAPIError),
+        (RetriableAPIError,),
         max_tries=5,
         factor=2,
     )
