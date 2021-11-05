@@ -188,9 +188,9 @@ class SQLSink(BatchSink):
         """Merge upsert data from one table to another.
 
         Args:
-            target_table_name (str): The destination table name.
-            from_table_name (str): The source table name.
-            join_keys (List[str]): The merge upsert keys, or `None` to append.
+            target_table_name: The destination table name.
+            from_table_name: The source table name.
+            join_keys: The merge upsert keys, or `None` to append.
 
         Return:
             The number of records copied, if detectable, or `None` if the API does not
@@ -232,7 +232,7 @@ class SQLSink(BatchSink):
         self,
         full_table_name: str,
         column_name: str,
-        schema: dict,
+        sql_type: sqlalchemy.types.TypeEngine,
     ) -> None:
         """Adapt target table to provided schema if possible.
 
@@ -245,14 +245,14 @@ class SQLSink(BatchSink):
             self.create_empty_column(
                 full_table_name=full_table_name,
                 column_name=column_name,
-                schema=schema,
+                sql_type=sql_type,
             )
             return
 
         self._adapt_column_type(
             full_table_name,
             column_name=column_name,
-            schema=schema,
+            sql_type=sql_type,
         )
 
     def create_empty_table(
@@ -278,7 +278,7 @@ class SQLSink(BatchSink):
         self,
         full_table_name: str,
         column_name: str,
-        schema: dict,
+        sql_type: sqlalchemy.types.TypeEngine,
     ) -> None:
         """Create a new column.
 
@@ -310,7 +310,7 @@ class SQLSink(BatchSink):
             self.prepare_target_column(
                 self.full_table_name,
                 self.soft_delete_column_name,
-                schema=th.DateTimeType().to_dict(),
+                sql_type=sqlalchemy.types.DateTime,
             )
         self.connection.execute(
             f"UPDATE {self.full_table_name} "
@@ -318,17 +318,20 @@ class SQLSink(BatchSink):
         )
 
     def _adapt_column_type(
-        self, full_table_name: str, column_name: str, schema: dict
+        self,
+        full_table_name: str,
+        column_name: str,
+        sql_type: sqlalchemy.types.TypeEngine,
     ) -> None:
         """Adapt table column type to support the new JSON schema type.
 
         Args:
             full_table_name: The target table name.
             column_name: The target column name.
-            schema: The new JSON Schema type.
+            sql_type: The new SQLAlchemy type.
         """
         current_sql_type = self.connector.get_column_type(full_table_name, column_name)
-        needed_sql_type = self.connector.to_sql_type(schema)
+        needed_sql_type = self.connector.to_sql_type(sql_type)
         compatible_sql_type = self.connector.merge_sql_types(
             current_sql_type, needed_sql_type
         )
