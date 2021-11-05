@@ -537,3 +537,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             target.listen(input)
 
         return cli
+
+
+class SQLTarget(Target):
+    """Target implementation for SQL destinations."""
+
+    pass
