@@ -38,3 +38,15 @@ tests:
     tap_id: test-tap-other-custom-type
     stream_type: Other
     auth_method: Custom or N/A
+
+  - source_name: CICDTemplateTest
+    tap_id: test-tap-other-custom-type
+    stream_type: Other
+    auth_method: Custom or N/A
+    include_cicd_sample_template: Github
+
+  - source_name: CICDTemplateTest-None
+    tap_id: test-tap-other-custom-type
+    stream_type: Other
+    auth_method: Custom or N/A
+    include_cicd_sample_template: "None / Skip"
