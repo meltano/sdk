@@ -8,6 +8,9 @@ import pytest
 
 from singer_sdk import SQLStream, SQLConnector
 from singer_sdk.tap_base import SQLTap
+from singer_sdk.target_base import SQLTarget
+from singer_sdk.sinks.sql import SQLSink
+
 from singer_sdk.helpers._singer import Metadata, StreamMetadata, MetadataMapping
 
 
@@ -54,6 +57,21 @@ def sqlite_sampletap(sqlite_connector):
     return SQLiteTap(config={"sqlalchemy_url": sqlite_connector.sqlalchemy_url})
 
 
+@pytest.fixture
+def sqlite_sample_target(sqlite_connector):
+    pass
+
+    class SQLiteSink(SQLSink):
+        pass
+
+    class SQLiteTarget(SQLTarget):
+        connector = sqlite_connector
+        name = "target-sqlite-tester"
+        default_sink_class = SQLiteSink
+
+    return SQLiteTarget(config={"sqlalchemy_url": sqlite_connector.sqlalchemy_url})
+
+
 def test_sql_metadata(sqlite_sampletap: SQLTap):
     stream = cast(SQLStream, sqlite_sampletap.streams["main-t1"])
     detected_metadata = stream.catalog_entry["metadata"]
@@ -82,3 +100,7 @@ def test_sqlite_discovery(sqlite_sampletap: SQLTap):
     # Fails here (schema is None):
     assert stream.metadata.root.schema_name == "main"
     assert stream.fully_qualified_name == "main.t1"
+
+
+def test_sqlite_target(sqlite_sample_target: SQLTarget):
+    pass
