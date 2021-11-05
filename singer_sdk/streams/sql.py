@@ -141,6 +141,28 @@ class SQLConnector:
 
         raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
 
+    def to_sql_type(cls, jsonschema_type: dict) -> dict:
+        """Return a JSON Schema representation of the provided type.
+
+        By default will call `typing.to_jsonschema_type()` for strings and Python types.
+
+        Developers may override this method to accept additional input argument types,
+        to support non-standard types, or to provide custom typing logic.
+
+        Args:
+            jsonschema_type: The JSON Schema representation of the source type.
+
+        Raises:
+            ValueError: If the type received could not be translated to a SQL type.
+
+        Return:
+            The string representation of the SQL type,
+            or a Python class, or a custom-specified object.
+        """
+        # TODO: Add mapping logic
+
+        raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
+
     @staticmethod
     def get_fully_qualified_name(
         table_name: str,

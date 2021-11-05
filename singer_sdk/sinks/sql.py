@@ -2,7 +2,6 @@
 
 from enum import Enum
 from typing import Any, Dict, Iterable, List, Optional
-from numpy import full
 from pendulum import now
 
 import sqlalchemy
@@ -131,6 +130,7 @@ class SQLSink(BatchSink):
 
         Args:
             full_table_name: the target table name.
+            column_name: the target column name.
 
         Returns:
             True if table exists, False if not, None if unsure or undetectable.
@@ -242,14 +242,14 @@ class SQLSink(BatchSink):
             schema: the import schema.
         """
         if not self.target_column_exists(full_table_name, column_name):
-            self.create_column(
+            self.create_empty_column(
                 full_table_name=full_table_name,
                 column_name=column_name,
                 schema=schema,
             )
             return
 
-        self.adapt_column_to_type(
+        self._adapt_column_type(
             full_table_name,
             column_name=column_name,
             schema=schema,
@@ -279,7 +279,7 @@ class SQLSink(BatchSink):
         full_table_name: str,
         column_name: str,
         schema: dict,
-    ):
+    ) -> None:
         """Create a new column.
 
         Args:
@@ -292,7 +292,13 @@ class SQLSink(BatchSink):
         self,
         full_table_name: str,
         table_version: int,
-    ):
+    ) -> None:
+        """Bump the active version of the target table.
+
+        Args:
+            full_table_name: The target table name.
+            table_version: The version number to activate.
+        """
         if self.config.get("hard_delete", True):
             self.connection.execute(
                 f"DELETE FROM {self.full_table_name} "
@@ -301,20 +307,29 @@ class SQLSink(BatchSink):
         if not self.target_column_exists(
             full_table_name=full_table_name, column_name=self.soft_delete_column_name
         ):
-            self.create_target_column(
-                self.full_table_name, self.soft_delete_column_name, th.DateTimeType()
+            self.prepare_target_column(
+                self.full_table_name,
+                self.soft_delete_column_name,
+                schema=th.DateTimeType().to_dict(),
             )
         self.connection.execute(
             f"UPDATE {self.full_table_name} "
             f"SET {self.soft_delete_column_name} = '{now().isoformat()}'"
         )
 
-    def adapt_column_to_type(
+    def _adapt_column_type(
         self, full_table_name: str, column_name: str, schema: dict
-    ):
-        current_sql_type = _
-        needed_sql_type = _
-        compatible_sql_type = self.get_merged_sql_type(
+    ) -> None:
+        """Adapt table column type to support the new JSON schema type.
+
+        Args:
+            full_table_name: The target table name.
+            column_name: The target column name.
+            schema: The new JSON Schema type.
+        """
+        current_sql_type = self.connector.get_column_type(full_table_name, column_name)
+        needed_sql_type = self.connector.to_sql_type(schema)
+        compatible_sql_type = self.connector.merge_sql_types(
             current_sql_type, needed_sql_type
         )
         self.connection.execute(
