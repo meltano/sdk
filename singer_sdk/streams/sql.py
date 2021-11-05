@@ -118,7 +118,7 @@ class SQLConnector:
 
         return cast(str, config["sqlalchemy_url"])
 
-    def to_jsonschema_type(cls, sql_type: Union[type, str, Any]) -> dict:
+    def to_jsonschema_type(cls, sql_type: sqlalchemy.types.TypeEngine) -> dict:
         """Return a JSON Schema representation of the provided type.
 
         By default will call `typing.to_jsonschema_type()` for strings and Python types.
@@ -141,7 +141,7 @@ class SQLConnector:
 
         raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
 
-    def to_sql_type(cls, jsonschema_type: dict) -> dict:
+    def to_sql_type(cls, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
         """Return a JSON Schema representation of the provided type.
 
         By default will call `typing.to_jsonschema_type()` for strings and Python types.
@@ -156,12 +156,11 @@ class SQLConnector:
             ValueError: If the type received could not be translated to a SQL type.
 
         Return:
-            The string representation of the SQL type,
-            or a Python class, or a custom-specified object.
+            The SQLAlchemy type representation of the data type.
         """
         # TODO: Add mapping logic
 
-        raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
+        raise ValueError(f"Unexpected type received: '{jsonschema_type}'")
 
     @staticmethod
     def get_fully_qualified_name(
