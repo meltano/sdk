@@ -25,11 +25,12 @@ from a parent record each time the child stream is invoked.
 
 Here is an abbreviated example from the Gitlab sample (also in this repo) which uses the
 above techniques.
+In this example, EpicIssuesStream is a child of EpicsStream. 
 
 ```py
 class GitlabStream(RESTStream):
     # Base stream definition with auth and pagination logic 
-    # ...
+    # This logic works for other base classes as well, including Stream, GraphQLStream, etc.
 
 
 class EpicsStream(GitlabStream):
@@ -48,6 +49,8 @@ class EpicsStream(GitlabStream):
 
 
 class EpicIssuesStream(GitlabStream):
+    # Note that this class inherits from the GitlabStream base class, and not from 
+    # the EpicsStream class.
 
     name = "epic_issues"
 

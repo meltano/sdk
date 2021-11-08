@@ -25,7 +25,7 @@ copyright = "2021, Meltano Core Team and Contributors"
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.3.12"
+release = "0.3.13"
 
 
 # -- General configuration ---------------------------------------------------
@@ -36,6 +36,7 @@ release = "0.3.12"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
+    "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
     "sphinx_rtd_theme",
     "sphinx_copybutton",
