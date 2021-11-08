@@ -138,6 +138,19 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """
         return ["sync", "catalog", "state", "discover"]
 
+    @property
+    def default_tests(self) -> List:
+        """Return an array of built-in tap test classes.
+
+        Returns:
+            List of built-in test classes.
+        """
+        return [
+            "cli_prints",
+            "discovery",
+            "stream_connection"
+        ]
+
     # Connection test:
 
     @final
