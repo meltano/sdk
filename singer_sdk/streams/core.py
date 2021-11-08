@@ -248,11 +248,7 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             List of built-in test classes.
         """
-        return [
-            "record_schema_matches_catalog",
-            "returns_records",
-            "primary_keys"
-        ]
+        return ["record_schema_matches_catalog", "returns_records", "primary_keys"]
 
     @final
     @property

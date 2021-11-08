@@ -5,9 +5,7 @@ import sys
 import io
 
 from collections import defaultdict
-from enum import Enum
-from dateutil import parser
-from typing import Callable, List, Type, Any, Tuple
+from typing import List, Type, Any
 
 from singer_sdk.tap_base import Tap
 from singer_sdk.exceptions import MaxRecordsLimitException
@@ -43,6 +41,7 @@ class TapTestRunner(object):
         test_func(**params)
     ```
     """
+
     schema_messages = []
     state_messages = []
     record_messages = []
@@ -150,10 +149,10 @@ class TapTestRunner(object):
 
     def _generate_tap_tests(self):
         manifest = []
-        for test_class in self.tap.default_tests:
+        for test_name in self.tap.default_tests:
+            test_class = TapTests[test_name].value
             initialized_test = test_class(
-                tap_class=self.tap_class,
-                tap_config = self.tap_config
+                tap_class=self.tap_class, tap_config=self.tap_config
             )
             manifest.append(initialized_test)
         return manifest
@@ -161,7 +160,8 @@ class TapTestRunner(object):
     def _generate_schema_tests(self):
         manifest = []
         for stream in self.tap.streams.values():
-            for test_class in stream.default_tests:
+            for test_name in stream.default_tests:
+                test_class = StreamTests[test_name].value
                 initialized_test = test_class(
                     tap_class=self.tap_class,
                     tap_init=self.tap,
@@ -193,5 +193,3 @@ class TapTestRunner(object):
 
     def _generate_test_ids(self, test_manifest):
         return [initialized_test.id for initialized_test in test_manifest]
-
-

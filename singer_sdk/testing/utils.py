@@ -1,14 +1,6 @@
-import json
-import sys
-import io
-
-from collections import defaultdict
-from enum import Enum
-from dateutil import parser
 from typing import Callable, List, Type, Any, Tuple
 
 from singer_sdk.tap_base import Tap
-from singer_sdk.exceptions import MaxRecordsLimitException
 
 
 def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Callable]:

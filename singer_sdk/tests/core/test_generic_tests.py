@@ -22,11 +22,17 @@ runner.run_sync()
 def tap_test_runner():
     yield runner
 
+
 def test_is_number_expectation(tap_test_runner):
     test_class = AttributeTests.is_number.value
-    params = {"test_runner": tap_test_runner, "stream_name": "countries", "attribute_name": "currency"}
+    params = {
+        "test_runner": tap_test_runner,
+        "stream_name": "countries",
+        "attribute_name": "currency",
+    }
     e = test_class(**params)
     e.run_test()
+
 
 # @pytest.mark.parametrize("test_config", **pytest_params)
 # def test_builtin_tap_tests(test_util, test_config):
@@ -40,4 +46,3 @@ def test_countries_tap_standard_tests():
     tests = get_standard_tap_tests(SampleTapCountries)
     for test in tests:
         test()
-

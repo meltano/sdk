@@ -145,11 +145,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         Returns:
             List of built-in test classes.
         """
-        return [
-            "cli_prints",
-            "discovery",
-            "stream_connection"
-        ]
+        return ["cli_prints", "discovery", "stream_connection"]
 
     # Connection test:
 

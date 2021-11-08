@@ -3,13 +3,10 @@
 import warnings
 
 from singer_sdk.tap_base import Tap
-from singer_sdk.exceptions import MaxRecordsLimitException
 
-from collections import defaultdict
 from enum import Enum
 from dateutil import parser
-from typing import Callable, List, Type, Any, Tuple
-
+from typing import List, Any
 
 
 class TestTemplate:
@@ -22,6 +19,7 @@ class TestTemplate:
         NotImplementedError: [description]
         NotImplementedError: [description]
     """
+
     name: str = None
     type: str = None
     required_args: List[str] = []
@@ -174,7 +172,9 @@ class AttributeIsUniqueTest(AttributeTestTemplate):
     def run_test(self):
         records = [r["record"] for r in self.records[self.stream_name]]
         values = [
-            r.get(self.attribute_name) for r in records if r.get(self.attribute_name) is not None
+            r.get(self.attribute_name)
+            for r in records
+            if r.get(self.attribute_name) is not None
         ]
         if not values:
             warnings.warn(UserWarning("No records were available to test."))
@@ -190,7 +190,9 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
     def run_test(self):
         records = [r["record"] for r in self.records[self.stream_name]]
         values = [
-            r.get(self.attribute_name) for r in records if r.get(self.attribute_name) is not None
+            r.get(self.attribute_name)
+            for r in records
+            if r.get(self.attribute_name) is not None
         ]
 
         assert all(parser.parse(v) for v in values)
@@ -214,8 +216,9 @@ class AttributeIsBooleanTest(AttributeTestTemplate):
         for record in self.records[self.stream_name]:
             r = record["record"]
             if r.get(self.attribute_name) is not None:
-                assert type(bool(r[self.attribute_name])) == bool, \
-                    f"Unable to cast value ('{r[self.attribute_name]}') to boolean type."
+                assert (
+                    type(bool(r[self.attribute_name])) == bool
+                ), f"Unable to cast value ('{r[self.attribute_name]}') to boolean type."
 
 
 class AttributeIsObjectTest(AttributeTestTemplate):
@@ -226,8 +229,10 @@ class AttributeIsObjectTest(AttributeTestTemplate):
         for record in self.records[self.stream_name]:
             r = record["record"]
             if r.get(self.attribute_name) is not None:
-                assert dict(r[self.attribute_name]), \
-                    f"Unable to cast value ('{r[self.attribute_name]}') to dict type."
+                assert dict(
+                    r[self.attribute_name]
+                ), f"Unable to cast value ('{r[self.attribute_name]}') to dict type."
+
 
 class AttributeIsInteger(AttributeTestTemplate):
     "Test that a given attribute can be converted to an integer type."
@@ -237,8 +242,9 @@ class AttributeIsInteger(AttributeTestTemplate):
         for record in self.test_runner.records[self.stream_name]:
             r = record["record"]
             if r.get(self.attribute_name) is not None:
-                assert int(r[self.attribute_name]), \
-                    f"Unable to cast value ('{r[self.attribute_name]}') to int type."
+                assert int(
+                    r[self.attribute_name]
+                ), f"Unable to cast value ('{r[self.attribute_name]}') to int type."
 
 
 class AttributeIsNumberTest(AttributeTestTemplate):
@@ -249,8 +255,9 @@ class AttributeIsNumberTest(AttributeTestTemplate):
         records = self.test_runner.records[self.stream_name]
         for record in records:
             if record.get(self.attribute_name) is not None:
-                assert float(record.get(self.attribute_name)), \
-                    f"Unable to cast value ('{record[self.attribute_name]}') to float type."
+                assert float(
+                    record.get(self.attribute_name)
+                ), f"Unable to cast value ('{record[self.attribute_name]}') to float type."
 
 
 class TapTests(Enum):
@@ -258,11 +265,13 @@ class TapTests(Enum):
     discovery = TapDiscoveryTest
     stream_connection = TapStreamConnectionTest
 
+
 class StreamTests(Enum):
     returns_records = StreamReturnsRecordTest
     catalog_schema_matches_records = StreamCatalogSchemaMatchesRecordTest
     record_schema_matches_catalog = StreamRecordSchemaMatchesCatalogTest
     primary_keys = StreamPrimaryKeysTest
+
 
 class AttributeTests(Enum):
     is_unique = AttributeIsUniqueTest
@@ -272,4 +281,3 @@ class AttributeTests(Enum):
     is_object = AttributeIsObjectTest
     is_integer = AttributeIsInteger
     is_number = AttributeIsNumberTest
-
