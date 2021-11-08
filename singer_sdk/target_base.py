@@ -14,6 +14,7 @@ from joblib import Parallel, delayed, parallel_backend
 from singer_sdk.exceptions import RecordsWitoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._hooks import prepare_and_cleanup_hooks
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
@@ -212,16 +213,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """
         if not input:
             input = sys.stdin
-        error = None
-        self.prepare_target()
-        try:
+        with prepare_and_cleanup_hooks("target", self):
             self._process_lines(input)
             self._process_endofpipe()
-        except Exception as e:
-            error = e
-            raise e
-        finally:
-            self.cleanup_target(error)
 
     @final
     def add_sink(
@@ -491,20 +485,13 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         Args:
             sink: Sink to be drained.
         """
-        error = None
-        sink.prepare_sink()
-        try:
+        with prepare_and_cleanup_hooks("sink", sink):
             if sink.current_size == 0:
                 return
 
             draining_status = sink.start_drain()
             sink.process_batch(draining_status)
             sink.mark_drained()
-        except Exception as e:
-            error = e
-            raise e
-        finally:
-            sink.cleanup_sink(error)
 
     def _drain_all(self, sink_list: List[Sink], parallelism: int) -> None:
         if parallelism == 1:

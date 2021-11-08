@@ -32,6 +32,7 @@ from singer.schema import Schema
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._hooks import prepare_and_cleanup_hooks
 from singer_sdk.helpers._singer import (
     Catalog,
     CatalogEntry,
@@ -973,9 +974,7 @@ class Stream(metaclass=abc.ABCMeta):
             msg += f" with context: {context}"
         self.logger.info(f"{msg}...")
 
-        error = None
-        self.prepare_stream()
-        try:
+        with prepare_and_cleanup_hooks("stream", self):
             # Use a replication signpost, if available
             signpost = self.get_replication_key_signpost(context)
             if signpost:
@@ -985,11 +984,6 @@ class Stream(metaclass=abc.ABCMeta):
             self._write_schema_message()
             # Sync the records themselves:
             self._sync_records(context)
-        except Exception as e:
-            error = e
-            raise e
-        finally:
-            self.cleanup_stream(error)
 
     def _sync_children(self, child_context: dict) -> None:
         for child_stream in self.child_streams:

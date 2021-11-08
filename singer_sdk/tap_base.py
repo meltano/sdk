@@ -11,6 +11,7 @@ from singer_sdk.exceptions import MaxRecordsLimitException
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._hooks import prepare_and_cleanup_hooks
 from singer_sdk.helpers._singer import Catalog
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import read_json_file
@@ -354,9 +355,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
         stream: "Stream"
-        error = None
-        self.prepare_tap()
-        try:
+        with prepare_and_cleanup_hooks("tap", self):
             for stream in self.streams.values():
                 if not stream.selected and not stream.has_selected_descendents:
                     self.logger.info(f"Skipping deselected stream '{stream.name}'.")
@@ -373,11 +372,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
                 stream.sync()
                 stream.finalize_state_progress_markers()
-        except Exception as e:
-            error = e
-            raise e
-        finally:
-            self.cleanup_tap(error)
 
     # Command Line Execution
 
