@@ -1,7 +1,7 @@
 """Base class for SQL-type streams."""
 
 import abc
-from typing import Any, Dict, Iterable, List, Optional, Union, cast
+from typing import Any, Dict, Iterable, List, Optional, cast
 
 import singer
 import sqlalchemy
@@ -293,6 +293,214 @@ class SQLConnector:
                 result.append(catalog_entry.to_dict())
 
         return result
+
+    def table_exists(self, full_table_name: Optional[str] = None) -> Optional[bool]:
+        """Determine if the target table already exists.
+
+        Args:
+            full_table_name: the target table name.
+
+        Returns:
+            True if table exists, False if not, None if unsure or undetectable.
+        """
+        return None
+
+    def column_exists(
+        self,
+        full_table_name: Optional[str] = None,
+        column_name: Optional[str] = None,
+    ) -> Optional[bool]:
+        """Determine if the target table already exists.
+
+        Args:
+            full_table_name: the target table name.
+            column_name: the target column name.
+
+        Returns:
+            True if table exists, False if not, None if unsure or undetectable.
+        """
+        return None
+
+    def create_empty_table(
+        self,
+        full_table_name: str,
+        schema: dict,
+        primary_keys: Optional[List[str]] = None,
+        partition_keys: Optional[List[str]] = None,
+        as_temp_table: bool = False,
+    ) -> None:
+        """Create an empty target table.
+
+        Args:
+            full_table_name: the target table name.
+            schema: the JSON schema for the new table.
+            primary_keys: list of key properties.
+            partition_keys: list of partition keys.
+            as_temp_table: True to create a temp table.
+        """
+        pass
+
+    def _create_empty_column(
+        self,
+        full_table_name: str,
+        column_name: str,
+        sql_type: sqlalchemy.types.TypeEngine,
+    ) -> None:
+        """Create a new column.
+
+        Args:
+            full_table_name: The target table name.
+            column_name: The name of the new column.
+            sql_type: SQLAlchemy type engine to be used in creating the new column.
+        """
+
+    def prepare_table(
+        self,
+        full_table_name: str,
+        schema: dict,
+        primary_keys: List[str],
+        partition_keys: Optional[List[str]] = None,
+        as_temp_table: bool = False,
+    ) -> None:
+        """Adapt target table to provided schema if possible.
+
+        Args:
+            full_table_name: the target table name.
+            schema: the JSON Schema for the table.
+            primary_keys: list of key properties.
+            partition_keys: list of partition keys.
+            as_temp_table: True to create a temp table.
+        """
+        if not self.table_exists(full_table_name=full_table_name):
+            self.create_empty_table(
+                full_table_name=full_table_name,
+                schema=schema,
+                primary_keys=primary_keys,
+                partition_keys=partition_keys,
+                as_temp_table=as_temp_table,
+            )
+            return
+
+        for property_name, property_def in schema["properties"].items():
+            self.prepare_column(full_table_name, property_name, property_def)
+
+    def prepare_column(
+        self,
+        full_table_name: str,
+        column_name: str,
+        sql_type: sqlalchemy.types.TypeEngine,
+    ) -> None:
+        """Adapt target table to provided schema if possible.
+
+        Args:
+            full_table_name: the target table name.
+            column_name: the target column name.
+            sql_type: the SQLAlchemy type.
+        """
+        if not self.column_exists(full_table_name, column_name):
+            self._create_empty_column(
+                full_table_name=full_table_name,
+                column_name=column_name,
+                sql_type=sql_type,
+            )
+            return
+
+        self._adapt_column_type(
+            full_table_name,
+            column_name=column_name,
+            sql_type=sql_type,
+        )
+
+    def merge_sql_types(
+        self, sql_types: List[sqlalchemy.types.TypeEngine]
+    ) -> sqlalchemy.types.TypeEngine:
+        """Return a compatible SQL type for the selected type list.
+
+        Args:
+            sql_types: List of SQL types.
+
+        Returns:
+            A SQL type that is compatible with the input types.
+
+        Raises:
+            ValueError: If sql_types argument has zero members.
+        """
+        if not sql_types:
+            raise ValueError("Expected at least one member in `sql_types` argument.")
+
+        if len(sql_types) == 1:
+            return sql_types[0]
+
+        sql_types = self._sort_types(sql_types)
+
+        if len(sql_types) >= 2:
+            return self.merge_sql_types(
+                [self.merge_sql_types([sql_types[0], sql_types[1]])] + sql_types[2:]
+            )
+
+        assert len(sql_types) == 2
+        if isinstance(
+            sql_types[0].as_generic(),
+            (sqlalchemy.types.String, sqlalchemy.types.Unicode),
+        ):
+            return sql_types[0]
+
+    def _sort_types(
+        self, sql_types: List[sqlalchemy.types.TypeEngine]
+    ) -> List[sqlalchemy.types.TypeEngine]:
+        """Return the input types sorted from most to least compatible.
+
+        For example, [Smallint, Integer, Datetime, String, Double] would become
+        [Unicode, String, Double, Integer, Smallint, Datetime].
+        String types will be listed first, then decimal types, then integer types,
+        then bool types, and finally datetime and date. Higher precision, scale, and
+        length will be sorted earlier.
+
+        Args:
+            sql_types (List[sqlalchemy.types.TypeEngine]): [description]
+
+        Returns:
+            The sorted list.
+        """
+        return sql_types
+
+    def _get_column_type(
+        self, full_table_name: str, column_name: str
+    ) -> sqlalchemy.types.TypeEngine:
+        """Gets the SQL type of the declared column.
+
+        Args:
+            full_table_name: The name of the table.
+            column_name: The name of the column.
+
+        Return:
+            The type of the column.
+        """
+        pass
+
+    def _adapt_column_type(
+        self,
+        full_table_name: str,
+        column_name: str,
+        sql_type: sqlalchemy.types.TypeEngine,
+    ) -> None:
+        """Adapt table column type to support the new JSON schema type.
+
+        Args:
+            full_table_name: The target table name.
+            column_name: The target column name.
+            sql_type: The new SQLAlchemy type.
+        """
+        compatible_sql_type = self.merge_sql_types(
+            [
+                self._get_column_type(full_table_name, column_name),
+                self.to_sql_type(sql_type),
+            ]
+        )
+        self.connection.execute(
+            f"ALTER TABLE {full_table_name} "
+            f"ALTER COLUMN {column_name} ({compatible_sql_type})"
+        )
 
 
 class SQLStream(Stream, metaclass=abc.ABCMeta):
