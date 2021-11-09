@@ -9,7 +9,10 @@ DB_PATH = "path_to_db"
 
 
 class SQLiteConnector(SQLConnector):
-    """The connector for SQLite."""
+    """The connector for SQLite.
+
+    This class handles all DDL and type conversions.
+    """
 
     def get_sqlalchemy_url(self, config: Dict[str, Any]) -> str:
         """Generates a SQLAlchemy URL for SQLite."""
@@ -17,7 +20,15 @@ class SQLiteConnector(SQLConnector):
 
 
 class SQLiteStream(SQLStream):
-    """The Stream class for SQLite."""
+    """The Stream class for SQLite.
+
+    This class allows developers to optionally override `get_records()` and other
+    stream methods in order to improve performance beyond the default SQLAlchemy-based
+    interface.
+
+    DDL and type conversion operations are delegated to the connector logic specified
+    in `connector_class` or by overriding the `connector` object.
+    """
 
     connector_class = SQLiteConnector
 
