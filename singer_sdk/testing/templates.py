@@ -60,7 +60,7 @@ class StreamTestTemplate(TestTemplate):
 
     @property
     def id(self):
-        return f"{self.params['stream_name']}__{self.name}"
+        return f"{self.stream_name}__{self.name}"
 
 
 class AttributeTestTemplate(TestTemplate):
@@ -69,7 +69,18 @@ class AttributeTestTemplate(TestTemplate):
 
     @property
     def id(self):
-        return f"{self.params['stream_name']}__{self.params['attribute_name']}__{self.name}"
+        return f"{self.stream_name}__{self.attribute_name}__{self.name}"
+
+    def _extract_non_null_attribute_values(self) -> List[Any]:
+        """Helper function to extract attribute values from stream records."""
+        values = [
+            r[self.attribute_name]
+            for r in self.test_runner.records[self.stream_name]
+            if r.get(self.attribute_name) is not None
+        ]
+        if not values:
+            warnings.warn(UserWarning("No records were available to test."))
+        return values
 
 
 class TapCLIPrintsTest(TapTestTemplate):
@@ -157,44 +168,70 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
         assert all(all(k is not None for k in pk) for pk in record_ids)
 
 
-class AttributeIsUniqueTest(AttributeTestTemplate):
-    "Test that a given attribute contains unique values, ignoring nulls."
-    name = "unique"
-
-    def run_test(self):
-        values = [
-            r[self.attribute_name]
-            for r in self.test_runner.records[self.stream_name]
-            if r.get(self.attribute_name) is not None
-        ]
-        if not values:
-            warnings.warn(UserWarning("No records were available to test."))
-            return
-
-        assert len(set(values)) == len(
-            values
-        ), f"Attribute ({self.attribute_name}) is not unique."
-
-
 class AttributeIsDateTimeTest(AttributeTestTemplate):
     "Test that a given attribute contains unique values, ignoring nulls."
     name = "is_datetime"
 
     def run_test(self):
-        values = [
-            r[self.attribute_name]
-            for r in self.test_runner.records[self.stream_name]
-            if r.get(self.attribute_name) is not None
-        ]
-        if not values:
-            warnings.warn(UserWarning("No records were available to test."))
-            return
-
+        values = self._extract_non_null_attribute_values()
         for v in values:
             try:
                 parser.parse(v)
-            except TypeError:
-                raise TypeError(f"Unable to cast value ('{v}') to float type.")
+            except TypeError as e:
+                raise Exception(f"Unable to cast value ('{v}') to float type.") from e
+
+
+class AttributeIsBooleanTest(AttributeTestTemplate):
+    "Test taht a given attribute is boolean datatype."
+    name = "is_boolean"
+
+    def run_test(self):
+        "Test that a given attribute does not contain any null values."
+        values = self._extract_non_null_attribute_values()
+        for v in values:
+            try:
+                bool(v)
+            except ValueError as e:
+                raise Exception(f"Unable to cast value ('{v}') to boolean type.") from e
+
+
+class AttributeIsObjectTest(AttributeTestTemplate):
+    "Test that a given attribute is an object type."
+    name = "is_object"
+
+    def run_test(self):
+        values = self._extract_non_null_attribute_values()
+        for v in values:
+            try:
+                dict(v)
+            except ValueError as e:
+                raise Exception(f"Unable to cast value ('{v}') to dict type.") from e
+
+
+class AttributeIsInteger(AttributeTestTemplate):
+    "Test that a given attribute can be converted to an integer type."
+    name = "is_integer"
+
+    def run_test(self):
+        values = self._extract_non_null_attribute_values()
+        for v in values:
+            try:
+                int(v)
+            except ValueError as e:
+                raise Exception(f"Unable to cast value ('{v}') to int type.") from e
+
+
+class AttributeIsNumberTest(AttributeTestTemplate):
+    "Test that a given attribute can be converted to a floating point number type."
+    name = "is_numeric"
+
+    def run_test(self):
+        values = self._extract_non_null_attribute_values()
+        for v in values:
+            try:
+                float(v)
+            except ValueError as e:
+                raise Exception(f"Unable to cast value ('{v}') to float type.") from e
 
 
 class AttributeNotNullTest(AttributeTestTemplate):
@@ -207,79 +244,15 @@ class AttributeNotNullTest(AttributeTestTemplate):
         ), "Detected null records in attribute."
 
 
-class AttributeIsBooleanTest(AttributeTestTemplate):
-    "Test taht a given attribute is boolean datatype."
-    name = "is_boolean"
+class AttributeUniquenessTest(AttributeTestTemplate):
+    "Test that a given attribute contains unique values, ignoring nulls."
+    name = "unique"
 
     def run_test(self):
-        "Test that a given attribute does not contain any null values."
-        values = [
-            r[self.attribute_name]
-            for r in self.test_runner.records[self.stream_name]
-            if r.get(self.attribute_name) is not None
-        ]
-        if not values:
-            warnings.warn(UserWarning("No records were available to test."))
-            return
-        for v in values:
-            try:
-                bool(v)
-            except TypeError:
-                raise TypeError(f"Unable to cast value ('{v}') to boolean type.")
-
-
-class AttributeIsObjectTest(AttributeTestTemplate):
-    "Test that a given attribute is an object type."
-    name = "is_object"
-
-    def run_test(self):
-        values = [
-            r[self.attribute_name]
-            for r in self.test_runner.records[self.stream_name]
-            if r.get(self.attribute_name) is not None
-        ]
-        if not values:
-            warnings.warn(UserWarning("No records were available to test."))
-            return
-        for v in values:
-            assert dict(v), f"Unable to cast value ('{v}') to dict type."
-
-
-class AttributeIsInteger(AttributeTestTemplate):
-    "Test that a given attribute can be converted to an integer type."
-    name = "is_integer"
-
-    def run_test(self):
-        values = [
-            r[self.attribute_name]
-            for r in self.test_runner.records[self.stream_name]
-            if r.get(self.attribute_name) is not None
-        ]
-        if not values:
-            warnings.warn(UserWarning("No records were available to test."))
-            return
-        for v in values:
-            assert dict(v), f"Unable to cast value ('{v}') to int type."
-
-
-class AttributeIsNumberTest(AttributeTestTemplate):
-    "Test that a given attribute can be converted to a floating point number type."
-    name = "is_numeric"
-
-    def run_test(self):
-        values = [
-            r[self.attribute_name]
-            for r in self.test_runner.records[self.stream_name]
-            if r.get(self.attribute_name) is not None
-        ]
-        if not values:
-            warnings.warn(UserWarning("No records were available to test."))
-            return
-        for v in values:
-            try:
-                float(v)
-            except TypeError:
-                raise TypeError(f"Unable to cast value ('{v}') to float type.")
+        values = self._extract_non_null_attribute_values()
+        assert len(set(values)) == len(
+            values
+        ), f"Attribute ({self.attribute_name}) is not unique."
 
 
 class TapTests(Enum):
@@ -302,4 +275,4 @@ class AttributeTests(Enum):
     is_number = AttributeIsNumberTest
     is_object = AttributeIsObjectTest
     not_null = AttributeNotNullTest
-    unique = AttributeIsUniqueTest
+    unique = AttributeUniquenessTest
