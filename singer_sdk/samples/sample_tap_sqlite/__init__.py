@@ -1,7 +1,8 @@
 """A sample implementation for SQLite."""
 
 from typing import Any, Dict
-from singer_sdk import SQLStream, SQLTap, SQLConnector
+
+from singer_sdk import SQLConnector, SQLStream, SQLTap
 from singer_sdk import typing as th
 
 DB_PATH = "path_to_db"

@@ -6,9 +6,9 @@ from typing import cast
 
 import pytest
 
-from singer_sdk import SQLStream, SQLConnector
+from singer_sdk import SQLConnector, SQLStream
+from singer_sdk.helpers._singer import Metadata, MetadataMapping, StreamMetadata
 from singer_sdk.tap_base import SQLTap
-from singer_sdk.helpers._singer import Metadata, StreamMetadata, MetadataMapping
 
 
 @pytest.fixture
