@@ -18,6 +18,6 @@
     ],
     "include_cicd_sample_template": [
         "GitHub",
-        "None / Skip"
+        "None (Skip)"
     ]
 }
