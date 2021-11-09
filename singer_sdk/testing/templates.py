@@ -9,6 +9,10 @@ from dateutil import parser
 from typing import List, Any
 
 
+class TapValidationError(Exception):
+    pass
+
+
 class TestTemplate:
     """
     The following attributes are passed down from the TapTestRunner during
@@ -177,8 +181,8 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
         for v in values:
             try:
                 parser.parse(v)
-            except TypeError as e:
-                raise Exception(f"Unable to cast value ('{v}') to float type.") from e
+            except parser.ParserError as e:
+                raise TapValidationError(f"Unable to parse value ('{v}') with datetime parser.") from e
 
 
 class AttributeIsBooleanTest(AttributeTestTemplate):
@@ -192,7 +196,7 @@ class AttributeIsBooleanTest(AttributeTestTemplate):
             try:
                 bool(v)
             except ValueError as e:
-                raise Exception(f"Unable to cast value ('{v}') to boolean type.") from e
+                raise TapValidationError(f"Unable to cast value ('{v}') to boolean type.") from e
 
 
 class AttributeIsObjectTest(AttributeTestTemplate):
@@ -205,7 +209,7 @@ class AttributeIsObjectTest(AttributeTestTemplate):
             try:
                 dict(v)
             except ValueError as e:
-                raise Exception(f"Unable to cast value ('{v}') to dict type.") from e
+                raise TapValidationError(f"Unable to cast value ('{v}') to dict type.") from e
 
 
 class AttributeIsInteger(AttributeTestTemplate):
@@ -218,7 +222,7 @@ class AttributeIsInteger(AttributeTestTemplate):
             try:
                 int(v)
             except ValueError as e:
-                raise Exception(f"Unable to cast value ('{v}') to int type.") from e
+                raise TapValidationError(f"Unable to cast value ('{v}') to int type.") from e
 
 
 class AttributeIsNumberTest(AttributeTestTemplate):
@@ -231,7 +235,7 @@ class AttributeIsNumberTest(AttributeTestTemplate):
             try:
                 float(v)
             except ValueError as e:
-                raise Exception(f"Unable to cast value ('{v}') to float type.") from e
+                raise TapValidationError(f"Unable to cast value ('{v}') to float type.") from e
 
 
 class AttributeNotNullTest(AttributeTestTemplate):

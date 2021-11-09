@@ -48,9 +48,9 @@ class TapTestRunner(object):
     def __init__(
         self,
         tap_class: Type[Tap],
-        config: dict = {},
+        tap_config: dict = {},
+        tap_creation_args: dict = {},
         stream_record_limit: int = 10,
-        parse_env_config: bool = True,
     ) -> None:
         """
         Initializes the test utility.
@@ -61,16 +61,14 @@ class TapTestRunner(object):
             stream_record_limit (int, optional): The max number of records a stream may emit before being stopped. Defaults to 10.
             parse_env_config (bool, optional): Whether to use env variables when initializing the tap. Defaults to True.
         """
-        self.tap_config = config
+        self.tap_config = tap_config
         self.tap_class = tap_class
-        self.parse_env_config = parse_env_config
+        self.tap_creation_args = tap_creation_args
         self.tap = self.create_new_tap()
         self.stream_record_limit = stream_record_limit
 
-    def create_new_tap(self, **kwargs):
-        tap = self.tap_class(
-            config=self.tap_config, parse_env_config=self.parse_env_config, **kwargs
-        )
+    def create_new_tap(self):
+        tap = self.tap_class(config=self.tap_config, **self.tap_creation_args)
         return tap
 
     def run_sync(self):
