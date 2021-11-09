@@ -9,8 +9,6 @@ jobs:
   linting:
 
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: {{ '${{secrets.GITHUB_TOKEN}}' }}
     strategy:
       matrix:
         # Only lint using the primary version used for dev
