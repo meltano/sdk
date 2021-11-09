@@ -10,7 +10,7 @@ from singer_sdk.streams import (
     SQLStream,
     Stream,
 )
-from singer_sdk.tap_base import Tap, SQLTap
+from singer_sdk.tap_base import SQLTap, Tap
 from singer_sdk.target_base import Target
 
 __all__ = [

@@ -2,13 +2,14 @@
 
 from enum import Enum
 from typing import Any, Dict, Iterable, List, Optional
-from pendulum import now
 
 import sqlalchemy
+from pendulum import now
+
+from singer_sdk import typing as th
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks.batch import BatchSink
 from singer_sdk.streams.sql import SQLConnector
-from singer_sdk import typing as th
 
 
 class SQLSink(BatchSink):
