@@ -22,17 +22,15 @@ class TapTestRunner(object):
     It is intended to be used as a testing fixture to simplify data testing. For example:
 
     ```
-    test_utility = TapTestUtility(TapSlack, SAMPLE_CONFIG, stream_record_limit=500)
-    test_utility.run_discovery()
-    test_utility.run_sync()
+    test_runner = TapTestRunner(TapSlack, SAMPLE_CONFIG, stream_record_limit=500)
+    test_runner.run_discovery()
+    test_runner.run_sync()
 
-    pytest_params = test_utility.generate_built_in_tests()
-
+    pytest_params = test_runner.generate_built_in_tests()
 
     @pytest.fixture(scope="session")
     def test_util():
-        yield test_utility
-
+        yield test_runner
 
     @pytest.mark.parametrize("test_config", **pytest_params)
     def test_builtin_tap_tests(test_util, test_config):

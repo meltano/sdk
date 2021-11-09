@@ -11,34 +11,41 @@ PARQUET_SAMPLE_FILENAME = Path(__file__).parent / Path("./resources/testfile.par
 PARQUET_TEST_CONFIG = {"filepath": str(PARQUET_SAMPLE_FILENAME)}
 
 
-runner = TapTestRunner(SampleTapCountries, {})
-runner.run_discovery()
-runner.run_sync()
-
-# pytest_params = test_runner.generate_built_in_tests()
-
-
 @pytest.fixture(scope="session")
 def tap_test_runner():
+    runner = TapTestRunner(SampleTapCountries, {})
+    runner.run_discovery()
+    runner.run_sync()
+
     yield runner
 
 
-def test_is_number_expectation(tap_test_runner):
-    test_class = AttributeTests.is_number.value
-    params = {
-        "test_runner": tap_test_runner,
-        "stream_name": "countries",
-        "attribute_name": "currency",
-    }
-    e = test_class(**params)
-    e.run_test()
+def test_attribute_unique_test(tap_test_runner):
+    t = AttributeTests.unique.value(
+        test_runner=tap_test_runner, stream_name="countries", attribute_name="currency"
+    )
+    t.run_test()
 
 
-# @pytest.mark.parametrize("test_config", **pytest_params)
-# def test_builtin_tap_tests(test_util, test_config):
-#     test_name, params = test_config
-#     test_func = test_util.available_tests[test_name]
-#     test_func(**params)
+def test_attribute_is_number_expectation(tap_test_runner):
+    t = AttributeTests.is_number.value(
+        test_runner=tap_test_runner, stream_name="countries", attribute_name="currency"
+    )
+    t.run_test()
+
+
+def test_attribute_is_boolean_expectation(tap_test_runner):
+    t = AttributeTests.is_boolean.value(
+        test_runner=tap_test_runner, stream_name="countries", attribute_name="currency"
+    )
+    t.run_test()
+
+
+def test_attribute_is_datetime_expectation(tap_test_runner):
+    t = AttributeTests.is_number.value(
+        test_runner=tap_test_runner, stream_name="countries", attribute_name="currency"
+    )
+    t.run_test()
 
 
 def test_countries_tap_standard_tests():
