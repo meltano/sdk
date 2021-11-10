@@ -26,6 +26,9 @@ class Target{{ cookiecutter.destination_name }}(Target):
     ).to_dict()
     default_sink_class = {{ cookiecutter.destination_name }}Sink
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
     def prepare_target(self) -> None:
         """Set up the target before running.
 

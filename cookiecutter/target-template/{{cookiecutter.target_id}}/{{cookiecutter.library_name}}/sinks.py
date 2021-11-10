@@ -10,6 +10,9 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
     max_size = 10000  # Max records to write in one batch
     {%- endif %}
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
     def prepare_sink(self) -> None:
         """Set up the sink before running.
 

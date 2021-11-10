@@ -10,6 +10,9 @@ from singer_sdk.streams import Stream
 class {{ cookiecutter.source_name }}Stream(Stream):
     """Stream class for {{ cookiecutter.source_name }} streams."""
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
     def prepare_stream(self) -> None:
         """Set up the stream before running.
 
