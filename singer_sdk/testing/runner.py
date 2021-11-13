@@ -147,7 +147,6 @@ class TapTestRunner(object):
         params = dict(
             tap_class=self.tap_class,
             tap_config=self.tap_config,
-            test_runner=self,
         )
         for test_name in self.tap.default_tests:
             test_class = TapTests[test_name].value
@@ -159,11 +158,12 @@ class TapTestRunner(object):
         manifest = []
         for stream in self.tap.streams.values():
             params = dict(
-                test_runner=self,
                 tap_class=self.tap_class,
                 tap_init=self.tap,
                 tap_config=self.tap_config,
                 stream_name=stream.name,
+                stream_object=stream,
+                stream_records = self.records[stream.name]
             )
             for test_name in stream.default_tests:
                 test_class = StreamTests[test_name].value
@@ -177,7 +177,9 @@ class TapTestRunner(object):
             schema = stream.schema
             for k, v in schema["properties"].items():
                 params = dict(
-                    test_runner=self, stream_name=stream.name, attribute_name=k
+                    stream_records=self.records[stream.name],
+                    stream_object=stream,
+                    stream_name=stream.name, attribute_name=k
                 )
                 if v.get("required"):
                     test_class = AttributeTests.is_unique.value

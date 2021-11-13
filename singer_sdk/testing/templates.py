@@ -21,8 +21,9 @@ class TestTemplate:
     Possible Args:
         tap_class (str, optional): [description]. Defaults to None.
         tap_config (str, optional): [description]. Defaults to None.
-        test_runner (str, optional): [description]. Defaults to None.
+        stream_class (obj, optional): [description]. Defaults to None.
         stream_name (str, optional): [description]. Defaults to None.
+        stream_records (list[obj]): Defaults to None
         attribute_name (str, optional): [description]. Defaults to None.
 
     Raises:
@@ -51,7 +52,7 @@ class TestTemplate:
 
 class TapTestTemplate(TestTemplate):
     type = "tap"
-    required_args = ["test_runner", "tap_class", "tap_config"]
+    required_args = ["tap_class", "tap_config"]
 
     @property
     def id(self):
@@ -60,7 +61,7 @@ class TapTestTemplate(TestTemplate):
 
 class StreamTestTemplate(TestTemplate):
     type = "stream"
-    required_args = ["test_runner", "stream_name"]
+    required_args = ["stream_object", "stream_name", "stream_records"]
 
     @property
     def id(self):
@@ -69,7 +70,7 @@ class StreamTestTemplate(TestTemplate):
 
 class AttributeTestTemplate(TestTemplate):
     type = "attribute"
-    required_args = ["test_runner", "stream_name", "attribute_name"]
+    required_args = ["stream_records", "stream_object", "stream_name", "attribute_name"]
 
     @property
     def id(self):
@@ -79,7 +80,7 @@ class AttributeTestTemplate(TestTemplate):
         """Helper function to extract attribute values from stream records."""
         values = [
             r[self.attribute_name]
-            for r in self.test_runner.records[self.stream_name]
+            for r in self.stream_records
             if r.get(self.attribute_name) is not None
         ]
         if not values:
@@ -91,7 +92,7 @@ class TapCLIPrintsTest(TapTestTemplate):
     name = "cli_prints"
 
     def run_test(self):
-        tap = self.test_runner.create_new_tap()
+        tap = self.tap_class(config=self.tap_config)
         tap.print_version()
         tap.print_about()
         tap.print_about(format="json")
@@ -101,11 +102,11 @@ class TapDiscoveryTest(TapTestTemplate):
     name = "discovery"
 
     def run_test(self) -> None:
-        tap1 = self.test_runner.create_new_tap()
+        tap1 = self.tap_class(config=self.tap_config)
         tap1.run_discovery()
         catalog = tap1.catalog_dict
         # Reset and re-initialize with an input catalog
-        tap2: Tap = self.test_runner.create_new_tap(catalog=catalog)
+        tap2: Tap = self.tap_class(config=self.tap_config, catalog=catalog)
         assert tap2
 
 
@@ -114,7 +115,7 @@ class TapStreamConnectionTest(TapTestTemplate):
 
     def run_test(self) -> None:
         # Initialize with basic config
-        tap = self.test_runner.create_new_tap()
+        tap = self.tap_class(config=self.tap_config)
         tap.run_connection_test()
 
 
@@ -123,7 +124,7 @@ class StreamReturnsRecordTest(StreamTestTemplate):
     name = "returns_record"
 
     def run_test(self):
-        record_count = len(self.test_runner.records[self.stream_name])
+        record_count = len(self.stream_records)
         assert record_count > 0
 
 
@@ -132,11 +133,8 @@ class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
     name = "catalog_schema_matches_record"
 
     def run_test(self):
-        stream = self.test_runner.tap.streams[self.stream_name]
-        stream_catalog_keys = set(stream.schema["properties"].keys())
-        stream_record_keys = set().union(
-            *(d["record"].keys() for d in self.test_runner.records[self.stream_name])
-        )
+        stream_catalog_keys = set(self.stream_object.schema["properties"].keys())
+        stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
         diff = stream_catalog_keys - stream_record_keys
 
         assert diff == set(), f"Fields in catalog but not in record: ({diff})"
@@ -147,11 +145,8 @@ class StreamRecordSchemaMatchesCatalogTest(StreamTestTemplate):
 
     def run_test(self):
         "The stream's first record should have a catalog identical to that defined."
-        stream = self.test_runner.tap.streams[self.stream_name]
-        stream_catalog_keys = set(stream.schema["properties"].keys())
-        stream_record_keys = set().union(
-            *(d.keys() for d in self.test_runner.records[self.stream_name])
-        )
+        stream_catalog_keys = set(self.stream_object.schema["properties"].keys())
+        stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
         diff = stream_record_keys - stream_catalog_keys
 
         assert diff == set(), f"Fields in records but not in catalog: ({diff})"
@@ -162,12 +157,12 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
     name = "primary_keys"
 
     def run_test(self):
-        primary_keys = self.test_runner.tap.streams[self.stream_name].primary_keys
+        primary_keys = self.stream_object.primary_keys
         record_ids = []
-        for r in self.test_runner.records[self.stream_name]:
+        for r in self.stream_records:
             record_ids.append((r[k] for k in primary_keys))
         count_unique_records = len(set(record_ids))
-        count_records = len(self.test_runner.records[self.stream_name])
+        count_records = len(self.stream_records)
 
         assert count_unique_records == count_records, \
             f"Length of set of records IDs ({count_unique_records})" \
@@ -258,7 +253,7 @@ class AttributeNotNullTest(AttributeTestTemplate):
 
     def run_test(self):
         assert all(
-            r.get(self.attribute_name) is not None for r in self.test_runner.records
+            r.get(self.attribute_name) is not None for r in self.stream_records
         ), "Detected null records in attribute."
 
 
