@@ -12,6 +12,7 @@ runner.run_sync()
 
 pytest_tests = runner.generate_pytest_tests()
 
+
 @pytest.fixture(scope="session")
 def test_runner():
     yield runner

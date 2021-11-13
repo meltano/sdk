@@ -70,13 +70,14 @@ class StreamTestTemplate(TestTemplate):
 
 class AttributeTestTemplate(TestTemplate):
     type = "attribute"
-    required_args = ["stream_records", "stream_object", "stream_name", "attribute_name"]
+    required_args = ["stream_records", "stream_name", "attribute_name"]
 
     @property
     def id(self):
         return f"{self.stream_name}__{self.attribute_name}__{self.name}"
 
-    def _extract_non_null_attribute_values(self) -> List[Any]:
+    @property
+    def non_null_attribute_values(self) -> List[Any]:
         """Helper function to extract attribute values from stream records."""
         values = [
             r[self.attribute_name]
@@ -125,7 +126,7 @@ class StreamReturnsRecordTest(StreamTestTemplate):
 
     def run_test(self):
         record_count = len(self.stream_records)
-        assert record_count > 0
+        assert record_count > 0, "No records returned in stream."
 
 
 class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
@@ -164,11 +165,13 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
         count_unique_records = len(set(record_ids))
         count_records = len(self.stream_records)
 
-        assert count_unique_records == count_records, \
-            f"Length of set of records IDs ({count_unique_records})" \
+        assert count_unique_records == count_records, (
+            f"Length of set of records IDs ({count_unique_records})"
             f" is not equal to number of records ({count_records})."
-        assert all(all(k is not None for k in pk) for pk in record_ids), \
-            "Primary keys contain some key values that are null."
+        )
+        assert all(
+            all(k is not None for k in pk) for pk in record_ids
+        ), "Primary keys contain some key values that are null."
 
 
 class AttributeIsDateTimeTest(AttributeTestTemplate):
@@ -176,30 +179,25 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
     name = "is_datetime"
 
     def run_test(self):
-        values = self._extract_non_null_attribute_values()
-        for v in values:
+        for v in self.non_null_attribute_values:
             try:
-                parser.parse(v)
+                error_message = f"Unable to parse value ('{v}') with datetime parser."
+                assert parser.parse(v), error_message
             except parser.ParserError as e:
-                raise TapValidationError(
-                    f"Unable to parse value ('{v}') with datetime parser."
-                ) from e
+                raise AssertionError(error_message) from e
 
 
 class AttributeIsBooleanTest(AttributeTestTemplate):
-    "Test taht a given attribute is boolean datatype."
+    "Test that an attribute is of boolean datatype (or can be cast to it)."
     name = "is_boolean"
 
     def run_test(self):
         "Test that a given attribute does not contain any null values."
-        values = self._extract_non_null_attribute_values()
-        for v in values:
-            try:
-                bool(v)
-            except ValueError as e:
-                raise TapValidationError(
-                    f"Unable to cast value ('{v}') to boolean type."
-                ) from e
+        for v in self.non_null_attribute_values:
+            assert isinstance(v, bool) or str(v).lower() in [
+                "true",
+                "false",
+            ], f"Unable to cast value ('{v}') to boolean type."
 
 
 class AttributeIsObjectTest(AttributeTestTemplate):
@@ -207,14 +205,8 @@ class AttributeIsObjectTest(AttributeTestTemplate):
     name = "is_object"
 
     def run_test(self):
-        values = self._extract_non_null_attribute_values()
-        for v in values:
-            try:
-                dict(v)
-            except ValueError as e:
-                raise TapValidationError(
-                    f"Unable to cast value ('{v}') to dict type."
-                ) from e
+        for v in self.non_null_attribute_values:
+            assert isinstance(v, dict), f"Unable to cast value ('{v}') to dict type."
 
 
 class AttributeIsInteger(AttributeTestTemplate):
@@ -222,14 +214,8 @@ class AttributeIsInteger(AttributeTestTemplate):
     name = "is_integer"
 
     def run_test(self):
-        values = self._extract_non_null_attribute_values()
-        for v in values:
-            try:
-                int(v)
-            except ValueError as e:
-                raise TapValidationError(
-                    f"Unable to cast value ('{v}') to int type."
-                ) from e
+        for v in self.non_null_attribute_values:
+            assert isinstance(v, int), f"Unable to cast value ('{v}') to int type."
 
 
 class AttributeIsNumberTest(AttributeTestTemplate):
@@ -237,24 +223,22 @@ class AttributeIsNumberTest(AttributeTestTemplate):
     name = "is_numeric"
 
     def run_test(self):
-        values = self._extract_non_null_attribute_values()
-        for v in values:
+        for v in self.non_null_attribute_values:
             try:
-                float(v)
-            except ValueError as e:
-                raise TapValidationError(
-                    f"Unable to cast value ('{v}') to float type."
-                ) from e
-
+                error_message =  f"Unable to cast value ('{v}') to float type."
+                assert isinstance(v, float) or isinstance(v, int), error_message
+            except Exception as e:
+                raise AssertionError(error_message) from e
 
 class AttributeNotNullTest(AttributeTestTemplate):
     "Test that a given attribute does not contain any null values."
     name = "not_null"
 
     def run_test(self):
-        assert all(
-            r.get(self.attribute_name) is not None for r in self.stream_records
-        ), "Detected null records in attribute."
+        for r in self.stream_records:
+            assert (
+                r.get(self.attribute_name) is not None
+            ), "Detected null records in attribute."
 
 
 class AttributeUniquenessTest(AttributeTestTemplate):
@@ -262,7 +246,7 @@ class AttributeUniquenessTest(AttributeTestTemplate):
     name = "unique"
 
     def run_test(self):
-        values = self._extract_non_null_attribute_values()
+        values = self.non_null_attribute_values
         assert len(set(values)) == len(
             values
         ), f"Attribute ({self.attribute_name}) is not unique."

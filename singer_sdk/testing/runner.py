@@ -163,7 +163,7 @@ class TapTestRunner(object):
                 tap_config=self.tap_config,
                 stream_name=stream.name,
                 stream_object=stream,
-                stream_records = self.records[stream.name]
+                stream_records=self.records[stream.name],
             )
             for test_name in stream.default_tests:
                 test_class = StreamTests[test_name].value
@@ -179,7 +179,8 @@ class TapTestRunner(object):
                 params = dict(
                     stream_records=self.records[stream.name],
                     stream_object=stream,
-                    stream_name=stream.name, attribute_name=k
+                    stream_name=stream.name,
+                    attribute_name=k,
                 )
                 if v.get("required"):
                     test_class = AttributeTests.is_unique.value
