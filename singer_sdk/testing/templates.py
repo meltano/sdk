@@ -150,7 +150,7 @@ class StreamRecordSchemaMatchesCatalogTest(StreamTestTemplate):
         stream = self.test_runner.tap.streams[self.stream_name]
         stream_catalog_keys = set(stream.schema["properties"].keys())
         stream_record_keys = set().union(
-            *(d["record"].keys() for d in self.test_runner.records[self.stream_name])
+            *(d.keys() for d in self.test_runner.records[self.stream_name])
         )
         diff = stream_record_keys - stream_catalog_keys
 
@@ -165,11 +165,15 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
         primary_keys = self.test_runner.tap.streams[self.stream_name].primary_keys
         record_ids = []
         for r in self.test_runner.records[self.stream_name]:
-            id = (r[k] for k in primary_keys)
-            record_ids.append(id)
+            record_ids.append((r[k] for k in primary_keys))
+        count_unique_records = len(set(record_ids))
+        count_records = len(self.test_runner.records[self.stream_name])
 
-        assert len(set(record_ids)) == len(self.test_runner.records)
-        assert all(all(k is not None for k in pk) for pk in record_ids)
+        assert count_unique_records == count_records, \
+            f"Length of set of records IDs ({count_unique_records})" \
+            f" is not equal to number of records ({count_records})."
+        assert all(all(k is not None for k in pk) for pk in record_ids), \
+            "Primary keys contain some key values that are null."
 
 
 class AttributeIsDateTimeTest(AttributeTestTemplate):
@@ -182,7 +186,9 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
             try:
                 parser.parse(v)
             except parser.ParserError as e:
-                raise TapValidationError(f"Unable to parse value ('{v}') with datetime parser.") from e
+                raise TapValidationError(
+                    f"Unable to parse value ('{v}') with datetime parser."
+                ) from e
 
 
 class AttributeIsBooleanTest(AttributeTestTemplate):
@@ -196,7 +202,9 @@ class AttributeIsBooleanTest(AttributeTestTemplate):
             try:
                 bool(v)
             except ValueError as e:
-                raise TapValidationError(f"Unable to cast value ('{v}') to boolean type.") from e
+                raise TapValidationError(
+                    f"Unable to cast value ('{v}') to boolean type."
+                ) from e
 
 
 class AttributeIsObjectTest(AttributeTestTemplate):
@@ -209,7 +217,9 @@ class AttributeIsObjectTest(AttributeTestTemplate):
             try:
                 dict(v)
             except ValueError as e:
-                raise TapValidationError(f"Unable to cast value ('{v}') to dict type.") from e
+                raise TapValidationError(
+                    f"Unable to cast value ('{v}') to dict type."
+                ) from e
 
 
 class AttributeIsInteger(AttributeTestTemplate):
@@ -222,7 +232,9 @@ class AttributeIsInteger(AttributeTestTemplate):
             try:
                 int(v)
             except ValueError as e:
-                raise TapValidationError(f"Unable to cast value ('{v}') to int type.") from e
+                raise TapValidationError(
+                    f"Unable to cast value ('{v}') to int type."
+                ) from e
 
 
 class AttributeIsNumberTest(AttributeTestTemplate):
@@ -235,7 +247,9 @@ class AttributeIsNumberTest(AttributeTestTemplate):
             try:
                 float(v)
             except ValueError as e:
-                raise TapValidationError(f"Unable to cast value ('{v}') to float type.") from e
+                raise TapValidationError(
+                    f"Unable to cast value ('{v}') to float type."
+                ) from e
 
 
 class AttributeNotNullTest(AttributeTestTemplate):

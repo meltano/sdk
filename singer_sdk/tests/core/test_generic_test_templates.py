@@ -4,9 +4,7 @@ import pytest
 
 from singer_sdk.testing import TapTestRunner, AttributeTests, TapValidationError
 
-import pendulum
 import pytest
-import requests
 from typing import Optional, List, Iterable, Dict, Any
 
 from singer_sdk.helpers.jsonpath import _compile_jsonpath
@@ -51,6 +49,7 @@ class SimpleTestStream(Stream):
             "updatedAt": "2021-01-01T00:00:00Z",
             "is_country": True,
             "same_value": "foo",
+            "float_value": 9.8,
         }
         yield {
             "id": 2,
@@ -58,6 +57,7 @@ class SimpleTestStream(Stream):
             "updatedAt": "2021-02-01T00:00:00Z",
             "is_country": None,
             "same_value": "foo",
+            "float_value": 9.9,
         }
         yield {
             "id": 3,
@@ -65,6 +65,7 @@ class SimpleTestStream(Stream):
             "updatedAt": "2021-03-01T00:00:00Z",
             "is_country": False,
             "same_value": "foo",
+            "float_value": 9.5,
         }
 
 
@@ -114,7 +115,7 @@ def test_attribute_unique_test(attribute_test_kwargs):
     t2 = test_class(attribute_name="same_value", **attribute_test_kwargs)
 
     t1.run_test()
-    with pytest.raises(TapValidationError):
+    with pytest.raises(Exception):
         t2.run_test()
 
 
@@ -124,8 +125,9 @@ def test_attribute_is_number_expectation(attribute_test_kwargs):
     t2 = test_class(attribute_name="value", **attribute_test_kwargs)
 
     t1.run_test()
-    with pytest.raises(TapValidationError):
+    with pytest.raises(Exception):
         t2.run_test()
+
 
 def test_attribute_is_boolean_expectation(attribute_test_kwargs):
     test_class = AttributeTests.is_boolean.value
@@ -133,7 +135,7 @@ def test_attribute_is_boolean_expectation(attribute_test_kwargs):
     t2 = test_class(attribute_name="id", **attribute_test_kwargs)
 
     t1.run_test()
-    with pytest.raises(TapValidationError):
+    with pytest.raises(Exception):
         t2.run_test()
 
 
@@ -143,5 +145,25 @@ def test_attribute_is_datetime_expectation(attribute_test_kwargs):
     t2 = test_class(attribute_name="same_value", **attribute_test_kwargs)
 
     t1.run_test()
-    with pytest.raises(TapValidationError):
+    with pytest.raises(Exception):
+        t2.run_test()
+
+
+def test_attribute_is_integer_expectation(attribute_test_kwargs):
+    test_class = AttributeTests.is_integer.value
+    t1 = test_class(attribute_name="id", **attribute_test_kwargs)
+    t2 = test_class(attribute_name="float_value", **attribute_test_kwargs)
+
+    t1.run_test()
+    with pytest.raises(Exception):
+        t2.run_test()
+
+
+def test_attribute_is_object_expectation(attribute_test_kwargs):
+    test_class = AttributeTests.is_integer.value
+    t1 = test_class(attribute_name="id", **attribute_test_kwargs)
+    t2 = test_class(attribute_name="float_value", **attribute_test_kwargs)
+
+    t1.run_test()
+    with pytest.raises(Exception):
         t2.run_test()

@@ -63,12 +63,11 @@ class TapTestRunner(object):
         """
         self.tap_config = tap_config
         self.tap_class = tap_class
-        self.tap_creation_args = tap_creation_args
-        self.tap = self.create_new_tap()
+        self.tap = self.create_new_tap(**tap_creation_args)
         self.stream_record_limit = stream_record_limit
 
-    def create_new_tap(self):
-        tap = self.tap_class(config=self.tap_config, **self.tap_creation_args)
+    def create_new_tap(self, **kwargs):
+        tap = self.tap_class(config=self.tap_config, **kwargs)
         return tap
 
     def run_sync(self):
@@ -79,12 +78,12 @@ class TapTestRunner(object):
     def run_discovery(self):
         self.tap.run_discovery()
 
-    def generate_built_in_tests(self):
+    def generate_pytest_tests(self):
         tap_tests = self._generate_tap_tests()
         schema_tests = self._generate_schema_tests()
         attribute_tests = self._generate_attribute_tests()
         test_manifest = tap_tests + schema_tests + attribute_tests
-        test_ids = self._generate_test_ids(test_manifest)
+        test_ids = [initialized_test.id for initialized_test in test_manifest]
         return {"argvalues": test_manifest, "ids": test_ids}
 
     def _execute_sync(self) -> List[dict]:
@@ -145,25 +144,30 @@ class TapTestRunner(object):
 
     def _generate_tap_tests(self):
         manifest = []
+        params = dict(
+            tap_class=self.tap_class,
+            tap_config=self.tap_config,
+            test_runner=self,
+        )
         for test_name in self.tap.default_tests:
             test_class = TapTests[test_name].value
-            initialized_test = test_class(
-                tap_class=self.tap_class, tap_config=self.tap_config
-            )
+            initialized_test = test_class(**params)
             manifest.append(initialized_test)
         return manifest
 
     def _generate_schema_tests(self):
         manifest = []
         for stream in self.tap.streams.values():
+            params = dict(
+                test_runner=self,
+                tap_class=self.tap_class,
+                tap_init=self.tap,
+                tap_config=self.tap_config,
+                stream_name=stream.name,
+            )
             for test_name in stream.default_tests:
                 test_class = StreamTests[test_name].value
-                initialized_test = test_class(
-                    tap_class=self.tap_class,
-                    tap_init=self.tap,
-                    tap_config=self.tap_config,
-                    stream_name=stream,
-                )
+                initialized_test = test_class(**params)
                 manifest.append(initialized_test)
         return manifest
 
@@ -172,20 +176,25 @@ class TapTestRunner(object):
         for stream in self.tap.streams.values():
             schema = stream.schema
             for k, v in schema["properties"].items():
-                params = {"stream_name": stream.name, "attribute_name": k}
+                params = dict(
+                    test_runner=self, stream_name=stream.name, attribute_name=k
+                )
                 if v.get("required"):
-                    manifest.append(AttributeTests.is_unique(**params))
+                    test_class = AttributeTests.is_unique.value
+                    manifest.append(test_class(**params))
                 if v.get("format") == "date-time":
-                    manifest.append(AttributeTests.is_datetime(**params))
+                    test_class = AttributeTests.is_datetime.value
+                    manifest.append(test_class(**params))
                 if not "null" in v.get("type", []):
-                    manifest.append(AttributeTests.not_null(**params))
+                    test_class = AttributeTests.not_null.value
+                    manifest.append(test_class(**params))
                 if "boolean" in v.get("type", []):
-                    manifest.append(AttributeTests.is_boolean(**params))
+                    test_class = AttributeTests.is_boolean.value
+                    manifest.append(test_class(**params))
                 if "integer" in v.get("type", []):
-                    manifest.append(AttributeTests.is_integer(**params))
+                    test_class = AttributeTests.is_integer.value
+                    manifest.append(test_class(**params))
                 if "object" in v.get("type", []):
-                    manifest.append(AttributeTests.is_object(**params))
+                    test_class = AttributeTests.is_object.value
+                    manifest.append(test_class(**params))
         return manifest
-
-    def _generate_test_ids(self, test_manifest):
-        return [initialized_test.id for initialized_test in test_manifest]
