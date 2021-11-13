@@ -3,19 +3,10 @@
 import pytest
 
 from singer_sdk.samples.sample_tap_countries.countries_tap import SampleTapCountries
-from singer_sdk.testing import TapTestRunner
+from singer_sdk.testing import get_standard_tap_tests_for_pytest
 
 
-runner = TapTestRunner(SampleTapCountries, {})
-runner.run_discovery()
-runner.run_sync()
-
-pytest_tests = runner.generate_pytest_tests()
-
-
-@pytest.fixture(scope="session")
-def test_runner():
-    yield runner
+pytest_tests = get_standard_tap_tests_for_pytest(SampleTapCountries, {})
 
 
 @pytest.mark.parametrize("test_object", **pytest_tests)

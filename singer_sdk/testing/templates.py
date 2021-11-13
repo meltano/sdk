@@ -225,10 +225,11 @@ class AttributeIsNumberTest(AttributeTestTemplate):
     def run_test(self):
         for v in self.non_null_attribute_values:
             try:
-                error_message =  f"Unable to cast value ('{v}') to float type."
+                error_message = f"Unable to cast value ('{v}') to float type."
                 assert isinstance(v, float) or isinstance(v, int), error_message
             except Exception as e:
                 raise AssertionError(error_message) from e
+
 
 class AttributeNotNullTest(AttributeTestTemplate):
     "Test that a given attribute does not contain any null values."

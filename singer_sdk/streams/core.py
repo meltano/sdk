@@ -241,15 +241,6 @@ class Stream(metaclass=abc.ABCMeta):
 
         return cast(datetime.datetime, pendulum.parse(value))
 
-    @property
-    def default_tests(self) -> List:
-        """Return an array of built-in test classes.
-
-        Returns:
-            List of built-in test classes.
-        """
-        return ["record_schema_matches_catalog", "returns_records", "primary_keys"]
-
     @final
     @property
     def selected(self) -> bool:

@@ -9,7 +9,6 @@ from typing import List, Type, Any
 
 from singer_sdk.tap_base import Tap
 from singer_sdk.exceptions import MaxRecordsLimitException
-from singer_sdk.testing.templates import TapTests, StreamTests, AttributeTests
 
 
 class TapTestRunner(object):
@@ -78,14 +77,6 @@ class TapTestRunner(object):
     def run_discovery(self):
         self.tap.run_discovery()
 
-    def generate_pytest_tests(self):
-        tap_tests = self._generate_tap_tests()
-        schema_tests = self._generate_schema_tests()
-        attribute_tests = self._generate_attribute_tests()
-        test_manifest = tap_tests + schema_tests + attribute_tests
-        test_ids = [initialized_test.id for initialized_test in test_manifest]
-        return {"argvalues": test_manifest, "ids": test_ids}
-
     def _execute_sync(self) -> List[dict]:
         "Executes the sync and captures the records printed to stdout."
         output_buffer = io.StringIO()
@@ -141,63 +132,3 @@ class TapTestRunner(object):
                 self.records[stream_name].append(record["record"])
                 continue
         return
-
-    def _generate_tap_tests(self):
-        manifest = []
-        params = dict(
-            tap_class=self.tap_class,
-            tap_config=self.tap_config,
-        )
-        for test_name in self.tap.default_tests:
-            test_class = TapTests[test_name].value
-            initialized_test = test_class(**params)
-            manifest.append(initialized_test)
-        return manifest
-
-    def _generate_schema_tests(self):
-        manifest = []
-        for stream in self.tap.streams.values():
-            params = dict(
-                tap_class=self.tap_class,
-                tap_init=self.tap,
-                tap_config=self.tap_config,
-                stream_name=stream.name,
-                stream_object=stream,
-                stream_records=self.records[stream.name],
-            )
-            for test_name in stream.default_tests:
-                test_class = StreamTests[test_name].value
-                initialized_test = test_class(**params)
-                manifest.append(initialized_test)
-        return manifest
-
-    def _generate_attribute_tests(self):
-        manifest = []
-        for stream in self.tap.streams.values():
-            schema = stream.schema
-            for k, v in schema["properties"].items():
-                params = dict(
-                    stream_records=self.records[stream.name],
-                    stream_object=stream,
-                    stream_name=stream.name,
-                    attribute_name=k,
-                )
-                if v.get("required"):
-                    test_class = AttributeTests.is_unique.value
-                    manifest.append(test_class(**params))
-                if v.get("format") == "date-time":
-                    test_class = AttributeTests.is_datetime.value
-                    manifest.append(test_class(**params))
-                if not "null" in v.get("type", []):
-                    test_class = AttributeTests.not_null.value
-                    manifest.append(test_class(**params))
-                if "boolean" in v.get("type", []):
-                    test_class = AttributeTests.is_boolean.value
-                    manifest.append(test_class(**params))
-                if "integer" in v.get("type", []):
-                    test_class = AttributeTests.is_integer.value
-                    manifest.append(test_class(**params))
-                if "object" in v.get("type", []):
-                    test_class = AttributeTests.is_object.value
-                    manifest.append(test_class(**params))
-        return manifest
