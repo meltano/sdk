@@ -27,12 +27,9 @@ jobs:
     - name: Install dependencies
       run: |
         poetry install
-    - name: Check formatting with black
+    - name: Run lint command from tox.ini
       run: |
-        poetry run black --check .
-    - name: Check typing annotations with mypy
-      run: |
-        poetry run mypy . --ignore-missing-imports
+        poetry run tox lint
 
   pytest:
 
