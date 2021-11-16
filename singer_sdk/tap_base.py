@@ -496,7 +496,7 @@ class SQLTap(Tap):
             The tap's catalog as a dict
         """
         if self.input_catalog:
-            return self.input_catalog
+            return self.input_catalog.to_dict()
 
         connector = self.default_stream_class.connector_class(dict(self.config))
 
