@@ -2,10 +2,12 @@
 
 from typing import Any, Dict
 
+import sqlalchemy
+
 from singer_sdk import SQLConnector, SQLStream, SQLTap
 from singer_sdk import typing as th
 
-DB_PATH = "path_to_db"
+DB_PATH_CONFIG = "path_to_db"
 
 
 class SQLiteConnector(SQLConnector):
@@ -16,7 +18,20 @@ class SQLiteConnector(SQLConnector):
 
     def get_sqlalchemy_url(self, config: Dict[str, Any]) -> str:
         """Generates a SQLAlchemy URL for SQLite."""
-        return f"sqlite:///{config[DB_PATH]}"
+        return f"sqlite:///{config[DB_PATH_CONFIG]}"
+
+    def create_sqlalchemy_connection(self) -> sqlalchemy.engine.Connection:
+        """Return a new SQLAlchemy connection using the provided config.
+
+        Returns:
+            A newly created SQLAlchemy engine object.
+        """
+        try:
+            return super().create_sqlalchemy_connection()
+        except Exception as ex:
+            raise RuntimeError(
+                f"Error connecting to DB at '{self.config[DB_PATH_CONFIG]}'"
+            ) from ex
 
 
 class SQLiteStream(SQLStream):
@@ -40,8 +55,11 @@ class SQLiteTap(SQLTap):
     default_stream_class = SQLiteStream
     config_jsonschema = th.PropertiesList(
         th.Property(
-            DB_PATH,
+            DB_PATH_CONFIG,
             th.StringType,
             description="The path to your SQLite database file(s).",
         )
     ).to_dict()
+
+
+__all__ = ["SQLiteTap", "SQLiteConnector", "SQLiteStream"]
