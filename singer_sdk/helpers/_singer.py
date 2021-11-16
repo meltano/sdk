@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass, fields
 from enum import Enum
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union, cast
 
 from singer.catalog import Catalog as BaseCatalog
 from singer.catalog import CatalogEntry as BaseCatalogEntry
@@ -256,6 +256,14 @@ class Catalog(Dict[str, CatalogEntry], BaseCatalog):
             entry = CatalogEntry.from_dict(stream)
             instance[entry.tap_stream_id] = entry
         return instance
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Return a dictionary representation of the catalog.
+
+        Returns:
+            A dictionary with the defined catalog streams.
+        """
+        return cast(Dict[str, Any], super().to_dict())
 
     @property
     def streams(self) -> List[CatalogEntry]:
