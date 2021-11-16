@@ -72,6 +72,9 @@ flake8-annotations = "^2.6.2"
 darglint = "^1.8.0"
 isort = "^5.9.3"
 
+[tool.black]
+exclude = ".*simpleeval.*"
+
 [tool.isort]
 profile = "black"
 multi_line_output = 3 # Vertical Hanging Indent
