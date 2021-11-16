@@ -223,7 +223,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     def discover_streams(self) -> List[Stream]:
         """Initialize all available streams and return them as a list.
 
-        Returns:
+        Return:
             List of discovered Stream objects.
 
         Raises:
