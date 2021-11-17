@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.3.10"
+version = "0.3.13"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 maintainers = ["Meltano Team and Contributors"]
@@ -27,7 +27,7 @@ license = "Apache 2.0"
 "Youtube" = "https://www.youtube.com/meltano"
 
 [tool.poetry.dependencies]
-python = "<3.10,>=3.6.1"
+python = "<3.10,>=3.6.2"
 pipelinewise-singer-python = "1.2.0"
 backoff = ">=1.8.0,<2.0"
 pendulum = "^2.1.0"
@@ -40,6 +40,7 @@ memoization = "^0.3.2"
 jsonpath-ng = "^1.5.3"
 joblib = "^1.0.1"
 inflection = "^0.5.1"
+dataclasses = {version = "*", markers = "python_version < \"3.7\""}
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
@@ -64,6 +65,7 @@ pyarrow = "^3.0.0"
 pandas = ">1,<=1.2.0"
 tox = "^3.23.1"
 codecov = "^2.1.11"
+freezegun = "^1.1.0"
 viztracer = "^0.14.0"
 flake8-annotations = "^2.6.2"
 darglint = "^1.8.0"

@@ -43,6 +43,7 @@ Developer Resources
    python_tips
    code_samples
    cli_commands
+   capabilities
 
 Reference
 ---------

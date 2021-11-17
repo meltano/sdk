@@ -478,7 +478,7 @@ class PluginMapper:
                 )
         else:
             logging.info(
-                "Operator '{MAPPER_ELSE_OPTION}=None' was not found. "
+                f"Operator '{MAPPER_ELSE_OPTION}=None' was not found. "
                 "Unmapped streams will be included in output."
             )
         for stream_map_key, stream_def in self.stream_maps_dict.items():
