@@ -5,9 +5,8 @@ import copy
 import json
 import sys
 import time
-
-from pathlib import Path, PurePath
 from io import FileIO
+from pathlib import Path, PurePath
 from typing import IO, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import click
