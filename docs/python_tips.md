@@ -17,7 +17,8 @@ environments for you so that you don't have to worry about dependency conflicts.
   program (versus a python library). Pipx automatically creates a virtual
   environment for you and automatically makes sure that the executables
   contained in the python package get added to your path.
-- **Poetry**: Use this when you are developing in Python. The SDK cookiecutter
+- **Poetry**: Use this when you are developing in Python. Use pipx to install poetry with
+  `pipx install poetry`. The SDK cookiecutter
   template already sets you up for poetry. When you are
   running a command with `poetry run ...`, poetry is doing the work to make
   sure your command runs in the correct virtual environment behind the scenes.
