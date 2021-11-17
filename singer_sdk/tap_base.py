@@ -364,6 +364,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             help="Display package metadata and settings.",
         )
         @click.option(
+            "--format",
+            help="Specify output style for --about",
+            type=click.Choice(["json", "markdown"], case_sensitive=False),
+            default=None,
+        )
+        @click.option(
             "--discover",
             is_flag=True,
             help="Run the tap in discovery mode.",
@@ -372,12 +378,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             "--test",
             is_flag=True,
             help="Test connectivity by syncing a single record and exiting.",
-        )
-        @click.option(
-            "--format",
-            help="Specify output style for --about",
-            type=click.Choice(["json", "markdown"], case_sensitive=False),
-            default=None,
         )
         @click.option(
             "--config",
@@ -419,7 +419,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 test: Test connectivity by syncing a single record and exiting.
                 format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
-                    variables.
+                    variables. Accepts multiple inputs as a tuple.
                 catalog: Use a Singer catalog file with the tap.",
                 state: Use a bookmarks file for incremental replication.
 
