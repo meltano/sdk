@@ -21,6 +21,16 @@ To add your project to this list, please
 
 These are code samples taken from other projects. Use these as a reference if you get stuck.
 
+- [A simple Tap class definition with two streams](./code_samples.html#a-simple-tap-class-definition-with-two-streams)
+- [Define a simple GraphQL-based stream with schema defined in a file](./code_samples.html#define-a-simple-graphql-based-stream-with-schema-defined-in-a-file)
+- [Define a REST-based stream with a JSONPath expression](./code_samples.html#define-a-rest-based-stream-with-a-jsonpath-expression)
+- [Dynamically discovering `schema` for a stream](./code_samples.html#dynamically-discovering-schema-for-a-stream)
+- [Initialize a collection of tap streams with differing types](./code_samples.html#initialize-a-collection-of-tap-streams-with-differing-types)
+- [Run the standard built-in tap tests](./code_samples.html#run-the-standard-built-in-tap-tests)
+- [Make all streams reuse the same authenticator instance](./code_samples.html#make-all-streams-reuse-the-same-authenticator-instance)
+- [Make a stream reuse the same authenticator instance for all requests](./code_samples.html#make-a-stream-reuse-the-same-authenticator-instance-for-all-requests)
+- [Custom response validation](./code_samples.html#custom-response-validation)
+
 ### A simple Tap class definition with two streams
 
 ```python
@@ -231,6 +241,47 @@ class CachedAuthStream(RESTStream):
     def authenticator(self) -> APIAuthenticatorBase:
         """Stream authenticator."""
         return APIAuthenticatorBase(stream=self)
+```
+
+### Custom response validation
+
+Some APIs deviate from HTTP status codes to report failures. For those cases,
+you can override [`RESTStream.validate_response()`](./classes/singer_sdk.RESTStream.html#singer_sdk.RESTStream.validate_response)
+and raise [`FatalAPIError`](./classes/singer_sdk.exceptions.FatalAPIError)
+if an unrecoverable error is detected. If the API also has transient errors, either client-side
+like rate limits, or server-side like temporary 5xx, you can raise
+[`RetriableAPIError`](./classes/singer_sdk.exceptions.RetriableAPIError)
+and the request will be retried with back-off:
+
+```python
+from enum import Enum
+from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
+from singer_sdk.streams.rest import RESTStream
+
+class CustomResponseValidationStream(RESTStream):
+    """Stream with non-conventional error response."""
+
+    url_base = "https://badapi.test"
+    name = "non_conventional"
+    schema = {"type": "object", "properties": {}}
+    path = "/dummy
+
+    class StatusMessage(str, Enum):
+        """Possible status messages."""
+
+        OK = "OK"
+        ERROR = "ERROR"
+        UNAVAILABLE = "UNAVAILABLE"
+
+    def validate_response(self, response):
+        # Still catch error status codes
+        super().validate_response(response)
+
+        data = response.json()
+        if data["status"] == self.StatusMessage.ERROR:
+            raise FatalAPIError("Error message found :(")
+        if data["status"] == self.StatusMessage.UNAVAILABLE:
+            raise RetriableAPIError("API is unavailable")
 ```
 
 ## Additional Resources

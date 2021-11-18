@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New
 
+- Tap SDK: New method `RESTStream.validate_response` to allow developers to use custom validation of HTTP responses ([#207](https://gitlab.com/meltano/sdk/-/issues/207), [!195](https://gitlab.com/meltano/sdk/-/merge_requests/195))
+- Tap SDK: New method `RESTStream.request_decorator` to allow developers to use custom back-off parameters ([#137](https://gitlab.com/meltano/sdk/-/issues/137), [!195](https://gitlab.com/meltano/sdk/-/merge_requests/195))
+
 ### Changes
 
 ### Fixes
