@@ -162,6 +162,9 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     def request_decorator(self, func: Callable) -> Callable:
         """Instantiate a decorator for handling request failures.
 
+        Developers may override this method to provide custom backoff or retry
+        handling.
+
         Args:
             func: Function to decorate.
 
