@@ -20,6 +20,7 @@ class SimpleRESTStream(RESTStream):
         "type": "object",
         "properties": {},
     }
+    path = "/dummy"
 
     @property
     def authenticator(self) -> APIAuthenticatorBase:
