@@ -1,6 +1,7 @@
 """Sink classes load data to a target."""
 
 import abc
+
 from singer_sdk.helpers._compat import final
 from singer_sdk.sinks.core import Sink
 
