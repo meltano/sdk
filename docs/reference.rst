@@ -58,10 +58,12 @@ Exception Types
     :template: class.rst
 
     exceptions.ConfigValidationError
+    exceptions.FatalAPIError
     exceptions.InvalidStreamSortException
     exceptions.MapExpressionError
     exceptions.MaxRecordsLimitException
     exceptions.RecordsWitoutSchemaException
+    exceptions.RetriableAPIError
     exceptions.StreamMapConfigError
     exceptions.TapStreamConnectionFailure
     exceptions.TooManyRecordsException
