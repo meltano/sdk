@@ -15,5 +15,9 @@
         "OAuth2",
         "JWT",
         "Custom or N/A"
+    ],
+    "include_cicd_sample_template": [
+        "GitHub",
+        "None (Skip)"
     ]
 }
