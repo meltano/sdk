@@ -179,7 +179,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         )(func)
         return decorator
 
-    def _request_with_backoff(
+    def _request(
         self, prepared_request: requests.PreparedRequest, context: Optional[dict]
     ) -> requests.Response:
         """TODO.
@@ -283,7 +283,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """
         next_page_token: Any = None
         finished = False
-        decorated_request = self.request_decorator(self._request_with_backoff)
+        decorated_request = self.request_decorator(self._request)
 
         while not finished:
             prepared_request = self.prepare_request(
