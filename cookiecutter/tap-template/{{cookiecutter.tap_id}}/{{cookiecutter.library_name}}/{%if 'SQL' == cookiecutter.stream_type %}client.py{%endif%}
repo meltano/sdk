@@ -3,8 +3,9 @@
 This includes {{ cookiecutter.source_name }}Stream and {{ cookiecutter.source_name }}Connector.
 """
 
-from singer_sdk import SQLConnector, SQLStream
+import sqlalchemy
 
+from singer_sdk import SQLConnector, SQLStream
 
 class {{ cookiecutter.source_name }}Connector(SQLConnector):
     """Connects to the {{ cookiecutter.source_name }} SQL source."""
@@ -20,8 +21,46 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
             f"s3_staging_dir={config['s3_staging_dir']}"
         )
 
+    def to_jsonschema_type(cls, sql_type: sqlalchemy.types.TypeEngine) -> dict:
+        """Returns a JSON Schema equivalent for the given SQL type.
+
+        Developers may optionally add custom logic before calling the default implementation
+        inherited from the base class.
+        """
+        # Optionally, add custom logic before calling the super().
+        # You may delete this method if overrides are not needed.
+        return super().to_jsonschema_type(sql_type)
+
+    def to_sql_type(cls, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+        """Returns a JSON Schema equivalent for the given SQL type.
+        
+        Developers may optionally add custom logic before calling the default implementation
+        inherited from the base class.
+        """
+        # Optionally, add custom logic before calling the super().
+        # You may delete this method if overrides are not needed.
+        return super().to_sql_type(jsonschema_type)
+
 
 class {{ cookiecutter.source_name }}Stream(SQLStream):
     """Stream class for {{ cookiecutter.source_name }} streams."""
 
     connector_class = {{ cookiecutter.source_name }}Connector
+
+
+    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
+        """Return a generator of row-type dictionary objects.
+
+        Developers may optionally add custom logic before calling the default implementation
+        inherited from the base class.
+
+        Args:
+            partition: If provided, will read specifically from this data slice.
+
+        Yields:
+            One dict per record.
+        """
+        # Optionally, add custom logic instead of calling the super().
+        # This is helpful if the source database provides batch-optimized record retreival.
+        # If no overrides or optimizations are needed, you may delete this method.
+        yield from super().get_records(partition)
