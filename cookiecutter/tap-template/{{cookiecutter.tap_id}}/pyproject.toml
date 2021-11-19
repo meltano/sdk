@@ -22,6 +22,7 @@ black = "^21.9b0"
 pydocstyle = "^6.1.1"
 mypy = "^0.910"
 types-requests = "^2.25.8"
+isort = "^5.10.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
