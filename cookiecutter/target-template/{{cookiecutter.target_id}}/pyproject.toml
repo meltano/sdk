@@ -13,6 +13,7 @@ license = "Apache 2.0"
 python = "<3.10,>=3.6.2"
 requests = "^2.25.1"
 singer-sdk = "^0.3.14"
+isort = "^5.10.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
@@ -22,6 +23,11 @@ black = "^21.9b0"
 pydocstyle = "^6.1.1"
 mypy = "^0.910"
 types-requests = "^2.25.8"
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3 # Vertical Hanging Indent
+src_paths = "{{cookiecutter.library_name}}"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
