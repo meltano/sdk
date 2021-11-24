@@ -2,7 +2,7 @@
 
 import warnings
 
-from typing import Callable, List, Type, Dict
+from typing import Callable, List, Type
 
 from singer_sdk.tap_base import Tap
 from singer_sdk.target_base import Target
@@ -14,11 +14,11 @@ def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Ca
     """Return callable pytest which executes simple discovery and connection tests.
 
     Args:
-        target_class: TODO
-        config: TODO
+        tap_class: Class of Tap to be tested against.
+        config: Configuration to pass to test tap(s).
 
     Returns:
-        TODO
+        List of test functions that can be called directly.
     """
     warnings.warn(
         DeprecationWarning(
@@ -34,14 +34,29 @@ def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Ca
 
 def get_standard_tap_pytest_parameters(
     tap_class: Type[Tap],
-    tap_config: dict = None,
+    tap_config: dict = {},
     tap_kwargs: dict = {},
     include_tap_tests: bool = True,
     include_stream_tests: bool = False,
     include_attribute_tests: bool = False,
     stream_record_limit: int = 50,
-) -> Dict:
-    """Generates tap tests based on standard rules."""
+) -> dict:
+    """Generates tap tests based on standard rules.
+
+    Args:
+        tap_class (Type[Tap]): Tap class.
+        tap_config (dict): Configuration for tap. Defaults to None.
+        tap_kwargs (dict): Default Keyword arguments to be passed during
+            tap creation. Defaults to {}.
+        include_tap_tests (bool): Generate tap-level tests.
+        include_stream_tests (bool): Generate schema-level tests.
+        include_attribute_tests (bool): Generate attribute-level tests.
+        stream_record_limit (int): Max number of records to sync per stream.
+
+    Returns:
+        dict: a dictionary containing test classes that can be passed
+            to `pytest.parametrize` to run built-in tap tests.
+    """
     runner = TapTestRunner(tap_class, tap_config, tap_kwargs)
     runner.run_discovery()
     runner.run_sync(stream_record_limit=stream_record_limit)
@@ -75,10 +90,20 @@ def get_standard_target_tests(
 
 
 def get_tap_tests(
-    test_runner: TapTestRunner,
+    test_runner: Type[TapTestRunner],
     selected_test_names: List[str] = ["cli_prints", "discovery", "stream_connection"],
 ) -> List:
-    """Returns an array of tap-level test objects."""
+    """
+    [summary]
+
+    Args:
+        test_runner (Type[TapTestRunner]): [description]
+        selected_test_names (List[str]): List of test names to create.
+            Defaults to ["cli_prints", "discovery", "stream_connection"].
+
+    Returns:
+        List: List of initialized test objects.
+    """
     test_list = []
     test_params = dict(
         tap_class=test_runner.tap_class,
@@ -92,8 +117,8 @@ def get_tap_tests(
 
 
 def get_tap_schema_tests(
-    test_runner,
-    selected_test_names=[
+    test_runner: Type[TapTestRunner],
+    selected_test_names: List[str] = [
         "record_schema_matches_catalog",
         "returns_records",
         "primary_keys",
