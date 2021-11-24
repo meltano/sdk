@@ -2,12 +2,11 @@
 
 import pytest
 
-from singer_sdk.testing import TapTestRunner, AttributeTests, TapValidationError
+from singer_sdk.testing import TapTestRunner, TapTests, StreamTests, AttributeTests
 
 import pytest
 from typing import Optional, List, Iterable, Dict, Any
 
-from singer_sdk.helpers.jsonpath import _compile_jsonpath
 from singer_sdk.streams.core import (
     REPLICATION_FULL_TABLE,
     Stream,
@@ -114,7 +113,7 @@ def test_runner():
     runner = TapTestRunner(
         tap_class=SimpleTestTap,
         tap_config={},
-        tap_creation_args={"catalog": catalog_dict},
+        tap_kwargs={"catalog": catalog_dict},
     )
     runner.run_sync()
 

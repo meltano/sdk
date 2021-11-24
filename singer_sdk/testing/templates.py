@@ -1,30 +1,25 @@
-"""Generic test classes meant to be applicable to any tap or target."""
+"""Generic test classes intended to be applicable to any tap or target."""
 
 import warnings
-
-from singer_sdk.tap_base import Tap
 
 from enum import Enum
 from dateutil import parser
 from typing import List, Any
 
-
-class TapValidationError(Exception):
-    pass
+from singer_sdk.tap_base import Tap
 
 
 class TestTemplate:
     """
-    The following attributes are passed down from the TapTestRunner during
-    the generation of tests.
+    Each Test class requires one or more of the following arguments.
 
     Possible Args:
-        tap_class (str, optional): [description]. Defaults to None.
-        tap_config (str, optional): [description]. Defaults to None.
-        stream_class (obj, optional): [description]. Defaults to None.
-        stream_name (str, optional): [description]. Defaults to None.
-        stream_records (list[obj]): Defaults to None
-        attribute_name (str, optional): [description]. Defaults to None.
+        tap_class (str, optional): The class for the tap.
+        tap_config (str, optional): Config to be used when initializing the tap.
+        stream (obj, optional): Initialized stream object to be tested.
+        stream_name (str, optional): Name of the stream to be tested.
+        stream_records (list[obj]): Array of records output by the stream sync.
+        attribute_name (str, optional): Name of the attribute to be tested.
 
     Raises:
         ValueError: [description]
@@ -38,16 +33,16 @@ class TestTemplate:
 
     def __init__(self, **kwargs):
         if not self.name or not self.type:
-            raise ValueError("Tests must have 'name' and 'type' set.")
+            raise ValueError("Test must have 'name' and 'type' properties.")
         for p in self.required_args:
             setattr(self, p, kwargs[p])
 
     @property
     def id(self):
-        raise NotImplementedError("Method not implemented in template class.")
+        raise NotImplementedError("Method not implemented.")
 
     def run_test(self):
-        raise NotImplementedError("Method not implemented in template class.")
+        raise NotImplementedError("Method not implemented.")
 
 
 class TapTestTemplate(TestTemplate):
@@ -61,7 +56,7 @@ class TapTestTemplate(TestTemplate):
 
 class StreamTestTemplate(TestTemplate):
     type = "stream"
-    required_args = ["stream_object", "stream_name", "stream_records"]
+    required_args = ["stream", "stream_name", "stream_records"]
 
     @property
     def id(self):
@@ -90,6 +85,7 @@ class AttributeTestTemplate(TestTemplate):
 
 
 class TapCLIPrintsTest(TapTestTemplate):
+    "Test that the tap is able to print standard metadata."
     name = "cli_prints"
 
     def run_test(self):
@@ -100,6 +96,7 @@ class TapCLIPrintsTest(TapTestTemplate):
 
 
 class TapDiscoveryTest(TapTestTemplate):
+    "Test that discovery mode generates a valid tap catalog."
     name = "discovery"
 
     def run_test(self) -> None:
@@ -112,6 +109,7 @@ class TapDiscoveryTest(TapTestTemplate):
 
 
 class TapStreamConnectionTest(TapTestTemplate):
+    "Test that the tap can connect to each stream."
     name = "stream_connections"
 
     def run_test(self) -> None:
@@ -121,7 +119,7 @@ class TapStreamConnectionTest(TapTestTemplate):
 
 
 class StreamReturnsRecordTest(StreamTestTemplate):
-    "The stream sync should have returned at least 1 record."
+    "Test that a stream sync returns at least 1 record."
     name = "returns_record"
 
     def run_test(self):
@@ -130,11 +128,11 @@ class StreamReturnsRecordTest(StreamTestTemplate):
 
 
 class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
-    "The stream's first record should have a catalog identical to that defined."
+    "Test that all attributes in the catalog schema are present in the record schema."
     name = "catalog_schema_matches_record"
 
     def run_test(self):
-        stream_catalog_keys = set(self.stream_object.schema["properties"].keys())
+        stream_catalog_keys = set(self.stream.schema["properties"].keys())
         stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
         diff = stream_catalog_keys - stream_record_keys
 
@@ -142,11 +140,11 @@ class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
 
 
 class StreamRecordSchemaMatchesCatalogTest(StreamTestTemplate):
+    "Test that all attributes in the record schema are present in the catalog schema."
     name = "record_schema_matches_catalog"
 
     def run_test(self):
-        "The stream's first record should have a catalog identical to that defined."
-        stream_catalog_keys = set(self.stream_object.schema["properties"].keys())
+        stream_catalog_keys = set(self.stream.schema["properties"].keys())
         stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
         diff = stream_record_keys - stream_catalog_keys
 
@@ -158,7 +156,7 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
     name = "primary_keys"
 
     def run_test(self):
-        primary_keys = self.stream_object.primary_keys
+        primary_keys = self.stream.primary_keys
         record_ids = []
         for r in self.stream_records:
             record_ids.append((r[k] for k in primary_keys))
@@ -175,7 +173,7 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
 
 
 class AttributeIsDateTimeTest(AttributeTestTemplate):
-    "Test that a given attribute contains unique values, ignoring nulls."
+    "Test that a given attribute contains unique values (ignores null values)."
     name = "is_datetime"
 
     def run_test(self):
@@ -239,7 +237,7 @@ class AttributeNotNullTest(AttributeTestTemplate):
         for r in self.stream_records:
             assert (
                 r.get(self.attribute_name) is not None
-            ), "Detected null records in attribute."
+            ), f"Detected null records in attribute ('{self.attribute_name}')."
 
 
 class AttributeUniquenessTest(AttributeTestTemplate):

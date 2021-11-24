@@ -1,6 +1,11 @@
-from typing import Callable, List, Type, Any, Tuple
+"""Utility functions for building test sets for taps and targets."""
+
+import warnings
+
+from typing import Callable, List, Type, Dict
 
 from singer_sdk.tap_base import Tap
+from singer_sdk.target_base import Target
 from singer_sdk.testing.templates import TapTests, StreamTests, AttributeTests
 from singer_sdk.testing.runner import TapTestRunner
 
@@ -9,33 +14,52 @@ def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Ca
     """Return callable pytest which executes simple discovery and connection tests.
 
     Args:
-        tap_class: TODO
+        target_class: TODO
         config: TODO
 
     Returns:
         TODO
     """
+    warnings.warn(
+        DeprecationWarning(
+            "`get_standard_tap_tests` has been deprecated. "
+            "Please use the `get_standard_tap_pytest_parameters` workflow instead."
+        )
+    )
 
     runner = TapTestRunner(tap_class, config)
+    test_list = get_tap_tests(runner)
+    return [t.run_test for t in test_list]
+
+
+def get_standard_tap_pytest_parameters(
+    tap_class: Type[Tap],
+    tap_config: dict = None,
+    tap_kwargs: dict = {},
+    include_tap_tests: bool = True,
+    include_stream_tests: bool = False,
+    include_attribute_tests: bool = False,
+    stream_record_limit: int = 50,
+) -> Dict:
+    """Generates tap tests based on standard rules."""
+    runner = TapTestRunner(tap_class, tap_config, tap_kwargs)
     runner.run_discovery()
-    runner.run_sync()
+    runner.run_sync(stream_record_limit=stream_record_limit)
 
-    tap_tests = _generate_tap_tests(runner)
-    schema_tests = _generate_schema_tests(runner)
-    attribute_tests = _generate_attribute_tests(runner)
-    test_manifest = tap_tests + schema_tests + attribute_tests
+    test_list = []
+    if include_tap_tests:
+        test_list.extend(get_tap_tests(runner))
+    if include_stream_tests:
+        test_list.extend(get_tap_schema_tests(runner))
+    if include_attribute_tests:
+        test_list.extend(get_tap_attribute_tests(runner))
 
-    return [t for t in test_manifest]
-
-
-def get_standard_tap_tests_for_pytest(tap_class, config):
-    test_manifest = get_standard_tap_tests(tap_class, config)
-    test_ids = [initialized_test.id for initialized_test in test_manifest]
-    return {"argvalues": test_manifest, "ids": test_ids}
+    test_ids = [initialized_test.id for initialized_test in test_list]
+    return {"argvalues": test_list, "ids": test_ids}
 
 
 def get_standard_target_tests(
-    target_class: Type[Tap],
+    target_class: Type[Target],
     config: dict = None,
 ) -> List[Callable]:
     """Return callable pytest which executes simple discovery and connection tests.
@@ -50,70 +74,87 @@ def get_standard_target_tests(
     return []
 
 
-def _generate_tap_tests(test_runner: TapTestRunner):
-    manifest = []
-    default_tests = ["cli_prints", "discovery", "stream_connection"]
-    params = dict(
+def get_tap_tests(
+    test_runner: TapTestRunner,
+    selected_test_names: List[str] = ["cli_prints", "discovery", "stream_connection"],
+) -> List:
+    """Returns an array of tap-level test objects."""
+    test_list = []
+    test_params = dict(
         tap_class=test_runner.tap_class,
         tap_config=test_runner.tap_config,
     )
-    for test_name in default_tests:
+    for test_name in selected_test_names:
         test_class = TapTests[test_name].value
-        initialized_test = test_class(**params)
-        manifest.append(initialized_test)
-    return manifest
+        initialized_test = test_class(**test_params)
+        test_list.append(initialized_test)
+    return test_list
 
 
-def _generate_schema_tests(test_runner):
-    manifest = []
-    default_tests = [
+def get_tap_schema_tests(
+    test_runner,
+    selected_test_names=[
         "record_schema_matches_catalog",
         "returns_records",
         "primary_keys",
-    ]
+    ],
+) -> List:
+    """Returns an array of schema-level test objects."""
+    test_list = []
     for stream in test_runner.tap.streams.values():
-        params = dict(
+        test_params = dict(
+            stream=stream,
+            stream_name=stream.name,
+            stream_records=test_runner.records[stream.name],
             tap_class=test_runner.tap_class,
             tap_init=test_runner.tap,
             tap_config=test_runner.tap_config,
-            stream_name=stream.name,
-            stream_object=stream,
-            stream_records=test_runner.records[stream.name],
         )
-        for test_name in default_tests:
+        for test_name in selected_test_names:
             test_class = StreamTests[test_name].value
-            initialized_test = test_class(**params)
-            manifest.append(initialized_test)
-    return manifest
+            initialized_test = test_class(**test_params)
+            test_list.append(initialized_test)
+    return test_list
 
 
-def _generate_attribute_tests(test_runner):
-    manifest = []
+def get_tap_attribute_tests(
+    test_runner: Type[TapTestRunner],
+    selected_test_names: List[str] = [
+        "is_unique",
+        "is_datetime",
+        "not_null",
+        "is_boolean",
+        "is_integer",
+        "is_object",
+    ],
+) -> List:
+    """Returns an array of attribute-level test objects."""
+    test_list = []
     for stream in test_runner.tap.streams.values():
         schema = stream.schema
         for k, v in schema["properties"].items():
-            params = dict(
-                stream_records=test_runner.records[stream.name],
-                stream_object=stream,
-                stream_name=stream.name,
+            test_params = dict(
                 attribute_name=k,
+                stream=stream,
+                stream_name=stream.name,
+                stream_records=test_runner.records[stream.name],
             )
-            if v.get("required"):
+            if v.get("required") and "is_unique" in selected_test_names:
                 test_class = AttributeTests.is_unique.value
-                manifest.append(test_class(**params))
-            if v.get("format") == "date-time":
+                test_list.append(test_class(**test_params))
+            if v.get("format") == "date-time" and "is_datetime" in selected_test_names:
                 test_class = AttributeTests.is_datetime.value
-                manifest.append(test_class(**params))
-            if not "null" in v.get("type", []):
+                test_list.append(test_class(**test_params))
+            if "null" not in v.get("type", []) and "not_null" in selected_test_names:
                 test_class = AttributeTests.not_null.value
-                manifest.append(test_class(**params))
-            if "boolean" in v.get("type", []):
+                test_list.append(test_class(**test_params))
+            if "boolean" in v.get("type", []) and "is_boolean" in selected_test_names:
                 test_class = AttributeTests.is_boolean.value
-                manifest.append(test_class(**params))
-            if "integer" in v.get("type", []):
+                test_list.append(test_class(**test_params))
+            if "integer" in v.get("type", []) and "is_integer" in selected_test_names:
                 test_class = AttributeTests.is_integer.value
-                manifest.append(test_class(**params))
-            if "object" in v.get("type", []):
+                test_list.append(test_class(**test_params))
+            if "object" in v.get("type", []) and "is_object" in selected_test_names:
                 test_class = AttributeTests.is_object.value
-                manifest.append(test_class(**params))
-    return manifest
+                test_list.append(test_class(**test_params))
+    return test_list
