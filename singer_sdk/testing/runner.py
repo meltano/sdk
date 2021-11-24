@@ -1,14 +1,13 @@
 """Utility object for running a tap and capturing sync output during testing."""
 
+import io
 import json
 import sys
-import io
-
 from collections import defaultdict
-from typing import List, Type, Optional
+from typing import List, Optional, Type
 
-from singer_sdk.tap_base import Tap
 from singer_sdk.exceptions import MaxRecordsLimitException
+from singer_sdk.tap_base import Tap
 
 
 class TapTestRunner(object):

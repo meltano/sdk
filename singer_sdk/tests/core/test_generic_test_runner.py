@@ -8,7 +8,6 @@ from singer_sdk.testing import (
     get_standard_tap_tests,
 )
 
-
 pytest_tests = get_standard_tap_pytest_parameters(SampleTapCountries, {})
 
 

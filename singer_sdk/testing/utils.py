@@ -1,13 +1,12 @@
 """Utility functions for building test sets for taps and targets."""
 
 import warnings
-
 from typing import Callable, List, Type
 
 from singer_sdk.tap_base import Tap
 from singer_sdk.target_base import Target
-from singer_sdk.testing.templates import TapTests, StreamTests, AttributeTests
 from singer_sdk.testing.runner import TapTestRunner
+from singer_sdk.testing.templates import AttributeTests, StreamTests, TapTests
 
 
 def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Callable]:

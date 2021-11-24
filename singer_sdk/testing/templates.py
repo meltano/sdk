@@ -1,10 +1,10 @@
 """Generic test classes intended to be applicable to any tap or target."""
 
 import warnings
-
 from enum import Enum
+from typing import Any, List
+
 from dateutil import parser
-from typing import List, Any
 
 from singer_sdk.tap_base import Tap
 

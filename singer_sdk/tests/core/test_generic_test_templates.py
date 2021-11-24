@@ -1,17 +1,12 @@
 """Test the generic tests from `singer_sdk.testing`."""
 
-import pytest
-
-from singer_sdk.testing import TapTestRunner, TapTests, StreamTests, AttributeTests
+from typing import Any, Dict, Iterable, List, Optional
 
 import pytest
-from typing import Optional, List, Iterable, Dict, Any
 
-from singer_sdk.streams.core import (
-    REPLICATION_FULL_TABLE,
-    Stream,
-)
+from singer_sdk.streams.core import REPLICATION_FULL_TABLE, Stream
 from singer_sdk.tap_base import Tap
+from singer_sdk.testing import AttributeTests, StreamTests, TapTestRunner, TapTests
 from singer_sdk.typing import (
     ArrayType,
     BooleanType,

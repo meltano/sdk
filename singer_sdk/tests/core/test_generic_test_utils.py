@@ -1,13 +1,13 @@
 """Test the generic tests from `singer_sdk.testing.utils`."""
 
-import pytest
-
 from pathlib import Path
+
+import pytest
 
 from singer_sdk.samples.sample_tap_countries.countries_tap import SampleTapCountries
 from singer_sdk.testing import (
-    get_standard_tap_tests,
     get_standard_tap_pytest_parameters,
+    get_standard_tap_tests,
 )
 
 PARQUET_SAMPLE_FILENAME = Path(__file__).parent / Path("./resources/testfile.parquet")
