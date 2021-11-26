@@ -688,7 +688,7 @@ class Stream(metaclass=abc.ABCMeta):
             schema_message = SchemaMessage(
                 stream_map.stream_alias,
                 stream_map.transformed_schema,
-                self.primary_keys,
+                stream_map.transformed_key_properties,
                 bookmark_keys,
             )
             singer.write_message(schema_message)
