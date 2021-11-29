@@ -101,7 +101,7 @@ def get_datelike_property_type(
                 "date",
             }:
                 return cast(str, type_dict["format"])
-    if "string" in property_schema["type"] and property_schema.get("format", None) in {
+    elif "string" in property_schema["type"] and property_schema.get("format", None) in {
         "date-time",
         "time",
         "date",
