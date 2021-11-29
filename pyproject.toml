@@ -71,6 +71,7 @@ viztracer = "^0.14.0"
 flake8-annotations = "^2.6.2"
 darglint = "^1.8.0"
 isort = "^5.9.3"
+types-requests = "^2.26.1"
 
 [tool.black]
 exclude = ".*simpleeval.*"
