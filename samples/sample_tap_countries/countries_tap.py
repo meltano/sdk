@@ -8,11 +8,11 @@ See the online explorer and query builder here:
 
 from typing import List
 
-from singer_sdk import Stream, Tap
-from singer_sdk.samples.sample_tap_countries.countries_streams import (
+from samples.sample_tap_countries.countries_streams import (
     ContinentsStream,
     CountriesStream,
 )
+from singer_sdk import Stream, Tap
 from singer_sdk.typing import PropertiesList
 
 

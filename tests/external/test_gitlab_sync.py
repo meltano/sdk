@@ -1,9 +1,9 @@
 """Test sample sync."""
 from typing import Optional
 
+from samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 from singer_sdk.helpers import _catalog
 from singer_sdk.helpers._singer import Catalog
-from singer_sdk.samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 
 COUNTER = 0
 SAMPLE_CONFIG_BAD = {"not": "correct"}

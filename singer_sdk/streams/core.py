@@ -12,6 +12,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Generator,
     Iterable,
     List,
     Mapping,
@@ -167,7 +168,7 @@ class Stream(metaclass=abc.ABCMeta):
                     key_properties=self.primary_keys,
                 )
             ]
-        return self.stream_maps
+        return self._stream_maps
 
     @property
     def is_timestamp_replication_key(self) -> bool:
@@ -681,16 +682,25 @@ class Stream(metaclass=abc.ABCMeta):
         """Write out a STATE message with the latest state."""
         singer.write_message(StateMessage(value=self.tap_state))
 
-    def _write_schema_message(self) -> None:
-        """Write out a SCHEMA message with the stream schema."""
+    def _generate_schema_messages(self) -> Generator[SchemaMessage, None, None]:
+        """Generate schema messages from stream maps.
+
+        Yields:
+            Schema message objects.
+        """
         bookmark_keys = [self.replication_key] if self.replication_key else None
         for stream_map in self.stream_maps:
             schema_message = SchemaMessage(
                 stream_map.stream_alias,
                 stream_map.transformed_schema,
-                self.primary_keys,
+                stream_map.transformed_key_properties,
                 bookmark_keys,
             )
+            yield schema_message
+
+    def _write_schema_message(self) -> None:
+        """Write out a SCHEMA message with the stream schema."""
+        for schema_message in self._generate_schema_messages():
             singer.write_message(schema_message)
 
     @property
@@ -705,11 +715,17 @@ class Stream(metaclass=abc.ABCMeta):
             self._mask = self.metadata.resolve_selection()
         return self._mask
 
-    def _write_record_message(self, record: dict) -> None:
+    def _generate_record_messages(
+        self,
+        record: dict,
+    ) -> Generator[RecordMessage, None, None]:
         """Write out a RECORD message.
 
         Args:
-            record: TODO
+            record: A single stream record.
+
+        Yields:
+            Record message objects.
         """
         pop_deselected_record_properties(record, self.schema, self.mask, self.logger)
         record = conform_record_data_types(
@@ -728,7 +744,17 @@ class Stream(metaclass=abc.ABCMeta):
                     version=None,
                     time_extracted=utc_now(),
                 )
-                singer.write_message(record_message)
+
+                yield record_message
+
+    def _write_record_message(self, record: dict) -> None:
+        """Write out a RECORD message.
+
+        Args:
+            record: A single stream record.
+        """
+        for record_message in self._generate_record_messages(record):
+            singer.write_message(record_message)
 
     @property
     def _metric_logging_function(self) -> Optional[Callable]:
