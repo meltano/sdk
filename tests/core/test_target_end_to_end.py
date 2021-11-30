@@ -6,9 +6,9 @@ from typing import Any, Dict, List, Optional
 
 from freezegun import freeze_time
 
+from samples.sample_tap_countries.countries_tap import SampleTapCountries
+from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk import typing as th
-from singer_sdk.samples.sample_tap_countries.countries_tap import SampleTapCountries
-from singer_sdk.samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk.sinks import BatchSink
 from singer_sdk.target_base import Target
 

@@ -79,6 +79,7 @@ exclude = ".*simpleeval.*"
 profile = "black"
 multi_line_output = 3 # Vertical Hanging Indent
 src_paths = "singer_sdk"
+known_first_party = ["tests", "samples"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

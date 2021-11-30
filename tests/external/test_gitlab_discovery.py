@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from singer_sdk.samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
+from samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 
 
 def test_gitlab_tap_discovery(gitlab_config: Optional[dict]):

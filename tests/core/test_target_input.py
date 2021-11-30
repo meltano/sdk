@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from singer_sdk.samples.sample_target_csv.csv_target import SampleTargetCSV
+from samples.sample_target_csv.csv_target import SampleTargetCSV
 
 SAMPLE_FILENAME = Path(__file__).parent / Path("./resources/messages.jsonl")
 EXPECTED_OUTPUT = """"id"	"name"
