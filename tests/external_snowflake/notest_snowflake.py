@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from singer_sdk.samples.sample_tap_snowflake.snowflake_tap import SampleTapSnowflake
+from samples.sample_tap_snowflake.snowflake_tap import SampleTapSnowflake
 
 CONFIG_FILE = "singer_sdk/tests/.secrets/snowflake-config.json"
 

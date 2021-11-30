@@ -301,7 +301,7 @@ class CustomStreamMap(StreamMap):
             logging.info(f"Found '{self.stream_alias}' filter rule: {filter_rule}")
 
         if stream_map and MAPPER_KEY_PROPERTIES_OPTION in stream_map:
-            self.transformed_key_properties = stream_map.pop(
+            self.transformed_key_properties: List[str] = stream_map.pop(
                 MAPPER_KEY_PROPERTIES_OPTION
             )
             logging.info(
@@ -413,7 +413,8 @@ class CustomStreamMap(StreamMap):
                 # Start with only the defined (or transformed) key properties
                 result = {}
                 for key_property in self.transformed_key_properties or []:
-                    result[key_property] = record[key_property]
+                    if key_property in record:
+                        result[key_property] = record[key_property]
 
             for prop_key, prop_def in list(stream_map.items()):
                 if prop_def is None:
