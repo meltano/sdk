@@ -173,7 +173,10 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """
         decorator: Callable = backoff.on_exception(
             backoff.expo,
-            (RetriableAPIError, requests.exceptions.ReadTimeout,),
+            (
+                RetriableAPIError,
+                requests.exceptions.ReadTimeout,
+            ),
             max_tries=5,
             factor=2,
         )(func)
