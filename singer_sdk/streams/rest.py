@@ -173,7 +173,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """
         decorator: Callable = backoff.on_exception(
             backoff.expo,
-            (RetriableAPIError,),
+            (RetriableAPIError, requests.exceptions.ReadTimeout,),
             max_tries=5,
             factor=2,
         )(func)
@@ -191,7 +191,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             TODO
         """
-        response = self.requests_session.send(prepared_request)
+        response = self.requests_session.send(prepared_request, timeout=self.timeout)
         if self._LOG_REQUEST_METRICS:
             extra_tags = {}
             if self._LOG_REQUEST_METRIC_URLS:
@@ -364,6 +364,11 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         if "user_agent" in self.config:
             result["User-Agent"] = self.config.get("user_agent")
         return result
+
+    @property
+    def timeout(self) -> int:
+        """Return the request timeout limit in seconds."""
+        pass
 
     # Records iterator
 
