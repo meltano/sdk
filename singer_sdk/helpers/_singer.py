@@ -132,7 +132,7 @@ class MetadataMapping(Dict[Breadcrumb, Union[Metadata, StreamMetadata]]):
             if schema_name:
                 root.schema_name = schema_name
 
-            for field_name in schema["properties"].keys():
+            for field_name in schema.get("properties", {}).keys():
                 if key_properties and field_name in key_properties:
                     entry = Metadata(inclusion=Metadata.InclusionType.AUTOMATIC)
                 else:
