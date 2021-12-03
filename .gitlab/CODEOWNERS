@@ -1,0 +1,19 @@
+# https://gitlab.com/help/user/project/code_owners
+
+# Ending a path in a `/` will specify the code owners for every file
+# nested in that directory, on any level
+
+# Default
+* @DouweM @aaronsteers
+
+# Docs
+/docs/ @meltano/core-team
+/CONTRIBUTING.md @meltano/core-team
+/README.md @meltano/core-team
+
+# Release Ops (see `/.bumbversion.cfg` for list of bumped files)
+/CHANGELOG.md @meltano/core-team
+/cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml @meltano/core-team
+/cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml @meltano/core-team
+/docs/conf.py @meltano/core-team
+/pyproject.toml @meltano/core-team
