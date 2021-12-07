@@ -33,10 +33,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     plugins.
     """
 
-    # Stream classes used for creating new stream objects. This class list provides
-    # a default implementation for discovery and catalog creation.
-    catalog_entry_generators: List[Type["Stream"]] = []
-
     # Constructor
 
     def __init__(
