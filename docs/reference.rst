@@ -11,6 +11,7 @@ Plugin Classes
     :template: class.rst
 
     Tap
+    SQLTap
     Target
 
 Stream Classes
