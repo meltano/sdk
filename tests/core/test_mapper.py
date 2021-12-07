@@ -3,13 +3,15 @@
 import copy
 import json
 import logging
-from typing import Dict, List
+from typing import Dict, List, Set
 
 import pytest
 
 from singer_sdk.exceptions import MapExpressionError
 from singer_sdk.helpers._singer import Catalog
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
+from singer_sdk.streams.core import Stream
+from singer_sdk.tap_base import Tap
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 
 
@@ -371,3 +373,63 @@ def _test_transform(
         f"Failed '{test_name}' record result test. "
         f"Generated output was {json.dumps(output, indent=2)}"
     )
+
+
+class MappedStream(Stream):
+    """A stream to be mapped."""
+
+    name = "mapped"
+    schema = PropertiesList(
+        Property("email", StringType),
+        Property("count", IntegerType),
+    ).to_dict()
+
+    def get_records(self, context):
+        yield {"email": "alice@example.com", "count": 21}
+        yield {"email": "bob@example.com", "count": 13}
+        yield {"email": "charlie@example.com", "count": 19}
+
+
+class MappedTap(Tap):
+    """A tap with mapped streams."""
+
+    name = "tap-mapped"
+
+    def discover_streams(self):
+        """Discover streams."""
+        return [MappedStream(self)]
+
+
+@pytest.mark.parametrize(
+    "stream_map,fields",
+    [
+        (
+            {},
+            {"email", "count"},
+        ),
+        (
+            {"email_hash": "md5(email)", "__key_properties__": ["email_hash"]},
+            {"email", "count", "email_hash"},
+        ),
+        (
+            {
+                "email_hash": "md5(email)",
+                "fixed_count": "int(count-1)",
+                "__key_properties__": ["email_hash"],
+                "__else__": None,
+            },
+            {"fixed_count", "email_hash"},
+        ),
+    ],
+    ids=["no_map", "keep_all_fields", "only_mapped_fields"],
+)
+def test_mapped_stream(stream_map: dict, fields: Set[str]):
+    tap = MappedTap(config={"stream_maps": {"mapped": stream_map}})
+    stream = tap.streams["mapped"]
+
+    schema_message = next(stream._generate_schema_messages())
+    assert schema_message.key_properties == stream_map.get("__key_properties__", [])
+
+    for record in stream.get_records(None):
+        record_message = next(stream._generate_record_messages(record))
+        assert fields == set(record_message.record)

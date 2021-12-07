@@ -37,8 +37,8 @@ build_and_test:
         poetry run tox -e py
       else
         echo "Run 'core' and 'cookiecutter' python test suites..."
-        poetry run pytest singer_sdk/tests/core
-        poetry run pytest singer_sdk/tests/cookiecutters
+        poetry run pytest tests/core
+        poetry run pytest tests/cookiecutters
       fi
 
 lint:

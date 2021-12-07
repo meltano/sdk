@@ -2,8 +2,7 @@
 
 from typing import List
 
-from singer_sdk import Stream, Tap
-from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
+from samples.sample_tap_gitlab.gitlab_rest_streams import (
     CommitsStream,
     EpicIssuesStream,
     EpicsStream,
@@ -11,6 +10,7 @@ from singer_sdk.samples.sample_tap_gitlab.gitlab_rest_streams import (
     ProjectsStream,
     ReleasesStream,
 )
+from singer_sdk import Stream, Tap
 from singer_sdk.typing import (
     ArrayType,
     DateTimeType,

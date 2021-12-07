@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.3.13"
+version = "0.3.15"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 maintainers = ["Meltano Team and Contributors"]
@@ -73,6 +73,7 @@ viztracer = "^0.14.0"
 flake8-annotations = "^2.6.2"
 darglint = "^1.8.0"
 isort = "^5.9.3"
+types-requests = "^2.26.1"
 
 [tool.black]
 exclude = ".*simpleeval.*"
@@ -81,6 +82,7 @@ exclude = ".*simpleeval.*"
 profile = "black"
 multi_line_output = 3 # Vertical Hanging Indent
 src_paths = "singer_sdk"
+known_first_party = ["tests", "samples"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

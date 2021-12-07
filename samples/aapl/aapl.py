@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from singer_sdk import Tap, Stream
+from singer_sdk import Stream, Tap
 
 PROJECT_DIR = Path(__file__).parent
 

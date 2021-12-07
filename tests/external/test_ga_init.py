@@ -2,9 +2,7 @@
 
 from typing import Optional
 
-from singer_sdk.samples.sample_tap_google_analytics.ga_tap import (
-    SampleTapGoogleAnalytics,
-)
+from samples.sample_tap_google_analytics.ga_tap import SampleTapGoogleAnalytics
 
 CONFIG_FILE = "singer_sdk/tests/external/.secrets/google-analytics-config.json"
 
