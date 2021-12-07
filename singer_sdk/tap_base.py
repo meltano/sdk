@@ -482,6 +482,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 class SQLTap(Tap):
     """A specialized Tap for extracting from SQL streams."""
 
+    # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: Type[SQLStream]
 
     @property
