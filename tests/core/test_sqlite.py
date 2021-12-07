@@ -7,9 +7,11 @@ import pytest
 
 from singer_sdk import SQLStream
 from singer_sdk.helpers._singer import MetadataMapping, StreamMetadata
-from singer_sdk.samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
+import sqlalchemy
+from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
 from singer_sdk.tap_base import SQLTap
 from singer_sdk.testing import get_standard_tap_tests
+from singer_sdk import typing as th
 
 
 @pytest.fixture
@@ -122,3 +124,12 @@ def test_sqlite_tap_standard_tests(sqlite_sampletap: SQLTap):
     )
     for test in tests:
         test()
+
+
+@pytest.mark.parametrize(
+    "sql_type,jsonschema_type", [(sqlalchemy.types.Integer(), th.IntegerType())]
+)
+def test_sqllite_type_conversions(
+    sql_type: sqlalchemy.types.TypeEngine, jsonschema_type
+):
+    """Check that type conversions work as expected."""
