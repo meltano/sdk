@@ -4,14 +4,14 @@ from pathlib import Path
 from typing import cast
 
 import pytest
-
-from singer_sdk import SQLStream
-from singer_sdk.helpers._singer import MetadataMapping, StreamMetadata
 import sqlalchemy
+
 from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
+from singer_sdk import SQLStream
+from singer_sdk import typing as th
+from singer_sdk.helpers._singer import MetadataMapping, StreamMetadata
 from singer_sdk.tap_base import SQLTap
 from singer_sdk.testing import get_standard_tap_tests
-from singer_sdk import typing as th
 
 
 @pytest.fixture
