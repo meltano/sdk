@@ -176,6 +176,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     @final
     def produce_schema(self) -> None:
+        """Write a SCHEMA message for all known streams to STDOUT."""
         for stream in self.streams.values():
             stream._write_schema_message()
 
@@ -428,6 +429,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 about: Display package metadata and settings.
                 discover: Run the tap in discovery mode.
                 test: Test connectivity by syncing a single record and exiting.
+                schema: Write the data schema to stdout and exit.
                 format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
                     variables. Accepts multiple inputs as a tuple.
