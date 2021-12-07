@@ -174,6 +174,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 pass
         return True
 
+    @final
+    def produce_schema(self) -> None:
+        for stream in self.streams.values():
+            stream._write_schema_message()
+
     # Stream detection:
 
     def run_discovery(self) -> str:
@@ -380,6 +385,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             help="Test connectivity by syncing a single record and exiting.",
         )
         @click.option(
+            "--schema",
+            is_flag=True,
+            help="Generate SCHEMA messages for all streams, but no records.",
+        )
+        @click.option(
             "--config",
             multiple=True,
             help="Configuration file location or 'ENV' to use environment variables.",
@@ -405,6 +415,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             about: bool = False,
             discover: bool = False,
             test: bool = False,
+            schema: bool = False,
             config: Tuple[str, ...] = (),
             state: str = None,
             catalog: str = None,
@@ -470,6 +481,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     tap.run_connection_test()
             elif test:
                 tap.run_connection_test()
+            elif schema:
+                tap.produce_schema()
             else:
                 tap.sync_all()
 
