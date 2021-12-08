@@ -153,20 +153,27 @@ class SQLConnector:
         raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
 
     @staticmethod
-    def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
-        """Returns a JSON Schema equivalent for the given SQL type.
+    def to_sql_type(cls, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+        """Return a JSON Schema representation of the provided type.
+
+        By default will call `typing.to_sql_type()`.
+
+        Developers may override this method to accept additional input argument types,
+        to support non-standard types, or to provide custom typing logic.
+
+        If overriding this method, developers should call the default implementation
+        from the base class for all unhandled cases.
 
         Args:
-            jsonschema_type: The JSON Schema type to convert.
+            jsonschema_type: The JSON Schema representation of the source type.
 
-        Developers may optionally add custom logic before calling the default implementation
-        inherited from the base class.
+        Raises:
+            ValueError: If the type received could not be translated to a SQL type.
 
-        Returns:
-            The SQL type.
+        Return:
+            The SQLAlchemy type representation of the data type.
         """
-        # Optionally, add custom logic before calling the super().
-        # You may delete this method if overrides are not needed.
+        # TODO: Add mapping logic
         return th.to_sql_type(jsonschema_type)
 
     @staticmethod
