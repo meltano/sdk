@@ -126,7 +126,10 @@ class SQLConnector:
 
         return cast(str, config["sqlalchemy_url"])
 
-    def to_jsonschema_type(cls, sql_type: Union[type, str, Any]) -> dict:
+    @staticmethod
+    def to_jsonschema_type(
+        sql_type: Union[type, str, sqlalchemy.types.TypeEngine]
+    ) -> dict:
         """Return a JSON Schema representation of the provided type.
 
         By default will call `typing.to_jsonschema_type()` for strings and Python types.
@@ -148,6 +151,23 @@ class SQLConnector:
             return th.to_jsonschema_type(sql_type)
 
         raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
+
+    @staticmethod
+    def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+        """Returns a JSON Schema equivalent for the given SQL type.
+
+        Args:
+            jsonschema_type: The JSON Schema type to convert.
+
+        Developers may optionally add custom logic before calling the default implementation
+        inherited from the base class.
+
+        Returns:
+            The SQL type.
+        """
+        # Optionally, add custom logic before calling the super().
+        # You may delete this method if overrides are not needed.
+        return th.to_sql_type(jsonschema_type)
 
     @staticmethod
     def get_fully_qualified_name(

@@ -21,7 +21,8 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
             f"s3_staging_dir={config['s3_staging_dir']}"
         )
 
-    def to_jsonschema_type(cls, sql_type: sqlalchemy.types.TypeEngine) -> dict:
+    @staticmethod
+    def to_jsonschema_type(sql_type: sqlalchemy.types.TypeEngine) -> dict:
         """Returns a JSON Schema equivalent for the given SQL type.
 
         Developers may optionally add custom logic before calling the default implementation
@@ -31,7 +32,8 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
         # You may delete this method if overrides are not needed.
         return super().to_jsonschema_type(sql_type)
 
-    def to_sql_type(cls, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+    @staticmethod
+    def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
         """Returns a JSON Schema equivalent for the given SQL type.
         
         Developers may optionally add custom logic before calling the default implementation
