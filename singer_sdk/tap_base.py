@@ -175,7 +175,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         return True
 
     @final
-    def produce_schema(self) -> None:
+    def write_schemas(self) -> None:
         """Write a SCHEMA message for all known streams to STDOUT."""
         for stream in self.streams.values():
             stream._write_schema_message()
@@ -484,7 +484,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             elif test:
                 tap.run_connection_test()
             elif schema:
-                tap.produce_schema()
+                tap.write_schemas()
             else:
                 tap.sync_all()
 
