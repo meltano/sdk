@@ -52,6 +52,14 @@ class SQLConnector:
     def create_sqlalchemy_connection(self) -> sqlalchemy.engine.Connection:
         """Return a new SQLAlchemy connection using the provided config.
 
+        By default this will create using the sqlalchemy `stream_results=True` option
+        described here:
+        https://docs.sqlalchemy.org/en/14/core/connections.html#using-server-side-cursors-a-k-a-stream-results
+
+        Developers may override this method if their provider does not support
+        server side cursors (`stream_results`) or in order to use different
+        configurations options when creating the connection object.
+
         Returns:
             A newly created SQLAlchemy engine object.
         """
