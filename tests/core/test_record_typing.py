@@ -8,7 +8,11 @@ import pendulum
 import pytest
 import pytz
 
-from singer_sdk.helpers._typing import conform_record_data_types, to_json_compatible
+from singer_sdk.helpers._typing import (
+    conform_record_data_types,
+    get_datelike_property_type,
+    to_json_compatible,
+)
 
 
 @pytest.mark.parametrize(
@@ -63,4 +67,35 @@ def test_conform_record_data_types(row: Dict[str, Any], schema: dict, expected_r
 def test_to_json_compatible(datetime_val, expected):
     actual = to_json_compatible(datetime_val)
 
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "schema,expected",
+    [
+        ({"type": ["null", "string"]}, None),
+        ({"type": "string", "format": "date-time"}, "date-time"),
+        ({"type": "string", "format": "date"}, "date"),
+        ({"type": "string", "format": "time"}, "time"),
+        (
+            {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+            "date-time",
+        ),
+        ({"anyOf": [{"type": "string", "maxLength": 5}]}, None),
+        (
+            {
+                "anyOf": [
+                    {
+                        "type": "array",
+                        "items": {"type": "string", "format": "date-time"},
+                    },
+                    {"type": "null"},
+                ]
+            },
+            None,
+        ),
+    ],
+)
+def test_get_datelike_property_type(schema, expected):
+    actual = get_datelike_property_type(schema)
     assert actual == expected
