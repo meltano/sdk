@@ -298,7 +298,7 @@ class Sink(metaclass=abc.ABCMeta):
             treatment: TODO
         """
         for key in record.keys():
-            datelike_type = get_datelike_property_type(key, schema["properties"][key])
+            datelike_type = get_datelike_property_type(schema["properties"][key])
             if datelike_type:
                 try:
                     date_val = record[key]
