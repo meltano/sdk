@@ -289,9 +289,15 @@ class SQLConnector:
                             required=not is_nullable,
                         )
                     )
-
                 schema = table_schema.to_dict()
-                addl_replication_methods: List[str] = []
+
+                addl_replication_methods: List[str] = [""]  # By default an empty list.
+                # Notes regarding replication methods:
+                # - 'INCREMENTAL' replication must be enabled by the user by specifying
+                #   a replication_key value.
+                # - 'LOG_BASED' replication must be enabled by the developer, according
+                #   to source-specific implementation capabilities.
+
                 key_properties = next(iter(possible_primary_keys), None)
                 replication_method = next(
                     reversed(["FULL_TABLE"] + addl_replication_methods)
