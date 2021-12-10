@@ -14,6 +14,8 @@ from singer_sdk import typing as th
         (th.BooleanType().to_dict(), sqlalchemy.types.BOOLEAN),
         (th.NumberType().to_dict(), sqlalchemy.types.DECIMAL),
         (th.ObjectType().to_dict(), sqlalchemy.types.VARCHAR),
+        (th.DateTimeType().to_dict(), sqlalchemy.types.DATETIME),
+        (th.DateType().to_dict(), sqlalchemy.types.DATE),
         # Unhandled types end up as 'varchar':
         (
             th.CustomType({"type": "array", "items": "something"}).to_dict(),
@@ -38,7 +40,8 @@ def test_convert_jsonschema_type_to_sql_type(
         (sqlalchemy.types.VARCHAR, th.StringType().to_dict()),
         (sqlalchemy.types.INTEGER, th.IntegerType().to_dict()),
         (sqlalchemy.types.BOOLEAN, th.BooleanType().to_dict()),
-        (sqlalchemy.types.DECIMAL, th.NumberType().to_dict()),
+        (sqlalchemy.types.DATETIME, th.DateTimeType().to_dict()),
+        (sqlalchemy.types.DATE, th.DateType().to_dict()),
         # Unhandled types end up as 'string':
         (sqlalchemy.types.CLOB, th.StringType().to_dict()),
     ],

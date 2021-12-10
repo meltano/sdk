@@ -44,7 +44,7 @@ import sqlalchemy
 from jsonschema import validators
 
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._typing import append_type
+from singer_sdk.helpers._typing import append_type, get_datelike_property_type
 
 
 def extend_validator_with_defaults(validator_class):  # noqa
@@ -108,6 +108,22 @@ class DateTimeType(JSONTypeHelper):
         return {
             "type": ["string"],
             "format": "date-time",
+        }
+
+
+class DateType(JSONTypeHelper):
+    """DateTime type."""
+
+    @classproperty
+    def type_dict(cls) -> dict:
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        return {
+            "type": ["string"],
+            "format": "date",
         }
 
 
@@ -310,12 +326,15 @@ class PropertiesList(ObjectType):
 
 
 def to_jsonschema_type(
-    from_type: Union[str, sqlalchemy.types.TypeEngine, Type]
+    from_type: Union[str, Type[sqlalchemy.types.TypeEngine]]
 ) -> dict:
-    """Return the JSON Schema dict that describes the sql type (str) or Python type.
+    """Return the JSON Schema dict that describes the sql type.
 
     Args:
-        from_type: The SQL type as a string, a sqlalchemy type, or a Python type.
+        from_type: The SQL type as a string or as a sqlalchemy type.
+
+    Raises:
+        ValueError: If the `from_type` value is not of type `str` or `TypeEngine`.
 
     Returns:
         A compatible JSON Schema type definition.
@@ -326,7 +345,7 @@ def to_jsonschema_type(
         #       will return the respective singer type.
         "timestamp": DateTimeType.type_dict,
         "datetime": DateTimeType.type_dict,
-        "date": DateTimeType.type_dict,
+        "date": DateType.type_dict,
         "int": IntegerType.type_dict,
         "number": NumberType.type_dict,
         "decimal": NumberType.type_dict,
@@ -338,24 +357,19 @@ def to_jsonschema_type(
         "bool": BooleanType.type_dict,
         "variant": StringType.type_dict,
     }
-
-    if isinstance(from_type, type) and issubclass(
+    if isinstance(from_type, str):
+        type_name = from_type
+    elif isinstance(from_type, type) and issubclass(
         from_type, sqlalchemy.types.TypeEngine
     ):
-        from_type = from_type.__name__
+        type_name = from_type.__name__
+    else:
+        raise ValueError("Expected `str` or a SQLAlchemy `TypeEngine` type.")
 
-    if isinstance(from_type, str):
-        for sqltype, jsonschema_type in sqltype_lookup.items():
-            if sqltype.lower() in from_type.lower():
-                return jsonschema_type
-
-        return sqltype_lookup["string"]  # safe failover to str
-
-    if from_type is int:
-        return sqltype_lookup["int"]
-
-    if from_type is float:
-        return sqltype_lookup["double"]
+    # Look for the type name within the known SQL type names:
+    for sqltype, jsonschema_type in sqltype_lookup.items():
+        if sqltype.lower() in type_name.lower():
+            return jsonschema_type
 
     return sqltype_lookup["string"]  # safe failover to str
 
@@ -395,7 +409,17 @@ def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
         The SQL type.
     """
     if _jsonschema_type_check(jsonschema_type, ("string",)):
+        datelike_type = get_datelike_property_type(jsonschema_type)
+        if datelike_type:
+            if datelike_type == "date-time":
+                return sqlalchemy.types.DATETIME
+            if datelike_type in "time":
+                return sqlalchemy.types.TIME
+            if datelike_type == "date":
+                return sqlalchemy.types.DATE
+
         return sqlalchemy.types.VARCHAR
+
     if _jsonschema_type_check(jsonschema_type, ("integer",)):
         return sqlalchemy.types.INTEGER
     if _jsonschema_type_check(jsonschema_type, ("number",)):
