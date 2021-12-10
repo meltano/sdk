@@ -41,6 +41,7 @@ Note:
 from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union, cast
 
 from jsonschema import validators
+import sqlalchemy
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._typing import append_type
@@ -350,3 +351,49 @@ def to_jsonschema_type(from_type: Union[str, Type]) -> dict:
         return sqltype_lookup["double"]
 
     return sqltype_lookup["string"]  # safe failover to str
+
+
+def _jsonschema_type_check(jsonschema_type: dict, type_check: Tuple[str]) -> bool:
+    """Return True if the jsonschema_type supports the provided type.
+
+    Args:
+        jsonschema_type: The type dict.
+        type_check: A tuple of type strings to look for.
+
+    Returns:
+        True if the schema suports the type.
+    """
+    if jsonschema_type.get("type") in type_check:
+        return True
+
+    if any((t in type_check for t in jsonschema_type.get("anyOf", ()))):
+        return True
+
+    return False
+
+
+def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+    """Convert JSON Schema type to a SQL type.
+
+    Args:
+        jsonschema_type: The JSON Schema object.
+
+    Returns:
+        The SQL type.
+    """
+    if _jsonschema_type_check(jsonschema_type, ("string",)):
+        return sqlalchemy.types.VARCHAR
+    if _jsonschema_type_check(jsonschema_type, ("integer",)):
+        return sqlalchemy.types.INTEGER
+    if _jsonschema_type_check(jsonschema_type, ("number",)):
+        return sqlalchemy.types.DECIMAL
+    if _jsonschema_type_check(jsonschema_type, ("boolean",)):
+        return sqlalchemy.types.BOOLEAN
+
+    if _jsonschema_type_check(jsonschema_type, ("object",)):
+        return sqlalchemy.types.VARCHAR
+
+    if _jsonschema_type_check(jsonschema_type, ("array",)):
+        return sqlalchemy.types.VARCHAR
+
+    return sqlalchemy.types.VARCHAR

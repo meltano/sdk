@@ -153,7 +153,7 @@ class SQLConnector:
         raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
 
     @staticmethod
-    def to_sql_type(cls, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+    def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
         """Return a JSON Schema representation of the provided type.
 
         By default will call `typing.to_sql_type()`.
@@ -167,10 +167,7 @@ class SQLConnector:
         Args:
             jsonschema_type: The JSON Schema representation of the source type.
 
-        Raises:
-            ValueError: If the type received could not be translated to a SQL type.
-
-        Return:
+        Returns:
             The SQLAlchemy type representation of the data type.
         """
         # TODO: Add mapping logic
