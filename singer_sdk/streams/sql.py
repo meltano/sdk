@@ -2,6 +2,7 @@
 
 import abc
 from typing import Any, Dict, Iterable, List, Optional, Union, cast
+from numpy import isin
 
 import singer
 import sqlalchemy
@@ -214,6 +215,26 @@ class SQLConnector:
 
         return result
 
+    @property
+    def _dialect(self) -> sqlalchemy.engine.Dialect:
+        """Return the dialect object.
+
+        Returns:
+            The dialect object.
+        """
+        return cast(sqlalchemy.engine.Dialect, self.connection.engine.dialect)
+
+    def quote(self, name: str) -> str:
+        """Quote a name if it needs quoting.
+
+        Args:
+            name: The unquoted name.
+
+        Returns:
+            str: The quoted name.
+        """
+        return cast(str, self._dialect.identifier_preparer.quote(name))
+
     def discover_catalog_entries(self) -> List[dict]:
         """Return a list of catalog entries from discovery.
 
@@ -417,25 +438,39 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
     # Get records from stream
 
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, context: Optional[dict]) -> Iterable[Dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
 
+        If the stream has a replication_key value defined, records will be sorted by the
+        incremental key. If the stream also has an available starting bookmark, the
+        records will be filtered for values greater than or equal to the bookmark value.
+
         Args:
-            partition: If provided, will read specifically from this data slice.
+            context: If partition context is provided, will read specifically from this
+                data slice.
 
         Yields:
             One dict per record.
 
         Raises:
-            NotImplementedError: If partition is passed and the stream does not
-                support partitioning.
+            NotImplementedError: If partition is passed in context and the stream does
+                not support partitioning.
         """
-        if partition:
+        if context:
             raise NotImplementedError(
                 f"Stream '{self.name}' does not support partitioning."
             )
 
-        for row in self.connector.connection.execute(
-            sqlalchemy.text(f"SELECT * FROM {self.fully_qualified_name}")
-        ):
+        query_text = sqlalchemy.text(f"SELECT * FROM {self.fully_qualified_name}")
+        if self.replication_key:
+            quoted_replication_key = self.connector.quote(self.replication_key)
+            query_text += sqlalchemy.text(f"\nORDER BY {quoted_replication_key}")
+
+            start_val = self.get_starting_replication_key_value(context)
+            if start_val:
+                query_text += sqlalchemy.text(
+                    f"\nWHERE {quoted_replication_key} >= :start_val"
+                ).bindparams(start_val=start_val)
+
+        for row in self.connector.connection.execute(query_text):
             yield dict(row)
