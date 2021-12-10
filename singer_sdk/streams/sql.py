@@ -139,7 +139,9 @@ class SQLConnector:
 
     @staticmethod
     def to_jsonschema_type(
-        sql_type: Union[str, Type[sqlalchemy.types.TypeEngine], Any]
+        sql_type: Union[
+            str, sqlalchemy.types.TypeEngine, Type[sqlalchemy.types.TypeEngine], Any
+        ]
     ) -> dict:
         """Return a JSON Schema representation of the provided type.
 
@@ -151,7 +153,7 @@ class SQLConnector:
 
         Args:
             sql_type: The string representation of the SQL type, a SQLAlchemy
-                TypeEngine, or a custom-specified object.
+                TypeEngine class or object, or a custom-specified object.
 
         Raises:
             ValueError: If the type received could not be translated to jsonschema.
@@ -159,12 +161,15 @@ class SQLConnector:
         Returns:
             The JSON Schema representation of the provided type.
         """
-        if isinstance(sql_type, (str,)):
+
+        if isinstance(sql_type, (str, sqlalchemy.types.TypeEngine)):
             return th.to_jsonschema_type(sql_type)
-        if isinstance(sql_type, type) and issubclass(
-            sql_type, sqlalchemy.types.TypeEngine
-        ):
-            return th.to_jsonschema_type(sql_type)
+
+        if isinstance(sql_type, type):
+            if issubclass(sql_type, sqlalchemy.types.TypeEngine):
+                return th.to_jsonschema_type(sql_type)
+
+            raise ValueError(f"Unexpected type received: '{sql_type.__name__}'")
 
         raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
 
@@ -305,9 +310,7 @@ class SQLConnector:
                     column_name = column_def["name"]
                     is_nullable = column_def.get("nullable", False)
                     jsonschema_type: dict = self.to_jsonschema_type(
-                        cast(
-                            sqlalchemy.types.TypeEngine, column_def["type"]
-                        ).python_type
+                        cast(sqlalchemy.types.TypeEngine, column_def["type"])
                     )
                     table_schema.append(
                         th.Property(

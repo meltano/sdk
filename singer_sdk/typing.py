@@ -326,12 +326,15 @@ class PropertiesList(ObjectType):
 
 
 def to_jsonschema_type(
-    from_type: Union[str, Type[sqlalchemy.types.TypeEngine]]
+    from_type: Union[
+        str, sqlalchemy.types.TypeEngine, Type[sqlalchemy.types.TypeEngine]
+    ]
 ) -> dict:
     """Return the JSON Schema dict that describes the sql type.
 
     Args:
-        from_type: The SQL type as a string or as a sqlalchemy type.
+        from_type: The SQL type as a string or as a TypeEngine. If a TypeEngine is
+            provided, it may be provided as a class or a specific object instance.
 
     Raises:
         ValueError: If the `from_type` value is not of type `str` or `TypeEngine`.
@@ -359,12 +362,14 @@ def to_jsonschema_type(
     }
     if isinstance(from_type, str):
         type_name = from_type
+    elif isinstance(from_type, sqlalchemy.types.TypeEngine):
+        type_name = type(from_type).__name__
     elif isinstance(from_type, type) and issubclass(
         from_type, sqlalchemy.types.TypeEngine
     ):
         type_name = from_type.__name__
     else:
-        raise ValueError("Expected `str` or a SQLAlchemy `TypeEngine` type.")
+        raise ValueError("Expected `str` or a SQLAlchemy `TypeEngine` object or type.")
 
     # Look for the type name within the known SQL type names:
     for sqltype, jsonschema_type in sqltype_lookup.items():
@@ -399,7 +404,7 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: Tuple[str]) -> boo
     return False
 
 
-def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+def to_sql_type(jsonschema_type: dict) -> Type[sqlalchemy.types.TypeEngine]:
     """Convert JSON Schema type to a SQL type.
 
     Args:
