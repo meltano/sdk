@@ -245,8 +245,8 @@ class SQLConnector:
                 possible_primary_keys: List[List[str]] = []
 
                 pk_def = inspected.get_pk_constraint(table_name, schema=schema_name)
-                if pk_def:
-                    possible_primary_keys.append(pk_def)
+                if pk_def and "constrained_columns" in pk_def:
+                    possible_primary_keys.append(pk_def["constrained_columns"])
 
                 for index_def in inspected.get_indexes(table_name, schema=schema_name):
                     if index_def.get("unique", False):
