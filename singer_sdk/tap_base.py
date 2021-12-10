@@ -159,6 +159,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             True if the test succeeded.
         """
         for stream in self.streams.values():
+            # Initialize streams' record limits before beginning the sync test.
+            stream._MAX_RECORDS_LIMIT = 1 if stream.child_streams else 0
+
+        for stream in self.streams.values():
             if stream.parent_stream_type:
                 self.logger.debug(
                     f"Child stream '{type(stream).__name__}' should be called by "
@@ -166,8 +170,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     "Skipping direct invocation."
                 )
                 continue
-
-            stream._MAX_RECORDS_LIMIT = 1 if stream.child_streams else 0
             try:
                 stream.sync()
             except MaxRecordsLimitException:
