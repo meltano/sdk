@@ -16,10 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixes
 
+### Breaks
+
+
+## 0.3.16 - (2021-12-09)
+---
+
+### Fixes
+
 - Tap SDK: Fix datelike type parsing bug with nested schemas ([#283](https://gitlab.com/meltano/sdk/-/issues/283), [!219](https://gitlab.com/meltano/sdk/-/merge_requests/219))
 - Tap SDK: Resolved bug in `--test` which caused child streams to not use record limiting ([#268](https://gitlab.com/meltano/sdk/-/issues/268), [!204](https://gitlab.com/meltano/sdk/-/merge_requests/204), [!220](https://gitlab.com/meltano/sdk/-/merge_requests/220)) -- _Thanks, **[Derek Visch](https://gitlab.com/vischous)**!_
-
-### Breaks
 
 
 ## 0.3.15 - (2021-12-03)
