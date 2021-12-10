@@ -244,7 +244,7 @@ class SQLConnector:
         """
         return cast(str, self._dialect.identifier_preparer.quote(name))
 
-    @lru_cache
+    @lru_cache()
     def _warn_no_view_detection(self) -> None:
         """Print a warning, but only the first time."""
         self.logger.warning(
