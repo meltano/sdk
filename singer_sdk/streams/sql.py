@@ -438,6 +438,24 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self._singer_catalog_entry.tap_stream_id
 
     @property
+    def primary_keys(self) -> Optional[List[str]]:
+        """Get primary keys from the catalog entry definition.
+
+        Returns:
+            A list of primary key(s) for the stream.
+        """
+        return self._singer_catalog_entry.metadata.root.table_key_properties or []
+
+    @primary_keys.setter
+    def primary_keys(self, new_value: List[str]) -> None:
+        """Set or reset the primary key(s) in the stream's catalog entry.
+
+        Args:
+            new_value: a list of one or more column names
+        """
+        self._singer_catalog_entry.metadata.root.table_key_properties = new_value
+
+    @property
     def fully_qualified_name(self) -> str:
         """Generate the fully qualified version of the table name.
 

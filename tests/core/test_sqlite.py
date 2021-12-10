@@ -46,7 +46,7 @@ def sqlite_sample_db(sqlite_connector):
     for t in range(3):
         sqlite_connector.connection.execute(f"DROP TABLE IF EXISTS t{t}")
         sqlite_connector.connection.execute(
-            f"CREATE TABLE t{t} (c1 int, c2 varchar(10))"
+            f"CREATE TABLE t{t} (c1 int PRIMARY KEY, c2 varchar(10))"
         )
         for x in range(100):
             sqlite_connector.connection.execute(
@@ -59,7 +59,7 @@ def sqlite_sampletap(sqlite_connector, sqlite_config):
     for t in range(3):
         sqlite_connector.connection.execute(f"DROP TABLE IF EXISTS t{t}")
         sqlite_connector.connection.execute(
-            f"CREATE TABLE t{t} (c1 int, c2 varchar(10))"
+            f"CREATE TABLE t{t} (c1 int PRIMARY KEY, c2 varchar(10))"
         )
         for x in range(100):
             sqlite_connector.connection.execute(
@@ -79,6 +79,7 @@ def test_sql_metadata(sqlite_sampletap: SQLTap):
     assert detected_root_md == translated_metadata.to_dict()
     md_map = MetadataMapping.from_iterable(stream.catalog_entry["metadata"])
     assert md_map[()].schema_name == "main"
+    assert md_map[()].table_key_properties == ["c1"]
 
 
 def test_sqlite_discovery(sqlite_sampletap: SQLTap):
@@ -94,9 +95,11 @@ def test_sqlite_discovery(sqlite_sampletap: SQLTap):
     assert md_map[()] is md_map.root
     assert md_map[()].schema_name == "main"
 
-    # Fails here (schema is None):
     assert stream.metadata.root.schema_name == "main"
     assert stream.fully_qualified_name == "main.t1"
+
+    assert stream.metadata.root.table_key_properties == ["c1"]
+    assert stream.primary_keys == ["c1"]
 
 
 def test_sqlite_input_catalog(sqlite_sampletap: SQLTap):
