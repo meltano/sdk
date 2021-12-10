@@ -1,6 +1,8 @@
 """Base class for SQL-type streams."""
 
 import abc
+import logging
+from functools import lru_cache
 from typing import Any, Dict, Iterable, List, Optional, Union, cast
 
 import singer
@@ -48,6 +50,15 @@ class SQLConnector:
             The settings as a dict.
         """
         return self._config
+
+    @property
+    def logger(self) -> logging.Logger:
+        """Get logger.
+
+        Returns:
+            Plugin logger.
+        """
+        return logging.getLogger("sqlconnector")
 
     def create_sqlalchemy_connection(self) -> sqlalchemy.engine.Connection:
         """Return a new SQLAlchemy connection using the provided config.
@@ -170,7 +181,6 @@ class SQLConnector:
         Returns:
             The SQLAlchemy type representation of the data type.
         """
-        # TODO: Add mapping logic
         return th.to_sql_type(jsonschema_type)
 
     @staticmethod
@@ -234,6 +244,14 @@ class SQLConnector:
         """
         return cast(str, self._dialect.identifier_preparer.quote(name))
 
+    @lru_cache
+    def _warn_no_view_detection(self) -> None:
+        """Print a warning, but only the first time."""
+        self.logger.warning(
+            "Provider does not support get_view_names(). "
+            "Streams list may be incomplete or `is_view` may be unpopulated."
+        )
+
     def discover_catalog_entries(self) -> List[dict]:
         """Return a list of catalog entries from discovery.
 
@@ -248,11 +266,7 @@ class SQLConnector:
             try:
                 view_names = inspected.get_view_names(schema=schema_name)
             except NotImplementedError:
-                # TODO: Handle `get_view_names()`` not implemented
-                # self.logger.warning(
-                #     "Provider does not support get_view_names(). "
-                #     "Streams list may be incomplete or `is_view` may be unpopulated."
-                # )
+                self._warn_no_view_detection()
                 view_names = []
             object_names = [(t, False) for t in table_names] + [
                 (v, True) for v in view_names
