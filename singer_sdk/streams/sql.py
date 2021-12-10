@@ -262,30 +262,39 @@ class SQLConnector:
         engine = self.create_sqlalchemy_engine()
         inspected = sqlalchemy.inspect(engine)
         for schema_name in inspected.get_schema_names():
+            # Get list of tables and views
             table_names = inspected.get_table_names(schema=schema_name)
             try:
                 view_names = inspected.get_view_names(schema=schema_name)
             except NotImplementedError:
+                # Some DB providers do not understand 'views'
                 self._warn_no_view_detection()
                 view_names = []
             object_names = [(t, False) for t in table_names] + [
                 (v, True) for v in view_names
             ]
-            for table_name, is_view in object_names:
-                # table_obj: sqlalchemy.Table = sqlalchemy.Table(
-                #     table_name, schema=schema_name
-                # )
-                # inspected.reflect_table(table=table_obj)
-                possible_primary_keys: List[List[str]] = []
 
+            # Iterate through each table and view
+            for table_name, is_view in object_names:
+                # Initialize unique stream name
+                unique_stream_id = self.get_fully_qualified_name(
+                    db_name=None,
+                    schema_name=schema_name,
+                    table_name=table_name,
+                    delimiter="-",
+                )
+
+                # Detect key properties
+                possible_primary_keys: List[List[str]] = []
                 pk_def = inspected.get_pk_constraint(table_name, schema=schema_name)
                 if pk_def and "constrained_columns" in pk_def:
                     possible_primary_keys.append(pk_def["constrained_columns"])
-
                 for index_def in inspected.get_indexes(table_name, schema=schema_name):
                     if index_def.get("unique", False):
                         possible_primary_keys.append(index_def["column_names"])
+                key_properties = next(iter(possible_primary_keys), None)
 
+                # Initialize columns list
                 table_schema = th.PropertiesList()
                 for column_def in inspected.get_columns(table_name, schema=schema_name):
                     column_name = column_def["name"]
@@ -304,23 +313,18 @@ class SQLConnector:
                     )
                 schema = table_schema.to_dict()
 
+                # Initialize available replication methods
                 addl_replication_methods: List[str] = [""]  # By default an empty list.
                 # Notes regarding replication methods:
                 # - 'INCREMENTAL' replication must be enabled by the user by specifying
                 #   a replication_key value.
                 # - 'LOG_BASED' replication must be enabled by the developer, according
                 #   to source-specific implementation capabilities.
-
-                key_properties = next(iter(possible_primary_keys), None)
                 replication_method = next(
                     reversed(["FULL_TABLE"] + addl_replication_methods)
                 )
-                unique_stream_id = self.get_fully_qualified_name(
-                    db_name=None,
-                    schema_name=schema_name,
-                    table_name=table_name,
-                    delimiter="-",
-                )
+
+                # Create the catalog entry object
                 catalog_entry = CatalogEntry(
                     tap_stream_id=unique_stream_id,
                     stream=unique_stream_id,
