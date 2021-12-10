@@ -2,7 +2,6 @@
 
 import abc
 from typing import Any, Dict, Iterable, List, Optional, Union, cast
-from numpy import isin
 
 import singer
 import sqlalchemy
