@@ -309,11 +309,13 @@ class PropertiesList(ObjectType):
         self.wrapped.append(property)
 
 
-def to_jsonschema_type(from_type: Union[str, Type]) -> dict:
+def to_jsonschema_type(
+    from_type: Union[str, sqlalchemy.types.TypeEngine, Type]
+) -> dict:
     """Return the JSON Schema dict that describes the sql type (str) or Python type.
 
     Args:
-        from_type: The SQL type as a string, or a Python type.
+        from_type: The SQL type as a string, a sqlalchemy type, or a Python type.
 
     Returns:
         A compatible JSON Schema type definition.
@@ -336,6 +338,11 @@ def to_jsonschema_type(from_type: Union[str, Type]) -> dict:
         "bool": BooleanType.type_dict,
         "variant": StringType.type_dict,
     }
+
+    if isinstance(from_type, type) and issubclass(
+        from_type, sqlalchemy.types.TypeEngine
+    ):
+        from_type = from_type.__name__
 
     if isinstance(from_type, str):
         for sqltype, jsonschema_type in sqltype_lookup.items():
@@ -363,8 +370,14 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: Tuple[str]) -> boo
     Returns:
         True if the schema suports the type.
     """
-    if jsonschema_type.get("type") in type_check:
-        return True
+    if "type" in jsonschema_type:
+        if isinstance(jsonschema_type["type"], (list, tuple)):
+            for t in jsonschema_type["type"]:
+                if t in type_check:
+                    return True
+        else:
+            if jsonschema_type.get("type") in type_check:
+                return True
 
     if any((t in type_check for t in jsonschema_type.get("anyOf", ()))):
         return True
