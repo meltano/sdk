@@ -3,7 +3,7 @@
 import abc
 import logging
 from functools import lru_cache
-from typing import Any, Dict, Iterable, List, Optional, Union, cast
+from typing import Any, Dict, Iterable, List, Optional, Type, Union, cast
 
 import singer
 import sqlalchemy
@@ -139,18 +139,19 @@ class SQLConnector:
 
     @staticmethod
     def to_jsonschema_type(
-        sql_type: Union[type, str, sqlalchemy.types.TypeEngine]
+        sql_type: Union[str, Type[sqlalchemy.types.TypeEngine], Any]
     ) -> dict:
         """Return a JSON Schema representation of the provided type.
 
-        By default will call `typing.to_jsonschema_type()` for strings and Python types.
+        By default will call `typing.to_jsonschema_type()` for strings and SQLAlchemy
+        types.
 
         Developers may override this method to accept additional input argument types,
         to support non-standard types, or to provide custom typing logic.
 
         Args:
-            sql_type (Union[type, str, Any]): The string representation of the SQL type,
-                or a Python class, or a custom-specified object.
+            sql_type: The string representation of the SQL type, a SQLAlchemy
+                TypeEngine, or a custom-specified object.
 
         Raises:
             ValueError: If the type received could not be translated to jsonschema.
@@ -158,7 +159,11 @@ class SQLConnector:
         Returns:
             The JSON Schema representation of the provided type.
         """
-        if isinstance(sql_type, (type, str)):
+        if isinstance(sql_type, (str,)):
+            return th.to_jsonschema_type(sql_type)
+        if isinstance(sql_type, type) and issubclass(
+            sql_type, sqlalchemy.types.TypeEngine
+        ):
             return th.to_jsonschema_type(sql_type)
 
         raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
