@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import pytest
 
@@ -51,12 +51,25 @@ def test_catalog_parsing():
 
 
 @pytest.mark.parametrize(
-    "schema,key_properties,replication_method",
+    "schema,key_properties,replication_method,valid_replication_keys",
     [
         (
             {"properties": {"id": {"type": "integer"}}, "type": "object"},
             ["id"],
             "FULL_TABLE",
+            None,
+        ),
+        (
+            {
+                "properties": {
+                    "first_name": {"type": "string"},
+                    "last_name": {"type": "string"},
+                },
+                "type": "object",
+            },
+            ["first_name", "last_name"],
+            "INCREMENTAL",
+            ["updated_at"],
         ),
         (
             {
@@ -68,10 +81,12 @@ def test_catalog_parsing():
             },
             ["first_name", "last_name"],
             "FULL_TABLE",
+            None,
         ),
         (
             {},
             [],
+            None,
             None,
         ),
     ],
@@ -79,7 +94,8 @@ def test_catalog_parsing():
 def test_standard_metadata(
     schema: dict,
     key_properties: List[str],
-    replication_method: str,
+    replication_method: Optional[str],
+    valid_replication_keys: Optional[List[str]],
 ):
     """Validate generated metadata."""
     metadata = MetadataMapping.get_standard_metadata(
@@ -87,12 +103,13 @@ def test_standard_metadata(
         schema_name="test",
         key_properties=key_properties,
         replication_method=replication_method,
+        valid_replication_keys=valid_replication_keys,
     )
 
     stream_metadata = metadata[()]
     assert stream_metadata.table_key_properties == key_properties
     assert stream_metadata.forced_replication_method == replication_method
-    assert stream_metadata.valid_replication_keys is None
+    assert stream_metadata.valid_replication_keys == valid_replication_keys
     assert stream_metadata.selected is None
 
     for pk in key_properties:
