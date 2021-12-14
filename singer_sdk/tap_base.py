@@ -487,6 +487,23 @@ class SQLTap(Tap):
     # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: Type[SQLStream]
 
+    def __init__(
+        self,
+        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        catalog: Union[PurePath, str, dict, None] = None,
+        state: Union[PurePath, str, dict, None] = None,
+        parse_env_config: bool = False,
+        validate_config: bool = True,
+    ) -> None:
+        self._catalog_dict: Optional[dict] = None
+        super().__init__(
+            config=config,
+            catalog=catalog,
+            state=state,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
+
     @property
     def catalog_dict(self) -> dict:
         """Get catalog dictionary.
@@ -494,6 +511,9 @@ class SQLTap(Tap):
         Returns:
             The tap's catalog as a dict
         """
+        if self._catalog_dict:
+            return self._catalog_dict
+
         if self.input_catalog:
             return self.input_catalog.to_dict()
 
@@ -501,7 +521,9 @@ class SQLTap(Tap):
 
         result: Dict[str, List[dict]] = {"streams": []}
         result["streams"].extend(connector.discover_catalog_entries())
-        return result
+
+        self._catalog_dict = result
+        return self._catalog_dict
 
     def discover_streams(self) -> List[Stream]:
         """Initialize all available streams and return them as a list.

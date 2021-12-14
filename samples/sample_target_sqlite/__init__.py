@@ -54,7 +54,7 @@ class SQLiteTarget(SQLTarget):
     """The Tap class for SQLite."""
 
     name = "target-sqlite-sample"
-    default_stream_class = SQLiteSink
+    default_sink_class = SQLiteSink
     config_jsonschema = th.PropertiesList(
         th.Property(
             DB_PATH_CONFIG,
