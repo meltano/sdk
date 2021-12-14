@@ -1,7 +1,9 @@
 """Base class for SQL-type streams."""
 
 import abc
-from typing import Any, Dict, Iterable, List, Optional, cast
+import logging
+from functools import lru_cache
+from typing import Any, Dict, Iterable, List, Optional, Type, Union, cast
 
 import singer
 import sqlalchemy
@@ -49,8 +51,25 @@ class SQLConnector:
         """
         return self._config
 
+    @property
+    def logger(self) -> logging.Logger:
+        """Get logger.
+
+        Returns:
+            Plugin logger.
+        """
+        return logging.getLogger("sqlconnector")
+
     def create_sqlalchemy_connection(self) -> sqlalchemy.engine.Connection:
         """Return a new SQLAlchemy connection using the provided config.
+
+        By default this will create using the sqlalchemy `stream_results=True` option
+        described here:
+        https://docs.sqlalchemy.org/en/14/core/connections.html#using-server-side-cursors-a-k-a-stream-results
+
+        Developers may override this method if their provider does not support
+        server side cursors (`stream_results`) or in order to use different
+        configurations options when creating the connection object.
 
         Returns:
             A newly created SQLAlchemy engine object.
@@ -118,17 +137,23 @@ class SQLConnector:
 
         return cast(str, config["sqlalchemy_url"])
 
-    def to_jsonschema_type(cls, sql_type: sqlalchemy.types.TypeEngine) -> dict:
+    @staticmethod
+    def to_jsonschema_type(
+        sql_type: Union[
+            str, sqlalchemy.types.TypeEngine, Type[sqlalchemy.types.TypeEngine], Any
+        ]
+    ) -> dict:
         """Return a JSON Schema representation of the provided type.
 
-        By default will call `typing.to_jsonschema_type()` for strings and Python types.
+        By default will call `typing.to_jsonschema_type()` for strings and SQLAlchemy
+        types.
 
         Developers may override this method to accept additional input argument types,
         to support non-standard types, or to provide custom typing logic.
 
         Args:
-            sql_type (Union[type, str, Any]): The string representation of the SQL type,
-                or a Python class, or a custom-specified object.
+            sql_type: The string representation of the SQL type, a SQLAlchemy
+                TypeEngine class or object, or a custom-specified object.
 
         Raises:
             ValueError: If the type received could not be translated to jsonschema.
@@ -136,31 +161,37 @@ class SQLConnector:
         Returns:
             The JSON Schema representation of the provided type.
         """
-        if isinstance(sql_type, (type, str)):
+
+        if isinstance(sql_type, (str, sqlalchemy.types.TypeEngine)):
             return th.to_jsonschema_type(sql_type)
+
+        if isinstance(sql_type, type):
+            if issubclass(sql_type, sqlalchemy.types.TypeEngine):
+                return th.to_jsonschema_type(sql_type)
+
+            raise ValueError(f"Unexpected type received: '{sql_type.__name__}'")
 
         raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
 
-    def to_sql_type(cls, jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+    @staticmethod
+    def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
         """Return a JSON Schema representation of the provided type.
 
-        By default will call `typing.to_jsonschema_type()` for strings and Python types.
+        By default will call `typing.to_sql_type()`.
 
         Developers may override this method to accept additional input argument types,
         to support non-standard types, or to provide custom typing logic.
 
+        If overriding this method, developers should call the default implementation
+        from the base class for all unhandled cases.
+
         Args:
             jsonschema_type: The JSON Schema representation of the source type.
 
-        Raises:
-            ValueError: If the type received could not be translated to a SQL type.
-
-        Return:
+        Returns:
             The SQLAlchemy type representation of the data type.
         """
-        # TODO: Add mapping logic
-
-        raise ValueError(f"Unexpected type received: '{jsonschema_type}'")
+        return th.to_sql_type(jsonschema_type)
 
     @staticmethod
     def get_fully_qualified_name(
@@ -203,6 +234,34 @@ class SQLConnector:
 
         return result
 
+    @property
+    def _dialect(self) -> sqlalchemy.engine.Dialect:
+        """Return the dialect object.
+
+        Returns:
+            The dialect object.
+        """
+        return cast(sqlalchemy.engine.Dialect, self.connection.engine.dialect)
+
+    def quote(self, name: str) -> str:
+        """Quote a name if it needs quoting.
+
+        Args:
+            name: The unquoted name.
+
+        Returns:
+            str: The quoted name.
+        """
+        return cast(str, self._dialect.identifier_preparer.quote(name))
+
+    @lru_cache()
+    def _warn_no_view_detection(self) -> None:
+        """Print a warning, but only the first time."""
+        self.logger.warning(
+            "Provider does not support get_view_names(). "
+            "Streams list may be incomplete or `is_view` may be unpopulated."
+        )
+
     def discover_catalog_entries(self) -> List[dict]:
         """Return a list of catalog entries from discovery.
 
@@ -213,42 +272,45 @@ class SQLConnector:
         engine = self.create_sqlalchemy_engine()
         inspected = sqlalchemy.inspect(engine)
         for schema_name in inspected.get_schema_names():
+            # Get list of tables and views
             table_names = inspected.get_table_names(schema=schema_name)
             try:
                 view_names = inspected.get_view_names(schema=schema_name)
             except NotImplementedError:
-                # TODO: Handle `get_view_names()`` not implemented
-                # self.logger.warning(
-                #     "Provider does not support get_view_names(). "
-                #     "Streams list may be incomplete or `is_view` may be unpopulated."
-                # )
+                # Some DB providers do not understand 'views'
+                self._warn_no_view_detection()
                 view_names = []
             object_names = [(t, False) for t in table_names] + [
                 (v, True) for v in view_names
             ]
+
+            # Iterate through each table and view
             for table_name, is_view in object_names:
-                # table_obj: sqlalchemy.Table = sqlalchemy.Table(
-                #     table_name, schema=schema_name
-                # )
-                # inspected.reflect_table(table=table_obj)
+                # Initialize unique stream name
+                unique_stream_id = self.get_fully_qualified_name(
+                    db_name=None,
+                    schema_name=schema_name,
+                    table_name=table_name,
+                    delimiter="-",
+                )
+
+                # Detect key properties
                 possible_primary_keys: List[List[str]] = []
-
                 pk_def = inspected.get_pk_constraint(table_name, schema=schema_name)
-                if pk_def:
-                    possible_primary_keys.append(pk_def)
-
+                if pk_def and "constrained_columns" in pk_def:
+                    possible_primary_keys.append(pk_def["constrained_columns"])
                 for index_def in inspected.get_indexes(table_name, schema=schema_name):
                     if index_def.get("unique", False):
                         possible_primary_keys.append(index_def["column_names"])
+                key_properties = next(iter(possible_primary_keys), None)
 
+                # Initialize columns list
                 table_schema = th.PropertiesList()
                 for column_def in inspected.get_columns(table_name, schema=schema_name):
                     column_name = column_def["name"]
                     is_nullable = column_def.get("nullable", False)
                     jsonschema_type: dict = self.to_jsonschema_type(
-                        cast(
-                            sqlalchemy.types.TypeEngine, column_def["type"]
-                        ).python_type
+                        cast(sqlalchemy.types.TypeEngine, column_def["type"])
                     )
                     table_schema.append(
                         th.Property(
@@ -257,19 +319,20 @@ class SQLConnector:
                             required=not is_nullable,
                         )
                     )
-
                 schema = table_schema.to_dict()
-                addl_replication_methods: List[str] = []
-                key_properties = next(iter(possible_primary_keys), None)
+
+                # Initialize available replication methods
+                addl_replication_methods: List[str] = [""]  # By default an empty list.
+                # Notes regarding replication methods:
+                # - 'INCREMENTAL' replication must be enabled by the user by specifying
+                #   a replication_key value.
+                # - 'LOG_BASED' replication must be enabled by the developer, according
+                #   to source-specific implementation capabilities.
                 replication_method = next(
                     reversed(["FULL_TABLE"] + addl_replication_methods)
                 )
-                unique_stream_id = self.get_fully_qualified_name(
-                    db_name=None,
-                    schema_name=schema_name,
-                    table_name=table_name,
-                    delimiter="-",
-                )
+
+                # Create the catalog entry object
                 catalog_entry = CatalogEntry(
                     tap_stream_id=unique_stream_id,
                     stream=unique_stream_id,
@@ -591,6 +654,24 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self._singer_catalog_entry.tap_stream_id
 
     @property
+    def primary_keys(self) -> Optional[List[str]]:
+        """Get primary keys from the catalog entry definition.
+
+        Returns:
+            A list of primary key(s) for the stream.
+        """
+        return self._singer_catalog_entry.metadata.root.table_key_properties or []
+
+    @primary_keys.setter
+    def primary_keys(self, new_value: List[str]) -> None:
+        """Set or reset the primary key(s) in the stream's catalog entry.
+
+        Args:
+            new_value: a list of one or more column names
+        """
+        self._singer_catalog_entry.metadata.root.table_key_properties = new_value
+
+    @property
     def fully_qualified_name(self) -> str:
         """Generate the fully qualified version of the table name.
 
@@ -614,25 +695,39 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
     # Get records from stream
 
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, context: Optional[dict]) -> Iterable[Dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
 
+        If the stream has a replication_key value defined, records will be sorted by the
+        incremental key. If the stream also has an available starting bookmark, the
+        records will be filtered for values greater than or equal to the bookmark value.
+
         Args:
-            partition: If provided, will read specifically from this data slice.
+            context: If partition context is provided, will read specifically from this
+                data slice.
 
         Yields:
             One dict per record.
 
         Raises:
-            NotImplementedError: If partition is passed and the stream does not
-                support partitioning.
+            NotImplementedError: If partition is passed in context and the stream does
+                not support partitioning.
         """
-        if partition:
+        if context:
             raise NotImplementedError(
                 f"Stream '{self.name}' does not support partitioning."
             )
 
-        for row in self.connector.connection.execute(
-            sqlalchemy.text(f"SELECT * FROM {self.fully_qualified_name}")
-        ):
+        query_text = sqlalchemy.text(f"SELECT * FROM {self.fully_qualified_name}")
+        if self.replication_key:
+            quoted_replication_key = self.connector.quote(self.replication_key)
+            query_text += sqlalchemy.text(f"\nORDER BY {quoted_replication_key}")
+
+            start_val = self.get_starting_replication_key_value(context)
+            if start_val:
+                query_text += sqlalchemy.text(
+                    f"\nWHERE {quoted_replication_key} >= :start_val"
+                ).bindparams(start_val=start_val)
+
+        for row in self.connector.connection.execute(query_text):
             yield dict(row)

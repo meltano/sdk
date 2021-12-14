@@ -12,7 +12,8 @@ license = "Apache 2.0"
 [tool.poetry.dependencies]
 python = "<3.10,>=3.6.2"
 requests = "^2.25.1"
-singer-sdk = {version = "^0.3.13", extras = [{{'"SQL"' if cookiecutter.serialization_method == "SQL" else ''}}]}
+singer-sdk = "^0.3.16"
+isort = "^5.10.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
@@ -21,7 +22,12 @@ flake8 = "^3.9.2"
 black = "^21.9b0"
 pydocstyle = "^6.1.1"
 mypy = "^0.910"
-types-requests = "^2.25.8"
+types-requests = "^2.26.1"
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3 # Vertical Hanging Indent
+src_paths = "{{cookiecutter.library_name}}"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

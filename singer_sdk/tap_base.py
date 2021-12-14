@@ -33,10 +33,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     plugins.
     """
 
-    # Stream classes used for creating new stream objects. This class list provides
-    # a default implementation for discovery and catalog creation.
-    catalog_entry_generators: List[Type["Stream"]] = []
-
     # Constructor
 
     def __init__(
@@ -163,6 +159,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             True if the test succeeded.
         """
         for stream in self.streams.values():
+            # Initialize streams' record limits before beginning the sync test.
+            stream._MAX_RECORDS_LIMIT = 1 if stream.child_streams else 0
+
+        for stream in self.streams.values():
             if stream.parent_stream_type:
                 self.logger.debug(
                     f"Child stream '{type(stream).__name__}' should be called by "
@@ -170,8 +170,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     "Skipping direct invocation."
                 )
                 continue
-
-            stream._MAX_RECORDS_LIMIT = 1 if stream.child_streams else 0
             try:
                 stream.sync()
             except MaxRecordsLimitException:
@@ -486,6 +484,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 class SQLTap(Tap):
     """A specialized Tap for extracting from SQL streams."""
 
+    # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: Type[SQLStream]
 
     @property

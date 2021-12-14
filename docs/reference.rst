@@ -11,6 +11,7 @@ Plugin Classes
     :template: class.rst
 
     Tap
+    SQLTap
     Target
 
 Stream Classes
@@ -35,6 +36,15 @@ Sink Classes
     Sink
     RecordSink
     BatchSink
+
+SQL Connector for SQL Taps and Targets
+--------------------------------------
+
+.. autosummary::
+    :toctree: _autosummary
+    :template: class.rst
+
+    SQLConnector
 
 Authenticator Classes
 ---------------------

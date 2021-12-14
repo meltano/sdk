@@ -12,15 +12,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New
 
-- Tap SDK: New method `RESTStream.validate_response` to allow developers to use custom validation of HTTP responses ([#207](https://gitlab.com/meltano/sdk/-/issues/207), [!195](https://gitlab.com/meltano/sdk/-/merge_requests/195))
-- Tap SDK: New method `RESTStream.request_decorator` to allow developers to use custom back-off parameters ([#137](https://gitlab.com/meltano/sdk/-/issues/137), [!195](https://gitlab.com/meltano/sdk/-/merge_requests/195))
-
 ### Changes
 
 ### Fixes
 
+- Resolve lint errors when ArrayType is used to wrap other types ([!223](https://gitlab.com/meltano/sdk/-/merge_requests/223)) -- _Thanks, **[David Wallace](https://gitlab.com/dwallace0723)**!_
+
 ### Breaks
 
+
+## 0.3.16 - (2021-12-09)
+---
+
+### Fixes
+
+- Tap SDK: Fix datelike type parsing bug with nested schemas ([#283](https://gitlab.com/meltano/sdk/-/issues/283), [!219](https://gitlab.com/meltano/sdk/-/merge_requests/219))
+- Tap SDK: Resolved bug in `--test` which caused child streams to not use record limiting ([#268](https://gitlab.com/meltano/sdk/-/issues/268), [!204](https://gitlab.com/meltano/sdk/-/merge_requests/204), [!220](https://gitlab.com/meltano/sdk/-/merge_requests/220)) -- _Thanks, **[Derek Visch](https://gitlab.com/vischous)**!_
+
+
+## 0.3.15 - (2021-12-03)
+---
+
+### Fixes
+
+- Tap SDK: Fixed mapped __key_properties__ not being passed to the emitted schema message ([#281](https://gitlab.com/meltano/sdk/-/issues/281), [!209](https://gitlab.com/meltano/sdk/-/merge_requests/209))
+- Tap SDK: Fixed missing schema during development causing sync to fail [#284](https://gitlab.com/meltano/sdk/-/issues/284), [!212](https://gitlab.com/meltano/sdk/-/merge_requests/212) -- _Thanks, **[Fred Reimer](https://gitlab.com/freimer)**!_
+
+
+## 0.3.14 - (2021-11-18)
+---
+
+### New
+
+- Tap SDK: New method `RESTStream.validate_response` for custom validation of HTTP responses ([#207](https://gitlab.com/meltano/sdk/-/issues/207), [!195](https://gitlab.com/meltano/sdk/-/merge_requests/195))
+- Tap SDK: New method `RESTStream.request_decorator` for custom back-off and retry parameters ([#137](https://gitlab.com/meltano/sdk/-/issues/137), [!195](https://gitlab.com/meltano/sdk/-/merge_requests/195))
+
+### Changes
+
+- Target SDK: Split sink classes into separate modules ([#264](https://gitlab.com/meltano/sdk/-/issues/264), [!201](https://gitlab.com/meltano/sdk/-/merge_requests/201))
+
+### Fixes
+
+- Target SDK: Document options for the target CLI and accept multiple config files as input ([!183](https://gitlab.com/meltano/sdk/-/merge_requests/183))
 
 ## 0.3.13 - (2021-10-28)
 ---

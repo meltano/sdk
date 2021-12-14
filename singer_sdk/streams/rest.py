@@ -4,7 +4,7 @@ import abc
 import copy
 import logging
 from datetime import datetime
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union, cast
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 import backoff
 import requests
@@ -195,7 +195,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         if self._LOG_REQUEST_METRICS:
             extra_tags = {}
             if self._LOG_REQUEST_METRIC_URLS:
-                extra_tags["url"] = cast(str, prepared_request.path_url)
+                extra_tags["url"] = prepared_request.path_url
             self._write_request_duration_log(
                 endpoint=self.path,
                 response=response,
@@ -252,16 +252,13 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             headers.update(authenticator.auth_headers or {})
             params.update(authenticator.auth_params or {})
 
-        request = cast(
-            requests.PreparedRequest,
-            self.requests_session.prepare_request(
-                requests.Request(
-                    method=http_method,
-                    url=url,
-                    params=params,
-                    headers=headers,
-                    json=request_data,
-                )
+        request = self.requests_session.prepare_request(
+            requests.Request(
+                method=http_method,
+                url=url,
+                params=params,
+                headers=headers,
+                json=request_data,
             ),
         )
         return request
