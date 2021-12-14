@@ -185,7 +185,7 @@ W = TypeVar("W", bound=JSONTypeHelper)
 class ArrayType(JSONTypeHelper, Generic[W]):
     """Array type."""
 
-    def __init__(self, wrapped_type: W) -> None:
+    def __init__(self, wrapped_type: Union[W, Type[W]]) -> None:
         """Initialize Array type with wrapped inner type.
 
         Args:
