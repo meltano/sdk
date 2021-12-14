@@ -1,7 +1,5 @@
 """Test tap-to-target sync."""
 
-import io
-from contextlib import redirect_stdout
 from typing import Any, Dict, List, Optional
 
 from freezegun import freeze_time

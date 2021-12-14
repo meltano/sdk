@@ -4,11 +4,9 @@ from pathlib import Path
 from typing import cast
 
 import pytest
-import sqlalchemy
 
 from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
 from singer_sdk import SQLStream
-from singer_sdk import typing as th
 from singer_sdk.helpers._singer import MetadataMapping, StreamMetadata
 from singer_sdk.sinks.sql import SQLSink
 from singer_sdk.tap_base import SQLTap
