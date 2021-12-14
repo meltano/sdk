@@ -2,7 +2,6 @@
 
 import io
 from contextlib import redirect_stderr, redirect_stdout
-
 from typing import Callable, List, Optional, Tuple, Type
 
 from singer_sdk.tap_base import Tap

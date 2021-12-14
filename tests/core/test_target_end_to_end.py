@@ -9,11 +9,7 @@ from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk import typing as th
 from singer_sdk.sinks import BatchSink
 from singer_sdk.target_base import Target
-from singer_sdk.testing import (
-    tap_sync_test,
-    target_sync_test,
-    tap_to_target_sync_test,
-)
+from singer_sdk.testing import tap_sync_test, tap_to_target_sync_test, target_sync_test
 
 SAMPLE_FILENAME = "/tmp/testfile.countries"
 SAMPLE_TAP_CONFIG: Dict[str, Any] = {}

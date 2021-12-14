@@ -11,7 +11,7 @@ from singer_sdk.streams import (
     Stream,
 )
 from singer_sdk.tap_base import SQLTap, Tap
-from singer_sdk.target_base import Target, SQLTarget
+from singer_sdk.target_base import SQLTarget, Target
 
 __all__ = [
     "BatchSink",
