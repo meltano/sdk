@@ -129,4 +129,7 @@ def tap_to_target_sync_test(
     tap_stdout, tap_stderr = tap_sync_test(tap)
     target_stdout, target_stderr = target_sync_test(target, tap_stdout, finalize=True)
 
+    # Reset the tap's stdout buffer before returning
+    tap_stdout.seek(0)
+
     return tap_stdout, tap_stderr, target_stdout, target_stderr
