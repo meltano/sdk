@@ -13,7 +13,7 @@ from singer_sdk.helpers._singer import MetadataMapping, StreamMetadata
 from singer_sdk.sinks.sql import SQLSink
 from singer_sdk.tap_base import SQLTap
 from singer_sdk.target_base import SQLTarget
-from singer_sdk.testing import get_standard_tap_tests
+from singer_sdk.testing import get_standard_tap_tests, tap_to_target_sync_test
 
 
 @pytest.fixture
@@ -57,7 +57,7 @@ def sqlite_sample_db(sqlite_connector):
 
 
 @pytest.fixture
-def sqlite_sampletap(sqlite_connector, sqlite_config):
+def sqlite_sample_tap(sqlite_connector, sqlite_config):
     for t in range(3):
         sqlite_connector.connection.execute(f"DROP TABLE IF EXISTS t{t}")
         sqlite_connector.connection.execute(
@@ -86,8 +86,8 @@ def sqlite_sample_target(sqlite_connector):
     return SQLiteTarget(config={"sqlalchemy_url": sqlite_connector.sqlalchemy_url})
 
 
-def test_sql_metadata(sqlite_sampletap: SQLTap):
-    stream = cast(SQLStream, sqlite_sampletap.streams["main-t1"])
+def test_sql_metadata(sqlite_sample_tap: SQLTap):
+    stream = cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
     detected_metadata = stream.catalog_entry["metadata"]
     detected_root_md = [md for md in detected_metadata if md["breadcrumb"] == []][0]
     detected_root_md = detected_root_md["metadata"]
@@ -99,10 +99,10 @@ def test_sql_metadata(sqlite_sampletap: SQLTap):
     assert md_map[()].table_key_properties == ["c1"]
 
 
-def test_sqlite_discovery(sqlite_sampletap: SQLTap):
-    sqlite_sampletap.run_discovery()
-    sqlite_sampletap.sync_all()
-    stream = cast(SQLStream, sqlite_sampletap.streams["main-t1"])
+def test_sqlite_discovery(sqlite_sample_tap: SQLTap):
+    sqlite_sample_tap.run_discovery()
+    sqlite_sample_tap.sync_all()
+    stream = cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
     schema = stream.schema
     assert len(schema["properties"]) == 2
     assert stream.name == stream.tap_stream_id == "main-t1"
@@ -119,10 +119,10 @@ def test_sqlite_discovery(sqlite_sampletap: SQLTap):
     assert stream.primary_keys == ["c1"]
 
 
-def test_sqlite_input_catalog(sqlite_sampletap: SQLTap):
-    sqlite_sampletap.run_discovery()
-    sqlite_sampletap.sync_all()
-    stream = cast(SQLStream, sqlite_sampletap.streams["main-t1"])
+def test_sqlite_input_catalog(sqlite_sample_tap: SQLTap):
+    sqlite_sample_tap.run_discovery()
+    sqlite_sample_tap.sync_all()
+    stream = cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
     schema = stream.schema
     assert len(schema["properties"]) == 2
     assert stream.name == stream.tap_stream_id == "main-t1"
@@ -137,14 +137,14 @@ def test_sqlite_input_catalog(sqlite_sampletap: SQLTap):
     assert stream.fully_qualified_name == "main.t1"
 
 
-def test_sqlite_tap_standard_tests(sqlite_sampletap: SQLTap):
+def test_sqlite_tap_standard_tests(sqlite_sample_tap: SQLTap):
     """Run standard tap tests against Countries tap."""
     tests = get_standard_tap_tests(
-        type(sqlite_sampletap), dict(sqlite_sampletap.config)
+        type(sqlite_sample_tap), dict(sqlite_sample_tap.config)
     )
     for test in tests:
         test()
 
 
-def test_sqlite_target(sqlite_sample_target: SQLTarget):
-    pass
+def test_sqlite_target(sqlite_sample_tap: SQLTap, sqlite_sample_target: SQLTarget):
+    tap_to_target_sync_test(sqlite_sample_tap, sqlite_sample_target)
