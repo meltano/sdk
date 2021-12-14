@@ -23,6 +23,8 @@ class SQLiteConnector(SQLConnector):
     def create_sqlalchemy_connection(self) -> sqlalchemy.engine.Connection:
         """Return a new SQLAlchemy connection using the provided config.
 
+        This override simply provides a more helpful error message on failure.
+
         Returns:
             A newly created SQLAlchemy engine object.
         """
