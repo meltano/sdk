@@ -495,6 +495,20 @@ class SQLTap(Tap):
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
+        """Initialize the SQL tap.
+
+        The SQLTap initializer additionally creates a cache variable for _catalog_dict.
+
+        Args:
+            config: Tap configuration. Can be a dictionary, a single path to a
+                configuration file, or a list of paths to multiple configuration
+                files.
+            catalog: Tap catalog. Can be a dictionary or a path to the catalog file.
+            state: Tap state. Can be dictionary or a path to the state file.
+            parse_env_config: Whether to look for configuration values in environment
+                variables.
+            validate_config: True to require validation of config settings.
+        """
         self._catalog_dict: Optional[dict] = None
         super().__init__(
             config=config,
