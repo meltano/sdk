@@ -32,7 +32,7 @@ class SQLiteConnector(SQLConnector):
             return super().create_sqlalchemy_connection()
         except Exception as ex:
             raise RuntimeError(
-                f"Error connecting to DB at '{self.config[DB_PATH_CONFIG]}'"
+                f"Error connecting to DB at '{self.config[DB_PATH_CONFIG]}': {ex}"
             ) from ex
 
 
