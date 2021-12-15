@@ -102,7 +102,10 @@ platformdirs = ">=2"
 regex = ">=2020.1.8"
 tomli = ">=0.2.6,<2.0.0"
 typed-ast = {version = ">=1.4.2", markers = "python_version < \"3.8\" and implementation_name == \"cpython\""}
-typing-extensions = ">=3.10.0.0"
+typing-extensions = [
+    {version = ">=3.10.0.0", markers = "python_version < \"3.10\""},
+    {version = "!=3.10.0.1", markers = "python_version >= \"3.10\""},
+]
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
@@ -1205,8 +1208,8 @@ docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser"]
 
 [metadata]
 lock-version = "1.1"
-python-versions = "<3.10,>=3.6.2"
-content-hash = "ff01b5820201135732638cef136c90e291db69bfb3e6006b4995667991a28455"
+python-versions = "<3.11,>=3.6.2"
+content-hash = "758473f7ebc1dc5a529e941d0b97c8ba8e4aed7297177c47a4c530607381787f"
 
 [metadata.files]
 alabaster = [
