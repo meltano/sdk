@@ -62,24 +62,33 @@ class SQLSink(BatchSink):
 
     @property
     def table_name(self) -> str:
-        """Returns the table name, with no schema or database part."""
-        pass
+        """Returns the table name, with no schema or database part.
+
+        Returns:
+            The target table name.
+        """
+        parts = self.stream_name.split("-")
+
+        if len(parts) == 1:
+            return self.stream_name
+        else:
+            return parts[-1]
 
     @property
     def schema_name(self) -> Optional[str]:
         """Returns the schema name or `None` if using names with no schema part.
 
-        Return:
-            The schema name.
+        Returns:
+            The target schema name.
         """
-        pass
+        return None  # Assumes single-schema target context.
 
     @property
     def database_name(self) -> Optional[str]:
         """Returns the DB name or `None` if using names with no database part.
 
         Returns:
-            The database name.
+            The target database name.
         """
         return None  # Assumes single-DB target context.
 
@@ -101,7 +110,9 @@ class SQLSink(BatchSink):
             as_temp_table=False,
         )
         self.bulk_insert_records(
-            full_table_name=self.full_table_name, records=context["records"]
+            full_table_name=self.full_table_name,
+            schema=self.schema,
+            records=context["records"],
         )
 
     @property
@@ -149,18 +160,35 @@ class SQLSink(BatchSink):
         self.bulk_insert_records(full_table_name=full_table_name, records=records)
 
     def bulk_insert_records(
-        self, full_table_name: str, records: Iterable[Dict[str, Any]]
+        self,
+        full_table_name: str,
+        schema: dict,
+        records: Iterable[Dict[str, Any]],
     ) -> Optional[int]:
         """Bulk insert records to an existing destination table.
 
         Args:
             full_table_name: the target table name.
+            schema: the JSON schema for the new table, to be used when inferring column
+                names.
             records: the input records.
 
-        Return:
+        Returns:
             True if table exists, False if not, None if unsure or undetectable.
         """
-        pass
+        property_names = list(schema["properties"].keys())
+        insert_sql = sqlalchemy.text(
+            f"INSERT INTO {full_table_name} VALUES "
+            f"({', '.join([':' + n for n in property_names])})"
+        )
+        self.connector.connection.execute(
+            insert_sql,
+            records,
+        )
+        if isinstance(records, list):
+            return len(records)  # If list, we can quickly return record count.
+
+        return None  # Unknown record count.
 
     def merge_upsert_from_table(
         self, target_table_name: str, from_table_name: str, join_keys: List[str]
