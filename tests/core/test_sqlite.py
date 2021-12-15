@@ -20,7 +20,6 @@ from singer_sdk.testing import (
     tap_to_target_sync_test,
 )
 
-
 # Sample DB Setup and Config
 
 

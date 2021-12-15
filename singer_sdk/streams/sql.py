@@ -419,7 +419,8 @@ class SQLConnector:
             as_temp_table: True to create a temp table.
 
         Raises:
-            NotImplementedError: if temp tables are unsupported and as_temp_table=True
+            NotImplementedError: if temp tables are unsupported and as_temp_table=True.
+            RuntimeError: if a variant schema is passed with no properties defined.
         """
         if as_temp_table:
             raise NotImplementedError("Temporary tables are not supported.")

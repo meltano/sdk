@@ -4,9 +4,9 @@ import io
 from contextlib import redirect_stderr, redirect_stdout
 from typing import Callable, List, Optional, Tuple, Type
 
+from singer_sdk.helpers import _singer
 from singer_sdk.tap_base import Tap
 from singer_sdk.target_base import Target
-from singer_sdk.helpers import _singer
 
 
 def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Callable]:
@@ -76,16 +76,18 @@ def tap_sync_test(tap: Tap) -> Tuple[io.StringIO, io.StringIO]:
     return stdout_buf, stderr_buf
 
 
-def _get_tap_catalog(tap_class: Type[Tap], config, select_all: bool = False) -> dict:
+def _get_tap_catalog(
+    tap_class: Type[Tap], config: dict, select_all: bool = False
+) -> dict:
     """Return a catalog dict by running discovery.
 
     Args:
-        tap_class (Type[Tap]): [description]
-        config ([type]): [description]
-        select_all (bool, optional): [description]. Defaults to True.
+        tap_class: the tap class to create.
+        config: the config dict.
+        select_all: True to automatically select all streams in the catalog.
 
     Returns:
-        dict: [description]
+        Catalog dict created by discovery.
     """
     # Initialize with basic config
     tap: Tap = tap_class(config=config, parse_env_config=True)
