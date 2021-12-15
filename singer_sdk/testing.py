@@ -6,6 +6,7 @@ from typing import Callable, List, Optional, Tuple, Type
 
 from singer_sdk.tap_base import Tap
 from singer_sdk.target_base import Target
+from singer_sdk.helpers import _singer
 
 
 def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Callable]:
@@ -28,13 +29,8 @@ def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Ca
         tap1.print_about(format="json")
 
     def _test_discovery() -> None:
-        # Initialize with basic config
-        tap1: Tap = tap_class(config=config, parse_env_config=True)
-        # Test discovery
-        tap1.run_discovery()
-        catalog1 = tap1.catalog_dict
+        catalog1 = _get_tap_catalog(tap_class, config)
         # Reset and re-initialize with an input catalog
-        tap1 = None  # type: ignore
         tap2: Tap = tap_class(config=config, parse_env_config=True, catalog=catalog1)
         assert tap2
 
@@ -78,6 +74,44 @@ def tap_sync_test(tap: Tap) -> Tuple[io.StringIO, io.StringIO]:
     stdout_buf.seek(0)
     stderr_buf.seek(0)
     return stdout_buf, stderr_buf
+
+
+def _get_tap_catalog(tap_class: Type[Tap], config, select_all: bool = False) -> dict:
+    """Return a catalog dict by running discovery.
+
+    Args:
+        tap_class (Type[Tap]): [description]
+        config ([type]): [description]
+        select_all (bool, optional): [description]. Defaults to True.
+
+    Returns:
+        dict: [description]
+    """
+    # Initialize with basic config
+    tap: Tap = tap_class(config=config, parse_env_config=True)
+    # Test discovery
+    tap.run_discovery()
+    catalog_dict = tap.catalog_dict
+    if select_all:
+        return _select_all(catalog_dict)
+
+    return catalog_dict
+
+
+def _select_all(catalog_dict: dict) -> dict:
+    """Return the catalog dict with all streams selected.
+
+    Args:
+        catalog_dict (dict): [description]
+
+    Returns:
+        dict: [description]
+    """
+    catalog = _singer.Catalog.from_dict(catalog_dict)
+    for catalog_entry in catalog.streams:
+        catalog_entry.metadata.root.selected = True
+
+    return catalog.to_dict()
 
 
 def target_sync_test(
