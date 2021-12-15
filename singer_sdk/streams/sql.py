@@ -89,7 +89,7 @@ class SQLConnector:
         Returns:
             A newly created SQLAlchemy engine object.
         """
-        return sqlalchemy.create_engine(self.sqlalchemy_url)
+        return sqlalchemy.create_engine(self.sqlalchemy_url, echo=True)
 
     @property
     def connection(self) -> sqlalchemy.engine.Connection:
@@ -208,7 +208,8 @@ class SQLConnector:
             delimiter: Generally: '.' for SQL names and '-' for Singer names.
 
         Raises:
-            ValueError: If neither schema_name or db_name are provided.
+            ValueError: If table_name is not provided or if neither schema_name or
+                db_name are provided.
 
         Returns:
             The fully qualified name as a string.
@@ -219,14 +220,16 @@ class SQLConnector:
             result = delimiter.join([db_name, table_name])
         elif schema_name:
             result = delimiter.join([schema_name, table_name])
+        elif table_name:
+            result = table_name
         else:
             raise ValueError(
-                "Schema name or database name was expected for stream: "
+                "Could not generate fully qualified name for stream: "
                 + ":".join(
                     [
                         db_name or "(unknown-db)",
                         schema_name or "(unknown-schema)",
-                        table_name,
+                        table_name or "(unknown-table-name)",
                     ]
                 )
             )
@@ -241,6 +244,15 @@ class SQLConnector:
             The dialect object.
         """
         return cast(sqlalchemy.engine.Dialect, self.connection.engine.dialect)
+
+    @property
+    def _engine(self) -> sqlalchemy.engine.Engine:
+        """Return the dialect object.
+
+        Returns:
+            The dialect object.
+        """
+        return cast(sqlalchemy.engine.Engine, self.connection.engine)
 
     def quote(self, name: str) -> str:
         """Quote a name if it needs quoting.
@@ -365,7 +377,13 @@ class SQLConnector:
         Returns:
             True if table exists, False if not, None if unsure or undetectable.
         """
-        return None
+        return (
+            cast(
+                Optional[bool],
+                self._engine.has_table(full_table_name),
+            )
+            or None
+        )
 
     def column_exists(
         self,
@@ -399,8 +417,36 @@ class SQLConnector:
             primary_keys: list of key properties.
             partition_keys: list of partition keys.
             as_temp_table: True to create a temp table.
+
+        Raises:
+            NotImplementedError: if temp tables are unsupported and as_temp_table=True
         """
-        pass
+        if as_temp_table:
+            raise NotImplementedError("Temporary tables are not supported.")
+
+        _ = partition_keys  # Not supported in generic implementation.
+
+        meta = sqlalchemy.MetaData()
+        columns: List[sqlalchemy.Column] = []
+        primary_keys = primary_keys or []
+        try:
+            properties: dict = schema["properties"]
+        except KeyError:
+            raise RuntimeError(
+                f"Schema for '{full_table_name}' does not define properties: {schema}"
+            )
+        for property_name, property_jsonschema in properties.items():
+            is_primary_key = property_name in primary_keys
+            columns.append(
+                sqlalchemy.Column(
+                    property_name,
+                    self.to_sql_type(property_jsonschema),
+                    primary_key=is_primary_key,
+                )
+            )
+
+        _ = sqlalchemy.Table(full_table_name, meta, *columns)
+        meta.create_all(self._engine)
 
     def _create_empty_column(
         self,
