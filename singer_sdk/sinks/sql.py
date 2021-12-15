@@ -157,7 +157,9 @@ class SQLSink(BatchSink):
             schema=schema,
             as_temp_table=as_temp_table,
         )
-        self.bulk_insert_records(full_table_name=full_table_name, records=records)
+        self.bulk_insert_records(
+            full_table_name=full_table_name, schema=schema, records=records
+        )
 
     def bulk_insert_records(
         self,
@@ -203,8 +205,12 @@ class SQLSink(BatchSink):
         Return:
             The number of records copied, if detectable, or `None` if the API does not
             report number of records affected/inserted.
+
+        Raises:
+            NotImplementedError: if the merge upsert capability does not exist or is
+                undefined.
         """
-        pass
+        raise NotImplementedError()
 
     def activate_table_version(
         self,
@@ -224,6 +230,8 @@ class SQLSink(BatchSink):
             )
             return
 
+        deleted_at = now()
+
         if not self.connector.column_exists(
             full_table_name=full_table_name, column_name=self.soft_delete_column_name
         ):
@@ -233,6 +241,6 @@ class SQLSink(BatchSink):
                 sql_type=sqlalchemy.types.DateTime,
             )
         self.connection.execute(
-            f"UPDATE {self.full_table_name} "
-            f"SET {self.soft_delete_column_name} = '{now().isoformat()}'"
+            f"UPDATE {self.full_table_name} SET {self.soft_delete_column_name} = ?",
+            deleted_at,
         )
