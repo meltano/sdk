@@ -223,14 +223,14 @@ class SQLSink(BatchSink):
             full_table_name: The target table name.
             table_version: The version number to activate.
         """
+        deleted_at = now()
+
         if self.config.get("hard_delete", True):
             self.connection.execute(
                 f"DELETE FROM {self.full_table_name} "
                 f"WHERE {self.version_column_name} <= {table_version}"
             )
             return
-
-        deleted_at = now()
 
         if not self.connector.column_exists(
             full_table_name=full_table_name, column_name=self.soft_delete_column_name
