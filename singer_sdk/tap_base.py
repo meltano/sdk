@@ -2,6 +2,7 @@
 
 import abc
 import json
+from enum import Enum
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
@@ -24,6 +25,14 @@ from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams.core import Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
+
+
+class CliTestOptionValue(Enum):
+    """Values for CLI option --test."""
+
+    All = "all"
+    Schema = "schema"
+    Disabled = False
 
 
 class Tap(PluginBase, metaclass=abc.ABCMeta):
@@ -382,13 +391,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         )
         @click.option(
             "--test",
-            is_flag=True,
+            is_flag=False,
+            flag_value=CliTestOptionValue.All.value,
+            default=CliTestOptionValue.Disabled,
             help="Test connectivity by syncing a single record and exiting.",
-        )
-        @click.option(
-            "--schema",
-            is_flag=True,
-            help="Generate SCHEMA messages for all streams, but no records.",
         )
         @click.option(
             "--config",
@@ -415,8 +421,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             version: bool = False,
             about: bool = False,
             discover: bool = False,
-            test: bool = False,
-            schema: bool = False,
+            test: CliTestOptionValue = CliTestOptionValue.Disabled,
             config: Tuple[str, ...] = (),
             state: str = None,
             catalog: str = None,
@@ -429,7 +434,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 about: Display package metadata and settings.
                 discover: Run the tap in discovery mode.
                 test: Test connectivity by syncing a single record and exiting.
-                schema: Write the data schema to stdout and exit.
                 format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
                     variables. Accepts multiple inputs as a tuple.
@@ -479,11 +483,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 tap.print_about(format)
             elif discover:
                 tap.run_discovery()
-                if test:
+                if test == CliTestOptionValue.All.value:
                     tap.run_connection_test()
-            elif test:
+            elif test == CliTestOptionValue.All.value:
                 tap.run_connection_test()
-            elif schema:
+            elif test == CliTestOptionValue.Schema.value:
                 tap.write_schemas()
             else:
                 tap.sync_all()
