@@ -394,3 +394,18 @@ class Sink(metaclass=abc.ABCMeta):
                 self._batch_records_read - self._batch_dupe_records_merged
             )
         self._batch_records_read = 0
+
+    def activate_version(self, new_version: int) -> None:
+        """Bump the active version of the target table.
+
+        This method should be overridden by developers if a custom implementation is
+        expected.
+
+        Args:
+            new_version: The version number to activate.
+        """
+        _ = new_version
+        self.logger.warning(
+            "ACTIVATE_VERSION message received but not implemented by this target. "
+            "Ignoring."
+        )

@@ -212,28 +212,24 @@ class SQLSink(BatchSink):
         """
         raise NotImplementedError()
 
-    def activate_table_version(
-        self,
-        full_table_name: str,
-        table_version: int,
-    ) -> None:
+    def activate_version(self, new_version: int) -> None:
         """Bump the active version of the target table.
 
         Args:
-            full_table_name: The target table name.
-            table_version: The version number to activate.
+            new_version: The version number to activate.
         """
         deleted_at = now()
 
         if self.config.get("hard_delete", True):
             self.connection.execute(
                 f"DELETE FROM {self.full_table_name} "
-                f"WHERE {self.version_column_name} <= {table_version}"
+                f"WHERE {self.version_column_name} <= {new_version}"
             )
             return
 
         if not self.connector.column_exists(
-            full_table_name=full_table_name, column_name=self.soft_delete_column_name
+            full_table_name=self.full_table_name,
+            column_name=self.soft_delete_column_name,
         ):
             self.connector.prepare_column(
                 self.full_table_name,
@@ -241,8 +237,12 @@ class SQLSink(BatchSink):
                 sql_type=sqlalchemy.types.DateTime,
             )
         self.connection.execute(
-            f"UPDATE {self.full_table_name} SET {self.soft_delete_column_name} = ?",
+            f"UPDATE {self.full_table_name}\n"
+            f"SET {self.soft_delete_column_name} = ? \n"
+            f"WHERE {self.version_column_name} < ? \n"
+            f"  AND {self.soft_delete_column_name} IS NULL\n",
             deleted_at,
+            new_version,
         )
 
 

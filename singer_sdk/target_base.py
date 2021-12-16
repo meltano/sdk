@@ -429,10 +429,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         Args:
             message_dict: TODO
         """
-        self.logger.warning(
-            "ACTIVATE_VERSION message received but not supported. Ignoring."
-            "For more information: https://gitlab.com/meltano/sdk/-/issues/18"
-        )
+        stream_name = message_dict["stream"]
+        sink = self.get_sink(stream_name)
+        sink.activate_version(message_dict["version"])
 
     # Sink drain methods
 
