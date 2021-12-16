@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New
 
+- Tap SDK: Add configurable timeout for HTTP requests ([#287](https://gitlab.com/meltano/sdk/-/issues/287), [!217](https://gitlab.com/meltano/sdk/-/merge_requests/217), [!225](https://gitlab.com/meltano/sdk/-/merge_requests/225)) -- _Thanks, **[Josh Lloyd](https://gitlab.com/jlloyd3)**!_
+
 ### Changes
 
 ### Fixes
