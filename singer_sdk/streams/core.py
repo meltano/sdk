@@ -27,7 +27,7 @@ from typing import (
 import pendulum
 import requests
 import singer
-from singer import RecordMessage, SchemaMessage, StateMessage
+from singer import RecordMessage, SchemaMessage, StateMessage, ActivateVersionMessage
 from singer.schema import Schema
 
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
@@ -97,6 +97,7 @@ class Stream(metaclass=abc.ABCMeta):
         if not self.name:
             raise ValueError("Missing argument or class variable 'name'.")
 
+        self._stream_table_version: Optional[int] = None
         self.logger: logging.Logger = tap.logger
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
@@ -703,6 +704,12 @@ class Stream(metaclass=abc.ABCMeta):
         for schema_message in self._generate_schema_messages():
             singer.write_message(schema_message)
 
+    def _write_activate_version_message(self) -> None:
+        """Write out a STATE message with the latest state."""
+        singer.write_message(
+            ActivateVersionMessage(stream=self.name, version=self.stream_table_version)
+        )
+
     @property
     def mask(self) -> SelectionMask:
         """Get a boolean mask for stream and property selection.
@@ -714,6 +721,25 @@ class Stream(metaclass=abc.ABCMeta):
         if self._mask is None:
             self._mask = self.metadata.resolve_selection()
         return self._mask
+
+    def stream_table_version(self) -> Optional[int]:
+        """Provide the table version for an ACTIVATE_VERSION message.
+
+        This by default is an integer representing the starting timestamp of the sync
+        operation, used by downstream targets to deprecate or delete old records when
+        syncing with FULL_TABLE replication.
+
+        Returns:
+            The table version, generally an epoch version of the stream start time.
+        """
+        if self._stream_table_version:
+            return self._stream_table_version
+
+        if self.replication_method == REPLICATION_FULL_TABLE:
+            # Should remain null except when using FULL_TABLE replication
+            self._stream_table_version = pendulum.now().int_timestamp
+
+        return self._stream_table_version
 
     def _generate_record_messages(
         self,
@@ -741,7 +767,7 @@ class Stream(metaclass=abc.ABCMeta):
                 record_message = RecordMessage(
                     stream=stream_map.stream_alias,
                     record=mapped_record,
-                    version=None,
+                    version=self.stream_table_version,
                     time_extracted=utc_now(),
                 )
 
@@ -982,6 +1008,9 @@ class Stream(metaclass=abc.ABCMeta):
         self._write_record_count_log(record_count=record_count, context=context)
         # Reset interim bookmarks before emitting final STATE message:
         self._write_state_message()
+
+        if self.replication_method == REPLICATION_FULL_TABLE:
+            self._write_activate_version_message()
 
     # Public methods ("final", not recommended to be overridden)
 
