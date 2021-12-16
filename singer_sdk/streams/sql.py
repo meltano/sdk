@@ -368,7 +368,7 @@ class SQLConnector:
 
         return result
 
-    def table_exists(self, full_table_name: Optional[str] = None) -> Optional[bool]:
+    def table_exists(self, full_table_name: str) -> bool:
         """Determine if the target table already exists.
 
         Args:
@@ -377,19 +377,12 @@ class SQLConnector:
         Returns:
             True if table exists, False if not, None if unsure or undetectable.
         """
-        return (
-            cast(
-                Optional[bool],
-                self._engine.has_table(full_table_name),
-            )
-            or None
+        return cast(
+            bool,
+            self._engine.has_table(full_table_name),
         )
 
-    def column_exists(
-        self,
-        full_table_name: Optional[str] = None,
-        column_name: Optional[str] = None,
-    ) -> Optional[bool]:
+    def column_exists(self, full_table_name: str, column_name: str) -> bool:
         """Determine if the target table already exists.
 
         Args:
@@ -398,8 +391,14 @@ class SQLConnector:
 
         Returns:
             True if table exists, False if not, None if unsure or undetectable.
+
+        Raises:
+            NotImplementedError: if column detection is not supported.
         """
-        return None
+        raise NotImplementedError(
+            f"No operation is defined to detect column '{column_name}' "
+            f"on table '{full_table_name}'."
+        )
 
     def create_empty_table(
         self,
@@ -461,7 +460,14 @@ class SQLConnector:
             full_table_name: The target table name.
             column_name: The name of the new column.
             sql_type: SQLAlchemy type engine to be used in creating the new column.
+
+        Raises:
+            NotImplementedError: if adding columns is not supported.
         """
+        raise NotImplementedError(
+            f"No operation is defined to add column '{column_name}' "
+            f"on table '{full_table_name}'."
+        )
 
     def prepare_table(
         self,
@@ -584,8 +590,14 @@ class SQLConnector:
 
         Return:
             The type of the column.
+
+        Raises:
+            NotImplementedError: if column detection is not supported.
         """
-        pass
+        raise NotImplementedError(
+            f"No operation is defined to detect column '{column_name}' "
+            f"on table '{full_table_name}'."
+        )
 
     def _adapt_column_type(
         self,
