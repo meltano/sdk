@@ -244,3 +244,6 @@ class SQLSink(BatchSink):
             f"UPDATE {self.full_table_name} SET {self.soft_delete_column_name} = ?",
             deleted_at,
         )
+
+
+__all__ = ["SQLSink", "SQLConnector"]

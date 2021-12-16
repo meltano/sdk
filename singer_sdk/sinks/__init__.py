@@ -10,4 +10,5 @@ __all__ = [
     "RecordSink",
     "Sink",
     "SQLSink",
+    "SQLConnector",
 ]

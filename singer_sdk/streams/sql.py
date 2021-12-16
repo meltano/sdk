@@ -777,3 +777,6 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         for row in self.connector.connection.execute(query_text):
             yield dict(row)
+
+
+__all__ = ["SQLStream", "SQLConnector"]
