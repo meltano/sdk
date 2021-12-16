@@ -89,9 +89,6 @@ def _discover_and_select_all(tap: SQLTap) -> None:
         md.root.selected = True
         catalog_entry["metadata"] = md.to_list()
 
-    for stream in tap.streams.values():
-        stream._update_stream_maps()
-
 
 # SQLite Tap Tests
 
