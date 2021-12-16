@@ -1,5 +1,10 @@
 # Meltano SDK for Taps and Targets
 
+[![Python Versions](https://img.shields.io/pypi/pyversions/singer-sdk)](https://pypi.org/project/singer-sdk)
+[![Downloads](https://img.shields.io/pypi/dw/singer-sdk?color=blue)](https://pypi.org/project/singer-sdk)
+[![PyPI Version](https://img.shields.io/pypi/v/singer-sdk?color=blue)](https://pypi.org/project/singer-sdk)
+[![Documentation Status](https://readthedocs.org/projects/meltano-sdk/badge/?version=latest)](https://sdk.meltano.com/en/latest/?badge=latest)
+
 The Tap and Target SDKs are the fastest way to build custom data extractors and loaders!
 Taps and targets built on the SDK are automatically compliant with the
 [Singer Spec](https://hub.meltano.com/singer/spec), the
