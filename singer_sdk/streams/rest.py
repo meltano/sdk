@@ -17,7 +17,7 @@ from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 
 DEFAULT_PAGE_SIZE = 1000
-
+DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 class RESTStream(Stream, metaclass=abc.ABCMeta):
     """Abstract base class for REST API streams."""
@@ -370,8 +370,14 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     @property
     def timeout(self) -> int:
-        """Return the request timeout limit in seconds."""
-        pass
+        """Return the request timeout limit in seconds.
+
+        The default timeout is 300 seconds, or as defined by DEFAULT_REQUEST_TIMEOUT.
+        
+        Returns:
+            The request timeout limit as number of seconds.
+        """
+        return DEFAULT_REQUEST_TIMEOUT
 
     # Records iterator
 
