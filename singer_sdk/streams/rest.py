@@ -19,6 +19,7 @@ from singer_sdk.streams.core import Stream
 DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
+
 class RESTStream(Stream, metaclass=abc.ABCMeta):
     """Abstract base class for REST API streams."""
 
