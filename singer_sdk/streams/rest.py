@@ -374,7 +374,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """Return the request timeout limit in seconds.
 
         The default timeout is 300 seconds, or as defined by DEFAULT_REQUEST_TIMEOUT.
-        
+
         Returns:
             The request timeout limit as number of seconds.
         """
