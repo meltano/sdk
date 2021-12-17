@@ -27,7 +27,7 @@ build_and_test:
   stage: test
   parallel:
     matrix:
-      - PYTHON_VERSION: ["3.6", "3.7", "3.8", "3.9"]
+      - PYTHON_VERSION: ["3.6", "3.7", "3.8", "3.9", "3.10"]
   image: python:${PYTHON_VERSION}
   script:
     - |
@@ -37,8 +37,8 @@ build_and_test:
         poetry run tox -e py
       else
         echo "Run 'core' and 'cookiecutter' python test suites..."
-        poetry run pytest singer_sdk/tests/core
-        poetry run pytest singer_sdk/tests/cookiecutters
+        poetry run pytest tests/core
+        poetry run pytest tests/cookiecutters
       fi
 
 lint:

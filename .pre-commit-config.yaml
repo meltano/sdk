@@ -26,3 +26,9 @@ repos:
         language: system
         types: [python]
         exclude: singer_sdk/tests/.*
+
+      - id: pyupgrade
+        name: pyupgrade
+        entry: poetry run pyupgrade --py36-plus
+        language: system
+        types: [python]

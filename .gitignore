@@ -14,6 +14,7 @@
 
 # By default, ignore local IDE configs:
 .vscode
+.idea
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -79,3 +80,4 @@ venv.bak/
 .dmypy.json
 dmypy.json
 .DS_Store
+

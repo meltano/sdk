@@ -160,6 +160,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             True if the test succeeded.
         """
         for stream in self.streams.values():
+            # Initialize streams' record limits before beginning the sync test.
+            stream._MAX_RECORDS_LIMIT = 1 if stream.child_streams else 0
+
+        for stream in self.streams.values():
             if stream.parent_stream_type:
                 self.logger.debug(
                     f"Child stream '{type(stream).__name__}' should be called by "
@@ -167,8 +171,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     "Skipping direct invocation."
                 )
                 continue
-
-            stream._MAX_RECORDS_LIMIT = 1 if stream.child_streams else 0
             try:
                 stream.sync()
             except MaxRecordsLimitException:
@@ -394,6 +396,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             help="Display package metadata and settings.",
         )
         @click.option(
+            "--format",
+            help="Specify output style for --about",
+            type=click.Choice(["json", "markdown"], case_sensitive=False),
+            default=None,
+        )
+        @click.option(
             "--discover",
             is_flag=True,
             help="Run the tap in discovery mode.",
@@ -402,12 +410,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             "--test",
             is_flag=True,
             help="Test connectivity by syncing a single record and exiting.",
-        )
-        @click.option(
-            "--format",
-            help="Specify output style for --about",
-            type=click.Choice(["json", "markdown"], case_sensitive=False),
-            default=None,
         )
         @click.option(
             "--config",
@@ -449,7 +451,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 test: Test connectivity by syncing a single record and exiting.
                 format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
-                    variables.
+                    variables. Accepts multiple inputs as a tuple.
                 catalog: Use a Singer catalog file with the tap.",
                 state: Use a bookmarks file for incremental replication.
 

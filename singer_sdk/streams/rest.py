@@ -4,18 +4,20 @@ import abc
 import copy
 import logging
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Optional, Union, cast
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 import backoff
 import requests
 from singer.schema import Schema
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
+from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 
 DEFAULT_PAGE_SIZE = 1000
+DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 
 class RESTStream(Stream, metaclass=abc.ABCMeta):
@@ -40,7 +42,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def url_base(self) -> str:
-        """Return the base url, e.g. 'https://api.mysite.com/v3/'."""
+        """Return the base url, e.g. ``https://api.mysite.com/v3/``."""
         pass
 
     def __init__(
@@ -118,14 +120,70 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             self._requests_session = requests.Session()
         return self._requests_session
 
-    @backoff.on_exception(
-        backoff.expo,
-        (requests.exceptions.RequestException),
-        max_tries=5,
-        giveup=lambda e: e.response is not None and 400 <= e.response.status_code < 500,
-        factor=2,
-    )
-    def _request_with_backoff(
+    def validate_response(self, response: requests.Response) -> None:
+        """Validate HTTP response.
+
+        By default, checks for error status codes (>400) and raises a
+        :class:`singer_sdk.exceptions.FatalAPIError`.
+
+        Tap developers are encouraged to override this method if their APIs use HTTP
+        status codes in non-conventional ways, or if they communicate errors
+        differently (e.g. in the response body).
+
+        .. image:: ../images/200.png
+
+
+        In case an error is deemed transient and can be safely retried, then this
+        method should raise an :class:`singer_sdk.exceptions.RetriableAPIError`.
+
+        Args:
+            response: A `requests.Response`_ object.
+
+        Raises:
+            FatalAPIError: If the request is not retriable.
+            RetriableAPIError: If the request is retriable.
+
+        .. _requests.Response:
+            https://docs.python-requests.org/en/latest/api/#requests.Response
+        """
+        if 400 <= response.status_code < 500:
+            msg = (
+                f"{response.status_code} Client Error: "
+                f"{response.reason} for path: {self.path}"
+            )
+            raise FatalAPIError(msg)
+
+        elif 500 <= response.status_code < 600:
+            msg = (
+                f"{response.status_code} Server Error: "
+                f"{response.reason} for path: {self.path}"
+            )
+            raise RetriableAPIError(msg)
+
+    def request_decorator(self, func: Callable) -> Callable:
+        """Instantiate a decorator for handling request failures.
+
+        Developers may override this method to provide custom backoff or retry
+        handling.
+
+        Args:
+            func: Function to decorate.
+
+        Returns:
+            A decorated method.
+        """
+        decorator: Callable = backoff.on_exception(
+            backoff.expo,
+            (
+                RetriableAPIError,
+                requests.exceptions.ReadTimeout,
+            ),
+            max_tries=5,
+            factor=2,
+        )(func)
+        return decorator
+
+    def _request(
         self, prepared_request: requests.PreparedRequest, context: Optional[dict]
     ) -> requests.Response:
         """TODO.
@@ -136,36 +194,19 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         Returns:
             TODO
-
-        Raises:
-            RuntimeError: TODO
         """
-        response = self.requests_session.send(prepared_request)
+        response = self.requests_session.send(prepared_request, timeout=self.timeout)
         if self._LOG_REQUEST_METRICS:
             extra_tags = {}
             if self._LOG_REQUEST_METRIC_URLS:
-                extra_tags["url"] = cast(str, prepared_request.path_url)
+                extra_tags["url"] = prepared_request.path_url
             self._write_request_duration_log(
                 endpoint=self.path,
                 response=response,
                 context=context,
                 extra_tags=extra_tags,
             )
-        if response.status_code in [401, 403]:
-            self.logger.info("Failed request for {}".format(prepared_request.url))
-            self.logger.info(
-                f"Reason: {response.status_code} - {str(response.content)}"
-            )
-            raise RuntimeError(
-                "Requested resource was unauthorized, forbidden, or not found."
-            )
-        elif response.status_code >= 400:
-            raise RuntimeError(
-                f"Error making request to API: {prepared_request.url} "
-                f"[{response.status_code} - {str(response.content)}]".replace(
-                    "\\n", "\n"
-                )
-            )
+        self.validate_response(response)
         logging.debug("Response received successfully.")
         return response
 
@@ -215,16 +256,13 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             headers.update(authenticator.auth_headers or {})
             params.update(authenticator.auth_params or {})
 
-        request = cast(
-            requests.PreparedRequest,
-            self.requests_session.prepare_request(
-                requests.Request(
-                    method=http_method,
-                    url=url,
-                    params=params,
-                    headers=headers,
-                    json=request_data,
-                )
+        request = self.requests_session.prepare_request(
+            requests.Request(
+                method=http_method,
+                url=url,
+                params=params,
+                headers=headers,
+                json=request_data,
             ),
         )
         return request
@@ -246,11 +284,13 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """
         next_page_token: Any = None
         finished = False
+        decorated_request = self.request_decorator(self._request)
+
         while not finished:
             prepared_request = self.prepare_request(
                 context, next_page_token=next_page_token
             )
-            resp = self._request_with_backoff(prepared_request, context)
+            resp = decorated_request(prepared_request, context)
             for row in self.parse_response(resp):
                 yield row
             previous_token = copy.deepcopy(next_page_token)
@@ -328,6 +368,17 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         if "user_agent" in self.config:
             result["User-Agent"] = self.config.get("user_agent")
         return result
+
+    @property
+    def timeout(self) -> int:
+        """Return the request timeout limit in seconds.
+
+        The default timeout is 300 seconds, or as defined by DEFAULT_REQUEST_TIMEOUT.
+
+        Returns:
+            The request timeout limit as number of seconds.
+        """
+        return DEFAULT_REQUEST_TIMEOUT
 
     # Records iterator
 

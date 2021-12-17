@@ -86,28 +86,27 @@ def is_datetime_type(type_dict: dict) -> bool:
     )
 
 
-def get_datelike_property_type(
-    property_key: str, property_schema: Dict
-) -> Optional[str]:
+def get_datelike_property_type(property_schema: Dict) -> Optional[str]:
     """Return one of 'date-time', 'time', or 'date' if property is date-like.
 
     Otherwise return None.
     """
-    if "anyOf" in property_schema:
+    if _is_string_with_format(property_schema):
+        return cast(str, property_schema["format"])
+    elif "anyOf" in property_schema:
         for type_dict in property_schema["anyOf"]:
-            if "string" in type_dict["type"] and type_dict.get("format", None) in {
-                "date-time",
-                "time",
-                "date",
-            }:
+            if _is_string_with_format(type_dict):
                 return cast(str, type_dict["format"])
-    if "string" in property_schema["type"] and property_schema.get("format", None) in {
+    return None
+
+
+def _is_string_with_format(type_dict):
+    if "string" in type_dict.get("type", []) and type_dict.get("format") in {
         "date-time",
         "time",
         "date",
     }:
-        return cast(str, property_schema["format"])
-    return None
+        return True
 
 
 def handle_invalid_timestamp_in_record(
