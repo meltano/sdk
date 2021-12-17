@@ -389,7 +389,7 @@ class SQLConnector:
             full_table_name: the target table name.
             column_name: the target column name.
 
-        Returns:
+        Return:
             True if table exists, False if not, None if unsure or undetectable.
 
         Raises:
