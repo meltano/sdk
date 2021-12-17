@@ -3,7 +3,7 @@
 import abc
 import logging
 from functools import lru_cache
-from typing import Any, Dict, Iterable, List, Optional, Type, Union, cast
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union, cast
 
 import singer
 import sqlalchemy
@@ -28,6 +28,10 @@ class SQLConnector:
     - performing type conversions to/from JSONSchema types
     - dialect-specific functions, such as escaping and fully qualified names
     """
+
+    allow_column_add: bool = True
+    allow_column_alter: bool = True
+    allow_column_rename: bool = True
 
     def __init__(
         self, config: Optional[dict] = None, sqlalchemy_url: Optional[str] = None
@@ -368,6 +372,37 @@ class SQLConnector:
 
         return result
 
+    def parse_full_table_name(self, full_table_name: str) -> Tuple[str, str, str]:
+        """Parse a fully qualified table name into its parts.
+
+        Developers may override this method if their platform does not support the
+        traditional 3-part convention: `db_name.schema_name.table_name`
+
+        Args:
+            full_table_name: A table name or a fully qualified table name. Depending on
+                SQL the platform, this could take the following forms:
+                - `<db>.<schema>.<table>` (three part names)
+                - `<db>.<table>` (platforms which do not use schema groupings)
+                - `<schema>.<name>` (if DB name is already in context)
+                - `<table>` (if DB name and schema name are already in context)
+
+        Returns:
+            A three part tuple (db_name, schema_name, table_name) with any unspecified
+            or unused parts returned as None.
+        """
+        db_name: Optional[str] = None
+        schema_name: Optional[str] = None
+
+        parts = full_table_name.split(".")
+        if len(parts) == 1:
+            table_name = full_table_name
+        if len(parts) == 2:
+            schema_name, table_name = parts
+        if len(parts) == 3:
+            db_name, schema_name, table_name = parts
+
+        return db_name, schema_name, table_name
+
     def table_exists(self, full_table_name: str) -> bool:
         """Determine if the target table already exists.
 
@@ -382,6 +417,31 @@ class SQLConnector:
             self._engine.has_table(full_table_name),
         )
 
+    def get_table_columns(self, full_table_name: str) -> List[sqlalchemy.Column]:
+        """Return a list of table columns.
+
+        Args:
+            full_table_name: Fully qualified table name.
+
+        Returns:
+            An ordered list of column objects.
+        """
+        _, schema_name, table_name = self.parse_full_table_name(full_table_name)
+        inspector = sqlalchemy.inspect(self._engine)
+        columns = inspector.get_columns(table_name, schema_name)
+
+        result: List[sqlalchemy.Column] = []
+        for col_meta in columns:
+            result.append(
+                sqlalchemy.Column(
+                    col_meta["name"],
+                    col_meta["type"],
+                    nullable=col_meta.get("nullable", False),
+                )
+            )
+
+        return result
+
     def column_exists(self, full_table_name: str, column_name: str) -> bool:
         """Determine if the target table already exists.
 
@@ -389,15 +449,11 @@ class SQLConnector:
             full_table_name: the target table name.
             column_name: the target column name.
 
-        Return:
+        Returns:
             True if table exists, False if not, None if unsure or undetectable.
-
-        Raises:
-            NotImplementedError: if column detection is not supported.
         """
-        raise NotImplementedError(
-            f"No operation is defined to detect column '{column_name}' "
-            f"on table '{full_table_name}'."
+        return any(
+            [c.name == column_name for c in self.get_table_columns(full_table_name)]
         )
 
     def create_empty_table(
@@ -464,9 +520,11 @@ class SQLConnector:
         Raises:
             NotImplementedError: if adding columns is not supported.
         """
-        raise NotImplementedError(
-            f"No operation is defined to add column '{column_name}' "
-            f"on table '{full_table_name}'."
+        if not self.allow_column_add:
+            raise NotImplementedError("Adding columns is not supported.")
+
+        self.connection.execute(
+            f"ALTER TABLE {full_table_name} " f"ADD COLUMN {column_name} ({sql_type})"
         )
 
     def prepare_table(
@@ -524,6 +582,22 @@ class SQLConnector:
             full_table_name,
             column_name=column_name,
             sql_type=sql_type,
+        )
+
+    def rename_column(self, full_table_name: str, old_name: str, new_name: str) -> None:
+        """Rename the provided columns.
+
+        Args:
+            full_table_name: The fully qualified table name.
+            old_name: The old column to be renamed.
+            new_name: The new name for the column.
+        """
+        if not self.allow_column_rename:
+            raise NotImplementedError("Renaming columns is not supported.")
+
+        self.connection.execute(
+            f"ALTER TABLE {full_table_name} "
+            f'RENAME COLUMN "{old_name}" to "{new_name}"'
         )
 
     def merge_sql_types(
@@ -611,13 +685,19 @@ class SQLConnector:
             full_table_name: The target table name.
             column_name: The target column name.
             sql_type: The new SQLAlchemy type.
+
+        Raises:
+            NotImplementedError: if altering columns is not supported.
         """
-        compatible_sql_type = self.merge_sql_types(
-            [
-                self._get_column_type(full_table_name, column_name),
-                self.to_sql_type(sql_type),
-            ]
-        )
+        current_type = self._get_column_type(full_table_name, column_name)
+        compatible_sql_type = self.merge_sql_types([current_type, sql_type])
+        if current_type == compatible_sql_type:
+            # Nothing to do
+            return
+
+        if not self.allow_column_alter:
+            raise NotImplementedError("Altering columns is not supported.")
+
         self.connection.execute(
             f"ALTER TABLE {full_table_name} "
             f"ALTER COLUMN {column_name} ({compatible_sql_type})"
