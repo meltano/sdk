@@ -6,7 +6,7 @@ See the online explorer and query builder here:
   - https://countries.trevorblades.com/
 """
 
-from typing import List
+from typing import List, Optional
 
 from samples.sample_tap_countries.countries_streams import (
     ContinentsStream,
@@ -28,3 +28,11 @@ class SampleTapCountries(Tap):
             CountriesStream(tap=self),
             ContinentsStream(tap=self),
         ]
+
+    def prepare_tap(self) -> None:
+        """Test prepare."""
+        self.some_val: int = 42
+
+    def cleanup_tap(self, error: Optional[Exception] = None) -> None:
+        """Test prepare."""
+        print(self.some_val)
