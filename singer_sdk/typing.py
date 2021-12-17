@@ -417,25 +417,27 @@ def to_sql_type(jsonschema_type: dict) -> Type[sqlalchemy.types.TypeEngine]:
         datelike_type = get_datelike_property_type(jsonschema_type)
         if datelike_type:
             if datelike_type == "date-time":
-                return sqlalchemy.types.DATETIME
+                return cast(
+                    Type[sqlalchemy.types.TypeEngine], sqlalchemy.types.DATETIME
+                )
             if datelike_type in "time":
-                return sqlalchemy.types.TIME
+                return cast(Type[sqlalchemy.types.TypeEngine], sqlalchemy.types.TIME)
             if datelike_type == "date":
-                return sqlalchemy.types.DATE
+                return cast(Type[sqlalchemy.types.TypeEngine], sqlalchemy.types.DATE)
 
-        return sqlalchemy.types.VARCHAR
+        return cast(Type[sqlalchemy.types.TypeEngine], sqlalchemy.types.VARCHAR)
 
     if _jsonschema_type_check(jsonschema_type, ("integer",)):
-        return sqlalchemy.types.INTEGER
+        return cast(Type[sqlalchemy.types.TypeEngine], sqlalchemy.types.INTEGER)
     if _jsonschema_type_check(jsonschema_type, ("number",)):
-        return sqlalchemy.types.DECIMAL
+        return cast(Type[sqlalchemy.types.TypeEngine], sqlalchemy.types.DECIMAL)
     if _jsonschema_type_check(jsonschema_type, ("boolean",)):
-        return sqlalchemy.types.BOOLEAN
+        return cast(Type[sqlalchemy.types.TypeEngine], sqlalchemy.types.BOOLEAN)
 
     if _jsonschema_type_check(jsonschema_type, ("object",)):
-        return sqlalchemy.types.VARCHAR
+        return cast(Type[sqlalchemy.types.TypeEngine], sqlalchemy.types.VARCHAR)
 
     if _jsonschema_type_check(jsonschema_type, ("array",)):
-        return sqlalchemy.types.VARCHAR
+        return cast(Type[sqlalchemy.types.TypeEngine], sqlalchemy.types.VARCHAR)
 
-    return sqlalchemy.types.VARCHAR
+    return cast(Type[sqlalchemy.types.TypeEngine], sqlalchemy.types.VARCHAR)

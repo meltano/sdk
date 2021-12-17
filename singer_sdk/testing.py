@@ -2,7 +2,7 @@
 
 import io
 from contextlib import redirect_stderr, redirect_stdout
-from typing import Callable, List, Optional, Tuple, Type
+from typing import Callable, List, Optional, Tuple, Type, cast
 
 from singer_sdk.helpers import _singer
 from singer_sdk.tap_base import Tap
@@ -29,7 +29,7 @@ def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Ca
         tap1.print_about(format="json")
 
     def _test_discovery() -> None:
-        catalog1 = _get_tap_catalog(tap_class, config)
+        catalog1 = _get_tap_catalog(tap_class, config or {})
         # Reset and re-initialize with an input catalog
         tap2: Tap = tap_class(config=config, parse_env_config=True, catalog=catalog1)
         assert tap2
@@ -113,7 +113,7 @@ def _select_all(catalog_dict: dict) -> dict:
     for catalog_entry in catalog.streams:
         catalog_entry.metadata.root.selected = True
 
-    return catalog.to_dict()
+    return cast(dict, catalog.to_dict())
 
 
 def target_sync_test(
