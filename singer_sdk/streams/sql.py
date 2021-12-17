@@ -161,7 +161,6 @@ class SQLConnector:
         Returns:
             The JSON Schema representation of the provided type.
         """
-
         if isinstance(sql_type, (str, sqlalchemy.types.TypeEngine)):
             return th.to_jsonschema_type(sql_type)
 
