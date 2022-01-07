@@ -732,25 +732,6 @@ class Stream(metaclass=abc.ABCMeta):
             self._mask = self.metadata.resolve_selection()
         return self._mask
 
-    def stream_table_version(self) -> Optional[int]:
-        """Provide the table version for an ACTIVATE_VERSION message.
-
-        This by default is an integer representing the starting timestamp of the sync
-        operation, used by downstream targets to deprecate or delete old records when
-        syncing with FULL_TABLE replication.
-
-        Returns:
-            The table version, generally an epoch version of the stream start time.
-        """
-        if self._stream_table_version:
-            return self._stream_table_version
-
-        if self.replication_method == REPLICATION_FULL_TABLE:
-            # Should remain null except when using FULL_TABLE replication
-            self._stream_table_version = pendulum.now().int_timestamp
-
-        return self._stream_table_version
-
     def _generate_record_messages(
         self,
         record: dict,
@@ -770,6 +751,9 @@ class Stream(metaclass=abc.ABCMeta):
             schema=self.schema,
             logger=self.logger,
         )
+        if not self._sync_start_time:
+            self._sync_start_time = utc_now()
+
         for stream_map in self.stream_maps:
             mapped_record = stream_map.transform(record)
             # Emit record if not filtered
@@ -777,7 +761,7 @@ class Stream(metaclass=abc.ABCMeta):
                 record_message = RecordMessage(
                     stream=stream_map.stream_alias,
                     record=mapped_record,
-                    version=self.stream_table_version,
+                    version=self._sync_start_time.int_timestamp,
                     time_extracted=utc_now(),
                 )
 
