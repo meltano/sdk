@@ -97,7 +97,9 @@ class Stream(metaclass=abc.ABCMeta):
         if not self.name:
             raise ValueError("Missing argument or class variable 'name'.")
 
-        self._stream_table_version: Optional[int] = None
+        # Delay _sync_start_time init until stream start
+        self._sync_start_time: Optional[pendulum.Date.DateTime] = None
+
         self.logger: logging.Logger = tap.logger
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
@@ -342,7 +344,10 @@ class Stream(metaclass=abc.ABCMeta):
             Max allowable bookmark value for this stream's replication key.
         """
         if self.is_timestamp_replication_key:
-            return utc_now()
+            if not self._sync_start_time:
+                self._sync_start_time = utc_now()
+
+            return self._sync_start_time
 
         return None
 
@@ -706,8 +711,13 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _write_activate_version_message(self) -> None:
         """Write out a STATE message with the latest state."""
+        if not self._sync_start_time:
+            self._sync_start_time = utc_now()
+
         singer.write_message(
-            ActivateVersionMessage(stream=self.name, version=self.stream_table_version)
+            ActivateVersionMessage(
+                stream=self.name, version=self._sync_start_time.int_timestamp
+            )
         )
 
     @property
