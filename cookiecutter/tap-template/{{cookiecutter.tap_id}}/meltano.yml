@@ -5,9 +5,7 @@ plugins:
   extractors:
   - name: {{cookiecutter.tap_id}}
     namespace: {{cookiecutter.library_name}}
-    # TODO: To test using Meltano, replace with absolute path
-    #       to the {{cookiecutter.tap_id}}.sh script:
-    executable: ./{{cookiecutter.tap_id}}.sh
+    pip_url: -e .
     capabilities:
     - state
     - catalog
