@@ -66,12 +66,11 @@ class _FakeOAuthAuthenticator(OAuthAuthenticator):
         return {}
 
 
-@requests_mock.Mocker(kw="mock")
 def test_oauth_authenticator_expires_in_and_no_default_expiration(
-    rest_tap: Tap, **kwargs
+    rest_tap: Tap,
+    requests_mock: requests_mock.Mocker,
 ):
-    mock = kwargs["mock"]
-    mock.post(
+    requests_mock.post(
         "https://example.com/oauth",
         json={"access_token": "an-access-token", "expires_in": 123},
     )
@@ -84,12 +83,11 @@ def test_oauth_authenticator_expires_in_and_no_default_expiration(
     assert authenticator.expires_in == 123
 
 
-@requests_mock.Mocker(kw="mock")
 def test_oauth_authenticator_no_expires_in_and_default_expiration(
-    rest_tap: Tap, **kwargs
+    rest_tap: Tap,
+    requests_mock: requests_mock.Mocker,
 ):
-    mock = kwargs["mock"]
-    mock.post(
+    requests_mock.post(
         "https://example.com/oauth",
         json={"access_token": "an-access-token"},
     )
@@ -103,10 +101,10 @@ def test_oauth_authenticator_no_expires_in_and_default_expiration(
     assert authenticator.expires_in == 234
 
 
-@requests_mock.Mocker(kw="mock")
-def test_oauth_authenticator_expires_in_and_default_expiration(rest_tap: Tap, **kwargs):
-    mock = kwargs["mock"]
-    mock.post(
+def test_oauth_authenticator_expires_in_and_default_expiration(
+    rest_tap: Tap, requests_mock: requests_mock.Mocker
+):
+    requests_mock.post(
         "https://example.com/oauth",
         json={"access_token": "an-access-token", "expires_in": 123},
     )
@@ -120,12 +118,11 @@ def test_oauth_authenticator_expires_in_and_default_expiration(rest_tap: Tap, **
     assert authenticator.expires_in == 123
 
 
-@requests_mock.Mocker(kw="mock")
 def test_oauth_authenticator_no_expires_in_no_default_expiration(
-    rest_tap: Tap, **kwargs
+    rest_tap: Tap,
+    requests_mock: requests_mock.Mocker,
 ):
-    mock = kwargs["mock"]
-    mock.post(
+    requests_mock.post(
         "https://example.com/oauth",
         json={"access_token": "an-access-token"},
     )
