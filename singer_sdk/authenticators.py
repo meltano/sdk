@@ -282,6 +282,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         stream: RESTStreamBase,
         auth_endpoint: Optional[str] = None,
         oauth_scopes: Optional[str] = None,
+        default_expiration: Optional[int] = None,
     ) -> None:
         """Create a new authenticator.
 
@@ -289,9 +290,11 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             stream: The stream instance to use with this authenticator.
             auth_endpoint: API username.
             oauth_scopes: API password.
+            default_expiration: Default token expiry in seconds.
         """
         super().__init__(stream=stream)
         self._auth_endpoint = auth_endpoint
+        self._default_expiration = default_expiration
         self._oauth_scopes = oauth_scopes
 
         # Initialize internal tracking attributes
@@ -429,7 +432,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             )
         token_json = token_response.json()
         self.access_token = token_json["access_token"]
-        self.expires_in = token_json["expires_in"]
+        self.expires_in = token_json.get("expires_in", self._default_expiration)
         self.last_refreshed = request_time
 
 

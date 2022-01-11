@@ -1,7 +1,9 @@
 """Tests for authentication helpers."""
 
 import pytest
+import requests_mock
 
+from singer_sdk.authenticators import OAuthAuthenticator
 from singer_sdk.streams import RESTStream
 from singer_sdk.tap_base import Tap
 
@@ -57,3 +59,80 @@ def test_authenticator_is_reused(
     other_stream: RESTStream = rest_tap.streams[other_stream_name]
 
     assert (stream.authenticator is other_stream.authenticator) is auth_reused
+
+
+class _FakeOAuthAuthenticator(OAuthAuthenticator):
+    def oauth_request_body(self) -> dict:
+        return {}
+
+
+@requests_mock.Mocker(kw="mock")
+def test_oauth_authenticator_expires_in_and_no_default_expiration(
+    rest_tap: Tap, **kwargs
+):
+    mock = kwargs["mock"]
+    mock.post(
+        "https://example.com/oauth",
+        json={"access_token": "an-access-token", "expires_in": 123},
+    )
+    authenticator = _FakeOAuthAuthenticator(
+        stream=rest_tap.streams["some_stream"],
+        auth_endpoint="https://example.com/oauth",
+    )
+    authenticator.update_access_token()
+
+    assert authenticator.expires_in == 123
+
+
+@requests_mock.Mocker(kw="mock")
+def test_oauth_authenticator_no_expires_in_and_default_expiration(
+    rest_tap: Tap, **kwargs
+):
+    mock = kwargs["mock"]
+    mock.post(
+        "https://example.com/oauth",
+        json={"access_token": "an-access-token"},
+    )
+    authenticator = _FakeOAuthAuthenticator(
+        stream=rest_tap.streams["some_stream"],
+        auth_endpoint="https://example.com/oauth",
+        default_expiration=234,
+    )
+    authenticator.update_access_token()
+
+    assert authenticator.expires_in == 234
+
+
+@requests_mock.Mocker(kw="mock")
+def test_oauth_authenticator_expires_in_and_default_expiration(rest_tap: Tap, **kwargs):
+    mock = kwargs["mock"]
+    mock.post(
+        "https://example.com/oauth",
+        json={"access_token": "an-access-token", "expires_in": 123},
+    )
+    authenticator = _FakeOAuthAuthenticator(
+        stream=rest_tap.streams["some_stream"],
+        auth_endpoint="https://example.com/oauth",
+        default_expiration=234,
+    )
+    authenticator.update_access_token()
+
+    assert authenticator.expires_in == 123
+
+
+@requests_mock.Mocker(kw="mock")
+def test_oauth_authenticator_no_expires_in_no_default_expiration(
+    rest_tap: Tap, **kwargs
+):
+    mock = kwargs["mock"]
+    mock.post(
+        "https://example.com/oauth",
+        json={"access_token": "an-access-token"},
+    )
+    authenticator = _FakeOAuthAuthenticator(
+        stream=rest_tap.streams["some_stream"],
+        auth_endpoint="https://example.com/oauth",
+    )
+    authenticator.update_access_token()
+
+    assert authenticator.expires_in is None
