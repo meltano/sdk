@@ -2,13 +2,11 @@ version: 1
 send_anonymous_usage_stats: true
 project_id: {{cookiecutter.target_id}}
 plugins:
-  extractors:
+  extractors: []
   loaders:
   - name: {{cookiecutter.target_id}}
     namespace: {{cookiecutter.library_name}}
-    # TODO: To test using Meltano, replace with absolute path
-    #       to the {{cookiecutter.target_id}}.sh script:
-    executable: ./{{cookiecutter.target_id}}.sh
+    pip_url: -e .
     capabilities:
     - state
     - catalog
