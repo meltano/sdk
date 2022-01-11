@@ -66,70 +66,60 @@ class _FakeOAuthAuthenticator(OAuthAuthenticator):
         return {}
 
 
-def test_oauth_authenticator_expires_in_and_no_default_expiration(
+@pytest.mark.parametrize(
+    "oauth_response_expires_in,default_expiration,result",
+    [
+        (
+            123,
+            None,
+            123,
+        ),
+        (
+            123,
+            234,
+            123,
+        ),
+        (
+            None,
+            234,
+            234,
+        ),
+        (
+            None,
+            None,
+            None,
+        ),
+    ],
+    ids=[
+        "expires-in-and-no-default-expiration",
+        "expires-in-and-default-expiration",
+        "no-expires-in-and-default-expiration",
+        "no-expires-in-and-no-default-expiration",
+    ],
+)
+def test_oauth_authenticator_token_expiry_handling(
     rest_tap: Tap,
     requests_mock: requests_mock.Mocker,
+    oauth_response_expires_in: int,
+    default_expiration: int,
+    result: bool,
 ):
+    """Validate various combinations of expires_in and default_expiration."""
+    response = {"access_token": "an-access-token"}
+
+    if oauth_response_expires_in:
+        response["expires_in"] = oauth_response_expires_in
+
     requests_mock.post(
         "https://example.com/oauth",
-        json={"access_token": "an-access-token", "expires_in": 123},
+        json=response,
     )
+
     authenticator = _FakeOAuthAuthenticator(
         stream=rest_tap.streams["some_stream"],
         auth_endpoint="https://example.com/oauth",
+        default_expiration=default_expiration,
     )
     authenticator.update_access_token()
 
-    assert authenticator.expires_in == 123
-
-
-def test_oauth_authenticator_no_expires_in_and_default_expiration(
-    rest_tap: Tap,
-    requests_mock: requests_mock.Mocker,
-):
-    requests_mock.post(
-        "https://example.com/oauth",
-        json={"access_token": "an-access-token"},
-    )
-    authenticator = _FakeOAuthAuthenticator(
-        stream=rest_tap.streams["some_stream"],
-        auth_endpoint="https://example.com/oauth",
-        default_expiration=234,
-    )
-    authenticator.update_access_token()
-
-    assert authenticator.expires_in == 234
-
-
-def test_oauth_authenticator_expires_in_and_default_expiration(
-    rest_tap: Tap, requests_mock: requests_mock.Mocker
-):
-    requests_mock.post(
-        "https://example.com/oauth",
-        json={"access_token": "an-access-token", "expires_in": 123},
-    )
-    authenticator = _FakeOAuthAuthenticator(
-        stream=rest_tap.streams["some_stream"],
-        auth_endpoint="https://example.com/oauth",
-        default_expiration=234,
-    )
-    authenticator.update_access_token()
-
-    assert authenticator.expires_in == 123
-
-
-def test_oauth_authenticator_no_expires_in_no_default_expiration(
-    rest_tap: Tap,
-    requests_mock: requests_mock.Mocker,
-):
-    requests_mock.post(
-        "https://example.com/oauth",
-        json={"access_token": "an-access-token"},
-    )
-    authenticator = _FakeOAuthAuthenticator(
-        stream=rest_tap.streams["some_stream"],
-        auth_endpoint="https://example.com/oauth",
-    )
-    authenticator.update_access_token()
-
-    assert authenticator.expires_in is None
+    assert authenticator.expires_in == result
