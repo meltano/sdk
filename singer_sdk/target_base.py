@@ -15,6 +15,7 @@ from joblib import Parallel, delayed, parallel_backend
 from singer_sdk.exceptions import RecordsWitoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._hooks import prepare_and_cleanup_hooks
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
@@ -213,9 +214,9 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """
         if not input:
             input = sys.stdin
-
-        self._process_lines(input)
-        self._process_endofpipe()
+        with prepare_and_cleanup_hooks("target", self):
+            self._process_lines(input)
+            self._process_endofpipe()
 
     @final
     def add_sink(
@@ -275,6 +276,33 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 f"A record for stream '{stream_name}' was encountered before a "
                 "corresponding schema."
             )
+
+    # Hooks
+
+    def prepare_target(self) -> None:
+        """Set up the target before running.
+
+        This method is called before any messages are processed. It can be used
+        to configure the target, open connections, etc.
+
+        The default implementation of this method is a no-op.
+        """
+        pass
+
+    def cleanup_target(self, error: Optional[Exception] = None) -> None:
+        """Clean up resources after running.
+
+        This method is called at the end of processing messages, including
+        after exceptions are thrown. It can be used to clean up resources
+        opened during `prepare_target` such as connections.
+
+        The default implementation of this method is a no-op.
+
+        Args:
+            error: The error that interrupted the target, if any.
+                Will be `None` if the target completed successfully.
+        """
+        pass
 
     # Message handling
 
@@ -458,12 +486,13 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         Args:
             sink: Sink to be drained.
         """
-        if sink.current_size == 0:
-            return
+        with prepare_and_cleanup_hooks("sink", sink):
+            if sink.current_size == 0:
+                return
 
-        draining_status = sink.start_drain()
-        sink.process_batch(draining_status)
-        sink.mark_drained()
+            draining_status = sink.start_drain()
+            sink.process_batch(draining_status)
+            sink.mark_drained()
 
     def _drain_all(self, sink_list: List[Sink], parallelism: int) -> None:
         if parallelism == 1:

@@ -11,6 +11,7 @@ from singer_sdk.exceptions import MaxRecordsLimitException
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._hooks import prepare_and_cleanup_hooks
 from singer_sdk.helpers._singer import Catalog
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import read_json_file
@@ -321,6 +322,33 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     stream.replication_key = None
                     stream.forced_replication_method = "FULL_TABLE"
 
+    # Hooks
+
+    def prepare_tap(self) -> None:
+        """Set up the tap before running.
+
+        This method is called before any streams are started. It can be used
+        to configure the tap, open connections, etc.
+
+        The default implementation of this method is a no-op.
+        """
+        pass
+
+    def cleanup_tap(self, error: Optional[Exception] = None) -> None:
+        """Clean up resources after running.
+
+        This method is called at the end of all streams messages, including
+        after exceptions are thrown. It can be used to clean up resources
+        opened during `prepare_tap` such as connections.
+
+        The default implementation of this method is a no-op.
+
+        Args:
+            error: The error that interrupted the tap, if any.
+                Will be `None` if the tap completed successfully.
+        """
+        pass
+
     # Sync methods
 
     @final
@@ -329,21 +357,23 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
         stream: "Stream"
-        for stream in self.streams.values():
-            if not stream.selected and not stream.has_selected_descendents:
-                self.logger.info(f"Skipping deselected stream '{stream.name}'.")
-                continue
+        with prepare_and_cleanup_hooks("tap", self):
+            for stream in self.streams.values():
+                if not stream.selected and not stream.has_selected_descendents:
+                    self.logger.info(f"Skipping deselected stream '{stream.name}'.")
+                    continue
 
-            if stream.parent_stream_type:
-                self.logger.debug(
-                    f"Child stream '{type(stream).__name__}' is expected to be called "
-                    f"by parent stream '{stream.parent_stream_type.__name__}'. "
-                    "Skipping direct invocation."
-                )
-                continue
+                if stream.parent_stream_type:
+                    self.logger.debug(
+                        f"Child stream '{type(stream).__name__}' is expected to be "
+                        "called by parent stream "
+                        f"'{stream.parent_stream_type.__name__}'. "
+                        "Skipping direct invocation."
+                    )
+                    continue
 
-            stream.sync()
-            stream.finalize_state_progress_markers()
+                stream.sync()
+                stream.finalize_state_progress_markers()
 
     # Command Line Execution
 

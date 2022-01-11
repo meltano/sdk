@@ -54,9 +54,31 @@ class Tap{{ cookiecutter.source_name }}(Tap):
             description="The url for the API service"
         ),
     ).to_dict()
+
+    def prepare_tap(self) -> None:
+        """Set up the tap before running.
+    
+        This method is called before any streams are started. It can be used
+        to configure the tap, open connections, etc.
+        """
+        pass  # TODO: Delete this method if not needed.
+
 {%- if cookiecutter.stream_type in ("GraphQL", "REST", "Other") %}
 
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
         return [stream_class(tap=self) for stream_class in STREAM_TYPES]
 {%- endif %}
+
+    def cleanup_tap(self, error: Optional[Exception] = None) -> None:
+        """Clean up resources after running.
+    
+        This method is called at the end of all streams messages, including
+        after exceptions are thrown. It can be used to clean up resources
+        opened during `prepare_tap` such as connections.
+
+        Args:
+            error: The error that interrupted the tap, if any.
+                Will be `None` if the tap completed successfully.
+        """
+        pass  # TODO: Delete this method if not needed.

@@ -33,6 +33,7 @@ from singer.schema import Schema
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._hooks import prepare_and_cleanup_hooks
 from singer_sdk.helpers._singer import (
     Catalog,
     CatalogEntry,
@@ -999,15 +1000,16 @@ class Stream(metaclass=abc.ABCMeta):
             msg += f" with context: {context}"
         self.logger.info(f"{msg}...")
 
-        # Use a replication signpost, if available
-        signpost = self.get_replication_key_signpost(context)
-        if signpost:
-            self._write_replication_key_signpost(context, signpost)
+        with prepare_and_cleanup_hooks("stream", self):
+            # Use a replication signpost, if available
+            signpost = self.get_replication_key_signpost(context)
+            if signpost:
+                self._write_replication_key_signpost(context, signpost)
 
-        # Send a SCHEMA message to the downstream target:
-        self._write_schema_message()
-        # Sync the records themselves:
-        self._sync_records(context)
+            # Send a SCHEMA message to the downstream target:
+            self._write_schema_message()
+            # Sync the records themselves:
+            self._sync_records(context)
 
     def _sync_children(self, child_context: dict) -> None:
         for child_stream in self.child_streams:
@@ -1086,6 +1088,33 @@ class Stream(metaclass=abc.ABCMeta):
                     )
 
         return context or record
+
+    # Hooks
+
+    def prepare_stream(self) -> None:
+        """Set up the stream before running.
+
+        This method is called before any message are output. It can be used
+        to configure the stream, open connections, etc.
+
+        The default implementation of this method is a no-op.
+        """
+        pass
+
+    def cleanup_stream(self, error: Optional[Exception] = None) -> None:
+        """Clean up resources after running.
+
+        This method is called at the end of the stream, including
+        after exceptions are thrown. It can be used to clean up resources
+        opened during `prepare_stream` such as connections.
+
+        The default implementation of this method is a no-op.
+
+        Args:
+            error: The error that interrupted the stream, if any.
+                Will be `None` if the stream completed successfully.
+        """
+        pass
 
     # Abstract Methods
 

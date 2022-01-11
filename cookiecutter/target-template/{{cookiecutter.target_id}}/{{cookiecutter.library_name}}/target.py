@@ -25,3 +25,27 @@ class Target{{ cookiecutter.destination_name }}(Target):
         ),
     ).to_dict()
     default_sink_class = {{ cookiecutter.destination_name }}Sink
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+    def prepare_target(self) -> None:
+        """Set up the target before running.
+
+        This method is called before any messages are processed. It can be used
+        to configure the target, open connections, etc.
+        """
+        pass  # TODO: Delete this method if not needed.
+
+    def cleanup_target(self, error: Optional[Exception] = None) -> None:
+        """Clean up resources after running.
+
+        This method is called at the end of processing messages, including
+        after exceptions are thrown. It can be used to clean up resources
+        opened during `prepare_target` such as connections.
+
+        Args:
+            error: The error that interrupted the target, if any.
+                Will be `None` if the target completed successfully.
+        """
+        pass  # TODO: Delete this method if not needed.
