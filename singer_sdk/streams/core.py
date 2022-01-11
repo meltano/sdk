@@ -245,7 +245,7 @@ class Stream(metaclass=abc.ABCMeta):
     @final
     @property
     def selected(self) -> bool:
-        """Check isf stream is selected.
+        """Check if stream is selected.
 
         Returns:
             True if the stream is selected.
