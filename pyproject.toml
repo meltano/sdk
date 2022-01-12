@@ -80,6 +80,7 @@ darglint = "^1.8.0"
 isort = "^5.9.3"
 types-requests = "^2.26.1"
 pyupgrade = "^2.29.1"
+requests-mock = "^1.9.3"
 
 [tool.black]
 exclude = ".*simpleeval.*"
