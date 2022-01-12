@@ -1,3 +1,5 @@
+"""A sample inline mapper app."""
+
 from pathlib import PurePath
 from typing import List, Optional, Union
 
@@ -10,6 +12,8 @@ from singer_sdk.mapper_base import InlineMapper
 
 
 class MyMapper(InlineMapper):
+    """A sample inline mapper."""
+
     name = "my-mapper"
 
     config_jsonschema = th.PropertiesList(
@@ -36,6 +40,16 @@ class MyMapper(InlineMapper):
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
+        """Create a new inline mapper.
+
+        Args:
+            config: Mapper configuration. Can be a dictionary, a single path to a
+                configuration file, or a list of paths to multiple configuration
+                files.
+            parse_env_config: Whether to look for configuration values in environment
+                variables.
+            validate_config: True to require validation of config settings.
+        """
         super().__init__(
             config=config,
             parse_env_config=parse_env_config,
