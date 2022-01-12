@@ -1,8 +1,12 @@
 """Pre-built test functions which can be applied to multiple taps."""
 
+import io
+from contextlib import redirect_stdout
 from typing import Callable, List, Type
 
+from singer_sdk.mapper_base import InlineMapper
 from singer_sdk.tap_base import Tap
+from singer_sdk.target_base import Target
 
 
 def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Callable]:
@@ -57,3 +61,30 @@ def get_standard_target_tests(
         TODO
     """
     return []
+
+
+def sync_end_to_end(tap: Tap, target: Target, *mappers: InlineMapper) -> None:
+    """Test and end-to-end sink from the tap to the target.
+
+    Args:
+        tap: Singer tap.
+        target: Singer target.
+        mappers: Zero or more inline mapper to apply in between the tap and target, in
+            order.
+    """
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        tap.sync_all()
+
+    buf.seek(0)
+    mapper_output = buf
+
+    for mapper in mappers:
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            mapper.listen(mapper_output)
+
+        buf.seek(0)
+        mapper_output = buf
+
+    target.listen(mapper_output)

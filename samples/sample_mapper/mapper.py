@@ -11,7 +11,7 @@ from singer_sdk.mapper import PluginMapper
 from singer_sdk.mapper_base import InlineMapper
 
 
-class MyMapper(InlineMapper):
+class StreamTransformMapper(InlineMapper):
     """A sample inline mapper."""
 
     name = "my-mapper"
@@ -142,4 +142,4 @@ class MyMapper(InlineMapper):
 
 
 if __name__ == "__main__":
-    MyMapper.cli()
+    StreamTransformMapper.cli()
