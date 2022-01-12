@@ -41,14 +41,15 @@ def test_get_env_var_config():
         os.environ,
         {
             "PLUGIN_TEST_PROP1": "hello",
+            "PLUGIN_TEST_PROP3": "val1,val2",
             "PLUGIN_TEST_PROP4": "not-a-tap-setting",
         },
     ):
         env_config = parse_environment_config(CONFIG_JSONSCHEMA, "PLUGIN_TEST_")
         assert env_config["prop1"] == "hello"
+        assert env_config["prop3"] == ["val1", "val2"]
         assert "PROP1" not in env_config
         assert "prop2" not in env_config and "PROP2" not in env_config
-        assert "prop3" not in env_config and "PROP3" not in env_config
         assert "prop4" not in env_config and "PROP4" not in env_config
 
     no_env_config = parse_environment_config(CONFIG_JSONSCHEMA, "PLUGIN_TEST_")

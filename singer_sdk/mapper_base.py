@@ -2,9 +2,10 @@
 
 import abc
 from io import FileIO
-from typing import Callable, Tuple
+from typing import Callable, Iterable, Tuple
 
 import click
+import singer
 
 from singer_sdk.cli import common_options
 from singer_sdk.configuration._dict_config import merge_config_sources
@@ -19,6 +20,62 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     @classproperty
     def _env_prefix(cls) -> str:
         return f"{cls.name.upper().replace('-', '_')}_"
+
+    @staticmethod
+    def _write_messages(messages: Iterable[singer.Message]) -> None:
+        for message in messages:
+            singer.write_message(message)
+
+    def _process_schema_message(self, message_dict: dict) -> None:
+        self._write_messages(self.map_schema_message(message_dict))
+
+    def _process_record_message(self, message_dict: dict) -> None:
+        self._write_messages(self.map_record_message(message_dict))
+
+    def _process_state_message(self, message_dict: dict) -> None:
+        self._write_messages(self.map_state_message(message_dict))
+
+    def _process_activate_version_message(self, message_dict: dict) -> None:
+        self._write_messages(self.map_activate_version_message(message_dict))
+
+    @abc.abstractmethod
+    def map_schema_message(self, message_dict: dict) -> Iterable[singer.Message]:
+        """Map a schema message to zero or more new messages.
+
+        Args:
+            message_dict: A SCHEMA message JSON dictionary.
+        """
+        ...
+
+    @abc.abstractmethod
+    def map_record_message(self, message_dict: dict) -> Iterable[singer.Message]:
+        """Map a record message to zero or more new messages.
+
+        Args:
+            message_dict: A RECORD message JSON dictionary.
+        """
+        ...
+
+    @abc.abstractmethod
+    def map_state_message(self, message_dict: dict) -> Iterable[singer.Message]:
+        """Map a state message to zero or more new messages.
+
+        Args:
+            message_dict: A STATE message JSON dictionary.
+        """
+        ...
+
+    @abc.abstractmethod
+    def map_activate_version_message(
+        self,
+        message_dict: dict,
+    ) -> Iterable[singer.Message]:
+        """Map a version message to zero or more new messages.
+
+        Args:
+            message_dict: An ACTIVATE_VERSION message JSON dictionary.
+        """
+        ...
 
     @classproperty
     def cli(cls) -> Callable:

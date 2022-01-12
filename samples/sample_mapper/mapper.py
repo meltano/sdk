@@ -1,7 +1,7 @@
 """A sample inline mapper app."""
 
 from pathlib import PurePath
-from typing import List, Optional, Union
+from typing import Generator, List, Optional, Union
 
 import singer
 
@@ -58,7 +58,18 @@ class MyMapper(InlineMapper):
 
         self.mapper = PluginMapper(plugin_config=dict(self.config), logger=self.logger)
 
-    def _process_schema_message(self, message_dict: dict) -> None:
+    def map_schema_message(
+        self,
+        message_dict: dict,
+    ) -> Generator[singer.Message, None, None]:
+        """Map a schema message according to config.
+
+        Args:
+            message_dict: A SCHEMA message JSON dictionary.
+
+        Yields:
+            Transformed schema messages.
+        """
         self._assert_line_requires(message_dict, requires={"stream", "schema"})
 
         stream_id: str = message_dict["stream"]
@@ -74,9 +85,20 @@ class MyMapper(InlineMapper):
                 stream_map.transformed_key_properties,
                 message_dict.get("bookmark_keys", []),
             )
-            singer.write_message(schema_message)
+            yield schema_message
 
-    def _process_record_message(self, message_dict: dict) -> None:
+    def map_record_message(
+        self,
+        message_dict: dict,
+    ) -> Generator[singer.Message, None, None]:
+        """Map a record message according to config.
+
+        Args:
+            message_dict: A RECORD message JSON dictionary.
+
+        Yields:
+            Transformed record messages.
+        """
         self._assert_line_requires(message_dict, requires={"stream", "record"})
 
         stream_id: str = message_dict["stream"]
@@ -86,23 +108,37 @@ class MyMapper(InlineMapper):
                 record_message = singer.RecordMessage(
                     stream=stream_map.stream_alias,
                     record=mapped_record,
-                    version=None,
+                    version=message_dict.get("version"),
                     time_extracted=utc_now(),
                 )
-                singer.write_message(record_message)
+                yield record_message
 
-    def _process_state_message(self, message_dict: dict) -> None:
-        self._assert_line_requires(message_dict, requires={"value"})
-        singer.write_message(singer.StateMessage(value=message_dict["value"]))
+    def map_state_message(self, message_dict: dict) -> List[singer.Message]:
+        """Do nothing to the message.
 
-    def _process_activate_version_message(self, message_dict: dict) -> None:
-        self._assert_line_requires(message_dict, requires={"stream", "version"})
-        singer.write_message(
+        Args:
+            message_dict: A STATE message JSON dictionary.
+
+        Returns:
+            The same state message
+        """
+        return [singer.StateMessage(value=message_dict["value"])]
+
+    def map_activate_version_message(self, message_dict: dict) -> List[singer.Message]:
+        """Do nothing to the message.
+
+        Args:
+            message_dict: An ACTIVATE_VERSION message JSON dictionary.
+
+        Returns:
+            The same state message
+        """
+        return [
             singer.ActivateVersionMessage(
                 stream=message_dict["stream"],
                 version=message_dict["version"],
             )
-        )
+        ]
 
 
 if __name__ == "__main__":
