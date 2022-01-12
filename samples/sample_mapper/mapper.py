@@ -1,0 +1,95 @@
+from pathlib import PurePath
+from typing import List, Optional, Union
+
+import singer
+
+import singer_sdk.typing as th
+from singer_sdk.helpers._util import utc_now
+from singer_sdk.mapper import PluginMapper
+from singer_sdk.mapper_base import InlineMapper
+
+
+class MyMapper(InlineMapper):
+    name = "my-mapper"
+
+    config_jsonschema = th.PropertiesList(
+        th.Property(
+            "stream_maps",
+            th.ObjectType(
+                additional_properties=th.CustomType(
+                    {
+                        "type": ["object", "string", "null"],
+                        "additionalProperties": {
+                            "type": ["string", "null"],
+                        },
+                    }
+                )
+            ),
+            required=True,
+            description="TODO",
+        )
+    ).to_dict()
+
+    def __init__(
+        self,
+        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        parse_env_config: bool = False,
+        validate_config: bool = True,
+    ) -> None:
+        super().__init__(
+            config=config,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
+
+        self.mapper = PluginMapper(plugin_config=dict(self.config), logger=self.logger)
+
+    def _process_schema_message(self, message_dict: dict) -> None:
+        self._assert_line_requires(message_dict, requires={"stream", "schema"})
+
+        stream_id: str = message_dict["stream"]
+        self.mapper.register_raw_stream_schema(
+            stream_id,
+            message_dict["schema"],
+            message_dict.get("key_properties", []),
+        )
+        for stream_map in self.mapper.stream_maps[stream_id]:
+            schema_message = singer.SchemaMessage(
+                stream_map.stream_alias,
+                stream_map.transformed_schema,
+                stream_map.transformed_key_properties,
+                message_dict.get("bookmark_keys", []),
+            )
+            singer.write_message(schema_message)
+
+    def _process_record_message(self, message_dict: dict) -> None:
+        self._assert_line_requires(message_dict, requires={"stream", "record"})
+
+        stream_id: str = message_dict["stream"]
+        for stream_map in self.mapper.stream_maps[stream_id]:
+            mapped_record = stream_map.transform(message_dict["record"])
+            if mapped_record is not None:
+                record_message = singer.RecordMessage(
+                    stream=stream_map.stream_alias,
+                    record=mapped_record,
+                    version=None,
+                    time_extracted=utc_now(),
+                )
+                singer.write_message(record_message)
+
+    def _process_state_message(self, message_dict: dict) -> None:
+        self._assert_line_requires(message_dict, requires={"value"})
+        singer.write_message(singer.StateMessage(value=message_dict["value"]))
+
+    def _process_activate_version_message(self, message_dict: dict) -> None:
+        self._assert_line_requires(message_dict, requires={"stream", "version"})
+        singer.write_message(
+            singer.ActivateVersionMessage(
+                stream=message_dict["stream"],
+                version=message_dict["version"],
+            )
+        )
+
+
+if __name__ == "__main__":
+    MyMapper.cli()
