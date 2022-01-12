@@ -17,6 +17,15 @@ class Flattener(StreamMap):
         max_level: int,
         separator: str = "__",
     ) -> None:
+        """Initialize the Flattener.
+
+        Args:
+            stream_alias: [description]
+            raw_schema: [description]
+            key_properties: [description]
+            max_level: [description]
+            separator: [description]. Defaults to "__".
+        """
         super().__init__(stream_alias, raw_schema, key_properties)
 
         self.separator = separator
@@ -51,3 +60,14 @@ class Flattener(StreamMap):
             max_level=self.max_level,
             separator=self.separator,
         )
+
+    def get_filter_result(self, record: dict) -> bool:
+        """No records are excluded by flatteners.
+
+        Args:
+            record: The record dict.
+
+        Returns:
+            True to include the record. False to filter it out.
+        """
+        return True
