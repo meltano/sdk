@@ -54,7 +54,7 @@ class Metadata:
         )
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert metadata to a JSON-encodable dictionary."""
+        """Convert metadata to a JSON-encodeable dictionary."""
         result = {}
 
         for field in fields(self):
