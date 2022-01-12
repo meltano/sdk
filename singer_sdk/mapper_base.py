@@ -14,7 +14,7 @@ from singer_sdk.plugin_base import PluginBase
 
 
 class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
-    """TODO."""
+    """Abstract base class for inline mappers."""
 
     @classproperty
     def _env_prefix(cls) -> str:
