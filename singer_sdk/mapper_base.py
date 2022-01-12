@@ -2,7 +2,7 @@
 
 import abc
 from io import FileIO
-from typing import Callable, Iterable, Tuple
+from typing import Callable, Iterable, List, Tuple
 
 import click
 import singer
@@ -10,6 +10,7 @@ import singer
 from singer_sdk.cli import common_options
 from singer_sdk.configuration._dict_config import merge_config_sources
 from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import PluginBase
 
@@ -20,6 +21,17 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     @classproperty
     def _env_prefix(cls) -> str:
         return f"{cls.name.upper().replace('-', '_')}_"
+
+    @classproperty
+    def capabilities(self) -> List[CapabilitiesEnum]:
+        """Get capabilities.
+
+        Returns:
+            A list of plugin capabilities.
+        """
+        return [
+            PluginCapabilities.STREAM_MAPS,
+        ]
 
     @staticmethod
     def _write_messages(messages: Iterable[singer.Message]) -> None:

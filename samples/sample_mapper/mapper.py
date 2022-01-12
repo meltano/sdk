@@ -14,7 +14,7 @@ from singer_sdk.mapper_base import InlineMapper
 class StreamTransformMapper(InlineMapper):
     """A sample inline mapper."""
 
-    name = "my-mapper"
+    name = "meltano-map-transformer"
 
     config_jsonschema = th.PropertiesList(
         th.Property(
@@ -23,14 +23,21 @@ class StreamTransformMapper(InlineMapper):
                 additional_properties=th.CustomType(
                     {
                         "type": ["object", "string", "null"],
-                        "additionalProperties": {
-                            "type": ["string", "null"],
+                        "properties": {
+                            "__filter__": {"type": ["string", "null"]},
+                            "__source__": {"type": ["string", "null"]},
+                            "__else__": {"type": ["null"]},
+                            "__key_properties__": {
+                                "type": ["array", "null"],
+                                "items": {"type": "string"},
+                            },
                         },
+                        "additionalProperties": {"type": ["string", "null"]},
                     }
                 )
             ),
             required=True,
-            description="TODO",
+            description="Stream maps",
         )
     ).to_dict()
 
