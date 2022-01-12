@@ -149,7 +149,7 @@ def is_string_array_type(type_dict: dict) -> bool:
     if "type" not in type_dict:
         raise ValueError(f"Could not detect type from schema '{type_dict}'")
 
-    return type_dict["type"] == "array" and bool(is_string_type(type_dict["items"]))
+    return "array" in type_dict["type"] and bool(is_string_type(type_dict["items"]))
 
 
 def is_boolean_type(property_schema: dict) -> Optional[bool]:

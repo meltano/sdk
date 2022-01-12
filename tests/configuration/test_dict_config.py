@@ -12,8 +12,8 @@ from singer_sdk.configuration._dict_config import (
 
 CONFIG_JSONSCHEMA = th.PropertiesList(
     th.Property("prop1", th.StringType, required=True),
-    th.Property("prop2", th.IntegerType),
-    th.Property("prop3", th.StringType),
+    th.Property("prop2", th.StringType),
+    th.Property("prop3", th.ArrayType(th.StringType)),
 ).to_dict()
 
 
@@ -30,7 +30,7 @@ def config_file1(tmpdir) -> str:
 def config_file2(tmpdir) -> str:
     filepath: str = tmpdir.join("file2.json")
     with open(filepath, "w") as f:
-        json.dump({"prop3": "from-file-2"}, f)
+        json.dump({"prop3": ["from-file-2"]}, f)
 
     return filepath
 
@@ -58,6 +58,19 @@ def test_get_env_var_config():
     assert "prop4" not in no_env_config and "PROP4" not in env_config
 
 
+def test_get_env_var_config_not_parsable():
+    """Test settings parsing from environment variables with a non-parsable value."""
+    with mock.patch.dict(
+        os.environ,
+        {
+            "PLUGIN_TEST_PROP1": "hello",
+            "PLUGIN_TEST_PROP3": '["repeated"]',
+        },
+    ):
+        with pytest.raises(ValueError):
+            parse_environment_config(CONFIG_JSONSCHEMA, "PLUGIN_TEST_")
+
+
 def test_merge_config_sources(config_file1, config_file2):
     """Test merging multiple configuration sources."""
     with mock.patch.dict(
@@ -74,5 +87,15 @@ def test_merge_config_sources(config_file1, config_file2):
         )
         assert config["prop1"] == "from-env"
         assert config["prop2"] == "from-file-1"
-        assert config["prop3"] == "from-file-2"
+        assert config["prop3"] == ["from-file-2"]
         assert "prop4" not in config
+
+
+def test_merge_config_sources_missing_file():
+    """Test merging multiple configuration sources when a file is not found."""
+    with pytest.raises(FileNotFoundError):
+        merge_config_sources(
+            ["missing.json"],
+            CONFIG_JSONSCHEMA,
+            "PLUGIN_TEST_",
+        )
