@@ -12,6 +12,7 @@ Plugin Classes
 
     Tap
     Target
+    InlineMapper
 
 Stream Classes
 --------------
