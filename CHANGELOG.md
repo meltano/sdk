@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### New
 
 - Inline Mapper SDK: Support for creation of inline mapper plugins ([#257](https://gitlab.com/meltano/sdk/-/issues/257), [!234](https://gitlab.com/meltano/sdk/-/merge_requests/234))
-- Tap and Target Cookiecutter: Support editable installation in Meltano with [PEP 660](https://www.python.org/dev/peps/pep-0660/) ([#238](https://gitlab.com/meltano/sdk/-/issues/238), [!231](https://gitlab.com/meltano/sdk/-/merge_requests/231))
+- Tap and Target Cookiecutter: Support editable pip installs (`pip install -e .`) with [PEP 660](https://www.python.org/dev/peps/pep-0660/) ([#238](https://gitlab.com/meltano/sdk/-/issues/238), [!231](https://gitlab.com/meltano/sdk/-/merge_requests/231))
 
 ### Fixes
 
