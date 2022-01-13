@@ -22,6 +22,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.3.18 - (2022-01-13)
 ---
 
+### New
+
+- Inline Mapper SDK: Support for creation of inline mapper plugins ([#257](https://gitlab.com/meltano/sdk/-/issues/257), [!234](https://gitlab.com/meltano/sdk/-/merge_requests/234))
+- Tap and Target Cookiecutter: Support editable installation in Meltano with PEP 660 ([#238](https://gitlab.com/meltano/sdk/-/issues/238), [!231](https://gitlab.com/meltano/sdk/-/merge_requests/231))
+
+### Fixes
+
+- Tap Cookiecutter: Add output directory for target-jsonl ([!228](https://gitlab.com/meltano/sdk/-/merge_requests/228)) -- _Thanks, **[Niall Woodward](https://gitlab.com/NiallRees)**!_
+- Tap SDK: Make the `expires_in` property optional in OAuth response ([#297](https://gitlab.com/meltano/sdk/-/issues/297), [!232](https://gitlab.com/meltano/sdk/-/merge_requests/232)) -- _Thanks, **[Daniel Ferguson](https://gitlab.com/daniel-ferguson)**!_
 ## 0.3.17 - (2021-12-16)
 ---
 
