@@ -275,6 +275,9 @@ class CustomStreamMap(StreamMap):
             The transformed record.
         """
         transformed_record = self._transform_fn(record)
+        if not transformed_record:
+            return None
+
         return super().transform(transformed_record)
 
     def get_filter_result(self, record: dict) -> bool:
@@ -672,47 +675,3 @@ class PluginMapper:
             else:
                 # Additional mappers for aliasing and multi-projection:
                 self.stream_maps[stream_name].append(mapper)
-
-    def _wrap_with_flattener(self, stream_map: StreamMap) -> StreamMap:
-        """If flattening is enabled, wrap the stream map in a flattener."""
-        if self._max_flattening_level:
-            self.logger.debug(
-                f"Stream '{stream_map.stream_alias}' has flattening enabled with "
-                f"max flattening level '{self._max_flattening_level}'."
-            )
-            mapper = Flattener(
-                stream_alias=stream_map.stream_alias,
-                raw_schema=stream_map.transformed_schema,
-                key_properties=stream_map.transformed_key_properties,
-                max_level=self._max_flattening_level,
-                nested_stream_map=stream_map,
-            )
-
-    def get_primary_mapper(self, stream_name: str) -> StreamMap:
-        """Return the primary mapper for the specified stream name.
-
-        Args:
-            stream_name: TODO
-
-        Returns:
-            TODO
-
-        Raises:
-            StreamMapConfigError: TODO
-        """
-        if stream_name not in self.stream_maps:
-            raise StreamMapConfigError(f"No mapper found for {stream_name}. ")
-
-        return self.stream_maps[stream_name][0]
-
-    def apply_primary_mapper(self, stream_name: str, record: dict) -> Optional[dict]:
-        """Apply the primary mapper for the stream and return the result.
-
-        Args:
-            stream_name: TODO
-            record: TODO
-
-        Returns:
-            TODO
-        """
-        return self.get_primary_mapper(stream_name).transform(record)

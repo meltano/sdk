@@ -177,7 +177,6 @@ def flatten_record(
     )
 
 
-# pylint: disable-msg=invalid-name
 def _flatten_record(
     record_node: MutableMapping[Any, Any],
     flattened_schema: dict = None,
