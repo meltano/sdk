@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 
 from freezegun import freeze_time
 
-from samples.sample_mapper.mapper import StreamTransformMapper
+from samples.sample_mapper.mapper import StreamTransform
 from samples.sample_tap_countries.countries_tap import SampleTapCountries
 from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk import typing as th
@@ -78,7 +78,7 @@ def test_countries_to_csv(csv_config: dict):
 def test_countries_to_csv_mapped(csv_config: dict):
     tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
     target = SampleTargetCSV(config=csv_config)
-    mapper = StreamTransformMapper(config=COUNTRIES_STREAM_MAPS_CONFIG)
+    mapper = StreamTransform(config=COUNTRIES_STREAM_MAPS_CONFIG)
     sync_end_to_end(tap, target, mapper)
 
 

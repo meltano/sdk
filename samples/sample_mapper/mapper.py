@@ -11,8 +11,8 @@ from singer_sdk.mapper import PluginMapper
 from singer_sdk.mapper_base import InlineMapper
 
 
-class StreamTransformMapper(InlineMapper):
-    """A sample inline mapper."""
+class StreamTransform(InlineMapper):
+    """A map transformer which implements the Stream Maps capability."""
 
     name = "meltano-map-transformer"
 
@@ -118,6 +118,7 @@ class StreamTransformMapper(InlineMapper):
                     version=message_dict.get("version"),
                     time_extracted=utc_now(),
                 )
+                self.logger.info(stream_map.stream_alias)
                 yield record_message
 
     def map_state_message(self, message_dict: dict) -> List[singer.Message]:
@@ -131,22 +132,27 @@ class StreamTransformMapper(InlineMapper):
         """
         return [singer.StateMessage(value=message_dict["value"])]
 
-    def map_activate_version_message(self, message_dict: dict) -> List[singer.Message]:
-        """Do nothing to the message.
+    def map_activate_version_message(
+        self,
+        message_dict: dict,
+    ) -> Generator[singer.Message, None, None]:
+        """Duplicate the message or alias the stream name as defined in configuration.
 
         Args:
             message_dict: An ACTIVATE_VERSION message JSON dictionary.
 
-        Returns:
-            The same state message
+        Yields:
+            An ACTIVATE_VERSION for each duplicated or aliased stream.
         """
-        return [
-            singer.ActivateVersionMessage(
-                stream=message_dict["stream"],
+        self._assert_line_requires(message_dict, requires={"stream", "version"})
+
+        stream_id: str = message_dict["stream"]
+        for stream_map in self.mapper.stream_maps[stream_id]:
+            yield singer.ActivateVersionMessage(
+                stream=stream_map.stream_alias,
                 version=message_dict["version"],
             )
-        ]
 
 
 if __name__ == "__main__":
-    StreamTransformMapper.cli()
+    StreamTransform.cli()
