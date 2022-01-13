@@ -6,7 +6,6 @@ import pandas
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from singer_sdk.helpers._flattening import RecordFlattener
 from singer_sdk.sinks import BatchSink
 
 

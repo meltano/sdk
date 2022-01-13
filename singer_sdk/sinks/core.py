@@ -10,8 +10,6 @@ from typing import Any, Dict, List, Mapping, Optional, Union
 from dateutil import parser
 from jsonschema import Draft4Validator, FormatChecker
 
-# TODO: Re-implement schema validation
-# from singer_sdk.helpers._flattening import RecordFlattener
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._typing import (
     DatetimeErrorTreatmentEnum,
