@@ -3,10 +3,41 @@
 import collections
 import json
 import re
-from typing import Any, List, MutableMapping, Tuple
+from typing import Any, List, Mapping, MutableMapping, NamedTuple, Optional, Tuple
 import itertools
 
 import inflection
+
+
+DEFAULT_FLATTENING_SEPARATOR = "__"
+
+
+class FlatteningOptions(NamedTuple):
+    """A stream map which performs the flattening role."""
+
+    max_level: int
+    flattening_enabled: bool = True
+    separator: str = DEFAULT_FLATTENING_SEPARATOR
+
+
+def get_flattening_options(
+    plugin_config: Mapping,
+) -> Optional[FlatteningOptions]:
+    """Get flattening options, if flattening is enabled.
+
+    Args:
+        plugin_config: The tap or target config dictionary.
+
+    Returns:
+        A new FlatteningOptions object or None if flattening is disabled.
+    """
+    if (
+        "max_flattening_level" in plugin_config
+        and plugin_config["max_flattening_level"]
+    ):
+        return FlatteningOptions(max_level=int(plugin_config["max_flattening_level"]))
+
+    return None
 
 
 def flatten_key(key_name: str, parent_keys: List[str], separator: str = "__") -> str:

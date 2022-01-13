@@ -7,12 +7,28 @@ import abc
 import copy
 import hashlib
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
 from singer_sdk.helpers import _simpleeval as simpleeval
 from singer_sdk.helpers._catalog import get_selected_schema
 from singer_sdk.helpers._singer import Catalog
+from singer_sdk.helpers._flattening import (
+    flatten_record,
+    flatten_schema,
+    get_flattening_options,
+    FlatteningOptions,
+)
 from singer_sdk.typing import (
     CustomType,
     IntegerType,
@@ -46,35 +62,97 @@ class StreamMap(metaclass=abc.ABCMeta):
     """Abstract base class for all map classes."""
 
     def __init__(
-        self, stream_alias: str, raw_schema: dict, key_properties: Optional[List[str]]
+        self,
+        stream_alias: str,
+        raw_schema: dict,
+        key_properties: Optional[List[str]],
+        flattening_options: Optional[FlatteningOptions],
     ) -> None:
         """Initialize mapper.
 
         Args:
             stream_alias: Stream name.
-            raw_schema: Original strem JSON schema.
+            raw_schema: Original stream JSON schema.
             key_properties: Primary key of the source stream.
+            flattening_options: Flattening options, or None to skip flattening.
         """
         self.stream_alias = stream_alias
         self.raw_schema = raw_schema
         self.raw_key_properties = key_properties
         self.transformed_schema = raw_schema
         self.transformed_key_properties = key_properties
+        self.flattening_options = flattening_options
+        if self.flattening_enabled:
+            self.transformed_schema = self.flatten_schema(self.transformed_schema)
+
+    @property
+    def flattening_enabled(self) -> bool:
+        """True if flattening is enabled for this stream map.
+
+        Returns:
+            True if flattening is enabled, otherwise False.
+        """
+        return (
+            self.flattening_options is not None
+            and self.flattening_options.flattening_enabled
+            and self.flattening_options.max_level > 0
+        )
+
+    def flatten_record(self, record: dict) -> dict:
+        """If flattening is enabled, flatten a record and return the result.
+
+        If flattening is disabled, the original record will be returned.
+
+        Args:
+            record: An individual record dictionary in a stream.
+
+        Returns:
+            A new dictionary representing the flattened record.
+        """
+        if not self.flattening_options or not self.flattening_enabled:
+            return record
+
+        return flatten_record(
+            record,
+            flattened_schema=self.transformed_schema,
+            max_level=self.flattening_options.max_level,
+            separator=self.flattening_options.separator,
+        )
+
+    def flatten_schema(self, raw_schema: dict) -> dict:
+        """Flatten the provided schema.
+
+        Args:
+            raw_schema: The raw schema to flatten.
+
+        Returns:
+            The flattened version of the schema.
+        """
+        if not self.flattening_options or not self.flattening_enabled:
+            return raw_schema
+
+        return flatten_schema(
+            raw_schema,
+            separator=self.flattening_options.separator,
+            max_level=self.flattening_options.max_level,
+        )
 
     @abc.abstractmethod
     def transform(self, record: dict) -> Optional[dict]:
         """Transform a record and return the result.
 
+        Record flattening will also be performed, if enabled.
+
+        Subclasses should call the super().transform(record) after any other custom
+        transforms are performed.
+
         Args:
             record: An individual record dictionary in a stream.
 
-        Return:
+        Returns:
             A new dictionary representing a transformed record.
-
-        Raises:
-            NotImplementedError: If the derived class doesn't override this method.
         """
-        raise NotImplementedError
+        return self.flatten_record(record)
 
     @abc.abstractmethod
     def get_filter_result(self, record: dict) -> bool:
@@ -135,7 +213,7 @@ class SameRecordTransform(DefaultStreamMap):
         Returns:
             The original record unchanged.
         """
-        return record
+        return cast(dict, super().transform(record))
 
     def get_filter_result(self, record: dict) -> bool:
         """Return True (always include).
@@ -159,20 +237,23 @@ class CustomStreamMap(StreamMap):
         raw_schema: dict,
         key_properties: Optional[List[str]],
         map_transform: dict,
+        flattening_options: Optional[FlatteningOptions],
     ) -> None:
         """Initialize mapper.
 
         Args:
             stream_alias: Stream name.
             map_config: Stream map configuration.
-            raw_schema: Original strem JSON schema.
+            raw_schema: Original stream's JSON schema.
             key_properties: Primary key of the source stream.
             map_transform: Dictionary of transformations to apply to the stream.
+            flattening_options: Flattening options, or None to skip flattening.
         """
         super().__init__(
             stream_alias=stream_alias,
             raw_schema=raw_schema,
             key_properties=key_properties,
+            flattening_options=flattening_options,
         )
 
         self.map_config = map_config
@@ -193,7 +274,8 @@ class CustomStreamMap(StreamMap):
         Returns:
             The transformed record.
         """
-        return self._transform_fn(record)
+        transformed_record = self._transform_fn(record)
+        return super().transform(transformed_record)
 
     def get_filter_result(self, record: dict) -> bool:
         """Return True to include or False to exclude.
@@ -208,7 +290,7 @@ class CustomStreamMap(StreamMap):
 
     @property
     def functions(self) -> Dict[str, Callable]:
-        """Get avaibale transformation functions.
+        """Get availabale transformation functions.
 
         Returns:
             Functions which should be available for expression evaluation.
@@ -458,6 +540,7 @@ class PluginMapper:
         """
         self.stream_maps = cast(Dict[str, List[StreamMap]], {})
         self.map_config = plugin_config.get("stream_map_config", {})
+        self.flattening_options = get_flattening_options(plugin_config)
         self.default_mapper_type: Type[DefaultStreamMap] = SameRecordTransform
         self.logger = logger
 
@@ -523,7 +606,12 @@ class PluginMapper:
             # The 0th mapper should be the same-named treatment.
             # Additional items may be added for aliasing or multi projections.
             self.stream_maps[stream_name] = [
-                self.default_mapper_type(stream_name, schema, key_properties)
+                self.default_mapper_type(
+                    stream_name,
+                    schema,
+                    key_properties,
+                    flattening_options=self.flattening_options,
+                )
             ]
 
         for stream_map_key, stream_def in self.stream_maps_dict.items():
@@ -545,6 +633,7 @@ class PluginMapper:
                     stream_alias=stream_map_key,
                     raw_schema=schema,
                     key_properties=None,
+                    flattening_options=self.flattening_options,
                 )
                 logging.info(f"Set null tansform as default for '{stream_name}'")
                 continue
@@ -573,7 +662,9 @@ class PluginMapper:
                 map_config=self.map_config,
                 raw_schema=schema,
                 key_properties=key_properties,
+                flattening_options=self.flattening_options,
             )
+
             if stream_name == stream_alias:
                 # Zero-th mapper should be the same-named mapper.
                 # Override the default mapper with this custom map
@@ -581,6 +672,21 @@ class PluginMapper:
             else:
                 # Additional mappers for aliasing and multi-projection:
                 self.stream_maps[stream_name].append(mapper)
+
+    def _wrap_with_flattener(self, stream_map: StreamMap) -> StreamMap:
+        """If flattening is enabled, wrap the stream map in a flattener."""
+        if self._max_flattening_level:
+            self.logger.debug(
+                f"Stream '{stream_map.stream_alias}' has flattening enabled with "
+                f"max flattening level '{self._max_flattening_level}'."
+            )
+            mapper = Flattener(
+                stream_alias=stream_map.stream_alias,
+                raw_schema=stream_map.transformed_schema,
+                key_properties=stream_map.transformed_key_properties,
+                max_level=self._max_flattening_level,
+                nested_stream_map=stream_map,
+            )
 
     def get_primary_mapper(self, stream_name: str) -> StreamMap:
         """Return the primary mapper for the specified stream name.
