@@ -38,7 +38,7 @@ Note:
   here.
 
 """
-from typing import Any, Generic, List, Tuple, Type, TypeVar, Union, cast
+from typing import Any, Generic, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 from jsonschema import validators
 
@@ -195,6 +195,7 @@ class Property(JSONTypeHelper, Generic[W]):
         required: bool = False,
         default: Any = None,
         description: str = None,
+        selected_by_default: Optional[bool] = None,
     ) -> None:
         """Initialize Property object.
 
@@ -204,12 +205,14 @@ class Property(JSONTypeHelper, Generic[W]):
             required: Whether this is a required property.
             default: Default value in the JSON Schema.
             description: Long-text property description.
+            selected_by_default: Whether to select this property if selected is not set.
         """
         self.name = name
         self.wrapped = wrapped
         self.optional = not required
         self.default = default
         self.description = description
+        self.selected_by_default = selected_by_default
 
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
@@ -233,6 +236,8 @@ class Property(JSONTypeHelper, Generic[W]):
             type_dict.update({"default": self.default})
         if self.description:
             type_dict.update({"description": self.description})
+        if self.selected_by_default is not None:
+            type_dict.update({"selected-by-default": self.selected_by_default})
         return {self.name: type_dict}
 
 

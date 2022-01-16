@@ -91,3 +91,21 @@ def test_property_description():
             "description": text,
         }
     }
+
+
+def test_property_selected_by_default():
+    text = "A test property"
+    prop = Property("test_property", StringType, selected_by_default=False)
+    assert prop.to_dict() == {
+        "test_property": {
+            "type": ["string", "null"],
+            "selected-by-default": False,
+        }
+    }
+    prop2 = Property("test_property_true", StringType, selected_by_default=True)
+    assert prop2.to_dict() == {
+        "test_property_true": {
+            "type": ["string", "null"],
+            "selected-by-default": True,
+        }
+    }
