@@ -591,6 +591,9 @@ class SQLConnector:
             full_table_name: The fully qualified table name.
             old_name: The old column to be renamed.
             new_name: The new name for the column.
+
+        Raises:
+            NotImplementedError: If `self.allow_column_rename` is false.
         """
         if not self.allow_column_rename:
             raise NotImplementedError("Renaming columns is not supported.")

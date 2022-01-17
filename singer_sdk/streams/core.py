@@ -775,7 +775,7 @@ class Stream(metaclass=abc.ABCMeta):
         if self.config[METRICS_LOG_LEVEL_SETTING].upper() == "NONE":
             return None
 
-        assert False, (
+        raise AssertionError(
             "Unexpected logging level for metrics: "
             + self.config[METRICS_LOG_LEVEL_SETTING]
         )
