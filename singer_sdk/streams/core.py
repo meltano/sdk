@@ -758,10 +758,10 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def _metric_logging_function(self) -> Optional[Callable]:
-        """TODO.
+        """Return the metrics logging function.
 
         Returns:
-            TODO
+            The logging function for emitting metrics.
 
         Raises:
             ValueError: If logging level setting is an unsupported value.
