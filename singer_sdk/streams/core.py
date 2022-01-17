@@ -762,6 +762,9 @@ class Stream(metaclass=abc.ABCMeta):
 
         Returns:
             TODO
+
+        Raises:
+            ValueError: If logging level setting is an unsupported value.
         """
         if METRICS_LOG_LEVEL_SETTING not in self.config:
             return self.logger.info
@@ -775,7 +778,7 @@ class Stream(metaclass=abc.ABCMeta):
         if self.config[METRICS_LOG_LEVEL_SETTING].upper() == "NONE":
             return None
 
-        raise AssertionError(
+        raise ValueError(
             "Unexpected logging level for metrics: "
             + self.config[METRICS_LOG_LEVEL_SETTING]
         )
