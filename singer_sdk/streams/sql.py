@@ -569,7 +569,9 @@ class SQLConnector:
             return
 
         for property_name, property_def in schema["properties"].items():
-            self.prepare_column(full_table_name, property_name, self.to_sql_type(property_def))
+            self.prepare_column(
+                full_table_name, property_name, self.to_sql_type(property_def)
+            )
 
     def prepare_column(
         self,
@@ -883,7 +885,9 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 f"Stream '{self.name}' does not support partitioning."
             )
 
-        query = sqlalchemy.sql.select(f"{self.fully_qualified_name}")
+        query = sqlalchemy.sql.select(
+            sqlalchemy.text("* FROM :tbl").bindparams(tbl=self.fully_qualified_name)
+        )
         if self.replication_key:
             quoted_replication_key = self.connector.quote(self.replication_key)
             query = query.order_by(f"{quoted_replication_key}")
