@@ -177,7 +177,7 @@ class SQLConnector:
         raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
 
     @staticmethod
-    def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+    def to_sql_type(jsonschema_type: dict) -> Type[sqlalchemy.types.TypeEngine]:
         """Return a JSON Schema representation of the provided type.
 
         By default will call `typing.to_sql_type()`.
@@ -372,7 +372,9 @@ class SQLConnector:
 
         return result
 
-    def parse_full_table_name(self, full_table_name: str) -> Tuple[str, str, str]:
+    def parse_full_table_name(
+        self, full_table_name: str
+    ) -> Tuple[Optional[str], Optional[str], str]:
         """Parse a fully qualified table name into its parts.
 
         Developers may override this method if their platform does not support the
@@ -523,8 +525,20 @@ class SQLConnector:
         if not self.allow_column_add:
             raise NotImplementedError("Adding columns is not supported.")
 
+        create_column_clause = sqlalchemy.schema.CreateColumn(
+            sqlalchemy.Column(
+                column_name,
+                sql_type,
+            )
+        )
         self.connection.execute(
-            f"ALTER TABLE {full_table_name} " f"ADD COLUMN {column_name} ({sql_type})"
+            sqlalchemy.DDL(
+                "ALTER TABLE %(table)s ADD COLUMN %(create_column)s",
+                {
+                    "table": full_table_name,
+                    "create_column": create_column_clause,
+                },
+            )
         )
 
     def prepare_table(
@@ -561,7 +575,7 @@ class SQLConnector:
         self,
         full_table_name: str,
         column_name: str,
-        sql_type: sqlalchemy.types.TypeEngine,
+        sql_type: Union[sqlalchemy.types.TypeEngine, Type[sqlalchemy.types.TypeEngine]],
     ) -> None:
         """Adapt target table to provided schema if possible.
 
@@ -680,7 +694,7 @@ class SQLConnector:
         self,
         full_table_name: str,
         column_name: str,
-        sql_type: sqlalchemy.types.TypeEngine,
+        sql_type: Union[sqlalchemy.types.TypeEngine, Type[sqlalchemy.types.TypeEngine]],
     ) -> None:
         """Adapt table column type to support the new JSON schema type.
 
@@ -699,11 +713,21 @@ class SQLConnector:
             return
 
         if not self.allow_column_alter:
-            raise NotImplementedError("Altering columns is not supported.")
+            raise NotImplementedError(
+                "Altering columns is not supported. "
+                f"Could not convert column '{full_table_name}.column_name' "
+                f"from '{current_type}' to '{compatible_sql_type}'."
+            )
 
         self.connection.execute(
-            f"ALTER TABLE {full_table_name} "
-            f"ALTER COLUMN {column_name} ({compatible_sql_type})"
+            sqlalchemy.DDL(
+                "ALTER TABLE %(table)s ALTER COLUMN %(col_name)s (%(col_type)s)",
+                {
+                    "table": full_table_name,
+                    "col_name": column_name,
+                    "col_type": compatible_sql_type,
+                },
+            )
         )
 
 
@@ -859,18 +883,20 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 f"Stream '{self.name}' does not support partitioning."
             )
 
-        query_text = sqlalchemy.text(f"SELECT * FROM {self.fully_qualified_name}")
+        query = sqlalchemy.sql.select(f"{self.fully_qualified_name}")
         if self.replication_key:
             quoted_replication_key = self.connector.quote(self.replication_key)
-            query_text += sqlalchemy.text(f"\nORDER BY {quoted_replication_key}")
+            query = query.order_by(f"{quoted_replication_key}")
 
             start_val = self.get_starting_replication_key_value(context)
             if start_val:
-                query_text += sqlalchemy.text(
-                    f"\nWHERE {quoted_replication_key} >= :start_val"
-                ).bindparams(start_val=start_val)
+                query = query.where(
+                    sqlalchemy.text(
+                        f"\n{quoted_replication_key} >= :start_val"
+                    ).bindparams(start_val=start_val)
+                )
 
-        for row in self.connector.connection.execute(query_text):
+        for row in self.connector.connection.execute(query):
             yield dict(row)
 
 
