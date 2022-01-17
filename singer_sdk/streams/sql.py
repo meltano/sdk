@@ -569,7 +569,7 @@ class SQLConnector:
             return
 
         for property_name, property_def in schema["properties"].items():
-            self.prepare_column(full_table_name, property_name, property_def)
+            self.prepare_column(full_table_name, property_name, self.to_sql_type(property_def))
 
     def prepare_column(
         self,
