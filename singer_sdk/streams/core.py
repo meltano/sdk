@@ -344,9 +344,7 @@ class Stream(metaclass=abc.ABCMeta):
             Max allowable bookmark value for this stream's replication key.
         """
         if self.is_timestamp_replication_key:
-            if not self._sync_start_time:
-                self._sync_start_time = utc_now()
-
+            assert self._sync_start_time, "Sync start time is not initialized."
             return self._sync_start_time
 
         return None
@@ -711,8 +709,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _write_activate_version_message(self) -> None:
         """Write out a STATE message with the latest state."""
-        if not self._sync_start_time:
-            self._sync_start_time = utc_now()
+        assert self._sync_start_time is not None, "Sync start time is not initialized."
 
         singer.write_message(
             ActivateVersionMessage(
@@ -744,6 +741,8 @@ class Stream(metaclass=abc.ABCMeta):
         Yields:
             Record message objects.
         """
+        assert self._sync_start_time is not None, "Sync start time is not initialized."
+
         pop_deselected_record_properties(record, self.schema, self.mask, self.logger)
         record = conform_record_data_types(
             stream_name=self.name,
@@ -751,9 +750,6 @@ class Stream(metaclass=abc.ABCMeta):
             schema=self.schema,
             logger=self.logger,
         )
-        if not self._sync_start_time:
-            self._sync_start_time = utc_now()
-
         for stream_map in self.stream_maps:
             mapped_record = stream_map.transform(record)
             # Emit record if not filtered
@@ -1020,11 +1016,13 @@ class Stream(metaclass=abc.ABCMeta):
         Args:
             context: Stream partition or context dictionary.
         """
+        if not self._sync_start_time:
+            self._sync_start_time = utc_now()
+
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
             msg += f" with context: {context}"
         self.logger.info(f"{msg}...")
-
         # Use a replication signpost, if available
         signpost = self.get_replication_key_signpost(context)
         if signpost:
