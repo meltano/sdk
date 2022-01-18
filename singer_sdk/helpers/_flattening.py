@@ -38,9 +38,10 @@ class RecordFlattener:
             reducer_index += 1
         return self.sep.join(inflected_key)
 
-    def flatten_record(self, d, flatten_schema=None, parent_key=[], level=0):
+    def flatten_record(self, d, flatten_schema=None, parent_key=None, level=0):
         """Return a flattened version of the record."""
         items = []
+        parent_key = parent_key or []
         for k, v in d.items():
             new_key = self._flatten_key(k, parent_key)
             if isinstance(v, collections.MutableMapping) and level < self.max_level:

@@ -5,3 +5,6 @@ tests:
   - destination_name: TargetRecordSinkTest
     target_id: target-recordsink-test
     serialization_method: Per record
+  - destination_name: SQLSinkTest
+    target_id: target-sqlsink-test
+    serialization_method: SQL
