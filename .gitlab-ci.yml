@@ -32,6 +32,12 @@ generate_requirements:
   stage: setup
   image:
     name: python:3.8
+  before_script:
+    # Install poetry
+    - python -V
+    - python -m pip install pipx
+    - python -m pipx ensurepath
+    - python -m pipx install poetry
   script:
     - poetry export --format requirements.txt --output requirements.txt
   artifacts:
