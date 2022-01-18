@@ -219,11 +219,11 @@ class SQLSink(BatchSink):
             new_version: The version number to activate.
         """
         deleted_at = now()
+        table = self.connector.get_table(self.full_table_name)
 
         if self.config.get("hard_delete", True):
-            self.connection.execute(
-                f"DELETE FROM {self.full_table_name} "
-                f"WHERE {self.version_column_name} <= {new_version}"
+            table.delete(
+                sqlalchemy.text(f"{self.version_column_name} <= {new_version}")
             )
             return
 
@@ -234,7 +234,7 @@ class SQLSink(BatchSink):
             self.connector.prepare_column(
                 self.full_table_name,
                 self.soft_delete_column_name,
-                sql_type=sqlalchemy.types.DateTime,
+                sql_type=sqlalchemy.types.DateTime(),
             )
         self.connection.execute(
             f"UPDATE {self.full_table_name}\n"

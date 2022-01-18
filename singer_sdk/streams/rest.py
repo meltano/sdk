@@ -4,7 +4,7 @@ import abc
 import copy
 import logging
 from datetime import datetime
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union, cast
 
 import backoff
 import requests
@@ -252,13 +252,16 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             headers.update(authenticator.auth_headers or {})
             params.update(authenticator.auth_params or {})
 
-        request = self.requests_session.prepare_request(
-            requests.Request(
-                method=http_method,
-                url=url,
-                params=params,
-                headers=headers,
-                json=request_data,
+        request = cast(
+            requests.PreparedRequest,
+            self.requests_session.prepare_request(
+                requests.Request(
+                    method=http_method,
+                    url=url,
+                    params=params,
+                    headers=headers,
+                    json=request_data,
+                ),
             ),
         )
         return request

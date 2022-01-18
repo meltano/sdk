@@ -40,7 +40,7 @@ memoization = "^0.3.2"
 jsonpath-ng = "^1.5.3"
 joblib = "^1.0.1"
 inflection = "^0.5.1"
-sqlalchemy = {version = "^1.4"}
+sqlalchemy = "^1.4"
 dataclasses = {version = "*", markers = "python_version < \"3.7\""}
 contextlib2 = {version = "*", markers = "python_version < \"3.7\""}
 
@@ -73,6 +73,7 @@ flake8-annotations = "^2.6.2"
 darglint = "^1.8.0"
 isort = "^5.9.3"
 types-requests = "^2.26.1"
+sqlalchemy2-stubs = {version = "^0.0.2a19", allow-prereleases = true}
 
 [tool.black]
 exclude = ".*simpleeval.*"

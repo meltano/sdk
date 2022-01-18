@@ -778,10 +778,13 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def _metric_logging_function(self) -> Optional[Callable]:
-        """TODO.
+        """Return the metrics logging function.
 
         Returns:
-            TODO
+            The logging function for emitting metrics.
+
+        Raises:
+            ValueError: If logging level setting is an unsupported value.
         """
         if METRICS_LOG_LEVEL_SETTING not in self.config:
             return self.logger.info
@@ -795,7 +798,7 @@ class Stream(metaclass=abc.ABCMeta):
         if self.config[METRICS_LOG_LEVEL_SETTING].upper() == "NONE":
             return None
 
-        assert False, (
+        raise ValueError(
             "Unexpected logging level for metrics: "
             + self.config[METRICS_LOG_LEVEL_SETTING]
         )
