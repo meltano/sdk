@@ -31,7 +31,7 @@ def test_convert_jsonschema_type_to_sql_type(
     jsonschema_type: dict, is_of_sql_type: sqlalchemy.types.TypeEngine
 ):
     result = th.to_sql_type(jsonschema_type)
-    assert result == is_of_sql_type
+    assert type(result) is is_of_sql_type
 
 
 @pytest.mark.parametrize(

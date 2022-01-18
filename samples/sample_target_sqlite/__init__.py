@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 import sqlalchemy
 
-from singer_sdk import SQLConnector, SQLStream, SQLTap
+from singer_sdk import SQLConnector, SQLSink, SQLTarget
 from singer_sdk import typing as th
 
 DB_PATH_CONFIG = "path_to_db"
@@ -32,12 +32,12 @@ class SQLiteConnector(SQLConnector):
             return super().create_sqlalchemy_connection()
         except Exception as ex:
             raise RuntimeError(
-                f"Error connecting to DB at '{self.config[DB_PATH_CONFIG]}': {ex}"
+                f"Error connecting to DB at '{self.config[DB_PATH_CONFIG]}'"
             ) from ex
 
 
-class SQLiteStream(SQLStream):
-    """The Stream class for SQLite.
+class SQLiteSink(SQLSink):
+    """The Sink class for SQLite.
 
     This class allows developers to optionally override `get_records()` and other
     stream methods in order to improve performance beyond the default SQLAlchemy-based
@@ -50,11 +50,11 @@ class SQLiteStream(SQLStream):
     connector_class = SQLiteConnector
 
 
-class SQLiteTap(SQLTap):
+class SQLiteTarget(SQLTarget):
     """The Tap class for SQLite."""
 
-    name = "tap-sqlite-sample"
-    default_stream_class = SQLiteStream
+    name = "target-sqlite-sample"
+    default_sink_class = SQLiteSink
     config_jsonschema = th.PropertiesList(
         th.Property(
             DB_PATH_CONFIG,
@@ -64,4 +64,4 @@ class SQLiteTap(SQLTap):
     ).to_dict()
 
 
-__all__ = ["SQLiteTap", "SQLiteConnector", "SQLiteStream"]
+__all__ = ["SQLiteTarget", "SQLiteConnector", "SQLiteSink"]
