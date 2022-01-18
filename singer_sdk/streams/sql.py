@@ -2,8 +2,9 @@
 
 import abc
 import logging
+from datetime import datetime
 from functools import lru_cache
-from typing import Any, Dict, Iterable, List, Optional, Type, Union, cast
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union, cast
 
 import singer
 import sqlalchemy
@@ -28,6 +29,10 @@ class SQLConnector:
     - performing type conversions to/from JSONSchema types
     - dialect-specific functions, such as escaping and fully qualified names
     """
+
+    allow_column_add: bool = True
+    allow_column_rename: bool = True
+    allow_column_alter: bool = False
 
     def __init__(
         self, config: Optional[dict] = None, sqlalchemy_url: Optional[str] = None
@@ -89,7 +94,7 @@ class SQLConnector:
         Returns:
             A newly created SQLAlchemy engine object.
         """
-        return sqlalchemy.create_engine(self.sqlalchemy_url)
+        return sqlalchemy.create_engine(self.sqlalchemy_url, echo=True)
 
     @property
     def connection(self) -> sqlalchemy.engine.Connection:
@@ -208,7 +213,8 @@ class SQLConnector:
             delimiter: Generally: '.' for SQL names and '-' for Singer names.
 
         Raises:
-            ValueError: If neither schema_name or db_name are provided.
+            ValueError: If table_name is not provided or if neither schema_name or
+                db_name are provided.
 
         Returns:
             The fully qualified name as a string.
@@ -219,14 +225,16 @@ class SQLConnector:
             result = delimiter.join([db_name, table_name])
         elif schema_name:
             result = delimiter.join([schema_name, table_name])
+        elif table_name:
+            result = table_name
         else:
             raise ValueError(
-                "Schema name or database name was expected for stream: "
+                "Could not generate fully qualified name for stream: "
                 + ":".join(
                     [
                         db_name or "(unknown-db)",
                         schema_name or "(unknown-schema)",
-                        table_name,
+                        table_name or "(unknown-table-name)",
                     ]
                 )
             )
@@ -241,6 +249,15 @@ class SQLConnector:
             The dialect object.
         """
         return cast(sqlalchemy.engine.Dialect, self.connection.engine.dialect)
+
+    @property
+    def _engine(self) -> sqlalchemy.engine.Engine:
+        """Return the dialect object.
+
+        Returns:
+            The dialect object.
+        """
+        return cast(sqlalchemy.engine.Engine, self.connection.engine)
 
     def quote(self, name: str) -> str:
         """Quote a name if it needs quoting.
@@ -355,6 +372,413 @@ class SQLConnector:
                 result.append(catalog_entry.to_dict())
 
         return result
+
+    def parse_full_table_name(
+        self, full_table_name: str
+    ) -> Tuple[Optional[str], Optional[str], str]:
+        """Parse a fully qualified table name into its parts.
+
+        Developers may override this method if their platform does not support the
+        traditional 3-part convention: `db_name.schema_name.table_name`
+
+        Args:
+            full_table_name: A table name or a fully qualified table name. Depending on
+                SQL the platform, this could take the following forms:
+                - `<db>.<schema>.<table>` (three part names)
+                - `<db>.<table>` (platforms which do not use schema groupings)
+                - `<schema>.<name>` (if DB name is already in context)
+                - `<table>` (if DB name and schema name are already in context)
+
+        Returns:
+            A three part tuple (db_name, schema_name, table_name) with any unspecified
+            or unused parts returned as None.
+        """
+        db_name: Optional[str] = None
+        schema_name: Optional[str] = None
+
+        parts = full_table_name.split(".")
+        if len(parts) == 1:
+            table_name = full_table_name
+        if len(parts) == 2:
+            schema_name, table_name = parts
+        if len(parts) == 3:
+            db_name, schema_name, table_name = parts
+
+        return db_name, schema_name, table_name
+
+    def table_exists(self, full_table_name: str) -> bool:
+        """Determine if the target table already exists.
+
+        Args:
+            full_table_name: the target table name.
+
+        Returns:
+            True if table exists, False if not, None if unsure or undetectable.
+        """
+        return cast(
+            bool,
+            self._engine.has_table(full_table_name),
+        )
+
+    def get_table_columns(self, full_table_name: str) -> Dict[str, sqlalchemy.Column]:
+        """Return a list of table columns.
+
+        Args:
+            full_table_name: Fully qualified table name.
+
+        Returns:
+            An ordered list of column objects.
+        """
+        _, schema_name, table_name = self.parse_full_table_name(full_table_name)
+        inspector = sqlalchemy.inspect(self._engine)
+        columns = inspector.get_columns(table_name, schema_name)
+
+        result: Dict[str, sqlalchemy.Column] = {}
+        for col_meta in columns:
+            result[col_meta["name"]] = sqlalchemy.Column(
+                col_meta["name"],
+                col_meta["type"],
+                nullable=col_meta.get("nullable", False),
+            )
+
+        return result
+
+    def get_table(self, full_table_name: str) -> sqlalchemy.Table:
+        """Return a table object.
+
+        Args:
+            full_table_name: Fully qualified table name.
+
+        Returns:
+            A table object with column list.
+        """
+        columns = self.get_table_columns(full_table_name).values()
+        _, schema_name, table_name = self.parse_full_table_name(full_table_name)
+        meta = sqlalchemy.MetaData()
+        return sqlalchemy.schema.Table(
+            table_name, meta, *list(columns), schema=schema_name
+        )
+
+    def column_exists(self, full_table_name: str, column_name: str) -> bool:
+        """Determine if the target table already exists.
+
+        Args:
+            full_table_name: the target table name.
+            column_name: the target column name.
+
+        Returns:
+            True if table exists, False if not, None if unsure or undetectable.
+        """
+        return column_name in self.get_table_columns(full_table_name)
+
+    def create_empty_table(
+        self,
+        full_table_name: str,
+        schema: dict,
+        primary_keys: Optional[List[str]] = None,
+        partition_keys: Optional[List[str]] = None,
+        as_temp_table: bool = False,
+    ) -> None:
+        """Create an empty target table.
+
+        Args:
+            full_table_name: the target table name.
+            schema: the JSON schema for the new table.
+            primary_keys: list of key properties.
+            partition_keys: list of partition keys.
+            as_temp_table: True to create a temp table.
+
+        Raises:
+            NotImplementedError: if temp tables are unsupported and as_temp_table=True.
+            RuntimeError: if a variant schema is passed with no properties defined.
+        """
+        if as_temp_table:
+            raise NotImplementedError("Temporary tables are not supported.")
+
+        _ = partition_keys  # Not supported in generic implementation.
+
+        meta = sqlalchemy.MetaData()
+        columns: List[sqlalchemy.Column] = []
+        primary_keys = primary_keys or []
+        try:
+            properties: dict = schema["properties"]
+        except KeyError:
+            raise RuntimeError(
+                f"Schema for '{full_table_name}' does not define properties: {schema}"
+            )
+        for property_name, property_jsonschema in properties.items():
+            is_primary_key = property_name in primary_keys
+            columns.append(
+                sqlalchemy.Column(
+                    property_name,
+                    self.to_sql_type(property_jsonschema),
+                    primary_key=is_primary_key,
+                )
+            )
+
+        _ = sqlalchemy.Table(full_table_name, meta, *columns)
+        meta.create_all(self._engine)
+
+    def _create_empty_column(
+        self,
+        full_table_name: str,
+        column_name: str,
+        sql_type: sqlalchemy.types.TypeEngine,
+    ) -> None:
+        """Create a new column.
+
+        Args:
+            full_table_name: The target table name.
+            column_name: The name of the new column.
+            sql_type: SQLAlchemy type engine to be used in creating the new column.
+
+        Raises:
+            NotImplementedError: if adding columns is not supported.
+        """
+        if not self.allow_column_add:
+            raise NotImplementedError("Adding columns is not supported.")
+
+        create_column_clause = sqlalchemy.schema.CreateColumn(
+            sqlalchemy.Column(
+                column_name,
+                sql_type,
+            )
+        )
+        self.connection.execute(
+            sqlalchemy.DDL(
+                "ALTER TABLE %(table)s ADD COLUMN %(create_column)s",
+                {
+                    "table": full_table_name,
+                    "create_column": create_column_clause,
+                },
+            )
+        )
+
+    def prepare_table(
+        self,
+        full_table_name: str,
+        schema: dict,
+        primary_keys: List[str],
+        partition_keys: Optional[List[str]] = None,
+        as_temp_table: bool = False,
+    ) -> None:
+        """Adapt target table to provided schema if possible.
+
+        Args:
+            full_table_name: the target table name.
+            schema: the JSON Schema for the table.
+            primary_keys: list of key properties.
+            partition_keys: list of partition keys.
+            as_temp_table: True to create a temp table.
+        """
+        if not self.table_exists(full_table_name=full_table_name):
+            self.create_empty_table(
+                full_table_name=full_table_name,
+                schema=schema,
+                primary_keys=primary_keys,
+                partition_keys=partition_keys,
+                as_temp_table=as_temp_table,
+            )
+            return
+
+        for property_name, property_def in schema["properties"].items():
+            self.prepare_column(
+                full_table_name, property_name, self.to_sql_type(property_def)
+            )
+
+    def prepare_column(
+        self,
+        full_table_name: str,
+        column_name: str,
+        sql_type: sqlalchemy.types.TypeEngine,
+    ) -> None:
+        """Adapt target table to provided schema if possible.
+
+        Args:
+            full_table_name: the target table name.
+            column_name: the target column name.
+            sql_type: the SQLAlchemy type.
+        """
+        if not self.column_exists(full_table_name, column_name):
+            self._create_empty_column(
+                full_table_name=full_table_name,
+                column_name=column_name,
+                sql_type=sql_type,
+            )
+            return
+
+        self._adapt_column_type(
+            full_table_name,
+            column_name=column_name,
+            sql_type=sql_type,
+        )
+
+    def rename_column(self, full_table_name: str, old_name: str, new_name: str) -> None:
+        """Rename the provided columns.
+
+        Args:
+            full_table_name: The fully qualified table name.
+            old_name: The old column to be renamed.
+            new_name: The new name for the column.
+
+        Raises:
+            NotImplementedError: If `self.allow_column_rename` is false.
+        """
+        if not self.allow_column_rename:
+            raise NotImplementedError("Renaming columns is not supported.")
+
+        self.connection.execute(
+            f"ALTER TABLE {full_table_name} "
+            f'RENAME COLUMN "{old_name}" to "{new_name}"'
+        )
+
+    def merge_sql_types(
+        self, sql_types: List[sqlalchemy.types.TypeEngine]
+    ) -> sqlalchemy.types.TypeEngine:
+        """Return a compatible SQL type for the selected type list.
+
+        Args:
+            sql_types: List of SQL types.
+
+        Returns:
+            A SQL type that is compatible with the input types.
+
+        Raises:
+            ValueError: If sql_types argument has zero members.
+        """
+        if not sql_types:
+            raise ValueError("Expected at least one member in `sql_types` argument.")
+
+        if len(sql_types) == 1:
+            return sql_types[0]
+
+        sql_types = self._sort_types(sql_types)
+
+        if len(sql_types) > 2:
+            return self.merge_sql_types(
+                [self.merge_sql_types([sql_types[0], sql_types[1]])] + sql_types[2:]
+            )
+
+        assert len(sql_types) == 2
+        generic_type = type(sql_types[0].as_generic())
+        if isinstance(generic_type, type):
+            if issubclass(
+                generic_type,
+                (sqlalchemy.types.String, sqlalchemy.types.Unicode),
+            ):
+                return sql_types[0]
+
+        elif isinstance(
+            generic_type,
+            (sqlalchemy.types.String, sqlalchemy.types.Unicode),
+        ):
+            return sql_types[0]
+
+        raise ValueError(
+            f"Unable to merge sql types: {', '.join([str(t) for t in sql_types])}"
+        )
+
+    def _sort_types(
+        self,
+        sql_types: Iterable[sqlalchemy.types.TypeEngine],
+    ) -> List[sqlalchemy.types.TypeEngine]:
+        """Return the input types sorted from most to least compatible.
+
+        For example, [Smallint, Integer, Datetime, String, Double] would become
+        [Unicode, String, Double, Integer, Smallint, Datetime].
+        String types will be listed first, then decimal types, then integer types,
+        then bool types, and finally datetime and date. Higher precision, scale, and
+        length will be sorted earlier.
+
+        Args:
+            sql_types (List[sqlalchemy.types.TypeEngine]): [description]
+
+        Returns:
+            The sorted list.
+        """
+
+        def _get_type_sort_key(
+            sql_type: sqlalchemy.types.TypeEngine,
+        ) -> Tuple[int, int]:
+            _len = int(getattr(sql_type, "length", 0) or 0)
+
+            _pytype = cast(type, sql_type.python_type)
+            if issubclass(_pytype, (str, bytes)):
+                return 0, _len
+            elif issubclass(_pytype, datetime):
+                return 100, _len
+            elif issubclass(_pytype, float):
+                return 200, _len
+            elif issubclass(_pytype, int):
+                return 300, _len
+
+            return 900, _len
+
+        return sorted(sql_types, key=_get_type_sort_key)
+
+    def _get_column_type(
+        self, full_table_name: str, column_name: str
+    ) -> sqlalchemy.types.TypeEngine:
+        """Gets the SQL type of the declared column.
+
+        Args:
+            full_table_name: The name of the table.
+            column_name: The name of the column.
+
+        Returns:
+            The type of the column.
+
+        Raises:
+            KeyError: If the provided column name does not exist.
+        """
+        try:
+            column = self.get_table_columns(full_table_name)[column_name]
+        except KeyError as ex:
+            raise KeyError(
+                f"Column `{column_name}` does not exist in table `{full_table_name}`."
+            ) from ex
+
+        return cast(sqlalchemy.types.TypeEngine, column.type)
+
+    def _adapt_column_type(
+        self,
+        full_table_name: str,
+        column_name: str,
+        sql_type: sqlalchemy.types.TypeEngine,
+    ) -> None:
+        """Adapt table column type to support the new JSON schema type.
+
+        Args:
+            full_table_name: The target table name.
+            column_name: The target column name.
+            sql_type: The new SQLAlchemy type.
+
+        Raises:
+            NotImplementedError: if altering columns is not supported.
+        """
+        current_type = self._get_column_type(full_table_name, column_name)
+        compatible_sql_type = self.merge_sql_types([current_type, sql_type])
+        if current_type == compatible_sql_type:
+            # Nothing to do
+            return
+
+        if not self.allow_column_alter:
+            raise NotImplementedError(
+                "Altering columns is not supported. "
+                f"Could not convert column '{full_table_name}.column_name' "
+                f"from '{current_type}' to '{compatible_sql_type}'."
+            )
+
+        self.connection.execute(
+            sqlalchemy.DDL(
+                "ALTER TABLE %(table)s ALTER COLUMN %(col_name)s (%(col_type)s)",
+                {
+                    "table": full_table_name,
+                    "col_name": column_name,
+                    "col_type": compatible_sql_type,
+                },
+            )
+        )
 
 
 class SQLStream(Stream, metaclass=abc.ABCMeta):
@@ -509,16 +933,22 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 f"Stream '{self.name}' does not support partitioning."
             )
 
-        query_text = sqlalchemy.text(f"SELECT * FROM {self.fully_qualified_name}")
+        table = self.connector.get_table(self.fully_qualified_name)
+        query = table.select()
         if self.replication_key:
             quoted_replication_key = self.connector.quote(self.replication_key)
-            query_text += sqlalchemy.text(f"\nORDER BY {quoted_replication_key}")
+            query = query.order_by(f"{quoted_replication_key}")
 
             start_val = self.get_starting_replication_key_value(context)
             if start_val:
-                query_text += sqlalchemy.text(
-                    f"\nWHERE {quoted_replication_key} >= :start_val"
-                ).bindparams(start_val=start_val)
+                query = query.where(
+                    sqlalchemy.text(
+                        f"\n{quoted_replication_key} >= :start_val"
+                    ).bindparams(start_val=start_val)
+                )
 
-        for row in self.connector.connection.execute(query_text):
+        for row in self.connector.connection.execute(query):
             yield dict(row)
+
+
+__all__ = ["SQLStream", "SQLConnector"]

@@ -303,7 +303,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def _reset_state_progress_markers(self) -> None:
         """Clear prior jobs' progress markers at beginning of sync."""
-        for stream_name, state in self.state.get("bookmarks", {}).items():
+        for _, state in self.state.get("bookmarks", {}).items():
             _state.reset_state_progress_markers(state)
             for partition_state in state.get("partitions", []):
                 _state.reset_state_progress_markers(partition_state)
@@ -487,6 +487,37 @@ class SQLTap(Tap):
     # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: Type[SQLStream]
 
+    def __init__(
+        self,
+        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        catalog: Union[PurePath, str, dict, None] = None,
+        state: Union[PurePath, str, dict, None] = None,
+        parse_env_config: bool = False,
+        validate_config: bool = True,
+    ) -> None:
+        """Initialize the SQL tap.
+
+        The SQLTap initializer additionally creates a cache variable for _catalog_dict.
+
+        Args:
+            config: Tap configuration. Can be a dictionary, a single path to a
+                configuration file, or a list of paths to multiple configuration
+                files.
+            catalog: Tap catalog. Can be a dictionary or a path to the catalog file.
+            state: Tap state. Can be dictionary or a path to the state file.
+            parse_env_config: Whether to look for configuration values in environment
+                variables.
+            validate_config: True to require validation of config settings.
+        """
+        self._catalog_dict: Optional[dict] = None
+        super().__init__(
+            config=config,
+            catalog=catalog,
+            state=state,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
+
     @property
     def catalog_dict(self) -> dict:
         """Get catalog dictionary.
@@ -494,6 +525,9 @@ class SQLTap(Tap):
         Returns:
             The tap's catalog as a dict
         """
+        if self._catalog_dict:
+            return self._catalog_dict
+
         if self.input_catalog:
             return self.input_catalog.to_dict()
 
@@ -501,7 +535,9 @@ class SQLTap(Tap):
 
         result: Dict[str, List[dict]] = {"streams": []}
         result["streams"].extend(connector.discover_catalog_entries())
-        return result
+
+        self._catalog_dict = result
+        return self._catalog_dict
 
     def discover_streams(self) -> List[Stream]:
         """Initialize all available streams and return them as a list.

@@ -3,5 +3,5 @@
     "admin_name": "FirstName LastName",
     "target_id": "target-{{ cookiecutter.destination_name.lower() }}",
     "library_name": "{{ cookiecutter.target_id.replace('-', '_') }}",
-    "serialization_method": ["Per record", "Per batch"]
+    "serialization_method": ["Per record", "Per batch", "SQL"]
 }
