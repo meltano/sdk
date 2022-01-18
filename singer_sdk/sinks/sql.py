@@ -234,7 +234,7 @@ class SQLSink(BatchSink):
             self.connector.prepare_column(
                 self.full_table_name,
                 self.soft_delete_column_name,
-                sql_type=sqlalchemy.types.DateTime,
+                sql_type=sqlalchemy.types.DateTime(),
             )
         self.connection.execute(
             f"UPDATE {self.full_table_name}\n"

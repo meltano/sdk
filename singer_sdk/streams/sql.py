@@ -1,6 +1,7 @@
 """Base class for SQL-type streams."""
 
 import abc
+from datetime import datetime
 import logging
 from functools import lru_cache
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union, cast
@@ -30,8 +31,8 @@ class SQLConnector:
     """
 
     allow_column_add: bool = True
-    allow_column_alter: bool = True
     allow_column_rename: bool = True
+    allow_column_alter: bool = False
 
     def __init__(
         self, config: Optional[dict] = None, sqlalchemy_url: Optional[str] = None
@@ -177,7 +178,7 @@ class SQLConnector:
         raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
 
     @staticmethod
-    def to_sql_type(jsonschema_type: dict) -> Type[sqlalchemy.types.TypeEngine]:
+    def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
         """Return a JSON Schema representation of the provided type.
 
         By default will call `typing.to_sql_type()`.
@@ -419,7 +420,7 @@ class SQLConnector:
             self._engine.has_table(full_table_name),
         )
 
-    def get_table_columns(self, full_table_name: str) -> List[sqlalchemy.Column]:
+    def get_table_columns(self, full_table_name: str) -> Dict[str, sqlalchemy.Column]:
         """Return a list of table columns.
 
         Args:
@@ -432,17 +433,31 @@ class SQLConnector:
         inspector = sqlalchemy.inspect(self._engine)
         columns = inspector.get_columns(table_name, schema_name)
 
-        result: List[sqlalchemy.Column] = []
+        result: Dict[str, sqlalchemy.Column] = {}
         for col_meta in columns:
-            result.append(
-                sqlalchemy.Column(
-                    col_meta["name"],
-                    col_meta["type"],
-                    nullable=col_meta.get("nullable", False),
-                )
+            result[col_meta["name"]] = sqlalchemy.Column(
+                col_meta["name"],
+                col_meta["type"],
+                nullable=col_meta.get("nullable", False),
             )
 
         return result
+
+    def get_table(self, full_table_name: str) -> sqlalchemy.Table:
+        """Return a table object.
+
+        Args:
+            full_table_name: Fully qualified table name.
+
+        Returns:
+            A table object with column list.
+        """
+        columns = self.get_table_columns(full_table_name).values()
+        _, schema_name, table_name = self.parse_full_table_name(full_table_name)
+        meta = sqlalchemy.MetaData()
+        return sqlalchemy.schema.Table(
+            table_name, meta, *list(columns), schema=schema_name
+        )
 
     def column_exists(self, full_table_name: str, column_name: str) -> bool:
         """Determine if the target table already exists.
@@ -454,9 +469,7 @@ class SQLConnector:
         Returns:
             True if table exists, False if not, None if unsure or undetectable.
         """
-        return any(
-            [c.name == column_name for c in self.get_table_columns(full_table_name)]
-        )
+        return column_name in self.get_table_columns(full_table_name)
 
     def create_empty_table(
         self,
@@ -577,7 +590,7 @@ class SQLConnector:
         self,
         full_table_name: str,
         column_name: str,
-        sql_type: Union[sqlalchemy.types.TypeEngine, Type[sqlalchemy.types.TypeEngine]],
+        sql_type: sqlalchemy.types.TypeEngine,
     ) -> None:
         """Adapt target table to provided schema if possible.
 
@@ -641,20 +654,33 @@ class SQLConnector:
 
         sql_types = self._sort_types(sql_types)
 
-        if len(sql_types) >= 2:
+        if len(sql_types) > 2:
             return self.merge_sql_types(
                 [self.merge_sql_types([sql_types[0], sql_types[1]])] + sql_types[2:]
             )
 
         assert len(sql_types) == 2
-        if isinstance(
-            sql_types[0].as_generic(),
+        generic_type = type(sql_types[0].as_generic())
+        if isinstance(generic_type, type):
+            if issubclass(
+                generic_type,
+                (sqlalchemy.types.String, sqlalchemy.types.Unicode),
+            ):
+                return sql_types[0]
+
+        elif isinstance(
+            generic_type,
             (sqlalchemy.types.String, sqlalchemy.types.Unicode),
         ):
             return sql_types[0]
 
+        raise ValueError(
+            f"Unable to merge sql types: {', '.join([str(t) for t in sql_types])}"
+        )
+
     def _sort_types(
-        self, sql_types: List[sqlalchemy.types.TypeEngine]
+        self,
+        sql_types: Iterable[sqlalchemy.types.TypeEngine],
     ) -> List[sqlalchemy.types.TypeEngine]:
         """Return the input types sorted from most to least compatible.
 
@@ -670,7 +696,25 @@ class SQLConnector:
         Returns:
             The sorted list.
         """
-        return sql_types
+
+        def _get_type_sort_key(
+            sql_type: sqlalchemy.types.TypeEngine,
+        ) -> Tuple[int, int]:
+            _len = int(getattr(sql_type, "length", 0) or 0)
+
+            _pytype = cast(type, sql_type.python_type)
+            if issubclass(_pytype, (str, bytes)):
+                return 0, _len
+            elif issubclass(_pytype, datetime):
+                return 100, _len
+            elif issubclass(_pytype, float):
+                return 200, _len
+            elif issubclass(_pytype, int):
+                return 300, _len
+
+            return 900, _len
+
+        return sorted(sql_types, key=_get_type_sort_key)
 
     def _get_column_type(
         self, full_table_name: str, column_name: str
@@ -681,22 +725,26 @@ class SQLConnector:
             full_table_name: The name of the table.
             column_name: The name of the column.
 
-        Return:
+        Returns:
             The type of the column.
 
         Raises:
-            NotImplementedError: if column detection is not supported.
+            KeyError: If the provided column name does not exist.
         """
-        raise NotImplementedError(
-            f"No operation is defined to detect column '{column_name}' "
-            f"on table '{full_table_name}'."
-        )
+        try:
+            column = self.get_table_columns(full_table_name)[column_name]
+        except KeyError as ex:
+            raise KeyError(
+                f"Column `{column_name}` does not exist in table `{full_table_name}`."
+            ) from ex
+
+        return cast(sqlalchemy.types.TypeEngine, column.type)
 
     def _adapt_column_type(
         self,
         full_table_name: str,
         column_name: str,
-        sql_type: Union[sqlalchemy.types.TypeEngine, Type[sqlalchemy.types.TypeEngine]],
+        sql_type: sqlalchemy.types.TypeEngine,
     ) -> None:
         """Adapt table column type to support the new JSON schema type.
 
@@ -885,9 +933,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 f"Stream '{self.name}' does not support partitioning."
             )
 
-        query = sqlalchemy.sql.select(
-            sqlalchemy.text("* FROM :tbl").bindparams(tbl=self.fully_qualified_name)
-        )
+        table = self.connector.get_table(self.fully_qualified_name)
+        query = table.select()
         if self.replication_key:
             quoted_replication_key = self.connector.quote(self.replication_key)
             query = query.order_by(f"{quoted_replication_key}")
