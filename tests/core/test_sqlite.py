@@ -1,10 +1,12 @@
 """Typing tests."""
 
 import json
-from pathlib import Path
-from typing import cast
-
 import pytest
+from copy import deepcopy
+from io import StringIO
+from pathlib import Path
+from typing import Dict, cast
+from uuid import uuid4
 
 from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
 from samples.sample_target_csv.csv_target import SampleTargetCSV
@@ -18,7 +20,9 @@ from singer_sdk.testing import (
     get_standard_tap_tests,
     tap_sync_test,
     tap_to_target_sync_test,
+    target_sync_test,
 )
+from singer_sdk import typing as th
 
 # Sample DB Setup and Config
 
@@ -227,3 +231,146 @@ def test_sync_sqlite_to_sqlite(
             assert tapped_json["record"] == orig_json["record"]
 
     assert line_num > 0, "No lines read."
+
+
+def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
+    """End-to-end-to-end test for SQLite tap and target.
+
+    Test performs the following actions:
+
+    - Load a dataset with 1 column.
+    - Ensure column count is 1.
+    - Load a dataset with 2 columns.
+    - Ensure column count is 2.
+    """
+    test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
+    props_a: Dict[str, dict] = {"col_a": th.StringType().to_dict()}
+    props_b = deepcopy(props_a)
+    props_b["col_b"] = th.IntegerType().to_dict()
+    schema_msg_a, schema_msg_b = (
+        {
+            "type": "SCHEMA",
+            "stream": test_tbl,
+            "schema": {
+                "type": "object",
+                "properties": props,
+            },
+        }
+        for props in [props_a, props_b]
+    )
+    tap_output_a = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg_a,
+            {"type": "RECORD", "stream": test_tbl, "record": {"col_a": "samplerow1"}},
+        ]
+    )
+    tap_output_b = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg_b,
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"col_a": "samplerow2", "col_b": 2},
+            },
+        ]
+    )
+    target_sync_test(sqlite_sample_target, input=StringIO(tap_output_a), finalize=True)
+    target_sync_test(sqlite_sample_target, input=StringIO(tap_output_b), finalize=True)
+
+
+def test_sqlite_column_morph(sqlite_sample_target: SQLTarget):
+    """End-to-end-to-end test for SQLite tap and target.
+
+    Test performs the following actions:
+
+    - Load a column as an int.
+    - Send a new column definition to redefine as string.
+    - Ensure redefinition raises NotImplementedError, since column ALTERs are not
+      supported by SQLite.
+    """
+    test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
+    props_a: Dict[str, dict] = {"col_a": th.IntegerType().to_dict()}
+    props_b: Dict[str, dict] = {"col_a": th.StringType().to_dict()}
+    schema_msg_a, schema_msg_b = (
+        {
+            "type": "SCHEMA",
+            "stream": test_tbl,
+            "schema": {
+                "type": "object",
+                "properties": props,
+            },
+        }
+        for props in [props_a, props_b]
+    )
+    tap_output_a = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg_a,
+            {"type": "RECORD", "stream": test_tbl, "record": {"col_a": 123}},
+        ]
+    )
+    tap_output_b = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg_b,
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"col_a": "row-number-2"},
+            },
+        ]
+    )
+    target_sync_test(sqlite_sample_target, input=StringIO(tap_output_a), finalize=True)
+    with pytest.raises(NotImplementedError):
+        # SQLite does not support altering column types.
+        target_sync_test(
+            sqlite_sample_target, input=StringIO(tap_output_b), finalize=True
+        )
+
+
+def test_sqlite_column_no_morph(sqlite_sample_target: SQLTarget):
+    """End-to-end-to-end test for SQLite tap and target.
+
+    Test performs the following actions:
+
+    - Load a column as a string.
+    - Send a new column definition to redefine as int.
+    - Ensure int value can still insert.
+    """
+    test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
+    props_a: Dict[str, dict] = {"col_a": th.StringType().to_dict()}
+    props_b: Dict[str, dict] = {"col_a": th.IntegerType().to_dict()}
+    schema_msg_a, schema_msg_b = (
+        {
+            "type": "SCHEMA",
+            "stream": test_tbl,
+            "schema": {
+                "type": "object",
+                "properties": props,
+            },
+        }
+        for props in [props_a, props_b]
+    )
+    tap_output_a = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg_a,
+            {"type": "RECORD", "stream": test_tbl, "record": {"col_a": "123"}},
+        ]
+    )
+    tap_output_b = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg_b,
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"col_a": 456},
+            },
+        ]
+    )
+    target_sync_test(sqlite_sample_target, input=StringIO(tap_output_a), finalize=True)
+    # Int should be inserted as string.
+    target_sync_test(sqlite_sample_target, input=StringIO(tap_output_b), finalize=True)
