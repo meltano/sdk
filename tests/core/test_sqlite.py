@@ -81,13 +81,6 @@ def sqlite_target_test_config(path_to_target_db: str) -> dict:
     return {"path_to_db": str(path_to_target_db)}
 
 
-@pytest.fixture
-def sqlite_sample_target(sqlite_target_test_config):
-    """Get a sample target object."""
-    target = SQLiteTarget(sqlite_target_test_config)
-    return target
-
-
 def _discover_and_select_all(tap: SQLTap) -> None:
     """Discover catalog and auto-select all streams."""
     for catalog_entry in tap.catalog_dict["streams"]:
