@@ -1,13 +1,12 @@
 """Internal helper library for record flatteting functions."""
 
 import collections
+import itertools
 import json
 import re
 from typing import Any, List, Mapping, MutableMapping, NamedTuple, Optional, Tuple
-import itertools
 
 import inflection
-
 
 DEFAULT_FLATTENING_SEPARATOR = "__"
 

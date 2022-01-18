@@ -33,13 +33,13 @@ from singer.schema import Schema
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._flattening import get_flattening_options
 from singer_sdk.helpers._singer import (
     Catalog,
     CatalogEntry,
     MetadataMapping,
     SelectionMask,
 )
-from singer_sdk.helpers._flattening import get_flattening_options
 from singer_sdk.helpers._state import (
     finalize_state_progress_markers,
     get_starting_replication_value,
