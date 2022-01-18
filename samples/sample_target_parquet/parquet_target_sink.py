@@ -21,15 +21,7 @@ class SampleParquetTargetSink(BatchSink):
         schema = pa.schema([("some_int", pa.int32()), ("some_string", pa.string())])
         writer = pq.ParquetWriter(self.config["filepath"], schema)
 
-        count = 0
-        flattened_records = []
-        flattener = RecordFlattener()
-        for record in records_to_drain:
-            flatten_record = flattener.flatten_record(record, schema, level=0)
-            flattened_records.append(flatten_record)
-            count += 1
-
-        df = pandas.DataFrame(data=flattened_records)
+        df = pandas.DataFrame(data=records_to_drain)
         table = pa.Table.from_pandas(df)
         writer.write_table(table)
         writer.close()
