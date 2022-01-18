@@ -98,7 +98,7 @@ class Stream(metaclass=abc.ABCMeta):
             raise ValueError("Missing argument or class variable 'name'.")
 
         # Delay _sync_start_time init until stream start
-        self._sync_start_time: Optional[pendulum.Date.DateTime] = None
+        self._sync_start_time: Optional[pendulum.DateTime] = None
 
         self.logger: logging.Logger = tap.logger
         self.tap_name: str = tap.name

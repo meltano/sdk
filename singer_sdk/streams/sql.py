@@ -406,7 +406,7 @@ class SQLConnector:
 
         return db_name, schema_name, table_name
 
-    def table_exists(self, full_table_name: Optional[str] = None) -> Optional[bool]:
+    def table_exists(self, full_table_name: str) -> Optional[bool]:
         """Determine if the target table already exists.
 
         Args:
@@ -670,6 +670,10 @@ class SQLConnector:
             (sqlalchemy.types.String, sqlalchemy.types.Unicode),
         ):
             return sql_types[0]
+
+        raise RuntimeError(
+            f"Could not merge SQL types: {', '.join([str(t) for t in sql_types])}"
+        )
 
     def _sort_types(
         self,
