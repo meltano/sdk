@@ -43,17 +43,17 @@ def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Ca
 
 
 def get_standard_target_tests(
-    target_class: Type[Tap],
+    target_class: Type[Target],
     config: dict = None,
 ) -> List[Callable]:
     """Return callable pytest which executes simple discovery and connection tests.
 
     Args:
-        target_class: TODO
-        config: TODO
+        target_class: The target class to test.
+        config: A config dictionary for the tests.
 
     Returns:
-        TODO
+        A list of callable tests.
     """
     return []
 
