@@ -29,7 +29,12 @@ from singer_sdk.helpers._compat import metadata
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._typing import is_string_array_type
 from singer_sdk.helpers._util import read_json_file
-from singer_sdk.helpers.capabilities import CapabilitiesEnum
+from singer_sdk.helpers.capabilities import (
+    CapabilitiesEnum,
+    PluginCapabilities,
+    FLATTENING_CONFIG,
+    STREAM_MAPS_CONFIG,
+)
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import extend_validator_with_defaults
 
@@ -107,10 +112,16 @@ class PluginBase(metaclass=abc.ABCMeta):
     def capabilities(self) -> List[CapabilitiesEnum]:
         """Get capabilities.
 
+        Developers may override this property in oder to add or remove
+        advertised capabilities for this plugin.
+
         Returns:
             A list of plugin capabilities.
         """
-        return []
+        return [
+            PluginCapabilities.STREAM_MAPS,
+            PluginCapabilities.FLATTENING,
+        ]
 
     @classproperty
     def _env_var_config(cls) -> Dict[str, Any]:
@@ -127,16 +138,16 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         result: Dict[str, Any] = {}
         plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
-        for config_key in cls.config_jsonschema["properties"].keys():
+        config_jsonschema = cls.config_jsonschema
+        cls.append_builtin_config(config_jsonschema)
+        for config_key in config_jsonschema["properties"].keys():
             env_var_name = plugin_env_prefix + config_key.upper().replace("-", "_")
             if env_var_name in os.environ:
                 env_var_value = os.environ[env_var_name]
                 cls.logger.info(
                     f"Parsing '{config_key}' config from env variable '{env_var_name}'."
                 )
-                if is_string_array_type(
-                    cls.config_jsonschema["properties"][config_key]
-                ):
+                if is_string_array_type(config_jsonschema["properties"][config_key]):
                     if env_var_value[0] == "[" and env_var_value[-1] == "]":
                         raise ValueError(
                             "A bracketed list was detected in the environment variable "
@@ -230,19 +241,21 @@ class PluginBase(metaclass=abc.ABCMeta):
         warnings: List[str] = []
         errors: List[str] = []
         log_fn = self.logger.info
-        if self.config_jsonschema:
+        config_jsonschema = self.config_jsonschema
+        if config_jsonschema:
+            self.append_builtin_config(config_jsonschema)
             try:
                 self.logger.debug(
-                    f"Validating config using jsonschema: {self.config_jsonschema}"
+                    f"Validating config using jsonschema: {config_jsonschema}"
                 )
-                validator = JSONSchemaValidator(self.config_jsonschema)
+                validator = JSONSchemaValidator(config_jsonschema)
                 validator.validate(self._config)
             except (ValidationError, SchemaError) as ex:
                 errors.append(str(ex.message))
         if errors:
             summary = (
                 f"Config validation failed: {f'; '.join(errors)}\n"
-                f"JSONSchema was: {self.config_jsonschema}"
+                f"JSONSchema was: {config_jsonschema}"
             )
             if raise_errors:
                 raise ConfigValidationError(summary)
@@ -286,8 +299,41 @@ class PluginBase(metaclass=abc.ABCMeta):
         info["version"] = self.plugin_version
         info["sdk_version"] = self.sdk_version
         info["capabilities"] = self.capabilities
-        info["settings"] = self.config_jsonschema
+
+        config_jsonschema = self.config_jsonschema
+        self.append_builtin_config(config_jsonschema)
+        info["settings"] = config_jsonschema
         return info
+
+    @classmethod
+    def append_builtin_config(cls: Type["PluginBase"], config_jsonschema: dict) -> None:
+        """Appends built-in config to `config_jsonschema` if not already set.
+
+        To customize or disable this behavior, developers may either override this class
+        method or override the `capabilities` property to disabled any unwanted
+        built-in capabilities.
+
+        For all except very advanced use cases, we recommend leaving these
+        implementations "as-is", since this provides the most choice to users and is
+        the most "future proof" in terms of taking advantage of built-in capabilities
+        which may be added in the future.
+
+        Args:
+            config_jsonschema: [description]
+        """
+
+        def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
+            # Append any missing properties in the target with those from source.
+            for k, v in STREAM_MAPS_CONFIG["properties"].items():
+                if k not in config_jsonschema["properties"]:
+                    config_jsonschema["properties"][k] = v
+
+        capabilities = cls.capabilities
+        if PluginCapabilities.STREAM_MAPS in capabilities:
+            _merge_missing(STREAM_MAPS_CONFIG, config_jsonschema)
+
+        if PluginCapabilities.FLATTENING in capabilities:
+            _merge_missing(FLATTENING_CONFIG, config_jsonschema)
 
     def print_about(self, format: Optional[str] = None) -> None:
         """Print capabilities and other tap metadata.
