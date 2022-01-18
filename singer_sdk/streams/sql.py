@@ -406,7 +406,7 @@ class SQLConnector:
 
         return db_name, schema_name, table_name
 
-    def table_exists(self, full_table_name: str) -> bool:
+    def table_exists(self, full_table_name: str) -> Optional[bool]:
         """Determine if the target table already exists.
 
         Args:
@@ -415,10 +415,7 @@ class SQLConnector:
         Returns:
             True if table exists, False if not, None if unsure or undetectable.
         """
-        return cast(
-            bool,
-            self._engine.has_table(full_table_name),
-        )
+        return self._engine.has_table(full_table_name)
 
     def get_table_columns(self, full_table_name: str) -> Dict[str, sqlalchemy.Column]:
         """Return a list of table columns.
@@ -674,8 +671,8 @@ class SQLConnector:
         ):
             return sql_types[0]
 
-        raise ValueError(
-            f"Unable to merge sql types: {', '.join([str(t) for t in sql_types])}"
+        raise RuntimeError(
+            f"Could not merge SQL types: {', '.join([str(t) for t in sql_types])}"
         )
 
     def _sort_types(
@@ -752,6 +749,7 @@ class SQLConnector:
             full_table_name: The target table name.
             column_name: The target column name.
             sql_type: The new SQLAlchemy type.
+
 
         Raises:
             NotImplementedError: if altering columns is not supported.

@@ -27,7 +27,7 @@ from typing import (
 import pendulum
 import requests
 import singer
-from singer import RecordMessage, SchemaMessage, StateMessage
+from singer import ActivateVersionMessage, RecordMessage, SchemaMessage, StateMessage
 from singer.schema import Schema
 
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
@@ -96,6 +96,9 @@ class Stream(metaclass=abc.ABCMeta):
             self.name: str = name
         if not self.name:
             raise ValueError("Missing argument or class variable 'name'.")
+
+        # Delay _sync_start_time init until stream start
+        self._sync_start_time: Optional[pendulum.DateTime] = None
 
         self.logger: logging.Logger = tap.logger
         self.tap_name: str = tap.name
@@ -341,7 +344,8 @@ class Stream(metaclass=abc.ABCMeta):
             Max allowable bookmark value for this stream's replication key.
         """
         if self.is_timestamp_replication_key:
-            return utc_now()
+            assert self._sync_start_time, "Sync start time is not initialized."
+            return self._sync_start_time
 
         return None
 
@@ -703,6 +707,16 @@ class Stream(metaclass=abc.ABCMeta):
         for schema_message in self._generate_schema_messages():
             singer.write_message(schema_message)
 
+    def _write_activate_version_message(self) -> None:
+        """Write out a STATE message with the latest state."""
+        assert self._sync_start_time is not None, "Sync start time is not initialized."
+
+        singer.write_message(
+            ActivateVersionMessage(
+                stream=self.name, version=self._sync_start_time.int_timestamp
+            )
+        )
+
     @property
     def mask(self) -> SelectionMask:
         """Get a boolean mask for stream and property selection.
@@ -727,6 +741,8 @@ class Stream(metaclass=abc.ABCMeta):
         Yields:
             Record message objects.
         """
+        assert self._sync_start_time is not None, "Sync start time is not initialized."
+
         pop_deselected_record_properties(record, self.schema, self.mask, self.logger)
         record = conform_record_data_types(
             stream_name=self.name,
@@ -741,7 +757,7 @@ class Stream(metaclass=abc.ABCMeta):
                 record_message = RecordMessage(
                     stream=stream_map.stream_alias,
                     record=mapped_record,
-                    version=None,
+                    version=self._sync_start_time.int_timestamp,
                     time_extracted=utc_now(),
                 )
 
@@ -986,6 +1002,9 @@ class Stream(metaclass=abc.ABCMeta):
         # Reset interim bookmarks before emitting final STATE message:
         self._write_state_message()
 
+        if self.replication_method == REPLICATION_FULL_TABLE:
+            self._write_activate_version_message()
+
     # Public methods ("final", not recommended to be overridden)
 
     @final
@@ -997,11 +1016,13 @@ class Stream(metaclass=abc.ABCMeta):
         Args:
             context: Stream partition or context dictionary.
         """
+        if not self._sync_start_time:
+            self._sync_start_time = utc_now()
+
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
             msg += f" with context: {context}"
         self.logger.info(f"{msg}...")
-
         # Use a replication signpost, if available
         signpost = self.get_replication_key_signpost(context)
         if signpost:
