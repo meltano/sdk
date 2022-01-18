@@ -40,6 +40,7 @@ generate_requirements:
     - python -m pipx install poetry
     # Force update PATH to include pipx executables
     - export PATH=$PATH:/root/.local/bin
+  before_script: []  # negate defaults above
   script:
     - poetry export --format requirements.txt --output requirements.txt
   artifacts:
