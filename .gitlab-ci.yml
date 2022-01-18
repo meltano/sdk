@@ -49,7 +49,7 @@ generate_requirements:
 license_scanning:
   stage: test
   before_script: []  # negate defaults above
-  needs:
+  dependencies:
     - generate_requirements
 
 build_and_test:
