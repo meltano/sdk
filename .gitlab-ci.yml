@@ -1,6 +1,10 @@
 stages:
+  - setup
   - test
   - publish
+
+include:
+  - template: Security/License-Scanning.gitlab-ci.yml
 
 default:
   before_script:
@@ -17,11 +21,27 @@ default:
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  LM_PYTHON_VERSION: 3
 
 cache:
   paths:
     - .cache/pip
     - venv/
+
+generate_requirements:
+  stage: setup
+  image:
+    name: python:3.8
+  script:
+    - poetry export --format requirements.txt --output requirements.txt
+  artifacts:
+    paths:
+      - requirements.txt
+
+license_scanning:
+  stage: test
+  needs:
+    - generate_requirements
 
 build_and_test:
   stage: test
@@ -68,7 +88,7 @@ version_bump_trigger:
     - git config --global user.email "hello@meltano.com"
     - git config --global user.name "Gitlab CI (bot)"
     - pip install changelog-cli bumpversion
-    # - poetry install 
+    # - poetry install
   script:
     - |
       echo "Setting up 'discovery.yml' sync from 'hub.meltano.com'..."
