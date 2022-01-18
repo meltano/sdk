@@ -375,19 +375,43 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """Process a SCHEMA messages.
 
         Args:
-            message_dict: TODO
+            message_dict: The newly received schema message.
         """
         self._assert_line_requires(message_dict, requires=["stream", "schema"])
 
         stream_name = message_dict["stream"]
         schema = message_dict["schema"]
         key_properties = message_dict.get("key_properties", None)
+        do_registration = False
         if stream_name not in self.mapper.stream_maps:
-            self.mapper.register_raw_stream_schema(
-                stream_name,
-                schema,
-                key_properties,
+            do_registration = True
+        elif self.mapper.stream_maps[stream_name][0].raw_schema != schema:
+            self.logger.info(
+                f"Schema has changed for stream '{stream_name}'. "
+                "Mapping definitions will be reset."
             )
+            do_registration = True
+        elif (
+            self.mapper.stream_maps[stream_name][0].raw_key_properties != key_properties
+        ):
+            self.logger.info(
+                f"Key properties have changed for stream '{stream_name}'. "
+                "Mapping definitions will be reset."
+            )
+            do_registration = True
+
+        if not do_registration:
+            self.logger.debug(
+                f"No changes detected in SCHEMA message for stream '{stream_name}'. "
+                "Ignoring."
+            )
+            return
+
+        self.mapper.register_raw_stream_schema(
+            stream_name,
+            schema,
+            key_properties,
+        )
         for stream_map in self.mapper.stream_maps[stream_name]:
             # new_schema = helpers._float_to_decimal(new_schema)
             _ = self.get_sink(
