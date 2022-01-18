@@ -1,17 +1,19 @@
 """Typing tests."""
 
 import json
-import pytest
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
 from typing import Dict, cast
 from uuid import uuid4
 
+import pytest
+
 from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
 from samples.sample_target_csv.csv_target import SampleTargetCSV
 from samples.sample_target_sqlite import SQLiteTarget
 from singer_sdk import SQLStream
+from singer_sdk import typing as th
 from singer_sdk.helpers._singer import MetadataMapping, StreamMetadata
 from singer_sdk.tap_base import SQLTap
 from singer_sdk.target_base import SQLTarget
@@ -22,7 +24,6 @@ from singer_sdk.testing import (
     tap_to_target_sync_test,
     target_sync_test,
 )
-from singer_sdk import typing as th
 
 # Sample DB Setup and Config
 

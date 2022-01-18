@@ -1,8 +1,8 @@
 """Base class for SQL-type streams."""
 
 import abc
-from datetime import datetime
 import logging
+from datetime import datetime
 from functools import lru_cache
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union, cast
 
