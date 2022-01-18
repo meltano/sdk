@@ -148,6 +148,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             TapCapabilities.DISCOVER,
             PluginCapabilities.ABOUT,
             PluginCapabilities.STREAM_MAPS,
+            PluginCapabilities.FLATTENING,
         ]
 
     # Connection test:

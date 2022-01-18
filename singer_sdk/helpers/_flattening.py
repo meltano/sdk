@@ -30,11 +30,8 @@ def get_flattening_options(
     Returns:
         A new FlatteningOptions object or None if flattening is disabled.
     """
-    if (
-        "max_flattening_level" in plugin_config
-        and plugin_config["max_flattening_level"]
-    ):
-        return FlatteningOptions(max_level=int(plugin_config["max_flattening_level"]))
+    if "flattening_enabled" in plugin_config and plugin_config["flattening_enabled"]:
+        return FlatteningOptions(max_level=int(plugin_config["flattening_max_depth"]))
 
     return None
 

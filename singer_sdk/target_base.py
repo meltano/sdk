@@ -81,7 +81,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     @classproperty
     def capabilities(self) -> List[CapabilitiesEnum]:
-        """Get target capabilites.
+        """Get target capabilities.
 
         Returns:
             A list of capabilities supported by this target.
@@ -89,6 +89,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         return [
             PluginCapabilities.ABOUT,
             PluginCapabilities.STREAM_MAPS,
+            PluginCapabilities.FLATTENING,
         ]
 
     @property
