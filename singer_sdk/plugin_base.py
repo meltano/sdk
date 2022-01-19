@@ -324,9 +324,9 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
             # Append any missing properties in the target with those from source.
-            for k, v in STREAM_MAPS_CONFIG["properties"].items():
-                if k not in config_jsonschema["properties"]:
-                    config_jsonschema["properties"][k] = v
+            for k, v in source_jsonschema["properties"].items():
+                if k not in target_jsonschema["properties"]:
+                    target_jsonschema["properties"][k] = v
 
         capabilities = cls.capabilities
         if PluginCapabilities.STREAM_MAPS in capabilities:
