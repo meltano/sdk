@@ -55,6 +55,8 @@ class SQLiteTarget(SQLTarget):
 
     name = "target-sqlite-sample"
     default_sink_class = SQLiteSink
+    max_parallelism = 1
+
     config_jsonschema = th.PropertiesList(
         th.Property(
             DB_PATH_CONFIG,
