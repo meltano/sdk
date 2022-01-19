@@ -260,7 +260,11 @@ class SQLConnector:
         return cast(sqlalchemy.engine.Engine, self.connection.engine)
 
     def quote(self, name: str) -> str:
-        """Quote a name if it needs quoting.
+        """Quote a name if it needs quoting, using '.' as a name-part delimiter.
+
+        Examples:
+          "my_table"           => "`my_table`"
+          "my_schema.my_table" => "`my_schema`.`my_table`"
 
         Args:
             name: The unquoted name.
@@ -268,7 +272,12 @@ class SQLConnector:
         Returns:
             str: The quoted name.
         """
-        return cast(str, self._dialect.identifier_preparer.quote(name))
+        return ".".join(
+            [
+                self._dialect.identifier_preparer.quote(name_part)
+                for name_part in name.split(".")
+            ]
+        )
 
     @lru_cache()
     def _warn_no_view_detection(self) -> None:
@@ -936,15 +945,15 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         table = self.connector.get_table(self.fully_qualified_name)
         query = table.select()
         if self.replication_key:
-            quoted_replication_key = self.connector.quote(self.replication_key)
-            query = query.order_by(f"{quoted_replication_key}")
+            replication_key_col = table.columns[self.replication_key]
+            query = query.order_by(replication_key_col)
 
             start_val = self.get_starting_replication_key_value(context)
             if start_val:
                 query = query.where(
-                    sqlalchemy.text(
-                        f"\n{quoted_replication_key} >= :start_val"
-                    ).bindparams(start_val=start_val)
+                    sqlalchemy.text(":replication_key >= :start_val").bindparams(
+                        replication_key=replication_key_col, start_val=start_val
+                    )
                 )
 
         for row in self.connector.connection.execute(query):

@@ -14,7 +14,11 @@ from samples.sample_target_csv.csv_target import SampleTargetCSV
 from samples.sample_target_sqlite import SQLiteTarget
 from singer_sdk import SQLStream
 from singer_sdk import typing as th
-from singer_sdk.helpers._singer import MetadataMapping, StreamMetadata
+from singer_sdk.helpers._singer import (
+    MetadataMapping,
+    StreamMetadata,
+    Catalog,
+)
 from singer_sdk.tap_base import SQLTap
 from singer_sdk.target_base import SQLTarget
 from singer_sdk.testing import (
@@ -61,10 +65,15 @@ def sqlite_sample_db(sqlite_connector):
 @pytest.fixture
 def sqlite_sample_tap(sqlite_sample_db, sqlite_sample_db_config) -> SQLiteTap:
     _ = sqlite_sample_db
-    catalog = _get_tap_catalog(
-        SQLiteTap, config=sqlite_sample_db_config, select_all=True
+    catalog_obj = Catalog.from_dict(
+        _get_tap_catalog(SQLiteTap, config=sqlite_sample_db_config, select_all=True)
     )
-    return SQLiteTap(config=sqlite_sample_db_config, catalog=catalog)
+
+    # Set stream `t1` to use incremental replication.
+    t0 = catalog_obj.get_stream("main-t0")
+    t0.replication_key = "c1"
+    t0.replication_method = "INCREMENTAL"
+    return SQLiteTap(config=sqlite_sample_db_config, catalog=catalog_obj.to_dict())
 
 
 # Target Test DB Setup and Config
