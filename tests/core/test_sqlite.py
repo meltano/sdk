@@ -73,6 +73,13 @@ def sqlite_sample_tap(sqlite_sample_db, sqlite_sample_db_config) -> SQLiteTap:
     t0 = catalog_obj.get_stream("main-t0")
     t0.replication_key = "c1"
     t0.replication_method = "INCREMENTAL"
+    t1 = catalog_obj.get_stream("main-t1")
+    t1.key_properties = ["c1"]
+    t1.replication_method = "FULL_TABLE"
+    t2 = catalog_obj.get_stream("main-t2")
+    t2.key_properties = ["c1"]
+    t2.replication_key = "c1"
+    t2.replication_method = "INCREMENTAL"
     return SQLiteTap(config=sqlite_sample_db_config, catalog=catalog_obj.to_dict())
 
 
