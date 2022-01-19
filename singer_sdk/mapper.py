@@ -404,10 +404,6 @@ class CustomStreamMap(StreamMap):
         if not include_by_default:
             # Start with only the defined (or transformed) key properties
             transformed_schema = PropertiesList().to_dict()
-            for key_property in self.transformed_key_properties or []:
-                transformed_schema["properties"][key_property] = self.raw_schema[
-                    "properties"
-                ][key_property]
 
         if "properties" not in transformed_schema:
             transformed_schema["properties"] = {}
@@ -442,6 +438,13 @@ class CustomStreamMap(StreamMap):
                 raise StreamMapConfigError(
                     f"Unexpected type '{type(prop_def).__name__}' in stream map "
                     f"for '{self.stream_alias}:{prop_key}'."
+                )
+
+        for key_property in self.transformed_key_properties or []:
+            if key_property not in transformed_schema["properties"]:
+                raise StreamMapConfigError(
+                    f"Could not use '{key_property}' as key property "
+                    f"for '{self.stream_alias}'. Property does not exist."
                 )
 
         # Declare function variables
