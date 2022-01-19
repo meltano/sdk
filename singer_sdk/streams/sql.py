@@ -30,9 +30,11 @@ class SQLConnector:
     - dialect-specific functions, such as escaping and fully qualified names
     """
 
-    allow_column_add: bool = True
-    allow_column_rename: bool = True
-    allow_column_alter: bool = False
+    allow_column_add: bool = True  # Whether ADD COLUMN is supported.
+    allow_column_rename: bool = True  # Whether RENAME COLUMN is supported.
+    allow_column_alter: bool = False  # Whether altering column types is supported.
+    allow_merge_upsert: bool = False  # Whether MERGE UPSERT is supported.
+    allow_temp_tables: bool = True  # Whether temp tables are supported.
 
     def __init__(
         self, config: Optional[dict] = None, sqlalchemy_url: Optional[str] = None

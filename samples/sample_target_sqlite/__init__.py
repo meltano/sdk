@@ -16,6 +16,10 @@ class SQLiteConnector(SQLConnector):
     This class handles all DDL and type conversions.
     """
 
+    allow_temp_tables = False
+    allow_column_alter = False
+    allow_merge_upsert = True
+
     def get_sqlalchemy_url(self, config: Dict[str, Any]) -> str:
         """Generates a SQLAlchemy URL for SQLite."""
         return f"sqlite:///{config[DB_PATH_CONFIG]}"
