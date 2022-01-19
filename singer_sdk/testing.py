@@ -5,6 +5,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from typing import Callable, List, Optional, Tuple, Type, cast
 
 from singer_sdk.helpers import _singer
+from singer_sdk.mapper_base import InlineMapper
 from singer_sdk.tap_base import Tap
 from singer_sdk.target_base import Target
 
@@ -168,3 +169,30 @@ def tap_to_target_sync_test(
     tap_stdout.seek(0)
 
     return tap_stdout, tap_stderr, target_stdout, target_stderr
+
+
+def sync_end_to_end(tap: Tap, target: Target, *mappers: InlineMapper) -> None:
+    """Test and end-to-end sink from the tap to the target.
+
+    Args:
+        tap: Singer tap.
+        target: Singer target.
+        mappers: Zero or more inline mapper to apply in between the tap and target, in
+            order.
+    """
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        tap.sync_all()
+
+    buf.seek(0)
+    mapper_output = buf
+
+    for mapper in mappers:
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            mapper.listen(mapper_output)
+
+        buf.seek(0)
+        mapper_output = buf
+
+    target.listen(mapper_output)

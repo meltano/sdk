@@ -7,15 +7,17 @@ import sys
 import time
 from io import FileIO
 from pathlib import Path, PurePath
-from typing import IO, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import IO, Callable, Counter, Dict, List, Optional, Tuple, Type, Union
 
 import click
 from joblib import Parallel, delayed, parallel_backend
 
+from singer_sdk.cli import common_options
 from singer_sdk.exceptions import RecordsWitoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
+from singer_sdk.io_base import SingerMessageType, SingerReader
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks import Sink
@@ -23,7 +25,7 @@ from singer_sdk.sinks import Sink
 _MAX_PARALLELISM = 8
 
 
-class Target(PluginBase, metaclass=abc.ABCMeta):
+class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     """Abstract base class for targets.
 
     The `Target` class manages config information and is responsible for processing the
@@ -203,21 +205,6 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         return stream_name in self._sinks_active
 
     @final
-    def listen(self, input: Optional[IO[str]] = None) -> None:
-        """Read from input until all messages are processed.
-
-        Args:
-            input: Readable stream of messages. Defaults to standard in.
-
-        This method is internal to the SDK and should not need to be overridden.
-        """
-        if not input:
-            input = sys.stdin
-
-        self._process_lines(input)
-        self._process_endofpipe()
-
-    @final
     def add_sink(
         self, stream_name: str, schema: dict, key_properties: Optional[List[str]] = None
     ) -> Sink:
@@ -244,23 +231,6 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         self._sinks_active[stream_name] = result
         return result
 
-    @staticmethod
-    def _assert_line_requires(line_dict: dict, requires: List[str]) -> None:
-        """TODO.
-
-        Args:
-            line_dict: TODO
-            requires: TODO
-
-        Raises:
-            Exception: TODO
-        """
-        for required in requires:
-            if required not in line_dict:
-                raise Exception(
-                    f"Line is missing required '{required}' key: {line_dict}"
-                )
-
     def _assert_sink_exists(self, stream_name: str) -> None:
         """Raise a RecordsWitoutSchemaException exception if stream doesn't exist.
 
@@ -278,55 +248,27 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
 
     # Message handling
 
-    def _process_lines(self, input: IO[str]) -> None:
+    def _process_lines(self, file_input: IO[str]) -> Counter[SingerMessageType]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:
-            input: Readable stream of messages, each on a separate line.
+            file_input: Readable stream of messages, each on a separate line.
 
-        Raises:
-            json.decoder.JSONDecodeError: raised if any lines are not valid json
-            ValueError: raised if a message type is not recognized
+        Returns:
+            A counter object for the processed lines.
         """
         self.logger.info(f"Target '{self.name}' is listening for input from tap.")
-        line_counter = 0
-        record_counter = 0
-        state_counter = 0
-        for line in input:
-            line_counter += 1
-            try:
-                line_dict = json.loads(line)
-            except json.decoder.JSONDecodeError:
-                self.logger.error("Unable to parse:\n{}".format(line))
-                raise
+        counter = super()._process_lines(file_input)
 
-            self._assert_line_requires(line_dict, requires=["type"])
-
-            record_type = line_dict["type"]
-            if record_type == "SCHEMA":
-                self._process_schema_message(line_dict)
-                continue
-
-            if record_type == "RECORD":
-                self._process_record_message(line_dict)
-                record_counter += 1
-                continue
-
-            if record_type == "ACTIVATE_VERSION":
-                self._process_activate_version_message(line_dict)
-                continue
-
-            if record_type == "STATE":
-                self._process_state_message(line_dict)
-                state_counter += 1
-                continue
-
-            raise ValueError(f"Unknown message type '{record_type}' in message.")
+        line_count = sum(counter.values())
 
         self.logger.info(
-            f"Target '{self.name}' completed reading {line_counter} lines of input "
-            f"({record_counter} records, {state_counter} state messages)."
+            f"Target '{self.name}' completed reading {line_count} lines of input "
+            f"({counter[SingerMessageType.RECORD]} records, "
+            f"{counter[SingerMessageType.STATE]} state messages)."
         )
+
+        return counter
 
     def _process_endofpipe(self) -> None:
         """Called after all input lines have been read."""
@@ -338,7 +280,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         Args:
             message_dict: TODO
         """
-        self._assert_line_requires(message_dict, requires=["stream", "record"])
+        self._assert_line_requires(message_dict, requires={"stream", "record"})
 
         stream_name = message_dict["stream"]
         for stream_map in self.mapper.stream_maps[stream_name]:
@@ -377,7 +319,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         Args:
             message_dict: The newly received schema message.
         """
-        self._assert_line_requires(message_dict, requires=["stream", "schema"])
+        self._assert_line_requires(message_dict, requires={"stream", "schema"})
 
         stream_name = message_dict["stream"]
         schema = message_dict["schema"]
@@ -435,7 +377,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         Args:
             message_dict: TODO
         """
-        self._assert_line_requires(message_dict, requires=["value"])
+        self._assert_line_requires(message_dict, requires={"value"})
         state = message_dict["value"]
         if self._latest_state == state:
             return
@@ -508,7 +450,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
         """
         state_json = json.dumps(state)
         self.logger.info(f"Emitting completed target state {state_json}")
-        sys.stdout.write("{}\n".format(state_json))
+        sys.stdout.write(f"{state_json}\n")
         sys.stdout.flush()
 
     # CLI handler
@@ -521,34 +463,11 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             A callable CLI object.
         """
 
-        @click.option(
-            "--version",
-            is_flag=True,
-            help="Display the package version.",
-        )
-        @click.option(
-            "--about",
-            is_flag=True,
-            help="Display package metadata and settings.",
-        )
-        @click.option(
-            "--format",
-            help="Specify output style for --about",
-            type=click.Choice(["json", "markdown"], case_sensitive=False),
-            default=None,
-        )
-        @click.option(
-            "--config",
-            multiple=True,
-            help="Configuration file location or 'ENV' to use environment variables.",
-            type=click.STRING,
-            default=(),
-        )
-        @click.option(
-            "--input",
-            help="A path to read messages from instead of from standard in.",
-            type=click.File("r"),
-        )
+        @common_options.PLUGIN_VERSION
+        @common_options.PLUGIN_ABOUT
+        @common_options.PLUGIN_ABOUT_FORMAT
+        @common_options.PLUGIN_CONFIG
+        @common_options.PLUGIN_FILE_INPUT
         @click.command(
             help="Execute the Singer target.",
             context_settings={"help_option_names": ["--help"]},
@@ -558,7 +477,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             about: bool = False,
             config: Tuple[str, ...] = (),
             format: str = None,
-            input: FileIO = None,
+            file_input: FileIO = None,
         ) -> None:
             """Handle command line execution.
 
@@ -568,7 +487,7 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
                     variables. Accepts multiple inputs as a tuple.
-                input: Specify a path to an input file to read messages from.
+                file_input: Specify a path to an input file to read messages from.
                     Defaults to standard in if unspecified.
 
             Raises:
@@ -578,9 +497,12 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
                 cls.print_version()
                 return
 
+            if not about:
+                cls.print_version(print_fn=cls.logger.info)
+
+            validate_config: bool = True
             if about:
-                cls.print_about(format)
-                return
+                validate_config = False
 
             cls.print_version(print_fn=cls.logger.info)
 
@@ -604,8 +526,13 @@ class Target(PluginBase, metaclass=abc.ABCMeta):
             target = cls(  # type: ignore  # Ignore 'type not callable'
                 config=config_files or None,
                 parse_env_config=parse_env_config,
+                validate_config=validate_config,
             )
-            target.listen(input)
+
+            if about:
+                target.print_about(format)
+            else:
+                target.listen(file_input)
 
         return cli
 

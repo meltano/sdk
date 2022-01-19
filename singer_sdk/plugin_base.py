@@ -302,7 +302,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         elif format == "markdown":
             max_setting_len = cast(
-                int, max([len(k) for k in info["settings"]["properties"].keys()])
+                int, max(len(k) for k in info["settings"]["properties"].keys())
             )
 
             # Set table base for markdown

@@ -14,6 +14,7 @@ Plugin Classes
     Target
     SQLTap
     SQLTarget
+    InlineMapper
 
 Stream Classes
 --------------

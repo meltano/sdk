@@ -60,13 +60,12 @@ def extend_validator_with_defaults(validator_class):  # noqa
             if "default" in subschema:
                 instance.setdefault(property, subschema["default"])
 
-        for error in validate_properties(
+        yield from validate_properties(
             validator,
             properties,
             instance,
             schema,
-        ):
-            yield error
+        )
 
     return validators.extend(
         validator_class,
@@ -74,7 +73,7 @@ def extend_validator_with_defaults(validator_class):  # noqa
     )
 
 
-class JSONTypeHelper(object):
+class JSONTypeHelper:
     """Type helper base class for JSONSchema types."""
 
     @classproperty
@@ -257,13 +256,20 @@ class Property(JSONTypeHelper, Generic[W]):
 class ObjectType(JSONTypeHelper):
     """Object type, which wraps one or more named properties."""
 
-    def __init__(self, *properties: Property) -> None:
+    def __init__(
+        self,
+        *properties: Property,
+        additional_properties: Union[W, Type[W], None] = None,
+    ) -> None:
         """Initialize ObjectType from its list of properties.
 
         Args:
-            properties: TODO
+            properties: Zero or more attributes for this JSON object.
+            additional_properties: A schema to match against unnamed properties in
+                this object.
         """
         self.wrapped: List[Property] = list(properties)
+        self.additional_properties = additional_properties
 
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
@@ -279,8 +285,13 @@ class ObjectType(JSONTypeHelper):
             if not w.optional:
                 required.append(w.name)
         result = {"type": "object", "properties": merged_props}
+
         if required:
             result["required"] = required
+
+        if self.additional_properties:
+            result["additionalProperties"] = self.additional_properties.type_dict
+
         return result
 
 

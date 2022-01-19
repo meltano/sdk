@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 import click
 
+from singer_sdk.cli import common_options
 from singer_sdk.exceptions import MaxRecordsLimitException
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
@@ -358,22 +359,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             A callable CLI object.
         """
 
-        @click.option(
-            "--version",
-            is_flag=True,
-            help="Display the package version.",
-        )
-        @click.option(
-            "--about",
-            is_flag=True,
-            help="Display package metadata and settings.",
-        )
-        @click.option(
-            "--format",
-            help="Specify output style for --about",
-            type=click.Choice(["json", "markdown"], case_sensitive=False),
-            default=None,
-        )
+        @common_options.PLUGIN_VERSION
+        @common_options.PLUGIN_ABOUT
+        @common_options.PLUGIN_ABOUT_FORMAT
+        @common_options.PLUGIN_CONFIG
         @click.option(
             "--discover",
             is_flag=True,
@@ -383,13 +372,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             "--test",
             is_flag=True,
             help="Test connectivity by syncing a single record and exiting.",
-        )
-        @click.option(
-            "--config",
-            multiple=True,
-            help="Configuration file location or 'ENV' to use environment variables.",
-            type=click.STRING,
-            default=(),
         )
         @click.option(
             "--catalog",

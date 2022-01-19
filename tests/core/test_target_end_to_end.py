@@ -4,15 +4,24 @@ from typing import Any, Dict, List, Optional
 
 from freezegun import freeze_time
 
+from samples.sample_mapper.mapper import StreamTransform
 from samples.sample_tap_countries.countries_tap import SampleTapCountries
 from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk import typing as th
 from singer_sdk.sinks import BatchSink
 from singer_sdk.target_base import Target
-from singer_sdk.testing import tap_sync_test, tap_to_target_sync_test, target_sync_test
+from singer_sdk.testing import (
+    sync_end_to_end,
+    tap_sync_test,
+    tap_to_target_sync_test,
+    target_sync_test,
+)
 
 SAMPLE_FILENAME = "/tmp/testfile.countries"
 SAMPLE_TAP_CONFIG: Dict[str, Any] = {}
+COUNTRIES_STREAM_MAPS_CONFIG: Dict[str, Any] = {
+    "stream_maps": {"continents": {}, "__else__": None}
+}
 
 
 class BatchSinkMock(BatchSink):
@@ -31,10 +40,10 @@ class BatchSinkMock(BatchSink):
         super().__init__(target, stream_name, schema, key_properties)
         self.target = target
 
-    def process_record(self, record: dict, context: dict) -> Optional[dict]:
+    def process_record(self, record: dict, context: dict) -> None:
         """Tracks the count of processed records."""
         self.target.num_records_processed += 1
-        return super().process_record(record, context)
+        super().process_record(record, context)
 
     def process_batch(self, context: dict) -> None:
         """Write to mock trackers."""
@@ -67,6 +76,13 @@ def test_countries_to_csv(csv_config: dict):
     tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
     target = SampleTargetCSV(config=csv_config)
     tap_to_target_sync_test(tap, target)
+
+
+def test_countries_to_csv_mapped(csv_config: dict):
+    tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
+    target = SampleTargetCSV(config=csv_config)
+    mapper = StreamTransform(config=COUNTRIES_STREAM_MAPS_CONFIG)
+    sync_end_to_end(tap, target, mapper)
 
 
 def test_target_batching():
