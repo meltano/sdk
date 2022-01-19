@@ -30,10 +30,10 @@ from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._typing import is_string_array_type
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
-    CapabilitiesEnum,
-    PluginCapabilities,
     FLATTENING_CONFIG,
     STREAM_MAPS_CONFIG,
+    CapabilitiesEnum,
+    PluginCapabilities,
 )
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import extend_validator_with_defaults

@@ -5,11 +5,11 @@ from typing import Any, Optional
 from warnings import warn
 
 from singer_sdk.typing import (
-    PropertiesList,
-    Property,
-    ObjectType,
     BooleanType,
     IntegerType,
+    ObjectType,
+    PropertiesList,
+    Property,
 )
 
 # Default JSON Schema to support config for built-in capabilities:
