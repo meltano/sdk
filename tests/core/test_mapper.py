@@ -3,7 +3,7 @@
 import copy
 import json
 import logging
-from typing import Dict, List, Set
+from typing import Dict, List, Optional, Set
 
 import pytest
 
@@ -12,7 +12,13 @@ from singer_sdk.helpers._singer import Catalog
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
-from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
+from singer_sdk.typing import (
+    IntegerType,
+    ObjectType,
+    PropertiesList,
+    Property,
+    StringType,
+)
 
 
 @pytest.fixture
@@ -382,12 +388,31 @@ class MappedStream(Stream):
     schema = PropertiesList(
         Property("email", StringType),
         Property("count", IntegerType),
+        Property(
+            "user",
+            ObjectType(
+                Property("id", IntegerType()),
+                Property("sub", ObjectType(Property("num", IntegerType()))),
+            ),
+        ),
     ).to_dict()
 
     def get_records(self, context):
-        yield {"email": "alice@example.com", "count": 21}
-        yield {"email": "bob@example.com", "count": 13}
-        yield {"email": "charlie@example.com", "count": 19}
+        yield {
+            "email": "alice@example.com",
+            "count": 21,
+            "user": {"id": 1, "sub": {"num": 1}},
+        }
+        yield {
+            "email": "bob@example.com",
+            "count": 13,
+            "user": {"id": 2, "sub": {"num": 2}},
+        }
+        yield {
+            "email": "charlie@example.com",
+            "count": 19,
+            "user": {"id": 3, "sub": {"num": 3}},
+        }
 
 
 class MappedTap(Tap):
@@ -401,15 +426,19 @@ class MappedTap(Tap):
 
 
 @pytest.mark.parametrize(
-    "stream_map,fields",
+    "stream_map,flatten,flatten_max_depth,output_fields",
     [
         (
             {},
-            {"email", "count"},
+            False,
+            None,
+            {"email", "count", "user"},
         ),
         (
             {"email_hash": "md5(email)", "__key_properties__": ["email_hash"]},
-            {"email", "count", "email_hash"},
+            False,
+            None,
+            {"email", "count", "email_hash", "user"},
         ),
         (
             {
@@ -418,18 +447,61 @@ class MappedTap(Tap):
                 "__key_properties__": ["email_hash"],
                 "__else__": None,
             },
+            False,
+            None,
             {"fixed_count", "email_hash"},
         ),
+        (
+            {},
+            True,
+            1,
+            {"email", "count", "user__id", "user__sub"},
+        ),
+        (
+            {},
+            True,
+            10,
+            {"email", "count", "user__id", "user__sub__num"},
+        ),
+        (
+            {"email_hash": "md5(email)", "__key_properties__": ["email_hash"]},
+            True,
+            10,
+            {"email", "count", "email_hash", "user__id", "user__sub__num"},
+        ),
     ],
-    ids=["no_map", "keep_all_fields", "only_mapped_fields"],
+    ids=[
+        "no_map",
+        "keep_all_fields",
+        "only_mapped_fields",
+        "flatten_depth_1",
+        "flatten_all",
+        "map_and_flatten",
+    ],
 )
-def test_mapped_stream(stream_map: dict, fields: Set[str]):
-    tap = MappedTap(config={"stream_maps": {"mapped": stream_map}})
+def test_mapped_stream(
+    stream_map: dict,
+    flatten: bool,
+    flatten_max_depth: Optional[int],
+    output_fields: Set[str],
+):
+    tap = MappedTap(
+        config={
+            "stream_maps": {"mapped": stream_map},
+            "flattening_enabled": flatten,
+            "flattening_max_depth": flatten_max_depth,
+        }
+    )
     stream = tap.streams["mapped"]
 
     schema_message = next(stream._generate_schema_messages())
     assert schema_message.key_properties == stream_map.get("__key_properties__", [])
 
-    for record in stream.get_records(None):
-        record_message = next(stream._generate_record_messages(record))
-        assert fields == set(record_message.record)
+    for raw_record in stream.get_records(None):
+        record_message = next(stream._generate_record_messages(raw_record))
+        transformed_record = record_message.record
+        assert output_fields == set(transformed_record.keys())
+        for output_field in output_fields:
+            assert transformed_record[
+                output_field
+            ], f"Value for field '{output_field}' should be nonempty."
