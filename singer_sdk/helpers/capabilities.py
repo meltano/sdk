@@ -31,7 +31,7 @@ FLATTENING_CONFIG = PropertiesList(
         "flattening_enabled",
         BooleanType(),
         description=(
-            "'True' to enabled schema flattening and automatically expand nested "
+            "'True' to enable schema flattening and automatically expand nested "
             "properties.",
         ),
     ),
