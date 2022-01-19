@@ -23,7 +23,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
     Property(
         "stream_map_config",
         ObjectType(),
-        description="Config object for stream maps capability.",
+        description="User-defined configurations to be used within stream map expressions.",
     ),
 ).to_dict()
 FLATTENING_CONFIG = PropertiesList(
