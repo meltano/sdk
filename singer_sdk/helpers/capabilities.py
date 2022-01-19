@@ -23,7 +23,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
     Property(
         "stream_map_config",
         ObjectType(),
-        description="User-defined configurations to be used within stream map expressions.",
+        description="User-defined config values to be used within map expressions.",
     ),
 ).to_dict()
 FLATTENING_CONFIG = PropertiesList(
@@ -32,7 +32,7 @@ FLATTENING_CONFIG = PropertiesList(
         BooleanType(),
         description=(
             "'True' to enable schema flattening and automatically expand nested "
-            "properties.",
+            "properties."
         ),
     ),
     Property(
