@@ -41,6 +41,11 @@ tests:
     auth_method: JWT
     include_cicd_sample_template: "None (Skip)"
 
+  - source_name: SQLTemplateTest
+    tap_id: test-tap-sql-type
+    stream_type: SQL
+    auth_method: Custom or N/A
+
   - source_name: OtherCustomTemplateTest
     tap_id: test-tap-other-custom-type
     stream_type: Other

@@ -12,6 +12,8 @@ Plugin Classes
 
     Tap
     Target
+    SQLTap
+    SQLTarget
     InlineMapper
 
 Stream Classes
@@ -24,6 +26,7 @@ Stream Classes
     Stream
     RESTStream
     GraphQLStream
+    SQLStream
 
 Sink Classes
 --------------
@@ -35,6 +38,16 @@ Sink Classes
     Sink
     RecordSink
     BatchSink
+    SQLSink
+
+SQL Connector for SQL Taps and Targets
+--------------------------------------
+
+.. autosummary::
+    :toctree: _autosummary
+    :template: class.rst
+
+    SQLConnector
 
 Authenticator Classes
 ---------------------
