@@ -1,7 +1,5 @@
 """Test tap-to-target sync."""
 
-import io
-from contextlib import redirect_stdout
 from typing import Any, Dict, List, Optional
 
 from freezegun import freeze_time
@@ -12,7 +10,12 @@ from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk import typing as th
 from singer_sdk.sinks import BatchSink
 from singer_sdk.target_base import Target
-from singer_sdk.testing import sync_end_to_end
+from singer_sdk.testing import (
+    sync_end_to_end,
+    tap_sync_test,
+    tap_to_target_sync_test,
+    target_sync_test,
+)
 
 SAMPLE_FILENAME = "/tmp/testfile.countries"
 SAMPLE_TAP_CONFIG: Dict[str, Any] = {}
@@ -72,7 +75,7 @@ class TargetMock(Target):
 def test_countries_to_csv(csv_config: dict):
     tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
     target = SampleTargetCSV(config=csv_config)
-    sync_end_to_end(tap, target)
+    tap_to_target_sync_test(tap, target)
 
 
 def test_countries_to_csv_mapped(csv_config: dict):
@@ -90,9 +93,8 @@ def test_target_batching():
     minutes elapsed between checkpoints.
     """
     tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
-    buf = io.StringIO()
-    with redirect_stdout(buf):
-        tap.sync_all()
+
+    buf, _ = tap_sync_test(tap)
 
     mocked_starttime = "2012-01-01 12:00:00"
     mocked_jumptotime2 = "2012-01-01 12:31:00"
@@ -107,10 +109,7 @@ def test_target_batching():
         assert len(target.state_messages_written) == 0
 
         # `buf` now contains the output of the full tap sync
-        buf.seek(0)
-        target._process_lines(buf)
-
-        # sync_end_to_end(tap, target)
+        target_sync_test(target, buf, finalize=False)
 
         assert target.num_records_processed == countries_record_count
         assert len(target.records_written) == 0  # Drain not yet called
@@ -118,7 +117,7 @@ def test_target_batching():
 
     with freeze_time(mocked_jumptotime2):
         buf.seek(0)
-        target._process_lines(buf)
+        target_sync_test(target, buf, finalize=False)
 
         # The first next record should force a batch drain
         assert target.num_records_processed == countries_record_count * 2
@@ -127,14 +126,15 @@ def test_target_batching():
 
     with freeze_time(mocked_jumptotime3):
         buf.seek(0)
-        target._process_lines(buf)
+        target_sync_test(target, buf, finalize=False)
 
         # The first next record should force a batch drain
         assert target.num_records_processed == countries_record_count * 3
         assert len(target.records_written) == (countries_record_count * 2) + 1
         assert len(target.state_messages_written) == 2
 
-        target._process_endofpipe()  # Should force a final STATE message
+        # Should force a final STATE message
+        target_sync_test(target, input=None, finalize=True)
 
     assert target.num_records_processed == countries_record_count * 3
     assert len(target.state_messages_written) == 3
