@@ -2,9 +2,12 @@
 
 from typing import List
 
-from singer_sdk import Tap, Stream
+from singer_sdk import {{ 'SQL' if cookiecutter.stream_type == 'SQL' else '' }}Tap, {{ 'SQL' if cookiecutter.stream_type == 'SQL' else '' }}Stream
 from singer_sdk import typing as th  # JSON schema typing helpers
 
+{%- if cookiecutter.stream_type == "SQL" %}
+from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }}Stream
+{%- else %}
 # TODO: Import your custom stream types here:
 from {{ cookiecutter.library_name }}.streams import (
     {{ cookiecutter.source_name }}Stream,
@@ -13,6 +16,7 @@ from {{ cookiecutter.library_name }}.streams import (
     GroupsStream,
 {%- endif %}
 )
+{%- endif %}
 
 {%- if cookiecutter.stream_type in ("GraphQL", "REST", "Other") %}
 # TODO: Compile a list of custom stream types here
@@ -24,7 +28,7 @@ STREAM_TYPES = [
 {%- endif %}
 
 
-class Tap{{ cookiecutter.source_name }}(Tap):
+class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.source_name == 'SQL' else '' }}Tap):
     """{{ cookiecutter.source_name }} tap class."""
     name = "{{ cookiecutter.tap_id }}"
 

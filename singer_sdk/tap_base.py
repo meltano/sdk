@@ -22,7 +22,7 @@ from singer_sdk.helpers.capabilities import (
 )
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
-from singer_sdk.streams.core import Stream
+from singer_sdk.streams import SQLStream, Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
 
@@ -222,6 +222,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     def discover_streams(self) -> List[Stream]:
         """Initialize all available streams and return them as a list.
 
+        Return:
+            List of discovered Stream objects.
+
         Raises:
             NotImplementedError: If the tap implementation does not override this
                 method.
@@ -301,7 +304,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def _reset_state_progress_markers(self) -> None:
         """Clear prior jobs' progress markers at beginning of sync."""
-        for stream_name, state in self.state.get("bookmarks", {}).items():
+        for _, state in self.state.get("bookmarks", {}).items():
             _state.reset_state_progress_markers(state)
             for partition_state in state.get("partitions", []):
                 _state.reset_state_progress_markers(partition_state)
@@ -458,3 +461,74 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 tap.sync_all()
 
         return cli
+
+
+class SQLTap(Tap):
+    """A specialized Tap for extracting from SQL streams."""
+
+    # Stream class used to initialize new SQL streams from their catalog declarations.
+    default_stream_class: Type[SQLStream]
+
+    def __init__(
+        self,
+        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        catalog: Union[PurePath, str, dict, None] = None,
+        state: Union[PurePath, str, dict, None] = None,
+        parse_env_config: bool = False,
+        validate_config: bool = True,
+    ) -> None:
+        """Initialize the SQL tap.
+
+        The SQLTap initializer additionally creates a cache variable for _catalog_dict.
+
+        Args:
+            config: Tap configuration. Can be a dictionary, a single path to a
+                configuration file, or a list of paths to multiple configuration
+                files.
+            catalog: Tap catalog. Can be a dictionary or a path to the catalog file.
+            state: Tap state. Can be dictionary or a path to the state file.
+            parse_env_config: Whether to look for configuration values in environment
+                variables.
+            validate_config: True to require validation of config settings.
+        """
+        self._catalog_dict: Optional[dict] = None
+        super().__init__(
+            config=config,
+            catalog=catalog,
+            state=state,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
+
+    @property
+    def catalog_dict(self) -> dict:
+        """Get catalog dictionary.
+
+        Returns:
+            The tap's catalog as a dict
+        """
+        if self._catalog_dict:
+            return self._catalog_dict
+
+        if self.input_catalog:
+            return self.input_catalog.to_dict()
+
+        connector = self.default_stream_class.connector_class(dict(self.config))
+
+        result: Dict[str, List[dict]] = {"streams": []}
+        result["streams"].extend(connector.discover_catalog_entries())
+
+        self._catalog_dict = result
+        return self._catalog_dict
+
+    def discover_streams(self) -> List[Stream]:
+        """Initialize all available streams and return them as a list.
+
+        Returns:
+            List of discovered Stream objects.
+        """
+        result: List[Stream] = []
+        for catalog_entry in self.catalog_dict["streams"]:
+            result.append(self.default_stream_class(self, catalog_entry))
+
+        return result

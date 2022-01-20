@@ -44,16 +44,23 @@ First clone, then...
 
 ## Testing Locally
 
-To run tests and gather coverage metrics:
+To run tests:
 
 ```bash
+# Run all tests (external creds required):
 poetry run pytest
+# Run just the core and cookiecutter tests (no external creds required):
+poetry run pytest tests/cookiecutters
+poetry run pytest tests/core
 ```
 
 To run tests while gathering coverage metrics:
 
 ```bash
+# Run with all tests (external creds required):
 poetry run coverage run -m pytest
+# Run with just the core tests (no external creds required):
+poetry run coverage run -m pytest tests/core
 ```
 
 To view the code coverage report:
