@@ -711,21 +711,23 @@ class SQLConnector:
         def _get_type_sort_key(
             sql_type: sqlalchemy.types.TypeEngine,
         ) -> Tuple[int, int]:
+            # return rank, with higher numbers ranking first
+
             _len = int(getattr(sql_type, "length", 0) or 0)
 
             _pytype = cast(type, sql_type.python_type)
             if issubclass(_pytype, (str, bytes)):
-                return 0, _len
+                return 900, _len
             elif issubclass(_pytype, datetime):
-                return 100, _len
+                return 600, _len
             elif issubclass(_pytype, float):
-                return 200, _len
+                return 400, _len
             elif issubclass(_pytype, int):
                 return 300, _len
 
-            return 900, _len
+            return 0, _len
 
-        return sorted(sql_types, key=_get_type_sort_key)
+        return sorted(sql_types, key=_get_type_sort_key, reverse=True)
 
     def _get_column_type(
         self, full_table_name: str, column_name: str
