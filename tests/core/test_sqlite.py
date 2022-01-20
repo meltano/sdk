@@ -252,9 +252,7 @@ def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
     Test performs the following actions:
 
     - Load a dataset with 1 column.
-    - Ensure column count is 1.
     - Load a dataset with 2 columns.
-    - Ensure column count is 2.
     """
     test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
     props_a: Dict[str, dict] = {"col_a": th.StringType().to_dict()}

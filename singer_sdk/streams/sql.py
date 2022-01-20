@@ -478,7 +478,7 @@ class SQLConnector:
             column_name: the target column name.
 
         Returns:
-            True if table exists, False if not, None if unsure or undetectable.
+            True if table exists, False if not.
         """
         return column_name in self.get_table_columns(full_table_name)
 
