@@ -161,7 +161,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """
         for stream in self.streams.values():
             # Initialize streams' record limits before beginning the sync test.
-            stream._MAX_RECORDS_LIMIT = 1 if stream.child_streams else 0
+            stream._MAX_RECORDS_LIMIT = 1
 
         for stream in self.streams.values():
             if stream.parent_stream_type:
