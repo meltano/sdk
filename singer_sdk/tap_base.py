@@ -2,6 +2,7 @@
 
 import abc
 import json
+from enum import Enum
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
@@ -25,6 +26,14 @@ from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams import SQLStream, Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
+
+
+class CliTestOptionValue(Enum):
+    """Values for CLI option --test."""
+
+    All = "all"
+    Schema = "schema"
+    Disabled = False
 
 
 class Tap(PluginBase, metaclass=abc.ABCMeta):
@@ -176,6 +185,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             except MaxRecordsLimitException:
                 pass
         return True
+
+    @final
+    def write_schemas(self) -> None:
+        """Write a SCHEMA message for all known streams to STDOUT."""
+        for stream in self.streams.values():
+            stream._write_schema_message()
 
     # Stream detection:
 
@@ -370,8 +385,14 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         )
         @click.option(
             "--test",
-            is_flag=True,
-            help="Test connectivity by syncing a single record and exiting.",
+            is_flag=False,
+            flag_value=CliTestOptionValue.All.value,
+            default=CliTestOptionValue.Disabled,
+            help=(
+                "Use --test to sync a single record for each stream. "
+                + "Use --test=schema to test schema output without syncing "
+                + "records."
+            ),
         )
         @click.option(
             "--catalog",
@@ -391,7 +412,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             version: bool = False,
             about: bool = False,
             discover: bool = False,
-            test: bool = False,
+            test: CliTestOptionValue = CliTestOptionValue.Disabled,
             config: Tuple[str, ...] = (),
             state: str = None,
             catalog: str = None,
@@ -453,10 +474,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 tap.print_about(format)
             elif discover:
                 tap.run_discovery()
-                if test:
+                if test == CliTestOptionValue.All.value:
                     tap.run_connection_test()
-            elif test:
+            elif test == CliTestOptionValue.All.value:
                 tap.run_connection_test()
+            elif test == CliTestOptionValue.Schema.value:
+                tap.write_schemas()
             else:
                 tap.sync_all()
 
