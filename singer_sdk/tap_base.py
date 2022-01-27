@@ -394,7 +394,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             is_flag=False,
             flag_value=CliTestOptionValue.All.value,
             default=CliTestOptionValue.Disabled,
-            help="Test connectivity by syncing a single record and exiting.",
+            help=(
+                "Use --test to sync a single record for each stream. "
+                + "Use --test=schema to test schema output without syncing "
+                + "records."
+            ),
         )
         @click.option(
             "--config",
