@@ -3,7 +3,7 @@
 import copy
 import json
 import logging
-from typing import Dict, List, Set
+from typing import Dict, List, Set, cast
 
 import pytest
 
@@ -378,7 +378,7 @@ def _test_transform(
 class MappedStream(Stream):
     """A stream to be mapped."""
 
-    name = "mapped"
+    name = "mystream"
     schema = PropertiesList(
         Property("email", StringType),
         Property("count", IntegerType),
@@ -401,35 +401,90 @@ class MappedTap(Tap):
 
 
 @pytest.mark.parametrize(
-    "stream_map,fields",
+    "stream_alias,stream_maps,fields,key_properties",
     [
         (
+            "mystream",
             {},
             {"email", "count"},
+            [],
         ),
         (
-            {"email_hash": "md5(email)", "__key_properties__": ["email_hash"]},
-            {"email", "count", "email_hash"},
-        ),
-        (
+            "mystream",
             {
-                "email_hash": "md5(email)",
-                "fixed_count": "int(count-1)",
-                "__key_properties__": ["email_hash"],
-                "__else__": None,
+                "mystream": {
+                    "email_hash": "md5(email)",
+                }
+            },
+            {"email", "count", "email_hash"},
+            [],
+        ),
+        (
+            "mystream",
+            {
+                "mystream": {
+                    "email_hash": "md5(email)",
+                    "fixed_count": "int(count-1)",
+                    "__else__": None,
+                }
             },
             {"fixed_count", "email_hash"},
+            [],
+        ),
+        (
+            "mystream",
+            {
+                "mystream": {
+                    "email_hash": "md5(email)",
+                    "__key_properties__": ["email_hash"],
+                    "__else__": None,
+                }
+            },
+            {"email_hash"},
+            ["email_hash"],
+        ),
+        (
+            "sourced_stream_1",
+            {"mystream": None, "sourced_stream_1": {"__source__": "mystream"}},
+            {"email", "count"},
+            [],
+        ),
+        (
+            "sourced_stream_2",
+            {"sourced_stream_2": {"__source__": "mystream"}, "__else__": None},
+            {"email", "count"},
+            [],
+        ),
+        (
+            "aliased_stream",
+            {"mystream": {"__alias__": "aliased_stream"}},
+            {"email", "count"},
+            [],
         ),
     ],
-    ids=["no_map", "keep_all_fields", "only_mapped_fields"],
+    ids=[
+        "no_map",
+        "keep_all_fields",
+        "only_mapped_fields",
+        "changed_key_properties",
+        "sourced_stream_1",
+        "sourced_stream_2",
+        "aliased_stream",
+    ],
 )
-def test_mapped_stream(stream_map: dict, fields: Set[str]):
-    tap = MappedTap(config={"stream_maps": {"mapped": stream_map}})
-    stream = tap.streams["mapped"]
+def test_mapped_stream(
+    stream_alias: str, stream_maps: dict, fields: Set[str], key_properties: List[str]
+):
+    tap = MappedTap(config={"stream_maps": stream_maps})
+    stream = tap.streams["mystream"]
 
-    schema_message = next(stream._generate_schema_messages())
-    assert schema_message.key_properties == stream_map.get("__key_properties__", [])
+    schema_messages = list(stream._generate_schema_messages())
+    assert len(schema_messages) == 1, "Incorrect number of schema messages generated."
+    schema_message = schema_messages[0]
+    assert schema_message.stream == stream_alias
+    assert schema_message.key_properties == key_properties
 
     for record in stream.get_records(None):
-        record_message = next(stream._generate_record_messages(record))
-        assert fields == set(record_message.record)
+        record_message = next(stream._generate_record_messages(cast(dict, record)))
+        assert record_message.stream == stream_alias
+        assert fields == set(record_message.record.keys())
