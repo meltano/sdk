@@ -413,7 +413,6 @@ class MappedTap(Tap):
             {
                 "mystream": {
                     "email_hash": "md5(email)",
-                    "__key_properties__": ["email_hash"],
                 }
             },
             {"email", "count", "email_hash"},
@@ -424,11 +423,21 @@ class MappedTap(Tap):
                 "mystream": {
                     "email_hash": "md5(email)",
                     "fixed_count": "int(count-1)",
-                    "__key_properties__": ["email_hash"],
                     "__else__": None,
                 }
             },
             {"fixed_count", "email_hash"},
+        ),
+        (
+            "mystream",
+            {
+                "mystream": {
+                    "email_hash": "md5(email)",
+                    "__key_properties__": ["email_hash"],
+                    "__else__": None,
+                }
+            },
+            {"email", "count", "email_hash"},
         ),
         (
             "sourced_stream_1",
@@ -450,6 +459,7 @@ class MappedTap(Tap):
         "no_map",
         "keep_all_fields",
         "only_mapped_fields",
+        "changed_key_properties",
         "sourced_stream_1",
         "sourced_stream_2",
         "aliased_stream",
