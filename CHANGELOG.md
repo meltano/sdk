@@ -14,12 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changes
 
-- Always sync one record per stream when invoking with `--test` or `--test=all` ([#311](https://gitlab.com/meltano/sdk/-/issues/311), [!241](https://gitlab.com/meltano/sdk/-/merge_requests/241))
-
 ### Fixes
 
 ### Breaks
 
+
+## 0.4.1 - (2022-01-27)
+---
+
+### Changes
+
+- Always sync one record per stream when invoking with `--test` or `--test=all` ([#311](https://gitlab.com/meltano/sdk/-/issues/311), [!241](https://gitlab.com/meltano/sdk/-/merge_requests/241))
+- Add `--test=schema` option to emit tap SCHEMA messages only ([!218](https://gitlab.com/meltano/sdk/-/merge_requests/218)) - _Thanks, **[Laurent Savaëte](https://gitlab.com/LaurentS)**_!
 
 ## 0.4.0 - (2022-01-21)
 ---
