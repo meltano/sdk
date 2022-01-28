@@ -52,7 +52,7 @@ from singer_sdk.helpers._state import (
 )
 from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type
 from singer_sdk.helpers._util import utc_now
-from singer_sdk.mapper import SameRecordTransform, StreamMap
+from singer_sdk.mapper import SameRecordTransform, StreamMap, RemoveRecordTransform
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 
 # Replication methods
@@ -690,6 +690,10 @@ class Stream(metaclass=abc.ABCMeta):
         """
         bookmark_keys = [self.replication_key] if self.replication_key else None
         for stream_map in self.stream_maps:
+            if isinstance(stream_map, RemoveRecordTransform):
+                # Don't emit schema if the stream's records are all ignored.
+                continue
+
             schema_message = SchemaMessage(
                 stream_map.stream_alias,
                 stream_map.transformed_schema,
