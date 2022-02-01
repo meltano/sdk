@@ -8,15 +8,15 @@ body {
 
 a,
 a:visited {
-  color: #464acb;
+  color: #3438bf;
 }
 a:hover {
-  color: #464acb;
+  color: #3438bf;
   text-decoration: underline;
 }
 
 .wy-nav-top {
-  background-color: #464acb;
+  background-color: #3438bf;
 }
 
 .wy-nav-top a {
@@ -25,11 +25,11 @@ a:hover {
 }
 
 .wy-nav-side {
-  background-color: #595cd0;
+  background-color: #3438bf;
 }
 
 .wy-side-nav-search {
-  background-color: #464acb;
+  background-color: #3438bf;
 }
 
 .wy-side-nav-search > a {
@@ -59,11 +59,11 @@ a:hover {
 }
 
 .wy-side-nav-search input[type="text"] {
-  border-color: #464acb;
+  border-color: #3438bf;
 }
 
 .wy-menu-vertical a:hover {
-  background-color: #464acb;
+  background-color: #3438bf;
 }
 
 .wy-menu-vertical a,
@@ -84,11 +84,11 @@ a:hover {
 
 .rst-versions,
 .rst-versions .rst-current-version {
-  background-color: #464acb;
+  background-color: #3438bf;
 }
 
 .rst-versions .rst-current-version {
-  color: rgb(255, 229, 100);
+  color: #fbbf52;
 }
 
 .rst-versions .rst-other-versions {
@@ -116,12 +116,12 @@ a:hover {
 }
 
 .rst-versions .rst-other-versions dd a:hover {
-  color: #464acb;
+  color: #3438bf;
   background-color: white;
 }
 
 .rst-content code.literal {
-  color: #476582;
+  color: #62626e;
 }
 
 h1,
