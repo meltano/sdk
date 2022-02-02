@@ -2,15 +2,27 @@
 
 from dataclasses import dataclass, field
 from datetime import date, datetime
-from typing import Any, Dict, Generic, List, Optional, TypeVar
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
 
 from mashumaro import DataClassJSONMixin
+from mashumaro.config import TO_DICT_ADD_OMIT_NONE_FLAG
 
 TReplKey = TypeVar("TReplKey", int, str, datetime, date, float)
 
 
+class BaseModel(DataClassJSONMixin):
+    """Basic dataclass model."""
+
+    class Config:
+        """Dataclass options."""
+
+        code_generation_options = [
+            TO_DICT_ADD_OMIT_NONE_FLAG,
+        ]
+
+
 @dataclass
-class Bookmark(Generic[TReplKey], DataClassJSONMixin):
+class Bookmark(Generic[TReplKey], BaseModel):
     """Generic and base bookmark for all state, resumable or not."""
 
     replication_key: Optional[str] = None
@@ -37,7 +49,7 @@ class BookmarkWithMarkers(Bookmark[TReplKey]):
 class PartitionState(BookmarkWithMarkers[TReplKey]):
     """Bookmark for a stream partition."""
 
-    context: Optional[Dict[str, Any]] = None
+    context: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -46,9 +58,43 @@ class StreamState(BookmarkWithMarkers[TReplKey]):
 
     partitions: List[PartitionState[TReplKey]] = field(default_factory=list)
 
+    @classmethod
+    def __pre_deserialize__(
+        cls: Type["StreamState"],
+        d: Dict[Any, Any],
+    ) -> Dict[Any, Any]:
+        """Process raw dictionary.
+
+        - Add an empty partitions array if none is found.
+
+        Args:
+            d: Input dictionary.
+
+        Returns:
+            Processed dictionary.
+        """
+        if d.get("partitions") is None:
+            d["partitions"] = []
+        return d
+
+    def __post_serialize__(self, d: Dict[Any, Any]) -> Dict[Any, Any]:
+        """Process output dictionary.
+
+        - Remove partitions array if it's empty.
+
+        Args:
+            d: Output dictionary.
+
+        Returns:
+            Processed dictionary.
+        """
+        if not d["partitions"]:
+            d.pop("partitions")
+        return d
+
 
 @dataclass
-class TapState(Generic[TReplKey], DataClassJSONMixin):
+class TapState(Generic[TReplKey], BaseModel):
     """Singer tap state."""
 
     bookmarks: Dict[str, StreamState[TReplKey]] = field(default_factory=dict)
