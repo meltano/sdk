@@ -98,3 +98,24 @@ class TapState(Generic[TReplKey], BaseModel):
     """Singer tap state."""
 
     bookmarks: Dict[str, StreamState[TReplKey]] = field(default_factory=dict)
+
+    @classmethod
+    def __pre_deserialize__(
+        cls: Type["TapState"],
+        d: Dict[Any, Any],
+    ) -> Dict[Any, Any]:
+        """Process raw dictionary.
+
+        - Add an empty bookmarks mapping if none is found.
+        - Apparently only required in Python 3.6.
+
+        Args:
+            d: Input dictionary.
+
+        Returns:
+            Processed dictionary.
+        """
+        if d.get("bookmarks") is None:
+            d["bookmarks"] = {}
+
+        return d
