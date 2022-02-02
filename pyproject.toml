@@ -27,7 +27,7 @@ license = "Apache 2.0"
 "Youtube" = "https://www.youtube.com/meltano"
 
 [tool.poetry.dependencies]
-python = "<3.11,>=3.6.2"
+python = "<3.11,>=3.7.1"
 pipelinewise-singer-python = "1.2.0"
 backoff = ">=1.8.0,<2.0"
 pendulum = "^2.1.0"
@@ -41,8 +41,6 @@ jsonpath-ng = "^1.5.3"
 joblib = "^1.0.1"
 inflection = "^0.5.1"
 sqlalchemy = "^1.4"
-dataclasses = {version = "*", markers = "python_version < \"3.7\""}
-contextlib2 = {version = "*", markers = "python_version < \"3.7\""}
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
@@ -64,14 +62,8 @@ PyYAML = "^5.4.1"
 flake8-docstrings = "^1.6.0"
 flake8 = "^3.9.0"
 pyarrow = "^6.0.0"
-pandas = [
-    {version = ">1,<1.2.0", python = "<3.7.1"},
-    {version = ">=1.2.0", python = ">=3.7.1"},
-]
-numpy = [
-    {version = ">=1.19.0,<1.20.0", python = "<3.7.0"},
-    {version = ">=1.20.0", python = ">=3.7.0"},
-]
+pandas = ">=1.2.0"
+numpy = ">=1.20.0"
 tox = "^3.23.1"
 codecov = "^2.1.11"
 freezegun = "^1.1.0"
