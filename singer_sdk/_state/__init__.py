@@ -1,5 +1,6 @@
 """Helper functions for state and bookmark management."""
 
+from datetime import datetime
 from typing import List, Optional, Union
 
 from singer_sdk._state.schema import (
@@ -171,7 +172,7 @@ def reset_state_progress_markers(
 
 def write_replication_key_signpost(
     stream_or_partition_state: AnyState,
-    new_signpost_value: TReplKey,
+    new_signpost_value: datetime,
 ) -> None:
     """Write initial replication value to state.
 

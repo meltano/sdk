@@ -30,7 +30,7 @@ def dirty_state() -> TapState[str]:
                             "progress_markers": {
                                 "Note": "This is not resumable until finalized.",
                                 "replication_key": "updated_at",
-                                "replication_key_value": "2021-05-17T20:41:16Z",
+                                "replication_key_value": "2021-05-17T20:41:16+00:00",
                             },
                         },
                         {
@@ -41,7 +41,7 @@ def dirty_state() -> TapState[str]:
                             "progress_markers": {
                                 "Note": "This is not resumable until finalized.",
                                 "replication_key": "updated_at",
-                                "replication_key_value": "2021-05-11T18:07:11Z",
+                                "replication_key_value": "2021-05-11T18:07:11+00:00",
                             },
                         },
                         {"context": {"org": "VirusEnabled", "repo": "Athena"}},
@@ -49,7 +49,7 @@ def dirty_state() -> TapState[str]:
                     "progress_markers": {
                         "Note": "This is not resumable until finalized.",
                         "replication_key": "updated_at",
-                        "replication_key_value": "2021-05-11T18:07:11Z",
+                        "replication_key_value": "2021-05-11T18:07:11+00:00",
                     },
                 },
             }
@@ -84,7 +84,7 @@ def finalized_state() -> TapState[str]:
                         {
                             "context": {"org": "aaronsteers", "repo": "target-athena"},
                             "replication_key": "updated_at",
-                            "replication_key_value": "2021-05-17T20:41:16Z",
+                            "replication_key_value": "2021-05-17T20:41:16+00:00",
                         },
                         {
                             "context": {
@@ -92,12 +92,12 @@ def finalized_state() -> TapState[str]:
                                 "repo": "target-athena",
                             },
                             "replication_key": "updated_at",
-                            "replication_key_value": "2021-05-11T18:07:11Z",
+                            "replication_key_value": "2021-05-11T18:07:11+00:00",
                         },
                         {"context": {"org": "VirusEnabled", "repo": "Athena"}},
                     ],
                     "replication_key": "updated_at",
-                    "replication_key_value": "2021-05-11T18:07:11Z",
+                    "replication_key_value": "2021-05-11T18:07:11+00:00",
                 },
             }
         }
@@ -114,7 +114,7 @@ def finalized_state_with_signpost() -> TapState[str]:
                         {
                             "context": {"org": "aaronsteers", "repo": "target-athena"},
                             "replication_key": "updated_at",
-                            "replication_key_value": "2021-05-17T20:41:16Z",
+                            "replication_key_value": "2021-05-17T20:41:16+00:00",
                         },
                         {
                             "context": {
@@ -122,16 +122,86 @@ def finalized_state_with_signpost() -> TapState[str]:
                                 "repo": "target-athena",
                             },
                             "replication_key": "updated_at",
-                            "replication_key_value": "2021-05-11T18:07:11Z",
+                            "replication_key_value": "2021-05-11T18:07:11+00:00",
                         },
                         {"context": {"org": "VirusEnabled", "repo": "Athena"}},
                     ],
                     "replication_key": "updated_at",
-                    "replication_key_value": "2020-05-11T18:07:11Z",
+                    "replication_key_value": "2020-05-11T18:07:11+00:00",
                 },
             }
         }
     )
+
+
+@pytest.mark.parametrize(
+    "state_dict,expected",
+    [
+        ({}, TapState()),
+        ({"bookmarks": {}}, TapState()),
+        (
+            {"bookmarks": {"my_stream": {}}},
+            TapState(bookmarks={"my_stream": StreamState()}),
+        ),
+        (
+            {
+                "bookmarks": {
+                    "my_stream": {
+                        "partitions": [
+                            {
+                                "context": {"parent_id": 123},
+                                "replication_key": "updatedAt",
+                                "replication_key_value": datetime(2022, 1, 1),
+                            },
+                        ]
+                    },
+                }
+            },
+            TapState(
+                bookmarks={
+                    "my_stream": StreamState(
+                        partitions=[
+                            PartitionState(
+                                context={"parent_id": 123},
+                                replication_key="updatedAt",
+                                replication_key_value=datetime(2022, 1, 1),
+                            )
+                        ]
+                    )
+                }
+            ),
+        ),
+        (
+            {
+                "bookmarks": {
+                    "my_stream": {
+                        "context": {"parent_id": 123},
+                        "replication_key": "updatedAt",
+                        "replication_key_value": datetime(2022, 1, 1),
+                    },
+                }
+            },
+            TapState(
+                bookmarks={
+                    "my_stream": StreamState(
+                        replication_key="updatedAt",
+                        replication_key_value=datetime(2022, 1, 1),
+                    )
+                }
+            ),
+        ),
+    ],
+    ids=[
+        "empty_dict",
+        "empty_bookmarks",
+        "stream_with_no_bookmarks",
+        "stream_with_partition_bookmark",
+        "stream_with_bookmark",
+    ],
+)
+def test_parse_state(state_dict: dict, expected: TapState):
+    """Check if state is parsed correctly."""
+    assert TapState.from_dict(state_dict) == expected
 
 
 def test_get_state(finalized_state: TapState[str]):
@@ -172,7 +242,7 @@ def test_get_state(finalized_state: TapState[str]):
     assert stream_state is not None
     assert isinstance(stream_state, StreamState)
     assert stream_state.replication_key == "updated_at"
-    assert stream_state.replication_key_value == "2021-05-11T18:07:11Z"
+    assert stream_state.replication_key_value == "2021-05-11T18:07:11+00:00"
 
     partition_state = get_state_if_exists(
         state,
@@ -185,7 +255,7 @@ def test_get_state(finalized_state: TapState[str]):
     assert partition_state is not None
     assert isinstance(partition_state, PartitionState)
     assert partition_state.replication_key == "updated_at"
-    assert partition_state.replication_key_value == "2021-05-17T20:41:16Z"
+    assert partition_state.replication_key_value == "2021-05-17T20:41:16+00:00"
 
     partition_state = get_state_if_exists(
         state,
@@ -248,7 +318,7 @@ def test_get_writable_state(finalized_state: TapState[str]):
     assert isinstance(partition_state, PartitionState)
     assert partition_state.context == {"org": "aaronsteers", "repo": "target-athena"}
     assert partition_state.replication_key == "updated_at"
-    assert partition_state.replication_key_value == "2021-05-17T20:41:16Z"
+    assert partition_state.replication_key_value == "2021-05-17T20:41:16+00:00"
 
     partition_state = get_writeable_state(
         state,
@@ -381,7 +451,7 @@ def test_state_finalize_unsorted_signpost(
     """Test state finalization when a signpost is selected as new replication value."""
     state = dirty_state
     for stream_state in state.bookmarks.values():
-        write_replication_key_signpost(stream_state, "2020-05-11T18:07:11Z")
+        write_replication_key_signpost(stream_state, datetime(2020, 5, 11, 18, 7, 11))
         finalize_state_progress_markers(stream_state)
         for partition_state in stream_state.partitions:
             finalize_state_progress_markers(partition_state)
