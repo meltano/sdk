@@ -6,7 +6,6 @@ from typing import Any, Dict
 
 import pendulum
 import pytest
-import pytz
 
 from singer_sdk.helpers._typing import (
     conform_record_data_types,
