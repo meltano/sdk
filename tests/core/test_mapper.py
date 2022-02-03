@@ -445,7 +445,7 @@ class MappedTap(Tap):
             },
             False,
             0,
-            {"email", "count", "email_hash"},
+            {"email", "count", "user", "email_hash"},
             [],
         ),
         (
@@ -481,7 +481,7 @@ class MappedTap(Tap):
             {"mystream": None, "sourced_stream_1": {"__source__": "mystream"}},
             False,
             0,
-            {"email", "count"},
+            {"email", "count", "user"},
             [],
         ),
         (
@@ -489,7 +489,7 @@ class MappedTap(Tap):
             {"sourced_stream_2": {"__source__": "mystream"}, "__else__": None},
             False,
             0,
-            {"email", "count"},
+            {"email", "count", "user"},
             [],
         ),
         (
@@ -497,7 +497,7 @@ class MappedTap(Tap):
             {"mystream": {"__alias__": "aliased_stream"}},
             False,
             0,
-            {"email", "count"},
+            {"email", "count", "user"},
             [],
         ),
         (
@@ -518,7 +518,12 @@ class MappedTap(Tap):
         ),
         (
             "mystream",
-            {"email_hash": "md5(email)", "__key_properties__": ["email_hash"]},
+            {
+                "mystream": {
+                    "email_hash": "md5(email)",
+                    "__key_properties__": ["email_hash"],
+                }
+            },
             True,
             10,
             {"email", "count", "email_hash", "user__id", "user__sub__num"},
@@ -553,8 +558,6 @@ def test_mapped_stream(
             "flattening_max_depth": flatten_max_depth,
         }
     )
-    stream = tap.streams["mapped"]
-    tap = MappedTap(config={"stream_maps": stream_maps})
     stream = tap.streams["mystream"]
 
     schema_messages = list(stream._generate_schema_messages())
