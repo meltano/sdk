@@ -2,6 +2,7 @@
 
 import abc
 import json
+from enum import Enum
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
@@ -22,9 +23,17 @@ from singer_sdk.helpers.capabilities import (
 )
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
-from singer_sdk.streams.core import Stream
+from singer_sdk.streams import SQLStream, Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
+
+
+class CliTestOptionValue(Enum):
+    """Values for CLI option --test."""
+
+    All = "all"
+    Schema = "schema"
+    Disabled = False
 
 
 class Tap(PluginBase, metaclass=abc.ABCMeta):
@@ -162,7 +171,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """
         for stream in self.streams.values():
             # Initialize streams' record limits before beginning the sync test.
-            stream._MAX_RECORDS_LIMIT = 1 if stream.child_streams else 0
+            stream._MAX_RECORDS_LIMIT = 1
 
         for stream in self.streams.values():
             if stream.parent_stream_type:
@@ -177,6 +186,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             except MaxRecordsLimitException:
                 pass
         return True
+
+    @final
+    def write_schemas(self) -> None:
+        """Write a SCHEMA message for all known streams to STDOUT."""
+        for stream in self.streams.values():
+            stream._write_schema_message()
 
     # Stream detection:
 
@@ -222,6 +237,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def discover_streams(self) -> List[Stream]:
         """Initialize all available streams and return them as a list.
+
+        Return:
+            List of discovered Stream objects.
 
         Raises:
             NotImplementedError: If the tap implementation does not override this
@@ -302,7 +320,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def _reset_state_progress_markers(self) -> None:
         """Clear prior jobs' progress markers at beginning of sync."""
-        for stream_name, state in self.state.get("bookmarks", {}).items():
+        for _, state in self.state.get("bookmarks", {}).items():
             _state.reset_state_progress_markers(state)
             for partition_state in state.get("partitions", []):
                 _state.reset_state_progress_markers(partition_state)
@@ -368,8 +386,14 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         )
         @click.option(
             "--test",
-            is_flag=True,
-            help="Test connectivity by syncing a single record and exiting.",
+            is_flag=False,
+            flag_value=CliTestOptionValue.All.value,
+            default=CliTestOptionValue.Disabled,
+            help=(
+                "Use --test to sync a single record for each stream. "
+                + "Use --test=schema to test schema output without syncing "
+                + "records."
+            ),
         )
         @click.option(
             "--catalog",
@@ -389,7 +413,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             version: bool = False,
             about: bool = False,
             discover: bool = False,
-            test: bool = False,
+            test: CliTestOptionValue = CliTestOptionValue.Disabled,
             config: Tuple[str, ...] = (),
             state: str = None,
             catalog: str = None,
@@ -451,11 +475,84 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 tap.print_about(format)
             elif discover:
                 tap.run_discovery()
-                if test:
+                if test == CliTestOptionValue.All.value:
                     tap.run_connection_test()
-            elif test:
+            elif test == CliTestOptionValue.All.value:
                 tap.run_connection_test()
+            elif test == CliTestOptionValue.Schema.value:
+                tap.write_schemas()
             else:
                 tap.sync_all()
 
         return cli
+
+
+class SQLTap(Tap):
+    """A specialized Tap for extracting from SQL streams."""
+
+    # Stream class used to initialize new SQL streams from their catalog declarations.
+    default_stream_class: Type[SQLStream]
+
+    def __init__(
+        self,
+        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        catalog: Union[PurePath, str, dict, None] = None,
+        state: Union[PurePath, str, dict, None] = None,
+        parse_env_config: bool = False,
+        validate_config: bool = True,
+    ) -> None:
+        """Initialize the SQL tap.
+
+        The SQLTap initializer additionally creates a cache variable for _catalog_dict.
+
+        Args:
+            config: Tap configuration. Can be a dictionary, a single path to a
+                configuration file, or a list of paths to multiple configuration
+                files.
+            catalog: Tap catalog. Can be a dictionary or a path to the catalog file.
+            state: Tap state. Can be dictionary or a path to the state file.
+            parse_env_config: Whether to look for configuration values in environment
+                variables.
+            validate_config: True to require validation of config settings.
+        """
+        self._catalog_dict: Optional[dict] = None
+        super().__init__(
+            config=config,
+            catalog=catalog,
+            state=state,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
+
+    @property
+    def catalog_dict(self) -> dict:
+        """Get catalog dictionary.
+
+        Returns:
+            The tap's catalog as a dict
+        """
+        if self._catalog_dict:
+            return self._catalog_dict
+
+        if self.input_catalog:
+            return self.input_catalog.to_dict()
+
+        connector = self.default_stream_class.connector_class(dict(self.config))
+
+        result: Dict[str, List[dict]] = {"streams": []}
+        result["streams"].extend(connector.discover_catalog_entries())
+
+        self._catalog_dict = result
+        return self._catalog_dict
+
+    def discover_streams(self) -> List[Stream]:
+        """Initialize all available streams and return them as a list.
+
+        Returns:
+            List of discovered Stream objects.
+        """
+        result: List[Stream] = []
+        for catalog_entry in self.catalog_dict["streams"]:
+            result.append(self.default_stream_class(self, catalog_entry))
+
+        return result

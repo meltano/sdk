@@ -3,7 +3,7 @@
 import copy
 import json
 import logging
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, cast
 
 import pytest
 
@@ -384,7 +384,7 @@ def _test_transform(
 class MappedStream(Stream):
     """A stream to be mapped."""
 
-    name = "mapped"
+    name = "mystream"
     schema = PropertiesList(
         Property("email", StringType),
         Property("count", IntegerType),
@@ -426,81 +426,150 @@ class MappedTap(Tap):
 
 
 @pytest.mark.parametrize(
-    "stream_map,flatten,flatten_max_depth,output_fields",
+    "stream_alias,stream_maps,flatten,flatten_max_depth,output_fields,key_properties",
     [
         (
+            "mystream",
             {},
             False,
-            None,
+            0,
             {"email", "count", "user"},
+            [],
         ),
         (
-            {"email_hash": "md5(email)", "__key_properties__": ["email_hash"]},
-            False,
-            None,
-            {"email", "count", "email_hash", "user"},
-        ),
-        (
+            "mystream",
             {
-                "email_hash": "md5(email)",
-                "fixed_count": "int(count-1)",
-                "__key_properties__": ["email_hash"],
-                "__else__": None,
+                "mystream": {
+                    "email_hash": "md5(email)",
+                }
             },
             False,
-            None,
-            {"fixed_count", "email_hash"},
+            0,
+            {"email", "count", "email_hash"},
+            [],
         ),
         (
+            "mystream",
+            {
+                "mystream": {
+                    "email_hash": "md5(email)",
+                    "fixed_count": "int(count-1)",
+                    "__else__": None,
+                }
+            },
+            False,
+            0,
+            {"fixed_count", "email_hash"},
+            [],
+        ),
+        (
+            "mystream",
+            {
+                "mystream": {
+                    "email_hash": "md5(email)",
+                    "__key_properties__": ["email_hash"],
+                    "__else__": None,
+                }
+            },
+            False,
+            0,
+            {"email_hash"},
+            ["email_hash"],
+        ),
+        (
+            "sourced_stream_1",
+            {"mystream": None, "sourced_stream_1": {"__source__": "mystream"}},
+            False,
+            0,
+            {"email", "count"},
+            [],
+        ),
+        (
+            "sourced_stream_2",
+            {"sourced_stream_2": {"__source__": "mystream"}, "__else__": None},
+            False,
+            0,
+            {"email", "count"},
+            [],
+        ),
+        (
+            "aliased_stream",
+            {"mystream": {"__alias__": "aliased_stream"}},
+            False,
+            0,
+            {"email", "count"},
+            [],
+        ),
+        (
+            "mystream",
             {},
             True,
             1,
             {"email", "count", "user__id", "user__sub"},
+            [],
         ),
         (
+            "mystream",
             {},
             True,
             10,
             {"email", "count", "user__id", "user__sub__num"},
+            [],
         ),
         (
+            "mystream",
             {"email_hash": "md5(email)", "__key_properties__": ["email_hash"]},
             True,
             10,
             {"email", "count", "email_hash", "user__id", "user__sub__num"},
+            ["email_hash"],
         ),
     ],
     ids=[
         "no_map",
         "keep_all_fields",
         "only_mapped_fields",
+        "changed_key_properties",
+        "sourced_stream_1",
+        "sourced_stream_2",
+        "aliased_stream",
         "flatten_depth_1",
         "flatten_all",
         "map_and_flatten",
     ],
 )
 def test_mapped_stream(
-    stream_map: dict,
+    stream_alias: str,
+    stream_maps: dict,
     flatten: bool,
     flatten_max_depth: Optional[int],
     output_fields: Set[str],
+    key_properties: List[str],
 ):
     tap = MappedTap(
         config={
-            "stream_maps": {"mapped": stream_map},
+            "stream_maps": stream_maps,
             "flattening_enabled": flatten,
             "flattening_max_depth": flatten_max_depth,
         }
     )
     stream = tap.streams["mapped"]
+    tap = MappedTap(config={"stream_maps": stream_maps})
+    stream = tap.streams["mystream"]
 
-    schema_message = next(stream._generate_schema_messages())
-    assert schema_message.key_properties == stream_map.get("__key_properties__", [])
+    schema_messages = list(stream._generate_schema_messages())
+    assert len(schema_messages) == 1, "Incorrect number of schema messages generated."
+    schema_message = schema_messages[0]
+    assert schema_message.stream == stream_alias
+    assert schema_message.key_properties == key_properties
 
     for raw_record in stream.get_records(None):
-        record_message = next(stream._generate_record_messages(raw_record))
+        record_message = next(stream._generate_record_messages(cast(dict, raw_record)))
         transformed_record = record_message.record
+
+        assert record_message.stream == stream_alias
         assert output_fields == set(transformed_record.keys())
+
         for output_field in output_fields:
             assert transformed_record[
                 output_field

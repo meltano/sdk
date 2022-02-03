@@ -443,8 +443,9 @@ class CustomStreamMap(StreamMap):
         for key_property in self.transformed_key_properties or []:
             if key_property not in transformed_schema["properties"]:
                 raise StreamMapConfigError(
-                    f"Could not use '{key_property}' as key property "
-                    f"for '{self.stream_alias}'. Property does not exist."
+                    f"Invalid key properties for '{self.stream_alias}': "
+                    f"[{','.join(self.transformed_key_properties)}]. "
+                    f"Property '{key_property}' was not detected in schema."
                 )
 
         # Declare function variables
@@ -590,14 +591,26 @@ class PluginMapper:
     ) -> None:
         """Register a new stream as described by its name and schema.
 
+        If stream has already been registered and schema or key_properties has changed,
+        the older registration will be removed and replaced with new, updated mappings.
+
         Args:
-            stream_name: TODO
-            schema: TODO
-            key_properties: TODO
+            stream_name: The stream name.
+            schema: The schema definition for the stream.
+            key_properties: The key properties of the stream.
 
         Raises:
-            StreamMapConfigError: TODO
+            StreamMapConfigError: If the configuration is invalid.
         """
+        if stream_name in self.stream_maps:
+            primary_mapper = self.stream_maps[stream_name][0]
+            if (
+                primary_mapper.raw_schema != schema
+                or primary_mapper.raw_key_properties != key_properties
+            ):
+                # Unload/reset stream maps if schema or key properties have changed.
+                self.stream_maps.pop(stream_name)
+
         if stream_name not in self.stream_maps:
             # The 0th mapper should be the same-named treatment.
             # Additional items may be added for aliasing or multi projections.
@@ -612,6 +625,7 @@ class PluginMapper:
 
         for stream_map_key, stream_def in self.stream_maps_dict.items():
             stream_alias: str = stream_map_key
+            source_stream: str = stream_map_key
             if isinstance(stream_def, str):
                 if stream_name == stream_map_key:
                     # TODO: Add any expected cases for str expressions (currently none)
@@ -641,11 +655,9 @@ class PluginMapper:
                 )
 
             if MAPPER_SOURCE_OPTION in stream_def:
-                if stream_name != cast(str, stream_def.pop(MAPPER_SOURCE_OPTION)):
-                    # Not a match
-                    continue
+                source_stream = cast(str, stream_def.pop(MAPPER_SOURCE_OPTION))
 
-            elif stream_name != stream_map_key:
+            if source_stream != stream_name:
                 # Not a match
                 continue
 
@@ -661,9 +673,9 @@ class PluginMapper:
                 flattening_options=self.flattening_options,
             )
 
-            if stream_name == stream_alias:
-                # Zero-th mapper should be the same-named mapper.
-                # Override the default mapper with this custom map
+            if source_stream == stream_map_key:
+                # Zero-th mapper should be the same-keyed mapper.
+                # Override the default mapper with this custom map.
                 self.stream_maps[stream_name][0] = mapper
             else:
                 # Additional mappers for aliasing and multi-projection:

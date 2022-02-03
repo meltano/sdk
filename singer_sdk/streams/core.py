@@ -53,7 +53,7 @@ from singer_sdk.helpers._state import (
 )
 from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type
 from singer_sdk.helpers._util import utc_now
-from singer_sdk.mapper import SameRecordTransform, StreamMap
+from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 
 # Replication methods
@@ -692,6 +692,10 @@ class Stream(metaclass=abc.ABCMeta):
         """
         bookmark_keys = [self.replication_key] if self.replication_key else None
         for stream_map in self.stream_maps:
+            if isinstance(stream_map, RemoveRecordTransform):
+                # Don't emit schema if the stream's records are all ignored.
+                continue
+
             schema_message = SchemaMessage(
                 stream_map.stream_alias,
                 stream_map.transformed_schema,
@@ -760,10 +764,13 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def _metric_logging_function(self) -> Optional[Callable]:
-        """TODO.
+        """Return the metrics logging function.
 
         Returns:
-            TODO
+            The logging function for emitting metrics.
+
+        Raises:
+            ValueError: If logging level setting is an unsupported value.
         """
         if METRICS_LOG_LEVEL_SETTING not in self.config:
             return self.logger.info
@@ -777,7 +784,7 @@ class Stream(metaclass=abc.ABCMeta):
         if self.config[METRICS_LOG_LEVEL_SETTING].upper() == "NONE":
             return None
 
-        assert False, (
+        raise ValueError(
             "Unexpected logging level for metrics: "
             + self.config[METRICS_LOG_LEVEL_SETTING]
         )
