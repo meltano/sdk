@@ -33,6 +33,7 @@ from singer.schema import Schema
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._flattening import get_flattening_options
 from singer_sdk.helpers._singer import (
     Catalog,
     CatalogEntry,
@@ -159,13 +160,14 @@ class Stream(metaclass=abc.ABCMeta):
         else:
             self.logger.info(
                 f"No custom mapper provided for '{self.name}'. "
-                "Using SameRecordTransform as default."
+                "Using SameRecordTransform."
             )
             self._stream_maps = [
                 SameRecordTransform(
                     stream_alias=self.name,
                     raw_schema=self.schema,
                     key_properties=self.primary_keys,
+                    flattening_options=get_flattening_options(self.config),
                 )
             ]
         return self._stream_maps

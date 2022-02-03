@@ -19,6 +19,30 @@ SDK-based taps, targets, and mappers automatically support the custom inline map
 - **Property-level additions:** new properties can be created based on inline user-defined
   expressions.
 
+### Schema Flattening Applications
+
+- ***Flatten nested properties:** separates large complex properties into multiple distinct fields.
+
+For instance, a complex `user` property may look like this:
+
+```js
+{
+    // ...
+    "user": {
+        "first_name": "Jane",
+        "last_name": "Carter",
+        "id": "jcarter"
+    }
+}
+```
+
+Rather than receive the entire record as one large structure, flattening the record would output
+three distinct fields:
+
+- `user__first_name`
+- `user__last_name`
+- `user__id`
+
 ## Out-of-scope capabilities
 
 These capabilities are all out of scope _by design_:
