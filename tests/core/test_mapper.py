@@ -3,7 +3,7 @@
 import copy
 import json
 import logging
-from typing import Dict, List, Set, cast
+from typing import Dict, List, Optional, Set, cast
 
 import pytest
 
@@ -12,7 +12,13 @@ from singer_sdk.helpers._singer import Catalog
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
-from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
+from singer_sdk.typing import (
+    IntegerType,
+    ObjectType,
+    PropertiesList,
+    Property,
+    StringType,
+)
 
 
 @pytest.fixture
@@ -382,12 +388,31 @@ class MappedStream(Stream):
     schema = PropertiesList(
         Property("email", StringType),
         Property("count", IntegerType),
+        Property(
+            "user",
+            ObjectType(
+                Property("id", IntegerType()),
+                Property("sub", ObjectType(Property("num", IntegerType()))),
+            ),
+        ),
     ).to_dict()
 
     def get_records(self, context):
-        yield {"email": "alice@example.com", "count": 21}
-        yield {"email": "bob@example.com", "count": 13}
-        yield {"email": "charlie@example.com", "count": 19}
+        yield {
+            "email": "alice@example.com",
+            "count": 21,
+            "user": {"id": 1, "sub": {"num": 1}},
+        }
+        yield {
+            "email": "bob@example.com",
+            "count": 13,
+            "user": {"id": 2, "sub": {"num": 2}},
+        }
+        yield {
+            "email": "charlie@example.com",
+            "count": 19,
+            "user": {"id": 3, "sub": {"num": 3}},
+        }
 
 
 class MappedTap(Tap):
@@ -401,12 +426,14 @@ class MappedTap(Tap):
 
 
 @pytest.mark.parametrize(
-    "stream_alias,stream_maps,fields,key_properties",
+    "stream_alias,stream_maps,flatten,flatten_max_depth,output_fields,key_properties",
     [
         (
             "mystream",
             {},
-            {"email", "count"},
+            False,
+            0,
+            {"email", "count", "user"},
             [],
         ),
         (
@@ -416,7 +443,9 @@ class MappedTap(Tap):
                     "email_hash": "md5(email)",
                 }
             },
-            {"email", "count", "email_hash"},
+            False,
+            0,
+            {"email", "count", "user", "email_hash"},
             [],
         ),
         (
@@ -428,6 +457,8 @@ class MappedTap(Tap):
                     "__else__": None,
                 }
             },
+            False,
+            0,
             {"fixed_count", "email_hash"},
             [],
         ),
@@ -440,26 +471,63 @@ class MappedTap(Tap):
                     "__else__": None,
                 }
             },
+            False,
+            0,
             {"email_hash"},
             ["email_hash"],
         ),
         (
             "sourced_stream_1",
             {"mystream": None, "sourced_stream_1": {"__source__": "mystream"}},
-            {"email", "count"},
+            False,
+            0,
+            {"email", "count", "user"},
             [],
         ),
         (
             "sourced_stream_2",
             {"sourced_stream_2": {"__source__": "mystream"}, "__else__": None},
-            {"email", "count"},
+            False,
+            0,
+            {"email", "count", "user"},
             [],
         ),
         (
             "aliased_stream",
             {"mystream": {"__alias__": "aliased_stream"}},
-            {"email", "count"},
+            False,
+            0,
+            {"email", "count", "user"},
             [],
+        ),
+        (
+            "mystream",
+            {},
+            True,
+            1,
+            {"email", "count", "user__id", "user__sub"},
+            [],
+        ),
+        (
+            "mystream",
+            {},
+            True,
+            10,
+            {"email", "count", "user__id", "user__sub__num"},
+            [],
+        ),
+        (
+            "mystream",
+            {
+                "mystream": {
+                    "email_hash": "md5(email)",
+                    "__key_properties__": ["email_hash"],
+                }
+            },
+            True,
+            10,
+            {"email", "count", "email_hash", "user__id", "user__sub__num"},
+            ["email_hash"],
         ),
     ],
     ids=[
@@ -470,12 +538,26 @@ class MappedTap(Tap):
         "sourced_stream_1",
         "sourced_stream_2",
         "aliased_stream",
+        "flatten_depth_1",
+        "flatten_all",
+        "map_and_flatten",
     ],
 )
 def test_mapped_stream(
-    stream_alias: str, stream_maps: dict, fields: Set[str], key_properties: List[str]
+    stream_alias: str,
+    stream_maps: dict,
+    flatten: bool,
+    flatten_max_depth: Optional[int],
+    output_fields: Set[str],
+    key_properties: List[str],
 ):
-    tap = MappedTap(config={"stream_maps": stream_maps})
+    tap = MappedTap(
+        config={
+            "stream_maps": stream_maps,
+            "flattening_enabled": flatten,
+            "flattening_max_depth": flatten_max_depth,
+        }
+    )
     stream = tap.streams["mystream"]
 
     schema_messages = list(stream._generate_schema_messages())
@@ -484,7 +566,14 @@ def test_mapped_stream(
     assert schema_message.stream == stream_alias
     assert schema_message.key_properties == key_properties
 
-    for record in stream.get_records(None):
-        record_message = next(stream._generate_record_messages(cast(dict, record)))
+    for raw_record in stream.get_records(None):
+        record_message = next(stream._generate_record_messages(cast(dict, raw_record)))
+        transformed_record = record_message.record
+
         assert record_message.stream == stream_alias
-        assert fields == set(record_message.record.keys())
+        assert output_fields == set(transformed_record.keys())
+
+        for output_field in output_fields:
+            assert transformed_record[
+                output_field
+            ], f"Value for field '{output_field}' should be nonempty."

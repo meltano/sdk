@@ -4,6 +4,44 @@ from enum import Enum, EnumMeta
 from typing import Any, Optional
 from warnings import warn
 
+from singer_sdk.typing import (
+    BooleanType,
+    IntegerType,
+    ObjectType,
+    PropertiesList,
+    Property,
+)
+
+# Default JSON Schema to support config for built-in capabilities:
+
+STREAM_MAPS_CONFIG = PropertiesList(
+    Property(
+        "stream_maps",
+        ObjectType(),
+        description="Config object for stream maps capability.",
+    ),
+    Property(
+        "stream_map_config",
+        ObjectType(),
+        description="User-defined config values to be used within map expressions.",
+    ),
+).to_dict()
+FLATTENING_CONFIG = PropertiesList(
+    Property(
+        "flattening_enabled",
+        BooleanType(),
+        description=(
+            "'True' to enable schema flattening and automatically expand nested "
+            "properties."
+        ),
+    ),
+    Property(
+        "flattening_max_depth",
+        IntegerType(),
+        description="The max depth to flatten schemas.",
+    ),
+).to_dict()
+
 
 class DeprecatedEnum(Enum):
     """Base class for capabilities enumeration."""
@@ -117,6 +155,9 @@ class PluginCapabilities(CapabilitiesEnum):
 
     #: Support :doc:`inline stream map transforms</stream_maps>`.
     STREAM_MAPS = "stream-maps"
+
+    #: Support schema flattening, aka denesting of complex properties.
+    FLATTENING = "schema-flattening"
 
     #: Support the
     #: `ACTIVATE_VERSION <https://hub.meltano.com/singer/docs#activate-version>`_
