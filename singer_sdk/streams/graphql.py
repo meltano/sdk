@@ -1,10 +1,9 @@
 """Abstract base class for API-type streams."""
 
 import abc
-from typing import Any, Iterable, Optional
+from typing import Any, Optional
 
-import requests
-
+from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.streams.rest import RESTStream
 
 
@@ -19,6 +18,15 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
 
     path = ""
     rest_method = "POST"
+
+    @classproperty
+    def records_jsonpath(cls) -> str:  # type: ignore  # OK: str vs @classproperty
+        """Get the JSONPath expression to extract records from an API response.
+
+        Returns:
+            JSONPath expression string
+        """
+        return f"$.data.{cls.name}[*]"
 
     @property
     def query(self) -> str:
@@ -64,19 +72,3 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
         }
         self.logger.debug(f"Attempting query:\n{query}")
         return request_data
-
-    def parse_response(self, response: requests.Response) -> Iterable[dict]:
-        """Parse the response and return an iterator of result rows.
-
-        Args:
-            response: A raw `requests.Response`_ object.
-
-        Yields:
-            One item for every item found in the response.
-
-        .. _requests.Response:
-            https://docs.python-requests.org/en/latest/api/#requests.Response
-        """
-        resp_json = response.json()
-        for row in resp_json["data"][self.name]:
-            yield row

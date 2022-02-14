@@ -81,7 +81,7 @@ The [Peloton tap](https://github.com/MeltanoLabs/tap-peloton) is an example of t
 
 ### RESTful JSONPaths
 
-By default, the Singer SDK for REST streams assumes the API responds with a JSON array of records, but you can easily override this behaviour by specifying the `records_jsonpath` expression in your `RESTStream` implementation:
+By default, the Singer SDK for REST streams assumes the API responds with a JSON array of records, but you can easily override this behaviour by specifying the `records_jsonpath` expression in your `RESTStream` or `GraphQLStream` implementation:
 
 ```python
 class EntityStream(RESTStream):
