@@ -12,6 +12,7 @@ from singer_sdk.streams.core import (
     REPLICATION_INCREMENTAL,
     Stream,
 )
+from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
@@ -49,6 +50,19 @@ class RestTestStream(RESTStream):
     """Test RESTful stream class."""
 
     name = "restful"
+    path = "/example"
+    url_base = "https://example.com"
+    schema = PropertiesList(
+        Property("id", IntegerType, required=True),
+        Property("value", StringType, required=True),
+    ).to_dict()
+    replication_key = "updatedAt"
+
+
+class GraphqlTestStream(GraphQLStream):
+    """Test Graphql stream class."""
+
+    name = "graphql"
     path = "/example"
     url_base = "https://example.com"
     schema = PropertiesList(
@@ -209,6 +223,45 @@ def test_jsonpath_rest_stream(
     rows = stream.parse_response(fake_response)
 
     assert list(rows) == result
+
+
+def test_jsonpath_graphql_stream_default(tap: SimpleTestTap):
+    """Validate graphql JSONPath, defaults to the stream name."""
+    content = """{
+                "data": {
+                    "graphql": [
+                        {"id": 1, "value": "abc"},
+                        {"id": 2, "value": "def"}
+                    ]
+                }
+            }"""
+
+    fake_response = requests.Response()
+    fake_response._content = str.encode(content)
+
+    stream = GraphqlTestStream(tap)
+    rows = stream.parse_response(fake_response)
+
+    assert list(rows) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
+
+
+def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
+    """Validate graphql jsonpath can be updated."""
+    content = """[
+                        {"id": 1, "value": "abc"},
+                        {"id": 2, "value": "def"}
+                    ]
+            """
+
+    fake_response = requests.Response()
+    fake_response._content = str.encode(content)
+
+    GraphqlTestStream.records_jsonpath = "$[*]"
+    stream = GraphqlTestStream(tap)
+
+    rows = stream.parse_response(fake_response)
+
+    assert list(rows) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
 
 
 @pytest.mark.parametrize(
