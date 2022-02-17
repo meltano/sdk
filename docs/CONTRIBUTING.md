@@ -1,6 +1,6 @@
 # Contributing to the SDK
 
-_**Note:** The SDK currently works with Python versions 3.6 through 3.8.x. Python 3.9 is not yet supported._
+_**Note:** The SDK currently works with Python versions 3.7 through 3.10.x. Python 3.6 is no longer supported._
 
 ## Setting up Prereqs
 
