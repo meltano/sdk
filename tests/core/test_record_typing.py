@@ -6,7 +6,6 @@ from typing import Any, Dict
 
 import pendulum
 import pytest
-import pytz
 
 from singer_sdk.helpers._typing import (
     conform_record_data_types,
@@ -54,11 +53,8 @@ def test_conform_record_data_types(row: Dict[str, Any], schema: dict, expected_r
             "2021-08-25T20:05:28+00:00",
         ),
         (
-            # need to do this because of python 3.6 and using the '%z' format
-            pytz.timezone("US/Eastern")
-            .localize(datetime(2021, 8, 25, 20, 5, 28))
-            .isoformat(),
-            "2021-08-25T20:05:28-04:00",
+            datetime.strptime("2021-08-25T20:05:28-03:00", "%Y-%m-%dT%H:%M:%S%z"),
+            "2021-08-25T20:05:28-03:00",
         ),
         ("2021-08-25T20:05:28", "2021-08-25T20:05:28"),
         ("2021-08-25T20:05:28Z", "2021-08-25T20:05:28Z"),
