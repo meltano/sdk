@@ -14,19 +14,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changes
 
-- Deprecate Python 3.6 ([#316](https://gitlab.com/meltano/sdk/-/issues/316), [!246](https://gitlab.com/meltano/sdk/-/merge_requests/246))
-
 ### Fixes
 
 ### Breaks
 
 
-## 0.5.0 - (2022-02-04)
+## 0.4.3 - (2022-02-18)
 ---
 
 ### New
 
-- Add record and schema flattening in Stream Maps ([!236](https://gitlab.com/meltano/sdk/-/merge_requests/236)), 
+- Enable JSONPath for GraphQL record extraction ([#327](https://gitlab.com/meltano/sdk/-/issues/327), [!247](https://gitlab.com/meltano/sdk/-/merge_requests/247)) - _Thanks, **[Fred O'Loughlin](https://gitlab.com/fred-oloughlin-fl)**_!
+
+### Changes
+
+- Deprecate Python 3.6 ([#316](https://gitlab.com/meltano/sdk/-/issues/316), [!246](https://gitlab.com/meltano/sdk/-/merge_requests/246))
+
+
+## 0.4.2 - (2022-02-04)
+---
+
+### New
+
+- Add record and schema flattening in Stream Maps ([!236](https://gitlab.com/meltano/sdk/-/merge_requests/236)),
 
 
 ### Fixes
