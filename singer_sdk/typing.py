@@ -129,6 +129,19 @@ class DateType(JSONTypeHelper):
 class StringType(JSONTypeHelper):
     """String type."""
 
+    format: str = None
+    """String format.
+
+    See the [formats built into the JSON Schema specification](https://json-schema.org/understanding-json-schema/reference/string.html#built-in-formats).
+
+    Returns:
+        A string describing the format.
+    """
+
+    @classproperty
+    def _format(cls) -> dict:
+        return {"format": cls.format} if cls.format else {}
+
     @classproperty
     def type_dict(cls) -> dict:
         """Get type dictionary.
@@ -136,7 +149,10 @@ class StringType(JSONTypeHelper):
         Returns:
             A dictionary describing the type.
         """
-        return {"type": ["string"]}
+        return {
+            "type": ["string"],
+            **cls._format,
+        }
 
 
 class BooleanType(JSONTypeHelper):
