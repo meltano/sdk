@@ -38,7 +38,7 @@ Note:
   here.
 
 """
-from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union, cast
+from typing import Any, Dict, Generic, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 import sqlalchemy
 from jsonschema import validators
@@ -97,10 +97,11 @@ class JSONTypeHelper:
 class StringType(JSONTypeHelper):
     """String type."""
 
-    format: str = None
+    format: Optional[str] = None
     """String format.
 
-    See the [formats built into the JSON Schema specification](https://json-schema.org/understanding-json-schema/reference/string.html#built-in-formats).
+    See the [formats built into the JSON Schema\
+    specification](https://json-schema.org/understanding-json-schema/reference/string.html#built-in-formats).
 
     Returns:
         A string describing the format.
@@ -193,12 +194,6 @@ class IPv6Type(StringType):
     """IPv6 type."""
 
     format = "ipv6"
-
-
-class IPv4Type(StringType):
-    """IPv4 type."""
-
-    format = "ipv4"
 
 
 class UUIDType(StringType):
