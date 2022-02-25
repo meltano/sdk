@@ -94,38 +94,6 @@ class JSONTypeHelper:
         return cast(dict, self.type_dict)
 
 
-class DateTimeType(JSONTypeHelper):
-    """DateTime type."""
-
-    @classproperty
-    def type_dict(cls) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
-        return {
-            "type": ["string"],
-            "format": "date-time",
-        }
-
-
-class DateType(JSONTypeHelper):
-    """DateTime type."""
-
-    @classproperty
-    def type_dict(cls) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
-        return {
-            "type": ["string"],
-            "format": "date",
-        }
-
-
 class StringType(JSONTypeHelper):
     """String type."""
 
@@ -153,6 +121,24 @@ class StringType(JSONTypeHelper):
             "type": ["string"],
             **cls._format,
         }
+
+
+class DateTimeType(StringType):
+    """DateTime type.
+
+    Example: `2018-11-13T20:20:39+00:00`
+    """
+
+    format = "date-time"
+
+
+class DateType(StringType):
+    """Date type.
+
+    Example: `2018-11-13`
+    """
+
+    format = "date"
 
 
 class BooleanType(JSONTypeHelper):
