@@ -132,6 +132,15 @@ class DateTimeType(StringType):
     format = "date-time"
 
 
+class TimeType(StringType):
+    """Time type.
+
+    Example: `20:20:39+00:00`
+    """
+
+    format = "time"
+
+
 class DateType(StringType):
     """Date type.
 
@@ -139,6 +148,114 @@ class DateType(StringType):
     """
 
     format = "date"
+
+
+class DurationType(StringType):
+    """Duration type.
+
+    Example: `P3D`
+    """
+
+    format = "duration"
+
+
+class EmailType(StringType):
+    """Email type."""
+
+    format = "email"
+
+
+class IDNEmailType(StringType):
+    """IDNEmail type."""
+
+    format = "idn-email"
+
+
+class HostnameType(StringType):
+    """Hostname type."""
+
+    format = "hostname"
+
+
+class IDNHostnameType(StringType):
+    """IDNHostname type."""
+
+    format = "idn-hostname"
+
+
+class IPv4Type(StringType):
+    """IPv4 address type."""
+
+    format = "ipv4"
+
+
+class IPv6Type(StringType):
+    """IPv6 type."""
+
+    format = "ipv6"
+
+
+class IPv4Type(StringType):
+    """IPv4 type."""
+
+    format = "ipv4"
+
+
+class UUIDType(StringType):
+    """UUID type.
+
+    Example: `3e4666bf-d5e5-4aa7-b8ce-cefe41c7568a`
+    """
+
+    format = "uuid"
+
+
+class URIType(StringType):
+    """URI type."""
+
+    format = "uri"
+
+
+class URIReferenceType(StringType):
+    """URIReference type."""
+
+    format = "uri-reference"
+
+
+class IRIType(StringType):
+    """IRI type."""
+
+    format = "iri"
+
+
+class IRIReferenceType(StringType):
+    """IRIReference type."""
+
+    format = "iri-reference"
+
+
+class URITemplateType(StringType):
+    """URITemplate type."""
+
+    format = "uri-template"
+
+
+class JSONPointerType(StringType):
+    """JSONPointer type."""
+
+    format = "json-pointer"
+
+
+class RelativeJSONPointerType(StringType):
+    """RelativeJSONPointer type."""
+
+    format = "relative-json-pointer"
+
+
+class RegexType(StringType):
+    """Regex type."""
+
+    format = "regex"
 
 
 class BooleanType(JSONTypeHelper):
