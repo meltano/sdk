@@ -166,22 +166,10 @@ class EmailType(StringType):
     string_format = "email"
 
 
-class IDNEmailType(StringType):
-    """IDNEmail type."""
-
-    string_format = "idn-email"
-
-
 class HostnameType(StringType):
     """Hostname type."""
 
     string_format = "hostname"
-
-
-class IDNHostnameType(StringType):
-    """IDNHostname type."""
-
-    string_format = "idn-hostname"
 
 
 class IPv4Type(StringType):
@@ -215,18 +203,6 @@ class URIReferenceType(StringType):
     """URIReference type."""
 
     string_format = "uri-reference"
-
-
-class IRIType(StringType):
-    """IRI type."""
-
-    string_format = "iri"
-
-
-class IRIReferenceType(StringType):
-    """IRIReference type."""
-
-    string_format = "iri-reference"
 
 
 class URITemplateType(StringType):
