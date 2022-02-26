@@ -97,7 +97,7 @@ class JSONTypeHelper:
 class StringType(JSONTypeHelper):
     """String type."""
 
-    format: Optional[str] = None
+    string_format: Optional[str] = None
     """String format.
 
     See the [formats built into the JSON Schema\
@@ -109,7 +109,7 @@ class StringType(JSONTypeHelper):
 
     @classproperty
     def _format(cls) -> dict:
-        return {"format": cls.format} if cls.format else {}
+        return {"format": cls.string_format} if cls.string_format else {}
 
     @classproperty
     def type_dict(cls) -> dict:
@@ -130,7 +130,7 @@ class DateTimeType(StringType):
     Example: `2018-11-13T20:20:39+00:00`
     """
 
-    format = "date-time"
+    string_format = "date-time"
 
 
 class TimeType(StringType):
@@ -139,7 +139,7 @@ class TimeType(StringType):
     Example: `20:20:39+00:00`
     """
 
-    format = "time"
+    string_format = "time"
 
 
 class DateType(StringType):
@@ -148,7 +148,7 @@ class DateType(StringType):
     Example: `2018-11-13`
     """
 
-    format = "date"
+    string_format = "date"
 
 
 class DurationType(StringType):
@@ -157,43 +157,43 @@ class DurationType(StringType):
     Example: `P3D`
     """
 
-    format = "duration"
+    string_format = "duration"
 
 
 class EmailType(StringType):
     """Email type."""
 
-    format = "email"
+    string_format = "email"
 
 
 class IDNEmailType(StringType):
     """IDNEmail type."""
 
-    format = "idn-email"
+    string_format = "idn-email"
 
 
 class HostnameType(StringType):
     """Hostname type."""
 
-    format = "hostname"
+    string_format = "hostname"
 
 
 class IDNHostnameType(StringType):
     """IDNHostname type."""
 
-    format = "idn-hostname"
+    string_format = "idn-hostname"
 
 
 class IPv4Type(StringType):
     """IPv4 address type."""
 
-    format = "ipv4"
+    string_format = "ipv4"
 
 
 class IPv6Type(StringType):
     """IPv6 type."""
 
-    format = "ipv6"
+    string_format = "ipv6"
 
 
 class UUIDType(StringType):
@@ -202,55 +202,55 @@ class UUIDType(StringType):
     Example: `3e4666bf-d5e5-4aa7-b8ce-cefe41c7568a`
     """
 
-    format = "uuid"
+    string_format = "uuid"
 
 
 class URIType(StringType):
     """URI type."""
 
-    format = "uri"
+    string_format = "uri"
 
 
 class URIReferenceType(StringType):
     """URIReference type."""
 
-    format = "uri-reference"
+    string_format = "uri-reference"
 
 
 class IRIType(StringType):
     """IRI type."""
 
-    format = "iri"
+    string_format = "iri"
 
 
 class IRIReferenceType(StringType):
     """IRIReference type."""
 
-    format = "iri-reference"
+    string_format = "iri-reference"
 
 
 class URITemplateType(StringType):
     """URITemplate type."""
 
-    format = "uri-template"
+    string_format = "uri-template"
 
 
 class JSONPointerType(StringType):
     """JSONPointer type."""
 
-    format = "json-pointer"
+    string_format = "json-pointer"
 
 
 class RelativeJSONPointerType(StringType):
     """RelativeJSONPointer type."""
 
-    format = "relative-json-pointer"
+    string_format = "relative-json-pointer"
 
 
 class RegexType(StringType):
     """Regex type."""
 
-    format = "regex"
+    string_format = "regex"
 
 
 class BooleanType(JSONTypeHelper):
