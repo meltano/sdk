@@ -7,9 +7,9 @@
 * @edgarrmondragon @aaronsteers 
 
 [Docs owners]
-/docs/ @tayloramurphy @afolson
-/CONTRIBUTING.md @tayloramurphy @afolson
-/README.md @tayloramurphy @afolson
+/docs/ @edgarrmondragon @afolson
+/CONTRIBUTING.md @edgarrmondragon @afolson
+/README.md @edgarrmondragon @afolson
 
 # Release Ops (see `/.bumpversion.cfg` for list of bumped files)
 [Release Ops]
