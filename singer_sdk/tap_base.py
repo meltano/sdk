@@ -1,4 +1,4 @@
-"""Tap abstract class."""
+"""Tap abstract class. """
 
 import abc
 import json
