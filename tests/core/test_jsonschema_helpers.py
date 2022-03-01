@@ -2,15 +2,35 @@
 
 from typing import List
 
+import pytest
+
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
     ArrayType,
+    BooleanType,
+    DateTimeType,
+    DateType,
+    DurationType,
+    EmailType,
+    HostnameType,
+    IPv4Type,
+    IPv6Type,
     IntegerType,
+    JSONPointerType,
+    JSONTypeHelper,
+    NumberType,
     ObjectType,
     PropertiesList,
     Property,
+    RegexType,
+    RelativeJSONPointerType,
     StringType,
+    TimeType,
+    URIReferenceType,
+    URITemplateType,
+    URIType,
+    UUIDType,
 )
 
 
@@ -91,3 +111,141 @@ def test_property_description():
             "description": text,
         }
     }
+
+
+@pytest.mark.parametrize(
+    "json_type,expected_json_schema",
+    [
+        (
+            StringType,
+            {
+                "type": ["string"],
+            },
+        ),
+        (
+            DateTimeType,
+            {
+                "type": ["string"],
+                "format": "date-time",
+            },
+        ),
+        (
+            TimeType,
+            {
+                "type": ["string"],
+                "format": "time",
+            },
+        ),
+        (
+            DateType,
+            {
+                "type": ["string"],
+                "format": "date",
+            },
+        ),
+        (
+            DurationType,
+            {
+                "type": ["string"],
+                "format": "duration",
+            },
+        ),
+        (
+            EmailType,
+            {
+                "type": ["string"],
+                "format": "email",
+            },
+        ),
+        (
+            HostnameType,
+            {
+                "type": ["string"],
+                "format": "hostname",
+            },
+        ),
+        (
+            IPv4Type,
+            {
+                "type": ["string"],
+                "format": "ipv4",
+            },
+        ),
+        (
+            IPv6Type,
+            {
+                "type": ["string"],
+                "format": "ipv6",
+            },
+        ),
+        (
+            UUIDType,
+            {
+                "type": ["string"],
+                "format": "uuid",
+            },
+        ),
+        (
+            URIType,
+            {
+                "type": ["string"],
+                "format": "uri",
+            },
+        ),
+        (
+            URIReferenceType,
+            {
+                "type": ["string"],
+                "format": "uri-reference",
+            },
+        ),
+        (
+            URITemplateType,
+            {
+                "type": ["string"],
+                "format": "uri-template",
+            },
+        ),
+        (
+            JSONPointerType,
+            {
+                "type": ["string"],
+                "format": "json-pointer",
+            },
+        ),
+        (
+            RelativeJSONPointerType,
+            {
+                "type": ["string"],
+                "format": "relative-json-pointer",
+            },
+        ),
+        (
+            RegexType,
+            {
+                "type": ["string"],
+                "format": "regex",
+            },
+        ),
+        (
+            BooleanType,
+            {
+                "type": ["boolean"],
+            },
+        ),
+        (
+            IntegerType,
+            {
+                "type": ["integer"],
+            },
+        ),
+        (
+            NumberType,
+            {
+                "type": ["number"],
+            },
+        ),
+    ],
+)
+def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
+    assert json_type.type_dict == expected_json_schema
