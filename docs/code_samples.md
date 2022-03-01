@@ -1,6 +1,6 @@
 # Code Samples
 
-Below you will find a collection of code samples which can be used for inspiration.
+Below you will find a collection of code samples which can be used for inspiration. 
 
 ## Project Samples
 
