@@ -38,7 +38,7 @@ Note:
   here.
 
 """
-from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union, cast
+from typing import Any, Dict, Generic, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 import sqlalchemy
 from jsonschema import validators
@@ -94,41 +94,23 @@ class JSONTypeHelper:
         return cast(dict, self.type_dict)
 
 
-class DateTimeType(JSONTypeHelper):
-    """DateTime type."""
-
-    @classproperty
-    def type_dict(cls) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
-        return {
-            "type": ["string"],
-            "format": "date-time",
-        }
-
-
-class DateType(JSONTypeHelper):
-    """DateTime type."""
-
-    @classproperty
-    def type_dict(cls) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
-        return {
-            "type": ["string"],
-            "format": "date",
-        }
-
-
 class StringType(JSONTypeHelper):
     """String type."""
 
+    string_format: Optional[str] = None
+    """String format.
+
+    See the [formats built into the JSON Schema\
+    specification](https://json-schema.org/understanding-json-schema/reference/string.html#built-in-formats).
+
+    Returns:
+        A string describing the format.
+    """
+
+    @classproperty
+    def _format(cls) -> dict:
+        return {"format": cls.string_format} if cls.string_format else {}
+
     @classproperty
     def type_dict(cls) -> dict:
         """Get type dictionary.
@@ -136,7 +118,115 @@ class StringType(JSONTypeHelper):
         Returns:
             A dictionary describing the type.
         """
-        return {"type": ["string"]}
+        return {
+            "type": ["string"],
+            **cls._format,
+        }
+
+
+class DateTimeType(StringType):
+    """DateTime type.
+
+    Example: `2018-11-13T20:20:39+00:00`
+    """
+
+    string_format = "date-time"
+
+
+class TimeType(StringType):
+    """Time type.
+
+    Example: `20:20:39+00:00`
+    """
+
+    string_format = "time"
+
+
+class DateType(StringType):
+    """Date type.
+
+    Example: `2018-11-13`
+    """
+
+    string_format = "date"
+
+
+class DurationType(StringType):
+    """Duration type.
+
+    Example: `P3D`
+    """
+
+    string_format = "duration"
+
+
+class EmailType(StringType):
+    """Email type."""
+
+    string_format = "email"
+
+
+class HostnameType(StringType):
+    """Hostname type."""
+
+    string_format = "hostname"
+
+
+class IPv4Type(StringType):
+    """IPv4 address type."""
+
+    string_format = "ipv4"
+
+
+class IPv6Type(StringType):
+    """IPv6 type."""
+
+    string_format = "ipv6"
+
+
+class UUIDType(StringType):
+    """UUID type.
+
+    Example: `3e4666bf-d5e5-4aa7-b8ce-cefe41c7568a`
+    """
+
+    string_format = "uuid"
+
+
+class URIType(StringType):
+    """URI type."""
+
+    string_format = "uri"
+
+
+class URIReferenceType(StringType):
+    """URIReference type."""
+
+    string_format = "uri-reference"
+
+
+class URITemplateType(StringType):
+    """URITemplate type."""
+
+    string_format = "uri-template"
+
+
+class JSONPointerType(StringType):
+    """JSONPointer type."""
+
+    string_format = "json-pointer"
+
+
+class RelativeJSONPointerType(StringType):
+    """RelativeJSONPointer type."""
+
+    string_format = "relative-json-pointer"
+
+
+class RegexType(StringType):
+    """Regex type."""
+
+    string_format = "regex"
 
 
 class BooleanType(JSONTypeHelper):
