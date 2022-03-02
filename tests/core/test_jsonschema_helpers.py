@@ -1,6 +1,5 @@
 """Test sample sync."""
 
-from collections import ChainMap
 from typing import List
 
 import pytest
@@ -16,9 +15,9 @@ from singer_sdk.typing import (
     DurationType,
     EmailType,
     HostnameType,
+    IntegerType,
     IPv4Type,
     IPv6Type,
-    IntegerType,
     JSONPointerType,
     JSONTypeHelper,
     NumberType,
