@@ -1,5 +1,6 @@
 """Test sample sync."""
 
+from collections import ChainMap
 from typing import List
 
 import pytest
@@ -9,6 +10,7 @@ from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
     ArrayType,
     BooleanType,
+    CustomType,
     DateTimeType,
     DateType,
     DurationType,
@@ -249,3 +251,137 @@ def test_property_description():
 )
 def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
     assert json_type.type_dict == expected_json_schema
+
+
+def test_array_type():
+    wrapped_type = StringType
+    expected_json_schema = {
+        "type": "array",
+        "items": wrapped_type.type_dict,
+    }
+
+    assert ArrayType(wrapped_type).type_dict == expected_json_schema
+
+
+@pytest.mark.parametrize(
+    "properties,addtional_properties",
+    [
+        (
+            [
+                Property("id", StringType),
+                Property("email", StringType),
+                Property("username", StringType),
+                Property("phone_number", StringType),
+            ],
+            None,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("email", StringType),
+                Property("username", StringType),
+                Property("phone_number", StringType),
+            ],
+            StringType,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("id", StringType),
+                Property("email", StringType),
+                Property("username", StringType),
+                Property("phone_number", StringType),
+            ],
+            None,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("id", StringType),
+                Property("email", StringType),
+                Property("username", StringType),
+                Property("phone_number", StringType),
+            ],
+            StringType,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("email", StringType, True),
+                Property("username", StringType, True),
+                Property("phone_number", StringType),
+            ],
+            None,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("email", StringType, True),
+                Property("username", StringType, True),
+                Property("phone_number", StringType),
+            ],
+            StringType,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("email", StringType, True),
+                Property("email", StringType, True),
+                Property("username", StringType, True),
+                Property("phone_number", StringType),
+            ],
+            None,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("email", StringType, True),
+                Property("email", StringType, True),
+                Property("username", StringType, True),
+                Property("phone_number", StringType),
+            ],
+            StringType,
+        ),
+    ],
+    ids=[
+        "no requried, no duplicates, no additional properties",
+        "no requried, no duplicates, additional properties",
+        "no requried, duplicates, no additional properties",
+        "no requried, duplicates, additional properties",
+        "requried, no duplicates, no additional properties",
+        "requried, no duplicates, additional properties",
+        "requried, duplicates, no additional properties",
+        "requried, duplicates, additional properties",
+    ],
+)
+def test_object_type(properties: List[Property], addtional_properties: JSONTypeHelper):
+    merged_property_schemas = {
+        name: schema for p in properties for name, schema in p.to_dict().items()
+    }
+
+    required = [p.name for p in properties if not p.optional]
+    required_schema = {"required": required} if required else {}
+    addtional_properties_schema = (
+        {"additionalProperties": addtional_properties.type_dict}
+        if addtional_properties
+        else {}
+    )
+
+    expected_json_schema = {
+        "type": "object",
+        "properties": merged_property_schemas,
+        **required_schema,
+        **addtional_properties_schema,
+    }
+
+    object_type = ObjectType(*properties, additional_properties=addtional_properties)
+    assert object_type.type_dict == expected_json_schema
+
+
+def test_custom_type():
+    json_schema = {
+        "type": ["string"],
+        "pattern": "^meltano$",
+    }
+
+    assert CustomType(json_schema).type_dict == json_schema
