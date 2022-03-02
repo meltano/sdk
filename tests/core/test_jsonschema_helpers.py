@@ -2,15 +2,36 @@
 
 from typing import List
 
+import pytest
+
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
     ArrayType,
+    BooleanType,
+    CustomType,
+    DateTimeType,
+    DateType,
+    DurationType,
+    EmailType,
+    HostnameType,
     IntegerType,
+    IPv4Type,
+    IPv6Type,
+    JSONPointerType,
+    JSONTypeHelper,
+    NumberType,
     ObjectType,
     PropertiesList,
     Property,
+    RegexType,
+    RelativeJSONPointerType,
     StringType,
+    TimeType,
+    URIReferenceType,
+    URITemplateType,
+    URIType,
+    UUIDType,
 )
 
 
@@ -91,3 +112,275 @@ def test_property_description():
             "description": text,
         }
     }
+
+
+@pytest.mark.parametrize(
+    "json_type,expected_json_schema",
+    [
+        (
+            StringType,
+            {
+                "type": ["string"],
+            },
+        ),
+        (
+            DateTimeType,
+            {
+                "type": ["string"],
+                "format": "date-time",
+            },
+        ),
+        (
+            TimeType,
+            {
+                "type": ["string"],
+                "format": "time",
+            },
+        ),
+        (
+            DateType,
+            {
+                "type": ["string"],
+                "format": "date",
+            },
+        ),
+        (
+            DurationType,
+            {
+                "type": ["string"],
+                "format": "duration",
+            },
+        ),
+        (
+            EmailType,
+            {
+                "type": ["string"],
+                "format": "email",
+            },
+        ),
+        (
+            HostnameType,
+            {
+                "type": ["string"],
+                "format": "hostname",
+            },
+        ),
+        (
+            IPv4Type,
+            {
+                "type": ["string"],
+                "format": "ipv4",
+            },
+        ),
+        (
+            IPv6Type,
+            {
+                "type": ["string"],
+                "format": "ipv6",
+            },
+        ),
+        (
+            UUIDType,
+            {
+                "type": ["string"],
+                "format": "uuid",
+            },
+        ),
+        (
+            URIType,
+            {
+                "type": ["string"],
+                "format": "uri",
+            },
+        ),
+        (
+            URIReferenceType,
+            {
+                "type": ["string"],
+                "format": "uri-reference",
+            },
+        ),
+        (
+            URITemplateType,
+            {
+                "type": ["string"],
+                "format": "uri-template",
+            },
+        ),
+        (
+            JSONPointerType,
+            {
+                "type": ["string"],
+                "format": "json-pointer",
+            },
+        ),
+        (
+            RelativeJSONPointerType,
+            {
+                "type": ["string"],
+                "format": "relative-json-pointer",
+            },
+        ),
+        (
+            RegexType,
+            {
+                "type": ["string"],
+                "format": "regex",
+            },
+        ),
+        (
+            BooleanType,
+            {
+                "type": ["boolean"],
+            },
+        ),
+        (
+            IntegerType,
+            {
+                "type": ["integer"],
+            },
+        ),
+        (
+            NumberType,
+            {
+                "type": ["number"],
+            },
+        ),
+    ],
+)
+def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
+    assert json_type.type_dict == expected_json_schema
+
+
+def test_array_type():
+    wrapped_type = StringType
+    expected_json_schema = {
+        "type": "array",
+        "items": wrapped_type.type_dict,
+    }
+
+    assert ArrayType(wrapped_type).type_dict == expected_json_schema
+
+
+@pytest.mark.parametrize(
+    "properties,addtional_properties",
+    [
+        (
+            [
+                Property("id", StringType),
+                Property("email", StringType),
+                Property("username", StringType),
+                Property("phone_number", StringType),
+            ],
+            None,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("email", StringType),
+                Property("username", StringType),
+                Property("phone_number", StringType),
+            ],
+            StringType,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("id", StringType),
+                Property("email", StringType),
+                Property("username", StringType),
+                Property("phone_number", StringType),
+            ],
+            None,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("id", StringType),
+                Property("email", StringType),
+                Property("username", StringType),
+                Property("phone_number", StringType),
+            ],
+            StringType,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("email", StringType, True),
+                Property("username", StringType, True),
+                Property("phone_number", StringType),
+            ],
+            None,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("email", StringType, True),
+                Property("username", StringType, True),
+                Property("phone_number", StringType),
+            ],
+            StringType,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("email", StringType, True),
+                Property("email", StringType, True),
+                Property("username", StringType, True),
+                Property("phone_number", StringType),
+            ],
+            None,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("email", StringType, True),
+                Property("email", StringType, True),
+                Property("username", StringType, True),
+                Property("phone_number", StringType),
+            ],
+            StringType,
+        ),
+    ],
+    ids=[
+        "no requried, no duplicates, no additional properties",
+        "no requried, no duplicates, additional properties",
+        "no requried, duplicates, no additional properties",
+        "no requried, duplicates, additional properties",
+        "requried, no duplicates, no additional properties",
+        "requried, no duplicates, additional properties",
+        "requried, duplicates, no additional properties",
+        "requried, duplicates, additional properties",
+    ],
+)
+def test_object_type(properties: List[Property], addtional_properties: JSONTypeHelper):
+    merged_property_schemas = {
+        name: schema for p in properties for name, schema in p.to_dict().items()
+    }
+
+    required = [p.name for p in properties if not p.optional]
+    required_schema = {"required": required} if required else {}
+    addtional_properties_schema = (
+        {"additionalProperties": addtional_properties.type_dict}
+        if addtional_properties
+        else {}
+    )
+
+    expected_json_schema = {
+        "type": "object",
+        "properties": merged_property_schemas,
+        **required_schema,
+        **addtional_properties_schema,
+    }
+
+    object_type = ObjectType(*properties, additional_properties=addtional_properties)
+    assert object_type.type_dict == expected_json_schema
+
+
+def test_custom_type():
+    json_schema = {
+        "type": ["string"],
+        "pattern": "^meltano$",
+    }
+
+    assert CustomType(json_schema).type_dict == json_schema
