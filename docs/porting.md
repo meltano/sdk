@@ -4,12 +4,12 @@ _This guide walks you through the process of migrating an existing Singer Tap ov
 
 ## A Clear Slate
 
-When porting over an existing tap, most developers find it easier to start from a fresh repo than to incrementally change there existing one.
+When porting over an existing tap, most developers find it easier to start from a fresh repo than to incrementally change their existing one.
 
 1. Within your existing repo, create a new branch.
-1. Move _all_ of the files in the old branch into a subfolder called "archive". 
+1. Move _all_ of the files in the old branch into a subfolder called "archive".
 1. Commit and push the result to your new branch. (You'll do this several times along the way, which creates a fresh tree and a fresh diff for subsequent commits.)
-1. Now follow the steps in the [dev guide](dev_guide.md) to create a new project using the Tap cookiecutter.
+1. Now follow the steps in the [dev guide](dev_guide.md#building-a-new-tap-or-target) to create a new project using the Tap cookiecutter.
 1. Copy all the files from the cookiecutter output into your main repo and commit the result.
 
 ## Settings and Readme
@@ -18,7 +18,15 @@ Next, we'll copy over the settings and readme from the old project to the new on
 
 1. Open `archive/README.md` and copy-paste the old file into the new `README.md`. Generally, the best place to insert it is in the settings section, then move things around as needed. Commit the result when you're happy with the new file.
 2. Open the `README.md` in side-by-side mode with `tap.py` and copy paste each setting and it's description into an appropriate type helper class (prefixed with `th.*`).
-   - If settings are not defined in your README.md, you can try searching the `arichived/**.py` files for references to `config.get(` or `config[`, and/or check any other available reference for the expected input settings.
+   - If settings are not defined in your README.md, you can try searching the `archived/**.py` files for references to `config.get(` or `config[`, and/or check any other available reference for the expected input settings.
+
+## If you are building a SQL tap
+
+Since SQL taps leverage the excellent SQLAlchemy library, most behaviors are already predefined and automatic. This includes catalog creation, table scanning, and many other common challenges.
+
+If you are porting over a SQL tap... skip ahead now to the [Installing Dependencies](#installing_dependencies) and make sure your SQL provider's SQLAlchemy drivers are included in the added library dependencies. Also, when you get the step of searching for TODO items, pay close attention to `get_sqlalchemy_url()` since this will drive authentication and connectivity.
+
+Continue until just before you reach the "Pagination" section, at which point you are probably done! 🚀 Optionally, you can further optimize performance by overriding `get_records()` with a sync method native to your SQL operations.
 
 ## Authentication
 
@@ -34,7 +42,7 @@ Before you begin this section, please select a stream you would like to port as 
 2. Make sure you set `primary_keys`, `replication_key` first.
 3. If you have a schema file for each stream:
    1. Move the entire `schemas` folder out of the `archive` directory.
-   2. Set `schema_filepath` property to be equal to the schema file for this tream.
+   2. Set `schema_filepath` property to be equal to the schema file for this stream.
 4. If you are declaring schemas directly (without an existing JSON schema file):
    1. Using the typing helpers (`th.*`) to define just the `primary_key`, `replication_key`, and 3-5 additional fields.
    2. Don't worry about defining all properties up front. Instead, come back to this step _after_ you finish a successful stream test.
