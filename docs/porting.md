@@ -1,6 +1,8 @@
 # Singer Tap Porting Guide
 
-_This guide walks you through the process of migrating an existing Singer Tap over to the SDK._
+This guide walks you through the process of migrating an existing Singer Tap over to the SDK.
+
+_Want to follow along in a real world porting example? See our recorded pair coding session for the `tap-gitlab` port `[here](YouTube Link TK)`._
 
 ## A Clear Slate
 
@@ -61,11 +63,19 @@ poetry add my-library
 poetry add my-library==1.0.2
 ```
 
+Note:
+
+- You can probably skip any libraries related to `requests`, `backoff`, or `singer-*` - as these functions are already managed in the SDK.
+
 Once you have the necessary dependencies added, run `poetry install` to make sure everything is ready to go.
 
-## Find and replace `TODO` items
+## Perform `TODO` items in `tap.py` and `client.py`
 
-It's a good idea to search the entire project for TODO items at this point. You don't necessarily have to resolve everything, but if there are any sections you can obviously resolve, go ahead and do so now.
+1. Open `tap.py` and search for TODO items. Depending on the type of tap you are porting, you will likely have to provide your new stream's class names so that the tap class knows to invoke them.
+2. Open `client.py` and search for TODO items. If your API type requires a `url_base`, go ahead and input it now.
+   - You can postpone the other TODOs for now. Pagination will be addressed in the steps below.
+
+Note: You _do not_ have to resolve TODOs everywhere in the project, but if there are any sections you can obviously resolve, you can go ahead and do so now.
 
 ## Test, debug, repeat, ... until... _success!_
 
