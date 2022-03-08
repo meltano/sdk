@@ -26,6 +26,7 @@ SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
+    # TODO: Set the API's base URL here:
     url_base = "https://api.mysample.com"
 
     # OR use a dynamic url_base:
