@@ -2,7 +2,7 @@
 
 This guide walks you through the process of migrating an existing Singer Tap over to the SDK.
 
-_Want to follow along in a real world porting example? See our recorded pair coding session for the `tap-gitlab` port `[here](YouTube Link TK)`._
+_Want to follow along in a real world porting example? See our recorded pair coding session for the `tap-gitlab` port `[here](http://www.youtube.com/watch?v=XNm5BN_zluw)`._
 
 ## A Clear Slate
 
