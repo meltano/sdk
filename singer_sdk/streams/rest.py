@@ -195,7 +195,12 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             TODO
         """
-        response = self.requests_session.send(prepared_request, timeout=self.timeout)
+        request_settings = self.requests_session.merge_environment_settings(
+            prepared_request.url, {}, None, None, None
+        )
+        response = self.requests_session.send(
+            prepared_request, timeout=self.timeout, **request_settings
+        )
         if self._LOG_REQUEST_METRICS:
             extra_tags = {}
             if self._LOG_REQUEST_METRIC_URLS:
