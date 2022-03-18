@@ -73,3 +73,9 @@ prefix determined by the plugin name.
 > For example: For a sample plugin named `tap-my-example` and settings named "username" and "access_key", the SDK will automatically scrape
 > the settings from environment variables `TAP_MY_EXAMPLE_USERNAME` and
 > `TAP_MY_EXAMPLE_ACCESS_KEY`, if they exist.
+
+### `--input` (targets only)
+
+Specifies that the target should read messages from a file instead of reading its data from `STDIN`. 
+
+This option is helpful in testing scenarios where you want to invoke the target directly without repeatedly re-invoking the tap.
