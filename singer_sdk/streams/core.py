@@ -30,7 +30,11 @@ import singer
 from singer import RecordMessage, SchemaMessage, StateMessage
 from singer.schema import Schema
 
-from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException, SkipPartitionAPIError
+from singer_sdk.exceptions import (
+    InvalidStreamSortException,
+    MaxRecordsLimitException,
+    SkipPartitionAPIError,
+)
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._flattening import get_flattening_options
@@ -967,7 +971,9 @@ class Stream(metaclass=abc.ABCMeta):
                             self._write_state_message()
                         self._write_record_message(record)
                         try:
-                            self._increment_stream_state(record, context=current_context)
+                            self._increment_stream_state(
+                                record, context=current_context
+                            )
                         except InvalidStreamSortException as ex:
                             log_sort_error(
                                 log_fn=self.logger.error,
