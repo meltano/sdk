@@ -9,6 +9,10 @@ class FatalAPIError(Exception):
     """Exception raised when a failed request should not be considered retriable."""
 
 
+class SkipPartitionAPIError(Exception):
+    """Raised by children of Stream on errors that are fatal for the partition."""
+
+
 class InvalidStreamSortException(Exception):
     """Exception to raise if sorting errors are found while syncing the records."""
 
