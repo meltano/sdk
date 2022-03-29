@@ -7,6 +7,8 @@ import abc
 import copy
 import hashlib
 import logging
+import binascii
+import pywintypes
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
@@ -46,6 +48,25 @@ def md5(input: str) -> str:
         A string digested into MD5.
     """
     return hashlib.md5(input.encode("utf-8")).hexdigest()
+
+def uuid(input: str) -> str:
+    """Convert from Hex String to UUID String, Active Directory Specefic
+
+    Args:
+        input: String to digest.
+
+    Returns:
+        A string digested into MD5.
+    >>> uuid("X'31914b12ca48664990d2c31049c07d00'")
+    {124B9131-48CA-4966-90D2-C31049C07D00}
+    """
+    if input[0] != "X" or input[1] != "'" or input[-1] != "'":
+        raise Exception(f"UUID input data is incorect, input: {input}")
+
+    hex_string = input[2:-1]
+    n = len(hex_string)
+    binary_data =  binascii.unhexlify(hex_string.zfill(n+(n&1)))
+    return pywintypes.IID(binary_data, True).__str__()[1:-1]
 
 
 class StreamMap(metaclass=abc.ABCMeta):
@@ -290,6 +311,7 @@ class CustomStreamMap(StreamMap):
         """
         funcs: Dict[str, Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
         funcs["md5"] = md5
+        funcs["uuid"] = uuid
         return funcs
 
     def _eval(self, expr: str, record: dict, property_name: Optional[str]) -> Any:

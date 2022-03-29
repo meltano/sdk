@@ -69,21 +69,25 @@ def sample_stream():
                 "name": "tap-something",
                 "owner_email": "sample1@example.com",
                 "description": "Comment A",
+                "objectGUID": "X'31914b12ca48664990d2c31049c07d00'"
             },
             {
                 "name": "my-tap-something",
                 "owner_email": "sample2@example.com",
                 "description": "Comment B",
+                "objectGUID": "X'31914b12ca48664990d2c31049c07d00'"
             },
             {
                 "name": "target-something",
                 "owner_email": "sample3@example.com",
                 "description": "Comment C",
+                "objectGUID": "X'31914b12ca48664990d2c31049c07d00'"
             },
             {
                 "name": "not-atap",
                 "owner_email": "sample4@example.com",
                 "description": "Comment D",
+                "objectGUID": "X'31914b12ca48664990d2c31049c07d00'"
             },
         ],
         "foobars": [
@@ -104,6 +108,7 @@ def transform_stream_maps():
             "repo_name": "_['name']",
             "email_domain": "owner_email.split('@')[1]",
             "email_hash": "md5(config['hash_seed'] + owner_email)",
+            "guid": "uuid(objectGUID)",
             "description": "'[masked]'",
             "description2": "str('[masked]')",
             "int_test": "int('0')",
@@ -124,6 +129,7 @@ def transformed_result(stream_map_config):
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
+                "guid": "124B9131-48CA-4966-90D2-C31049C07D00",
                 "int_test": 0,
             },
             {
@@ -134,6 +140,7 @@ def transformed_result(stream_map_config):
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
+                "guid": "124B9131-48CA-4966-90D2-C31049C07D00",
                 "int_test": 0,
             },
             {
@@ -144,6 +151,7 @@ def transformed_result(stream_map_config):
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
+                "guid": "124B9131-48CA-4966-90D2-C31049C07D00",
                 "int_test": 0,
             },
             {
@@ -154,6 +162,7 @@ def transformed_result(stream_map_config):
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
+                "guid": "124B9131-48CA-4966-90D2-C31049C07D00",
                 "int_test": 0,
             },
         ],
@@ -173,6 +182,7 @@ def transformed_schemas():
             Property("email_hash", StringType),
             Property("description", StringType),
             Property("description2", StringType),
+            Property("guid", StringType),
             Property("int_test", IntegerType),
         ).to_dict(),
         "foobars": PropertiesList(
