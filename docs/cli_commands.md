@@ -183,4 +183,4 @@ plugins:
 | ELT                 | `my-tap --config=... \| path/to/target-jsonl --config=...`                                  | `meltano elt my-tap target-jsonl`                                    |
 
 [Meltano]: https://www.meltano.com
-[declare settings]: https://meltano.com/docs/command-line-interface.html#how-to-use-2
+[declare settings]: https://docs.meltano.com/reference/command-line-interface#how-to-use-2
