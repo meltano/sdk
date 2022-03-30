@@ -69,15 +69,15 @@ project will be created.
 
 Once you've answered the cookiecutter prompts, follow the instructions in the
 generated `README.md` file to complete your new tap or target. You can also reference the
-[Meltano Tutorial](https://meltano.com/tutorials/create-a-custom-extractor.html) for a more
+[Meltano Tutorial](https://docs.meltano.com/tutorials/custom-extractor) for a more
 detailed guide.
 
 ### Using an existing library
 
 In some cases, there may already be a library that connects to the API and all you need the SDK for
-is to reformat the data into the Singer specification. 
-The SDK is still a great choice for this. 
-The [Peloton tap](https://github.com/MeltanoLabs/tap-peloton) is an example of this. 
+is to reformat the data into the Singer specification.
+The SDK is still a great choice for this.
+The [Peloton tap](https://github.com/MeltanoLabs/tap-peloton) is an example of this.
 
 ### RESTful JSONPaths
 
@@ -164,7 +164,7 @@ For more information about the SDK's' Singer implementation details, please see 
 
 ### Code Samples
 
-For a list of code samples solving a variety of different scenarios, please see our 
+For a list of code samples solving a variety of different scenarios, please see our
 [Code Samples](./code_samples.md) page.
 
 ### CLI Samples
@@ -177,7 +177,7 @@ We've collected some [Python tips](python_tips.md) which may be helpful for new 
 
 ### VSCode Tips
 
-Ensure the intrepreter you're using in VSCode is set to use poetry. 
+Ensure the intrepreter you're using in VSCode is set to use poetry.
 You can change this by using the command pallete to go to intrepeter settings.
 Doing this will also help with autocompletion.
 

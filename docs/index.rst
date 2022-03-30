@@ -6,8 +6,8 @@
 Meltano SDK for Taps and Targets
 =======================================
 
-The Meltano_ SDK for Taps and Targets is the fastest way to build custom 
-data extractors and loaders! Taps and targets built on the SDK are automatically compliant with the 
+The Meltano_ SDK for Taps and Targets is the fastest way to build custom
+data extractors and loaders! Taps and targets built on the SDK are automatically compliant with the
 `Singer Spec`_, the de-facto open source standard for extract and load pipelines.
 
 Future-proof extractors and loaders, with less code
@@ -22,7 +22,7 @@ Built by Meltano and the Singer Community
 -----------------------------------------
 
 The SDK is built with love by the Meltano_ core
-team and contributors, with contributions from developers across the Singer_ 
+team and contributors, with contributions from developers across the Singer_
 open source community. SDK-based plugins can easily be `integrated with Meltano`_,
 but they can also be used in any data pipeline tool that supports the
 `Singer Spec`_.
@@ -48,12 +48,12 @@ Developer Resources
 
 Reference
 ---------
-   
+
 .. toctree::
    :maxdepth: 2
 
    reference
-   
+
 
 Advanced Topics
 ---------------
@@ -71,7 +71,7 @@ Advanced Topics
 .. _Singer: https://singer.io
 .. _Singer Spec: https://hub.meltano.com/singer/spec
 .. _Meltano: https://www.meltano.com
-.. _integrated with Meltano: https://meltano.com/tutorials/create-a-custom-extractor.html#add-the-plugin-to-your-meltano-project
+.. _integrated with Meltano: https://docs.meltano.com/tutorials/custom-extractor#add-the-plugin-to-your-meltano-project
 .. _contribute back: https://gitlab.com/meltano/sdk/-/issues?scope=all&state=opened&label_name[]=Accepting%20Merge%20Requests
 .. _source code: https://gitlab.com/meltano/sdk
 .. _log an issue or feature request: https://gitlab.com/meltano/sdk/-/issues
