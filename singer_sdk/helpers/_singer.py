@@ -249,7 +249,7 @@ class Catalog(Dict[str, CatalogEntry], BaseCatalog):
     """Singer catalog mapping of stream entries."""
 
     @classmethod
-    def from_dict(cls, data: Dict[str, List[Dict[str, Any]]]):
+    def from_dict(cls, data: Dict[str, List[Dict[str, Any]]]) -> "Catalog":
         """Create a catalog from a dictionary."""
         instance = cls()
         for stream in data.get("streams", []):
