@@ -1,12 +1,14 @@
 """Tests standard target features using the built-in SDK tests library."""
 
-import datetime
-
 from typing import Dict, Any
+
+from dotenv import load_dotenv
 
 from singer_sdk.testing import get_standard_target_tests
 
 from {{ cookiecutter.library_name }}.target import Target{{ cookiecutter.destination_name }}
+
+load_dotenv()  # Import any environment variables from local `.env` file.
 
 SAMPLE_CONFIG: Dict[str, Any] = {
     # TODO: Initialize minimal target config
