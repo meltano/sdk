@@ -2,6 +2,7 @@
 
 
 from typing import Any, Dict, List
+
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import BooleanType, PropertiesList, Property
