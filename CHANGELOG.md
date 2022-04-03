@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 
 - Avoid SQLAlchemy deprecation warning caused to using `Engine.has_table()` ([#341](https://gitlab.com/meltano/sdk/-/issues/341), [!264](https://gitlab.com/meltano/sdk/-/merge_requests/264))
+- Resolve issue where "falsey" defaults like '0', '', and 'False' would not be properly applied to tap settings config. ([#357](https://gitlab.com/meltano/sdk/-/issues/357), [!265](https://gitlab.com/meltano/sdk/-/merge_requests/265))
 
 ### Breaks
 

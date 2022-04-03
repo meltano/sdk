@@ -336,7 +336,7 @@ class Property(JSONTypeHelper, Generic[W]):
         type_dict = self.type_dict
         if self.optional:
             type_dict = append_type(type_dict, "null")
-        if self.default:
+        if self.default is not None:
             type_dict.update({"default": self.default})
         if self.description:
             type_dict.update({"description": self.description})
