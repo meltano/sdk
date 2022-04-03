@@ -428,7 +428,7 @@ class SQLConnector:
         """
         return cast(
             bool,
-            self._engine.has_table(full_table_name),
+            sqlalchemy.inspect(self._engine).has_table(full_table_name),
         )
 
     def get_table_columns(self, full_table_name: str) -> Dict[str, sqlalchemy.Column]:
