@@ -348,7 +348,7 @@ def _test_transform(
             "stream_maps": stream_maps,
             "stream_map_config": stream_map_config,
         },
-        logger=logging,
+        logger=logging.getLogger(),
     )
     mapper.register_raw_streams_from_catalog(sample_catalog_obj)
 
@@ -529,6 +529,18 @@ class MappedTap(Tap):
             {"email", "count", "email_hash", "user__id", "user__sub__num"},
             ["email_hash"],
         ),
+        (
+            "mystream",
+            {
+                "mystream": {
+                    "email": None,
+                }
+            },
+            False,
+            0,
+            {"count", "user"},
+            [],
+        ),
     ],
     ids=[
         "no_map",
@@ -541,6 +553,7 @@ class MappedTap(Tap):
         "flatten_depth_1",
         "flatten_all",
         "map_and_flatten",
+        "drop_property",
     ],
 )
 def test_mapped_stream(
