@@ -22,7 +22,7 @@ environments for you so that you don't have to worry about dependency conflicts.
   template already sets you up for poetry. When you are
   running a command with `poetry run ...`, poetry is doing the work to make
   sure your command runs in the correct virtual environment behind the scenes.
-  This means you will automatically be running with whatever library versions you 
+  This means you will automatically be running with whatever library versions you
   have specified in `pyproject.toml` and/or with `poetry add ...`. If it ever feels like
   your environment may be stale, you can run `poetry install` or `poetry update`.
 
@@ -39,11 +39,6 @@ creating and managing virtual environments, these two tools automate the process
     `poetry add -D <pippable-dev-only-ref>`.
   - If version conflicts occur, relax the version constraints in `pyproject.toml` for the
     libraries where the conflict is reported, then try again.
-  - The biggest change is that `-e` ("editable mode")
-    doesn't work how it used to with `pip`. Instead, just use the shell-script approach
-    from the cookiecutter template. This script automatically changes into the poetry directory
-    and executes the needed `poetry run` commands from that folder. (There's a
-    stackoverflow link in the shell script with more context.)
   - Poetry can also publish your libraries to PyPi.
 - **pipx**: Install pipx once, and then use pipx _instead of_ pip.
   - If you are using poetry for development, then all other pip-installables should be
@@ -97,7 +92,7 @@ class DynamicSampleStream(Stream):
     def primary_keys(self):
         """Return primary key dynamically based on user inputs."""
         return self.config["primary_key"]
-    
+
     @property
     def replication_key(self):
         """Return replication key dynamically based on user inputs."""
@@ -117,5 +112,12 @@ and use dynamic syntax whenever you need to calculate the stream's properties or
 the one difference of having the `@property` decorator directly above the method definition. This one change
 tells Python that you want to be able to access the method as a property (as in `pk = stream.primary_key`)
 instead of as a callable function (as in `pk = stream.primary_key()`).
+
+### Troubleshooting
+
+- If you are working on a SDK tap/target that uses a `poetry-core` version before v1.0.8,
+you may have trouble specifying a `pip_url` in Meltano with "editable mode" (`-e path/to/package`) enabled
+(as per [#238](https://gitlab.com/meltano/sdk/-/issues/238)). This can be resolved by upgrading
+the version of `poetry-core>=1.0.8` in your `pyproject.toml`.
 
 For more examples, please see the [Code Samples](./code_samples.md) page.
