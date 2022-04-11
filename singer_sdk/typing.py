@@ -38,7 +38,19 @@ Note:
   here.
 
 """
-from typing import Any, Dict, Generic, List, Optional, Tuple, Type, TypeVar, Union, cast
+from typing import (
+    Any,
+    Dict,
+    Generic,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import sqlalchemy
 from jsonschema import validators
@@ -324,8 +336,20 @@ class Property(JSONTypeHelper, Generic[W]):
 
         Returns:
             A dictionary describing the type.
+
+        Raises:
+            ValueError: If the type dict is not valid.
         """
-        return cast(dict, self.wrapped.type_dict)
+        wrapped = self.wrapped
+
+        if isinstance(wrapped, type) and not isinstance(wrapped.type_dict, Mapping):
+            raise ValueError(
+                f"Type dict for {wrapped} is not defined. "
+                + "Try instantiating it with a nested type such as "
+                + f"{wrapped.__name__}(StringType)."
+            )
+
+        return cast(dict, wrapped.type_dict)
 
     def to_dict(self) -> dict:
         """Return a dict mapping the property name to its definition.
