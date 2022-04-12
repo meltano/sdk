@@ -6,6 +6,7 @@ import pendulum
 import pytest
 import requests
 
+from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.jsonpath import _compile_jsonpath
 from singer_sdk.streams.core import (
     REPLICATION_FULL_TABLE,
@@ -118,6 +119,7 @@ def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
     assert stream.replication_method == REPLICATION_INCREMENTAL
     assert stream.forced_replication_method is None
 
+    assert tap.input_catalog is not None
     stream.apply_catalog(catalog=tap.input_catalog)
 
     assert stream.primary_keys == ["id"]
@@ -201,6 +203,32 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
             """,
             [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}],
         ),
+        (
+            "$.link[?(@.relation=='next')].url",
+            """
+            {
+              "link": [
+                {
+                  "releation": "previous",
+                  "url": "https://myapi.test/6"
+                },
+                {
+                  "relation": "next",
+                  "url": "https://myapi.test/8"
+                },
+                {
+                  "relation": "first",
+                  "url": "https://myapi.test/1"
+                },
+                {
+                  "relation": "last",
+                  "url": "https://myapi.test/20"
+                }
+              ]
+            }
+            """,
+            ["https://myapi.test/8"],
+        ),
     ],
     ids=[
         "array",
@@ -208,6 +236,7 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
         "nested_two_levels",
         "single_object",
         "nested_values",
+        "filtered",
     ],
 )
 def test_jsonpath_rest_stream(
@@ -256,8 +285,12 @@ def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
     fake_response = requests.Response()
     fake_response._content = str.encode(content)
 
-    GraphqlTestStream.records_jsonpath = "$[*]"
-    stream = GraphqlTestStream(tap)
+    class GraphQLJSONPathOverride(GraphqlTestStream):
+        @classproperty
+        def records_jsonpath(cls):
+            return "$[*]"
+
+    stream = GraphQLJSONPathOverride(tap)
 
     rows = stream.parse_response(fake_response)
 
