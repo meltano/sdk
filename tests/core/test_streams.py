@@ -203,32 +203,6 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
             """,
             [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}],
         ),
-        (
-            "$.link[?(@.relation=='next')].url",
-            """
-            {
-              "link": [
-                {
-                  "releation": "previous",
-                  "url": "https://myapi.test/6"
-                },
-                {
-                  "relation": "next",
-                  "url": "https://myapi.test/8"
-                },
-                {
-                  "relation": "first",
-                  "url": "https://myapi.test/1"
-                },
-                {
-                  "relation": "last",
-                  "url": "https://myapi.test/20"
-                }
-              ]
-            }
-            """,
-            ["https://myapi.test/8"],
-        ),
     ],
     ids=[
         "array",
@@ -236,7 +210,6 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
         "nested_two_levels",
         "single_object",
         "nested_values",
-        "filtered",
     ],
 )
 def test_jsonpath_rest_stream(
@@ -324,8 +297,41 @@ def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
             {"X-Next-Page": "xyz123"},
             "xyz123",
         ),
+        (
+            "$.link[?(@.relation=='next')].url",
+            """
+            {
+              "link": [
+                {
+                  "releation": "previous",
+                  "url": "https://myapi.test/6"
+                },
+                {
+                  "relation": "next",
+                  "url": "https://myapi.test/8"
+                },
+                {
+                  "relation": "first",
+                  "url": "https://myapi.test/1"
+                },
+                {
+                  "relation": "last",
+                  "url": "https://myapi.test/20"
+                }
+              ]
+            }
+            """,
+            {},
+            "https://myapi.test/8",
+        ),
     ],
-    ids=["has_next_page", "null_next_page", "no_next_page_key", "use_header"],
+    ids=[
+        "has_next_page",
+        "null_next_page",
+        "no_next_page_key",
+        "use_header",
+        "filtered_hateoas",
+    ],
 )
 def test_next_page_token_jsonpath(
     tap: SimpleTestTap, path: str, content: str, headers: dict, result: str
