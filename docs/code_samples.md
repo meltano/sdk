@@ -24,6 +24,7 @@ These are code samples taken from other projects. Use these as a reference if yo
 - [A simple Tap class definition with two streams](./code_samples.html#a-simple-tap-class-definition-with-two-streams)
 - [Define a simple GraphQL-based stream with schema defined in a file](./code_samples.html#define-a-simple-graphql-based-stream-with-schema-defined-in-a-file)
 - [Define a REST-based stream with a JSONPath expression](./code_samples.html#define-a-rest-based-stream-with-a-jsonpath-expression)
+- [Use a JSONPath expression to extract the next page URL from a HATEOAS response](./code_samples.html#use-a-jsonpath-expression-to-extract-the-next-page-url-from-a-hateoas-response)
 - [Dynamically discovering `schema` for a stream](./code_samples.html#dynamically-discovering-schema-for-a-stream)
 - [Initialize a collection of tap streams with differing types](./code_samples.html#initialize-a-collection-of-tap-streams-with-differing-types)
 - [Run the standard built-in tap tests](./code_samples.html#run-the-standard-built-in-tap-tests)
@@ -95,6 +96,16 @@ class LOTRCharactersStream(RESTStream):
                 "Authorization": f"Bearer {self.config.get('api_key')}",
             },
         )
+```
+
+### Use a JSONPath expression to extract the next page URL from a [HATEOAS](https://en.wikipedia.org/wiki/HATEOAS) response
+
+```python
+class MyStream(RESTStream):
+    """A custom stream."""
+
+    # Gets the href property from the links item where rel="next"
+    next_page_token_jsonpath = "$.links[?(@.rel=='next')].href"
 ```
 
 ### Dynamically discovering `schema` for a stream
