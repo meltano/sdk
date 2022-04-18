@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixes
 
+- Support JSONPath extensions in `records_jsonpath` and `next_page_token_jsonpath` ([#361](https://gitlab.com/meltano/sdk/-/issues/361), [!271](https://gitlab.com/meltano/sdk/-/merge_requests/271)).
+
 ### Breaks
 
 
