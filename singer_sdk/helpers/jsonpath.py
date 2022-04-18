@@ -4,6 +4,7 @@ from typing import Any, Generator, Union
 
 import jsonpath_ng
 import memoization
+from jsonpath_ng.ext import parse
 
 
 def extract_jsonpath(
@@ -35,4 +36,4 @@ def _compile_jsonpath(expression: str) -> jsonpath_ng.JSONPath:
     Returns:
         A compiled JSONPath object.
     """
-    return jsonpath_ng.parse(expression)
+    return parse(expression)
