@@ -31,6 +31,7 @@ These are code samples taken from other projects. Use these as a reference if yo
 - [Make all streams reuse the same authenticator instance](./code_samples.html#make-all-streams-reuse-the-same-authenticator-instance)
 - [Make a stream reuse the same authenticator instance for all requests](./code_samples.html#make-a-stream-reuse-the-same-authenticator-instance-for-all-requests)
 - [Custom response validation](./code_samples.html#custom-response-validation)
+- [Custom rate limit handling](./code_samples.html#custom-rate-limit-handling)
 
 ### A simple Tap class definition with two streams
 
@@ -294,6 +295,30 @@ class CustomResponseValidationStream(RESTStream):
         if data["status"] == self.StatusMessage.UNAVAILABLE:
             raise RetriableAPIError("API is unavailable")
 ```
+
+## Custom Backoff
+Custom backoff and retry behaviour can be added by overriding the methods:
+[`backoff_wait_generator`](./classes/singer_sdk.RESTStream.html#singer_sdk.RESTStream.backoff_wait_generator)
+[`backoff_max_tries`](./classes/singer_sdk.RESTStream.html#singer_sdk.RESTStream.backoff_max_tries)
+[`backoff_handler`](./classes/singer_sdk.RESTStream.html#singer_sdk.RESTStream.backoff_handler)
+
+For example, to use a constant retry:
+```
+def backoff_wait_generator() -> Callable[..., Generator[int, Any, None]]:
+    return backoff.constant(interval=10)
+```
+
+To utilise a response header as a wait value you can use [`backoff_runtime`](./classes/singer_sdk.RESTStream.html#singer_sdk.RESTStream.backoff_runtime), and pass a method that returns a wait value:
+```
+def backoff_wait_generator() -> Callable[..., Generator[int, Any, None]]:
+    def _backoff_from_headers(retriable_api_error):
+        response_headers = retriable_api_error.response.headers
+        return int(response_headers.get("Retry-After", 0))
+
+    return self.backoff_runtime(value=_backoff_from_headers)
+
+```
+
 
 ## Additional Resources
 
