@@ -28,7 +28,7 @@ STREAM_TYPES = [
 {%- endif %}
 
 
-class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.source_name == 'SQL' else '' }}Tap):
+class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 'SQL' else '' }}Tap):
     """{{ cookiecutter.source_name }} tap class."""
     name = "{{ cookiecutter.tap_id }}"
 
