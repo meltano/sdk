@@ -85,6 +85,9 @@ multi_line_output = 3 # Vertical Hanging Indent
 src_paths = "singer_sdk"
 known_first_party = ["tests", "samples"]
 
+[tool.pytest.ini_options]
+addopts = '-vvv'
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
