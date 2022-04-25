@@ -19,9 +19,9 @@ def pytest_generate_tests(metafunc):
     id_list = []
     argvalues = []
 
-    for cookiecutter in ["tap", "target"]:
-        template_dir = f"cookiecutter/{cookiecutter}-template"
-        case_key = f"{cookiecutter}_id"
+    for template in ["tap", "target"]:
+        template_dir = f"cookiecutter/{template}-template"
+        case_key = f"{template}_id"
         test_input_file = os.path.join(template_dir, "cookiecutter.tests.yml")
 
         for case in yaml.safe_load(Path(test_input_file).read_text())["tests"]:
