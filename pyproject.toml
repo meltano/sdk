@@ -32,7 +32,7 @@ pipelinewise-singer-python = "1.2.0"
 backoff = ">=1.8.0,<2.0"
 pendulum = "^2.1.0"
 click = "~=8.0"
-PyJWT = "1.7.1"
+PyJWT = "2.3.0"
 requests = "^2.25.1"
 cryptography = "^3.4.6"
 importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
