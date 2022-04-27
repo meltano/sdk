@@ -23,6 +23,7 @@ from typing import (
 import click
 from jsonschema import Draft4Validator, SchemaError, ValidationError
 
+from singer_sdk._state.schema import TapState
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
@@ -190,7 +191,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     # Abstract methods:
 
     @property
-    def state(self) -> dict:
+    def state(self) -> TapState:
         """Get state.
 
         Raises:

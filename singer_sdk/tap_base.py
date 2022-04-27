@@ -8,13 +8,13 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 import click
 
+from singer_sdk import _state
+from singer_sdk._state.schema import TapState
 from singer_sdk.cli import common_options
 from singer_sdk.exceptions import MaxRecordsLimitException
-from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._singer import Catalog
-from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
     CapabilitiesEnum,
@@ -74,7 +74,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         # Declare private members
         self._streams: Optional[Dict[str, Stream]] = None
         self._input_catalog: Optional[Catalog] = None
-        self._state: Dict[str, Stream] = {}
+        self._state = TapState()
 
         # Process input catalog
         if isinstance(catalog, dict):
@@ -122,7 +122,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         return self._streams
 
     @property
-    def state(self) -> dict:
+    def state(self) -> TapState:
         """Get tap state.
 
         Returns:
@@ -299,30 +299,16 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
         Args:
             state: Initialize the tap'ss state with this value.
-
-        Raises:
-            ValueError: If the tap's own state is None, meaning it has not been
-                initialized.
         """
-        if self.state is None:
-            raise ValueError("Cannot write to uninitialized state dictionary.")
-
-        for stream_name, stream_state in state.get("bookmarks", {}).items():
-            for key, val in stream_state.items():
-                write_stream_state(
-                    self.state,
-                    stream_name,
-                    key,
-                    val,
-                )
+        self._state = TapState.from_dict(state)
 
     # State handling
 
     def _reset_state_progress_markers(self) -> None:
         """Clear prior jobs' progress markers at beginning of sync."""
-        for _, state in self.state.get("bookmarks", {}).items():
+        for _, state in self.state.bookmarks.items():
             _state.reset_state_progress_markers(state)
-            for partition_state in state.get("partitions", []):
+            for partition_state in state.partitions:
                 _state.reset_state_progress_markers(partition_state)
 
     # Fix sync replication method incompatibilities
