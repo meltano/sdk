@@ -298,7 +298,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         `super().load_state(state)` to ensure compatibility with the SDK.
 
         Args:
-            state: Initialize the tap'ss state with this value.
+            state: Initialize the tap's state with this value.
 
         Raises:
             ValueError: If the tap's own state is None, meaning it has not been
