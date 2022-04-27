@@ -500,7 +500,8 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
                 password=passphrase,
                 backend=default_backend(),
             )
+        private_key_string: Union[str, Any] = private_key.decode('utf-8')
         return {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
-            "assertion": jwt.encode(self.oauth_request_body, private_key, "RS256"),
+            "assertion": jwt.encode(self.oauth_request_body, private_key_string, "RS256"),
         }
