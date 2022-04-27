@@ -1,5 +1,6 @@
 """Test sample sync."""
 
+import re
 from typing import List
 
 import pytest
@@ -250,6 +251,33 @@ def test_property_description():
 )
 def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
     assert json_type.type_dict == expected_json_schema
+
+
+def test_wrapped_type_dict():
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "Type dict for <class 'singer_sdk.typing.ArrayType'> is not defined. "
+            + "Try instantiating it with a nested type such as ArrayType(StringType)."
+        ),
+    ):
+        Property("bad_array_prop", ArrayType).to_dict()
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "Type dict for <class 'singer_sdk.typing.ObjectType'> is not defined. "
+            + "Try instantiating it with a nested type such as ObjectType(StringType)."
+        ),
+    ):
+        Property("bad_object_prop", ObjectType).to_dict()
+
+    assert Property("good_array_prop", ArrayType(StringType)).to_dict() == {
+        "good_array_prop": {
+            "type": ["array", "null"],
+            "items": {"type": ["string"]},
+        }
+    }
 
 
 def test_array_type():
