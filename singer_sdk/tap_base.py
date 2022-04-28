@@ -48,7 +48,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     def __init__(
         self,
         config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
-        catalog: Union[PurePath, str, dict, None] = None,
+        catalog: Union[PurePath, str, dict, Catalog, None] = None,
         state: Union[PurePath, str, dict, None] = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
@@ -75,9 +75,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         self._streams: Optional[Dict[str, Stream]] = None
         self._input_catalog: Optional[Catalog] = None
         self._state: Dict[str, Stream] = {}
+        self._catalog: Optional[Catalog] = None  # Tap's working catalog
 
         # Process input catalog
-        if isinstance(catalog, dict):
+        if isinstance(catalog, Catalog):
+            self._input_catalog = catalog
+        elif isinstance(catalog, dict):
             self._input_catalog = Catalog.from_dict(catalog)
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
@@ -88,9 +91,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             plugin_config=dict(self.config),
             logger=self.logger,
         )
-        self.mapper.register_raw_streams_from_catalog(
-            self.input_catalog or self._singer_catalog
-        )
+
+        self.mapper.register_raw_streams_from_catalog(self.catalog)
 
         # Process state
         state_dict: dict = {}
@@ -143,6 +145,18 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             Catalog dictionary input, or None if not provided.
         """
         return self._input_catalog
+
+    @property
+    def catalog(self) -> Catalog:
+        """Get the tap's working catalog.
+
+        Returns:
+            A Singer catalog object.
+        """
+        if self._catalog is None:
+            self._catalog = self.input_catalog or self._singer_catalog
+
+        return self._catalog
 
     @classproperty
     def capabilities(self) -> List[CapabilitiesEnum]:
