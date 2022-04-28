@@ -18,7 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Tap Cookiecutter: Fixed a bug where the wrong key was used to select the appropriate `Tap` class for SQL taps ([#353](https://gitlab.com/meltano/sdk/-/issues/353), [!275](https://gitlab.com/meltano/sdk/-/merge_requests/275)) - _Thanks, **[Dan Norman](https://gitlab.com/BuzzCutNorman)**_!
 - Tap Cookiecutter: Fixed a bug where `client.py` for SQL taps was overwritten during initialization ([#354](https://gitlab.com/meltano/sdk/-/issues/354), [!276](https://gitlab.com/meltano/sdk/-/merge_requests/276)) - _Thanks, **[Dan Norman](https://gitlab.com/BuzzCutNorman)**_!
-- Tap SDK: Bump `pyjwt` dependency to `~=2.3`  ([!281](https://gitlab.com/meltano/sdk/-/merge_requests/281)) - _Thanks **[Eric Boucher](https://gitlab.com/ericboucher)**_!
+- Tap SDK: Fixed a bug where a parent stream emitted schema messages when it's not selected, but at least one of its child streams is ([#366](https://gitlab.com/meltano/sdk/-/issues/366), [!280](https://gitlab.com/meltano/sdk/-/merge_requests/280))
+- Tap SDK: Bump `pyjwt` dependency to `~=2.3` ([!281](https://gitlab.com/meltano/sdk/-/merge_requests/281)) - _Thanks, **[Eric Boucher](https://gitlab.com/ericboucher)**_!
 
 ### Breaks
 
