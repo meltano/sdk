@@ -1014,7 +1014,8 @@ class Stream(metaclass=abc.ABCMeta):
             self._write_replication_key_signpost(context, signpost)
 
         # Send a SCHEMA message to the downstream target:
-        self._write_schema_message()
+        if self.selected:
+            self._write_schema_message()
         # Sync the records themselves:
         self._sync_records(context)
 
