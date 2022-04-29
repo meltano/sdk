@@ -1,9 +1,23 @@
 """Tests for authentication helpers."""
 
+from __future__ import annotations
+
+import jwt
 import pytest
 import requests_mock
+from cryptography.hazmat.primitives.asymmetric.rsa import (
+    RSAPrivateKey,
+    RSAPublicKey,
+    generate_private_key,
+)
+from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    NoEncryption,
+    PrivateFormat,
+    PublicFormat,
+)
 
-from singer_sdk.authenticators import OAuthAuthenticator
+from singer_sdk.authenticators import OAuthAuthenticator, OAuthJWTAuthenticator
 from singer_sdk.streams import RESTStream
 from singer_sdk.tap_base import Tap
 
@@ -123,3 +137,48 @@ def test_oauth_authenticator_token_expiry_handling(
     authenticator.update_access_token()
 
     assert authenticator.expires_in == result
+
+
+@pytest.fixture
+def private_key() -> RSAPrivateKey:
+    return generate_private_key(public_exponent=65537, key_size=4096)
+
+
+@pytest.fixture
+def public_key(private_key: RSAPrivateKey) -> RSAPublicKey:
+    return private_key.public_key()
+
+
+@pytest.fixture
+def private_key_string(private_key: RSAPrivateKey) -> str:
+    return private_key.private_bytes(
+        Encoding.PEM,
+        format=PrivateFormat.PKCS8,
+        encryption_algorithm=NoEncryption(),
+    ).decode("utf-8")
+
+
+@pytest.fixture
+def public_key_string(public_key: RSAPublicKey) -> str:
+    return public_key.public_bytes(
+        Encoding.PEM,
+        format=PublicFormat.PKCS1,
+    ).decode("utf-8")
+
+
+def test_oauth_jwt_authenticator_payload(
+    rest_tap: Tap,
+    private_key_string: str,
+    public_key_string: str,
+):
+    class _FakeOAuthJWTAuthenticator(OAuthJWTAuthenticator):
+        private_key = private_key_string
+        oauth_request_body = {"some": "payload"}
+
+    authenticator = _FakeOAuthJWTAuthenticator(stream=rest_tap.streams["some_stream"])
+
+    body = authenticator.oauth_request_body
+    payload = authenticator.oauth_request_payload
+    token = payload["assertion"]
+
+    assert jwt.decode(token, public_key_string, algorithms=["RS256"]) == body
