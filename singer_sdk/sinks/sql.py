@@ -222,6 +222,11 @@ class SQLSink(BatchSink):
         Args:
             new_version: The version number to activate.
         """
+        # There's nothing to do if the table doesn't exist yet
+        # (which it won't the first time the stream is processed)
+        if not self.connector.table_exists(self.full_table_name):
+            return
+
         deleted_at = now()
 
         if self.config.get("hard_delete", True):
