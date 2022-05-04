@@ -447,6 +447,9 @@ class CustomStreamMap(StreamMap):
                     f"Property '{key_property}' was not detected in schema."
                 )
 
+        if self.flattening_enabled:
+            transformed_schema = self.flatten_schema(transformed_schema)
+
         # Declare function variables
 
         def eval_filter(record: dict) -> bool:
