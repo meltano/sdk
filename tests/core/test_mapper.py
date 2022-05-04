@@ -427,8 +427,9 @@ class MappedTap(Tap):
 
 
 @pytest.fixture
-def clear_schema_cache():
+def clear_schema_cache() -> None:
     """Schemas are cached, so the cache needs to be cleared between test invocations."""
+    yield
     get_selected_schema.cache_clear()
 
 
@@ -564,7 +565,7 @@ def clear_schema_cache():
     ],
 )
 def test_mapped_stream(
-    clear_schema_cache: pytest.fixture,
+    clear_schema_cache: None,
     stream_alias: str,
     stream_maps: dict,
     flatten: bool,
