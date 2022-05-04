@@ -548,7 +548,7 @@ def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
             if datelike_type == "date":
                 return cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATE())
 
-        maxlength = jsonschema_type["maxLength"] if "maxLength" in jsonschema_type else None
+        maxlength = jsonschema_type.get("maxLength")
         return cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR(maxlength))
 
     if _jsonschema_type_check(jsonschema_type, ("integer",)):
