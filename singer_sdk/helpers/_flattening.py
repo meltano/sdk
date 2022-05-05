@@ -4,6 +4,7 @@ import collections
 import itertools
 import json
 import re
+from copy import deepcopy
 from typing import Any, List, Mapping, MutableMapping, NamedTuple, Optional, Tuple
 
 import inflection
@@ -46,6 +47,12 @@ def flatten_key(key_name: str, parent_keys: List[str], separator: str = "__") ->
 
     Returns:
         The flattened key name as a string.
+
+    >>> flatten_key("foo", ["bar", "baz"])
+    'bar__baz__foo'
+
+    >>> flatten_key("foo", ["bar", "baz"], separator=".")
+    'bar.baz.foo'
     """
     full_key = parent_keys + [key_name]
     inflected_key = full_key.copy()
@@ -78,13 +85,123 @@ def flatten_schema(
 
     Returns:
         A flattened version of the provided schema definition.
+
+    >>> import json
+    >>> schema = {
+    ...     "type": "object",
+    ...     "properties": {
+    ...         "id": {
+    ...             "type": "string"
+    ...         },
+    ...         "foo": {
+    ...             "type": "object",
+    ...             "properties": {
+    ...                 "bar": {
+    ...                     "type": "object",
+    ...                     "properties": {
+    ...                         "baz": {
+    ...                             "type": "object",
+    ...                             "properties": {
+    ...                                 "qux": {
+    ...                                     "type": "string"
+    ...                                 }
+    ...                             }
+    ...                         }
+    ...                     }
+    ...                 }
+    ...             }
+    ...         }
+    ...     }
+    ... }
+    >>> print(json.dumps(flatten_schema(schema, 0), indent=2))
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "foo": {
+          "type": "object",
+          "properties": {
+            "bar": {
+              "type": "object",
+              "properties": {
+                "baz": {
+                  "type": "object",
+                  "properties": {
+                    "qux": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    >>> print(json.dumps(flatten_schema(schema, 1), indent=2))
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "foo__bar": {
+          "type": "object",
+          "properties": {
+            "baz": {
+              "type": "object",
+              "properties": {
+                "qux": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    >>> print(json.dumps(flatten_schema(schema, 2), indent=2))
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "foo__bar__baz": {
+          "type": "object",
+          "properties": {
+            "qux": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+
+    >>> print(json.dumps(flatten_schema(schema, 3), indent=2))
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "foo__bar__baz__qux": {
+          "type": "string"
+        }
+      }
+    }
     """
-    schema["properties"] = _flatten_schema(
-        schema_node=schema,
+    new_schema = deepcopy(schema)
+    new_schema["properties"] = _flatten_schema(
+        schema_node=new_schema,
         max_level=max_level,
         separator=separator,
     )
-    return schema
+    return new_schema
 
 
 def _flatten_schema(
