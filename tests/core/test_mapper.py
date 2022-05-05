@@ -587,13 +587,7 @@ def test_mapped_stream(
     schema_message = schema_messages[0]
     assert schema_message.stream == stream_alias
     assert schema_message.key_properties == key_properties
-
-    if "properties" in schema_message.schema:
-        schema_properties = schema_message.schema["properties"].keys()
-    else:
-        schema_properties = schema_message.schema.keys()
-
-    assert schema_properties == output_fields
+    assert schema_message.schema["properties"].keys() == output_fields
 
     for raw_record in stream.get_records(None):
         record_message = next(stream._generate_record_messages(cast(dict, raw_record)))
