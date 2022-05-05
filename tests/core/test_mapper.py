@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Set, cast
 import pytest
 
 from singer_sdk.exceptions import MapExpressionError
+from singer_sdk.helpers._catalog import get_selected_schema
 from singer_sdk.helpers._singer import Catalog
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
 from singer_sdk.streams.core import Stream
@@ -425,6 +426,13 @@ class MappedTap(Tap):
         return [MappedStream(self)]
 
 
+@pytest.fixture
+def clear_schema_cache() -> None:
+    """Schemas are cached, so the cache needs to be cleared between test invocations."""
+    yield
+    get_selected_schema.cache_clear()
+
+
 @pytest.mark.parametrize(
     "stream_alias,stream_maps,flatten,flatten_max_depth,output_fields,key_properties",
     [
@@ -557,6 +565,7 @@ class MappedTap(Tap):
     ],
 )
 def test_mapped_stream(
+    clear_schema_cache: None,
     stream_alias: str,
     stream_maps: dict,
     flatten: bool,
@@ -578,6 +587,7 @@ def test_mapped_stream(
     schema_message = schema_messages[0]
     assert schema_message.stream == stream_alias
     assert schema_message.key_properties == key_properties
+    assert schema_message.schema["properties"].keys() == output_fields
 
     for raw_record in stream.get_records(None):
         record_message = next(stream._generate_record_messages(cast(dict, raw_record)))
