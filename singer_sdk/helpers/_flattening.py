@@ -79,7 +79,12 @@ def flatten_schema(
     Returns:
         A flattened version of the provided schema definition.
     """
-    return _flatten_schema(schema_node=schema, max_level=max_level, separator=separator)
+    schema["properties"] = _flatten_schema(
+        schema_node=schema,
+        max_level=max_level,
+        separator=separator,
+    )
+    return schema
 
 
 def _flatten_schema(

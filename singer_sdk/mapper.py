@@ -121,14 +121,11 @@ class StreamMap(metaclass=abc.ABCMeta):
         if not self.flattening_options or not self.flattening_enabled:
             return raw_schema
 
-        transformed_schema = copy.deepcopy(raw_schema)
-        transformed_schema["properties"] = flatten_schema(
-            transformed_schema,
+        return flatten_schema(
+            raw_schema,
             separator=self.flattening_options.separator,
             max_level=self.flattening_options.max_level,
         )
-
-        return transformed_schema
 
     @abc.abstractmethod
     def transform(self, record: dict) -> Optional[dict]:
