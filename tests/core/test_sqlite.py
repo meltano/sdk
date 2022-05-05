@@ -99,6 +99,15 @@ def sqlite_sample_target(sqlite_target_test_config):
     return SQLiteTarget(sqlite_target_test_config)
 
 
+@pytest.fixture
+def sqlite_sample_target_soft_delete(sqlite_target_test_config):
+    """Get a sample target object with hard_delete disabled."""
+    conf = sqlite_target_test_config
+    conf["hard_delete"] = False
+
+    return SQLiteTarget(conf)
+
+
 def _discover_and_select_all(tap: SQLTap) -> None:
     """Discover catalog and auto-select all streams."""
     for catalog_entry in tap.catalog_dict["streams"]:
@@ -291,7 +300,8 @@ def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output_b), finalize=True)
 
 
-def test_sqlite_activate_version(sqlite_sample_target: SQLTarget):
+def test_sqlite_activate_version(sqlite_sample_target: SQLTarget,
+                                 sqlite_sample_target_soft_delete: SQLTarget):
     """Test handling the activate_version message for the SQLite target.
 
     Test performs the following actions:
@@ -311,10 +321,17 @@ def test_sqlite_activate_version(sqlite_sample_target: SQLTarget):
         for msg in [
             schema_msg,
             {"type": "ACTIVATE_VERSION", "stream": test_tbl, "version": 12345},
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"col_a": "samplerow1"},
+                "version": 12345,
+            },
         ]
     )
 
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output), finalize=True)
+    target_sync_test(sqlite_sample_target_soft_delete, input=StringIO(tap_output), finalize=True)
 
 
 def test_sqlite_column_morph(sqlite_sample_target: SQLTarget):

@@ -3,6 +3,8 @@
 from typing import Any, Dict, Iterable, List, Optional, Type
 
 import sqlalchemy
+from sqlalchemy.sql.expression import bindparam
+
 from pendulum import now
 
 from singer_sdk.plugin_base import PluginBase
@@ -229,6 +231,16 @@ class SQLSink(BatchSink):
 
         deleted_at = now()
 
+        if not self.connector.column_exists(
+            full_table_name=self.full_table_name,
+            column_name=self.version_column_name,
+        ):
+            self.connector.prepare_column(
+                self.full_table_name,
+                self.version_column_name,
+                sql_type=sqlalchemy.types.Integer(),
+            )
+
         if self.config.get("hard_delete", True):
             self.connection.execute(
                 f"DELETE FROM {self.full_table_name} "
@@ -245,14 +257,17 @@ class SQLSink(BatchSink):
                 self.soft_delete_column_name,
                 sql_type=sqlalchemy.types.DateTime(),
             )
-        self.connection.execute(
+
+        query = sqlalchemy.text(
             f"UPDATE {self.full_table_name}\n"
-            f"SET {self.soft_delete_column_name} = ? \n"
-            f"WHERE {self.version_column_name} < ? \n"
-            f"  AND {self.soft_delete_column_name} IS NULL\n",
-            deleted_at,
-            new_version,
+            f"SET {self.soft_delete_column_name} = :deletedate \n"
+            f"WHERE {self.version_column_name} < :version \n"
+            f"  AND {self.soft_delete_column_name} IS NULL\n")
+        query = query.bindparams(
+            bindparam("deletedate", value=deleted_at, type_=sqlalchemy.types.DateTime),
+            bindparam("version", value=new_version, type_=sqlalchemy.types.Integer)
         )
+        self.connector.connection.execute(query)
 
 
 __all__ = ["SQLSink", "SQLConnector"]
