@@ -4,7 +4,7 @@ import abc
 import copy
 import logging
 from datetime import datetime
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union, cast
+from typing import Any, Callable, Dict, Generator, Iterable, List, Optional, Union, cast
 
 import backoff
 import requests
@@ -29,6 +29,9 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     #: JSONPath expression to extract records from the API response.
     records_jsonpath: str = "$[*]"
+
+    #: Response code reference for rate limit retries
+    extra_retry_statuses: List[int] = [429]
 
     #: Optional JSONPath expression to extract a pagination token from the API response.
     #: Example: `"$.next_page"`
@@ -123,18 +126,23 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     def validate_response(self, response: requests.Response) -> None:
         """Validate HTTP response.
 
-        By default, checks for error status codes (>400) and raises a
-        :class:`singer_sdk.exceptions.FatalAPIError`.
+        Checks for error status codes and wether they are fatal or retriable.
+
+        In case an error is deemed transient and can be safely retried, then this
+        method should raise an :class:`singer_sdk.exceptions.RetriableAPIError`.
+        By default this applies to 5xx error codes, along with values set in:
+        :attr:`~singer_sdk.RESTStream.extra_retry_statuses`
+
+        In case an error is unrecoverable raises a
+        :class:`singer_sdk.exceptions.FatalAPIError`. By default, this applies to
+        4xx errors, excluding values found in:
+        :attr:`~singer_sdk.RESTStream.extra_retry_statuses`
 
         Tap developers are encouraged to override this method if their APIs use HTTP
         status codes in non-conventional ways, or if they communicate errors
         differently (e.g. in the response body).
 
         .. image:: ../images/200.png
-
-
-        In case an error is deemed transient and can be safely retried, then this
-        method should raise an :class:`singer_sdk.exceptions.RetriableAPIError`.
 
         Args:
             response: A `requests.Response`_ object.
@@ -146,25 +154,43 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         .. _requests.Response:
             https://docs.python-requests.org/en/latest/api/#requests.Response
         """
-        if 400 <= response.status_code < 500:
-            msg = (
-                f"{response.status_code} Client Error: "
-                f"{response.reason} for path: {self.path}"
-            )
+        if (
+            response.status_code in self.extra_retry_statuses
+            or 500 <= response.status_code < 600
+        ):
+            msg = self.response_error_message(response)
+            raise RetriableAPIError(msg, response)
+        elif 400 <= response.status_code < 500:
+            msg = self.response_error_message(response)
             raise FatalAPIError(msg)
 
-        elif 500 <= response.status_code < 600:
-            msg = (
-                f"{response.status_code} Server Error: "
-                f"{response.reason} for path: {self.path}"
-            )
-            raise RetriableAPIError(msg)
+    def response_error_message(self, response: requests.Response) -> str:
+        """Build error message for invalid http statuses.
+
+        Args:
+            response: A `requests.Response`_ object.
+
+        Returns:
+            str: The error message
+        """
+        if 400 <= response.status_code < 500:
+            error_type = "Client"
+        else:
+            error_type = "Server"
+
+        return (
+            f"{response.status_code} {error_type} Error: "
+            f"{response.reason} for path: {self.path}"
+        )
 
     def request_decorator(self, func: Callable) -> Callable:
         """Instantiate a decorator for handling request failures.
 
-        Developers may override this method to provide custom backoff or retry
-        handling.
+        Uses a wait generator defined in `backoff_wait_generator` to
+        determine backoff behaviour. Try limit is defined in
+        `backoff_max_tries`, and will trigger the event defined in
+        `backoff_handler` before retrying. Developers may override one or
+        all of these methods to provide custom backoff or retry handling.
 
         Args:
             func: Function to decorate.
@@ -173,13 +199,13 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             A decorated method.
         """
         decorator: Callable = backoff.on_exception(
-            backoff.expo,
+            self.backoff_wait_generator,
             (
                 RetriableAPIError,
                 requests.exceptions.ReadTimeout,
             ),
-            max_tries=5,
-            factor=2,
+            max_tries=self.backoff_max_tries,
+            on_backoff=self.backoff_handler,
         )(func)
         return decorator
 
@@ -294,8 +320,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
                 context, next_page_token=next_page_token
             )
             resp = decorated_request(prepared_request, context)
-            for row in self.parse_response(resp):
-                yield row
+            yield from self.parse_response(resp)
             previous_token = copy.deepcopy(next_page_token)
             next_page_token = self.get_next_page_token(
                 response=resp, previous_token=previous_token
@@ -431,3 +456,63 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             requests.
         """
         return SimpleAuthenticator(stream=self)
+
+    def backoff_wait_generator(self) -> Callable[..., Generator[int, Any, None]]:
+        """The wait generator used by the backoff decorator on request failure.
+
+        See for options:
+        https://github.com/litl/backoff/blob/master/backoff/_wait_gen.py
+
+        And see for examples:
+        https://sdk.meltano.com/en/latest/code_samples.html#custom-backoff
+
+        Returns:
+            The wait generator
+        """
+        return backoff.expo(factor=2)  # type: ignore # ignore 'Returning Any'
+
+    def backoff_max_tries(self) -> int:
+        """The number of attempts before giving up when retrying requests.
+
+        Setting to None will retry indefinetely.
+
+        Returns:
+            int: limit
+        """
+        return 5
+
+    def backoff_handler(self, details: dict) -> None:
+        """Adds additional behaviour prior to retry.
+
+        By default will log out backoff details, developers can override
+        to extend or change this behaviour.
+
+        Args:
+            details: backoff invocation details
+                https://github.com/litl/backoff#event-handlers
+        """
+        logging.error(
+            "Backing off {wait:0.1f} seconds after {tries} tries "
+            "calling function {target} with args {args} and kwargs "
+            "{kwargs}".format(**details)
+        )
+
+    def backoff_runtime(
+        self, *, value: Callable[[Any], int]
+    ) -> Generator[int, None, None]:
+        """Optional backoff wait generator that can replace the default `backoff.expo`.
+
+        It is based on parsing the thrown exception of the decorated method, making it
+        possible for response values to be in scope.
+
+        Args:
+            value: a callable which takes as input the decorated
+                function's thrown exception and determines how
+                long to wait.
+
+        Yields:
+            The thrown exception
+        """
+        exception = yield  # type: ignore[misc]
+        while True:
+            exception = yield value(exception)
