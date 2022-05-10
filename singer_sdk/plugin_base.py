@@ -287,21 +287,22 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version})")
 
-    def _get_about_info(self) -> Dict[str, Any]:
+    @classmethod
+    def _get_about_info(cls: Type["PluginBase"]) -> Dict[str, Any]:
         """Returns capabilities and other tap metadata.
 
         Returns:
             A dictionary containing the relevant 'about' information.
         """
         info: Dict[str, Any] = OrderedDict({})
-        info["name"] = self.name
-        info["description"] = self.__doc__
-        info["version"] = self.plugin_version
-        info["sdk_version"] = self.sdk_version
-        info["capabilities"] = self.capabilities
+        info["name"] = cls.name
+        info["description"] = cls.__doc__
+        info["version"] = cls.plugin_version
+        info["sdk_version"] = cls.sdk_version
+        info["capabilities"] = cls.capabilities
 
-        config_jsonschema = self.config_jsonschema
-        self.append_builtin_config(config_jsonschema)
+        config_jsonschema = cls.config_jsonschema
+        cls.append_builtin_config(config_jsonschema)
         info["settings"] = config_jsonschema
         return info
 
@@ -335,13 +336,14 @@ class PluginBase(metaclass=abc.ABCMeta):
         if PluginCapabilities.FLATTENING in capabilities:
             _merge_missing(FLATTENING_CONFIG, config_jsonschema)
 
-    def print_about(self, format: Optional[str] = None) -> None:
+    @classmethod
+    def print_about(cls: Type["PluginBase"], format: Optional[str] = None) -> None:
         """Print capabilities and other tap metadata.
 
         Args:
             format: Render option for the plugin information.
         """
-        info = self._get_about_info()
+        info = cls._get_about_info()
 
         if format == "json":
             print(json.dumps(info, indent=2, default=str))
