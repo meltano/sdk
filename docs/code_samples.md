@@ -21,16 +21,17 @@ To add your project to this list, please
 
 These are code samples taken from other projects. Use these as a reference if you get stuck.
 
-- [A simple Tap class definition with two streams](./code_samples.html#a-simple-tap-class-definition-with-two-streams)
-- [Define a simple GraphQL-based stream with schema defined in a file](./code_samples.html#define-a-simple-graphql-based-stream-with-schema-defined-in-a-file)
-- [Define a REST-based stream with a JSONPath expression](./code_samples.html#define-a-rest-based-stream-with-a-jsonpath-expression)
-- [Use a JSONPath expression to extract the next page URL from a HATEOAS response](./code_samples.html#use-a-jsonpath-expression-to-extract-the-next-page-url-from-a-hateoas-response)
-- [Dynamically discovering `schema` for a stream](./code_samples.html#dynamically-discovering-schema-for-a-stream)
-- [Initialize a collection of tap streams with differing types](./code_samples.html#initialize-a-collection-of-tap-streams-with-differing-types)
-- [Run the standard built-in tap tests](./code_samples.html#run-the-standard-built-in-tap-tests)
-- [Make all streams reuse the same authenticator instance](./code_samples.html#make-all-streams-reuse-the-same-authenticator-instance)
-- [Make a stream reuse the same authenticator instance for all requests](./code_samples.html#make-a-stream-reuse-the-same-authenticator-instance-for-all-requests)
-- [Custom response validation](./code_samples.html#custom-response-validation)
+- [A simple Tap class definition with two streams](./code_samples.md#a-simple-tap-class-definition-with-two-streams)
+- [Define a simple GraphQL-based stream with schema defined in a file](./code_samples.md#define-a-simple-graphql-based-stream-with-schema-defined-in-a-file)
+- [Define a REST-based stream with a JSONPath expression](./code_samples.md#define-a-rest-based-stream-with-a-jsonpath-expression)
+- [Use a JSONPath expression to extract the next page URL from a HATEOAS response](./code_samples.md#use-a-jsonpath-expression-to-extract-the-next-page-url-from-a-hateoas-response)
+- [Dynamically discovering `schema` for a stream](./code_samples.md#dynamically-discovering-schema-for-a-stream)
+- [Initialize a collection of tap streams with differing types](./code_samples.md#initialize-a-collection-of-tap-streams-with-differing-types)
+- [Run the standard built-in tap tests](./code_samples.md#run-the-standard-built-in-tap-tests)
+- [Make all streams reuse the same authenticator instance](./code_samples.md#make-all-streams-reuse-the-same-authenticator-instance)
+- [Make a stream reuse the same authenticator instance for all requests](./code_samples.md#make-a-stream-reuse-the-same-authenticator-instance-for-all-requests)
+- [Custom response validation](./code_samples.md#custom-response-validation)
+- [Custom Backoff](./code_samples.md#custom-backoff)
 
 ### A simple Tap class definition with two streams
 
@@ -294,6 +295,30 @@ class CustomResponseValidationStream(RESTStream):
         if data["status"] == self.StatusMessage.UNAVAILABLE:
             raise RetriableAPIError("API is unavailable")
 ```
+
+### Custom Backoff
+Custom backoff and retry behaviour can be added by overriding the methods:
+[`backoff_wait_generator`](./classes/singer_sdk.RESTStream.html#singer_sdk.RESTStream.backoff_wait_generator)
+[`backoff_max_tries`](./classes/singer_sdk.RESTStream.html#singer_sdk.RESTStream.backoff_max_tries)
+[`backoff_handler`](./classes/singer_sdk.RESTStream.html#singer_sdk.RESTStream.backoff_handler)
+
+For example, to use a constant retry:
+```
+def backoff_wait_generator() -> Callable[..., Generator[int, Any, None]]:
+    return backoff.constant(interval=10)
+```
+
+To utilise a response header as a wait value you can use [`backoff_runtime`](./classes/singer_sdk.RESTStream.html#singer_sdk.RESTStream.backoff_runtime), and pass a method that returns a wait value:
+```
+def backoff_wait_generator() -> Callable[..., Generator[int, Any, None]]:
+    def _backoff_from_headers(retriable_api_error):
+        response_headers = retriable_api_error.response.headers
+        return int(response_headers.get("Retry-After", 0))
+
+    return self.backoff_runtime(value=_backoff_from_headers)
+
+```
+
 
 ## Additional Resources
 

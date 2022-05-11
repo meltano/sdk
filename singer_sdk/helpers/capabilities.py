@@ -211,3 +211,6 @@ class TargetCapabilities(CapabilitiesEnum):
 
     #: Allow denesting complex properties.
     RECORD_FLATTENING = "record-flattening"
+
+    #: Allow setting the target schema.
+    TARGET_SCHEMA = "target-schema"
