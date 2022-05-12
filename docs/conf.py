@@ -74,4 +74,5 @@ html_css_files = [
     "css/custom.css",
 ]
 
-myst_heading_anchors = 3
+# TODO: set this back to 3 after MyST-Parser 0.18.0 is released
+myst_heading_anchors = 4

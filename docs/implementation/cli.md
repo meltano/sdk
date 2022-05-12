@@ -1,3 +1,10 @@
+---
+# TODO: this will be supported after MyST-Parser 0.18.0 is released
+myst:
+  heading_anchors: 4
+---
+
+
 # Command Line Reference
 
 This page describes how SDK-based taps and targets can be invoked via the command line interface, or "CLI".
@@ -9,13 +16,13 @@ This page describes how SDK-based taps and targets can be invoked via the comman
     - [`--about`](#--about)
       - [`--format`](#--format)
     - [`--config`](#--config)
-      - [`--config=ENV`](#--configenv)
+      - [`--config=ENV`](#--config-env)
   - [Tap-Specific CLI Options](#tap-specific-cli-options)
     - [`--state`](#--state)
     - [`--catalog`](#--catalog)
       - [Input Catalog Stream Selection](#input-catalog-stream-selection)
     - [`--test`](#--test)
-      - [`--test=schema`](#--testschema)
+      - [`--test=schema`](#--test-schema)
     - [`--discover`](#--discover)
   - [Target-Specific CLI Options](#target-specific-cli-options)
     - [`--input`](#--input)
@@ -55,7 +62,7 @@ If one or more files conflict for a given setting, the latter provided files wil
 - If `--config=ENV` is set and one or more files conflict with an environment variable setting, the environment variable setting will always have precedence, regardless of ordering.
 - One benefit of this approach is that credentials and other secrets can be stored completely separately from general settings: either by having two distinct `config.json` files or by using environment variables for secure settings and `config.json` files for the rest.
 
-#### `--config=ENV`
+#### `--config ENV`
 
 When `--config=ENV` is specified, the SDK will automatically capture and pass along any
 values from environment variables which match the exact name of a setting, along with a
@@ -90,7 +97,7 @@ Selection rules are applied at three levels:
 
 When invoked on its own, the `--test` flag will cause the tap to emit one record per stream and then exit.
 
-#### `--test=schema`
+#### `--test schema`
 
 When invoked with the `schema` option, such as `--test=schema` or `--test schema`, the tap will only emit `SCHEMA` messages downstream and will skip emitting any `RECORD` messages. This option is helpful if you want to the target to pre-create all target tables without inserting any records.
 
