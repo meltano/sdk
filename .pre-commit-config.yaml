@@ -25,7 +25,7 @@ repos:
         entry: poetry run mypy
         language: system
         types: [python]
-        exclude: singer_sdk/tests/.*
+        exclude: tests/.*
 
       - id: pyupgrade
         name: pyupgrade

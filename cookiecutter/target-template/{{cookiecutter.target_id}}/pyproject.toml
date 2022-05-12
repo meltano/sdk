@@ -12,7 +12,7 @@ license = "Apache 2.0"
 [tool.poetry.dependencies]
 python = "<3.11,>=3.7.1"
 requests = "^2.25.1"
-singer-sdk = "^0.4.4"
+singer-sdk = "^0.4.8"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
@@ -30,11 +30,7 @@ multi_line_output = 3 # Vertical Hanging Indent
 src_paths = "{{cookiecutter.library_name}}"
 
 [build-system]
-# Uncomment the pinned version in favor of the git URL once
-# https://github.com/python-poetry/poetry-core/pull/257 is merged
-# and a new poetry-core 1.0.x is released
-# requires = ["poetry-core>=1.0.0"]
-requires = ["poetry-core @ git+https://github.com/python-poetry/poetry-core.git@master"]
+requires = ["poetry-core>=1.0.8"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]

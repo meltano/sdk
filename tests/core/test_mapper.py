@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Set, cast
 import pytest
 
 from singer_sdk.exceptions import MapExpressionError
+from singer_sdk.helpers._catalog import get_selected_schema
 from singer_sdk.helpers._singer import Catalog
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
 from singer_sdk.streams.core import Stream
@@ -348,7 +349,7 @@ def _test_transform(
             "stream_maps": stream_maps,
             "stream_map_config": stream_map_config,
         },
-        logger=logging,
+        logger=logging.getLogger(),
     )
     mapper.register_raw_streams_from_catalog(sample_catalog_obj)
 
@@ -423,6 +424,13 @@ class MappedTap(Tap):
     def discover_streams(self):
         """Discover streams."""
         return [MappedStream(self)]
+
+
+@pytest.fixture
+def clear_schema_cache() -> None:
+    """Schemas are cached, so the cache needs to be cleared between test invocations."""
+    yield
+    get_selected_schema.cache_clear()
 
 
 @pytest.mark.parametrize(
@@ -529,6 +537,18 @@ class MappedTap(Tap):
             {"email", "count", "email_hash", "user__id", "user__sub__num"},
             ["email_hash"],
         ),
+        (
+            "mystream",
+            {
+                "mystream": {
+                    "email": None,
+                }
+            },
+            False,
+            0,
+            {"count", "user"},
+            [],
+        ),
     ],
     ids=[
         "no_map",
@@ -541,9 +561,11 @@ class MappedTap(Tap):
         "flatten_depth_1",
         "flatten_all",
         "map_and_flatten",
+        "drop_property",
     ],
 )
 def test_mapped_stream(
+    clear_schema_cache: None,
     stream_alias: str,
     stream_maps: dict,
     flatten: bool,
@@ -565,6 +587,7 @@ def test_mapped_stream(
     schema_message = schema_messages[0]
     assert schema_message.stream == stream_alias
     assert schema_message.key_properties == key_properties
+    assert schema_message.schema["properties"].keys() == output_fields
 
     for raw_record in stream.get_records(None):
         record_message = next(stream._generate_record_messages(cast(dict, raw_record)))

@@ -38,7 +38,19 @@ Note:
   here.
 
 """
-from typing import Any, Dict, Generic, List, Optional, Tuple, Type, TypeVar, Union, cast
+from typing import (
+    Any,
+    Dict,
+    Generic,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import sqlalchemy
 from jsonschema import validators
@@ -324,8 +336,20 @@ class Property(JSONTypeHelper, Generic[W]):
 
         Returns:
             A dictionary describing the type.
+
+        Raises:
+            ValueError: If the type dict is not valid.
         """
-        return cast(dict, self.wrapped.type_dict)
+        wrapped = self.wrapped
+
+        if isinstance(wrapped, type) and not isinstance(wrapped.type_dict, Mapping):
+            raise ValueError(
+                f"Type dict for {wrapped} is not defined. "
+                + "Try instantiating it with a nested type such as "
+                + f"{wrapped.__name__}(StringType)."
+            )
+
+        return cast(dict, wrapped.type_dict)
 
     def to_dict(self) -> dict:
         """Return a dict mapping the property name to its definition.
@@ -336,7 +360,7 @@ class Property(JSONTypeHelper, Generic[W]):
         type_dict = self.type_dict
         if self.optional:
             type_dict = append_type(type_dict, "null")
-        if self.default:
+        if self.default is not None:
             type_dict.update({"default": self.default})
         if self.description:
             type_dict.update({"description": self.description})
@@ -524,7 +548,8 @@ def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
             if datelike_type == "date":
                 return cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATE())
 
-        return cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR())
+        maxlength = jsonschema_type.get("maxLength")
+        return cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR(maxlength))
 
     if _jsonschema_type_check(jsonschema_type, ("integer",)):
         return cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.INTEGER())
