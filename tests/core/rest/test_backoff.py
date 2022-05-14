@@ -69,9 +69,17 @@ def custom_validation_stream(rest_tap):
                 match=r"503 Server Error: Service Unavailable for path: /dummy",
             ),
         ),
+        (
+            429,
+            "Too Many Requests",
+            pytest.raises(
+                RetriableAPIError,
+                match=r"429 Client Error: Too Many Requests for path: /dummy",
+            ),
+        ),
         (200, "OK", nullcontext()),
     ],
-    ids=["client-error", "server-error", "ok"],
+    ids=["client-error", "server-error", "rate-limited", "ok"],
 )
 def test_status_code_api(basic_rest_stream, status_code, reason, expectation):
     fake_response = requests.Response()
@@ -108,3 +116,39 @@ def test_status_message_api(custom_validation_stream, message, expectation):
 
     with expectation:
         custom_validation_stream.validate_response(fake_response)
+
+
+@pytest.mark.parametrize(
+    "rate_limit_codes,response_status,expectation",
+    [
+        (
+            CustomResponseValidationStream.extra_retry_statuses,
+            429,
+            pytest.raises(RetriableAPIError),
+        ),
+        (
+            [429, 403],
+            403,
+            pytest.raises(RetriableAPIError),
+        ),
+        (
+            [],
+            429,
+            pytest.raises(FatalAPIError),
+        ),
+    ],
+    ids=[
+        "default",
+        "changed",
+        "missing",
+    ],
+)
+def test_rate_limiting_status_override(
+    basic_rest_stream, rate_limit_codes, response_status, expectation
+):
+    fake_response = requests.Response()
+    fake_response.status_code = response_status
+    basic_rest_stream.extra_retry_statuses = rate_limit_codes
+
+    with expectation:
+        basic_rest_stream.validate_response(fake_response)

@@ -418,7 +418,7 @@ class CustomStreamMap(StreamMap):
                         "to specify either a new list of key property names or `null` "
                         "to replicate with no key properties in the stream."
                     )
-
+                transformed_schema["properties"].pop(prop_key, None)
             elif isinstance(prop_def, str):
                 default_type: JSONTypeHelper = StringType()  # Fallback to string
                 existing_schema: dict = transformed_schema["properties"].get(
@@ -446,6 +446,9 @@ class CustomStreamMap(StreamMap):
                     f"[{','.join(self.transformed_key_properties)}]. "
                     f"Property '{key_property}' was not detected in schema."
                 )
+
+        if self.flattening_enabled:
+            transformed_schema = self.flatten_schema(transformed_schema)
 
         # Declare function variables
 

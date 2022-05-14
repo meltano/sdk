@@ -25,7 +25,7 @@ copyright = "2021, Meltano Core Team and Contributors"
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.4.7"
+release = "0.4.8"
 
 
 # -- General configuration ---------------------------------------------------
@@ -73,3 +73,6 @@ html_static_path = ["_static"]
 html_css_files = [
     "css/custom.css",
 ]
+
+# TODO: set this back to 3 after MyST-Parser 0.18.0 is released
+myst_heading_anchors = 4
