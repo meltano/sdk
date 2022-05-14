@@ -290,23 +290,21 @@ def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output_a), finalize=True)
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output_b), finalize=True)
 
+
 def test_sqlite_activate_version(sqlite_sample_target: SQLTarget):
     """Test handling the activate_version message for the SQLite target.
 
     Test performs the following actions:
 
-    - Sends an activate_version message for a table that doesn't exist (which should have no effect)
+    - Sends an activate_version message for a table that doesn't exist (which should
+      have no effect)
     """
     test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
-    props: Dict[str, dict] = {"col_a": th.StringType().to_dict()}
     schema_msg = {
-            "type": "SCHEMA",
-            "stream": test_tbl,
-            "schema": {
-                "type": "object",
-                "properties": props,
-            }
-        }
+        "type": "SCHEMA",
+        "stream": test_tbl,
+        "schema": th.PropertiesList(th.Property("col_a", th.StringType())).to_dict(),
+    }
 
     tap_output = "\n".join(
         json.dumps(msg)
