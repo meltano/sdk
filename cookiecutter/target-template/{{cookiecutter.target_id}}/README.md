@@ -25,6 +25,12 @@ target is available by running:
 {{ cookiecutter.target_id }} --about
 ```
 
+### Configure using environment variables
+
+This Singer target will automatically import any environment variables within the working directory's
+`.env` if the `--config=ENV` is provided, such that config values will be considered if a matching
+environment variable is set either in the terminal context or in the `.env` file.
+
 ### Source Authentication and Authorization
 
 - [ ] `Developer TODO:` If your target requires special access on the source system, or any special authentication requirements, provide those here.
