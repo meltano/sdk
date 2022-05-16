@@ -67,6 +67,7 @@ def test_get_dotenv_config(tmpdir, monkeypatch: pytest.MonkeyPatch):
     dotenv_config = parse_environment_config(
         CONFIG_JSONSCHEMA,
         "PLUGIN_TEST_",
+        dotenv_path=dotenv,
     )
     assert dotenv_config
     assert dotenv_config["prop1"] == "hello"

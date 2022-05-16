@@ -3,7 +3,6 @@
 import abc
 import json
 import logging
-import os
 from collections import OrderedDict
 from pathlib import PurePath
 from types import MappingProxyType
@@ -23,11 +22,11 @@ from typing import (
 import click
 from jsonschema import Draft4Validator, SchemaError, ValidationError
 
+from singer_sdk.configuration._dict_config import parse_environment_config
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
-from singer_sdk.helpers._typing import is_string_array_type
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
     FLATTENING_CONFIG,
@@ -132,32 +131,12 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         Returns:
             Dictionary of configuration parsed from the environment.
-
-        Raises:
-            ValueError: If there's an environment variable with unsupported syntax.
         """
-        result: Dict[str, Any] = {}
         plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
         config_jsonschema = cls.config_jsonschema
         cls.append_builtin_config(config_jsonschema)
-        for config_key in config_jsonschema["properties"].keys():
-            env_var_name = plugin_env_prefix + config_key.upper().replace("-", "_")
-            if env_var_name in os.environ:
-                env_var_value = os.environ[env_var_name]
-                cls.logger.info(
-                    f"Parsing '{config_key}' config from env variable '{env_var_name}'."
-                )
-                if is_string_array_type(config_jsonschema["properties"][config_key]):
-                    if env_var_value[0] == "[" and env_var_value[-1] == "]":
-                        raise ValueError(
-                            "A bracketed list was detected in the environment variable "
-                            f"'{env_var_name}'. This syntax is no longer supported. "
-                            "Please remove the brackets and try again."
-                        )
-                    result[config_key] = env_var_value.split(",")
-                else:
-                    result[config_key] = env_var_value
-        return result
+
+        return parse_environment_config(config_jsonschema, plugin_env_prefix)
 
     # Core plugin metadata:
 

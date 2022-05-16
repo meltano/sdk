@@ -1,9 +1,14 @@
 """Helpers for parsing and wrangling configuration dictionaries."""
 
+from __future__ import annotations
+
 import logging
 import os
 from pathlib import Path
-from typing import Any, Dict, Iterable
+from typing import Any, Iterable
+
+from dotenv import find_dotenv
+from dotenv.main import DotEnv
 
 from singer_sdk.helpers._typing import is_string_array_type
 from singer_sdk.helpers._util import read_json_file
@@ -12,13 +17,17 @@ logger = logging.getLogger(__name__)
 
 
 def parse_environment_config(
-    config_schema: Dict[str, Any], prefix: str
-) -> Dict[str, Any]:
+    config_schema: dict[str, Any],
+    prefix: str,
+    dotenv_path: str | None = None,
+) -> dict[str, Any]:
     """Parse configuration from environment variables.
 
     Args:
         config_schema: A JSON Schema dictionary for the configuration.
-        prefix: Prefix for environment variables..
+        prefix: Prefix for environment variables.
+        dotenv_path: Path to a .env file. If None, will try to find one in increasingly
+            higher folders.
 
     Raises:
         ValueError: If an un-parsable setting is found.
@@ -26,7 +35,14 @@ def parse_environment_config(
     Returns:
         A configuration dictionary.
     """
-    result: Dict[str, Any] = {}
+    result: dict[str, Any] = {}
+
+    if not dotenv_path:
+        dotenv_path = find_dotenv()
+
+    logger.debug("Loading configuration from %s", dotenv_path)
+    DotEnv(dotenv_path).set_as_environment_variables()
+
     for config_key in config_schema["properties"].keys():
         env_var_name = prefix + config_key.upper().replace("-", "_")
         if env_var_name in os.environ:
@@ -51,9 +67,9 @@ def parse_environment_config(
 
 def merge_config_sources(
     inputs: Iterable[str],
-    config_schema: Dict[str, Any],
+    config_schema: dict[str, Any],
     env_prefix: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Merge configuration from multiple sources into a single dictionary.
 
     Args:
@@ -67,7 +83,7 @@ def merge_config_sources(
     Returns:
         A single configuration dictionary.
     """
-    config: Dict[str, Any] = {}
+    config: dict[str, Any] = {}
     for config_path in inputs:
         if config_path == "ENV":
             env_config = parse_environment_config(config_schema, prefix=env_prefix)
