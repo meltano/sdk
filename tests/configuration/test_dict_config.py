@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -57,6 +58,18 @@ def test_get_env_var_config():
     assert "prop2" not in no_env_config and "PROP2" not in env_config
     assert "prop3" not in no_env_config and "PROP3" not in env_config
     assert "prop4" not in no_env_config and "PROP4" not in env_config
+
+
+def test_get_dotenv_config(tmpdir, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(tmpdir)
+    dotenv = Path(tmpdir) / ".env"
+    dotenv.write_text("PLUGIN_TEST_PROP1=hello\n")
+    dotenv_config = parse_environment_config(
+        CONFIG_JSONSCHEMA,
+        "PLUGIN_TEST_",
+    )
+    assert dotenv_config
+    assert dotenv_config["prop1"] == "hello"
 
 
 def test_get_env_var_config_not_parsable():
