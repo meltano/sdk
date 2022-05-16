@@ -16,10 +16,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixes
 
-- Tap and Target SDK: Fixed a bug where setting stream map property to `null` did not remove it from SCHEMA message ([#370](https://gitlab.com/meltano/sdk/-/issues/370), [!286](https://gitlab.com/meltano/sdk/-/merge_requests/286)) - _Thanks, **[Ryan Whitten](https://gitlab.com/rwhitten577)**_!
-- Tap and Target SDK: Fixed a bug where flattening resulted in an invalid SCHEMA message ([!286](https://gitlab.com/meltano/sdk/-/merge_requests/286)) - _Thanks, **[Ryan Whitten](https://gitlab.com/rwhitten577)**_!
+- Target SDK: Fixes bug where an `activate_version` message caused an error when destination table does not exist ([#372](https://gitlab.com/meltano/sdk/-/issues/372), [!285](https://gitlab.com/meltano/sdk/-/merge_requests/285)) - _Thanks, **[Thomas Briggs](https://gitlab.com/tbriggs2)**_!
 
 ### Breaks
+
+
+## 0.4.9 - (2022-05-12)
+---
+
+### New
+
+- Tap SDK: Improved helpers for handling rate limits, backoff and retries ([#137](https://gitlab.com/meltano/sdk/-/issues/137), [#140](https://gitlab.com/meltano/sdk/-/issues/140), [!277](https://gitlab.com/meltano/sdk/-/merge_requests/277)) - _Thanks, **[Fred O'Loughlin](https://gitlab.com/fred-oloughlin-fl)**_!
+
+### Changes
+
+- Remove "errors" from non-error log line to improve log searchability ([!279](https://gitlab.com/meltano/sdk/-/merge_requests/279/diffs)) - _Thanks, **[Laurent Savaëte](https://gitlab.com/LaurentS)**_!
+
+### Fixes
+
+- Tap and Target SDK: Fixed a bug where setting stream map property to `null` did not remove it from SCHEMA message ([#370](https://gitlab.com/meltano/sdk/-/issues/370), [!286](https://gitlab.com/meltano/sdk/-/merge_requests/286)) - _Thanks, **[Ryan Whitten](https://gitlab.com/rwhitten577)**_!
+- Tap and Target SDK: Fixed a bug where flattening resulted in an invalid SCHEMA message ([!286](https://gitlab.com/meltano/sdk/-/merge_requests/286)) - _Thanks, **[Ryan Whitten](https://gitlab.com/rwhitten577)**_!
 
 
 ## 0.4.8 - (2022-05-05)

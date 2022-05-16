@@ -262,9 +262,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
             log_fn = self.logger.warning
         else:
-            summary = (
-                f"Config validation passed with 0 errors and {len(warnings)} warnings."
-            )
+            summary = f"Config validation passed with {len(warnings)} warnings."
             for warning in warnings:
                 summary += f"\n{warning}"
         if warnings_as_errors and raise_errors and warnings:
