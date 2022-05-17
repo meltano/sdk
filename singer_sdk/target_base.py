@@ -500,10 +500,11 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             if not about:
                 cls.print_version(print_fn=cls.logger.info)
+            else:
+                cls.print_about(format=format)
+                return
 
             validate_config: bool = True
-            if about:
-                validate_config = False
 
             cls.print_version(print_fn=cls.logger.info)
 
@@ -530,10 +531,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 validate_config=validate_config,
             )
 
-            if about:
-                target.print_about(format)
-            else:
-                target.listen(file_input)
+            target.listen(file_input)
 
         return cli
 
