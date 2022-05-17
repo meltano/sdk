@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 
 - Target SDK: Fixes bug where an `activate_version` message caused an error when destination table does not exist ([#372](https://gitlab.com/meltano/sdk/-/issues/372), [!285](https://gitlab.com/meltano/sdk/-/merge_requests/285)) - _Thanks, **[Thomas Briggs](https://gitlab.com/tbriggs2)**_!
+- Tap and Target SDK: Do not fail `--about` option if tap or target is not configured ([#379](https://gitlab.com/meltano/sdk/-/issues/379), [!291](https://gitlab.com/meltano/sdk/-/merge_requests/291)).
 
 ### Breaks
 

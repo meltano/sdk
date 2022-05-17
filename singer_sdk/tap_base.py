@@ -455,9 +455,12 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
             if not about:
                 cls.print_version(print_fn=cls.logger.info)
+            else:
+                cls.print_about(format=format)
+                return
 
             validate_config: bool = True
-            if about or discover:
+            if discover:
                 # Don't abort on validation failures
                 validate_config = False
 
@@ -485,9 +488,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 parse_env_config=parse_env_config,
                 validate_config=validate_config,
             )
-            if about:
-                tap.print_about(format)
-            elif discover:
+
+            if discover:
                 tap.run_discovery()
                 if test == CliTestOptionValue.All.value:
                     tap.run_connection_test()
