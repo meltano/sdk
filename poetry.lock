@@ -1259,8 +1259,8 @@ docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser"]
 
 [metadata]
 lock-version = "1.1"
-python-versions = "<3.11,>=3.7.1"
-content-hash = "a614e1f960f4d4d0b8a9cd6b5a0451c470ad9979696f86f13108cdbb0cf535f6"
+python-versions = "<3.12,>=3.7.1"
+content-hash = "c0ac4c3640e328ec954f51a728790fd0de9b8cb529fa81f4d30599decde7a286"
 
 [metadata.files]
 alabaster = [
