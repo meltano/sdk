@@ -65,8 +65,9 @@ If one or more files conflict for a given setting, the latter provided files wil
 #### `--config ENV`
 
 When `--config=ENV` is specified, the SDK will automatically capture and pass along any
-values from environment variables which match the exact name of a setting, along with a
-prefix determined by the plugin name.
+values from environment variables, and from a `.env` file if present within the current
+working directory, which match the exact name of a setting, along with a prefix determined
+by the plugin name.
 
 > For example: For a sample plugin named `tap-my-example` and settings named "username" and "access_key", the SDK will automatically scrape
 > the settings from environment variables `TAP_MY_EXAMPLE_USERNAME` and
