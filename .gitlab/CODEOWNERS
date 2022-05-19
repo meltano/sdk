@@ -6,7 +6,7 @@
 # Default owners
 * @edgarrmondragon @cjohnhanson @aaronsteers
 
-# Docs owners
+^[Docs]
 /docs/ @edgarrmondragon @afolson
 /CONTRIBUTING.md @edgarrmondragon @afolson
 /README.md @edgarrmondragon @afolson

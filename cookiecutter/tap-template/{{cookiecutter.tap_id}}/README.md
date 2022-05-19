@@ -25,6 +25,12 @@ tap is available by running:
 {{ cookiecutter.tap_id }} --about
 ```
 
+### Configure using environment variables
+
+This Singer tap will automatically import any environment variables within the working directory's
+`.env` if the `--config=ENV` is provided, such that config values will be considered if a matching
+environment variable is set either in the terminal context or in the `.env` file.
+
 ### Source Authentication and Authorization
 
 - [ ] `Developer TODO:` If your tap requires special access on the source system, or any special authentication requirements, provide those here.

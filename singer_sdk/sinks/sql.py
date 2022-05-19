@@ -3,9 +3,8 @@
 from typing import Any, Dict, Iterable, List, Optional, Type
 
 import sqlalchemy
-from sqlalchemy.sql.expression import bindparam
-
 from pendulum import now
+from sqlalchemy.sql.expression import bindparam
 
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks.batch import BatchSink
@@ -186,7 +185,9 @@ class SQLSink(BatchSink):
         """
         property_names = list(schema["properties"].keys())
         insert_sql = sqlalchemy.text(
-            f"INSERT INTO {full_table_name} VALUES "
+            f"INSERT INTO {full_table_name} "
+            f"({', '.join([n for n in property_names])})"
+            f" VALUES "
             f"({', '.join([':' + n for n in property_names])})"
         )
         self.connector.connection.execute(
@@ -262,10 +263,11 @@ class SQLSink(BatchSink):
             f"UPDATE {self.full_table_name}\n"
             f"SET {self.soft_delete_column_name} = :deletedate \n"
             f"WHERE {self.version_column_name} < :version \n"
-            f"  AND {self.soft_delete_column_name} IS NULL\n")
+            f"  AND {self.soft_delete_column_name} IS NULL\n"
+        )
         query = query.bindparams(
             bindparam("deletedate", value=deleted_at, type_=sqlalchemy.types.DateTime),
-            bindparam("version", value=new_version, type_=sqlalchemy.types.Integer)
+            bindparam("version", value=new_version, type_=sqlalchemy.types.Integer),
         )
         self.connector.connection.execute(query)
 

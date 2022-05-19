@@ -12,9 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New
 
+- Tap and Target SDK: The `--config=ENV` option now also considers environment variables from a
+  dotenv (`.env`) file if present ([#384](https://gitlab.com/meltano/sdk/-/issues/384), [!293](https://gitlab.com/meltano/sdk/-/merge_requests/293)).
+
 ### Changes
 
 - Target SDK:  Use generic SQLALchemy markers for parameterized queries in SQL targets ([#376](https://gitlab.com/meltano/sdk/-/issues/376), [!287](https://gitlab.com/meltano/sdk/-/merge_requests/287)) - _Thanks, **[Thomas Briggs](https://gitlab.com/tbriggs2)**_!
+
+- Target SDK:  Explicitly specify column names when inserting rows in SQL targets ([#385](https://gitlab.com/meltano/sdk/-/issues/385), [!294](https://gitlab.com/meltano/sdk/-/merge_requests/294)) - _Thanks, **[Thomas Briggs](https://gitlab.com/tbriggs2)**_!
 
 ### Fixes
 
