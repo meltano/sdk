@@ -184,7 +184,9 @@ class SQLSink(BatchSink):
         """
         property_names = list(schema["properties"].keys())
         insert_sql = sqlalchemy.text(
-            f"INSERT INTO {full_table_name} VALUES "
+            f"INSERT INTO {full_table_name} "
+            f"({', '.join([n for n in property_names])})"
+            f" VALUES "
             f"({', '.join([':' + n for n in property_names])})"
         )
         self.connector.connection.execute(
