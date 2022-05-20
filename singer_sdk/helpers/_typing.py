@@ -177,7 +177,7 @@ def _warn_unmapped_properties(
     stream_name: str, property_names: list[str], logger: logging.Logger
 ):
     logger.info(
-        f"Properties {property_names} were present in the '{stream_name}' stream but "
+        f"Properties {str(property_names)} were present in the '{stream_name}' stream but "
         "not found in catalog schema. Ignoring."
     )
 
