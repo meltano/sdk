@@ -173,11 +173,11 @@ def is_string_type(property_schema: dict) -> Optional[bool]:
 
 
 @lru_cache()
-def _warn_unmapped_property(
-    stream_name: str, property_name: str, logger: logging.Logger
+def _warn_unmapped_properties(
+    stream_name: str, property_names: list[str], logger: logging.Logger
 ):
-    logger.warning(
-        f"Property '{property_name}' was present in the '{stream_name}' stream but "
+    logger.info(
+        f"Properties {property_names} were present in the '{stream_name}' stream but "
         "not found in catalog schema. Ignoring."
     )
 
@@ -191,9 +191,10 @@ def conform_record_data_types(  # noqa: C901
     warning will be logged exactly once per unmapped property name.
     """
     rec: Dict[str, Any] = {}
+    unmapped_properties: list[str] = []
     for property_name, elem in row.items():
         if property_name not in schema["properties"]:
-            _warn_unmapped_property(stream_name, property_name, logger)
+            unmapped_properties.append(property_name)
             continue
 
         property_schema = schema["properties"][property_name]
@@ -226,4 +227,5 @@ def conform_record_data_types(  # noqa: C901
             rec[property_name] = boolean_representation
         else:
             rec[property_name] = elem
+    _warn_unmapped_properties(stream_name, unmapped_properties, logger)
     return rec
