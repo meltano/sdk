@@ -191,7 +191,7 @@ def conform_record_data_types(  # noqa: C901
     warning will be logged exactly once per unmapped property name.
     """
     rec: Dict[str, Any] = {}
-    unmapped_properties: list[str] = []
+    unmapped_properties: List[str] = []
     for property_name, elem in row.items():
         if property_name not in schema["properties"]:
             unmapped_properties.append(property_name)
