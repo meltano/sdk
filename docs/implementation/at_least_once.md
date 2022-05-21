@@ -4,13 +4,19 @@ The Singer Spec promises that each record in the source system will be processed
 
 ## Causes of Record Duplication
 
-Record duplication can occur for two reasons: (1) 'greater than or equal' logic in bookmark comparisons, and (2) streams which are retried after interruption or execution failure.
+Record duplication can occur for two reasons: (1) 'greater than or equal' logic in bookmark comparisons, (2) replication key signposts, as used in unsorted streams and parent-child streams, and (3) streams which are retried after interruption or execution failure.
 
 ### Cause #1: Greater-than-or-equal-to comparisons
 
 According to the Singer spec, bookmark comparisons are performed on the basis of "greater than or equal to" logic. This ensures that every record arrives in the downstream target _at least once_ and no records are ever missed or omitted during replication. It does also mean that the last record streamed in one execution is likely to be the first record streamed in a subsequent execution.
 
-### Cause #2: Stream interruption
+### Cause #2: Replication Key Signposts
+
+[Replication Key Signposts](./state.md#replication-key-signposts) are an advanced design feature which are necessary to deliver the 'at least once' delivery promise for both unsorted streams and parent-child streams. The functions of signposts are to (1) ensure that bookmark keys do not advance past a point where we may have not synced all records, such as for unsorted or reverse-sorted streams, and (2) to reduce the number of bookmarks needed to track state on parent-child streams with a very large numbers of parent records.
+
+In all cases, the replication key is _intentionally_ not advanced as far as the max value from all records, and therefor any records whose replication key is greater than the signpost value will necessarily need to be re-synced in the next execution.
+
+### Cause #3: Stream interruption
 
 Streams which are retried after failing often have a subset of records already committed to the target system at the time of interruption, but the target likely has not yet received or processed a state message corresponding to those records. When the stream is retried, any records not confirmed as having been received in the state message will be sent again to the target, resulting in duplication.
 
@@ -32,4 +38,4 @@ For cases where the destination table _does not_ use primary keys, the most comm
 
 There is a [feature proposal](https://gitlab.com/meltano/sdk/-/issues/162) for the SDK to optionally store record hashes within the tap's state object and then dedupe record hashes against new records prior to sending data downstream to the target. This would likely be an opt-in behavior for developers and/or users, and it would come at some small performance penalty, as well as a small cost of increased size of the state object. If you are interested in contributing this feature, please see [this issue](https://gitlab.com/meltano/sdk/-/issues/162).
 
-Note that while this future proposal may resolve the issue of duplicates due to greater-than-or-equal-to comparison logic, streams will still be subject to record duplication due to interrupted and retried sync operations. Thus, any implementations not using primary keys to dedupe data in the target will always need some plan for a deduplication strategy in their downstream data processing.
+Note that while this future proposal may resolve the issue of duplicates due to signposts and greater-than-or-equal-to comparison logic, streams will still be subject to record duplication due to interrupted and retried sync operations. Thus, any implementations not using primary keys to dedupe data in the target will always need some plan for a deduplication strategy in their downstream data processing.
