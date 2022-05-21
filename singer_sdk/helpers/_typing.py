@@ -5,7 +5,7 @@ import datetime
 import logging
 from enum import Enum
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 import pendulum
 
@@ -174,7 +174,7 @@ def is_string_type(property_schema: dict) -> Optional[bool]:
 
 @lru_cache()
 def _warn_unmapped_properties(
-    stream_name: str, property_names: List[str], logger: logging.Logger
+    stream_name: str, property_names: Tuple[str], logger: logging.Logger
 ):
     logger.info(
         f"Properties {property_names} were present in the '{stream_name}' stream but "
@@ -227,5 +227,5 @@ def conform_record_data_types(  # noqa: C901
             rec[property_name] = boolean_representation
         else:
             rec[property_name] = elem
-    _warn_unmapped_properties(stream_name, unmapped_properties, logger)
+    _warn_unmapped_properties(stream_name, tuple(unmapped_properties), logger)
     return rec
