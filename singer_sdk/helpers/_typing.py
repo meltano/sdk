@@ -174,10 +174,10 @@ def is_string_type(property_schema: dict) -> Optional[bool]:
 
 @lru_cache()
 def _warn_unmapped_properties(
-    stream_name: str, property_names: list[str], logger: logging.Logger
+    stream_name: str, property_names: List[str], logger: logging.Logger
 ):
     logger.info(
-        f"Properties {str(property_names)} were present in the '{stream_name}' stream but "
+        f"Properties {property_names} were present in the '{stream_name}' stream but "
         "not found in catalog schema. Ignoring."
     )
 
