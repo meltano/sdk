@@ -1,4 +1,4 @@
-singer\_sdk.authenticators.APIKeyAuthenticator
+﻿singer_sdk.authenticators.APIKeyAuthenticator
 =============================================
 
 .. currentmodule:: singer_sdk.authenticators

@@ -1,5 +1,5 @@
-singer\_sdk.GraphQLStream
-=========================
+﻿singer_sdk.GraphQLStream
+========================
 
 .. currentmodule:: singer_sdk
 

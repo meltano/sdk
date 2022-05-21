@@ -1,5 +1,5 @@
-singer\_sdk.Tap
-===============
+﻿singer_sdk.Tap
+==============
 
 .. currentmodule:: singer_sdk
 

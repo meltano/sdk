@@ -2,12 +2,16 @@
 
 This section documents certain behaviors and expectations of the SDK framework.
 
-1. [CLI](./cli.md)
-2. [Discovery](./discovery.md)
-3. [Catalog Metadata](./catalog_metadata.md)
-4. [Record Metadata](./record_metadata.md)
-5. [Metrics](./metrics.md)
-6. [State](./state.md)
+```{toctree}
+:caption: Implementation Details
+
+cli
+discovery
+catalog_metadata
+record_metadata
+metrics
+state
+```
 
 ## How to use the implementation reference material
 

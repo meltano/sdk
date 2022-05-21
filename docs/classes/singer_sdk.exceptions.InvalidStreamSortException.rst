@@ -1,6 +1,7 @@
-singer\_sdk.exceptions.InvalidStreamSortException
-==============================================
+﻿singer_sdk.exceptions.InvalidStreamSortException
+================================================
 
 .. currentmodule:: singer_sdk.exceptions
 
-.. autoexception:: InvalidStreamSortException
+.. autoclass:: InvalidStreamSortException
+    :members:

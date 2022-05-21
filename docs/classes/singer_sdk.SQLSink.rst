@@ -1,5 +1,5 @@
-singer\_sdk.SQLSink
-======================
+﻿singer_sdk.SQLSink
+==================
 
 .. currentmodule:: singer_sdk
 

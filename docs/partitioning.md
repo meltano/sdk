@@ -32,7 +32,7 @@ When dealing with state, for example, developers may always call
 The method will automatically return the state that is appropriate, either for the partition
 or for the stream.
 
-## See Also
+## Additional State Partitioning References
 
 - [Tap SDK State](./implementation/state.md)
 - [Tap SDK Parent-Child Streams](./parent_streams.md)

@@ -1,4 +1,4 @@
-# [SDK Implementation Details](./README.md) - Catalog Discovery
+# [SDK Implementation Details](./index.md) - Catalog Discovery
 
 All taps developed using the SDK will automatically support `discovery` as a base
 capability, which is the process of generating and emitting a catalog that describes the
@@ -14,7 +14,7 @@ provided either directly as a Python `dict` or indirectly as a `.json` filepath.
 - `Stream.replication_key` - a single string indicating the name of the stream's replication
 key (if applicable).
 
-## See Also
+## Additional Discovery Mode References
 
 - See the [Dev Guide](../dev_guide.md) and [Code Samples](../code_samples.md) for more
 information on working with dynamic stream schemas.

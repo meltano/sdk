@@ -1,5 +1,5 @@
-singer\_sdk.SQLTap
-===============
+﻿singer_sdk.SQLTap
+=================
 
 .. currentmodule:: singer_sdk
 

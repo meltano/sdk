@@ -1,4 +1,4 @@
-# Code Samples
+# SDK Code Samples
 
 Below you will find a collection of code samples which can be used for inspiration.
 
@@ -259,10 +259,10 @@ class CachedAuthStream(RESTStream):
 
 Some APIs deviate from HTTP status codes to report failures. For those cases,
 you can override [`RESTStream.validate_response()`](singer_sdk.RESTStream.validate_response)
-and raise [`FatalAPIError`](singer_sdk.exceptions.FatalAPIError)
+and raise [`FatalAPIError`](FatalAPIError)
 if an unrecoverable error is detected. If the API also has transient errors, either client-side
 like rate limits, or server-side like temporary 5xx, you can raise
-[`RetriableAPIError`](singer_sdk.exceptions.RetriableAPIError)
+[`RetriableAPIError`](RetriableAPIError)
 and the request will be retried with back-off:
 
 ```python
