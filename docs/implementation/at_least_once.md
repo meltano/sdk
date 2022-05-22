@@ -4,7 +4,11 @@ The Singer Spec promises that each record in the source system will be processed
 
 ## Causes of Record Duplication
 
-Record duplication can occur for two reasons: (1) 'greater than or equal' logic in bookmark comparisons, (2) replication key signposts, as used in unsorted streams and parent-child streams, and (3) streams which are retried after interruption or execution failure.
+Record duplication can occur for three reasons:
+
+1. 'greater than or equal' logic in bookmark comparisons,
+1. replication key signposts, as used in unsorted streams and parent-child streams, and
+1. streams which are retried after interruption or execution failure.
 
 ### Cause #1: Greater-than-or-equal-to comparisons
 
