@@ -36,7 +36,28 @@ However, this approach will not work for streams that lack primary keys or in im
 
 ### Strategy #2: Removing duplicates using `dbt` transformations
 
-For cases where the destination table _does not_ use primary keys, the most common way of resolving duplicates after they've landed in the downstream dataset is to apply a `ROW_NUMBER()` function in a tool like [dbt](https://www.getdbt.com). The `ROW_NUMBER()` function can caculate a `dedupe_rank` or `recency_rank` in the transformation layer, and then downstream queries can easily filter out any duplicates using the calculated rank.
+For cases where the destination table _does not_ use primary keys, the most common way of resolving duplicates after they've landed in the downstream dataset is to apply a `ROW_NUMBER()` function in a tool like [dbt](https://www.getdbt.com). The `ROW_NUMBER()` function can caculate a `dedupe_rank` and/or a `recency_rank` in the transformation layer, and then downstream queries can easily filter out any duplicates using the calculated rank.
+
+#### Sample dedupe implementation using `dbt`:
+
+Within a staging table model file `stg_widgets.sql` in `dbt`:
+
+```sql
+SELECT
+    widget_id,
+    widget_name,
+    widget_desc,
+    updated_date,
+    ROW_NUMBER() OVER (
+        PARTITION BY widget_id, widget_name, widget_desc
+        ORDER BY updated_date DESC
+    ) AS recency_rank, // filter `recency_rank = 1` to get only latest records
+    ROW_NUMBER() OVER (
+        PARTITION BY widget_id, widget_name, widget_desc, updated_date
+        ORDER BY updated_date DESC
+    ) AS dedupe_rank, // filter `dedupe_rank = 1` to get only unique records
+FROM {{ source('tap_widgets', 'widgets') }} AS raw
+```
 
 ## Future proposals to mitigate record duplication
 
