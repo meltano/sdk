@@ -47,7 +47,7 @@ from `main` branch.
         - Check contributor profile links to make sure they are correct.
     4. [ ] Merge the resulting MR to `main` with the merge commit message `Release vX.Y.Z`
     5. [ ] Check the [pending MRs](https://gitlab.com/meltano/sdk/-/merge_requests?sort=updated_desc) to make sure nothing is missing
-    6. [ ] [Open the next `Release` issue](https://gitlab.com/meltano/sdk/-/issues/new?issue) using the `Release` template.
+    6. [ ] [Open the next `Release` issue](https://gitlab.com/meltano/sdk/-/issues/new?issuable_template=Release&issue[title]=Release%20vX.Y.Z&issue[issue_type]=issue).
 
 ### Announcements, Marketing, and Promotion
 
