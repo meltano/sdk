@@ -12,9 +12,9 @@ According to the Singer spec, bookmark comparisons are performed on the basis of
 
 ### Cause #2: Replication Key Signposts
 
-[Replication Key Signposts](./state.md#replication-key-signposts) are an advanced design feature which are necessary to deliver the 'at least once' delivery promise for both unsorted streams and parent-child streams. The functions of signposts are to (1) ensure that bookmark keys do not advance past a point where we may have not synced all records, such as for unsorted or reverse-sorted streams, and (2) to reduce the number of bookmarks needed to track state on parent-child streams with a very large numbers of parent records.
+[Replication Key Signposts](./state.md#replication-key-signposts) are an internal and automatic feature of the SDK, which is necessary in order to deliver the 'at least once' delivery promise for unsorted streams and parent-child streams. The function of a signpost is to ensure that bookmark keys do not advance past a point where we may have not synced all records, such as for unsorted or reverse-sorted streams. This feature also enables developers to override `state_partitioning_key`, which reduces the number of bookmarks needed to track state on parent-child streams with a large number of parent records.
 
-In all cases, the replication key is _intentionally_ not advanced as far as the max value from all records, and therefor any records whose replication key is greater than the signpost value will necessarily need to be re-synced in the next execution.
+In all applications, the signpost prevents the bookmark's value from advancing too far and prevents records from being skipped in future sync operations. We _intentionally_ do not advance the bookmark as far as the max replication key value from all records we've synced, with the knowlege that _some_ records with equal or lower replication key values may have not yet been synced. It follows then, that any records whose replication key is greater than the signpost value will necessarily be re-synced in the next execution, causing some amount of record duplication downstream.
 
 ### Cause #3: Stream interruption
 
