@@ -68,6 +68,7 @@ Advanced Topics
    sinks
    CONTRIBUTING
    implementation/index
+   typing
 
 .. _Singer: https://singer.io
 .. _Singer Spec: https://hub.meltano.com/singer/spec

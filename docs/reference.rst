@@ -80,3 +80,11 @@ Exception Types
     exceptions.StreamMapConfigError
     exceptions.TapStreamConnectionFailure
     exceptions.TooManyRecordsException
+
+JSON Schema builder classes
+---------------------------
+
+.. autosummary::
+    :template: module.rst
+
+    typing
