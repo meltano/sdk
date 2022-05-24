@@ -36,7 +36,7 @@ However, this approach will not work for streams that lack primary keys or in im
 
 ### Strategy #2: Removing duplicates using `dbt` transformations
 
-For cases where the destination table _does not_ use primary keys, the most common way of resolving duplicates after they've landed in the downstream dataset is to apply a `ROW_NUMBER()` function in a tool like [dbt](https://www.getdbt.com). The `ROW_NUMBER()` function can caculate a `dedupe_rank` and/or a `recency_rank` in the transformation layer, and then downstream queries can easily filter out any duplicates using the calculated rank.
+For cases where the destination table _does not_ use primary keys, the most common way of resolving duplicates after they've landed in the downstream dataset is to apply a `ROW_NUMBER()` function in a tool like [dbt](https://www.getdbt.com). The `ROW_NUMBER()` function can caculate a `dedupe_rank` and/or a `recency_rank` in the transformation layer, and then downstream queries can easily filter out any duplicates using the calculated rank. Users can write these transformations by hand or leverage the [deduplicate-source](https://github.com/dbt-labs/dbt-utils#deduplicate-source) macro from the [dbt-utils](https://github.com/dbt-labs/dbt-utils) package.
 
 #### Sample dedupe implementation using `dbt`:
 
