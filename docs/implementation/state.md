@@ -67,6 +67,12 @@ under a `partitions` key which exactly matches their `context`.
 For [parent-child streams](../parent_streams.md), the SDK will automatically use the parent's context as the default
 state partition.
 
+## Record Duplication
+
+The Singer Spec promises that each record in the source system will be processed successfully in the target _at least once_. This means that no record will ever be omitted from the stream or go missing, but it _does not_ guarantee that all records will be received _exactly once_.
+
+For more information on causes and mitigations of record duplication, please see the [At Least Once](./at_least_once.md) implementation documentation.
+
 ## Advanced Use Cases
 
 If some cases, the default behavior would create hundreds or millions of distinct bookmarks,
