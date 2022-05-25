@@ -11,6 +11,7 @@ catalog_metadata
 record_metadata
 metrics
 state
+at_least_once
 ```
 
 ## How to use the implementation reference material
