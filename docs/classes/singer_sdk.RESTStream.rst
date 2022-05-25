@@ -1,5 +1,5 @@
-singer\_sdk.RESTStream
-======================
+﻿singer_sdk.RESTStream
+=====================
 
 .. currentmodule:: singer_sdk
 

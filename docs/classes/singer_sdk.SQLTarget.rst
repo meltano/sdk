@@ -1,5 +1,5 @@
-singer\_sdk.SQLTarget
-===============
+﻿singer_sdk.SQLTarget
+====================
 
 .. currentmodule:: singer_sdk
 

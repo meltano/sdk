@@ -1,5 +1,5 @@
-singer\_sdk.InlineMapper
-========================
+﻿singer_sdk.InlineMapper
+=======================
 
 .. currentmodule:: singer_sdk
 

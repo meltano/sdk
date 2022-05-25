@@ -1,4 +1,4 @@
-# [SDK Implementation Details](./README.md) - "At Least Once" Delivery Promise
+# [SDK Implementation Details](./index.md) - "At Least Once" Delivery Promise
 
 The Singer Spec promises that each record in the source system will be processed successfully in the target _at least once_. This promises that no record will ever go missing or be omitted, but it _does not_ guarantee that all records will be received _exactly once_.
 
@@ -42,7 +42,7 @@ For cases where the destination table _does not_ use primary keys, the most comm
 
 Within a staging table model file `stg_widgets.sql` in `dbt`:
 
-```sql
+```jinja
 SELECT
     widget_id,
     widget_name,
@@ -55,7 +55,7 @@ SELECT
     ROW_NUMBER() OVER (
         PARTITION BY widget_id, widget_name, widget_desc, updated_date
         ORDER BY updated_date DESC
-    ) AS dedupe_rank, /* filter `dedupe_rank = 1` to get only unique records */
+    ) AS dedupe_rank /* filter `dedupe_rank = 1` to get only unique records */
 FROM {{ source('tap_widgets', 'widgets') }} AS raw
 ```
 

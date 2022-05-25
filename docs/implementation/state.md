@@ -1,4 +1,4 @@
-# [SDK Implementation Details](./README.md) - Stream State
+# [SDK Implementation Details](./index.md) - Stream State
 
 The SDK automatically handles state management and bookmarks.
 
@@ -14,7 +14,7 @@ don't have to. If you are building a tap with the SDK and you find a need to dir
 The Singer Spec does not dictate exactly how state needs to be tracked. However, the basic
 structure is documented as follows:
 
-```json
+```js
 {
   "bookmarks": {
     "orders": {
@@ -176,7 +176,7 @@ Signposts are enabled automatically for datetime replication keys, except when
 non-timestamp replication keys (e.g. for `binlog` and `event_id` types) by overriding
 `Stream.get_replication_key_signpost()`.
 
-## See Also
+## Additional Singer State References
 
 - [SDK Partitioning](../partitioning.md)
 - [SDK Parent-Child Streams](../parent_streams.md)

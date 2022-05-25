@@ -1,5 +1,5 @@
-singer\_sdk.BatchSink
-==================
+﻿singer_sdk.BatchSink
+====================
 
 .. currentmodule:: singer_sdk
 

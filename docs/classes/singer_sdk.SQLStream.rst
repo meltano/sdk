@@ -1,5 +1,5 @@
-singer\_sdk.SQLStream
-======================
+﻿singer_sdk.SQLStream
+====================
 
 .. currentmodule:: singer_sdk
 

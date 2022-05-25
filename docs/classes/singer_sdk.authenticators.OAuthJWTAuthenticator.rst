@@ -1,5 +1,5 @@
-singer\_sdk.authenticators.OAuthJWTAuthenticator
-================================================
+﻿singer_sdk.authenticators.OAuthJWTAuthenticator
+===============================================
 
 .. currentmodule:: singer_sdk.authenticators
 
