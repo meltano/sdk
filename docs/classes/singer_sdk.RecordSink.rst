@@ -1,5 +1,5 @@
-singer\_sdk.RecordSink
-==================
+﻿singer_sdk.RecordSink
+=====================
 
 .. currentmodule:: singer_sdk
 

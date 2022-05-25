@@ -66,6 +66,6 @@ class EpicIssuesStream(GitlabStream):
     # ...
 ```
 
-## See Also
+## Additional Parent-Child References
 
 - [Singer State in SDK Taps](./implementation/state.md)

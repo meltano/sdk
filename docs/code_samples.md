@@ -1,4 +1,4 @@
-# Code Samples
+# SDK Code Samples
 
 Below you will find a collection of code samples which can be used for inspiration.
 
@@ -258,11 +258,11 @@ class CachedAuthStream(RESTStream):
 ### Custom response validation
 
 Some APIs deviate from HTTP status codes to report failures. For those cases,
-you can override [`RESTStream.validate_response()`](./classes/singer_sdk.RESTStream.html#singer_sdk.RESTStream.validate_response)
-and raise [`FatalAPIError`](./classes/singer_sdk.exceptions.FatalAPIError)
+you can override [`RESTStream.validate_response()`](singer_sdk.RESTStream.validate_response)
+and raise [`FatalAPIError`](FatalAPIError)
 if an unrecoverable error is detected. If the API also has transient errors, either client-side
 like rate limits, or server-side like temporary 5xx, you can raise
-[`RetriableAPIError`](./classes/singer_sdk.exceptions.RetriableAPIError)
+[`RetriableAPIError`](RetriableAPIError)
 and the request will be retried with back-off:
 
 ```python
@@ -298,9 +298,10 @@ class CustomResponseValidationStream(RESTStream):
 
 ### Custom Backoff
 Custom backoff and retry behaviour can be added by overriding the methods:
-[`backoff_wait_generator`](./classes/singer_sdk.RESTStream.html#singer_sdk.RESTStream.backoff_wait_generator)
-[`backoff_max_tries`](./classes/singer_sdk.RESTStream.html#singer_sdk.RESTStream.backoff_max_tries)
-[`backoff_handler`](./classes/singer_sdk.RESTStream.html#singer_sdk.RESTStream.backoff_handler)
+
+- [`backoff_wait_generator`](singer_sdk.RESTStream.backoff_wait_generator)
+- [`backoff_max_tries`](singer_sdk.RESTStream.backoff_max_tries)
+- [`backoff_handler`](singer_sdk.RESTStream.backoff_handler)
 
 For example, to use a constant retry:
 ```
@@ -308,7 +309,8 @@ def backoff_wait_generator() -> Callable[..., Generator[int, Any, None]]:
     return backoff.constant(interval=10)
 ```
 
-To utilise a response header as a wait value you can use [`backoff_runtime`](./classes/singer_sdk.RESTStream.html#singer_sdk.RESTStream.backoff_runtime), and pass a method that returns a wait value:
+To utilise a response header as a wait value you can use [`backoff_runtime`](singer_sdk.RESTStream.backoff_runtime), and pass a method that returns a wait value:
+
 ```
 def backoff_wait_generator() -> Callable[..., Generator[int, Any, None]]:
     def _backoff_from_headers(retriable_api_error):

@@ -1,6 +1,7 @@
-singer\_sdk.exceptions.TapStreamConnectionFailure
-=================================================
+﻿singer_sdk.exceptions.TapStreamConnectionFailure
+================================================
 
 .. currentmodule:: singer_sdk.exceptions
 
-.. autoexception:: TapStreamConnectionFailure
+.. autoclass:: TapStreamConnectionFailure
+    :members:

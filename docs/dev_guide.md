@@ -151,16 +151,16 @@ Some APIs instead return the records as values inside an object where each key i
     ]
     ```
 
-## Additional Resources
+## Resources
 
 ### Detailed Class Reference
 
 For a detailed reference, please see the [SDK Reference Guide](./reference.md)
 
-### SDK Implementation Details
+### Implementation Details
 
 For more information about the SDK's' Singer implementation details, please see the
-[SDK Implementation Details](./implementation/README.md) section.
+[SDK Implementation Details](./implementation/index.md) section.
 
 ### Code Samples
 
@@ -208,10 +208,3 @@ Thet output should look like this
 ![SDK Flame Graph](https://gitlab.com/meltano/sdk/uploads/07633ba1217de6eb1bb0e018133c608d/_write_record_message.png)
 
 **Note**: Chrome seems to work best for running the `vizviewer` app.
-
-## Additional Resources
-
-More links, resources, and example solutions are available from community
-members in the [`#singer-tap-development`](https://meltano.slack.com/archives/C01PKLU5D1R)
-and [`#singer-target-development`](https://meltano.slack.com/archives/C01RKUVUG4S)
-channels on [Meltano Slack](https://meltano.com/slack).

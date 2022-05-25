@@ -1,6 +1,7 @@
-singer\_sdk.exceptions.FatalAPIError
-==============================================
+﻿singer_sdk.exceptions.FatalAPIError
+===================================
 
 .. currentmodule:: singer_sdk.exceptions
 
-.. autoexception:: FatalAPIError
+.. autoclass:: FatalAPIError
+    :members:

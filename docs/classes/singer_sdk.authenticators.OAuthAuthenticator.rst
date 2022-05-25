@@ -1,5 +1,5 @@
-singer\_sdk.authenticators.OAuthAuthenticator
-=============================================
+﻿singer_sdk.authenticators.OAuthAuthenticator
+============================================
 
 .. currentmodule:: singer_sdk.authenticators
 

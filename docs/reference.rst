@@ -1,5 +1,5 @@
-Reference
-=========
+SDK Reference
+=============
 
 .. currentmodule:: singer_sdk
 
@@ -7,7 +7,7 @@ Plugin Classes
 --------------
 
 .. autosummary::
-    :toctree: _autosummary
+    :toctree: classes
     :template: class.rst
 
     Tap
@@ -20,7 +20,7 @@ Stream Classes
 --------------
 
 .. autosummary::
-    :toctree: _autosummary
+    :toctree: classes
     :template: class.rst
 
     Stream
@@ -29,10 +29,10 @@ Stream Classes
     SQLStream
 
 Sink Classes
---------------
+------------
 
 .. autosummary::
-    :toctree: _autosummary
+    :toctree: classes
     :template: class.rst
 
     Sink
@@ -44,7 +44,7 @@ SQL Connector for SQL Taps and Targets
 --------------------------------------
 
 .. autosummary::
-    :toctree: _autosummary
+    :toctree: classes
     :template: class.rst
 
     SQLConnector
@@ -53,7 +53,7 @@ Authenticator Classes
 ---------------------
 
 .. autosummary::
-    :toctree: _autosummary
+    :toctree: classes
     :template: class.rst
 
     authenticators.APIKeyAuthenticator
@@ -67,7 +67,7 @@ Exception Types
 ---------------
 
 .. autosummary::
-    :toctree: _autosummary
+    :toctree: classes
     :template: class.rst
 
     exceptions.ConfigValidationError
@@ -80,3 +80,11 @@ Exception Types
     exceptions.StreamMapConfigError
     exceptions.TapStreamConnectionFailure
     exceptions.TooManyRecordsException
+
+JSON Schema builder classes
+---------------------------
+
+.. autosummary::
+    :template: module.rst
+
+    typing

@@ -65,8 +65,10 @@ Advanced Topics
    partitioning
    stream_maps
    porting
+   sinks
    CONTRIBUTING
-   implementation/README
+   implementation/index
+   typing
 
 .. _Singer: https://singer.io
 .. _Singer Spec: https://hub.meltano.com/singer/spec

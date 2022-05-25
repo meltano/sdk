@@ -1,6 +1,7 @@
-singer\_sdk.exceptions.RetriableAPIError
-==============================================
+﻿singer_sdk.exceptions.RetriableAPIError
+=======================================
 
 .. currentmodule:: singer_sdk.exceptions
 
-.. autoexception:: RetriableAPIError
+.. autoclass:: RetriableAPIError
+    :members:
