@@ -1,5 +1,5 @@
-singer\_sdk.SQLConnector
-======================
+﻿singer_sdk.SQLConnector
+=======================
 
 .. currentmodule:: singer_sdk
 

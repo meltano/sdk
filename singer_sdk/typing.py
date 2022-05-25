@@ -1,8 +1,9 @@
 """Classes and functions to streamline JSONSchema typing.
 
 Usage example:
-----------
-```py
+--------------
+.. code-block:: python
+
     jsonschema = PropertiesList(
         Property("id", IntegerType, required=True),
         Property("name", StringType),
@@ -28,10 +29,9 @@ Usage example:
             )
         ),
     ).to_dict()
-```
 
 Note:
-----
+-----
 - These helpers are designed to output json in the traditional Singer dialect.
 - Due to the expansive set of capabilities within the JSONSchema spec, there may be
   other valid implementations which are not syntactically identical to those generated
@@ -57,6 +57,37 @@ from jsonschema import validators
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._typing import append_type, get_datelike_property_type
+
+__all__ = [
+    "extend_validator_with_defaults",
+    "to_jsonschema_type",
+    "to_sql_type",
+    "JSONTypeHelper",
+    "StringType",
+    "DateTimeType",
+    "TimeType",
+    "DateType",
+    "DurationType",
+    "EmailType",
+    "HostnameType",
+    "IPv4Type",
+    "IPv6Type",
+    "UUIDType",
+    "URIType",
+    "URIReferenceType",
+    "URITemplateType",
+    "JSONPointerType",
+    "RelativeJSONPointerType",
+    "RegexType",
+    "BooleanType",
+    "IntegerType",
+    "NumberType",
+    "ArrayType",
+    "Property",
+    "ObjectType",
+    "CustomType",
+    "PropertiesList",
+]
 
 
 def extend_validator_with_defaults(validator_class):  # noqa

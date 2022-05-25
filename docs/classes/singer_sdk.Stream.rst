@@ -1,5 +1,5 @@
-singer\_sdk.Stream
-==================
+﻿singer_sdk.Stream
+=================
 
 .. currentmodule:: singer_sdk
 

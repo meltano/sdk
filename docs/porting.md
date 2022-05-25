@@ -26,7 +26,7 @@ Next, we'll copy over the settings and readme from the old project to the new on
 
 Since SQL taps leverage the excellent SQLAlchemy library, most behaviors are already predefined and automatic. This includes catalog creation, table scanning, and many other common challenges.
 
-If you are porting over a SQL tap... skip ahead now to the [Installing Dependencies](#installing_dependencies) and make sure your SQL provider's SQLAlchemy drivers are included in the added library dependencies. Also, when you get the step of searching for TODO items, pay close attention to `get_sqlalchemy_url()` since this will drive authentication and connectivity.
+If you are porting over a SQL tap... skip ahead now to the [Installing Dependencies](#install-dependencies) and make sure your SQL provider's SQLAlchemy drivers are included in the added library dependencies. Also, when you get the step of searching for TODO items, pay close attention to `get_sqlalchemy_url()` since this will drive authentication and connectivity.
 
 Continue until just before you reach the "Pagination" section, at which point you are probably done! 🚀 Optionally, you can further optimize performance by overriding `get_records()` with a sync method native to your SQL operations.
 
@@ -146,7 +146,7 @@ poetry run pytest
 
 The SDK will automatically handle `STATE` for you 99% of the time. However, it is very likely that the legacy version of the tap has a different `STATE` format in comparison with the SDK format. If you want to seamlessly support both old and new STATE formats, you'll need to define a conversion operation.
 
-To handle the conversion operation, you'll override [`Tap.load_state()`](classes/singer_sdk.Tap.rst#singer_sdk.Tap.load_state). The exact process of converting state is outside of this guide, but please check the [STATE implementation docs](implementation/state.md) for an explanation of general format expectations.
+To handle the conversion operation, you'll override [`Tap.load_state()`](singer_sdk.Tap.load_state). The exact process of converting state is outside of this guide, but please check the [STATE implementation docs](implementation/state.md) for an explanation of general format expectations.
 
 ### Leverage Auto Generated README
 

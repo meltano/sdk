@@ -1,6 +1,7 @@
-singer\_sdk.exceptions.TooManyRecordsException
-==============================================
+﻿singer_sdk.exceptions.TooManyRecordsException
+=============================================
 
 .. currentmodule:: singer_sdk.exceptions
 
-.. autoexception:: TooManyRecordsException
+.. autoclass:: TooManyRecordsException
+    :members:

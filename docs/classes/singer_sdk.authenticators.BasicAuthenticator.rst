@@ -1,5 +1,5 @@
-singer\_sdk.authenticators.BasicAuthenticator
-=============================================
+﻿singer_sdk.authenticators.BasicAuthenticator
+============================================
 
 .. currentmodule:: singer_sdk.authenticators
 
