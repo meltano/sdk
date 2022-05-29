@@ -1,13 +1,8 @@
 """A sample implementation for BigQuery"""
 
-from typing import List, Type
+from typing import List, Tuple, Type
 
-from singer_sdk import SQLTap, SQLStream
-from singer_sdk import typing as th  # JSON schema typing helpers
-
-from typing import List, Tuple
-
-from singer_sdk import SQLConnector, SQLStream
+from singer_sdk import SQLConnector, SQLStream, SQLTap
 from singer_sdk import typing as th  # JSON schema typing helpers
 
 
