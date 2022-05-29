@@ -1,4 +1,4 @@
-"""A sample implementation for BigQuery"""
+"""A sample implementation for BigQuery."""
 
 from typing import List, Tuple, Type
 

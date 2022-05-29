@@ -8,6 +8,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union, cast
 
 import singer
 import sqlalchemy
+from sqlalchemy.engine import Engine
 from sqlalchemy.engine.reflection import Inspector
 
 from singer_sdk import typing as th
@@ -290,13 +291,18 @@ class SQLConnector:
             "Streams list may be incomplete or `is_view` may be unpopulated."
         )
 
-    def _get_schema_names(self, engine, inspected: Inspector) -> List[str]:
+    def _get_schema_names(self, engine: Engine, inspected: Inspector) -> List[str]:
         return inspected.get_schema_names()
 
     def _get_object_names(
-        self, engine, inspected: Inspector, schema_name: str
+        self, engine: Engine, inspected: Inspector, schema_name: str
     ) -> List[Tuple[str, bool]]:
         """Return a list of syncable objects.
+
+        Args:
+            engine: SQLAlchemy engine
+            inspected: SQLAlchemy inspector instance for engine
+            schema_name: Schema name to inspect
 
         Returns:
             List of tuples (<table_or_view_name>, <is_view>)
@@ -318,7 +324,7 @@ class SQLConnector:
     # TODO maybe should be splitted into smaller parts?
     def _discover_catalog_entry(
         self,
-        engine,
+        engine: Engine,
         inspected: Inspector,
         schema_name: str,
         table_name: str,
