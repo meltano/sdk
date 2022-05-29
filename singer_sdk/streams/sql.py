@@ -96,7 +96,7 @@ class SQLConnector:
         Returns:
             A newly created SQLAlchemy engine object.
         """
-        return sqlalchemy.create_engine(self.sqlalchemy_url, echo=True)
+        return sqlalchemy.create_engine(self.sqlalchemy_url, echo=False)
 
     @property
     def connection(self) -> sqlalchemy.engine.Connection:
