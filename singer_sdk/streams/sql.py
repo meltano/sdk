@@ -292,6 +292,15 @@ class SQLConnector:
         )
 
     def get_schema_names(self, engine: Engine, inspected: Inspector) -> List[str]:
+        """Return a list of schema names in DB.
+
+        Args:
+            engine: SQLAlchemy engine
+            inspected: SQLAlchemy inspector instance for engine
+
+        Returns:
+            List of schema names
+        """
         return inspected.get_schema_names()
 
     def get_object_names(
@@ -330,6 +339,18 @@ class SQLConnector:
         table_name: str,
         is_view: bool,
     ) -> CatalogEntry:
+        """Create `CatalogEntry` object for the given table or a view.
+
+        Args:
+            engine: SQLAlchemy engine
+            inspected: SQLAlchemy inspector instance for engine
+            schema_name: Schema name to inspect
+            table_name: Name of the table or a view
+            is_view: Flag whether this object is a view, returned by `get_object_names`
+
+        Returns:
+            `CatalogEntry` object for the given table or a view
+        """
         # Initialize unique stream name
         unique_stream_id = self.get_fully_qualified_name(
             db_name=None,

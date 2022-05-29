@@ -16,6 +16,7 @@ class BigQueryConnector(SQLConnector):
     def get_object_names(
         self, engine, inspected, schema_name: str
     ) -> List[Tuple[str, bool]]:
+        """Return discoverable object names."""
         # Bigquery inspections returns table names in the form
         # `schema_name.table_name` which later results in the project name
         # override due to specifics in behavior of sqlalchemy-bigquery
