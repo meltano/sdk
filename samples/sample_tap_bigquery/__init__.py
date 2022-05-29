@@ -18,17 +18,20 @@ class BigQueryConnector(SQLConnector):
         """Concatenate a SQLAlchemy URL for use in connecting to the source."""
         return f"bigquery://{config['project_id']}"
 
-    def _get_object_names(self, engine, inspected, schema_name: str) -> List[Tuple[str, bool]]:
+    def _get_object_names(
+        self, engine, inspected, schema_name: str
+    ) -> List[Tuple[str, bool]]:
         # Bigquery inspections returns table names in the form
         # `schema_name.table_name` which later results in the project name
         # override due to specifics in behavior of sqlalchemy-bigquery
-        # 
+        #
         # Let's strip `schema_name` prefix on the inspection
-        
+
         return [
             (table_name.split(".")[-1], is_view)
-            for (table_name, is_view)
-            in super()._get_object_names(engine, inspected, schema_name)
+            for (table_name, is_view) in super()._get_object_names(
+                engine, inspected, schema_name
+            )
         ]
 
 
@@ -40,14 +43,12 @@ class BigQueryStream(SQLStream):
 
 class TapBigQuery(SQLTap):
     """BigQuery tap class."""
+
     name = "tap-bigquery"
 
     config_jsonschema = th.PropertiesList(
         th.Property(
-            "project_id",
-            th.StringType,
-            required=True,
-            description="GCP Project"
+            "project_id", th.StringType, required=True, description="GCP Project"
         ),
     ).to_dict()
 
