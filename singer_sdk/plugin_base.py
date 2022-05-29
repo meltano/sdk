@@ -3,6 +3,7 @@
 import abc
 import json
 import logging
+import os
 from collections import OrderedDict
 from pathlib import PurePath
 from types import MappingProxyType
@@ -60,7 +61,19 @@ class PluginBase(metaclass=abc.ABCMeta):
         Returns:
             Plugin logger.
         """
-        return logging.getLogger(cls.name)
+        # Get the level from <PLUGIN_NAME>_LOGLEVEL or LOGLEVEL environment variables
+        LOGLEVEL = (
+            os.environ.get(f"{cls.name.upper()}_LOGLEVEL")
+            or os.environ.get("LOGLEVEL")
+            or "INFO"
+        ).upper()
+
+        assert (
+            LOGLEVEL in logging._levelToName.values()
+        ), f"Invalid LOGLEVEL configuration: {LOGLEVEL}"
+        logger = logging.getLogger(cls.name)
+        logger.setLevel(LOGLEVEL)
+        return logger
 
     # Constructor
 
