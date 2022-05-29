@@ -293,7 +293,9 @@ class SQLConnector:
     def _get_schema_names(self, engine, inspected: Inspector) -> List[str]:
         return inspected.get_schema_names()
 
-    def _get_object_names(self, engine, inspected: Inspector, schema_name: str) -> List[Tuple[str, bool]]:
+    def _get_object_names(
+        self, engine, inspected: Inspector, schema_name: str
+    ) -> List[Tuple[str, bool]]:
         """Return a list of syncable objects.
 
         Returns:
@@ -314,7 +316,14 @@ class SQLConnector:
         return object_names
 
     # TODO maybe should be splitted into smaller parts?
-    def _discover_catalog_entry(self, engine, inspected: Inspector, schema_name: str, table_name: str, is_view: bool) -> CatalogEntry:
+    def _discover_catalog_entry(
+        self,
+        engine,
+        inspected: Inspector,
+        schema_name: str,
+        table_name: str,
+        is_view: bool,
+    ) -> CatalogEntry:
         # Initialize unique stream name
         unique_stream_id = self.get_fully_qualified_name(
             db_name=None,
@@ -357,9 +366,7 @@ class SQLConnector:
         #   a replication_key value.
         # - 'LOG_BASED' replication must be enabled by the developer, according
         #   to source-specific implementation capabilities.
-        replication_method = next(
-            reversed(["FULL_TABLE"] + addl_replication_methods)
-        )
+        replication_method = next(reversed(["FULL_TABLE"] + addl_replication_methods))
 
         # Create the catalog entry object
         catalog_entry = CatalogEntry(
@@ -396,8 +403,12 @@ class SQLConnector:
         inspected = sqlalchemy.inspect(engine)
         for schema_name in self._get_schema_names(engine, inspected):
             # Iterate through each table and view
-            for table_name, is_view in self._get_object_names(engine, inspected, schema_name):
-                catalog_entry = self._discover_catalog_entry(engine, inspected, schema_name, table_name, is_view)
+            for table_name, is_view in self._get_object_names(
+                engine, inspected, schema_name
+            ):
+                catalog_entry = self._discover_catalog_entry(
+                    engine, inspected, schema_name, table_name, is_view
+                )
                 result.append(catalog_entry.to_dict())
 
         return result
