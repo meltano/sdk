@@ -291,10 +291,10 @@ class SQLConnector:
             "Streams list may be incomplete or `is_view` may be unpopulated."
         )
 
-    def _get_schema_names(self, engine: Engine, inspected: Inspector) -> List[str]:
+    def get_schema_names(self, engine: Engine, inspected: Inspector) -> List[str]:
         return inspected.get_schema_names()
 
-    def _get_object_names(
+    def get_object_names(
         self, engine: Engine, inspected: Inspector, schema_name: str
     ) -> List[Tuple[str, bool]]:
         """Return a list of syncable objects.
@@ -322,7 +322,7 @@ class SQLConnector:
         return object_names
 
     # TODO maybe should be splitted into smaller parts?
-    def _discover_catalog_entry(
+    def discover_catalog_entry(
         self,
         engine: Engine,
         inspected: Inspector,
@@ -407,12 +407,12 @@ class SQLConnector:
         result: List[dict] = []
         engine = self.create_sqlalchemy_engine()
         inspected = sqlalchemy.inspect(engine)
-        for schema_name in self._get_schema_names(engine, inspected):
+        for schema_name in self.get_schema_names(engine, inspected):
             # Iterate through each table and view
-            for table_name, is_view in self._get_object_names(
+            for table_name, is_view in self.get_object_names(
                 engine, inspected, schema_name
             ):
-                catalog_entry = self._discover_catalog_entry(
+                catalog_entry = self.discover_catalog_entry(
                     engine, inspected, schema_name, table_name, is_view
                 )
                 result.append(catalog_entry.to_dict())

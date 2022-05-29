@@ -13,7 +13,7 @@ class BigQueryConnector(SQLConnector):
         """Concatenate a SQLAlchemy URL for use in connecting to the source."""
         return f"bigquery://{config['project_id']}"
 
-    def _get_object_names(
+    def get_object_names(
         self, engine, inspected, schema_name: str
     ) -> List[Tuple[str, bool]]:
         # Bigquery inspections returns table names in the form
@@ -24,7 +24,7 @@ class BigQueryConnector(SQLConnector):
 
         return [
             (table_name.split(".")[-1], is_view)
-            for (table_name, is_view) in super()._get_object_names(
+            for (table_name, is_view) in super().get_object_names(
                 engine, inspected, schema_name
             )
         ]
