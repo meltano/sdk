@@ -50,10 +50,6 @@ jobs:
       run: |
         poetry install
 
-    - name: Install Dependencies
-      run: |
-        poetry install
-
     # TODO: Run complete test suite. Requires setting up some repository secrets
     - name: Run tests
       run: |
