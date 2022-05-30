@@ -57,3 +57,48 @@ jobs:
         poetry run pytest --doctest-modules singer_sdk
         poetry run pytest tests/core
         poetry run pytest tests/cookiecutters
+
+  # TODO: Avoid this repetition by leveraging Tox sessions
+  lint:
+    name: Lint on ${{ matrix.python-version }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: false
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - { python-version: "3.8", os: "ubuntu-latest" }
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v3.0.2
+
+    - name: Install Poetry
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
+      run: |
+        pipx install poetry
+        poetry --version
+
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3.1.2
+      with:
+        python-version: ${{ matrix.python-version }}
+        architecture: x64
+        cache: 'poetry'
+
+    - name: Upgrade pip
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
+      run: |
+        pip install pip
+        pip --version
+
+    - name: Install Dependencies
+      run: |
+        poetry env use "${{ matrix.python-version }}"
+        poetry install
+
+    - name: Run tests
+      run: |
+        poetry run tox -e lint
