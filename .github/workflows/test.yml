@@ -1,5 +1,12 @@
 name: Test
 
+on:
+  pull_request: {}
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs: {}
+
 jobs:
   tests:
     name: Test on ${{ matrix.python-version }} / ${{ matrix.os }}
