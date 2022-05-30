@@ -25,6 +25,13 @@ jobs:
     - name: Check out the repository
       uses: actions/checkout@v3.0.2
 
+    - name: Install Poetry
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
+      run: |
+        pipx install poetry
+        poetry --version
+
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3.1.2
       with:
@@ -38,13 +45,6 @@ jobs:
       run: |
         pip install pip
         pip --version
-
-    - name: Install Poetry
-      env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
-      run: |
-        pipx install poetry
-        poetry --version
 
     - name: Install Dependencies
       run: |
