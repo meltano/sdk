@@ -105,6 +105,5 @@ jobs:
       run: |
         poetry run tox -e coverage_xml
 
-    # TODO: requires setup in codecov.io. Doesn't need a token :)
-    # - name: Upload coverage report
-    #   uses: codecov/codecov-action@v3.1.0
+    - name: Upload coverage report
+      uses: codecov/codecov-action@v3.1.0
