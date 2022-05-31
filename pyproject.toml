@@ -87,7 +87,10 @@ src_paths = "singer_sdk"
 known_first_party = ["tests", "samples"]
 
 [tool.pytest.ini_options]
-addopts = '-vvv --ignore=singer_sdk/helpers/_simpleeval.py'
+addopts = '-vvv --ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
+markers = [
+    "external: Tests relying on external resources",
+]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
