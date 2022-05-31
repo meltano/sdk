@@ -21,6 +21,7 @@ jobs:
         - { tox-env: py, python-version: "3.9", os: "ubuntu-latest" }
         - { tox-env: py, python-version: "3.10", os: "ubuntu-latest" }
         - { tox-env: py, python-version: "3.10", os: "ubuntu-latest", external: true }
+        - { tox-env: doctest, python-version: "3.10", os: "ubuntu-latest" }
         - { tox-env: lint, python-version: "3.8", os: "ubuntu-latest" }
 
     steps:
@@ -55,7 +56,7 @@ jobs:
 
     - name: Run tox
       run: |
-        poetry run tox -e ${{ matrix.tox-env }} -- ${{ matrix.external && ' -m "external"' || '' }}
+        poetry run tox -e ${{ matrix.tox-env }} --${{ matrix.external && ' -m "external"' || '' }}${{ matrix.doctest && ' --doctest-modules singer_sdk' }}
 
     - name: Upload coverage data
       if: always() && (matrix.tox-env == 'py')
