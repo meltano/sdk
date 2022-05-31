@@ -11,7 +11,7 @@ jobs:
   tests:
     name: Test on ${{ matrix.python-version }} (${{ matrix.tox-env }}${{ matrix.external && ', external' || '' }}) / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    continue-on-error: false
+    continue-on-error: ${{ matrix.external || false }}
     strategy:
       fail-fast: false
       matrix:
@@ -93,11 +93,11 @@ jobs:
 
     - name: Combine coverage data and display human readable report
       run: |
-        tox -e combine_coverage
+        poetry tox -e combine_coverage
 
     - name: Create coverage report
       run: |
-        tox -e coverage_xml
+        poetry tox -e coverage_xml
 
     # TODO: requires setup in codecov.io. Doesn't need a token :)
     # - name: Upload coverage report
