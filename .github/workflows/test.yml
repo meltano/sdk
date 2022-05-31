@@ -9,17 +9,18 @@ on:
 
 jobs:
   tests:
-    name: Test on ${{ matrix.python-version }} / ${{ matrix.os }}
+    name: Test on ${{ matrix.python-version }} (${{ matrix.tox-env }}) / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     continue-on-error: false
     strategy:
       fail-fast: false
       matrix:
         include:
-        - { python-version: "3.7", os: "ubuntu-latest" }
-        - { python-version: "3.8", os: "ubuntu-latest" }
-        - { python-version: "3.9", os: "ubuntu-latest" }
-        - { python-version: "3.10", os: "ubuntu-latest" }
+        - { tox-env: no_external, python-version: "3.7", os: "ubuntu-latest" }
+        - { tox-env: no_external, python-version: "3.8", os: "ubuntu-latest" }
+        - { tox-env: no_external, python-version: "3.9", os: "ubuntu-latest" }
+        - { tox-env: no_external, python-version: "3.10", os: "ubuntu-latest" }
+        - { tox-env: lint, python-version: "3.8", os: "ubuntu-latest" }
 
     steps:
     - name: Check out the repository
@@ -51,54 +52,6 @@ jobs:
         poetry env use "${{ matrix.python-version }}"
         poetry install
 
-    # TODO: Run complete test suite. Requires setting up some repository secrets
-    - name: Run tests
+    - name: Run tox
       run: |
-        poetry run pytest --doctest-modules singer_sdk
-        poetry run pytest tests/core
-        poetry run pytest tests/cookiecutters
-
-  # TODO: Avoid this repetition by leveraging Tox sessions
-  lint:
-    name: Lint on ${{ matrix.python-version }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    continue-on-error: false
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-        - { python-version: "3.8", os: "ubuntu-latest" }
-    steps:
-    - name: Check out the repository
-      uses: actions/checkout@v3.0.2
-
-    - name: Install Poetry
-      env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
-      run: |
-        pipx install poetry
-        poetry --version
-
-
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3.1.2
-      with:
-        python-version: ${{ matrix.python-version }}
-        architecture: x64
-        cache: 'poetry'
-
-    - name: Upgrade pip
-      env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
-      run: |
-        pip install pip
-        pip --version
-
-    - name: Install Dependencies
-      run: |
-        poetry env use "${{ matrix.python-version }}"
-        poetry install
-
-    - name: Run tests
-      run: |
-        poetry run tox -e lint
+        poetry run tox -e ${{ matrix.tox-env }}
