@@ -12,6 +12,22 @@ Contributors are expected to follow our [Code of Conduct](https://docs.meltano.c
 
 ## Semantic Pull Requests
 
-This repo uses the [semantic-prs](https://github.com/meltano/gitops/issues/6#issuecomment-1140308939) app to check all PRs againts the conventional commit syntax.
+This repo uses the [semantic-prs](https://github.com/Ezard/semantic-prs) GitHub app to check all PRs againts the conventional commit syntax.
 
 Pull requests should be named according to the conventional commit syntax to streamline changelog and release notes management. We encourage (but do not require) the use of conventional commits in commit messages as well.
+
+In general, PR titles should follow the format "<type>: <desc>", where type is any one of these:
+
+- `ci`
+- `chore`
+- `build`
+- `docs`
+- `feat`
+- `fix`
+- `perf`
+- `refactor`
+- `revert`
+- `style`
+- `test`
+
+More advanced rules and settings can be found within the file `.github/semantic.yml`.

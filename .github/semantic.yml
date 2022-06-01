@@ -1,0 +1,26 @@
+# Validate the PR title, and ignore all commit messages
+titleOnly: true
+
+# The values allowed for the "type" part of the PR title/commit message.
+# e.g. for a PR title/commit message of "feat: add some stuff", the type would be "feat"
+types:
+  - ci
+  - chore
+  - build
+  - docs
+  - feat
+  - fix
+  - perf
+  - refactor
+  - revert
+  - style
+  - test
+
+# The values allowed for the "scope" part of the PR title/commit message.
+# e.g. for a PR title/commit message of "feat(awesome-feature): add some stuff",
+#      the type would be "awesome-feature"
+scopes:
+  - taps       # tap SDK only
+  - targets    # target SDK only
+  - mappers    # mappers only
+  - templates  # cookiecutters
