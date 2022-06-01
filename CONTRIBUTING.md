@@ -37,4 +37,5 @@ Optionally, you may use the expanded syntax to specify a scope in the form `<typ
   - `targets`    # target SDK only
   - `mappers`    # mappers only
   - `templates`  # cookiecutters 
+
 More advanced rules and settings can be found within the file `.github/semantic.yml`.
