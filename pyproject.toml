@@ -6,7 +6,7 @@ authors = ["Meltano Team and Contributors"]
 maintainers = ["Meltano Team and Contributors"]
 readme = "README.md"
 homepage = "https://sdk.meltano.com/en/latest/"
-repository = "https://gitlab.com/meltano/sdk"
+repository = "https://github.com/meltano/sdk"
 documentation = "https://sdk.meltano.com/en/latest/"
 keywords = [
     "Meltano",
@@ -19,11 +19,10 @@ classifiers = [
 license = "Apache 2.0"
 
 [tool.poetry.urls]
-"Issue Tracker" = "https://gitlab.com/meltano/sdk/-/issues"
+"Issue Tracker" = "https://github.com/meltano/sdk/issues"
 "Twitter" = "https://twitter.com/meltanodata/"
-"Changelog" = "https://gitlab.com/meltano/sdk/-/blob/main/CHANGELOG.md"
+"Changelog" = "https://github.com/meltano/sdk/blob/main/CHANGELOG.md"
 "Slack" = "https://meltano.com/slack"
-"GitHub Mirror" = "https://github.com/meltano/sdk"
 "Youtube" = "https://www.youtube.com/meltano"
 
 [tool.poetry.dependencies]

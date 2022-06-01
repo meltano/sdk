@@ -30,10 +30,6 @@ class Sink(metaclass=abc.ABCMeta):
 
     MAX_SIZE_DEFAULT = 10000
 
-    # TODO: Implement schema flattening: https://gitlab.com/meltano/sdk/-/issues/133
-    # _flattener: Optional[RecordFlattener]
-    # _MAX_FLATTEN_DEPTH = 0
-
     def __init__(
         self,
         target: PluginBase,
@@ -74,8 +70,6 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_dupe_records_merged: int = 0
 
         self._validator = Draft4Validator(schema, format_checker=FormatChecker())
-        # TODO: Implement schema flattener: https://gitlab.com/meltano/sdk/-/issues/133
-        # self._flattener = RecordFlattener(max_level=self._MAX_FLATTEN_DEPTH)
 
     def _get_context(self, record: dict) -> dict:
         """Return an empty dictionary by default.
