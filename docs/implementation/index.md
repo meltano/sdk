@@ -10,6 +10,7 @@ discovery
 catalog_metadata
 record_metadata
 metrics
+logging
 state
 at_least_once
 ```
