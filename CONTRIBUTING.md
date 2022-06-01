@@ -30,4 +30,11 @@ In general, PR titles should follow the format "<type>: <desc>", where type is a
 - `style`
 - `test`
 
+Optionally, you may use the expanded syntax to specify a scope in the form `<type>(<scope>): <desc>`. Currently scopes are:
+
+ scopes:
+  - `taps`       # tap SDK only
+  - `targets`    # target SDK only
+  - `mappers`    # mappers only
+  - `templates`  # cookiecutters 
 More advanced rules and settings can be found within the file `.github/semantic.yml`.
