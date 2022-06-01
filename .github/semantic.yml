@@ -20,7 +20,7 @@ types:
 
 # The values allowed for the "scope" part of the PR title/commit message.
 # e.g. for a PR title/commit message of "feat(awesome-feature): add some stuff",
-#      the type would be "awesome-feature"
+#      the scope would be "awesome-feature"
 scopes:
   - taps       # tap SDK only
   - targets    # target SDK only
