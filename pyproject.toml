@@ -66,7 +66,6 @@ pyarrow = "^6.0.0"
 pandas = ">=1.2.0"
 numpy = ">=1.20.0"
 tox = "^3.23.1"
-codecov = "^2.1.11"
 freezegun = "^1.1.0"
 viztracer = "^0.14.0"
 flake8-annotations = "^2.6.2"
@@ -76,6 +75,7 @@ pyupgrade = "^2.29.1"
 requests-mock = "^1.9.3"
 sqlalchemy2-stubs = {version = "^0.0.2a19", allow-prereleases = true}
 types-requests = "^2.26.1"
+coverage = {extras = ["toml"], version = "^6.4"}
 
 [tool.black]
 exclude = ".*simpleeval.*"
@@ -87,7 +87,10 @@ src_paths = "singer_sdk"
 known_first_party = ["tests", "samples"]
 
 [tool.pytest.ini_options]
-addopts = '-vvv --ignore=singer_sdk/helpers/_simpleeval.py'
+addopts = '-vvv --ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
+markers = [
+    "external: Tests relying on external resources",
+]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
