@@ -1,3 +1,5 @@
+# Config ref: https://github.com/Ezard/semantic-prs
+
 # Validate the PR title, and ignore all commit messages
 titleOnly: true
 
