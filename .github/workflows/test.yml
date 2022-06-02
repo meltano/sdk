@@ -12,6 +12,14 @@ jobs:
     name: Test on ${{ matrix.python-version }} (${{ matrix.tox-env }}${{ matrix.external && ', external' || '' }}) / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.external || false }}
+    env:
+      SAMPLE_TAP_GITLAB_AUTH_TOKEN: ${{ secrets.SAMPLE_TAP_GITLAB_AUTH_TOKEN }}
+      SAMPLE_TAP_GITLAB_GROUP_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_GROUP_IDS }}
+      SAMPLE_TAP_GITLAB_PROJECT_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_PROJECT_IDS }}
+      SAMPLE_TAP_GITLAB_START_DATE: "2022-01-01T00:00:00Z"
+      SAMPLE_TAP_GOOGLE_ANALYTICS_CLIENT_EMAIL: ${{ secrets.SAMPLE_TAP_GOOGLE_ANALYTICS_CLIENT_EMAIL }}
+      SAMPLE_TAP_GOOGLE_ANALYTICS_PRIVATE_KEY: ${{ secrets.SAMPLE_TAP_GOOGLE_ANALYTICS_PRIVATE_KEY }}
+      SAMPLE_TAP_GOOGLE_ANALYTICS_VIEW_ID: ${{ secrets.SAMPLE_TAP_GOOGLE_ANALYTICS_VIEW_ID }}
     strategy:
       fail-fast: false
       matrix:
@@ -20,9 +28,7 @@ jobs:
         - { tox-env: py, python-version: "3.8", os: "ubuntu-latest" }
         - { tox-env: py, python-version: "3.9", os: "ubuntu-latest" }
         - { tox-env: py, python-version: "3.10", os: "ubuntu-latest" }
-        #TODO: resolve by mapping CI vars to creds: 
-        # https://github.com/meltano/sdk/issues/683
-        # - { tox-env: py, python-version: "3.10", os: "ubuntu-latest", external: true }
+        - { tox-env: py, python-version: "3.10", os: "ubuntu-latest", external: true }
         - { tox-env: doctest, python-version: "3.10", os: "ubuntu-latest" }
         - { tox-env: lint, python-version: "3.8", os: "ubuntu-latest" }
 
