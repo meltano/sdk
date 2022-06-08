@@ -496,7 +496,7 @@ testing = ["coverage", "pytest (>=3.6,<4)", "pytest-cov", "pytest-regressions"]
 
 [[package]]
 name = "memoization"
-version = "0.3.2"
+version = "0.4.0"
 description = "A powerful caching library for Python, with TTL support and multiple algorithm options. (https://github.com/lonelyenvoy/python-memoization)"
 category = "main"
 optional = false
@@ -1258,7 +1258,7 @@ docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser"]
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.11,>=3.7.1"
-content-hash = "bc920a17403aefcdcbc9bbad504e09fa4ae68d540171b6fcaacaaad9abb5bd08"
+content-hash = "fdf18b7d93b88850b95bb2c04a46ac06a2eab3f4096727fb51980dbe1d568148"
 
 [metadata.files]
 alabaster = [
@@ -1679,8 +1679,7 @@ mdit-py-plugins = [
     {file = "mdit_py_plugins-0.3.0-py3-none-any.whl", hash = "sha256:b1279701cee2dbf50e188d3da5f51fee8d78d038cdf99be57c6b9d1aa93b4073"},
 ]
 memoization = [
-    {file = "memoization-0.3.2-py3-none-any.whl", hash = "sha256:6109bcfdbd6fc6c33004fcdc5d8e291c1223a7416c5dad61ec777d260f6038d2"},
-    {file = "memoization-0.3.2.tar.gz", hash = "sha256:65d19404b9acc74a764d3e584d8fb17c56bc446d386a28afb93f2247507c99cc"},
+    {file = "memoization-0.4.0.tar.gz", hash = "sha256:fde5e7cd060ef45b135e0310cfec17b2029dc472ccb5bbbbb42a503d4538a135"},
 ]
 mypy = [
     {file = "mypy-0.812-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:a26f8ec704e5a7423c8824d425086705e381b4f1dfdef6e3a1edab7ba174ec49"},
