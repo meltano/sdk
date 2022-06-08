@@ -338,8 +338,8 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         self,
         request: requests.PreparedRequest,
         response: requests.Response,
-        context: Optional[dict],
-    ) -> dict[str, int]:
+        context: Optional[Dict],
+    ) -> Dict[str, int]:
         """Update internal calculation of API costs.
 
         Args:
@@ -364,8 +364,8 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         self,
         request: requests.PreparedRequest,
         response: requests.Response,
-        context: Optional[dict],
-    ) -> dict[str, int]:
+        context: Optional[Dict],
+    ) -> Dict[str, int]:
         """Calculate the cost of the last API call made.
 
         This method can optionally be implemented in streams to calculate
