@@ -29,3 +29,5 @@ scopes:
   - targets    # target SDK only
   - mappers    # mappers only
   - templates  # cookiecutters
+  - deps       # production dependencies
+  - deps-dev   # development depencencies (testing, linting, etc.)
