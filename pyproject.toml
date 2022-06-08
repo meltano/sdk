@@ -73,7 +73,7 @@ isort = "^5.9.3"
 pyupgrade = "^2.33.0"
 requests-mock = "^1.9.3"
 sqlalchemy2-stubs = {version = "^0.0.2a19", allow-prereleases = true}
-types-requests = "^2.26.1"
+types-requests = "^2.27.30"
 coverage = {extras = ["toml"], version = "^6.4"}
 
 [tool.black]
