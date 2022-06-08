@@ -45,7 +45,7 @@ python-dotenv = "^0.20.0"
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
 sphinx = {version = "^4.5.0", optional = true}
-sphinx-rtd-theme = {version = "^0.5.2", optional = true}
+sphinx-rtd-theme = {version = ">=0.5.2,<1.1.0", optional = true}
 sphinx-copybutton = {version = "^0.3.1", optional = true}
 myst-parser = {version = "^0.17.2", optional = true}
 
