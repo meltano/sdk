@@ -70,7 +70,7 @@ viztracer = "^0.15.2"
 flake8-annotations = "^2.6.2"
 darglint = "^1.8.0"
 isort = "^5.9.3"
-pyupgrade = "^2.33.0"
+pyupgrade = "^2.34.0"
 requests-mock = "^1.9.3"
 sqlalchemy2-stubs = {version = "^0.0.2a19", allow-prereleases = true}
 types-requests = "^2.27.30"
