@@ -249,7 +249,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     # Message handling
 
-    def _process_lines(self, file_input: IO[str]) -> Counter[SingerMessageType]:
+    def _process_lines(self, file_input: IO[str]) -> Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:
