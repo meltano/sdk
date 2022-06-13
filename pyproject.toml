@@ -56,7 +56,7 @@ docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser"]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
 pytest = "^7.1.2"
 black = {version = "^22.3", allow-prereleases = true}
-mypy = "^0.812"
+mypy = "^0.961"
 cookiecutter = "^1.7.2"
 PyYAML = "^6.0"
 flake8-docstrings = "^1.6.0"
