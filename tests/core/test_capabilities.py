@@ -28,3 +28,14 @@ def test_deprecated_capabilities():
     frameinfo = getframeinfo(currentframe())
     assert warning.lineno == frameinfo.lineno - 3
     assert warning.filename.endswith("test_capabilities.py")
+
+    with pytest.warns(
+        DeprecationWarning,
+        match="is deprecated. No longer supported",
+    ) as record:
+        DummyCapabilitiesEnum("deprecated")
+
+    warning = record.list[0]
+    frameinfo = getframeinfo(currentframe())
+    assert warning.lineno == frameinfo.lineno - 3
+    assert warning.filename.endswith("test_capabilities.py")

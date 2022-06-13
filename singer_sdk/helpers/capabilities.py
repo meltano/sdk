@@ -1,7 +1,9 @@
 """Module with helpers to declare capabilities and plugin behavior."""
 
+from __future__ import annotations
+
 from enum import Enum, EnumMeta
-from typing import Any, Optional
+from typing import Any
 from warnings import warn
 
 from singer_sdk.typing import (
@@ -46,7 +48,7 @@ FLATTENING_CONFIG = PropertiesList(
 class DeprecatedEnum(Enum):
     """Base class for capabilities enumeration."""
 
-    def __new__(cls, value: Any, deprecation: Optional[str] = None) -> "DeprecatedEnum":
+    def __new__(cls, value: Any, deprecation: str | None = None) -> DeprecatedEnum:
         """Create a new enum member.
 
         Args:
@@ -56,19 +58,19 @@ class DeprecatedEnum(Enum):
         Returns:
             An enum member value.
         """
-        member: "DeprecatedEnum" = object.__new__(cls)
+        member: DeprecatedEnum = object.__new__(cls)
         member._value_ = value
         member._deprecation = deprecation
         return member
 
     @property
-    def deprecation_message(self) -> Optional[str]:
+    def deprecation_message(self) -> str | None:
         """Get deprecation message.
 
         Returns:
             Deprecation message.
         """
-        self._deprecation: Optional[str]
+        self._deprecation: str | None
         return self._deprecation
 
     def emit_warning(self) -> None:
@@ -111,7 +113,7 @@ class DeprecatedEnumMeta(EnumMeta):
             obj.emit_warning()
         return obj
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Enum:
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         """Call enum member.
 
         Args:
@@ -121,7 +123,7 @@ class DeprecatedEnumMeta(EnumMeta):
         Returns:
             Enum member.
         """
-        obj: Enum = super().__call__(*args, **kwargs)
+        obj = super().__call__(*args, **kwargs)
         if isinstance(obj, DeprecatedEnum) and obj.deprecation_message:
             obj.emit_warning()
         return obj
