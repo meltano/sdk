@@ -4,7 +4,18 @@ import abc
 import copy
 import logging
 from datetime import datetime
-from typing import Any, Callable, Dict, Generator, Iterable, List, Optional, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    Generic,
+    Iterable,
+    List,
+    Optional,
+    TypeVar,
+    Union,
+)
 
 import backoff
 import requests
@@ -19,8 +30,10 @@ from singer_sdk.streams.core import Stream
 DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
+_TToken = TypeVar("_TToken")
 
-class RESTStream(Stream, metaclass=abc.ABCMeta):
+
+class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
     """Abstract base class for REST API streams."""
 
     _page_size: int = DEFAULT_PAGE_SIZE
@@ -237,7 +250,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return response
 
     def get_url_params(
-        self, context: Optional[dict], next_page_token: Optional[Any]
+        self, context: Optional[dict], next_page_token: Optional[_TToken]
     ) -> Dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization.
 
@@ -254,7 +267,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return {}
 
     def prepare_request(
-        self, context: Optional[dict], next_page_token: Optional[Any]
+        self, context: Optional[dict], next_page_token: Optional[_TToken]
     ) -> requests.PreparedRequest:
         """Prepare a request object.
 
@@ -282,16 +295,13 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             headers.update(authenticator.auth_headers or {})
             params.update(authenticator.auth_params or {})
 
-        request = cast(
-            requests.PreparedRequest,
-            self.requests_session.prepare_request(
-                requests.Request(
-                    method=http_method,
-                    url=url,
-                    params=params,
-                    headers=headers,
-                    json=request_data,
-                ),
+        request = self.requests_session.prepare_request(
+            requests.Request(
+                method=http_method,
+                url=url,
+                params=params,
+                headers=headers,
+                json=request_data,
             ),
         )
         return request
@@ -311,7 +321,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             RuntimeError: If a loop in pagination is detected. That is, when two
                 consecutive pagination tokens are identical.
         """
-        next_page_token: Any = None
+        next_page_token: Optional[_TToken] = None
         finished = False
         decorated_request = self.request_decorator(self._request)
 
@@ -336,7 +346,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     # Overridable:
 
     def prepare_request_payload(
-        self, context: Optional[dict], next_page_token: Optional[Any]
+        self, context: Optional[dict], next_page_token: Optional[_TToken]
     ) -> Optional[dict]:
         """Prepare the data payload for the REST API request.
 
@@ -357,8 +367,10 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return None
 
     def get_next_page_token(
-        self, response: requests.Response, previous_token: Optional[Any]
-    ) -> Any:
+        self,
+        response: requests.Response,
+        previous_token: Optional[_TToken],
+    ) -> Optional[_TToken]:
         """Return token identifying next page or None if all records have been read.
 
         Args:
