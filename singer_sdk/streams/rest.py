@@ -320,7 +320,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
                 context, next_page_token=next_page_token
             )
             resp = decorated_request(prepared_request, context)
-            self.update_api_costs(prepared_request, resp, context)
+            self.update_sync_costs(prepared_request, resp, context)
             yield from self.parse_response(resp)
             previous_token = copy.deepcopy(next_page_token)
             next_page_token = self.get_next_page_token(
@@ -352,11 +352,11 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             the "cost domains". See `calculate_api_request_cost` for details.
         """
         call_costs = self.calculate_api_request_cost(request, response, context)
-        self._api_costs = {
-            k: self._api_costs.get(k, 0) + call_costs.get(k, 0)
+        self._sync_costs = {
+            k: self._sync_costs.get(k, 0) + call_costs.get(k, 0)
             for k in call_costs.keys()
         }
-        return self._api_costs
+        return self._sync_costs
 
     # Overridable:
 

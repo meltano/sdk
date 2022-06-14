@@ -77,7 +77,7 @@ class Stream(metaclass=abc.ABCMeta):
     ignore_parent_replication_key: bool = False
 
     # Internal API cost aggregator
-    _api_costs: Dict[str, int] = {}
+    _sync_costs: Dict[str, int] = {}
 
     def __init__(
         self,
