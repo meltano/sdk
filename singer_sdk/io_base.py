@@ -1,5 +1,7 @@
 """Abstract base classes for all Singer messages IO operations."""
 
+from __future__ import annotations
+
 import abc
 import enum
 import json
@@ -8,7 +10,6 @@ import sys
 from collections import Counter, defaultdict
 from typing import IO
 from typing import Counter as CounterType
-from typing import Dict, Optional, Set
 
 from singer_sdk.helpers._compat import final
 
@@ -28,7 +29,7 @@ class SingerReader(metaclass=abc.ABCMeta):
     """Interface for all plugins reading Singer messages from stdin."""
 
     @final
-    def listen(self, file_input: Optional[IO[str]] = None) -> None:
+    def listen(self, file_input: IO[str] | None = None) -> None:
         """Read from input until all messages are processed.
 
         Args:
@@ -43,7 +44,7 @@ class SingerReader(metaclass=abc.ABCMeta):
         self._process_endofpipe()
 
     @staticmethod
-    def _assert_line_requires(line_dict: dict, requires: Set[str]) -> None:
+    def _assert_line_requires(line_dict: dict, requires: set[str]) -> None:
         """Check if dictionary .
 
         Args:
@@ -59,7 +60,7 @@ class SingerReader(metaclass=abc.ABCMeta):
                 f"Line is missing required {', '.join(missing)} key(s): {line_dict}"
             )
 
-    def _process_lines(self, file_input: IO[str]) -> CounterType[SingerMessageType]:
+    def _process_lines(self, file_input: IO[str]) -> CounterType[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:
@@ -71,7 +72,7 @@ class SingerReader(metaclass=abc.ABCMeta):
         Raises:
             json.decoder.JSONDecodeError: raised if any lines are not valid json
         """
-        stats: Dict[str, int] = defaultdict(int)
+        stats: dict[str, int] = defaultdict(int)
         for line in file_input:
             try:
                 line_dict = json.loads(line)
@@ -81,7 +82,7 @@ class SingerReader(metaclass=abc.ABCMeta):
 
             self._assert_line_requires(line_dict, requires={"type"})
 
-            record_type = line_dict["type"]
+            record_type: SingerMessageType = line_dict["type"]
             if record_type == SingerMessageType.SCHEMA:
                 self._process_schema_message(line_dict)
 
