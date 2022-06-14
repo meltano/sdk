@@ -1,11 +1,13 @@
 """Classes to assist in authenticating to APIs."""
 
+from __future__ import annotations
+
 import base64
 import logging
 import math
 from datetime import datetime, timedelta
 from types import MappingProxyType
-from typing import Any, Dict, Mapping, Optional, Tuple, Type, Union
+from typing import Any, Mapping
 
 import jwt
 import requests
@@ -20,7 +22,7 @@ from singer_sdk.streams import Stream as RESTStreamBase
 class SingletonMeta(type):
     """A general purpose singleton metaclass."""
 
-    def __init__(cls, name: str, bases: Tuple[type], dic: dict) -> None:
+    def __init__(cls, name: str, bases: tuple[type], dic: dict) -> None:
         """Init metaclass.
 
         The single instance is saved as an attribute of the the metaclass.
@@ -33,7 +35,7 @@ class SingletonMeta(type):
         cls.__single_instance = None
         super().__init__(name, bases, dic)
 
-    def __call__(cls, *args: Any, **kwargs: Dict[str, Any]) -> Any:
+    def __call__(cls, *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
         """Create or reuse the singleton.
 
         Args:
@@ -61,9 +63,9 @@ class APIAuthenticatorBase:
             stream: A stream for a RESTful endpoint.
         """
         self.tap_name: str = stream.tap_name
-        self._config: Dict[str, Any] = dict(stream.config)
-        self._auth_headers: Dict[str, Any] = {}
-        self._auth_params: Dict[str, Any] = {}
+        self._config: dict[str, Any] = dict(stream.config)
+        self._auth_headers: dict[str, Any] = {}
+        self._auth_params: dict[str, Any] = {}
         self.logger: logging.Logger = stream.logger
 
     @property
@@ -104,7 +106,7 @@ class SimpleAuthenticator(APIAuthenticatorBase):
     def __init__(
         self,
         stream: RESTStreamBase,
-        auth_headers: Optional[Dict] = None,
+        auth_headers: dict | None = None,
     ) -> None:
         """Create a new authenticator.
 
@@ -166,12 +168,12 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
 
     @classmethod
     def create_for_stream(
-        cls: Type["APIKeyAuthenticator"],
+        cls: type[APIKeyAuthenticator],
         stream: RESTStreamBase,
         key: str,
         value: str,
         location: str,
-    ) -> "APIKeyAuthenticator":
+    ) -> APIKeyAuthenticator:
         """Create an Authenticator object specific to the Stream class.
 
         Args:
@@ -181,7 +183,8 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
             location: Where the API key is to be added. Either 'header' or 'params'.
 
         Returns:
-            A new :class:`singer_sdk.authenticators.APIKeyAuthenticator` instance.
+            APIKeyAuthenticator: A new
+                :class:`singer_sdk.authenticators.APIKeyAuthenticator` instance.
         """
         return cls(stream=stream, key=key, value=value, location=location)
 
@@ -210,8 +213,8 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
 
     @classmethod
     def create_for_stream(
-        cls: Type["BearerTokenAuthenticator"], stream: RESTStreamBase, token: str
-    ) -> "BearerTokenAuthenticator":
+        cls: type[BearerTokenAuthenticator], stream: RESTStreamBase, token: str
+    ) -> BearerTokenAuthenticator:
         """Create an Authenticator object specific to the Stream class.
 
         Args:
@@ -219,7 +222,8 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
             token: Authentication token.
 
         Returns:
-            A new :class:`singer_sdk.authenticators.BearerTokenAuthenticator` instance.
+            BearerTokenAuthenticator: A new
+                :class:`singer_sdk.authenticators.BearerTokenAuthenticator` instance.
         """
         return cls(stream=stream, token=token)
 
@@ -256,11 +260,11 @@ class BasicAuthenticator(APIAuthenticatorBase):
 
     @classmethod
     def create_for_stream(
-        cls: Type["BasicAuthenticator"],
+        cls: type[BasicAuthenticator],
         stream: RESTStreamBase,
         username: str,
         password: str,
-    ) -> "BasicAuthenticator":
+    ) -> BasicAuthenticator:
         """Create an Authenticator object specific to the Stream class.
 
         Args:
@@ -269,7 +273,8 @@ class BasicAuthenticator(APIAuthenticatorBase):
             password: API password.
 
         Returns:
-            A new :class:`singer_sdk.authenticators.BasicAuthenticator` instance.
+            BasicAuthenticator: A new
+                :class:`singer_sdk.authenticators.BasicAuthenticator` instance.
         """
         return cls(stream=stream, username=username, password=password)
 
@@ -280,9 +285,9 @@ class OAuthAuthenticator(APIAuthenticatorBase):
     def __init__(
         self,
         stream: RESTStreamBase,
-        auth_endpoint: Optional[str] = None,
-        oauth_scopes: Optional[str] = None,
-        default_expiration: Optional[int] = None,
+        auth_endpoint: str | None = None,
+        oauth_scopes: str | None = None,
+        default_expiration: int | None = None,
     ) -> None:
         """Create a new authenticator.
 
@@ -298,10 +303,10 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         self._oauth_scopes = oauth_scopes
 
         # Initialize internal tracking attributes
-        self.access_token: Optional[str] = None
-        self.refresh_token: Optional[str] = None
-        self.last_refreshed: Optional[datetime] = None
-        self.expires_in: Optional[int] = None
+        self.access_token: str | None = None
+        self.refresh_token: str | None = None
+        self.last_refreshed: datetime | None = None
+        self.expires_in: int | None = None
 
     @property
     def auth_headers(self) -> dict:
@@ -333,7 +338,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         return self._auth_endpoint
 
     @property
-    def oauth_scopes(self) -> Optional[str]:
+    def oauth_scopes(self) -> str | None:
         """Get OAuth scopes.
 
         Returns:
@@ -378,7 +383,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         )
 
     @property
-    def client_id(self) -> Optional[str]:
+    def client_id(self) -> str | None:
         """Get client ID string to be used in authentication.
 
         Returns:
@@ -389,7 +394,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         return None
 
     @property
-    def client_secret(self) -> Optional[str]:
+    def client_secret(self) -> str | None:
         """Get client secret to be used in authentication.
 
         Returns:
@@ -446,7 +451,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
     """API Authenticator for OAuth 2.0 flows which utilize a JWT refresh token."""
 
     @property
-    def private_key(self) -> Optional[str]:
+    def private_key(self) -> str | None:
         """Return the private key to use in encryption.
 
         Returns:
@@ -455,7 +460,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         return self.config.get("private_key", None)
 
     @property
-    def private_key_passphrase(self) -> Optional[str]:
+    def private_key_passphrase(self) -> str | None:
         """Return the private key passphrase to use in encryption.
 
         Returns:
@@ -492,7 +497,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         if not self.private_key:
             raise ValueError("Missing 'private_key' property for OAuth payload.")
 
-        private_key: Union[bytes, Any] = bytes(self.private_key, "UTF-8")
+        private_key: bytes | Any = bytes(self.private_key, "UTF-8")
         if self.private_key_passphrase:
             passphrase = bytes(self.private_key_passphrase, "UTF-8")
             private_key = serialization.load_pem_private_key(
@@ -500,7 +505,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
                 password=passphrase,
                 backend=default_backend(),
             )
-        private_key_string: Union[str, Any] = private_key.decode("UTF-8")
+        private_key_string: str | Any = private_key.decode("UTF-8")
         return {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": jwt.encode(
