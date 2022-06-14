@@ -334,24 +334,24 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             # Cycle until get_next_page_token() no longer returns a value
             finished = not next_page_token
 
-    def update_api_costs(
+    def update_sync_costs(
         self,
         request: requests.PreparedRequest,
         response: requests.Response,
         context: Optional[Dict],
     ) -> Dict[str, int]:
-        """Update internal calculation of API costs.
+        """Update internal calculation of Sync costs.
 
         Args:
-            request: the API Request object that was just called.
+            request: the Request object that was just called.
             response: the `requests.Response` object
             context: the context passed to the call
 
         Returns:
             A dict of costs (for the single request) whose keys are
-            the "cost domains". See `calculate_api_request_cost` for details.
+            the "cost domains". See `calculate_sync_cost` for details.
         """
-        call_costs = self.calculate_api_request_cost(request, response, context)
+        call_costs = self.calculate_sync_cost(request, response, context)
         self._sync_costs = {
             k: self._sync_costs.get(k, 0) + call_costs.get(k, 0)
             for k in call_costs.keys()
@@ -360,7 +360,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     # Overridable:
 
-    def calculate_api_request_cost(
+    def calculate_sync_cost(
         self,
         request: requests.PreparedRequest,
         response: requests.Response,
@@ -370,7 +370,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         This method can optionally be implemented in streams to calculate
         the costs (in arbitrary units to be defined by the tap developer)
-        associated with a single API call. The request and response objects
+        associated with a single API/network call. The request and response objects
         are available in the callback, as well as the context.
 
         The method returns a dict where the keys are arbitrary cost dimensions,
@@ -387,8 +387,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             context: the context passed to the call
 
         Returns:
-            A dict of accumulated costs whose keys are the "cost domains". See
-            `calculate_api_request_cost` for details.
+            A dict of accumulated costs whose keys are the "cost domains".
         """
         return {}
 
