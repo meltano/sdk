@@ -357,3 +357,23 @@ def test_cached_jsonpath():
 
     # cached objects should point to the same memory location
     assert recompiled is compiled
+
+
+def test_sync_costs_calculation(tap: SimpleTestTap):
+    """Test sync costs are added up correctly."""
+    fake_request = requests.PreparedRequest()
+    fake_response = requests.Response()
+
+    stream = RestTestStream(tap)
+
+    def calculate_test_cost(
+        request: requests.PreparedRequest,
+        response: requests.Response,
+        context: Optional[Dict],
+    ):
+        return {"dim1": 1, "dim2": 2}
+
+    stream.calculate_sync_cost = calculate_test_cost
+    stream.update_sync_costs(fake_request, fake_response, None)
+    stream.update_sync_costs(fake_request, fake_response, None)
+    assert stream._sync_costs == {"dim1": 2, "dim2": 4}
