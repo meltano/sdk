@@ -71,16 +71,6 @@ build_and_test:
         poetry run pytest tests/cookiecutters
       fi
 
-lint:
-  stage: test
-  parallel:
-    matrix:
-      - PYTHON_VERSION: ["3.8"]
-  image: python:${PYTHON_VERSION}
-  script:
-    - poetry run tox -e lint
-
-
 version_bump_trigger:
   # This job triggers for any branches named like `release/vX.Y.Z`
   # The job will automatically flush the changelog, bump version refs,
