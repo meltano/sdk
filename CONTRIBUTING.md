@@ -36,6 +36,6 @@ Optionally, you may use the expanded syntax to specify a scope in the form `<typ
   - `taps`       # tap SDK only
   - `targets`    # target SDK only
   - `mappers`    # mappers only
-  - `templates`  # cookiecutters 
+  - `templates`  # cookiecutters
 
 More advanced rules and settings can be found within the file `.github/semantic.yml`.

@@ -9,20 +9,41 @@ repos:
   hooks:
   - id: check-json
   - id: check-toml
+    exclude: |
+        (?x)^(
+            cookiecutter/.*/pyproject.toml
+        )$
   - id: check-yaml
+    exclude: |
+        (?x)^(
+            cookiecutter/.*/meltano.yml
+        )$
   - id: end-of-file-fixer
+    exclude: (cookiecutter/.*|docs/.*|samples/.*\.json)
   - id: trailing-whitespace
+    exclude: |
+        (?x)^(
+            singer_sdk/helpers/_simpleeval.py|
+            tests/core/test_simpleeval.py
+        )$
 
 - repo: https://github.com/psf/black
   rev: 22.3.0
   hooks:
   - id: black
     language_version: python3.10
+    exclude: |
+        (?x)^(
+            cookiecutter/.*|
+            singer_sdk/helpers/_simpleeval.py|
+            tests/core/test_simpleeval.py
+        )$
 
 - repo: https://github.com/pycqa/isort
   rev: 5.10.1
   hooks:
   - id: isort
+    exclude: (cookiecutter/.*|singer_sdk/helpers/_simpleeval/.*)
 
 - repo: https://github.com/pycqa/flake8
   rev: 4.0.1
@@ -39,12 +60,8 @@ repos:
   hooks:
   - id: pyupgrade
     args: [--py37-plus]
-
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v0.961
-  hooks:
-  - id: mypy
-    exclude: tests/.*
-    args: ["--pretty", "--show-error-codes"]
-    additional_dependencies:
-    - 'types-requests==2.27.30'
+    exclude: |
+        (?x)^(
+            singer_sdk/helpers/_simpleeval.py|
+            tests/core/test_simpleeval.py
+        )$

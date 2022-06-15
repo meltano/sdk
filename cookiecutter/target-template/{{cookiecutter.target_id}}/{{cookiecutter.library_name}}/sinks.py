@@ -18,7 +18,7 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
 
     def start_batch(self, context: dict) -> None:
         """Start a batch.
-        
+
         Developers may optionally add additional markers to the `context` dict,
         which is unique to this batch.
         """
