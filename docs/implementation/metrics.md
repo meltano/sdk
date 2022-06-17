@@ -1,6 +1,6 @@
 # [SDK Implementation Details](./index.md) - Tap Metrics
 
-Metrics logging is specified in the 
+Metrics logging is specified in the
 [Singer Spec](https://hub.meltano.com/singer/spec#metrics). The SDK will automatically
 emit two types of metrics `record_count` and `http_request_duration`.
 
