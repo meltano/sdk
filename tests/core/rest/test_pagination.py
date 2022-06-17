@@ -77,6 +77,18 @@ def test_paginator_hateoas_missing_implementation():
         BaseHATEOASPaginator()
 
 
+def test_paginator_attributes():
+    """Validate paginator that uses the page number."""
+
+    response = Response()
+    paginator = JSONPathPaginator(jsonpath="$.nextPageToken")
+    assert str(paginator) == "JSONPathPaginator<None>"
+
+    response._content = b'{"nextPageToken": "abc"}'
+    paginator.advance(response)
+    assert str(paginator) == "JSONPathPaginator<abc>"
+
+
 def test_paginator_loop():
     """Validate paginator that uses the page number."""
 

@@ -384,7 +384,7 @@ class LegacyPaginatedStreamProtocol(Protocol[TPageToken]):
             response: API response object.
             previous_token: Previous page token.
         """
-        ...
+        ...  # pragma: no cover
 
 
 class LegacyStreamPaginator(
