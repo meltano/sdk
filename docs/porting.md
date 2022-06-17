@@ -114,11 +114,11 @@ from singer_sdk.pagination import BaseHATEOASPaginator, first
 
 
 class CustomHATEOASPaginator(BaseHATEOASPaginator):
-    """Paginator for HATEOAS APIs - or "Hypermedia as the Engine of Application State".
-    
-    This paginator expects responses to have a key "next" with a value
-    like "https://api.com/link/to/next-item".
-    """"
+   """Paginator for HATEOAS APIs - or "Hypermedia as the Engine of Application State".
+
+   This paginator expects responses to have a key "next" with a value
+   like "https://api.com/link/to/next-item".
+   """"
 
    def get_next_url(self, response: Response) -> str | None:
       """Get a parsed HATEOAS link for the next, if the response has one."""
