@@ -88,3 +88,22 @@ JSON Schema builder classes
     :template: module.rst
 
     typing
+
+
+Pagination
+----------
+
+.. autosummary::
+    :toctree: classes
+    :template: class.rst
+
+    pagination.BaseAPIPaginator
+    pagination.SinglePagePaginator
+    pagination.BaseHATEOASPaginator
+    pagination.HeaderLinkPaginator
+    pagination.JSONPathPaginator
+    pagination.SimpleHeaderPaginator
+    pagination.BasePageNumberPaginator
+    pagination.BaseOffsetPaginator
+    pagination.LegacyPaginatedStreamProtocol
+    pagination.LegacyStreamPaginator

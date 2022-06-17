@@ -103,9 +103,75 @@ _Important: If you've gotten this far, this is a good time to commit your code b
 
 Pagination is generally unique for almost every API. There's no single method that solves for very different API's approach to pagination.
 
-Most likely you will use `get_next_page_token` to parse and return whatever the "next page" token is for your source, and you'll use `get_url_params` to define how to pass the "next page" token back to the API when asking for subsequent pages.
+Most likely you will use [get_new_paginator](singer_sdk.RESTStream.get_new_paginator) to instantiate a [pagination class](./classes/singer_sdk.pagination.BaseAPIPaginator) for your source, and you'll use `get_url_params` to define how to pass the "next page" token back to the API when asking for subsequent pages.
 
 When you think you have it right, run `poetry run tap-mysource` again, and debug until you are confident the result is including multiple pages back from the API.
+
+You can also add unit tests for your pagination implementation for additional confidence:
+
+```python
+from singer_sdk.pagination import BaseHATEOASPaginator, first
+
+
+class CustomHATEOASPaginator(BaseHATEOASPaginator):
+   def get_next_url(self, response: Response) -> str | None:
+      """Get a parsed HATEOAS link for the next, if the response has one."""
+
+      try:
+            return first(
+               extract_jsonpath("$.links[?(@.rel=='next')].href", response.json())
+            )
+      except StopIteration:
+            return None
+
+
+def test_paginator_custom_hateoas():
+   """Validate paginator that my custom paginator."""
+
+   resource_path = "/path/to/resource"
+   response = Response()
+   paginator = CustomHATEOASPaginator()
+   assert not paginator.finished
+   assert paginator.current_value is None
+   assert paginator.count == 0
+
+   response._content = json.dumps(
+      {
+         "links": [
+               {
+                  "rel": "next",
+                  "href": f"{resource_path}?page=2&limit=100",
+               }
+         ]
+      }
+   ).encode()
+   paginator.advance(response)
+   assert not paginator.finished
+   assert paginator.current_value.path == resource_path
+   assert paginator.current_value.query == "page=2&limit=100"
+   assert paginator.count == 1
+
+   response._content = json.dumps(
+      {
+         "links": [
+               {
+                  "rel": "next",
+                  "href": f"{resource_path}?page=3&limit=100",
+               }
+         ]
+      }
+   ).encode()
+   paginator.advance(response)
+   assert not paginator.finished
+   assert paginator.current_value.path == resource_path
+   assert paginator.current_value.query == "page=3&limit=100"
+   assert paginator.count == 2
+
+   response._content = json.dumps({"links": []}).encode()
+   paginator.advance(response)
+   assert paginator.finished
+   assert paginator.count == 3
+```
 
 Note: Depending on how well the API is designed, this could take 5 minutes or multiple hours. If you need help, sometimes [PostMan](https://postman.com) or [Thunder Client](https://marketplace.visualstudio.com/items?itemName=rangav.vscode-thunder-client) can be helpful in debugging the APIs specific quirks.
 
