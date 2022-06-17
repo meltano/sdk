@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from typing import Any
 
 import pytest
 from requests import Response
@@ -139,8 +140,10 @@ def test_paginator_offset():
             start_value: int,
             page_size: int,
             records_jsonpath: str,
+            *args: Any,
+            **kwargs: Any,
         ) -> None:
-            super().__init__(start_value, page_size)
+            super().__init__(start_value, page_size, *args, **kwargs)
             self._records_jsonpath = records_jsonpath
 
         def has_more(self, response: Response) -> bool:
