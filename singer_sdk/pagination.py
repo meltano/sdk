@@ -176,10 +176,10 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
 
 class BaseHATEOASPaginator(BaseAPIPaginator[Optional[ParseResult]], metaclass=ABCMeta):
     """Paginator class for APIs supporting HATEOAS links in their response bodies.
-    
+
     HATEOAS stands for "Hypermedia as the Engine of Application State". See
     https://en.wikipedia.org/wiki/HATEOAS.
-    
+
     This paginator expects responses to have a key "next" with a value
     like "https://api.com/link/to/next-item".
     """
