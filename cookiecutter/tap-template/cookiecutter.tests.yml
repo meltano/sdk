@@ -24,9 +24,9 @@ tests:
     include_cicd_sample_template: "None (Skip)"
 
   - source_name: RESTOAuthTemplateTest
-    tap_id: test-tap-rest-oath-type
+    tap_id: test-tap-rest-oauth-type
     stream_type: REST
-    auth_method: OAuth
+    auth_method: OAuth2
     include_cicd_sample_template: "None (Skip)"
 
   - source_name: RESTJWTTemplateTest
@@ -56,4 +56,4 @@ tests:
     tap_id: test-tap-other-custom-with-github-ci
     stream_type: Other
     auth_method: Custom or N/A
-    include_cicd_sample_template: Github
+    include_cicd_sample_template: GitHub
