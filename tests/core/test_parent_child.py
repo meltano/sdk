@@ -87,13 +87,12 @@ def test_parent_context_fields_in_child(tap: MyTap):
     parent_stream = tap.streams["parent"]
     child_stream = tap.streams["child"]
 
-    buf = io.StringIO()
-    with redirect_stdout(buf):
+    with io.BytesIO() as buf, io.TextIOWrapper(buf) as to, redirect_stdout(to):
         tap.sync_all()
 
-    buf.seek(0)
-    lines = buf.read().splitlines()
-    messages = [json.loads(line) for line in lines]
+        to.seek(0)
+        lines = to.read().splitlines()
+        messages = [json.loads(line) for line in lines]
 
     # Parent schema is emitted
     assert messages[0]
@@ -123,13 +122,12 @@ def test_child_deselected_parent(tap_with_deselected_parent: MyTap):
     assert not parent_stream.selected
     assert parent_stream.has_selected_descendents
 
-    buf = io.StringIO()
-    with redirect_stdout(buf):
+    with io.BytesIO() as buf, io.TextIOWrapper(buf) as to, redirect_stdout(to):
         tap_with_deselected_parent.sync_all()
 
-    buf.seek(0)
-    lines = buf.read().splitlines()
-    messages = [json.loads(line) for line in lines]
+        buf.seek(0)
+        lines = buf.read().splitlines()
+        messages = [json.loads(line) for line in lines]
 
     # First message is a schema for the child stream, not the parent
     assert messages[0]
