@@ -55,27 +55,27 @@ docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser"]
 [tool.poetry.dev-dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
 pytest = "^7.1.2"
-black = {version = "^22.3", allow-prereleases = true}
 mypy = "^0.961"
 cookiecutter = "^2.1.1"
 PyYAML = "^6.0"
-flake8-docstrings = "^1.6.0"
-flake8 = "^3.9.0"
 pyarrow = "^8.0.0"
 pandas = ">=1.2.0"
 numpy = ">=1.20.0"
 tox = "^3.25.0"
 freezegun = "^1.2.1"
 viztracer = "^0.15.3"
-flake8-annotations = "^2.9.0"
-darglint = "^1.8.0"
-isort = "^5.9.3"
-pyupgrade = "^2.34.0"
 requests-mock = "^1.9.3"
 sqlalchemy2-stubs = {version = "^0.0.2a24", allow-prereleases = true}
 types-python-dateutil = "^2.8.17"
 types-requests = "^2.27.30"
 coverage = {extras = ["toml"], version = "^6.4"}
+
+# Cookiecutter tests
+black = "^22.3"
+darglint = "^1.8.0"
+flake8 = "^3.9.0"
+flake8-annotations = "^2.9.0"
+flake8-docstrings = "^1.6.0"
 
 [tool.black]
 exclude = ".*simpleeval.*"

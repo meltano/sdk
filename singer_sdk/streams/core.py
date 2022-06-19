@@ -434,18 +434,27 @@ class Stream(metaclass=abc.ABCMeta):
 
     @property
     def is_sorted(self) -> bool:
-        """Check if stream is sorted.
+        """Expect stream to be sorted.
 
         When `True`, incremental streams will attempt to resume if unexpectedly
         interrupted.
-
-        This setting enables additional checks which may trigger
-        `InvalidStreamSortException` if records are found which are unsorted.
 
         Returns:
             `True` if stream is sorted. Defaults to `False`.
         """
         return False
+
+    @property
+    def check_sorted(self) -> bool:
+        """Check if stream is sorted.
+
+        This setting enables additional checks which may trigger
+        `InvalidStreamSortException` if records are found which are unsorted.
+
+        Returns:
+            `True` if sorting is checked. Defaults to `True`.
+        """
+        return True
 
     @property
     def metadata(self) -> MetadataMapping:
@@ -679,6 +688,7 @@ class Stream(metaclass=abc.ABCMeta):
                     replication_key=self.replication_key,
                     latest_record=latest_record,
                     is_sorted=treat_as_sorted,
+                    check_sorted=self.check_sorted,
                 )
 
     # Private message authoring methods:
