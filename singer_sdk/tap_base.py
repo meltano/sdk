@@ -378,6 +378,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
             stream.sync()
             stream.finalize_state_progress_markers()
+            stream.log_sync_costs()
 
     # Command Line Execution
 
