@@ -1,5 +1,6 @@
 """Stream tests."""
 
+import logging
 from typing import Any, Dict, Iterable, List, Optional, cast
 
 import pendulum
@@ -357,3 +358,32 @@ def test_cached_jsonpath():
 
     # cached objects should point to the same memory location
     assert recompiled is compiled
+
+
+def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
+    """Test sync costs are added up correctly."""
+    fake_request = requests.PreparedRequest()
+    fake_response = requests.Response()
+
+    stream = RestTestStream(tap)
+
+    def calculate_test_cost(
+        request: requests.PreparedRequest,
+        response: requests.Response,
+        context: Optional[Dict],
+    ):
+        return {"dim1": 1, "dim2": 2}
+
+    stream.calculate_sync_cost = calculate_test_cost
+    stream.update_sync_costs(fake_request, fake_response, None)
+    stream.update_sync_costs(fake_request, fake_response, None)
+    assert stream._sync_costs == {"dim1": 2, "dim2": 4}
+
+    with caplog.at_level(logging.INFO, logger=tap.name):
+        stream.log_sync_costs()
+
+    assert len(caplog.records) == 1
+
+    for record in caplog.records:
+        assert record.levelname == "INFO"
+        assert f"Total Sync costs for stream {stream.name}" in record.message

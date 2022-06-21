@@ -76,6 +76,9 @@ class Stream(metaclass=abc.ABCMeta):
     parent_stream_type: Optional[Type["Stream"]] = None
     ignore_parent_replication_key: bool = False
 
+    # Internal API cost aggregator
+    _sync_costs: Dict[str, int] = {}
+
     def __init__(
         self,
         tap: TapBaseClass,
@@ -863,6 +866,18 @@ class Stream(metaclass=abc.ABCMeta):
         if context:
             extra_tags["context"] = context
         self._write_metric_log(metric=request_duration_metric, extra_tags=extra_tags)
+
+    def log_sync_costs(self) -> None:
+        """Log a summary of Sync costs.
+
+        The costs are calculated via `calculate_sync_cost`.
+        This method can be overridden to log results in a custom
+        format. It is only called once at the end of the life of
+        the stream.
+        """
+        if len(self._sync_costs) > 0:
+            msg = f"Total Sync costs for stream {self.name}: {self._sync_costs}"
+            self.logger.info(msg)
 
     def _check_max_record_limit(self, record_count: int) -> None:
         """TODO.
