@@ -359,7 +359,7 @@ def test_cached_jsonpath():
     assert recompiled is compiled
 
 
-def test_sync_costs_calculation(tap: SimpleTestTap):
+def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
     """Test sync costs are added up correctly."""
     fake_request = requests.PreparedRequest()
     fake_response = requests.Response()
@@ -377,3 +377,12 @@ def test_sync_costs_calculation(tap: SimpleTestTap):
     stream.update_sync_costs(fake_request, fake_response, None)
     stream.update_sync_costs(fake_request, fake_response, None)
     assert stream._sync_costs == {"dim1": 2, "dim2": 4}
+
+    with caplog.at_level(logging.INFO, logger=tap.name):
+        stream.log_sync_costs()
+
+    assert len(caplog.records) == 1
+
+    for record in caplog.records:
+        assert record.levelname == "INFO"
+        assert f"Total Sync costs for stream {stream.name}" in record.message
