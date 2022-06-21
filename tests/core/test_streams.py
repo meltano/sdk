@@ -1,5 +1,6 @@
 """Stream tests."""
 
+import logging
 from typing import Any, Dict, Iterable, List, Optional, cast
 
 import pendulum
