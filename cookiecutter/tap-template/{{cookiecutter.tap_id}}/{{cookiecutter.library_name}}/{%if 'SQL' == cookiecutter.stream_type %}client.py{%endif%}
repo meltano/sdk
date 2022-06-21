@@ -36,7 +36,7 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
     @staticmethod
     def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
         """Returns a JSON Schema equivalent for the given SQL type.
-        
+
         Developers may optionally add custom logic before calling the default
         implementation inherited from the base class.
         """

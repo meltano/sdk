@@ -1,7 +1,8 @@
 name: Test
 
 on:
-  pull_request: {}
+  pull_request:
+    types: [opened, synchronize, reopened]
   push:
     branches: [main]
   workflow_dispatch:
@@ -9,17 +10,8 @@ on:
 
 jobs:
   tests:
-    name: Test on ${{ matrix.python-version }} (${{ matrix.tox-env }}${{ matrix.external && ', external' || '' }}) / ${{ matrix.os }}
+    name: Test on ${{ matrix.python-version }} (${{ matrix.tox-env }}) / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.external || false }}
-    env:
-      SAMPLE_TAP_GITLAB_AUTH_TOKEN: ${{ secrets.SAMPLE_TAP_GITLAB_AUTH_TOKEN }}
-      SAMPLE_TAP_GITLAB_GROUP_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_GROUP_IDS }}
-      SAMPLE_TAP_GITLAB_PROJECT_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_PROJECT_IDS }}
-      SAMPLE_TAP_GITLAB_START_DATE: "2022-01-01T00:00:00Z"
-      SAMPLE_TAP_GOOGLE_ANALYTICS_CLIENT_EMAIL: ${{ secrets.SAMPLE_TAP_GOOGLE_ANALYTICS_CLIENT_EMAIL }}
-      SAMPLE_TAP_GOOGLE_ANALYTICS_PRIVATE_KEY: ${{ secrets.SAMPLE_TAP_GOOGLE_ANALYTICS_PRIVATE_KEY }}
-      SAMPLE_TAP_GOOGLE_ANALYTICS_VIEW_ID: ${{ secrets.SAMPLE_TAP_GOOGLE_ANALYTICS_VIEW_ID }}
     strategy:
       fail-fast: false
       matrix:
@@ -28,9 +20,8 @@ jobs:
         - { tox-env: py, python-version: "3.8", os: "ubuntu-latest" }
         - { tox-env: py, python-version: "3.9", os: "ubuntu-latest" }
         - { tox-env: py, python-version: "3.10", os: "ubuntu-latest" }
-        - { tox-env: py, python-version: "3.10", os: "ubuntu-latest", external: true }
         - { tox-env: doctest, python-version: "3.10", os: "ubuntu-latest" }
-        - { tox-env: lint, python-version: "3.8", os: "ubuntu-latest" }
+        - { tox-env: mypy, python-version: "3.8", os: "ubuntu-latest" }
 
     steps:
     - name: Check out the repository
@@ -64,7 +55,7 @@ jobs:
 
     - name: Run tox
       run: |
-        poetry run tox -e ${{ matrix.tox-env }} --${{ matrix.external && ' -m "external"' || '' }}${{ matrix.doctest && ' --doctest-modules singer_sdk' }}
+        poetry run tox -e ${{ matrix.tox-env }} --${{ matrix.doctest && ' --doctest-modules singer_sdk' }}
 
     - name: Upload coverage data
       if: always() && (matrix.tox-env == 'py')
@@ -73,7 +64,55 @@ jobs:
         name: coverage-data
         path: ".coverage.*"
 
+  tests-external:
+    name: External Tests
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.head.repo.fork }}
+    env:
+      SAMPLE_TAP_GITLAB_AUTH_TOKEN: ${{ secrets.SAMPLE_TAP_GITLAB_AUTH_TOKEN }}
+      SAMPLE_TAP_GITLAB_GROUP_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_GROUP_IDS }}
+      SAMPLE_TAP_GITLAB_PROJECT_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_PROJECT_IDS }}
+      SAMPLE_TAP_GITLAB_START_DATE: "2022-01-01T00:00:00Z"
+      SAMPLE_TAP_GOOGLE_ANALYTICS_CLIENT_EMAIL: ${{ secrets.SAMPLE_TAP_GOOGLE_ANALYTICS_CLIENT_EMAIL }}
+      SAMPLE_TAP_GOOGLE_ANALYTICS_PRIVATE_KEY: ${{ secrets.SAMPLE_TAP_GOOGLE_ANALYTICS_PRIVATE_KEY }}
+      SAMPLE_TAP_GOOGLE_ANALYTICS_VIEW_ID: ${{ secrets.SAMPLE_TAP_GOOGLE_ANALYTICS_VIEW_ID }}
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v3.0.2
+
+    - name: Install Poetry
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
+      run: |
+        pipx install poetry
+        poetry --version
+
+    - name: Setup Python 3.10
+      uses: actions/setup-python@v4.0.0
+      with:
+        python-version: '3.10'
+        architecture: x64
+        cache: 'poetry'
+
+    - name: Upgrade pip
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
+      run: |
+        pip install pip
+        pip --version
+
+    - name: Install Dependencies
+      run: |
+        poetry env use "3.10"
+        poetry install
+
+    - name: Run tox
+      run: |
+        poetry run tox -e py -- -m "external"
+
   coverage:
+    name: Coverage
     runs-on: ubuntu-latest
     needs: tests
     steps:
