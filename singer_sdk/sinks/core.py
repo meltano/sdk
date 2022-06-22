@@ -401,3 +401,7 @@ class Sink(metaclass=abc.ABCMeta):
             "ACTIVATE_VERSION message received but not implemented by this target. "
             "Ignoring."
         )
+
+    def clean_up(self) -> None:
+        """Perform any clean up actions required at end of a stream."""
+        pass

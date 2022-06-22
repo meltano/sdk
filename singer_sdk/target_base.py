@@ -273,7 +273,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     def _process_endofpipe(self) -> None:
         """Called after all input lines have been read."""
-        self.drain_all()
+        self.drain_all(is_endofpipe=True)
 
     def _process_record_message(self, message_dict: dict) -> None:
         """Process a RECORD message.
@@ -403,15 +403,19 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     # Sink drain methods
 
     @final
-    def drain_all(self) -> None:
+    def drain_all(self, is_endofpipe=False) -> None:
         """Drains all sinks, starting with those cleared due to changed schema.
 
         This method is internal to the SDK and should not need to be overridden.
         """
         state = copy.deepcopy(self._latest_state)
         self._drain_all(self._sinks_to_clear, 1)
+        if is_endofpipe:
+            (sink.clean_up() for sink in self._sinks_active.values())
         self._sinks_to_clear = []
         self._drain_all(list(self._sinks_active.values()), self.max_parallelism)
+        if is_endofpipe:
+            (sink.clean_up() for sink in self._sinks_to_clear)
         self._write_state_message(state)
         self._reset_max_record_age()
 
