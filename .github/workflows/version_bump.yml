@@ -55,6 +55,7 @@ jobs:
         push: "false"
         changelog: "false"
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        # changelog_increment_filename: body.md
 
     - env:
         PIP_CONSTRAINT: .github/workflows/constraints.txt
@@ -62,7 +63,7 @@ jobs:
         pipx install changelog-cli
 
     - name: Prepare Changelog
-      if: always() && (github.event.inputs.prerelease != '')
+      if: always() && (github.event.inputs.prerelease != 'none')
       run: |
         bump_lowercase=$(echo "${{ github.event.inputs.bump }}" | tr '[:upper:]' '[:lower:]')
         changelog release --$bump_lowercase --yes
@@ -78,3 +79,13 @@ jobs:
         branch: release/v${{ steps.cz-bump.outputs.version }}
         base: main
         labels: release
+
+    # - name: Draft Release
+    #   uses: softprops/action-gh-release@v1
+    #   with:
+    #     draft: true
+    #     body_path: body.md
+    #     tag_name: v${{ steps.cz-bump.outputs.version }}
+    #     prerelease: ${{ github.event.inputs.prerelease != 'none' }}
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
