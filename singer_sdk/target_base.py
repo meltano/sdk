@@ -411,11 +411,13 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         state = copy.deepcopy(self._latest_state)
         self._drain_all(self._sinks_to_clear, 1)
         if is_endofpipe:
-            (sink.clean_up() for sink in self._sinks_active.values())
+            for sink in self._sinks_to_clear:
+                sink.clean_up()
         self._sinks_to_clear = []
         self._drain_all(list(self._sinks_active.values()), self.max_parallelism)
         if is_endofpipe:
-            (sink.clean_up() for sink in self._sinks_to_clear)
+            for sink in self._sinks_active.values():
+                sink.clean_up()
         self._write_state_message(state)
         self._reset_max_record_age()
 
