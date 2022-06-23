@@ -402,7 +402,6 @@ class Sink(metaclass=abc.ABCMeta):
             "Ignoring."
         )
 
-    @abc.abstractmethod
     def clean_up(self) -> None:
         """Perform any clean up actions required at end of a stream.
 
