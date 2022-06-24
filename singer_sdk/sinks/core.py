@@ -407,5 +407,6 @@ class Sink(metaclass=abc.ABCMeta):
 
         Implementations should ensure that clean up does not affect resources
         that may be in use from other instances of the same sink. Stream name alone
-        should not be relied on, it's recommended to use a uuid as well."""
+        should not be relied on, it's recommended to use a uuid as well.
+        """
         pass

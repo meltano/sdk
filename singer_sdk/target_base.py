@@ -403,10 +403,16 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     # Sink drain methods
 
     @final
-    def drain_all(self, is_endofpipe=False) -> None:
+    def drain_all(self, is_endofpipe: bool = False) -> None:
         """Drains all sinks, starting with those cleared due to changed schema.
 
         This method is internal to the SDK and should not need to be overridden.
+
+        Args:
+            is_endofpipe: This is passed by the
+                          :meth:`~singer_sdk.Sink._process_endofpipe()` which
+                          is called after the target instance has finished
+                          listening to the stdin
         """
         state = copy.deepcopy(self._latest_state)
         self._drain_all(self._sinks_to_clear, 1)
