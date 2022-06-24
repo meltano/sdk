@@ -5,8 +5,8 @@ import copy
 import logging
 from datetime import datetime
 from typing import (
-    Callable,
     Any,
+    Callable,
     Dict,
     Generator,
     Generic,
