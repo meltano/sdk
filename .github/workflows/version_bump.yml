@@ -75,10 +75,17 @@ jobs:
         commit-message: "chore: Bump package version"
         title: "chore: Release v${{ steps.cz-bump.outputs.version }}"
         body: |
-          Prepare MeltanoSDK `v${{ steps.cz-bump.outputs.version }}` for release
+          Prepare MeltanoSDK `v${{ steps.cz-bump.outputs.version }}` for release.
+
+          Checklist:
+
+          - [ ] Check that the right version is set in all the files.
+          - [ ] Groom the changelog for wording or missing entries.
+          - [ ] Merge this PR once everything looks good.
         branch: release/v${{ steps.cz-bump.outputs.version }}
         base: main
         labels: release
+        assignees: "${{ github.actor }}"
 
     # - name: Draft Release
     #   uses: softprops/action-gh-release@v1
