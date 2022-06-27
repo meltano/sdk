@@ -23,6 +23,7 @@ repos:
   - id: trailing-whitespace
     exclude: |
         (?x)^(
+            .bumpversion.cfg|
             singer_sdk/helpers/_simpleeval.py|
             tests/core/test_simpleeval.py
         )$
