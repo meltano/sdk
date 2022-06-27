@@ -320,8 +320,18 @@ class Stream(metaclass=abc.ABCMeta):
             ):
                 value = replication_key_value
 
-            elif "start_date" in self.config:
-                value = self.config["start_date"]
+            # Use start_date if it is more recent than the replication_key state
+            if "start_date" in self.config:
+                if not value:
+                    value = self.config["start_date"]
+                else:
+                    value_datetime = pendulum.parse(value)
+                    start_datetime = pendulum.parse(self.config["start_date"])
+                    value = (
+                        value
+                        if value_datetime > start_datetime
+                        else self.config["start_date"]
+                    )
 
         write_starting_replication_value(state, value)
 
