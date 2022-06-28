@@ -23,6 +23,7 @@ from typing import (
     Union,
     cast,
 )
+from xmlrpc.client import DateTime
 
 import pendulum
 import requests
@@ -325,8 +326,8 @@ class Stream(metaclass=abc.ABCMeta):
                 if not value:
                     value = self.config["start_date"]
                 else:
-                    value_datetime = pendulum.parse(value)
-                    start_datetime = pendulum.parse(self.config["start_date"])
+                    value_datetime: DateTime = pendulum.parse(value)
+                    start_datetime: DateTime = pendulum.parse(self.config["start_date"])
                     value = (
                         value
                         if value_datetime > start_datetime
