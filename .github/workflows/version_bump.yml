@@ -63,7 +63,7 @@ jobs:
         pipx install changelog-cli
 
     - name: Prepare Changelog
-      if: always() && (github.event.inputs.prerelease != 'none')
+      if: always() && (github.event.inputs.prerelease == 'none')
       run: |
         bump_lowercase=$(echo "${{ github.event.inputs.bump }}" | tr '[:upper:]' '[:lower:]')
         changelog release --$bump_lowercase --yes
