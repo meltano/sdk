@@ -52,25 +52,6 @@ license_scanning:
   dependencies:
     - generate_requirements
 
-build_and_test:
-  stage: test
-  parallel:
-    matrix:
-      - PYTHON_VERSION: ["3.7", "3.8", "3.9", "3.10"]
-  image: python:${PYTHON_VERSION}
-  script:
-    - |
-      if [[ "$CI_PROJECT_NAMESPACE" == "meltano" ]]
-      then
-        echo "Run full test suite using 'py${PYTHON_VERSION//./}' tox env config..."
-        poetry run tox -e py
-      else
-        echo "Run 'core' and 'cookiecutter' python test suites..."
-        poetry run pytest --doctest-modules singer_sdk
-        poetry run pytest tests/core
-        poetry run pytest tests/cookiecutters
-      fi
-
 pypi_publish:
   # release:
   #   name: '$CI_COMMIT_TAG'
