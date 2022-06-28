@@ -71,7 +71,7 @@ types-requests = "^2.28.0"
 coverage = {extras = ["toml"], version = "^6.4"}
 
 # Cookiecutter tests
-black = "^22.3"
+black = "^22.6"
 darglint = "^1.8.0"
 flake8 = "^3.9.0"
 flake8-annotations = "^2.9.0"
