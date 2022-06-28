@@ -325,11 +325,67 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
                 next_page_token=paginator.current_value,
             )
             resp = decorated_request(prepared_request, context)
+            self.update_sync_costs(prepared_request, resp, context)
             yield from self.parse_response(resp)
 
             paginator.advance(resp)
 
+    def update_sync_costs(
+        self,
+        request: requests.PreparedRequest,
+        response: requests.Response,
+        context: dict | None,
+    ) -> dict[str, int]:
+        """Update internal calculation of Sync costs.
+
+        Args:
+            request: the Request object that was just called.
+            response: the `requests.Response` object
+            context: the context passed to the call
+
+        Returns:
+            A dict of costs (for the single request) whose keys are
+            the "cost domains". See `calculate_sync_cost` for details.
+        """
+        call_costs = self.calculate_sync_cost(request, response, context)
+        self._sync_costs = {
+            k: self._sync_costs.get(k, 0) + call_costs.get(k, 0)
+            for k in call_costs.keys()
+        }
+        return self._sync_costs
+
     # Overridable:
+
+    def calculate_sync_cost(
+        self,
+        request: requests.PreparedRequest,
+        response: requests.Response,
+        context: dict | None,
+    ) -> dict[str, int]:
+        """Calculate the cost of the last API call made.
+
+        This method can optionally be implemented in streams to calculate
+        the costs (in arbitrary units to be defined by the tap developer)
+        associated with a single API/network call. The request and response objects
+        are available in the callback, as well as the context.
+
+        The method returns a dict where the keys are arbitrary cost dimensions,
+        and the values the cost along each dimension for this one call. For
+        instance: { "rest": 0, "graphql": 42 } for a call to github's graphql API.
+        All keys should be present in the dict.
+
+        This method can be overridden by tap streams. By default it won't do
+        anything.
+
+        Args:
+            request: the API Request object that was just called.
+            response: the `requests.Response` object
+            context: the context passed to the call
+
+        Returns:
+            A dict of accumulated costs whose keys are the "cost domains".
+        """
+        return {}
 
     def prepare_request_payload(
         self, context: dict | None, next_page_token: _TToken | None
