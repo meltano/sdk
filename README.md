@@ -27,3 +27,15 @@ to get started with the SDK.
 ## Contributing back to the SDK
 
 - For more information on how to contribute, see our [Contributors Guide](https://sdk.meltano.com/en/latest/CONTRIBUTING.html).
+
+## Making a new release of the SDK
+
+1. Trigger a version bump [using the GitHub web UI](https://github.com/edgarrmondragon/sdk/actions/workflows/version_bump.yml) or the cli:
+
+   ```console
+   $ gh workflow run
+   ```
+
+1. Follow the checklist in the PR description.
+
+1. Publish a new release [using the GitHub web UI](https://github.com/meltano/sdk/releases/new).
