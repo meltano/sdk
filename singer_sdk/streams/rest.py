@@ -29,7 +29,6 @@ DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 _TToken = TypeVar("_TToken")
-# _TPaginator = TypeVar("_TPaginator", bound=BaseAPIPaginator)
 
 
 class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
