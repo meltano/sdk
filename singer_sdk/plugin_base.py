@@ -275,7 +275,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             print_fn: A function to use to display the plugin version.
                 Defaults to :function:`print`.
         """
-        print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version})")
+        print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version}")
 
     @classmethod
     def _get_about_info(cls: Type["PluginBase"]) -> Dict[str, Any]:
