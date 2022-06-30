@@ -12,6 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New
 
+### Changes
+
+### Fixes
+
+### Breaks
+
+
+## 0.6.0 - (2022-06-30)
+---
+
+### New
+
 - Tap and Target SDK: Adds the ability to override the [logging level](https://sdk.meltano.com/en/latest/implementation/logging.html) via `LOGLEVEL` environment variables. ([!300](https://gitlab.com/meltano/sdk/-/merge_requests/300)) - Thanks, _**[Eric Boucher](https://gitlab.com/ericboucher)**_!
 - Tap SDK: Allow sort checking to be disabled for taps with un-sortable replication keys. ([#729](https://github.com/meltano/sdk/issues/729), [#730](https://github.com/meltano/sdk/pull/730)) - Thanks, _**[Ilkka](https://github.com/ilkkapeltola)**_!
 - Tap SDK: Add `Stream.calculate_sync_cost` hook to gather "cost" (in terms of number of requests, etc.) for each stream. ([#348](https://github.com/meltano/sdk/issues/348), [#704](https://github.com/meltano/sdk/pull/704)) - Thanks, _**[Laurent Savaëte](https://github.com/laurentS)**_!
@@ -26,8 +38,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Tap and Target SDK: Resolves an issue where SQLAlchemy logs would be printed to `STDOUT`. ([!303](https://gitlab.com/meltano/sdk/-/merge_requests/303)) - Thanks, _**[Andrey Tatarinov](https://gitlab.com/elephantum)**_!
 - Tap SDK: Reduces number of log lines printed when unmapped properties are ignored from the source API ([!300](https://gitlab.com/meltano/sdk/-/merge_requests/300)) - Thanks, _**[Eric Boucher](https://gitlab.com/ericboucher)**_!
-
-### Breaks
 
 
 ## 0.5.0 - (2022-05-19)
