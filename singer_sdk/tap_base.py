@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 import click
 
 from singer_sdk.cli import common_options
-from singer_sdk.exceptions import MaxRecordsLimitException
+from singer_sdk.exceptions import ConfigValidationError, MaxRecordsLimitException
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
@@ -453,6 +453,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
             Raises:
                 FileNotFoundError: If the config file does not exist.
+                Abort: If the configuration is not valid.
             """
             if version:
                 cls.print_version()
@@ -486,13 +487,20 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
                 config_files.append(Path(config_path))
 
-            tap = cls(  # type: ignore  # Ignore 'type not callable'
-                config=config_files or None,
-                state=state,
-                catalog=catalog,
-                parse_env_config=parse_env_config,
-                validate_config=validate_config,
-            )
+            try:
+                tap = cls(  # type: ignore  # Ignore 'type not callable'
+                    config=config_files or None,
+                    state=state,
+                    catalog=catalog,
+                    parse_env_config=parse_env_config,
+                    validate_config=validate_config,
+                )
+            except ConfigValidationError as exc:
+                for error in exc.errors:
+                    click.secho(error, fg="red")
+                for warning in exc.warnings:
+                    click.secho(warning, fg="warning")
+                raise click.Abort("Configuration is not valid.")
 
             if discover:
                 tap.run_discovery()

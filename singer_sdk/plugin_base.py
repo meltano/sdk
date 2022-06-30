@@ -250,7 +250,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                 f"JSONSchema was: {config_jsonschema}"
             )
             if raise_errors:
-                raise ConfigValidationError(summary)
+                raise ConfigValidationError(summary, errors=errors)
 
             log_fn = self.logger.warning
         else:
@@ -259,7 +259,8 @@ class PluginBase(metaclass=abc.ABCMeta):
                 summary += f"\n{warning}"
         if warnings_as_errors and raise_errors and warnings:
             raise ConfigValidationError(
-                f"One or more warnings ocurred during validation: {warnings}"
+                f"One or more warnings ocurred during validation: {warnings}",
+                warnings=warnings,
             )
         log_fn(summary)
         return warnings, errors

@@ -403,14 +403,14 @@ class ObjectType(JSONTypeHelper):
     def __init__(
         self,
         *properties: Property,
-        additional_properties: W | type[W] | None = None,
+        additional_properties: W | type[W] | bool | None = None,
     ) -> None:
         """Initialize ObjectType from its list of properties.
 
         Args:
             properties: Zero or more attributes for this JSON object.
             additional_properties: A schema to match against unnamed properties in
-                this object.
+                this object or a boolean indicating if extra properties are allowed.
         """
         self.wrapped: list[Property] = list(properties)
         self.additional_properties = additional_properties
@@ -428,13 +428,16 @@ class ObjectType(JSONTypeHelper):
             merged_props.update(w.to_dict())
             if not w.optional:
                 required.append(w.name)
-        result = {"type": "object", "properties": merged_props}
+        result: dict = {"type": "object", "properties": merged_props}
 
         if required:
             result["required"] = required
 
-        if self.additional_properties:
-            result["additionalProperties"] = self.additional_properties.type_dict
+        if self.additional_properties is not None:
+            if isinstance(self.additional_properties, bool):
+                result["additionalProperties"] = self.additional_properties
+            else:
+                result["additionalProperties"] = self.additional_properties.type_dict
 
         return result
 

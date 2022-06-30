@@ -1,7 +1,8 @@
 """Test sample sync."""
 
+from __future__ import annotations
+
 import re
-from typing import List
 
 import pytest
 
@@ -47,7 +48,7 @@ class ConfigTestTap(Tap):
         Property("batch_size", IntegerType, default=-1),
     ).to_dict()
 
-    def discover_streams(self) -> List[Stream]:
+    def discover_streams(self) -> list[Stream]:
         return []
 
 
@@ -291,7 +292,7 @@ def test_array_type():
 
 
 @pytest.mark.parametrize(
-    "properties,addtional_properties",
+    "properties,additional_properties",
     [
         (
             [
@@ -314,6 +315,15 @@ def test_array_type():
         (
             [
                 Property("id", StringType),
+                Property("email", StringType),
+                Property("username", StringType),
+                Property("phone_number", StringType),
+            ],
+            False,
+        ),
+        (
+            [
+                Property("id", StringType),
                 Property("id", StringType),
                 Property("email", StringType),
                 Property("username", StringType),
@@ -334,6 +344,16 @@ def test_array_type():
         (
             [
                 Property("id", StringType),
+                Property("id", StringType),
+                Property("email", StringType),
+                Property("username", StringType),
+                Property("phone_number", StringType),
+            ],
+            False,
+        ),
+        (
+            [
+                Property("id", StringType),
                 Property("email", StringType, True),
                 Property("username", StringType, True),
                 Property("phone_number", StringType),
@@ -353,6 +373,15 @@ def test_array_type():
             [
                 Property("id", StringType),
                 Property("email", StringType, True),
+                Property("username", StringType, True),
+                Property("phone_number", StringType),
+            ],
+            False,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("email", StringType, True),
                 Property("email", StringType, True),
                 Property("username", StringType, True),
                 Property("phone_number", StringType),
@@ -368,29 +397,50 @@ def test_array_type():
                 Property("phone_number", StringType),
             ],
             StringType,
+        ),
+        (
+            [
+                Property("id", StringType),
+                Property("email", StringType, True),
+                Property("email", StringType, True),
+                Property("username", StringType, True),
+                Property("phone_number", StringType),
+            ],
+            False,
         ),
     ],
     ids=[
-        "no requried, no duplicates, no additional properties",
-        "no requried, no duplicates, additional properties",
-        "no requried, duplicates, no additional properties",
-        "no requried, duplicates, additional properties",
-        "requried, no duplicates, no additional properties",
-        "requried, no duplicates, additional properties",
-        "requried, duplicates, no additional properties",
-        "requried, duplicates, additional properties",
+        "no required, no duplicates, no additional properties",
+        "no required, no duplicates, additional properties",
+        "no required, no duplicates, no additional properties allowed",
+        "no required, duplicates, no additional properties",
+        "no required, duplicates, additional properties",
+        "no required, duplicates, no additional properties allowed",
+        "required, no duplicates, no additional properties",
+        "required, no duplicates, additional properties",
+        "required, no duplicates, no additional properties allowed",
+        "required, duplicates, no additional properties",
+        "required, duplicates, additional properties",
+        "required, duplicates, no additional properties allowed",
     ],
 )
-def test_object_type(properties: List[Property], addtional_properties: JSONTypeHelper):
+def test_object_type(
+    properties: list[Property],
+    additional_properties: JSONTypeHelper | bool,
+):
     merged_property_schemas = {
         name: schema for p in properties for name, schema in p.to_dict().items()
     }
 
     required = [p.name for p in properties if not p.optional]
     required_schema = {"required": required} if required else {}
-    addtional_properties_schema = (
-        {"additionalProperties": addtional_properties.type_dict}
-        if addtional_properties
+    additional_properties_schema = (
+        {
+            "additionalProperties": additional_properties
+            if isinstance(additional_properties, bool)
+            else additional_properties.type_dict
+        }
+        if additional_properties is not None
         else {}
     )
 
@@ -398,10 +448,10 @@ def test_object_type(properties: List[Property], addtional_properties: JSONTypeH
         "type": "object",
         "properties": merged_property_schemas,
         **required_schema,
-        **addtional_properties_schema,
+        **additional_properties_schema,
     }
 
-    object_type = ObjectType(*properties, additional_properties=addtional_properties)
+    object_type = ObjectType(*properties, additional_properties=additional_properties)
     assert object_type.type_dict == expected_json_schema
 
 
