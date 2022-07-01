@@ -53,20 +53,20 @@ jobs:
         prerelease: ${{ github.event.inputs.prerelease != 'none' && github.event.inputs.prerelease || '' }}
         commit: "false"
         push: "false"
-        changelog: "false"
+        changelog: "true"
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        # changelog_increment_filename: body.md
+        changelog_increment_filename: _changelog_fragment.md
 
-    - env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
-      run: |
-        pipx install changelog-cli
-
-    - name: Prepare Changelog
-      if: always() && (github.event.inputs.prerelease == 'none')
-      run: |
-        bump_lowercase=$(echo "${{ github.event.inputs.bump }}" | tr '[:upper:]' '[:lower:]')
-        changelog release --$bump_lowercase --yes
+    - name: Draft Release
+      id: draft-release
+      uses: softprops/action-gh-release@v1
+      with:
+        draft: true
+        body_path: _changelog_fragment.md
+        tag_name: v${{ steps.cz-bump.outputs.version }}
+        prerelease: ${{ github.event.inputs.prerelease != 'none' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v4
@@ -82,17 +82,9 @@ jobs:
           - [ ] Check that the right version is set in all the files.
           - [ ] Groom the changelog for wording or missing entries.
           - [ ] Merge this PR once everything looks good.
+
+          [Release Draft](${{ steps.draft-release.outputs.url }})
         branch: release/v${{ steps.cz-bump.outputs.version }}
         base: main
         labels: release
         assignees: "${{ github.actor }}"
-
-    # - name: Draft Release
-    #   uses: softprops/action-gh-release@v1
-    #   with:
-    #     draft: true
-    #     body_path: body.md
-    #     tag_name: v${{ steps.cz-bump.outputs.version }}
-    #     prerelease: ${{ github.event.inputs.prerelease != 'none' }}
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
