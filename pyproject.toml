@@ -56,13 +56,13 @@ docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser"]
 [tool.poetry.dev-dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
 pytest = "^7.1.2"
+xdoctest = "^1.0.0"
 mypy = "^0.961"
 cookiecutter = "^2.1.1"
 PyYAML = "^6.0"
 pyarrow = "^8.0.0"
 pandas = ">=1.2.0"
 numpy = ">=1.20.0"
-tox = "^3.25.1"
 freezegun = "^1.2.1"
 viztracer = "^0.15.3"
 requests-mock = "^1.9.3"
