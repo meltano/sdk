@@ -56,7 +56,7 @@ First clone, then...
     - `poetry install -E docs`
 1. The project has `pre-commit` hooks. Install them with:
     - `pre-commit install`
-1. Most development tasks you might need should be covered by `nox` environments. You can use `nox -l` to list all available tasks.
+1. Most development tasks you might need should be covered by `nox` sessions. You can use `nox -l` to list all available tasks.
 For example:
 
     - Run unit tests: `nox -r`.
