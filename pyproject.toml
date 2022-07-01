@@ -104,6 +104,25 @@ version_files = [
     "cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:singer-sdk",
 ]
 
+[tool.coverage.run]
+source = ["singer_sdk"]
+omit = [
+    "tests/*",
+    "samples/*",
+    "singer_sdk/helpers/_compat.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    '''class .*\bProtocol\):''',
+]
+fail_under = 85
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
