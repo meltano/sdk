@@ -8,13 +8,15 @@ on:
   workflow_dispatch:
     inputs: {}
 
+env:
+  FORCE_COLOR: "1"
+
 jobs:
   tests:
     name: Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     env:
       NOXSESSION: ${{ matrix.session }}
-      FORCE_COLOR: "1"
     strategy:
       fail-fast: false
       matrix:
