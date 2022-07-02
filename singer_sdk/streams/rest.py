@@ -16,7 +16,6 @@ from typing import (
     TypeVar,
     Union,
 )
-from urllib.parse import urlparse
 
 import backoff
 import requests
@@ -187,7 +186,6 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         Returns:
             str: The error message
         """
-        full_path = urlparse(response.url).path
         if 400 <= response.status_code < 500:
             error_type = "Client"
         else:
@@ -195,7 +193,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
 
         return (
             f"{response.status_code} {error_type} Error: "
-            f"{response.reason} for path: {full_path}"
+            f"{response.reason} for path: {self.path}"
         )
 
     def request_decorator(self, func: Callable) -> Callable:
