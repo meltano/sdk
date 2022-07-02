@@ -15,7 +15,7 @@ Contributors are expected to follow our [Code of Conduct](https://docs.meltano.c
 ## Setting up Prereqs
 
 Make sure [`poetry`](https://python-poetry.org/docs/),
-[`pre-commit`](https://pre-commit.com/) and [`tox`](https://tox.wiki/en/latest/)
+[`pre-commit`](https://pre-commit.com/) and [`nox`](https://nox.thea.codes/en/stable/)
 are installed. You can use [`pipx`](https://pypa.github.io/pipx/) to install
 all of them. To install `pipx`:
 
@@ -29,7 +29,8 @@ With `pipx` installed, you globally add the required tools:
 ```bash
 pipx install poetry
 pipx install pre-commit
-pipx install tox
+pipx install nox
+pipx inject nox nox-poetry
 ```
 
 Now you can use Poetry to install package dependencies:
@@ -55,18 +56,18 @@ First clone, then...
     - `poetry install -E docs`
 1. The project has `pre-commit` hooks. Install them with:
     - `pre-commit install`
-1. Most development tasks you might need should be covered by `tox` environments. You can use `tox -l` to list all available tasks.
+1. Most development tasks you might need should be covered by `nox` sessions. You can use `nox -l` to list all available tasks.
 For example:
 
-    - Run unit tests: `tox -e py`.
+    - Run unit tests: `nox -r`.
 
       We use `coverage` for code coverage metrics.
 
-    - Run pre-commit hooks: `tox -e pre-commit`.
+    - Run pre-commit hooks: `pre-commit run --all`.
 
       We use `black`, `flake8`, `isort`, `mypy` and `pyupgrade`. The project-wide max line length is `88`.
 
-    - Build documentation: `tox -e docs`
+    - Build documentation: `nox -rs docs`
 
       We use `sphinx` to build documentation.
 
@@ -84,22 +85,16 @@ To run tests:
 
 ```bash
 # Run just the core and cookiecutter tests (no external creds required):
-tox -e py
+nox -rs tests
 
 # Run all tests (external creds required):
-tox -e py -- -m "external"
-```
-
-To gather and display coverage metrics:
-
-```bash
-tox -e combine_coverage
+nox -rs tests -- -m "external"
 ```
 
 To view the code coverage report in HTML format:
 
 ```bash
-tox -e coverage_artifact -- html && open ./htmlcov/index.html
+nox -rs coverage -- html && open ./htmlcov/index.html
 ```
 
 ## Testing Updates to Docs
@@ -113,7 +108,7 @@ To build the docs:
 
 ```bash
 # Build docs
-tox -e docs
+nox -rs docs
 
 # Open in the local browser:
 open build/index.html
