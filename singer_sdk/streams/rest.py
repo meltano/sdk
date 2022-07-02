@@ -187,7 +187,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         Returns:
             str: The error message
         """
-        full_path = urlparse(response.url).path
+        full_path = urlparse(response.url).path or self.path
         if 400 <= response.status_code < 500:
             error_type = "Client"
         else:
