@@ -30,7 +30,7 @@ With `pipx` installed, you globally add the required tools:
 pipx install poetry
 pipx install pre-commit
 pipx install nox
-pipx install nox-poetry
+pipx inject nox nox-poetry
 ```
 
 Now you can use Poetry to install package dependencies:
