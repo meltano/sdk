@@ -89,3 +89,4 @@ jobs:
         base: main
         labels: release
         assignees: "${{ github.actor }}"
+        token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}
