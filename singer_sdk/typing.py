@@ -86,7 +86,15 @@ __all__ = [
     "PropertiesList",
 ]
 
-_JsonValue: TypeAlias = Union[str, int, float, bool, None]
+_JsonValue: TypeAlias = Union[
+    str,
+    int,
+    float,
+    bool,
+    list,
+    dict,
+    None,
+]
 
 
 def extend_validator_with_defaults(validator_class):  # noqa

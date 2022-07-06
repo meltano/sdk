@@ -7,8 +7,9 @@ on:
         description: "Version bump type"
         required: true
         type: choice
-        default: PATCH
+        default: auto
         options:
+        - auto
         - PATCH
         - MINOR
         - MAJOR
@@ -49,7 +50,7 @@ jobs:
       # TODO: https://github.com/commitizen-tools/commitizen-action/pull/38
       uses: edgarrmondragon/commitizen-action@feat-add-increment-option
       with:
-        increment: ${{ github.event.inputs.bump }}
+        increment: ${{ github.event.inputs.bump != 'auto' && github.event.inputs.bump || '' }}
         prerelease: ${{ github.event.inputs.prerelease != 'none' && github.event.inputs.prerelease || '' }}
         commit: "false"
         push: "false"
@@ -88,3 +89,4 @@ jobs:
         base: main
         labels: release
         assignees: "${{ github.actor }}"
+        token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}
