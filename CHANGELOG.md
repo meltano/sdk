@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.7.0 (2022-07-07)
+
+### Fix
+
+- Allow lists and dictionaries as types for default JSON values (#781)
+
 ## v0.6.1 (2022-07-01)
 
 ### Fix
