@@ -10,9 +10,9 @@ on:
         default: auto
         options:
         - auto
-        - PATCH
-        - MINOR
-        - MAJOR
+        - patch
+        - minor
+        - major
       prerelease:
         description: "Increase to this prerelease version"
         required: false
@@ -47,8 +47,7 @@ jobs:
 
     - name: Bump version
       id: cz-bump
-      # TODO: https://github.com/commitizen-tools/commitizen-action/pull/38
-      uses: edgarrmondragon/commitizen-action@feat-add-increment-option
+      uses: commitizen-tools/commitizen-action@0.14.1
       with:
         increment: ${{ github.event.inputs.bump != 'auto' && github.event.inputs.bump || '' }}
         prerelease: ${{ github.event.inputs.prerelease != 'none' && github.event.inputs.prerelease || '' }}
