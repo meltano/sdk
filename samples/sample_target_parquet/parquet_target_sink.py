@@ -2,7 +2,6 @@
 
 from typing import Any, Dict, List, Tuple, Union
 
-import pandas
 import pyarrow as pa
 import pyarrow.parquet as pq
 
@@ -21,8 +20,7 @@ class SampleParquetTargetSink(BatchSink):
         schema = pa.schema([("some_int", pa.int32()), ("some_string", pa.string())])
         writer = pq.ParquetWriter(self.config["filepath"], schema)
 
-        df = pandas.DataFrame(data=records_to_drain)
-        table = pa.Table.from_pandas(df)
+        table = pa.Table.from_pylist(records_to_drain, schema=schema)
         writer.write_table(table)
         writer.close()
 
