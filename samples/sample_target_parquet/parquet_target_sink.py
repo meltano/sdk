@@ -1,11 +1,86 @@
 """Sample Parquet target stream class, which handles writing streams."""
 
-from typing import Any, Dict, List, Tuple, Union
+from __future__ import annotations
+
+from typing import Any, Dict, Union
 
 import pyarrow as pa
 import pyarrow.parquet as pq
 
 from singer_sdk.sinks import BatchSink
+
+
+def json_schema_to_arrow(schema: dict[str, Any]) -> pa.Schema:
+    """Convert a JSON Schema to an Arrow schema.
+
+    Args:
+        schema: The JSON Schema definition.
+
+    Returns:
+        An Arrow schema.
+    """
+    fields = _json_schema_to_arrow_fields(schema)
+    return pa.schema(fields)
+
+
+def _json_schema_to_arrow_fields(schema: dict[str, Any]) -> pa.StructType:
+    """Convert a JSON Schema to an Arrow struct.
+
+    Args:
+        schema: The JSON Schema definition.
+
+    Returns:
+        An Arrow struct.
+    """
+    fields = []
+    for name, property_schema in schema.get("properties", {}).items():
+        field = pa.field(name, _json_type_to_arrow_field(property_schema))
+        fields.append(field)
+    return fields
+
+
+def _json_type_to_arrow_field(schema_type: dict[str, Any]) -> pa.DataType:
+    """Convert a JSON Schema to an Arrow struct.
+
+    Args:
+        schema: The JSON Schema definition.
+
+    Returns:
+        An Arrow struct.
+    """
+    property_type = schema_type.get("type")
+
+    if isinstance(property_type, list):
+        try:
+            main_type = property_type[0]
+        except IndexError:
+            main_type = "null"
+    else:
+        main_type = property_type
+
+    if main_type == "array":
+        items = schema_type.get("items", {})
+        return pa.list_(_json_type_to_arrow_field(items))
+
+    elif main_type == "object":
+        return pa.struct(_json_schema_to_arrow_fields(schema_type))
+
+    elif main_type == "string":
+        return pa.string()
+
+    elif main_type == "integer":
+        return pa.int64()
+
+    elif main_type == "number":
+        return pa.float64()
+
+    elif main_type == "boolean":
+        return pa.bool_()
+
+    elif main_type == "null":
+        return pa.null()
+
+    return pa.null()
 
 
 class SampleParquetTargetSink(BatchSink):
@@ -16,8 +91,7 @@ class SampleParquetTargetSink(BatchSink):
     def process_batch(self, context: dict) -> None:
         """Write any prepped records out and return only once fully written."""
         records_to_drain = context["records"]
-        # TODO: Replace with actual schema from the SCHEMA message
-        schema = pa.schema([("some_int", pa.int32()), ("some_string", pa.string())])
+        schema = json_schema_to_arrow(self.schema)
         writer = pq.ParquetWriter(self.config["filepath"], schema)
 
         table = pa.Table.from_pylist(records_to_drain, schema=schema)
@@ -25,7 +99,7 @@ class SampleParquetTargetSink(BatchSink):
         writer.close()
 
     @staticmethod
-    def translate_data_type(singer_type: Union[str, Dict]) -> Any:
+    def translate_data_type(singer_type: str | dict) -> Any:
         """Translate from singer_type to a native type."""
         if singer_type in ["decimal", "float", "double"]:
             return pa.decimal128
