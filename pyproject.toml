@@ -104,8 +104,19 @@ version_files = [
     "cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:singer-sdk",
 ]
 
+[tool.coverage.paths]
+source = [
+    "singer_sdk/",
+    "*/singer_sdk",
+]
+tests = [
+    "tests/",
+    "*/tests",
+]
+
 [tool.coverage.run]
-source = ["singer_sdk"]
+branch = true
+source = ["singer_sdk", "tests"]
 omit = [
     "tests/*",
     "samples/*",
@@ -121,7 +132,7 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     '''class .*\bProtocol\):''',
 ]
-fail_under = 85
+fail_under = 82
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
