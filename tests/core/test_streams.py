@@ -147,13 +147,14 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
             }
         }
     )
+    stream._tap_state = tap.state
     stream._write_starting_replication_value(None)
     assert stream.replication_key == "updatedAt"
     assert stream.replication_method == REPLICATION_INCREMENTAL
     assert stream.is_timestamp_replication_key
     assert stream.get_starting_timestamp(None) == pendulum.parse(
         timestamp_value
-    ), f"Incorrect starting timestamp. Tap state was {dict(tap.state)}"
+    ), f"Incorrect starting timestamp. Tap state was {tap.state}"
 
 
 @pytest.mark.parametrize(

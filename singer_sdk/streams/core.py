@@ -13,6 +13,7 @@ from typing import (
     Callable,
     Dict,
     Generator,
+    Generic,
     Iterable,
     List,
     Mapping,
@@ -30,6 +31,8 @@ import singer
 from singer import RecordMessage, SchemaMessage, StateMessage
 from singer.schema import Schema
 
+from singer_sdk import _state
+from singer_sdk._state.schema import TapState, TReplKey
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import final
@@ -40,17 +43,7 @@ from singer_sdk.helpers._singer import (
     MetadataMapping,
     SelectionMask,
 )
-from singer_sdk.helpers._state import (
-    finalize_state_progress_markers,
-    get_starting_replication_value,
-    get_state_partitions_list,
-    get_writeable_state_dict,
-    increment_state,
-    log_sort_error,
-    reset_state_progress_markers,
-    write_replication_key_signpost,
-    write_starting_replication_value,
-)
+from singer_sdk.helpers._state import log_sort_error
 from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
@@ -66,7 +59,7 @@ FactoryType = TypeVar("FactoryType", bound="Stream")
 METRICS_LOG_LEVEL_SETTING = "metrics_log_level"
 
 
-class Stream(metaclass=abc.ABCMeta):
+class Stream(Generic[TReplKey], metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
     STATE_MSG_FREQUENCY = 10000  # Number of records between state messages
@@ -211,7 +204,7 @@ class Stream(metaclass=abc.ABCMeta):
         """
         state = self.get_context_state(context)
 
-        return get_starting_replication_value(state)
+        return _state.get_starting_replication_value(state)
 
     def get_starting_timestamp(
         self, context: Optional[dict]
@@ -287,7 +280,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _write_replication_key_signpost(
         self,
         context: Optional[dict],
-        value: Union[datetime.datetime, str, int, float],
+        value: datetime.datetime,
     ) -> None:
         """Write the signpost value, if available.
 
@@ -302,7 +295,7 @@ class Stream(metaclass=abc.ABCMeta):
             return
 
         state = self.get_context_state(context)
-        write_replication_key_signpost(state, value)
+        _state.write_replication_key_signpost(state, value)
 
     def _write_starting_replication_value(self, context: Optional[dict]) -> None:
         """Write the starting replication value, if available.
@@ -314,20 +307,19 @@ class Stream(metaclass=abc.ABCMeta):
         state = self.get_context_state(context)
 
         if self.replication_key:
-            replication_key_value = state.get("replication_key_value")
-            if replication_key_value and self.replication_key == state.get(
-                "replication_key"
-            ):
+            replication_key_value = state.replication_key_value
+            if replication_key_value and self.replication_key == state.replication_key:
                 value = replication_key_value
 
             elif "start_date" in self.config:
-                value = self.config["start_date"]
+                value = cast(TReplKey, self.config["start_date"])
 
-        write_starting_replication_value(state, value)
+        if value:
+            _state.write_starting_replication_value(state, value)
 
     def get_replication_key_signpost(
         self, context: Optional[dict]
-    ) -> Optional[Union[datetime.datetime, Any]]:
+    ) -> Optional[datetime.datetime]:
         """Get the replication signpost.
 
         For timestamp-based replication keys, this defaults to `utc_now()`. For
@@ -560,7 +552,7 @@ class Stream(metaclass=abc.ABCMeta):
     # State properties:
 
     @property
-    def tap_state(self) -> dict:
+    def tap_state(self) -> TapState:
         """Return a writeable state dict for the entire tap.
 
         Note: This dictionary is shared (and writable) across all streams.
@@ -578,7 +570,7 @@ class Stream(metaclass=abc.ABCMeta):
         """
         return self._tap_state
 
-    def get_context_state(self, context: Optional[dict]) -> dict:
+    def get_context_state(self, context: Optional[dict]) -> _state.AnyState[TReplKey]:
         """Return a writable state dict for the given context.
 
         Gives a partitioned context state if applicable; else returns stream state.
@@ -604,15 +596,15 @@ class Stream(metaclass=abc.ABCMeta):
         """
         state_partition_context = self._get_state_partition_context(context)
         if state_partition_context:
-            return get_writeable_state_dict(
-                self.tap_state,
-                self.name,
+            return _state.get_writeable_state(
+                tap_state=self.tap_state,
+                tap_stream_id=self.name,
                 state_partition_context=state_partition_context,
             )
         return self.stream_state
 
     @property
-    def stream_state(self) -> dict:
+    def stream_state(self) -> _state.AnyState[TReplKey]:
         """Get writable state.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -628,7 +620,7 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             A writable state dict for this stream.
         """
-        return get_writeable_state_dict(self.tap_state, self.name)
+        return _state.get_writeable_state(self.tap_state, self.name)
 
     # Partitions
 
@@ -646,9 +638,9 @@ class Stream(metaclass=abc.ABCMeta):
         """
         result: List[dict] = []
         for partition_state in (
-            get_state_partitions_list(self.tap_state, self.name) or []
+            _state.get_state_partitions_list(self.tap_state, self.name) or []
         ):
-            result.append(partition_state["context"])
+            result.append(partition_state.context)
         return result or None
 
     # Private bookmarking methods
@@ -668,7 +660,7 @@ class Stream(metaclass=abc.ABCMeta):
         Raises:
             ValueError: TODO
         """
-        state_dict = self.get_context_state(context)
+        state = self.get_context_state(context)
         if latest_record:
             if self.replication_method in [
                 REPLICATION_INCREMENTAL,
@@ -683,8 +675,8 @@ class Stream(metaclass=abc.ABCMeta):
                 if not treat_as_sorted and self.state_partitioning_keys is not None:
                     # Streams with custom state partitioning are not resumable.
                     treat_as_sorted = False
-                increment_state(
-                    state_dict,
+                _state.increment_state(
+                    state,
                     replication_key=self.replication_key,
                     latest_record=latest_record,
                     is_sorted=treat_as_sorted,
@@ -695,7 +687,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _write_state_message(self) -> None:
         """Write out a STATE message with the latest state."""
-        singer.write_message(StateMessage(value=self.tap_state))
+        singer.write_message(StateMessage(value=self.tap_state.to_dict(omit_none=True)))
 
     def _generate_schema_messages(self) -> Generator[SchemaMessage, None, None]:
         """Generate schema messages from stream maps.
@@ -899,25 +891,10 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Handle interim stream state
 
-    def reset_state_progress_markers(self, state: Optional[dict] = None) -> None:
-        """Reset progress markers. If all=True, all state contexts will be set.
-
-        This method is internal to the SDK and should not need to be overridden.
-
-        Args:
-            state: State object to promote progress markers with.
-        """
-        if state is None or state == {}:
-            context: Optional[dict]
-            for context in self.partitions or [{}]:
-                context = context or None
-                state = self.get_context_state(context)
-                reset_state_progress_markers(state)
-            return
-
-        reset_state_progress_markers(state)
-
-    def finalize_state_progress_markers(self, state: Optional[dict] = None) -> None:
+    def finalize_state_progress_markers(
+        self,
+        state: Optional[_state.AnyState[TReplKey]] = None,
+    ) -> None:
         """Reset progress markers. If all=True, all state contexts will be finalized.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -927,7 +904,7 @@ class Stream(metaclass=abc.ABCMeta):
         Args:
             state: State object to promote progress markers with.
         """
-        if state is None or state == {}:
+        if state is None:
             for child_stream in self.child_streams or []:
                 child_stream.finalize_state_progress_markers()
 
@@ -935,10 +912,10 @@ class Stream(metaclass=abc.ABCMeta):
             for context in self.partitions or [{}]:
                 context = context or None
                 state = self.get_context_state(context)
-                finalize_state_progress_markers(state)
+                _state.finalize_state_progress_markers(state)
             return
 
-        finalize_state_progress_markers(state)
+        _state.finalize_state_progress_markers(state)
 
     # Private sync methods:
 
@@ -1008,11 +985,11 @@ class Stream(metaclass=abc.ABCMeta):
                 partition_record_count += 1
             if current_context == state_partition_context:
                 # Finalize per-partition state only if 1:1 with context
-                finalize_state_progress_markers(state)
+                _state.finalize_state_progress_markers(state)
         if not context:
             # Finalize total stream only if we have the full full context.
             # Otherwise will be finalized by tap at end of sync.
-            finalize_state_progress_markers(self.stream_state)
+            _state.finalize_state_progress_markers(self.stream_state)
         self._write_record_count_log(record_count=record_count, context=context)
         # Reset interim bookmarks before emitting final STATE message:
         self._write_state_message()

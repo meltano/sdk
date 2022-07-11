@@ -35,6 +35,7 @@ PyJWT = "~=2.4"
 requests = "^2.25.1"
 cryptography = ">=3.4.6,<38.0.0"
 importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
+mashumaro = "^2.11"
 memoization = ">=0.3.2,<0.5.0"
 jsonpath-ng = "^1.5.3"
 joblib = "^1.0.1"
