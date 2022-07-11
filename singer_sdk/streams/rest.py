@@ -180,6 +180,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
 
     def response_error_message(self, response: requests.Response) -> str:
         """Build error message for invalid http statuses.
+
         WARNING - Override this method when the URL path may contain secrets or PII
 
         Args:
