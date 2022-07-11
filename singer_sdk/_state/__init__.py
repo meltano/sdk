@@ -221,6 +221,7 @@ def increment_state(
     latest_record: dict,
     replication_key: str,
     is_sorted: bool,
+    check_sorted: bool,
 ) -> None:
     """Update the state using data from the latest record.
 
@@ -230,6 +231,7 @@ def increment_state(
         replication_key: Name of field to extract as replication value.
         is_sorted: Whether the stream emits records ordered by replication key value,
             ascending.
+        check_sorted: Whether to check that the stream is sorted.
 
     Raises:
         InvalidStreamSortException: If is_sorted=True and unsorted
@@ -246,7 +248,7 @@ def increment_state(
     old_rk_value = to_json_compatible(progress.replication_key_value)
     new_rk_value = to_json_compatible(latest_record[replication_key])
 
-    if old_rk_value is None or new_rk_value >= old_rk_value:
+    if old_rk_value is None or not check_sorted or new_rk_value >= old_rk_value:
         progress.replication_key = replication_key
         progress.replication_key_value = new_rk_value
         return
