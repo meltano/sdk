@@ -25,6 +25,14 @@ jobs:
         - { session: tests,   python-version: "3.8",  os: "ubuntu-latest" }
         - { session: tests,   python-version: "3.9",  os: "ubuntu-latest" }
         - { session: tests,   python-version: "3.10", os: "ubuntu-latest" }
+        - { session: tests,   python-version: "3.7",  os: "macos-latest" }
+        - { session: tests,   python-version: "3.8",  os: "macos-latest" }
+        - { session: tests,   python-version: "3.9",  os: "macos-latest" }
+        - { session: tests,   python-version: "3.10", os: "macos-latest" }
+        - { session: tests,   python-version: "3.7",  os: "windows-latest" }
+        - { session: tests,   python-version: "3.8",  os: "windows-latest" }
+        - { session: tests,   python-version: "3.9",  os: "windows-latest" }
+        - { session: tests,   python-version: "3.10", os: "windows-latest" }
         - { session: doctest, python-version: "3.10", os: "ubuntu-latest" }
         - { session: mypy,    python-version: "3.8",  os: "ubuntu-latest" }
 
@@ -40,7 +48,7 @@ jobs:
         poetry --version
 
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4.0.0
+      uses: actions/setup-python@v4.1.0
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
@@ -98,7 +106,7 @@ jobs:
         poetry --version
 
     - name: Setup Python 3.10
-      uses: actions/setup-python@v4.0.0
+      uses: actions/setup-python@v4.1.0
       with:
         python-version: '3.10'
         architecture: x64
@@ -138,7 +146,7 @@ jobs:
         poetry --version
 
     - name: Set up Python
-      uses: actions/setup-python@v4.0.0
+      uses: actions/setup-python@v4.1.0
       with:
         python-version: '3.10'
         cache: 'pip'

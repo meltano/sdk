@@ -36,6 +36,8 @@ to get started with the SDK.
    $ gh workflow run
    ```
 
+   The `increment: auto` option will figure out the most appropriate bump based on commit history.
+
 1. Follow the checklist in the PR description.
 
 1. Publish a new release [using the GitHub web UI](https://github.com/meltano/sdk/releases/new).
