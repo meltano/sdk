@@ -271,6 +271,48 @@ class Stream(metaclass=abc.ABCMeta):
 
         Raises:
             ValueError: If the replication value is not a valid timestamp.
+
+        >>> from singer_sdk import Tap
+        >>> class MyStream(Stream):
+        >>>     name = "my_stream"
+        >>>     replication_key = "updated_at"
+        ...     def get_records(self, context):
+        ...         return [{'id': 1, 'updated_at': '2023-01-01T00:00:00Z'}]
+        >>> class MyTap(Tap):
+        ...     name = "my_tap"
+        ...
+        ...     def discover_streams(self):
+        ...         return [
+        ...             MyStream(
+        ...                 tap=self,
+        ...                 schema={
+        ...                     "properties": {
+        ...                         "id": {"type": "integer"},
+        ...                         "updated_at": {
+        ...                             "type": "string",
+        ...                             "format": "date-time",
+        ...                         },
+        ...                     }
+        ...                 },
+        ...             )
+        ...         ]
+        >>> tap = MyTap(
+        ...     config={},
+        ...     state={
+        ...         "bookmarks": {
+        ...             "my_stream": {
+        ...                 "partitions": [],
+        ...                 "replication_key": "updated_at",
+        ...                 "replication_key_value": "2020-01-01T00:00:00Z",
+        ...             }
+        ...         }
+        ...     },
+        ... )
+        >>> tap.streams["my_stream"].is_timestamp_replication_key
+        True
+        >>> tap.streams["my_stream"]._write_starting_replication_value(None)
+        >>> tap.streams["my_stream"].get_starting_timestamp(None)
+        DateTime(2020, 1, 1, 0, 0, 0, tzinfo=Timezone('UTC'))
         """
         value = self.get_starting_replication_key_value(context)
 
