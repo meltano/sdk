@@ -324,7 +324,7 @@ class Stream(metaclass=abc.ABCMeta):
             if "start_date" in self.config:
                 if not value:
                     value = self.config["start_date"]
-                else:
+                elif self.is_timestamp_replication_key:
                     value_datetime = cast(datetime.datetime, pendulum.parse(value))
                     start_datetime = cast(
                         datetime.datetime, pendulum.parse(self.config["start_date"])
