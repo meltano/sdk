@@ -6,6 +6,7 @@
 [![Documentation Status](https://readthedocs.org/projects/meltano-sdk/badge/?version=latest)](https://sdk.meltano.com/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/meltano/sdk/branch/main/graph/badge.svg?token=kS1zkemAgo)](https://codecov.io/gh/meltano/sdk)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/meltano/sdk/main.svg)](https://results.pre-commit.ci/latest/github/meltano/sdk/main)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmeltano%2Fsdk.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmeltano%2Fsdk?ref=badge_shield)
 
 The Tap and Target SDKs are the fastest way to build custom data extractors and loaders!
 Taps and targets built on the SDK are automatically compliant with the
@@ -41,3 +42,7 @@ to get started with the SDK.
 1. Follow the checklist in the PR description.
 
 1. Publish a new release [using the GitHub web UI](https://github.com/meltano/sdk/releases/new).
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmeltano%2Fsdk.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmeltano%2Fsdk?ref=badge_large)
