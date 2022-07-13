@@ -1017,7 +1017,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 )
 
         for row in self.connector.connection.execute(query):
-            yield dict(row)
+            yield {str(column): value for column, value in row._mapping.items()}
 
 
 __all__ = ["SQLStream", "SQLConnector"]
