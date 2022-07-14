@@ -101,7 +101,7 @@ markers = [
 ]
 
 [tool.commitizen]
-name = "cz_conventional_commits"
+name = "cz_customize"
 version = "0.6.1"
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
@@ -110,6 +110,25 @@ version_files = [
     "cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml:singer-sdk",
     "cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:singer-sdk",
 ]
+
+[tool.commitizen.customize]
+commit_parser = '^(?P<change_type>feat|fix|refactor|perf|break|docs)(?:\((?P<scope>[^()\r\n]*)\)|\()?(?P<breaking>!)?:\s(?P<message>.*)?'
+change_type_order = [
+  "BREAKING CHANGES",
+  "✨ New",
+  "🐛 Fixes",
+  "⚙️ Under the Hood",
+  "⚡ Performance Improvements",
+  "📚 Documentation Improvements",
+]
+
+[tool.commitizen.customize.change_type_map]
+break = "BREAKING CHANGES"
+feat = "✨ New"
+fix = "🐛 Fixes"
+refactor = "⚙️ Under the Hood"
+docs = "📚 Documentation Improvements"
+perf = "⚡ Performance Improvements"
 
 [tool.coverage.paths]
 source = [
