@@ -1,7 +1,42 @@
 """{{ cookiecutter.destination_name }} target sink class, which handles writing streams."""
 
-{% set sinkclass = "BatchSink" if cookiecutter.serialization_method == "Per batch" else "RecordSink" %}
-from singer_sdk.sinks import {{ sinkclass }}
+from __future__ import annotations
+
+{%- set
+    sinkclass_mapping = {
+        "Per batch": "BatchSink",
+        "Per record": "RecordSink",
+        "SQL": "SQLSink",
+    }
+%}
+
+{%- set sinkclass = sinkclass_mapping[cookiecutter.serialization_method] %}
+
+from singer_sdk.sinks import {% if sinkclass == "SQLSink" %}SQLConnector, {% endif %}{{ sinkclass }}
+
+{%- if sinkclass == "SQLSink" %}
+
+
+class {{ cookiecutter.destination_name }}Connector(SQLConnector):
+    """The connector for {{ cookiecutter.destination_name }}.
+
+    This class handles all DDL and type conversions.
+    """
+
+    allow_column_add: bool = True  # Whether ADD COLUMN is supported.
+    allow_column_rename: bool = True  # Whether RENAME COLUMN is supported.
+    allow_column_alter: bool = False  # Whether altering column types is supported.
+    allow_merge_upsert: bool = False  # Whether MERGE UPSERT is supported.
+    allow_temp_tables: bool = True  # Whether temp tables are supported.
+
+    def get_sqlalchemy_url(self, config: dict) -> str:
+        """Generates a SQLAlchemy URL for {{ cookiecutter.destination_name }}.
+
+        Args:
+            config: The configuration for the connector.
+        """
+        return super().get_sqlalchemy_url(config)
+{%- endif %}
 
 
 class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
@@ -13,7 +48,9 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
         # Sample:
         # ------
         # client.write(record)
-    {%- else -%}
+
+    {%- elif sinkclass == "BatchSink" -%}
+
     max_size = 10000  # Max records to write in one batch
 
     def start_batch(self, context: dict) -> None:
@@ -44,4 +81,8 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
         # ------
         # client.upload(context["file_path"])  # Upload file
         # Path(context["file_path"]).unlink()  # Delete local copy
+
+    {%- elif sinkclass == "SQLSink" -%}
+
+    connector_class = {{ cookiecutter.destination_name }}Connector
     {%- endif %}
