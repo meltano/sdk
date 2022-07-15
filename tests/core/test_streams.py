@@ -48,6 +48,16 @@ class SimpleTestStream(Stream):
         yield {"id": 3, "value": "India"}
 
 
+class UnixTimestampIncrementalStream(SimpleTestStream):
+    name = "unix_ts"
+    schema = PropertiesList(
+        Property("id", IntegerType, required=True),
+        Property("value", StringType, required=True),
+        Property("updatedAt", IntegerType, required=True),
+    ).to_dict()
+    replication_key = "updatedAt"
+
+
 class RestTestStream(RESTStream):
     """Test RESTful stream class."""
 
@@ -85,6 +95,17 @@ class SimpleTestTap(Tap):
         return [SimpleTestStream(self)]
 
 
+class UnixTimestampTap(Tap):
+    """Test tap class."""
+
+    name = "test-tap"
+    settings_jsonschema = PropertiesList(Property("start_date", IntegerType)).to_dict()
+
+    def discover_streams(self) -> List[Stream]:
+        """List all streams."""
+        return [UnixTimestampIncrementalStream(self)]
+
+
 @pytest.fixture
 def tap() -> SimpleTestTap:
     """Tap instance."""
@@ -108,9 +129,37 @@ def tap() -> SimpleTestTap:
 
 
 @pytest.fixture
+def unix_tap() -> UnixTimestampTap:
+    """Tap instance."""
+    catalog_dict = {
+        "streams": [
+            {
+                "key_properties": ["id"],
+                "tap_stream_id": UnixTimestampIncrementalStream.name,
+                "stream": UnixTimestampIncrementalStream.name,
+                "schema": UnixTimestampIncrementalStream.schema,
+                "replication_method": REPLICATION_FULL_TABLE,
+                "replication_key": None,
+            }
+        ]
+    }
+    return UnixTimestampTap(
+        config={"start_date": "1640991660"},
+        parse_env_config=False,
+        catalog=catalog_dict,
+    )
+
+
+@pytest.fixture
 def stream(tap: SimpleTestTap) -> SimpleTestStream:
     """Create a new stream instance."""
     return cast(SimpleTestStream, tap.load_streams()[0])
+
+
+@pytest.fixture
+def unix_timestamp_stream(unix_tap: UnixTimestampTap) -> UnixTimestampIncrementalStream:
+    """Create a new stream instance."""
+    return cast(UnixTimestampIncrementalStream, unix_tap.load_streams()[0])
 
 
 def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
@@ -129,7 +178,12 @@ def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
     assert stream.forced_replication_method == REPLICATION_FULL_TABLE
 
 
-def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream):
+def test_stream_starting_timestamp(
+    tap: SimpleTestTap,
+    stream: SimpleTestStream,
+    unix_tap: UnixTimestampTap,
+    unix_timestamp_stream: UnixTimestampIncrementalStream,
+):
     """Validate state and start_time setting handling."""
     timestamp_value = "2021-02-01"
 
@@ -171,6 +225,37 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
     stream._write_starting_replication_value(None)
     assert stream.get_starting_timestamp(None) == pendulum.parse(
         stream.config.get("start_date")
+    )
+
+    timestamp_value = "2030-01-01"
+    tap.load_state(
+        {
+            "bookmarks": {
+                stream.name: {
+                    "replication_key": stream.replication_key,
+                    "replication_key_value": timestamp_value,
+                }
+            }
+        }
+    )
+    stream._write_starting_replication_value(None)
+    assert stream.get_starting_timestamp(None) == pendulum.parse(timestamp_value)
+
+    timestamp_value = "1640991600"
+    unix_tap.load_state(
+        {
+            "bookmarks": {
+                unix_timestamp_stream.name: {
+                    "replication_key": unix_timestamp_stream.replication_key,
+                    "replication_key_value": timestamp_value,
+                }
+            }
+        }
+    )
+    unix_timestamp_stream._write_starting_replication_value(None)
+    assert (
+        unix_timestamp_stream.get_starting_replication_key_value(None)
+        == unix_tap.config["start_date"]
     )
 
 
