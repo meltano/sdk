@@ -102,7 +102,7 @@ def doctest(session: Session) -> None:
 @session(python=main_python_version)
 def coverage(session: Session) -> None:
     """Generate coverage report."""
-    args = session.posargs or ["report"]
+    args = session.posargs or ["report", "-m"]
 
     session.install("coverage[toml]")
 
