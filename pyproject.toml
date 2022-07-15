@@ -101,7 +101,7 @@ markers = [
 ]
 
 [tool.commitizen]
-name = "cz_conventional_commits"
+name = "cz_customize"
 version = "0.6.1"
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
@@ -110,6 +110,57 @@ version_files = [
     "cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml:singer-sdk",
     "cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:singer-sdk",
 ]
+
+[tool.commitizen.customize]
+message_template = "{{change_type}}: {{message}}"
+commit_parser = '^(?P<change_type>feat|fix|refactor|perf|break|docs)(?:\((?P<scope>[^()\r\n]*)\)|\()?(?P<breaking>!)?:\s(?P<message>.*)?'
+schema_pattern = '(feat|fix|refactor|perf|break|docs|ci|chore|style|revert|test|build)(?:\((?P<scope>[^()\r\n]*)\)|\()?(?P<breaking>!)?:(\s.*)'
+schema = """
+<type>(<scope>): <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+(BREAKING CHANGE: )<footer>"""
+change_type_order = [
+  "BREAKING CHANGES",
+  "✨ New",
+  "🐛 Fixes",
+  "⚙️ Under the Hood",
+  "⚡ Performance Improvements",
+  "📚 Documentation Improvements",
+]
+
+[tool.commitizen.customize.change_type_map]
+break = "BREAKING CHANGES"
+feat = "✨ New"
+fix = "🐛 Fixes"
+refactor = "⚙️ Under the Hood"
+docs = "📚 Documentation Improvements"
+perf = "⚡ Performance Improvements"
+
+[[tool.commitizen.customize.questions]]
+type = "list"
+name = "change_type"
+choices = [
+    { value = "feat",     name = "feat: A new feature." },
+    { value = "fix",      name = "fix: A bug fix." },
+    { value = "refactor", name = "refactor: A code change that neither fixes a bug nor adds a feature." },
+    { value = "perf",     name = "perf: A code change that improves performance." },
+    { value = "docs",     name = "docs: A documentation change." },
+    { value = "break",    name = "break: A breaking change." },
+    { value = "chore",    name = "chore: A change that doesn't affect the meaning of the codebase." },
+    { value = "style",    name = "style: A code style change." },
+    { value = "revert",   name = "revert: Revert to a commit." },
+    { value = "test",     name = "test: A test change." },
+    { value = "build",    name = "build: A build system change." },
+    { value = "ci",       name = "ci: A change to CI/CD." },
+]
+message = "Select the type of change you are committing"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "message"
+message = "Subject"
 
 [tool.coverage.paths]
 source = [
