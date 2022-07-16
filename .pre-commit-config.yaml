@@ -32,7 +32,6 @@ repos:
   rev: 22.6.0
   hooks:
   - id: black
-    language_version: python3.10
     exclude: |
         (?x)^(
             cookiecutter/.*|
