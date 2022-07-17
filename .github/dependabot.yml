@@ -22,3 +22,15 @@ updates:
       interval: weekly
     reviewers: [meltano/engineering]
     labels: [deps]
+  - package-ecosystem: pip
+    directory: "./cookiecutter/tap-template/{{cookiecutter.tap_id}}"
+    schedule:
+      interval: weekly
+    reviewers: [meltano/engineering]
+    labels: [deps]
+  - package-ecosystem: pip
+    directory: "./cookiecutter/target-template/{{cookiecutter.tap_id}}"
+    schedule:
+      interval: weekly
+    reviewers: [meltano/engineering]
+    labels: [deps]
