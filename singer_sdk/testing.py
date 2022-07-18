@@ -40,7 +40,36 @@ def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Ca
         tap1: Tap = tap_class(config=config, parse_env_config=True)
         tap1.run_connection_test()
 
-    return [_test_cli_prints, _test_discovery, _test_stream_connections]
+    def _test_pkeys_in_schema():
+        """Verify that primary keys are actually in the stream's schema."""
+        tap = tap_class(config=config, parse_env_config=True)
+        for name, stream in tap.streams.items():
+            pkeys = stream.primary_keys or []
+            schema_props = set(stream.schema["properties"].keys())
+            for pkey in pkeys:
+                assert (
+                    pkey in schema_props
+                ), f"Coding error in stream '{name}': primary_key '{pkey}' is missing in schema"
+
+    def _test_state_partitioning_keys_in_schema():
+        """Verify that state partitioning keys are actually in the stream's schema."""
+        tap = tap_class(config=config, parse_env_config=True)
+        for name, stream in tap.streams.items():
+            pkeys = stream.state_partitioning_keys or []
+            schema_props = set(stream.schema["properties"].keys())
+            for pkey in pkeys:
+                assert pkey in schema_props, (
+                    f"Coding error in stream '{name}': state_partitioning_key "
+                    f"'{pkey}' is missing in schema"
+                )
+
+    return [
+        _test_cli_prints,
+        _test_discovery,
+        _test_stream_connections,
+        _test_pkeys_in_schema,
+        _test_state_partitioning_keys_in_schema,
+    ]
 
 
 def get_standard_target_tests(
