@@ -55,13 +55,26 @@ def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Ca
         """Verify that state partitioning keys are actually in the stream's schema."""
         tap = tap_class(config=config, parse_env_config=True)
         for name, stream in tap.streams.items():
-            pkeys = stream.state_partitioning_keys or []
+            sp_keys = stream.state_partitioning_keys or []
             schema_props = set(stream.schema["properties"].keys())
-            for pkey in pkeys:
-                assert pkey in schema_props, (
+            for sp_key in sp_keys:
+                assert sp_key in schema_props, (
                     f"Coding error in stream '{name}': state_partitioning_key "
-                    f"'{pkey}' is missing in schema"
+                    f"'{sp_key}' is missing in schema"
                 )
+
+    def _test_replication_keys_in_schema():
+        """Verify that the replication key is actually in the stream's schema."""
+        tap = tap_class(config=config, parse_env_config=True)
+        for name, stream in tap.streams.items():
+            rep_key = stream.replication_key
+            if rep_key is None:
+                continue
+            schema_props = set(stream.schema["properties"].keys())
+            assert rep_key in schema_props, (
+                f"Coding error in stream '{name}': replication_key "
+                f"'{rep_key}' is missing in schema"
+            )
 
     return [
         _test_cli_prints,
@@ -69,6 +82,7 @@ def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Ca
         _test_stream_connections,
         _test_pkeys_in_schema,
         _test_state_partitioning_keys_in_schema,
+        _test_replication_keys_in_schema,
     ]
 
 
