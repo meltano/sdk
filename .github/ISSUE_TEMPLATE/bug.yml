@@ -49,7 +49,7 @@ body:
     id: os
     attributes:
       label: Operating System
-      description: What Operating System you are using
+      description: What operating system you are using
       placeholder: "Windows"
     validations:
       required: true
@@ -65,8 +65,7 @@ body:
     id: failing-code
     attributes:
       label: Code
-      description: Paste the failing code and traceback, if applicable
-      placeholder: Tell us what happened, what went wrong, and what you expected to happen
+      description: Paste the failing code and/or traceback, if applicable
       render: python
     validations:
       required: false
