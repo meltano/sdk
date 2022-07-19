@@ -1,12 +1,15 @@
 """Stream tests."""
 
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, Iterable, List, Optional, cast
+from typing import Any, Iterable, cast
 
 import pendulum
 import pytest
 import requests
 
+from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.jsonpath import _compile_jsonpath
 from singer_sdk.streams.core import (
@@ -41,7 +44,7 @@ class SimpleTestStream(Stream):
         """Create a new stream."""
         super().__init__(tap, schema=self.schema, name=self.name)
 
-    def get_records(self, context: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
         """Generate records."""
         yield {"id": 1, "value": "Egypt"}
         yield {"id": 2, "value": "Germany"}
@@ -78,9 +81,14 @@ class SimpleTestTap(Tap):
     """Test tap class."""
 
     name = "test-tap"
-    settings_jsonschema = PropertiesList(Property("start_date", DateTimeType)).to_dict()
+    config_jsonschema = PropertiesList(
+        Property("username", StringType, required=True),
+        Property("password", StringType, required=True),
+        Property("start_date", DateTimeType),
+        additional_properties=False,
+    ).to_dict()
 
-    def discover_streams(self) -> List[Stream]:
+    def discover_streams(self) -> list[Stream]:
         """List all streams."""
         return [SimpleTestStream(self)]
 
@@ -101,7 +109,11 @@ def tap() -> SimpleTestTap:
         ]
     }
     return SimpleTestTap(
-        config={"start_date": "2021-01-01"},
+        config={
+            "username": "utest",
+            "password": "ptest",
+            "start_date": "2021-01-01",
+        },
         parse_env_config=False,
         catalog=catalog_dict,
     )
@@ -214,7 +226,7 @@ def test_stream_starting_timestamp(tap: SimpleTestTap, stream: SimpleTestStream)
     ],
 )
 def test_jsonpath_rest_stream(
-    tap: SimpleTestTap, path: str, content: str, result: List[dict]
+    tap: SimpleTestTap, path: str, content: str, result: list[dict]
 ):
     """Validate records are extracted correctly from the API response."""
     fake_response = requests.Response()
@@ -370,7 +382,7 @@ def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
     def calculate_test_cost(
         request: requests.PreparedRequest,
         response: requests.Response,
-        context: Optional[Dict],
+        context: dict | None,
     ):
         return {"dim1": 1, "dim2": 2}
 
@@ -387,3 +399,32 @@ def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
     for record in caplog.records:
         assert record.levelname == "INFO"
         assert f"Total Sync costs for stream {stream.name}" in record.message
+
+
+@pytest.mark.parametrize(
+    "config_dict,errors",
+    [
+        (
+            {},
+            ["'username' is a required property"],
+        ),
+        (
+            {"username": "utest"},
+            ["'password' is a required property"],
+        ),
+        (
+            {"username": "utest", "password": "ptest", "extra": "not valid"},
+            ["Additional properties are not allowed ('extra' was unexpected)"],
+        ),
+    ],
+    ids=[
+        "missing_username",
+        "missing_password",
+        "extra_property",
+    ],
+)
+def test_config_errors(config_dict: dict, errors: list[str]):
+    with pytest.raises(ConfigValidationError, match="Config validation failed") as exc:
+        SimpleTestTap(config_dict, validate_config=True)
+
+    assert exc.value.errors == errors
