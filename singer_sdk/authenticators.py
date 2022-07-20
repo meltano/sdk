@@ -101,7 +101,7 @@ class APIAuthenticatorBase:
         Args:
             request: A `request object`_.
 
-        .. request object:
+        .. _request object:
             https://requests.readthedocs.io/en/latest/api/#requests.Request
         """
         request.headers.update(self.auth_headers or {})
