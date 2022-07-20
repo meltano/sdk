@@ -95,14 +95,14 @@ class APIAuthenticatorBase:
         """
         return self._auth_params or {}
 
-    def authenticate_request(self, request: requests.PreparedRequest) -> None:
+    def authenticate_request(self, request: requests.Request) -> None:
         """Authenticate a request.
 
         Args:
-            request: A `prepared request`_ object.
+            request: A `request object`_.
 
-        .. _prepared request:
-            https://requests.readthedocs.io/en/latest/api/#requests.PreparedRequest
+        .. request object:
+            https://requests.readthedocs.io/en/latest/api/#requests.Request
         """
         request.headers.update(self.auth_headers or {})
         request.params.update(self.auth_params or {})

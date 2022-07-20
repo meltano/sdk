@@ -292,13 +292,12 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             https://requests.readthedocs.io/en/latest/api/#requests.Request
         """
         request = requests.Request(*args, **kwargs)
-        prepared_request = self.requests_session.prepare_request(request)
 
         if self.authenticator:
             authenticator = self.authenticator
-            authenticator.authenticate_request(prepared_request)
+            authenticator.authenticate_request(request)
 
-        return prepared_request
+        return self.requests_session.prepare_request(request)
 
     def prepare_request(
         self, context: Optional[dict], next_page_token: Optional[_TToken]
