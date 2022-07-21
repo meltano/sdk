@@ -11,19 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ New
 
-- Output full URL path in error messages (#785)
+- [#785](https://github.com/meltano/sdk/issues/785) Output full URL path in error messages
 
 ### 🐛 Fixes
 
-- **templates**: Generate correct SQL target project from cookiecutter (#816)
-- Generate correct SQL target project from cookiecutter
-- Allow lists and dictionaries as types for default JSON values (#781)
+- [#815](https://github.com/meltano/sdk/issues/815) Generate correct SQL target project from cookiecutter
+- [#782](https://github.com/meltano/sdk/issues/782) Allow lists and dictionaries as types for default JSON values
 
 ### 📚 Documentation Improvements
 
-- Add link to the sdk for README generation regarding Stream Maps (#823)
-- Fix PyPI trove classifiers (#814)
-- Document using pipx inject for nox-poetry (#783)
+- [#823](https://github.com/meltano/sdk/issues/823) Add link to the sdk for README generation regarding Stream Maps
+- [#813](https://github.com/meltano/sdk/issues/813) Fix PyPI trove classifiers
+- [#783](https://github.com/meltano/sdk/issues/783) Document using pipx inject for nox-poetry
 
 ## v0.6.1 (2022-07-01)
 
