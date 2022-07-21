@@ -7,7 +7,7 @@
 * @edgarrmondragon @cjohnhanson @aaronsteers
 
 # CI/CD
-/.github/workflows @edgarrmondragon @meltano/engineering
+/.github/workflows/ @edgarrmondragon @meltano/engineering
 
 # Docs (General)
 /docs/ @meltano/engineering @meltano/marketing
