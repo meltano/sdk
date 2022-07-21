@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.7.0 (2022-07-21)
+
+### ✨ New
+
+- Output full URL path in error messages (#785)
+
+### 🐛 Fixes
+
+- **templates**: Generate correct SQL target project from cookiecutter (#816)
+- Generate correct SQL target project from cookiecutter
+- Allow lists and dictionaries as types for default JSON values (#781)
+
+### 📚 Documentation Improvements
+
+- Add link to the sdk for README generation regarding Stream Maps (#823)
+- Fix PyPI trove classifiers (#814)
+- Document using pipx inject for nox-poetry (#783)
+
 ## v0.6.1 (2022-07-01)
 
 ### Fix
