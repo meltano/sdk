@@ -17,7 +17,6 @@
 /docs/CONTRIBUTING.md @afolson @tayloramurphy @meltano/engineering
 
 # Release Ops (see `/.pyproject.toml` for list of bumped files)
-/cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml @meltano/engineering
-/cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml @meltano/engineering
+/cookiecutter/*/*/pyproject.toml @meltano/engineering
 /docs/conf.py @meltano/engineering
 /pyproject.toml @meltano/engineering
