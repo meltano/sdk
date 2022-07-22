@@ -198,4 +198,11 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 # Sample CLI declaration:
-# sdk-tap-countries-sample = 'singer_sdk.samples.sample_tap_countries.countries_tap:SampleTapCountries.cli'
+# Note you'll need to add
+#packages = [
+#    { include = "singer_sdk" },
+#    { include = "samples" },
+#]
+# to tool.poetry above
+# sdk-tap-countries-sample = 'samples.sample_tap_countries.countries_tap:SampleTapCountries.cli'
+# tap-aapl = 'samples.aapl.aapl:Fundamentals.cli'
