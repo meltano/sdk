@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.6.1"
+version = "0.7.0"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 maintainers = ["Meltano Team and Contributors"]
@@ -66,7 +66,7 @@ docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser"]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
 pytest = "^7.1.2"
 xdoctest = "^1.0.1"
-mypy = "^0.961"
+mypy = "^0.971"
 cookiecutter = "^2.1.1"
 PyYAML = "^6.0"
 pyarrow = "^8.0.0"
@@ -74,8 +74,8 @@ freezegun = "^1.2.1"
 viztracer = "^0.15.3"
 requests-mock = "^1.9.3"
 sqlalchemy2-stubs = {version = "^0.0.2a24", allow-prereleases = true}
-types-python-dateutil = "^2.8.18"
-types-requests = "^2.28.1"
+types-python-dateutil = "^2.8.19"
+types-requests = "^2.28.3"
 coverage = {extras = ["toml"], version = "^6.4"}
 
 # Cookiecutter tests
@@ -102,7 +102,7 @@ markers = [
 
 [tool.commitizen]
 name = "cz_customize"
-version = "0.6.1"
+version = "0.7.0"
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
     "docs/conf.py",

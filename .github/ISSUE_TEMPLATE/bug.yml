@@ -1,0 +1,71 @@
+name: Bug Report
+description: File a bug report
+title: "[Bug]: <title>"
+labels: ["kind/Bug", "valuestream/SDK"]
+assignees:
+  - meltano/engineering
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: input
+    id: sdk_version
+    attributes:
+      label: Singer SDK Version
+      description: Version of the library you are using
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: python_version
+    attributes:
+      label: Python Version
+      description: Version of Python you are using
+      options:
+        - "3.6 (deprecated)"
+        - "3.7"
+        - "3.8"
+        - "3.9"
+        - "3.10"
+        - "NA"
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Bug scope
+      description: Functionality this bug affects
+      options:
+        - Taps (catalog, state, stream maps, etc.)
+        - Targets (data type handling, batching, SQL object generation, etc.)
+        - Configuration (settings parsing, validation, etc.)
+        - CLI (options, error messages, logging, etc.)
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system you are using
+      placeholder: "Windows"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Description
+      description: Describe what you were trying to get done
+      placeholder: Tell us what happened, what went wrong, and what you expected to happen
+    validations:
+      required: true
+  - type: textarea
+    id: failing-code
+    attributes:
+      label: Code
+      description: Paste the failing code and/or traceback, if applicable
+      render: python
+    validations:
+      required: false
