@@ -56,6 +56,7 @@ Authenticator Classes
     :toctree: classes
     :template: class.rst
 
+    authenticators.APIAuthenticatorBase
     authenticators.APIKeyAuthenticator
     authenticators.BasicAuthenticator
     authenticators.BearerTokenAuthenticator
