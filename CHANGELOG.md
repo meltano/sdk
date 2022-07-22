@@ -7,7 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## Unreleased
+## v0.7.0 (2022-07-21)
+
+### ✨ New
+
+- [#785](https://github.com/meltano/sdk/issues/785) Output full URL path in error messages
+
+### 🐛 Fixes
+
+- [#815](https://github.com/meltano/sdk/issues/815) Generate correct SQL target project from cookiecutter
+- [#782](https://github.com/meltano/sdk/issues/782) Allow lists and dictionaries as types for default JSON values
+
+### 📚 Documentation Improvements
+
+- [#823](https://github.com/meltano/sdk/issues/823) Add link to the sdk for README generation regarding Stream Maps
+- [#813](https://github.com/meltano/sdk/issues/813) Fix PyPI trove classifiers
+- [#783](https://github.com/meltano/sdk/issues/783) Document using pipx inject for nox-poetry
+
+## v0.6.1 (2022-07-01)
+
+### Fix
+
+- Fix missing typing-extensions for Python<3.10 (#776)
+
+## 0.6.0 - (2022-06-30)
 ---
 
 ### New
@@ -26,8 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Tap and Target SDK: Resolves an issue where SQLAlchemy logs would be printed to `STDOUT`. ([!303](https://gitlab.com/meltano/sdk/-/merge_requests/303)) - Thanks, _**[Andrey Tatarinov](https://gitlab.com/elephantum)**_!
 - Tap SDK: Reduces number of log lines printed when unmapped properties are ignored from the source API ([!300](https://gitlab.com/meltano/sdk/-/merge_requests/300)) - Thanks, _**[Eric Boucher](https://gitlab.com/ericboucher)**_!
-
-### Breaks
+- Tap and Target SDK: Remove trailing parenthesis from logged version ([#766](https://github.com/meltano/sdk/issues/766), [#767](https://github.com/meltano/sdk/pull/767)).
 
 
 ## 0.5.0 - (2022-05-19)

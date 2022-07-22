@@ -29,10 +29,9 @@ repos:
         )$
 
 - repo: https://github.com/psf/black
-  rev: 22.3.0
+  rev: 22.6.0
   hooks:
   - id: black
-    language_version: python3.10
     exclude: |
         (?x)^(
             cookiecutter/.*|
@@ -57,7 +56,7 @@ repos:
     files: 'singer_sdk/.*'
 
 - repo: https://github.com/asottile/pyupgrade
-  rev: v2.34.0
+  rev: v2.37.1
   hooks:
   - id: pyupgrade
     args: [--py37-plus]

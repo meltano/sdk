@@ -1,3 +1,4 @@
+import warnings
 from inspect import currentframe, getframeinfo
 
 import pytest
@@ -13,10 +14,9 @@ class DummyCapabilitiesEnum(CapabilitiesEnum):
 
 
 def test_deprecated_capabilities():
-    with pytest.warns(None) as record:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
         DummyCapabilitiesEnum.MY_SUPPORTED_FEATURE
-
-    assert len(record.list) == 0
 
     with pytest.warns(
         DeprecationWarning,

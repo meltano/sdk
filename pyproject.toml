@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.5.0"
+version = "0.7.0"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 maintainers = ["Meltano Team and Contributors"]
@@ -14,7 +14,16 @@ keywords = [
     "ELT",
 ]
 classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Typing :: Typed",
 ]
 license = "Apache 2.0"
 
@@ -41,6 +50,7 @@ joblib = "^1.0.1"
 inflection = "^0.5.1"
 sqlalchemy = "^1.4"
 python-dotenv = "^0.20.0"
+typing-extensions = "^4.2.0"
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
@@ -55,19 +65,17 @@ docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser"]
 [tool.poetry.dev-dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
 pytest = "^7.1.2"
-mypy = "^0.961"
+xdoctest = "^1.0.1"
+mypy = "^0.971"
 cookiecutter = "^2.1.1"
 PyYAML = "^6.0"
 pyarrow = "^8.0.0"
-pandas = ">=1.2.0"
-numpy = ">=1.20.0"
-tox = "^3.25.0"
 freezegun = "^1.2.1"
 viztracer = "^0.15.3"
 requests-mock = "^1.9.3"
 sqlalchemy2-stubs = {version = "^0.0.2a24", allow-prereleases = true}
-types-python-dateutil = "^2.8.18"
-types-requests = "^2.28.0"
+types-python-dateutil = "^2.8.19"
+types-requests = "^2.28.3"
 coverage = {extras = ["toml"], version = "^6.4"}
 
 # Cookiecutter tests
@@ -93,8 +101,8 @@ markers = [
 ]
 
 [tool.commitizen]
-name = "cz_conventional_commits"
-version = "0.5.0"
+name = "cz_customize"
+version = "0.7.0"
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
     "docs/conf.py",
@@ -102,6 +110,88 @@ version_files = [
     "cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml:singer-sdk",
     "cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:singer-sdk",
 ]
+
+[tool.commitizen.customize]
+message_template = "{{change_type}}: {{message}}"
+commit_parser = '^(?P<change_type>feat|fix|refactor|perf|break|docs)(?:\((?P<scope>[^()\r\n]*)\)|\()?(?P<breaking>!)?:\s(?P<message>.*)?'
+schema_pattern = '(feat|fix|refactor|perf|break|docs|ci|chore|style|revert|test|build)(?:\((?P<scope>[^()\r\n]*)\)|\()?(?P<breaking>!)?:(\s.*)'
+schema = """
+<type>(<scope>): <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+(BREAKING CHANGE: )<footer>"""
+change_type_order = [
+  "BREAKING CHANGES",
+  "✨ New",
+  "🐛 Fixes",
+  "⚙️ Under the Hood",
+  "⚡ Performance Improvements",
+  "📚 Documentation Improvements",
+]
+
+[tool.commitizen.customize.change_type_map]
+break = "BREAKING CHANGES"
+feat = "✨ New"
+fix = "🐛 Fixes"
+refactor = "⚙️ Under the Hood"
+docs = "📚 Documentation Improvements"
+perf = "⚡ Performance Improvements"
+
+[[tool.commitizen.customize.questions]]
+type = "list"
+name = "change_type"
+choices = [
+    { value = "feat",     name = "feat: A new feature." },
+    { value = "fix",      name = "fix: A bug fix." },
+    { value = "refactor", name = "refactor: A code change that neither fixes a bug nor adds a feature." },
+    { value = "perf",     name = "perf: A code change that improves performance." },
+    { value = "docs",     name = "docs: A documentation change." },
+    { value = "break",    name = "break: A breaking change." },
+    { value = "chore",    name = "chore: A change that doesn't affect the meaning of the codebase." },
+    { value = "style",    name = "style: A code style change." },
+    { value = "revert",   name = "revert: Revert to a commit." },
+    { value = "test",     name = "test: A test change." },
+    { value = "build",    name = "build: A build system change." },
+    { value = "ci",       name = "ci: A change to CI/CD." },
+]
+message = "Select the type of change you are committing"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "message"
+message = "Subject"
+
+[tool.coverage.paths]
+source = [
+    "singer_sdk/",
+    "*/singer_sdk",
+]
+tests = [
+    "tests/",
+    "*/tests",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["singer_sdk", "tests"]
+omit = [
+    "tests/*",
+    "samples/*",
+    "singer_sdk/helpers/_compat.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    '''class .*\bProtocol\):''',
+    '''@(abc\.)?abstractmethod''',
+]
+fail_under = 82
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
