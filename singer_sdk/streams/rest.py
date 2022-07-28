@@ -19,6 +19,7 @@ from typing import (
 from urllib.parse import urlparse
 
 import backoff
+from backoff._typing import _MaybeCallable
 import requests
 from singer.schema import Schema
 
@@ -542,7 +543,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return backoff.expo(factor=2)  # type: ignore # ignore 'Returning Any'
 
-    def backoff_max_tries(self) -> int:
+    def backoff_max_tries(self) -> Optional[_MaybeCallable[int]]:
         """The number of attempts before giving up when retrying requests.
 
         Setting to None will retry indefinitely.
