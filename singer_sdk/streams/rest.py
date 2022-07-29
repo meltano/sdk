@@ -547,7 +547,8 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
     def backoff_max_tries(self) -> Optional[_MaybeCallable[int]]:
         """The number of attempts before giving up when retrying requests.
 
-        Setting to None will retry indefinitely.
+        Can be an integer, a zero-argument callable that returns an integer,
+        or ``None`` to retry indefinitely.
 
         Returns:
             int: limit
