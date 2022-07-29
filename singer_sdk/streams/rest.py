@@ -19,8 +19,8 @@ from typing import (
 from urllib.parse import urlparse
 
 import backoff
-from backoff._typing import _MaybeCallable
 import requests
+from backoff._typing import _MaybeCallable
 from singer.schema import Schema
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
