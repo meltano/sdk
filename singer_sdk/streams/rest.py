@@ -32,7 +32,8 @@ DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 _TToken = TypeVar("_TToken")
-_MaybeCallable = Union[_TToken, Callable[[], _TToken]]
+_T = TypeVar("_T")
+_MaybeCallable = Union[_T, Callable[[], _T]]
 
 
 class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
