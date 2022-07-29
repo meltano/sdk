@@ -32,7 +32,7 @@ DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 _TToken = TypeVar("_TToken")
-_MaybeCallable = Union[T, Callable[[], T]]
+_MaybeCallable = Union[_TToken, Callable[[], _TToken]]
 
 
 
