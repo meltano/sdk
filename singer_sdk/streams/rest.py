@@ -20,7 +20,6 @@ from urllib.parse import urlparse
 
 import backoff
 import requests
-from backoff._typing import _MaybeCallable
 from singer.schema import Schema
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
@@ -33,6 +32,8 @@ DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 _TToken = TypeVar("_TToken")
+_MaybeCallable = Union[T, Callable[[], T]]
+
 
 
 class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
