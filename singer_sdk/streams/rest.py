@@ -35,7 +35,6 @@ _TToken = TypeVar("_TToken")
 _MaybeCallable = Union[_TToken, Callable[[], _TToken]]
 
 
-
 class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
     """Abstract base class for REST API streams."""
 
