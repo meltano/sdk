@@ -82,7 +82,7 @@ coverage = {extras = ["toml"], version = "^6.4"}
 black = "^22.6"
 darglint = "^1.8.0"
 flake8 = "^3.9.0"
-flake8-annotations = "^2.9.0"
+flake8-annotations = "^2.9.1"
 flake8-docstrings = "^1.6.0"
 
 [tool.black]
