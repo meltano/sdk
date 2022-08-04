@@ -1,16 +1,17 @@
 """Sample tap stream test for tap-google-analytics."""
 
-from pathlib import Path
 from typing import Any, Iterable, List, Optional, cast
 
 import pendulum
 
+from samples.sample_tap_google_analytics import schemas
 from singer_sdk.authenticators import OAuthJWTAuthenticator
+from singer_sdk.helpers._util import get_package_files
 from singer_sdk.streams import RESTStream
 
 GOOGLE_OAUTH_ENDPOINT = "https://oauth2.googleapis.com/token"
 GA_OAUTH_SCOPES = "https://www.googleapis.com/auth/analytics.readonly"
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+SCHEMAS_DIR = get_package_files(schemas)
 
 
 class GoogleJWTAuthenticator(OAuthJWTAuthenticator):

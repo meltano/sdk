@@ -4,13 +4,13 @@
 #  - https://gitlab.com/-/graphql-explorer
 """
 
-from pathlib import Path
-
+from samples.sample_tap_gitlab import schemas
+from singer_sdk.helpers._util import get_package_files
 from singer_sdk.streams import GraphQLStream
 
 SITE_URL = "https://gitlab.com/graphql"
 
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+SCHEMAS_DIR = get_package_files(schemas)
 
 
 class GitlabGraphQLStream(GraphQLStream):

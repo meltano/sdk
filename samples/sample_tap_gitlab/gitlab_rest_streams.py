@@ -1,11 +1,12 @@
 """Sample tap stream test for tap-gitlab."""
 
-from pathlib import Path
 from typing import Any, Dict, List, Optional, cast
 
 import requests
 
+from samples.sample_tap_gitlab import schemas
 from singer_sdk.authenticators import SimpleAuthenticator
+from singer_sdk.helpers._util import get_package_files
 from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import (
     ArrayType,
@@ -16,7 +17,7 @@ from singer_sdk.typing import (
     StringType,
 )
 
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+SCHEMAS_DIR = get_package_files(schemas)
 
 DEFAULT_URL_BASE = "https://gitlab.com/api/v4"
 

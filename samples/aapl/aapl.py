@@ -1,11 +1,12 @@
 """A simple tap with one big record and schema."""
 
 import json
-from pathlib import Path
 
+from samples import aapl
 from singer_sdk import Stream, Tap
+from singer_sdk.helpers._util import get_package_files
 
-PROJECT_DIR = Path(__file__).parent
+PROJECT_DIR = get_package_files(aapl)
 
 
 class AAPL(Stream):

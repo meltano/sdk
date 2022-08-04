@@ -7,12 +7,13 @@ See the online explorer and query builder here:
 """
 
 import abc
-from pathlib import Path
 
+from samples.sample_tap_countries import schemas
 from singer_sdk import typing as th
+from singer_sdk.helpers._util import get_package_files
 from singer_sdk.streams.graphql import GraphQLStream
 
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+SCHEMAS_DIR = get_package_files(schemas)
 
 
 class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):

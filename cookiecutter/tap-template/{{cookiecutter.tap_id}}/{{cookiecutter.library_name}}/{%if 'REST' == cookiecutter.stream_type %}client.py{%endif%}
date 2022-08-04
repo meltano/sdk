@@ -20,9 +20,6 @@ from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}A
 {%- endif %}
 
 
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
-
-
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 

@@ -4,11 +4,13 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Union, List, Iterable
 
 from singer_sdk import typing as th  # JSON Schema typing helpers
+from singer_sdk.helpers._util import get_package_files
 
+from {{ cookiecutter.library_name }} import schemas
 from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }}Stream
 
 # TODO: Delete this is if not using json files for schema definition
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+SCHEMAS_DIR = get_package_files(schemas)
 
 
 {%- if cookiecutter.stream_type == "GraphQL" %}
