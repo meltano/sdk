@@ -1,9 +1,9 @@
 """Test _typing - specifically conform_record_data_types()."""
-
+import datetime
 import logging
 import unittest
 
-from singer_sdk.helpers._typing import conform_record_data_types
+from singer_sdk.helpers._typing import conform_record_data_types, _conform_primitive_property
 from singer_sdk.typing import (
     ArrayType,
     BooleanType,
@@ -165,3 +165,21 @@ class TestSimpleEval(unittest.TestCase):
                     "catalog schema. Ignoring."
                 ],
             )
+
+
+def test_conform_primitives():
+    assert _conform_primitive_property(datetime.datetime(2020, 5, 17),
+                                       {"type": "string"}) == "2020-05-17T00:00:00+00:00"
+    assert _conform_primitive_property(datetime.date(2020, 5, 17), {"type": "string"}) == "2020-05-17T00:00:00+00:00"
+    assert _conform_primitive_property(datetime.timedelta(365), {"type": "string"}) == "1971-01-01T00:00:00+00:00"
+    assert _conform_primitive_property(datetime.time(12, 0, 0), {"type": "string"}) == "12:00:00"
+
+    assert _conform_primitive_property(b"\x00", {"type": "string"}) == "00"
+    assert _conform_primitive_property(b"\xBC", {"type": "string"}) == "bc"
+
+    assert _conform_primitive_property(b"\x00", {"type": "boolean"}) == False
+    assert _conform_primitive_property(b"\xBC", {"type": "boolean"}) == True
+
+    assert _conform_primitive_property(None, {"type": "boolean"}) is None
+    assert _conform_primitive_property(0, {"type": "boolean"}) == False
+    assert _conform_primitive_property(1, {"type": "boolean"}) == True
