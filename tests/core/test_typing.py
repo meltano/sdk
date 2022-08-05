@@ -42,7 +42,6 @@ def test_primitive_arrays_are_conformed():
     schema = PropertiesList(
         Property("list", ArrayType(BooleanType)),
     ).to_dict()
-    print(schema)
 
     record = {
         "list": [b"\x01", b"\x00"],
