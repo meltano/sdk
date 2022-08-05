@@ -11,12 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixes
 
-- **taps**: Update return type for `backoff_max_tries` to reflect it accepts a callable that returns an integer (#868)
-- Change to use json dumps for outputting metrics (#878)
+- [#868](https://github.com/meltano/sdk/issues/868) Update return type for `backoff_max_tries` to reflect it accepts a callable that returns an integer
+- [#878](https://github.com/meltano/sdk/issues/878) Change to use json dumps for outputting metrics
 
 ### 📚 Documentation Improvements
 
-- Cleanup whitespace in backoff code samples (#869)
+- [#869](https://github.com/meltano/sdk/issues/869) Cleanup whitespace in backoff code samples
 
 ## v0.7.0 (2022-07-21)
 
