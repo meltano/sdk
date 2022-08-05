@@ -75,12 +75,17 @@ def is_array_type(property_schema: dict) -> Optional[bool]:
 
 
 def is_uniform_list(property_schema: dict) -> Optional[bool]:
-    """Return true if the JSON Schema type is an array containing elements with a single shared schema.
+    """Return true if the JSON Schema type is an array with a single schema.
+
     This is as opposed to 'tuples' where different indices have different schemas;
     https://json-schema.org/understanding-json-schema/reference/array.html#array
     """
-    return is_array_type(property_schema) is True and "items" in property_schema and \
-           "prefixItems" not in property_schema and isinstance(property_schema["items"], dict)
+    return (
+        is_array_type(property_schema) is True
+        and "items" in property_schema
+        and "prefixItems" not in property_schema
+        and isinstance(property_schema["items"], dict)
+    )
 
 
 def is_datetime_type(type_dict: dict) -> bool:
@@ -209,7 +214,6 @@ def conform_record_data_types(  # noqa: C901
     Any property names not found in the schema catalog will be removed, and a single
     warning will be logged listing each unmapped property name.
     """
-
     rec, unmapped_properties = _conform_record_data_types(row, schema, None)
 
     _warn_unmapped_properties(stream_name, tuple(unmapped_properties), logger)
@@ -217,8 +221,9 @@ def conform_record_data_types(  # noqa: C901
     return rec
 
 
-def _conform_record_data_types(input_object: Dict[str, Any], schema: dict, parent: Optional[str]) -> Tuple[
-    Dict[str, Any], List[str]]:  # noqa: C901
+def _conform_record_data_types(
+    input_object: Dict[str, Any], schema: dict, parent: Optional[str]
+) -> Tuple[Dict[str, Any], List[str]]:  # noqa: C901
     """Translate values in record dictionary to singer-compatible data types.
 
     Any property names not found in the schema catalog will be removed, and a single
@@ -234,7 +239,9 @@ def _conform_record_data_types(input_object: Dict[str, Any], schema: dict, paren
     output_object: Dict[str, Any] = {}
     unmapped_properties: List[str] = []
     for property_name, elem in input_object.items():
-        property_path = property_name if parent is None else parent + "." + property_name
+        property_path = (
+            property_name if parent is None else parent + "." + property_name
+        )
         if property_name not in schema["properties"]:
             unmapped_properties.append(property_path)
             continue
@@ -245,24 +252,33 @@ def _conform_record_data_types(input_object: Dict[str, Any], schema: dict, paren
             output = []
             for item in elem:
                 if is_object_type(item_schema) and isinstance(item, dict):
-                    output_item, sub_unmapped_properties = _conform_record_data_types(item, item_schema,
-                                                                                      property_path)
+                    output_item, sub_unmapped_properties = _conform_record_data_types(
+                        item, item_schema, property_path
+                    )
                     unmapped_properties.extend(sub_unmapped_properties)
                     output.append(output_item)
                 else:
                     output.append(_conform_primitive_property(item, item_schema))
             output_object[property_name] = output
-        elif isinstance(elem, dict) and is_object_type(property_schema) and "properties" in property_schema:
-            output_object[property_name], sub_unmapped_properties = _conform_record_data_types(elem, property_schema,
-                                                                                               property_path)
+        elif (
+            isinstance(elem, dict)
+            and is_object_type(property_schema)
+            and "properties" in property_schema
+        ):
+            (
+                output_object[property_name],
+                sub_unmapped_properties,
+            ) = _conform_record_data_types(elem, property_schema, property_path)
             unmapped_properties.extend(sub_unmapped_properties)
         else:
-            output_object[property_name] = _conform_primitive_property(elem, property_schema)
+            output_object[property_name] = _conform_primitive_property(
+                elem, property_schema
+            )
     return output_object, unmapped_properties
 
 
-def _conform_primitive_property(elem: Any, property_schema: dict):
-    """ Converts the given primitive (i.e. not object or array) to a json compatible data type (if necessary) """
+def _conform_primitive_property(elem: Any, property_schema: dict) -> Any:
+    """Converts a primitive (i.e. not object or array) to a json compatible type."""
     if isinstance(elem, (datetime.datetime, pendulum.DateTime)):
         return to_json_compatible(elem)
     elif isinstance(elem, datetime.date):
