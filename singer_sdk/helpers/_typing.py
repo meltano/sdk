@@ -242,17 +242,16 @@ def _conform_record_data_types(input_object: Dict[str, Any], schema: dict, paren
         property_schema = schema["properties"][property_name]
         if isinstance(elem, list) and is_uniform_list(property_schema):
             item_schema = property_schema["items"]
-            if is_object_type(item_schema):
-                output = []
-                for item in elem:
-                    if isinstance(item, dict):
-                        output_item, sub_unmapped_properties = _conform_record_data_types(item, item_schema,
-                                                                                          property_path)
-                        unmapped_properties.extend(sub_unmapped_properties)
-                        output.append(output_item)
-                output_object[property_name] = output
-            else:
-                output_object[property_name] = [_conform_primitive_property(a, item_schema) for a in elem]
+            output = []
+            for item in elem:
+                if is_object_type(item_schema) and isinstance(item, dict):
+                    output_item, sub_unmapped_properties = _conform_record_data_types(item, item_schema,
+                                                                                      property_path)
+                    unmapped_properties.extend(sub_unmapped_properties)
+                    output.append(output_item)
+                else:
+                    output.append(_conform_primitive_property(item, item_schema))
+            output_object[property_name] = output
         elif isinstance(elem, dict) and is_object_type(property_schema) and "properties" in property_schema:
             output_object[property_name], sub_unmapped_properties = _conform_record_data_types(elem, property_schema,
                                                                                                property_path)

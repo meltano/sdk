@@ -33,7 +33,7 @@ def test_simple_schema_conforms_types():
     assert actual_output == expected_output
 
 
-def test_primitive_arrays_are_transformed():
+def test_primitive_arrays_are_conformed():
     schema = PropertiesList(
         Property("list", ArrayType(BooleanType)),
     ).to_dict()
@@ -79,6 +79,46 @@ def test_object_arrays_are_conformed():
             {
                 "value": False
             }
+        ]
+    }
+
+    actual_output = conform_record_data_types("test_stream", record, schema, logger)
+    assert actual_output == expected_output
+
+
+def test_mixed_arrays_are_conformed():
+    schema = {
+        'type': 'object',
+        'properties': {
+            'list': {
+                'type': ['array', 'null'],
+                'items': {
+                    'type': ['object', 'boolean'],
+                    'properties': {
+                        'value': {
+                            'type': ['boolean', 'null']
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    record = {
+        "list": [
+            {
+                "value": b"\x01"
+            },
+            b"\x00"
+        ]
+    }
+
+    expected_output = {
+        "list": [
+            {
+                "value": True
+            },
+            False
         ]
     }
 
@@ -190,4 +230,3 @@ class TestSimpleEval(unittest.TestCase):
             self.assertEqual(logs.output, [
                 "WARNING:log:Properties ('list.remove',) were present in the 'test_stream' stream but not found in "
                 "catalog schema. Ignoring."])
-
