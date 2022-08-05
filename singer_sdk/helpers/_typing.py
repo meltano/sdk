@@ -129,13 +129,13 @@ def _is_string_with_format(type_dict):
 
 
 def handle_invalid_timestamp_in_record(
-        record,
-        key_breadcrumb: List[str],
-        invalid_value: str,
-        datelike_typename: str,
-        ex: Exception,
-        treatment: Optional[DatetimeErrorTreatmentEnum],
-        logger: logging.Logger,
+    record,
+    key_breadcrumb: List[str],
+    invalid_value: str,
+    datelike_typename: str,
+    ex: Exception,
+    treatment: Optional[DatetimeErrorTreatmentEnum],
+    logger: logging.Logger,
 ) -> Any:
     """Apply treatment or raise an error for invalid time values."""
     treatment = treatment or DatetimeErrorTreatmentEnum.ERROR
@@ -193,7 +193,7 @@ def is_string_type(property_schema: dict) -> Optional[bool]:
 
 @lru_cache()
 def _warn_unmapped_properties(
-        stream_name: str, property_names: Tuple[str], logger: logging.Logger
+    stream_name: str, property_names: Tuple[str], logger: logging.Logger
 ):
     logger.warning(
         f"Properties {property_names} were present in the '{stream_name}' stream but "
@@ -202,7 +202,7 @@ def _warn_unmapped_properties(
 
 
 def conform_record_data_types(  # noqa: C901
-        stream_name: str, row: Dict[str, Any], schema: dict, logger: logging.Logger
+    stream_name: str, row: Dict[str, Any], schema: dict, logger: logging.Logger
 ) -> Dict[str, Any]:
     """Translate values in record dictionary to singer-compatible data types.
 
