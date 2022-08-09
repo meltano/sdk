@@ -28,13 +28,13 @@ from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
-from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
     FLATTENING_CONFIG,
     STREAM_MAPS_CONFIG,
     CapabilitiesEnum,
     PluginCapabilities,
 )
+from singer_sdk.helpers.util import read_json_file
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import extend_validator_with_defaults
 

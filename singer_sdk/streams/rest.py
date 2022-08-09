@@ -6,13 +6,13 @@ import abc
 import copy
 import logging
 from datetime import datetime
-from typing import Any, Callable, Generator, Generic, Iterable, TypeVar, Union
+from typing import Any, Callable, Generator, Generic, Iterable, TypeVar
 from urllib.parse import urlparse
 
 import backoff
 import requests
-from singer.schema import Schema
 
+from singer_sdk._python_types import _MaybeCallable, _StreamSchemaInput
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.helpers.jsonpath import extract_jsonpath
@@ -23,8 +23,6 @@ DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 _TToken = TypeVar("_TToken")
-_T = TypeVar("_T")
-_MaybeCallable = Union[_T, Callable[[], _T]]
 
 
 class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
@@ -59,7 +57,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         self,
         tap: TapBaseClass,
         name: str | None = None,
-        schema: dict[str, Any] | Schema | None = None,
+        schema: _StreamSchemaInput | None = None,
         path: str | None = None,
     ) -> None:
         """Initialize the REST stream.

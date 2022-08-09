@@ -54,7 +54,7 @@ class TapCountries(Tap):
 ### Define a simple GraphQL-based stream with schema defined in a file
 
 ```python
-from singer_sdk.helpers._util import get_package_files
+from singer_sdk.helpers.util import get_package_files
 from tap_countries import schemas
 
 SCHEMAS_DIR = get_package_files(schemas)

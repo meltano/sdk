@@ -5,7 +5,7 @@
 """
 
 from samples.sample_tap_gitlab import schemas
-from singer_sdk.helpers._util import get_package_files
+from singer_sdk.helpers.util import get_package_files
 from singer_sdk.streams import GraphQLStream
 
 SITE_URL = "https://gitlab.com/graphql"

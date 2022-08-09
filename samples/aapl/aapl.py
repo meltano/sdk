@@ -4,7 +4,7 @@ import json
 
 from samples import aapl
 from singer_sdk import Stream, Tap
-from singer_sdk.helpers._util import get_package_files
+from singer_sdk.helpers.util import get_package_files
 
 PROJECT_DIR = get_package_files(aapl)
 

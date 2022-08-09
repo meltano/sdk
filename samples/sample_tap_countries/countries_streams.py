@@ -10,7 +10,7 @@ import abc
 
 from samples.sample_tap_countries import schemas
 from singer_sdk import typing as th
-from singer_sdk.helpers._util import get_package_files
+from singer_sdk.helpers.util import get_package_files
 from singer_sdk.streams.graphql import GraphQLStream
 
 SCHEMAS_DIR = get_package_files(schemas)

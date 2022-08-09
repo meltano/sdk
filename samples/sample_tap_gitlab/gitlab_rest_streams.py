@@ -6,7 +6,7 @@ import requests
 
 from samples.sample_tap_gitlab import schemas
 from singer_sdk.authenticators import SimpleAuthenticator
-from singer_sdk.helpers._util import get_package_files
+from singer_sdk.helpers.util import get_package_files
 from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import (
     ArrayType,

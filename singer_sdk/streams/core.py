@@ -20,6 +20,7 @@ import singer
 from singer import RecordMessage, SchemaMessage, StateMessage
 from singer.schema import Schema
 
+from singer_sdk._python_types import _StreamSchemaInput
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import final
@@ -42,7 +43,7 @@ from singer_sdk.helpers._state import (
     write_starting_replication_value,
 )
 from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type
-from singer_sdk.helpers._util import utc_now
+from singer_sdk.helpers.util import utc_now
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 
@@ -78,7 +79,7 @@ class Stream(metaclass=abc.ABCMeta):
     def __init__(
         self,
         tap: TapBaseClass,
-        schema: None | (str | PathLike | dict[str, Any] | Schema | Traversable) = None,
+        schema: _StreamSchemaInput | None = None,
         name: str | None = None,
     ) -> None:
         """Init tap stream.

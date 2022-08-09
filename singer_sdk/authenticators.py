@@ -15,7 +15,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from singer import utils
 
-from singer_sdk.helpers._util import utc_now
+from singer_sdk.helpers.util import utc_now
 from singer_sdk.streams import Stream as RESTStreamBase
 
 

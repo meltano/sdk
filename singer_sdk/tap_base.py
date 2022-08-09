@@ -15,12 +15,12 @@ from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._singer import Catalog
 from singer_sdk.helpers._state import write_stream_state
-from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
     CapabilitiesEnum,
     PluginCapabilities,
     TapCapabilities,
 )
+from singer_sdk.helpers.util import read_json_file
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.streams import SQLStream, Stream

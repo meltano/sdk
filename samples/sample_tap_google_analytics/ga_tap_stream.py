@@ -6,7 +6,7 @@ import pendulum
 
 from samples.sample_tap_google_analytics import schemas
 from singer_sdk.authenticators import OAuthJWTAuthenticator
-from singer_sdk.helpers._util import get_package_files
+from singer_sdk.helpers.util import get_package_files
 from singer_sdk.streams import RESTStream
 
 GOOGLE_OAUTH_ENDPOINT = "https://oauth2.googleapis.com/token"

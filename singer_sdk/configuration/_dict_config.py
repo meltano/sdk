@@ -11,7 +11,7 @@ from dotenv import find_dotenv
 from dotenv.main import DotEnv
 
 from singer_sdk.helpers._typing import is_string_array_type
-from singer_sdk.helpers._util import read_json_file
+from singer_sdk.helpers.util import read_json_file
 
 logger = logging.getLogger(__name__)
 

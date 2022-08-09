@@ -16,7 +16,18 @@ else:
 
 
 def read_json_file(path: Union[PurePath, str]) -> Dict[str, Any]:
-    """Read json file, thowing an error if missing."""
+    """Read json file, thowing an error if missing.
+
+    Args:
+        path: The path to the file to read.
+
+    Returns:
+        The contents of the file as a dictionary.
+
+    Raises:
+        RuntimeError: If the path is empty.
+        FileNotFoundError: If the file does not exist.
+    """
     if not path:
         raise RuntimeError("Could not open file. Filepath not provided.")
 
@@ -25,13 +36,17 @@ def read_json_file(path: Union[PurePath, str]) -> Dict[str, Any]:
         for template in [f"{path}.template"]:
             if Path(template).exists():
                 msg += f"\nFor more info, please see the sample template at: {template}"
-        raise FileExistsError(msg)
+        raise FileNotFoundError(msg)
 
     return cast(dict, json.loads(Path(path).read_text()))
 
 
 def utc_now() -> pendulum.DateTime:
-    """Return current time in UTC."""
+    """Return current time in UTC.
+
+    Returns:
+        The current time in UTC.
+    """
     return pendulum.now(tz="UTC")
 
 
@@ -42,6 +57,8 @@ def get_package_files(package: resources.Package) -> Traversable:
 
     Args:
         package: The package to load the resource from.
-        resource: The name of the resource to load.
+
+    Returns:
+        The resource as a Traversable object.
     """
     return resources.files(package)
