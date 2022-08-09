@@ -13,7 +13,7 @@ import click
 from joblib import Parallel, delayed, parallel_backend
 
 from singer_sdk.cli import common_options
-from singer_sdk.exceptions import RecordsWitoutSchemaException
+from singer_sdk.exceptions import ConfigValidationError, RecordsWitoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
@@ -505,6 +505,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             Raises:
                 FileNotFoundError: If the config file does not exist.
+                Abort: If the configuration is not valid.
             """
             if version:
                 cls.print_version()
@@ -537,11 +538,16 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
                 config_files.append(Path(config_path))
 
-            target = cls(  # type: ignore  # Ignore 'type not callable'
-                config=config_files or None,
-                parse_env_config=parse_env_config,
-                validate_config=validate_config,
-            )
+            try:
+                target = cls(  # type: ignore  # Ignore 'type not callable'
+                    config=config_files or None,
+                    parse_env_config=parse_env_config,
+                    validate_config=validate_config,
+                )
+            except ConfigValidationError as exc:
+                for error in exc.errors:
+                    click.secho(error, fg="red", err=True)
+                raise click.Abort()
 
             target.listen(file_input)
 

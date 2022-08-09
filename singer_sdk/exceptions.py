@@ -13,18 +13,15 @@ class ConfigValidationError(Exception):
         message: str,
         *,
         errors: list[str] | None = None,
-        warnings: list[str] | None = None,
     ) -> None:
         """Initialize a ConfigValidationError.
 
         Args:
             message: A message describing the error.
             errors: A list of errors which caused the validation error.
-            warnings: A list of warnings which caused the validation error.
         """
         super().__init__(message)
         self.errors = errors or []
-        self.warnings = warnings or []
 
 
 class FatalAPIError(Exception):

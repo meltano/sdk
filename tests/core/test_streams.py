@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any, Iterable, cast
 
 import pendulum
 import pytest
 import requests
+from click.testing import CliRunner
 
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
@@ -406,7 +408,7 @@ def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
     [
         (
             {},
-            ["'username' is a required property"],
+            ["'username' is a required property", "'password' is a required property"],
         ),
         (
             {"username": "utest"},
@@ -428,3 +430,19 @@ def test_config_errors(config_dict: dict, errors: list[str]):
         SimpleTestTap(config_dict, validate_config=True)
 
     assert exc.value.errors == errors
+
+
+def test_cli(tmp_path):
+    """Test the CLI."""
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(SimpleTestTap.cli, ["--help"])
+    assert result.exit_code == 0
+    assert "Show this message and exit." in result.output
+
+    config_path = tmp_path / "config.json"
+    config_path.write_text(json.dumps({}))
+    result = runner.invoke(SimpleTestTap.cli, ["--config", str(config_path)])
+    assert result.exit_code == 1
+    assert result.stdout == ""
+    assert "'username' is a required property" in result.stderr
+    assert "'password' is a required property" in result.stderr

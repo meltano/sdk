@@ -497,10 +497,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 )
             except ConfigValidationError as exc:
                 for error in exc.errors:
-                    click.secho(error, fg="red")
-                for warning in exc.warnings:
-                    click.secho(warning, fg="warning")
-                raise click.Abort("Configuration is not valid.")
+                    click.secho(error, fg="red", err=True)
+                raise click.Abort()
 
             if discover:
                 tap.run_discovery()
