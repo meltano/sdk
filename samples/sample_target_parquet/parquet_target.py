@@ -14,3 +14,7 @@ class SampleTargetParquet(Target):
         th.Property("file_naming_scheme", th.StringType),
     ).to_dict()
     default_sink_class = SampleParquetTargetSink
+
+
+if __name__ == "__main__":
+    SampleTargetParquet.cli()

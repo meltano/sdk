@@ -318,9 +318,7 @@ def backoff_wait_generator() -> Callable[..., Generator[int, Any, None]]:
         return int(response_headers.get("Retry-After", 0))
 
     return self.backoff_runtime(value=_backoff_from_headers)
-
 ```
-
 
 ## Additional Resources
 
