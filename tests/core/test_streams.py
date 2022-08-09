@@ -446,3 +446,17 @@ def test_cli(tmp_path):
     assert result.stdout == ""
     assert "'username' is a required property" in result.stderr
     assert "'password' is a required property" in result.stderr
+
+    config_path = tmp_path / "config.json"
+    config_path.write_text(json.dumps({}))
+    result = runner.invoke(
+        SimpleTestTap.cli,
+        [
+            "--config",
+            str(config_path),
+            "--discover",
+        ],
+    )
+    assert result.exit_code == 0
+    assert "streams" in json.loads(result.stdout)
+    assert result.stderr == ""
