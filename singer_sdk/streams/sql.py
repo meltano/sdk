@@ -719,14 +719,19 @@ class SQLConnector:
         if len(sql_types) == 1:
             return sql_types[0]
 
+        # Convert the two types given into a sorted list
+        # containing the best conversion classes
         sql_types = self._sort_types(sql_types)
 
+        # If greater than two evaluate the first pair then on down the line
         if len(sql_types) > 2:
             return self.merge_sql_types(
                 [self.merge_sql_types([sql_types[0], sql_types[1]])] + sql_types[2:]
             )
 
         assert len(sql_types) == 2
+
+        # Get the generic type class
         generic_type = type(sql_types[0].as_generic())
         if isinstance(generic_type, type):
             if issubclass(
@@ -825,9 +830,33 @@ class SQLConnector:
         Raises:
             NotImplementedError: if altering columns is not supported.
         """
-        current_type = self._get_column_type(full_table_name, column_name)
+        current_type: sqlalchemy.types.TypeEngine = self._get_column_type(
+            full_table_name, column_name
+        )
+
+        # Check if the existing column type and the sql type are the same
+        if isinstance(sql_type, type(current_type)):
+            # The current column and sql type are the same
+            # Nothing to do
+            return
+        # Check if the existing column generic type
+        # and sql generic type are the same
+        elif isinstance(sql_type.as_generic(), type(current_type.as_generic())):
+            # The current column and sql generic types are the same
+            # Nothing to do
+            return
+        # Check if the new type is a subclass of the current type
+        elif issubclass(type(sql_type.as_generic()), type(current_type)):
+            # Since it is a sub class of the current type
+            # a conversion on insert will happen
+            # Nothing to do
+            return
+
+        # Not the same type, generic type or compatible types
+        # calling merge_sql_types for assistnace
         compatible_sql_type = self.merge_sql_types([current_type, sql_type])
-        if current_type == compatible_sql_type:
+
+        if compatible_sql_type == current_type:
             # Nothing to do
             return
 
