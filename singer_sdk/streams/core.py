@@ -116,19 +116,18 @@ class Stream(metaclass=abc.ABCMeta):
         self.child_streams: list[Stream] = []
         if schema:
             if isinstance(schema, (PathLike, str)):
-                if not Path(schema).is_file():
-                    raise FileNotFoundError(
-                        f"Could not find schema file '{self.schema_filepath}'."
+                if isinstance(schema, str):
+                    warn(
+                        "Passing a string filepath is deprecated. "
+                        + "Use singer_sdk.helpers.util.get_package instead.",
+                        DeprecationWarning,
                     )
-                warn(
-                    "Passing a string or pathlib.Path schema filepath is deprecated. "
-                    + "Use importlib.resources.files() instead.",
-                    DeprecationWarning,
-                )
+                    self._schema_filepath = Path(schema)
+                else:
+                    self._schema_filepath = schema
 
-                self._schema_filepath = Path(schema)
-            elif isinstance(schema, Traversable):
-                self._schema_filepath = schema
+                if not self._schema_filepath.is_file():
+                    raise FileNotFoundError(f"Could not find schema file '{schema}'.")
             elif isinstance(schema, dict):
                 self._schema = schema
             elif isinstance(schema, Schema):

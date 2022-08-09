@@ -1,6 +1,7 @@
 """Stream tests."""
 
 import logging
+import os
 from typing import Any, Dict, Iterable, List, Optional, cast
 
 import pendulum
@@ -9,6 +10,7 @@ import requests
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.jsonpath import _compile_jsonpath
+from singer_sdk.helpers.util import get_package_files
 from singer_sdk.streams.core import (
     REPLICATION_FULL_TABLE,
     REPLICATION_INCREMENTAL,
@@ -111,6 +113,30 @@ def tap() -> SimpleTestTap:
 def stream(tap: SimpleTestTap) -> SimpleTestStream:
     """Create a new stream instance."""
     return cast(SimpleTestStream, tap.load_streams()[0])
+
+
+def test_constructor(tap):
+    with pytest.warns(DeprecationWarning):
+        filepath = os.path.join(
+            __file__,
+            os.pardir,
+            "resources",
+            "schema.json",
+        )
+        RestTestStream(
+            tap,
+            name="test",
+            schema=os.path.abspath(filepath),
+        )
+
+    import tests.core.resources as test_resources
+
+    stream = RestTestStream(
+        tap,
+        name="test",
+        schema=get_package_files(test_resources).joinpath("schema.json"),
+    )
+    assert stream.schema_filepath.exists()
 
 
 def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
