@@ -5,3 +5,4 @@
 
 .. autoclass:: APIKeyAuthenticator
     :members:
+    :special-members: __init__

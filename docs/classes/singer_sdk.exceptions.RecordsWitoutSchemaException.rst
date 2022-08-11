@@ -5,3 +5,4 @@
 
 .. autoclass:: RecordsWitoutSchemaException
     :members:
+    :special-members: __init__
