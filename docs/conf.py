@@ -52,7 +52,7 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Show typehints in the description, along with parameter descriptions
-autodoc_typehints = "description"
+autodoc_typehints = "signature"
 autodoc_class_signature = "separated"
 
 # -- Options for HTML output -------------------------------------------------
