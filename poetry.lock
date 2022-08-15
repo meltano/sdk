@@ -35,10 +35,10 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [package.extras]
-tests_no_zope = ["cloudpickle", "pytest-mypy-plugins", "mypy", "six", "pytest (>=4.3.0)", "pympler", "hypothesis", "coverage[toml] (>=5.0.2)"]
-tests = ["cloudpickle", "zope.interface", "pytest-mypy-plugins", "mypy", "six", "pytest (>=4.3.0)", "pympler", "hypothesis", "coverage[toml] (>=5.0.2)"]
-docs = ["sphinx-notfound-page", "zope.interface", "sphinx", "furo"]
-dev = ["cloudpickle", "pre-commit", "sphinx-notfound-page", "sphinx", "furo", "zope.interface", "pytest-mypy-plugins", "mypy", "six", "pytest (>=4.3.0)", "pympler", "hypothesis", "coverage[toml] (>=5.0.2)"]
+dev = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "mypy", "pytest-mypy-plugins", "zope.interface", "furo", "sphinx", "sphinx-notfound-page", "pre-commit", "cloudpickle"]
+docs = ["furo", "sphinx", "zope.interface", "sphinx-notfound-page"]
+tests = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "mypy", "pytest-mypy-plugins", "zope.interface", "cloudpickle"]
+tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "mypy", "pytest-mypy-plugins", "cloudpickle"]
 
 [[package]]
 name = "babel"
@@ -323,9 +323,9 @@ typing-extensions = {version = ">=3.6.4", markers = "python_version < \"3.8\""}
 zipp = ">=0.5"
 
 [package.extras]
-testing = ["importlib-resources (>=1.3)", "pytest-mypy (>=0.9.1)", "pytest-black (>=0.3.7)", "pytest-perf (>=0.9.2)", "flufl.flake8", "pyfakefs", "packaging", "pytest-enabler (>=1.3)", "pytest-cov", "pytest-flake8", "pytest-checkdocs (>=2.4)", "pytest (>=6)"]
+docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)"]
 perf = ["ipython"]
-docs = ["rst.linker (>=1.9)", "jaraco.packaging (>=9)", "sphinx"]
+testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.3)", "packaging", "pyfakefs", "flufl.flake8", "pytest-perf (>=0.9.2)", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)", "importlib-resources (>=1.3)"]
 
 [[package]]
 name = "inflection"
@@ -495,9 +495,9 @@ typed-ast = {version = ">=1.4.0,<2", markers = "python_version < \"3.8\""}
 typing-extensions = ">=3.10"
 
 [package.extras]
-reports = ["lxml"]
-python2 = ["typed-ast (>=1.4.0,<2)"]
 dmypy = ["psutil (>=4.0)"]
+python2 = ["typed-ast (>=1.4.0,<2)"]
+reports = ["lxml"]
 
 [[package]]
 name = "mypy-extensions"
@@ -605,8 +605,8 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-test = ["pytest-mock (>=3.6)", "pytest-cov (>=2.7)", "pytest (>=6)", "appdirs (==1.4.4)"]
-docs = ["sphinx-autodoc-typehints (>=1.12)", "proselint (>=0.10.2)", "furo (>=2021.7.5b38)", "Sphinx (>=4)"]
+docs = ["Sphinx (>=4)", "furo (>=2021.7.5b38)", "proselint (>=0.10.2)", "sphinx-autodoc-typehints (>=1.12)"]
+test = ["appdirs (==1.4.4)", "pytest (>=6)", "pytest-cov (>=2.7)", "pytest-mock (>=3.6)"]
 
 [[package]]
 name = "pluggy"
@@ -719,7 +719,7 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-diagrams = ["railroad-diagrams", "jinja2"]
+diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pyrsistent"
@@ -749,7 +749,7 @@ py = ">=1.8.2"
 tomli = ">=1.0.0"
 
 [package.extras]
-testing = ["xmlschema", "requests", "pygments (>=2.7.2)", "nose", "mock", "hypothesis (>=3.56)", "argcomplete"]
+testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "xmlschema"]
 
 [[package]]
 name = "python-dateutil"
@@ -826,8 +826,8 @@ idna = ">=2.5,<4"
 urllib3 = ">=1.21.1,<1.27"
 
 [package.extras]
-use_chardet_on_py3 = ["chardet (>=3.0.2,<6)"]
 socks = ["PySocks (>=1.5.6,!=1.5.7)"]
+use_chardet_on_py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "requests-mock"
@@ -897,9 +897,9 @@ sphinxcontrib-qthelp = "*"
 sphinxcontrib-serializinghtml = ">=1.1.5"
 
 [package.extras]
-test = ["typed-ast", "cython", "html5lib", "pytest (>=4.6)"]
-lint = ["types-requests", "types-typed-ast", "docutils-stubs", "sphinx-lint", "mypy (>=0.971)", "isort", "flake8-bugbear", "flake8-comprehensions", "flake8 (>=3.5.0)"]
 docs = ["sphinxcontrib-websupport"]
+lint = ["flake8 (>=3.5.0)", "flake8-comprehensions", "flake8-bugbear", "isort", "mypy (>=0.971)", "sphinx-lint", "docutils-stubs", "types-typed-ast", "types-requests"]
+test = ["pytest (>=4.6)", "html5lib", "cython", "typed-ast"]
 
 [[package]]
 name = "sphinx-autobuild"
@@ -1138,13 +1138,13 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 
 [package.extras]
-socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
-secure = ["ipaddress", "certifi", "idna (>=2.0.0)", "cryptography (>=1.3.4)", "pyOpenSSL (>=0.14)"]
 brotli = ["brotlipy (>=0.6.0)"]
+secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "certifi", "ipaddress"]
+socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "viztracer"
-version = "0.15.3"
+version = "0.15.4"
 description = "A debugging and profiling tool that can trace and visualize python code execution"
 category = "dev"
 optional = false
@@ -1187,8 +1187,8 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-testing = ["pytest-mypy", "pytest-black (>=0.3.7)", "func-timeout", "jaraco.itertools", "pytest-enabler (>=1.0.1)", "pytest-cov", "pytest-flake8", "pytest-checkdocs (>=2.4)", "pytest (>=4.6)"]
-docs = ["rst.linker (>=1.9)", "jaraco.packaging (>=8.2)", "sphinx"]
+docs = ["sphinx", "jaraco.packaging (>=8.2)", "rst.linker (>=1.9)"]
+testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.0.1)", "jaraco.itertools", "func-timeout", "pytest-black (>=0.3.7)", "pytest-mypy"]
 
 [extras]
 docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser", "sphinx-autobuild"]
@@ -1196,7 +1196,7 @@ docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser", "sphin
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.11,>=3.7.1"
-content-hash = "009d30415ecb7e1176adad6ce6b62cb8e377a9df9988be52cb96650a71d6c164"
+content-hash = "25b0d31835c4a37dfce6d9f22e10a810364d1bfe8317ec5e541c6d46b9b0e7c4"
 
 [metadata.files]
 alabaster = [
@@ -2063,42 +2063,44 @@ urllib3 = [
     {file = "urllib3-1.26.8.tar.gz", hash = "sha256:0e7c33d9a63e7ddfcb86780aac87befc2fbddf46c58dbb487e0855f7ceec283c"},
 ]
 viztracer = [
-    {file = "viztracer-0.15.3-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:1ae9c70ea45f6d56faab89f46e387e31c5e20484b024cbf8cb4542140f131060"},
-    {file = "viztracer-0.15.3-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5799fc9c284047030f6de1448ef9681782ffb49f4e54ce3f9d890dd214436991"},
-    {file = "viztracer-0.15.3-cp310-cp310-manylinux_2_17_i686.manylinux2014_i686.manylinux_2_24_i686.whl", hash = "sha256:7fad5c50857c4ed0c7b3a43c867c3e79d148ef173ec35a3019eeb9ade032ac2a"},
-    {file = "viztracer-0.15.3-cp310-cp310-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:871b29f74155189e160e9d3849a30a476cd398ca2e823e09ab4fd571edaee588"},
-    {file = "viztracer-0.15.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a55e5851e292d3b110d08612f19fe0f0a92105ab717e95582ff910c9b29fc424"},
-    {file = "viztracer-0.15.3-cp310-cp310-win32.whl", hash = "sha256:d4a855370d309b529b38684a63adb118a1afa8f407d988db8396e052059d1ade"},
-    {file = "viztracer-0.15.3-cp310-cp310-win_amd64.whl", hash = "sha256:ee03edbd153b315e126bc6f5e13965c4926735f0762d3a76bf7414c7ded8c047"},
-    {file = "viztracer-0.15.3-cp36-cp36m-macosx_10_15_x86_64.whl", hash = "sha256:d30a0f5b0794fa68fd3dae9de9131d925b24d6b39826c5f421b0871417e59ab4"},
-    {file = "viztracer-0.15.3-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:eb127260dc9ce12d594500852052b4936e1f5b199abedea1a86d6853c943337b"},
-    {file = "viztracer-0.15.3-cp36-cp36m-manylinux_2_17_i686.manylinux2014_i686.manylinux_2_24_i686.whl", hash = "sha256:111e5d2f9bebb328987abbde23e6b649260bf6965d01ba14e566f5beb03e3333"},
-    {file = "viztracer-0.15.3-cp36-cp36m-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:3f4282210f6fe4bbcd0ef6a52e28e3b016d6058b3f8b2b3cd529360c2dedeb55"},
-    {file = "viztracer-0.15.3-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9006f8cc4ab7f79be92c42b6af6c0c4d6058a3a1402c1f6985834ff4b8e54ff1"},
-    {file = "viztracer-0.15.3-cp36-cp36m-win32.whl", hash = "sha256:670aea21f07a89b991ba684fc646276182a7bda012e47ae1cf8adad17d6e44f4"},
-    {file = "viztracer-0.15.3-cp36-cp36m-win_amd64.whl", hash = "sha256:4998f252fc1b2f1221521537b73777716a8b3591548d0a82d80dfbea5cbe55fe"},
-    {file = "viztracer-0.15.3-cp37-cp37m-macosx_10_15_x86_64.whl", hash = "sha256:7f72ed27ee847dc840835cca74211086a9a99dc4f5d4e74d12d5b11ecf462f66"},
-    {file = "viztracer-0.15.3-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:924e5e5a01fde11e27c5d631c6a35c57a44927b9dfbe4786470fadeb922c38ba"},
-    {file = "viztracer-0.15.3-cp37-cp37m-manylinux_2_17_i686.manylinux2014_i686.manylinux_2_24_i686.whl", hash = "sha256:86bad516a3709ec278d894b2530b84dfbbbdcfb1d09f43bdaef586e7d17c39ed"},
-    {file = "viztracer-0.15.3-cp37-cp37m-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:082c07fb5c0b6df016f7209df0f351d67fb0d94a2b7478c638f6913897fe424c"},
-    {file = "viztracer-0.15.3-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2f843f9482d7b52c51e606023b649ef82c5dc6b22611d024d85cf07b4e0e573c"},
-    {file = "viztracer-0.15.3-cp37-cp37m-win32.whl", hash = "sha256:c202e5c9a841766aad2be240edb2256d8dac3f69005d608d357319abea412d2b"},
-    {file = "viztracer-0.15.3-cp37-cp37m-win_amd64.whl", hash = "sha256:51d39a405295af404bf3fc8bbc68baa05940cff7b29742cd8df7fb0bfc9b8b30"},
-    {file = "viztracer-0.15.3-cp38-cp38-macosx_10_15_x86_64.whl", hash = "sha256:54f51c08f8d53b86bbb8d2bbdbaf4b56c797d077952185e38980811333facb3e"},
-    {file = "viztracer-0.15.3-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:ce9acfa872af1d9282f3c7999ee56a9d981e901ba795d6a87e69da9f17ded398"},
-    {file = "viztracer-0.15.3-cp38-cp38-manylinux_2_17_i686.manylinux2014_i686.manylinux_2_24_i686.whl", hash = "sha256:ae833b1000c2c9e2272898459bd09ca45cbab66281e632eee96f3e07bfb2b25e"},
-    {file = "viztracer-0.15.3-cp38-cp38-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:c90d94f2f38d508a62cb6c3c802344ef2f250ae3b236d13c89dc093cd1f492f5"},
-    {file = "viztracer-0.15.3-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d6c99923ba13dda455cb6324500c3917262007277f3c04b603e27fbf6579d553"},
-    {file = "viztracer-0.15.3-cp38-cp38-win32.whl", hash = "sha256:f5988e6a6437890420a067ba74e3b315911674816d5e9ef523d3dbe7bd2f8419"},
-    {file = "viztracer-0.15.3-cp38-cp38-win_amd64.whl", hash = "sha256:a27bd61f8a860e0e0f457b4d3efbd65054e3204779f47c812fde18b47c862627"},
-    {file = "viztracer-0.15.3-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:7b34ec770f30014e929616b2e6da10de04d13fd0fe436cc25ef332b74730f90a"},
-    {file = "viztracer-0.15.3-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d07ebb2cc225a26070fa2a0415b6112330a213d6aa9110850116c59680a9f90d"},
-    {file = "viztracer-0.15.3-cp39-cp39-manylinux_2_17_i686.manylinux2014_i686.manylinux_2_24_i686.whl", hash = "sha256:a502382413997e95ffea2f03e3809d31f28a2e6ae2ccbfc6bc5e291a07d0a8d4"},
-    {file = "viztracer-0.15.3-cp39-cp39-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:30e0b520e7eed63c46a45a65b463c669da883bca9819a0bd7f1ff3c6cd92523b"},
-    {file = "viztracer-0.15.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:271817e017d35090fa0838992da32530be2591f2ca46353e05d59254d57db083"},
-    {file = "viztracer-0.15.3-cp39-cp39-win32.whl", hash = "sha256:b24eb667f05990016b08a892a110bb61bd3642dd008473b34a2b2a2166b36a63"},
-    {file = "viztracer-0.15.3-cp39-cp39-win_amd64.whl", hash = "sha256:4280b59d699ed5aec175eb3c825e494779b6501d59cc6281195efe4ab4bfa812"},
-    {file = "viztracer-0.15.3.tar.gz", hash = "sha256:f28de150304c300b27b3335993e0bdc47f5a7ba7b6f8c43dc54c4e74efa32cd6"},
+    {file = "viztracer-0.15.4-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:94b916d893b15c065f504292b1e0016af32b4c9588f29522e15a6fdabd12dbbf"},
+    {file = "viztracer-0.15.4-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7e2cff8443f05b983265f7391118070fee27b586295b6df83575d7c811b51057"},
+    {file = "viztracer-0.15.4-cp310-cp310-manylinux_2_17_i686.manylinux2014_i686.manylinux_2_24_i686.whl", hash = "sha256:7fab9a97256c0fda692ceef4ccfc678c2acbd07cae2a946e0b760ae5b52fd501"},
+    {file = "viztracer-0.15.4-cp310-cp310-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:9b25ee86e22649e38e37ba0857387986ebfed0f613a607a5cd1f54f7fd317132"},
+    {file = "viztracer-0.15.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:880375b2192227daef5a71d60eb4d8158d27d9e7548fbd76baf9870e65082749"},
+    {file = "viztracer-0.15.4-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:0bd97d1621093297d8c94c227dd1fc3d5b2de748ea14751603552a17ca6ca025"},
+    {file = "viztracer-0.15.4-cp310-cp310-win32.whl", hash = "sha256:d1ba7762b974fb82359d618fbcc425da0db896952657129e374c61fd1e86310e"},
+    {file = "viztracer-0.15.4-cp310-cp310-win_amd64.whl", hash = "sha256:ef4ef2fa4ad5a434633c4a0cae45dfbc6c187bef0d31b482385a101bedc80054"},
+    {file = "viztracer-0.15.4-cp36-cp36m-macosx_10_15_x86_64.whl", hash = "sha256:3c5bd1c944ddfc6ce059f294dd25f7d0a850967f5b118566a7147ac24f7a3c4c"},
+    {file = "viztracer-0.15.4-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4cc8c06ea7e8cfb0dc390c03b9d95c772e85eb73d7e14a3a7e4e95d1961fdced"},
+    {file = "viztracer-0.15.4-cp36-cp36m-manylinux_2_17_i686.manylinux2014_i686.manylinux_2_24_i686.whl", hash = "sha256:dea4664ff25bb09454d3723f17e57eaa1e384a1917648b73db55e801f8ca59db"},
+    {file = "viztracer-0.15.4-cp36-cp36m-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:c4fbaf8aa710aa0655db35e14ec97a90390fb6559c68d3d72408ecaa8b9f1eef"},
+    {file = "viztracer-0.15.4-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:44fad4f8029585bad6d4ef6c90e3aec91c678ec34865d32136501d71ea0351cc"},
+    {file = "viztracer-0.15.4-cp36-cp36m-win32.whl", hash = "sha256:5ab1b10ebc30faf6ecd4bccc4cb020919a3b0aedd8e371e8cb99d438f21a822e"},
+    {file = "viztracer-0.15.4-cp36-cp36m-win_amd64.whl", hash = "sha256:4bc92e1b2f289e472999d68366314c5c87ed38dbe5f947d2f2ddea81df0bb32f"},
+    {file = "viztracer-0.15.4-cp37-cp37m-macosx_10_15_x86_64.whl", hash = "sha256:a0c467fc21e69cc1ec30b3c830d2c6a35586db39e95b46f2f51b1c215113e742"},
+    {file = "viztracer-0.15.4-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5db8a5607d91f6f7ca54440d2e6faeac3d15da4c28ff4a547e11fccb6deb695a"},
+    {file = "viztracer-0.15.4-cp37-cp37m-manylinux_2_17_i686.manylinux2014_i686.manylinux_2_24_i686.whl", hash = "sha256:2d78c189464fb9338fdef67223c0217f6370d3bcfcfb66f2f3dc947aa5615c88"},
+    {file = "viztracer-0.15.4-cp37-cp37m-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:d3889a18b4ad4eafceed6e78269a41764e3755d1a338391baebb93ab3450e62e"},
+    {file = "viztracer-0.15.4-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:40cf6e6315e7894f2ec17113f626590d0bf4685f46a5e86fd85eba38fe6e9d29"},
+    {file = "viztracer-0.15.4-cp37-cp37m-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:2182f2aa599e57914ce496da5e609b5f411aba5e3cdbc992993c3af5cafad5d8"},
+    {file = "viztracer-0.15.4-cp37-cp37m-win32.whl", hash = "sha256:09063442836a1b171558637b50c76fa45e31c102724b5de448986c3899cf3225"},
+    {file = "viztracer-0.15.4-cp37-cp37m-win_amd64.whl", hash = "sha256:32eb9160d7fdac84934e581c54cfb25a2f0a3f5a58bc76f1e8b05d3dc3e1ec26"},
+    {file = "viztracer-0.15.4-cp38-cp38-macosx_10_15_x86_64.whl", hash = "sha256:731b3245a8a8f6fe0cf2da7ab78648f0fe9c8c46058dabc8c8f0d59ef5a21112"},
+    {file = "viztracer-0.15.4-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9d43aca3e67cb54861731efe35a50e1a75999e6b173d7464e0ff7456be6ba59a"},
+    {file = "viztracer-0.15.4-cp38-cp38-manylinux_2_17_i686.manylinux2014_i686.manylinux_2_24_i686.whl", hash = "sha256:00c2338f04d1bf6b2c2b003f10a154eafb902584a0204572f47d9efc1d0202f1"},
+    {file = "viztracer-0.15.4-cp38-cp38-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:524c7957213352232ee1aa7081d2b390c1f3c2d38cd5b70fa70fadf76a57cf0f"},
+    {file = "viztracer-0.15.4-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2667097770cde8ee1af0bf77d470cf3e6b27a01c84565ec1f516a8a309910e5c"},
+    {file = "viztracer-0.15.4-cp38-cp38-win32.whl", hash = "sha256:757e473622a2b95f72763b8267455e9554d2290d8fac8d6311239ce639aa9034"},
+    {file = "viztracer-0.15.4-cp38-cp38-win_amd64.whl", hash = "sha256:7a0e53ae02dc1a0e10a24849de498353e6221f326973ff33ff4734f5999b173c"},
+    {file = "viztracer-0.15.4-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:d6ab0d24e93ddc3f623219ba13d9ddff3bac2f81890e6de13055c41965112083"},
+    {file = "viztracer-0.15.4-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a93afcb7d2fc3adac3706e6cc409f5df3992381b98b899947be6032e9b825d38"},
+    {file = "viztracer-0.15.4-cp39-cp39-manylinux_2_17_i686.manylinux2014_i686.manylinux_2_24_i686.whl", hash = "sha256:35d948a34c6d14cac388f59a66f7f57c9c78973d035ff350ce6c0382430dfdf7"},
+    {file = "viztracer-0.15.4-cp39-cp39-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:9110feb65a47e95dfdfa66a0f3cd87f06c3d44d18f1291b920dd0eda234ec176"},
+    {file = "viztracer-0.15.4-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:be7dee1190a5ef7642d162e1772d72ba395a820d828ac006a863f45cfdd7db32"},
+    {file = "viztracer-0.15.4-cp39-cp39-win32.whl", hash = "sha256:a97887c2c34985990e67e287da42b176eaa8c411482b09a4ba252f2cbd9b11f1"},
+    {file = "viztracer-0.15.4-cp39-cp39-win_amd64.whl", hash = "sha256:6a5ba827ad201fecee5f1647cc32c2f59476ec2881395d82e4bea56fa7599dc8"},
+    {file = "viztracer-0.15.4.tar.gz", hash = "sha256:df18692a0f765e29e70ad1c5c74429be54968f16fca8a6db8dd0dc52cd87fb8b"},
 ]
 xdoctest = [
     {file = "xdoctest-1.0.1-py3-none-any.whl", hash = "sha256:334e422dfd7a889acf17b56db4f42a45f530f7324e3418a5ce9b0df4603babba"},
