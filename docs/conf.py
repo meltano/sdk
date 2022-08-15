@@ -51,9 +51,9 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-# Show typehints in the signature
-# https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_typehints
+# Show typehints in the description, along with parameter descriptions
 autodoc_typehints = "signature"
+autodoc_class_signature = "separated"
 
 # -- Options for HTML output -------------------------------------------------
 

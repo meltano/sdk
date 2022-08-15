@@ -1,5 +1,6 @@
 """Sink classes load data to SQL targets."""
 
+from textwrap import dedent
 from typing import Any, Dict, Iterable, List, Optional, Type
 
 import sqlalchemy
@@ -162,6 +163,31 @@ class SQLSink(BatchSink):
             full_table_name=full_table_name, schema=schema, records=records
         )
 
+    def generate_insert_statement(
+        self,
+        full_table_name: str,
+        schema: dict,
+    ) -> str:
+        """Generate an insert statement for the given records.
+
+        Args:
+            full_table_name: the target table name.
+            schema: the JSON schema for the new table.
+
+        Returns:
+            An insert statement.
+        """
+        property_names = list(schema["properties"].keys())
+        statement = dedent(
+            f"""\
+            INSERT INTO {full_table_name}
+            ({", ".join(property_names)})
+            VALUES ({", ".join([f":{name}" for name in property_names])})
+            """
+        )
+
+        return statement.rstrip()
+
     def bulk_insert_records(
         self,
         full_table_name: str,
@@ -183,15 +209,13 @@ class SQLSink(BatchSink):
         Returns:
             True if table exists, False if not, None if unsure or undetectable.
         """
-        property_names = list(schema["properties"].keys())
-        insert_sql = sqlalchemy.text(
-            f"INSERT INTO {full_table_name} "
-            f"({', '.join([n for n in property_names])})"
-            f" VALUES "
-            f"({', '.join([':' + n for n in property_names])})"
+        insert_sql = self.generate_insert_statement(
+            full_table_name,
+            schema,
         )
+        self.logger.info("Inserting with SQL: %s", insert_sql)
         self.connector.connection.execute(
-            insert_sql,
+            sqlalchemy.text(insert_sql),
             records,
         )
         if isinstance(records, list):

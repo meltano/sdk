@@ -5,3 +5,4 @@
 
 .. autoclass:: FatalAPIError
     :members:
+    :special-members: __init__

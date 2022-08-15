@@ -5,3 +5,4 @@
 
 .. autoclass:: MaxRecordsLimitException
     :members:
+    :special-members: __init__
