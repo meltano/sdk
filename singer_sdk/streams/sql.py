@@ -845,12 +845,6 @@ class SQLConnector:
             # The current column and sql generic types are the same
             # Nothing to do
             return
-        # Check if the new type is a subclass of the current type
-        elif issubclass(type(sql_type.as_generic()), type(current_type)):
-            # Since it is a sub class of the current type
-            # a conversion on insert will happen
-            # Nothing to do
-            return
 
         # Not the same type, generic type or compatible types
         # calling merge_sql_types for assistnace
