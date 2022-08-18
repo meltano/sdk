@@ -835,14 +835,8 @@ class SQLConnector:
         )
 
         # Check if the existing column type and the sql type are the same
-        if isinstance(sql_type, type(current_type)):
+        if str(sql_type) == str(current_type):
             # The current column and sql type are the same
-            # Nothing to do
-            return
-        # Check if the existing column generic type
-        # and sql generic type are the same
-        elif isinstance(sql_type.as_generic(), type(current_type.as_generic())):
-            # The current column and sql generic types are the same
             # Nothing to do
             return
 
