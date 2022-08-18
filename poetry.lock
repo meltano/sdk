@@ -468,9 +468,9 @@ python-versions = "~=3.6"
 markdown-it-py = ">=1.0.0,<3.0.0"
 
 [package.extras]
-testing = ["pytest-regressions", "pytest-cov", "pytest (>=3.6,<4)", "coverage"]
-rtd = ["sphinx-book-theme (>=0.1.0,<0.2.0)", "myst-parser (>=0.14.0,<0.15.0)"]
 code_style = ["pre-commit (==2.6)"]
+rtd = ["myst-parser (>=0.14.0,<0.15.0)", "sphinx-book-theme (>=0.1.0,<0.2.0)"]
+testing = ["coverage", "pytest (>=3.6,<4)", "pytest-cov", "pytest-regressions"]
 
 [[package]]
 name = "memoization"
@@ -594,7 +594,7 @@ pytz = "<2021.0"
 simplejson = "3.11.1"
 
 [package.extras]
-dev = ["nose", "ipdb", "ipython", "pylint"]
+dev = ["pylint", "ipython", "ipdb", "nose"]
 
 [[package]]
 name = "platformdirs"
@@ -620,8 +620,8 @@ python-versions = ">=3.6"
 importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
 
 [package.extras]
-testing = ["pytest-benchmark", "pytest"]
-dev = ["tox", "pre-commit"]
+dev = ["pre-commit", "tox"]
+testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "ply"
@@ -690,11 +690,14 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "pygments"
-version = "2.11.2"
+version = "2.13.0"
 description = "Pygments is a syntax highlighting package written in Python."
 category = "main"
 optional = true
-python-versions = ">=3.5"
+python-versions = ">=3.6"
+
+[package.extras]
+plugins = ["importlib-metadata"]
 
 [[package]]
 name = "pyjwt"
@@ -929,8 +932,8 @@ python-versions = ">=3.6"
 sphinx = ">=1.8"
 
 [package.extras]
-rtd = ["sphinx-book-theme", "myst-nb", "ipython", "sphinx"]
 code_style = ["pre-commit (==2.12.1)"]
+rtd = ["sphinx", "ipython", "myst-nb", "sphinx-book-theme"]
 
 [[package]]
 name = "sphinx-rtd-theme"
@@ -956,8 +959,8 @@ optional = true
 python-versions = ">=3.5"
 
 [package.extras]
+lint = ["flake8", "mypy", "docutils-stubs"]
 test = ["pytest"]
-lint = ["docutils-stubs", "mypy", "flake8"]
 
 [[package]]
 name = "sphinxcontrib-devhelp"
@@ -968,8 +971,8 @@ optional = true
 python-versions = ">=3.5"
 
 [package.extras]
+lint = ["flake8", "mypy", "docutils-stubs"]
 test = ["pytest"]
-lint = ["docutils-stubs", "mypy", "flake8"]
 
 [[package]]
 name = "sphinxcontrib-htmlhelp"
@@ -980,8 +983,8 @@ optional = true
 python-versions = ">=3.6"
 
 [package.extras]
-test = ["html5lib", "pytest"]
-lint = ["docutils-stubs", "mypy", "flake8"]
+lint = ["flake8", "mypy", "docutils-stubs"]
+test = ["pytest", "html5lib"]
 
 [[package]]
 name = "sphinxcontrib-jsmath"
@@ -992,7 +995,7 @@ optional = true
 python-versions = ">=3.5"
 
 [package.extras]
-test = ["mypy", "flake8", "pytest"]
+test = ["pytest", "flake8", "mypy"]
 
 [[package]]
 name = "sphinxcontrib-qthelp"
@@ -1003,8 +1006,8 @@ optional = true
 python-versions = ">=3.5"
 
 [package.extras]
+lint = ["flake8", "mypy", "docutils-stubs"]
 test = ["pytest"]
-lint = ["docutils-stubs", "mypy", "flake8"]
 
 [[package]]
 name = "sphinxcontrib-serializinghtml"
@@ -1015,8 +1018,8 @@ optional = true
 python-versions = ">=3.5"
 
 [package.extras]
+lint = ["flake8", "mypy", "docutils-stubs"]
 test = ["pytest"]
-lint = ["docutils-stubs", "mypy", "flake8"]
 
 [[package]]
 name = "sqlalchemy"
@@ -1168,15 +1171,15 @@ python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4"
 six = "*"
 
 [package.extras]
-tests = ["pytest-cov", "pytest", "typing", "pytest", "pytest-cov", "pytest", "pytest-cov", "pytest", "pytest", "pytest-cov", "pytest", "scikit-build", "pybind11", "ninja", "codecov", "cmake"]
-tests-strict = ["pytest-cov (==3.0.0)", "pytest (==6.2.5)", "typing (==3.7.4)", "pytest (==4.6.0)", "pytest (==4.6.0)", "pytest-cov (==2.9.0)", "pytest (==4.6.0)", "pytest-cov (==2.8.1)", "pytest (==4.6.0)", "pytest (==4.6.0)", "pytest-cov (==2.8.1)", "scikit-build (==0.11.1)", "pybind11 (==2.7.1)", "ninja (==1.10.2)", "codecov (==2.0.15)", "cmake (==3.21.2)"]
+all = ["cmake", "codecov", "ninja", "pybind11", "scikit-build", "six", "colorama", "pytest", "pytest-cov", "debugpy", "pytest", "pygments", "pytest", "pytest-cov", "pytest", "pytest-cov", "jupyter-client", "ipython", "debugpy", "ipykernel", "pytest", "debugpy", "debugpy", "typing", "debugpy", "ipython-genutils", "pytest", "pygments", "attrs", "jedi", "jinja2", "jupyter-core", "nbconvert", "pytest-cov", "jupyter-client", "ipython", "ipykernel"]
+all-strict = ["cmake (==3.21.2)", "codecov (==2.0.15)", "ninja (==1.10.2)", "pybind11 (==2.7.1)", "scikit-build (==0.11.1)", "six (==1.11.0)", "colorama (==0.4.1)", "pytest-cov (==2.8.1)", "pytest (==4.6.0)", "debugpy (==1.3.0)", "pytest (==4.6.0)", "Pygments (==2.0.0)", "pytest-cov (==2.8.1)", "pytest (==4.6.0)", "pytest-cov (==2.9.0)", "pytest (==4.6.0)", "jupyter-client (==6.1.5)", "IPython (==7.10.0)", "debugpy (==1.0.0)", "ipykernel (==5.2.0)", "pytest (==4.6.0)", "debugpy (==1.0.0)", "debugpy (==1.0.0)", "typing (==3.7.4)", "debugpy (==1.6.0)", "ipython-genutils (==0.2.0)", "pytest (==6.2.5)", "Pygments (==2.4.1)", "attrs (==19.2.0)", "jedi (==0.16)", "jinja2 (==3.0.0)", "jupyter-core (==4.7.0)", "nbconvert (==6.0.0)", "pytest-cov (==3.0.0)", "jupyter-client (==7.0.0)", "IPython (==7.23.1)", "ipykernel (==6.0.0)"]
+colors = ["colorama", "pygments", "pygments"]
+jupyter = ["debugpy", "jupyter-client", "ipython", "debugpy", "ipykernel", "debugpy", "debugpy", "debugpy", "ipython-genutils", "attrs", "jedi", "jinja2", "jupyter-core", "nbconvert", "jupyter-client", "ipython", "ipykernel"]
+optional-strict = ["colorama (==0.4.1)", "debugpy (==1.3.0)", "tomli (==0.2.0)", "Pygments (==2.0.0)", "jupyter-client (==6.1.5)", "IPython (==7.10.0)", "debugpy (==1.0.0)", "ipykernel (==5.2.0)", "debugpy (==1.0.0)", "debugpy (==1.0.0)", "debugpy (==1.6.0)", "ipython-genutils (==0.2.0)", "Pygments (==2.4.1)", "attrs (==19.2.0)", "jedi (==0.16)", "jinja2 (==3.0.0)", "jupyter-core (==4.7.0)", "nbconvert (==6.0.0)", "jupyter-client (==7.0.0)", "IPython (==7.23.1)", "ipykernel (==6.0.0)"]
+optional = ["colorama", "debugpy", "tomli", "pygments", "jupyter-client", "ipython", "debugpy", "ipykernel", "debugpy", "debugpy", "debugpy", "ipython-genutils", "pygments", "attrs", "jedi", "jinja2", "jupyter-core", "nbconvert", "jupyter-client", "ipython", "ipykernel"]
 runtime-strict = ["six (==1.11.0)"]
-optional = ["ipykernel", "ipython", "jupyter-client", "nbconvert", "jupyter-core", "jinja2", "jedi", "attrs", "pygments", "ipython-genutils", "debugpy", "debugpy", "debugpy", "ipykernel", "debugpy", "ipython", "jupyter-client", "pygments", "tomli", "debugpy", "colorama"]
-optional-strict = ["ipykernel (==6.0.0)", "IPython (==7.23.1)", "jupyter-client (==7.0.0)", "nbconvert (==6.0.0)", "jupyter-core (==4.7.0)", "jinja2 (==3.0.0)", "jedi (==0.16)", "attrs (==19.2.0)", "Pygments (==2.4.1)", "ipython-genutils (==0.2.0)", "debugpy (==1.6.0)", "debugpy (==1.0.0)", "debugpy (==1.0.0)", "ipykernel (==5.2.0)", "debugpy (==1.0.0)", "IPython (==7.10.0)", "jupyter-client (==6.1.5)", "Pygments (==2.0.0)", "tomli (==0.2.0)", "debugpy (==1.3.0)", "colorama (==0.4.1)"]
-jupyter = ["ipykernel", "ipython", "jupyter-client", "nbconvert", "jupyter-core", "jinja2", "jedi", "attrs", "ipython-genutils", "debugpy", "debugpy", "debugpy", "ipykernel", "debugpy", "ipython", "jupyter-client", "debugpy"]
-colors = ["pygments", "pygments", "colorama"]
-all = ["ipykernel", "ipython", "jupyter-client", "pytest-cov", "nbconvert", "jupyter-core", "jinja2", "jedi", "attrs", "pygments", "pytest", "ipython-genutils", "debugpy", "typing", "debugpy", "debugpy", "pytest", "ipykernel", "debugpy", "ipython", "jupyter-client", "pytest-cov", "pytest", "pytest-cov", "pytest", "pygments", "pytest", "debugpy", "pytest-cov", "pytest", "colorama", "six", "scikit-build", "pybind11", "ninja", "codecov", "cmake"]
-all-strict = ["ipykernel (==6.0.0)", "IPython (==7.23.1)", "jupyter-client (==7.0.0)", "pytest-cov (==3.0.0)", "nbconvert (==6.0.0)", "jupyter-core (==4.7.0)", "jinja2 (==3.0.0)", "jedi (==0.16)", "attrs (==19.2.0)", "Pygments (==2.4.1)", "pytest (==6.2.5)", "ipython-genutils (==0.2.0)", "debugpy (==1.6.0)", "typing (==3.7.4)", "debugpy (==1.0.0)", "debugpy (==1.0.0)", "pytest (==4.6.0)", "ipykernel (==5.2.0)", "debugpy (==1.0.0)", "IPython (==7.10.0)", "jupyter-client (==6.1.5)", "pytest (==4.6.0)", "pytest-cov (==2.9.0)", "pytest (==4.6.0)", "pytest-cov (==2.8.1)", "Pygments (==2.0.0)", "pytest (==4.6.0)", "debugpy (==1.3.0)", "pytest (==4.6.0)", "pytest-cov (==2.8.1)", "colorama (==0.4.1)", "six (==1.11.0)", "scikit-build (==0.11.1)", "pybind11 (==2.7.1)", "ninja (==1.10.2)", "codecov (==2.0.15)", "cmake (==3.21.2)"]
+tests = ["cmake", "codecov", "ninja", "pybind11", "scikit-build", "pytest", "pytest-cov", "pytest", "pytest", "pytest-cov", "pytest", "pytest-cov", "pytest", "typing", "pytest", "pytest-cov"]
+tests-strict = ["cmake (==3.21.2)", "codecov (==2.0.15)", "ninja (==1.10.2)", "pybind11 (==2.7.1)", "scikit-build (==0.11.1)", "pytest-cov (==2.8.1)", "pytest (==4.6.0)", "pytest (==4.6.0)", "pytest-cov (==2.8.1)", "pytest (==4.6.0)", "pytest-cov (==2.9.0)", "pytest (==4.6.0)", "pytest (==4.6.0)", "typing (==3.7.4)", "pytest (==6.2.5)", "pytest-cov (==3.0.0)"]
 
 [[package]]
 name = "zipp"
@@ -1788,8 +1791,8 @@ pyflakes = [
     {file = "pyflakes-2.3.1.tar.gz", hash = "sha256:f5bc8ecabc05bb9d291eb5203d6810b49040f6ff446a756326104746cc00c1db"},
 ]
 pygments = [
-    {file = "Pygments-2.11.2-py3-none-any.whl", hash = "sha256:44238f1b60a76d78fc8ca0528ee429702aae011c265fe6a8dd8b63049ae41c65"},
-    {file = "Pygments-2.11.2.tar.gz", hash = "sha256:4e426f72023d88d03b2fa258de560726ce890ff3b630f88c21cbb8b2503b8c6a"},
+    {file = "Pygments-2.13.0-py3-none-any.whl", hash = "sha256:f643f331ab57ba3c9d89212ee4a2dabc6e94f117cf4eefde99a0574720d14c42"},
+    {file = "Pygments-2.13.0.tar.gz", hash = "sha256:56a8508ae95f98e2b9bdf93a6be5ae3f7d8af858b43e02c5a2ff083726be40c1"},
 ]
 pyjwt = [
     {file = "PyJWT-2.4.0-py3-none-any.whl", hash = "sha256:72d1d253f32dbd4f5c88eaf1fdc62f3a19f676ccbadb9dbc5d07e951b2b26daf"},
