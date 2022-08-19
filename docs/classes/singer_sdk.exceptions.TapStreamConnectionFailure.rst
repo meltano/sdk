@@ -5,3 +5,4 @@
 
 .. autoclass:: TapStreamConnectionFailure
     :members:
+    :special-members: __init__

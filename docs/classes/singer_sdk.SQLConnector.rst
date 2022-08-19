@@ -5,3 +5,4 @@
 
 .. autoclass:: SQLConnector
     :members:
+    :special-members: __init__

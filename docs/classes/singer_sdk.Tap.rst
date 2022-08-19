@@ -5,3 +5,4 @@
 
 .. autoclass:: Tap
     :members:
+    :special-members: __init__

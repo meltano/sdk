@@ -104,14 +104,10 @@ ReadtheDocs.org. When a push is detected by readthedocs.org, they automatically 
 and republish the docs. ReadtheDocs is also version aware, so it retains prior and unreleased
 versions of the docs for us.
 
-To build the docs:
+To build the docs and live-reload them locally:
 
 ```bash
-# Build docs
-nox -rs docs
-
-# Open in the local browser:
-open build/index.html
+nox -rs docs-serve
 ```
 
 Sphinx will automatically generate class stubs, so be sure to `git add` them.

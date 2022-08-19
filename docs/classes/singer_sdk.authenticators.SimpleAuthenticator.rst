@@ -5,3 +5,4 @@
 
 .. autoclass:: SimpleAuthenticator
     :members:
+    :special-members: __init__
