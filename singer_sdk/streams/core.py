@@ -27,13 +27,13 @@ from typing import (
 import pendulum
 import requests
 import singer
-from singer import RecordMessage, SchemaMessage, StateMessage, Schema
-from singer_sdk.helpers._schema import SchemaPlus
+from singer import RecordMessage, Schema, SchemaMessage, StateMessage
 
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._flattening import get_flattening_options
+from singer_sdk.helpers._schema import SchemaPlus
 from singer_sdk.helpers._singer import (
     Catalog,
     CatalogEntry,
