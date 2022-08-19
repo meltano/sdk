@@ -5,3 +5,4 @@
 
 .. autoclass:: StreamMapConfigError
     :members:
+    :special-members: __init__
