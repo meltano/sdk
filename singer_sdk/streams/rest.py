@@ -24,6 +24,7 @@ from singer.schema import Schema
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
+from singer_sdk.helpers._schema import SchemaPlus
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream

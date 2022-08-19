@@ -7,6 +7,8 @@ from singer.catalog import Catalog as BaseCatalog
 from singer.catalog import CatalogEntry as BaseCatalogEntry
 from singer.schema import Schema
 
+from singer_sdk.helpers._schema import SchemaPlus
+
 Breadcrumb = Tuple[str, ...]
 
 logger = logging.getLogger(__name__)
@@ -210,7 +212,7 @@ class CatalogEntry(BaseCatalogEntry):
 
     tap_stream_id: str
     metadata: MetadataMapping
-    schema: Schema
+    schema: SchemaPlus
     stream: Optional[str] = None
     key_properties: Optional[List[str]] = None
     replication_key: Optional[str] = None
@@ -231,7 +233,7 @@ class CatalogEntry(BaseCatalogEntry):
             key_properties=stream.get("key_properties"),
             database=stream.get("database_name"),
             table=stream.get("table_name"),
-            schema=Schema.from_dict(stream.get("schema", {})),
+            schema=SchemaPlus.from_dict(stream.get("schema", {})),
             is_view=stream.get("is_view"),
             stream_alias=stream.get("stream_alias"),
             metadata=MetadataMapping.from_iterable(stream.get("metadata", [])),

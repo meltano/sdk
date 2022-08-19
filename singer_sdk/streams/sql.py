@@ -13,6 +13,7 @@ from sqlalchemy.engine.reflection import Inspector
 
 from singer_sdk import typing as th
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.helpers._schema import SchemaPlus
 from singer_sdk.helpers._singer import CatalogEntry, MetadataMapping
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
@@ -401,7 +402,7 @@ class SQLConnector:
             stream=unique_stream_id,
             table=table_name,
             key_properties=key_properties,
-            schema=singer.Schema.from_dict(schema),
+            schema=SchemaPlus.from_dict(schema),
             is_view=is_view,
             replication_method=replication_method,
             metadata=MetadataMapping.get_standard_metadata(
