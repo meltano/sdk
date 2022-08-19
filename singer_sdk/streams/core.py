@@ -27,7 +27,7 @@ from typing import (
 import pendulum
 import requests
 import singer
-from singer import RecordMessage, SchemaMessage, StateMessage
+from singer import RecordMessage, SchemaMessage, StateMessage, Schema
 from singer_sdk.helpers._schema import SchemaPlus
 
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
