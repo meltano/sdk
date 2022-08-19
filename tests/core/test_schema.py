@@ -39,17 +39,9 @@ def test_simple_schema():
         "required": ["latitude", "longitude"],
         "type": "object",
         "properties": {
-            "latitude": {
-                "type": "number",
-                "minimum": -90,
-                "maximum": 90
-            },
-            "longitude": {
-                "type": "number",
-                "minimum": -180,
-                "maximum": 180
-            }
-        }
+            "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+            "longitude": {"type": "number", "minimum": -180, "maximum": 180},
+        },
     }
 
     schema_plus = SchemaPlus.from_dict(simple_schema)
@@ -64,14 +56,7 @@ def test_schema_with_items():
     schema = {
         "description": "A representation of a person, company, organization, or place",
         "type": "object",
-        "properties": {
-            "fruits": {
-                "type": "array",
-                "items": {
-                    "type": "string"
-                }
-            }
-        }
+        "properties": {"fruits": {"type": "array", "items": {"type": "string"}}},
     }
     schema_plus = SchemaPlus.from_dict(schema)
     assert schema_plus.to_dict() == schema

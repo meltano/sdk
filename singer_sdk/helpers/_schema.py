@@ -1,29 +1,31 @@
 # pylint: disable=redefined-builtin, too-many-arguments, invalid-name
-"""Provides an object model for JSON Schema"""
+"""Provides an object model for JSON Schema."""
 
 import json
 
 from singer import Schema
 
-# These are keys defined in the JSON Schema spec that do not themselves contain schemas (or lists of schemas)
+# These are keys defined in the JSON Schema spec that do not themselves contain
+# schemas (or lists of schemas)
 STANDARD_KEYS = [
-    'title',
-    'description',
-    'minimum',
-    'maximum',
-    'exclusiveMinimum',
-    'exclusiveMaximum',
-    'multipleOf',
-    'maxLength',
-    'minLength',
-    'format',
-    'type',
-    'required',
-    'enum',
-    # These are NOT simple keys (they can contain schemas themselves). We could consider adding extra handling to them.
-    'additionalProperties',
-    'anyOf',
-    'patternProperties'
+    "title",
+    "description",
+    "minimum",
+    "maximum",
+    "exclusiveMinimum",
+    "exclusiveMaximum",
+    "multipleOf",
+    "maxLength",
+    "minLength",
+    "format",
+    "type",
+    "required",
+    "enum",
+    # These are NOT simple keys (they can contain schemas themselves). We could
+    # consider adding extra handling to them.
+    "additionalProperties",
+    "anyOf",
+    "patternProperties",
 ]
 
 
@@ -40,12 +42,28 @@ class SchemaPlus(Schema):  # pylint: disable=too-many-instance-attributes
     """
 
     # pylint: disable=too-many-locals
-    def __init__(self, type=None, format=None, properties=None, items=None,
-                 description=None, minimum=None,
-                 maximum=None, exclusiveMinimum=None, exclusiveMaximum=None,
-                 multipleOf=None, maxLength=None, minLength=None, additionalProperties=None,
-                 anyOf=None, patternProperties=None, required=None, enum=None, title=None):
-
+    def __init__(
+        self,
+        type=None,
+        format=None,
+        properties=None,
+        items=None,
+        description=None,
+        minimum=None,
+        maximum=None,
+        exclusiveMinimum=None,
+        exclusiveMaximum=None,
+        multipleOf=None,
+        maxLength=None,
+        minLength=None,
+        additionalProperties=None,
+        anyOf=None,
+        patternProperties=None,
+        required=None,
+        enum=None,
+        title=None,
+    ):
+        """Creates a SchemaPlus with the given json-schema keys."""
         self.type = type
         self.properties = properties
         self.items = items
@@ -69,9 +87,9 @@ class SchemaPlus(Schema):  # pylint: disable=too-many-instance-attributes
         return json.dumps(self.to_dict())
 
     def __repr__(self):
-        pairs = [k + '=' + repr(v) for k, v in self.__dict__.items()]
-        args = ', '.join(pairs)
-        return 'SchemaPlus(' + args + ')'
+        pairs = [k + "=" + repr(v) for k, v in self.__dict__.items()]
+        args = ", ".join(pairs)
+        return "SchemaPlus(" + args + ")"
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -81,15 +99,13 @@ class SchemaPlus(Schema):  # pylint: disable=too-many-instance-attributes
         result = {}
 
         if self.properties is not None:
-            result['properties'] = {
+            result["properties"] = {
                 k: v.to_dict()
-                for k, v
-                in self.properties.items()  # pylint: disable=no-member
+                for k, v in self.properties.items()  # pylint: disable=no-member
             }
 
-
         if self.items is not None:
-            result['items'] = self.items.to_dict()  # pylint: disable=no-member
+            result["items"] = self.items.to_dict()  # pylint: disable=no-member
 
         for key in STANDARD_KEYS:
             if self.__dict__.get(key) is not None:
@@ -101,19 +117,19 @@ class SchemaPlus(Schema):  # pylint: disable=too-many-instance-attributes
     def from_dict(cls, data, **schema_defaults):
         """Initialize a Schema object based on the JSON Schema structure.
 
-        :param schema_defaults: The default values to the Schema
-        constructor."""
+        :param schema_defaults: The default values to the Schema constructor.
+        """
         kwargs = schema_defaults.copy()
-        properties = data.get('properties')
-        items = data.get('items')
+        properties = data.get("properties")
+        items = data.get("items")
 
         if properties is not None:
-            kwargs['properties'] = {
+            kwargs["properties"] = {
                 k: SchemaPlus.from_dict(v, **schema_defaults)
                 for k, v in properties.items()
             }
         if items is not None:
-            kwargs['items'] = SchemaPlus.from_dict(items, **schema_defaults)
+            kwargs["items"] = SchemaPlus.from_dict(items, **schema_defaults)
         for key in STANDARD_KEYS:
             if key in data:
                 kwargs[key] = data[key]

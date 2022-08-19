@@ -6,7 +6,6 @@ from datetime import datetime
 from functools import lru_cache
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union, cast
 
-import singer
 import sqlalchemy
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.reflection import Inspector
