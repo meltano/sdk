@@ -28,7 +28,7 @@ import pendulum
 import requests
 import singer
 from singer import RecordMessage, SchemaMessage, StateMessage
-from singer.schema import Schema
+from singer_sdk.helpers._schema import SchemaPlus
 
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
@@ -502,7 +502,7 @@ class Stream(metaclass=abc.ABCMeta):
         return CatalogEntry(
             tap_stream_id=self.tap_stream_id,
             stream=self.name,
-            schema=Schema.from_dict(self.schema),
+            schema=SchemaPlus.from_dict(self.schema),
             metadata=self.metadata,
             key_properties=self.primary_keys or [],
             replication_key=self.replication_key,
