@@ -72,7 +72,7 @@ docs = [
 [tool.poetry.dev-dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
 pytest = "^7.1.2"
-xdoctest = "^1.0.1"
+xdoctest = "^1.0.2"
 mypy = "^0.971"
 cookiecutter = "^2.1.1"
 PyYAML = "^6.0"
