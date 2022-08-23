@@ -42,7 +42,7 @@ For cases where the destination table _does not_ use primary keys, the most comm
 
 Within a staging table model file `stg_widgets.sql` in `dbt`:
 
-```jinja
+```sql+jinja
 SELECT
     widget_id,
     widget_name,
