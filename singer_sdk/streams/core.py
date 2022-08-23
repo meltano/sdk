@@ -304,6 +304,29 @@ class Stream(metaclass=abc.ABCMeta):
         state = self.get_context_state(context)
         write_replication_key_signpost(state, value)
 
+    def compare_start_date(self, value: str, start_date_value: str) -> str:
+        """Compare a bookmark value to a start date and return the most recent value.
+
+        If the replication key is a datetime-formatted string, this method will parse
+        the value and compare it to the start date. Otherwise, the bookmark value is
+        returned.
+
+        If the tap uses a non-datetime replication key (e.g. an UNIX timestamp), the
+        developer is encouraged to override this method to provide custom logic for
+        comparing the bookmark value to the start date.
+
+        Args:
+            value: The replication key value.
+            start_date_value: The start date value from the config.
+
+        Returns:
+            The most recent value between the bookmark and start date.
+        """
+        if self.is_timestamp_replication_key:
+            return max(value, start_date_value, key=pendulum.parse)
+        else:
+            return value
+
     def _write_starting_replication_value(self, context: Optional[dict]) -> None:
         """Write the starting replication value, if available.
 
@@ -321,14 +344,12 @@ class Stream(metaclass=abc.ABCMeta):
                 value = replication_key_value
 
             # Use start_date if it is more recent than the replication_key state
-            if "start_date" in self.config:
-                start_date_value = self.config["start_date"]
+            start_date_value: Optional[str] = self.config.get("start_date")
+            if start_date_value:
                 if not value:
                     value = start_date_value
-                elif self.is_timestamp_replication_key:
-                    value = max(value, start_date_value, key=pendulum.parse)
                 else:
-                    value = max(value, start_date_value)
+                    value = self.compare_start_date(value, start_date_value)
 
         write_starting_replication_value(state, value)
 
