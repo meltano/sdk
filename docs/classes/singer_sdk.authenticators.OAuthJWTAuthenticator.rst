@@ -5,3 +5,4 @@
 
 .. autoclass:: OAuthJWTAuthenticator
     :members:
+    :special-members: __init__
