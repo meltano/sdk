@@ -5,3 +5,4 @@
 
 .. autoclass:: SQLSink
     :members:
+    :special-members: __init__

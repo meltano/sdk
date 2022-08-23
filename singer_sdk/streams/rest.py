@@ -1,21 +1,12 @@
 """Abstract base class for API-type streams."""
 
+from __future__ import annotations
+
 import abc
 import copy
 import logging
 from datetime import datetime
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generator,
-    Generic,
-    Iterable,
-    List,
-    Optional,
-    TypeVar,
-    Union,
-)
+from typing import Any, Callable, Generator, Generic, Iterable, TypeVar, Union
 from urllib.parse import urlparse
 
 import backoff
@@ -32,24 +23,26 @@ DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 _TToken = TypeVar("_TToken")
+_T = TypeVar("_T")
+_MaybeCallable = Union[_T, Callable[[], _T]]
 
 
 class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
     """Abstract base class for REST API streams."""
 
     _page_size: int = DEFAULT_PAGE_SIZE
-    _requests_session: Optional[requests.Session]
+    _requests_session: requests.Session | None
     rest_method = "GET"
 
     #: JSONPath expression to extract records from the API response.
     records_jsonpath: str = "$[*]"
 
     #: Response code reference for rate limit retries
-    extra_retry_statuses: List[int] = [429]
+    extra_retry_statuses: list[int] = [429]
 
     #: Optional JSONPath expression to extract a pagination token from the API response.
     #: Example: `"$.next_page"`
-    next_page_token_jsonpath: Optional[str] = None
+    next_page_token_jsonpath: str | None = None
 
     # Private constants. May not be supported in future releases:
     _LOG_REQUEST_METRICS: bool = True
@@ -65,9 +58,9 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
     def __init__(
         self,
         tap: TapBaseClass,
-        name: Optional[str] = None,
-        schema: Optional[Union[Dict[str, Any], Schema]] = None,
-        path: Optional[str] = None,
+        name: str | None = None,
+        schema: dict[str, Any] | Schema | None = None,
+        path: str | None = None,
     ) -> None:
         """Initialize the REST stream.
 
@@ -86,7 +79,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         self._next_page_token_compiled_jsonpath = None
 
     @staticmethod
-    def _url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
+    def _url_encode(val: str | datetime | bool | int | list[str]) -> str:
         """Encode the val argument as url-compatible string.
 
         Args:
@@ -101,7 +94,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             result = str(val)
         return result
 
-    def get_url(self, context: Optional[dict]) -> str:
+    def get_url(self, context: dict | None) -> str:
         """Get stream entity URL.
 
         Developers override this method to perform dynamic URL generation.
@@ -220,6 +213,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             (
                 RetriableAPIError,
                 requests.exceptions.ReadTimeout,
+                requests.exceptions.ConnectionError,
             ),
             max_tries=self.backoff_max_tries,
             on_backoff=self.backoff_handler,
@@ -227,7 +221,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         return decorator
 
     def _request(
-        self, prepared_request: requests.PreparedRequest, context: Optional[dict]
+        self, prepared_request: requests.PreparedRequest, context: dict | None
     ) -> requests.Response:
         """TODO.
 
@@ -254,8 +248,8 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         return response
 
     def get_url_params(
-        self, context: Optional[dict], next_page_token: Optional[_TToken]
-    ) -> Dict[str, Any]:
+        self, context: dict | None, next_page_token: _TToken | None
+    ) -> dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization.
 
         If paging is supported, developers may override with specific paging logic.
@@ -300,7 +294,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         return self.requests_session.prepare_request(request)
 
     def prepare_request(
-        self, context: Optional[dict], next_page_token: Optional[_TToken]
+        self, context: dict | None, next_page_token: _TToken | None
     ) -> requests.PreparedRequest:
         """Prepare a request object for this stream.
 
@@ -331,7 +325,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             json=request_data,
         )
 
-    def request_records(self, context: Optional[dict]) -> Iterable[dict]:
+    def request_records(self, context: dict | None) -> Iterable[dict]:
         """Request records from REST endpoint(s), returning response records.
 
         If pagination is detected, pages will be recursed automatically.
@@ -346,7 +340,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             RuntimeError: If a loop in pagination is detected. That is, when two
                 consecutive pagination tokens are identical.
         """
-        next_page_token: Optional[_TToken] = None
+        next_page_token: _TToken | None = None
         finished = False
         decorated_request = self.request_decorator(self._request)
 
@@ -373,8 +367,8 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         self,
         request: requests.PreparedRequest,
         response: requests.Response,
-        context: Optional[Dict],
-    ) -> Dict[str, int]:
+        context: dict | None,
+    ) -> dict[str, int]:
         """Update internal calculation of Sync costs.
 
         Args:
@@ -399,8 +393,8 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         self,
         request: requests.PreparedRequest,
         response: requests.Response,
-        context: Optional[Dict],
-    ) -> Dict[str, int]:
+        context: dict | None,
+    ) -> dict[str, int]:
         """Calculate the cost of the last API call made.
 
         This method can optionally be implemented in streams to calculate
@@ -427,8 +421,8 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         return {}
 
     def prepare_request_payload(
-        self, context: Optional[dict], next_page_token: Optional[_TToken]
-    ) -> Optional[dict]:
+        self, context: dict | None, next_page_token: _TToken | None
+    ) -> dict | None:
         """Prepare the data payload for the REST API request.
 
         By default, no payload will be sent (return None).
@@ -450,8 +444,8 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
     def get_next_page_token(
         self,
         response: requests.Response,
-        previous_token: Optional[_TToken],
-    ) -> Optional[_TToken]:
+        previous_token: _TToken | None,
+    ) -> _TToken | None:
         """Return token identifying next page or None if all records have been read.
 
         Args:
@@ -503,7 +497,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
 
     # Records iterator
 
-    def get_records(self, context: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
 
         Each row emitted should be a dictionary of property names to their values.
@@ -538,7 +532,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
     # Abstract methods:
 
     @property
-    def authenticator(self) -> Optional[APIAuthenticatorBase]:
+    def authenticator(self) -> APIAuthenticatorBase | None:
         """Return or set the authenticator for managing HTTP auth headers.
 
         If an authenticator is not specified, REST-based taps will simply pass
@@ -563,13 +557,15 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return backoff.expo(factor=2)  # type: ignore # ignore 'Returning Any'
 
-    def backoff_max_tries(self) -> int:
+    def backoff_max_tries(self) -> _MaybeCallable[int] | None:
         """The number of attempts before giving up when retrying requests.
 
-        Setting to None will retry indefinitely.
+        Can be an integer, a zero-argument callable that returns an integer,
+        or ``None`` to retry indefinitely.
 
         Returns:
-            int: limit
+            int | Callable[[], int] | None: Number of max retries, callable or
+            ``None``.
         """
         return 5
 
