@@ -31,7 +31,7 @@ STANDARD_KEYS = [
 
 
 @dataclass
-class SchemaPlus(Schema):  # pylint: disable=too-many-instance-attributes
+class SchemaPlus(Schema):
     """Object model for JSON Schema.
 
     Tap and Target authors may find this to be more convenient than
