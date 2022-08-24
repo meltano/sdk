@@ -73,7 +73,7 @@ class SchemaPlus(Schema):  # pylint: disable=too-many-instance-attributes
             }
 
         if self.items is not None:
-            result["items"] = self.items.to_dict()  # pylint: disable=no-member
+            result["items"] = self.items.to_dict()
 
         for key in STANDARD_KEYS:
             if self.__dict__.get(key) is not None:
