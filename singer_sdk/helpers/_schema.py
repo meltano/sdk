@@ -1,7 +1,8 @@
 # pylint: disable=redefined-builtin, too-many-arguments, invalid-name
 """Provides an object model for JSON Schema."""
 
-import json
+from dataclasses import dataclass
+from typing import Any, List, Optional, Union
 
 from singer import Schema
 
@@ -29,6 +30,7 @@ STANDARD_KEYS = [
 ]
 
 
+@dataclass
 class SchemaPlus(Schema):  # pylint: disable=too-many-instance-attributes
     """Object model for JSON Schema.
 
@@ -41,58 +43,24 @@ class SchemaPlus(Schema):  # pylint: disable=too-many-instance-attributes
 
     """
 
-    # pylint: disable=too-many-locals
-    def __init__(
-        self,
-        type=None,
-        format=None,
-        properties=None,
-        items=None,
-        description=None,
-        minimum=None,
-        maximum=None,
-        exclusiveMinimum=None,
-        exclusiveMaximum=None,
-        multipleOf=None,
-        maxLength=None,
-        minLength=None,
-        additionalProperties=None,
-        anyOf=None,
-        patternProperties=None,
-        required=None,
-        enum=None,
-        title=None,
-    ):
-        """Creates a SchemaPlus with the given json-schema keys."""
-        self.type = type
-        self.properties = properties
-        self.items = items
-        self.description = description
-        self.minimum = minimum
-        self.maximum = maximum
-        self.exclusiveMinimum = exclusiveMinimum
-        self.exclusiveMaximum = exclusiveMaximum
-        self.multipleOf = multipleOf
-        self.maxLength = maxLength
-        self.minLength = minLength
-        self.anyOf = anyOf
-        self.format = format
-        self.additionalProperties = additionalProperties
-        self.patternProperties = patternProperties
-        self.required = required
-        self.enum = enum
-        self.title = title
-
-    def __str__(self):
-        return json.dumps(self.to_dict())
-
-    def __repr__(self):
-        pairs = [k + "=" + repr(v) for k, v in self.__dict__.items()]
-        args = ", ".join(pairs)
-        return "SchemaPlus(" + args + ")"
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
+    type: Optional[Union[str, List[str]]] = None
+    properties: Optional[dict] = None
+    items: Optional[Any] = None
+    description: Optional[str] = None
+    minimum: Optional[float] = None
+    maximum: Optional[float] = None
+    exclusiveMinimum: Optional[float] = None
+    exclusiveMaximum: Optional[float] = None
+    multipleOf: Optional[float] = None
+    maxLength: Optional[int] = None
+    minLength: Optional[int] = None
+    anyOf: Optional[Any] = None
+    format: Optional[str] = None
+    additionalProperties: Optional[Any] = None
+    patternProperties: Optional[Any] = None
+    required: Optional[List[str]] = None
+    enum: Optional[List[Any]] = None
+    title: Optional[str] = None
 
     def to_dict(self):
         """Return the raw JSON Schema as a (possibly nested) dict."""
