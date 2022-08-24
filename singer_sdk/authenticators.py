@@ -104,8 +104,8 @@ class APIAuthenticatorBase:
         .. _request object:
             https://requests.readthedocs.io/en/latest/api/#requests.Request
         """
-        request.headers.update(self.auth_headers or {})
-        request.params.update(self.auth_params or {})
+        request.headers.update(self.auth_headers)
+        request.params.update(self.auth_params)
 
 
 class SimpleAuthenticator(APIAuthenticatorBase):
