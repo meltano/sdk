@@ -1,4 +1,3 @@
-# pylint: disable=redefined-builtin, too-many-arguments, invalid-name
 """Provides an object model for JSON Schema."""
 
 from dataclasses import dataclass
