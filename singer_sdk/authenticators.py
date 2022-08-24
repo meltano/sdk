@@ -95,6 +95,18 @@ class APIAuthenticatorBase:
         """
         return self._auth_params or {}
 
+    def authenticate_request(self, request: requests.Request) -> None:
+        """Authenticate a request.
+
+        Args:
+            request: A `request object`_.
+
+        .. _request object:
+            https://requests.readthedocs.io/en/latest/api/#requests.Request
+        """
+        request.headers.update(self.auth_headers)
+        request.params.update(self.auth_params)
+
 
 class SimpleAuthenticator(APIAuthenticatorBase):
     """DEPRECATED: Please use a more specific authenticator.
