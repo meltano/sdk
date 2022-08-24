@@ -4,6 +4,7 @@ import json
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
+from textwrap import dedent
 from typing import Dict, cast
 from uuid import uuid4
 
@@ -11,7 +12,7 @@ import pytest
 
 from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
 from samples.sample_target_csv.csv_target import SampleTargetCSV
-from samples.sample_target_sqlite import SQLiteTarget
+from samples.sample_target_sqlite import SQLiteSink, SQLiteTarget
 from singer_sdk import SQLStream
 from singer_sdk import typing as th
 from singer_sdk.helpers._singer import Catalog, MetadataMapping, StreamMetadata
@@ -431,3 +432,49 @@ def test_sqlite_column_no_morph(sqlite_sample_target: SQLTarget):
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output_a), finalize=True)
     # Int should be inserted as string.
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output_b), finalize=True)
+
+
+@pytest.mark.parametrize(
+    "stream_name,schema,key_properties,expected_dml",
+    [
+        (
+            "test_stream",
+            {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer"},
+                    "name": {"type": "string"},
+                },
+            },
+            [],
+            dedent(
+                """\
+                INSERT INTO test_stream
+                (id, name)
+                VALUES (:id, :name)"""
+            ),
+        ),
+    ],
+    ids=[
+        "no_key_properties",
+    ],
+)
+def test_sqlite_generate_insert_statement(
+    sqlite_sample_target: SQLiteTarget,
+    stream_name: str,
+    schema: dict,
+    key_properties: list,
+    expected_dml: str,
+):
+    sink = SQLiteSink(
+        sqlite_sample_target,
+        stream_name=stream_name,
+        schema=schema,
+        key_properties=key_properties,
+    )
+
+    dml = sink.generate_insert_statement(
+        sink.full_table_name,
+        sink.schema,
+    )
+    assert dml == expected_dml

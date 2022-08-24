@@ -5,3 +5,4 @@
 
 .. autoclass:: BearerTokenAuthenticator
     :members:
+    :special-members: __init__

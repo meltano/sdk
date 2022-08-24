@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.8.0 (2022-08-05)
+
+### 🐛 Fixes
+
+- [#784](https://github.com/meltano/sdk/issues/784) Update return type for `backoff_max_tries` to reflect it accepts a callable that returns an integer
+- [#874](https://github.com/meltano/sdk/issues/874) Singer metrics are now properly emitted in JSON format --_Thanks, **@Jack-Burnett!**_
+
+### 📚 Documentation Improvements
+
+- [#869](https://github.com/meltano/sdk/issues/869) Cleanup whitespace in backoff code samples
+
+
+## v0.7.0 (2022-07-21)
+
+### ✨ New
+
+- [#785](https://github.com/meltano/sdk/issues/785) Output full URL path in error messages
+
+### 🐛 Fixes
+
+- [#815](https://github.com/meltano/sdk/issues/815) Generate correct SQL target project from cookiecutter
+- [#782](https://github.com/meltano/sdk/issues/782) Allow lists and dictionaries as types for default JSON values
+
+### 📚 Documentation Improvements
+
+- [#823](https://github.com/meltano/sdk/issues/823) Add link to the sdk for README generation regarding Stream Maps
+- [#813](https://github.com/meltano/sdk/issues/813) Fix PyPI trove classifiers
+- [#783](https://github.com/meltano/sdk/issues/783) Document using pipx inject for nox-poetry
+
 ## v0.6.1 (2022-07-01)
 
 ### Fix

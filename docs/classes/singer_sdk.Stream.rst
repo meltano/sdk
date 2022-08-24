@@ -5,3 +5,4 @@
 
 .. autoclass:: Stream
     :members:
+    :special-members: __init__

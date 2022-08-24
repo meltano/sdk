@@ -5,3 +5,4 @@
 
 .. autoclass:: InvalidStreamSortException
     :members:
+    :special-members: __init__
