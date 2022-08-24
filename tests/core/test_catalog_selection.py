@@ -10,6 +10,7 @@ from singer_sdk.helpers._catalog import (
     get_selected_schema,
     pop_deselected_record_properties,
 )
+from singer_sdk.helpers._schema import SchemaPlus
 from singer_sdk.typing import ObjectType, PropertiesList, Property, StringType
 
 
@@ -151,7 +152,7 @@ def catalog_entry_obj(schema, stream_name, selection_metadata) -> singer.Catalog
     return singer.CatalogEntry(
         tap_stream_id=stream_name,
         stream=stream_name,
-        schema=singer.Schema.from_dict(schema),
+        schema=SchemaPlus.from_dict(schema),
         metadata=singer.MetadataMapping.from_iterable(selection_metadata),
     )
 
