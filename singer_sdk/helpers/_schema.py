@@ -68,7 +68,7 @@ class SchemaPlus(Schema):
         if self.properties is not None:
             result["properties"] = {
                 k: v.to_dict()
-                for k, v in self.properties.items()  # pylint: disable=no-member
+                for k, v in self.properties.items()
             }
 
         if self.items is not None:
