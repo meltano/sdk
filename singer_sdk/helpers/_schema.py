@@ -66,10 +66,7 @@ class SchemaPlus(Schema):
         result = {}
 
         if self.properties is not None:
-            result["properties"] = {
-                k: v.to_dict()
-                for k, v in self.properties.items()
-            }
+            result["properties"] = {k: v.to_dict() for k, v in self.properties.items()}
 
         if self.items is not None:
             result["items"] = self.items.to_dict()
