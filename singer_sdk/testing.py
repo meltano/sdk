@@ -48,7 +48,7 @@ def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Ca
             schema_props = set(stream.schema["properties"].keys())
             for pkey in pkeys:
                 error_message = (
-                    f"Coding error in stream '{name}': " +
+                    f"Coding error in stream '{name}': "
                     f"primary_key '{pkey}' is missing in schema"
                 )
                 assert pkey in schema_props, error_message
