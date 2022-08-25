@@ -41,8 +41,9 @@ Note:
 
 from __future__ import annotations
 
+import json
 import sys
-from typing import Generic, Mapping, TypeVar, Union, cast
+from typing import Any, Generic, Mapping, TypeVar, Union, cast
 
 import sqlalchemy
 from jsonschema import validators
@@ -142,6 +143,17 @@ class JSONTypeHelper:
             A JSON Schema dictionary describing the object.
         """
         return cast(dict, self.type_dict)
+
+    def to_json(self, **kwargs: Any) -> str:
+        """Convert to JSON.
+
+        Args:
+            kwargs: Additional keyword arguments to pass to json.dumps().
+
+        Returns:
+            A JSON string describing the object.
+        """
+        return json.dumps(self.to_dict(), **kwargs)
 
 
 class StringType(JSONTypeHelper):
@@ -418,7 +430,80 @@ class ObjectType(JSONTypeHelper):
         Args:
             properties: Zero or more attributes for this JSON object.
             additional_properties: A schema to match against unnamed properties in
-                this object or a boolean indicating if extra properties are allowed.
+                this object, or a boolean indicating if extra properties are allowed.
+
+        Examples:
+            >>> t = ObjectType(
+            ...     Property("name", StringType, required=True),
+            ...     Property("age", IntegerType),
+            ...     Property("height", NumberType),
+            ...     additional_properties=False,
+            ... )
+            >>> print(t.to_json(indent=2))
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "age": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "height": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            }
+
+            >>> t = ObjectType(
+            ...     Property("name", StringType, required=True),
+            ...     Property("age", IntegerType),
+            ...     Property("height", NumberType),
+            ...     additional_properties=StringType,
+            ... )
+            >>> print(t.to_json(indent=2))
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "age": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "height": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": {
+                "type": [
+                  "string"
+                ]
+              }
+            }
         """
         self.wrapped: list[Property] = list(properties)
         self.additional_properties = additional_properties

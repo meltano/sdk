@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from textwrap import dedent
 
 import pytest
 
@@ -50,6 +51,48 @@ class ConfigTestTap(Tap):
 
     def discover_streams(self) -> list[Stream]:
         return []
+
+
+def test_to_json():
+    schema = PropertiesList(
+        Property(
+            "test_property",
+            StringType,
+            description="A test property",
+            required=True,
+        ),
+        Property(
+            "test_property_2",
+            StringType,
+            description="A test property",
+        ),
+        additional_properties=False,
+    )
+    assert schema.to_json(indent=4) == dedent(
+        """\
+        {
+            "type": "object",
+            "properties": {
+                "test_property": {
+                    "type": [
+                        "string"
+                    ],
+                    "description": "A test property"
+                },
+                "test_property_2": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "A test property"
+                }
+            },
+            "required": [
+                "test_property"
+            ],
+            "additionalProperties": false
+        }"""
+    )
 
 
 def test_nested_complex_objects():
