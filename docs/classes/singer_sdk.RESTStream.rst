@@ -5,3 +5,4 @@
 
 .. autoclass:: RESTStream
     :members:
+    :special-members: __init__

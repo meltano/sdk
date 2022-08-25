@@ -5,3 +5,4 @@
 
 .. autoclass:: {{ name }}
     :members:
+    :special-members: __init__

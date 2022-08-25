@@ -5,3 +5,4 @@
 
 .. autoclass:: OAuthAuthenticator
     :members:
+    :special-members: __init__
