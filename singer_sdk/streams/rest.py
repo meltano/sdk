@@ -124,7 +124,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             The `requests.Session`_ object for HTTP requests.
 
         .. _requests.Session:
-            https://docs.python-requests.org/en/latest/api/#request-sessions
+            https://requests.readthedocs.io/en/latest/api/#request-sessions
         """
         if not self._requests_session:
             self._requests_session = requests.Session()
@@ -159,7 +159,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             RetriableAPIError: If the request is retriable.
 
         .. _requests.Response:
-            https://docs.python-requests.org/en/latest/api/#requests.Response
+            https://requests.readthedocs.io/en/latest/api/#requests.Response
         """
         if (
             response.status_code in self.extra_retry_statuses
@@ -213,6 +213,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             (
                 RetriableAPIError,
                 requests.exceptions.ReadTimeout,
+                requests.exceptions.ConnectionError,
             ),
             max_tries=self.backoff_max_tries,
             on_backoff=self.backoff_handler,
@@ -263,10 +264,39 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return {}
 
+    def build_prepared_request(
+        self,
+        *args: Any,
+        **kwargs: Any,
+    ) -> requests.PreparedRequest:
+        """Build a generic but authenticated request.
+
+        Uses the authenticator instance to mutate the request with authentication.
+
+        Args:
+            *args: Arguments to pass to `requests.Request`_.
+            **kwargs: Keyword arguments to pass to `requests.Request`_.
+
+        Returns:
+            A `requests.PreparedRequest`_ object.
+
+        .. _requests.PreparedRequest:
+            https://requests.readthedocs.io/en/latest/api/#requests.PreparedRequest
+        .. _requests.Request:
+            https://requests.readthedocs.io/en/latest/api/#requests.Request
+        """
+        request = requests.Request(*args, **kwargs)
+
+        if self.authenticator:
+            authenticator = self.authenticator
+            authenticator.authenticate_request(request)
+
+        return self.requests_session.prepare_request(request)
+
     def prepare_request(
         self, context: dict | None, next_page_token: _TToken | None
     ) -> requests.PreparedRequest:
-        """Prepare a request object.
+        """Prepare a request object for this stream.
 
         If partitioning is supported, the `context` object will contain the partition
         definitions. Pagination information can be parsed from `next_page_token` if
@@ -287,21 +317,13 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         request_data = self.prepare_request_payload(context, next_page_token)
         headers = self.http_headers
 
-        authenticator = self.authenticator
-        if authenticator:
-            headers.update(authenticator.auth_headers or {})
-            params.update(authenticator.auth_params or {})
-
-        request = self.requests_session.prepare_request(
-            requests.Request(
-                method=http_method,
-                url=url,
-                params=params,
-                headers=headers,
-                json=request_data,
-            ),
+        return self.build_prepared_request(
+            method=http_method,
+            url=url,
+            params=params,
+            headers=headers,
+            json=request_data,
         )
-        return request
 
     def request_records(self, context: dict | None) -> Iterable[dict]:
         """Request records from REST endpoint(s), returning response records.
@@ -434,7 +456,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             Reference value to retrieve next page.
 
         .. _requests.Response:
-            https://docs.python-requests.org/en/latest/api/#requests.Response
+            https://requests.readthedocs.io/en/latest/api/#requests.Response
         """
         if self.next_page_token_jsonpath:
             all_matches = extract_jsonpath(
@@ -503,7 +525,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             One item for every item found in the response.
 
         .. _requests.Response:
-            https://docs.python-requests.org/en/latest/api/#requests.Response
+            https://requests.readthedocs.io/en/latest/api/#requests.Response
         """
         yield from extract_jsonpath(self.records_jsonpath, input=response.json())
 
