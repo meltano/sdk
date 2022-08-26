@@ -220,7 +220,7 @@ def conform_record_data_types(  # noqa: C901
             boolean_representation: Optional[bool]
             if elem is None:
                 boolean_representation = None
-            elif elem == 0:
+            elif elem in [0, 'false']:
                 boolean_representation = False
             else:
                 boolean_representation = True
