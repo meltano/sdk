@@ -217,17 +217,22 @@ def conform_record_data_types(  # noqa: C901
             else:
                 rec[property_name] = elem.hex()
         elif is_boolean_type(property_schema):
+            is_standard_boolean: bool = True
             boolean_representation: Optional[bool]
             if elem is None:
                 boolean_representation = None
             elif elem == 0:
                 boolean_representation = False
-            elif isinstance(elem, str):
-                if elem.lower() in ['false', 'f']:
-                    boolean_representation = False
-            else:
+            elif elem == 1:
                 boolean_representation = True
-            rec[property_name] = boolean_representation
+            elif isinstance(elem, str):
+                if elem.lower() in ['false', 'f', '0']:
+                    boolean_representation = False
+                if elem.lower() in ['true', 't', '1']:
+                    boolean_representation = True
+            else:
+                is_standard_boolean = False
+            rec[property_name] = boolean_representation if is_standard_boolean else elem
         else:
             rec[property_name] = elem
     _warn_unmapped_properties(stream_name, tuple(unmapped_properties), logger)
