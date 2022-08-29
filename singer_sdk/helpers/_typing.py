@@ -228,7 +228,7 @@ def conform_record_data_types(  # noqa: C901
             elif isinstance(elem, str):
                 if elem.lower() in ['false', 'f', '0']:
                     boolean_representation = False
-                if elem.lower() in ['true', 't', '1']:
+                elif elem.lower() in ['true', 't', '1']:
                     boolean_representation = True
             else:
                 is_standard_boolean = False
