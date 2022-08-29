@@ -16,6 +16,7 @@ from singer_sdk.cli import common_options
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._singer import BaseBatchFileEncoding
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerMessageType, SingerReader
 from singer_sdk.mapper import PluginMapper
@@ -267,6 +268,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self.logger.info(
             f"Target '{self.name}' completed reading {line_count} lines of input "
             f"({counter[SingerMessageType.RECORD]} records, "
+            f"({counter[SingerMessageType.BATCH]} batch manifests, "
             f"{counter[SingerMessageType.STATE]} state messages)."
         )
 
@@ -400,6 +402,15 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         stream_name = message_dict["stream"]
         sink = self.get_sink(stream_name)
         sink.activate_version(message_dict["version"])
+
+    def _process_batch_message(self, message_dict: dict) -> None:
+        """Handle the optional BATCH message extension.
+
+        Args:
+            message_dict: TODO
+        """
+        encoding = BaseBatchFileEncoding.from_dict(message_dict["encoding"])
+        self.logger.info("Processing record batch encoded as %s", encoding)
 
     # Sink drain methods
 

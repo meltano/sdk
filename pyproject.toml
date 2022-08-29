@@ -148,6 +148,7 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     '''class .*\bProtocol\):''',
     '''@(abc\.)?abstractmethod''',
+    "if TYPE_CHECKING:",
 ]
 fail_under = 82
 

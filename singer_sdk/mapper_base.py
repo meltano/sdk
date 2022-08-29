@@ -50,6 +50,9 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     def _process_activate_version_message(self, message_dict: dict) -> None:
         self._write_messages(self.map_activate_version_message(message_dict))
 
+    def _process_batch_message(self, message_dict: dict) -> None:
+        self._write_messages(self.map_batch_message(message_dict))
+
     @abc.abstractmethod
     def map_schema_message(self, message_dict: dict) -> Iterable[singer.Message]:
         """Map a schema message to zero or more new messages.
@@ -88,6 +91,17 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             message_dict: An ACTIVATE_VERSION message JSON dictionary.
         """
         ...
+
+    def map_batch_message(
+        self,
+        message_dict: dict,
+    ) -> Iterable[singer.Message]:
+        """Map a version message to zero or more new messages.
+
+        Args:
+            message_dict: An ACTIVATE_VERSION message JSON dictionary.
+        """
+        pass
 
     @classproperty
     def cli(cls) -> Callable:

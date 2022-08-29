@@ -1,18 +1,38 @@
 from __future__ import annotations
 
+import enum
 import logging
-from dataclasses import dataclass, fields
-from enum import Enum
-from typing import Any, Dict, Iterable, Tuple, Union, cast
+import sys
+from dataclasses import asdict, dataclass, field, fields
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Iterable, Tuple, Union, cast
 
 from singer.catalog import Catalog as BaseCatalog
 from singer.catalog import CatalogEntry as BaseCatalogEntry
+from singer.messages import Message
 
 from singer_sdk.helpers._schema import SchemaPlus
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+    if sys.version_info >= (3, 8):
+        from typing import Literal
+    else:
+        from typing_extensions import Literal
 
 Breadcrumb = Tuple[str, ...]
 
 logger = logging.getLogger(__name__)
+
+
+class SingerMessageType(str, enum.Enum):
+    """Singer specification message types."""
+
+    RECORD = "RECORD"
+    SCHEMA = "SCHEMA"
+    STATE = "STATE"
+    ACTIVATE_VERSION = "ACTIVATE_VERSION"
+    BATCH = "BATCH"
 
 
 class SelectionMask(Dict[Breadcrumb, bool]):
@@ -35,7 +55,7 @@ class SelectionMask(Dict[Breadcrumb, bool]):
 class Metadata:
     """Base stream or property metadata."""
 
-    class InclusionType(str, Enum):
+    class InclusionType(str, enum.Enum):
         """Catalog inclusion types."""
 
         AVAILABLE = "available"
@@ -51,8 +71,8 @@ class Metadata:
         """Parse metadata dictionary."""
         return cls(
             **{
-                field.name: value.get(field.name.replace("_", "-"))
-                for field in fields(cls)
+                object_field.name: value.get(object_field.name.replace("_", "-"))
+                for object_field in fields(cls)
             }
         )
 
@@ -60,10 +80,10 @@ class Metadata:
         """Convert metadata to a JSON-encodeable dictionary."""
         result = {}
 
-        for field in fields(self):
-            value = getattr(self, field.name)
+        for object_field in fields(self):
+            value = getattr(self, object_field.name)
             if value is not None:
-                result[field.name.replace("_", "-")] = value
+                result[object_field.name.replace("_", "-")] = value
 
         return result
 
@@ -78,13 +98,16 @@ class StreamMetadata(Metadata):
     schema_name: str | None = None
 
 
-class MetadataMapping(Dict[Breadcrumb, Union[Metadata, StreamMetadata]]):
+AnyMetadata: TypeAlias = Union[Metadata, StreamMetadata]
+
+
+class MetadataMapping(Dict[Breadcrumb, AnyMetadata]):
     """Stream metadata mapping."""
 
     @classmethod
     def from_iterable(cls, iterable: Iterable[dict[str, Any]]):
         """Create a metadata mapping from an iterable of metadata dictionaries."""
-        mapping = cls()
+        mapping: dict[Breadcrumb, AnyMetadata] = cls()
         for d in iterable:
             breadcrumb = tuple(d["breadcrumb"])
             metadata = d["metadata"]
@@ -280,3 +303,91 @@ class Catalog(Dict[str, CatalogEntry], BaseCatalog):
     def get_stream(self, stream_id: str) -> CatalogEntry | None:
         """Retrieve a stream entry from the catalog."""
         return self.get(stream_id)
+
+
+class BatchFileFormat(str, enum.Enum):
+    """Batch file format."""
+
+    JSONL = "jsonl"
+    """JSON Lines format."""
+
+
+@dataclass
+class BaseBatchFileEncoding:
+    """Base class for batch file encodings."""
+
+    registered_encodings: ClassVar[dict[str, type[BaseBatchFileEncoding]]] = {}
+    __encoding_format__: ClassVar[str] = "OVERRIDE_ME"
+
+    # Base encoding fields
+    format: str = field(init=False)
+    """The format of the batch file."""
+
+    compression: str | None = None
+    """The compression of the batch file."""
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Register subclasses."""
+        super().__init_subclass__(**kwargs)
+        cls.registered_encodings[cls.__encoding_format__] = cls
+
+    def __post_init__(self) -> None:
+        self.format = self.__encoding_format__
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> BaseBatchFileEncoding:
+        """Create an encoding from a dictionary."""
+        encoding_format = data.pop("format")
+        encoding_cls = cls.registered_encodings[encoding_format]
+        return encoding_cls(**data)
+
+
+@dataclass
+class JSONLinesEncoding(BaseBatchFileEncoding):
+    """JSON Lines encoding for batch files."""
+
+    __encoding_format__ = "jsonl"
+
+
+@dataclass
+class SDKBatchMessage(Message):
+    """Singer batch message in the Meltano SDK flavor."""
+
+    type: Literal[SingerMessageType.BATCH] = field(init=False)
+    """The message type."""
+
+    stream: str
+    """The stream name."""
+
+    encoding: BaseBatchFileEncoding
+    """The file encoding of the batch."""
+
+    manifest: list[str] = field(default_factory=list)
+    """The manifest of files in the batch."""
+
+    def __post_init__(self):
+        if isinstance(self.encoding, dict):
+            self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
+
+        self.type = SingerMessageType.BATCH
+
+    def asdict(self):
+        """Return a dictionary representation of the message.
+
+        Returns:
+            A dictionary with the defined message fields.
+        """
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> SDKBatchMessage:
+        """Create an encoding from a dictionary.
+
+        Args:
+            data: The dictionary to create the message from.
+
+        Returns:
+            The created message.
+        """
+        data.pop("type")
+        return cls(**data)
