@@ -987,7 +987,7 @@ class Stream(metaclass=abc.ABCMeta):
             record_context: The record context.
             child_context: The child context.
             partition_context: The partition context.
-            count: The current record count.
+            count: The current record count per stream.
         """
         partition_context = partition_context or {}
         child_context = copy.copy(
