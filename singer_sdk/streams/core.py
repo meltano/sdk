@@ -17,6 +17,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Tuple,
     Type,
     TypeVar,
     Union,
@@ -1033,9 +1034,14 @@ class Stream(metaclass=abc.ABCMeta):
             )
 
             for record_result in self.get_records(current_context):
+                if isinstance(record_result, tuple):
+                    # Tuple items should be the record and the child context
+                    record, child_context = record_result
+                else:
+                    record = record_result
                 try:
                     self._process_record(
-                        record_result,
+                        record,
                         selected,
                         record_context=current_context,
                         child_context=child_context,
@@ -1175,7 +1181,9 @@ class Stream(metaclass=abc.ABCMeta):
     # Abstract Methods
 
     @abc.abstractmethod
-    def get_records(self, context: Optional[dict]) -> Iterable[dict]:
+    def get_records(
+        self, context: Optional[dict]
+    ) -> Iterable[Union[dict, Tuple[dict, dict]]]:
         """Abstract row generator function. Must be overridden by the child class.
 
         Each row emitted should be a dictionary of property names to their values.
