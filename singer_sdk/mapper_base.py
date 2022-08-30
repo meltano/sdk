@@ -99,7 +99,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         """Map a version message to zero or more new messages.
 
         Args:
-            message_dict: An ACTIVATE_VERSION message JSON dictionary.
+            message_dict: A BATCH message JSON dictionary.
         """
         pass
 
