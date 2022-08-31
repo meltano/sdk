@@ -1098,6 +1098,8 @@ class Stream(metaclass=abc.ABCMeta):
                     )
                     raise ex
 
+                self._check_max_record_limit(record_count)
+
                 if selected:
                     if (
                         record_count - 1
