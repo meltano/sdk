@@ -1,5 +1,7 @@
 """Stream abstract class."""
 
+from __future__ import annotations
+
 import abc
 import copy
 import datetime
@@ -8,21 +10,7 @@ import logging
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generator,
-    Iterable,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Generator, Iterable, Mapping, TypeVar, cast
 
 import pendulum
 import requests
@@ -70,20 +58,20 @@ class Stream(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
     STATE_MSG_FREQUENCY = 10000  # Number of records between state messages
-    _MAX_RECORDS_LIMIT: Optional[int] = None
+    _MAX_RECORDS_LIMIT: int | None = None
 
     # Used for nested stream relationships
-    parent_stream_type: Optional[Type["Stream"]] = None
+    parent_stream_type: type[Stream] | None = None
     ignore_parent_replication_key: bool = False
 
     # Internal API cost aggregator
-    _sync_costs: Dict[str, int] = {}
+    _sync_costs: dict[str, int] = {}
 
     def __init__(
         self,
         tap: TapBaseClass,
-        schema: Optional[Union[str, PathLike, Dict[str, Any], Schema]] = None,
-        name: Optional[str] = None,
+        schema: str | PathLike | dict[str, Any] | Schema | None = None,
+        name: str | None = None,
     ) -> None:
         """Init tap stream.
 
@@ -106,17 +94,17 @@ class Stream(metaclass=abc.ABCMeta):
         self._config: dict = dict(tap.config)
         self._tap = tap
         self._tap_state = tap.state
-        self._tap_input_catalog: Optional[Catalog] = None
-        self._stream_maps: Optional[List[StreamMap]] = None
-        self.forced_replication_method: Optional[str] = None
-        self._replication_key: Optional[str] = None
-        self._primary_keys: Optional[List[str]] = None
-        self._state_partitioning_keys: Optional[List[str]] = None
-        self._schema_filepath: Optional[Path] = None
-        self._metadata: Optional[MetadataMapping] = None
-        self._mask: Optional[SelectionMask] = None
+        self._tap_input_catalog: Catalog | None = None
+        self._stream_maps: list[StreamMap] | None = None
+        self.forced_replication_method: str | None = None
+        self._replication_key: str | None = None
+        self._primary_keys: list[str] | None = None
+        self._state_partitioning_keys: list[str] | None = None
+        self._schema_filepath: Path | None = None
+        self._metadata: MetadataMapping | None = None
+        self._mask: SelectionMask | None = None
         self._schema: dict
-        self.child_streams: List[Stream] = []
+        self.child_streams: list[Stream] = []
         if schema:
             if isinstance(schema, (PathLike, str)):
                 if not Path(schema).is_file():
@@ -144,7 +132,7 @@ class Stream(metaclass=abc.ABCMeta):
             )
 
     @property
-    def stream_maps(self) -> List[StreamMap]:
+    def stream_maps(self) -> list[StreamMap]:
         """Get stream transformation maps.
 
         The 0th item is the primary stream map. List should not be empty.
@@ -191,9 +179,7 @@ class Stream(metaclass=abc.ABCMeta):
         type_dict = self.schema.get("properties", {}).get(self.replication_key)
         return is_datetime_type(type_dict)
 
-    def get_starting_replication_key_value(
-        self, context: Optional[dict]
-    ) -> Optional[Any]:
+    def get_starting_replication_key_value(self, context: dict | None) -> Any | None:
         """Get starting replication key.
 
         Will return the value of the stream's replication key when `--state` is passed.
@@ -213,9 +199,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         return get_starting_replication_value(state)
 
-    def get_starting_timestamp(
-        self, context: Optional[dict]
-    ) -> Optional[datetime.datetime]:
+    def get_starting_timestamp(self, context: dict | None) -> datetime.datetime | None:
         """Get starting replication timestamp.
 
         Will return the value of the stream's replication key when `--state` is passed.
@@ -273,21 +257,21 @@ class Stream(metaclass=abc.ABCMeta):
 
     @final
     @property
-    def descendent_streams(self) -> List["Stream"]:
+    def descendent_streams(self) -> list[Stream]:
         """Get child streams.
 
         Returns:
             A list of all children, recursively.
         """
-        result: List[Stream] = list(self.child_streams) or []
+        result: list[Stream] = list(self.child_streams) or []
         for child in self.child_streams:
             result += child.descendent_streams or []
         return result
 
     def _write_replication_key_signpost(
         self,
-        context: Optional[dict],
-        value: Union[datetime.datetime, str, int, float],
+        context: dict | None,
+        value: datetime.datetime | str | int | float,
     ) -> None:
         """Write the signpost value, if available.
 
@@ -327,7 +311,7 @@ class Stream(metaclass=abc.ABCMeta):
         else:
             return value
 
-    def _write_starting_replication_value(self, context: Optional[dict]) -> None:
+    def _write_starting_replication_value(self, context: dict | None) -> None:
         """Write the starting replication value, if available.
 
         Args:
@@ -344,7 +328,7 @@ class Stream(metaclass=abc.ABCMeta):
                 value = replication_key_value
 
             # Use start_date if it is more recent than the replication_key state
-            start_date_value: Optional[str] = self.config.get("start_date")
+            start_date_value: str | None = self.config.get("start_date")
             if start_date_value:
                 if not value:
                     value = start_date_value
@@ -354,8 +338,8 @@ class Stream(metaclass=abc.ABCMeta):
         write_starting_replication_value(state, value)
 
     def get_replication_key_signpost(
-        self, context: Optional[dict]
-    ) -> Optional[Union[datetime.datetime, Any]]:
+        self, context: dict | None
+    ) -> datetime.datetime | Any | None:
         """Get the replication signpost.
 
         For timestamp-based replication keys, this defaults to `utc_now()`. For
@@ -379,7 +363,7 @@ class Stream(metaclass=abc.ABCMeta):
         return None
 
     @property
-    def schema_filepath(self) -> Optional[Path]:
+    def schema_filepath(self) -> Path | None:
         """Get path to schema file.
 
         Returns:
@@ -397,7 +381,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._schema
 
     @property
-    def primary_keys(self) -> Optional[List[str]]:
+    def primary_keys(self) -> list[str] | None:
         """Get primary keys.
 
         Returns:
@@ -408,7 +392,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._primary_keys
 
     @primary_keys.setter
-    def primary_keys(self, new_value: List[str]) -> None:
+    def primary_keys(self, new_value: list[str]) -> None:
         """Set primary key(s) for the stream.
 
         Args:
@@ -417,7 +401,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._primary_keys = new_value
 
     @property
-    def state_partitioning_keys(self) -> Optional[List[str]]:
+    def state_partitioning_keys(self) -> list[str] | None:
         """Get state partition keys.
 
         If not set, a default partitioning will be inherited from the stream's context.
@@ -429,7 +413,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._state_partitioning_keys
 
     @state_partitioning_keys.setter
-    def state_partitioning_keys(self, new_value: Optional[List[str]]) -> None:
+    def state_partitioning_keys(self, new_value: list[str] | None) -> None:
         """Set partition keys for the stream state bookmarks.
 
         If not set, a default partitioning will be inherited from the stream's context.
@@ -441,7 +425,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._state_partitioning_keys = new_value
 
     @property
-    def replication_key(self) -> Optional[str]:
+    def replication_key(self) -> str | None:
         """Get replication key.
 
         Returns:
@@ -606,7 +590,7 @@ class Stream(metaclass=abc.ABCMeta):
         """
         return self._tap_state
 
-    def get_context_state(self, context: Optional[dict]) -> dict:
+    def get_context_state(self, context: dict | None) -> dict:
         """Return a writable state dict for the given context.
 
         Gives a partitioned context state if applicable; else returns stream state.
@@ -661,7 +645,7 @@ class Stream(metaclass=abc.ABCMeta):
     # Partitions
 
     @property
-    def partitions(self) -> Optional[List[dict]]:
+    def partitions(self) -> list[dict] | None:
         """Get stream partitions.
 
         Developers may override this property to provide a default partitions list.
@@ -672,7 +656,7 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             A list of partition key dicts (if applicable), otherwise `None`.
         """
-        result: List[dict] = []
+        result: list[dict] = []
         for partition_state in (
             get_state_partitions_list(self.tap_state, self.name) or []
         ):
@@ -682,7 +666,7 @@ class Stream(metaclass=abc.ABCMeta):
     # Private bookmarking methods
 
     def _increment_stream_state(
-        self, latest_record: Dict[str, Any], *, context: Optional[dict] = None
+        self, latest_record: dict[str, Any], *, context: dict | None = None
     ) -> None:
         """Update state of stream or partition with data from the provided record.
 
@@ -804,7 +788,7 @@ class Stream(metaclass=abc.ABCMeta):
             singer.write_message(record_message)
 
     @property
-    def _metric_logging_function(self) -> Optional[Callable]:
+    def _metric_logging_function(self) -> Callable | None:
         """Return the metrics logging function.
 
         Returns:
@@ -830,7 +814,7 @@ class Stream(metaclass=abc.ABCMeta):
             + self.config[METRICS_LOG_LEVEL_SETTING]
         )
 
-    def _write_metric_log(self, metric: dict, extra_tags: Optional[dict]) -> None:
+    def _write_metric_log(self, metric: dict, extra_tags: dict | None) -> None:
         """Emit a metric log. Optionally with appended tag info.
 
         Args:
@@ -847,9 +831,7 @@ class Stream(metaclass=abc.ABCMeta):
             metric["tags"].update(extra_tags)
         self._metric_logging_function(f"INFO METRIC: {json.dumps(metric)}")
 
-    def _write_record_count_log(
-        self, record_count: int, context: Optional[dict]
-    ) -> None:
+    def _write_record_count_log(self, record_count: int, context: dict | None) -> None:
         """Emit a metric log. Optionally with appended tag info.
 
         Args:
@@ -857,7 +839,7 @@ class Stream(metaclass=abc.ABCMeta):
             context: Stream partition or context dictionary.
         """
         extra_tags = {} if not context else {"context": context}
-        counter_metric: Dict[str, Any] = {
+        counter_metric: dict[str, Any] = {
             "type": "counter",
             "metric": "record_count",
             "value": record_count,
@@ -869,8 +851,8 @@ class Stream(metaclass=abc.ABCMeta):
         self,
         endpoint: str,
         response: requests.Response,
-        context: Optional[dict],
-        extra_tags: Optional[dict],
+        context: dict | None,
+        extra_tags: dict | None,
     ) -> None:
         """TODO.
 
@@ -880,7 +862,7 @@ class Stream(metaclass=abc.ABCMeta):
             context: Stream partition or context dictionary.
             extra_tags: TODO
         """
-        request_duration_metric: Dict[str, Any] = {
+        request_duration_metric: dict[str, Any] = {
             "type": "timer",
             "metric": "http_request_duration",
             "value": response.elapsed.total_seconds(),
@@ -927,7 +909,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Handle interim stream state
 
-    def reset_state_progress_markers(self, state: Optional[dict] = None) -> None:
+    def reset_state_progress_markers(self, state: dict | None = None) -> None:
         """Reset progress markers. If all=True, all state contexts will be set.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -936,7 +918,7 @@ class Stream(metaclass=abc.ABCMeta):
             state: State object to promote progress markers with.
         """
         if state is None or state == {}:
-            context: Optional[dict]
+            context: dict | None
             for context in self.partitions or [{}]:
                 context = context or None
                 state = self.get_context_state(context)
@@ -945,7 +927,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         reset_state_progress_markers(state)
 
-    def finalize_state_progress_markers(self, state: Optional[dict] = None) -> None:
+    def finalize_state_progress_markers(self, state: dict | None = None) -> None:
         """Reset progress markers. If all=True, all state contexts will be finalized.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -959,7 +941,7 @@ class Stream(metaclass=abc.ABCMeta):
             for child_stream in self.child_streams or []:
                 child_stream.finalize_state_progress_markers()
 
-            context: Optional[dict]
+            context: dict | None
             for context in self.partitions or [{}]:
                 context = context or None
                 state = self.get_context_state(context)
@@ -971,7 +953,7 @@ class Stream(metaclass=abc.ABCMeta):
     # Private sync methods:
 
     def _sync_records(  # noqa C901  # too complex
-        self, context: Optional[dict] = None
+        self, context: dict | None = None
     ) -> None:
         """Sync records, emitting RECORD and STATE messages.
 
@@ -982,8 +964,8 @@ class Stream(metaclass=abc.ABCMeta):
             InvalidStreamSortException: TODO
         """
         record_count = 0
-        current_context: Optional[dict]
-        context_list: Optional[List[dict]]
+        current_context: dict | None
+        context_list: list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
@@ -993,7 +975,7 @@ class Stream(metaclass=abc.ABCMeta):
             state = self.get_context_state(current_context)
             state_partition_context = self._get_state_partition_context(current_context)
             self._write_starting_replication_value(current_context)
-            child_context: Optional[dict] = (
+            child_context: dict | None = (
                 None if current_context is None else copy.copy(current_context)
             )
             for record_result in self.get_records(current_context):
@@ -1048,7 +1030,7 @@ class Stream(metaclass=abc.ABCMeta):
     # Public methods ("final", not recommended to be overridden)
 
     @final
-    def sync(self, context: Optional[dict] = None) -> None:
+    def sync(self, context: dict | None = None) -> None:
         """Sync this stream.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -1099,7 +1081,7 @@ class Stream(metaclass=abc.ABCMeta):
             if catalog_entry.replication_method:
                 self.forced_replication_method = catalog_entry.replication_method
 
-    def _get_state_partition_context(self, context: Optional[dict]) -> Optional[Dict]:
+    def _get_state_partition_context(self, context: dict | None) -> dict | None:
         """Override state handling if Stream.state_partitioning_keys is specified.
 
         Args:
@@ -1116,7 +1098,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         return {k: v for k, v in context.items() if k in self.state_partitioning_keys}
 
-    def get_child_context(self, record: dict, context: Optional[dict]) -> dict:
+    def get_child_context(self, record: dict, context: dict | None) -> dict:
         """Return a child context object from the record and optional provided context.
 
         By default, will return context if provided and otherwise the record dict.
@@ -1153,9 +1135,7 @@ class Stream(metaclass=abc.ABCMeta):
     # Abstract Methods
 
     @abc.abstractmethod
-    def get_records(
-        self, context: Optional[dict]
-    ) -> Iterable[Union[dict, Tuple[dict, dict]]]:
+    def get_records(self, context: dict | None) -> Iterable[dict | tuple[dict, dict]]:
         """Abstract row generator function. Must be overridden by the child class.
 
         Each row emitted should be a dictionary of property names to their values.
@@ -1181,7 +1161,7 @@ class Stream(metaclass=abc.ABCMeta):
         """
         pass
 
-    def post_process(self, row: dict, context: Optional[dict] = None) -> Optional[dict]:
+    def post_process(self, row: dict, context: dict | None = None) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
 
         Optional. This method gives developers an opportunity to "clean up" the results
