@@ -3,12 +3,11 @@
 import abc
 import json
 from enum import Enum
-from pathlib import Path, PurePath
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
+from pathlib import PurePath
+from typing import Any, Dict, List, Optional, Tuple, Type, Union, cast
 
 import click
 
-from singer_sdk.cli import common_options
 from singer_sdk.exceptions import MaxRecordsLimitException
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
@@ -33,7 +32,7 @@ class CliTestOptionValue(Enum):
 
     All = "all"
     Schema = "schema"
-    Disabled = False
+    Disabled = "disabled"
 
 
 class Tap(PluginBase, metaclass=abc.ABCMeta):
@@ -386,126 +385,137 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     # Command Line Execution
 
+    @classmethod
+    def invoke(
+        cls: Type["Tap"],
+        config: Tuple[str, ...] = (),
+        state: str = None,
+        catalog: str = None,
+    ) -> None:
+        """Invoke the tap's command line interface.
+
+        Args:
+            config: Configuration file location or 'ENV' to use environment
+                variables. Accepts multiple inputs as a tuple.
+            catalog: Use a Singer catalog file with the tap.",
+            state: Use a bookmarks file for incremental replication.
+        """
+        cls.print_version(print_fn=cls.logger.info)
+        config_files, parse_env_config = cls.config_from_cli_args(*config)
+
+        tap = cls(
+            config=config_files or None,
+            state=state,
+            catalog=catalog,
+            parse_env_config=parse_env_config,
+            validate_config=True,
+        )
+        tap.sync_all()
+
+    @classmethod
+    def cb_discover(
+        cls: Type["Tap"],
+        ctx: click.Context,
+        param: click.Option,
+        value: bool,
+    ) -> None:
+        """CLI callback to run the tap in discovery mode.
+
+        Args:
+            ctx: Click context.
+            param: Click option.
+            value: Whether to run in discovery mode.
+        """
+        if not value:
+            return
+
+        config_args = ctx.params.get("config", ())
+        config_files, parse_env_config = cls.config_from_cli_args(*config_args)
+        tap = cls(
+            config=config_files,
+            parse_env_config=parse_env_config,
+            validate_config=False,
+        )
+        tap.run_discovery()
+        ctx.exit()
+
+    @classmethod
+    def cb_test(
+        cls: Type["Tap"],
+        ctx: click.Context,
+        param: click.Option,
+        value: bool,
+    ) -> None:
+        """CLI callback to run the tap in test mode.
+
+        Args:
+            ctx: Click context.
+            param: Click option.
+            value: Whether to run in test mode.
+        """
+        if value == CliTestOptionValue.Disabled.value:
+            return
+
+        config_args = ctx.params.get("config", ())
+        config_files, parse_env_config = cls.config_from_cli_args(*config_args)
+        tap = cls(
+            config=config_files,
+            parse_env_config=parse_env_config,
+            validate_config=True,
+        )
+
+        if value == CliTestOptionValue.Schema.value:
+            tap.write_schemas()
+        else:
+            tap.run_connection_test()
+
+        ctx.exit()
+
     @classproperty
-    def cli(cls) -> Callable:
+    def cli(cls) -> click.Command:
         """Execute standard CLI handler for taps.
 
         Returns:
-            A callable CLI object.
+            A click.Command object.
         """
-
-        @common_options.PLUGIN_VERSION
-        @common_options.PLUGIN_ABOUT
-        @common_options.PLUGIN_ABOUT_FORMAT
-        @common_options.PLUGIN_CONFIG
-        @click.option(
-            "--discover",
-            is_flag=True,
-            help="Run the tap in discovery mode.",
+        command = super().cli
+        command.help = "Execute the Singer tap."
+        command.params.extend(
+            [
+                click.Option(
+                    ["--discover"],
+                    is_flag=True,
+                    help="Run the tap in discovery mode.",
+                    callback=cls.cb_discover,
+                    expose_value=False,
+                ),
+                click.Option(
+                    ["--test"],
+                    is_flag=False,
+                    flag_value=CliTestOptionValue.All.value,
+                    default=CliTestOptionValue.Disabled.value,
+                    help=(
+                        "Use --test to sync a single record for each stream. "
+                        + "Use --test=schema to test schema output without syncing "
+                        + "records."
+                    ),
+                    callback=cls.cb_test,
+                    expose_value=False,
+                ),
+                click.Option(
+                    ["--catalog"],
+                    help="Use a Singer catalog file with the tap.",
+                    type=click.Path(),
+                ),
+                click.Option(
+                    ["--state"],
+                    help="Use a bookmarks file for incremental replication.",
+                    type=click.Path(),
+                ),
+            ],
         )
-        @click.option(
-            "--test",
-            is_flag=False,
-            flag_value=CliTestOptionValue.All.value,
-            default=CliTestOptionValue.Disabled,
-            help=(
-                "Use --test to sync a single record for each stream. "
-                + "Use --test=schema to test schema output without syncing "
-                + "records."
-            ),
-        )
-        @click.option(
-            "--catalog",
-            help="Use a Singer catalog file with the tap.",
-            type=click.Path(),
-        )
-        @click.option(
-            "--state",
-            help="Use a bookmarks file for incremental replication.",
-            type=click.Path(),
-        )
-        @click.command(
-            help="Execute the Singer tap.",
-            context_settings={"help_option_names": ["--help"]},
-        )
-        def cli(
-            version: bool = False,
-            about: bool = False,
-            discover: bool = False,
-            test: CliTestOptionValue = CliTestOptionValue.Disabled,
-            config: Tuple[str, ...] = (),
-            state: str = None,
-            catalog: str = None,
-            format: str = None,
-        ) -> None:
-            """Handle command line execution.
 
-            Args:
-                version: Display the package version.
-                about: Display package metadata and settings.
-                discover: Run the tap in discovery mode.
-                test: Test connectivity by syncing a single record and exiting.
-                format: Specify output style for `--about`.
-                config: Configuration file location or 'ENV' to use environment
-                    variables. Accepts multiple inputs as a tuple.
-                catalog: Use a Singer catalog file with the tap.",
-                state: Use a bookmarks file for incremental replication.
-
-            Raises:
-                FileNotFoundError: If the config file does not exist.
-            """
-            if version:
-                cls.print_version()
-                return
-
-            if not about:
-                cls.print_version(print_fn=cls.logger.info)
-            else:
-                cls.print_about(format=format)
-                return
-
-            validate_config: bool = True
-            if discover:
-                # Don't abort on validation failures
-                validate_config = False
-
-            parse_env_config = False
-            config_files: List[PurePath] = []
-            for config_path in config:
-                if config_path == "ENV":
-                    # Allow parse from env vars:
-                    parse_env_config = True
-                    continue
-
-                # Validate config file paths before adding to list
-                if not Path(config_path).is_file():
-                    raise FileNotFoundError(
-                        f"Could not locate config file at '{config_path}'."
-                        "Please check that the file exists."
-                    )
-
-                config_files.append(Path(config_path))
-
-            tap = cls(  # type: ignore  # Ignore 'type not callable'
-                config=config_files or None,
-                state=state,
-                catalog=catalog,
-                parse_env_config=parse_env_config,
-                validate_config=validate_config,
-            )
-
-            if discover:
-                tap.run_discovery()
-                if test == CliTestOptionValue.All.value:
-                    tap.run_connection_test()
-            elif test == CliTestOptionValue.All.value:
-                tap.run_connection_test()
-            elif test == CliTestOptionValue.Schema.value:
-                tap.write_schemas()
-            else:
-                tap.sync_all()
-
-        return cli
+        return command
 
 
 class SQLTap(Tap):

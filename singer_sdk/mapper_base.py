@@ -2,13 +2,11 @@
 
 import abc
 from io import FileIO
-from typing import Callable, Iterable, List, Tuple
+from typing import Iterable, List, Tuple, Type
 
 import click
 import singer
 
-from singer_sdk.cli import common_options
-from singer_sdk.configuration._dict_config import merge_config_sources
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerReader
@@ -89,68 +87,48 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         """
         ...
 
+    # CLI handler
+
+    @classmethod
+    def invoke(
+        cls: Type["InlineMapper"],
+        config: Tuple[str, ...] = (),
+        file_input: FileIO = None,
+    ) -> None:
+        """Invoke the mapper.
+
+        Args:
+            config: Configuration file location or 'ENV' to use environment
+                variables. Accepts multiple inputs as a tuple.
+            file_input: Optional file to read input from.
+        """
+        cls.print_version(print_fn=cls.logger.info)
+        config_files, parse_env_config = cls.config_from_cli_args(*config)
+
+        mapper = cls(
+            config=config_files,
+            validate_config=True,
+            parse_env_config=parse_env_config,
+        )
+        mapper.listen(file_input)
+
     @classproperty
-    def cli(cls) -> Callable:
+    def cli(cls) -> click.Command:
         """Execute standard CLI handler for inline mappers.
 
         Returns:
-            A callable CLI object.
+            A click.Command object.
         """
-
-        @common_options.PLUGIN_VERSION
-        @common_options.PLUGIN_ABOUT
-        @common_options.PLUGIN_ABOUT_FORMAT
-        @common_options.PLUGIN_CONFIG
-        @common_options.PLUGIN_FILE_INPUT
-        @click.command(
-            help="Execute the Singer mapper.",
-            context_settings={"help_option_names": ["--help"]},
+        command = super().cli
+        command.help = "Execute the Singer mapper."
+        command.params.extend(
+            [
+                click.Option(
+                    ["--input", "file_input"],
+                    help="A path to read messages from instead of from standard in.",
+                    type=click.File("r"),
+                ),
+            ],
         )
-        def cli(
-            version: bool = False,
-            about: bool = False,
-            config: Tuple[str, ...] = (),
-            format: str = None,
-            file_input: FileIO = None,
-        ) -> None:
-            """Handle command line execution.
 
-            Args:
-                version: Display the package version.
-                about: Display package metadata and settings.
-                format: Specify output style for `--about`.
-                config: Configuration file location or 'ENV' to use environment
-                    variables. Accepts multiple inputs as a tuple.
-                file_input: Specify a path to an input file to read messages from.
-                    Defaults to standard in if unspecified.
-            """
-            if version:
-                cls.print_version()
-                return
-
-            if not about:
-                cls.print_version(print_fn=cls.logger.info)
-
-            validate_config: bool = True
-            if about:
-                validate_config = False
-
-            cls.print_version(print_fn=cls.logger.info)
-
-            config_dict = merge_config_sources(
-                config,
-                cls.config_jsonschema,
-                cls._env_prefix,
-            )
-
-            mapper = cls(  # type: ignore  # Ignore 'type not callable'
-                config=config_dict,
-                validate_config=validate_config,
-            )
-
-            if about:
-                mapper.print_about(format)
-            else:
-                mapper.listen(file_input)
-
-        return cli
+        return command

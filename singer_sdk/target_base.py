@@ -6,13 +6,12 @@ import json
 import sys
 import time
 from io import FileIO
-from pathlib import Path, PurePath
-from typing import IO, Callable, Counter, Dict, List, Optional, Tuple, Type, Union
+from pathlib import PurePath
+from typing import IO, Counter, Dict, List, Optional, Tuple, Type, Union
 
 import click
 from joblib import Parallel, delayed, parallel_backend
 
-from singer_sdk.cli import common_options
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
@@ -469,84 +468,49 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     # CLI handler
 
+    @classmethod
+    def invoke(
+        cls: Type["Target"],
+        config: Tuple[str, ...] = (),
+        file_input: FileIO = None,
+    ) -> None:
+        """Invoke the target.
+
+        Args:
+            config: Configuration file location or 'ENV' to use environment
+                variables. Accepts multiple inputs as a tuple.
+            file_input: Optional file to read input from.
+        """
+        cls.print_version(print_fn=cls.logger.info)
+        config_files, parse_env_config = cls.config_from_cli_args(*config)
+
+        target = cls(
+            config=config_files,
+            validate_config=True,
+            parse_env_config=parse_env_config,
+        )
+        target.listen(file_input)
+
     @classproperty
-    def cli(cls) -> Callable:
+    def cli(cls) -> click.Command:
         """Execute standard CLI handler for taps.
 
         Returns:
-            A callable CLI object.
+            A click.Command object.
         """
-
-        @common_options.PLUGIN_VERSION
-        @common_options.PLUGIN_ABOUT
-        @common_options.PLUGIN_ABOUT_FORMAT
-        @common_options.PLUGIN_CONFIG
-        @common_options.PLUGIN_FILE_INPUT
-        @click.command(
-            help="Execute the Singer target.",
-            context_settings={"help_option_names": ["--help"]},
+        command = super().cli
+        command.help = "Execute the Singer target."
+        command.params.extend(
+            [
+                click.Option(
+                    ["--input", "file_input"],
+                    help="A path to read messages from instead of from standard in.",
+                    type=click.File("r"),
+                ),
+            ],
         )
-        def cli(
-            version: bool = False,
-            about: bool = False,
-            config: Tuple[str, ...] = (),
-            format: str = None,
-            file_input: FileIO = None,
-        ) -> None:
-            """Handle command line execution.
 
-            Args:
-                version: Display the package version.
-                about: Display package metadata and settings.
-                format: Specify output style for `--about`.
-                config: Configuration file location or 'ENV' to use environment
-                    variables. Accepts multiple inputs as a tuple.
-                file_input: Specify a path to an input file to read messages from.
-                    Defaults to standard in if unspecified.
-
-            Raises:
-                FileNotFoundError: If the config file does not exist.
-            """
-            if version:
-                cls.print_version()
-                return
-
-            if not about:
-                cls.print_version(print_fn=cls.logger.info)
-            else:
-                cls.print_about(format=format)
-                return
-
-            validate_config: bool = True
-
-            cls.print_version(print_fn=cls.logger.info)
-
-            parse_env_config = False
-            config_files: List[PurePath] = []
-            for config_path in config:
-                if config_path == "ENV":
-                    # Allow parse from env vars:
-                    parse_env_config = True
-                    continue
-
-                # Validate config file paths before adding to list
-                if not Path(config_path).is_file():
-                    raise FileNotFoundError(
-                        f"Could not locate config file at '{config_path}'."
-                        "Please check that the file exists."
-                    )
-
-                config_files.append(Path(config_path))
-
-            target = cls(  # type: ignore  # Ignore 'type not callable'
-                config=config_files or None,
-                parse_env_config=parse_env_config,
-                validate_config=validate_config,
-            )
-
-            target.listen(file_input)
-
-        return cli
+        return command
 
 
 class SQLTarget(Target):

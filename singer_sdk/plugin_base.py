@@ -5,7 +5,7 @@ import json
 import logging
 import os
 from collections import OrderedDict
-from pathlib import PurePath
+from pathlib import Path, PurePath
 from types import MappingProxyType
 from typing import (
     Any,
@@ -397,16 +397,131 @@ class PluginBase(metaclass=abc.ABCMeta):
             formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
             print(formatted)
 
+    @staticmethod
+    def config_from_cli_args(*args: str) -> Tuple[List[str], bool]:
+        """Parse CLI arguments into a config dictionary.
+
+        Args:
+            args: CLI arguments.
+
+        Raises:
+            FileNotFoundError: If the config file does not exist.
+
+        Returns:
+            A tuple containing the config dictionary and a boolean indicating whether
+            the config file was found.
+        """
+        config_files = []
+        parse_env_config = False
+
+        for config_path in args:
+            if config_path == "ENV":
+                # Allow parse from env vars:
+                parse_env_config = True
+                continue
+
+            # Validate config file paths before adding to list
+            if not Path(config_path).is_file():
+                raise FileNotFoundError(
+                    f"Could not locate config file at '{config_path}'."
+                    "Please check that the file exists."
+                )
+
+            config_files.append(Path(config_path))
+
+        return config_files, parse_env_config
+
+    @abc.abstractclassmethod
+    def invoke(cls: Type["PluginBase"], *args: Any, **kwargs: Any) -> None:
+        """Invoke the plugin.
+
+        Args:
+            args: Plugin arguments.
+            kwargs: Plugin keyword arguments.
+        """
+        ...
+
+    @classmethod
+    def cb_version(
+        cls: Type["PluginBase"],
+        ctx: click.Context,
+        param: click.Option,
+        value: bool,
+    ) -> None:
+        """CLI callback to print the plugin version and exit.
+
+        Args:
+            ctx: Click context.
+            param: Click parameter.
+            value: Boolean indicating whether to print the version.
+        """
+        if not value:
+            return
+        cls.print_version(print_fn=click.echo)
+        ctx.exit()
+
+    @classmethod
+    def cb_about(
+        cls: Type["PluginBase"],
+        ctx: click.Context,
+        param: click.Option,
+        value: str,
+    ) -> None:
+        """CLI callback to print the plugin information and exit.
+
+        Args:
+            ctx: Click context.
+            param: Click parameter.
+            value: String indicating the format of the information to print.
+        """
+        if not value:
+            return
+        cls.print_about(format=value)
+        ctx.exit()
+
     @classproperty
-    def cli(cls) -> Callable:
+    def cli(cls) -> click.Command:
         """Handle command line execution.
 
         Returns:
             A callable CLI object.
         """
-
-        @click.command()
-        def cli() -> None:
-            pass
-
-        return cli
+        return click.Command(
+            name=cls.name,
+            callback=cls.invoke,
+            context_settings={"help_option_names": ["--help"]},
+            params=[
+                click.Option(
+                    ["--version"],
+                    is_flag=True,
+                    help="Display the package version.",
+                    is_eager=True,
+                    expose_value=False,
+                    callback=cls.cb_version,
+                ),
+                click.Option(
+                    ["--about"],
+                    type=click.Choice(
+                        ["plain", "json", "markdown"],
+                        case_sensitive=False,
+                    ),
+                    help="Display package metadata and settings.",
+                    is_flag=False,
+                    is_eager=True,
+                    expose_value=False,
+                    callback=cls.cb_about,
+                    flag_value="plain",
+                ),
+                click.Option(
+                    ["--config"],
+                    multiple=True,
+                    help=(
+                        "Configuration file location or 'ENV' to use environment "
+                        + "variables."
+                    ),
+                    type=click.STRING,
+                    default=(),
+                    is_eager=True,
+                ),
+            ],
+        )
