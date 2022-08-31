@@ -1,0 +1,4 @@
+import os
+from typing import Union
+
+_FilePath = Union[str, os.PathLike]

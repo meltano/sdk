@@ -5,7 +5,7 @@ import json
 import logging
 import os
 from collections import OrderedDict
-from pathlib import Path, PurePath
+from pathlib import Path
 from types import MappingProxyType
 from typing import (
     Any,
@@ -14,6 +14,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Sequence,
     Tuple,
     Type,
     Union,
@@ -23,6 +24,7 @@ from typing import (
 import click
 from jsonschema import Draft4Validator, SchemaError, ValidationError
 
+from singer_sdk._python_types import _FilePath
 from singer_sdk.configuration._dict_config import parse_environment_config
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
@@ -79,7 +81,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        config: Optional[Union[dict, _FilePath, Sequence[_FilePath]]] = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
@@ -96,7 +98,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         if not config:
             config_dict = {}
-        elif isinstance(config, str) or isinstance(config, PurePath):
+        elif isinstance(config, (str, bytes, os.PathLike)):
             config_dict = read_json_file(config)
         elif isinstance(config, list):
             config_dict = {}
@@ -398,7 +400,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             print(formatted)
 
     @staticmethod
-    def config_from_cli_args(*args: str) -> Tuple[List[str], bool]:
+    def config_from_cli_args(*args: str) -> Tuple[List[Path], bool]:
         """Parse CLI arguments into a config dictionary.
 
         Args:
@@ -432,7 +434,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         return config_files, parse_env_config
 
     @abc.abstractclassmethod
-    def invoke(cls: Type["PluginBase"], *args: Any, **kwargs: Any) -> None:
+    def invoke(cls, *args: Any, **kwargs: Any) -> None:
         """Invoke the plugin.
 
         Args:
@@ -479,8 +481,8 @@ class PluginBase(metaclass=abc.ABCMeta):
         cls.print_about(format=value)
         ctx.exit()
 
-    @classproperty
-    def cli(cls) -> click.Command:
+    @classmethod
+    def get_command(cls: Type["PluginBase"]) -> click.Command:
         """Handle command line execution.
 
         Returns:
@@ -525,3 +527,13 @@ class PluginBase(metaclass=abc.ABCMeta):
                 ),
             ],
         )
+
+    @classmethod
+    def cli(cls: Type["PluginBase"]) -> Any:  # noqa: ANN401
+        """Execute standard CLI handler for taps.
+
+        Returns:
+            The return value of the CLI handler.
+        """
+        command = cls.get_command()
+        return command.main()

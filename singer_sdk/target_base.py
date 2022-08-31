@@ -5,13 +5,12 @@ import copy
 import json
 import sys
 import time
-from io import FileIO
-from pathlib import PurePath
-from typing import IO, Counter, Dict, List, Optional, Tuple, Type, Union
+from typing import IO, Counter, Dict, List, Optional, Sequence, Tuple, Type, Union
 
 import click
 from joblib import Parallel, delayed, parallel_backend
 
+from singer_sdk._python_types import _FilePath
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
@@ -42,7 +41,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        config: Optional[Union[dict, _FilePath, Sequence[_FilePath]]] = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
@@ -469,10 +468,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     # CLI handler
 
     @classmethod
-    def invoke(
+    def invoke(  # type: ignore[override]
         cls: Type["Target"],
         config: Tuple[str, ...] = (),
-        file_input: FileIO = None,
+        file_input: IO[str] = None,
     ) -> None:
         """Invoke the target.
 
@@ -491,14 +490,14 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         )
         target.listen(file_input)
 
-    @classproperty
-    def cli(cls) -> click.Command:
+    @classmethod
+    def get_command(cls: Type["Target"]) -> click.Command:
         """Execute standard CLI handler for taps.
 
         Returns:
             A click.Command object.
         """
-        command = super().cli
+        command = super().get_command()
         command.help = "Execute the Singer target."
         command.params.extend(
             [

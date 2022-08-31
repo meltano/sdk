@@ -4,10 +4,11 @@ import abc
 import json
 from enum import Enum
 from pathlib import PurePath
-from typing import Any, Dict, List, Optional, Tuple, Type, Union, cast
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Type, Union, cast
 
 import click
 
+from singer_sdk._python_types import _FilePath
 from singer_sdk.exceptions import MaxRecordsLimitException
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
@@ -46,7 +47,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        config: Optional[Union[dict, _FilePath, Sequence[_FilePath]]] = None,
         catalog: Union[PurePath, str, dict, Catalog, None] = None,
         state: Union[PurePath, str, dict, None] = None,
         parse_env_config: bool = False,
@@ -386,7 +387,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Command Line Execution
 
     @classmethod
-    def invoke(
+    def invoke(  # type: ignore[override]
         cls: Type["Tap"],
         config: Tuple[str, ...] = (),
         state: str = None,
@@ -404,7 +405,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         config_files, parse_env_config = cls.config_from_cli_args(*config)
 
         tap = cls(
-            config=config_files or None,
+            config=config_files,
             state=state,
             catalog=catalog,
             parse_env_config=parse_env_config,
@@ -471,14 +472,14 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
         ctx.exit()
 
-    @classproperty
-    def cli(cls) -> click.Command:
+    @classmethod
+    def get_command(cls: Type["Tap"]) -> click.Command:
         """Execute standard CLI handler for taps.
 
         Returns:
             A click.Command object.
         """
-        command = super().cli
+        command = super().get_command()
         command.help = "Execute the Singer tap."
         command.params.extend(
             [
@@ -526,7 +527,7 @@ class SQLTap(Tap):
 
     def __init__(
         self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        config: Optional[Union[dict, _FilePath, Sequence[_FilePath]]] = None,
         catalog: Union[PurePath, str, dict, None] = None,
         state: Union[PurePath, str, dict, None] = None,
         parse_env_config: bool = False,

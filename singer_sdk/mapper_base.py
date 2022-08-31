@@ -1,8 +1,7 @@
 """Abstract base class for stream mapper plugins."""
 
 import abc
-from io import FileIO
-from typing import Iterable, List, Tuple, Type
+from typing import IO, Iterable, List, Tuple, Type
 
 import click
 import singer
@@ -90,10 +89,10 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     # CLI handler
 
     @classmethod
-    def invoke(
+    def invoke(  # type: ignore[override]
         cls: Type["InlineMapper"],
         config: Tuple[str, ...] = (),
-        file_input: FileIO = None,
+        file_input: IO[str] = None,
     ) -> None:
         """Invoke the mapper.
 
@@ -112,14 +111,14 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         )
         mapper.listen(file_input)
 
-    @classproperty
-    def cli(cls) -> click.Command:
+    @classmethod
+    def get_command(cls: Type["InlineMapper"]) -> click.Command:
         """Execute standard CLI handler for inline mappers.
 
         Returns:
             A click.Command object.
         """
-        command = super().cli
+        command = super().get_command()
         command.help = "Execute the Singer mapper."
         command.params.extend(
             [

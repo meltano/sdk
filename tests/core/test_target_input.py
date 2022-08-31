@@ -39,7 +39,7 @@ def config_file_path(target):
 
 def test_input_arg(cli_runner, config_file_path, target):
     result = cli_runner.invoke(
-        target.cli,
+        target.get_command(),
         [
             "--config",
             config_file_path,
