@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass, fields
 from enum import Enum
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, Iterable, Tuple, Union, cast
 
 from singer.catalog import Catalog as BaseCatalog
 from singer.catalog import CatalogEntry as BaseCatalogEntry
-from singer.schema import Schema
+
+from singer_sdk.helpers._schema import SchemaPlus
 
 Breadcrumb = Tuple[str, ...]
 
@@ -39,12 +42,12 @@ class Metadata:
         AUTOMATIC = "automatic"
         UNSUPPORTED = "unsupported"
 
-    inclusion: Optional[InclusionType] = None
-    selected: Optional[bool] = None
-    selected_by_default: Optional[bool] = None
+    inclusion: InclusionType | None = None
+    selected: bool | None = None
+    selected_by_default: bool | None = None
 
     @classmethod
-    def from_dict(cls, value: Dict[str, Any]):
+    def from_dict(cls, value: dict[str, Any]):
         """Parse metadata dictionary."""
         return cls(
             **{
@@ -53,7 +56,7 @@ class Metadata:
             }
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert metadata to a JSON-encodeable dictionary."""
         result = {}
 
@@ -69,17 +72,17 @@ class Metadata:
 class StreamMetadata(Metadata):
     """Stream metadata."""
 
-    table_key_properties: Optional[List[str]] = None
-    forced_replication_method: Optional[str] = None
-    valid_replication_keys: Optional[List[str]] = None
-    schema_name: Optional[str] = None
+    table_key_properties: list[str] | None = None
+    forced_replication_method: str | None = None
+    valid_replication_keys: list[str] | None = None
+    schema_name: str | None = None
 
 
 class MetadataMapping(Dict[Breadcrumb, Union[Metadata, StreamMetadata]]):
     """Stream metadata mapping."""
 
     @classmethod
-    def from_iterable(cls, iterable: Iterable[Dict[str, Any]]):
+    def from_iterable(cls, iterable: Iterable[dict[str, Any]]):
         """Create a metadata mapping from an iterable of metadata dictionaries."""
         mapping = cls()
         for d in iterable:
@@ -92,7 +95,7 @@ class MetadataMapping(Dict[Breadcrumb, Union[Metadata, StreamMetadata]]):
 
         return mapping
 
-    def to_list(self) -> List[Dict[str, Any]]:
+    def to_list(self) -> list[dict[str, Any]]:
         """Convert mapping to a JSON-encodable list."""
         return [
             {"breadcrumb": list(k), "metadata": v.to_dict()} for k, v in self.items()
@@ -112,11 +115,11 @@ class MetadataMapping(Dict[Breadcrumb, Union[Metadata, StreamMetadata]]):
     @classmethod
     def get_standard_metadata(
         cls,
-        schema: Optional[Dict[str, Any]] = None,
-        schema_name: Optional[str] = None,
-        key_properties: Optional[List[str]] = None,
-        valid_replication_keys: Optional[List[str]] = None,
-        replication_method: Optional[str] = None,
+        schema: dict[str, Any] | None = None,
+        schema_name: str | None = None,
+        key_properties: list[str] | None = None,
+        valid_replication_keys: list[str] | None = None,
+        replication_method: str | None = None,
     ):
         """Get default metadata for a stream."""
         mapping = cls()
@@ -210,19 +213,19 @@ class CatalogEntry(BaseCatalogEntry):
 
     tap_stream_id: str
     metadata: MetadataMapping
-    schema: Schema
-    stream: Optional[str] = None
-    key_properties: Optional[List[str]] = None
-    replication_key: Optional[str] = None
-    is_view: Optional[bool] = None
-    database: Optional[str] = None
-    table: Optional[str] = None
-    row_count: Optional[int] = None
-    stream_alias: Optional[str] = None
-    replication_method: Optional[str] = None
+    schema: SchemaPlus
+    stream: str | None = None
+    key_properties: list[str] | None = None
+    replication_key: str | None = None
+    is_view: bool | None = None
+    database: str | None = None
+    table: str | None = None
+    row_count: int | None = None
+    stream_alias: str | None = None
+    replication_method: str | None = None
 
     @classmethod
-    def from_dict(cls, stream: Dict[str, Any]):
+    def from_dict(cls, stream: dict[str, Any]):
         """Create a catalog entry from a dictionary."""
         return cls(
             tap_stream_id=stream["tap_stream_id"],
@@ -231,7 +234,7 @@ class CatalogEntry(BaseCatalogEntry):
             key_properties=stream.get("key_properties"),
             database=stream.get("database_name"),
             table=stream.get("table_name"),
-            schema=Schema.from_dict(stream.get("schema", {})),
+            schema=SchemaPlus.from_dict(stream.get("schema", {})),
             is_view=stream.get("is_view"),
             stream_alias=stream.get("stream_alias"),
             metadata=MetadataMapping.from_iterable(stream.get("metadata", [])),
@@ -249,7 +252,7 @@ class Catalog(Dict[str, CatalogEntry], BaseCatalog):
     """Singer catalog mapping of stream entries."""
 
     @classmethod
-    def from_dict(cls, data: Dict[str, List[Dict[str, Any]]]) -> "Catalog":
+    def from_dict(cls, data: dict[str, list[dict[str, Any]]]) -> Catalog:
         """Create a catalog from a dictionary."""
         instance = cls()
         for stream in data.get("streams", []):
@@ -257,7 +260,7 @@ class Catalog(Dict[str, CatalogEntry], BaseCatalog):
             instance[entry.tap_stream_id] = entry
         return instance
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return a dictionary representation of the catalog.
 
         Returns:
@@ -266,7 +269,7 @@ class Catalog(Dict[str, CatalogEntry], BaseCatalog):
         return cast(Dict[str, Any], super().to_dict())
 
     @property
-    def streams(self) -> List[CatalogEntry]:
+    def streams(self) -> list[CatalogEntry]:
         """Get catalog entries."""
         return list(self.values())
 
@@ -274,6 +277,6 @@ class Catalog(Dict[str, CatalogEntry], BaseCatalog):
         """Add a stream entry to the catalog."""
         self[entry.tap_stream_id] = entry
 
-    def get_stream(self, stream_id: str) -> Optional[CatalogEntry]:
+    def get_stream(self, stream_id: str) -> CatalogEntry | None:
         """Retrieve a stream entry from the catalog."""
         return self.get(stream_id)

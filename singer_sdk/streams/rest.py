@@ -6,7 +6,7 @@ import abc
 import copy
 import logging
 from datetime import datetime
-from typing import Any, Callable, Generator, Generic, Iterable, TypeVar
+from typing import Any, Callable, Generator, Generic, Iterable, TypeVar, Union
 from urllib.parse import urlparse
 from warnings import warn
 
@@ -30,6 +30,8 @@ DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 _TToken = TypeVar("_TToken")
+_T = TypeVar("_T")
+_MaybeCallable = Union[_T, Callable[[], _T]]
 
 
 class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
@@ -129,7 +131,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             The `requests.Session`_ object for HTTP requests.
 
         .. _requests.Session:
-            https://docs.python-requests.org/en/latest/api/#request-sessions
+            https://requests.readthedocs.io/en/latest/api/#request-sessions
         """
         if not self._requests_session:
             self._requests_session = requests.Session()
@@ -164,7 +166,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             RetriableAPIError: If the request is retriable.
 
         .. _requests.Response:
-            https://docs.python-requests.org/en/latest/api/#requests.Response
+            https://requests.readthedocs.io/en/latest/api/#requests.Response
         """
         if (
             response.status_code in self.extra_retry_statuses
@@ -218,6 +220,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             (
                 RetriableAPIError,
                 requests.exceptions.ReadTimeout,
+                requests.exceptions.ConnectionError,
             ),
             max_tries=self.backoff_max_tries,
             on_backoff=self.backoff_handler,
@@ -268,10 +271,39 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return {}
 
+    def build_prepared_request(
+        self,
+        *args: Any,
+        **kwargs: Any,
+    ) -> requests.PreparedRequest:
+        """Build a generic but authenticated request.
+
+        Uses the authenticator instance to mutate the request with authentication.
+
+        Args:
+            *args: Arguments to pass to `requests.Request`_.
+            **kwargs: Keyword arguments to pass to `requests.Request`_.
+
+        Returns:
+            A `requests.PreparedRequest`_ object.
+
+        .. _requests.PreparedRequest:
+            https://requests.readthedocs.io/en/latest/api/#requests.PreparedRequest
+        .. _requests.Request:
+            https://requests.readthedocs.io/en/latest/api/#requests.Request
+        """
+        request = requests.Request(*args, **kwargs)
+
+        if self.authenticator:
+            authenticator = self.authenticator
+            authenticator.authenticate_request(request)
+
+        return self.requests_session.prepare_request(request)
+
     def prepare_request(
         self, context: dict | None, next_page_token: _TToken | None
     ) -> requests.PreparedRequest:
-        """Prepare a request object.
+        """Prepare a request object for this stream.
 
         If partitioning is supported, the `context` object will contain the partition
         definitions. Pagination information can be parsed from `next_page_token` if
@@ -292,21 +324,13 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         request_data = self.prepare_request_payload(context, next_page_token)
         headers = self.http_headers
 
-        authenticator = self.authenticator
-        if authenticator:
-            headers.update(authenticator.auth_headers or {})
-            params.update(authenticator.auth_params or {})
-
-        request = self.requests_session.prepare_request(
-            requests.Request(
-                method=http_method,
-                url=url,
-                params=params,
-                headers=headers,
-                json=request_data,
-            ),
+        return self.build_prepared_request(
+            method=http_method,
+            url=url,
+            params=params,
+            headers=headers,
+            json=request_data,
         )
-        return request
 
     def request_records(self, context: dict | None) -> Iterable[dict]:
         """Request records from REST endpoint(s), returning response records.
@@ -486,7 +510,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             One item for every item found in the response.
 
         .. _requests.Response:
-            https://docs.python-requests.org/en/latest/api/#requests.Response
+            https://requests.readthedocs.io/en/latest/api/#requests.Response
         """
         yield from extract_jsonpath(self.records_jsonpath, input=response.json())
 
@@ -518,13 +542,15 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return backoff.expo(factor=2)  # type: ignore # ignore 'Returning Any'
 
-    def backoff_max_tries(self) -> int:
+    def backoff_max_tries(self) -> _MaybeCallable[int] | None:
         """The number of attempts before giving up when retrying requests.
 
-        Setting to None will retry indefinitely.
+        Can be an integer, a zero-argument callable that returns an integer,
+        or ``None`` to retry indefinitely.
 
         Returns:
-            int: limit
+            int | Callable[[], int] | None: Number of max retries, callable or
+            ``None``.
         """
         return 5
 
