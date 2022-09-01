@@ -76,7 +76,7 @@ Exception Types
     exceptions.InvalidStreamSortException
     exceptions.MapExpressionError
     exceptions.MaxRecordsLimitException
-    exceptions.RecordsWitoutSchemaException
+    exceptions.RecordsWithoutSchemaException
     exceptions.RetriableAPIError
     exceptions.StreamMapConfigError
     exceptions.TapStreamConnectionFailure
