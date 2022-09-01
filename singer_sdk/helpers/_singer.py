@@ -337,6 +337,7 @@ class BaseBatchFileEncoding:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> BaseBatchFileEncoding:
         """Create an encoding from a dictionary."""
+        data = data.copy()
         encoding_format = data.pop("format")
         encoding_cls = cls.registered_encodings[encoding_format]
         return encoding_cls(**data)
@@ -390,4 +391,73 @@ class SDKBatchMessage(Message):
             The created message.
         """
         data.pop("type")
+        return cls(**data)
+
+
+@dataclass
+class StorageTarget:
+    """Storage target."""
+
+    root: str
+    """"The root directory of the storage target."""
+
+    prefix: str
+    """"The file prefix."""
+
+    def asdict(self):
+        """Return a dictionary representation of the message.
+
+        Returns:
+            A dictionary with the defined message fields.
+        """
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> StorageTarget:
+        """Create an encoding from a dictionary.
+
+        Args:
+            data: The dictionary to create the message from.
+
+        Returns:
+            The created message.
+        """
+        return cls(**data)
+
+
+@dataclass
+class BatchConfig:
+    """Batch configuration."""
+
+    encoding: BaseBatchFileEncoding
+    """The encoding of the batch file."""
+
+    storage: StorageTarget
+    """The storage target of the batch file."""
+
+    def __post_init__(self):
+        if isinstance(self.encoding, dict):
+            self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
+
+        if isinstance(self.storage, dict):
+            self.storage = StorageTarget.from_dict(self.storage)
+
+    def asdict(self):
+        """Return a dictionary representation of the message.
+
+        Returns:
+            A dictionary with the defined message fields.
+        """
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> BatchConfig:
+        """Create an encoding from a dictionary.
+
+        Args:
+            data: The dictionary to create the message from.
+
+        Returns:
+            The created message.
+        """
         return cls(**data)

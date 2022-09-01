@@ -40,9 +40,9 @@ from singer_sdk.helpers._flattening import get_flattening_options
 from singer_sdk.helpers._schema import SchemaPlus
 from singer_sdk.helpers._singer import (
     BaseBatchFileEncoding,
+    BatchConfig,
     Catalog,
     CatalogEntry,
-    JSONLinesEncoding,
     MetadataMapping,
     SDKBatchMessage,
     SelectionMask,
@@ -1280,19 +1280,16 @@ class Stream(metaclass=abc.ABCMeta):
         """
         pass
 
-    def get_batch_encoding(self, config: dict) -> BaseBatchFileEncoding:
-        """Return the batch file encoding for this stream.
-
-        Encoding can be determined from the tap config or hardcoded to a specific
-        encoding supported by the tap.
+    def get_batch_config(self, config: Mapping) -> BatchConfig:
+        """Return the batch config for this stream.
 
         Args:
             config: Tap configuration dictionary.
 
         Returns:
-            Batch file encoding for this stream.
+            Batch config for this stream.
         """
-        return JSONLinesEncoding(compression="gzip")
+        return BatchConfig.from_dict(config["batch_config"])
 
     def get_batches(
         self,
@@ -1309,8 +1306,11 @@ class Stream(metaclass=abc.ABCMeta):
         Yields:
             A tuple of (encoding, manifest) for each batch.
         """
-        encoding = self.get_batch_encoding(self.config)
-        prefix = f"{self.tap_name}--{self.name}-{uuid4()}"
+        batch_config = self.get_batch_config(self.config)
+        sync_id = f"{self.tap_name}--{self.name}-{uuid4()}"
+
+        prefix = batch_config.storage.prefix
+        root = batch_config.storage.root
 
         for i, chunk in enumerate(
             lazy_chunked_generator(
@@ -1319,13 +1319,13 @@ class Stream(metaclass=abc.ABCMeta):
             ),
             start=1,
         ):
-            filename = f".output/{prefix}-{i}.json.gz"
+            filename = f"{root}/{prefix}{sync_id}-{i}.json.gz"
 
             # TODO: Determine compression from config.
             with gzip.open(filename, "wb") as f:
                 f.writelines((json.dumps(record) + "\n").encode() for record in chunk)
 
-            yield encoding, [filename]
+            yield batch_config.encoding, [filename]
 
     def post_process(self, row: dict, context: Optional[dict] = None) -> Optional[dict]:
         """As needed, append or transform raw data to match expected structure.

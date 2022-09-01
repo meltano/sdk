@@ -91,8 +91,20 @@ def test_with_catalog_entry():
 
 def test_batch_mode(monkeypatch, outdir):
     """Test batch mode."""
-    tap = SampleTapCountries(config=None)
-    tap.batch_size = 100
+    tap = SampleTapCountries(
+        config={
+            "batch_config": {
+                "encoding": {
+                    "format": "jsonl",
+                    "compression": "gzip",
+                },
+                "storage": {
+                    "root": outdir,
+                    "prefix": "pytest-countries-",
+                },
+            }
+        }
+    )
 
     # TODO: This is a hack to get the tap to run in batch mode.
     monkeypatch.setenv("SINGER_BATCH_MODE", "true")
@@ -119,6 +131,6 @@ def test_batch_mode(monkeypatch, outdir):
     assert counter["BATCH", "continents"] == 1
 
     assert counter["SCHEMA", "countries"] == 1
-    assert counter["BATCH", "countries"] == 3
+    assert counter["BATCH", "countries"] == 1
 
-    assert counter[("STATE",)] == 4
+    assert counter[("STATE",)] == 2
