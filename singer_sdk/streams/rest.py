@@ -8,6 +8,7 @@ import logging
 from datetime import datetime
 from typing import Any, Callable, Generator, Generic, Iterable, TypeVar, Union
 from urllib.parse import urlparse
+from warnings import warn
 
 import backoff
 import requests
@@ -16,6 +17,12 @@ from singer.schema import Schema
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.pagination import (
+    BaseAPIPaginator,
+    JSONPathPaginator,
+    LegacyStreamPaginator,
+    SimpleHeaderPaginator,
+)
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 
@@ -335,33 +342,20 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
 
         Yields:
             An item for every record in the response.
-
-        Raises:
-            RuntimeError: If a loop in pagination is detected. That is, when two
-                consecutive pagination tokens are identical.
         """
-        next_page_token: _TToken | None = None
-        finished = False
+        paginator = self.get_new_paginator()
         decorated_request = self.request_decorator(self._request)
 
-        while not finished:
+        while not paginator.finished:
             prepared_request = self.prepare_request(
-                context, next_page_token=next_page_token
+                context,
+                next_page_token=paginator.current_value,
             )
             resp = decorated_request(prepared_request, context)
             self.update_sync_costs(prepared_request, resp, context)
             yield from self.parse_response(resp)
-            previous_token = copy.deepcopy(next_page_token)
-            next_page_token = self.get_next_page_token(
-                response=resp, previous_token=previous_token
-            )
-            if next_page_token and next_page_token == previous_token:
-                raise RuntimeError(
-                    f"Loop detected in pagination. "
-                    f"Pagination token {next_page_token} is identical to prior token."
-                )
-            # Cycle until get_next_page_token() no longer returns a value
-            finished = not next_page_token
+
+            paginator.advance(resp)
 
     def update_sync_costs(
         self,
@@ -441,33 +435,24 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return None
 
-    def get_next_page_token(
-        self,
-        response: requests.Response,
-        previous_token: _TToken | None,
-    ) -> _TToken | None:
-        """Return token identifying next page or None if all records have been read.
-
-        Args:
-            response: A raw `requests.Response`_ object.
-            previous_token: Previous pagination reference.
+    def get_new_paginator(self) -> BaseAPIPaginator:
+        """Get a fresh paginator for this API endpoint.
 
         Returns:
-            Reference value to retrieve next page.
-
-        .. _requests.Response:
-            https://requests.readthedocs.io/en/latest/api/#requests.Response
+            A paginator instance.
         """
-        if self.next_page_token_jsonpath:
-            all_matches = extract_jsonpath(
-                self.next_page_token_jsonpath, response.json()
+        if hasattr(self, "get_next_page_token"):
+            warn(
+                "`RESTStream.get_next_page_token` is deprecated and will not be used "
+                + "in a future version of the Meltano SDK. "
+                + "Override `RESTStream.get_new_paginator` instead.",
+                DeprecationWarning,
             )
-            first_match = next(iter(all_matches), None)
-            next_page_token = first_match
+            return LegacyStreamPaginator(self)  # type: ignore
+        elif self.next_page_token_jsonpath:
+            return JSONPathPaginator(self.next_page_token_jsonpath)
         else:
-            next_page_token = response.headers.get("X-Next-Page", None)
-
-        return next_page_token
+            return SimpleHeaderPaginator("X-Next-Page")
 
     @property
     def http_headers(self) -> dict:
