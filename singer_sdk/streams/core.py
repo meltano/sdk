@@ -1280,6 +1280,20 @@ class Stream(metaclass=abc.ABCMeta):
         """
         pass
 
+    def get_batch_encoding(self, config: dict) -> BaseBatchFileEncoding:
+        """Return the batch file encoding for this stream.
+
+        Encoding can be determined from the tap config or hardcoded to a specific
+        encoding supported by the tap.
+
+        Args:
+            config: Tap configuration dictionary.
+
+        Returns:
+            Batch file encoding for this stream.
+        """
+        return JSONLinesEncoding(compression="gzip")
+
     def get_batches(
         self,
         context: Optional[dict] = None,
@@ -1295,17 +1309,23 @@ class Stream(metaclass=abc.ABCMeta):
         Yields:
             A tuple of (encoding, manifest) for each batch.
         """
-        for chunk in lazy_chunked_generator(
-            self._sync_records(context, write_messages=False),
-            self.batch_size,
+        encoding = self.get_batch_encoding(self.config)
+        prefix = f"{self.tap_name}--{self.name}-{uuid4()}"
+
+        for i, chunk in enumerate(
+            lazy_chunked_generator(
+                self._sync_records(context, write_messages=False),
+                self.batch_size,
+            ),
+            start=1,
         ):
-            filename = f"output/{self.name}-{uuid4()}.json.gz"
+            filename = f".output/{prefix}-{i}.json.gz"
 
             # TODO: Determine compression from config.
             with gzip.open(filename, "wb") as f:
                 f.writelines((json.dumps(record) + "\n").encode() for record in chunk)
 
-            yield JSONLinesEncoding(compression="gzip"), [filename]
+            yield encoding, [filename]
 
     def post_process(self, row: dict, context: Optional[dict] = None) -> Optional[dict]:
         """As needed, append or transform raw data to match expected structure.
