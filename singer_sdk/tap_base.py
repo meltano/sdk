@@ -43,6 +43,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     plugins.
     """
 
+    dynamic_catalog: bool = False
+    """Whether the tap's catalog is dynamic. Set to True if the catalog is
+    generated dynamically (e.g. by querying a database's system tables)."""
+
     # Constructor
 
     def __init__(
@@ -435,7 +439,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         tap = cls(
             config=config_files,
             parse_env_config=parse_env_config,
-            validate_config=False,
+            validate_config=cls.dynamic_catalog,
         )
         tap.run_discovery()
         ctx.exit()
@@ -524,6 +528,7 @@ class SQLTap(Tap):
 
     # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: Type[SQLStream]
+    dynamic_catalog: bool = True
 
     def __init__(
         self,
