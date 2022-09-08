@@ -9,7 +9,6 @@ import gzip
 import itertools
 import json
 import logging
-import os
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
@@ -1128,13 +1127,18 @@ class Stream(metaclass=abc.ABCMeta):
             # Reset interim bookmarks before emitting final STATE message:
             self._write_state_message()
 
-    def _sync_batches(self, context: Optional[dict] = None) -> None:
+    def _sync_batches(
+        self,
+        batch_config: BatchConfig,
+        context: dict | None = None,
+    ) -> None:
         """Sync batches, emitting BATCH messages.
 
         Args:
+            batch_config: The batch configuration.
             context: Stream partition or context dictionary.
         """
-        for encoding, manifest in self.get_batches(context):
+        for encoding, manifest in self.get_batches(batch_config, context):
             self._write_batch_message(encoding=encoding, manifest=manifest)
             self._write_state_message()
 
@@ -1163,11 +1167,9 @@ class Stream(metaclass=abc.ABCMeta):
         if self.selected:
             self._write_schema_message()
 
-        # TODO: This is a temporary hack to toggle BATCH mode during development.
-        batch_mode = os.getenv("SINGER_BATCH_MODE", "false") == "true"
-
-        if batch_mode:
-            self._sync_batches(context=context)
+        batch_config = self.get_batch_config(self.config)
+        if batch_config:
+            self._sync_batches(batch_config, context=context)
         else:
             # Sync the records themselves:
             for _ in self._sync_records(context=context):
@@ -1280,7 +1282,7 @@ class Stream(metaclass=abc.ABCMeta):
         """
         pass
 
-    def get_batch_config(self, config: Mapping) -> BatchConfig:
+    def get_batch_config(self, config: Mapping) -> BatchConfig | None:
         """Return the batch config for this stream.
 
         Args:
@@ -1289,28 +1291,28 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             Batch config for this stream.
         """
-        return BatchConfig.from_dict(config["batch_config"])
+        raw = config.get("batch_config")
+        return BatchConfig.from_dict(raw) if raw else None
 
     def get_batches(
         self,
-        context: Optional[dict] = None,
-    ) -> Iterable[Tuple[BaseBatchFileEncoding, List[str]]]:
+        batch_config: BatchConfig,
+        context: dict | None = None,
+    ) -> Iterable[tuple[BaseBatchFileEncoding, list[str]]]:
         """Batch generator function.
 
         Developers are encouraged to override this method to customize batching
         behavior for databases, bulk APIs, etc.
 
         Args:
+            batch_config: Batch config for this stream.
             context: Stream partition or context dictionary.
 
         Yields:
             A tuple of (encoding, manifest) for each batch.
         """
-        batch_config = self.get_batch_config(self.config)
         sync_id = f"{self.tap_name}--{self.name}-{uuid4()}"
-
         prefix = batch_config.storage.prefix
-        root = batch_config.storage.root
 
         for i, chunk in enumerate(
             lazy_chunked_generator(
@@ -1319,11 +1321,13 @@ class Stream(metaclass=abc.ABCMeta):
             ),
             start=1,
         ):
-            filename = f"{root}/{prefix}{sync_id}-{i}.json.gz"
-
-            # TODO: Determine compression from config.
-            with gzip.open(filename, "wb") as f:
-                f.writelines((json.dumps(record) + "\n").encode() for record in chunk)
+            filename = f"{prefix}{sync_id}-{i}.json.gz"
+            with batch_config.storage.open(filename, "wb") as f:
+                # TODO: Determine compression from config.
+                with gzip.GzipFile(fileobj=f, mode="wb") as gz:
+                    gz.writelines(
+                        (json.dumps(record) + "\n").encode() for record in chunk
+                    )
 
             yield batch_config.encoding, [filename]
 

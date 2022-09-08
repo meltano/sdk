@@ -3,9 +3,22 @@ from __future__ import annotations
 import enum
 import logging
 import sys
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field, fields
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Iterable, Tuple, Union, cast
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    Generator,
+    Iterable,
+    Tuple,
+    Union,
+    cast,
+)
 
+import fs
 from singer.catalog import Catalog as BaseCatalog
 from singer.catalog import CatalogEntry as BaseCatalogEntry
 from singer.messages import Message
@@ -423,6 +436,25 @@ class StorageTarget:
             The created message.
         """
         return cls(**data)
+
+    @contextmanager
+    def open(self, filename: str, mode: str = "rb") -> Generator[IO, None, None]:
+        """Open a file in the storage target.
+
+        Args:
+            filename: The filename to open.
+            mode: The mode to open the file in.
+
+        Returns:
+            The opened file.
+        """
+        filesystem = fs.open_fs(self.root, writeable=True, create=True)
+        fo = filesystem.open(filename, mode=mode)
+        try:
+            yield fo
+        finally:
+            fo.close()
+            filesystem.close()
 
 
 @dataclass

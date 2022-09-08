@@ -106,9 +106,6 @@ def test_batch_mode(monkeypatch, outdir):
         }
     )
 
-    # TODO: This is a hack to get the tap to run in batch mode.
-    monkeypatch.setenv("SINGER_BATCH_MODE", "true")
-
     buf = io.StringIO()
     with redirect_stdout(buf):
         tap.sync_all()

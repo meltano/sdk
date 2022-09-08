@@ -408,9 +408,21 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         Args:
             message_dict: TODO
+
+        Raises:
+            RuntimeError: If the batch message can not be processed.
         """
+        sink = self.get_sink(message_dict["stream"])
+        if sink.batch_config is None:
+            raise RuntimeError(
+                f"Received BATCH message for stream '{sink.stream_name}' "
+                "but no batch config was provided."
+            )
+
         encoding = BaseBatchFileEncoding.from_dict(message_dict["encoding"])
-        self.logger.info("Processing record batch encoded as %s", encoding)
+
+        for file in message_dict["manifest"]:
+            sink.process_batch_file(encoding, sink.batch_config.storage, file)
 
     # Sink drain methods
 

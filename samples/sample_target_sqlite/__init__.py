@@ -1,8 +1,11 @@
 """A sample implementation for SQLite."""
 
-from typing import Any, Dict
+from __future__ import annotations
+
+from typing import Any
 
 import sqlalchemy
+from sqlalchemy.dialects.sqlite import insert
 
 from singer_sdk import SQLConnector, SQLSink, SQLTarget
 from singer_sdk import typing as th
@@ -20,7 +23,7 @@ class SQLiteConnector(SQLConnector):
     allow_column_alter = False
     allow_merge_upsert = True
 
-    def get_sqlalchemy_url(self, config: Dict[str, Any]) -> str:
+    def get_sqlalchemy_url(self, config: dict[str, Any]) -> str:
         """Generates a SQLAlchemy URL for SQLite."""
         return f"sqlite:///{config[DB_PATH_CONFIG]}"
 
@@ -52,6 +55,29 @@ class SQLiteSink(SQLSink):
     """
 
     connector_class = SQLiteConnector
+
+    def generate_insert_statement(self, full_table_name: str, schema: dict) -> str:
+        """Generate an insert statement for the given table and schema.
+
+        Args:
+            full_table_name: The full table name to insert into.
+            schema: The schema of the table.
+        """
+        engine = self.connector.create_sqlalchemy_engine()
+        meta = sqlalchemy.MetaData(bind=engine)
+        table = sqlalchemy.Table(full_table_name, meta, autoload=True)
+        statement = insert(table)
+
+        if self.key_properties:
+            statement = statement.on_conflict_do_update(
+                index_elements=table.primary_key.columns,
+                set_={
+                    column.name: getattr(statement.excluded, column.name)
+                    for column in table.columns
+                },
+            )
+
+        return statement
 
 
 class SQLiteTarget(SQLTarget):

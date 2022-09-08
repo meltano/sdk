@@ -213,11 +213,11 @@ class SQLSink(BatchSink):
             full_table_name,
             schema,
         )
+        if isinstance(insert_sql, str):
+            insert_sql = sqlalchemy.text(insert_sql)
+
         self.logger.info("Inserting with SQL: %s", insert_sql)
-        self.connector.connection.execute(
-            sqlalchemy.text(insert_sql),
-            records,
-        )
+        self.connector.connection.execute(insert_sql, records)
         if isinstance(records, list):
             return len(records)  # If list, we can quickly return record count.
 
