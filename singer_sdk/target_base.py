@@ -420,9 +420,11 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             )
 
         encoding = BaseBatchFileEncoding.from_dict(message_dict["encoding"])
-
-        for file in message_dict["manifest"]:
-            sink.process_batch_file(encoding, sink.batch_config.storage, file)
+        sink.process_batch_files(
+            encoding,
+            sink.batch_config.storage,
+            message_dict["manifest"],
+        )
 
     # Sink drain methods
 

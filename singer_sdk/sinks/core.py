@@ -10,7 +10,7 @@ from gzip import GzipFile
 from gzip import open as gzip_open
 from logging import Logger
 from types import MappingProxyType
-from typing import IO, Any, Mapping
+from typing import IO, Any, Mapping, Sequence
 
 from dateutil import parser
 from jsonschema import Draft4Validator, FormatChecker
@@ -432,30 +432,31 @@ class Sink(metaclass=abc.ABCMeta):
         """
         pass
 
-    def process_batch_file(
+    def process_batch_files(
         self,
         encoding: BaseBatchFileEncoding,
         storage: StorageTarget,
-        path: str,
+        files: Sequence[str],
     ) -> None:
         """Process a batch file with the given batch context.
 
         Args:
             encoding: The batch file encoding.
             storage: The storage target.
-            path: The path to the batch file.
+            files: The batch files to process.
 
         Raises:
             NotImplementedError: If the batch file encoding is not supported.
         """
         file: GzipFile | IO
-        if encoding.format == BatchFileFormat.JSONL:
-            with storage.open(path) as file:
-                if encoding.compression == "gzip":
-                    file = gzip_open(file)
-                context = {"records": [json.loads(line) for line in file]}
-                self.process_batch(context)
-        else:
-            raise NotImplementedError(
-                f"Unsupported batch encoding format: {encoding.format}"
-            )
+        for path in files:
+            if encoding.format == BatchFileFormat.JSONL:
+                with storage.open(path) as file:
+                    if encoding.compression == "gzip":
+                        file = gzip_open(file)
+                    context = {"records": [json.loads(line) for line in file]}
+                    self.process_batch(context)
+            else:
+                raise NotImplementedError(
+                    f"Unsupported batch encoding format: {encoding.format}"
+                )
