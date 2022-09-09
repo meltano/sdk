@@ -56,29 +56,6 @@ class SQLiteSink(SQLSink):
 
     connector_class = SQLiteConnector
 
-    def generate_insert_statement(self, full_table_name: str, schema: dict) -> str:
-        """Generate an insert statement for the given table and schema.
-
-        Args:
-            full_table_name: The full table name to insert into.
-            schema: The schema of the table.
-        """
-        engine = self.connector.create_sqlalchemy_engine()
-        meta = sqlalchemy.MetaData(bind=engine)
-        table = sqlalchemy.Table(full_table_name, meta, autoload=True)
-        statement = insert(table)
-
-        if self.key_properties:
-            statement = statement.on_conflict_do_update(
-                index_elements=table.primary_key.columns,
-                set_={
-                    column.name: getattr(statement.excluded, column.name)
-                    for column in table.columns
-                },
-            )
-
-        return statement
-
 
 class SQLiteTarget(SQLTarget):
     """The Tap class for SQLite."""
