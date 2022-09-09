@@ -5,3 +5,4 @@
 
 .. autoclass:: BasePageNumberPaginator
     :members:
+    :special-members: __init__
