@@ -96,12 +96,15 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self,
         message_dict: dict,
     ) -> Iterable[singer.Message]:
-        """Map a version message to zero or more new messages.
+        """Map a batch message to zero or more new messages.
 
         Args:
             message_dict: A BATCH message JSON dictionary.
+
+        Raises:
+            NotImplementedError: if not implemented by subclass.
         """
-        pass
+        raise NotImplementedError("BATCH messages are not supported by mappers.")
 
     @classproperty
     def cli(cls) -> Callable:
