@@ -12,12 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### ✨ New
 
 - [#829](https://github.com/meltano/sdk/issues/829) Add checks for primary keys, replication keys and state partitioning keys to standard tap tests -- _**Thanks @laurentS!**_
-- [#732](https://github.com/meltano/sdk/issues/732) Implement reference paginators -- _**Thanks @edgarrmondragon!**_
+- [#732](https://github.com/meltano/sdk/issues/732) Implement reference paginators.
 
 ### 🐛 Fixes
 
 - [#898](https://github.com/meltano/sdk/issues/898) Fix SQL type merging for pre-existing target tables -- _**Thanks @BuzzCutNorman!**_
-- [#856](https://github.com/meltano/sdk/issues/856) Fix typo RecordsWitoutSchemaException -> RecordsWithoutSchemaException -- _**Thanks @edgarrmondragon!**_
+- [#856](https://github.com/meltano/sdk/issues/856) Fix typo RecordsWitoutSchemaException -> RecordsWithoutSchemaException.
 
 ### ⚙️ Under the Hood
 
@@ -25,9 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📚 Documentation Improvements
 
-- [#950](https://github.com/meltano/sdk/issues/950) Document missing initializers for authentication and pagination helpers -- _**Thanks @edgarrmondragon!**_
-- [#947](https://github.com/meltano/sdk/issues/947) Remove stale autodoc page for RecordsWitoutSchemaException -- _**Thanks @edgarrmondragon!**_
-- [#942](https://github.com/meltano/sdk/issues/942) Add docs preview links to PR description -- _**Thanks @edgarrmondragon!**_
+- [#950](https://github.com/meltano/sdk/issues/950) Document missing initializers for authentication and pagination helpers.
+- [#947](https://github.com/meltano/sdk/issues/947) Remove stale autodoc page for RecordsWitoutSchemaException.
+- [#942](https://github.com/meltano/sdk/issues/942) Add docs preview links to PR description.
 
 ## v0.9.0 (2022-08-24)
 
