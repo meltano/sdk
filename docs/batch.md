@@ -1,7 +1,8 @@
-# PREVIEW - Batch Messages (A.K.A. Fast Sync)
+# Batch Messages
 
 ```{warning}
 The `BATCH` message functionality is currently in preview and is subject to change.
+You can [open an issue](https://github.com/meltano/sdk/issues) or [join the discussion](https://github.com/meltano/sdk/discussions/963) on GitHub to provide feedback during the preview period.
 ```
 
 [The Singer message specification](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#output) defines the three basic types of messages: `RECORD`, `STATE`, and `SCHEMA`. The `RECORD` message is used to send data from the tap to the target. The `STATE` message is used to send state data from the tap to the target. The `SCHEMA` message is used to send schema data from the tap to the target, and for example, create tables with the correct column types.
