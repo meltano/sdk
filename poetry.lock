@@ -833,11 +833,11 @@ six = ">=1.5"
 
 [[package]]
 name = "python-dotenv"
-version = "0.20.0"
+version = "0.21.0"
 description = "Read key-value pairs from a .env file and set them as environment variables"
 category = "main"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.7"
 
 [package.extras]
 cli = ["click (>=5.0)"]
@@ -1286,7 +1286,7 @@ docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser", "sphin
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.11,>=3.7.1"
-content-hash = "fb42244598969067fa3012a7a48605fe8c7cc29099055ea0edd3ba39f2f3e00d"
+content-hash = "504989e9cada558fa87ec004a26ad2b985a371230f4f35dedbd1165d6142a0cb"
 
 [metadata.files]
 alabaster = [
@@ -1927,8 +1927,8 @@ python-dateutil = [
     {file = "python_dateutil-2.8.2-py2.py3-none-any.whl", hash = "sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9"},
 ]
 python-dotenv = [
-    {file = "python-dotenv-0.20.0.tar.gz", hash = "sha256:b7e3b04a59693c42c36f9ab1cc2acc46fa5df8c78e178fc33a8d4cd05c8d498f"},
-    {file = "python_dotenv-0.20.0-py3-none-any.whl", hash = "sha256:d92a187be61fe482e4fd675b6d52200e7be63a12b724abbf931a40ce4fa92938"},
+    {file = "python-dotenv-0.21.0.tar.gz", hash = "sha256:b77d08274639e3d34145dfa6c7008e66df0f04b7be7a75fd0d5292c191d79045"},
+    {file = "python_dotenv-0.21.0-py3-none-any.whl", hash = "sha256:1684eb44636dd462b66c3ee016599815514527ad99965de77f43e0944634a7e5"},
 ]
 python-slugify = [
     {file = "python-slugify-6.1.2.tar.gz", hash = "sha256:272d106cb31ab99b3496ba085e3fea0e9e76dcde967b5e9992500d1f785ce4e1"},
