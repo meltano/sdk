@@ -73,7 +73,7 @@ docs = [
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
 commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
 pytest = "^7.1.3"
-xdoctest = "^1.0.2"
+xdoctest = "^1.1.0"
 mypy = "^0.971"
 cookiecutter = "^2.1.1"
 PyYAML = "^6.0"
