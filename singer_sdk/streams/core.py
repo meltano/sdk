@@ -12,19 +12,7 @@ import logging
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
-from typing import (
-    Any,
-    Callable,
-    Generator,
-    Iterable,
-    Iterator,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    TypeVar,
-    cast,
-)
+from typing import Any, Callable, Generator, Iterable, Iterator, Mapping, TypeVar, cast
 from uuid import uuid4
 
 import pendulum
@@ -834,7 +822,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _write_batch_message(
         self,
         encoding: BaseBatchFileEncoding,
-        manifest: List[str],
+        manifest: list[str],
     ) -> None:
         """Write out a BATCH message.
 
@@ -1018,8 +1006,8 @@ class Stream(metaclass=abc.ABCMeta):
     def _process_record(
         self,
         record: dict,
-        child_context: Optional[dict] = None,
-        partition_context: Optional[dict] = None,
+        child_context: dict | None = None,
+        partition_context: dict | None = None,
     ) -> None:
         """Process a record.
 
@@ -1043,7 +1031,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _sync_records(
         self,
-        context: Optional[dict] = None,
+        context: dict | None = None,
         write_messages: bool = True,
     ) -> Generator[dict, Any, Any]:
         """Sync records, emitting RECORD and STATE messages.
@@ -1331,7 +1319,7 @@ class Stream(metaclass=abc.ABCMeta):
 
             yield batch_config.encoding, [filename]
 
-    def post_process(self, row: dict, context: Optional[dict] = None) -> Optional[dict]:
+    def post_process(self, row: dict, context: dict | None = None) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
 
         Optional. This method gives developers an opportunity to "clean up" the results
