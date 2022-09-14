@@ -27,8 +27,8 @@ Currently only a local filesystem is supported, but other filesystems like AWS S
     "compression": "gzip"
   },
   "manifest": [
-    "path/to/batch/file/1",
-    "path/to/batch/file/2"
+    "file://path/to/batch/file/1",
+    "file://path/to/batch/file/2"
   ]
 }
 ```
@@ -43,7 +43,10 @@ The `manifest` field is used to specify the paths to the batch files. The paths 
 
 ## Batch configuration
 
-The batch configuration is used to specify the root directory for the batch files, and the maximum number of records per batch file.
+When local storage is used, targets do no require special configuration to process `BATCH` messages.
+
+Taps may be configured to specify a root storage `root` directory, file path `prefix`, and `encoding` for batch files using a configuration like the below:
+
 
 In `config.json`:
 
@@ -67,7 +70,7 @@ In `config.json`:
 
 ### Tap side
 
-The tap can customize the batch file creation by implementing the [`get_batches`](singer_sdk.Stream.get_batches). This method should return a _tuple_ of an encoding and a list of batch files:
+Taps can optionally customize the batch file creation by implementing the [`get_batches`](singer_sdk.Stream.get_batches). This method should return a _tuple_ of an encoding and a list of batch files:
 
 ```python
 class MyStream(Stream):
@@ -83,7 +86,7 @@ class MyStream(Stream):
 
 ### Target side
 
-The target can customize the batch file processing by implementing the [`process_batch_files`](singer_sdk.Sink.process_batch_files).
+Targets can optionally customize the batch file processing by implementing the [`process_batch_files`](singer_sdk.Sink.process_batch_files).
 
 ```python
 class MySink(Sink):
