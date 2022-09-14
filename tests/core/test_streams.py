@@ -11,7 +11,8 @@ import requests
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._singer import Catalog, MetadataMapping
-from singer_sdk.helpers.jsonpath import _compile_jsonpath
+from singer_sdk.helpers.jsonpath import _compile_jsonpath, extract_jsonpath
+from singer_sdk.pagination import first
 from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMENTAL
 from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
@@ -34,6 +35,24 @@ class RestTestStream(RESTStream):
         Property("value", StringType, required=True),
     ).to_dict()
     replication_key = "updatedAt"
+
+    def get_next_page_token(
+        self,
+        response: requests.Response,
+        previous_token: str | None,
+    ) -> str | None:
+        if self.next_page_token_jsonpath:
+            all_matches = extract_jsonpath(
+                self.next_page_token_jsonpath,
+                response.json(),
+            )
+            try:
+                return first(all_matches)
+            except StopIteration:
+                return None
+
+        else:
+            return response.headers.get("X-Next-Page", None)
 
 
 class GraphqlTestStream(GraphQLStream):
@@ -360,7 +379,10 @@ def test_next_page_token_jsonpath(
     RestTestStream.next_page_token_jsonpath = path
     stream = RestTestStream(tap)
 
-    next_page = stream.get_next_page_token(fake_response, previous_token=None)
+    with pytest.warns(DeprecationWarning):
+        paginator = stream.get_new_paginator()
+
+    next_page = paginator.get_next(fake_response)
 
     assert next_page == result
 

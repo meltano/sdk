@@ -40,7 +40,7 @@ class MaxRecordsLimitException(Exception):
     """Exception to raise if the maximum number of allowable records is exceeded."""
 
 
-class RecordsWitoutSchemaException(Exception):
+class RecordsWithoutSchemaException(Exception):
     """Raised if a target receives RECORD messages prior to a SCHEMA message."""
 
 

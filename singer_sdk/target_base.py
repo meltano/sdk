@@ -13,7 +13,7 @@ import click
 from joblib import Parallel, delayed, parallel_backend
 
 from singer_sdk.cli import common_options
-from singer_sdk.exceptions import ConfigValidationError, RecordsWitoutSchemaException
+from singer_sdk.exceptions import ConfigValidationError, RecordsWithoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
@@ -135,7 +135,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         sink depending on the values within the `record` object. Otherwise, please see
         `default_sink_class` property and/or the `get_sink_class()` method.
 
-        Raises :class:`singer_sdk.exceptions.RecordsWitoutSchemaException` if sink does
+        Raises :class:`singer_sdk.exceptions.RecordsWithoutSchemaException` if sink does
         not exist and schema is not sent.
 
         Args:
@@ -233,16 +233,17 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         return result
 
     def _assert_sink_exists(self, stream_name: str) -> None:
-        """Raise a RecordsWitoutSchemaException exception if stream doesn't exist.
+        """Raise a RecordsWithoutSchemaException exception if stream doesn't exist.
 
         Args:
             stream_name: TODO
 
         Raises:
-            RecordsWitoutSchemaException: If sink does not exist and schema is not sent.
+            RecordsWithoutSchemaException: If sink does not exist and schema
+                is not sent.
         """
         if not self.sink_exists(stream_name):
-            raise RecordsWitoutSchemaException(
+            raise RecordsWithoutSchemaException(
                 f"A record for stream '{stream_name}' was encountered before a "
                 "corresponding schema."
             )
