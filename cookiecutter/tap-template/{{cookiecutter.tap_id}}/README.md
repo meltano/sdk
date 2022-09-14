@@ -4,7 +4,7 @@
 
 Built with the [Meltano Tap SDK](https://sdk.meltano.com) for Singer Taps.
 
-<!-- 
+<!--
 
 Developer TODO: Update the below as needed to correctly describe the install procedure. For instance, if you do not have a PyPi repo, or if you want users to directly install from your git repo, you can modify this step as appropriate.
 
@@ -28,7 +28,7 @@ pipx install git+https://github.com/ORG_NAME/{{ cookiecutter.tap_id }}.git@main
 
 ### Accepted Config Options
 
-<!-- 
+<!--
 Developer TODO: Provide a list of config options accepted by the tap.
 
 This section can be created by copy-pasting the CLI output from:
@@ -100,7 +100,7 @@ poetry run {{cookiecutter.tap_id}} --help
 _**Note:** This tap will work in any Singer environment and does not require Meltano.
 Examples here are for convenience and to streamline end-to-end orchestration scenarios._
 
-<!-- 
+<!--
 Developer TODO:
 Your project comes with a custom `meltano.yml` project file already created. Open the `meltano.yml` and follow any "TODO" items listed in
 the file.
