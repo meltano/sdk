@@ -45,15 +45,20 @@ The `manifest` field is used to specify the paths to the batch files. The paths 
 
 The batch configuration is used to specify the root directory for the batch files, and the maximum number of records per batch file.
 
-```json
+In `config.json`:
+
+```js
 {
-  "encoding": {
-    "format": "jsonl",
-    "compression": "gzip",
-  },
-  "storage": {
-    "root": "file://tests/core/resources",
-    "prefix": "test-batch-",
+  // ...
+  "batch_config": {
+    "encoding": {
+      "format": "jsonl",
+      "compression": "gzip",
+    },
+    "storage": {
+      "root": "file://tests/core/resources",
+      "prefix": "test-batch-",
+    }
   }
 }
 ```
