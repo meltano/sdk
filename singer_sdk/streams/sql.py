@@ -1020,7 +1020,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
     # Get records from stream
 
     def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
-        """Return a generator of row-type dictionary objects.
+        """Return a generator of record-type dictionary objects.
 
         If the stream has a replication_key value defined, records will be sorted by the
         incremental key. If the stream also has an available starting bookmark, the
@@ -1056,8 +1056,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                     )
                 )
 
-        for row in self.connector.connection.execute(query):
-            yield dict(row)
+        for record in self.connector.connection.execute(query):
+            yield dict(record)
 
 
 __all__ = ["SQLStream", "SQLConnector"]

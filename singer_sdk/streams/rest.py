@@ -483,9 +483,9 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
     # Records iterator
 
     def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
-        """Return a generator of row-type dictionary objects.
+        """Return a generator of record-type dictionary objects.
 
-        Each row emitted should be a dictionary of property names to their values.
+        Each record emitted should be a dictionary of property names to their values.
 
         Args:
             context: Stream partition or context dictionary.
@@ -501,7 +501,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             yield transformed_record
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
-        """Parse the response and return an iterator of result rows.
+        """Parse the response and return an iterator of result records.
 
         Args:
             response: A raw `requests.Response`_ object.

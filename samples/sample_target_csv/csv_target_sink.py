@@ -39,7 +39,7 @@ class SampleCSVTargetSink(BatchSink):
             )
             for record in records_to_drain:
                 if newfile and not records_written:
-                    # Write header row if new file
+                    # Write header line if new file
                     writer.writerow(record.keys())
                 writer.writerow(record.values())
                 records_written += 1
