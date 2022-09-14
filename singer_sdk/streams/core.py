@@ -1161,7 +1161,7 @@ class Stream(metaclass=abc.ABCMeta):
         """
         pass
 
-    def post_process(self, row: dict, context: dict | None = None) -> dict | None:
+    def post_process(self, record: dict, context: dict | None = None) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
 
         Optional. This method gives developers an opportunity to "clean up" the results
@@ -1173,10 +1173,10 @@ class Stream(metaclass=abc.ABCMeta):
         invalid or not-applicable records from the stream.
 
         Args:
-            row: Individual record in the stream.
+            record: Individual record in the stream.
             context: Stream partition or context dictionary.
 
         Returns:
             The resulting record dict, or `None` if the record should be excluded.
         """
-        return row
+        return record
