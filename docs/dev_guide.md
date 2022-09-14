@@ -184,7 +184,7 @@ Doing this will also help with autocompletion.
 #### Debugging
 
 In order to launch your plugin via it's CLI with the built-in debugger, VSCode requires a [Launch configuration](https://code.visualstudio.com/docs/editor/debugging#_launch-configurations).
-An example launch configuration, added to your `launch.json` might be as follows:
+An example launch configuration, added to your `launch.json`, might be as follows:
 
 ```js
 {
@@ -203,7 +203,7 @@ An example launch configuration, added to your `launch.json` might be as follows
 }
 ```
 
-The above `module` value relies on an equivalent to the following snippet being added to your `tap.py` or `target.py` files:
+The above `module` value relies on an equivalent to the following snippet being added to the end of your `tap.py` or `target.py` file:
 
 ```python
 if __name__ == "__main":
