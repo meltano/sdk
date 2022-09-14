@@ -29,12 +29,12 @@ pipx install git+https://github.com/ORG_NAME/{{ cookiecutter.target_id }}.git@ma
 ### Accepted Config Options
 
 <!--
-Developer TODO: Provide a list of config options accepted by the tap.
+Developer TODO: Provide a list of config options accepted by the target.
 
 This section can be created by copy-pasting the CLI output from:
 
 ```
-{{ cookiecutter.tap_id }} --about --format=markdown
+{{ cookiecutter.target_id }} --about --format=markdown
 ```
 -->
 
@@ -54,7 +54,7 @@ environment variable is set either in the terminal context or in the `.env` file
 ### Source Authentication and Authorization
 
 <!--
-Developer TODO: If your tap requires special access on the source system, or any special authentication requirements, provide those here.
+Developer TODO: If your target requires special access on the destination system, or any special authentication requirements, provide those here.
 -->
 
 ## Usage
