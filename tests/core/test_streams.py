@@ -257,9 +257,9 @@ def test_jsonpath_rest_stream(tap: Tap, path: str, content: str, result: list[di
     RestTestStream.records_jsonpath = path
     stream = RestTestStream(tap)
 
-    rows = stream.parse_response(fake_response)
+    records = stream.parse_response(fake_response)
 
-    assert list(rows) == result
+    assert list(records) == result
 
 
 def test_jsonpath_graphql_stream_default(tap: Tap):
@@ -277,9 +277,9 @@ def test_jsonpath_graphql_stream_default(tap: Tap):
     fake_response._content = str.encode(content)
 
     stream = GraphqlTestStream(tap)
-    rows = stream.parse_response(fake_response)
+    records = stream.parse_response(fake_response)
 
-    assert list(rows) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
+    assert list(records) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
 
 
 def test_jsonpath_graphql_stream_override(tap: Tap):
@@ -300,9 +300,9 @@ def test_jsonpath_graphql_stream_override(tap: Tap):
 
     stream = GraphQLJSONPathOverride(tap)
 
-    rows = stream.parse_response(fake_response)
+    records = stream.parse_response(fake_response)
 
-    assert list(rows) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
+    assert list(records) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
 
 
 @pytest.mark.parametrize(
