@@ -21,17 +21,19 @@ import singer
 from singer import RecordMessage, Schema, SchemaMessage, StateMessage
 
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
+from singer_sdk.helpers._batch import (
+    BaseBatchFileEncoding,
+    BatchConfig,
+    SDKBatchMessage,
+)
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._flattening import get_flattening_options
 from singer_sdk.helpers._schema import SchemaPlus
 from singer_sdk.helpers._singer import (
-    BaseBatchFileEncoding,
-    BatchConfig,
     Catalog,
     CatalogEntry,
     MetadataMapping,
-    SDKBatchMessage,
     SelectionMask,
 )
 from singer_sdk.helpers._state import (
@@ -1300,7 +1302,7 @@ class Stream(metaclass=abc.ABCMeta):
             A tuple of (encoding, manifest) for each batch.
         """
         sync_id = f"{self.tap_name}--{self.name}-{uuid4()}"
-        prefix = batch_config.storage.prefix
+        prefix = batch_config.storage.prefix or ""
 
         for i, chunk in enumerate(
             lazy_chunked_generator(
@@ -1310,14 +1312,16 @@ class Stream(metaclass=abc.ABCMeta):
             start=1,
         ):
             filename = f"{prefix}{sync_id}-{i}.json.gz"
-            with batch_config.storage.open(filename, "wb") as f:
-                # TODO: Determine compression from config.
-                with gzip.GzipFile(fileobj=f, mode="wb") as gz:
-                    gz.writelines(
-                        (json.dumps(record) + "\n").encode() for record in chunk
-                    )
+            with batch_config.storage.fs() as fs:
+                with fs.open(filename, "wb") as f:
+                    # TODO: Determine compression from config.
+                    with gzip.GzipFile(fileobj=f, mode="wb") as gz:
+                        gz.writelines(
+                            (json.dumps(record) + "\n").encode() for record in chunk
+                        )
+                file_url = fs.geturl(filename)
 
-            yield batch_config.encoding, [filename]
+            yield batch_config.encoding, [file_url]
 
     def post_process(self, row: dict, context: dict | None = None) -> dict | None:
         """As needed, append or transform raw data to match expected structure.

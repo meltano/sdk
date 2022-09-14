@@ -114,16 +114,6 @@ def sqlite_sample_target_soft_delete(sqlite_target_test_config):
 def sqlite_sample_target_batch(sqlite_target_test_config):
     """Get a sample target object with hard_delete disabled."""
     conf = sqlite_target_test_config
-    conf["batch_config"] = {
-        "encoding": {
-            "format": "jsonl",
-            "compression": "gzip",
-        },
-        "storage": {
-            "root": "file://tests/core/resources",
-            "prefix": "test-batch-",
-        },
-    }
 
     return SQLiteTarget(conf)
 
@@ -435,7 +425,10 @@ def test_sqlite_process_batch_message(
         "type": "BATCH",
         "stream": "users",
         "encoding": {"format": "jsonl", "compression": "gzip"},
-        "manifest": ["batch.1.jsonl.gz", "batch.2.jsonl.gz"],
+        "manifest": [
+            "file://tests/core/resources/batch.1.jsonl.gz",
+            "file://tests/core/resources/batch.2.jsonl.gz",
+        ],
     }
     tap_output = "\n".join([json.dumps(schema_message), json.dumps(batch_message)])
 

@@ -2,25 +2,8 @@ from dataclasses import asdict
 
 import pytest
 
-from singer_sdk.helpers._singer import (
-    BaseBatchFileEncoding,
-    JSONLinesEncoding,
-    SDKBatchMessage,
-    SingerMessageType,
-)
-
-
-@pytest.mark.parametrize(
-    "encoding,expected",
-    [
-        (JSONLinesEncoding("gzip"), {"compression": "gzip", "format": "jsonl"}),
-        (JSONLinesEncoding(), {"compression": None, "format": "jsonl"}),
-    ],
-    ids=["jsonl-compression-gzip", "jsonl-compression-none"],
-)
-def test_encoding_as_dict(encoding: BaseBatchFileEncoding, expected: dict) -> None:
-    """Test encoding as dict."""
-    assert asdict(encoding) == expected
+from singer_sdk.helpers._batch import JSONLinesEncoding, SDKBatchMessage
+from singer_sdk.helpers._singer import SingerMessageType
 
 
 @pytest.mark.parametrize(

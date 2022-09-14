@@ -14,9 +14,9 @@ from joblib import Parallel, delayed, parallel_backend
 
 from singer_sdk.cli import common_options
 from singer_sdk.exceptions import RecordsWithoutSchemaException
+from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
-from singer_sdk.helpers._singer import BaseBatchFileEncoding
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerMessageType, SingerReader
 from singer_sdk.mapper import PluginMapper
@@ -408,21 +408,12 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         Args:
             message_dict: TODO
-
-        Raises:
-            RuntimeError: If the batch message can not be processed.
         """
         sink = self.get_sink(message_dict["stream"])
-        if sink.batch_config is None:
-            raise RuntimeError(
-                f"Received BATCH message for stream '{sink.stream_name}' "
-                "but no batch config was provided."
-            )
 
         encoding = BaseBatchFileEncoding.from_dict(message_dict["encoding"])
         sink.process_batch_files(
             encoding,
-            sink.batch_config.storage,
             message_dict["manifest"],
         )
 

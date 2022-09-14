@@ -2,36 +2,17 @@ from __future__ import annotations
 
 import enum
 import logging
-import sys
-from contextlib import contextmanager
-from dataclasses import asdict, dataclass, field, fields
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Dict,
-    Generator,
-    Iterable,
-    Tuple,
-    Union,
-    cast,
-)
+from dataclasses import dataclass, fields
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Tuple, Union, cast
 
-import fs
 from singer.catalog import Catalog as BaseCatalog
 from singer.catalog import CatalogEntry as BaseCatalogEntry
-from singer.messages import Message
 
 from singer_sdk.helpers._schema import SchemaPlus
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    if sys.version_info >= (3, 8):
-        from typing import Literal
-    else:
-        from typing_extensions import Literal
 
 Breadcrumb = Tuple[str, ...]
 
@@ -316,180 +297,3 @@ class Catalog(Dict[str, CatalogEntry], BaseCatalog):
     def get_stream(self, stream_id: str) -> CatalogEntry | None:
         """Retrieve a stream entry from the catalog."""
         return self.get(stream_id)
-
-
-class BatchFileFormat(str, enum.Enum):
-    """Batch file format."""
-
-    JSONL = "jsonl"
-    """JSON Lines format."""
-
-
-@dataclass
-class BaseBatchFileEncoding:
-    """Base class for batch file encodings."""
-
-    registered_encodings: ClassVar[dict[str, type[BaseBatchFileEncoding]]] = {}
-    __encoding_format__: ClassVar[str] = "OVERRIDE_ME"
-
-    # Base encoding fields
-    format: str = field(init=False)
-    """The format of the batch file."""
-
-    compression: str | None = None
-    """The compression of the batch file."""
-
-    def __init_subclass__(cls, **kwargs: Any) -> None:
-        """Register subclasses."""
-        super().__init_subclass__(**kwargs)
-        cls.registered_encodings[cls.__encoding_format__] = cls
-
-    def __post_init__(self) -> None:
-        self.format = self.__encoding_format__
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> BaseBatchFileEncoding:
-        """Create an encoding from a dictionary."""
-        data = data.copy()
-        encoding_format = data.pop("format")
-        encoding_cls = cls.registered_encodings[encoding_format]
-        return encoding_cls(**data)
-
-
-@dataclass
-class JSONLinesEncoding(BaseBatchFileEncoding):
-    """JSON Lines encoding for batch files."""
-
-    __encoding_format__ = "jsonl"
-
-
-@dataclass
-class SDKBatchMessage(Message):
-    """Singer batch message in the Meltano SDK flavor."""
-
-    type: Literal[SingerMessageType.BATCH] = field(init=False)
-    """The message type."""
-
-    stream: str
-    """The stream name."""
-
-    encoding: BaseBatchFileEncoding
-    """The file encoding of the batch."""
-
-    manifest: list[str] = field(default_factory=list)
-    """The manifest of files in the batch."""
-
-    def __post_init__(self):
-        if isinstance(self.encoding, dict):
-            self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
-
-        self.type = SingerMessageType.BATCH
-
-    def asdict(self):
-        """Return a dictionary representation of the message.
-
-        Returns:
-            A dictionary with the defined message fields.
-        """
-        return asdict(self)
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> SDKBatchMessage:
-        """Create an encoding from a dictionary.
-
-        Args:
-            data: The dictionary to create the message from.
-
-        Returns:
-            The created message.
-        """
-        data.pop("type")
-        return cls(**data)
-
-
-@dataclass
-class StorageTarget:
-    """Storage target."""
-
-    root: str
-    """"The root directory of the storage target."""
-
-    prefix: str
-    """"The file prefix."""
-
-    def asdict(self):
-        """Return a dictionary representation of the message.
-
-        Returns:
-            A dictionary with the defined message fields.
-        """
-        return asdict(self)
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> StorageTarget:
-        """Create an encoding from a dictionary.
-
-        Args:
-            data: The dictionary to create the message from.
-
-        Returns:
-            The created message.
-        """
-        return cls(**data)
-
-    @contextmanager
-    def open(self, filename: str, mode: str = "rb") -> Generator[IO, None, None]:
-        """Open a file in the storage target.
-
-        Args:
-            filename: The filename to open.
-            mode: The mode to open the file in.
-
-        Returns:
-            The opened file.
-        """
-        filesystem = fs.open_fs(self.root, writeable=True, create=True)
-        fo = filesystem.open(filename, mode=mode)
-        try:
-            yield fo
-        finally:
-            fo.close()
-            filesystem.close()
-
-
-@dataclass
-class BatchConfig:
-    """Batch configuration."""
-
-    encoding: BaseBatchFileEncoding
-    """The encoding of the batch file."""
-
-    storage: StorageTarget
-    """The storage target of the batch file."""
-
-    def __post_init__(self):
-        if isinstance(self.encoding, dict):
-            self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
-
-        if isinstance(self.storage, dict):
-            self.storage = StorageTarget.from_dict(self.storage)
-
-    def asdict(self):
-        """Return a dictionary representation of the message.
-
-        Returns:
-            A dictionary with the defined message fields.
-        """
-        return asdict(self)
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> BatchConfig:
-        """Create an encoding from a dictionary.
-
-        Args:
-            data: The dictionary to create the message from.
-
-        Returns:
-            The created message.
-        """
-        return cls(**data)

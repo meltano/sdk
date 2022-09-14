@@ -11,17 +11,18 @@ from gzip import open as gzip_open
 from logging import Logger
 from types import MappingProxyType
 from typing import IO, Any, Mapping, Sequence
+from urllib.parse import urlparse
 
 from dateutil import parser
 from jsonschema import Draft4Validator, FormatChecker
 
-from singer_sdk.helpers._compat import final
-from singer_sdk.helpers._singer import (
+from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
     BatchFileFormat,
     StorageTarget,
 )
+from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._typing import (
     DatetimeErrorTreatmentEnum,
     get_datelike_property_type,
@@ -435,27 +436,35 @@ class Sink(metaclass=abc.ABCMeta):
     def process_batch_files(
         self,
         encoding: BaseBatchFileEncoding,
-        storage: StorageTarget,
         files: Sequence[str],
     ) -> None:
         """Process a batch file with the given batch context.
 
         Args:
             encoding: The batch file encoding.
-            storage: The storage target.
             files: The batch files to process.
 
         Raises:
             NotImplementedError: If the batch file encoding is not supported.
         """
         file: GzipFile | IO
+        storage: StorageTarget | None = None
+
         for path in files:
+            url = urlparse(path)
+
+            if self.batch_config:
+                storage = self.batch_config.storage
+            else:
+                storage = StorageTarget.from_url(url)
+
             if encoding.format == BatchFileFormat.JSONL:
-                with storage.open(path) as file:
-                    if encoding.compression == "gzip":
-                        file = gzip_open(file)
-                    context = {"records": [json.loads(line) for line in file]}
-                    self.process_batch(context)
+                with storage.fs(create=False) as fs:
+                    with fs.open(url.path, mode="rb") as file:
+                        if encoding.compression == "gzip":
+                            file = gzip_open(file)
+                        context = {"records": [json.loads(line) for line in file]}
+                        self.process_batch(context)
             else:
                 raise NotImplementedError(
                     f"Unsupported batch encoding format: {encoding.format}"
