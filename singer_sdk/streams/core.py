@@ -795,7 +795,7 @@ class Stream(metaclass=abc.ABCMeta):
         pop_deselected_record_properties(record, self.schema, self.mask, self.logger)
         record = conform_record_data_types(
             stream_name=self.name,
-            row=record,
+            record=record,
             schema=self.schema,
             logger=self.logger,
         )
@@ -1247,9 +1247,9 @@ class Stream(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_records(self, context: dict | None) -> Iterable[dict | tuple[dict, dict]]:
-        """Abstract row generator function. Must be overridden by the child class.
+        """Abstract record generator function. Must be overridden by the child class.
 
-        Each row emitted should be a dictionary of property names to their values.
+        Each record emitted should be a dictionary of property names to their values.
         Returns either a record dict or a tuple: (record_dict, child_context)
 
         A method which should retrieve data from the source and return records
