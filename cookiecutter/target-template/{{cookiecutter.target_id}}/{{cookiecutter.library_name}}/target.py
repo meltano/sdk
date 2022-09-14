@@ -25,3 +25,7 @@ class Target{{ cookiecutter.destination_name }}(Target):
         ),
     ).to_dict()
     default_sink_class = {{ cookiecutter.destination_name }}Sink
+
+
+if __name__ == "__main__":
+    Target{{ cookiecutter.destination_name }}.cli()

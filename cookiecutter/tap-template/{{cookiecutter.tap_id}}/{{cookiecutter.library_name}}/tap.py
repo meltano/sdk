@@ -64,3 +64,6 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
         """Return a list of discovered streams."""
         return [stream_class(tap=self) for stream_class in STREAM_TYPES]
 {%- endif %}
+
+if __name__ == "__main__":
+    Tap{{ cookiecutter.source_name }}.cli()
