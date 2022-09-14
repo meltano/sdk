@@ -506,7 +506,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             Raises:
                 FileNotFoundError: If the config file does not exist.
-                Abort: If the configuration is not valid.
             """
             if version:
                 cls.print_version()
@@ -548,7 +547,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             except ConfigValidationError as exc:
                 for error in exc.errors:
                     click.secho(error, fg="red", err=True)
-                raise click.Abort()
+                sys.exit(1)
 
             target.listen(file_input)
 

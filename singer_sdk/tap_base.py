@@ -2,6 +2,7 @@
 
 import abc
 import json
+import sys
 from enum import Enum
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
@@ -453,7 +454,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
             Raises:
                 FileNotFoundError: If the config file does not exist.
-                Abort: If the configuration is not valid.
             """
             if version:
                 cls.print_version()
@@ -498,7 +498,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             except ConfigValidationError as exc:
                 for error in exc.errors:
                     click.secho(error, fg="red", err=True)
-                raise click.Abort()
+                sys.exit(1)
 
             if discover:
                 tap.run_discovery()

@@ -1,6 +1,7 @@
 """Abstract base class for stream mapper plugins."""
 
 import abc
+import sys
 from io import FileIO
 from typing import Callable, Iterable, List, Tuple
 
@@ -9,6 +10,7 @@ import singer
 
 from singer_sdk.cli import common_options
 from singer_sdk.configuration._dict_config import merge_config_sources
+from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerReader
@@ -143,10 +145,15 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 cls._env_prefix,
             )
 
-            mapper = cls(  # type: ignore  # Ignore 'type not callable'
-                config=config_dict,
-                validate_config=validate_config,
-            )
+            try:
+                mapper = cls(  # type: ignore  # Ignore 'type not callable'
+                    config=config_dict,
+                    validate_config=validate_config,
+                )
+            except ConfigValidationError as exc:
+                for error in exc.errors:
+                    click.secho(error, fg="red", err=True)
+                sys.exit(1)
 
             if about:
                 mapper.print_about(format)
