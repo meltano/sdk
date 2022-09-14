@@ -54,13 +54,13 @@ pipx install poetry
 Now you can initialize your new project with the Cookiecutter template for taps:
 
 ```bash
-cookiecutter https://gitlab.com/meltano/sdk --directory="cookiecutter/tap-template"
+cookiecutter https://github.com/meltano/sdk --directory="cookiecutter/tap-template"
 ```
 
 ...or for targets:
 
 ```bash
-cookiecutter https://gitlab.com/meltano/sdk --directory="cookiecutter/target-template"
+cookiecutter https://github.com/meltano/sdk --directory="cookiecutter/target-template"
 ```
 
 Note that you do not need to create the directory for the tap.

@@ -1,0 +1,24 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: daily
+      time: "12:00"
+      timezone: "UTC"
+    reviewers: [meltano/engineering]
+    labels: [deps]
+  - package-ecosystem: pip
+    directory: "/.github/workflows"
+    schedule:
+      interval: daily
+      time: "12:00"
+      timezone: "UTC"
+    reviewers: [meltano/engineering]
+    labels: [deps]
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    reviewers: [meltano/engineering]
+    labels: [deps]

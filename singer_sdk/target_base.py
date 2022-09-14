@@ -13,7 +13,7 @@ import click
 from joblib import Parallel, delayed, parallel_backend
 
 from singer_sdk.cli import common_options
-from singer_sdk.exceptions import RecordsWitoutSchemaException
+from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
@@ -135,7 +135,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         sink depending on the values within the `record` object. Otherwise, please see
         `default_sink_class` property and/or the `get_sink_class()` method.
 
-        Raises :class:`singer_sdk.exceptions.RecordsWitoutSchemaException` if sink does
+        Raises :class:`singer_sdk.exceptions.RecordsWithoutSchemaException` if sink does
         not exist and schema is not sent.
 
         Args:
@@ -233,23 +233,24 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         return result
 
     def _assert_sink_exists(self, stream_name: str) -> None:
-        """Raise a RecordsWitoutSchemaException exception if stream doesn't exist.
+        """Raise a RecordsWithoutSchemaException exception if stream doesn't exist.
 
         Args:
             stream_name: TODO
 
         Raises:
-            RecordsWitoutSchemaException: If sink does not exist and schema is not sent.
+            RecordsWithoutSchemaException: If sink does not exist and schema
+                is not sent.
         """
         if not self.sink_exists(stream_name):
-            raise RecordsWitoutSchemaException(
+            raise RecordsWithoutSchemaException(
                 f"A record for stream '{stream_name}' was encountered before a "
                 "corresponding schema."
             )
 
     # Message handling
 
-    def _process_lines(self, file_input: IO[str]) -> Counter[SingerMessageType]:
+    def _process_lines(self, file_input: IO[str]) -> Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:
@@ -273,7 +274,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     def _process_endofpipe(self) -> None:
         """Called after all input lines have been read."""
-        self.drain_all()
+        self.drain_all(is_endofpipe=True)
 
     def _process_record_message(self, message_dict: dict) -> None:
         """Process a RECORD message.
@@ -403,15 +404,27 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     # Sink drain methods
 
     @final
-    def drain_all(self) -> None:
+    def drain_all(self, is_endofpipe: bool = False) -> None:
         """Drains all sinks, starting with those cleared due to changed schema.
 
         This method is internal to the SDK and should not need to be overridden.
+
+        Args:
+            is_endofpipe: This is passed by the
+                          :meth:`~singer_sdk.Sink._process_endofpipe()` which
+                          is called after the target instance has finished
+                          listening to the stdin
         """
         state = copy.deepcopy(self._latest_state)
         self._drain_all(self._sinks_to_clear, 1)
+        if is_endofpipe:
+            for sink in self._sinks_to_clear:
+                sink.clean_up()
         self._sinks_to_clear = []
         self._drain_all(list(self._sinks_active.values()), self.max_parallelism)
+        if is_endofpipe:
+            for sink in self._sinks_active.values():
+                sink.clean_up()
         self._write_state_message(state)
         self._reset_max_record_age()
 

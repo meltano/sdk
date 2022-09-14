@@ -1,7 +1,9 @@
 """Module with helpers to declare capabilities and plugin behavior."""
 
+from __future__ import annotations
+
 from enum import Enum, EnumMeta
-from typing import Any, Optional
+from typing import Any, TypeVar
 from warnings import warn
 
 from singer_sdk.typing import (
@@ -12,13 +14,17 @@ from singer_sdk.typing import (
     Property,
 )
 
+_EnumMemberT = TypeVar("_EnumMemberT")
+
 # Default JSON Schema to support config for built-in capabilities:
 
 STREAM_MAPS_CONFIG = PropertiesList(
     Property(
         "stream_maps",
         ObjectType(),
-        description="Config object for stream maps capability.",
+        description="Config object for stream maps capability. "
+        + "For more information check out "
+        + "[Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html).",
     ),
     Property(
         "stream_map_config",
@@ -46,7 +52,11 @@ FLATTENING_CONFIG = PropertiesList(
 class DeprecatedEnum(Enum):
     """Base class for capabilities enumeration."""
 
-    def __new__(cls, value: Any, deprecation: Optional[str] = None) -> "DeprecatedEnum":
+    def __new__(
+        cls,
+        value: _EnumMemberT,
+        deprecation: str | None = None,
+    ) -> DeprecatedEnum:
         """Create a new enum member.
 
         Args:
@@ -56,19 +66,19 @@ class DeprecatedEnum(Enum):
         Returns:
             An enum member value.
         """
-        member: "DeprecatedEnum" = object.__new__(cls)
+        member: DeprecatedEnum = object.__new__(cls)
         member._value_ = value
         member._deprecation = deprecation
         return member
 
     @property
-    def deprecation_message(self) -> Optional[str]:
+    def deprecation_message(self) -> str | None:
         """Get deprecation message.
 
         Returns:
             Deprecation message.
         """
-        self._deprecation: Optional[str]
+        self._deprecation: str | None
         return self._deprecation
 
     def emit_warning(self) -> None:
@@ -83,7 +93,7 @@ class DeprecatedEnum(Enum):
 class DeprecatedEnumMeta(EnumMeta):
     """Metaclass for enumeration with deprecation support."""
 
-    def __getitem__(self, name: str) -> Any:
+    def __getitem__(self, name: str) -> Any:  # noqa: ANN401
         """Retrieve mapping item.
 
         Args:
@@ -97,7 +107,7 @@ class DeprecatedEnumMeta(EnumMeta):
             obj.emit_warning()
         return obj
 
-    def __getattribute__(cls, name: str) -> Any:
+    def __getattribute__(cls, name: str) -> Any:  # noqa: ANN401
         """Retrieve enum attribute.
 
         Args:
@@ -111,7 +121,7 @@ class DeprecatedEnumMeta(EnumMeta):
             obj.emit_warning()
         return obj
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Enum:
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
         """Call enum member.
 
         Args:
@@ -121,7 +131,7 @@ class DeprecatedEnumMeta(EnumMeta):
         Returns:
             Enum member.
         """
-        obj: Enum = super().__call__(*args, **kwargs)
+        obj = super().__call__(*args, **kwargs)
         if isinstance(obj, DeprecatedEnum) and obj.deprecation_message:
             obj.emit_warning()
         return obj

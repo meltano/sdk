@@ -12,7 +12,7 @@ pipx install cookiecutter
 Initialize Cookiecutter template directly from Git:
 
 ```bash
-cookiecutter https://gitlab.com/meltano/sdk --directory="cookiecutter/target-template"
+cookiecutter https://github.com/meltano/sdk --directory="cookiecutter/target-template"
 ```
 
 Or locally from an already-cloned `sdk` repo:

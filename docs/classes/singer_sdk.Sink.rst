@@ -5,3 +5,4 @@
 
 .. autoclass:: Sink
     :members:
+    :special-members: __init__

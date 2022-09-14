@@ -202,10 +202,11 @@ def increment_state(
     latest_record: dict,
     replication_key: str,
     is_sorted: bool,
+    check_sorted: bool,
 ) -> None:
     """Update the state using data from the latest record.
 
-    Raises InvalidStreamSortException if is_sorted=True and unsorted
+    Raises InvalidStreamSortException if is_sorted=True, check_sorted=True and unsorted
     data is detected in the stream.
     """
     progress_dict = stream_or_partition_state
@@ -217,7 +218,7 @@ def increment_state(
         progress_dict = stream_or_partition_state[PROGRESS_MARKERS]
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
     new_rk_value = to_json_compatible(latest_record[replication_key])
-    if old_rk_value is None or new_rk_value >= old_rk_value:
+    if old_rk_value is None or not check_sorted or new_rk_value >= old_rk_value:
         progress_dict["replication_key"] = replication_key
         progress_dict["replication_key_value"] = new_rk_value
         return

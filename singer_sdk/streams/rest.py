@@ -1,10 +1,14 @@
 """Abstract base class for API-type streams."""
 
+from __future__ import annotations
+
 import abc
 import copy
 import logging
 from datetime import datetime
-from typing import Any, Callable, Dict, Generator, Iterable, List, Optional, Union, cast
+from typing import Any, Callable, Generator, Generic, Iterable, TypeVar, Union
+from urllib.parse import urlparse
+from warnings import warn
 
 import backoff
 import requests
@@ -13,29 +17,39 @@ from singer.schema import Schema
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.pagination import (
+    BaseAPIPaginator,
+    JSONPathPaginator,
+    LegacyStreamPaginator,
+    SimpleHeaderPaginator,
+)
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 
 DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
+_TToken = TypeVar("_TToken")
+_T = TypeVar("_T")
+_MaybeCallable = Union[_T, Callable[[], _T]]
 
-class RESTStream(Stream, metaclass=abc.ABCMeta):
+
+class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
     """Abstract base class for REST API streams."""
 
     _page_size: int = DEFAULT_PAGE_SIZE
-    _requests_session: Optional[requests.Session]
+    _requests_session: requests.Session | None
     rest_method = "GET"
 
     #: JSONPath expression to extract records from the API response.
     records_jsonpath: str = "$[*]"
 
     #: Response code reference for rate limit retries
-    extra_retry_statuses: List[int] = [429]
+    extra_retry_statuses: list[int] = [429]
 
     #: Optional JSONPath expression to extract a pagination token from the API response.
     #: Example: `"$.next_page"`
-    next_page_token_jsonpath: Optional[str] = None
+    next_page_token_jsonpath: str | None = None
 
     # Private constants. May not be supported in future releases:
     _LOG_REQUEST_METRICS: bool = True
@@ -51,9 +65,9 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     def __init__(
         self,
         tap: TapBaseClass,
-        name: Optional[str] = None,
-        schema: Optional[Union[Dict[str, Any], Schema]] = None,
-        path: Optional[str] = None,
+        name: str | None = None,
+        schema: dict[str, Any] | Schema | None = None,
+        path: str | None = None,
     ) -> None:
         """Initialize the REST stream.
 
@@ -72,7 +86,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         self._next_page_token_compiled_jsonpath = None
 
     @staticmethod
-    def _url_encode(val: Union[str, datetime, bool, int, List[str]]) -> str:
+    def _url_encode(val: str | datetime | bool | int | list[str]) -> str:
         """Encode the val argument as url-compatible string.
 
         Args:
@@ -87,7 +101,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             result = str(val)
         return result
 
-    def get_url(self, context: Optional[dict]) -> str:
+    def get_url(self, context: dict | None) -> str:
         """Get stream entity URL.
 
         Developers override this method to perform dynamic URL generation.
@@ -117,7 +131,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             The `requests.Session`_ object for HTTP requests.
 
         .. _requests.Session:
-            https://docs.python-requests.org/en/latest/api/#request-sessions
+            https://requests.readthedocs.io/en/latest/api/#request-sessions
         """
         if not self._requests_session:
             self._requests_session = requests.Session()
@@ -152,7 +166,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             RetriableAPIError: If the request is retriable.
 
         .. _requests.Response:
-            https://docs.python-requests.org/en/latest/api/#requests.Response
+            https://requests.readthedocs.io/en/latest/api/#requests.Response
         """
         if (
             response.status_code in self.extra_retry_statuses
@@ -167,12 +181,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
     def response_error_message(self, response: requests.Response) -> str:
         """Build error message for invalid http statuses.
 
+        WARNING - Override this method when the URL path may contain secrets or PII
+
         Args:
             response: A `requests.Response`_ object.
 
         Returns:
             str: The error message
         """
+        full_path = urlparse(response.url).path or self.path
         if 400 <= response.status_code < 500:
             error_type = "Client"
         else:
@@ -180,7 +197,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         return (
             f"{response.status_code} {error_type} Error: "
-            f"{response.reason} for path: {self.path}"
+            f"{response.reason} for path: {full_path}"
         )
 
     def request_decorator(self, func: Callable) -> Callable:
@@ -203,6 +220,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             (
                 RetriableAPIError,
                 requests.exceptions.ReadTimeout,
+                requests.exceptions.ConnectionError,
             ),
             max_tries=self.backoff_max_tries,
             on_backoff=self.backoff_handler,
@@ -210,7 +228,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return decorator
 
     def _request(
-        self, prepared_request: requests.PreparedRequest, context: Optional[dict]
+        self, prepared_request: requests.PreparedRequest, context: dict | None
     ) -> requests.Response:
         """TODO.
 
@@ -237,8 +255,8 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         return response
 
     def get_url_params(
-        self, context: Optional[dict], next_page_token: Optional[Any]
-    ) -> Dict[str, Any]:
+        self, context: dict | None, next_page_token: _TToken | None
+    ) -> dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization.
 
         If paging is supported, developers may override with specific paging logic.
@@ -253,10 +271,39 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """
         return {}
 
-    def prepare_request(
-        self, context: Optional[dict], next_page_token: Optional[Any]
+    def build_prepared_request(
+        self,
+        *args: Any,
+        **kwargs: Any,
     ) -> requests.PreparedRequest:
-        """Prepare a request object.
+        """Build a generic but authenticated request.
+
+        Uses the authenticator instance to mutate the request with authentication.
+
+        Args:
+            *args: Arguments to pass to `requests.Request`_.
+            **kwargs: Keyword arguments to pass to `requests.Request`_.
+
+        Returns:
+            A `requests.PreparedRequest`_ object.
+
+        .. _requests.PreparedRequest:
+            https://requests.readthedocs.io/en/latest/api/#requests.PreparedRequest
+        .. _requests.Request:
+            https://requests.readthedocs.io/en/latest/api/#requests.Request
+        """
+        request = requests.Request(*args, **kwargs)
+
+        if self.authenticator:
+            authenticator = self.authenticator
+            authenticator.authenticate_request(request)
+
+        return self.requests_session.prepare_request(request)
+
+    def prepare_request(
+        self, context: dict | None, next_page_token: _TToken | None
+    ) -> requests.PreparedRequest:
+        """Prepare a request object for this stream.
 
         If partitioning is supported, the `context` object will contain the partition
         definitions. Pagination information can be parsed from `next_page_token` if
@@ -277,26 +324,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         request_data = self.prepare_request_payload(context, next_page_token)
         headers = self.http_headers
 
-        authenticator = self.authenticator
-        if authenticator:
-            headers.update(authenticator.auth_headers or {})
-            params.update(authenticator.auth_params or {})
-
-        request = cast(
-            requests.PreparedRequest,
-            self.requests_session.prepare_request(
-                requests.Request(
-                    method=http_method,
-                    url=url,
-                    params=params,
-                    headers=headers,
-                    json=request_data,
-                ),
-            ),
+        return self.build_prepared_request(
+            method=http_method,
+            url=url,
+            params=params,
+            headers=headers,
+            json=request_data,
         )
-        return request
 
-    def request_records(self, context: Optional[dict]) -> Iterable[dict]:
+    def request_records(self, context: dict | None) -> Iterable[dict]:
         """Request records from REST endpoint(s), returning response records.
 
         If pagination is detected, pages will be recursed automatically.
@@ -306,38 +342,81 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
         Yields:
             An item for every record in the response.
-
-        Raises:
-            RuntimeError: If a loop in pagination is detected. That is, when two
-                consecutive pagination tokens are identical.
         """
-        next_page_token: Any = None
-        finished = False
+        paginator = self.get_new_paginator()
         decorated_request = self.request_decorator(self._request)
 
-        while not finished:
+        while not paginator.finished:
             prepared_request = self.prepare_request(
-                context, next_page_token=next_page_token
+                context,
+                next_page_token=paginator.current_value,
             )
             resp = decorated_request(prepared_request, context)
+            self.update_sync_costs(prepared_request, resp, context)
             yield from self.parse_response(resp)
-            previous_token = copy.deepcopy(next_page_token)
-            next_page_token = self.get_next_page_token(
-                response=resp, previous_token=previous_token
-            )
-            if next_page_token and next_page_token == previous_token:
-                raise RuntimeError(
-                    f"Loop detected in pagination. "
-                    f"Pagination token {next_page_token} is identical to prior token."
-                )
-            # Cycle until get_next_page_token() no longer returns a value
-            finished = not next_page_token
+
+            paginator.advance(resp)
+
+    def update_sync_costs(
+        self,
+        request: requests.PreparedRequest,
+        response: requests.Response,
+        context: dict | None,
+    ) -> dict[str, int]:
+        """Update internal calculation of Sync costs.
+
+        Args:
+            request: the Request object that was just called.
+            response: the `requests.Response` object
+            context: the context passed to the call
+
+        Returns:
+            A dict of costs (for the single request) whose keys are
+            the "cost domains". See `calculate_sync_cost` for details.
+        """
+        call_costs = self.calculate_sync_cost(request, response, context)
+        self._sync_costs = {
+            k: self._sync_costs.get(k, 0) + call_costs.get(k, 0)
+            for k in call_costs.keys()
+        }
+        return self._sync_costs
 
     # Overridable:
 
+    def calculate_sync_cost(
+        self,
+        request: requests.PreparedRequest,
+        response: requests.Response,
+        context: dict | None,
+    ) -> dict[str, int]:
+        """Calculate the cost of the last API call made.
+
+        This method can optionally be implemented in streams to calculate
+        the costs (in arbitrary units to be defined by the tap developer)
+        associated with a single API/network call. The request and response objects
+        are available in the callback, as well as the context.
+
+        The method returns a dict where the keys are arbitrary cost dimensions,
+        and the values the cost along each dimension for this one call. For
+        instance: { "rest": 0, "graphql": 42 } for a call to github's graphql API.
+        All keys should be present in the dict.
+
+        This method can be overridden by tap streams. By default it won't do
+        anything.
+
+        Args:
+            request: the API Request object that was just called.
+            response: the `requests.Response` object
+            context: the context passed to the call
+
+        Returns:
+            A dict of accumulated costs whose keys are the "cost domains".
+        """
+        return {}
+
     def prepare_request_payload(
-        self, context: Optional[dict], next_page_token: Optional[Any]
-    ) -> Optional[dict]:
+        self, context: dict | None, next_page_token: _TToken | None
+    ) -> dict | None:
         """Prepare the data payload for the REST API request.
 
         By default, no payload will be sent (return None).
@@ -356,31 +435,24 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """
         return None
 
-    def get_next_page_token(
-        self, response: requests.Response, previous_token: Optional[Any]
-    ) -> Any:
-        """Return token identifying next page or None if all records have been read.
-
-        Args:
-            response: A raw `requests.Response`_ object.
-            previous_token: Previous pagination reference.
+    def get_new_paginator(self) -> BaseAPIPaginator:
+        """Get a fresh paginator for this API endpoint.
 
         Returns:
-            Reference value to retrieve next page.
-
-        .. _requests.Response:
-            https://docs.python-requests.org/en/latest/api/#requests.Response
+            A paginator instance.
         """
-        if self.next_page_token_jsonpath:
-            all_matches = extract_jsonpath(
-                self.next_page_token_jsonpath, response.json()
+        if hasattr(self, "get_next_page_token"):
+            warn(
+                "`RESTStream.get_next_page_token` is deprecated and will not be used "
+                + "in a future version of the Meltano SDK. "
+                + "Override `RESTStream.get_new_paginator` instead.",
+                DeprecationWarning,
             )
-            first_match = next(iter(all_matches), None)
-            next_page_token = first_match
+            return LegacyStreamPaginator(self)  # type: ignore
+        elif self.next_page_token_jsonpath:
+            return JSONPathPaginator(self.next_page_token_jsonpath)
         else:
-            next_page_token = response.headers.get("X-Next-Page", None)
-
-        return next_page_token
+            return SimpleHeaderPaginator("X-Next-Page")
 
     @property
     def http_headers(self) -> dict:
@@ -410,7 +482,7 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
 
     # Records iterator
 
-    def get_records(self, context: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
 
         Each row emitted should be a dictionary of property names to their values.
@@ -438,14 +510,14 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
             One item for every item found in the response.
 
         .. _requests.Response:
-            https://docs.python-requests.org/en/latest/api/#requests.Response
+            https://requests.readthedocs.io/en/latest/api/#requests.Response
         """
         yield from extract_jsonpath(self.records_jsonpath, input=response.json())
 
     # Abstract methods:
 
     @property
-    def authenticator(self) -> Optional[APIAuthenticatorBase]:
+    def authenticator(self) -> APIAuthenticatorBase | None:
         """Return or set the authenticator for managing HTTP auth headers.
 
         If an authenticator is not specified, REST-based taps will simply pass
@@ -470,13 +542,15 @@ class RESTStream(Stream, metaclass=abc.ABCMeta):
         """
         return backoff.expo(factor=2)  # type: ignore # ignore 'Returning Any'
 
-    def backoff_max_tries(self) -> int:
+    def backoff_max_tries(self) -> _MaybeCallable[int] | None:
         """The number of attempts before giving up when retrying requests.
 
-        Setting to None will retry indefinitely.
+        Can be an integer, a zero-argument callable that returns an integer,
+        or ``None`` to retry indefinitely.
 
         Returns:
-            int: limit
+            int | Callable[[], int] | None: Number of max retries, callable or
+            ``None``.
         """
         return 5
 

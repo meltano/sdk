@@ -1,7 +1,9 @@
 """Abstract base class for API-type streams."""
 
+from __future__ import annotations
+
 import abc
-from typing import Any, Optional
+from typing import Any
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.streams.rest import RESTStream
@@ -38,8 +40,8 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
         raise NotImplementedError("GraphQLStream `query` is not defined.")
 
     def prepare_request_payload(
-        self, context: Optional[dict], next_page_token: Optional[Any]
-    ) -> Optional[dict]:
+        self, context: dict | None, next_page_token: Any | None
+    ) -> dict | None:
         """Prepare the data payload for the GraphQL API request.
 
         Developers generally should generally not need to override this method.

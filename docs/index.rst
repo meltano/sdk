@@ -28,7 +28,7 @@ but they can also be used in any data pipeline tool that supports the
 `Singer Spec`_.
 
 The SDK project is 100% open source, licensed under the `Apache 2.0`_
-permissive license. Please visit our code repo `here in Gitlab`_, where you can
+permissive license. Please visit our code repo `here in GitHub`_, where you can
 read the `source code`_, `log an issue or feature request`_, and `contribute back`_
 to the SDK. We also regularly discuss SDK topics in our `Meltano Slack`_ community,
 within the `#singer-tap-development`_ and `#singer-target-development`_ Slack channels.
@@ -74,11 +74,11 @@ Advanced Topics
 .. _Singer Spec: https://hub.meltano.com/singer/spec
 .. _Meltano: https://www.meltano.com
 .. _integrated with Meltano: https://docs.meltano.com/tutorials/custom-extractor#add-the-plugin-to-your-meltano-project
-.. _contribute back: https://gitlab.com/meltano/sdk/-/issues?scope=all&state=opened&label_name[]=Accepting%20Merge%20Requests
-.. _source code: https://gitlab.com/meltano/sdk
-.. _log an issue or feature request: https://gitlab.com/meltano/sdk/-/issues
+.. _contribute back: https://github.com/meltano/sdk/issues?q=is%3Aopen+is%3Aissue+label%3A%22accepting+merge+requests%22
+.. _source code: https://github.com/meltano/sdk
+.. _log an issue or feature request: https://github.com/meltano/sdk/-/issues
 .. _Apache 2.0: https://en.wikipedia.org/wiki/Apache_License
-.. _here in Gitlab: https://gitlab.com/meltano/sdk
+.. _here in GitHub: https://github.com/meltano/sdk
 .. _Meltano Slack: https://join.slack.com/t/meltano/shared_invite/zt-obgpdeba-7yrqKhwyMBfdHDXsZY8G7Q
 .. _#singer-tap-development: https://meltano.slack.com/archives/C01PKLU5D1R
 .. _#singer-target-development: https://meltano.slack.com/archives/C01RKUVUG4S

@@ -5,3 +5,4 @@
 
 .. autoclass:: SQLTarget
     :members:
+    :special-members: __init__

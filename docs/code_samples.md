@@ -15,7 +15,7 @@ or to get more information on what an SDK-based tap or target will look like.
 - [target-athena, Community Project led by Andrew Stewart](https://github.com/dataops-tk/target-athena)
 
 To add your project to this list, please
-[submit an issue](https://gitlab.com/meltano/meltano/-/issues/new?issue%5Bassignee_id%5D=&issue%5Bmilestone_id%5D=).
+[submit an issue](https://github.com/meltano/sdk/issues/new).
 
 ## Reusable Code Snippets
 
@@ -318,9 +318,7 @@ def backoff_wait_generator() -> Callable[..., Generator[int, Any, None]]:
         return int(response_headers.get("Retry-After", 0))
 
     return self.backoff_runtime(value=_backoff_from_headers)
-
 ```
-
 
 ## Additional Resources
 

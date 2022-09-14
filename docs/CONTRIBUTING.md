@@ -2,14 +2,35 @@
 
 _**Note:** The SDK currently works with Python versions 3.7 through 3.10.x. Python 3.6 is no longer supported._
 
+Let's build together! Please see our [Contributor Guide](https://docs.meltano.com/contribute/)
+for more information on contributing to Meltano.
+
+We believe that everyone can contribute and we welcome all contributions.
+If you're not sure what to work on, here are some [ideas to get you started](https://github.com/meltano/sdk/labels/accepting%20pull%20requests).
+
+Chat with us in [#contributing](https://meltano.slack.com/archives/C013Z450LCD) on [Slack](https://meltano.com/slack).
+
+Contributors are expected to follow our [Code of Conduct](https://docs.meltano.com/contribute/#code-of-conduct).
+
 ## Setting up Prereqs
 
-If poetry and pipx are not already installed:
+Make sure [`poetry`](https://python-poetry.org/docs/),
+[`pre-commit`](https://pre-commit.com/) and [`nox`](https://nox.thea.codes/en/stable/)
+are installed. You can use [`pipx`](https://pypa.github.io/pipx/) to install
+all of them. To install `pipx`:
 
 ```bash
 pip3 install pipx
 pipx ensurepath
+```
+
+With `pipx` installed, you globally add the required tools:
+
+```bash
 pipx install poetry
+pipx install pre-commit
+pipx install nox
+pipx inject nox nox-poetry
 ```
 
 Now you can use Poetry to install package dependencies:
@@ -29,85 +50,97 @@ poetry install --no-root
 
 First clone, then...
 
-1. If you are using VS Code, make sure you have also installed the `Python` extension.
-2. Ensure you have the correct test library, formatters, and linters installed:
+1. Ensure you have the correct test library, formatters, and linters installed:
     - `poetry install`
-3. Configure Linting and Formatting Settings:
-    - We use `pytest` for testing (`poetry run pytest`).
-    - We use `black`, `flake8`, `mypy`, and `pydocstyle` as CI linting tests.
-    - We use `coverage` for code coverage metrics.
-    - The project-wide max line length is `89`.
-    - The project has pre-commit hooks. Just run `pre-commit install` and the next time
-      you make a commit, the changes will be linted.
-4. Set interpreter to match poetry's virtualenv:
-    - In VS Code, run `Python: Select interpreter` and select the poetry interpreter.
+1. If you are going to update documentation, install the `docs` extras:
+    - `poetry install -E docs`
+1. The project has `pre-commit` hooks. Install them with:
+    - `pre-commit install`
+1. Most development tasks you might need should be covered by `nox` sessions. You can use `nox -l` to list all available tasks.
+For example:
+
+    - Run unit tests: `nox -r`.
+
+      We use `coverage` for code coverage metrics.
+
+    - Run pre-commit hooks: `pre-commit run --all`.
+
+      We use `black`, `flake8`, `isort`, `mypy` and `pyupgrade`. The project-wide max line length is `88`.
+
+    - Build documentation: `nox -rs docs`
+
+      We use `sphinx` to build documentation.
+
+### If you are using VSCode
+
+1. Make sure you have also installed the `Python` extension.
+1. Set interpreter to match poetry's virtualenv: run
+   `Python: Select interpreter` and select the poetry interpreter.
+1. The [pre-commit extension](https://marketplace.visualstudio.com/items?itemName=MarkLarah.pre-commit-vscode)
+will allow to run pre-commit hooks on the current file from the VSCode command palette.
 
 ## Testing Locally
 
 To run tests:
 
 ```bash
-# Run all tests (external creds required):
-poetry run pytest
 # Run just the core and cookiecutter tests (no external creds required):
-poetry run pytest tests/cookiecutters
-poetry run pytest tests/core
+nox -rs tests
+
+# Run all tests (external creds required):
+nox -rs tests -- -m "external"
 ```
 
-To run tests while gathering coverage metrics:
+To view the code coverage report in HTML format:
 
 ```bash
-# Run with all tests (external creds required):
-poetry run coverage run -m pytest
-# Run with just the core tests (no external creds required):
-poetry run coverage run -m pytest tests/core
-```
-
-To view the code coverage report:
-
-```bash
-# CLI output
-poetry run coverage report
-
-# Or html output:
-poetry run coverage html && open ./htmlcov/index.html
-```
-
-To run all tests:
-
-```bash
-poetry run tox
+nox -rs coverage -- html && open ./htmlcov/index.html
 ```
 
 ## Testing Updates to Docs
 
-Documentation runs on Sphinx, a using ReadtheDocs style template, and hosting from
+Documentation runs on Sphinx, using ReadtheDocs style template, and hosting from
 ReadtheDocs.org. When a push is detected by readthedocs.org, they automatically rebuild
 and republish the docs. ReadtheDocs is also version aware, so it retains prior and unreleased
 versions of the docs for us.
 
-First, make sure your virtual env has all the right tools and versions:
+To build the docs and live-reload them locally:
 
 ```bash
-poetry install
+nox -rs docs-serve
 ```
 
-To build the docs:
+Sphinx will automatically generate class stubs, so be sure to `git add` them.
 
-```bash
-cd docs
-# Build docs
-poetry run make html
-# Open in the local browser:
-open _build/html/index.html
-```
+## Semantic Pull Requests
 
-To build missing stubs:
+This repo uses the [semantic-prs](https://github.com/Ezard/semantic-prs) GitHub app to check all PRs againts the conventional commit syntax.
 
-```bash
-cd docs
-poetry run sphinx-autogen -o classes *.rst
-```
+Pull requests should be named according to the conventional commit syntax to streamline changelog and release notes management. We encourage (but do not require) the use of conventional commits in commit messages as well.
+
+In general, PR titles should follow the format "<type>: <desc>", where type is any one of these:
+
+- `ci`
+- `chore`
+- `build`
+- `docs`
+- `feat`
+- `fix`
+- `perf`
+- `refactor`
+- `revert`
+- `style`
+- `test`
+
+Optionally, you may use the expanded syntax to specify a scope in the form `<type>(<scope>): <desc>`. Currently scopes are:
+
+ scopes:
+  - `taps`       # tap SDK only
+  - `targets`    # target SDK only
+  - `mappers`    # mappers only
+  - `templates`  # cookiecutters
+
+More advanced rules and settings can be found within the file [`.github/semantic.yml`](https://github.com/meltano/sdk/blob/main/.github/semantic.yml).
 
 ## Workspace Development Strategies for the SDK
 

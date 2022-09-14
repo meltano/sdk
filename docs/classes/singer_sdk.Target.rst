@@ -5,3 +5,4 @@
 
 .. autoclass:: Target
     :members:
+    :special-members: __init__

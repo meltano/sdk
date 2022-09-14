@@ -38,25 +38,22 @@ Note:
   here.
 
 """
-from typing import (
-    Any,
-    Dict,
-    Generic,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+
+from __future__ import annotations
+
+import sys
+from typing import Generic, Mapping, TypeVar, Union, cast
 
 import sqlalchemy
 from jsonschema import validators
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._typing import append_type, get_datelike_property_type
+
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
 
 __all__ = [
     "extend_validator_with_defaults",
@@ -87,6 +84,16 @@ __all__ = [
     "ObjectType",
     "CustomType",
     "PropertiesList",
+]
+
+_JsonValue: TypeAlias = Union[
+    str,
+    int,
+    float,
+    bool,
+    list,
+    dict,
+    None,
 ]
 
 
@@ -140,7 +147,7 @@ class JSONTypeHelper:
 class StringType(JSONTypeHelper):
     """String type."""
 
-    string_format: Optional[str] = None
+    string_format: str | None = None
     """String format.
 
     See the [formats built into the JSON Schema\
@@ -317,7 +324,7 @@ W = TypeVar("W", bound=JSONTypeHelper)
 class ArrayType(JSONTypeHelper, Generic[W]):
     """Array type."""
 
-    def __init__(self, wrapped_type: Union[W, Type[W]]) -> None:
+    def __init__(self, wrapped_type: W | type[W]) -> None:
         """Initialize Array type with wrapped inner type.
 
         Args:
@@ -341,9 +348,9 @@ class Property(JSONTypeHelper, Generic[W]):
     def __init__(
         self,
         name: str,
-        wrapped: Union[W, Type[W]],
+        wrapped: W | type[W],
         required: bool = False,
-        default: Any = None,
+        default: _JsonValue = None,
         description: str = None,
     ) -> None:
         """Initialize Property object.
@@ -404,7 +411,7 @@ class ObjectType(JSONTypeHelper):
     def __init__(
         self,
         *properties: Property,
-        additional_properties: Union[W, Type[W], None] = None,
+        additional_properties: W | type[W] | None = None,
     ) -> None:
         """Initialize ObjectType from its list of properties.
 
@@ -413,7 +420,7 @@ class ObjectType(JSONTypeHelper):
             additional_properties: A schema to match against unnamed properties in
                 this object.
         """
-        self.wrapped: List[Property] = list(properties)
+        self.wrapped: list[Property] = list(properties)
         self.additional_properties = additional_properties
 
     @property
@@ -464,7 +471,7 @@ class CustomType(JSONTypeHelper):
 class PropertiesList(ObjectType):
     """Properties list. A convenience wrapper around the ObjectType class."""
 
-    def items(self) -> List[Tuple[str, Property]]:
+    def items(self) -> list[tuple[str, Property]]:
         """Get wrapped properties.
 
         Returns:
@@ -482,9 +489,7 @@ class PropertiesList(ObjectType):
 
 
 def to_jsonschema_type(
-    from_type: Union[
-        str, sqlalchemy.types.TypeEngine, Type[sqlalchemy.types.TypeEngine]
-    ]
+    from_type: str | sqlalchemy.types.TypeEngine | type[sqlalchemy.types.TypeEngine],
 ) -> dict:
     """Return the JSON Schema dict that describes the sql type.
 
@@ -498,7 +503,7 @@ def to_jsonschema_type(
     Returns:
         A compatible JSON Schema type definition.
     """
-    sqltype_lookup: Dict[str, dict] = {
+    sqltype_lookup: dict[str, dict] = {
         # NOTE: This is an ordered mapping, with earlier mappings taking precedence.
         #       If the SQL-provided type contains the type name on the left, the mapping
         #       will return the respective singer type.
@@ -535,7 +540,7 @@ def to_jsonschema_type(
     return sqltype_lookup["string"]  # safe failover to str
 
 
-def _jsonschema_type_check(jsonschema_type: dict, type_check: Tuple[str]) -> bool:
+def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> bool:
     """Return True if the jsonschema_type supports the provided type.
 
     Args:

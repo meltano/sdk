@@ -1,3 +1,7 @@
+# CI
+
+_changelog_fragment.md
+
 # Sphinx documentation
 
 **/_build
@@ -81,4 +85,3 @@ venv.bak/
 .dmypy.json
 dmypy.json
 .DS_Store
-
