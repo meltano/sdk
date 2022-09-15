@@ -1,6 +1,7 @@
 """Typing tests."""
 
 import json
+import sqlite3
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
@@ -105,6 +106,14 @@ def sqlite_sample_target_soft_delete(sqlite_target_test_config):
     """Get a sample target object with hard_delete disabled."""
     conf = sqlite_target_test_config
     conf["hard_delete"] = False
+
+    return SQLiteTarget(conf)
+
+
+@pytest.fixture
+def sqlite_sample_target_batch(sqlite_target_test_config):
+    """Get a sample target object with hard_delete disabled."""
+    conf = sqlite_target_test_config
 
     return SQLiteTarget(conf)
 
@@ -386,6 +395,52 @@ def test_sqlite_column_morph(sqlite_sample_target: SQLTarget):
         target_sync_test(
             sqlite_sample_target, input=StringIO(tap_output_b), finalize=True
         )
+
+
+def test_sqlite_process_batch_message(
+    sqlite_target_test_config: dict,
+    sqlite_sample_target_batch: SQLiteTarget,
+):
+    """Test handling the batch message for the SQLite target.
+
+    Test performs the following actions:
+
+    - Sends a batch message for a table that doesn't exist (which should
+      have no effect)
+    """
+    schema_message = {
+        "type": "SCHEMA",
+        "stream": "users",
+        "key_properties": ["id"],
+        "schema": {
+            "required": ["id"],
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": ["null", "string"]},
+            },
+        },
+    }
+    batch_message = {
+        "type": "BATCH",
+        "stream": "users",
+        "encoding": {"format": "jsonl", "compression": "gzip"},
+        "manifest": [
+            "file://tests/core/resources/batch.1.jsonl.gz",
+            "file://tests/core/resources/batch.2.jsonl.gz",
+        ],
+    }
+    tap_output = "\n".join([json.dumps(schema_message), json.dumps(batch_message)])
+
+    target_sync_test(
+        sqlite_sample_target_batch,
+        input=StringIO(tap_output),
+        finalize=True,
+    )
+    db = sqlite3.connect(sqlite_target_test_config["path_to_db"])
+    cursor = db.cursor()
+    cursor.execute("SELECT COUNT(*) as count FROM users")
+    assert cursor.fetchone()[0] == 4
 
 
 def test_sqlite_column_no_morph(sqlite_sample_target: SQLTarget):

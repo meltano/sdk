@@ -28,3 +28,7 @@ class SampleTapCountries(Tap):
             CountriesStream(tap=self),
             ContinentsStream(tap=self),
         ]
+
+
+if __name__ == "__main__":
+    SampleTapCountries.cli()

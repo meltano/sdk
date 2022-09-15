@@ -51,7 +51,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
     connector_class = {{ cookiecutter.source_name }}Connector
 
     def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
-        """Return a generator of row-type dictionary objects.
+        """Return a generator of record-type dictionary objects.
 
         Developers may optionally add custom logic before calling the default
         implementation inherited from the base class.

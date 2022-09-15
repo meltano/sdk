@@ -1,18 +1,32 @@
 from __future__ import annotations
 
+import enum
 import logging
 from dataclasses import dataclass, fields
-from enum import Enum
-from typing import Any, Dict, Iterable, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Tuple, Union, cast
 
 from singer.catalog import Catalog as BaseCatalog
 from singer.catalog import CatalogEntry as BaseCatalogEntry
 
 from singer_sdk.helpers._schema import SchemaPlus
 
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+
 Breadcrumb = Tuple[str, ...]
 
 logger = logging.getLogger(__name__)
+
+
+class SingerMessageType(str, enum.Enum):
+    """Singer specification message types."""
+
+    RECORD = "RECORD"
+    SCHEMA = "SCHEMA"
+    STATE = "STATE"
+    ACTIVATE_VERSION = "ACTIVATE_VERSION"
+    BATCH = "BATCH"
 
 
 class SelectionMask(Dict[Breadcrumb, bool]):
@@ -35,7 +49,7 @@ class SelectionMask(Dict[Breadcrumb, bool]):
 class Metadata:
     """Base stream or property metadata."""
 
-    class InclusionType(str, Enum):
+    class InclusionType(str, enum.Enum):
         """Catalog inclusion types."""
 
         AVAILABLE = "available"
@@ -51,8 +65,8 @@ class Metadata:
         """Parse metadata dictionary."""
         return cls(
             **{
-                field.name: value.get(field.name.replace("_", "-"))
-                for field in fields(cls)
+                object_field.name: value.get(object_field.name.replace("_", "-"))
+                for object_field in fields(cls)
             }
         )
 
@@ -60,10 +74,10 @@ class Metadata:
         """Convert metadata to a JSON-encodeable dictionary."""
         result = {}
 
-        for field in fields(self):
-            value = getattr(self, field.name)
+        for object_field in fields(self):
+            value = getattr(self, object_field.name)
             if value is not None:
-                result[field.name.replace("_", "-")] = value
+                result[object_field.name.replace("_", "-")] = value
 
         return result
 
@@ -78,13 +92,16 @@ class StreamMetadata(Metadata):
     schema_name: str | None = None
 
 
-class MetadataMapping(Dict[Breadcrumb, Union[Metadata, StreamMetadata]]):
+AnyMetadata: TypeAlias = Union[Metadata, StreamMetadata]
+
+
+class MetadataMapping(Dict[Breadcrumb, AnyMetadata]):
     """Stream metadata mapping."""
 
     @classmethod
     def from_iterable(cls, iterable: Iterable[dict[str, Any]]):
         """Create a metadata mapping from an iterable of metadata dictionaries."""
-        mapping = cls()
+        mapping: dict[Breadcrumb, AnyMetadata] = cls()
         for d in iterable:
             breadcrumb = tuple(d["breadcrumb"])
             metadata = d["metadata"]
