@@ -29,9 +29,9 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
         Developers may optionally add custom logic before calling the default
         implementation inherited from the base class.
         """
-        # Optionally, add custom logic before calling the super().
+        # Optionally, add custom logic before calling the parent SQLConnector method.
         # You may delete this method if overrides are not needed.
-        return super().to_jsonschema_type(sql_type)
+        return SQLConnector.to_jsonschema_type(sql_type)
 
     @staticmethod
     def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
@@ -40,9 +40,9 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
         Developers may optionally add custom logic before calling the default
         implementation inherited from the base class.
         """
-        # Optionally, add custom logic before calling the super().
+        # Optionally, add custom logic before calling the parent SQLConnector method.
         # You may delete this method if overrides are not needed.
-        return super().to_sql_type(jsonschema_type)
+        return SQLConnector.to_sql_type(jsonschema_type)
 
 
 class {{ cookiecutter.source_name }}Stream(SQLStream):
