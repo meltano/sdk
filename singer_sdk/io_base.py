@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import abc
-import enum
 import json
 import logging
 import sys
@@ -12,17 +11,9 @@ from typing import IO
 from typing import Counter as CounterType
 
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._singer import SingerMessageType
 
 logger = logging.getLogger(__name__)
-
-
-class SingerMessageType(str, enum.Enum):
-    """Singer specification message types."""
-
-    RECORD = "RECORD"
-    SCHEMA = "SCHEMA"
-    STATE = "STATE"
-    ACTIVATE_VERSION = "ACTIVATE_VERSION"
 
 
 class SingerReader(metaclass=abc.ABCMeta):
@@ -95,6 +86,9 @@ class SingerReader(metaclass=abc.ABCMeta):
             elif record_type == SingerMessageType.STATE:
                 self._process_state_message(line_dict)
 
+            elif record_type == SingerMessageType.BATCH:
+                self._process_batch_message(line_dict)
+
             else:
                 self._process_unknown_message(line_dict)
 
@@ -116,6 +110,10 @@ class SingerReader(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def _process_activate_version_message(self, message_dict: dict) -> None:
+        ...
+
+    @abc.abstractmethod
+    def _process_batch_message(self, message_dict: dict) -> None:
         ...
 
     def _process_unknown_message(self, message_dict: dict) -> None:
