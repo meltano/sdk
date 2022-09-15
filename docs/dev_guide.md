@@ -197,7 +197,9 @@ An example launch configuration, added to your `launch.json`, might be as follow
       "request": "launch",
       "module": "tap_snowflake.tap",
       "args": ["--config", "config.json", "--discover"],
-      "python": "${command:python.interpreterPath}"
+      "python": "${command:python.interpreterPath}",
+      // Set to true to debug third-party library code
+      "justMyCode": false,
     }
   ]
 }
