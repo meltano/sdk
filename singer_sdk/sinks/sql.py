@@ -1,10 +1,11 @@
 """Sink classes load data to SQL targets."""
 
 from textwrap import dedent
-from typing import Any, Dict, Iterable, List, Optional, Type
+from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
 import sqlalchemy
 from pendulum import now
+from sqlalchemy.sql import Executable
 from sqlalchemy.sql.expression import bindparam
 
 from singer_sdk.plugin_base import PluginBase
@@ -167,7 +168,7 @@ class SQLSink(BatchSink):
         self,
         full_table_name: str,
         schema: dict,
-    ) -> str:
+    ) -> Union[str, Executable]:
         """Generate an insert statement for the given records.
 
         Args:
@@ -213,11 +214,11 @@ class SQLSink(BatchSink):
             full_table_name,
             schema,
         )
+        if isinstance(insert_sql, str):
+            insert_sql = sqlalchemy.text(insert_sql)
+
         self.logger.info("Inserting with SQL: %s", insert_sql)
-        self.connector.connection.execute(
-            sqlalchemy.text(insert_sql),
-            records,
-        )
+        self.connector.connection.execute(insert_sql, records)
         if isinstance(records, list):
             return len(records)  # If list, we can quickly return record count.
 
