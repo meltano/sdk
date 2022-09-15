@@ -64,6 +64,7 @@ Advanced Topics
    parent_streams
    partitioning
    stream_maps
+   batch
    porting
    sinks
    CONTRIBUTING

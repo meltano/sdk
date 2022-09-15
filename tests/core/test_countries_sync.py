@@ -1,7 +1,12 @@
 """Test sample sync."""
 
 import copy
+import io
+import json
 import logging
+from contextlib import redirect_stdout
+from re import I
+from typing import Counter
 
 from samples.sample_tap_countries.countries_tap import SampleTapCountries
 from singer_sdk.helpers._catalog import (
@@ -82,3 +87,47 @@ def test_with_catalog_entry():
         logger=logging.getLogger(),
     )
     assert new_schema == stream.schema
+
+
+def test_batch_mode(monkeypatch, outdir):
+    """Test batch mode."""
+    tap = SampleTapCountries(
+        config={
+            "batch_config": {
+                "encoding": {
+                    "format": "jsonl",
+                    "compression": "gzip",
+                },
+                "storage": {
+                    "root": outdir,
+                    "prefix": "pytest-countries-",
+                },
+            }
+        }
+    )
+
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        tap.sync_all()
+
+    buf.seek(0)
+    lines = buf.read().splitlines()
+    messages = [json.loads(line) for line in lines]
+
+    def tally_messages(messages: list) -> Counter:
+        """Tally messages."""
+        return Counter(
+            (message["type"], message["stream"])
+            if message["type"] != "STATE"
+            else (message["type"],)
+            for message in messages
+        )
+
+    counter = tally_messages(messages)
+    assert counter["SCHEMA", "continents"] == 1
+    assert counter["BATCH", "continents"] == 1
+
+    assert counter["SCHEMA", "countries"] == 1
+    assert counter["BATCH", "countries"] == 1
+
+    assert counter[("STATE",)] == 2
