@@ -4,7 +4,7 @@ import io
 from contextlib import redirect_stderr, redirect_stdout
 from typing import Callable, List, Optional, Tuple, Type, cast
 
-from singer_sdk.helpers import _singer
+import singer_sdk._singerlib as singer
 from singer_sdk.mapper_base import InlineMapper
 from singer_sdk.tap_base import Tap
 from singer_sdk.target_base import Target
@@ -155,7 +155,7 @@ def _select_all(catalog_dict: dict) -> dict:
     Returns:
         dict: [description]
     """
-    catalog = _singer.Catalog.from_dict(catalog_dict)
+    catalog = singer.Catalog.from_dict(catalog_dict)
     for catalog_entry in catalog.streams:
         catalog_entry.metadata.root.selected = True
 

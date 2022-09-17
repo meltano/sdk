@@ -1,9 +1,9 @@
 """Provides an object model for JSON Schema."""
 
-from dataclasses import dataclass
-from typing import Any, List, Optional, Union
+from __future__ import annotations
 
-from singer import Schema
+import typing as t
+from dataclasses import dataclass
 
 # These are keys defined in the JSON Schema spec that do not themselves contain
 # schemas (or lists of schemas)
@@ -30,7 +30,7 @@ STANDARD_KEYS = [
 
 
 @dataclass
-class SchemaPlus(Schema):
+class Schema:
     """Object model for JSON Schema.
 
     Tap and Target authors may find this to be more convenient than
@@ -39,30 +39,33 @@ class SchemaPlus(Schema):
     This is based on, and overwrites
     https://github.com/transferwise/pipelinewise-singer-python/blob/master/singer/schema.py.
     This is because we wanted to expand it with extra STANDARD_KEYS.
-
     """
 
-    type: Optional[Union[str, List[str]]] = None
-    properties: Optional[dict] = None
-    items: Optional[Any] = None
-    description: Optional[str] = None
-    minimum: Optional[float] = None
-    maximum: Optional[float] = None
-    exclusiveMinimum: Optional[float] = None
-    exclusiveMaximum: Optional[float] = None
-    multipleOf: Optional[float] = None
-    maxLength: Optional[int] = None
-    minLength: Optional[int] = None
-    anyOf: Optional[Any] = None
-    format: Optional[str] = None
-    additionalProperties: Optional[Any] = None
-    patternProperties: Optional[Any] = None
-    required: Optional[List[str]] = None
-    enum: Optional[List[Any]] = None
-    title: Optional[str] = None
+    type: str | list[str] | None = None
+    properties: dict | None = None
+    items: t.Any | None = None
+    description: str | None = None
+    minimum: float | None = None
+    maximum: float | None = None
+    exclusiveMinimum: float | None = None
+    exclusiveMaximum: float | None = None
+    multipleOf: float | None = None
+    maxLength: int | None = None
+    minLength: int | None = None
+    anyOf: t.Any | None = None
+    format: str | None = None
+    additionalProperties: t.Any | None = None
+    patternProperties: t.Any | None = None
+    required: list[str] | None = None
+    enum: list[t.Any] | None = None
+    title: str | None = None
 
-    def to_dict(self):
-        """Return the raw JSON Schema as a (possibly nested) dict."""
+    def to_dict(self) -> dict[str, t.Any]:
+        """Return the raw JSON Schema as a (possibly nested) dict.
+
+        Returns:
+            The raw JSON Schema as a (possibly nested) dict.
+        """
         result = {}
 
         if self.properties is not None:
@@ -78,10 +81,15 @@ class SchemaPlus(Schema):
         return result
 
     @classmethod
-    def from_dict(cls, data, **schema_defaults):
+    def from_dict(cls: t.Type[Schema], data: dict, **schema_defaults: t.Any) -> Schema:
         """Initialize a Schema object based on the JSON Schema structure.
 
-        :param schema_defaults: The default values to the Schema constructor.
+        Args:
+            data: The JSON Schema structure.
+            schema_defaults: Default values for the schema.
+
+        Returns:
+            The initialized Schema object.
         """
         kwargs = schema_defaults.copy()
         properties = data.get("properties")
@@ -89,12 +97,11 @@ class SchemaPlus(Schema):
 
         if properties is not None:
             kwargs["properties"] = {
-                k: SchemaPlus.from_dict(v, **schema_defaults)
-                for k, v in properties.items()
+                k: cls.from_dict(v, **schema_defaults) for k, v in properties.items()
             }
         if items is not None:
-            kwargs["items"] = SchemaPlus.from_dict(items, **schema_defaults)
+            kwargs["items"] = cls.from_dict(items, **schema_defaults)
         for key in STANDARD_KEYS:
             if key in data:
                 kwargs[key] = data[key]
-        return SchemaPlus(**kwargs)
+        return cls(**kwargs)

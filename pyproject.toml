@@ -36,7 +36,6 @@ license = "Apache 2.0"
 
 [tool.poetry.dependencies]
 python = "<3.11,>=3.7.1"
-pipelinewise-singer-python = "1.2.0"
 backoff = ">=1.8.0,<2.0"
 pendulum = "^2.1.0"
 click = "~=8.0"
@@ -52,6 +51,9 @@ inflection = "^0.5.1"
 sqlalchemy = "^1.4"
 python-dotenv = ">=0.20,<0.22"
 typing-extensions = "^4.2.0"
+simplejson = "^3.17.6"
+jsonschema = "^4.16.0"
+pytz = "^2022.2.1"
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
@@ -84,7 +86,9 @@ viztracer = "^0.15.4"
 requests-mock = "^1.10.0"
 sqlalchemy2-stubs = {version = "^0.0.2a27", allow-prereleases = true}
 types-python-dateutil = "^2.8.19"
+types-pytz = "^2022.2.1.0"
 types-requests = "^2.28.10"
+types-simplejson = "^3.17.7"
 coverage = {extras = ["toml"], version = "^6.4"}
 
 # Cookiecutter tests
@@ -149,7 +153,7 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     '''class .*\bProtocol\):''',
     '''@(abc\.)?abstractmethod''',
-    "if TYPE_CHECKING:",
+    '''if (t\.)?TYPE_CHECKING:''',
 ]
 fail_under = 82
 
