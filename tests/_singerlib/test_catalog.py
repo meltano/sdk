@@ -1,4 +1,4 @@
-from typing import List, Optional
+from __future__ import annotations
 
 import pytest
 
@@ -240,10 +240,10 @@ def test_catalog_parsing():
 )
 def test_standard_metadata(
     schema: dict,
-    key_properties: List[str],
-    replication_method: Optional[str],
-    valid_replication_keys: Optional[List[str]],
-    schema_name: Optional[str],
+    key_properties: list[str] | None,
+    replication_method: str | None,
+    valid_replication_keys: list[str] | None,
+    schema_name: str | None,
 ):
     """Validate generated metadata."""
     metadata = MetadataMapping.get_standard_metadata(
