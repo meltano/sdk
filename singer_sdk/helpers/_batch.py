@@ -10,7 +10,7 @@ from urllib.parse import ParseResult, parse_qs, urlencode, urlparse
 
 import fs
 
-from singer_sdk.singer import Message, SingerMessageType
+from singer_sdk._singerlib.messages import Message, SingerMessageType
 
 if TYPE_CHECKING:
     from fs.base import FS

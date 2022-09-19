@@ -5,8 +5,8 @@ from datetime import datetime
 import pytest
 from pytz import UTC, timezone
 
-from singer_sdk import singer
-from singer_sdk.singer.messages import format_message
+import singer_sdk._singerlib as singer
+from singer_sdk._singerlib.messages import format_message
 
 
 def test_exclude_null_dict():

@@ -3,8 +3,8 @@
 from pathlib import PurePath
 from typing import Generator, List, Optional, Union
 
+import singer_sdk._singerlib as singer
 import singer_sdk.typing as th
-from singer_sdk import singer
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.mapper_base import InlineMapper

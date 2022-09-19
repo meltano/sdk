@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import pytest
 
-from singer_sdk import singer
+import singer_sdk._singerlib as singer
 from singer_sdk.helpers._catalog import (
     get_selected_schema,
     pop_deselected_record_properties,

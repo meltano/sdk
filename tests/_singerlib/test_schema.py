@@ -1,6 +1,6 @@
 import pytest
 
-from singer_sdk.singer import Schema
+from singer_sdk._singerlib import Schema
 
 STRING_SCHEMA = Schema(type="string", maxLength=32)
 STRING_DICT = {"type": "string", "maxLength": 32}

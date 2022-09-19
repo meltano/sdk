@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 import click
 
+from singer_sdk._singerlib import Catalog
 from singer_sdk.cli import common_options
 from singer_sdk.exceptions import MaxRecordsLimitException
 from singer_sdk.helpers import _state
@@ -22,7 +23,6 @@ from singer_sdk.helpers.capabilities import (
 )
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
-from singer_sdk.singer import Catalog
 from singer_sdk.streams import SQLStream, Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
@@ -242,7 +242,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Return a Catalog object.
 
         Returns:
-            :class:`singer_sdk.singer.Catalog`.
+            :class:`singer_sdk._singerlib.Catalog`.
         """
         return Catalog(
             (stream.tap_stream_id, stream._singer_catalog_entry)

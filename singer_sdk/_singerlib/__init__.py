@@ -1,6 +1,4 @@
-"""Singer Protocol package."""
-
-from singer_sdk.singer.catalog import (
+from singer_sdk._singerlib.catalog import (
     Catalog,
     CatalogEntry,
     Metadata,
@@ -8,7 +6,7 @@ from singer_sdk.singer.catalog import (
     SelectionMask,
     StreamMetadata,
 )
-from singer_sdk.singer.messages import (
+from singer_sdk._singerlib.messages import (
     ActivateVersionMessage,
     Message,
     RecordMessage,
@@ -18,4 +16,4 @@ from singer_sdk.singer.messages import (
     exclude_null_dict,
     write_message,
 )
-from singer_sdk.singer.schema import Schema
+from singer_sdk._singerlib.schema import Schema

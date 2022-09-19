@@ -7,10 +7,10 @@ from typing import Dict, List, Optional, Set, cast
 
 import pytest
 
+from singer_sdk._singerlib import Catalog
 from singer_sdk.exceptions import MapExpressionError
 from singer_sdk.helpers._catalog import get_selected_schema
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
-from singer_sdk.singer import Catalog
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (

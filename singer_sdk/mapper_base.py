@@ -6,7 +6,7 @@ from typing import Callable, Iterable, List, Tuple
 
 import click
 
-from singer_sdk import singer
+import singer_sdk._singerlib as singer
 from singer_sdk.cli import common_options
 from singer_sdk.configuration._dict_config import merge_config_sources
 from singer_sdk.helpers._classproperty import classproperty

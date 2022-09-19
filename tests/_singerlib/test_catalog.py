@@ -2,7 +2,7 @@ from typing import List, Optional
 
 import pytest
 
-from singer_sdk.singer import (
+from singer_sdk._singerlib import (
     Catalog,
     CatalogEntry,
     Metadata,

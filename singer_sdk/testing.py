@@ -4,7 +4,7 @@ import io
 from contextlib import redirect_stderr, redirect_stdout
 from typing import Callable, List, Optional, Tuple, Type, cast
 
-from singer_sdk import singer
+import singer_sdk._singerlib as singer
 from singer_sdk.mapper_base import InlineMapper
 from singer_sdk.tap_base import Tap
 from singer_sdk.target_base import Target
