@@ -16,4 +16,4 @@ from singer_sdk._singerlib.messages import (
     exclude_null_dict,
     write_message,
 )
-from singer_sdk._singerlib.schema import Schema
+from singer_sdk._singerlib.schema import Schema, resolve_schema_references
