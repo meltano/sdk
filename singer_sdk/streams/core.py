@@ -18,7 +18,7 @@ from uuid import uuid4
 import pendulum
 import requests
 
-import singer_sdk._singerlib as singer
+from singer_sdk import singer
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,

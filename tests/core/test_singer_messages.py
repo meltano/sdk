@@ -1,7 +1,7 @@
 import pytest
 
-from singer_sdk._singerlib import SingerMessageType
 from singer_sdk.helpers._batch import JSONLinesEncoding, SDKBatchMessage
+from singer_sdk.singer import SingerMessageType
 
 
 @pytest.mark.parametrize(

@@ -2,8 +2,8 @@
 from typing import Optional
 
 from samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
-from singer_sdk._singerlib import Catalog
 from singer_sdk.helpers import _catalog
+from singer_sdk.singer import Catalog
 
 COUNTER = 0
 SAMPLE_CONFIG_BAD = {"not": "correct"}

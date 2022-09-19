@@ -13,9 +13,9 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.engine.reflection import Inspector
 
 from singer_sdk import typing as th
-from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
+from singer_sdk.singer import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.streams.core import Stream
 
 

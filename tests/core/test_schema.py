@@ -29,7 +29,7 @@ Some might need more thinking if they can contain schemas (though, note that we 
 'anyOf' and' patternProperties' as SIMPLE even though they can contain schemas.
 """
 
-from singer_sdk._singerlib import Schema
+from singer_sdk.singer import Schema
 
 
 def test_simple_schema():

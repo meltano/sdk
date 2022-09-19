@@ -11,7 +11,6 @@ import hashlib
 import logging
 from typing import Any, Callable
 
-from singer_sdk._singerlib.catalog import Catalog
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
 from singer_sdk.helpers import _simpleeval as simpleeval
 from singer_sdk.helpers._catalog import get_selected_schema
@@ -21,6 +20,7 @@ from singer_sdk.helpers._flattening import (
     flatten_schema,
     get_flattening_options,
 )
+from singer_sdk.singer import Catalog
 from singer_sdk.typing import (
     CustomType,
     IntegerType,
