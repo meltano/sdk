@@ -15,10 +15,13 @@ from types import MappingProxyType
 from typing import Any, Callable, Generator, Iterable, Iterator, Mapping, TypeVar, cast
 from uuid import uuid4
 
+from memoization import cached
 import pendulum
 import requests
 import singer
-from singer import RecordMessage, Schema, SchemaMessage, StateMessage
+from singer import (
+    RecordMessage, Schema, SchemaMessage, StateMessage, ActivateVersionMessage
+)
 
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
 from singer_sdk.helpers._batch import (
@@ -164,6 +167,32 @@ class Stream(metaclass=abc.ABCMeta):
                 f"Could not initialize schema for stream '{self.name}'. "
                 "A valid schema object or filepath was not provided."
             )
+
+    def sync_start_time(context: dict | None = None) -> datetime.datetime:
+        """Return the sync start time for the stream or a specific context.
+
+        If context is None or omitted, the start time of the stream will be returned.
+ 
+        Note: checking the start time also sets its value. Results are cached after
+        first access.
+
+        Args:
+            context: The specific stream context to check, or None to check the stream.
+
+        Returns:
+            The stream start time or the context start time if a context is requested.
+        """
+        if not context:
+            return self.sync_start_time()
+
+        # Make sure to initialize the stream-wide start time if it has not been set.
+        _ = self.sync_start_time()
+        return self.sync_start_time(context)
+
+    @cached
+    def _sync_start_time(context: dict | None = None) -> datetime.datetime:
+        """Cached private method to initialize and get sync start times."""
+        return pendulum.utcnow()
 
     @property
     def stream_maps(self) -> list[StreamMap]:
@@ -376,10 +405,9 @@ class Stream(metaclass=abc.ABCMeta):
     ) -> datetime.datetime | Any | None:
         """Get the replication signpost.
 
-        For timestamp-based replication keys, this defaults to `utc_now()`. For
-        non-timestamp replication keys, default to `None`. For consistency in subsequent
-        calls, the value will be frozen (cached) at its initially called state, per
-        partition argument if applicable.
+        For timestamp replication keys, default to `self.stream_start_time(context)`.
+        For non-timestamp replication keys, default to `None`. The value per each
+        context will be cached by the calling function.
 
         Developers may optionally override this method in advanced use cases such
         as unsorted incremental streams or complex hierarchical stream scenarios.
@@ -392,7 +420,7 @@ class Stream(metaclass=abc.ABCMeta):
             Max allowable bookmark value for this stream's replication key.
         """
         if self.is_timestamp_replication_key:
-            return utc_now()
+            return self.stream_start_time(context)
 
         return None
 
@@ -743,6 +771,10 @@ class Stream(metaclass=abc.ABCMeta):
         """Write out a STATE message with the latest state."""
         singer.write_message(StateMessage(value=self.tap_state))
 
+    def _write_activate_version_message(self, full_table_version: int) -> None:
+        """Write out an ACTIVATE_VERSION message."""
+        singer.write_message(ActivateVersionMessage(full_table_version))
+
     def _generate_schema_messages(self) -> Generator[SchemaMessage, None, None]:
         """Generate schema messages from stream maps.
 
@@ -783,11 +815,13 @@ class Stream(metaclass=abc.ABCMeta):
     def _generate_record_messages(
         self,
         record: dict,
+        full_table_version: int | None,
     ) -> Generator[RecordMessage, None, None]:
         """Write out a RECORD message.
 
         Args:
             record: A single stream record.
+            full_table_version: The table version if syncing as 'FULL_TABLE'.
 
         Yields:
             Record message objects.
@@ -806,19 +840,24 @@ class Stream(metaclass=abc.ABCMeta):
                 record_message = RecordMessage(
                     stream=stream_map.stream_alias,
                     record=mapped_record,
-                    version=None,
+                    version=full_table_version,
                     time_extracted=utc_now(),
                 )
 
                 yield record_message
 
-    def _write_record_message(self, record: dict) -> None:
+    def _write_record_message(
+        self, record: dict, full_table_version: int | None
+    ) -> None:
         """Write out a RECORD message.
 
         Args:
             record: A single stream record.
+            full_table_version: The table version if syncing as 'FULL_TABLE'.
         """
-        for record_message in self._generate_record_messages(record):
+        for record_message in self._generate_record_messages(
+            record, full_table_version
+        ):
             singer.write_message(record_message)
 
     def _write_batch_message(
@@ -1054,6 +1093,10 @@ class Stream(metaclass=abc.ABCMeta):
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
+        full_table_version: int | None = None
+        if self.replication_method == REPLICATION_FULL_TABLE:
+            full_table_version = int(self.sync_start_time().timestamp())
+
         for current_context in context_list or [{}]:
             partition_record_count = 0
             current_context = current_context or None
@@ -1096,7 +1139,7 @@ class Stream(metaclass=abc.ABCMeta):
                     ) % self.STATE_MSG_FREQUENCY == 0 and write_messages:
                         self._write_state_message()
                     if write_messages:
-                        self._write_record_message(record)
+                        self._write_record_message(record, full_table_version)
                     self._increment_stream_state(record, context=current_context)
 
                     yield record
@@ -1148,10 +1191,19 @@ class Stream(metaclass=abc.ABCMeta):
             msg += f" with context: {context}"
         self.logger.info(f"{msg}...")
 
-        # Use a replication signpost, if available
-        signpost = self.get_replication_key_signpost(context)
+        # Get sync start time for the stream and context
+        stream_start_time: datetime.datetime = self.sync_start_time()
+        sync_start_time: datetime.datetime = self.sync_start_time(context)
+
+        # Set the max replication signpost, if available
+        signpost = self.get_replication_key_signpost(context, sync_start_time)
         if signpost:
             self._write_replication_key_signpost(context, signpost)
+
+        # Initialize full table version ID if applicable
+        full_table_version: int | None = None
+        if self.replication_method == REPLICATION_FULL_TABLE:
+            full_table_version = int(stream_start_time).timestamp()
 
         # Send a SCHEMA message to the downstream target:
         if self.selected:
@@ -1164,6 +1216,9 @@ class Stream(metaclass=abc.ABCMeta):
             # Sync the records themselves:
             for _ in self._sync_records(context=context):
                 pass
+
+        if self.replication_method == REPLICATION_FULL_TABLE:
+            self._write_activate_version_message(full_table_version)
 
     def _sync_children(self, child_context: dict) -> None:
         for child_stream in self.child_streams:
