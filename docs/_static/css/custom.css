@@ -50,8 +50,7 @@ a:hover {
 
 .wy-side-nav-search > a::after {
   display: inline-block;
-  content: "SDK";
-  letter-spacing: -1px;
+  content: "| SDK";
 }
 
 .wy-side-nav-search > div.version {
