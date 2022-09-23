@@ -40,6 +40,8 @@ def mypy(session: Session) -> None:
         "sqlalchemy2-stubs",
         "types-python-dateutil",
         "types-requests",
+        "types-pytz",
+        "types-simplejson",
     )
     session.run("mypy", *args)
     if not session.posargs:
@@ -126,3 +128,25 @@ def docs(session: Session) -> None:
         shutil.rmtree(build_dir)
 
     session.run("sphinx-build", *args)
+
+
+@session(name="docs-serve", python=main_python_version)
+def docs_serve(session: Session) -> None:
+    """Build the documentation."""
+    args = session.posargs or [
+        "--open-browser",
+        "--watch",
+        ".",
+        "--ignore",
+        "**/.nox/*",
+        "docs",
+        "build",
+        "-W",
+    ]
+    session.install(".[docs]")
+
+    build_dir = Path("build")
+    if build_dir.exists():
+        shutil.rmtree(build_dir)
+
+    session.run("sphinx-autobuild", *args)

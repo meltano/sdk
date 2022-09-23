@@ -5,3 +5,4 @@
 
 .. autoclass:: InlineMapper
     :members:
+    :special-members: __init__

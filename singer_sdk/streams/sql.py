@@ -1,19 +1,20 @@
 """Base class for SQL-type streams."""
 
+from __future__ import annotations
+
 import abc
 import logging
 from datetime import datetime
 from functools import lru_cache
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union, cast
+from typing import Any, Iterable, cast
 
-import singer
 import sqlalchemy
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.reflection import Inspector
 
 from singer_sdk import typing as th
+from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
-from singer_sdk.helpers._singer import CatalogEntry, MetadataMapping
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 
@@ -39,7 +40,7 @@ class SQLConnector:
     allow_temp_tables: bool = True  # Whether temp tables are supported.
 
     def __init__(
-        self, config: Optional[dict] = None, sqlalchemy_url: Optional[str] = None
+        self, config: dict | None = None, sqlalchemy_url: str | None = None
     ) -> None:
         """Initialize the SQL connector.
 
@@ -47,9 +48,9 @@ class SQLConnector:
             config: The parent tap or target object's config.
             sqlalchemy_url: Optional URL for the connection.
         """
-        self._config: Dict[str, Any] = config or {}
-        self._sqlalchemy_url: Optional[str] = sqlalchemy_url or None
-        self._connection: Optional[sqlalchemy.engine.Connection] = None
+        self._config: dict[str, Any] = config or {}
+        self._sqlalchemy_url: str | None = sqlalchemy_url or None
+        self._connection: sqlalchemy.engine.Connection | None = None
 
     @property
     def config(self) -> dict:
@@ -124,7 +125,7 @@ class SQLConnector:
 
         return self._sqlalchemy_url
 
-    def get_sqlalchemy_url(self, config: Dict[str, Any]) -> str:
+    def get_sqlalchemy_url(self, config: dict[str, Any]) -> str:
         """Return the SQLAlchemy URL string.
 
         Developers can generally override just one of the following:
@@ -148,9 +149,9 @@ class SQLConnector:
 
     @staticmethod
     def to_jsonschema_type(
-        sql_type: Union[
-            str, sqlalchemy.types.TypeEngine, Type[sqlalchemy.types.TypeEngine], Any
-        ]
+        sql_type: (
+            str | sqlalchemy.types.TypeEngine | type[sqlalchemy.types.TypeEngine] | Any
+        ),
     ) -> dict:
         """Return a JSON Schema representation of the provided type.
 
@@ -204,8 +205,8 @@ class SQLConnector:
     @staticmethod
     def get_fully_qualified_name(
         table_name: str,
-        schema_name: Optional[str] = None,
-        db_name: Optional[str] = None,
+        schema_name: str | None = None,
+        db_name: str | None = None,
         delimiter: str = ".",
     ) -> str:
         """Concatenates a fully qualified name from the parts.
@@ -291,7 +292,7 @@ class SQLConnector:
             "Streams list may be incomplete or `is_view` may be unpopulated."
         )
 
-    def get_schema_names(self, engine: Engine, inspected: Inspector) -> List[str]:
+    def get_schema_names(self, engine: Engine, inspected: Inspector) -> list[str]:
         """Return a list of schema names in DB.
 
         Args:
@@ -305,7 +306,7 @@ class SQLConnector:
 
     def get_object_names(
         self, engine: Engine, inspected: Inspector, schema_name: str
-    ) -> List[Tuple[str, bool]]:
+    ) -> list[tuple[str, bool]]:
         """Return a list of syncable objects.
 
         Args:
@@ -360,7 +361,7 @@ class SQLConnector:
         )
 
         # Detect key properties
-        possible_primary_keys: List[List[str]] = []
+        possible_primary_keys: list[list[str]] = []
         pk_def = inspected.get_pk_constraint(table_name, schema=schema_name)
         if pk_def and "constrained_columns" in pk_def:
             possible_primary_keys.append(pk_def["constrained_columns"])
@@ -387,7 +388,7 @@ class SQLConnector:
         schema = table_schema.to_dict()
 
         # Initialize available replication methods
-        addl_replication_methods: List[str] = [""]  # By default an empty list.
+        addl_replication_methods: list[str] = [""]  # By default an empty list.
         # Notes regarding replication methods:
         # - 'INCREMENTAL' replication must be enabled by the user by specifying
         #   a replication_key value.
@@ -401,7 +402,7 @@ class SQLConnector:
             stream=unique_stream_id,
             table=table_name,
             key_properties=key_properties,
-            schema=singer.Schema.from_dict(schema),
+            schema=Schema.from_dict(schema),
             is_view=is_view,
             replication_method=replication_method,
             metadata=MetadataMapping.get_standard_metadata(
@@ -419,13 +420,13 @@ class SQLConnector:
 
         return catalog_entry
 
-    def discover_catalog_entries(self) -> List[dict]:
+    def discover_catalog_entries(self) -> list[dict]:
         """Return a list of catalog entries from discovery.
 
         Returns:
             The discovered catalog entries as a list.
         """
-        result: List[dict] = []
+        result: list[dict] = []
         engine = self.create_sqlalchemy_engine()
         inspected = sqlalchemy.inspect(engine)
         for schema_name in self.get_schema_names(engine, inspected):
@@ -442,7 +443,7 @@ class SQLConnector:
 
     def parse_full_table_name(
         self, full_table_name: str
-    ) -> Tuple[Optional[str], Optional[str], str]:
+    ) -> tuple[str | None, str | None, str]:
         """Parse a fully qualified table name into its parts.
 
         Developers may override this method if their platform does not support the
@@ -460,8 +461,8 @@ class SQLConnector:
             A three part tuple (db_name, schema_name, table_name) with any unspecified
             or unused parts returned as None.
         """
-        db_name: Optional[str] = None
-        schema_name: Optional[str] = None
+        db_name: str | None = None
+        schema_name: str | None = None
 
         parts = full_table_name.split(".")
         if len(parts) == 1:
@@ -487,7 +488,7 @@ class SQLConnector:
             sqlalchemy.inspect(self._engine).has_table(full_table_name),
         )
 
-    def get_table_columns(self, full_table_name: str) -> Dict[str, sqlalchemy.Column]:
+    def get_table_columns(self, full_table_name: str) -> dict[str, sqlalchemy.Column]:
         """Return a list of table columns.
 
         Args:
@@ -500,7 +501,7 @@ class SQLConnector:
         inspector = sqlalchemy.inspect(self._engine)
         columns = inspector.get_columns(table_name, schema_name)
 
-        result: Dict[str, sqlalchemy.Column] = {}
+        result: dict[str, sqlalchemy.Column] = {}
         for col_meta in columns:
             result[col_meta["name"]] = sqlalchemy.Column(
                 col_meta["name"],
@@ -542,8 +543,8 @@ class SQLConnector:
         self,
         full_table_name: str,
         schema: dict,
-        primary_keys: Optional[List[str]] = None,
-        partition_keys: Optional[List[str]] = None,
+        primary_keys: list[str] | None = None,
+        partition_keys: list[str] | None = None,
         as_temp_table: bool = False,
     ) -> None:
         """Create an empty target table.
@@ -565,7 +566,7 @@ class SQLConnector:
         _ = partition_keys  # Not supported in generic implementation.
 
         meta = sqlalchemy.MetaData()
-        columns: List[sqlalchemy.Column] = []
+        columns: list[sqlalchemy.Column] = []
         primary_keys = primary_keys or []
         try:
             properties: dict = schema["properties"]
@@ -625,8 +626,8 @@ class SQLConnector:
         self,
         full_table_name: str,
         schema: dict,
-        primary_keys: List[str],
-        partition_keys: Optional[List[str]] = None,
+        primary_keys: list[str],
+        partition_keys: list[str] | None = None,
         as_temp_table: bool = False,
     ) -> None:
         """Adapt target table to provided schema if possible.
@@ -700,7 +701,7 @@ class SQLConnector:
         )
 
     def merge_sql_types(
-        self, sql_types: List[sqlalchemy.types.TypeEngine]
+        self, sql_types: list[sqlalchemy.types.TypeEngine]
     ) -> sqlalchemy.types.TypeEngine:
         """Return a compatible SQL type for the selected type list.
 
@@ -719,27 +720,53 @@ class SQLConnector:
         if len(sql_types) == 1:
             return sql_types[0]
 
+        # Gathering Type to match variables
+        # sent in _adapt_column_type
+        current_type = sql_types[0]
+        # sql_type = sql_types[1]
+
+        # Getting the length of each type
+        # current_type_len: int = getattr(sql_types[0], "length", 0)
+        sql_type_len: int = getattr(sql_types[1], "length", 0)
+        if sql_type_len is None:
+            sql_type_len = 0
+
+        # Convert the two types given into a sorted list
+        # containing the best conversion classes
         sql_types = self._sort_types(sql_types)
 
+        # If greater than two evaluate the first pair then on down the line
         if len(sql_types) > 2:
             return self.merge_sql_types(
                 [self.merge_sql_types([sql_types[0], sql_types[1]])] + sql_types[2:]
             )
 
         assert len(sql_types) == 2
-        generic_type = type(sql_types[0].as_generic())
-        if isinstance(generic_type, type):
-            if issubclass(
-                generic_type,
-                (sqlalchemy.types.String, sqlalchemy.types.Unicode),
-            ):
-                return sql_types[0]
+        # Get the generic type class
+        for opt in sql_types:
+            # Get the length
+            opt_len: int = getattr(opt, "length", 0)
+            generic_type = type(opt.as_generic())
 
-        elif isinstance(
-            generic_type,
-            (sqlalchemy.types.String, sqlalchemy.types.Unicode),
-        ):
-            return sql_types[0]
+            if isinstance(generic_type, type):
+                if issubclass(
+                    generic_type,
+                    (sqlalchemy.types.String, sqlalchemy.types.Unicode),
+                ):
+                    # If length None or 0 then is varchar max ?
+                    if (opt_len is None) or (opt_len == 0):
+                        return opt
+                elif isinstance(
+                    generic_type,
+                    (sqlalchemy.types.String, sqlalchemy.types.Unicode),
+                ):
+                    # If length None or 0 then is varchar max ?
+                    if (opt_len is None) or (opt_len == 0):
+                        return opt
+                # If best conversion class is equal to current type
+                # return the best conversion class
+                elif str(opt) == str(current_type):
+                    return opt
 
         raise ValueError(
             f"Unable to merge sql types: {', '.join([str(t) for t in sql_types])}"
@@ -748,7 +775,7 @@ class SQLConnector:
     def _sort_types(
         self,
         sql_types: Iterable[sqlalchemy.types.TypeEngine],
-    ) -> List[sqlalchemy.types.TypeEngine]:
+    ) -> list[sqlalchemy.types.TypeEngine]:
         """Return the input types sorted from most to least compatible.
 
         For example, [Smallint, Integer, Datetime, String, Double] would become
@@ -766,7 +793,7 @@ class SQLConnector:
 
         def _get_type_sort_key(
             sql_type: sqlalchemy.types.TypeEngine,
-        ) -> Tuple[int, int]:
+        ) -> tuple[int, int]:
             # return rank, with higher numbers ranking first
 
             _len = int(getattr(sql_type, "length", 0) or 0)
@@ -825,9 +852,21 @@ class SQLConnector:
         Raises:
             NotImplementedError: if altering columns is not supported.
         """
-        current_type = self._get_column_type(full_table_name, column_name)
+        current_type: sqlalchemy.types.TypeEngine = self._get_column_type(
+            full_table_name, column_name
+        )
+
+        # Check if the existing column type and the sql type are the same
+        if str(sql_type) == str(current_type):
+            # The current column and sql type are the same
+            # Nothing to do
+            return
+
+        # Not the same type, generic type or compatible types
+        # calling merge_sql_types for assistnace
         compatible_sql_type = self.merge_sql_types([current_type, sql_type])
-        if current_type == compatible_sql_type:
+
+        if str(compatible_sql_type) == str(current_type):
             # Nothing to do
             return
 
@@ -859,7 +898,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         self,
         tap: TapBaseClass,
         catalog_entry: dict,
-        connector: Optional[SQLConnector] = None,
+        connector: SQLConnector | None = None,
     ) -> None:
         """Initialize the database stream.
 
@@ -938,7 +977,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self._singer_catalog_entry.tap_stream_id
 
     @property
-    def primary_keys(self) -> Optional[List[str]]:
+    def primary_keys(self) -> list[str] | None:
         """Get primary keys from the catalog entry definition.
 
         Returns:
@@ -947,7 +986,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self._singer_catalog_entry.metadata.root.table_key_properties or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: List[str]) -> None:
+    def primary_keys(self, new_value: list[str]) -> None:
         """Set or reset the primary key(s) in the stream's catalog entry.
 
         Args:
@@ -979,8 +1018,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
     # Get records from stream
 
-    def get_records(self, context: Optional[dict]) -> Iterable[Dict[str, Any]]:
-        """Return a generator of row-type dictionary objects.
+    def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
+        """Return a generator of record-type dictionary objects.
 
         If the stream has a replication_key value defined, records will be sorted by the
         incremental key. If the stream also has an available starting bookmark, the
@@ -1016,8 +1055,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                     )
                 )
 
-        for row in self.connector.connection.execute(query):
-            yield dict(row)
+        for record in self.connector.connection.execute(query):
+            yield dict(record)
 
 
 __all__ = ["SQLStream", "SQLConnector"]

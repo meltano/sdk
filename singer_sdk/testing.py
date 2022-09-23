@@ -4,7 +4,7 @@ import io
 from contextlib import redirect_stderr, redirect_stdout
 from typing import Callable, List, Optional, Tuple, Type, cast
 
-from singer_sdk.helpers import _singer
+import singer_sdk._singerlib as singer
 from singer_sdk.mapper_base import InlineMapper
 from singer_sdk.tap_base import Tap
 from singer_sdk.target_base import Target
@@ -40,7 +40,52 @@ def get_standard_tap_tests(tap_class: Type[Tap], config: dict = None) -> List[Ca
         tap1: Tap = tap_class(config=config, parse_env_config=True)
         tap1.run_connection_test()
 
-    return [_test_cli_prints, _test_discovery, _test_stream_connections]
+    def _test_pkeys_in_schema() -> None:
+        """Verify that primary keys are actually in the stream's schema."""
+        tap = tap_class(config=config, parse_env_config=True)
+        for name, stream in tap.streams.items():
+            pkeys = stream.primary_keys or []
+            schema_props = set(stream.schema["properties"].keys())
+            for pkey in pkeys:
+                error_message = (
+                    f"Coding error in stream '{name}': "
+                    f"primary_key '{pkey}' is missing in schema"
+                )
+                assert pkey in schema_props, error_message
+
+    def _test_state_partitioning_keys_in_schema() -> None:
+        """Verify that state partitioning keys are actually in the stream's schema."""
+        tap = tap_class(config=config, parse_env_config=True)
+        for name, stream in tap.streams.items():
+            sp_keys = stream.state_partitioning_keys or []
+            schema_props = set(stream.schema["properties"].keys())
+            for sp_key in sp_keys:
+                assert sp_key in schema_props, (
+                    f"Coding error in stream '{name}': state_partitioning_key "
+                    f"'{sp_key}' is missing in schema"
+                )
+
+    def _test_replication_keys_in_schema() -> None:
+        """Verify that the replication key is actually in the stream's schema."""
+        tap = tap_class(config=config, parse_env_config=True)
+        for name, stream in tap.streams.items():
+            rep_key = stream.replication_key
+            if rep_key is None:
+                continue
+            schema_props = set(stream.schema["properties"].keys())
+            assert rep_key in schema_props, (
+                f"Coding error in stream '{name}': replication_key "
+                f"'{rep_key}' is missing in schema"
+            )
+
+    return [
+        _test_cli_prints,
+        _test_discovery,
+        _test_stream_connections,
+        _test_pkeys_in_schema,
+        _test_state_partitioning_keys_in_schema,
+        _test_replication_keys_in_schema,
+    ]
 
 
 def get_standard_target_tests(
@@ -110,7 +155,7 @@ def _select_all(catalog_dict: dict) -> dict:
     Returns:
         dict: [description]
     """
-    catalog = _singer.Catalog.from_dict(catalog_dict)
+    catalog = singer.Catalog.from_dict(catalog_dict)
     for catalog_entry in catalog.streams:
         catalog_entry.metadata.root.selected = True
 

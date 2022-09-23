@@ -11,6 +11,8 @@ per-file-ignores =
     singer_sdk/helpers/_*.py:ANN,DAR,D105
     # Don't require docstrings conventions in "meta" code
     # singer_sdk/helpers/_classproperty.py:D105
+    # Ignore unused imports in __init__.py files
+    singer_sdk/_singerlib/__init__.py:F401
 max-complexity = 10
 docstring-convention = google
 allow-star-arg-any = true

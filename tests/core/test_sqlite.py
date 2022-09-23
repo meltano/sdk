@@ -1,9 +1,11 @@
 """Typing tests."""
 
 import json
+import sqlite3
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
+from textwrap import dedent
 from typing import Dict, cast
 from uuid import uuid4
 
@@ -11,10 +13,10 @@ import pytest
 
 from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
 from samples.sample_target_csv.csv_target import SampleTargetCSV
-from samples.sample_target_sqlite import SQLiteTarget
+from samples.sample_target_sqlite import SQLiteSink, SQLiteTarget
 from singer_sdk import SQLStream
 from singer_sdk import typing as th
-from singer_sdk.helpers._singer import Catalog, MetadataMapping, StreamMetadata
+from singer_sdk._singerlib import Catalog, MetadataMapping, StreamMetadata
 from singer_sdk.tap_base import SQLTap
 from singer_sdk.target_base import SQLTarget
 from singer_sdk.testing import (
@@ -104,6 +106,14 @@ def sqlite_sample_target_soft_delete(sqlite_target_test_config):
     """Get a sample target object with hard_delete disabled."""
     conf = sqlite_target_test_config
     conf["hard_delete"] = False
+
+    return SQLiteTarget(conf)
+
+
+@pytest.fixture
+def sqlite_sample_target_batch(sqlite_target_test_config):
+    """Get a sample target object with hard_delete disabled."""
+    conf = sqlite_target_test_config
 
     return SQLiteTarget(conf)
 
@@ -387,6 +397,52 @@ def test_sqlite_column_morph(sqlite_sample_target: SQLTarget):
         )
 
 
+def test_sqlite_process_batch_message(
+    sqlite_target_test_config: dict,
+    sqlite_sample_target_batch: SQLiteTarget,
+):
+    """Test handling the batch message for the SQLite target.
+
+    Test performs the following actions:
+
+    - Sends a batch message for a table that doesn't exist (which should
+      have no effect)
+    """
+    schema_message = {
+        "type": "SCHEMA",
+        "stream": "users",
+        "key_properties": ["id"],
+        "schema": {
+            "required": ["id"],
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": ["null", "string"]},
+            },
+        },
+    }
+    batch_message = {
+        "type": "BATCH",
+        "stream": "users",
+        "encoding": {"format": "jsonl", "compression": "gzip"},
+        "manifest": [
+            "file://tests/core/resources/batch.1.jsonl.gz",
+            "file://tests/core/resources/batch.2.jsonl.gz",
+        ],
+    }
+    tap_output = "\n".join([json.dumps(schema_message), json.dumps(batch_message)])
+
+    target_sync_test(
+        sqlite_sample_target_batch,
+        input=StringIO(tap_output),
+        finalize=True,
+    )
+    db = sqlite3.connect(sqlite_target_test_config["path_to_db"])
+    cursor = db.cursor()
+    cursor.execute("SELECT COUNT(*) as count FROM users")
+    assert cursor.fetchone()[0] == 4
+
+
 def test_sqlite_column_no_morph(sqlite_sample_target: SQLTarget):
     """End-to-end-to-end test for SQLite tap and target.
 
@@ -431,3 +487,49 @@ def test_sqlite_column_no_morph(sqlite_sample_target: SQLTarget):
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output_a), finalize=True)
     # Int should be inserted as string.
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output_b), finalize=True)
+
+
+@pytest.mark.parametrize(
+    "stream_name,schema,key_properties,expected_dml",
+    [
+        (
+            "test_stream",
+            {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer"},
+                    "name": {"type": "string"},
+                },
+            },
+            [],
+            dedent(
+                """\
+                INSERT INTO test_stream
+                (id, name)
+                VALUES (:id, :name)"""
+            ),
+        ),
+    ],
+    ids=[
+        "no_key_properties",
+    ],
+)
+def test_sqlite_generate_insert_statement(
+    sqlite_sample_target: SQLiteTarget,
+    stream_name: str,
+    schema: dict,
+    key_properties: list,
+    expected_dml: str,
+):
+    sink = SQLiteSink(
+        sqlite_sample_target,
+        stream_name=stream_name,
+        schema=schema,
+        key_properties=key_properties,
+    )
+
+    dml = sink.generate_insert_statement(
+        sink.full_table_name,
+        sink.schema,
+    )
+    assert dml == expected_dml

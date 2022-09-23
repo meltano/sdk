@@ -13,7 +13,6 @@ import jwt
 import requests
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
-from singer import utils
 
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.streams import Stream as RESTStreamBase
@@ -94,6 +93,18 @@ class APIAuthenticatorBase:
             URL query parameters for authentication.
         """
         return self._auth_params or {}
+
+    def authenticate_request(self, request: requests.Request) -> None:
+        """Authenticate a request.
+
+        Args:
+            request: A `request object`_.
+
+        .. _request object:
+            https://requests.readthedocs.io/en/latest/api/#requests.Request
+        """
+        request.headers.update(self.auth_headers)
+        request.params.update(self.auth_params)
 
 
 class SimpleAuthenticator(APIAuthenticatorBase):
@@ -414,7 +425,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             return False
         if not self.expires_in:
             return True
-        if self.expires_in > (utils.now() - self.last_refreshed).total_seconds():
+        if self.expires_in > (utc_now() - self.last_refreshed).total_seconds():
             return True
         return False
 

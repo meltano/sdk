@@ -15,7 +15,7 @@ from singer_sdk.helpers._typing import (
 
 
 @pytest.mark.parametrize(
-    "row,schema,expected_row",
+    "record,schema,expected_row",
     [
         (
             {"updatedAt": pendulum.parse("2021-08-25T20:05:28+00:00")},
@@ -34,12 +34,12 @@ from singer_sdk.helpers._typing import (
         ),
     ],
 )
-def test_conform_record_data_types(row: Dict[str, Any], schema: dict, expected_row):
+def test_conform_record_data_types(record: Dict[str, Any], schema: dict, expected_row):
     stream_name = "test-stream"
     # TODO: mock this out
     logger = logging.getLogger()
-    actual = conform_record_data_types(stream_name, row, schema, logger)
-    print(row["updatedAt"].isoformat())
+    actual = conform_record_data_types(stream_name, record, schema, logger)
+    print(record["updatedAt"].isoformat())
     assert actual == expected_row
 
 

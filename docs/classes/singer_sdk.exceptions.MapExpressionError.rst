@@ -5,3 +5,4 @@
 
 .. autoclass:: MapExpressionError
     :members:
+    :special-members: __init__

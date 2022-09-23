@@ -5,8 +5,8 @@ from io import FileIO
 from typing import Callable, Iterable, List, Tuple
 
 import click
-import singer
 
+import singer_sdk._singerlib as singer
 from singer_sdk.cli import common_options
 from singer_sdk.configuration._dict_config import merge_config_sources
 from singer_sdk.helpers._classproperty import classproperty
@@ -50,6 +50,9 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     def _process_activate_version_message(self, message_dict: dict) -> None:
         self._write_messages(self.map_activate_version_message(message_dict))
 
+    def _process_batch_message(self, message_dict: dict) -> None:
+        self._write_messages(self.map_batch_message(message_dict))
+
     @abc.abstractmethod
     def map_schema_message(self, message_dict: dict) -> Iterable[singer.Message]:
         """Map a schema message to zero or more new messages.
@@ -88,6 +91,20 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             message_dict: An ACTIVATE_VERSION message JSON dictionary.
         """
         ...
+
+    def map_batch_message(
+        self,
+        message_dict: dict,
+    ) -> Iterable[singer.Message]:
+        """Map a batch message to zero or more new messages.
+
+        Args:
+            message_dict: A BATCH message JSON dictionary.
+
+        Raises:
+            NotImplementedError: if not implemented by subclass.
+        """
+        raise NotImplementedError("BATCH messages are not supported by mappers.")
 
     @classproperty
     def cli(cls) -> Callable:

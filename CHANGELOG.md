@@ -7,6 +7,94 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.11.0 (2022-09-23)
+
+### ✨ New
+
+- [#968](https://github.com/meltano/sdk/issues/968) Added cookiecutter support and docs for VSCode debugging
+- [#904](https://github.com/meltano/sdk/issues/904) Add support for new `BATCH` message type in taps and targets
+
+### 🐛 Fixes
+
+- [#972](https://github.com/meltano/sdk/issues/972) Resolve issue where TypeError is thrown by SQLConnector cookiecutter implementation due to super() references
+
+### 📚 Documentation Improvements
+
+- [#988](https://github.com/meltano/sdk/issues/988) Add pipe before SDK logo in header
+- [#970](https://github.com/meltano/sdk/issues/970) Move cookiecutter TODOs into markdown comments
+
+## v0.10.0 (2022-09-12)
+
+### ✨ New
+
+- [#829](https://github.com/meltano/sdk/issues/829) Add checks for primary keys, replication keys and state partitioning keys to standard tap tests -- _**Thanks @laurentS!**_
+- [#732](https://github.com/meltano/sdk/issues/732) Implement reference paginators.
+
+### 🐛 Fixes
+
+- [#898](https://github.com/meltano/sdk/issues/898) Fix SQL type merging for pre-existing target tables -- _**Thanks @BuzzCutNorman!**_
+- [#856](https://github.com/meltano/sdk/issues/856) Fix typo RecordsWitoutSchemaException -> RecordsWithoutSchemaException.
+
+### ⚙️ Under the Hood
+
+- Use __future__.annotations on singer_sdk.helpers._singer
+
+### 📚 Documentation Improvements
+
+- [#950](https://github.com/meltano/sdk/issues/950) Document missing initializers for authentication and pagination helpers.
+- [#947](https://github.com/meltano/sdk/issues/947) Remove stale autodoc page for RecordsWitoutSchemaException.
+- [#942](https://github.com/meltano/sdk/issues/942) Add docs preview links to PR description.
+
+## v0.9.0 (2022-08-24)
+
+### ✨ New
+
+- [#842](https://github.com/meltano/sdk/issues/842) Allow authenticating more generic requests
+- [#919](https://github.com/meltano/sdk/issues/919) add `ConnectionError` to list of backoff exceptions for auto-retry
+
+### 🐛 Fixes
+
+- [#917](https://github.com/meltano/sdk/issues/917) Allow Singer schemas to include the `required` and `enum` fields
+- [#759](https://github.com/meltano/sdk/issues/759) Use recent start_date as starting_replication_value
+
+### ⚙️ Under the Hood
+
+- [#908](https://github.com/meltano/sdk/issues/908) Allow overriding the bulk insert statement in `SQLSink`
+
+### 📚 Documentation Improvements
+
+- [#914](https://github.com/meltano/sdk/issues/914) Bump Pygments and update dbt example
+- [#900](https://github.com/meltano/sdk/issues/900) Generate documentation for constructor parameters
+
+## v0.8.0 (2022-08-05)
+
+### 🐛 Fixes
+
+- [#784](https://github.com/meltano/sdk/issues/784) Update return type for `backoff_max_tries` to reflect it accepts a callable that returns an integer
+- [#874](https://github.com/meltano/sdk/issues/874) Singer metrics are now properly emitted in JSON format --_Thanks, **@Jack-Burnett!**_
+
+### 📚 Documentation Improvements
+
+- [#869](https://github.com/meltano/sdk/issues/869) Cleanup whitespace in backoff code samples
+
+
+## v0.7.0 (2022-07-21)
+
+### ✨ New
+
+- [#785](https://github.com/meltano/sdk/issues/785) Output full URL path in error messages
+
+### 🐛 Fixes
+
+- [#815](https://github.com/meltano/sdk/issues/815) Generate correct SQL target project from cookiecutter
+- [#782](https://github.com/meltano/sdk/issues/782) Allow lists and dictionaries as types for default JSON values
+
+### 📚 Documentation Improvements
+
+- [#823](https://github.com/meltano/sdk/issues/823) Add link to the sdk for README generation regarding Stream Maps
+- [#813](https://github.com/meltano/sdk/issues/813) Fix PyPI trove classifiers
+- [#783](https://github.com/meltano/sdk/issues/783) Document using pipx inject for nox-poetry
+
 ## v0.6.1 (2022-07-01)
 
 ### Fix
