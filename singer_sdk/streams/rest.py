@@ -6,7 +6,7 @@ import abc
 import copy
 import logging
 from datetime import datetime
-from typing import Any, Callable, Generator, Generic, Iterable, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Generator, Generic, Iterable, TypeVar
 from urllib.parse import urlparse
 from warnings import warn
 
@@ -26,12 +26,13 @@ from singer_sdk.pagination import (
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 
+if TYPE_CHECKING:
+    from backoff.types import Details
+
 DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 _TToken = TypeVar("_TToken")
-_T = TypeVar("_T")
-_MaybeCallable = Union[_T, Callable[[], _T]]
 
 
 class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
@@ -529,7 +530,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return SimpleAuthenticator(stream=self)
 
-    def backoff_wait_generator(self) -> Callable[..., Generator[int, Any, None]]:
+    def backoff_wait_generator(self) -> Generator[float, None, None]:
         """The wait generator used by the backoff decorator on request failure.
 
         See for options:
@@ -542,19 +543,15 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return backoff.expo(factor=2)  # type: ignore # ignore 'Returning Any'
 
-    def backoff_max_tries(self) -> _MaybeCallable[int] | None:
+    def backoff_max_tries(self) -> int:
         """The number of attempts before giving up when retrying requests.
 
-        Can be an integer, a zero-argument callable that returns an integer,
-        or ``None`` to retry indefinitely.
-
         Returns:
-            int | Callable[[], int] | None: Number of max retries, callable or
-            ``None``.
+            Number of max retries.
         """
         return 5
 
-    def backoff_handler(self, details: dict) -> None:
+    def backoff_handler(self, details: Details) -> None:
         """Adds additional behaviour prior to retry.
 
         By default will log out backoff details, developers can override
