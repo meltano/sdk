@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.11.0 (2022-09-23)
+
+### ✨ New
+
+- [#968](https://github.com/meltano/sdk/issues/968) Added cookiecutter support and docs for VSCode debugging
+- [#904](https://github.com/meltano/sdk/issues/904) Add support for new `BATCH` message type in taps and targets
+
+### 🐛 Fixes
+
+- [#972](https://github.com/meltano/sdk/issues/972) Resolve issue where TypeError is thrown by SQLConnector cookiecutter implementation due to super() references
+
+### 📚 Documentation Improvements
+
+- [#988](https://github.com/meltano/sdk/issues/988) Add pipe before SDK logo in header
+- [#970](https://github.com/meltano/sdk/issues/970) Move cookiecutter TODOs into markdown comments
+
 ## v0.10.0 (2022-09-12)
 
 ### ✨ New
