@@ -36,7 +36,7 @@ license = "Apache 2.0"
 
 [tool.poetry.dependencies]
 python = "<3.11,>=3.7.1"
-backoff = ">=1.8.0,<2.0"
+backoff = ">=2.0.0,<3.0"
 pendulum = "^2.1.0"
 click = "~=8.0"
 fs = "^2.4.16"
