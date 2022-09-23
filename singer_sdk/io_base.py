@@ -10,8 +10,8 @@ from collections import Counter, defaultdict
 from typing import IO
 from typing import Counter as CounterType
 
+from singer_sdk._singerlib import SingerMessageType
 from singer_sdk.helpers._compat import final
-from singer_sdk.helpers._singer import SingerMessageType
 
 logger = logging.getLogger(__name__)
 

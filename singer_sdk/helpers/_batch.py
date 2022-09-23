@@ -3,24 +3,17 @@
 from __future__ import annotations
 
 import enum
-import sys
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
 from typing import IO, TYPE_CHECKING, Any, ClassVar, Generator
 from urllib.parse import ParseResult, parse_qs, urlencode, urlparse
 
 import fs
-from singer.messages import Message
 
-from singer_sdk.helpers._singer import SingerMessageType
+from singer_sdk._singerlib.messages import Message, SingerMessageType
 
 if TYPE_CHECKING:
     from fs.base import FS
-
-    if sys.version_info >= (3, 8):
-        from typing import Literal
-    else:
-        from typing_extensions import Literal
 
 
 class BatchFileFormat(str, enum.Enum):
@@ -77,9 +70,6 @@ class JSONLinesEncoding(BaseBatchFileEncoding):
 class SDKBatchMessage(Message):
     """Singer batch message in the Meltano SDK flavor."""
 
-    type: Literal[SingerMessageType.BATCH] = field(init=False)
-    """The message type."""
-
     stream: str
     """The stream name."""
 
@@ -94,27 +84,6 @@ class SDKBatchMessage(Message):
             self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
 
         self.type = SingerMessageType.BATCH
-
-    def asdict(self):
-        """Return a dictionary representation of the message.
-
-        Returns:
-            A dictionary with the defined message fields.
-        """
-        return asdict(self)
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> SDKBatchMessage:
-        """Create an encoding from a dictionary.
-
-        Args:
-            data: The dictionary to create the message from.
-
-        Returns:
-            The created message.
-        """
-        data.pop("type")
-        return cls(**data)
 
 
 @dataclass

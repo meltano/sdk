@@ -17,9 +17,8 @@ from uuid import uuid4
 
 import pendulum
 import requests
-import singer
-from singer import RecordMessage, Schema, SchemaMessage, StateMessage
 
+import singer_sdk._singerlib as singer
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
@@ -29,13 +28,6 @@ from singer_sdk.helpers._batch import (
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._flattening import get_flattening_options
-from singer_sdk.helpers._schema import SchemaPlus
-from singer_sdk.helpers._singer import (
-    Catalog,
-    CatalogEntry,
-    MetadataMapping,
-    SelectionMask,
-)
 from singer_sdk.helpers._state import (
     finalize_state_progress_markers,
     get_starting_replication_value,
@@ -104,7 +96,7 @@ class Stream(metaclass=abc.ABCMeta):
     def __init__(
         self,
         tap: TapBaseClass,
-        schema: str | PathLike | dict[str, Any] | Schema | None = None,
+        schema: str | PathLike | dict[str, Any] | singer.Schema | None = None,
         name: str | None = None,
     ) -> None:
         """Init tap stream.
@@ -128,15 +120,15 @@ class Stream(metaclass=abc.ABCMeta):
         self._config: dict = dict(tap.config)
         self._tap = tap
         self._tap_state = tap.state
-        self._tap_input_catalog: Catalog | None = None
+        self._tap_input_catalog: singer.Catalog | None = None
         self._stream_maps: list[StreamMap] | None = None
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
         self._primary_keys: list[str] | None = None
         self._state_partitioning_keys: list[str] | None = None
         self._schema_filepath: Path | None = None
-        self._metadata: MetadataMapping | None = None
-        self._mask: SelectionMask | None = None
+        self._metadata: singer.MetadataMapping | None = None
+        self._mask: singer.SelectionMask | None = None
         self._schema: dict
         self.child_streams: list[Stream] = []
         if schema:
@@ -149,7 +141,7 @@ class Stream(metaclass=abc.ABCMeta):
                 self._schema_filepath = Path(schema)
             elif isinstance(schema, dict):
                 self._schema = schema
-            elif isinstance(schema, Schema):
+            elif isinstance(schema, singer.Schema):
                 self._schema = schema.to_dict()
             else:
                 raise ValueError(
@@ -503,7 +495,7 @@ class Stream(metaclass=abc.ABCMeta):
         return True
 
     @property
-    def metadata(self) -> MetadataMapping:
+    def metadata(self) -> singer.MetadataMapping:
         """Get stream metadata.
 
         Metadata attributes (`inclusion`, `selected`, etc.) are part of the Singer spec.
@@ -522,7 +514,7 @@ class Stream(metaclass=abc.ABCMeta):
                 self._metadata = catalog_entry.metadata
                 return self._metadata
 
-        self._metadata = MetadataMapping.get_standard_metadata(
+        self._metadata = singer.MetadataMapping.get_standard_metadata(
             schema=self.schema,
             replication_method=self.forced_replication_method,
             key_properties=self.primary_keys or [],
@@ -539,16 +531,16 @@ class Stream(metaclass=abc.ABCMeta):
         return self._metadata
 
     @property
-    def _singer_catalog_entry(self) -> CatalogEntry:
+    def _singer_catalog_entry(self) -> singer.CatalogEntry:
         """Return catalog entry as specified by the Singer catalog spec.
 
         Returns:
             TODO
         """
-        return CatalogEntry(
+        return singer.CatalogEntry(
             tap_stream_id=self.tap_stream_id,
             stream=self.name,
-            schema=SchemaPlus.from_dict(self.schema),
+            schema=singer.Schema.from_dict(self.schema),
             metadata=self.metadata,
             key_properties=self.primary_keys or [],
             replication_key=self.replication_key,
@@ -561,13 +553,13 @@ class Stream(metaclass=abc.ABCMeta):
         )
 
     @property
-    def _singer_catalog(self) -> Catalog:
+    def _singer_catalog(self) -> singer.Catalog:
         """TODO.
 
         Returns:
             TODO
         """
-        return Catalog([(self.tap_stream_id, self._singer_catalog_entry)])
+        return singer.Catalog([(self.tap_stream_id, self._singer_catalog_entry)])
 
     @property
     def config(self) -> Mapping[str, Any]:
@@ -741,9 +733,9 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _write_state_message(self) -> None:
         """Write out a STATE message with the latest state."""
-        singer.write_message(StateMessage(value=self.tap_state))
+        singer.write_message(singer.StateMessage(value=self.tap_state))
 
-    def _generate_schema_messages(self) -> Generator[SchemaMessage, None, None]:
+    def _generate_schema_messages(self) -> Generator[singer.SchemaMessage, None, None]:
         """Generate schema messages from stream maps.
 
         Yields:
@@ -755,7 +747,7 @@ class Stream(metaclass=abc.ABCMeta):
                 # Don't emit schema if the stream's records are all ignored.
                 continue
 
-            schema_message = SchemaMessage(
+            schema_message = singer.SchemaMessage(
                 stream_map.stream_alias,
                 stream_map.transformed_schema,
                 stream_map.transformed_key_properties,
@@ -769,7 +761,7 @@ class Stream(metaclass=abc.ABCMeta):
             singer.write_message(schema_message)
 
     @property
-    def mask(self) -> SelectionMask:
+    def mask(self) -> singer.SelectionMask:
         """Get a boolean mask for stream and property selection.
 
         Returns:
@@ -783,7 +775,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _generate_record_messages(
         self,
         record: dict,
-    ) -> Generator[RecordMessage, None, None]:
+    ) -> Generator[singer.RecordMessage, None, None]:
         """Write out a RECORD message.
 
         Args:
@@ -803,7 +795,7 @@ class Stream(metaclass=abc.ABCMeta):
             mapped_record = stream_map.transform(record)
             # Emit record if not filtered
             if mapped_record is not None:
-                record_message = RecordMessage(
+                record_message = singer.RecordMessage(
                     stream=stream_map.stream_alias,
                     record=mapped_record,
                     version=None,
@@ -1172,7 +1164,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Overridable Methods
 
-    def apply_catalog(self, catalog: Catalog) -> None:
+    def apply_catalog(self, catalog: singer.Catalog) -> None:
         """Apply a catalog dict, updating any settings overridden within the catalog.
 
         Developers may override this method in order to introduce advanced catalog

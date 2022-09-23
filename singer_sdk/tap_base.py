@@ -8,12 +8,12 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 import click
 
+from singer_sdk._singerlib import Catalog
 from singer_sdk.cli import common_options
 from singer_sdk.exceptions import MaxRecordsLimitException
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
-from singer_sdk.helpers._singer import Catalog
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -81,7 +81,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         if isinstance(catalog, Catalog):
             self._input_catalog = catalog
         elif isinstance(catalog, dict):
-            self._input_catalog = Catalog.from_dict(catalog)
+            self._input_catalog = Catalog.from_dict(catalog)  # type: ignore
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
 
@@ -242,7 +242,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Return a Catalog object.
 
         Returns:
-            :class:`singer_sdk.helpers._singer.Catalog`.
+            :class:`singer_sdk._singerlib.Catalog`.
         """
         return Catalog(
             (stream.tap_stream_id, stream._singer_catalog_entry)

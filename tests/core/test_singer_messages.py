@@ -1,9 +1,7 @@
-from dataclasses import asdict
-
 import pytest
 
+from singer_sdk._singerlib import SingerMessageType
 from singer_sdk.helpers._batch import JSONLinesEncoding, SDKBatchMessage
-from singer_sdk.helpers._singer import SingerMessageType
 
 
 @pytest.mark.parametrize(
@@ -34,7 +32,7 @@ from singer_sdk.helpers._singer import SingerMessageType
 def test_batch_message_as_dict(message, expected):
     """Test batch message as dict."""
 
-    dumped = message.asdict()
+    dumped = message.to_dict()
     assert dumped == expected
 
     assert message.from_dict(dumped) == message

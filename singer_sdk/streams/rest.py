@@ -12,8 +12,8 @@ from warnings import warn
 
 import backoff
 import requests
-from singer.schema import Schema
 
+from singer_sdk._singerlib import Schema
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.helpers.jsonpath import extract_jsonpath
