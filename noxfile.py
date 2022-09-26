@@ -40,6 +40,8 @@ def mypy(session: Session) -> None:
         "sqlalchemy2-stubs",
         "types-python-dateutil",
         "types-requests",
+        "types-pytz",
+        "types-simplejson",
     )
     session.run("mypy", *args)
     if not session.posargs:

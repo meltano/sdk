@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.11.0 (2022-09-23)
+
+### ✨ New
+
+- [#968](https://github.com/meltano/sdk/issues/968) Added cookiecutter support and docs for VSCode debugging
+- [#904](https://github.com/meltano/sdk/issues/904) Add support for new `BATCH` message type in taps and targets
+
+### 🐛 Fixes
+
+- [#972](https://github.com/meltano/sdk/issues/972) Resolve issue where TypeError is thrown by SQLConnector cookiecutter implementation due to super() references
+
+### 📚 Documentation Improvements
+
+- [#988](https://github.com/meltano/sdk/issues/988) Add pipe before SDK logo in header
+- [#970](https://github.com/meltano/sdk/issues/970) Move cookiecutter TODOs into markdown comments
+
+## v0.10.0 (2022-09-12)
+
+### ✨ New
+
+- [#829](https://github.com/meltano/sdk/issues/829) Add checks for primary keys, replication keys and state partitioning keys to standard tap tests -- _**Thanks @laurentS!**_
+- [#732](https://github.com/meltano/sdk/issues/732) Implement reference paginators.
+
+### 🐛 Fixes
+
+- [#898](https://github.com/meltano/sdk/issues/898) Fix SQL type merging for pre-existing target tables -- _**Thanks @BuzzCutNorman!**_
+- [#856](https://github.com/meltano/sdk/issues/856) Fix typo RecordsWitoutSchemaException -> RecordsWithoutSchemaException.
+
+### ⚙️ Under the Hood
+
+- Use __future__.annotations on singer_sdk.helpers._singer
+
+### 📚 Documentation Improvements
+
+- [#950](https://github.com/meltano/sdk/issues/950) Document missing initializers for authentication and pagination helpers.
+- [#947](https://github.com/meltano/sdk/issues/947) Remove stale autodoc page for RecordsWitoutSchemaException.
+- [#942](https://github.com/meltano/sdk/issues/942) Add docs preview links to PR description.
+
 ## v0.9.0 (2022-08-24)
 
 ### ✨ New

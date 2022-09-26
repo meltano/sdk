@@ -13,9 +13,8 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.engine.reflection import Inspector
 
 from singer_sdk import typing as th
+from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
-from singer_sdk.helpers._schema import SchemaPlus
-from singer_sdk.helpers._singer import CatalogEntry, MetadataMapping
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 
@@ -403,7 +402,7 @@ class SQLConnector:
             stream=unique_stream_id,
             table=table_name,
             key_properties=key_properties,
-            schema=SchemaPlus.from_dict(schema),
+            schema=Schema.from_dict(schema),
             is_view=is_view,
             replication_method=replication_method,
             metadata=MetadataMapping.get_standard_metadata(
@@ -1020,7 +1019,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
     # Get records from stream
 
     def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
-        """Return a generator of row-type dictionary objects.
+        """Return a generator of record-type dictionary objects.
 
         If the stream has a replication_key value defined, records will be sorted by the
         incremental key. If the stream also has an available starting bookmark, the
@@ -1056,8 +1055,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                     )
                 )
 
-        for row in self.connector.connection.execute(query):
-            yield dict(row)
+        for record in self.connector.connection.execute(query):
+            yield dict(record)
 
 
 __all__ = ["SQLStream", "SQLConnector"]

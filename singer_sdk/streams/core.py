@@ -5,29 +5,29 @@ from __future__ import annotations
 import abc
 import copy
 import datetime
+import gzip
+import itertools
 import json
 import logging
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Callable, Generator, Iterable, Mapping, TypeVar, cast
+from typing import Any, Callable, Generator, Iterable, Iterator, Mapping, TypeVar, cast
+from uuid import uuid4
 
 import pendulum
 import requests
-import singer
-from singer import RecordMessage, Schema, SchemaMessage, StateMessage
 
+import singer_sdk._singerlib as singer
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
+from singer_sdk.helpers._batch import (
+    BaseBatchFileEncoding,
+    BatchConfig,
+    SDKBatchMessage,
+)
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._flattening import get_flattening_options
-from singer_sdk.helpers._schema import SchemaPlus
-from singer_sdk.helpers._singer import (
-    Catalog,
-    CatalogEntry,
-    MetadataMapping,
-    SelectionMask,
-)
 from singer_sdk.helpers._state import (
     finalize_state_progress_markers,
     get_starting_replication_value,
@@ -50,8 +50,30 @@ REPLICATION_INCREMENTAL = "INCREMENTAL"
 REPLICATION_LOG_BASED = "LOG_BASED"
 
 FactoryType = TypeVar("FactoryType", bound="Stream")
+_T = TypeVar("_T")
 
 METRICS_LOG_LEVEL_SETTING = "metrics_log_level"
+
+
+def lazy_chunked_generator(
+    iterable: Iterable[_T],
+    chunk_size: int,
+) -> Generator[Iterator[_T], None, None]:
+    """Yield a generator for each chunk of the given iterable.
+
+    Args:
+        iterable: The iterable to chunk.
+        chunk_size: The size of each chunk.
+
+    Yields:
+        A generator for each chunk of the given iterable.
+    """
+    iterator = iter(iterable)
+    while True:
+        chunk = list(itertools.islice(iterator, chunk_size))
+        if not chunk:
+            break
+        yield iter(chunk)
 
 
 class Stream(metaclass=abc.ABCMeta):
@@ -67,10 +89,14 @@ class Stream(metaclass=abc.ABCMeta):
     # Internal API cost aggregator
     _sync_costs: dict[str, int] = {}
 
+    # Batch attributes
+    batch_size: int = 1000
+    """Max number of records to write to each batch file."""
+
     def __init__(
         self,
         tap: TapBaseClass,
-        schema: str | PathLike | dict[str, Any] | Schema | None = None,
+        schema: str | PathLike | dict[str, Any] | singer.Schema | None = None,
         name: str | None = None,
     ) -> None:
         """Init tap stream.
@@ -94,15 +120,15 @@ class Stream(metaclass=abc.ABCMeta):
         self._config: dict = dict(tap.config)
         self._tap = tap
         self._tap_state = tap.state
-        self._tap_input_catalog: Catalog | None = None
+        self._tap_input_catalog: singer.Catalog | None = None
         self._stream_maps: list[StreamMap] | None = None
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
         self._primary_keys: list[str] | None = None
         self._state_partitioning_keys: list[str] | None = None
         self._schema_filepath: Path | None = None
-        self._metadata: MetadataMapping | None = None
-        self._mask: SelectionMask | None = None
+        self._metadata: singer.MetadataMapping | None = None
+        self._mask: singer.SelectionMask | None = None
         self._schema: dict
         self.child_streams: list[Stream] = []
         if schema:
@@ -115,7 +141,7 @@ class Stream(metaclass=abc.ABCMeta):
                 self._schema_filepath = Path(schema)
             elif isinstance(schema, dict):
                 self._schema = schema
-            elif isinstance(schema, Schema):
+            elif isinstance(schema, singer.Schema):
                 self._schema = schema.to_dict()
             else:
                 raise ValueError(
@@ -469,7 +495,7 @@ class Stream(metaclass=abc.ABCMeta):
         return True
 
     @property
-    def metadata(self) -> MetadataMapping:
+    def metadata(self) -> singer.MetadataMapping:
         """Get stream metadata.
 
         Metadata attributes (`inclusion`, `selected`, etc.) are part of the Singer spec.
@@ -488,7 +514,7 @@ class Stream(metaclass=abc.ABCMeta):
                 self._metadata = catalog_entry.metadata
                 return self._metadata
 
-        self._metadata = MetadataMapping.get_standard_metadata(
+        self._metadata = singer.MetadataMapping.get_standard_metadata(
             schema=self.schema,
             replication_method=self.forced_replication_method,
             key_properties=self.primary_keys or [],
@@ -505,16 +531,16 @@ class Stream(metaclass=abc.ABCMeta):
         return self._metadata
 
     @property
-    def _singer_catalog_entry(self) -> CatalogEntry:
+    def _singer_catalog_entry(self) -> singer.CatalogEntry:
         """Return catalog entry as specified by the Singer catalog spec.
 
         Returns:
             TODO
         """
-        return CatalogEntry(
+        return singer.CatalogEntry(
             tap_stream_id=self.tap_stream_id,
             stream=self.name,
-            schema=SchemaPlus.from_dict(self.schema),
+            schema=singer.Schema.from_dict(self.schema),
             metadata=self.metadata,
             key_properties=self.primary_keys or [],
             replication_key=self.replication_key,
@@ -527,13 +553,13 @@ class Stream(metaclass=abc.ABCMeta):
         )
 
     @property
-    def _singer_catalog(self) -> Catalog:
+    def _singer_catalog(self) -> singer.Catalog:
         """TODO.
 
         Returns:
             TODO
         """
-        return Catalog([(self.tap_stream_id, self._singer_catalog_entry)])
+        return singer.Catalog([(self.tap_stream_id, self._singer_catalog_entry)])
 
     @property
     def config(self) -> Mapping[str, Any]:
@@ -707,9 +733,9 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _write_state_message(self) -> None:
         """Write out a STATE message with the latest state."""
-        singer.write_message(StateMessage(value=self.tap_state))
+        singer.write_message(singer.StateMessage(value=self.tap_state))
 
-    def _generate_schema_messages(self) -> Generator[SchemaMessage, None, None]:
+    def _generate_schema_messages(self) -> Generator[singer.SchemaMessage, None, None]:
         """Generate schema messages from stream maps.
 
         Yields:
@@ -721,7 +747,7 @@ class Stream(metaclass=abc.ABCMeta):
                 # Don't emit schema if the stream's records are all ignored.
                 continue
 
-            schema_message = SchemaMessage(
+            schema_message = singer.SchemaMessage(
                 stream_map.stream_alias,
                 stream_map.transformed_schema,
                 stream_map.transformed_key_properties,
@@ -735,7 +761,7 @@ class Stream(metaclass=abc.ABCMeta):
             singer.write_message(schema_message)
 
     @property
-    def mask(self) -> SelectionMask:
+    def mask(self) -> singer.SelectionMask:
         """Get a boolean mask for stream and property selection.
 
         Returns:
@@ -749,7 +775,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _generate_record_messages(
         self,
         record: dict,
-    ) -> Generator[RecordMessage, None, None]:
+    ) -> Generator[singer.RecordMessage, None, None]:
         """Write out a RECORD message.
 
         Args:
@@ -761,7 +787,7 @@ class Stream(metaclass=abc.ABCMeta):
         pop_deselected_record_properties(record, self.schema, self.mask, self.logger)
         record = conform_record_data_types(
             stream_name=self.name,
-            row=record,
+            record=record,
             schema=self.schema,
             logger=self.logger,
         )
@@ -769,7 +795,7 @@ class Stream(metaclass=abc.ABCMeta):
             mapped_record = stream_map.transform(record)
             # Emit record if not filtered
             if mapped_record is not None:
-                record_message = RecordMessage(
+                record_message = singer.RecordMessage(
                     stream=stream_map.stream_alias,
                     record=mapped_record,
                     version=None,
@@ -786,6 +812,25 @@ class Stream(metaclass=abc.ABCMeta):
         """
         for record_message in self._generate_record_messages(record):
             singer.write_message(record_message)
+
+    def _write_batch_message(
+        self,
+        encoding: BaseBatchFileEncoding,
+        manifest: list[str],
+    ) -> None:
+        """Write out a BATCH message.
+
+        Args:
+            encoding: The encoding to use for the batch.
+            manifest: A list of filenames for the batch.
+        """
+        singer.write_message(
+            SDKBatchMessage(
+                stream=self.name,
+                encoding=encoding,
+                manifest=manifest,
+            )
+        )
 
     @property
     def _metric_logging_function(self) -> Callable | None:
@@ -952,16 +997,48 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Private sync methods:
 
-    def _sync_records(  # noqa C901  # too complex
-        self, context: dict | None = None
+    def _process_record(
+        self,
+        record: dict,
+        child_context: dict | None = None,
+        partition_context: dict | None = None,
     ) -> None:
+        """Process a record.
+
+        Args:
+            record: The record to process.
+            child_context: The child context.
+            partition_context: The partition context.
+        """
+        partition_context = partition_context or {}
+        child_context = copy.copy(
+            self.get_child_context(record=record, context=child_context)
+        )
+        for key, val in partition_context.items():
+            # Add state context to records if not already present
+            if key not in record:
+                record[key] = val
+
+        # Sync children, except when primary mapper filters out the record
+        if self.stream_maps[0].get_filter_result(record):
+            self._sync_children(child_context)
+
+    def _sync_records(
+        self,
+        context: dict | None = None,
+        write_messages: bool = True,
+    ) -> Generator[dict, Any, Any]:
         """Sync records, emitting RECORD and STATE messages.
 
         Args:
             context: Stream partition or context dictionary.
+            write_messages: Whether to write Singer messages to stdout.
 
         Raises:
             InvalidStreamSortException: TODO
+
+        Yields:
+            Each record from the source.
         """
         record_count = 0
         current_context: dict | None
@@ -978,44 +1055,47 @@ class Stream(metaclass=abc.ABCMeta):
             child_context: dict | None = (
                 None if current_context is None else copy.copy(current_context)
             )
+
             for record_result in self.get_records(current_context):
                 if isinstance(record_result, tuple):
                     # Tuple items should be the record and the child context
                     record, child_context = record_result
                 else:
                     record = record_result
-                child_context = copy.copy(
-                    self.get_child_context(record=record, context=child_context)
-                )
-                for key, val in (state_partition_context or {}).items():
-                    # Add state context to records if not already present
-                    if key not in record:
-                        record[key] = val
+                try:
+                    self._process_record(
+                        record,
+                        child_context=child_context,
+                        partition_context=state_partition_context,
+                    )
+                except InvalidStreamSortException as ex:
+                    log_sort_error(
+                        log_fn=self.logger.error,
+                        ex=ex,
+                        record_count=record_count + 1,
+                        partition_record_count=partition_record_count + 1,
+                        current_context=current_context,
+                        state_partition_context=state_partition_context,
+                        stream_name=self.name,
+                    )
+                    raise ex
 
-                # Sync children, except when primary mapper filters out the record
-                if self.stream_maps[0].get_filter_result(record):
-                    self._sync_children(child_context)
                 self._check_max_record_limit(record_count)
-                if selected:
-                    if (record_count - 1) % self.STATE_MSG_FREQUENCY == 0:
-                        self._write_state_message()
-                    self._write_record_message(record)
-                    try:
-                        self._increment_stream_state(record, context=current_context)
-                    except InvalidStreamSortException as ex:
-                        log_sort_error(
-                            log_fn=self.logger.error,
-                            ex=ex,
-                            record_count=record_count + 1,
-                            partition_record_count=partition_record_count + 1,
-                            current_context=current_context,
-                            state_partition_context=state_partition_context,
-                            stream_name=self.name,
-                        )
-                        raise ex
 
-                record_count += 1
-                partition_record_count += 1
+                if selected:
+                    if (
+                        record_count - 1
+                    ) % self.STATE_MSG_FREQUENCY == 0 and write_messages:
+                        self._write_state_message()
+                    if write_messages:
+                        self._write_record_message(record)
+                    self._increment_stream_state(record, context=current_context)
+
+                    yield record
+
+                    record_count += 1
+                    partition_record_count += 1
+
             if current_context == state_partition_context:
                 # Finalize per-partition state only if 1:1 with context
                 finalize_state_progress_markers(state)
@@ -1024,8 +1104,25 @@ class Stream(metaclass=abc.ABCMeta):
             # Otherwise will be finalized by tap at end of sync.
             finalize_state_progress_markers(self.stream_state)
         self._write_record_count_log(record_count=record_count, context=context)
-        # Reset interim bookmarks before emitting final STATE message:
-        self._write_state_message()
+
+        if write_messages:
+            # Reset interim bookmarks before emitting final STATE message:
+            self._write_state_message()
+
+    def _sync_batches(
+        self,
+        batch_config: BatchConfig,
+        context: dict | None = None,
+    ) -> None:
+        """Sync batches, emitting BATCH messages.
+
+        Args:
+            batch_config: The batch configuration.
+            context: Stream partition or context dictionary.
+        """
+        for encoding, manifest in self.get_batches(batch_config, context):
+            self._write_batch_message(encoding=encoding, manifest=manifest)
+            self._write_state_message()
 
     # Public methods ("final", not recommended to be overridden)
 
@@ -1051,8 +1148,14 @@ class Stream(metaclass=abc.ABCMeta):
         # Send a SCHEMA message to the downstream target:
         if self.selected:
             self._write_schema_message()
-        # Sync the records themselves:
-        self._sync_records(context)
+
+        batch_config = self.get_batch_config(self.config)
+        if batch_config:
+            self._sync_batches(batch_config, context=context)
+        else:
+            # Sync the records themselves:
+            for _ in self._sync_records(context=context):
+                pass
 
     def _sync_children(self, child_context: dict) -> None:
         for child_stream in self.child_streams:
@@ -1061,7 +1164,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Overridable Methods
 
-    def apply_catalog(self, catalog: Catalog) -> None:
+    def apply_catalog(self, catalog: singer.Catalog) -> None:
         """Apply a catalog dict, updating any settings overridden within the catalog.
 
         Developers may override this method in order to introduce advanced catalog
@@ -1136,9 +1239,9 @@ class Stream(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_records(self, context: dict | None) -> Iterable[dict | tuple[dict, dict]]:
-        """Abstract row generator function. Must be overridden by the child class.
+        """Abstract record generator function. Must be overridden by the child class.
 
-        Each row emitted should be a dictionary of property names to their values.
+        Each record emitted should be a dictionary of property names to their values.
         Returns either a record dict or a tuple: (record_dict, child_context)
 
         A method which should retrieve data from the source and return records
@@ -1160,6 +1263,57 @@ class Stream(metaclass=abc.ABCMeta):
             context: Stream partition or context dictionary.
         """
         pass
+
+    def get_batch_config(self, config: Mapping) -> BatchConfig | None:
+        """Return the batch config for this stream.
+
+        Args:
+            config: Tap configuration dictionary.
+
+        Returns:
+            Batch config for this stream.
+        """
+        raw = config.get("batch_config")
+        return BatchConfig.from_dict(raw) if raw else None
+
+    def get_batches(
+        self,
+        batch_config: BatchConfig,
+        context: dict | None = None,
+    ) -> Iterable[tuple[BaseBatchFileEncoding, list[str]]]:
+        """Batch generator function.
+
+        Developers are encouraged to override this method to customize batching
+        behavior for databases, bulk APIs, etc.
+
+        Args:
+            batch_config: Batch config for this stream.
+            context: Stream partition or context dictionary.
+
+        Yields:
+            A tuple of (encoding, manifest) for each batch.
+        """
+        sync_id = f"{self.tap_name}--{self.name}-{uuid4()}"
+        prefix = batch_config.storage.prefix or ""
+
+        for i, chunk in enumerate(
+            lazy_chunked_generator(
+                self._sync_records(context, write_messages=False),
+                self.batch_size,
+            ),
+            start=1,
+        ):
+            filename = f"{prefix}{sync_id}-{i}.json.gz"
+            with batch_config.storage.fs() as fs:
+                with fs.open(filename, "wb") as f:
+                    # TODO: Determine compression from config.
+                    with gzip.GzipFile(fileobj=f, mode="wb") as gz:
+                        gz.writelines(
+                            (json.dumps(record) + "\n").encode() for record in chunk
+                        )
+                file_url = fs.geturl(filename)
+
+            yield batch_config.encoding, [file_url]
 
     def post_process(self, row: dict, context: dict | None = None) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
