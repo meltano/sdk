@@ -214,7 +214,7 @@ def conform_record_data_types(  # noqa: C901
     Any property names not found in the schema catalog will be removed, and a single
     warning will be logged listing each unmapped property name.
     """
-    rec, unmapped_properties = _conform_record_data_types(row, schema, None)
+    rec, unmapped_properties = _conform_record_data_types(record, schema, None)
 
     _warn_unmapped_properties(stream_name, tuple(unmapped_properties), logger)
 
@@ -233,7 +233,7 @@ def _conform_record_data_types(
 
     Args:
         input_object: A single record
-        schema: JSON schema the given row is expected to meet
+        schema: JSON schema the given input_object is expected to meet
         parent: '.' seperated path to this element from the object root (for logging)
     """
     output_object: Dict[str, Any] = {}
