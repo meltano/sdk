@@ -11,7 +11,6 @@ from gzip import open as gzip_open
 from logging import Logger
 from types import MappingProxyType
 from typing import IO, Any, Mapping, Sequence
-from urllib.parse import urlparse
 
 from dateutil import parser
 from jsonschema import Draft4Validator, FormatChecker
@@ -451,16 +450,16 @@ class Sink(metaclass=abc.ABCMeta):
         storage: StorageTarget | None = None
 
         for path in files:
-            url = urlparse(path)
+            head, tail = StorageTarget.split_url(path)
 
             if self.batch_config:
                 storage = self.batch_config.storage
             else:
-                storage = StorageTarget.from_url(url)
+                storage = StorageTarget.from_url(head)
 
             if encoding.format == BatchFileFormat.JSONL:
-                with storage.fs(create=False) as fs:
-                    with fs.open(url.path, mode="rb") as file:
+                with storage.fs(create=False) as batch_fs:
+                    with batch_fs.open(tail, mode="rb") as file:
                         if encoding.compression == "gzip":
                             file = gzip_open(file)
                         context = {"records": [json.loads(line) for line in file]}
