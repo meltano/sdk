@@ -9,8 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.11.1 (2022-09-27)
 
-## v0.12.0 (2022-09-27)
-
 ### 🐛 Fixes
 
 - [#999](https://github.com/meltano/sdk/issues/999) Absolute file paths created by taps running in BATCH mode can't be processed by the Sink
