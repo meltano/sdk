@@ -873,7 +873,7 @@ class SQLConnector:
         if not self.allow_column_alter:
             raise NotImplementedError(
                 "Altering columns is not supported. "
-                f"Could not convert column '{full_table_name}.column_name' "
+                f"Could not convert column '{full_table_name}.{column_name}' "
                 f"from '{current_type}' to '{compatible_sql_type}'."
             )
 
