@@ -21,7 +21,7 @@ capabilities and bug fixes, simply by updating your SDK dependency to the latest
 
 ## Meltano
 
-*Not familiar with Meltano?*  [Meltano](https://docs.meltano.com/getting-started/meltano-at-a-glance) is your DataOps infrastructure that: 
+*Not familiar with Meltano?*  [Meltano](https://docs.meltano.com/getting-started/meltano-at-a-glance) is your DataOps infrastructure that:
 
 - **Starts simple**: Meltano is pip-installable and comes in a prepackaged docker container, you can have your first ELT pipeline running within minutes.
 - **Has DataOps out-of-the-box**: Meltano provides tools that make DataOps best practices easy to use in every project.
