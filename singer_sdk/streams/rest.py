@@ -244,7 +244,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         if self._LOG_REQUEST_METRICS:
             extra_tags = {}
             if self._LOG_REQUEST_METRIC_URLS:
-                extra_tags["url"] = prepared_request.path_url
+                extra_tags["url"] = prepared_request.url
             self._write_request_duration_log(
                 endpoint=self.path,
                 response=response,
