@@ -14,30 +14,9 @@ metrics logging.
 
 ### `SINGER_SDK_LOG_CONFIG`
 
-Users of a tap can configure the SDK logging by setting the `SINGER_SDK_LOG_CONFIG`
-environment variable. The value of this variable should be a path to a YAML file in the
-[Python logging dict format](https://docs.python.org/3/library/logging.config.html#dictionary-schema-details).
-
-For example, to direct metrics records to a file, you could use the following config:
-
-```yaml
-version: 1
-disable_existing_loggers: false
-formatters:
-  metrics:
-    format: "{asctime} {message}"
-    style: "{"
-handlers:
-  metrics:
-    class: logging.FileHandler
-    formatter: metrics
-    filename: metrics.log
-loggers:
-  singer_sdk.metrics:
-    level: INFO
-    handlers: [ metrics ]
-    propagate: yes
-```
+Metrics are written by the `singer_sdk.metrics` logger, so the end user can set
+`SINGER_SDK_LOG_CONFIG` to a logging config file that defines the format and output
+for metrics. See the [logging docs](./logging.md) for an example file.
 
 ## Additional Singer Metrics References
 
