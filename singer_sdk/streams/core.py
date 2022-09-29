@@ -967,20 +967,22 @@ class Stream(metaclass=abc.ABCMeta):
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
-        for current_context in context_list or [{}]:
-            record_counter.context = current_context
-            timer.context = current_context
+        with record_counter, timer:
+            for current_context in context_list or [{}]:
+                record_counter.context = current_context
+                timer.context = current_context
 
-            partition_record_count = 0
-            current_context = current_context or None
-            state = self.get_context_state(current_context)
-            state_partition_context = self._get_state_partition_context(current_context)
-            self._write_starting_replication_value(current_context)
-            child_context: dict | None = (
-                None if current_context is None else copy.copy(current_context)
-            )
+                partition_record_count = 0
+                current_context = current_context or None
+                state = self.get_context_state(current_context)
+                state_partition_context = self._get_state_partition_context(
+                    current_context
+                )
+                self._write_starting_replication_value(current_context)
+                child_context: dict | None = (
+                    None if current_context is None else copy.copy(current_context)
+                )
 
-            with record_counter, timer:
                 for record_result in self.get_records(current_context):
                     if isinstance(record_result, tuple):
                         # Tuple items should be the record and the child context
@@ -1022,9 +1024,9 @@ class Stream(metaclass=abc.ABCMeta):
                         record_count += 1
                         partition_record_count += 1
 
-            if current_context == state_partition_context:
-                # Finalize per-partition state only if 1:1 with context
-                finalize_state_progress_markers(state)
+                if current_context == state_partition_context:
+                    # Finalize per-partition state only if 1:1 with context
+                    finalize_state_progress_markers(state)
         if not context:
             # Finalize total stream only if we have the full full context.
             # Otherwise will be finalized by tap at end of sync.

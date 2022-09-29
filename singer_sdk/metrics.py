@@ -7,13 +7,19 @@ import enum
 import json
 import logging
 import logging.config
+import os
 from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from time import time
 from types import TracebackType
 from typing import Any, Generic, Mapping, TypeVar
 
+import yaml
+
+from singer_sdk.helpers._resources import Traversable, get_package_files
+
 DEFAULT_LOG_INTERVAL = 60.0
-METRICS_LOGGER_NAME = "singer.metrics"
+METRICS_LOGGER_NAME = __name__
 METRICS_LOG_LEVEL_SETTING = "metrics_log_level"
 
 _TVal = TypeVar("_TVal")
@@ -279,7 +285,7 @@ def record_counter(
 ) -> Counter:
     """Use for counting records retrieved from the source.
 
-    with singer.metrics.record_counter(endpoint="users") as counter:
+    with record_counter("my_stream", endpoint="/users") as counter:
          for record in my_records:
              # Do something with the record
              counter.increment()
@@ -302,7 +308,7 @@ def record_counter(
 def batch_counter(stream: str, **tags: Any) -> Counter:
     """Use for counting batches sent to the target.
 
-    with singer.metrics.batch_counter() as counter:
+    with batch_counter("my_stream") as counter:
          for batch in my_batches:
              # Do something with the batch
              counter.increment()
@@ -326,7 +332,7 @@ def http_request_counter(
 ) -> Counter:
     """Use for counting HTTP requests.
 
-    with singer.metrics.http_request_counter() as counter:
+    with http_request_counter() as counter:
          for record in my_records:
              # Do something with the record
              counter.increment()
@@ -362,42 +368,27 @@ def sync_timer(stream: str, **tags: Any) -> Timer:
     return Timer(Metric.SYNC_DURATION, tags)
 
 
-def _get_logging_config(config: Mapping[str, Any] | None = None) -> dict:
-    """Get a logging configuration.
+def _load_yaml_logging_config(path: Traversable | Path) -> Any:  # noqa: ANN401
+    """Load the logging config from the YAML file.
 
     Args:
-        config: A logging configuration.
+        path: A path to the YAML file.
+
+    Returns:
+        The logging config.
+    """
+    with path.open() as f:
+        return yaml.safe_load(f)
+
+
+def _get_default_config() -> Any:  # noqa: ANN401
+    """Get a logging configuration.
 
     Returns:
         A logging configuration.
     """
-    config = config or {}
-    metrics_log_level = config.get(METRICS_LOG_LEVEL_SETTING, "INFO")
-
-    return {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "formatters": {
-            "metrics": {
-                "format": "{asctime} {message}",
-                "style": "{",
-            },
-        },
-        "handlers": {
-            "metrics": {
-                "class": "logging.FileHandler",
-                "formatter": "metrics",
-                "filename": "metrics.log",
-            },
-        },
-        "loggers": {
-            METRICS_LOGGER_NAME: {
-                "level": metrics_log_level,
-                "handlers": ["metrics"],
-                "propagate": True,
-            },
-        },
-    }
+    log_config_path = get_package_files("singer_sdk").joinpath("default_logging.yml")
+    return _load_yaml_logging_config(log_config_path)
 
 
 def _setup_logging(config: Mapping[str, Any]) -> None:
@@ -406,4 +397,12 @@ def _setup_logging(config: Mapping[str, Any]) -> None:
     Args:
         config: A plugin configuration dictionary.
     """
-    logging.config.dictConfig(_get_logging_config(config))
+    logging.config.dictConfig(_get_default_config())
+
+    config = config or {}
+    metrics_log_level = config.get(METRICS_LOG_LEVEL_SETTING, "INFO").upper()
+    logging.getLogger(METRICS_LOGGER_NAME).setLevel(metrics_log_level)
+
+    if "SINGER_SDK_LOG_CONFIG" in os.environ:
+        log_config_path = Path(os.environ["SINGER_SDK_LOG_CONFIG"])
+        logging.config.dictConfig(_load_yaml_logging_config(log_config_path))
