@@ -73,6 +73,9 @@ def test_authenticator_is_reused(
     other_stream: RESTStream = rest_tap.streams[other_stream_name]
 
     assert (stream.authenticator is other_stream.authenticator) is auth_reused
+    assert (
+        stream.get_authenticator(None) is other_stream.get_authenticator(None)
+    ) is auth_reused
 
 
 class _FakeOAuthAuthenticator(OAuthAuthenticator):

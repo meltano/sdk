@@ -1,5 +1,7 @@
 """REST fixtures."""
 
+from __future__ import annotations
+
 import pytest
 from memoization.memoization import cached
 
@@ -27,6 +29,9 @@ class SimpleRESTStream(RESTStream):
         """Stream authenticator."""
         return APIAuthenticatorBase(stream=self)
 
+    def get_authenticator(self, context: dict | None) -> APIAuthenticatorBase | None:
+        return self.authenticator
+
 
 class SingletonAuthStream(SimpleRESTStream):
     """A stream with singleton authenticator."""
@@ -35,6 +40,9 @@ class SingletonAuthStream(SimpleRESTStream):
     def authenticator(self) -> SingletonAuthenticator:
         """Stream authenticator."""
         return SingletonAuthenticator(stream=self)
+
+    def get_authenticator(self, context: dict | None) -> APIAuthenticatorBase | None:
+        return self.authenticator
 
 
 class NaiveAuthenticator(APIAuthenticatorBase):
@@ -49,6 +57,10 @@ class CachedAuthStream(SimpleRESTStream):
     def authenticator(self) -> NaiveAuthenticator:
         """Stream authenticator."""
         return NaiveAuthenticator(stream=self)
+
+    @cached
+    def get_authenticator(self, context: dict | None) -> APIAuthenticatorBase | None:
+        return self.authenticator
 
 
 class SimpleTap(Tap):

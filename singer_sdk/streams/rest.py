@@ -274,6 +274,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
 
     def build_prepared_request(
         self,
+        context: dict | None,
         *args: Any,
         **kwargs: Any,
     ) -> requests.PreparedRequest:
@@ -282,6 +283,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         Uses the authenticator instance to mutate the request with authentication.
 
         Args:
+            context: Stream partition or context dictionary.
             *args: Arguments to pass to `requests.Request`_.
             **kwargs: Keyword arguments to pass to `requests.Request`_.
 
@@ -295,8 +297,8 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         request = requests.Request(*args, **kwargs)
 
-        if self.authenticator:
-            authenticator = self.authenticator
+        authenticator = self.get_authenticator(context)
+        if authenticator:
             authenticator.authenticate_request(request)
 
         return self.requests_session.prepare_request(request)
@@ -326,6 +328,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         headers = self.http_headers
 
         return self.build_prepared_request(
+            context,
             method=http_method,
             url=url,
             params=params,
@@ -529,6 +532,21 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             requests.
         """
         return SimpleAuthenticator(stream=self)
+
+    def get_authenticator(self, context: dict | None) -> APIAuthenticatorBase | None:
+        """Return or set the authenticator for managing HTTP auth headers.
+
+        If an authenticator is not specified, REST-based taps will simply pass
+        `http_headers` as defined in the stream class.
+
+        Args:
+            context: Stream partition or context dictionary.
+
+        Returns:
+            Authenticator instance that will be used to authenticate all outgoing
+            requests.
+        """
+        return self.authenticator
 
     def backoff_wait_generator(self) -> Generator[float, None, None]:
         """The wait generator used by the backoff decorator on request failure.
