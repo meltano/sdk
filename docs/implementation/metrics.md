@@ -2,7 +2,7 @@
 
 Metrics logging is specified in the
 [Singer Spec](https://hub.meltano.com/singer/spec#metrics). The SDK will automatically
-emit two types of metrics `record_count`, `http_request_duration` and `sync_duration`.
+emit metrics for `record_count`, `http_request_duration` and `sync_duration`.
 
 ## Customization options
 
