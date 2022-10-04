@@ -165,7 +165,8 @@ class SQLSink(BatchSink):
         if primary_keys is None:
             primary_keys = self.key_properties
         partition_keys = partition_keys or None
-        # TODO: determine if this call to `prepare_table` is necessary (in addition to in `setup` above)
+        # TODO: determine if this call to `prepare_table` is necessary
+        # (in addition to in `setup` above)
         self.connector.prepare_table(
             full_table_name=full_table_name,
             primary_keys=primary_keys,

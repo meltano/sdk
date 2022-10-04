@@ -1,3 +1,5 @@
+"""Base class for SQLAlchemy-based connectors."""
+
 from __future__ import annotations
 
 import logging
@@ -11,7 +13,6 @@ from sqlalchemy.engine.reflection import Inspector
 
 from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
-from singer_sdk._singerlib.messages import SchemaMessage
 from singer_sdk.exceptions import ConfigValidationError
 
 
@@ -486,7 +487,7 @@ class SQLConnector:
         """Determine if the target database schema already exists.
 
         Args:
-            schema_name: The target database schema name.
+            full_schema_name: The target database schema name.
 
         Returns:
             True if the database schema exists, False if not.
