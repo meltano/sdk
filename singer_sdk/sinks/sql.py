@@ -76,7 +76,12 @@ class SQLSink(BatchSink):
         Returns:
             The target schema name.
         """
-        return None  # Assumes single-schema target context.
+        parts = self.stream_name.split("-")
+        if len(parts) == 2:
+            return parts[0]
+        if len(parts) == 3:
+            return parts[1]
+        return None
 
     @property
     def database_name(self) -> Optional[str]:
@@ -117,7 +122,8 @@ class SQLSink(BatchSink):
         This method is called on Sink creation, and creates the required Schema and
         Table entities in the target database.
         """
-        self.connector.prepare_schema(self.full_schema_name)
+        if self.full_schema_name:
+            self.connector.prepare_schema(self.full_schema_name)
         self.connector.prepare_table(
             full_table_name=self.full_table_name,
             schema=self.schema,
