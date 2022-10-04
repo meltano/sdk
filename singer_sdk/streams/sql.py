@@ -1023,7 +1023,6 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """Return a copy of the Stream JSON schema, dropping any fields not selected.
 
         Returns:
-
             A dictionary containing a copy of the Stream JSON schema, filtered
             to any selection criteria.
         """
