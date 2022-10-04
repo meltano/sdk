@@ -122,8 +122,8 @@ class SQLSink(BatchSink):
         This method is called on Sink creation, and creates the required Schema and
         Table entities in the target database.
         """
-        if self.full_schema_name:
-            self.connector.prepare_schema(self.full_schema_name)
+        if self.schema_name:
+            self.connector.prepare_schema(self.schema_name)
         self.connector.prepare_table(
             full_table_name=self.full_table_name,
             schema=self.schema,

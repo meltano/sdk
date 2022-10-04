@@ -483,17 +483,17 @@ class SQLConnector:
             sqlalchemy.inspect(self._engine).has_table(full_table_name),
         )
 
-    def schema_exists(self, full_schema_name: str) -> bool:
+    def schema_exists(self, schema_name: str) -> bool:
         """Determine if the target database schema already exists.
 
         Args:
-            full_schema_name: The target database schema name.
+            schema_name: The target database schema name.
 
         Returns:
             True if the database schema exists, False if not.
         """
         schema_names = sqlalchemy.inspect(self._engine).get_schema_names()
-        return full_schema_name in schema_names
+        return schema_name in schema_names
 
     def get_table_columns(self, full_table_name: str) -> dict[str, sqlalchemy.Column]:
         """Return a list of table columns.
@@ -545,13 +545,13 @@ class SQLConnector:
         """
         return column_name in self.get_table_columns(full_table_name)
 
-    def create_schema(self, full_schema_name: str) -> None:
-        """Create target database schema.
+    def create_schema(self, schema_name: str) -> None:
+        """Create target schema.
 
         Args:
-            full_schema_name: The target database schema to create.
+            schema_name: The target schema to create.
         """
-        self._engine.execute(sqlalchemy.schema.CreateSchema(full_schema_name))
+        self._engine.execute(sqlalchemy.schema.CreateSchema(schema_name))
 
     def create_empty_table(
         self,
@@ -579,7 +579,8 @@ class SQLConnector:
 
         _ = partition_keys  # Not supported in generic implementation.
 
-        meta = sqlalchemy.MetaData()
+        _, schema_name, table_name = self.parse_full_table_name(full_table_name)
+        meta = sqlalchemy.MetaData(schema=schema_name)
         columns: list[sqlalchemy.Column] = []
         primary_keys = primary_keys or []
         try:
@@ -598,7 +599,7 @@ class SQLConnector:
                 )
             )
 
-        _ = sqlalchemy.Table(full_table_name, meta, *columns)
+        _ = sqlalchemy.Table(table_name, meta, *columns)
         meta.create_all(self._engine)
 
     def _create_empty_column(
@@ -636,14 +637,15 @@ class SQLConnector:
             )
         )
 
-    def prepare_schema(self, full_schema_name: str) -> None:
+    def prepare_schema(self, schema_name: str) -> None:
         """Create the target database schema.
 
         Args:
-            full_schema_name: The target schema name.
+            schema_name: The target schema name.
         """
-        if not self.schema_exists(full_schema_name):
-            self.create_schema(full_schema_name)
+        schema_exists = self.schema_exists(schema_name)
+        if not schema_exists:
+            self.create_schema(schema_name)
 
     def prepare_table(
         self,
