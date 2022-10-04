@@ -6,7 +6,7 @@ import abc
 import logging
 from datetime import datetime
 from functools import lru_cache
-from typing import Any, Iterable, List, cast
+from typing import Any, Iterable, cast
 
 import sqlalchemy
 from sqlalchemy.engine import Engine
