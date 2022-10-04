@@ -494,6 +494,7 @@ class SQLConnector:
 
         Args:
             full_table_name: Fully qualified table name.
+            column_names: A list of column names to filter to.
 
         Returns:
             An ordered list of column objects.
@@ -519,6 +520,7 @@ class SQLConnector:
 
         Args:
             full_table_name: Fully qualified table name.
+            column_names: A list of column names to filter to.
 
         Returns:
             A table object with column list.
@@ -1018,7 +1020,13 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         )
 
     def get_selected_schema(self) -> dict:
-        """Return a copy of the Streams JSON schema, dropping any fields not selected."""
+        """Return a copy of the Stream JSON schema, dropping any fields not selected.
+
+        Returns:
+
+            A dictionary containing a copy of the Stream JSON schema, filtered
+            to any selection criteria.
+        """
         return catalog.get_selected_schema(
             stream_name=self.name,
             schema=self.schema,
