@@ -488,7 +488,7 @@ class SQLConnector:
         )
 
     def get_table_columns(
-        self, full_table_name: str, column_names: List[str] | None = None
+        self, full_table_name: str, column_names: list[str] | None = None
     ) -> dict[str, sqlalchemy.Column]:
         """Return a list of table columns.
 
@@ -514,7 +514,7 @@ class SQLConnector:
         }
 
     def get_table(
-        self, full_table_name: str, column_names: List[str] | None = None
+        self, full_table_name: str, column_names: list[str] | None = None
     ) -> sqlalchemy.Table:
         """Return a table object.
 
