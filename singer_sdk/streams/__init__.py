@@ -1,9 +1,10 @@
 """SDK for building singer-compliant taps."""
 
+from singer_sdk.sql import SQLConnector
 from singer_sdk.streams.core import Stream
 from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
-from singer_sdk.streams.sql import SQLConnector, SQLStream
+from singer_sdk.streams.sql import SQLStream
 
 __all__ = [
     "Stream",

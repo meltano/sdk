@@ -423,6 +423,14 @@ class Sink(metaclass=abc.ABCMeta):
             "Ignoring."
         )
 
+    def setup(self) -> None:
+        """Perform any setup actions at the beginning of a Stream.
+
+        Setup is executed once per Sink instance, after instantiation. If a Schema
+        change is detected, a new Sink is instantiated and this method is called again.
+        """
+        pass
+
     def clean_up(self) -> None:
         """Perform any clean up actions required at end of a stream.
 
