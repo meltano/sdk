@@ -1,5 +1,8 @@
 """Sink classes load data to SQL targets."""
 
+import re
+from copy import copy
+from string import digits
 from textwrap import dedent
 from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
@@ -8,6 +11,7 @@ from pendulum import now
 from sqlalchemy.sql import Executable
 from sqlalchemy.sql.expression import bindparam
 
+from singer_sdk.helpers._util import snakecase
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks.batch import BatchSink
 from singer_sdk.sql import SQLConnector
@@ -67,7 +71,8 @@ class SQLSink(BatchSink):
             The target table name.
         """
         parts = self.stream_name.split("-")
-        return self.stream_name if len(parts) == 1 else parts[-1]
+        table = self.stream_name if len(parts) == 1 else parts[-1]
+        return self.conform_name(table, "table")
 
     @property
     def schema_name(self) -> Optional[str]:
@@ -77,11 +82,12 @@ class SQLSink(BatchSink):
             The target schema name.
         """
         parts = self.stream_name.split("-")
+        schema = None
         if len(parts) == 2:
-            return parts[0]
+            schema = parts[0]
         if len(parts) == 3:
-            return parts[1]
-        return None
+            schema = parts[1]
+        return self.conform_name(schema, "schema") if schema else None
 
     @property
     def database_name(self) -> Optional[str]:
@@ -116,6 +122,42 @@ class SQLSink(BatchSink):
             schema_name=self.schema_name, db_name=self.database_name
         )
 
+    def conform_name(self, name: str, object_type: Optional[str] = None):
+        """Conform a stream property name to one suitable for the target system.
+
+        Transforms names to snake case by default, applicable to most common DBMSs'.
+        Developers may override this method to apply custom transformations
+        to database/schema/table/column names.
+
+        Returns:
+            The name transformed to snake case.
+        """
+        # strip non-alphanumeric characters, keeping -, _ and spaces
+        name = re.sub(r"[^a-zA-Z0-9_\-\.\s]", "", name)
+        # convert to snakecase
+        name = snakecase(name)
+        # remove leading digits
+        return name.lstrip(digits)
+
+    def conform_schema(self, schema: dict) -> dict:
+        """Return schema dictionary with property names conformed.
+
+        Returns:
+            A schema dictionary with the property names conformed.
+        """
+        conformed_schema = copy(schema)
+        conformed_schema["properties"] = {
+            self.conform_name(key): value
+            for key, value in conformed_schema["properties"].items()
+        }
+        return conformed_schema
+
+    def conform_record(self, record: dict) -> dict:
+        """Return record dictionary with property names conformed."""
+        return {
+            self.conform_name(key, "column"): value for key, value in record.items()
+        }
+
     def setup(self) -> None:
         """Set up Sink.
 
@@ -126,10 +168,19 @@ class SQLSink(BatchSink):
             self.connector.prepare_schema(self.schema_name)
         self.connector.prepare_table(
             full_table_name=self.full_table_name,
-            schema=self.schema,
+            schema=self.conform_schema(self.schema),
             primary_keys=self.key_properties,
             as_temp_table=False,
         )
+
+    @property
+    def key_properties(self) -> List[str]:
+        """Return key properties, conformed to target system naming requirements.
+
+        Returns:
+            A list of key properties, conformed with `self.conform_name()`
+        """
+        return [self.conform_name(key, "column") for key in super().key_properties]
 
     def process_batch(self, context: dict) -> None:
         """Process a batch with the given batch context.
@@ -197,7 +248,7 @@ class SQLSink(BatchSink):
         Returns:
             An insert statement.
         """
-        property_names = list(schema["properties"].keys())
+        property_names = list(self.conform_schema(schema)["properties"].keys())
         statement = dedent(
             f"""\
             INSERT INTO {full_table_name}
@@ -205,7 +256,6 @@ class SQLSink(BatchSink):
             VALUES ({", ".join([f":{name}" for name in property_names])})
             """
         )
-
         return statement.rstrip()
 
     def bulk_insert_records(
@@ -236,12 +286,14 @@ class SQLSink(BatchSink):
         if isinstance(insert_sql, str):
             insert_sql = sqlalchemy.text(insert_sql)
 
+        conformed_records = (
+            [self.conform_record(record) for record in records]
+            if isinstance(records, list)
+            else (self.conform_record(record) for record in records)
+        )
         self.logger.info("Inserting with SQL: %s", insert_sql)
-        self.connector.connection.execute(insert_sql, records)
-        if isinstance(records, list):
-            return len(records)  # If list, we can quickly return record count.
-
-        return None  # Unknown record count.
+        self.connector.connection.execute(insert_sql, conformed_records)
+        return len(conformed_records) if isinstance(conformed_records, list) else None
 
     def merge_upsert_from_table(
         self, target_table_name: str, from_table_name: str, join_keys: List[str]

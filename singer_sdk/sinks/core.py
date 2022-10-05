@@ -71,7 +71,7 @@ class Sink(metaclass=abc.ABCMeta):
         self.latest_state: dict | None = None
         self._draining_state: dict | None = None
         self.drained_state: dict | None = None
-        self.key_properties = key_properties or []
+        self._key_properties = key_properties or []
 
         # Tally counters
         self._total_records_written: int = 0
@@ -201,6 +201,15 @@ class Sink(metaclass=abc.ABCMeta):
             TODO
         """
         return DatetimeErrorTreatmentEnum.ERROR
+
+    @property
+    def key_properties(self) -> list[str]:
+        """Return key properties.
+
+        Returns:
+            A list of stream key properties.
+        """
+        return self._key_properties
 
     # Record processing
 
