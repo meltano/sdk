@@ -510,7 +510,8 @@ class SQLConnector:
                 nullable=col_meta.get("nullable", False),
             )
             for col_meta in columns
-            if not column_names or col_meta["name"] in column_names
+            if not column_names
+            or col_meta["name"].casefold() in {col.casefold() for col in column_names}
         }
 
     def get_table(
