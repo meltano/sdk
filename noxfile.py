@@ -42,6 +42,7 @@ def mypy(session: Session) -> None:
         "types-requests",
         "types-pytz",
         "types-simplejson",
+        "types-PyYAML",
     )
     session.run("mypy", *args)
     if not session.posargs:
