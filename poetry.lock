@@ -53,7 +53,7 @@ pytz = ">=2015.7"
 
 [[package]]
 name = "backoff"
-version = "2.1.2"
+version = "2.2.0"
 description = "Function decoration for backoff and retry"
 category = "main"
 optional = false
@@ -1355,8 +1355,8 @@ babel = [
     {file = "Babel-2.10.3.tar.gz", hash = "sha256:7614553711ee97490f732126dc077f8d0ae084ebc6a96e23db1482afabdb2c51"},
 ]
 backoff = [
-    {file = "backoff-2.1.2-py3-none-any.whl", hash = "sha256:b135e6d7c7513ba2bfd6895bc32bc8c66c6f3b0279b4c6cd866053cfd7d3126b"},
-    {file = "backoff-2.1.2.tar.gz", hash = "sha256:407f1bc0f22723648a8880821b935ce5df8475cf04f7b6b5017ae264d30f6069"},
+    {file = "backoff-2.2.0-py3-none-any.whl", hash = "sha256:659b65984bdceefb76cf53e8bbe745fdd10e9a89656ff453f44899c944542424"},
+    {file = "backoff-2.2.0.tar.gz", hash = "sha256:42fbbd37428d766657ad7907a0c4e0d8c30372983d41419baf1a41a05cb5680b"},
 ]
 binaryornot = [
     {file = "binaryornot-0.4.4-py2.py3-none-any.whl", hash = "sha256:b8b71173c917bddcd2c16070412e369c3ed7f0528926f70cac18a6c97fd563e4"},
