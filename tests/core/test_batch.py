@@ -47,3 +47,29 @@ def test_storage_from_url(file_url: str, root: str):
     head, _ = StorageTarget.split_url(file_url)
     target = StorageTarget.from_url(head)
     assert target.root == root
+
+
+@pytest.mark.parametrize(
+    "file_url,expected",
+    [
+        pytest.param(
+            "file:///Users/sdk/path/to/file",
+            ("file:///Users/sdk/path/to", "file"),
+            id="local",
+        ),
+        pytest.param(
+            "s3://bucket/path/to/file",
+            ("s3://bucket/path/to", "file"),
+            id="s3",
+        ),
+        pytest.param(
+            "C:\\Users\\sdk\\path\\to\\file",
+            ("C:\\Users\\sdk\\path\\to", "file"),
+            marks=(pytest.mark.windows,),
+            id="windows-local",
+        ),
+    ],
+)
+def test_storage_split_url(file_url: str, expected: tuple):
+    """Test storage target split URL."""
+    assert StorageTarget.split_url(file_url) == expected
