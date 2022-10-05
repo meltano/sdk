@@ -34,11 +34,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             connector: Optional connector to reuse.
         """
         self._connector: SQLConnector
-        if connector:
-            self._connector = connector
-        else:
-            self._connector = self.connector_class(dict(tap.config))
-
+        self._connector = connector or self.connector_class(dict(tap.config))
         self.catalog_entry = catalog_entry
         super().__init__(
             tap=tap,
@@ -140,8 +136,21 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             db_name=catalog_entry.database,
         )
 
-    # Get records from stream
+    def get_selected_schema(self) -> dict:
+        """Return a copy of the Stream JSON schema, dropping any fields not selected.
 
+        Returns:
+            A dictionary containing a copy of the Stream JSON schema, filtered
+            to any selection criteria.
+        """
+        return catalog.get_selected_schema(
+            stream_name=self.name,
+            schema=self.schema,
+            mask=self.mask,
+            logger=self.logger,
+        )
+
+    # Get records from stream
     def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
         """Return a generator of record-type dictionary objects.
 
@@ -165,7 +174,11 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 f"Stream '{self.name}' does not support partitioning."
             )
 
-        table = self.connector.get_table(self.fully_qualified_name)
+        selected_column_names = self.get_selected_schema()["properties"].keys()
+        table = self.connector.get_table(
+            full_table_name=self.fully_qualified_name,
+            column_names=selected_column_names,
+        )
         query = table.select()
         if self.replication_key:
             replication_key_col = table.columns[self.replication_key]
