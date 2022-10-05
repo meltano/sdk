@@ -114,6 +114,7 @@ known_first_party = ["tests", "samples"]
 addopts = '-vvv --ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
 markers = [
     "external: Tests relying on external resources",
+    "windows: Tests that only run on Windows",
 ]
 
 [tool.commitizen]
