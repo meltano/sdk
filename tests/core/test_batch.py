@@ -63,20 +63,8 @@ def test_storage_from_url(file_url: str, root: str):
             id="s3",
         ),
         pytest.param(
-            "C:\\Users\\sdk\\path\\to\\file",
-            ("C:\\Users\\sdk\\path\\to", "file"),
-            marks=(pytest.mark.windows,),
-            id="windows-local",
-        ),
-        pytest.param(
             "file://C:\\Users\\sdk\\path\\to\\file",
             ("file://C:\\Users\\sdk\\path\\to", "file"),
-            marks=(pytest.mark.windows,),
-            id="windows-local",
-        ),
-        pytest.param(
-            "\\\\remotemachine\\C$\\batches\\file",
-            ("\\\\remotemachine\\C$\\batches", "file"),
             marks=(pytest.mark.windows,),
             id="windows-local",
         ),
