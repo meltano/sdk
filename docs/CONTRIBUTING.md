@@ -97,6 +97,20 @@ To view the code coverage report in HTML format:
 nox -rs coverage -- html && open ./htmlcov/index.html
 ```
 
+### Platform-specific Testing
+
+To mark a test as platform-specific, use the `@pytest.mark.<platform>` decorator:
+
+```python
+import pytest
+
+@pytest.mark.windows
+def test_windows_only():
+    pass
+```
+
+Supported platform markers are `windows`, `darwin`, and `linux`.
+
 ## Testing Updates to Docs
 
 Documentation runs on Sphinx, using ReadtheDocs style template, and hosting from
