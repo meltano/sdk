@@ -13,6 +13,7 @@ from warnings import warn
 import backoff
 import requests
 
+from singer_sdk import metrics
 from singer_sdk._singerlib import Schema
 from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
@@ -241,16 +242,14 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             TODO
         """
         response = self.requests_session.send(prepared_request, timeout=self.timeout)
-        if self._LOG_REQUEST_METRICS:
-            extra_tags = {}
-            if self._LOG_REQUEST_METRIC_URLS:
-                extra_tags["url"] = prepared_request.path_url
-            self._write_request_duration_log(
-                endpoint=self.path,
-                response=response,
-                context=context,
-                extra_tags=extra_tags,
-            )
+        self._write_request_duration_log(
+            endpoint=self.path,
+            response=response,
+            context=context,
+            extra_tags={"url": prepared_request.path_url}
+            if self._LOG_REQUEST_METRIC_URLS
+            else None,
+        )
         self.validate_response(response)
         logging.debug("Response received successfully.")
         return response
@@ -350,16 +349,57 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         paginator = self.get_new_paginator()
         decorated_request = self.request_decorator(self._request)
 
-        while not paginator.finished:
-            prepared_request = self.prepare_request(
-                context,
-                next_page_token=paginator.current_value,
-            )
-            resp = decorated_request(prepared_request, context)
-            self.update_sync_costs(prepared_request, resp, context)
-            yield from self.parse_response(resp)
+        with metrics.http_request_counter(self.name, self.path) as request_counter:
+            request_counter.context = context
 
-            paginator.advance(resp)
+            while not paginator.finished:
+                prepared_request = self.prepare_request(
+                    context,
+                    next_page_token=paginator.current_value,
+                )
+                resp = decorated_request(prepared_request, context)
+                request_counter.increment()
+                self.update_sync_costs(prepared_request, resp, context)
+                yield from self.parse_response(resp)
+
+                paginator.advance(resp)
+
+    def _write_request_duration_log(
+        self,
+        endpoint: str,
+        response: requests.Response,
+        context: dict | None,
+        extra_tags: dict | None,
+    ) -> None:
+        """TODO.
+
+        Args:
+            endpoint: TODO
+            response: TODO
+            context: Stream partition or context dictionary.
+            extra_tags: TODO
+        """
+        extra_tags = extra_tags or {}
+        if context:
+            extra_tags[metrics.Tag.CONTEXT] = context
+
+        point = metrics.Point(
+            "timer",
+            metric=metrics.Metric.HTTP_REQUEST_DURATION,
+            value=response.elapsed.total_seconds(),
+            tags={
+                metrics.Tag.STREAM: self.name,
+                metrics.Tag.ENDPOINT: self.path,
+                metrics.Tag.HTTP_STATUS_CODE: response.status_code,
+                metrics.Tag.STATUS: (
+                    metrics.Status.SUCCEEDED
+                    if response.status_code < 400
+                    else metrics.Status.FAILED
+                ),
+                **extra_tags,
+            },
+        )
+        self._log_metric(point)
 
     def update_sync_costs(
         self,
