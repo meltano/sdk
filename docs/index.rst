@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Meltano Singer SDK
-=======================================
+==================
 
 The Meltano_ Singer SDK for Taps and Targets is the fastest way to build custom
 data extractors and loaders! Taps and targets built on the SDK are automatically compliant with the
