@@ -162,6 +162,12 @@ class SQLSink(BatchSink):
 
     def conform_record(self, record: dict) -> dict:
         """Return record dictionary with property names conformed."""
+
+        Args:
+            record: Dictionary representing a single record.
+
+        Returns:
+            New record dictionary with conformed column names.
         return {
             self.conform_name(key, "column"): value for key, value in record.items()
         }
