@@ -122,7 +122,7 @@ class SQLSink(BatchSink):
             schema_name=self.schema_name, db_name=self.database_name
         )
 
-    def conform_name(self, name: str, object_type: Optional[str] = None):
+    def conform_name(self, name: str, object_type: Optional[str] = None) -> str:
         """Conform a stream property name to one suitable for the target system.
 
         Transforms names to snake case by default, applicable to most common DBMSs'.
