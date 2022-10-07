@@ -1,12 +1,12 @@
-.. Meltano SDK documentation master file, created by
+.. Meltano Singer SDK documentation master file, created by
    sphinx-quickstart on Thu Jun  3 14:38:15 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Meltano SDK for Taps and Targets
+Meltano Singer SDK
 =======================================
 
-The Meltano_ SDK for Taps and Targets is the fastest way to build custom
+The Meltano_ Singer SDK for Taps and Targets is the fastest way to build custom
 data extractors and loaders! Taps and targets built on the SDK are automatically compliant with the
 `Singer Spec`_, the de-facto open source standard for extract and load pipelines.
 

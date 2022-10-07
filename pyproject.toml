@@ -10,7 +10,9 @@ repository = "https://github.com/meltano/sdk"
 documentation = "https://sdk.meltano.com/en/latest/"
 keywords = [
     "Meltano",
+    "Singer",
     "Meltano SDK",
+    "Singer SDK",
     "ELT",
 ]
 classifiers = [

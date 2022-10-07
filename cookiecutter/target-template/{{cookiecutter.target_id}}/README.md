@@ -128,5 +128,5 @@ meltano elt tap-carbon-intensity {{ cookiecutter.target_id }}
 
 ### SDK Dev Guide
 
-See the [dev guide](https://sdk.meltano.com/en/latest/dev_guide.html) for more instructions on how to use the Meltano SDK to
+See the [dev guide](https://sdk.meltano.com/en/latest/dev_guide.html) for more instructions on how to use the Meltano Singer SDK to
 develop your own Singer taps and targets.

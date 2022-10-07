@@ -175,7 +175,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """Return the package version number.
 
         Returns:
-            Meltano SDK version number.
+            Meltano Singer SDK version number.
         """
         try:
             version = metadata.version(SDK_PACKAGE_NAME)
@@ -362,8 +362,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             md_list.append(
                 f"# `{info['name']}`\n\n"
                 f"{info['description']}\n\n"
-                f"Built with the [Meltano SDK](https://sdk.meltano.com) for "
-                "Singer Taps and Targets.\n\n"
+                f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n"
             )
             for key, value in info.items():
 

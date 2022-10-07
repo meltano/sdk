@@ -69,7 +69,7 @@ class JSONLinesEncoding(BaseBatchFileEncoding):
 
 @dataclass
 class SDKBatchMessage(Message):
-    """Singer batch message in the Meltano SDK flavor."""
+    """Singer batch message in the Meltano Singer SDK flavor."""
 
     stream: str
     """The stream name."""

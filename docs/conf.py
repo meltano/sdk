@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
-project = "Meltano SDK"
+project = "Meltano Singer SDK"
 copyright = "2021, Meltano Core Team and Contributors"
 author = "Meltano Core Team and Contributors"
 
