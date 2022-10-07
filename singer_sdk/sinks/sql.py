@@ -147,6 +147,9 @@ class SQLSink(BatchSink):
     def conform_schema(self, schema: dict) -> dict:
         """Return schema dictionary with property names conformed.
 
+        Args:
+            schema: JSON schema dictionary.
+
         Returns:
             A schema dictionary with the property names conformed.
         """
