@@ -128,6 +128,11 @@ class SQLSink(BatchSink):
         Transforms names to snake case by default, applicable to most common DBMSs'.
         Developers may override this method to apply custom transformations
         to database/schema/table/column names.
+        
+        Args:
+            name: Property name.
+            object_type: One of ``database``, ``schema``, ``table`` or ``column``.
+
 
         Returns:
             The name transformed to snake case.
