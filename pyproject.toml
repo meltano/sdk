@@ -88,7 +88,7 @@ pyarrow = "^9.0.0"
 freezegun = "^1.2.2"
 viztracer = "^0.15.4"
 requests-mock = "^1.10.0"
-sqlalchemy2-stubs = {version = "^0.0.2a27", allow-prereleases = true}
+sqlalchemy2-stubs = {version = "^0.0.2a28", allow-prereleases = true}
 types-python-dateutil = "^2.8.19"
 types-pytz = "^2022.4.0.0"
 types-requests = "^2.28.11"
