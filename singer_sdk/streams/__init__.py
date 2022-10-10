@@ -1,4 +1,4 @@
-"""SDK for building singer-compliant taps."""
+"""SDK for building Singer taps."""
 
 from singer_sdk.streams.core import Stream
 from singer_sdk.streams.graphql import GraphQLStream
