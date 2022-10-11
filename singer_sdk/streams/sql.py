@@ -204,7 +204,7 @@ class SQLConnector:
 
     @staticmethod
     def get_fully_qualified_name(
-        table_name: str,
+        table_name: str | None = None,
         schema_name: str | None = None,
         db_name: str | None = None,
         delimiter: str = ".",
@@ -218,23 +218,23 @@ class SQLConnector:
             delimiter: Generally: '.' for SQL names and '-' for Singer names.
 
         Raises:
-            ValueError: If table_name is not provided or if neither schema_name or
-                db_name are provided.
+            ValueError: If all 3 name parts not supplied.
 
         Returns:
             The fully qualified name as a string.
         """
-        if db_name and schema_name:
-            result = delimiter.join([db_name, schema_name, table_name])
-        elif db_name:
-            result = delimiter.join([db_name, table_name])
-        elif schema_name:
-            result = delimiter.join([schema_name, table_name])
-        elif table_name:
-            result = table_name
-        else:
+        parts = []
+
+        if db_name:
+            parts.append(db_name)
+        if schema_name:
+            parts.append(schema_name)
+        if table_name:
+            parts.append(table_name)
+
+        if not parts:
             raise ValueError(
-                "Could not generate fully qualified name for stream: "
+                "Could not generate fully qualified name: "
                 + ":".join(
                     [
                         db_name or "(unknown-db)",
@@ -244,7 +244,7 @@ class SQLConnector:
                 )
             )
 
-        return result
+        return delimiter.join(parts)
 
     @property
     def _dialect(self) -> sqlalchemy.engine.Dialect:
@@ -557,6 +557,13 @@ class SQLConnector:
             True if table exists, False if not.
         """
         return column_name in self.get_table_columns(full_table_name)
+
+    def create_schema(self, schema_name: str) -> None:
+        """Create target schema.
+        Args:
+            schema_name: The target schema to create.
+        """
+        self._engine.execute(sqlalchemy.schema.CreateSchema(schema_name))
 
     def create_empty_table(
         self,
