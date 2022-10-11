@@ -22,7 +22,9 @@ from singer_sdk.streams.core import Stream
 
 class SQLConnector:
     """Base class for SQLAlchemy-based connectors.
+
     The connector class serves as a wrapper around the SQL connection.
+
     The functions of the connector are:
     - connecting to the source
     - generating SQLAlchemy connection and engine objects
@@ -41,6 +43,7 @@ class SQLConnector:
         self, config: dict | None = None, sqlalchemy_url: str | None = None
     ) -> None:
         """Initialize the SQL connector.
+
         Args:
             config: The parent tap or target object's config.
             sqlalchemy_url: Optional URL for the connection.
@@ -52,6 +55,7 @@ class SQLConnector:
     @property
     def config(self) -> dict:
         """If set, provides access to the tap or target config.
+
         Returns:
             The settings as a dict.
         """
@@ -60,6 +64,7 @@ class SQLConnector:
     @property
     def logger(self) -> logging.Logger:
         """Get logger.
+
         Returns:
             Plugin logger.
         """
@@ -67,12 +72,16 @@ class SQLConnector:
 
     def create_sqlalchemy_connection(self) -> sqlalchemy.engine.Connection:
         """Return a new SQLAlchemy connection using the provided config.
+
         By default this will create using the sqlalchemy `stream_results=True` option
         described here:
+
         https://docs.sqlalchemy.org/en/14/core/connections.html#using-server-side-cursors-a-k-a-stream-results
+
         Developers may override this method if their provider does not support
         server side cursors (`stream_results`) or in order to use different
         configurations options when creating the connection object.
+
         Returns:
             A newly created SQLAlchemy engine object.
         """
@@ -84,8 +93,10 @@ class SQLConnector:
 
     def create_sqlalchemy_engine(self) -> sqlalchemy.engine.Engine:
         """Return a new SQLAlchemy engine using the provided config.
+
         Developers can generally override just one of the following:
         `sqlalchemy_engine`, sqlalchemy_url`.
+
         Returns:
             A newly created SQLAlchemy engine object.
         """
@@ -94,6 +105,7 @@ class SQLConnector:
     @property
     def connection(self) -> sqlalchemy.engine.Connection:
         """Return or set the SQLAlchemy connection object.
+
         Returns:
             The active SQLAlchemy connection object.
         """
@@ -105,6 +117,7 @@ class SQLConnector:
     @property
     def sqlalchemy_url(self) -> str:
         """Return the SQLAlchemy URL string.
+
         Returns:
             The URL as a string.
         """
@@ -115,12 +128,16 @@ class SQLConnector:
 
     def get_sqlalchemy_url(self, config: dict[str, Any]) -> str:
         """Return the SQLAlchemy URL string.
+
         Developers can generally override just one of the following:
         `sqlalchemy_engine`, `get_sqlalchemy_url`.
+
         Args:
             config: A dictionary of settings from the tap or target config.
+
         Returns:
             The URL as a string.
+
         Raises:
             ConfigValidationError: If no valid sqlalchemy_url can be found.
         """
@@ -138,15 +155,20 @@ class SQLConnector:
         ),
     ) -> dict:
         """Return a JSON Schema representation of the provided type.
+
         By default will call `typing.to_jsonschema_type()` for strings and SQLAlchemy
         types.
+
         Developers may override this method to accept additional input argument types,
         to support non-standard types, or to provide custom typing logic.
+
         Args:
             sql_type: The string representation of the SQL type, a SQLAlchemy
                 TypeEngine class or object, or a custom-specified object.
+
         Raises:
             ValueError: If the type received could not be translated to jsonschema.
+
         Returns:
             The JSON Schema representation of the provided type.
         """
@@ -164,13 +186,17 @@ class SQLConnector:
     @staticmethod
     def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
         """Return a JSON Schema representation of the provided type.
+
         By default will call `typing.to_sql_type()`.
+
         Developers may override this method to accept additional input argument types,
         to support non-standard types, or to provide custom typing logic.
         If overriding this method, developers should call the default implementation
         from the base class for all unhandled cases.
+
         Args:
             jsonschema_type: The JSON Schema representation of the source type.
+
         Returns:
             The SQLAlchemy type representation of the data type.
         """
@@ -184,14 +210,17 @@ class SQLConnector:
         delimiter: str = ".",
     ) -> str:
         """Concatenates a fully qualified name from the parts.
+
         Args:
             table_name: The name of the table.
             schema_name: The name of the schema. Defaults to None.
             db_name: The name of the database. Defaults to None.
             delimiter: Generally: '.' for SQL names and '-' for Singer names.
+
         Raises:
             ValueError: If table_name is not provided or if neither schema_name or
                 db_name are provided.
+
         Returns:
             The fully qualified name as a string.
         """
@@ -220,6 +249,7 @@ class SQLConnector:
     @property
     def _dialect(self) -> sqlalchemy.engine.Dialect:
         """Return the dialect object.
+
         Returns:
             The dialect object.
         """
@@ -228,6 +258,7 @@ class SQLConnector:
     @property
     def _engine(self) -> sqlalchemy.engine.Engine:
         """Return the dialect object.
+
         Returns:
             The dialect object.
         """
@@ -235,11 +266,14 @@ class SQLConnector:
 
     def quote(self, name: str) -> str:
         """Quote a name if it needs quoting, using '.' as a name-part delimiter.
+
         Examples:
           "my_table"           => "`my_table`"
           "my_schema.my_table" => "`my_schema`.`my_table`"
+
         Args:
             name: The unquoted name.
+
         Returns:
             str: The quoted name.
         """
@@ -260,9 +294,11 @@ class SQLConnector:
 
     def get_schema_names(self, engine: Engine, inspected: Inspector) -> list[str]:
         """Return a list of schema names in DB.
+
         Args:
             engine: SQLAlchemy engine
             inspected: SQLAlchemy inspector instance for engine
+
         Returns:
             List of schema names
         """
@@ -272,10 +308,12 @@ class SQLConnector:
         self, engine: Engine, inspected: Inspector, schema_name: str
     ) -> list[tuple[str, bool]]:
         """Return a list of syncable objects.
+
         Args:
             engine: SQLAlchemy engine
             inspected: SQLAlchemy inspector instance for engine
             schema_name: Schema name to inspect
+
         Returns:
             List of tuples (<table_or_view_name>, <is_view>)
         """
@@ -299,12 +337,14 @@ class SQLConnector:
         is_view: bool,
     ) -> CatalogEntry:
         """Create `CatalogEntry` object for the given table or a view.
+
         Args:
             engine: SQLAlchemy engine
             inspected: SQLAlchemy inspector instance for engine
             schema_name: Schema name to inspect
             table_name: Name of the table or a view
             is_view: Flag whether this object is a view, returned by `get_object_names`
+
         Returns:
             `CatalogEntry` object for the given table or a view
         """
@@ -380,6 +420,7 @@ class SQLConnector:
 
     def discover_catalog_entries(self) -> list[dict]:
         """Return a list of catalog entries from discovery.
+
         Returns:
             The discovered catalog entries as a list.
         """
@@ -402,8 +443,10 @@ class SQLConnector:
         self, full_table_name: str
     ) -> tuple[str | None, str | None, str]:
         """Parse a fully qualified table name into its parts.
+
         Developers may override this method if their platform does not support the
         traditional 3-part convention: `db_name.schema_name.table_name`
+
         Args:
             full_table_name: A table name or a fully qualified table name. Depending on
                 SQL the platform, this could take the following forms:
@@ -411,6 +454,7 @@ class SQLConnector:
                 - `<db>.<table>` (platforms which do not use schema groupings)
                 - `<schema>.<name>` (if DB name is already in context)
                 - `<table>` (if DB name and schema name are already in context)
+
         Returns:
             A three part tuple (db_name, schema_name, table_name) with any unspecified
             or unused parts returned as None.
@@ -430,8 +474,10 @@ class SQLConnector:
 
     def table_exists(self, full_table_name: str) -> bool:
         """Determine if the target table already exists.
+
         Args:
             full_table_name: the target table name.
+
         Returns:
             True if table exists, False if not, None if unsure or undetectable.
         """
@@ -440,13 +486,27 @@ class SQLConnector:
             sqlalchemy.inspect(self._engine).has_table(full_table_name),
         )
 
+    def schema_exists(self, schema_name: str) -> bool:
+        """Determine if the target database schema already exists.
+
+        Args:
+            schema_name: The target database schema name.
+
+        Returns:
+            True if the database schema exists, False if not.
+        """
+        schema_names = sqlalchemy.inspect(self._engine).get_schema_names()
+        return schema_name in schema_names
+
     def get_table_columns(
         self, full_table_name: str, column_names: list[str] | None = None
     ) -> dict[str, sqlalchemy.Column]:
         """Return a list of table columns.
+
         Args:
             full_table_name: Fully qualified table name.
             column_names: A list of column names to filter to.
+
         Returns:
             An ordered list of column objects.
         """
@@ -469,9 +529,11 @@ class SQLConnector:
         self, full_table_name: str, column_names: list[str] | None = None
     ) -> sqlalchemy.Table:
         """Return a table object.
+
         Args:
             full_table_name: Fully qualified table name.
             column_names: A list of column names to filter to.
+
         Returns:
             A table object with column list.
         """
@@ -486,9 +548,11 @@ class SQLConnector:
 
     def column_exists(self, full_table_name: str, column_name: str) -> bool:
         """Determine if the target table already exists.
+
         Args:
             full_table_name: the target table name.
             column_name: the target column name.
+
         Returns:
             True if table exists, False if not.
         """
@@ -503,12 +567,14 @@ class SQLConnector:
         as_temp_table: bool = False,
     ) -> None:
         """Create an empty target table.
+
         Args:
             full_table_name: the target table name.
             schema: the JSON schema for the new table.
             primary_keys: list of key properties.
             partition_keys: list of partition keys.
             as_temp_table: True to create a temp table.
+
         Raises:
             NotImplementedError: if temp tables are unsupported and as_temp_table=True.
             RuntimeError: if a variant schema is passed with no properties defined.
@@ -547,10 +613,12 @@ class SQLConnector:
         sql_type: sqlalchemy.types.TypeEngine,
     ) -> None:
         """Create a new column.
+
         Args:
             full_table_name: The target table name.
             column_name: The name of the new column.
             sql_type: SQLAlchemy type engine to be used in creating the new column.
+
         Raises:
             NotImplementedError: if adding columns is not supported.
         """
@@ -573,6 +641,16 @@ class SQLConnector:
             )
         )
 
+    def prepare_schema(self, schema_name: str) -> None:
+        """Create the target database schema.
+
+        Args:
+            schema_name: The target schema name.
+        """
+        schema_exists = self.schema_exists(schema_name)
+        if not schema_exists:
+            self.create_schema(schema_name)
+
     def prepare_table(
         self,
         full_table_name: str,
@@ -582,6 +660,7 @@ class SQLConnector:
         as_temp_table: bool = False,
     ) -> None:
         """Adapt target table to provided schema if possible.
+
         Args:
             full_table_name: the target table name.
             schema: the JSON Schema for the table.
@@ -611,6 +690,7 @@ class SQLConnector:
         sql_type: sqlalchemy.types.TypeEngine,
     ) -> None:
         """Adapt target table to provided schema if possible.
+
         Args:
             full_table_name: the target table name.
             column_name: the target column name.
@@ -632,10 +712,12 @@ class SQLConnector:
 
     def rename_column(self, full_table_name: str, old_name: str, new_name: str) -> None:
         """Rename the provided columns.
+
         Args:
             full_table_name: The fully qualified table name.
             old_name: The old column to be renamed.
             new_name: The new name for the column.
+
         Raises:
             NotImplementedError: If `self.allow_column_rename` is false.
         """
@@ -651,10 +733,13 @@ class SQLConnector:
         self, sql_types: list[sqlalchemy.types.TypeEngine]
     ) -> sqlalchemy.types.TypeEngine:
         """Return a compatible SQL type for the selected type list.
+
         Args:
             sql_types: List of SQL types.
+
         Returns:
             A SQL type that is compatible with the input types.
+
         Raises:
             ValueError: If sql_types argument has zero members.
         """
@@ -721,13 +806,17 @@ class SQLConnector:
         sql_types: Iterable[sqlalchemy.types.TypeEngine],
     ) -> list[sqlalchemy.types.TypeEngine]:
         """Return the input types sorted from most to least compatible.
+
         For example, [Smallint, Integer, Datetime, String, Double] would become
         [Unicode, String, Double, Integer, Smallint, Datetime].
+
         String types will be listed first, then decimal types, then integer types,
         then bool types, and finally datetime and date. Higher precision, scale, and
         length will be sorted earlier.
+
         Args:
             sql_types (List[sqlalchemy.types.TypeEngine]): [description]
+
         Returns:
             The sorted list.
         """
@@ -756,12 +845,15 @@ class SQLConnector:
     def _get_column_type(
         self, full_table_name: str, column_name: str
     ) -> sqlalchemy.types.TypeEngine:
-        """Gets the SQL type of the declared column.
+        """Get the SQL type of the declared column.
+
         Args:
             full_table_name: The name of the table.
             column_name: The name of the column.
+
         Returns:
             The type of the column.
+
         Raises:
             KeyError: If the provided column name does not exist.
         """
@@ -781,10 +873,12 @@ class SQLConnector:
         sql_type: sqlalchemy.types.TypeEngine,
     ) -> None:
         """Adapt table column type to support the new JSON schema type.
+
         Args:
             full_table_name: The target table name.
             column_name: The target column name.
             sql_type: The new SQLAlchemy type.
+
         Raises:
             NotImplementedError: if altering columns is not supported.
         """
@@ -865,7 +959,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
     @property
     def connector(self) -> SQLConnector:
-        """The connector object.
+        """Return a connector object.
 
         Returns:
             The connector object.
@@ -874,7 +968,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
     @property
     def metadata(self) -> MetadataMapping:
-        """The Singer metadata.
+        """Return the Singer metadata.
 
         Metadata from an input catalog will override standard metadata.
 
