@@ -1,4 +1,4 @@
-"""SDK for building singer-compliant taps."""
+"""SDK for building Singer taps."""
 
 from singer_sdk.sql import SQLConnector
 from singer_sdk.streams.core import Stream

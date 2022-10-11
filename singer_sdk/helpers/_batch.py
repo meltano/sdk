@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import enum
+import platform
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
 from typing import IO, TYPE_CHECKING, Any, ClassVar, Generator
@@ -68,7 +69,7 @@ class JSONLinesEncoding(BaseBatchFileEncoding):
 
 @dataclass
 class SDKBatchMessage(Message):
-    """Singer batch message in the Meltano SDK flavor."""
+    """Singer batch message in the Meltano Singer SDK flavor."""
 
     stream: str
     """The stream name."""
@@ -129,7 +130,13 @@ class StorageTarget:
         Returns:
             A tuple of the head and tail parts of the URL.
         """
-        return fs.path.split(url)
+        if platform.system() == "Windows" and "\\" in url:
+            # Original code from pyFileSystem split
+            # Augemnted slitly to properly Windows paths
+            split = url.rsplit("\\", 1)
+            return (split[0] or "\\", split[1])
+        else:
+            return fs.path.split(url)
 
     @classmethod
     def from_url(cls, url: str) -> StorageTarget:
