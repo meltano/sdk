@@ -584,7 +584,8 @@ class SQLConnector:
 
         _ = partition_keys  # Not supported in generic implementation.
 
-        meta = sqlalchemy.MetaData()
+        _, schema_name, table_name = self.parse_full_table_name(full_table_name)
+        meta = sqlalchemy.MetaData(schema=schema_name)
         columns: list[sqlalchemy.Column] = []
         primary_keys = primary_keys or []
         try:
@@ -603,7 +604,7 @@ class SQLConnector:
                 )
             )
 
-        _ = sqlalchemy.Table(full_table_name, meta, *columns)
+        _ = sqlalchemy.Table(table_name, meta, *columns)
         meta.create_all(self._engine)
 
     def _create_empty_column(
