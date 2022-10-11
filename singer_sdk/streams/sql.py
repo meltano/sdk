@@ -560,6 +560,7 @@ class SQLConnector:
 
     def create_schema(self, schema_name: str) -> None:
         """Create target schema.
+
         Args:
             schema_name: The target schema to create.
         """
