@@ -128,7 +128,7 @@ class SQLSink(BatchSink):
         Transforms names to snake case by default, applicable to most common DBMSs'.
         Developers may override this method to apply custom transformations
         to database/schema/table/column names.
-        
+
         Args:
             name: Property name.
             object_type: One of ``database``, ``schema``, ``table`` or ``column``.
@@ -137,7 +137,7 @@ class SQLSink(BatchSink):
         Returns:
             The name transformed to snake case.
         """
-        # strip non-alphanumeric characters, keeping -, _ and spaces
+        # strip non-alphanumeric characters, keeping - . _ and spaces
         name = re.sub(r"[^a-zA-Z0-9_\-\.\s]", "", name)
         # convert to snakecase
         name = snakecase(name)
@@ -161,13 +161,14 @@ class SQLSink(BatchSink):
         return conformed_schema
 
     def conform_record(self, record: dict) -> dict:
-        """Return record dictionary with property names conformed."""
+        """Return record dictionary with property names conformed.
 
         Args:
             record: Dictionary representing a single record.
 
         Returns:
             New record dictionary with conformed column names.
+        """
         return {
             self.conform_name(key, "column"): value for key, value in record.items()
         }
