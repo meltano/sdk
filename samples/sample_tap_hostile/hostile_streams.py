@@ -21,6 +21,8 @@ class HostilePropertyNamesStream(Stream):
         th.Property("name-with-dashes", th.StringType),
         th.Property("Name-with-Dashes-and-Mixed-cases", th.StringType),
         th.Property("5name_starts_with_number", th.StringType),
+        th.Property("6name_starts_with_number", th.StringType),
+        th.Property("7name_starts_with_number", th.StringType),
         th.Property("name_with_emoji_😈", th.StringType),
     ).to_dict()
 
