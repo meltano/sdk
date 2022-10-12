@@ -11,6 +11,7 @@ from pendulum import now
 from sqlalchemy.sql import Executable
 from sqlalchemy.sql.expression import bindparam
 
+from singer_sdk.exceptions import ConformedNameClashException
 from singer_sdk.helpers._util import snakecase
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks.batch import BatchSink
@@ -144,6 +145,37 @@ class SQLSink(BatchSink):
         # remove leading digits
         return name.lstrip(digits)
 
+    @staticmethod
+    def _check_conformed_names_not_duplicated(
+        conformed_property_names: Dict[str, str]
+    ) -> None:
+        """Check if conformed names produce duplicate keys.
+
+        Raises:
+            ConformedNameClashException if duplicates found.
+        """
+        duplicates = {
+            x
+            for x in conformed_property_names.values()
+            if list(conformed_property_names.values()).count(x) > 1
+        }
+        if duplicates:
+            duplicated_properties = [
+                key
+                for key, value in conformed_property_names.items()
+                if value in duplicates
+            ]
+            duplicated_property_string = ", ".join(
+                [
+                    f"{dup} -> {conformed_property_names[dup]}"
+                    for dup in duplicated_properties
+                ]
+            )
+            raise ConformedNameClashException(
+                "Duplicate stream properties produced when conforming property names: "
+                + duplicated_property_string
+            )
+
     def conform_schema(self, schema: dict) -> dict:
         """Return schema dictionary with property names conformed.
 
@@ -154,8 +186,12 @@ class SQLSink(BatchSink):
             A schema dictionary with the property names conformed.
         """
         conformed_schema = copy(schema)
+        conformed_property_names = {
+            key: self.conform_name(key) for key in conformed_schema["properties"].keys()
+        }
+        self._check_conformed_names_not_duplicated(conformed_property_names)
         conformed_schema["properties"] = {
-            self.conform_name(key): value
+            conformed_property_names[key]: value
             for key, value in conformed_schema["properties"].items()
         }
         return conformed_schema
