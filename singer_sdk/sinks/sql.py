@@ -14,7 +14,7 @@ from sqlalchemy.sql.expression import bindparam
 from singer_sdk.helpers._util import snakecase
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks.batch import BatchSink
-from singer_sdk.sql import SQLConnector
+from singer_sdk.streams import SQLConnector
 
 
 class SQLSink(BatchSink):
