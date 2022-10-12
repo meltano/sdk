@@ -1,6 +1,7 @@
 """Sink classes load data to SQL targets."""
 
 import re
+from collections import defaultdict
 from copy import copy
 from textwrap import dedent
 from typing import Any, Dict, Iterable, List, Optional, Type, Union
@@ -156,26 +157,17 @@ class SQLSink(BatchSink):
         Raises:
             ConformedNameClashException if duplicates found.
         """
-        duplicates = {
-            x
-            for x in conformed_property_names.values()
-            if list(conformed_property_names.values()).count(x) > 1
-        }
+        # group: {'_a': ['1_a'], 'abc': ['aBc', 'abC']}
+        grouped = defaultdict(list)
+        for k, v in conformed_property_names.items():
+            grouped[v].append(k)
+
+        # filter
+        duplicates = list(filter(lambda p: len(p[1]) > 1, grouped.items()))
         if duplicates:
-            duplicated_properties = [
-                key
-                for key, value in conformed_property_names.items()
-                if value in duplicates
-            ]
-            duplicated_property_string = ", ".join(
-                [
-                    f"{dup} -> {conformed_property_names[dup]}"
-                    for dup in duplicated_properties
-                ]
-            )
             raise ConformedNameClashException(
-                "Duplicate stream properties produced when conforming property names: "
-                + duplicated_property_string
+                "Duplicate stream properties produced when "
+                + f"conforming property names: {duplicates}"
             )
 
     def conform_schema(self, schema: dict) -> dict:
