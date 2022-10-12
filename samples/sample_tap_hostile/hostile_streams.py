@@ -33,12 +33,8 @@ class HostilePropertyNamesStream(Stream):
     def get_records(self, context: dict | None) -> Iterable[dict | tuple[dict, dict]]:
         return (
             {
-                "name with spaces": self.get_random_lowercase_string(),
-                "NameIsCamelCase": self.get_random_lowercase_string(),
-                "name-with-dashes": self.get_random_lowercase_string(),
-                "Name-with-Dashes-and-Mixed-cases": self.get_random_lowercase_string(),
-                "5name_starts_with_number": self.get_random_lowercase_string(),
-                "name_with_emoji_😈": self.get_random_lowercase_string(),
+                key: self.get_random_lowercase_string()
+                for key in self.schema["properties"].keys()
             }
             for _ in range(10)
         )

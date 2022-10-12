@@ -603,6 +603,8 @@ def test_hostile_to_sqlite(
         "name_is_camel_case",
         "name_with_dashes",
         "name_with_dashes_and_mixed_cases",
-        "name_starts_with_number",
+        "gname_starts_with_number",
+        "fname_starts_with_number",
+        "hname_starts_with_number",
         "name_with_emoji",
     }

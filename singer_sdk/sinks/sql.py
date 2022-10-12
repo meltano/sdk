@@ -2,7 +2,6 @@
 
 import re
 from copy import copy
-from string import digits
 from textwrap import dedent
 from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
@@ -12,7 +11,7 @@ from sqlalchemy.sql import Executable
 from sqlalchemy.sql.expression import bindparam
 
 from singer_sdk.exceptions import ConformedNameClashException
-from singer_sdk.helpers._util import snakecase
+from singer_sdk.helpers._conformers import replace_leading_digit, snakecase
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks.batch import BatchSink
 from singer_sdk.streams import SQLConnector
@@ -142,8 +141,8 @@ class SQLSink(BatchSink):
         name = re.sub(r"[^a-zA-Z0-9_\-\.\s]", "", name)
         # convert to snakecase
         name = snakecase(name)
-        # remove leading digits
-        return name.lstrip(digits)
+        # replace leading digit
+        return replace_leading_digit(name)
 
     @staticmethod
     def _check_conformed_names_not_duplicated(
@@ -205,9 +204,9 @@ class SQLSink(BatchSink):
         Returns:
             New record dictionary with conformed column names.
         """
-        return {
-            self.conform_name(key, "column"): value for key, value in record.items()
-        }
+        conformed_property_names = {key: self.conform_name(key) for key in record}
+        self._check_conformed_names_not_duplicated(conformed_property_names)
+        return {conformed_property_names[key]: value for key, value in record.items()}
 
     def setup(self) -> None:
         """Set up Sink.
