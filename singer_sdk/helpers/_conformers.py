@@ -15,7 +15,7 @@ def snakecase(string: str) -> str:
     string = re.sub(r"[\-\.\s]", "_", string)
     string = (
         string[0].lower()
-        + re.sub(r"[A-Z]", lambda matched: f"_{matched.group(0).lower()}", string[1:])
+        + re.sub(r"[A-Z]", lambda matched: "_" + matched.group(0).lower(), string[1:])
         if string
         else string
     )
@@ -29,7 +29,8 @@ def replace_leading_digit(string: str) -> str:
         string: String to process.
 
     Returns:
-        A modified string if original starts with a number, else the unmodified original.
+        A modified string if original starts with a number,
+        else the unmodified original.
     """
     if string[0] in digits:
         letters = list(ascii_lowercase)

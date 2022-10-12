@@ -150,6 +150,9 @@ class SQLSink(BatchSink):
     ) -> None:
         """Check if conformed names produce duplicate keys.
 
+        Args:
+            conformed_property_names: A name:conformed_name dict map.
+
         Raises:
             ConformedNameClashException if duplicates found.
         """
