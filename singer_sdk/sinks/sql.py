@@ -155,7 +155,7 @@ class SQLSink(BatchSink):
             conformed_property_names: A name:conformed_name dict map.
 
         Raises:
-            ConformedNameClashException if duplicates found.
+            ConformedNameClashException: if duplicates found.
         """
         # group: {'_a': ['1_a'], 'abc': ['aBc', 'abC']}
         grouped = defaultdict(list)
