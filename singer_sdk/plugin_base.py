@@ -23,6 +23,7 @@ from typing import (
 import click
 from jsonschema import Draft4Validator, SchemaError, ValidationError
 
+from singer_sdk import metrics
 from singer_sdk.configuration._dict_config import parse_environment_config
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
@@ -120,6 +121,9 @@ class PluginBase(metaclass=abc.ABCMeta):
         self._validate_config(raise_errors=validate_config)
         self.mapper: PluginMapper
 
+        metrics._setup_logging(self.config)
+        self.metrics_logger = metrics.get_metrics_logger()
+
     @classproperty
     def capabilities(self) -> List[CapabilitiesEnum]:
         """Get capabilities.
@@ -171,7 +175,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """Return the package version number.
 
         Returns:
-            Meltano SDK version number.
+            Meltano Singer SDK version number.
         """
         try:
             version = metadata.version(SDK_PACKAGE_NAME)
@@ -358,8 +362,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             md_list.append(
                 f"# `{info['name']}`\n\n"
                 f"{info['description']}\n\n"
-                f"Built with the [Meltano SDK](https://sdk.meltano.com) for "
-                "Singer Taps and Targets.\n\n"
+                f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n"
             )
             for key, value in info.items():
 

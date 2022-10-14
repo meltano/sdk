@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.11.1 (2022-09-27)
+
+### 🐛 Fixes
+
+- [#999](https://github.com/meltano/sdk/issues/999) Absolute file paths created by taps running in BATCH mode can't be processed by the Sink
+
+### 📚 Documentation Improvements
+
+- Change `targetUrl` of semantic PR title check to point to SDK docs
+
+## v0.11.0 (2022-09-23)
+
+### ✨ New
+
+- [#968](https://github.com/meltano/sdk/issues/968) Added cookiecutter support and docs for VSCode debugging
+- [#904](https://github.com/meltano/sdk/issues/904) Add support for new `BATCH` message type in taps and targets
+
+### 🐛 Fixes
+
+- [#972](https://github.com/meltano/sdk/issues/972) Resolve issue where TypeError is thrown by SQLConnector cookiecutter implementation due to super() references
+
+### 📚 Documentation Improvements
+
+- [#988](https://github.com/meltano/sdk/issues/988) Add pipe before SDK logo in header
+- [#970](https://github.com/meltano/sdk/issues/970) Move cookiecutter TODOs into markdown comments
+
 ## v0.10.0 (2022-09-12)
 
 ### ✨ New

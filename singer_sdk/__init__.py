@@ -1,4 +1,4 @@
-"""SDK for building singer-compliant Singer taps."""
+"""SDK for building Singer taps."""
 
 from singer_sdk import streams
 from singer_sdk.mapper_base import InlineMapper

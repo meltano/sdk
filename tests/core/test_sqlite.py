@@ -16,7 +16,7 @@ from samples.sample_target_csv.csv_target import SampleTargetCSV
 from samples.sample_target_sqlite import SQLiteSink, SQLiteTarget
 from singer_sdk import SQLStream
 from singer_sdk import typing as th
-from singer_sdk.helpers._singer import Catalog, MetadataMapping, StreamMetadata
+from singer_sdk._singerlib import Catalog, MetadataMapping, StreamMetadata
 from singer_sdk.tap_base import SQLTap
 from singer_sdk.target_base import SQLTarget
 from singer_sdk.testing import (
