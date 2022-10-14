@@ -180,6 +180,37 @@ class BaseHATEOASPaginator(BaseAPIPaginator[Optional[ParseResult]], metaclass=AB
 
     This paginator expects responses to have a key "next" with a value
     like "https://api.com/link/to/next-item".
+
+    The :attr:`~singer_sdk.pagination.BaseAPIPaginator.current_value` attribute of
+    this paginator is a `urllib.parse.ParseResult`_ object. This object
+    contains the following attributes:
+
+    - scheme
+    - netloc
+    - path
+    - params
+    - query
+    - fragment
+
+    That means you can access the parse the query params in your stream like this:
+
+    .. code-block:: python
+
+       class MyHATEOASPaginator(BaseHATEOASPaginator):
+           def get_next_url(self, response):
+               return response.json().get("next")
+
+       class MyStream(Stream):
+           def get_new_paginator(self):
+               return MyHATEOASPaginator()
+
+           def get_url_params(self, next_page_token) -> dict:
+               if next_page_token:
+                   return dict(parse_qsl(next_page_token.query))
+               return {}
+
+    .. _`urllib.parse.ParseResult`:
+         https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlparse
     """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
