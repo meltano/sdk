@@ -63,6 +63,7 @@ Advanced Topics
 
    parent_streams
    partitioning
+   context_object
    stream_maps
    batch
    porting
