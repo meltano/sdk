@@ -192,7 +192,7 @@ class BaseHATEOASPaginator(BaseAPIPaginator[Optional[ParseResult]], metaclass=AB
     - query
     - fragment
 
-    That means you can access the parse the query params in your stream like this:
+    That means you can access and parse the query params in your stream like this:
 
     .. code-block:: python
 
