@@ -183,7 +183,7 @@ def _warn_unmapped_properties(
 
 
 def conform_record_data_types(  # noqa: C901
-    stream_name: str, row: Dict[str, Any], schema: dict, logger: logging.Logger
+    stream_name: str, record: Dict[str, Any], schema: dict, logger: logging.Logger
 ) -> Dict[str, Any]:
     """Translate values in record dictionary to singer-compatible data types.
 
@@ -192,7 +192,7 @@ def conform_record_data_types(  # noqa: C901
     """
     rec: Dict[str, Any] = {}
     unmapped_properties: List[str] = []
-    for property_name, elem in row.items():
+    for property_name, elem in record.items():
         if property_name not in schema["properties"]:
             unmapped_properties.append(property_name)
             continue

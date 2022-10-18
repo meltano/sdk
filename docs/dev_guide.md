@@ -8,16 +8,16 @@ Create taps with the SDK requires overriding just two or three classes:
    and stream discovery.
 2. The stream class. You have different options for your base class depending on the type
    of data source you are working with:
-    - `Stream` - The **generic** base class for streams.
-    - `RESTStream` - The base class for **REST**-type streams.
-    - `GraphQLStream` - The base class for **GraphQL**-type streams. This class inherits
-      from `RESTStream`, since GraphQL is built upon REST.
+   - `Stream` - The **generic** base class for streams.
+   - `RESTStream` - The base class for **REST**-type streams.
+   - `GraphQLStream` - The base class for **GraphQL**-type streams. This class inherits
+     from `RESTStream`, since GraphQL is built upon REST.
 3. An optional authenticator class. You can omit this class entirely if you do not require authentication or if you prefer to write custom authentication logic. The supported authenticator classes are:
-    - `SimpleAuthenticator` - This class is functionally equivalent to overriding
-      `http_headers` property in the stream class.
-    - `OAuthAuthenticator` - This class performs an OAuth 2.0 authentication flow.
-    - `OAuthJWTAuthenticator` - This class performs an JWT (JSON Web Token) authentication
-       flow.
+   - `SimpleAuthenticator` - This class is functionally equivalent to overriding
+     `http_headers` property in the stream class.
+   - `OAuthAuthenticator` - This class performs an OAuth 2.0 authentication flow.
+   - `OAuthJWTAuthenticator` - This class performs an JWT (JSON Web Token) authentication
+     flow.
 
 ## Target Development Overview
 
@@ -27,12 +27,12 @@ Create targets with the SDK requires overriding just two classes:
    and stream discovery.
 2. The `Sink` class. You have two different options depending on whether your target
    prefers writing one record at a time versus writing in batches:
-    - `RecordSink` writes one record at a time, via the `process_record()`
-      method.
-    - `BatchSink` writes one batch at a time. Important class members include:
-      - `start_batch()` to (optionally) initialize a new batch.
-      - `process_record()` to enqueue a record to be written.
-      - `process_batch()` to write any queued records and cleanup local resources.
+   - `RecordSink` writes one record at a time, via the `process_record()`
+     method.
+   - `BatchSink` writes one batch at a time. Important class members include:
+     - `start_batch()` to (optionally) initialize a new batch.
+     - `process_record()` to enqueue a record to be written.
+     - `process_batch()` to write any queued records and cleanup local resources.
 
 Note: The `Sink` class can receive records from one stream or from many. See the [Sink documentation](./sinks.md)
 for more information on differences between a target's `Sink` class versus a tap's `Stream` class.
@@ -97,27 +97,27 @@ Many APIs return the records in an array nested inside an JSON object key.
 
 - Response:
 
-    ```json
-    {
-      "data": {
-        "records": [
-          {"id": 1, "value": "abc"},
-          {"id": 2, "value": "def"}
-        ]
-      }
+  ```json
+  {
+    "data": {
+      "records": [
+        { "id": 1, "value": "abc" },
+        { "id": 2, "value": "def" }
+      ]
     }
-    ```
+  }
+  ```
 
 - Expression: `$.data.records[*]`
 
 - Result:
 
-    ```json
-    [
-      {"id": 1, "value": "abc"},
-      {"id": 2, "value": "def"}
-    ]
-    ```
+  ```json
+  [
+    { "id": 1, "value": "abc" },
+    { "id": 2, "value": "def" }
+  ]
+  ```
 
 #### Nested object values example
 
@@ -125,31 +125,31 @@ Some APIs instead return the records as values inside an object where each key i
 
 - Response:
 
-    ```json
-    {
-      "data": {
-        "1": {
-          "id": 1,
-          "value": "abc"
-        },
-        "2": {
-          "id": 2,
-          "value": "def"
-        }
+  ```json
+  {
+    "data": {
+      "1": {
+        "id": 1,
+        "value": "abc"
+      },
+      "2": {
+        "id": 2,
+        "value": "def"
       }
     }
-    ```
+  }
+  ```
 
 - Expression: `$.data.*`
 
 - Result:
 
-    ```json
-    [
-      {"id": 1, "value": "abc"},
-      {"id": 2, "value": "def"}
-    ]
-    ```
+  ```json
+  [
+    { "id": 1, "value": "abc" },
+    { "id": 2, "value": "def" }
+  ]
+  ```
 
 ## Resources
 
@@ -180,6 +180,39 @@ We've collected some [Python tips](python_tips.md) which may be helpful for new 
 Ensure the intrepreter you're using in VSCode is set to use poetry.
 You can change this by using the command pallete to go to intrepeter settings.
 Doing this will also help with autocompletion.
+
+#### Debugging
+
+In order to launch your plugin via it's CLI with the built-in debugger, VSCode requires a [Launch configuration](https://code.visualstudio.com/docs/editor/debugging#_launch-configurations).
+An example launch configuration, added to your `launch.json`, might be as follows:
+
+```js
+{
+  // launch.json
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "tap-snowflake discovery",
+      "type": "python",
+      "request": "launch",
+      "module": "tap_snowflake.tap",
+      "args": ["--config", "config.json", "--discover"],
+      "python": "${command:python.interpreterPath}",
+      // Set to true to debug third-party library code
+      "justMyCode": false,
+    }
+  ]
+}
+```
+
+The above `module` value relies on an equivalent to the following snippet being added to the end of your `tap.py` or `target.py` file:
+
+```python
+if __name__ == "__main":
+    TapSnowflake.cli()
+```
+
+This is automatically included in the most recent version of the tap and target cookiecutters.
 
 ### Testing performance
 

@@ -5,3 +5,4 @@
 
 .. autoclass:: APIAuthenticatorBase
     :members:
+    :special-members: __init__

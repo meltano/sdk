@@ -69,7 +69,7 @@ Developers simply enable the feature using the instructions below, and then user
 ## Enabling Stream Maps in SDK-Based Plugins
 
 To support inline mapping functions, the developer only needs to declare two plugin settings,
-called `stream_maps` and `stream_map_settings`, and declare both settings as `object` type. (For example:
+called `stream_maps` and `stream_map_config`, and declare both settings as `object` type. (For example:
 `Property("stream_maps, ObjectType())` if using the python helper classes or
 `"stream_maps": {"type": "object"}` if using native JSON Schema declarations.)
 

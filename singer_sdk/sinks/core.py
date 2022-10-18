@@ -1,15 +1,26 @@
 """Sink classes load data to a target."""
 
+from __future__ import annotations
+
 import abc
 import datetime
+import json
 import time
+from gzip import GzipFile
+from gzip import open as gzip_open
 from logging import Logger
 from types import MappingProxyType
-from typing import Any, Dict, List, Mapping, Optional, Union
+from typing import IO, Any, Mapping, Sequence
 
 from dateutil import parser
 from jsonschema import Draft4Validator, FormatChecker
 
+from singer_sdk.helpers._batch import (
+    BaseBatchFileEncoding,
+    BatchConfig,
+    BatchFileFormat,
+    StorageTarget,
+)
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._typing import (
     DatetimeErrorTreatmentEnum,
@@ -34,8 +45,8 @@ class Sink(metaclass=abc.ABCMeta):
         self,
         target: PluginBase,
         stream_name: str,
-        schema: Dict,
-        key_properties: Optional[List[str]],
+        schema: dict,
+        key_properties: list[str] | None,
     ) -> None:
         """Initialize target sink.
 
@@ -47,7 +58,7 @@ class Sink(metaclass=abc.ABCMeta):
         """
         self.logger = target.logger
         self._config = dict(target.config)
-        self._pending_batch: Optional[dict] = None
+        self._pending_batch: dict | None = None
         self.stream_name = stream_name
         self.logger.info(f"Initializing target sink for stream '{stream_name}'...")
         self.schema = schema
@@ -55,11 +66,11 @@ class Sink(metaclass=abc.ABCMeta):
             self._add_sdc_metadata_to_schema()
         else:
             self._remove_sdc_metadata_from_schema()
-        self.records_to_drain: Union[List[dict], Any] = []
-        self._context_draining: Optional[dict] = None
-        self.latest_state: Optional[dict] = None
-        self._draining_state: Optional[dict] = None
-        self.drained_state: Optional[dict] = None
+        self.records_to_drain: list[dict] | Any = []
+        self._context_draining: dict | None = None
+        self.latest_state: dict | None = None
+        self._draining_state: dict | None = None
+        self.drained_state: dict | None = None
         self.key_properties = key_properties or []
 
         # Tally counters
@@ -164,6 +175,16 @@ class Sink(metaclass=abc.ABCMeta):
         return MappingProxyType(self._config)
 
     @property
+    def batch_config(self) -> BatchConfig | None:
+        """Get batch configuration.
+
+        Returns:
+            A frozen (read-only) config dictionary map.
+        """
+        raw = self.config.get("batch_config")
+        return BatchConfig.from_dict(raw) if raw else None
+
+    @property
     def include_sdc_metadata_properties(self) -> bool:
         """Check if metadata columns should be added.
 
@@ -260,7 +281,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     # Record validation
 
-    def _validate_and_parse(self, record: Dict) -> Dict:
+    def _validate_and_parse(self, record: dict) -> dict:
         """Validate or repair the record, parsing to python-native types as needed.
 
         Args:
@@ -276,7 +297,7 @@ class Sink(metaclass=abc.ABCMeta):
         return record
 
     def _parse_timestamps_in_record(
-        self, record: Dict, schema: Dict, treatment: DatetimeErrorTreatmentEnum
+        self, record: dict, schema: dict, treatment: DatetimeErrorTreatmentEnum
     ) -> None:
         """Parse strings to datetime.datetime values, repairing or erroring on failure.
 
@@ -318,7 +339,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     # SDK developer overrides:
 
-    def preprocess_record(self, record: Dict, context: dict) -> dict:
+    def preprocess_record(self, record: dict, context: dict) -> dict:
         """Process incoming record and return a modified result.
 
         Args:
@@ -410,3 +431,40 @@ class Sink(metaclass=abc.ABCMeta):
         should not be relied on, it's recommended to use a uuid as well.
         """
         pass
+
+    def process_batch_files(
+        self,
+        encoding: BaseBatchFileEncoding,
+        files: Sequence[str],
+    ) -> None:
+        """Process a batch file with the given batch context.
+
+        Args:
+            encoding: The batch file encoding.
+            files: The batch files to process.
+
+        Raises:
+            NotImplementedError: If the batch file encoding is not supported.
+        """
+        file: GzipFile | IO
+        storage: StorageTarget | None = None
+
+        for path in files:
+            head, tail = StorageTarget.split_url(path)
+
+            if self.batch_config:
+                storage = self.batch_config.storage
+            else:
+                storage = StorageTarget.from_url(head)
+
+            if encoding.format == BatchFileFormat.JSONL:
+                with storage.fs(create=False) as batch_fs:
+                    with batch_fs.open(tail, mode="rb") as file:
+                        if encoding.compression == "gzip":
+                            file = gzip_open(file)
+                        context = {"records": [json.loads(line) for line in file]}
+                        self.process_batch(context)
+            else:
+                raise NotImplementedError(
+                    f"Unsupported batch encoding format: {encoding.format}"
+                )

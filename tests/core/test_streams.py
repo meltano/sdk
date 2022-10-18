@@ -1,15 +1,18 @@
 """Stream tests."""
 
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, Iterable, List, Optional, cast
+from typing import Any, Iterable, cast
 
 import pendulum
 import pytest
 import requests
 
+from singer_sdk._singerlib import Catalog, MetadataMapping
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._singer import Catalog, CatalogEntry, MetadataMapping
-from singer_sdk.helpers.jsonpath import _compile_jsonpath
+from singer_sdk.helpers.jsonpath import _compile_jsonpath, extract_jsonpath
+from singer_sdk.pagination import first
 from singer_sdk.streams.core import (
     REPLICATION_FULL_TABLE,
     REPLICATION_INCREMENTAL,
@@ -44,7 +47,7 @@ class SimpleTestStream(Stream):
         """Create a new stream."""
         super().__init__(tap, schema=self.schema, name=self.name)
 
-    def get_records(self, context: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
         """Generate records."""
         yield {"id": 1, "value": "Egypt"}
         yield {"id": 2, "value": "Germany"}
@@ -83,6 +86,24 @@ class RestTestStream(RESTStream):
     ).to_dict()
     replication_key = "updatedAt"
 
+    def get_next_page_token(
+        self,
+        response: requests.Response,
+        previous_token: str | None,
+    ) -> str | None:
+        if self.next_page_token_jsonpath:
+            all_matches = extract_jsonpath(
+                self.next_page_token_jsonpath,
+                response.json(),
+            )
+            try:
+                return first(all_matches)
+            except StopIteration:
+                return None
+
+        else:
+            return response.headers.get("X-Next-Page", None)
+
 
 class GraphqlTestStream(GraphQLStream):
     """Test Graphql stream class."""
@@ -103,7 +124,7 @@ class SimpleTestTap(Tap):
     name = "test-tap"
     settings_jsonschema = PropertiesList(Property("start_date", DateTimeType)).to_dict()
 
-    def discover_streams(self) -> List[Stream]:
+    def discover_streams(self) -> list[Stream]:
         """List all streams."""
         return [
             SimpleTestStream(self),
@@ -309,7 +330,7 @@ def test_stream_starting_timestamp(
     ],
 )
 def test_jsonpath_rest_stream(
-    tap: SimpleTestTap, path: str, content: str, result: List[dict]
+    tap: SimpleTestTap, path: str, content: str, result: list[dict]
 ):
     """Validate records are extracted correctly from the API response."""
     fake_response = requests.Response()
@@ -318,9 +339,9 @@ def test_jsonpath_rest_stream(
     RestTestStream.records_jsonpath = path
     stream = RestTestStream(tap)
 
-    rows = stream.parse_response(fake_response)
+    records = stream.parse_response(fake_response)
 
-    assert list(rows) == result
+    assert list(records) == result
 
 
 def test_jsonpath_graphql_stream_default(tap: SimpleTestTap):
@@ -338,9 +359,9 @@ def test_jsonpath_graphql_stream_default(tap: SimpleTestTap):
     fake_response._content = str.encode(content)
 
     stream = GraphqlTestStream(tap)
-    rows = stream.parse_response(fake_response)
+    records = stream.parse_response(fake_response)
 
-    assert list(rows) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
+    assert list(records) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
 
 
 def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
@@ -361,9 +382,9 @@ def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
 
     stream = GraphQLJSONPathOverride(tap)
 
-    rows = stream.parse_response(fake_response)
+    records = stream.parse_response(fake_response)
 
-    assert list(rows) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
+    assert list(records) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
 
 
 @pytest.mark.parametrize(
@@ -440,7 +461,10 @@ def test_next_page_token_jsonpath(
     RestTestStream.next_page_token_jsonpath = path
     stream = RestTestStream(tap)
 
-    next_page = stream.get_next_page_token(fake_response, previous_token=None)
+    with pytest.warns(DeprecationWarning):
+        paginator = stream.get_new_paginator()
+
+    next_page = paginator.get_next(fake_response)
 
     assert next_page == result
 
@@ -465,7 +489,7 @@ def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
     def calculate_test_cost(
         request: requests.PreparedRequest,
         response: requests.Response,
-        context: Optional[Dict],
+        context: dict | None,
     ):
         return {"dim1": 1, "dim2": 2}
 

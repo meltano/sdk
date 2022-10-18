@@ -1,0 +1,15 @@
+version: 1
+disable_existing_loggers: false
+formatters:
+  console:
+    format: "{asctime} {message}"
+    style: "{"
+handlers:
+  default:
+    class: logging.StreamHandler
+    formatter: console
+    stream: ext://sys.stderr
+root:
+  level: INFO
+  propagate: true
+  handlers: [default]

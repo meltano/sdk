@@ -7,6 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.12.0 (2022-10-17)
+
+### ✨ New
+
+- [#1032](https://github.com/meltano/sdk/issues/1032) Support stream property selection push-down in SQL streams
+- [#978](https://github.com/meltano/sdk/issues/978) Allow configuring a dedicated metrics logger
+
+### 🐛 Fixes
+
+- [#1043](https://github.com/meltano/sdk/issues/1043) Batch storage `split_url` to work with Windows paths -- _**Thanks @BuzzCutNorman!**_
+- [#826](https://github.com/meltano/sdk/issues/826) Remove Poetry version pin for GitHub Actions -- _**Thanks @visch!**_
+- [#1001](https://github.com/meltano/sdk/issues/1001) Use column name in `allow_column_alter` error message
+
+### 📚 Documentation Improvements
+
+- [#1060](https://github.com/meltano/sdk/issues/1060) Add explanation and recommendations for context usage
+- [#1074](https://github.com/meltano/sdk/issues/1074) Document an example implementation and usage of `BaseHATEOASPaginator`
+- [#1020](https://github.com/meltano/sdk/issues/1020) Fixed typo in `docs/stream_maps.md` -- _**Thanks @spacecowboy!**_
+- [#1006](https://github.com/meltano/sdk/issues/1006) Add links to Meltano install/tut
+
+## v0.11.1 (2022-09-27)
+
+### 🐛 Fixes
+
+- [#999](https://github.com/meltano/sdk/issues/999) Absolute file paths created by taps running in BATCH mode can't be processed by the Sink
+
+### 📚 Documentation Improvements
+
+- Change `targetUrl` of semantic PR title check to point to SDK docs
+
+## v0.11.0 (2022-09-23)
+
+### ✨ New
+
+- [#968](https://github.com/meltano/sdk/issues/968) Added cookiecutter support and docs for VSCode debugging
+- [#904](https://github.com/meltano/sdk/issues/904) Add support for new `BATCH` message type in taps and targets
+
+### 🐛 Fixes
+
+- [#972](https://github.com/meltano/sdk/issues/972) Resolve issue where TypeError is thrown by SQLConnector cookiecutter implementation due to super() references
+
+### 📚 Documentation Improvements
+
+- [#988](https://github.com/meltano/sdk/issues/988) Add pipe before SDK logo in header
+- [#970](https://github.com/meltano/sdk/issues/970) Move cookiecutter TODOs into markdown comments
+
+## v0.10.0 (2022-09-12)
+
+### ✨ New
+
+- [#829](https://github.com/meltano/sdk/issues/829) Add checks for primary keys, replication keys and state partitioning keys to standard tap tests -- _**Thanks @laurentS!**_
+- [#732](https://github.com/meltano/sdk/issues/732) Implement reference paginators.
+
+### 🐛 Fixes
+
+- [#898](https://github.com/meltano/sdk/issues/898) Fix SQL type merging for pre-existing target tables -- _**Thanks @BuzzCutNorman!**_
+- [#856](https://github.com/meltano/sdk/issues/856) Fix typo RecordsWitoutSchemaException -> RecordsWithoutSchemaException.
+
+### ⚙️ Under the Hood
+
+- Use __future__.annotations on singer_sdk.helpers._singer
+
+### 📚 Documentation Improvements
+
+- [#950](https://github.com/meltano/sdk/issues/950) Document missing initializers for authentication and pagination helpers.
+- [#947](https://github.com/meltano/sdk/issues/947) Remove stale autodoc page for RecordsWitoutSchemaException.
+- [#942](https://github.com/meltano/sdk/issues/942) Add docs preview links to PR description.
+
 ## v0.9.0 (2022-08-24)
 
 ### ✨ New
