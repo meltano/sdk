@@ -10,7 +10,7 @@ from sqlalchemy.sql.expression import bindparam
 
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks.batch import BatchSink
-from singer_sdk.streams.sql import SQLConnector
+from singer_sdk.streams import SQLConnector
 
 
 class SQLSink(BatchSink):
@@ -38,11 +38,7 @@ class SQLSink(BatchSink):
             connector: Optional connector to reuse.
         """
         self._connector: SQLConnector
-        if connector:
-            self._connector = connector
-        else:
-            self._connector = self.connector_class(dict(target.config))
-
+        self._connector = connector or self.connector_class(dict(target.config))
         super().__init__(target, stream_name, schema, key_properties)
 
     @property
@@ -65,35 +61,77 @@ class SQLSink(BatchSink):
 
     @property
     def table_name(self) -> str:
-        """Returns the table name, with no schema or database part.
+        """Return the table name, with no schema or database part.
 
         Returns:
             The target table name.
         """
         parts = self.stream_name.split("-")
-
-        if len(parts) == 1:
-            return self.stream_name
-        else:
-            return parts[-1]
+        return self.stream_name if len(parts) == 1 else parts[-1]
 
     @property
     def schema_name(self) -> Optional[str]:
-        """Returns the schema name or `None` if using names with no schema part.
+        """Return the schema name or `None` if using names with no schema part.
 
         Returns:
             The target schema name.
         """
-        return None  # Assumes single-schema target context.
+        parts = self.stream_name.split("-")
+        if len(parts) in {2, 3}:
+            # Stream name is a two-part or three-part identifier.
+            # Use the second-to-last part as the schema name.
+            return parts[-2]
+
+        # Schema name not detected.
+        return None
 
     @property
     def database_name(self) -> Optional[str]:
-        """Returns the DB name or `None` if using names with no database part.
+        """Return the DB name or `None` if using names with no database part.
 
         Returns:
             The target database name.
         """
         return None  # Assumes single-DB target context.
+
+    @property
+    def full_table_name(self) -> str:
+        """Return the fully qualified table name.
+
+        Returns:
+            The fully qualified table name.
+        """
+        return self.connector.get_fully_qualified_name(
+            table_name=self.table_name,
+            schema_name=self.schema_name,
+            db_name=self.database_name,
+        )
+
+    @property
+    def full_schema_name(self) -> str:
+        """Return the fully qualified schema name.
+
+        Returns:
+            The fully qualified schema name.
+        """
+        return self.connector.get_fully_qualified_name(
+            schema_name=self.schema_name, db_name=self.database_name
+        )
+
+    def setup(self) -> None:
+        """Set up Sink.
+
+        This method is called on Sink creation, and creates the required Schema and
+        Table entities in the target database.
+        """
+        if self.schema_name:
+            self.connector.prepare_schema(self.schema_name)
+        self.connector.prepare_table(
+            full_table_name=self.full_table_name,
+            schema=self.schema,
+            primary_keys=self.key_properties,
+            as_temp_table=False,
+        )
 
     def process_batch(self, context: dict) -> None:
         """Process a batch with the given batch context.
@@ -106,62 +144,10 @@ class SQLSink(BatchSink):
         """
         # If duplicates are merged, these can be tracked via
         # :meth:`~singer_sdk.Sink.tally_duplicate_merged()`.
-        self.connector.prepare_table(
-            full_table_name=self.full_table_name,
-            schema=self.schema,
-            primary_keys=self.key_properties,
-            as_temp_table=False,
-        )
         self.bulk_insert_records(
             full_table_name=self.full_table_name,
             schema=self.schema,
             records=context["records"],
-        )
-
-    @property
-    def full_table_name(self) -> str:
-        """Gives the fully qualified table name.
-
-        Returns:
-            The fully qualified table name.
-        """
-        return self.connector.get_fully_qualified_name(
-            self.table_name,
-            self.schema_name,
-            self.database_name,
-        )
-
-    def create_table_with_records(
-        self,
-        full_table_name: Optional[str],
-        schema: dict,
-        records: Iterable[Dict[str, Any]],
-        primary_keys: Optional[List[str]] = None,
-        partition_keys: Optional[List[str]] = None,
-        as_temp_table: bool = False,
-    ) -> None:
-        """Create an empty table.
-
-        Args:
-            full_table_name: the target table name.
-            schema: the JSON schema for the new table.
-            records: records to load.
-            primary_keys: list of key properties.
-            partition_keys: list of partition keys.
-            as_temp_table: True to create a temp table.
-        """
-        full_table_name = full_table_name or self.full_table_name
-        if primary_keys is None:
-            primary_keys = self.key_properties
-        partition_keys = partition_keys or None
-        self.connector.prepare_table(
-            full_table_name=full_table_name,
-            primary_keys=primary_keys,
-            schema=schema,
-            as_temp_table=as_temp_table,
-        )
-        self.bulk_insert_records(
-            full_table_name=full_table_name, schema=schema, records=records
         )
 
     def generate_insert_statement(

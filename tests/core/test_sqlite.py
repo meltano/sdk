@@ -10,6 +10,7 @@ from typing import Dict, cast
 from uuid import uuid4
 
 import pytest
+import sqlalchemy
 
 from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
 from samples.sample_target_csv.csv_target import SampleTargetCSV
@@ -263,6 +264,41 @@ def test_sync_sqlite_to_sqlite(
             assert tapped_json["record"] == orig_json["record"]
 
     assert line_num > 0, "No lines read."
+
+
+def test_sqlite_schema_addition(
+    sqlite_target_test_config: dict, sqlite_sample_target: SQLTarget
+):
+    """Test that SQL-based targets attempt to create new schema if included in stream name."""
+    schema_name = f"test_schema_{str(uuid4()).split('-')[-1]}"
+    table_name = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
+    test_stream_name = f"{schema_name}-{table_name}"
+    schema_message = {
+        "type": "SCHEMA",
+        "stream": test_stream_name,
+        "schema": {
+            "type": "object",
+            "properties": {"col_a": th.StringType().to_dict()},
+        },
+    }
+    tap_output = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_message,
+            {
+                "type": "RECORD",
+                "stream": test_stream_name,
+                "record": {"col_a": "samplerow1"},
+            },
+        ]
+    )
+    # sqlite doesn't support schema creation
+    with pytest.raises(sqlalchemy.exc.OperationalError) as excinfo:
+        target_sync_test(
+            sqlite_sample_target, input=StringIO(tap_output), finalize=True
+        )
+    # check the target at least tried to create the schema
+    assert excinfo.value.statement == f"CREATE SCHEMA {schema_name}"
 
 
 def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):

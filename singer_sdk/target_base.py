@@ -224,14 +224,15 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         """
         self.logger.info(f"Initializing '{self.name}' target sink...")
         sink_class = self.get_sink_class(stream_name=stream_name)
-        result = sink_class(
+        sink = sink_class(
             target=self,
             stream_name=stream_name,
             schema=schema,
             key_properties=key_properties,
         )
-        self._sinks_active[stream_name] = result
-        return result
+        sink.setup()
+        self._sinks_active[stream_name] = sink
+        return sink
 
     def _assert_sink_exists(self, stream_name: str) -> None:
         """Raise a RecordsWithoutSchemaException exception if stream doesn't exist.

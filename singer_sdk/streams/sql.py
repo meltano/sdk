@@ -26,7 +26,6 @@ class SQLConnector:
     The connector class serves as a wrapper around the SQL connection.
 
     The functions of the connector are:
-
     - connecting to the source
     - generating SQLAlchemy connection and engine objects
     - discovering schema catalog entries
@@ -76,6 +75,7 @@ class SQLConnector:
 
         By default this will create using the sqlalchemy `stream_results=True` option
         described here:
+
         https://docs.sqlalchemy.org/en/14/core/connections.html#using-server-side-cursors-a-k-a-stream-results
 
         Developers may override this method if their provider does not support
@@ -191,7 +191,6 @@ class SQLConnector:
 
         Developers may override this method to accept additional input argument types,
         to support non-standard types, or to provide custom typing logic.
-
         If overriding this method, developers should call the default implementation
         from the base class for all unhandled cases.
 
@@ -205,7 +204,7 @@ class SQLConnector:
 
     @staticmethod
     def get_fully_qualified_name(
-        table_name: str,
+        table_name: str | None = None,
         schema_name: str | None = None,
         db_name: str | None = None,
         delimiter: str = ".",
@@ -219,23 +218,23 @@ class SQLConnector:
             delimiter: Generally: '.' for SQL names and '-' for Singer names.
 
         Raises:
-            ValueError: If table_name is not provided or if neither schema_name or
-                db_name are provided.
+            ValueError: If all 3 name parts not supplied.
 
         Returns:
             The fully qualified name as a string.
         """
-        if db_name and schema_name:
-            result = delimiter.join([db_name, schema_name, table_name])
-        elif db_name:
-            result = delimiter.join([db_name, table_name])
-        elif schema_name:
-            result = delimiter.join([schema_name, table_name])
-        elif table_name:
-            result = table_name
-        else:
+        parts = []
+
+        if db_name:
+            parts.append(db_name)
+        if schema_name:
+            parts.append(schema_name)
+        if table_name:
+            parts.append(table_name)
+
+        if not parts:
             raise ValueError(
-                "Could not generate fully qualified name for stream: "
+                "Could not generate fully qualified name: "
                 + ":".join(
                     [
                         db_name or "(unknown-db)",
@@ -245,7 +244,7 @@ class SQLConnector:
                 )
             )
 
-        return result
+        return delimiter.join(parts)
 
     @property
     def _dialect(self) -> sqlalchemy.engine.Dialect:
@@ -487,6 +486,18 @@ class SQLConnector:
             sqlalchemy.inspect(self._engine).has_table(full_table_name),
         )
 
+    def schema_exists(self, schema_name: str) -> bool:
+        """Determine if the target database schema already exists.
+
+        Args:
+            schema_name: The target database schema name.
+
+        Returns:
+            True if the database schema exists, False if not.
+        """
+        schema_names = sqlalchemy.inspect(self._engine).get_schema_names()
+        return schema_name in schema_names
+
     def get_table_columns(
         self, full_table_name: str, column_names: list[str] | None = None
     ) -> dict[str, sqlalchemy.Column]:
@@ -547,6 +558,14 @@ class SQLConnector:
         """
         return column_name in self.get_table_columns(full_table_name)
 
+    def create_schema(self, schema_name: str) -> None:
+        """Create target schema.
+
+        Args:
+            schema_name: The target schema to create.
+        """
+        self._engine.execute(sqlalchemy.schema.CreateSchema(schema_name))
+
     def create_empty_table(
         self,
         full_table_name: str,
@@ -573,7 +592,8 @@ class SQLConnector:
 
         _ = partition_keys  # Not supported in generic implementation.
 
-        meta = sqlalchemy.MetaData()
+        _, schema_name, table_name = self.parse_full_table_name(full_table_name)
+        meta = sqlalchemy.MetaData(schema=schema_name)
         columns: list[sqlalchemy.Column] = []
         primary_keys = primary_keys or []
         try:
@@ -592,7 +612,7 @@ class SQLConnector:
                 )
             )
 
-        _ = sqlalchemy.Table(full_table_name, meta, *columns)
+        _ = sqlalchemy.Table(table_name, meta, *columns)
         meta.create_all(self._engine)
 
     def _create_empty_column(
@@ -629,6 +649,16 @@ class SQLConnector:
                 },
             )
         )
+
+    def prepare_schema(self, schema_name: str) -> None:
+        """Create the target database schema.
+
+        Args:
+            schema_name: The target schema name.
+        """
+        schema_exists = self.schema_exists(schema_name)
+        if not schema_exists:
+            self.create_schema(schema_name)
 
     def prepare_table(
         self,
@@ -788,6 +818,7 @@ class SQLConnector:
 
         For example, [Smallint, Integer, Datetime, String, Double] would become
         [Unicode, String, Double, Integer, Smallint, Datetime].
+
         String types will be listed first, then decimal types, then integer types,
         then bool types, and finally datetime and date. Higher precision, scale, and
         length will be sorted earlier.
@@ -823,7 +854,7 @@ class SQLConnector:
     def _get_column_type(
         self, full_table_name: str, column_name: str
     ) -> sqlalchemy.types.TypeEngine:
-        """Gets the SQL type of the declared column.
+        """Get the SQL type of the declared column.
 
         Args:
             full_table_name: The name of the table.
@@ -937,7 +968,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
     @property
     def connector(self) -> SQLConnector:
-        """The connector object.
+        """Return a connector object.
 
         Returns:
             The connector object.
@@ -946,7 +977,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
     @property
     def metadata(self) -> MetadataMapping:
-        """The Singer metadata.
+        """Return the Singer metadata.
 
         Metadata from an input catalog will override standard metadata.
 
