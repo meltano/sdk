@@ -78,7 +78,7 @@ docs = [
     "myst-parser",
     "sphinx-autobuild",
 ]
-s3fs = ["fs-s3fs"]
+s3 = ["fs-s3fs"]
 
 [tool.poetry.dev-dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!

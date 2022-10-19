@@ -1394,12 +1394,12 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 
 [extras]
 docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser", "sphinx-autobuild"]
-s3fs = ["fs-s3fs"]
+s3 = ["fs-s3fs"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.11,>=3.7.1"
-content-hash = "169380e7de9e8c5f3999df04273e4b958aa7a8c4f79b6b8205fc630d36323674"
+content-hash = "1eedf338d4416566d956a9dc1c1227a0bb3e776a976a26aa16bb8e3e71801e51"
 
 [metadata.files]
 alabaster = [
