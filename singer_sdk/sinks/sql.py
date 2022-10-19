@@ -148,41 +148,6 @@ class SQLSink(BatchSink):
             records=context["records"],
         )
 
-    def create_table_with_records(
-        self,
-        full_table_name: Optional[str],
-        schema: dict,
-        records: Iterable[Dict[str, Any]],
-        primary_keys: Optional[List[str]] = None,
-        partition_keys: Optional[List[str]] = None,
-        as_temp_table: bool = False,
-    ) -> None:
-        """Create an empty table.
-
-        Args:
-            full_table_name: the target table name.
-            schema: the JSON schema for the new table.
-            records: records to load.
-            primary_keys: list of key properties.
-            partition_keys: list of partition keys.
-            as_temp_table: True to create a temp table.
-        """
-        full_table_name = full_table_name or self.full_table_name
-        if primary_keys is None:
-            primary_keys = self.key_properties
-        partition_keys = partition_keys or None
-        # TODO: determine if this call to `prepare_table` is necessary
-        # (in addition to in `setup` above)
-        self.connector.prepare_table(
-            full_table_name=full_table_name,
-            primary_keys=primary_keys,
-            schema=schema,
-            as_temp_table=as_temp_table,
-        )
-        self.bulk_insert_records(
-            full_table_name=full_table_name, schema=schema, records=records
-        )
-
     def generate_insert_statement(
         self,
         full_table_name: str,
