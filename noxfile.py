@@ -69,6 +69,7 @@ def tests(session: Session) -> None:
         "flake8-annotations",
         "flake8-docstrings",
         "mypy",
+        "fs-s3fs",
     )
 
     try:
