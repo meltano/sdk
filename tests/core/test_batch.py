@@ -33,7 +33,7 @@ def test_storage_get_url():
 
 
 def test_storage_get_s3_url():
-    storage = StorageTarget("s3://test_bucket")
+    storage = StorageTarget("s3://testing123:testing123@test_bucket")
 
     with storage.fs(create=True) as fs:
         url = fs.geturl("prefix--file.jsonl.gz")
