@@ -77,10 +77,12 @@ class SQLSink(BatchSink):
             The target schema name.
         """
         parts = self.stream_name.split("-")
-        if len(parts) == 2:
-            return parts[0]
-        if len(parts) == 3:
-            return parts[1]
+        if len(parts) in {2, 3}:
+            # Stream name is a two-part or three-part identifier.
+            # Use the second-to-last part as the schema name.
+            return parts[-2]
+
+        # Schema name not detected.
         return None
 
     @property
