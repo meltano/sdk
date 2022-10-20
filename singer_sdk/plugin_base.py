@@ -29,6 +29,7 @@ from singer_sdk.configuration._dict_config import parse_environment_config
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
+from singer_sdk.helpers._meltano import meltano_yaml_str
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -348,8 +349,8 @@ class PluginBase(metaclass=abc.ABCMeta):
             cls._print_about_markdown(info)
             return
 
-        if format == "yaml":
-            cls._print_about_yaml(info)
+        if format == "meltano":
+            print(meltano_yaml_str(cls.name, cls.capabilities, cls.config_jsonschema))
             return
 
         formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
@@ -415,16 +416,6 @@ class PluginBase(metaclass=abc.ABCMeta):
                 md_list.append(setting)
 
         print("".join(md_list))
-
-    @classmethod
-    def _print_about_yaml(cls: Type["PluginBase"], info: dict) -> None:
-        """Print about info as YAML.
-
-        Args:
-            info: The collected metadata for the class.
-        """
-        yaml_structure: Dict[str, Any] = {}
-        print(yaml.dump(yaml_structure))
 
     @classproperty
     def cli(cls) -> Callable:

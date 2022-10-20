@@ -54,6 +54,40 @@ def append_type(type_dict: dict, new_type: str) -> dict:
     )
 
 
+def is_secret_type(type_dict: dict) -> bool:
+    """Return True if JSON Schema type definition appears to be a secret.
+
+    Will return true if either `writeOnly` or `sensitive` are true on this type
+    or any of the type's subproperties.
+
+    Args:
+        type_dict: The JSON Schema type to check.
+
+    Raises:
+        ValueError: If type_dict is None or empty.
+
+    Returns:
+        True if we detect any sensitive property nodes.
+    """
+    if not type_dict:
+        raise ValueError(
+            "Could not detect type from empty type_dict. "
+            "Did you forget to define a property in the stream schema?"
+        )
+
+    if type_dict.get("writeOnly") or type_dict.get("sensitive"):
+        return True
+
+    if "properties" in type_dict:
+        # Recursively check subproperties and return True if any child is secret.
+        return any(
+            is_secret_type(child_type_dict)
+            for child_type_dict in type_dict["properties"].values()
+        )
+
+    return False
+
+
 def is_object_type(property_schema: dict) -> Optional[bool]:
     """Return true if the JSON Schema type is an object or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
@@ -152,12 +186,39 @@ def is_string_array_type(type_dict: dict) -> bool:
     return "array" in type_dict["type"] and bool(is_string_type(type_dict["items"]))
 
 
+def is_array_type(type_dict: dict) -> bool:
+    """Return True if JSON Schema type definition is a string array."""
+    if not type_dict:
+        raise ValueError(
+            "Could not detect type from empty type_dict. "
+            "Did you forget to define a property in the stream schema?"
+        )
+
+    if "anyOf" in type_dict:
+        return any([is_array_type(t) for t in type_dict["anyOf"]])
+
+    if "type" not in type_dict:
+        raise ValueError(f"Could not detect type from schema '{type_dict}'")
+
+    return "array" in type_dict["type"]
+
+
 def is_boolean_type(property_schema: dict) -> Optional[bool]:
     """Return true if the JSON Schema type is a boolean or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
         if "boolean" in property_type or property_type == "boolean":
+            return True
+    return False
+
+
+def is_integer_type(property_schema: dict) -> Optional[bool]:
+    """Return true if the JSON Schema type is a boolean or None if detection fails."""
+    if "anyOf" not in property_schema and "type" not in property_schema:
+        return None  # Could not detect data type
+    for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
+        if "integer" in property_type or property_type == "integer":
             return True
     return False
 
