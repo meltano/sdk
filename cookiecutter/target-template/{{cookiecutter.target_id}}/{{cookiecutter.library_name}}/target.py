@@ -21,6 +21,7 @@ class Target{{ cookiecutter.destination_name }}({{ target_class }}):
         th.Property(
             "sqlalchemy_url",
             th.StringType,
+            secret=True,  # Flag config as protected.
             description="SQLAlchemy connection string",
         ),
         {%- else %}
@@ -33,6 +34,12 @@ class Target{{ cookiecutter.destination_name }}({{ target_class }}):
             "file_naming_scheme",
             th.StringType,
             description="The scheme with which output files will be named"
+        ),
+        th.Property(
+            "auth_token",
+            th.StringType,
+            secret=True,  # Flag config as protected.
+            description="The path to the target output file"
         ),
         {%- endif %}
     ).to_dict()
