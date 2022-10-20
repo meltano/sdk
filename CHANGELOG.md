@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.12.0 (2022-10-17)
+
+### ✨ New
+
+- [#1032](https://github.com/meltano/sdk/issues/1032) Support stream property selection push-down in SQL streams
+- [#978](https://github.com/meltano/sdk/issues/978) Allow configuring a dedicated metrics logger
+
+### 🐛 Fixes
+
+- [#1043](https://github.com/meltano/sdk/issues/1043) Batch storage `split_url` to work with Windows paths -- _**Thanks @BuzzCutNorman!**_
+- [#826](https://github.com/meltano/sdk/issues/826) Remove Poetry version pin for GitHub Actions -- _**Thanks @visch!**_
+- [#1001](https://github.com/meltano/sdk/issues/1001) Use column name in `allow_column_alter` error message
+
+### 📚 Documentation Improvements
+
+- [#1060](https://github.com/meltano/sdk/issues/1060) Add explanation and recommendations for context usage
+- [#1074](https://github.com/meltano/sdk/issues/1074) Document an example implementation and usage of `BaseHATEOASPaginator`
+- [#1020](https://github.com/meltano/sdk/issues/1020) Fixed typo in `docs/stream_maps.md` -- _**Thanks @spacecowboy!**_
+- [#1006](https://github.com/meltano/sdk/issues/1006) Add links to Meltano install/tut
+
 ## v0.11.1 (2022-09-27)
 
 ### 🐛 Fixes

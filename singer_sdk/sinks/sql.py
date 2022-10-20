@@ -83,12 +83,13 @@ class SQLSink(BatchSink):
             The target schema name.
         """
         parts = self.stream_name.split("-")
-        schema = None
-        if len(parts) == 2:
-            schema = parts[0]
-        if len(parts) == 3:
-            schema = parts[1]
-        return self.conform_name(schema, "schema") if schema else None
+        if len(parts) in {2, 3}:
+            # Stream name is a two-part or three-part identifier.
+            # Use the second-to-last part as the schema name.
+            return self.conform_name(parts[-2], "schema")
+
+        # Schema name not detected.
+        return None
 
     @property
     def database_name(self) -> Optional[str]:
@@ -233,6 +234,47 @@ class SQLSink(BatchSink):
         Writes a batch to the SQL target. Developers may override this method
         in order to provide a more efficient upload/upsert process.
 
+        Returns:
+            The fully qualified table name.
+        """
+        return self.connector.get_fully_qualified_name(
+            table_name=self.table_name,
+            schema_name=self.schema_name,
+            db_name=self.database_name,
+        )
+
+    @property
+    def full_schema_name(self) -> str:
+        """Return the fully qualified schema name.
+
+        Returns:
+            The fully qualified schema name.
+        """
+        return self.connector.get_fully_qualified_name(
+            schema_name=self.schema_name, db_name=self.database_name
+        )
+
+    def setup(self) -> None:
+        """Set up Sink.
+
+        This method is called on Sink creation, and creates the required Schema and
+        Table entities in the target database.
+        """
+        if self.schema_name:
+            self.connector.prepare_schema(self.schema_name)
+        self.connector.prepare_table(
+            full_table_name=self.full_table_name,
+            schema=self.schema,
+            primary_keys=self.key_properties,
+            as_temp_table=False,
+        )
+
+    def process_batch(self, context: dict) -> None:
+        """Process a batch with the given batch context.
+
+        Writes a batch to the SQL target. Developers may override this method
+        in order to provide a more efficient upload/upsert process.
+
         Args:
             context: Stream partition or context dictionary.
         """
@@ -242,41 +284,6 @@ class SQLSink(BatchSink):
             full_table_name=self.full_table_name,
             schema=self.schema,
             records=context["records"],
-        )
-
-    def create_table_with_records(
-        self,
-        full_table_name: Optional[str],
-        schema: dict,
-        records: Iterable[Dict[str, Any]],
-        primary_keys: Optional[List[str]] = None,
-        partition_keys: Optional[List[str]] = None,
-        as_temp_table: bool = False,
-    ) -> None:
-        """Create an empty table.
-
-        Args:
-            full_table_name: the target table name.
-            schema: the JSON schema for the new table.
-            records: records to load.
-            primary_keys: list of key properties.
-            partition_keys: list of partition keys.
-            as_temp_table: True to create a temp table.
-        """
-        full_table_name = full_table_name or self.full_table_name
-        if primary_keys is None:
-            primary_keys = self.key_properties
-        partition_keys = partition_keys or None
-        # TODO: determine if this call to `prepare_table` is necessary
-        # (in addition to in `setup` above)
-        self.connector.prepare_table(
-            full_table_name=full_table_name,
-            primary_keys=primary_keys,
-            schema=schema,
-            as_temp_table=as_temp_table,
-        )
-        self.bulk_insert_records(
-            full_table_name=full_table_name, schema=schema, records=records
         )
 
     def generate_insert_statement(
