@@ -296,7 +296,6 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
 )
 def test_property_creation(property_obj: Property, expected_jsonschema: dict) -> None:
     assert property_obj.to_dict() == expected_jsonschema
-    # assert property_obj.type_dict == expected_jsonschema["type"]
 
 
 def test_wrapped_type_dict():
