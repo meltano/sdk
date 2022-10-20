@@ -11,9 +11,9 @@ plugins:
     namespace: "{{cookiecutter.library_name}}"
     pip_url: -e .
     capabilities:
-    - state
-    - catalog
-    - discover
+    - about
+    - stream-maps
+    - record-flattening
     config:
       start_date: '2010-01-01T00:00:00Z'
     settings:
