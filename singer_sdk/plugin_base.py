@@ -295,7 +295,6 @@ class PluginBase(metaclass=abc.ABCMeta):
         info["version"] = cls.plugin_version
         info["sdk_version"] = cls.sdk_version
         info["capabilities"] = cls.capabilities
-
         config_jsonschema = cls.config_jsonschema
         cls.append_builtin_config(config_jsonschema)
         info["settings"] = config_jsonschema
