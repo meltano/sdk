@@ -15,7 +15,7 @@ from singer_sdk.exceptions import ConformedNameClashException
 from singer_sdk.helpers._conformers import replace_leading_digit, snakecase
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks.batch import BatchSink
-from singer_sdk.streams import SQLConnector
+from singer_sdk.sql import SQLConnector
 
 
 class SQLSink(BatchSink):
