@@ -253,6 +253,52 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
     assert json_type.type_dict == expected_json_schema
 
 
+@pytest.mark.parametrize(
+    "property_obj,expected_jsonschema",
+    [
+        (
+            Property("my_prop1", StringType, required=True),
+            {"my_prop1": {"type": ["string"]}},
+        ),
+        (
+            Property("my_prop2", StringType, required=False),
+            {"my_prop2": {"type": ["string", "null"]}},
+        ),
+        (
+            Property("my_prop3", StringType, secret=True),
+            {
+                "my_prop3": {
+                    "type": ["string", "null"],
+                    "secret": True,
+                    "writeOnly": True,
+                }
+            },
+        ),
+        (
+            Property("my_prop4", StringType, description="This is a property."),
+            {
+                "my_prop4": {
+                    "description": "This is a property.",
+                    "type": ["string", "null"],
+                }
+            },
+        ),
+        (
+            Property("my_prop5", StringType, default="some_val"),
+            {
+                "my_prop5": {
+                    "default": "some_val",
+                    "type": ["string", "null"],
+                }
+            },
+        ),
+    ],
+)
+def test_property_creation(property_obj: Property, expected_jsonschema: dict) -> None:
+    assert property_obj.to_dict() == expected_jsonschema
+    # assert property_obj.type_dict == expected_jsonschema["type"]
+
+
 def test_wrapped_type_dict():
     with pytest.raises(
         ValueError,
