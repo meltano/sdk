@@ -12,6 +12,7 @@ from uuid import uuid4
 import pytest
 import sqlalchemy
 
+from samples.sample_tap_hostile import SampleTapHostile
 from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
 from samples.sample_target_csv.csv_target import SampleTargetCSV
 from samples.sample_target_sqlite import SQLiteSink, SQLiteTarget
@@ -569,3 +570,41 @@ def test_sqlite_generate_insert_statement(
         sink.schema,
     )
     assert dml == expected_dml
+
+
+def test_hostile_to_sqlite(
+    sqlite_sample_target: SQLTarget, sqlite_target_test_config: dict
+):
+    tap = SampleTapHostile()
+    tap_to_target_sync_test(tap, sqlite_sample_target)
+    # check if stream table was created
+    db = sqlite3.connect(sqlite_target_test_config["path_to_db"])
+    cursor = db.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = [res[0] for res in cursor.fetchall()]
+    assert "hostile_property_names_stream" in tables
+    # check if columns were conformed
+    cursor.execute(
+        dedent(
+            """
+            SELECT
+                p.name as columnName
+            FROM sqlite_master m
+            left outer join pragma_table_info((m.name)) p
+                on m.name <> p.name
+            where m.name = 'hostile_property_names_stream'
+            ;
+            """
+        )
+    )
+    columns = {res[0] for res in cursor.fetchall()}
+    assert columns == {
+        "name_with_spaces",
+        "name_is_camel_case",
+        "name_with_dashes",
+        "name_with_dashes_and_mixed_cases",
+        "gname_starts_with_number",
+        "fname_starts_with_number",
+        "hname_starts_with_number",
+        "name_with_emoji",
+    }
