@@ -1,5 +1,7 @@
 """Common SQL connectors for Streams and Sinks."""
 
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 from functools import lru_cache
