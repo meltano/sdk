@@ -28,7 +28,6 @@ from singer_sdk.configuration._dict_config import parse_environment_config
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
-from singer_sdk.helpers._meltano import meltano_yaml_str
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -342,79 +341,64 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         if format == "json":
             print(json.dumps(info, indent=2, default=str))
-            return
 
-        if format == "markdown":
-            cls._print_about_markdown(info)
-            return
+        elif format == "markdown":
+            max_setting_len = cast(
+                int, max(len(k) for k in info["settings"]["properties"].keys())
+            )
 
-        if format == "meltano":
-            print(meltano_yaml_str(cls.name, cls.capabilities, cls.config_jsonschema))
-            return
+            # Set table base for markdown
+            table_base = (
+                f"| {'Setting':{max_setting_len}}| Required | Default | Description |\n"
+                f"|:{'-' * max_setting_len}|:--------:|:-------:|:------------|\n"
+            )
 
-        formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
-        print(formatted)
+            # Empty list for string parts
+            md_list = []
+            # Get required settings for table
+            required_settings = info["settings"].get("required", [])
 
-    @classmethod
-    def _print_about_markdown(cls: Type["PluginBase"], info: dict) -> None:
-        """Print about info as markdown.
+            # Iterate over Dict to set md
+            md_list.append(
+                f"# `{info['name']}`\n\n"
+                f"{info['description']}\n\n"
+                f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n"
+            )
+            for key, value in info.items():
 
-        Args:
-            info: The collected metadata for the class.
-        """
-        max_setting_len = cast(
-            int, max(len(k) for k in info["settings"]["properties"].keys())
-        )
+                if key == "capabilities":
+                    capabilities = f"## {key.title()}\n\n"
+                    capabilities += "\n".join([f"* `{v}`" for v in value])
+                    capabilities += "\n\n"
+                    md_list.append(capabilities)
 
-        # Set table base for markdown
-        table_base = (
-            f"| {'Setting':{max_setting_len}}| Required | Default | Description |\n"
-            f"|:{'-' * max_setting_len}|:--------:|:-------:|:------------|\n"
-        )
-
-        # Empty list for string parts
-        md_list = []
-        # Get required settings for table
-        required_settings = info["settings"].get("required", [])
-
-        # Iterate over Dict to set md
-        md_list.append(
-            f"# `{info['name']}`\n\n"
-            f"{info['description']}\n\n"
-            f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n"
-        )
-        for key, value in info.items():
-
-            if key == "capabilities":
-                capabilities = f"## {key.title()}\n\n"
-                capabilities += "\n".join([f"* `{v}`" for v in value])
-                capabilities += "\n\n"
-                md_list.append(capabilities)
-
-            if key == "settings":
-                setting = f"## {key.title()}\n\n"
-                for k, v in info["settings"].get("properties", {}).items():
-                    md_description = v.get("description", "").replace("\n", "<BR/>")
-                    table_base += (
-                        f"| {k}{' ' * (max_setting_len - len(k))}"
-                        f"| {'True' if k in required_settings else 'False':8} | "
-                        f"{v.get('default', 'None'):7} | "
-                        f"{md_description:11} |\n"
+                if key == "settings":
+                    setting = f"## {key.title()}\n\n"
+                    for k, v in info["settings"].get("properties", {}).items():
+                        md_description = v.get("description", "").replace("\n", "<BR/>")
+                        table_base += (
+                            f"| {k}{' ' * (max_setting_len - len(k))}"
+                            f"| {'True' if k in required_settings else 'False':8} | "
+                            f"{v.get('default', 'None'):7} | "
+                            f"{md_description:11} |\n"
+                        )
+                    setting += table_base
+                    setting += (
+                        "\n"
+                        + "\n".join(
+                            [
+                                "A full list of supported settings and capabilities "
+                                f"is available by running: `{info['name']} --about`"
+                            ]
+                        )
+                        + "\n"
                     )
-                setting += table_base
-                setting += (
-                    "\n"
-                    + "\n".join(
-                        [
-                            "A full list of supported settings and capabilities "
-                            f"is available by running: `{info['name']} --about`"
-                        ]
-                    )
-                    + "\n"
-                )
-                md_list.append(setting)
+                    md_list.append(setting)
 
-        print("".join(md_list))
+            print("".join(md_list))
+        else:
+            formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
+            print(formatted)
 
     @classproperty
     def cli(cls) -> Callable:
