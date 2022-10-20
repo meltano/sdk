@@ -1,6 +1,10 @@
 version: 1
 send_anonymous_usage_stats: true
 project_id: "{{cookiecutter.tap_id}}"
+environments:
+- name: dev
+- name: staging
+- name: prod
 plugins:
   extractors:
   - name: "{{cookiecutter.tap_id}}"
