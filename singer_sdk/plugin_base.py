@@ -21,7 +21,6 @@ from typing import (
 )
 
 import click
-import yaml
 from jsonschema import Draft4Validator, SchemaError, ValidationError
 
 from singer_sdk import metrics
