@@ -21,6 +21,7 @@ from typing import (
 )
 
 import click
+import yaml
 from jsonschema import Draft4Validator, SchemaError, ValidationError
 
 from singer_sdk import metrics
@@ -341,64 +342,89 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         if format == "json":
             print(json.dumps(info, indent=2, default=str))
+            return
 
-        elif format == "markdown":
-            max_setting_len = cast(
-                int, max(len(k) for k in info["settings"]["properties"].keys())
-            )
+        if format == "markdown":
+            cls._print_about_markdown(info)
+            return
 
-            # Set table base for markdown
-            table_base = (
-                f"| {'Setting':{max_setting_len}}| Required | Default | Description |\n"
-                f"|:{'-' * max_setting_len}|:--------:|:-------:|:------------|\n"
-            )
+        if format == "yaml":
+            cls._print_about_yaml(info)
+            return
 
-            # Empty list for string parts
-            md_list = []
-            # Get required settings for table
-            required_settings = info["settings"].get("required", [])
+        formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
+        print(formatted)
 
-            # Iterate over Dict to set md
-            md_list.append(
-                f"# `{info['name']}`\n\n"
-                f"{info['description']}\n\n"
-                f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n"
-            )
-            for key, value in info.items():
+    @classmethod
+    def _print_about_markdown(cls: Type["PluginBase"], info: dict) -> None:
+        """Print about info as markdown.
 
-                if key == "capabilities":
-                    capabilities = f"## {key.title()}\n\n"
-                    capabilities += "\n".join([f"* `{v}`" for v in value])
-                    capabilities += "\n\n"
-                    md_list.append(capabilities)
+        Args:
+            info: The collected metadata for the class.
+        """
+        max_setting_len = cast(
+            int, max(len(k) for k in info["settings"]["properties"].keys())
+        )
 
-                if key == "settings":
-                    setting = f"## {key.title()}\n\n"
-                    for k, v in info["settings"].get("properties", {}).items():
-                        md_description = v.get("description", "").replace("\n", "<BR/>")
-                        table_base += (
-                            f"| {k}{' ' * (max_setting_len - len(k))}"
-                            f"| {'True' if k in required_settings else 'False':8} | "
-                            f"{v.get('default', 'None'):7} | "
-                            f"{md_description:11} |\n"
-                        )
-                    setting += table_base
-                    setting += (
-                        "\n"
-                        + "\n".join(
-                            [
-                                "A full list of supported settings and capabilities "
-                                f"is available by running: `{info['name']} --about`"
-                            ]
-                        )
-                        + "\n"
+        # Set table base for markdown
+        table_base = (
+            f"| {'Setting':{max_setting_len}}| Required | Default | Description |\n"
+            f"|:{'-' * max_setting_len}|:--------:|:-------:|:------------|\n"
+        )
+
+        # Empty list for string parts
+        md_list = []
+        # Get required settings for table
+        required_settings = info["settings"].get("required", [])
+
+        # Iterate over Dict to set md
+        md_list.append(
+            f"# `{info['name']}`\n\n"
+            f"{info['description']}\n\n"
+            f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n"
+        )
+        for key, value in info.items():
+
+            if key == "capabilities":
+                capabilities = f"## {key.title()}\n\n"
+                capabilities += "\n".join([f"* `{v}`" for v in value])
+                capabilities += "\n\n"
+                md_list.append(capabilities)
+
+            if key == "settings":
+                setting = f"## {key.title()}\n\n"
+                for k, v in info["settings"].get("properties", {}).items():
+                    md_description = v.get("description", "").replace("\n", "<BR/>")
+                    table_base += (
+                        f"| {k}{' ' * (max_setting_len - len(k))}"
+                        f"| {'True' if k in required_settings else 'False':8} | "
+                        f"{v.get('default', 'None'):7} | "
+                        f"{md_description:11} |\n"
                     )
-                    md_list.append(setting)
+                setting += table_base
+                setting += (
+                    "\n"
+                    + "\n".join(
+                        [
+                            "A full list of supported settings and capabilities "
+                            f"is available by running: `{info['name']} --about`"
+                        ]
+                    )
+                    + "\n"
+                )
+                md_list.append(setting)
 
-            print("".join(md_list))
-        else:
-            formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
-            print(formatted)
+        print("".join(md_list))
+
+    @classmethod
+    def _print_about_yaml(cls: Type["PluginBase"], info: dict) -> None:
+        """Print about info as YAML.
+
+        Args:
+            info: The collected metadata for the class.
+        """
+        yaml_structure: Dict[str, Any] = {}
+        print(yaml.dump(yaml_structure))
 
     @classproperty
     def cli(cls) -> Callable:
