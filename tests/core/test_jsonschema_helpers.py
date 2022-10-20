@@ -43,7 +43,7 @@ class ConfigTestTap(Tap):
     config_jsonschema = PropertiesList(
         Property("host", StringType, required=True),
         Property("username", StringType, required=True),
-        Property("password", StringType, required=True),
+        Property("password", StringType, required=True, secret=True),
         Property("batch_size", IntegerType, default=-1),
     ).to_dict()
 
