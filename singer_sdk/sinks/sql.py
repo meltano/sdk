@@ -234,47 +234,6 @@ class SQLSink(BatchSink):
         Writes a batch to the SQL target. Developers may override this method
         in order to provide a more efficient upload/upsert process.
 
-        Returns:
-            The fully qualified table name.
-        """
-        return self.connector.get_fully_qualified_name(
-            table_name=self.table_name,
-            schema_name=self.schema_name,
-            db_name=self.database_name,
-        )
-
-    @property
-    def full_schema_name(self) -> str:
-        """Return the fully qualified schema name.
-
-        Returns:
-            The fully qualified schema name.
-        """
-        return self.connector.get_fully_qualified_name(
-            schema_name=self.schema_name, db_name=self.database_name
-        )
-
-    def setup(self) -> None:
-        """Set up Sink.
-
-        This method is called on Sink creation, and creates the required Schema and
-        Table entities in the target database.
-        """
-        if self.schema_name:
-            self.connector.prepare_schema(self.schema_name)
-        self.connector.prepare_table(
-            full_table_name=self.full_table_name,
-            schema=self.schema,
-            primary_keys=self.key_properties,
-            as_temp_table=False,
-        )
-
-    def process_batch(self, context: dict) -> None:
-        """Process a batch with the given batch context.
-
-        Writes a batch to the SQL target. Developers may override this method
-        in order to provide a more efficient upload/upsert process.
-
         Args:
             context: Stream partition or context dictionary.
         """
