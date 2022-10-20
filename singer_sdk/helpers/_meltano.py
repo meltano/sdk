@@ -71,7 +71,7 @@ def meltano_yaml_str(
         [
             f"""- name: {setting_name}
   label: {setting_name.replace("_", " ").title()}
-  kind: {_to_meltano_kind(property_node)},
+  kind: {_to_meltano_kind(property_node)}
   description: {property_node.get("description", 'null')}"""
             for setting_name, property_node in config_jsonschema["properties"].items()
         ]

@@ -39,8 +39,19 @@ from singer_sdk.typing import (
             "tap-from-source",
             ["about", "stream-maps"],
             PropertiesList(
-                Property("username", StringType, required=True),
-                Property("password", StringType, required=True, secret=True),
+                Property(
+                    "username",
+                    StringType,
+                    required=True,
+                    description="The username to connect with.",
+                ),
+                Property(
+                    "password",
+                    StringType,
+                    required=True,
+                    secret=True,
+                    description="The user's password.",
+                ),
                 Property("start_date", DateType),
             ).to_dict(),
             """name: tap-from-source
@@ -66,15 +77,15 @@ settings_group_validation:
 settings:
 - name: username
   label: Username
-  kind: string,
-  description: null
+  kind: string
+  description: The username to connect with.
 - name: password
   label: Password
-  kind: password,
-  description: null
+  kind: password
+  description: The user's password.
 - name: start_date
   label: Start Date
-  kind: date_iso8601,
+  kind: date_iso8601
   description: null
 """,
         )
