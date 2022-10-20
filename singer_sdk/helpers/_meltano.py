@@ -5,7 +5,7 @@ from __future__ import annotations
 from ._typing import (
     is_array_type,
     is_boolean_type,
-    is_datetime_type,
+    is_date_or_datetime_type,
     is_integer_type,
     is_object_type,
     is_secret_type,
@@ -13,8 +13,8 @@ from ._typing import (
 )
 
 
-def _to_meltano_kind(jsonschema_type: dict) -> str | None:
-    """Returns a Meltano `kind` indicator for the provided JSON Schema type.
+def _to_meltano_kind(jsonschema_def: dict) -> str | None:
+    """Returns a Meltano `kind` indicator for the provided JSON Schema property node.
 
     For reference:
     https://docs.meltano.com/reference/plugin-definition-syntax#settingskind
@@ -25,25 +25,25 @@ def _to_meltano_kind(jsonschema_type: dict) -> str | None:
     Returns:
         A string representing the meltano 'kind'.
     """
-    if is_secret_type(jsonschema_type):
+    if is_secret_type(jsonschema_def):
         return "password"
 
-    if is_string_type(jsonschema_type):
-        return "string"
-
-    if is_object_type(jsonschema_type):
-        return "object"
-
-    if is_array_type(jsonschema_type):
-        return "array"
-
-    if is_boolean_type(jsonschema_type):
-        return "boolean"
-
-    if is_datetime_type(jsonschema_type):
+    if is_date_or_datetime_type(jsonschema_def):
         return "date_iso8601"
 
-    if is_integer_type(jsonschema_type):
+    if is_string_type(jsonschema_def):
+        return "string"
+
+    if is_object_type(jsonschema_def):
+        return "object"
+
+    if is_array_type(jsonschema_def):
+        return "array"
+
+    if is_boolean_type(jsonschema_def):
+        return "boolean"
+
+    if is_integer_type(jsonschema_def):
         return "integer"
 
     return None
@@ -65,29 +65,26 @@ def meltano_yaml_str(
         A string representing the Meltano plugin Yaml definition.
     """
     capabilities_str: str = "\n".join(
-        [" - {capability}" for capability in capabilities]
+        [f" - {capability}" for capability in capabilities]
     )
     settings_str: str = "\n".join(
         [
-            f"""
-- name: {setting_name}
-  label: {setting_name.replace("_", " ").proper()}
-  kind: {_to_meltano_kind(type_dict["type"])},
-  description: {type_dict.get("description", 'null')}
-"""
-            for setting_name, type_dict in config_jsonschema["properties"].items()
+            f"""- name: {setting_name}
+  label: {setting_name.replace("_", " ").title()}
+  kind: {_to_meltano_kind(property_node)},
+  description: {property_node.get("description", 'null')}"""
+            for setting_name, property_node in config_jsonschema["properties"].items()
         ]
     )
     required_settings = [
         setting_name
-        for setting_name, type_dict in config_jsonschema.items()
+        for setting_name, type_dict in config_jsonschema["properties"].items()
         if setting_name in config_jsonschema.get("required", [])
         or type_dict.get("required", False)
     ]
-    settings_group_validation_str = " - - " + "\n  - ".join(required_settings)
+    settings_group_validation_str = " - - " + "\n   - ".join(required_settings)
 
-    return f"""
-name: {plugin_name}
+    return f"""name: {plugin_name}
 namespace: {plugin_name.replace('-', '_')}
 
 ## The following could not be auto-detected:
@@ -107,4 +104,4 @@ settings_group_validation:
 {settings_group_validation_str}
 settings:
 {settings_str}
-    """
+"""

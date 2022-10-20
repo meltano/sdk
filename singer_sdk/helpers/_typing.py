@@ -120,6 +120,40 @@ def is_datetime_type(type_dict: dict) -> bool:
     )
 
 
+def is_date_or_datetime_type(type_dict: dict) -> bool:
+    """Return True if JSON Schema type definition is a 'date'/'date-time' type.
+
+    Also returns True if type is nested within an 'anyOf' type Array.
+
+    Args:
+        type_dict: The JSON Schema definition.
+
+    Raises:
+        ValueError: If type is empty or null.
+
+    Returns:
+        True if date or date-time, else False.
+    """
+    if not type_dict:
+        raise ValueError(
+            "Could not detect type from empty type_dict. "
+            "Did you forget to define a property in the stream schema?"
+        )
+
+    if "anyOf" in type_dict:
+        for type_dict in type_dict["anyOf"]:
+            if is_date_or_datetime_type(type_dict):
+                return True
+        return False
+
+    if "type" in type_dict:
+        return type_dict.get("format") in {"date", "date-time"}
+
+    raise ValueError(
+        f"Could not detect type of replication key using schema '{type_dict}'"
+    )
+
+
 def get_datelike_property_type(property_schema: Dict) -> Optional[str]:
     """Return one of 'date-time', 'time', or 'date' if property is date-like.
 
