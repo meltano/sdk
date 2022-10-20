@@ -13,6 +13,8 @@ plugins:
     - state
     - catalog
     - discover
+    - about
+    - stream-maps
     config:
       start_date: '2010-01-01T00:00:00Z'
     settings:
