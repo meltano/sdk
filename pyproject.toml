@@ -168,5 +168,5 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-# Sample CLI declaration:
-# sdk-tap-countries-sample = 'singer_sdk.samples.sample_tap_countries.countries_tap:SampleTapCountries.cli'
+sample-tap-countries = 'samples.sample_tap_countries.countries_tap:SampleTapCountries.cli'
+singer-tools = 'singer_sdk.dev.cli:dev_cli'
