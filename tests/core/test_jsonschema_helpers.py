@@ -15,6 +15,7 @@ from singer_sdk.helpers._typing import (
     is_date_or_datetime_type,
     is_datetime_type,
     is_secret_type,
+    is_string_array_type,
     is_string_type,
 )
 from singer_sdk.streams.core import Stream
@@ -53,6 +54,7 @@ TYPE_FN_CHECKS: set[Callable] = {
     is_date_or_datetime_type,
     is_datetime_type,
     is_secret_type,
+    is_string_array_type,
     is_string_type,
 }
 
@@ -317,6 +319,16 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                 }
             },
             {is_string_type},
+        ),
+        (
+            Property("my_prop6", ArrayType(StringType)),
+            {
+                "my_prop6": {
+                    "type": ["array", "null"],
+                    "items": {"type": ["string"]},
+                }
+            },
+            {is_array_type, is_string_array_type},
         ),
     ],
 )
