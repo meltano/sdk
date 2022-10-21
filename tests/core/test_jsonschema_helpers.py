@@ -70,7 +70,7 @@ class ConfigTestTap(Tap):
         Property("batch_size", IntegerType, default=-1),
     ).to_dict()
 
-    def discover_streams(self) -> List[Stream]:
+    def discover_streams(self) -> list[Stream]:
         return []
 
 
@@ -480,7 +480,7 @@ def test_array_type():
         "requried, duplicates, additional properties",
     ],
 )
-def test_object_type(properties: List[Property], addtional_properties: JSONTypeHelper):
+def test_object_type(properties: list[Property], addtional_properties: JSONTypeHelper):
     merged_property_schemas = {
         name: schema for p in properties for name, schema in p.to_dict().items()
     }
