@@ -5,6 +5,10 @@ from typing import List
 
 import pytest
 
+from singer_sdk.helpers._typing import (
+    JSONSCHEMA_ANNOTATION_SECRET,
+    JSONSCHEMA_ANNOTATION_WRITEONLY,
+)
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
@@ -269,8 +273,8 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
             {
                 "my_prop3": {
                     "type": ["string", "null"],
-                    "secret": True,
-                    "writeOnly": True,
+                    JSONSCHEMA_ANNOTATION_SECRET: True,
+                    JSONSCHEMA_ANNOTATION_WRITEONLY: True,
                 }
             },
         ),
