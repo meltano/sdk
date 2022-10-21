@@ -5,13 +5,16 @@ Usage example:
 .. code-block:: python
 
     jsonschema = PropertiesList(
+        Property("username", StringType, required=True),
+        Property("password", StringType, required=True, secret=True),
+
         Property("id", IntegerType, required=True),
-        Property("name", StringType),
-        Property("tags", ArrayType(StringType)),
-        Property("ratio", NumberType),
+        Property("foo_or_bar", StringType, allowed_values=["foo", "bar"]),
+        Property("ratio", NumberType, examples=[0.25, 0.75, 1.0]),
         Property("days_active", IntegerType),
         Property("updated_on", DateTimeType),
         Property("is_deleted", BooleanType),
+
         Property(
             "author",
             ObjectType(
@@ -19,6 +22,7 @@ Usage example:
                 Property("name", StringType),
             )
         ),
+        Property("tags", ArrayType(StringType)),
         Property(
             "groups",
             ArrayType(
