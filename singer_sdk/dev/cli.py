@@ -51,3 +51,7 @@ def analyze(
     ]:
         print(f"{file_desc}: {out_path}")
         Path(out_path).write_text(file_text, encoding="utf-8")
+
+
+if __name__ == "__main__":
+    dev_cli()
