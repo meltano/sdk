@@ -168,5 +168,8 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-sample-tap-countries = 'samples.sample_tap_countries.countries_tap:SampleTapCountries.cli'
+# These are available while developing the SDK and after installing the SDK using pip/pipx.
 singer-tools = 'singer_sdk.dev.cli:dev_cli'
+
+# Uncomment to test sample connectors in the CLI:
+# sample-tap-countries = 'samples.sample_tap_countries.countries_tap:SampleTapCountries.cli'
