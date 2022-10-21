@@ -71,11 +71,6 @@ def is_secret_type(type_dict: dict) -> bool:
     Returns:
         True if we detect any sensitive property nodes.
     """
-    if not type_dict:
-        raise ValueError(
-            "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?"
-        )
     if type_dict.get(JSONSCHEMA_ANNOTATION_WRITEONLY) or type_dict.get(
         JSONSCHEMA_ANNOTATION_SECRET
     ):

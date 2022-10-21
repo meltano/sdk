@@ -8,6 +8,7 @@ import pytest
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
     JSONSCHEMA_ANNOTATION_WRITEONLY,
+    is_secret_type,
 )
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
@@ -258,15 +259,17 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
 
 
 @pytest.mark.parametrize(
-    "property_obj,expected_jsonschema",
+    "property_obj,expected_jsonschema,is_secret",
     [
         (
             Property("my_prop1", StringType, required=True),
             {"my_prop1": {"type": ["string"]}},
+            False,
         ),
         (
             Property("my_prop2", StringType, required=False),
             {"my_prop2": {"type": ["string", "null"]}},
+            False,
         ),
         (
             Property("my_prop3", StringType, secret=True),
@@ -277,6 +280,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                     JSONSCHEMA_ANNOTATION_WRITEONLY: True,
                 }
             },
+            False,
         ),
         (
             Property("my_prop4", StringType, description="This is a property."),
@@ -286,6 +290,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                     "type": ["string", "null"],
                 }
             },
+            False,
         ),
         (
             Property("my_prop5", StringType, default="some_val"),
@@ -295,11 +300,15 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                     "type": ["string", "null"],
                 }
             },
+            False,
         ),
     ],
 )
-def test_property_creation(property_obj: Property, expected_jsonschema: dict) -> None:
+def test_property_creation(
+    property_obj: Property, expected_jsonschema: dict, is_secret: bool
+) -> None:
     assert property_obj.to_dict() == expected_jsonschema
+    assert is_secret_type(property_obj.to_dict()) is is_secret
 
 
 def test_wrapped_type_dict():
