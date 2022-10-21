@@ -42,7 +42,7 @@ Note:
 from __future__ import annotations
 
 import sys
-from typing import Generic, Mapping, TypeVar, Union, cast
+from typing import Any, Generic, Mapping, TypeVar, Union, cast
 
 import sqlalchemy
 from jsonschema import validators
