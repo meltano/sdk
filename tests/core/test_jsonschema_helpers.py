@@ -14,6 +14,8 @@ from singer_sdk.helpers._typing import (
     is_boolean_type,
     is_date_or_datetime_type,
     is_datetime_type,
+    is_integer_type,
+    is_object_type,
     is_secret_type,
     is_string_array_type,
     is_string_type,
@@ -53,6 +55,7 @@ TYPE_FN_CHECKS: set[Callable] = {
     is_boolean_type,
     is_date_or_datetime_type,
     is_datetime_type,
+    is_integer_type,
     is_secret_type,
     is_string_array_type,
     is_string_type,
@@ -329,6 +332,38 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                 }
             },
             {is_array_type, is_string_array_type},
+        ),
+        (
+            Property(
+                "my_prop7",
+                ObjectType(
+                    Property("not_a_secret", StringType),
+                    Property("is_a_secret", StringType, secret=True),
+                ),
+            ),
+            {
+                "my_prop7": {
+                    "type": ["object", "null"],
+                    "properties": {
+                        "not_a_secret": {"type": ["string", "null"]},
+                        "is_a_secret": {
+                            "type": ["string", "null"],
+                            "secret": True,
+                            "writeOnly": True,
+                        },
+                    },
+                }
+            },
+            {is_object_type, is_secret_type},
+        ),
+        (
+            Property("my_prop8", IntegerType),
+            {
+                "my_prop8": {
+                    "type": ["integer", "null"],
+                }
+            },
+            {is_integer_type},
         ),
     ],
 )
