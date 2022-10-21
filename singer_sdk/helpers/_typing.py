@@ -132,12 +132,6 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
     Returns:
         True if date or date-time, else False.
     """
-    if not type_dict:
-        raise ValueError(
-            "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?"
-        )
-
     if "anyOf" in type_dict:
         for type_dict in type_dict["anyOf"]:
             if is_date_or_datetime_type(type_dict):

@@ -1,14 +1,21 @@
 """Test sample sync."""
 
+from __future__ import annotations
+
 import re
-from typing import List
+from typing import Callable, List
 
 import pytest
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
     JSONSCHEMA_ANNOTATION_WRITEONLY,
+    is_array_type,
+    is_boolean_type,
+    is_date_or_datetime_type,
+    is_datetime_type,
     is_secret_type,
+    is_string_type,
 )
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
@@ -39,6 +46,15 @@ from singer_sdk.typing import (
     URIType,
     UUIDType,
 )
+
+TYPE_FN_CHECKS: set[Callable] = {
+    is_array_type,
+    is_boolean_type,
+    is_date_or_datetime_type,
+    is_datetime_type,
+    is_secret_type,
+    is_string_type,
+}
 
 
 class ConfigTestTap(Tap):
@@ -259,17 +275,17 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
 
 
 @pytest.mark.parametrize(
-    "property_obj,expected_jsonschema,is_secret",
+    "property_obj,expected_jsonschema,type_fn_checks_true",
     [
         (
             Property("my_prop1", StringType, required=True),
             {"my_prop1": {"type": ["string"]}},
-            False,
+            {is_string_type},
         ),
         (
             Property("my_prop2", StringType, required=False),
             {"my_prop2": {"type": ["string", "null"]}},
-            False,
+            {is_string_type},
         ),
         (
             Property("my_prop3", StringType, secret=True),
@@ -280,7 +296,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                     JSONSCHEMA_ANNOTATION_WRITEONLY: True,
                 }
             },
-            False,
+            {is_secret_type, is_string_type},
         ),
         (
             Property("my_prop4", StringType, description="This is a property."),
@@ -290,7 +306,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                     "type": ["string", "null"],
                 }
             },
-            False,
+            {is_string_type},
         ),
         (
             Property("my_prop5", StringType, default="some_val"),
@@ -300,15 +316,28 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                     "type": ["string", "null"],
                 }
             },
-            False,
+            {is_string_type},
         ),
     ],
 )
 def test_property_creation(
-    property_obj: Property, expected_jsonschema: dict, is_secret: bool
+    property_obj: Property,
+    expected_jsonschema: dict,
+    type_fn_checks_true: set[Callable],
 ) -> None:
-    assert property_obj.to_dict() == expected_jsonschema
-    assert is_secret_type(property_obj.to_dict()) is is_secret
+    property_dict = property_obj.to_dict()
+    assert property_dict == expected_jsonschema
+    for check_fn in TYPE_FN_CHECKS:
+        property_name = list(property_dict.keys())[0]
+        property_node = property_dict[property_name]
+        if check_fn in type_fn_checks_true:
+            assert (
+                check_fn(property_node) is True
+            ), f"{check_fn.__name__} was not True for {repr(property_dict)}"
+        else:
+            assert (
+                check_fn(property_node) is False
+            ), f"{check_fn.__name__} was not False for {repr(property_dict)}"
 
 
 def test_wrapped_type_dict():
