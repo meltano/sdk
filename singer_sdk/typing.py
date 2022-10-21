@@ -48,7 +48,12 @@ import sqlalchemy
 from jsonschema import validators
 
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._typing import append_type, get_datelike_property_type
+from singer_sdk.helpers._typing import (
+    JSONSCHEMA_ANNOTATION_SECRET,
+    JSONSCHEMA_ANNOTATION_WRITEONLY,
+    append_type,
+    get_datelike_property_type,
+)
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
@@ -352,8 +357,15 @@ class Property(JSONTypeHelper, Generic[W]):
         required: bool = False,
         default: _JsonValue = None,
         description: str = None,
+        secret: bool = False,
     ) -> None:
         """Initialize Property object.
+
+        Note: Properties containing secrets should be specified with `secret=True`.
+        Doing so will add the annotation `writeOnly=True`, in accordance with JSON
+        Schema Draft 7 and later, and `secret=True` as an additional hint to readers.
+
+        More info: https://json-schema.org/draft-07/json-schema-release-notes.html
 
         Args:
             name: Property name.
@@ -361,12 +373,14 @@ class Property(JSONTypeHelper, Generic[W]):
             required: Whether this is a required property.
             default: Default value in the JSON Schema.
             description: Long-text property description.
+            secret: True if this is a credential or other secret.
         """
         self.name = name
         self.wrapped = wrapped
         self.optional = not required
         self.default = default
         self.description = description
+        self.secret = secret
 
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
@@ -402,6 +416,13 @@ class Property(JSONTypeHelper, Generic[W]):
             type_dict.update({"default": self.default})
         if self.description:
             type_dict.update({"description": self.description})
+        if self.secret:
+            type_dict.update(
+                {
+                    JSONSCHEMA_ANNOTATION_SECRET: True,
+                    JSONSCHEMA_ANNOTATION_WRITEONLY: True,
+                }
+            )
         return {self.name: type_dict}
 
 

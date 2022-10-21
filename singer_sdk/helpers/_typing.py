@@ -11,6 +11,8 @@ import pendulum
 
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"
+JSONSCHEMA_ANNOTATION_SECRET = "secret"
+JSONSCHEMA_ANNOTATION_WRITEONLY = "writeOnly"
 
 
 class DatetimeErrorTreatmentEnum(Enum):
@@ -54,6 +56,36 @@ def append_type(type_dict: dict, new_type: str) -> dict:
     )
 
 
+def is_secret_type(type_dict: dict) -> bool:
+    """Return True if JSON Schema type definition appears to be a secret.
+
+    Will return true if either `writeOnly` or `secret` are true on this type
+    or any of the type's subproperties.
+
+    Args:
+        type_dict: The JSON Schema type to check.
+
+    Raises:
+        ValueError: If type_dict is None or empty.
+
+    Returns:
+        True if we detect any sensitive property nodes.
+    """
+    if type_dict.get(JSONSCHEMA_ANNOTATION_WRITEONLY) or type_dict.get(
+        JSONSCHEMA_ANNOTATION_SECRET
+    ):
+        return True
+
+    if "properties" in type_dict:
+        # Recursively check subproperties and return True if any child is secret.
+        return any(
+            is_secret_type(child_type_dict)
+            for child_type_dict in type_dict["properties"].values()
+        )
+
+    return False
+
+
 def is_object_type(property_schema: dict) -> Optional[bool]:
     """Return true if the JSON Schema type is an object or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
@@ -81,6 +113,34 @@ def is_datetime_type(type_dict: dict) -> bool:
         return False
     elif "type" in type_dict:
         return type_dict.get("format") == "date-time"
+    raise ValueError(
+        f"Could not detect type of replication key using schema '{type_dict}'"
+    )
+
+
+def is_date_or_datetime_type(type_dict: dict) -> bool:
+    """Return True if JSON Schema type definition is a 'date'/'date-time' type.
+
+    Also returns True if type is nested within an 'anyOf' type Array.
+
+    Args:
+        type_dict: The JSON Schema definition.
+
+    Raises:
+        ValueError: If type is empty or null.
+
+    Returns:
+        True if date or date-time, else False.
+    """
+    if "anyOf" in type_dict:
+        for type_dict in type_dict["anyOf"]:
+            if is_date_or_datetime_type(type_dict):
+                return True
+        return False
+
+    if "type" in type_dict:
+        return type_dict.get("format") in {"date", "date-time"}
+
     raise ValueError(
         f"Could not detect type of replication key using schema '{type_dict}'"
     )
@@ -152,12 +212,39 @@ def is_string_array_type(type_dict: dict) -> bool:
     return "array" in type_dict["type"] and bool(is_string_type(type_dict["items"]))
 
 
+def is_array_type(type_dict: dict) -> bool:
+    """Return True if JSON Schema type definition is a string array."""
+    if not type_dict:
+        raise ValueError(
+            "Could not detect type from empty type_dict. "
+            "Did you forget to define a property in the stream schema?"
+        )
+
+    if "anyOf" in type_dict:
+        return any([is_array_type(t) for t in type_dict["anyOf"]])
+
+    if "type" not in type_dict:
+        raise ValueError(f"Could not detect type from schema '{type_dict}'")
+
+    return "array" in type_dict["type"]
+
+
 def is_boolean_type(property_schema: dict) -> Optional[bool]:
     """Return true if the JSON Schema type is a boolean or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
         if "boolean" in property_type or property_type == "boolean":
+            return True
+    return False
+
+
+def is_integer_type(property_schema: dict) -> Optional[bool]:
+    """Return true if the JSON Schema type is a boolean or None if detection fails."""
+    if "anyOf" not in property_schema and "type" not in property_schema:
+        return None  # Could not detect data type
+    for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
+        if "integer" in property_type or property_type == "integer":
             return True
     return False
 
