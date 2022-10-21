@@ -11,6 +11,8 @@ import pendulum
 
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"
+JSONSCHEMA_ANNOTATION_SECRET = "secret"
+JSONSCHEMA_ANNOTATION_WRITEONLY = "writeOnly"
 
 
 class DatetimeErrorTreatmentEnum(Enum):
@@ -57,7 +59,7 @@ def append_type(type_dict: dict, new_type: str) -> dict:
 def is_secret_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition appears to be a secret.
 
-    Will return true if either `writeOnly` or `sensitive` are true on this type
+    Will return true if either `writeOnly` or `secret` are true on this type
     or any of the type's subproperties.
 
     Args:
@@ -69,13 +71,9 @@ def is_secret_type(type_dict: dict) -> bool:
     Returns:
         True if we detect any sensitive property nodes.
     """
-    if not type_dict:
-        raise ValueError(
-            "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?"
-        )
-
-    if type_dict.get("writeOnly") or type_dict.get("sensitive"):
+    if type_dict.get(JSONSCHEMA_ANNOTATION_WRITEONLY) or type_dict.get(
+        JSONSCHEMA_ANNOTATION_SECRET
+    ):
         return True
 
     if "properties" in type_dict:
@@ -134,12 +132,6 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
     Returns:
         True if date or date-time, else False.
     """
-    if not type_dict:
-        raise ValueError(
-            "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?"
-        )
-
     if "anyOf" in type_dict:
         for type_dict in type_dict["anyOf"]:
             if is_date_or_datetime_type(type_dict):

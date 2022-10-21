@@ -21,7 +21,7 @@ from typing import (
 )
 
 import click
-from jsonschema import Draft4Validator, SchemaError, ValidationError
+from jsonschema import Draft7Validator, SchemaError, ValidationError
 
 from singer_sdk import metrics
 from singer_sdk.configuration._dict_config import parse_environment_config
@@ -42,7 +42,7 @@ from singer_sdk.typing import extend_validator_with_defaults
 SDK_PACKAGE_NAME = "singer_sdk"
 
 
-JSONSchemaValidator = extend_validator_with_defaults(Draft4Validator)
+JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
 
 
 class PluginBase(metaclass=abc.ABCMeta):

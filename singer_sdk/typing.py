@@ -48,7 +48,12 @@ import sqlalchemy
 from jsonschema import validators
 
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._typing import append_type, get_datelike_property_type
+from singer_sdk.helpers._typing import (
+    JSONSCHEMA_ANNOTATION_SECRET,
+    JSONSCHEMA_ANNOTATION_WRITEONLY,
+    append_type,
+    get_datelike_property_type,
+)
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
@@ -414,8 +419,8 @@ class Property(JSONTypeHelper, Generic[W]):
         if self.secret:
             type_dict.update(
                 {
-                    "secret": True,
-                    "writeOnly": True,
+                    JSONSCHEMA_ANNOTATION_SECRET: True,
+                    JSONSCHEMA_ANNOTATION_WRITEONLY: True,
                 }
             )
         return {self.name: type_dict}
