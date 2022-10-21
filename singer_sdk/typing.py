@@ -356,8 +356,10 @@ class Property(JSONTypeHelper, Generic[W]):
         wrapped: W | type[W],
         required: bool = False,
         default: _JsonValue = None,
-        description: str = None,
-        secret: bool = False,
+        description: str | None = None,
+        secret: bool | None = False,
+        allowed_values: list[Any] | None = None,
+        examples: list[Any] | None = None,
     ) -> None:
         """Initialize Property object.
 
@@ -374,6 +376,10 @@ class Property(JSONTypeHelper, Generic[W]):
             default: Default value in the JSON Schema.
             description: Long-text property description.
             secret: True if this is a credential or other secret.
+            allowed_values: A list of allowed value options, if only specific values
+                are permitted. This will define the type as an 'enum'.
+            examples: Optional. A list of one or more sample values. These may be
+                displayed to the user as hints of the expected format of inputs.
         """
         self.name = name
         self.wrapped = wrapped
@@ -381,6 +387,8 @@ class Property(JSONTypeHelper, Generic[W]):
         self.default = default
         self.description = description
         self.secret = secret
+        self.allowed_values = allowed_values or None
+        self.examples = examples or None
 
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
@@ -423,6 +431,10 @@ class Property(JSONTypeHelper, Generic[W]):
                     JSONSCHEMA_ANNOTATION_WRITEONLY: True,
                 }
             )
+        if self.allowed_values:
+            type_dict.update({"enum": self.allowed_values})
+        if self.examples:
+            type_dict.update({"examples": self.examples})
         return {self.name: type_dict}
 
 
