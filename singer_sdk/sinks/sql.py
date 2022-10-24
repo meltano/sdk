@@ -11,11 +11,11 @@ from pendulum import now
 from sqlalchemy.sql import Executable
 from sqlalchemy.sql.expression import bindparam
 
+from singer_sdk.connectors import SQLConnector
 from singer_sdk.exceptions import ConformedNameClashException
 from singer_sdk.helpers._conformers import replace_leading_digit, snakecase
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks.batch import BatchSink
-from singer_sdk.sql import SQLConnector
 
 
 class SQLSink(BatchSink):

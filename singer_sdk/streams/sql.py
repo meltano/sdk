@@ -9,8 +9,8 @@ import sqlalchemy
 
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping
+from singer_sdk.connectors import SQLConnector
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
-from singer_sdk.sql import SQLConnector
 from singer_sdk.streams.core import Stream
 
 
