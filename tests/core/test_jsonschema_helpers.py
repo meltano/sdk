@@ -365,6 +365,22 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
             },
             {is_integer_type},
         ),
+        (
+            Property(
+                "my_prop9",
+                IntegerType,
+                allowed_values=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+                examples=[1, 2, 3],
+            ),
+            {
+                "my_prop9": {
+                    "type": ["integer", "null"],
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                    "examples": [1, 2, 3],
+                }
+            },
+            {is_integer_type},
+        ),
     ],
 )
 def test_property_creation(
