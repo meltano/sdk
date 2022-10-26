@@ -93,3 +93,10 @@ class MySink(Sink):
     def process_batch_files(self, encoding, storage, files):
         # process the batch files
 ```
+
+## Known Limitations
+
+1. Currently the built-in `BATCH` implementation does not support incremental bookmarks or `STATE` tracking. This work is tracked in [Issue #976](https://github.com/meltano/sdk/issues/976).
+2. The `BATCH` implementation is not currently compatible with [Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html). This is certainly possible to implement in theory, but it would also introduce some performance penalties. This limitation is tracked in [Issue 1117#](https://github.com/meltano/sdk/issues/1117).
+
+If you are interested in contributing to one or both of these features, please add a comment in the respective issue.
