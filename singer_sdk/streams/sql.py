@@ -181,6 +181,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             column_names=selected_column_names,
         )
         query = table.select()
+
         if self.replication_key:
             replication_key_col = table.columns[self.replication_key]
             query = query.order_by(replication_key_col)
@@ -192,6 +193,9 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                         replication_key=replication_key_col, start_val=start_val
                     )
                 )
+
+        if self._MAX_RECORDS_LIMIT is not None:
+            query = query.limit(self._MAX_RECORDS_LIMIT)
 
         for record in self.connector.connection.execute(query):
             yield dict(record)
