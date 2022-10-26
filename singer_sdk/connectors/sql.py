@@ -907,7 +907,8 @@ class SQLConnector:
             A sqlalchemy DDL instance.
         """
         return sqlalchemy.DDL(
-            "ALTER TABLE %(table_name)s RENAME COLUMN %(column_name)s to %(new_column_name)s",
+            "ALTER TABLE %(table_name)s "
+            "RENAME COLUMN %(column_name)s to %(new_column_name)s",
             {
                 "table_name": table_name,
                 "column_name": column_name,
@@ -981,9 +982,9 @@ class SQLConnector:
                 f"from '{current_type}' to '{compatible_sql_type}'."
             )
 
-        alter_column_sql = self.get_column_alter_ddl(
+        alter_column_ddl = self.get_column_alter_ddl(
             table_name=full_table_name,
             column_name=column_name,
             column_type=compatible_sql_type,
         )
-        self.connection.execute(alter_column_sql)
+        self.connection.execute(alter_column_ddl)
