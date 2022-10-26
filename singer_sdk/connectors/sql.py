@@ -917,7 +917,7 @@ class SQLConnector:
 
     @staticmethod
     def get_column_alter_ddl(
-        table_name: str, column_name: str, column_type: str
+        table_name: str, column_name: str, column_type: sqlalchemy.types.TypeEngine
     ) -> sqlalchemy.DDL:
         """Get the alter column DDL statement.
 
