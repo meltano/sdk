@@ -20,7 +20,7 @@ except ImportError:
     raise SystemExit(dedent(message)) from None
 
 package = "singer_sdk"
-python_versions = ["3.10", "3.9", "3.8", "3.7"]
+python_versions = ["3.11", "3.10", "3.9", "3.8", "3.7"]
 main_python_version = "3.10"
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = (

@@ -23,6 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
@@ -37,7 +38,7 @@ license = "Apache 2.0"
 "Youtube" = "https://www.youtube.com/meltano"
 
 [tool.poetry.dependencies]
-python = "<3.11,>=3.7.1"
+python = "<3.12,>=3.7.1"
 backoff = ">=2.0.0,<3.0"
 pendulum = "^2.1.0"
 click = "~=8.0"
