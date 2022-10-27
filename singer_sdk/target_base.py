@@ -1,5 +1,7 @@
 """Target abstract class."""
 
+from __future__ import annotations
+
 import abc
 import copy
 import json
@@ -21,7 +23,7 @@ from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerMessageType, SingerReader
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
-from singer_sdk.sinks import SQLSink
+from singer_sdk.sinks import Sink, SQLSink
 from singer_sdk.streams import SQLStream
 from singer_sdk.tap_base import SQLTap
 
@@ -660,7 +662,7 @@ class SQLTarget(Target):
 
             if discover:
                 # Run in discovery mode (no data ingestion)
-                tap = cls.tap_emulator(config)
+                tap = cls.tap_class(config=config)
                 print(tap.run_discovery())
 
             else:
@@ -669,9 +671,9 @@ class SQLTarget(Target):
 
         return cli
 
-    @classmethod
-    def tap_emulator(cls, config: dict) -> SQLTap:
-        """Return a SQLTap object to emulate Tap capabilities.
+    @classproperty
+    def tap_class(cls) -> type[SQLTap]:
+        """Return a SQLTap class to emulate Tap capabilities.
 
         Args:
             config: The config object to use when initializing the tap.
@@ -681,14 +683,13 @@ class SQLTarget(Target):
             default sink.
         """
 
-        def _clone_class(class_name: str, from_class: type) -> type:
-            """Return a clone of a class without altering the original."""
-            return type(class_name, from_class.__bases__, dict(from_class.__dict__))
+        class TargetStreamClass(SQLStream):
+            connector_class = cls.default_sink_class.connector_class
 
-        stream_class: Type[SQLStream] = _clone_class("StreamEmulator", SQLStream)
-        stream_class.connector_class = cls.default_sink_class.connector_class
+        class TargetTapClass(SQLTap):
 
-        tap_class: Type[SQLTap] = _clone_class("TapEmulator", SQLTap)
-        tap_class.default_stream_class = stream_class
+            name = f"tap-from-{cls.name}"
+            default_stream_class = TargetStreamClass
+            config_jsonschema = cls.config_jsonschema
 
-        return tap_class(config=config)
+        return TargetTapClass
