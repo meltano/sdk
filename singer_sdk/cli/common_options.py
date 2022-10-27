@@ -35,3 +35,9 @@ PLUGIN_FILE_INPUT = click.option(
     help="A path to read messages from instead of from standard in.",
     type=click.File("r"),
 )
+
+PLUGIN_DISCOVERY = click.option(
+    "--discover",
+    is_flag=True,
+    help="Run in discovery mode.",
+)

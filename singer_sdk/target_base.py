@@ -21,7 +21,9 @@ from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerMessageType, SingerReader
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
-from singer_sdk.sinks import Sink
+from singer_sdk.sinks import SQLSink
+from singer_sdk.streams import SQLStream
+from singer_sdk.tap_base import SQLTap
 
 _MAX_PARALLELISM = 8
 
@@ -488,7 +490,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     @classproperty
     def cli(cls) -> Callable:
-        """Execute standard CLI handler for taps.
+        """Execute standard CLI handler for targets.
 
         Returns:
             A callable CLI object.
@@ -569,4 +571,124 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 class SQLTarget(Target):
     """Target implementation for SQL destinations."""
 
-    pass
+    # SQLTarget tightens constraint to type `SQLSink` and non-null.
+    default_sink_class: Type[SQLSink]
+
+    @classproperty
+    def cli(cls) -> Callable:
+        """Execute standard CLI handler for targets.
+
+        The SQLTarget CLI is a hybrid of target and tap, adding support for
+        `--discover`, in addition to the CLI elements shared by other targets.
+
+        Returns:
+            A callable CLI object.
+        """
+
+        @common_options.PLUGIN_VERSION
+        @common_options.PLUGIN_ABOUT
+        @common_options.PLUGIN_ABOUT_FORMAT
+        @common_options.PLUGIN_CONFIG
+        @common_options.PLUGIN_FILE_INPUT
+        @common_options.PLUGIN_DISCOVERY
+        @click.command(
+            help="Execute the Singer target.",
+            context_settings={"help_option_names": ["--help"]},
+        )
+        def cli(
+            version: bool = False,
+            about: bool = False,
+            discover: bool = False,
+            config: Tuple[str, ...] = (),
+            format: str = None,
+            file_input: FileIO = None,
+        ) -> None:
+            """Handle command line execution.
+
+            Args:
+                version: Display the package version.
+                about: Display package metadata and settings.
+                discover: Run in discovery mode.
+                format: Specify output style for `--about`.
+                config: Configuration file location or 'ENV' to use environment
+                    variables. Accepts multiple inputs as a tuple.
+                file_input: Specify a path to an input file to read messages from.
+                    Defaults to standard in if unspecified.
+
+            Raises:
+                FileNotFoundError: If the config file does not exist.
+            """
+            if version:
+                cls.print_version()
+                return
+
+            if not about:
+                cls.print_version(print_fn=cls.logger.info)
+            else:
+                cls.print_about(format=format)
+                return
+
+            validate_config: bool = True
+            if discover:
+                # Don't abort on validation failures
+                validate_config = False
+
+            cls.print_version(print_fn=cls.logger.info)
+
+            parse_env_config = False
+            config_files: List[PurePath] = []
+            for config_path in config:
+                if config_path == "ENV":
+                    # Allow parse from env vars:
+                    parse_env_config = True
+                    continue
+
+                # Validate config file paths before adding to list
+                if not Path(config_path).is_file():
+                    raise FileNotFoundError(
+                        f"Could not locate config file at '{config_path}'."
+                        "Please check that the file exists."
+                    )
+
+                config_files.append(Path(config_path))
+
+            target = cls(  # type: ignore  # Ignore 'type not callable'
+                config=config_files or None,
+                parse_env_config=parse_env_config,
+                validate_config=validate_config,
+            )
+
+            if discover:
+                # Run in discovery mode (no data ingestion)
+                tap = cls.tap_emulator(config)
+                print(tap.run_discovery())
+
+            else:
+                # Process incoming data streams from tap
+                target.listen(file_input)
+
+        return cli
+
+    @classmethod
+    def tap_emulator(cls, config: dict) -> SQLTap:
+        """Return a SQLTap object to emulate Tap capabilities.
+
+        Args:
+            config: The config object to use when initializing the tap.
+
+        Returns:
+            A basic SQLTap object using the default SQLConnector from the target's
+            default sink.
+        """
+
+        def _clone_class(class_name: str, from_class: type) -> type:
+            """Return a clone of a class without altering the original."""
+            return type(class_name, from_class.__bases__, dict(from_class.__dict__))
+
+        stream_class: Type[SQLStream] = _clone_class("StreamEmulator", SQLStream)
+        stream_class.connector_class = cls.default_sink_class.connector_class
+
+        tap_class: Type[SQLTap] = _clone_class("TapEmulator", SQLTap)
+        tap_class.default_stream_class = stream_class
+
+        return tap_class(config=config)

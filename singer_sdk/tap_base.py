@@ -398,11 +398,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         @common_options.PLUGIN_ABOUT
         @common_options.PLUGIN_ABOUT_FORMAT
         @common_options.PLUGIN_CONFIG
-        @click.option(
-            "--discover",
-            is_flag=True,
-            help="Run the tap in discovery mode.",
-        )
+        @common_options.PLUGIN_DISCOVERY
         @click.option(
             "--test",
             is_flag=False,
