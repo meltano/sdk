@@ -675,9 +675,6 @@ class SQLTarget(Target):
     def tap_class(cls) -> type[SQLTap]:
         """Return a SQLTap class to emulate Tap capabilities.
 
-        Args:
-            config: The config object to use when initializing the tap.
-
         Returns:
             A basic SQLTap object using the default SQLConnector from the target's
             default sink.
