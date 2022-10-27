@@ -44,11 +44,11 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     # Default class to use for creating new sink objects.
     # Required if `Target.get_sink_class()` is not defined.
-    default_sink_class: Optional[Type[Sink]] = None
+    default_sink_class: type[Sink] | None = None
 
     def __init__(
         self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
@@ -68,11 +68,11 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             validate_config=validate_config,
         )
 
-        self._latest_state: Dict[str, dict] = {}
-        self._drained_state: Dict[str, dict] = {}
-        self._sinks_active: Dict[str, Sink] = {}
-        self._sinks_to_clear: List[Sink] = []
-        self._max_parallelism: Optional[int] = _MAX_PARALLELISM
+        self._latest_state: dict[str, dict] = {}
+        self._drained_state: dict[str, dict] = {}
+        self._sinks_active: dict[str, Sink] = {}
+        self._sinks_to_clear: list[Sink] = []
+        self._max_parallelism: int | None = _MAX_PARALLELISM
 
         # Approximated for max record age enforcement
         self._last_full_drain_at: float = time.time()
@@ -85,7 +85,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         )
 
     @classproperty
-    def capabilities(self) -> List[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:
         """Get target capabilities.
 
         Returns:
@@ -126,9 +126,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self,
         stream_name: str,
         *,
-        record: Optional[dict] = None,
-        schema: Optional[dict] = None,
-        key_properties: Optional[List[str]] = None,
+        record: dict | None = None,
+        schema: dict | None = None,
+        key_properties: list[str] | None = None,
     ) -> Sink:
         """Return a sink for the given stream name.
 
@@ -174,7 +174,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         return existing_sink
 
-    def get_sink_class(self, stream_name: str) -> Type[Sink]:
+    def get_sink_class(self, stream_name: str) -> type[Sink]:
         """Get sink for a stream.
 
         Developers can override this method to return a custom Sink type depending
@@ -212,7 +212,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     @final
     def add_sink(
-        self, stream_name: str, schema: dict, key_properties: Optional[List[str]] = None
+        self, stream_name: str, schema: dict, key_properties: list[str] | None = None
     ) -> Sink:
         """Create a sink and register it.
 
@@ -465,7 +465,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         sink.process_batch(draining_status)
         sink.mark_drained()
 
-    def _drain_all(self, sink_list: List[Sink], parallelism: int) -> None:
+    def _drain_all(self, sink_list: list[Sink], parallelism: int) -> None:
         if parallelism == 1:
             for sink in sink_list:
                 self.drain_one(sink)
@@ -510,7 +510,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         def cli(
             version: bool = False,
             about: bool = False,
-            config: Tuple[str, ...] = (),
+            config: tuple[str, ...] = (),
             format: str = None,
             file_input: FileIO = None,
         ) -> None:
@@ -543,7 +543,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             cls.print_version(print_fn=cls.logger.info)
 
             parse_env_config = False
-            config_files: List[PurePath] = []
+            config_files: list[PurePath] = []
             for config_path in config:
                 if config_path == "ENV":
                     # Allow parse from env vars:
@@ -574,7 +574,7 @@ class SQLTarget(Target):
     """Target implementation for SQL destinations."""
 
     # SQLTarget tightens constraint to type `SQLSink` and non-null.
-    default_sink_class: Type[SQLSink]
+    default_sink_class: type[SQLSink]
 
     @classproperty
     def cli(cls) -> Callable:
@@ -601,7 +601,7 @@ class SQLTarget(Target):
             version: bool = False,
             about: bool = False,
             discover: bool = False,
-            config: Tuple[str, ...] = (),
+            config: tuple[str, ...] = (),
             format: str = None,
             file_input: FileIO = None,
         ) -> None:
@@ -638,7 +638,7 @@ class SQLTarget(Target):
             cls.print_version(print_fn=cls.logger.info)
 
             parse_env_config = False
-            config_files: List[PurePath] = []
+            config_files: list[PurePath] = []
             for config_path in config:
                 if config_path == "ENV":
                     # Allow parse from env vars:
