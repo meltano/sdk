@@ -223,8 +223,15 @@ def test_sync_sqlite_to_sqlite(
     )
     orig_stdout.seek(0)
     tapped_config = dict(sqlite_sample_target.config)
-    catalog = _get_tap_catalog(SQLiteTap, config=tapped_config, select_all=True)
-    tapped_target = SQLiteTap(config=tapped_config, catalog=catalog)
+    tap_catalog = _get_tap_catalog(SQLiteTap, config=tapped_config, select_all=True)
+    target_catalog = _get_tap_catalog(
+        sqlite_sample_target.tap_class,
+        config=dict(sqlite_sample_target.config),
+        select_all=True,
+    )
+    # emulated_tap = sqlite_sample_target.tap_class(config=sqlite_sample_target.config)
+    assert tap_catalog == target_catalog, "Target catalog should match the tap catalog."
+    tapped_target = SQLiteTap(config=tapped_config, catalog=tap_catalog)
     new_stdout, _ = tap_sync_test(tapped_target)
 
     orig_stdout.seek(0)
@@ -240,17 +247,17 @@ def test_sync_sqlite_to_sqlite(
     ):
         try:
             orig_json = json.loads(orig_out)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as ex:
             raise RuntimeError(
                 f"Could not parse JSON in orig line {line_num}: {orig_out}"
-            )
+            ) from ex
 
         try:
             tapped_json = json.loads(new_out)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as ex:
             raise RuntimeError(
                 f"Could not parse JSON in new line {line_num}: {new_out}"
-            )
+            ) from ex
 
         assert (
             tapped_json["type"] == orig_json["type"]
