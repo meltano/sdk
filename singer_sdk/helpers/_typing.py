@@ -216,7 +216,8 @@ def conform_record_data_types(  # noqa: C901
     """
     rec, unmapped_properties = _conform_record_data_types(record, schema, None)
 
-    _warn_unmapped_properties(stream_name, tuple(unmapped_properties), logger)
+    if len(unmapped_properties) > 0:
+        _warn_unmapped_properties(stream_name, tuple(unmapped_properties), logger)
 
     return rec
 
