@@ -684,9 +684,12 @@ class SQLTarget(Target):
         """
 
         class TargetStreamClass(SQLStream):
+            """Custom stream class, reusing target's connector."""
+
             connector_class = cls.default_sink_class.connector_class
 
         class TargetTapClass(SQLTap):
+            """Custom tap class, reusing target config."""
 
             name = f"tap-from-{cls.name}"
             default_stream_class = TargetStreamClass
