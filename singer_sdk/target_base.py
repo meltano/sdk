@@ -9,7 +9,7 @@ import sys
 import time
 from io import FileIO
 from pathlib import Path, PurePath
-from typing import IO, Callable, Counter, Dict, List, Optional, Tuple, Type, Union
+from typing import IO, Callable, Counter
 
 import click
 from joblib import Parallel, delayed, parallel_backend
