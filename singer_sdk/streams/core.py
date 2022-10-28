@@ -695,8 +695,11 @@ class Stream(metaclass=abc.ABCMeta):
     ) -> None:
         """Update state of stream or partition with data from the provided record.
 
-        Raises InvalidStreamSortException is self.is_sorted = True and unsorted data is
-        detected.
+        Raises `InvalidStreamSortException` is `self.is_sorted = True` and unsorted data
+        is detected.
+
+        Note: The default implementation is a no-op if `self.replication_method` is not
+        'INCREMENTAL'.
 
         Args:
             latest_record: TODO
@@ -705,12 +708,9 @@ class Stream(metaclass=abc.ABCMeta):
         Raises:
             ValueError: TODO
         """
-        state_dict = self.get_context_state(context)
         if latest_record:
-            if self.replication_method in [
-                REPLICATION_INCREMENTAL,
-                REPLICATION_LOG_BASED,
-            ]:
+            if self.replication_method == REPLICATION_INCREMENTAL:
+                state_dict = self.get_context_state(context)
                 if not self.replication_key:
                     raise ValueError(
                         f"Could not detect replication key for '{self.name}' stream"
