@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.13.0 (2022-10-24)
+
+### ✨ New
+
+- [#1098](https://github.com/meltano/sdk/issues/1098) Add JSON Schema `Property` helpers for `allowed_values` (`enum`) and `examples`
+- [#1096](https://github.com/meltano/sdk/issues/1096) Add secrets support for tap and target config, via `Property(..., secret=True)`
+- [#1039](https://github.com/meltano/sdk/issues/1039) Support conforming singer property names to target identifier constraints in SQL sinks
+
+### 🐛 Fixes
+
+- [#1093](https://github.com/meltano/sdk/issues/1093) Add environment support to the cookie cutter for `meltano.yml`
+- [#1036](https://github.com/meltano/sdk/issues/1036) Create schema and table on `add_sink`
+
 ## v0.12.0 (2022-10-17)
 
 ### ✨ New

@@ -38,6 +38,7 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
             "auth_token",
             th.StringType,
             required=True,
+            secret=True,  # Flag config as protected.
             description="The token to authenticate against the API service"
         ),
         th.Property(

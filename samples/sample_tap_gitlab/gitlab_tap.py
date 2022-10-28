@@ -34,7 +34,7 @@ class SampleTapGitlab(Tap):
 
     name: str = "sample-tap-gitlab"
     config_jsonschema = PropertiesList(
-        Property("auth_token", StringType, required=True),
+        Property("auth_token", StringType, required=True, secret=True),
         Property("project_ids", ArrayType(StringType), required=True),
         Property("group_ids", ArrayType(StringType), required=True),
         Property("start_date", DateTimeType, required=True),
