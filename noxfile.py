@@ -58,7 +58,6 @@ def tests(session: Session) -> None:
         "pytest",
         "freezegun",
         "pandas",
-        # "pyarrow",
         "requests-mock",
         # Cookiecutter tests
         "black",
@@ -70,6 +69,11 @@ def tests(session: Session) -> None:
         "flake8-docstrings",
         "mypy",
     )
+    # temp fix until pyarrow is supported on python 3.11
+    if sys.version_info < (3, 11):
+        session.install(
+            "pyarrow",
+        )
 
     try:
         session.run(
