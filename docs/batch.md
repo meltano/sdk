@@ -14,10 +14,11 @@ This library's implementation of the `BATCH` message is used to send records in 
 - when the tap outputs records at a much higher rate than the target can consume them, creating backpressure
 - when the source system can directly export data in bulk (e.g. a database dump)
 
-Currently only a local filesystem is supported, but other filesystems like AWS S3, FTP, etc. could be supported in the future.
+Currently only a local filesystem or AWS S3 are supported, but other filesystems like FTP, etc. could be supported in the future.
 
 ## The `BATCH` Message
 
+Local
 ```json
 {
   "type": "BATCH",
@@ -33,6 +34,22 @@ Currently only a local filesystem is supported, but other filesystems like AWS S
 }
 ```
 
+AWS S3
+```json
+{
+  "type": "BATCH",
+  "stream": "users",
+  "encoding": {
+    "format": "jsonl",
+    "compression": "gzip"
+  },
+  "manifest": [
+    "s3://path/to/batch/file/1",
+    "s3://path/to/batch/file/2"
+  ]
+}
+```
+
 ### `encoding`
 
 The `encoding` field is used to specify the format and compression of the batch files. Currently only `jsonl` and `gzip` are supported, respectively.
@@ -43,7 +60,7 @@ The `manifest` field is used to specify the paths to the batch files. The paths 
 
 ## Batch configuration
 
-When local storage is used, targets do no require special configuration to process `BATCH` messages.
+When local storage is used, targets do no require special configuration to process `BATCH` messages. Use of AWS S3 assumes S3/AWS credentials are already discoverable via the underlying S3 libraries (`AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_DEFAULT_REGION`)
 
 Taps may be configured to specify a root storage `root` directory, file path `prefix`, and `encoding` for batch files using a configuration like the below:
 
