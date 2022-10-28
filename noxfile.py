@@ -70,7 +70,7 @@ def tests(session: Session) -> None:
         "mypy",
     )
     # temp fix until pyarrow is supported on python 3.11
-    if sys.version_info < (3, 11):
+    if session.python != "3.11":
         session.install(
             "pyarrow",
         )
