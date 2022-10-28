@@ -58,7 +58,7 @@ def tests(session: Session) -> None:
         "pytest",
         "freezegun",
         "pandas",
-        "pyarrow",
+        # "pyarrow",
         "requests-mock",
         # Cookiecutter tests
         "black",
