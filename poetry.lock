@@ -1210,7 +1210,7 @@ python-versions = "*"
 
 [[package]]
 name = "types-pytz"
-version = "2022.5.0.0"
+version = "2022.6.0.1"
 description = "Typing stubs for pytz"
 category = "dev"
 optional = false
@@ -1334,7 +1334,7 @@ docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser", "sphin
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.11,>=3.7.1"
-content-hash = "a608dd90da721ed8d32a79efe20abc8005fc464bfa2469fa3195e283f6638565"
+content-hash = "d244877f9592117417176ed199822349994677d388185dc4068f1fd383e1f0c4"
 
 [metadata.files]
 alabaster = [
@@ -2262,8 +2262,8 @@ types-python-dateutil = [
     {file = "types_python_dateutil-2.8.19.2-py3-none-any.whl", hash = "sha256:3f4dbe465e7e0c6581db11fd7a4855d1355b78712b3f292bd399cd332247e9c0"},
 ]
 types-pytz = [
-    {file = "types-pytz-2022.5.0.0.tar.gz", hash = "sha256:0c163b15d3e598e6cc7074a99ca9ec72b25dc1b446acc133b827667af0b7b09a"},
-    {file = "types_pytz-2022.5.0.0-py3-none-any.whl", hash = "sha256:a8e1fe6a1b270fbfaf2553b20ad0f1316707cc320e596da903bb17d7373fed2d"},
+    {file = "types-pytz-2022.6.0.1.tar.gz", hash = "sha256:d078196374d1277e9f9984d49373ea043cf2c64d5d5c491fbc86c258557bd46f"},
+    {file = "types_pytz-2022.6.0.1-py3-none-any.whl", hash = "sha256:bea605ce5d5a5d52a8e1afd7656c9b42476e18a0f888de6be91587355313ddf4"},
 ]
 types-pyyaml = [
     {file = "types-PyYAML-6.0.12.1.tar.gz", hash = "sha256:70ccaafcf3fb404d57bffc1529fdd86a13e8b4f2cf9fc3ee81a6408ce0ad59d2"},
