@@ -20,7 +20,7 @@ except ImportError:
     raise SystemExit(dedent(message)) from None
 
 package = "singer_sdk"
-python_versions = ["3.10", "3.9", "3.8", "3.7"]
+python_versions = ["3.11", "3.10", "3.9", "3.8", "3.7"]
 main_python_version = "3.10"
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = (
@@ -58,7 +58,6 @@ def tests(session: Session) -> None:
         "pytest",
         "freezegun",
         "pandas",
-        "pyarrow",
         "requests-mock",
         # Cookiecutter tests
         "black",
@@ -70,6 +69,11 @@ def tests(session: Session) -> None:
         "flake8-docstrings",
         "mypy",
     )
+    # temp fix until pyarrow is supported on python 3.11
+    if session.python != "3.11":
+        session.install(
+            "pyarrow",
+        )
 
     try:
         session.run(
