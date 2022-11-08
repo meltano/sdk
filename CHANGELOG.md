@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.13.1 (2022-11-08)
+
+### 🐛 Fixes
+
+- [#1126](https://github.com/meltano/sdk/issues/1126) Resolve failure in `_increment_stream_state()` for cases when `replication_method` is `LOG_BASED`
+- [#1111](https://github.com/meltano/sdk/issues/1111) Push _MAX_RECORDS_LIMIT down into SQL
+
+### ⚙️ Under the Hood
+
+- [#1091](https://github.com/meltano/sdk/issues/1091) Move SQLConnector into a separate module, for use by both SQLStream and SQLSink
+
+### 📚 Documentation Improvements
+
+- [#1133](https://github.com/meltano/sdk/issues/1133) Fix duplicate `Known Limitations` header
+- [#1118](https://github.com/meltano/sdk/issues/1118) Document `BATCH` limitations
+
 ## v0.13.0 (2022-10-24)
 
 ### ✨ New
