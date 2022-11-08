@@ -1,10 +1,12 @@
 """Tap abstract class."""
 
+from __future__ import annotations
+
 import abc
 import json
 from enum import Enum
 from pathlib import Path, PurePath
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
+from typing import Any, Callable, cast
 
 import click
 
@@ -47,9 +49,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
-        catalog: Union[PurePath, str, dict, Catalog, None] = None,
-        state: Union[PurePath, str, dict, None] = None,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
+        catalog: PurePath | str | dict | Catalog | None = None,
+        state: PurePath | str | dict | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
@@ -72,10 +74,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         )
 
         # Declare private members
-        self._streams: Optional[Dict[str, Stream]] = None
-        self._input_catalog: Optional[Catalog] = None
-        self._state: Dict[str, Stream] = {}
-        self._catalog: Optional[Catalog] = None  # Tap's working catalog
+        self._streams: dict[str, Stream] | None = None
+        self._input_catalog: Catalog | None = None
+        self._state: dict[str, Stream] = {}
+        self._catalog: Catalog | None = None  # Tap's working catalog
 
         # Process input catalog
         if isinstance(catalog, Catalog):
@@ -105,7 +107,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Class properties
 
     @property
-    def streams(self) -> Dict[str, Stream]:
+    def streams(self) -> dict[str, Stream]:
         """Get streams discovered or catalogued for this tap.
 
         Results will be cached after first execution.
@@ -138,7 +140,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         return self._state
 
     @property
-    def input_catalog(self) -> Optional[Catalog]:
+    def input_catalog(self) -> Catalog | None:
         """Get the catalog passed to the tap.
 
         Returns:
@@ -159,7 +161,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         return self._catalog
 
     @classproperty
-    def capabilities(self) -> List[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:
         """Get tap capabilities.
 
         Returns:
@@ -249,7 +251,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             for stream in self.streams.values()
         )
 
-    def discover_streams(self) -> List[Stream]:
+    def discover_streams(self) -> list[Stream]:
         """Initialize all available streams and return them as a list.
 
         Return:
@@ -265,7 +267,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         )
 
     @final
-    def load_streams(self) -> List[Stream]:
+    def load_streams(self) -> list[Stream]:
         """Load streams from discovery and initialize DAG.
 
         Return the output of `self.discover_streams()` to enumerate
@@ -277,7 +279,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         # Build the parent-child dependency DAG
 
         # Index streams by type
-        streams_by_type: Dict[Type[Stream], List[Stream]] = {}
+        streams_by_type: dict[type[Stream], list[Stream]] = {}
         for stream in self.discover_streams():
             stream_type = type(stream)
             if stream_type not in streams_by_type:
@@ -304,7 +306,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     # Bookmarks and state management
 
-    def load_state(self, state: Dict[str, Any]) -> None:
+    def load_state(self, state: dict[str, Any]) -> None:
         """Merge or initialize stream state with the provided state dictionary input.
 
         Override this method to perform validation and backwards-compatibility patches
@@ -362,7 +364,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Sync all streams."""
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
-        stream: "Stream"
+        stream: Stream
         for stream in self.streams.values():
             if not stream.selected and not stream.has_selected_descendents:
                 self.logger.info(f"Skipping deselected stream '{stream.name}'.")
@@ -433,10 +435,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             about: bool = False,
             discover: bool = False,
             test: CliTestOptionValue = CliTestOptionValue.Disabled,
-            config: Tuple[str, ...] = (),
-            state: str = None,
-            catalog: str = None,
-            format: str = None,
+            config: tuple[str, ...] = (),
+            state: str | None = None,
+            catalog: str | None = None,
+            format: str | None = None,
         ) -> None:
             """Handle command line execution.
 
@@ -470,7 +472,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 validate_config = False
 
             parse_env_config = False
-            config_files: List[PurePath] = []
+            config_files: list[PurePath] = []
             for config_path in config:
                 if config_path == "ENV":
                     # Allow parse from env vars:
@@ -512,13 +514,13 @@ class SQLTap(Tap):
     """A specialized Tap for extracting from SQL streams."""
 
     # Stream class used to initialize new SQL streams from their catalog declarations.
-    default_stream_class: Type[SQLStream]
+    default_stream_class: type[SQLStream]
 
     def __init__(
         self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
-        catalog: Union[PurePath, str, dict, None] = None,
-        state: Union[PurePath, str, dict, None] = None,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
+        catalog: PurePath | str | dict | None = None,
+        state: PurePath | str | dict | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
@@ -536,7 +538,7 @@ class SQLTap(Tap):
                 variables.
             validate_config: True to require validation of config settings.
         """
-        self._catalog_dict: Optional[dict] = None
+        self._catalog_dict: dict | None = None
         super().__init__(
             config=config,
             catalog=catalog,
@@ -560,19 +562,19 @@ class SQLTap(Tap):
 
         connector = self.default_stream_class.connector_class(dict(self.config))
 
-        result: Dict[str, List[dict]] = {"streams": []}
+        result: dict[str, list[dict]] = {"streams": []}
         result["streams"].extend(connector.discover_catalog_entries())
 
         self._catalog_dict = result
         return self._catalog_dict
 
-    def discover_streams(self) -> List[Stream]:
+    def discover_streams(self) -> list[Stream]:
         """Initialize all available streams and return them as a list.
 
         Returns:
             List of discovered Stream objects.
         """
-        result: List[Stream] = []
+        result: list[Stream] = []
         for catalog_entry in self.catalog_dict["streams"]:
             result.append(self.default_stream_class(self, catalog_entry))
 
