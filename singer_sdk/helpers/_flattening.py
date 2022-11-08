@@ -1,11 +1,13 @@
 """Internal helper library for record flatteting functions."""
 
+from __future__ import annotations
+
 import collections
 import itertools
 import json
 import re
 from copy import deepcopy
-from typing import Any, List, Mapping, MutableMapping, NamedTuple, Optional, Tuple
+from typing import Any, Mapping, MutableMapping, NamedTuple
 
 import inflection
 
@@ -22,7 +24,7 @@ class FlatteningOptions(NamedTuple):
 
 def get_flattening_options(
     plugin_config: Mapping,
-) -> Optional[FlatteningOptions]:
+) -> FlatteningOptions | None:
     """Get flattening options, if flattening is enabled.
 
     Args:
@@ -37,7 +39,7 @@ def get_flattening_options(
     return None
 
 
-def flatten_key(key_name: str, parent_keys: List[str], separator: str = "__") -> str:
+def flatten_key(key_name: str, parent_keys: list[str], separator: str = "__") -> str:
     """Concatenate `key_name` with its `parent_keys` using `separator`.
 
     Args:
@@ -206,7 +208,7 @@ def flatten_schema(
 
 def _flatten_schema(
     schema_node: dict,
-    parent_keys: List[str] = None,
+    parent_keys: list[str] | None = None,
     separator: str = "__",
     level: int = 0,
     max_level: int = 0,
@@ -226,7 +228,7 @@ def _flatten_schema(
     if parent_keys is None:
         parent_keys = []
 
-    items: List[Tuple[str, dict]] = []
+    items: list[tuple[str, dict]] = []
     if "properties" not in schema_node:
         return {}
 
@@ -297,8 +299,8 @@ def flatten_record(
 
 def _flatten_record(
     record_node: MutableMapping[Any, Any],
-    flattened_schema: dict = None,
-    parent_key: List[str] = None,
+    flattened_schema: dict | None = None,
+    parent_key: list[str] | None = None,
     separator: str = "__",
     level: int = 0,
     max_level: int = 0,
@@ -322,7 +324,7 @@ def _flatten_record(
     if parent_key is None:
         parent_key = []
 
-    items: List[Tuple[str, Any]] = []
+    items: list[tuple[str, Any]] = []
     for k, v in record_node.items():
         new_key = flatten_key(k, parent_key, separator)
         if isinstance(v, collections.abc.MutableMapping) and level < max_level:
