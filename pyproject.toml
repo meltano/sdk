@@ -89,7 +89,7 @@ debugging = [
 commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
 pytest = "^7.2.0"
 xdoctest = "^1.1.0"
-mypy = "^0.982"
+mypy = "^0.990"
 cookiecutter = "^2.1.1"
 PyYAML = "^6.0"
 pyarrow = {version = "^10.0.0", optional = true, python = "<3.11"}
