@@ -16,6 +16,7 @@ from typing import Any, Generator, Iterable, Iterator, Mapping, TypeVar, cast
 from uuid import uuid4
 
 import pendulum
+import pyarrow as pa
 
 import singer_sdk._singerlib as singer
 from singer_sdk import metrics
@@ -23,6 +24,7 @@ from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitExc
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
+    BatchFileFormat,
     SDKBatchMessage,
 )
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
@@ -1223,7 +1225,17 @@ class Stream(metaclass=abc.ABCMeta):
 
         Yields:
             A tuple of (encoding, manifest) for each batch.
+
+        Raises:
+            NotImplementedError: If the batch encoding format is unsupported.
         """
+        if batch_config.encoding.format not in [
+            BatchFileFormat.PARQUET,
+            BatchFileFormat.JSONL,
+        ]:
+            raise NotImplementedError(
+                f"Unsupported batch encoding format: {batch_config.encoding.format}"
+            )
         sync_id = f"{self.tap_name}--{self.name}-{uuid4()}"
         prefix = batch_config.storage.prefix or ""
 
@@ -1234,17 +1246,44 @@ class Stream(metaclass=abc.ABCMeta):
             ),
             start=1,
         ):
-            filename = f"{prefix}{sync_id}-{i}.json.gz"
-            with batch_config.storage.fs() as fs:
-                with fs.open(filename, "wb") as f:
-                    # TODO: Determine compression from config.
-                    with gzip.GzipFile(fileobj=f, mode="wb") as gz:
-                        gz.writelines(
-                            (json.dumps(record) + "\n").encode() for record in chunk
-                        )
-                file_url = fs.geturl(filename)
-
+            if batch_config.encoding.format == BatchFileFormat.PARQUET:
+                filename = f"{prefix}{sync_id}-{i}.parquet"
+            else:
+                filename = f"{prefix}{sync_id}-{i}.json"
+            if batch_config.encoding.compression == "gzip":
+                filename = f"{filename}.gz"
+            file_url = self._write_batch_file(chunk, filename, batch_config)
             yield batch_config.encoding, [file_url]
+
+    def _write_batch_file(
+        self,
+        chunk: Iterator[dict],
+        filename: str,
+        batch_config: BatchConfig,
+    ) -> str:
+        with batch_config.storage.fs() as fs:
+            with fs.open(filename, "wb") as f:
+                if batch_config.encoding.compression == "gzip":
+                    if batch_config.encoding.format == BatchFileFormat.PARQUET:
+                        with gzip.GzipFile(fileobj=f, mode="wb") as gz:
+                            gz.writelines(
+                                pa.RecordBatch.from_pydict(record).encode()
+                                for record in chunk
+                            )
+                    else:
+                        with gzip.GzipFile(fileobj=f, mode="wb") as gz:
+                            gz.writelines(
+                                (json.dumps(record) + "\n").encode() for record in chunk
+                            )
+                elif batch_config.encoding.compression:
+                    raise NotImplementedError(
+                        f"Unsupported batch compression format: "
+                        f"{batch_config.encoding.compression}"
+                    )
+                else:
+                    f.writelines(record for record in chunk)
+            file_url = fs.geturl(filename)
+        return file_url
 
     def post_process(self, row: dict, context: dict | None = None) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
