@@ -630,10 +630,10 @@ class SQLConnector:
         if not self.allow_column_add:
             raise NotImplementedError("Adding columns is not supported.")
 
-        column_create_ddl = self.get_column_create_ddl(
+        column_add_ddl = self.get_column_add_ddl(
             table_name=full_table_name, column_name=column_name, column_type=sql_type
         )
-        self.connection.execute(column_create_ddl)
+        self.connection.execute(column_add_ddl)
 
     def prepare_schema(self, schema_name: str) -> None:
         """Create the target database schema.
@@ -861,7 +861,7 @@ class SQLConnector:
         return cast(sqlalchemy.types.TypeEngine, column.type)
 
     @staticmethod
-    def get_column_create_ddl(
+    def get_column_add_ddl(
         table_name: str, column_name: str, column_type: sqlalchemy.types.TypeEngine
     ) -> sqlalchemy.DDL:
         """Get the create column DDL statement.
@@ -883,10 +883,10 @@ class SQLConnector:
             )
         )
         return sqlalchemy.DDL(
-            "ALTER TABLE %(table)s ADD COLUMN %(create_column)s",
+            "ALTER TABLE %(table_name)s ADD COLUMN %(create_column_clause)s",
             {
-                "table": table_name,
-                "create_column": create_column_clause,
+                "table_name": table_name,
+                "create_column_clause": create_column_clause,
             },
         )
 
