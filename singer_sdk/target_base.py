@@ -589,7 +589,7 @@ class SQLTarget(Target):
         return sql_target_capabilities
 
     @classmethod
-    def append_builtin_config(self, config_jsonschema: dict) -> None:  # noqa: ANN102
+    def append_builtin_config(cls: type[SQLTarget], config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
         To customize or disable this behavior, developers may either override this class
@@ -611,7 +611,7 @@ class SQLTarget(Target):
                 if k not in target_jsonschema["properties"]:
                     target_jsonschema["properties"][k] = v
 
-        capabilities = self.capabilities
+        capabilities = cls.capabilities
 
         if TargetCapabilities.TARGET_SCHEMA in capabilities:
             _merge_missing(TARGET_SCHEMA_CONFIG, config_jsonschema)
