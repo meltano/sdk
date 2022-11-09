@@ -82,8 +82,6 @@ class SQLSink(BatchSink):
         Returns:
             The target schema name.
         """
-        # Get the current SQL Dialect being used
-        target_sqla_dialect = self.connection.engine.dialect.name
         # Look for a default_target_scheme in the configuraion fle
         default_target_schema = self.config.get("default_target_schema", None)
         parts = self.stream_name.split("-")
@@ -99,14 +97,7 @@ class SQLSink(BatchSink):
             # Stream name is a two-part or three-part identifier.
             # Use the second-to-last part as the schema name.
             stream_schema = self.conform_name(parts[-2], "schema")
-
-            # MS SQL Server has a public database role so the name is reserved
-            # and it can not be created as a schema.  To avoid this common error
-            # we convert "public" to "dbo" if the target dialet is mssql
-            if target_sqla_dialect == "mssql" and stream_schema == "public":
-                return "dbo"
-            else:
-                return stream_schema
+            return stream_schema
 
         # Schema name not detected.
         return None
