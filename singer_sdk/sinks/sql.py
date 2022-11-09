@@ -83,7 +83,7 @@ class SQLSink(BatchSink):
             The target schema name.
         """
         # Look for a default_target_scheme in the configuraion fle
-        default_target_schema = self.config.get("default_target_schema", None)
+        default_target_schema: str = self.config.get("default_target_schema", None)
         parts = self.stream_name.split("-")
 
         # 1) When default_target_scheme is in the configuration use it
