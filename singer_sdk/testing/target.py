@@ -36,7 +36,7 @@ class StandardSqlTargetTests:
     """
 
     def test_record_before_schema(self, Target, config):
-        test_stream = "record_before_schema.stream"
+        test_stream = "record_before_schema.singer"
         target = Target(config)
         stream = load_stream(test_stream)
 
@@ -45,7 +45,7 @@ class StandardSqlTargetTests:
         # assert "encountered before a corresponding schema" in str(excinfo.value)
 
     def test_invalid_schema(self, Target, config):
-        test_stream = "invalid_schema.stream"
+        test_stream = "invalid_schema.singer"
         target = Target(config)
         stream = load_stream(test_stream)
 
@@ -54,7 +54,7 @@ class StandardSqlTargetTests:
         assert "Not supported schema" in str(excinfo.value)
 
     def test_record_missing_key_property(self, Target, config, sqlalchemy_connection):
-        test_stream = "record_missing_key_property.stream"
+        test_stream = "record_missing_key_property.singer"
         target = Target(config)
         stream = load_stream(test_stream)
 
@@ -69,7 +69,7 @@ class StandardSqlTargetTests:
     def test_record_missing_required_property(
         self, Target, config, sqlalchemy_connection
     ):
-        test_stream = "record_missing_required_property.stream"
+        test_stream = "record_missing_required_property.singer"
         target = Target(config)
         stream = load_stream(test_stream)
 
@@ -90,7 +90,7 @@ class StandardSqlTargetTests:
             "total_records": {"test_camelcase": 2},
         }
 
-        test_stream = "camelcase.stream"
+        test_stream = "camelcase.singer"
 
         self.integration_test(
             Target,
@@ -122,7 +122,7 @@ class StandardSqlTargetTests:
             "total_records": {"test_special_chars_in_attributes": 1},
         }
 
-        test_stream = "special_chars_in_attributes.stream"
+        test_stream = "special_chars_in_attributes.singer"
 
         self.integration_test(
             Target, config, sqlalchemy_connection, expected_results, test_stream
@@ -142,7 +142,7 @@ class StandardSqlTargetTests:
             "total_records": {"test_optional_attributes": 4},
         }
 
-        test_stream = "optional_attributes.stream"
+        test_stream = "optional_attributes.singer"
 
         self.integration_test(
             Target, config, sqlalchemy_connection, expected_results, test_stream
@@ -171,7 +171,7 @@ class StandardSqlTargetTests:
             },
         }
 
-        test_stream = "schema_no_properties.stream"
+        test_stream = "schema_no_properties.singer"
 
         self.integration_test(
             Target,
@@ -223,7 +223,7 @@ class StandardSqlTargetTests:
             "total_records": {"test_schema_updates": 6},
         }
 
-        test_stream = "schema_updates.stream"
+        test_stream = "schema_updates.singer"
 
         self.integration_test(
             Target, config, sqlalchemy_connection, expected_results, test_stream
@@ -258,7 +258,7 @@ class StandardSqlTargetTests:
             },
         }
 
-        test_stream = "multiple_state_messages.stream"
+        test_stream = "multiple_state_messages.singer"
 
         updated_config = {**config, "batch_size": 3}
         self.integration_test(
@@ -301,7 +301,7 @@ class StandardSqlTargetTests:
             },
         }
 
-        test_stream = "user_location_data.stream"
+        test_stream = "user_location_data.singer"
 
         # We are not dropping the schema after the first integration test
         #  in order to also test UPSERTing records to SQLite
@@ -327,7 +327,7 @@ class StandardSqlTargetTests:
             "test_locations": 5,
             "test_user_in_location": 5,
         }
-        test_stream = "user_location_upsert_data.stream"
+        test_stream = "user_location_upsert_data.singer"
 
         self.integration_test(
             Target,
@@ -352,7 +352,7 @@ class StandardSqlTargetTests:
             "total_records": {"test_no_pk": 3},
         }
 
-        test_stream = "no_primary_keys.stream"
+        test_stream = "no_primary_keys.singer"
 
         # We are not dropping the schema after the first integration test
         #  in order to also test APPENDING records when no PK is defined
@@ -371,7 +371,7 @@ class StandardSqlTargetTests:
         expected_results["state"] = {"test_no_pk": 5}
         expected_results["total_records"] = {"test_no_pk": 8}
 
-        test_stream = "no_primary_keys_append.stream"
+        test_stream = "no_primary_keys_append.singer"
 
         self.integration_test(
             Target,
@@ -391,7 +391,7 @@ class StandardSqlTargetTests:
             "total_records": {"test_duplicate_records": 2},
         }
 
-        test_stream = "duplicate_records.stream"
+        test_stream = "duplicate_records.singer"
 
         self.integration_test(
             Target, config, sqlalchemy_connection, expected_results, test_stream
@@ -406,7 +406,7 @@ class StandardSqlTargetTests:
             "total_records": {"test_carts": 4},
         }
 
-        test_stream = "array_data.stream"
+        test_stream = "array_data.singer"
 
         self.integration_test(
             Target, config, sqlalchemy_connection, expected_results, test_stream
@@ -441,7 +441,7 @@ class StandardSqlTargetTests:
             },
         }
 
-        test_stream = "encoded_strings.stream"
+        test_stream = "encoded_strings.singer"
 
         self.integration_test(
             Target, config, sqlalchemy_connection, expected_results, test_stream
