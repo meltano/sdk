@@ -577,13 +577,13 @@ class SQLTarget(Target):
     """Target implementation for SQL destinations."""
 
     @classproperty
-    def capabilities(self) -> List[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:
         """Get target capabilities.
 
         Returns:
             A list of capabilities supported by this target.
         """
-        sql_target_capabilities: List[CapabilitiesEnum] = super().capabilities
+        sql_target_capabilities: list[CapabilitiesEnum] = super().capabilities
         sql_target_capabilities.extend([TargetCapabilities.TARGET_SCHEMA])
 
         return sql_target_capabilities
