@@ -586,7 +586,8 @@ class SQLTarget(Target):
 
         return sql_target_capabilities
 
-    def append_builtin_config(self, config_jsonschema: dict) -> None:
+    @classmethod
+    def append_builtin_config(self, config_jsonschema: dict) -> None:  # noqa: ANN102
         """Appends built-in config to `config_jsonschema` if not already set.
 
         To customize or disable this behavior, developers may either override this class
