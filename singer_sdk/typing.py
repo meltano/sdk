@@ -359,7 +359,7 @@ class Property(JSONTypeHelper, Generic[W]):
         name: str,
         wrapped: W | type[W],
         required: bool = False,
-        default: _JsonValue = None,
+        default: _JsonValue | None = None,
         description: str | None = None,
         secret: bool | None = False,
         allowed_values: list[Any] | None = None,

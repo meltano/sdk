@@ -630,21 +630,10 @@ class SQLConnector:
         if not self.allow_column_add:
             raise NotImplementedError("Adding columns is not supported.")
 
-        create_column_clause = sqlalchemy.schema.CreateColumn(
-            sqlalchemy.Column(
-                column_name,
-                sql_type,
-            )
+        column_add_ddl = self.get_column_add_ddl(
+            table_name=full_table_name, column_name=column_name, column_type=sql_type
         )
-        self.connection.execute(
-            sqlalchemy.DDL(
-                "ALTER TABLE %(table)s ADD COLUMN %(create_column)s",
-                {
-                    "table": full_table_name,
-                    "create_column": create_column_clause,
-                },
-            )
-        )
+        self.connection.execute(column_add_ddl)
 
     def prepare_schema(self, schema_name: str) -> None:
         """Create the target database schema.
@@ -729,10 +718,10 @@ class SQLConnector:
         if not self.allow_column_rename:
             raise NotImplementedError("Renaming columns is not supported.")
 
-        self.connection.execute(
-            f"ALTER TABLE {full_table_name} "
-            f'RENAME COLUMN "{old_name}" to "{new_name}"'
+        column_rename_ddl = self.get_column_rename_ddl(
+            table_name=full_table_name, column_name=old_name, new_column_name=new_name
         )
+        self.connection.execute(column_rename_ddl)
 
     def merge_sql_types(
         self, sql_types: list[sqlalchemy.types.TypeEngine]
@@ -871,6 +860,87 @@ class SQLConnector:
 
         return cast(sqlalchemy.types.TypeEngine, column.type)
 
+    @staticmethod
+    def get_column_add_ddl(
+        table_name: str, column_name: str, column_type: sqlalchemy.types.TypeEngine
+    ) -> sqlalchemy.DDL:
+        """Get the create column DDL statement.
+
+        Override this if your database uses a different syntax for creating columns.
+
+        Args:
+            table_name: Fully qualified table name of column to alter.
+            column_name: Column name to create.
+            column_type: New column sqlalchemy type.
+
+        Returns:
+            A sqlalchemy DDL instance.
+        """
+        create_column_clause = sqlalchemy.schema.CreateColumn(
+            sqlalchemy.Column(
+                column_name,
+                column_type,
+            )
+        )
+        return sqlalchemy.DDL(
+            "ALTER TABLE %(table_name)s ADD COLUMN %(create_column_clause)s",
+            {
+                "table_name": table_name,
+                "create_column_clause": create_column_clause,
+            },
+        )
+
+    @staticmethod
+    def get_column_rename_ddl(
+        table_name: str, column_name: str, new_column_name: str
+    ) -> sqlalchemy.DDL:
+        """Get the create column DDL statement.
+
+        Override this if your database uses a different syntax for renaming columns.
+
+        Args:
+            table_name: Fully qualified table name of column to alter.
+            column_name: Existing column name.
+            new_column_name: New column name.
+
+        Returns:
+            A sqlalchemy DDL instance.
+        """
+        return sqlalchemy.DDL(
+            "ALTER TABLE %(table_name)s "
+            "RENAME COLUMN %(column_name)s to %(new_column_name)s",
+            {
+                "table_name": table_name,
+                "column_name": column_name,
+                "new_column_name": new_column_name,
+            },
+        )
+
+    @staticmethod
+    def get_column_alter_ddl(
+        table_name: str, column_name: str, column_type: sqlalchemy.types.TypeEngine
+    ) -> sqlalchemy.DDL:
+        """Get the alter column DDL statement.
+
+        Override this if your database uses a different syntax for altering columns.
+
+        Args:
+            table_name: Fully qualified table name of column to alter.
+            column_name: Column name to alter.
+            column_type: New column type string.
+
+        Returns:
+            A sqlalchemy DDL instance.
+        """
+        return sqlalchemy.DDL(
+            "ALTER TABLE %(table_name)s ALTER COLUMN %(column_name)s (%(column_type)s)",
+            {
+                "table_name": table_name,
+                "column_name": column_name,
+                "column_type": column_type,
+            },
+        )
+
     def _adapt_column_type(
         self,
         full_table_name: str,
@@ -912,13 +982,9 @@ class SQLConnector:
                 f"from '{current_type}' to '{compatible_sql_type}'."
             )
 
-        self.connection.execute(
-            sqlalchemy.DDL(
-                "ALTER TABLE %(table)s ALTER COLUMN %(col_name)s (%(col_type)s)",
-                {
-                    "table": full_table_name,
-                    "col_name": column_name,
-                    "col_type": compatible_sql_type,
-                },
-            )
+        alter_column_ddl = self.get_column_alter_ddl(
+            table_name=full_table_name,
+            column_name=column_name,
+            column_type=compatible_sql_type,
         )
+        self.connection.execute(alter_column_ddl)
