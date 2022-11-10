@@ -491,7 +491,7 @@ class SQLConnector:
         else:
             return cast(
                 bool,
-                sqlalchemy.inspect(self._engine).has_table(table_name, schema_name),
+                sqlalchemy.inspect(self._engine).has_table(table_name),
             )
 
     def schema_exists(self, schema_name: str) -> bool:
