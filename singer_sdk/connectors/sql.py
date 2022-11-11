@@ -477,12 +477,9 @@ class SQLConnector:
         Returns:
             True if table exists, False if not, None if unsure or undetectable.
         """
-        # pftn -> Parsed Full Table Name [0] = db, [1] = schema, [2] = table
-        pftn: tuple = SQLConnector.parse_full_table_name(
-            self, full_table_name=full_table_name
+        _, schema_name, table_name = self.parse_full_table_name(
+            full_table_name=full_table_name
         )
-        table_name: str = pftn[2]
-        schema_name: str = pftn[1]
 
         return cast(
             bool,
