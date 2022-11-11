@@ -777,14 +777,22 @@ class SQLConnector:
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
                 ):
                     # If length None or 0 then is varchar max ?
-                    if (opt_len is None) or (opt_len == 0):
+                    if (
+                        (opt_len is None)
+                        or (opt_len == 0)
+                        or (opt_len >= current_type.length)
+                    ):
                         return opt
                 elif isinstance(
                     generic_type,
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
                 ):
                     # If length None or 0 then is varchar max ?
-                    if (opt_len is None) or (opt_len == 0):
+                    if (
+                        (opt_len is None)
+                        or (opt_len == 0)
+                        or (opt_len >= current_type.length)
+                    ):
                         return opt
                 # If best conversion class is equal to current type
                 # return the best conversion class
