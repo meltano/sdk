@@ -160,6 +160,8 @@ can be referenced directly by mapping expressions.
     of the hash's hex digest.
   - This is defined by the SDK internally with native python:
     `hashlib.md5(<input>.encode("utf-8")).hexdigest()`.
+- `datetime` - This is the datetime module object from the Python standard library. You can access
+    datetime.datetime, datetime.timedelta, etc.
 
 #### Built-in Variable Names
 

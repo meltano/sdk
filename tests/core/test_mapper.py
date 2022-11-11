@@ -36,6 +36,7 @@ def sample_catalog_dict() -> dict:
         Property("name", StringType),
         Property("owner_email", StringType),
         Property("description", StringType),
+        Property("description", StringType),
     ).to_dict()
     foobars_schema = PropertiesList(
         Property("the", StringType),
@@ -70,21 +71,25 @@ def sample_stream():
                 "name": "tap-something",
                 "owner_email": "sample1@example.com",
                 "description": "Comment A",
+                "create_date": "2019-01-01",
             },
             {
                 "name": "my-tap-something",
                 "owner_email": "sample2@example.com",
                 "description": "Comment B",
+                "create_date": "2020-01-01",
             },
             {
                 "name": "target-something",
                 "owner_email": "sample3@example.com",
                 "description": "Comment C",
+                "create_date": "2021-01-01",
             },
             {
                 "name": "not-atap",
                 "owner_email": "sample4@example.com",
                 "description": "Comment D",
+                "create_date": "2022-01-01",
             },
         ],
         "foobars": [
@@ -107,6 +112,7 @@ def transform_stream_maps():
             "email_hash": "md5(config['hash_seed'] + owner_email)",
             "description": "'[masked]'",
             "description2": "str('[masked]')",
+            "create_year": "int(datetime.date.fromisoformat(create_date).year)",
             "int_test": "int('0')",
             "__else__": None,
         },
@@ -125,6 +131,7 @@ def transformed_result(stream_map_config):
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
+                "create_year": 2019,
                 "int_test": 0,
             },
             {
@@ -135,6 +142,7 @@ def transformed_result(stream_map_config):
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
+                "create_year": 2020,
                 "int_test": 0,
             },
             {
@@ -145,6 +153,7 @@ def transformed_result(stream_map_config):
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
+                "create_year": 2021,
                 "int_test": 0,
             },
             {
@@ -155,6 +164,7 @@ def transformed_result(stream_map_config):
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
+                "create_year": 2022,
                 "int_test": 0,
             },
         ],
@@ -174,6 +184,7 @@ def transformed_schemas():
             Property("email_hash", StringType),
             Property("description", StringType),
             Property("description2", StringType),
+            Property("create_year", IntegerType),
             Property("int_test", IntegerType),
         ).to_dict(),
         "foobars": PropertiesList(

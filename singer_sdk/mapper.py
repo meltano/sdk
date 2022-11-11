@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import abc
 import copy
+import datetime
 import hashlib
 import logging
 from typing import Any, Callable
@@ -292,6 +293,7 @@ class CustomStreamMap(StreamMap):
         """
         funcs: dict[str, Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
         funcs["md5"] = md5
+        funcs["datetime"] = datetime
         return funcs
 
     def _eval(
