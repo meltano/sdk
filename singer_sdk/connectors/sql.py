@@ -477,9 +477,7 @@ class SQLConnector:
         Returns:
             True if table exists, False if not, None if unsure or undetectable.
         """
-        _, schema_name, table_name = self.parse_full_table_name(
-            full_table_name=full_table_name
-        )
+        _, schema_name, table_name = self.parse_full_table_name(full_table_name)
 
         return cast(
             bool,
