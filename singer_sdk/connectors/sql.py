@@ -483,16 +483,11 @@ class SQLConnector:
         )
         table_name: str = pftn[2]
         schema_name: str = pftn[1]
-        if schema_name:
-            return cast(
-                bool,
-                sqlalchemy.inspect(self._engine).has_table(table_name, schema_name),
-            )
-        else:
-            return cast(
-                bool,
-                sqlalchemy.inspect(self._engine).has_table(table_name),
-            )
+
+        return cast(
+            bool,
+            sqlalchemy.inspect(self._engine).has_table(table_name, schema_name),
+        )
 
     def schema_exists(self, schema_name: str) -> bool:
         """Determine if the target database schema already exists.
