@@ -669,9 +669,7 @@ class SQLConnector:
             partition_keys: list of partition keys.
             as_temp_table: True to create a temp table.
         """
-        self.logger.info(f"Preparing table {full_table_name}")
         if not self.table_exists(full_table_name=full_table_name):
-            self.logger.info(f"Table {full_table_name} does not exist")
             self.create_empty_table(
                 full_table_name=full_table_name,
                 schema=schema,
@@ -680,7 +678,7 @@ class SQLConnector:
                 as_temp_table=as_temp_table,
             )
             return
-        self.logger.info(f"Found table {full_table_name}, going to prepare columns")
+
         for property_name, property_def in schema["properties"].items():
             self.prepare_column(
                 full_table_name, property_name, self.to_sql_type(property_def)
