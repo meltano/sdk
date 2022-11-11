@@ -56,7 +56,6 @@ class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
         stream_catalog_keys = set(self.stream.schema["properties"].keys())
         stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
         diff = stream_catalog_keys - stream_record_keys
-
         assert diff == set(), f"Fields in catalog but not in record: ({diff})"
 
 
@@ -68,7 +67,6 @@ class StreamRecordSchemaMatchesCatalogTest(StreamTestTemplate):
         stream_catalog_keys = set(self.stream.schema["properties"].keys())
         stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
         diff = stream_record_keys - stream_catalog_keys
-
         assert diff == set(), f"Fields in records but not in catalog: ({diff})"
 
 
@@ -78,12 +76,9 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
 
     def test(self):
         primary_keys = self.stream.primary_keys
-        record_ids = []
-        for r in self.stream_records:
-            record_ids.append((r[k] for k in primary_keys))
+        record_ids = [(r[k] for k in primary_keys) for r in self.stream_records]
         count_unique_records = len(set(record_ids))
         count_records = len(self.stream_records)
-
         assert count_unique_records == count_records, (
             f"Length of set of records IDs ({count_unique_records})"
             f" is not equal to number of records ({count_records})."
@@ -113,10 +108,10 @@ class AttributeIsBooleanTest(AttributeTestTemplate):
     def test(self):
         "Test that a given attribute does not contain any null values."
         for v in self.non_null_attribute_values:
-            assert isinstance(v, bool) or str(v).lower() in [
+            assert isinstance(v, bool) or str(v).lower() in {
                 "true",
                 "false",
-            ], f"Unable to cast value ('{v}') to boolean type."
+            }, f"Unable to cast value ('{v}') to boolean type."
 
 
 class AttributeIsObjectTest(AttributeTestTemplate):
@@ -145,7 +140,7 @@ class AttributeIsNumberTest(AttributeTestTemplate):
         for v in self.non_null_attribute_values:
             try:
                 error_message = f"Unable to cast value ('{v}') to float type."
-                assert isinstance(v, float) or isinstance(v, int), error_message
+                assert isinstance(v, (float, int)), error_message
             except Exception as e:
                 raise AssertionError(error_message) from e
 
