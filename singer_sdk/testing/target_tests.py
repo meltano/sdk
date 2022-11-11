@@ -5,6 +5,10 @@ class TargetArrayData(TargetFileTestTemplate):
     name = "array_data"
 
 
+class TargetCamelcaseComplexSchema(TargetFileTestTemplate):
+    name = "camelcase_complex_schema"
+
+
 class TargetCamelcaseTest(TargetFileTestTemplate):
     name = "camelcase"
 

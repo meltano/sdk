@@ -50,34 +50,6 @@ class SingerTestRunner:
             kwargs = self.default_kwargs
         return self.singer_class(config=self.config, **kwargs)
 
-    def sync_all(self) -> None:
-        """Runs a full tap sync, assigning output to the runner object."""
-        self.stdout, self.stderr = self._execute_sync()
-        records = self._clean_sync_output(self.stdout.read())
-        self._parse_records(records)
-
-    def _clean_sync_output(self, raw_records: str) -> List[dict]:
-        lines = raw_records.strip().split("\n")
-        return [json.loads(ii) for ii in lines]
-
-    def _parse_records(self, records: List[dict]) -> None:
-        """Saves raw and parsed messages onto the runner object."""
-        self.raw_messages = records
-        for record in records:
-            if record:
-                if record["type"] == "STATE":
-                    self.state_messages.append(record)
-                    continue
-                if record["type"] == "SCHEMA":
-                    self.schema_messages.append(record)
-                    continue
-                if record["type"] == "RECORD":
-                    stream_name = record["stream"]
-                    self.record_messages.append(record)
-                    self.records[stream_name].append(record["record"])
-                    continue
-        return
-
 
 class TapTestRunner(SingerTestRunner):
     """Utility class to simplify tap testing.
@@ -131,6 +103,35 @@ class TapTestRunner(SingerTestRunner):
         """Run tap connection test."""
         return self.tap.run_connection_test()
 
+    def sync_all(self) -> None:
+        """Runs a full tap sync, assigning output to the runner object."""
+        stdout, stderr = self._execute_sync()
+        self.stdout, self.stderr = (stdout.read(), stderr.read())
+        records = self._clean_sync_output(self.stdout.read())
+        self._parse_records(records)
+
+    def _clean_sync_output(self, raw_records: str) -> List[dict]:
+        lines = raw_records.strip().split("\n")
+        return [json.loads(ii) for ii in lines]
+
+    def _parse_records(self, records: List[dict]) -> None:
+        """Saves raw and parsed messages onto the runner object."""
+        self.raw_messages = records
+        for record in records:
+            if record:
+                if record["type"] == "STATE":
+                    self.state_messages.append(record)
+                    continue
+                if record["type"] == "SCHEMA":
+                    self.schema_messages.append(record)
+                    continue
+                if record["type"] == "RECORD":
+                    stream_name = record["stream"]
+                    self.record_messages.append(record)
+                    self.records[stream_name].append(record["record"])
+                    continue
+        return
+
     def _execute_sync(self) -> List[dict]:
         """Invokes a Tap object and return STDOUT and STDERR results in StringIO buffers.
 
@@ -178,11 +179,9 @@ class TargetTestRunner(SingerTestRunner):
 
     def sync_all(self, finalize: bool = True) -> None:
         """Runs a full tap sync, assigning output to the runner object."""
-        self.stdout, self.stderr = self._execute_sync(
-            input=self.input, finalize=finalize
-        )
-        records = self._clean_sync_output(self.stdout.read())
-        self._parse_records(records)
+        stdout, stderr = self._execute_sync(input=self.input, finalize=finalize)
+        self.stdout, self.stderr = (stdout.read(), stderr.read())
+        self.state_messages.extend(self.stdout.split("\n"))
 
     def _execute_sync(
         self, input: io.StringIO | None, finalize: bool = True

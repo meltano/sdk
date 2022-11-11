@@ -19,6 +19,7 @@ from .tap_tests import (
 )
 from .target_tests import (
     TargetArrayData,
+    TargetCamelcaseComplexSchema,
     TargetCamelcaseTest,
     TargetCliPrintsTest,
     TargetDuplicateRecords,
@@ -74,6 +75,7 @@ target_tests = TestSuite(
     type="target",
     tests=[
         TargetArrayData,
+        TargetCamelcaseComplexSchema,
         TargetCamelcaseTest,
         TargetCliPrintsTest,
         TargetDuplicateRecords,
