@@ -1,0 +1,52 @@
+from dataclasses import dataclass
+from typing import List
+
+from .tap_tests import (
+    AttributeIsBooleanTest,
+    AttributeIsDateTimeTest,
+    AttributeIsIntegerTest,
+    AttributeIsNumberTest,
+    AttributeIsObjectTest,
+    AttributeNotNullTest,
+    AttributeUniquenessTest,
+    StreamCatalogSchemaMatchesRecordTest,
+    StreamPrimaryKeysTest,
+    StreamRecordSchemaMatchesCatalogTest,
+    StreamReturnsRecordTest,
+    TapCLIPrintsTest,
+    TapDiscoveryTest,
+    TapStreamConnectionTest,
+)
+from .templates import TestTemplate
+
+
+@dataclass
+class TestSuite:
+    type: str
+    tests: List[TestTemplate]
+
+
+tap_tests = TestSuite(
+    type="tap", tests=[TapCLIPrintsTest, TapDiscoveryTest, TapStreamConnectionTest]
+)
+tap_stream_tests = TestSuite(
+    type="tap_stream",
+    tests=[
+        StreamCatalogSchemaMatchesRecordTest,
+        StreamRecordSchemaMatchesCatalogTest,
+        StreamReturnsRecordTest,
+        StreamPrimaryKeysTest,
+    ],
+)
+tap_stream_attribute_tests = TestSuite(
+    type="tap_stream_attribute",
+    tests=[
+        AttributeIsBooleanTest,
+        AttributeIsDateTimeTest,
+        AttributeIsIntegerTest,
+        AttributeIsNumberTest,
+        AttributeIsObjectTest,
+        AttributeNotNullTest,
+        AttributeUniquenessTest,
+    ],
+)
