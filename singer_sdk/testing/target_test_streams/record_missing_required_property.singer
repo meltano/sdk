@@ -1,0 +1,2 @@
+{"type": "SCHEMA", "stream": "test_record_missing_required_property", "key_properties": [], "schema": {"required": ["id"], "type": "object", "properties": {"id": {"type": "integer"}, "metric": {"type": "integer"}}}}
+{"type": "RECORD", "stream": "test_record_missing_required_property", "record": {"metric": 3215}}

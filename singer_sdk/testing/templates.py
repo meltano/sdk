@@ -1,5 +1,7 @@
 import contextlib
+import os
 import warnings
+from pathlib import Path
 from typing import Any, List
 
 
@@ -42,7 +44,7 @@ class TestTemplate:
         raise NotImplementedError("Method not implemented.")
 
     def test(self):
-        raise NotImplementedError("Method not implemented.")
+        self.runner.sync_all()
 
     def validate(self):
         raise NotImplementedError("Method not implemented.")
@@ -54,15 +56,22 @@ class TestTemplate:
         with contextlib.suppress(NotImplementedError):
             self.setup()
 
-        self.test()
+        try:
+            self.test()
+            with contextlib.suppress(NotImplementedError):
+                self.validate()
 
-        with contextlib.suppress(NotImplementedError):
-            self.validate()
-            self.teardown()
+        finally:
+            with contextlib.suppress(NotImplementedError):
+                self.teardown()
 
 
 class TapTestTemplate(TestTemplate):
     type = "tap"
+
+    def __init__(self, runner, **kwargs):
+        super().__init__(runner=runner, **kwargs)
+        self.tap = self.runner.tap
 
     @property
     def id(self):
@@ -97,3 +106,34 @@ class AttributeTestTemplate(TestTemplate):
         if not values:
             warnings.warn(UserWarning("No records were available to test."))
         return values
+
+
+class TargetTestTemplate(TestTemplate):
+    type = "target"
+
+    def __init__(self, runner, **kwargs):
+        super().__init__(runner=runner, **kwargs)
+        self.target = self.runner.target
+
+    @property
+    def id(self):
+        return f"target__{self.name}"
+
+
+class TargetFileTestTemplate(TargetTestTemplate):
+    """Target Test Template"""
+
+    def __init__(self, runner, **kwargs):
+        super().__init__(runner=runner, **kwargs)
+        # set the runners input file according to test template singer file path
+        if getattr(self, "singer_filepath", None):
+            assert Path(
+                self.singer_filepath
+            ).exists(), f"Singer file {self.singer_filepath} does not exist."
+            self.runner.input_filepath = self.singer_filepath
+
+    @property
+    def singer_filepath(self):
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        base_singer_filepath = os.path.join(current_dir, "target_test_streams")
+        return os.path.join(base_singer_filepath, f"{self.name}.singer")

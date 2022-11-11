@@ -10,10 +10,9 @@ class TapCLIPrintsTest(TapTestTemplate):
     name = "cli_prints"
 
     def test(self):
-        tap = self.runner.tap
-        tap.print_version()
-        tap.print_about()
-        tap.print_about(format="json")
+        self.tap.print_version()
+        self.tap.print_about()
+        self.tap.print_about(format="json")
 
 
 class TapDiscoveryTest(TapTestTemplate):
@@ -21,7 +20,7 @@ class TapDiscoveryTest(TapTestTemplate):
     name = "discovery"
 
     def test(self) -> None:
-        tap1 = self.runner.tap
+        tap1 = self.tap
         tap1.run_discovery()
         catalog = tap1.catalog_dict
         # Reset and re-initialize with an input catalog
@@ -35,8 +34,7 @@ class TapStreamConnectionTest(TapTestTemplate):
 
     def test(self) -> None:
         # Initialize with basic config
-        tap = self.runner.tap
-        tap.run_connection_test()
+        self.tap.run_connection_test()
 
 
 class StreamReturnsRecordTest(StreamTestTemplate):

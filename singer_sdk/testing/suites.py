@@ -17,6 +17,22 @@ from .tap_tests import (
     TapDiscoveryTest,
     TapStreamConnectionTest,
 )
+from .target_tests import (
+    TargetArrayData,
+    TargetCamelcaseTest,
+    TargetCliPrintsTest,
+    TargetDuplicateRecords,
+    TargetEncodedStringData,
+    TargetInvalidSchemaTest,
+    TargetMultipleStateMessages,
+    TargetNoPrimaryKeys,
+    TargetOptionalAttributes,
+    TargetRecordBeforeSchemaTest,
+    TargetRecordMissingKeyProperty,
+    TargetSchemaNoProperties,
+    TargetSchemaUpdates,
+    TargetSpecialCharsInAttributes,
+)
 from .templates import TestTemplate
 
 
@@ -26,6 +42,7 @@ class TestSuite:
     tests: List[TestTemplate]
 
 
+# Tap Test Suites
 tap_tests = TestSuite(
     type="tap", tests=[TapCLIPrintsTest, TapDiscoveryTest, TapStreamConnectionTest]
 )
@@ -48,5 +65,27 @@ tap_stream_attribute_tests = TestSuite(
         AttributeIsObjectTest,
         AttributeNotNullTest,
         AttributeUniquenessTest,
+    ],
+)
+
+
+# Target Test Suites
+target_tests = TestSuite(
+    type="target",
+    tests=[
+        TargetArrayData,
+        TargetCamelcaseTest,
+        TargetCliPrintsTest,
+        TargetDuplicateRecords,
+        TargetEncodedStringData,
+        TargetInvalidSchemaTest,
+        TargetMultipleStateMessages,
+        TargetNoPrimaryKeys,
+        TargetOptionalAttributes,
+        TargetRecordBeforeSchemaTest,
+        TargetRecordMissingKeyProperty,
+        TargetSchemaNoProperties,
+        TargetSchemaUpdates,
+        TargetSpecialCharsInAttributes,
     ],
 )

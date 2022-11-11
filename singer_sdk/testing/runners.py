@@ -52,8 +52,8 @@ class SingerTestRunner:
 
     def sync_all(self) -> None:
         """Runs a full tap sync, assigning output to the runner object."""
-        stdout, _ = self._execute_sync()
-        records = self._clean_sync_output(stdout.read())
+        self.stdout, self.stderr = self._execute_sync()
+        records = self._clean_sync_output(self.stdout.read())
         self._parse_records(records)
 
     def _clean_sync_output(self, raw_records: str) -> List[dict]:
@@ -64,17 +64,18 @@ class SingerTestRunner:
         """Saves raw and parsed messages onto the runner object."""
         self.raw_messages = records
         for record in records:
-            if record["type"] == "STATE":
-                self.state_messages.append(record)
-                continue
-            if record["type"] == "SCHEMA":
-                self.schema_messages.append(record)
-                continue
-            if record["type"] == "RECORD":
-                stream_name = record["stream"]
-                self.record_messages.append(record)
-                self.records[stream_name].append(record["record"])
-                continue
+            if record:
+                if record["type"] == "STATE":
+                    self.state_messages.append(record)
+                    continue
+                if record["type"] == "SCHEMA":
+                    self.schema_messages.append(record)
+                    continue
+                if record["type"] == "RECORD":
+                    stream_name = record["stream"]
+                    self.record_messages.append(record)
+                    self.records[stream_name].append(record["record"])
+                    continue
         return
 
 
@@ -153,23 +154,34 @@ class TargetTestRunner(SingerTestRunner):
         target_class: Type[Target],
         config: dict = {},
         kwargs: dict = {"parse_env_config": True},
-        input_file: Path = None,
-        input: io.StringIO | None = None,
+        input_filepath: Path = None,
+        input_io: io.StringIO | None = None,
     ) -> None:
         super().__init__(singer_class=target_class, config=config, kwargs=kwargs)
         self.target = self.create()
-        self.input_file = input_file
+        self.input_filepath = input_filepath
+        self.input_io = input_io
+        self._input = None
 
-        if input:
-            self.input = input
-        elif input_file:
-            self.input = open(input_file, "r").read()
+    @property
+    def input(self):
+        if self._input is None:
+            if self.input_io:
+                self._input = self.input_io.read()
+            elif self.input_filepath:
+                self._input = open(self.input_filepath, "r").readlines()
+        return self._input
 
-    def sync_all(self, input: io.StringIO | None, finalize: bool = True) -> None:
+    @input.setter
+    def input(self, value):
+        self._input = value
+
+    def sync_all(self, finalize: bool = True) -> None:
         """Runs a full tap sync, assigning output to the runner object."""
-        input_ = input or self.input
-        stdout, _ = self._execute_sync(input=input_, finalize=finalize)
-        records = self._clean_sync_output(stdout)
+        self.stdout, self.stderr = self._execute_sync(
+            input=self.input, finalize=finalize
+        )
+        records = self._clean_sync_output(self.stdout.read())
         self._parse_records(records)
 
     def _execute_sync(

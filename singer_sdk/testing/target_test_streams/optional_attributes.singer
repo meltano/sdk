@@ -1,0 +1,6 @@
+{"type": "SCHEMA", "stream": "test_optional_attributes", "key_properties": ["id"], "schema": {"required": ["id"], "type": "object", "properties": {"id": {"type": "integer"}, "optional": {"type": "string"}}}}
+{"type": "RECORD", "stream": "test_optional_attributes", "record": {"id": 1, "optional": "This is optional"}}
+{"type": "RECORD", "stream": "test_optional_attributes", "record": {"id": 2}}
+{"type": "RECORD", "stream": "test_optional_attributes", "record": {"id": 3, "optional": "Also optional"}}
+{"type": "RECORD", "stream": "test_optional_attributes", "record": {"id": 4}}
+{"type": "STATE", "value": {"test_optional_attributes": 4}}

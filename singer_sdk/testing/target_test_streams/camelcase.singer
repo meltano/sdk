@@ -1,0 +1,3 @@
+{"type": "SCHEMA", "stream": "TestCamelcase", "schema": {"type": "object", "properties": { "Id": {"type": "string"}, "clientName": {"type": "string"} }}, "key_properties": ["Id"]}
+{"type": "RECORD", "stream": "TestCamelcase", "record": {"Id": "1", "clientName": "Gitter Windows Desktop App"}}
+{"type": "RECORD", "stream": "TestCamelcase", "record": {"Id": "2", "clientName": "Gitter iOS App"}}
