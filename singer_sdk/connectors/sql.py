@@ -477,9 +477,11 @@ class SQLConnector:
         Returns:
             True if table exists, False if not, None if unsure or undetectable.
         """
+        _, schema_name, table_name = self.parse_full_table_name(full_table_name)
+
         return cast(
             bool,
-            sqlalchemy.inspect(self._engine).has_table(full_table_name),
+            sqlalchemy.inspect(self._engine).has_table(table_name, schema_name),
         )
 
     def schema_exists(self, schema_name: str) -> bool:
