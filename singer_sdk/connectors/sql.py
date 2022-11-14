@@ -559,7 +559,7 @@ class SQLConnector:
         return column_name in self.get_table_columns(full_table_name)
 
     def unconformed_column_exists(self, full_table_name: str, column_name: str) -> bool:
-        """Determine if the target table already exists.
+        """Determine if the target table column already exists.
 
         Args:
             full_table_name: the target table name.
@@ -576,6 +576,27 @@ class SQLConnector:
             ] = crnt_columns_name
 
         return column_name in unconformed_column_names
+
+    def get_unconformed_column_name(
+        self, full_table_name: str, column_name: str
+    ) -> str:
+        """Determine if the target table already exists.
+
+        Args:
+            full_table_name: the target table name.
+            column_name: the target column name.
+
+        Returns:
+            True if table exists, False if not.
+        """
+        unconformed_column_names = {}
+
+        for crnt_columns_name in self.get_table_columns(full_table_name):
+            unconformed_column_names[
+                self.conform_name(crnt_columns_name)
+            ] = crnt_columns_name
+
+        return unconformed_column_names.get(column_name)
 
     def conform_name(self, name: str, object_type: str | None = None) -> str:
         """Conform a stream property name to one suitable for the target system.
