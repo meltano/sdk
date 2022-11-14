@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import datetime
 from functools import lru_cache
 from typing import Any, Iterable, cast
@@ -14,6 +15,7 @@ from sqlalchemy.engine.reflection import Inspector
 from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.helpers._conformers import replace_leading_digit, snakecase
 
 
 class SQLConnector:
@@ -555,6 +557,28 @@ class SQLConnector:
             True if table exists, False if not.
         """
         return column_name in self.get_table_columns(full_table_name)
+
+    def conform_name(self, name: str, object_type: str | None = None) -> str:
+        """Conform a stream property name to one suitable for the target system.
+
+        Transforms names to snake case by default, applicable to most common DBMSs'.
+        Developers may override this method to apply custom transformations
+        to database/schema/table/column names.
+
+        Args:
+            name: Property name.
+            object_type: One of ``database``, ``schema``, ``table`` or ``column``.
+
+
+        Returns:
+            The name transformed to snake case.
+        """
+        # strip non-alphanumeric characters, keeping - . _ and spaces
+        name = re.sub(r"[^a-zA-Z0-9_\-\.\s]", "", name)
+        # convert to snakecase
+        name = snakecase(name)
+        # replace leading digit
+        return replace_leading_digit(name)
 
     def create_schema(self, schema_name: str) -> None:
         """Create target schema.
