@@ -20,7 +20,6 @@ from singer_sdk.connectors import SQLConnector
 
 {%- if sinkclass == "SQLSink" %}
 
-
 class {{ cookiecutter.destination_name }}Connector(SQLConnector):
     """The connector for {{ cookiecutter.destination_name }}.
 
