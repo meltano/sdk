@@ -757,12 +757,18 @@ class SQLConnector:
             sql_type: the SQLAlchemy type.
         """
         if not self.column_exists(full_table_name, column_name):
-            self._create_empty_column(
-                full_table_name=full_table_name,
-                column_name=column_name,
-                sql_type=sql_type,
-            )
-            return
+            if self.unconformed_column_exists(full_table_name, column_name):
+                crnt_column_name = self.get_unconformed_column_name(
+                    full_table_name, column_name
+                )
+                self.rename_column(full_table_name, crnt_column_name, column_name)
+            else:
+                self._create_empty_column(
+                    full_table_name=full_table_name,
+                    column_name=column_name,
+                    sql_type=sql_type,
+                )
+                return
 
         self._adapt_column_type(
             full_table_name,
