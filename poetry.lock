@@ -1239,7 +1239,7 @@ types-urllib3 = "<1.27"
 
 [[package]]
 name = "types-simplejson"
-version = "3.17.7.2"
+version = "3.18.0.0"
 description = "Typing stubs for simplejson"
 category = "dev"
 optional = false
@@ -1338,7 +1338,7 @@ samples = []
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.12,>=3.7.1"
-content-hash = "20923658bae7b1ce354245cb37a30153bd6c5d5796c990764e6d3a7193bdc245"
+content-hash = "3c784adf4c987669d01ea83dab7eeb42133c68a8e862b47ace2d82bd871d7559"
 
 [metadata.files]
 alabaster = [
@@ -2274,8 +2274,8 @@ types-requests = [
     {file = "types_requests-2.28.11.4-py3-none-any.whl", hash = "sha256:bdb1f9811e53d0642c8347b09137363eb25e1a516819e190da187c29595a1df3"},
 ]
 types-simplejson = [
-    {file = "types-simplejson-3.17.7.2.tar.gz", hash = "sha256:a4968032706c4460e7fbe6ba66c5744ae7c9b94afd7c0abead7d54ab3fa67127"},
-    {file = "types_simplejson-3.17.7.2-py3-none-any.whl", hash = "sha256:ee1a49ed92b92a7adeaabb3413b71bad3623fb731791c5614db763ce9f195725"},
+    {file = "types-simplejson-3.18.0.0.tar.gz", hash = "sha256:857adb13190abd65d0d103be965152e79a6842c5663e01e8681bde1895713f52"},
+    {file = "types_simplejson-3.18.0.0-py3-none-any.whl", hash = "sha256:f8a8428f753574fa3b7eb290756776f0fb6b4ad9cae72bf8c0c9534eeda6398c"},
 ]
 types-urllib3 = [
     {file = "types-urllib3-1.26.25.1.tar.gz", hash = "sha256:a948584944b2412c9a74b9cf64f6c48caf8652cb88b38361316f6d15d8a184cd"},
