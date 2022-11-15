@@ -96,16 +96,6 @@ def is_object_type(property_schema: dict) -> Optional[bool]:
     return False
 
 
-def is_array_type(property_schema: dict) -> Optional[bool]:
-    """Return true if the JSON Schema type is an array or None if detection fails."""
-    if "anyOf" not in property_schema and "type" not in property_schema:
-        return None  # Could not detect data type
-    for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
-        if "array" in property_type or property_type == "array":
-            return True
-    return False
-
-
 def is_uniform_list(property_schema: dict) -> Optional[bool]:
     """Return true if the JSON Schema type is an array with a single schema.
 
@@ -237,7 +227,7 @@ def is_string_array_type(type_dict: dict) -> bool:
 
 
 def is_array_type(type_dict: dict) -> bool:
-    """Return True if JSON Schema type definition is a string array."""
+    """Return True if JSON Schema type is an array"""
     if not type_dict:
         raise ValueError(
             "Could not detect type from empty type_dict. "
