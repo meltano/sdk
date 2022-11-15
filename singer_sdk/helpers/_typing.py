@@ -227,7 +227,7 @@ def is_string_array_type(type_dict: dict) -> bool:
 
 
 def is_array_type(type_dict: dict) -> bool:
-    """Return True if JSON Schema type is an array"""
+    """Return True if JSON Schema type is an array."""
     if not type_dict:
         raise ValueError(
             "Could not detect type from empty type_dict. "
