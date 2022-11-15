@@ -7,6 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.13.1 (2022-11-08)
+
+### 🐛 Fixes
+
+- [#1126](https://github.com/meltano/sdk/issues/1126) Resolve failure in `_increment_stream_state()` for cases when `replication_method` is `LOG_BASED`
+- [#1111](https://github.com/meltano/sdk/issues/1111) Push _MAX_RECORDS_LIMIT down into SQL
+
+### ⚙️ Under the Hood
+
+- [#1091](https://github.com/meltano/sdk/issues/1091) Move SQLConnector into a separate module, for use by both SQLStream and SQLSink
+
+### 📚 Documentation Improvements
+
+- [#1133](https://github.com/meltano/sdk/issues/1133) Fix duplicate `Known Limitations` header
+- [#1118](https://github.com/meltano/sdk/issues/1118) Document `BATCH` limitations
+
+## v0.13.0 (2022-10-24)
+
+### ✨ New
+
+- [#1098](https://github.com/meltano/sdk/issues/1098) Add JSON Schema `Property` helpers for `allowed_values` (`enum`) and `examples`
+- [#1096](https://github.com/meltano/sdk/issues/1096) Add secrets support for tap and target config, via `Property(..., secret=True)`
+- [#1039](https://github.com/meltano/sdk/issues/1039) Support conforming singer property names to target identifier constraints in SQL sinks
+
+### 🐛 Fixes
+
+- [#1093](https://github.com/meltano/sdk/issues/1093) Add environment support to the cookie cutter for `meltano.yml`
+- [#1036](https://github.com/meltano/sdk/issues/1036) Create schema and table on `add_sink`
+
+## v0.12.0 (2022-10-17)
+
+### ✨ New
+
+- [#1032](https://github.com/meltano/sdk/issues/1032) Support stream property selection push-down in SQL streams
+- [#978](https://github.com/meltano/sdk/issues/978) Allow configuring a dedicated metrics logger
+
+### 🐛 Fixes
+
+- [#1043](https://github.com/meltano/sdk/issues/1043) Batch storage `split_url` to work with Windows paths -- _**Thanks @BuzzCutNorman!**_
+- [#826](https://github.com/meltano/sdk/issues/826) Remove Poetry version pin for GitHub Actions -- _**Thanks @visch!**_
+- [#1001](https://github.com/meltano/sdk/issues/1001) Use column name in `allow_column_alter` error message
+
+### 📚 Documentation Improvements
+
+- [#1060](https://github.com/meltano/sdk/issues/1060) Add explanation and recommendations for context usage
+- [#1074](https://github.com/meltano/sdk/issues/1074) Document an example implementation and usage of `BaseHATEOASPaginator`
+- [#1020](https://github.com/meltano/sdk/issues/1020) Fixed typo in `docs/stream_maps.md` -- _**Thanks @spacecowboy!**_
+- [#1006](https://github.com/meltano/sdk/issues/1006) Add links to Meltano install/tut
+
+## v0.11.1 (2022-09-27)
+
+### 🐛 Fixes
+
+- [#999](https://github.com/meltano/sdk/issues/999) Absolute file paths created by taps running in BATCH mode can't be processed by the Sink
+
+### 📚 Documentation Improvements
+
+- Change `targetUrl` of semantic PR title check to point to SDK docs
+
 ## v0.11.0 (2022-09-23)
 
 ### ✨ New

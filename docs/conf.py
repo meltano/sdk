@@ -20,12 +20,12 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
-project = "Meltano SDK"
+project = "Meltano Singer SDK"
 copyright = "2021, Meltano Core Team and Contributors"
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.11.0"
+release = "0.13.1"
 
 
 # -- General configuration ---------------------------------------------------

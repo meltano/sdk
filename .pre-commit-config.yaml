@@ -2,6 +2,7 @@ ci:
   autofix_prs: false
   autoupdate_schedule: weekly
   autoupdate_commit_msg: 'chore: pre-commit autoupdate'
+  skip: [poetry-lock]
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -29,7 +30,7 @@ repos:
         )$
 
 - repo: https://github.com/psf/black
-  rev: 22.8.0
+  rev: 22.10.0
   hooks:
   - id: black
     exclude: |
@@ -56,7 +57,7 @@ repos:
     files: 'singer_sdk/.*'
 
 - repo: https://github.com/asottile/pyupgrade
-  rev: v2.38.0
+  rev: v3.2.2
   hooks:
   - id: pyupgrade
     args: [--py37-plus]
@@ -65,3 +66,10 @@ repos:
             singer_sdk/helpers/_simpleeval.py|
             tests/core/test_simpleeval.py
         )$
+
+- repo: https://github.com/python-poetry/poetry
+  rev: 1.2.2
+  hooks:
+  - id: poetry-check
+  - id: poetry-lock
+    args: [--no-update]

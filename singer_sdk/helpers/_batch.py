@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import enum
+import platform
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
 from typing import IO, TYPE_CHECKING, Any, ClassVar, Generator
-from urllib.parse import ParseResult, parse_qs, urlencode, urlparse
+from urllib.parse import ParseResult, urlencode, urlparse
 
 import fs
 
@@ -68,7 +69,7 @@ class JSONLinesEncoding(BaseBatchFileEncoding):
 
 @dataclass
 class SDKBatchMessage(Message):
-    """Singer batch message in the Meltano SDK flavor."""
+    """Singer batch message in the Meltano Singer SDK flavor."""
 
     stream: str
     """The stream name."""
@@ -119,9 +120,27 @@ class StorageTarget:
         """
         return cls(**data)
 
+    @staticmethod
+    def split_url(url: str) -> tuple[str, str]:
+        """Split a URL into a head and tail pair.
+
+        Args:
+            url: The URL to split.
+
+        Returns:
+            A tuple of the head and tail parts of the URL.
+        """
+        if platform.system() == "Windows" and "\\" in url:
+            # Original code from pyFileSystem split
+            # Augemnted slitly to properly Windows paths
+            split = url.rsplit("\\", 1)
+            return (split[0] or "\\", split[1])
+        else:
+            return fs.path.split(url)
+
     @classmethod
-    def from_url(cls, url: ParseResult) -> StorageTarget:
-        """Create a storage target from a URL.
+    def from_url(cls, url: str) -> StorageTarget:
+        """Create a storage target from a file URL.
 
         Args:
             url: The URL to create the storage target from.
@@ -129,8 +148,9 @@ class StorageTarget:
         Returns:
             The created storage target.
         """
-        new_url = url._replace(path="", query="")
-        return cls(root=new_url.geturl(), params=parse_qs(url.query))
+        parsed_url = urlparse(url)
+        new_url = parsed_url._replace(query="")
+        return cls(root=new_url.geturl())
 
     @property
     def fs_url(self) -> ParseResult:

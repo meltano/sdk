@@ -29,20 +29,23 @@ jobs:
         - { session: tests,   python-version: "3.8",  os: "ubuntu-latest" }
         - { session: tests,   python-version: "3.9",  os: "ubuntu-latest" }
         - { session: tests,   python-version: "3.10", os: "ubuntu-latest" }
+        - { session: tests,   python-version: "3.11", os: "ubuntu-latest" }
         - { session: tests,   python-version: "3.7",  os: "macos-latest" }
         - { session: tests,   python-version: "3.8",  os: "macos-latest" }
         - { session: tests,   python-version: "3.9",  os: "macos-latest" }
         - { session: tests,   python-version: "3.10", os: "macos-latest" }
+        - { session: tests,   python-version: "3.11", os: "macos-latest" }
         - { session: tests,   python-version: "3.7",  os: "windows-latest" }
         - { session: tests,   python-version: "3.8",  os: "windows-latest" }
         - { session: tests,   python-version: "3.9",  os: "windows-latest" }
         - { session: tests,   python-version: "3.10", os: "windows-latest" }
+        - { session: tests,   python-version: "3.11", os: "windows-latest" }
         - { session: doctest, python-version: "3.10", os: "ubuntu-latest" }
         - { session: mypy,    python-version: "3.8",  os: "ubuntu-latest" }
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.0.2
+      uses: actions/checkout@v3.1.0
 
     - name: Install Poetry
       env:
@@ -52,7 +55,7 @@ jobs:
         poetry --version
 
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4.2.0
+      uses: actions/setup-python@v4.3.0
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
@@ -80,7 +83,7 @@ jobs:
 
     - name: Upload coverage data
       if: always() && (matrix.session == 'tests')
-      uses: actions/upload-artifact@v3.1.0
+      uses: actions/upload-artifact@v3.1.1
       with:
         name: coverage-data
         path: ".coverage.*"
@@ -100,7 +103,7 @@ jobs:
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.0.2
+      uses: actions/checkout@v3.1.0
 
     - name: Install Poetry
       env:
@@ -110,7 +113,7 @@ jobs:
         poetry --version
 
     - name: Setup Python 3.10
-      uses: actions/setup-python@v4.2.0
+      uses: actions/setup-python@v4.3.0
       with:
         python-version: '3.10'
         architecture: x64
@@ -142,7 +145,7 @@ jobs:
     needs: tests
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.0.2
+      uses: actions/checkout@v3.1.0
 
     - name: Install Poetry
       run: |
@@ -150,7 +153,7 @@ jobs:
         poetry --version
 
     - name: Set up Python
-      uses: actions/setup-python@v4.2.0
+      uses: actions/setup-python@v4.3.0
       with:
         python-version: '3.10'
         cache: 'pip'
@@ -162,7 +165,7 @@ jobs:
         pip --version
 
     - name: Download coverage data
-      uses: actions/download-artifact@v3.0.0
+      uses: actions/download-artifact@v3.0.1
       with:
         name: coverage-data
 
@@ -183,4 +186,4 @@ jobs:
         nox --session=coverage -- xml
 
     - name: Upload coverage report
-      uses: codecov/codecov-action@v3.1.0
+      uses: codecov/codecov-action@v3.1.1
