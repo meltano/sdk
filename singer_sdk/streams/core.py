@@ -15,8 +15,8 @@ from types import MappingProxyType
 from typing import Any, Generator, Iterable, Iterator, Mapping, TypeVar, cast
 from uuid import uuid4
 
+import pandas as pd
 import pendulum
-import pyarrow as pa
 
 import singer_sdk._singerlib as singer
 from singer_sdk import metrics
@@ -1265,11 +1265,10 @@ class Stream(metaclass=abc.ABCMeta):
             with fs.open(filename, "wb") as f:
                 if batch_config.encoding.compression == "gzip":
                     if batch_config.encoding.format == BatchFileFormat.PARQUET:
-                        with gzip.GzipFile(fileobj=f, mode="wb") as gz:
-                            gz.writelines(
-                                pa.RecordBatch.from_pydict(record).encode()
-                                for record in chunk
-                            )
+                        df = pd.DataFrame([record for record in chunk])
+                        df.to_parquet(
+                            path=f.name, engine="fastparquet", compression="gzip"
+                        )
                     else:
                         with gzip.GzipFile(fileobj=f, mode="wb") as gz:
                             gz.writelines(
