@@ -450,7 +450,7 @@ class ObjectType(JSONTypeHelper):
         self,
         *properties: Property,
         additional_properties: W | type[W] | None = None,
-        pattern_properties: dict[str, W | type[W]] | None = None,
+        pattern_properties: Mapping[str, W | type[W]] | None = None,
     ) -> None:
         """Initialize ObjectType from its list of properties.
 
