@@ -47,7 +47,6 @@ class Message:
         Returns:
             A dictionary with the defined message fields.
         """
-
         return asdict(self, dict_factory=exclude_null_dict)
 
     @classmethod
@@ -81,6 +80,10 @@ class RecordMessage(Message):
     """The time the record was extracted."""
 
     def to_dict(self) -> dict[str, t.Any]:
+        """ Converts to a dictionary.
+
+            This overrides the default conversion logic, since it uses unnecessary deep copying and is very slow
+        """
         result: dict[str, t.Any] = {
             'type': 'RECORD',
             'stream': self.stream,
