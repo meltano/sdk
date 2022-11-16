@@ -461,6 +461,7 @@ class ObjectType(JSONTypeHelper):
         self,
         *properties: Property,
         additional_properties: W | type[W] | bool | None = None,
+        pattern_properties: Mapping[str, W | type[W]] | None = None,
     ) -> None:
         """Initialize ObjectType from its list of properties.
 
@@ -468,6 +469,8 @@ class ObjectType(JSONTypeHelper):
             properties: Zero or more attributes for this JSON object.
             additional_properties: A schema to match against unnamed properties in
                 this object, or a boolean indicating if extra properties are allowed.
+            pattern_properties: A dictionary of regex patterns to match against
+                property names, and the schema to match against the values.
 
         Examples:
             >>> t = ObjectType(
@@ -543,6 +546,7 @@ class ObjectType(JSONTypeHelper):
         """
         self.wrapped: list[Property] = list(properties)
         self.additional_properties = additional_properties
+        self.pattern_properties = pattern_properties
 
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
@@ -568,7 +572,23 @@ class ObjectType(JSONTypeHelper):
             else:
                 result["additionalProperties"] = self.additional_properties.type_dict
 
+        if self.pattern_properties:
+            result["patternProperties"] = {
+                k: v.type_dict for k, v in self.pattern_properties.items()
+            }
+
         return result
+
+    def to_json(self, **kwargs: Any) -> str:
+        """Return a JSON string representation of the object.
+
+        Args:
+            **kwargs: Additional keyword arguments to pass to `json.dumps`.
+
+        Returns:
+            A JSON string.
+        """
+        return json.dumps(self.type_dict, **kwargs)
 
 
 class CustomType(JSONTypeHelper):
