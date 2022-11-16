@@ -579,17 +579,6 @@ class ObjectType(JSONTypeHelper):
 
         return result
 
-    def to_json(self, **kwargs: Any) -> str:
-        """Return a JSON string representation of the object.
-
-        Args:
-            **kwargs: Additional keyword arguments to pass to `json.dumps`.
-
-        Returns:
-            A JSON string.
-        """
-        return json.dumps(self.type_dict, **kwargs)
-
 
 class CustomType(JSONTypeHelper):
     """Accepts an arbitrary JSON Schema dictionary."""
