@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.14.0 (2022-11-16)
+
+### ✨ New
+
+- [#1175](https://github.com/meltano/sdk/issues/1175) Add `datetime` functions to simpleeval env in stream maps -- _**Thanks @qbatten!**_
+
+### 🐛 Fixes
+
+- [#1182](https://github.com/meltano/sdk/issues/1182) Update `SQLConnector` import for SQL target cookiecutter -- _**Thanks @radbrt!**_
+- [#1168](https://github.com/meltano/sdk/issues/1168) `SQLConnector.table_exists()` to use separate `table_name` and `schema_name` instead of fully qualified name -- _**Thanks @BuzzCutNorman!**_
+- [#1164](https://github.com/meltano/sdk/issues/1164) Write a valid final state message at the end of each stream sync -- _**Thanks @laurentS!**_
+
+### ⚙️ Under the Hood
+
+- [#1114](https://github.com/meltano/sdk/issues/1114) Make DDL overridable for column `ADD`, `ALTER`, and `RENAME` operations
+
 ## v0.13.1 (2022-11-08)
 
 ### 🐛 Fixes
