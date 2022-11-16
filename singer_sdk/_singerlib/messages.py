@@ -80,14 +80,18 @@ class RecordMessage(Message):
     """The time the record was extracted."""
 
     def to_dict(self) -> dict[str, t.Any]:
-        """ Converts to a dictionary.
+        """Return a dictionary representation of the message.
 
-            This overrides the default conversion logic, since it uses unnecessary deep copying and is very slow
+        This overrides the default conversion logic, since it uses unnecessary
+        deep copying and is very slow.
+
+        Returns:
+            A dictionary with the defined message fields.
         """
         result: dict[str, t.Any] = {
-            'type': 'RECORD',
-            'stream': self.stream,
-            'record': self.record
+            "type": "RECORD",
+            "stream": self.stream,
+            "record": self.record,
         }
         if self.version is not None:
             result["version"] = self.version
