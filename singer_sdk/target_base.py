@@ -38,7 +38,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     object for that record.
     """
 
-    _MAX_RECORD_AGE_IN_MINUTES: float = 30.0
+    _MAX_RECORD_AGE_IN_MINUTES: float = 5.0
 
     # Default class to use for creating new sink objects.
     # Required if `Target.get_sink_class()` is not defined.
