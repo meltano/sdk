@@ -44,3 +44,9 @@ def outdir() -> str:
 
     yield name
     shutil.rmtree(name)
+
+
+@pytest.fixture(scope="session")
+def snapshot_dir() -> pathlib.Path:
+    """Return the path to the snapshot directory."""
+    return pathlib.Path("tests/snapshots/")
