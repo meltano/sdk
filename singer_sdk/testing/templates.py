@@ -43,11 +43,12 @@ class TestTemplate:
     def teardown(self):
         raise NotImplementedError("Method not implemented.")
 
-    def run(self, runner):
+    def run(self, resource, runner):
 
         if not self.name or not self.type:
             raise ValueError("Test must have 'name' and 'type' properties.")
 
+        self.resource = resource
         self.runner = runner
 
         with contextlib.suppress(NotImplementedError):
@@ -70,9 +71,9 @@ class TapTestTemplate(TestTemplate):
     def id(self):
         return f"tap__{self.name}"
 
-    def run(self, runner):
+    def run(self, resource, runner):
         self.tap = runner.tap
-        super().run(runner)
+        super().run(resource, runner)
 
 
 class StreamTestTemplate(TestTemplate):
@@ -83,10 +84,10 @@ class StreamTestTemplate(TestTemplate):
     def id(self):
         return f"{self.stream.name}__{self.name}"
 
-    def run(self, runner, stream, stream_records):
+    def run(self, resource, runner, stream, stream_records):
         self.stream = stream
         self.stream_records = stream_records
-        super().run(runner)
+        super().run(resource, runner)
 
 
 class AttributeTestTemplate(TestTemplate):
@@ -96,11 +97,11 @@ class AttributeTestTemplate(TestTemplate):
     def id(self):
         return f"{self.stream.name}__{self.attribute_name}__{self.name}"
 
-    def run(self, runner, stream, stream_records, attribute_name):
+    def run(self, resource, runner, stream, stream_records, attribute_name):
         self.stream = stream
         self.stream_records = stream_records
         self.attribute_name = attribute_name
-        super().run(runner)
+        super().run(resource, runner)
 
     @property
     def non_null_attribute_values(self) -> List[Any]:
@@ -124,9 +125,9 @@ class AttributeTestTemplate(TestTemplate):
 class TargetTestTemplate(TestTemplate):
     type = "target"
 
-    def run(self, runner):
+    def run(self, resource, runner):
         self.target = runner.target
-        super().run(runner)
+        super().run(resource, runner)
 
     @property
     def id(self):
@@ -136,14 +137,14 @@ class TargetTestTemplate(TestTemplate):
 class TargetFileTestTemplate(TargetTestTemplate):
     """Target Test Template."""
 
-    def run(self, runner):
+    def run(self, resource, runner):
         # get input from file
         if getattr(self, "singer_filepath", None):
             assert Path(
                 self.singer_filepath
             ).exists(), f"Singer file {self.singer_filepath} does not exist."
             runner.input_filepath = self.singer_filepath
-        super().run(runner)
+        super().run(resource, runner)
 
     @property
     def singer_filepath(self):
