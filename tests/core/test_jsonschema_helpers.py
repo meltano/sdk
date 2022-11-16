@@ -594,6 +594,17 @@ def test_array_type():
                 Property("email", StringType, required=True),
                 Property("username", StringType, required=True),
                 Property("phone_number", StringType),
+            ),
+            "required_duplicates.json",
+            id="required, duplicates, no additional properties",
+        ),
+        pytest.param(
+            ObjectType(
+                Property("id", StringType),
+                Property("email", StringType, required=True),
+                Property("email", StringType, required=True),
+                Property("username", StringType, required=True),
+                Property("phone_number", StringType),
                 additional_properties=StringType,
             ),
             "required_duplicates_additional_properties.json",
