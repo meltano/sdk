@@ -12,6 +12,7 @@ from singer_sdk.typing import (
     ObjectType,
     PropertiesList,
     Property,
+    StringType,
 )
 
 _EnumMemberT = TypeVar("_EnumMemberT")
@@ -45,6 +46,13 @@ FLATTENING_CONFIG = PropertiesList(
         "flattening_max_depth",
         IntegerType(),
         description="The max depth to flatten schemas.",
+    ),
+).to_dict()
+TARGET_SCHEMA_CONFIG = PropertiesList(
+    Property(
+        "default_target_schema",
+        StringType(),
+        description="The default target database schema name to use for all streams.",
     ),
 ).to_dict()
 
