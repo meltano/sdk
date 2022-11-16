@@ -81,7 +81,7 @@ class RecordMessage(Message):
     """The time the record was extracted."""
 
     def to_dict(self) -> dict[str, t.Any]:
-        result = {
+        result: dict[str, t.Any] = {
             'type': 'RECORD',
             'stream': self.stream,
             'record': self.record
