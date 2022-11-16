@@ -28,6 +28,23 @@ nox.options.sessions = (
     "tests",
     "doctest",
 )
+test_dependencies = [
+    "coverage[toml]",
+    "pytest",
+    "pytest-snapshot",
+    "freezegun",
+    "pandas",
+    "requests-mock",
+    # Cookiecutter tests
+    "black",
+    "cookiecutter",
+    "PyYAML",
+    "darglint",
+    "flake8",
+    "flake8-annotations",
+    "flake8-docstrings",
+    "mypy",
+]
 
 
 @session(python=python_versions)
@@ -53,22 +70,8 @@ def mypy(session: Session) -> None:
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
     session.install(".")
-    session.install(
-        "coverage[toml]",
-        "pytest",
-        "freezegun",
-        "pandas",
-        "requests-mock",
-        # Cookiecutter tests
-        "black",
-        "cookiecutter",
-        "PyYAML",
-        "darglint",
-        "flake8",
-        "flake8-annotations",
-        "flake8-docstrings",
-        "mypy",
-    )
+    session.install(*test_dependencies)
+
     # temp fix until pyarrow is supported on python 3.11
     if session.python != "3.11":
         session.install(
@@ -89,6 +92,16 @@ def tests(session: Session) -> None:
     finally:
         if session.interactive:
             session.notify("coverage", posargs=[])
+
+
+@session(python=main_python_version)
+def update_snapshots(session: Session) -> None:
+    """Update pytest snapshots."""
+    args = session.posargs or ["-m", "snapshot"]
+
+    session.install(".")
+    session.install(*test_dependencies)
+    session.run("pytest", "--snapshot-update", *args)
 
 
 @session(python=python_versions)
