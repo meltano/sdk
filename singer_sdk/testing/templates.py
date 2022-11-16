@@ -26,15 +26,6 @@ class TestTemplate:
 
     name: str = None
     type: str = None
-    required_kwargs: List[str] = []
-
-    def __init__(self, runner, **kwargs):
-        if not self.name or not self.type:
-            raise ValueError("Test must have 'name' and 'type' properties.")
-
-        self.runner = runner
-        for p in self.required_kwargs:
-            setattr(self, p, kwargs[p])
 
     @property
     def id(self):
@@ -52,7 +43,13 @@ class TestTemplate:
     def teardown(self):
         raise NotImplementedError("Method not implemented.")
 
-    def run(self):
+    def run(self, runner):
+
+        if not self.name or not self.type:
+            raise ValueError("Test must have 'name' and 'type' properties.")
+
+        self.runner = runner
+
         with contextlib.suppress(NotImplementedError):
             self.setup()
 
@@ -69,31 +66,41 @@ class TestTemplate:
 class TapTestTemplate(TestTemplate):
     type = "tap"
 
-    def __init__(self, runner, **kwargs):
-        super().__init__(runner=runner, **kwargs)
-        self.tap = self.runner.tap
-
     @property
     def id(self):
         return f"tap__{self.name}"
 
+    def run(self, runner):
+        self.tap = runner.tap
+        super().run(runner)
+
 
 class StreamTestTemplate(TestTemplate):
     type = "stream"
-    required_kwargs = ["stream", "stream_name", "stream_records"]
+    required_kwargs = ["stream", "stream_records"]
 
     @property
     def id(self):
-        return f"{self.stream_name}__{self.name}"
+        return f"{self.stream.name}__{self.name}"
+
+    def run(self, runner, stream, stream_records):
+        self.stream = stream
+        self.stream_records = stream_records
+        super().run(runner)
 
 
 class AttributeTestTemplate(TestTemplate):
     type = "attribute"
-    required_kwargs = ["stream_records", "stream_name", "attribute_name"]
 
     @property
     def id(self):
-        return f"{self.stream_name}__{self.attribute_name}__{self.name}"
+        return f"{self.stream.name}__{self.attribute_name}__{self.name}"
+
+    def run(self, runner, stream, stream_records, attribute_name):
+        self.stream = stream
+        self.stream_records = stream_records
+        self.attribute_name = attribute_name
+        super().run(runner)
 
     @property
     def non_null_attribute_values(self) -> List[Any]:
@@ -107,13 +114,19 @@ class AttributeTestTemplate(TestTemplate):
             warnings.warn(UserWarning("No records were available to test."))
         return values
 
+    @classmethod
+    def evaluate(cls, prop):
+        raise NotImplementedError(
+            "The 'evaluate' method is required for attribute tests, but not implemented."
+        )
+
 
 class TargetTestTemplate(TestTemplate):
     type = "target"
 
-    def __init__(self, runner, **kwargs):
-        super().__init__(runner=runner, **kwargs)
-        self.target = self.runner.target
+    def run(self, runner):
+        self.target = runner.target
+        super().run(runner)
 
     @property
     def id(self):
@@ -121,16 +134,16 @@ class TargetTestTemplate(TestTemplate):
 
 
 class TargetFileTestTemplate(TargetTestTemplate):
-    """Target Test Template"""
+    """Target Test Template."""
 
-    def __init__(self, runner, **kwargs):
-        super().__init__(runner=runner, **kwargs)
-        # set the runners input file according to test template singer file path
+    def run(self, runner):
+        # get input from file
         if getattr(self, "singer_filepath", None):
             assert Path(
                 self.singer_filepath
             ).exists(), f"Singer file {self.singer_filepath} does not exist."
-            self.runner.input_filepath = self.singer_filepath
+            runner.input_filepath = self.singer_filepath
+        super().run(runner)
 
     @property
     def singer_filepath(self):

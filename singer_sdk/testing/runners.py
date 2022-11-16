@@ -86,6 +86,8 @@ class TapTestRunner(SingerTestRunner):
     ```
     """
 
+    type = "tap"
+
     def __init__(
         self,
         tap_class: Type[Tap],
@@ -106,8 +108,7 @@ class TapTestRunner(SingerTestRunner):
     def sync_all(self) -> None:
         """Runs a full tap sync, assigning output to the runner object."""
         stdout, stderr = self._execute_sync()
-        self.stdout, self.stderr = (stdout.read(), stderr.read())
-        records = self._clean_sync_output(self.stdout.read())
+        records = self._clean_sync_output(stdout)
         self._parse_records(records)
 
     def _clean_sync_output(self, raw_records: str) -> List[dict]:
@@ -144,11 +145,13 @@ class TapTestRunner(SingerTestRunner):
             self.tap.sync_all()
         stdout_buf.seek(0)
         stderr_buf.seek(0)
-        return stdout_buf, stderr_buf
+        return stdout_buf.read(), stderr_buf.read()
 
 
 class TargetTestRunner(SingerTestRunner):
     """Utility class to simplify target testing."""
+
+    type = "target"
 
     def __init__(
         self,

@@ -98,6 +98,10 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
             except parser.ParserError as e:
                 raise AssertionError(error_message) from e
 
+    @classmethod
+    def evaluate(cls, prop):
+        return prop.get("format") == "date-time"
+
 
 class AttributeIsBooleanTest(AttributeTestTemplate):
     "Test that an attribute is of boolean datatype (or can be cast to it)."
@@ -111,6 +115,10 @@ class AttributeIsBooleanTest(AttributeTestTemplate):
                 "false",
             }, f"Unable to cast value ('{v}') to boolean type."
 
+    @classmethod
+    def evaluate(cls, prop):
+        return "boolean" in prop.get("type", [])
+
 
 class AttributeIsObjectTest(AttributeTestTemplate):
     "Test that a given attribute is an object type."
@@ -120,6 +128,10 @@ class AttributeIsObjectTest(AttributeTestTemplate):
         for v in self.non_null_attribute_values:
             assert isinstance(v, dict), f"Unable to cast value ('{v}') to dict type."
 
+    @classmethod
+    def evaluate(cls, prop):
+        return "object" in prop.get("type", [])
+
 
 class AttributeIsIntegerTest(AttributeTestTemplate):
     "Test that a given attribute can be converted to an integer type."
@@ -128,6 +140,10 @@ class AttributeIsIntegerTest(AttributeTestTemplate):
     def test(self):
         for v in self.non_null_attribute_values:
             assert isinstance(v, int), f"Unable to cast value ('{v}') to int type."
+
+    @classmethod
+    def evaluate(cls, prop):
+        return "integer" in prop.get("type", [])
 
 
 class AttributeIsNumberTest(AttributeTestTemplate):
@@ -142,6 +158,10 @@ class AttributeIsNumberTest(AttributeTestTemplate):
             except Exception as e:
                 raise AssertionError(error_message) from e
 
+    @classmethod
+    def evaluate(cls, prop):
+        return "number" in prop.get("type", [])
+
 
 class AttributeNotNullTest(AttributeTestTemplate):
     "Test that a given attribute does not contain any null values."
@@ -153,13 +173,21 @@ class AttributeNotNullTest(AttributeTestTemplate):
                 r.get(self.attribute_name) is not None
             ), f"Detected null records in attribute ('{self.attribute_name}')."
 
+    @classmethod
+    def evaluate(cls, prop):
+        return "null" not in prop.get("type", [])
+
 
 class AttributeUniquenessTest(AttributeTestTemplate):
     "Test that a given attribute contains unique values, ignoring nulls."
-    name = "unique"
+    name = "is_unique"
 
     def test(self):
         values = self.non_null_attribute_values
         assert len(set(values)) == len(
             values
         ), f"Attribute ({self.attribute_name}) is not unique."
+
+    @classmethod
+    def evaluate(cls, prop):
+        return bool(prop.get("required"))
