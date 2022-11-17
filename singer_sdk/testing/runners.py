@@ -92,9 +92,9 @@ class TapTestRunner(SingerTestRunner):
         self,
         tap_class: Type[Tap],
         config: dict = {},
-        kwargs: dict = {"parse_env_config": True},
+        **kwargs,
     ) -> None:
-        super().__init__(singer_class=tap_class, config=config, kwargs=kwargs)
+        super().__init__(singer_class=tap_class, config=config, **kwargs)
         self.tap = self.create()
 
     def run_discovery(self) -> str:
@@ -157,11 +157,11 @@ class TargetTestRunner(SingerTestRunner):
         self,
         target_class: Type[Target],
         config: dict = {},
-        kwargs: dict = {"parse_env_config": True},
         input_filepath: Path = None,
         input_io: io.StringIO | None = None,
+        **kwargs,
     ) -> None:
-        super().__init__(singer_class=target_class, config=config, kwargs=kwargs)
+        super().__init__(singer_class=target_class, config=config, **kwargs)
         self.target = self.create()
         self.input_filepath = input_filepath
         self.input_io = input_io
