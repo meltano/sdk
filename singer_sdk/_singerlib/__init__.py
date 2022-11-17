@@ -17,3 +17,22 @@ from singer_sdk._singerlib.messages import (
     write_message,
 )
 from singer_sdk._singerlib.schema import Schema, resolve_schema_references
+
+__all__ = [
+    "Catalog",
+    "CatalogEntry",
+    "Metadata",
+    "MetadataMapping",
+    "SelectionMask",
+    "StreamMetadata",
+    "ActivateVersionMessage",
+    "Message",
+    "RecordMessage",
+    "SchemaMessage",
+    "SingerMessageType",
+    "StateMessage",
+    "exclude_null_dict",
+    "write_message",
+    "Schema",
+    "resolve_schema_references",
+]

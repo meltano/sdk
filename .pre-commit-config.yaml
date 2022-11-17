@@ -20,7 +20,13 @@ repos:
             cookiecutter/.*/meltano.yml
         )$
   - id: end-of-file-fixer
-    exclude: (cookiecutter/.*|docs/.*|samples/.*\.json)
+    exclude: |
+      (?x)^(
+        cookiecutter/.*|
+        docs/.*|
+        samples/.*\.json|
+        tests/snapshots/.*/.*\.json
+      )$
   - id: trailing-whitespace
     exclude: |
         (?x)^(
