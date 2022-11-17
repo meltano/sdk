@@ -13,7 +13,9 @@ from singer_sdk.testing.suites import (
 from .conftest import gitlab_config
 
 TestSampleTapGitlab = get_test_class(
-    test_runner=TapTestRunner(tap_class=SampleTapGitlab, config=gitlab_config()),
+    test_runner=TapTestRunner(
+        tap_class=SampleTapGitlab, config=gitlab_config(), parse_env_config=True
+    ),
     test_suites=[tap_tests, tap_stream_tests, tap_stream_attribute_tests],
 )
 

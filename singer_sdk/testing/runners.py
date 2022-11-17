@@ -24,7 +24,7 @@ class SingerTestRunner:
         self,
         singer_class: Type[Tap] | Type[Target],
         config: dict = {},
-        kwargs: dict = {"parse_env_config": True},
+        **kwargs,
     ) -> None:
         """Initializes the test runner object.
 
@@ -34,7 +34,7 @@ class SingerTestRunner:
             kwargs (dict): Default arguments to be passed to tap/target on create.
         """
         self.singer_class = singer_class
-        self.config = config
+        self.config = config or {}
         self.default_kwargs = kwargs
 
     def create(self, kwargs: Optional[dict] = None) -> Type[Tap] | Type[Target]:
