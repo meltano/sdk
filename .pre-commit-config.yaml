@@ -20,7 +20,13 @@ repos:
             cookiecutter/.*/meltano.yml
         )$
   - id: end-of-file-fixer
-    exclude: (cookiecutter/.*|docs/.*|samples/.*\.json)
+    exclude: |
+      (?x)^(
+        cookiecutter/.*|
+        docs/.*|
+        samples/.*\.json|
+        tests/snapshots/.*/.*\.json
+      )$
   - id: trailing-whitespace
     exclude: |
         (?x)^(
@@ -57,7 +63,7 @@ repos:
     files: 'singer_sdk/.*'
 
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.2.0
+  rev: v3.2.2
   hooks:
   - id: pyupgrade
     args: [--py37-plus]

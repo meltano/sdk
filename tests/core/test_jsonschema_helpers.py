@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import re
-from typing import Callable, List
+from pathlib import Path
+from typing import Callable
 
 import pytest
+from pytest_snapshot.plugin import Snapshot
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -440,119 +442,121 @@ def test_array_type():
     assert ArrayType(wrapped_type).type_dict == expected_json_schema
 
 
+@pytest.mark.snapshot
 @pytest.mark.parametrize(
-    "properties,addtional_properties",
+    "schema_obj,snapshot_name",
     [
-        (
-            [
+        pytest.param(
+            ObjectType(
                 Property("id", StringType),
                 Property("email", StringType),
                 Property("username", StringType),
                 Property("phone_number", StringType),
-            ],
-            None,
+            ),
+            "base.json",
+            id="no required, no duplicates, no additional properties",
         ),
-        (
-            [
+        pytest.param(
+            ObjectType(
                 Property("id", StringType),
                 Property("email", StringType),
                 Property("username", StringType),
                 Property("phone_number", StringType),
-            ],
-            StringType,
+                additional_properties=StringType,
+            ),
+            "additional_properties.json",
+            id="no required, no duplicates, additional properties",
         ),
-        (
-            [
-                Property("id", StringType),
-                Property("id", StringType),
-                Property("email", StringType),
-                Property("username", StringType),
-                Property("phone_number", StringType),
-            ],
-            None,
-        ),
-        (
-            [
+        pytest.param(
+            ObjectType(
                 Property("id", StringType),
                 Property("id", StringType),
                 Property("email", StringType),
                 Property("username", StringType),
                 Property("phone_number", StringType),
-            ],
-            StringType,
+            ),
+            "duplicates.json",
+            id="no required, duplicates, no additional properties",
         ),
-        (
-            [
+        pytest.param(
+            ObjectType(
                 Property("id", StringType),
-                Property("email", StringType, True),
-                Property("username", StringType, True),
-                Property("phone_number", StringType),
-            ],
-            None,
-        ),
-        (
-            [
                 Property("id", StringType),
-                Property("email", StringType, True),
-                Property("username", StringType, True),
+                Property("email", StringType),
+                Property("username", StringType),
                 Property("phone_number", StringType),
-            ],
-            StringType,
+                additional_properties=StringType,
+            ),
+            "duplicates_additional_properties.json",
+            id="no required, duplicates, additional properties",
         ),
-        (
-            [
+        pytest.param(
+            ObjectType(
                 Property("id", StringType),
-                Property("email", StringType, True),
-                Property("email", StringType, True),
-                Property("username", StringType, True),
+                Property("email", StringType, required=True),
+                Property("username", StringType, required=True),
                 Property("phone_number", StringType),
-            ],
-            None,
+            ),
+            "required.json",
+            id="required, no duplicates, no additional properties",
         ),
-        (
-            [
+        pytest.param(
+            ObjectType(
                 Property("id", StringType),
-                Property("email", StringType, True),
-                Property("email", StringType, True),
-                Property("username", StringType, True),
+                Property("email", StringType, required=True),
+                Property("username", StringType, required=True),
                 Property("phone_number", StringType),
-            ],
-            StringType,
+                additional_properties=StringType,
+            ),
+            "required_additional_properties.json",
+            id="required, no duplicates, additional properties",
         ),
-    ],
-    ids=[
-        "no requried, no duplicates, no additional properties",
-        "no requried, no duplicates, additional properties",
-        "no requried, duplicates, no additional properties",
-        "no requried, duplicates, additional properties",
-        "requried, no duplicates, no additional properties",
-        "requried, no duplicates, additional properties",
-        "requried, duplicates, no additional properties",
-        "requried, duplicates, additional properties",
+        pytest.param(
+            ObjectType(
+                Property("id", StringType),
+                Property("email", StringType, required=True),
+                Property("email", StringType, required=True),
+                Property("username", StringType, required=True),
+                Property("phone_number", StringType),
+            ),
+            "required_duplicates.json",
+            id="required, duplicates, no additional properties",
+        ),
+        pytest.param(
+            ObjectType(
+                Property("id", StringType),
+                Property("email", StringType, required=True),
+                Property("email", StringType, required=True),
+                Property("username", StringType, required=True),
+                Property("phone_number", StringType),
+                additional_properties=StringType,
+            ),
+            "required_duplicates_additional_properties.json",
+            id="required, duplicates, additional properties",
+        ),
+        pytest.param(
+            ObjectType(
+                Property("id", StringType),
+                Property("email", StringType),
+                Property("username", StringType),
+                Property("phone_number", StringType),
+                pattern_properties={
+                    "^attr_[a-z]+$": StringType,
+                },
+            ),
+            "pattern_properties.json",
+            id="pattern properties",
+        ),
     ],
 )
-def test_object_type(properties: list[Property], addtional_properties: JSONTypeHelper):
-    merged_property_schemas = {
-        name: schema for p in properties for name, schema in p.to_dict().items()
-    }
-
-    required = [p.name for p in properties if not p.optional]
-    required_schema = {"required": required} if required else {}
-    addtional_properties_schema = (
-        {"additionalProperties": addtional_properties.type_dict}
-        if addtional_properties
-        else {}
-    )
-
-    expected_json_schema = {
-        "type": "object",
-        "properties": merged_property_schemas,
-        **required_schema,
-        **addtional_properties_schema,
-    }
-
-    object_type = ObjectType(*properties, additional_properties=addtional_properties)
-    assert object_type.type_dict == expected_json_schema
+def test_object_type(
+    schema_obj: ObjectType,
+    snapshot_dir: Path,
+    snapshot_name: str,
+    snapshot: Snapshot,
+):
+    snapshot.snapshot_dir = snapshot_dir.joinpath("jsonschema")
+    snapshot.assert_match(schema_obj.to_json(indent=2), snapshot_name)
 
 
 def test_custom_type():

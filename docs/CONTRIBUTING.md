@@ -111,6 +111,18 @@ def test_windows_only():
 
 Supported platform markers are `windows`, `darwin`, and `linux`.
 
+### Snapshot Testing
+
+We use [pytest-snapshot](https://pypi.org/project/pytest-snapshot/) for snapshot testing.
+To update snapshots, run:
+
+```bash
+nox -rs update_snapshots
+```
+
+This will run all tests with the `snapshot` marker and update any snapshots that have changed.
+Commit the updated snapshots to your branch if they are expected to change.
+
 ## Testing Updates to Docs
 
 Documentation runs on Sphinx, using ReadtheDocs style template, and hosting from
