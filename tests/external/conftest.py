@@ -7,7 +7,6 @@ from typing import Optional
 import pytest
 
 
-@pytest.fixture
 def gitlab_config() -> Optional[dict]:
     """Create a tap-gitlab config object."""
     config: Optional[dict] = None
@@ -19,7 +18,11 @@ def gitlab_config() -> Optional[dict]:
     return config
 
 
-@pytest.fixture
+@pytest.fixture(name="gitlab_config")
+def gitlab_config_fixture() -> Optional[dict]:
+    return gitlab_config()
+
+
 def ga_config() -> Optional[dict]:
     """Create a tap-google-analytics config object."""
     config: Optional[dict] = None
@@ -29,3 +32,8 @@ def ga_config() -> Optional[dict]:
         config = json.loads(path.read_text())
 
     return config
+
+
+@pytest.fixture(name="ga_config")
+def ga_config_fixture() -> Optional[dict]:
+    return ga_config()
