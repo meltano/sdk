@@ -24,7 +24,9 @@ class TapDiscoveryTest(TapTestTemplate):
         tap1.run_discovery()
         catalog = tap1.catalog_dict
         # Reset and re-initialize with an input catalog
-        tap2: Tap = self.runner.singer_class(config=self.runner.config, catalog=catalog)
+        tap2: Tap = self.runner.singer_class(
+            config=self.runner.config, catalog=catalog, **self.runner.default_kwargs
+        )
         assert tap2
 
 
