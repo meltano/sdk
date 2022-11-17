@@ -19,7 +19,12 @@ from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
-from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
+from singer_sdk.helpers.capabilities import (
+    TARGET_SCHEMA_CONFIG,
+    CapabilitiesEnum,
+    PluginCapabilities,
+    TargetCapabilities,
+)
 from singer_sdk.io_base import SingerMessageType, SingerReader
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
@@ -570,5 +575,47 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
 class SQLTarget(Target):
     """Target implementation for SQL destinations."""
+
+    @classproperty
+    def capabilities(self) -> list[CapabilitiesEnum]:
+        """Get target capabilities.
+
+        Returns:
+            A list of capabilities supported by this target.
+        """
+        sql_target_capabilities: list[CapabilitiesEnum] = super().capabilities
+        sql_target_capabilities.extend([TargetCapabilities.TARGET_SCHEMA])
+
+        return sql_target_capabilities
+
+    @classmethod
+    def append_builtin_config(cls: type[SQLTarget], config_jsonschema: dict) -> None:
+        """Appends built-in config to `config_jsonschema` if not already set.
+
+        To customize or disable this behavior, developers may either override this class
+        method or override the `capabilities` property to disabled any unwanted
+        built-in capabilities.
+
+        For all except very advanced use cases, we recommend leaving these
+        implementations "as-is", since this provides the most choice to users and is
+        the most "future proof" in terms of taking advantage of built-in capabilities
+        which may be added in the future.
+
+        Args:
+            config_jsonschema: [description]
+        """
+
+        def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
+            # Append any missing properties in the target with those from source.
+            for k, v in source_jsonschema["properties"].items():
+                if k not in target_jsonschema["properties"]:
+                    target_jsonschema["properties"][k] = v
+
+        capabilities = cls.capabilities
+
+        if TargetCapabilities.TARGET_SCHEMA in capabilities:
+            _merge_missing(TARGET_SCHEMA_CONFIG, config_jsonschema)
+
+        super().append_builtin_config(config_jsonschema)
 
     pass
