@@ -7,15 +7,21 @@ from .runners import SingerTestRunner
 
 def pytest_generate_tests(metafunc):
     # called once per each test function
-    funcarglist = metafunc.cls.params.get(metafunc.definition.name)
-    funcargids = metafunc.cls.param_ids.get(metafunc.definition.name)
-    if funcarglist:
-        argnames = funcarglist[0].keys()
-        metafunc.parametrize(
-            ",".join(argnames),
-            [[funcargs[name] for name in argnames] for funcargs in funcarglist],
-            ids=funcargids,
-        )
+    if metafunc.cls:
+        if hasattr(metafunc.cls, "params"):
+            funcarglist = metafunc.cls.params.get(metafunc.definition.name)
+            funcargids = (
+                metafunc.cls.param_ids.get(metafunc.definition.name)
+                if hasattr(metafunc.cls, "param_ids")
+                else None
+            )
+            if funcarglist:
+                argnames = funcarglist[0].keys()
+                metafunc.parametrize(
+                    ",".join(argnames),
+                    [[funcargs[name] for name in argnames] for funcargs in funcarglist],
+                    ids=funcargids,
+                )
 
 
 def get_test_class(
