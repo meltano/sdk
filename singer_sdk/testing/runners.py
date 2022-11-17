@@ -94,7 +94,7 @@ class TapTestRunner(SingerTestRunner):
         config: dict = {},
         **kwargs,
     ) -> None:
-        super().__init__(singer_class=tap_class, config=config, **kwargs)
+        super().__init__(singer_class=tap_class, config=config or {}, **kwargs)
         self.tap = self.create()
 
     def run_discovery(self) -> str:
@@ -161,7 +161,7 @@ class TargetTestRunner(SingerTestRunner):
         input_io: io.StringIO | None = None,
         **kwargs,
     ) -> None:
-        super().__init__(singer_class=target_class, config=config, **kwargs)
+        super().__init__(singer_class=target_class, config=config or {}, **kwargs)
         self.target = self.create()
         self.input_filepath = input_filepath
         self.input_io = input_io
