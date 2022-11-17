@@ -14,7 +14,7 @@ SAMPLE_FILEPATH = Path(f".output/test_{uuid.uuid4()}/")
 SAMPLE_FILENAME = SAMPLE_FILEPATH / "testfile.parquet"
 SAMPLE_CONFIG = {"filepath": str(SAMPLE_FILENAME)}
 
-StandardTestsTargetCSV = get_test_class(
+StandardTests = get_test_class(
     test_runner=TargetTestRunner(
         target_class=SampleTargetParquet, config=SAMPLE_CONFIG
     ),
@@ -23,7 +23,7 @@ StandardTestsTargetCSV = get_test_class(
 
 
 @pytest.mark.skipif("sys.version_info >= (3,11)")
-class TestTargetCSV(StandardTestsTargetCSV):
+class TestSampleTargetParquet(StandardTests):
     """Standard Target Tests."""
 
     @pytest.fixture(scope="class")

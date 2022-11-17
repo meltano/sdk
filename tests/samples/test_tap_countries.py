@@ -23,7 +23,7 @@ SAMPLE_CONFIG = {}
 SAMPLE_CONFIG_BAD = {"not": "correct"}
 
 # standard tap tests
-TestTapCountries = get_test_class(
+TestSampleTapCountries = get_test_class(
     test_runner=TapTestRunner(tap_class=SampleTapCountries, config=SAMPLE_CONFIG),
     test_suites=[tap_tests, tap_stream_tests, tap_stream_attribute_tests],
 )

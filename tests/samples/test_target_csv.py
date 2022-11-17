@@ -30,13 +30,13 @@ from singer_sdk.testing.suites import target_tests
 TEST_OUTPUT_DIR = Path(f".output/test_{uuid.uuid4()}/")
 SAMPLE_CONFIG = {"target_folder": f"{TEST_OUTPUT_DIR}/"}
 
-StandardTestsTargetCSV = get_test_class(
+StandardTests = get_test_class(
     test_runner=TargetTestRunner(target_class=SampleTargetCSV, config=SAMPLE_CONFIG),
     test_suites=[target_tests],
 )
 
 
-class TestTargetCSV(StandardTestsTargetCSV):
+class TestSampleTargetCSV(StandardTests):
     """Standard Target Tests."""
 
     @pytest.fixture(scope="class")
