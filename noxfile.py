@@ -69,7 +69,8 @@ def mypy(session: Session) -> None:
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
-    session.install(".")
+
+    session.install(".[s3]")
     session.install(*test_dependencies)
 
     # temp fix until pyarrow is supported on python 3.11
