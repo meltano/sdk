@@ -31,6 +31,10 @@ def get_test_class(
         params = {}
         param_ids = {}
 
+        @pytest.fixture
+        def resource(self):
+            yield
+
         @pytest.fixture(scope="class")
         def runner(self):
             return test_runner
@@ -92,7 +96,7 @@ def get_test_class(
                     )
                     test_ids.extend(
                         [
-                            f"{stream.name}_{attribute_name}"
+                            f"{stream.name}.{attribute_name}"
                             for attribute_name, value in stream.schema[
                                 "properties"
                             ].items()
