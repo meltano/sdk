@@ -58,6 +58,16 @@ def test_storage_get_url(file_scheme, root, prefix, expected):
         assert url.replace("\\", "/").endswith(expected)
 
 
+def test_storage_get_s3_url():
+    storage = StorageTarget("s3://testing123:testing123@test_bucket")
+
+    with storage.fs(create=True) as fs:
+        url = fs.geturl("prefix--file.jsonl.gz")
+        assert url.startswith(
+            "https://s3.amazonaws.com/test_bucket/prefix--file.jsonl.gz"
+        )
+
+
 @pytest.mark.parametrize(
     "file_url,root",
     [
@@ -65,6 +75,11 @@ def test_storage_get_url(file_scheme, root, prefix, expected):
             "file:///Users/sdk/path/to/file",
             "file:///Users/sdk/path/to",
             id="local",
+        ),
+        pytest.param(
+            "s3://test_bucket/prefix--file.jsonl.gz",
+            "s3://test_bucket",
+            id="s3",
         ),
     ],
 )

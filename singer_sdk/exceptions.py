@@ -1,4 +1,7 @@
 """Defines a common set of exceptions which developers can raise and/or catch."""
+
+from __future__ import annotations
+
 import requests
 
 
@@ -29,7 +32,7 @@ class RecordsWithoutSchemaException(Exception):
 class RetriableAPIError(Exception):
     """Exception raised when a failed request can be safely retried."""
 
-    def __init__(self, message: str, response: requests.Response = None) -> None:
+    def __init__(self, message: str, response: requests.Response | None = None) -> None:
         """Extends the default with the failed response as an attribute.
 
         Args:

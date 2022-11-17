@@ -45,6 +45,7 @@ Note:
 
 from __future__ import annotations
 
+import json
 import sys
 from typing import Any, Generic, Mapping, TypeVar, Union, cast
 
@@ -359,7 +360,7 @@ class Property(JSONTypeHelper, Generic[W]):
         name: str,
         wrapped: W | type[W],
         required: bool = False,
-        default: _JsonValue = None,
+        default: _JsonValue | None = None,
         description: str | None = None,
         secret: bool | None = False,
         allowed_values: list[Any] | None = None,
@@ -449,6 +450,7 @@ class ObjectType(JSONTypeHelper):
         self,
         *properties: Property,
         additional_properties: W | type[W] | None = None,
+        pattern_properties: Mapping[str, W | type[W]] | None = None,
     ) -> None:
         """Initialize ObjectType from its list of properties.
 
@@ -456,9 +458,12 @@ class ObjectType(JSONTypeHelper):
             properties: Zero or more attributes for this JSON object.
             additional_properties: A schema to match against unnamed properties in
                 this object.
+            pattern_properties: A dictionary of regex patterns to match against
+                property names, and the schema to match against the values.
         """
         self.wrapped: list[Property] = list(properties)
         self.additional_properties = additional_properties
+        self.pattern_properties = pattern_properties
 
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
@@ -481,7 +486,23 @@ class ObjectType(JSONTypeHelper):
         if self.additional_properties:
             result["additionalProperties"] = self.additional_properties.type_dict
 
+        if self.pattern_properties:
+            result["patternProperties"] = {
+                k: v.type_dict for k, v in self.pattern_properties.items()
+            }
+
         return result
+
+    def to_json(self, **kwargs: Any) -> str:
+        """Return a JSON string representation of the object.
+
+        Args:
+            **kwargs: Additional keyword arguments to pass to `json.dumps`.
+
+        Returns:
+            A JSON string.
+        """
+        return json.dumps(self.type_dict, **kwargs)
 
 
 class CustomType(JSONTypeHelper):
