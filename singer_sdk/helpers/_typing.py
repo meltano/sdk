@@ -314,5 +314,6 @@ def conform_record_data_types(  # noqa: C901
             rec[property_name] = boolean_representation
         else:
             rec[property_name] = elem
-    _warn_unmapped_properties(stream_name, tuple(unmapped_properties), logger)
+    if unmapped_properties:
+        _warn_unmapped_properties(stream_name, tuple(unmapped_properties), logger)
     return rec
