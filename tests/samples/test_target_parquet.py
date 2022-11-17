@@ -26,7 +26,6 @@ if sys.version_info < (3, 11):
         test_suites=[target_tests],
     )
 
-    @pytest.mark.skipif("")
     class TestSampleTargetParquet(StandardTests):
         """Standard Target Tests."""
 
