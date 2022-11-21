@@ -12,8 +12,8 @@ from logging import Logger
 from types import MappingProxyType
 from typing import IO, Any, Mapping, Sequence
 
+import fastjsonschema
 from dateutil import parser
-from jsonschema import Draft7Validator, FormatChecker
 
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
@@ -29,8 +29,6 @@ from singer_sdk.helpers._typing import (
 )
 from singer_sdk.plugin_base import PluginBase
 
-JSONSchemaValidator = Draft7Validator
-
 
 class Sink(metaclass=abc.ABCMeta):
     """Abstract base class for target sinks."""
@@ -38,6 +36,10 @@ class Sink(metaclass=abc.ABCMeta):
     # max timestamp/datetime supported, used to reset invalid dates
 
     logger: Logger
+
+    # If true, converts all date fields (per the schema) to datetimes.
+    #  If this is unhelpful, performance can be improved by disabling this behaviour.
+    PARSE_TIMESTAMPS_IN_RECORD = True
 
     MAX_SIZE_DEFAULT = 10000
 
@@ -80,7 +82,9 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
-        self._validator = Draft7Validator(schema, format_checker=FormatChecker())
+        # We use fastjsonschema over jsonschema as it is around 10x faster, and we run it every record so this adds
+        #  up very quickly
+        self._validator = fastjsonschema.compile(schema)
 
     def _get_context(self, record: dict) -> dict:
         """Return an empty dictionary by default.
@@ -299,10 +303,11 @@ class Sink(metaclass=abc.ABCMeta):
         Returns:
             TODO
         """
-        self._validator.validate(record)
-        self._parse_timestamps_in_record(
-            record=record, schema=self.schema, treatment=self.datetime_error_treatment
-        )
+        self._validator(record)
+        if self.PARSE_TIMESTAMPS_IN_RECORD:
+            self._parse_timestamps_in_record(
+                record=record, schema=self.schema, treatment=self.datetime_error_treatment
+            )
         return record
 
     def _parse_timestamps_in_record(
