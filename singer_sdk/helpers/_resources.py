@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 from types import ModuleType
+from typing import cast
 
 if sys.version_info >= (3, 9):
     import importlib.resources as importlib_resources
@@ -21,4 +22,4 @@ def get_package_files(package: str | ModuleType) -> Traversable:
     Returns:
         The file as a Traversable object.
     """
-    return importlib_resources.files(package)
+    return cast(Traversable, importlib_resources.files(package))
