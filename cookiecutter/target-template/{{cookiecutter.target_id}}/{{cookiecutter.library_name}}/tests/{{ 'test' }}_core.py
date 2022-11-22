@@ -1,10 +1,10 @@
 """Tests standard target features using the built-in SDK tests library."""
 
-import datetime
-
+import pytest
 from typing import Dict, Any
 
-from singer_sdk.testing import get_standard_target_tests
+from singer_sdk.testing import TargetTestRunner, get_test_class
+from singer_sdk.testing.suites import target_tests
 
 from {{ cookiecutter.library_name }}.target import Target{{ cookiecutter.destination_name }}
 
@@ -12,16 +12,29 @@ SAMPLE_CONFIG: Dict[str, Any] = {
     # TODO: Initialize minimal target config
 }
 
-
 # Run standard built-in target tests from the SDK:
-def test_standard_target_tests():
-    """Run standard target tests from the SDK."""
-    tests = get_standard_target_tests(
-        Target{{ cookiecutter.destination_name }},
-        config=SAMPLE_CONFIG,
-    )
-    for test in tests:
-        test()
+StandardTargetTests = get_test_class(
+    test_runner=TargetTestRunner(
+        target_class=Target{{ cookiecutter.destination_name }}, config=SAMPLE_CONFIG
+    ),
+    test_suites=[target_tests],
+)
+
+
+class TestTarget{{ cookiecutter.destination_name }}(StandardTargetTests):
+    """Standard Target Tests."""
+
+    @pytest.fixture(scope="class")
+    def resource(self):
+        """Generic external resource.
+
+        This fixture is useful for setup and teardown of external resources,
+        such output folders, tables, buckets etc. for use during testing.
+
+        Example usage can be found in the SDK samples test suite:
+        https://github.com/meltano/sdk/tree/main/tests/samples
+        """
+        yield "resource"
 
 
 # TODO: Create additional tests as appropriate for your target.

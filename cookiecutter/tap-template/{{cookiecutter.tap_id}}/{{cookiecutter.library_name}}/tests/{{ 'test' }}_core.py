@@ -2,7 +2,16 @@
 
 import datetime
 
-from singer_sdk.testing import get_standard_tap_tests
+from singer_sdk.testing import (
+    TapTestRunner,
+    get_test_class,
+    pytest_generate_tests # pytest hook function, required for standard tests
+)
+from singer_sdk.testing.suites import (
+    tap_stream_attribute_tests,
+    tap_stream_tests,
+    tap_tests,
+)
 
 from {{ cookiecutter.library_name }}.tap import Tap{{ cookiecutter.source_name }}
 
@@ -13,14 +22,10 @@ SAMPLE_CONFIG = {
 
 
 # Run standard built-in tap tests from the SDK:
-def test_standard_tap_tests():
-    """Run standard tap tests from the SDK."""
-    tests = get_standard_tap_tests(
-        Tap{{ cookiecutter.source_name }},
-        config=SAMPLE_CONFIG
-    )
-    for test in tests:
-        test()
+TestTap{{ cookiecutter.source_name }} = get_test_class(
+    test_runner=TapTestRunner(tap_class=Tap{{ cookiecutter.source_name }}, config=SAMPLE_CONFIG),
+    test_suites=[tap_tests, tap_stream_tests, tap_stream_attribute_tests],
+)
 
 
 # TODO: Create additional tests as appropriate for your tap.
