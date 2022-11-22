@@ -10,7 +10,11 @@ import pytest
 def gitlab_config() -> Optional[dict]:
     """Create a tap-gitlab config object."""
     config: Optional[dict] = None
+
     path = Path("singer_sdk/tests/external/.secrets/gitlab-config.json")
+    if not path.exists():
+        # local testing relative path
+        path = Path("tests/external/.secrets/gitlab-config.json")
 
     if path.exists():
         config = json.loads(path.read_text())

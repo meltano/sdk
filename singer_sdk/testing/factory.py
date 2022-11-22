@@ -79,8 +79,6 @@ def get_test_class(
 
         if suite.type == "tap_stream_attribute":
 
-            params = []
-            param_ids = []
             for TestClass in suite.tests:
                 test = TestClass()
                 test_name = f"test_{suite.type}_{test.name}"
@@ -92,33 +90,39 @@ def get_test_class(
                             {
                                 "stream": stream,
                                 "stream_records": test_runner.records[stream.name],
-                                "attribute_name": attribute_name,
+                                "attribute_name": property_name,
                             }
-                            for attribute_name, value in stream.schema[
+                            for property_name, property_schema in stream.schema[
                                 "properties"
                             ].items()
-                            if TestClass.evaluate(value)
+                            if TestClass.evaluate(
+                                stream=stream,
+                                property_name=property_name,
+                                property_schema=property_schema,
+                            )
                         ]
                     )
                     test_ids.extend(
                         [
-                            f"{stream.name}.{attribute_name}"
-                            for attribute_name, value in stream.schema[
+                            f"{stream.name}.{property_name}"
+                            for property_name, property_schema in stream.schema[
                                 "properties"
                             ].items()
-                            if TestClass.evaluate(value)
+                            if TestClass.evaluate(
+                                stream=stream,
+                                property_name=property_name,
+                                property_schema=property_schema,
+                            )
                         ]
                     )
 
                 if test_params:
-                    params.extend(test_params)
-                    param_ids.extend(test_ids)
                     setattr(
                         test_factory_class,
                         test_name,
                         test.run,
                     )
-                    test_factory_class.params[test_name] = params
-                    test_factory_class.param_ids[test_name] = param_ids
+                    test_factory_class.params[test_name] = test_params
+                    test_factory_class.param_ids[test_name] = test_ids
 
     return test_factory_class

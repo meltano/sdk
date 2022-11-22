@@ -8,7 +8,6 @@ from .tap_tests import (
     AttributeIsNumberTest,
     AttributeIsObjectTest,
     AttributeNotNullTest,
-    AttributeUniquenessTest,
     StreamCatalogSchemaMatchesRecordTest,
     StreamPrimaryKeysTest,
     StreamRecordSchemaMatchesCatalogTest,
@@ -64,7 +63,6 @@ tap_stream_attribute_tests = TestSuite(
         AttributeIsNumberTest,
         AttributeIsObjectTest,
         AttributeNotNullTest,
-        AttributeUniquenessTest,
     ],
 )
 

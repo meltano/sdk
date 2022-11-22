@@ -116,7 +116,7 @@ class AttributeTestTemplate(TestTemplate):
         return values
 
     @classmethod
-    def evaluate(cls, prop):
+    def evaluate(cls, stream, property_name, property_schema):
         raise NotImplementedError(
             "The 'evaluate' method is required for attribute tests, but not implemented."
         )

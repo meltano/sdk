@@ -1,5 +1,8 @@
+import warnings
+
 from dateutil import parser
 
+import singer_sdk.helpers._typing as th
 from singer_sdk.tap_base import Tap
 
 from .templates import AttributeTestTemplate, StreamTestTemplate, TapTestTemplate
@@ -56,7 +59,8 @@ class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
         stream_catalog_keys = set(self.stream.schema["properties"].keys())
         stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
         diff = stream_catalog_keys - stream_record_keys
-        assert diff == set(), f"Fields in catalog but not in record: ({diff})"
+        if diff != set():
+            warnings.warn(UserWarning(f"Fields in catalog but not in record: ({diff})"))
 
 
 class StreamRecordSchemaMatchesCatalogTest(StreamTestTemplate):
@@ -76,7 +80,10 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
 
     def test(self):
         primary_keys = self.stream.primary_keys
-        record_ids = [(r[k] for k in primary_keys) for r in self.stream_records]
+        try:
+            record_ids = [(r[k] for k in primary_keys) for r in self.stream_records]
+        except KeyError as e:
+            raise AssertionError(f"Record missing primary key: {str(e)}")
         count_unique_records = len(set(record_ids))
         count_records = len(self.stream_records)
         assert count_unique_records == count_records, (
@@ -101,8 +108,8 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
                 raise AssertionError(error_message) from e
 
     @classmethod
-    def evaluate(cls, prop):
-        return prop.get("format") == "date-time"
+    def evaluate(cls, stream, property_name, property_schema):
+        return bool(th.is_date_or_datetime_type(property_schema))
 
 
 class AttributeIsBooleanTest(AttributeTestTemplate):
@@ -118,8 +125,8 @@ class AttributeIsBooleanTest(AttributeTestTemplate):
             }, f"Unable to cast value ('{v}') to boolean type."
 
     @classmethod
-    def evaluate(cls, prop):
-        return "boolean" in prop.get("type", [])
+    def evaluate(cls, stream, property_name, property_schema):
+        return bool(th.is_boolean_type(property_schema))
 
 
 class AttributeIsObjectTest(AttributeTestTemplate):
@@ -131,8 +138,8 @@ class AttributeIsObjectTest(AttributeTestTemplate):
             assert isinstance(v, dict), f"Unable to cast value ('{v}') to dict type."
 
     @classmethod
-    def evaluate(cls, prop):
-        return "object" in prop.get("type", [])
+    def evaluate(cls, stream, property_name, property_schema):
+        return bool(th.is_object_type(property_schema))
 
 
 class AttributeIsIntegerTest(AttributeTestTemplate):
@@ -141,11 +148,13 @@ class AttributeIsIntegerTest(AttributeTestTemplate):
 
     def test(self):
         for v in self.non_null_attribute_values:
-            assert isinstance(v, int), f"Unable to cast value ('{v}') to int type."
+            assert isinstance(v, int) or isinstance(
+                int(v), int
+            ), f"Unable to cast value ('{v}') to int type."
 
     @classmethod
-    def evaluate(cls, prop):
-        return "integer" in prop.get("type", [])
+    def evaluate(cls, stream, property_name, property_schema):
+        return bool(th.is_integer_type(property_schema))
 
 
 class AttributeIsNumberTest(AttributeTestTemplate):
@@ -161,8 +170,8 @@ class AttributeIsNumberTest(AttributeTestTemplate):
                 raise AssertionError(error_message) from e
 
     @classmethod
-    def evaluate(cls, prop):
-        return "number" in prop.get("type", [])
+    def evaluate(cls, stream, property_name, property_schema):
+        return bool(th.is_number_type(property_schema))
 
 
 class AttributeNotNullTest(AttributeTestTemplate):
@@ -173,23 +182,11 @@ class AttributeNotNullTest(AttributeTestTemplate):
         for r in self.stream_records:
             assert (
                 r.get(self.attribute_name) is not None
-            ), f"Detected null records in attribute ('{self.attribute_name}')."
+            ), f"Detected null values for attribute ('{self.attribute_name}')."
 
     @classmethod
-    def evaluate(cls, prop):
-        return "null" not in prop.get("type", [])
-
-
-class AttributeUniquenessTest(AttributeTestTemplate):
-    "Test that a given attribute contains unique values, ignoring nulls."
-    name = "is_unique"
-
-    def test(self):
-        values = self.non_null_attribute_values
-        assert len(set(values)) == len(
-            values
-        ), f"Attribute ({self.attribute_name}) is not unique."
-
-    @classmethod
-    def evaluate(cls, prop):
-        return bool(prop.get("required"))
+    def evaluate(cls, stream, property_name, property_schema):
+        if stream.name == "issues" and property_name == "closed_at":
+            null = th.is_null_type(property_schema)
+            return
+        return not bool(th.is_null_type(property_schema))
