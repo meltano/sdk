@@ -1,8 +1,10 @@
 """Typing tests."""
 
+from __future__ import annotations
+
 import logging
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 import pendulum
 import pytest
@@ -15,31 +17,60 @@ from singer_sdk.helpers._typing import (
 
 
 @pytest.mark.parametrize(
-    "record,schema,expected_row",
+    "record,schema,expected_row,ignore_props_message",
     [
         (
             {"updatedAt": pendulum.parse("2021-08-25T20:05:28+00:00")},
             {"properties": {"updatedAt": True}},
             {"updatedAt": "2021-08-25T20:05:28+00:00"},
+            None,
         ),
         (
             {"updatedAt": pendulum.parse("2021-08-25T20:05:28Z")},
             {"properties": {"updatedAt": True}},
             {"updatedAt": "2021-08-25T20:05:28+00:00"},
+            None,
         ),
         (
             {"updatedAt": pendulum.parse("2021-08-25T20:05:28")},
             {"properties": {"updatedAt": True}},
             {"updatedAt": "2021-08-25T20:05:28+00:00"},
+            None,
+        ),
+        (
+            {"present": 1, "absent": "2"},
+            {"properties": {"present": {"type": "integer"}}},
+            {"present": 1},
+            (
+                "Properties ('absent',) were present in the 'test-stream' stream but "
+                "not found in catalog schema. Ignoring."
+            ),
         ),
     ],
+    ids=[
+        "datetime with offset",
+        "datetime with timezone",
+        "datetime without timezone",
+        "ignored_props_message",
+    ],
 )
-def test_conform_record_data_types(record: Dict[str, Any], schema: dict, expected_row):
+def test_conform_record_data_types(
+    record: dict[str, Any],
+    schema: dict,
+    expected_row: dict,
+    ignore_props_message: str,
+    caplog: pytest.LogCaptureFixture,
+):
     stream_name = "test-stream"
-    # TODO: mock this out
-    logger = logging.getLogger()
-    actual = conform_record_data_types(stream_name, record, schema, logger)
-    print(record["updatedAt"].isoformat())
+    logger = logging.getLogger("test-logger")
+
+    with caplog.at_level(logging.INFO, logger=logger.name):
+        actual = conform_record_data_types(stream_name, record, schema, logger)
+        if ignore_props_message:
+            assert ignore_props_message in caplog.text
+        else:
+            assert not caplog.text
+
     assert actual == expected_row
 
 
