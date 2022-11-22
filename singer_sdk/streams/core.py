@@ -9,7 +9,6 @@ import gzip
 import itertools
 import json
 import logging
-from functools import partial
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
@@ -332,9 +331,8 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             The most recent value between the bookmark and start date.
         """
-        parse = partial(pendulum.parse, strict=False)
         if self.is_timestamp_replication_key:
-            return max(value, start_date_value, key=parse)
+            return max(value, start_date_value, key=pendulum.parse)
         else:
             return value
 
