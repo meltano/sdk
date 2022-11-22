@@ -83,10 +83,10 @@ def tests(session: Session) -> None:
         session.run(
             "coverage",
             "run",
-            "--parallel",
+            # "--parallel",
             "-m",
             "pytest",
-            "-x",
+            # "-x",
             "-v",
             *session.posargs,
         )
