@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 import os
 import warnings
@@ -24,8 +26,8 @@ class TestTemplate:
         NotImplementedError: [description]
     """
 
-    name: str = None
-    type: str = None
+    name: str | None = None
+    type: str | None = None
 
     @property
     def id(self):

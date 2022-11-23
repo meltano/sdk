@@ -1,5 +1,7 @@
+"""Standard Tap and Target test suites."""
+
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
 from .tap_tests import (
     AttributeIsBooleanTest,
@@ -32,13 +34,15 @@ from .target_tests import (  # TargetMultipleStateMessages,  TODO: fix behavior 
     TargetSchemaUpdates,
     TargetSpecialCharsInAttributes,
 )
-from .templates import TestTemplate
+from .templates import TapTestTemplate, TargetTestTemplate, TestTemplate
 
 
 @dataclass
 class TestSuite:
+    """Test Suite container class."""
+
     type: str
-    tests: List[TestTemplate]
+    tests: List[Union[TestTemplate, TapTestTemplate, TargetTestTemplate]]
 
 
 # Tap Test Suites

@@ -6,27 +6,28 @@ import json
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
-from typing import List, Optional, Type
+from typing import Any, List, Optional, Type, Union
 
-from singer_sdk.exceptions import MaxRecordsLimitException
 from singer_sdk.tap_base import Tap
 from singer_sdk.target_base import Target
 
 
 class SingerTestRunner:
-    raw_messages = None
-    schema_messages = []
-    record_messages = []
-    state_messages = []
-    records = defaultdict(list)
+    """Base Singer Test Runner."""
+
+    raw_messages: str | None = None
+    schema_messages: List[dict] = []
+    record_messages: List[dict] = []
+    state_messages: List[dict] = []
+    records: List[dict] = defaultdict(list)
 
     def __init__(
         self,
-        singer_class: Type[Tap] | Type[Target],
-        config: dict = {},
-        **kwargs,
+        singer_class: Union[Type[Tap], Type[Target]],
+        config: Optional[dict] = None,
+        **kwargs: Any,
     ) -> None:
-        """Initializes the test runner object.
+        """Initialize the test runner object.
 
         Args:
             singer_class (Type[Tap] | Type[Target]): Singer class to be tested.
@@ -37,8 +38,8 @@ class SingerTestRunner:
         self.config = config or {}
         self.default_kwargs = kwargs
 
-    def create(self, kwargs: Optional[dict] = None) -> Type[Tap] | Type[Target]:
-        """Creates a new tap/target from the runner defaults.
+    def create(self, kwargs: Optional[dict] = None) -> Union[Type[Tap], Type[Target]]:
+        """Create a new tap/target from the runner defaults.
 
         Args:
             kwargs (dict, optional): [description]. Defaults to None.
@@ -52,92 +53,92 @@ class SingerTestRunner:
 
 
 class TapTestRunner(SingerTestRunner):
-    """Utility class to simplify tap testing.
-
-    This utility class enables developers to more easily test taps against
-    live integrations. Developers can leverage the data output from the sync to
-    test assumptions about their tap schemas and the data output from the source
-    system.
-
-    The standard approach for testing is using the `get_standard_tap_tests`
-    approach, which uses the TapTestRunner to generate a series of tests and
-    run them via PyTest. In this case, no direct invocation of the runner object
-    is required by the developer.
-
-    The TapTestRunner can also be used to write custom tests against the tap output.
-    The most convenient way to do this is to initialize the object as a fixture,
-    then write specific tests against this.
-
-    ```
-    @pytest.fixture(scope="session")
-    def test_runner():
-        runner = TapTestRunner(
-            tap_classTapSlack,
-            tap_configconfig={},
-            stream_record_limit=500
-        )
-        runner.run_discovery()
-        runner.run_sync()
-
-        yield runner
-
-    def test_foo_stream_returns_500_records(test_runner):
-        assert len(runner.records["foo"]) == 500
-    ```
-    """
+    """Utility class to simplify tap testing."""
 
     type = "tap"
 
     def __init__(
         self,
         tap_class: Type[Tap],
-        config: dict = {},
-        **kwargs,
+        config: Optional[dict] = None,
+        **kwargs: Any,
     ) -> None:
+        """Initialize Tap instance.
+
+        Args:
+            tap_class: Tap class to run.
+            config: Config dict to pass to Tap class.
+            kwargs: Default arguments to be passed to tap on create.
+        """
         super().__init__(singer_class=tap_class, config=config or {}, **kwargs)
 
     @property
-    def tap(self):
+    def tap(self) -> Type[Tap]:
+        """Get new Tap instance.
+
+        Returns:
+            A configured Tap instance.
+        """
         return self.create()
 
     def run_discovery(self) -> str:
-        """Run tap discovery."""
+        """Run tap discovery.
+
+        Returns:
+            The catalog as a string.
+        """
         return self.tap.run_discovery()
 
     def run_connection_test(self) -> bool:
-        """Run tap connection test."""
+        """Run tap connection test.
+
+        Returns:
+            True if connection test passes, else False.
+        """
         return self.tap.run_connection_test()
 
     def sync_all(self) -> None:
-        """Runs a full tap sync, assigning output to the runner object."""
+        """Run a full tap sync, assigning output to the runner object."""
         stdout, stderr = self._execute_sync()
-        records = self._clean_sync_output(stdout)
-        self._parse_records(records)
+        messages = self._clean_sync_output(stdout)
+        self._parse_records(messages)
 
     def _clean_sync_output(self, raw_records: str) -> List[dict]:
+        """Clean sync output.
+
+        Args:
+            raw_records: String containing raw messages.
+
+        Returns:
+            A list of raw messages in dict form.
+        """
         lines = raw_records.strip().split("\n")
         return [json.loads(ii) for ii in lines]
 
-    def _parse_records(self, records: List[dict]) -> None:
-        """Saves raw and parsed messages onto the runner object."""
-        self.raw_messages = records
-        for record in records:
-            if record:
-                if record["type"] == "STATE":
-                    self.state_messages.append(record)
+    def _parse_records(self, messages: List[dict]) -> None:
+        """Save raw and parsed messages onto the runner object.
+
+        Args:
+            messages: A list of messages in dict form.
+        """
+        self.raw_messages = messages
+        for message in messages:
+            if message:
+                if message["type"] == "STATE":
+                    self.state_messages.append(message)
                     continue
-                if record["type"] == "SCHEMA":
-                    self.schema_messages.append(record)
+                if message["type"] == "SCHEMA":
+                    self.schema_messages.append(message)
                     continue
-                if record["type"] == "RECORD":
-                    stream_name = record["stream"]
-                    self.record_messages.append(record)
-                    self.records[stream_name].append(record["record"])
+                if message["type"] == "RECORD":
+                    stream_name = message["stream"]
+                    self.record_messages.append(message)
+                    self.records[stream_name].append(message["record"])
                     continue
         return
 
     def _execute_sync(self) -> List[dict]:
-        """Invokes a Tap object and return STDOUT and STDERR results in StringIO buffers.
+        """Invoke a Tap object and return STDOUT and STDERR results in StringIO buffers.
 
         Returns:
             A 2-item tuple with StringIO buffers from the Tap's output: (stdout, stderr)
@@ -159,22 +160,43 @@ class TargetTestRunner(SingerTestRunner):
     def __init__(
         self,
         target_class: Type[Target],
-        config: dict = {},
-        input_filepath: Path = None,
-        input_io: io.StringIO | None = None,
-        **kwargs,
+        config: Optional[dict] = None,
+        input_filepath: Optional[Path] = None,
+        input_io: Optional[io.StringIO] = None,
+        **kwargs: Any,
     ) -> None:
+        """Initialize TargetTestRunner.
+
+        Args:
+            target_class: Target Class to instantiate.
+            config: Config to pass to instantiated Target.
+            input_filepath: (optional) Path to a singer file containing records, to pass
+                to the Target during testing.
+            input_io: (optional) StringIO containing raw records to pass to the Target
+                during testing.
+            kwargs: Default arguments to be passed to tap/target on create.
+        """
         super().__init__(singer_class=target_class, config=config or {}, **kwargs)
         self.input_filepath = input_filepath
         self.input_io = input_io
         self._input = None
 
     @property
-    def target(self):
+    def target(self) -> Type[Target]:
+        """Get new Target instance.
+
+        Returns:
+            A configured Target instance.
+        """
         return self.create()
 
     @property
-    def input(self):
+    def input(self) -> List[str]:
+        """Input messages to pass to Target.
+
+        Returns:
+            A list of raw input messages in string form.
+        """
         if self._input is None:
             if self.input_io:
                 self._input = self.input_io.read()
@@ -183,11 +205,16 @@ class TargetTestRunner(SingerTestRunner):
         return self._input
 
     @input.setter
-    def input(self, value):
+    def input(self, value: List[str]) -> None:
         self._input = value
 
     def sync_all(self, finalize: bool = True) -> None:
-        """Runs a full tap sync, assigning output to the runner object."""
+        """Run a full tap sync, assigning output to the runner object.
+
+        Args:
+            finalize: True to process as the end of stream as a completion signal;
+                False to keep the sink operation open for further records.
+        """
         target = self.create()
         stdout, stderr = self._execute_sync(
             target=target, input=self.input, finalize=finalize
@@ -201,12 +228,14 @@ class TargetTestRunner(SingerTestRunner):
         """Invoke the target with the provided input.
 
         Args:
+            target: Target to sync.
             input: The input to process as if from STDIN.
-            finalize: True to process as the end of stream as a completion signal; False to
-                keep the sink operation open for further records.
+            finalize: True to process as the end of stream as a completion signal;
+                False to keep the sink operation open for further records.
 
         Returns:
-            A 2-item tuple with StringIO buffers from the Target's output: (stdout, stderr)
+            A 2-item tuple with StringIO buffers from the Target's output:
+                (stdout, stderr)
         """
         stdout_buf = io.StringIO()
         stderr_buf = io.StringIO()
