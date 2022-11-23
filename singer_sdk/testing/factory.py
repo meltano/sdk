@@ -64,6 +64,18 @@ def get_test_class(
 
     for suite in test_suites:
 
+        # make sure given runner is of type TapTestRunner
+        expected_runner_class = (  # type: ignore[valid-type]
+            TapTestRunner
+            if suite.kind in {"tap", "tap_stream", "tap_stream_attribute"}
+            else TargetTestRunner
+        )
+        assert isinstance(test_runner, expected_runner_class), (
+            f"Test suite of kind {suite.kind} passed, "
+            f"but test runner if of type {type(test_runner)}."
+        )
+        test_runner = cast(expected_runner_class, test_runner)  # type: ignore[valid-type]
+
         if suite.kind in {"tap", "target"}:
             for TestClass in suite.tests:
                 test = TestClass()
@@ -71,12 +83,6 @@ def get_test_class(
                 setattr(BaseTestClass, f"test_{suite.kind}_{test.name}", test.run)
 
         if suite.kind in {"tap_stream", "tap_stream_attribute"}:
-
-            # make sure given runner is of type TapTestRunner
-            assert isinstance(
-                test_runner, TapTestRunner
-            ), f"Tap test suite passed, but runner if of type {type(test_runner)}."
-            test_runner = cast(TapTestRunner, test_runner)
 
             # Populate runner class with records for use in stream/attribute tests
             test_runner.sync_all()
