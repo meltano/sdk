@@ -61,7 +61,7 @@ autodoc_class_signature = "separated"
 # a list of builtin themes.
 #
 html_theme = "sphinx_rtd_theme"
-html_theme_options = {"logo_only": True, "analytics_id": "G-84WQMSLGTE"}
+html_theme_options = {"logo_only": True, "analytics_id": "GTM-WHJMBX2"}
 
 html_logo = "_static/img/logo.svg"
 
