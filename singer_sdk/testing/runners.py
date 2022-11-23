@@ -1,4 +1,5 @@
 """Utility object for running taps/targets, capturing sync output during testing."""
+
 from __future__ import annotations
 
 import io
@@ -6,7 +7,7 @@ import json
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
-from typing import Any, List, Optional, Type, Union
+from typing import Any, List, Optional, Type
 
 from singer_sdk.tap_base import Tap
 from singer_sdk.target_base import Target
@@ -23,7 +24,7 @@ class SingerTestRunner:
 
     def __init__(
         self,
-        singer_class: Union[Type[Tap], Type[Target]],
+        singer_class: Type[Tap] | Type[Target],
         config: Optional[dict] = None,
         **kwargs: Any,
     ) -> None:
@@ -38,7 +39,7 @@ class SingerTestRunner:
         self.config = config or {}
         self.default_kwargs = kwargs
 
-    def create(self, kwargs: Optional[dict] = None) -> Union[Type[Tap], Type[Target]]:
+    def create(self, kwargs: Optional[dict] = None) -> Type[Tap] | Type[Target]:
         """Create a new tap/target from the runner defaults.
 
         Args:

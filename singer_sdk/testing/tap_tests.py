@@ -1,28 +1,36 @@
+"""Standard Tap Tests."""
+
 import warnings
+from typing import Self, Type
 
 from dateutil import parser
 
 import singer_sdk.helpers._typing as th
+from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 
 from .templates import AttributeTestTemplate, StreamTestTemplate, TapTestTemplate
 
 
 class TapCLIPrintsTest(TapTestTemplate):
-    "Test that the tap is able to print standard metadata."
+    """Test that the tap is able to print standard metadata."""
+
     name = "cli_prints"
 
-    def test(self):
+    def test(self) -> None:
+        """Run test."""
         self.tap.print_version()
         self.tap.print_about()
         self.tap.print_about(format="json")
 
 
 class TapDiscoveryTest(TapTestTemplate):
-    "Test that discovery mode generates a valid tap catalog."
+    """Test that discovery mode generates a valid tap catalog."""
+
     name = "discovery"
 
     def test(self) -> None:
+        """Run test."""
         tap1 = self.tap
         tap1.run_discovery()
         catalog = tap1.catalog_dict
@@ -34,28 +42,33 @@ class TapDiscoveryTest(TapTestTemplate):
 
 
 class TapStreamConnectionTest(TapTestTemplate):
-    "Test that the tap can connect to each stream."
+    """Test that the tap can connect to each stream."""
+
     name = "stream_connections"
 
     def test(self) -> None:
-        # Initialize with basic config
+        """Run test."""
         self.tap.run_connection_test()
 
 
 class StreamReturnsRecordTest(StreamTestTemplate):
-    "Test that a stream sync returns at least 1 record."
+    """Test that a stream sync returns at least 1 record."""
+
     name = "returns_record"
 
-    def test(self):
+    def test(self) -> None:
+        """Run test."""
         record_count = len(self.stream_records)
         assert record_count > 0, "No records returned in stream."
 
 
 class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
-    "Test that all attributes in the catalog schema are present in the record schema."
+    """Test all attributes in the catalog schema are present in the record schema."""
+
     name = "catalog_schema_matches_record"
 
-    def test(self):
+    def test(self) -> None:
+        """Run test."""
         stream_catalog_keys = set(self.stream.schema["properties"].keys())
         stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
         diff = stream_catalog_keys - stream_record_keys
@@ -64,10 +77,12 @@ class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
 
 
 class StreamRecordSchemaMatchesCatalogTest(StreamTestTemplate):
-    "Test that all attributes in the record schema are present in the catalog schema."
+    """Test all attributes in the record schema are present in the catalog schema."""
+
     name = "record_schema_matches_catalog"
 
-    def test(self):
+    def test(self) -> None:
+        """Run test."""
         stream_catalog_keys = set(self.stream.schema["properties"].keys())
         stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
         diff = stream_record_keys - stream_catalog_keys
@@ -75,10 +90,16 @@ class StreamRecordSchemaMatchesCatalogTest(StreamTestTemplate):
 
 
 class StreamPrimaryKeysTest(StreamTestTemplate):
-    "Test that all records for a stream's primary key are unique and non-null."
+    """Test all records for a stream's primary key are unique and non-null."""
+
     name = "primary_keys"
 
-    def test(self):
+    def test(self) -> None:
+        """Run test.
+
+        Raises:
+            AssertionError: if record is missing primary key.
+        """
         primary_keys = self.stream.primary_keys
         try:
             record_ids = [(r[k] for k in primary_keys) for r in self.stream_records]
@@ -96,10 +117,16 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
 
 
 class AttributeIsDateTimeTest(AttributeTestTemplate):
-    "Test that a given attribute contains unique values (ignores null values)."
+    """Test a given attribute contains unique values (ignores null values)."""
+
     name = "is_datetime"
 
-    def test(self):
+    def test(self) -> None:
+        """Run test.
+
+        Raises:
+            AssertionError: if value cannot be parsed as a datetime.
+        """
         for v in self.non_null_attribute_values:
             try:
                 error_message = f"Unable to parse value ('{v}') with datetime parser."
@@ -108,16 +135,32 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
                 raise AssertionError(error_message) from e
 
     @classmethod
-    def evaluate(cls, stream, property_name, property_schema):
+    def evaluate(
+        cls: Type[Self @ AttributeTestTemplate],
+        stream: Type[Stream],
+        property_name: str,
+        property_schema: dict,
+    ) -> bool:
+        """Determine if this attribute test is applicable to the given property.
+
+        Args:
+            stream: Parent Stream of given attribute.
+            property_name: Name of given attribute.
+            property_schema: JSON Schema of given property, in dict form.
+
+        Returns:
+            True if this test is applicable, False if not.
+        """
         return bool(th.is_date_or_datetime_type(property_schema))
 
 
 class AttributeIsBooleanTest(AttributeTestTemplate):
-    "Test that an attribute is of boolean datatype (or can be cast to it)."
+    """Test an attribute is of boolean datatype (or can be cast to it)."""
+
     name = "is_boolean"
 
-    def test(self):
-        "Test that a given attribute does not contain any null values."
+    def test(self) -> None:
+        """Run test."""
         for v in self.non_null_attribute_values:
             assert isinstance(v, bool) or str(v).lower() in {
                 "true",
@@ -125,43 +168,98 @@ class AttributeIsBooleanTest(AttributeTestTemplate):
             }, f"Unable to cast value ('{v}') to boolean type."
 
     @classmethod
-    def evaluate(cls, stream, property_name, property_schema):
+    def evaluate(
+        cls: Type[Self @ AttributeTestTemplate],
+        stream: Type[Stream],
+        property_name: str,
+        property_schema: dict,
+    ) -> bool:
+        """Determine if this attribute test is applicable to the given property.
+
+        Args:
+            stream: Parent Stream of given attribute.
+            property_name: Name of given attribute.
+            property_schema: JSON Schema of given property, in dict form.
+
+        Returns:
+            True if this test is applicable, False if not.
+        """
         return bool(th.is_boolean_type(property_schema))
 
 
 class AttributeIsObjectTest(AttributeTestTemplate):
-    "Test that a given attribute is an object type."
+    """Test that a given attribute is an object type."""
+
     name = "is_object"
 
-    def test(self):
+    def test(self) -> None:
+        """Run test."""
         for v in self.non_null_attribute_values:
             assert isinstance(v, dict), f"Unable to cast value ('{v}') to dict type."
 
     @classmethod
-    def evaluate(cls, stream, property_name, property_schema):
+    def evaluate(
+        cls: Type[Self @ AttributeTestTemplate],
+        stream: Type[Stream],
+        property_name: str,
+        property_schema: dict,
+    ) -> bool:
+        """Determine if this attribute test is applicable to the given property.
+
+        Args:
+            stream: Parent Stream of given attribute.
+            property_name: Name of given attribute.
+            property_schema: JSON Schema of given property, in dict form.
+
+        Returns:
+            True if this test is applicable, False if not.
+        """
         return bool(th.is_object_type(property_schema))
 
 
 class AttributeIsIntegerTest(AttributeTestTemplate):
-    "Test that a given attribute can be converted to an integer type."
+    """Test that a given attribute can be converted to an integer type."""
+
     name = "is_integer"
 
-    def test(self):
+    def test(self) -> None:
+        """Run test."""
         for v in self.non_null_attribute_values:
             assert isinstance(v, int) or isinstance(
                 int(v), int
             ), f"Unable to cast value ('{v}') to int type."
 
     @classmethod
-    def evaluate(cls, stream, property_name, property_schema):
+    def evaluate(
+        cls: Type[Self @ AttributeTestTemplate],
+        stream: Type[Stream],
+        property_name: str,
+        property_schema: dict,
+    ) -> bool:
+        """Determine if this attribute test is applicable to the given property.
+
+        Args:
+            stream: Parent Stream of given attribute.
+            property_name: Name of given attribute.
+            property_schema: JSON Schema of given property, in dict form.
+
+        Returns:
+            True if this test is applicable, False if not.
+        """
         return bool(th.is_integer_type(property_schema))
 
 
 class AttributeIsNumberTest(AttributeTestTemplate):
-    "Test that a given attribute can be converted to a floating point number type."
+    """Test that a given attribute can be converted to a floating point number type."""
+
     name = "is_numeric"
 
-    def test(self):
+    def test(self) -> None:
+        """Run test.
+
+        Raises:
+            AssertionError: if value cannot be cast to float type.
+        """
         for v in self.non_null_attribute_values:
             try:
                 error_message = f"Unable to cast value ('{v}') to float type."
@@ -170,23 +268,52 @@ class AttributeIsNumberTest(AttributeTestTemplate):
                 raise AssertionError(error_message) from e
 
     @classmethod
-    def evaluate(cls, stream, property_name, property_schema):
+    def evaluate(
+        cls: Type[Self @ AttributeTestTemplate],
+        stream: Type[Stream],
+        property_name: str,
+        property_schema: dict,
+    ) -> bool:
+        """Determine if this attribute test is applicable to the given property.
+
+        Args:
+            stream: Parent Stream of given attribute.
+            property_name: Name of given attribute.
+            property_schema: JSON Schema of given property, in dict form.
+
+        Returns:
+            True if this test is applicable, False if not.
+        """
         return bool(th.is_number_type(property_schema))
 
 
 class AttributeNotNullTest(AttributeTestTemplate):
-    "Test that a given attribute does not contain any null values."
+    """Test that a given attribute does not contain any null values."""
+
     name = "not_null"
 
-    def test(self):
+    def test(self) -> None:
+        """Run test."""
         for r in self.stream_records:
             assert (
                 r.get(self.attribute_name) is not None
             ), f"Detected null values for attribute ('{self.attribute_name}')."
 
     @classmethod
-    def evaluate(cls, stream, property_name, property_schema):
-        if stream.name == "issues" and property_name == "closed_at":
-            null = th.is_null_type(property_schema)
-            return
+    def evaluate(
+        cls: Type[Self @ AttributeTestTemplate],
+        stream: Type[Stream],
+        property_name: str,
+        property_schema: dict,
+    ) -> bool:
+        """Determine if this attribute test is applicable to the given property.
+
+        Args:
+            stream: Parent Stream of given attribute.
+            property_name: Name of given attribute.
+            property_schema: JSON Schema of given property, in dict form.
+
+        Returns:
+            True if this test is applicable, False if not.
+        """
         return not bool(th.is_null_type(property_schema))

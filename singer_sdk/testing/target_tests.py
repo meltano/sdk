@@ -61,9 +61,9 @@ class TargetMultipleStateMessages(TargetFileTestTemplate):
         self.runner.sync_all()
         state_messages = self.runner.state_messages
         assert state_messages == [
-            '{"test_multiple_state_messages_a": 1, "test_multiple_state_messages_b": 0}',
-            '{"test_multiple_state_messages_a": 3, "test_multiple_state_messages_b": 2}',
-            '{"test_multiple_state_messages_a": 5, "test_multiple_state_messages_b": 6}',
+            '{"test_multiple_state_messages_a": 1, "test_multiple_state_messages_b": 0}',  # noqa: E501
+            '{"test_multiple_state_messages_a": 3, "test_multiple_state_messages_b": 2}',  # noqa: E501
+            '{"test_multiple_state_messages_a": 5, "test_multiple_state_messages_b": 6}',  # noqa: E501
         ]
 
 

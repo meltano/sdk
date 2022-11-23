@@ -6,7 +6,7 @@ import contextlib
 import os
 import warnings
 from pathlib import Path
-from typing import Any, List, Self, Type, Union
+from typing import Any, List, Self, Type
 
 from singer_sdk.streams import Stream
 
@@ -72,8 +72,8 @@ class TestTemplate:
     def teardown(self) -> None:
         """Test Teardown.
 
-        This method is useful for cleaning up external resources (databases, folders etc.)
-        after test completion.
+        This method is useful for cleaning up external resources
+        (databases, folders etc.) after test completion.
 
         Raises:
             NotImplementedError: if not implemented.
@@ -81,7 +81,7 @@ class TestTemplate:
         raise NotImplementedError("Method not implemented.")
 
     def run(
-        self, resource: Any, runner: Union[Type[TapTestRunner], Type[TargetTestRunner]]
+        self, resource: Any, runner: Type[TapTestRunner] | Type[TargetTestRunner]
     ) -> None:
         """Test main run method.
 
@@ -120,22 +120,19 @@ class TapTestTemplate(TestTemplate):
     def id(self) -> str:
         """Test ID.
 
-        Returs:
+        Returns:
             Test ID string.
         """
         return f"tap__{self.name}"
 
     def run(
-        self, resource: Any, runner: Union[Type[TapTestRunner], Type[TargetTestRunner]]
+        self, resource: Any, runner: Type[TapTestRunner] | Type[TargetTestRunner]
     ) -> None:
         """Test main run method.
 
         Args:
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap or Target runner instance, to use with this test.
-
-        Raises:
-            ValueError: if Test instance does not have `name` and `type` properties.
         """
         self.tap = runner.tap
         super().run(resource, runner)
@@ -248,7 +245,8 @@ class AttributeTestTemplate(TestTemplate):
             NotImplementedError: if not implemented.
         """
         raise NotImplementedError(
-            "The 'evaluate' method is required for attribute tests, but not implemented."
+            "The 'evaluate' method is required for attribute tests, "
+            "but not implemented."
         )
 
 
@@ -268,7 +266,7 @@ class TargetTestTemplate(TestTemplate):
         super().run(resource, runner)
 
     @property
-    def id(self):
+    def id(self) -> str:
         """Test ID.
 
         Returns:
@@ -283,7 +281,7 @@ class TargetFileTestTemplate(TargetTestTemplate):
     Use this when sourcing Target test input from a .singer file.
     """
 
-    def run(self, resource: Any, runner: Type[TapTestRunner]):
+    def run(self, resource: Any, runner: Type[TapTestRunner]) -> None:
         """Test main run method.
 
         Args:

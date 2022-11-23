@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Type, Union
+from typing import Any, Callable, Type
 
 import pytest
 
@@ -36,7 +36,7 @@ def pytest_generate_tests(metafunc: Callable) -> None:
 
 
 def get_test_class(
-    test_runner: Union[TapTestRunner, TargetTestRunner], test_suites: list
+    test_runner: Type[TapTestRunner] | Type[TargetTestRunner], test_suites: list
 ) -> object:
     """Construct a valid pytest test class from given suites.
 
@@ -59,7 +59,7 @@ def get_test_class(
             yield
 
         @pytest.fixture(scope="class")
-        def runner(self) -> Union[Type[TapTestRunner], Type[TargetTestRunner]]:
+        def runner(self) -> Type[TapTestRunner] | Type[TargetTestRunner]:
             return test_runner
 
     for suite in test_suites:
