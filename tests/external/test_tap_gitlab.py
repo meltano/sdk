@@ -1,6 +1,5 @@
+import warnings
 from typing import Optional
-
-import warning
 
 from samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 from singer_sdk._singerlib import Catalog
@@ -24,7 +23,7 @@ try:
         test_suites=[tap_tests, tap_stream_tests, tap_stream_attribute_tests],
     )
 except ConfigValidationError as e:
-    warning.warn(
+    warnings.warn(
         UserWarning(
             "Could not configure external gitlab tests. "
             f"Config in CI is expected via env vars.\n{e}"
