@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -71,6 +71,12 @@ def get_test_class(
                 setattr(BaseTestClass, f"test_{suite.kind}_{test.name}", test.run)
 
         if suite.kind in {"tap_stream", "tap_stream_attribute"}:
+
+            # make sure given runner is of type TapTestRunner
+            assert isinstance(
+                test_runner, TapTestRunner
+            ), f"Tap test suite passed, but runner if of type {type(test_runner)}."
+            test_runner = cast(TapTestRunner, test_runner)
 
             # Populate runner class with records for use in stream/attribute tests
             test_runner.sync_all()
