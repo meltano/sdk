@@ -5,7 +5,7 @@
       "type": "string"
     },
     "project_id": {
-      "type": "integer"
+      "type": "string"
     },
     "short_id": {
       "type": "string"
