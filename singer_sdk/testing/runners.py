@@ -95,7 +95,10 @@ class TapTestRunner(SingerTestRunner):
         **kwargs,
     ) -> None:
         super().__init__(singer_class=tap_class, config=config or {}, **kwargs)
-        self.tap = self.create()
+
+    @property
+    def tap(self):
+        return self.create()
 
     def run_discovery(self) -> str:
         """Run tap discovery."""
@@ -162,10 +165,13 @@ class TargetTestRunner(SingerTestRunner):
         **kwargs,
     ) -> None:
         super().__init__(singer_class=target_class, config=config or {}, **kwargs)
-        self.target = self.create()
         self.input_filepath = input_filepath
         self.input_io = input_io
         self._input = None
+
+    @property
+    def target(self):
+        return self.create()
 
     @property
     def input(self):
@@ -182,12 +188,15 @@ class TargetTestRunner(SingerTestRunner):
 
     def sync_all(self, finalize: bool = True) -> None:
         """Runs a full tap sync, assigning output to the runner object."""
-        stdout, stderr = self._execute_sync(input=self.input, finalize=finalize)
+        target = self.create()
+        stdout, stderr = self._execute_sync(
+            target=target, input=self.input, finalize=finalize
+        )
         self.stdout, self.stderr = (stdout.read(), stderr.read())
         self.state_messages.extend(self.stdout.split("\n"))
 
     def _execute_sync(
-        self, input: io.StringIO | None, finalize: bool = True
+        self, target: Target, input: io.StringIO | None, finalize: bool = True
     ) -> tuple[io.StringIO, io.StringIO]:
         """Invoke the target with the provided input.
 
@@ -204,9 +213,9 @@ class TargetTestRunner(SingerTestRunner):
 
         with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
             if input is not None:
-                self.target._process_lines(input)
+                target._process_lines(input)
             if finalize:
-                self.target._process_endofpipe()
+                target._process_endofpipe()
 
         stdout_buf.seek(0)
         stderr_buf.seek(0)
