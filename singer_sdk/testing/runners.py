@@ -73,11 +73,11 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
             kwargs: Keyword arguments.
         """
 
-    @abc.abstractproperty
+    @property
     def tap(self) -> Tap:
         """Tap instance."""
 
-    @abc.abstractproperty
+    @property
     def target(self) -> Target:
         """Target instance."""
 
