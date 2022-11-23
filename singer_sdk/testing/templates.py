@@ -6,7 +6,7 @@ import contextlib
 import os
 import warnings
 from pathlib import Path
-from typing import Any, Self
+from typing import Any
 
 from singer_sdk.streams import Stream
 
@@ -229,7 +229,7 @@ class AttributeTestTemplate(TestTemplate):
 
     @classmethod
     def evaluate(
-        cls: type[Self @ AttributeTestTemplate],
+        cls: type[AttributeTestTemplate],
         stream: type[Stream],
         property_name: str,
         property_schema: dict,

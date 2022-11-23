@@ -1,7 +1,7 @@
 """Standard Tap Tests."""
 
 import warnings
-from typing import Self, Type
+from typing import Type
 
 from dateutil import parser
 
@@ -136,7 +136,7 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
 
     @classmethod
     def evaluate(
-        cls: Type[Self @ AttributeTestTemplate],
+        cls: Type[AttributeTestTemplate],
         stream: Type[Stream],
         property_name: str,
         property_schema: dict,
@@ -169,7 +169,7 @@ class AttributeIsBooleanTest(AttributeTestTemplate):
 
     @classmethod
     def evaluate(
-        cls: Type[Self @ AttributeTestTemplate],
+        cls: Type[AttributeTestTemplate],
         stream: Type[Stream],
         property_name: str,
         property_schema: dict,
@@ -199,7 +199,7 @@ class AttributeIsObjectTest(AttributeTestTemplate):
 
     @classmethod
     def evaluate(
-        cls: Type[Self @ AttributeTestTemplate],
+        cls: Type[AttributeTestTemplate],
         stream: Type[Stream],
         property_name: str,
         property_schema: dict,
@@ -231,7 +231,7 @@ class AttributeIsIntegerTest(AttributeTestTemplate):
 
     @classmethod
     def evaluate(
-        cls: Type[Self @ AttributeTestTemplate],
+        cls: Type[AttributeTestTemplate],
         stream: Type[Stream],
         property_name: str,
         property_schema: dict,
@@ -269,7 +269,7 @@ class AttributeIsNumberTest(AttributeTestTemplate):
 
     @classmethod
     def evaluate(
-        cls: Type[Self @ AttributeTestTemplate],
+        cls: Type[AttributeTestTemplate],
         stream: Type[Stream],
         property_name: str,
         property_schema: dict,
@@ -301,7 +301,7 @@ class AttributeNotNullTest(AttributeTestTemplate):
 
     @classmethod
     def evaluate(
-        cls: Type[Self @ AttributeTestTemplate],
+        cls: Type[AttributeTestTemplate],
         stream: Type[Stream],
         property_name: str,
         property_schema: dict,
