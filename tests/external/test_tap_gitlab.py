@@ -1,7 +1,10 @@
 from typing import Optional
 
+import warning
+
 from samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 from singer_sdk._singerlib import Catalog
+from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers import _catalog
 from singer_sdk.testing import TapTestRunner, get_test_class, pytest_generate_tests
 from singer_sdk.testing.suites import (
@@ -12,14 +15,21 @@ from singer_sdk.testing.suites import (
 
 from .conftest import gitlab_config
 
-config = gitlab_config()
-TestSampleTapGitlab = get_test_class(
-    test_runner=TapTestRunner(
-        tap_class=SampleTapGitlab, config=config, parse_env_config=True
-    ),
-    test_suites=[tap_tests, tap_stream_tests, tap_stream_attribute_tests],
-)
-
+try:
+    config = gitlab_config()
+    TestSampleTapGitlab = get_test_class(
+        test_runner=TapTestRunner(
+            tap_class=SampleTapGitlab, config=config, parse_env_config=True
+        ),
+        test_suites=[tap_tests, tap_stream_tests, tap_stream_attribute_tests],
+    )
+except ConfigValidationError as e:
+    warning.warn(
+        UserWarning(
+            "Could not configure external gitlab tests. "
+            f"Config in CI is expected via env vars.\n{e}"
+        )
+    )
 
 COUNTER = 0
 SAMPLE_CONFIG_BAD = {"not": "correct"}

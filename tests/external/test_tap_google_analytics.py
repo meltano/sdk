@@ -1,6 +1,9 @@
 """Tests standard tap features using the built-in SDK tests library."""
 
+import warning
+
 from samples.sample_tap_google_analytics.ga_tap import SampleTapGoogleAnalytics
+from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.testing import TapTestRunner, get_test_class, pytest_generate_tests
 from singer_sdk.testing.suites import (
     tap_stream_attribute_tests,
@@ -19,5 +22,10 @@ try:
         ),
         test_suites=[tap_tests, tap_stream_tests, tap_stream_attribute_tests],
     )
-except:
-    pass
+except ConfigValidationError as e:
+    warning.warn(
+        UserWarning(
+            "Could not configure external gitlab tests. "
+            f"Config in CI is expected via env vars.\n{e}"
+        )
+    )
