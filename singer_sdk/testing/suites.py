@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Type
 
 from .tap_tests import (
     AttributeIsBooleanTest,
@@ -47,7 +46,7 @@ class TestSuite:
     """Test Suite container class."""
 
     type: str
-    tests: List[Type[TestTemplate] | Type[TapTestTemplate] | Type[TargetTestTemplate]]
+    tests: list[type[TestTemplate] | type[TapTestTemplate] | type[TargetTestTemplate]]
 
 
 # Tap Test Suites

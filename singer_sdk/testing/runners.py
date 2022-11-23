@@ -7,7 +7,7 @@ import json
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
-from typing import Any, List, Optional, Type
+from typing import Any
 
 from singer_sdk.tap_base import Tap
 from singer_sdk.target_base import Target
@@ -17,15 +17,15 @@ class SingerTestRunner:
     """Base Singer Test Runner."""
 
     raw_messages: str | None = None
-    schema_messages: List[dict] = []
-    record_messages: List[dict] = []
-    state_messages: List[dict] = []
-    records: List[dict] = defaultdict(list)
+    schema_messages: list[dict] = []
+    record_messages: list[dict] = []
+    state_messages: list[dict] = []
+    records: list[dict] = defaultdict(list)
 
     def __init__(
         self,
-        singer_class: Type[Tap] | Type[Target],
-        config: Optional[dict] = None,
+        singer_class: type[Tap] | type[Target],
+        config: dict | None = None,
         **kwargs: Any,
     ) -> None:
         """Initialize the test runner object.
@@ -39,7 +39,7 @@ class SingerTestRunner:
         self.config = config or {}
         self.default_kwargs = kwargs
 
-    def create(self, kwargs: Optional[dict] = None) -> Type[Tap] | Type[Target]:
+    def create(self, kwargs: dict | None = None) -> type[Tap] | type[Target]:
         """Create a new tap/target from the runner defaults.
 
         Args:
@@ -60,8 +60,8 @@ class TapTestRunner(SingerTestRunner):
 
     def __init__(
         self,
-        tap_class: Type[Tap],
-        config: Optional[dict] = None,
+        tap_class: type[Tap],
+        config: dict | None = None,
         **kwargs: Any,
     ) -> None:
         """Initialize Tap instance.
@@ -74,7 +74,7 @@ class TapTestRunner(SingerTestRunner):
         super().__init__(singer_class=tap_class, config=config or {}, **kwargs)
 
     @property
-    def tap(self) -> Type[Tap]:
+    def tap(self) -> type[Tap]:
         """Get new Tap instance.
 
         Returns:
@@ -104,7 +104,7 @@ class TapTestRunner(SingerTestRunner):
         messages = self._clean_sync_output(stdout)
         self._parse_records(messages)
 
-    def _clean_sync_output(self, raw_records: str) -> List[dict]:
+    def _clean_sync_output(self, raw_records: str) -> list[dict]:
         """Clean sync output.
 
         Args:
@@ -116,7 +116,7 @@ class TapTestRunner(SingerTestRunner):
         lines = raw_records.strip().split("\n")
         return [json.loads(ii) for ii in lines]
 
-    def _parse_records(self, messages: List[dict]) -> None:
+    def _parse_records(self, messages: list[dict]) -> None:
         """Save raw and parsed messages onto the runner object.
 
         Args:
@@ -138,7 +138,7 @@ class TapTestRunner(SingerTestRunner):
                     continue
         return
 
-    def _execute_sync(self) -> List[dict]:
+    def _execute_sync(self) -> list[dict]:
         """Invoke a Tap object and return STDOUT and STDERR results in StringIO buffers.
 
         Returns:
@@ -160,10 +160,10 @@ class TargetTestRunner(SingerTestRunner):
 
     def __init__(
         self,
-        target_class: Type[Target],
-        config: Optional[dict] = None,
-        input_filepath: Optional[Path] = None,
-        input_io: Optional[io.StringIO] = None,
+        target_class: type[Target],
+        config: dict | None = None,
+        input_filepath: Path | None = None,
+        input_io: io.StringIO | None = None,
         **kwargs: Any,
     ) -> None:
         """Initialize TargetTestRunner.
@@ -183,7 +183,7 @@ class TargetTestRunner(SingerTestRunner):
         self._input = None
 
     @property
-    def target(self) -> Type[Target]:
+    def target(self) -> type[Target]:
         """Get new Target instance.
 
         Returns:
@@ -192,7 +192,7 @@ class TargetTestRunner(SingerTestRunner):
         return self.create()
 
     @property
-    def input(self) -> List[str]:
+    def input(self) -> list[str]:
         """Input messages to pass to Target.
 
         Returns:
@@ -202,11 +202,11 @@ class TargetTestRunner(SingerTestRunner):
             if self.input_io:
                 self._input = self.input_io.read()
             elif self.input_filepath:
-                self._input = open(self.input_filepath, "r").readlines()
+                self._input = open(self.input_filepath).readlines()
         return self._input
 
     @input.setter
-    def input(self, value: List[str]) -> None:
+    def input(self, value: list[str]) -> None:
         self._input = value
 
     def sync_all(self, finalize: bool = True) -> None:

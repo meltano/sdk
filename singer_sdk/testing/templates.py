@@ -6,7 +6,7 @@ import contextlib
 import os
 import warnings
 from pathlib import Path
-from typing import Any, List, Self, Type
+from typing import Any, Self
 
 from singer_sdk.streams import Stream
 
@@ -81,7 +81,7 @@ class TestTemplate:
         raise NotImplementedError("Method not implemented.")
 
     def run(
-        self, resource: Any, runner: Type[TapTestRunner] | Type[TargetTestRunner]
+        self, resource: Any, runner: type[TapTestRunner] | type[TargetTestRunner]
     ) -> None:
         """Test main run method.
 
@@ -126,7 +126,7 @@ class TapTestTemplate(TestTemplate):
         return f"tap__{self.name}"
 
     def run(
-        self, resource: Any, runner: Type[TapTestRunner] | Type[TargetTestRunner]
+        self, resource: Any, runner: type[TapTestRunner] | type[TargetTestRunner]
     ) -> None:
         """Test main run method.
 
@@ -156,9 +156,9 @@ class StreamTestTemplate(TestTemplate):
     def run(
         self,
         resource: Any,
-        runner: Type[TapTestRunner],
-        stream: Type[Stream],
-        stream_records: List[dict],
+        runner: type[TapTestRunner],
+        stream: type[Stream],
+        stream_records: list[dict],
     ) -> None:
         """Test main run method.
 
@@ -191,9 +191,9 @@ class AttributeTestTemplate(TestTemplate):
     def run(
         self,
         resource: Any,
-        runner: Type[TapTestRunner],
-        stream: Type[Stream],
-        stream_records: List[dict],
+        runner: type[TapTestRunner],
+        stream: type[Stream],
+        stream_records: list[dict],
         attribute_name: str,
     ) -> None:
         """Test main run method.
@@ -212,7 +212,7 @@ class AttributeTestTemplate(TestTemplate):
         super().run(resource, runner)
 
     @property
-    def non_null_attribute_values(self) -> List[Any]:
+    def non_null_attribute_values(self) -> list[Any]:
         """Extract attribute values from stream records.
 
         Returns:
@@ -229,8 +229,8 @@ class AttributeTestTemplate(TestTemplate):
 
     @classmethod
     def evaluate(
-        cls: Type[Self @ AttributeTestTemplate],
-        stream: Type[Stream],
+        cls: type[Self @ AttributeTestTemplate],
+        stream: type[Stream],
         property_name: str,
         property_schema: dict,
     ) -> bool:
@@ -255,7 +255,7 @@ class TargetTestTemplate(TestTemplate):
 
     type = "target"
 
-    def run(self, resource: Any, runner: Type[TapTestRunner]) -> None:
+    def run(self, resource: Any, runner: type[TapTestRunner]) -> None:
         """Test main run method.
 
         Args:
@@ -281,7 +281,7 @@ class TargetFileTestTemplate(TargetTestTemplate):
     Use this when sourcing Target test input from a .singer file.
     """
 
-    def run(self, resource: Any, runner: Type[TapTestRunner]) -> None:
+    def run(self, resource: Any, runner: type[TapTestRunner]) -> None:
         """Test main run method.
 
         Args:
