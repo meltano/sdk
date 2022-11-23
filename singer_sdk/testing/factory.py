@@ -1,3 +1,5 @@
+"""Test Class Factory."""
+
 from __future__ import annotations
 
 from typing import Any, Callable, Type, Union
@@ -53,7 +55,7 @@ def get_test_class(
         param_ids = {}
 
         @pytest.fixture
-        def resource(self) -> Any:
+        def resource(self) -> Any:  # noqa: ANN401
             yield
 
         @pytest.fixture(scope="class")

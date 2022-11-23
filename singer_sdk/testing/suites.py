@@ -18,7 +18,10 @@ from .tap_tests import (
     TapDiscoveryTest,
     TapStreamConnectionTest,
 )
-from .target_tests import (  # TargetMultipleStateMessages,  TODO: fix behavior in SDK to make this pass
+
+# TODO: add TargetMultipleStateMessages
+# TODO: fix behavior in SDK to make this pass
+from .target_tests import (
     TargetArrayData,
     TargetCamelcaseComplexSchema,
     TargetCamelcaseTest,
