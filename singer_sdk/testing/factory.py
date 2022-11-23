@@ -74,7 +74,9 @@ def get_test_class(
             f"Test suite of kind {suite.kind} passed, "
             f"but test runner if of type {type(test_runner)}."
         )
-        test_runner = cast(expected_runner_class, test_runner)  # type: ignore[valid-type]
+        test_runner = cast(
+            expected_runner_class, test_runner  # type: ignore[valid-type]
+        )
 
         if suite.kind in {"tap", "target"}:
             for TestClass in suite.tests:
