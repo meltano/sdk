@@ -70,7 +70,8 @@ repos:
     exclude: |
         (?x)^(
             singer_sdk/helpers/_simpleeval.py|
-            tests/core/test_simpleeval.py
+            tests/core/test_simpleeval.py|
+            singer_sdk/testing/runners.py
         )$
 
 - repo: https://github.com/python-poetry/poetry
