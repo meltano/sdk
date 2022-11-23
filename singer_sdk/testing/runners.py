@@ -8,10 +8,9 @@ import json
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
-from typing import IO, Any, List, Optional, Tuple, Type, Union, cast
+from typing import IO, Any, Type, cast
 
 from singer_sdk import Tap, Target
-from singer_sdk.plugin_base import PluginBase
 
 
 class SingerTestRunner(metaclass=abc.ABCMeta):
@@ -21,11 +20,11 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
     schema_messages: list[dict] = []
     record_messages: list[dict] = []
     state_messages: list[dict] = []
-    records: "defaultdict" = defaultdict(list)
+    records: defaultdict = defaultdict(list)
 
     def __init__(
         self,
-        singer_class: Type[Tap] | Type[Target],
+        singer_class: type[Tap] | type[Target],
         config: dict | None = None,
         **kwargs: Any,
     ) -> None:
@@ -129,7 +128,11 @@ class TapTestRunner(SingerTestRunner):
         return self.tap.run_connection_test()
 
     def sync_all(self, **kwargs: Any) -> None:
-        """Run a full tap sync, assigning output to the runner object."""
+        """Run a full tap sync, assigning output to the runner object.
+
+        Args:
+            kwargs: Unused keyword arguments.
+        """
         stdout, stderr = self._execute_sync()
         messages = self._clean_sync_output(stdout)
         self._parse_records(messages)
@@ -156,7 +159,7 @@ class TapTestRunner(SingerTestRunner):
                     continue
         return
 
-    def _execute_sync(self) -> Tuple[str, str]:
+    def _execute_sync(self) -> tuple[str, str]:
         """Invoke a Tap object and return STDOUT and STDERR results in StringIO buffers.
 
         Returns:
@@ -220,7 +223,7 @@ class TargetTestRunner(SingerTestRunner):
             if self.input_io:
                 self._input = self.input_io
             elif self.input_filepath:
-                self._input = open(self.input_filepath, "r")
+                self._input = open(self.input_filepath)
         return cast(IO[str], self._input)
 
     @input.setter
@@ -233,6 +236,7 @@ class TargetTestRunner(SingerTestRunner):
         Args:
             finalize: True to process as the end of stream as a completion signal;
                 False to keep the sink operation open for further records.
+            kwargs: Unused keyword arguments.
         """
         target = cast(Target, self.create())
         stdout, stderr = self._execute_sync(

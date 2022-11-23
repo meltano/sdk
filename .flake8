@@ -1,5 +1,5 @@
 [flake8]
-ignore = W503, C901, ANN101, ANN401
+ignore = W503, C901, ANN101, ANN102, ANN401
 max-line-length = 88
 exclude = cookiecutter
 per-file-ignores =

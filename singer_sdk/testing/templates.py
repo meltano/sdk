@@ -80,13 +80,7 @@ class TestTemplate:
         """
         raise NotImplementedError("Method not implemented.")
 
-    def run(
-        self,
-        resource: Any,
-        runner: TapTestRunner | TargetTestRunner,
-        *args: Any,
-        **kwargs: Any,
-    ) -> None:
+    def run(self, resource: Any, runner: TapTestRunner | TargetTestRunner) -> None:
         """Test main run method.
 
         Args:
