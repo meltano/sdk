@@ -959,23 +959,52 @@ class SQLConnector:
         Raises:
             NotImplementedError: if altering columns is not supported.
         """
+        collation_removed = False
         current_type: sqlalchemy.types.TypeEngine = self._get_column_type(
             full_table_name, column_name
         )
+        # my logger
+        self.logger.info(f"current_type: {current_type}, sql_type: {sql_type}")
 
+        # remove collation if present and save it for a rainy day
+        if hasattr(current_type, "collation"):
+            if current_type.collation:
+                current_type_collation = current_type.collation
+                setattr(current_type, "collation", None)
+                collation_removed = True
+                self.logger.info(
+                    f"new current_type: {current_type}, sql_type: {sql_type}"
+                )
+        if hasattr(sql_type, "collation"):
+            if column_name == "lastname":
+                setattr(sql_type, "length", 255)
+        # my logger
+        self.logger.info(f"current_type: {current_type}, sql_type: {sql_type}")
         # Check if the existing column type and the sql type are the same
         if str(sql_type) == str(current_type):
             # The current column and sql type are the same
             # Nothing to do
             return
-
+        # my logger
+        self.logger.info("I am going to call for help!!!")
         # Not the same type, generic type or compatible types
         # calling merge_sql_types for assistnace
         compatible_sql_type = self.merge_sql_types([current_type, sql_type])
-
+        # my logger
+        self.logger.info(f"comtible_sql_type: {compatible_sql_type}")
         if str(compatible_sql_type) == str(current_type):
             # Nothing to do
             return
+        # my logger
+        self.logger.info(f"Lets change the column to type: {compatible_sql_type}")
+        # Put the collation level back before altering the column
+        if hasattr(compatible_sql_type, "collation"):
+            if collation_removed:
+                setattr(compatible_sql_type, "collation", current_type_collation)
+                self.logger.info(
+                    "Lets change the column to",
+                    f"type with collation: {compatible_sql_type}",
+                )
 
         if not self.allow_column_alter:
             raise NotImplementedError(
