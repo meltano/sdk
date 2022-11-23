@@ -1,13 +1,13 @@
 """Standard Tap Tests."""
 
 import warnings
-from typing import Type
+from typing import Type, cast
 
 from dateutil import parser
 
 import singer_sdk.helpers._typing as th
+from singer_sdk import Tap
 from singer_sdk.streams.core import Stream
-from singer_sdk.tap_base import Tap
 
 from .templates import AttributeTestTemplate, StreamTestTemplate, TapTestTemplate
 
@@ -35,7 +35,7 @@ class TapDiscoveryTest(TapTestTemplate):
         tap1.run_discovery()
         catalog = tap1.catalog_dict
         # Reset and re-initialize with an input catalog
-        tap2: Tap = self.runner.singer_class(
+        tap2: Tap = cast(Type[Tap], self.runner.singer_class)(
             config=self.runner.config, catalog=catalog, **self.runner.default_kwargs
         )
         assert tap2
@@ -102,7 +102,9 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
         """
         primary_keys = self.stream.primary_keys
         try:
-            record_ids = [(r[k] for k in primary_keys) for r in self.stream_records]
+            record_ids = [
+                (r[k] for k in primary_keys or []) for r in self.stream_records
+            ]
         except KeyError as e:
             raise AssertionError(f"Record missing primary key: {str(e)}")
         count_unique_records = len(set(record_ids))
@@ -136,8 +138,8 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
 
     @classmethod
     def evaluate(
-        cls: Type[AttributeTestTemplate],
-        stream: Type[Stream],
+        cls,
+        stream: Stream,
         property_name: str,
         property_schema: dict,
     ) -> bool:
@@ -169,8 +171,8 @@ class AttributeIsBooleanTest(AttributeTestTemplate):
 
     @classmethod
     def evaluate(
-        cls: Type[AttributeTestTemplate],
-        stream: Type[Stream],
+        cls,
+        stream: Stream,
         property_name: str,
         property_schema: dict,
     ) -> bool:
@@ -199,8 +201,8 @@ class AttributeIsObjectTest(AttributeTestTemplate):
 
     @classmethod
     def evaluate(
-        cls: Type[AttributeTestTemplate],
-        stream: Type[Stream],
+        cls,
+        stream: Stream,
         property_name: str,
         property_schema: dict,
     ) -> bool:
@@ -231,8 +233,8 @@ class AttributeIsIntegerTest(AttributeTestTemplate):
 
     @classmethod
     def evaluate(
-        cls: Type[AttributeTestTemplate],
-        stream: Type[Stream],
+        cls,
+        stream: Stream,
         property_name: str,
         property_schema: dict,
     ) -> bool:
@@ -269,8 +271,8 @@ class AttributeIsNumberTest(AttributeTestTemplate):
 
     @classmethod
     def evaluate(
-        cls: Type[AttributeTestTemplate],
-        stream: Type[Stream],
+        cls,
+        stream: Stream,
         property_name: str,
         property_schema: dict,
     ) -> bool:
@@ -301,8 +303,8 @@ class AttributeNotNullTest(AttributeTestTemplate):
 
     @classmethod
     def evaluate(
-        cls: Type[AttributeTestTemplate],
-        stream: Type[Stream],
+        cls,
+        stream: Stream,
         property_name: str,
         property_schema: dict,
     ) -> bool:

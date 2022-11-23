@@ -81,7 +81,11 @@ class TestTemplate:
         raise NotImplementedError("Method not implemented.")
 
     def run(
-        self, resource: Any, runner: type[TapTestRunner] | type[TargetTestRunner]
+        self,
+        resource: Any,
+        runner: TapTestRunner | TargetTestRunner,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Test main run method.
 
@@ -125,8 +129,10 @@ class TapTestTemplate(TestTemplate):
         """
         return f"tap__{self.name}"
 
-    def run(
-        self, resource: Any, runner: type[TapTestRunner] | type[TargetTestRunner]
+    def run(  # type: ignore[override]
+        self,
+        resource: Any,
+        runner: TapTestRunner,
     ) -> None:
         """Test main run method.
 
@@ -153,11 +159,11 @@ class StreamTestTemplate(TestTemplate):
         """
         return f"{self.stream.name}__{self.name}"
 
-    def run(
+    def run(  # type: ignore[override]
         self,
         resource: Any,
-        runner: type[TapTestRunner],
-        stream: type[Stream],
+        runner: TapTestRunner,
+        stream: Stream,
         stream_records: list[dict],
     ) -> None:
         """Test main run method.
@@ -188,11 +194,11 @@ class AttributeTestTemplate(TestTemplate):
         """
         return f"{self.stream.name}__{self.attribute_name}__{self.name}"
 
-    def run(
+    def run(  # type: ignore[override]
         self,
         resource: Any,
-        runner: type[TapTestRunner],
-        stream: type[Stream],
+        runner: TapTestRunner,
+        stream: Stream,
         stream_records: list[dict],
         attribute_name: str,
     ) -> None:
@@ -229,8 +235,8 @@ class AttributeTestTemplate(TestTemplate):
 
     @classmethod
     def evaluate(
-        cls: type[AttributeTestTemplate],
-        stream: type[Stream],
+        cls,
+        stream: Stream,
         property_name: str,
         property_schema: dict,
     ) -> bool:
@@ -255,7 +261,11 @@ class TargetTestTemplate(TestTemplate):
 
     type = "target"
 
-    def run(self, resource: Any, runner: type[TapTestRunner]) -> None:
+    def run(  # type: ignore[override]
+        self,
+        resource: Any,
+        runner: TargetTestRunner,
+    ) -> None:
         """Test main run method.
 
         Args:
@@ -281,7 +291,11 @@ class TargetFileTestTemplate(TargetTestTemplate):
     Use this when sourcing Target test input from a .singer file.
     """
 
-    def run(self, resource: Any, runner: type[TapTestRunner]) -> None:
+    def run(  # type: ignore[override]
+        self,
+        resource: Any,
+        runner: TargetTestRunner,
+    ) -> None:
         """Test main run method.
 
         Args:
@@ -305,6 +319,5 @@ class TargetFileTestTemplate(TargetTestTemplate):
         Returns:
             The expected Path to this tests singer file.
         """
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        base_singer_filepath = os.path.join(current_dir, "target_test_streams")
-        return os.path.join(base_singer_filepath, f"{self.name}.singer")
+        current_dir = Path(os.path.dirname(os.path.abspath(__file__)))
+        return current_dir / "target_test_streams" / f"{self.name}.singer"

@@ -2,36 +2,37 @@
 
 from __future__ import annotations
 
+import abc
 import io
 import json
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
-from typing import Any
+from typing import IO, Any, List, Optional, Tuple, Type, Union, cast
 
-from singer_sdk.tap_base import Tap
-from singer_sdk.target_base import Target
+from singer_sdk import Tap, Target
+from singer_sdk.plugin_base import PluginBase
 
 
-class SingerTestRunner:
+class SingerTestRunner(metaclass=abc.ABCMeta):
     """Base Singer Test Runner."""
 
-    raw_messages: str | None = None
+    raw_messages: list[dict] = []
     schema_messages: list[dict] = []
     record_messages: list[dict] = []
     state_messages: list[dict] = []
-    records: list[dict] = defaultdict(list)
+    records: "defaultdict" = defaultdict(list)
 
     def __init__(
         self,
-        singer_class: type[Tap] | type[Target],
+        singer_class: Type[Tap] | Type[Target],
         config: dict | None = None,
         **kwargs: Any,
     ) -> None:
         """Initialize the test runner object.
 
         Args:
-            singer_class (Type[Tap] | Type[Target]): Singer class to be tested.
+            singer_class (type[PluginBase]): Singer class to be tested.
             config (dict): Tap/Target configuration for testing.
             kwargs (dict): Default arguments to be passed to tap/target on create.
         """
@@ -39,7 +40,20 @@ class SingerTestRunner:
         self.config = config or {}
         self.default_kwargs = kwargs
 
-    def create(self, kwargs: dict | None = None) -> type[Tap] | type[Target]:
+    @staticmethod
+    def _clean_sync_output(raw_records: str) -> list[dict]:
+        """Clean sync output.
+
+        Args:
+            raw_records: String containing raw messages.
+
+        Returns:
+            A list of raw messages in dict form.
+        """
+        lines = raw_records.strip().split("\n")
+        return [json.loads(ii) for ii in lines]
+
+    def create(self, kwargs: dict | None = None) -> Tap | Target:
         """Create a new tap/target from the runner defaults.
 
         Args:
@@ -52,6 +66,22 @@ class SingerTestRunner:
             kwargs = self.default_kwargs
         return self.singer_class(config=self.config, **kwargs)
 
+    @abc.abstractmethod
+    def sync_all(self, **kwargs: Any) -> None:
+        """Sync all records.
+
+        Args:
+            kwargs: Keyword arguments.
+        """
+
+    @abc.abstractproperty
+    def tap(self) -> Tap:
+        """Tap instance."""
+
+    @abc.abstractproperty
+    def target(self) -> Target:
+        """Target instance."""
+
 
 class TapTestRunner(SingerTestRunner):
     """Utility class to simplify tap testing."""
@@ -60,7 +90,7 @@ class TapTestRunner(SingerTestRunner):
 
     def __init__(
         self,
-        tap_class: type[Tap],
+        tap_class: Type[Tap],
         config: dict | None = None,
         **kwargs: Any,
     ) -> None:
@@ -74,13 +104,13 @@ class TapTestRunner(SingerTestRunner):
         super().__init__(singer_class=tap_class, config=config or {}, **kwargs)
 
     @property
-    def tap(self) -> type[Tap]:
+    def tap(self) -> Tap:
         """Get new Tap instance.
 
         Returns:
             A configured Tap instance.
         """
-        return self.create()
+        return cast(Tap, self.create())
 
     def run_discovery(self) -> str:
         """Run tap discovery.
@@ -98,23 +128,11 @@ class TapTestRunner(SingerTestRunner):
         """
         return self.tap.run_connection_test()
 
-    def sync_all(self) -> None:
+    def sync_all(self, **kwargs: Any) -> None:
         """Run a full tap sync, assigning output to the runner object."""
         stdout, stderr = self._execute_sync()
         messages = self._clean_sync_output(stdout)
         self._parse_records(messages)
-
-    def _clean_sync_output(self, raw_records: str) -> list[dict]:
-        """Clean sync output.
-
-        Args:
-            raw_records: String containing raw messages.
-
-        Returns:
-            A list of raw messages in dict form.
-        """
-        lines = raw_records.strip().split("\n")
-        return [json.loads(ii) for ii in lines]
 
     def _parse_records(self, messages: list[dict]) -> None:
         """Save raw and parsed messages onto the runner object.
@@ -138,7 +156,7 @@ class TapTestRunner(SingerTestRunner):
                     continue
         return
 
-    def _execute_sync(self) -> list[dict]:
+    def _execute_sync(self) -> Tuple[str, str]:
         """Invoke a Tap object and return STDOUT and STDERR results in StringIO buffers.
 
         Returns:
@@ -160,7 +178,7 @@ class TargetTestRunner(SingerTestRunner):
 
     def __init__(
         self,
-        target_class: type[Target],
+        target_class: Type[Target],
         config: dict | None = None,
         input_filepath: Path | None = None,
         input_io: io.StringIO | None = None,
@@ -180,19 +198,19 @@ class TargetTestRunner(SingerTestRunner):
         super().__init__(singer_class=target_class, config=config or {}, **kwargs)
         self.input_filepath = input_filepath
         self.input_io = input_io
-        self._input = None
+        self._input: IO[str] | None = None
 
     @property
-    def target(self) -> type[Target]:
+    def target(self) -> Target:
         """Get new Target instance.
 
         Returns:
             A configured Target instance.
         """
-        return self.create()
+        return cast(Target, self.create())
 
     @property
-    def input(self) -> list[str]:
+    def input(self) -> IO[str]:
         """Input messages to pass to Target.
 
         Returns:
@@ -200,31 +218,31 @@ class TargetTestRunner(SingerTestRunner):
         """
         if self._input is None:
             if self.input_io:
-                self._input = self.input_io.read()
+                self._input = self.input_io
             elif self.input_filepath:
-                self._input = open(self.input_filepath).readlines()
-        return self._input
+                self._input = open(self.input_filepath, "r")
+        return cast(IO[str], self._input)
 
     @input.setter
-    def input(self, value: list[str]) -> None:
+    def input(self, value: IO[str]) -> None:
         self._input = value
 
-    def sync_all(self, finalize: bool = True) -> None:
+    def sync_all(self, finalize: bool = True, **kwargs: Any) -> None:
         """Run a full tap sync, assigning output to the runner object.
 
         Args:
             finalize: True to process as the end of stream as a completion signal;
                 False to keep the sink operation open for further records.
         """
-        target = self.create()
+        target = cast(Target, self.create())
         stdout, stderr = self._execute_sync(
             target=target, input=self.input, finalize=finalize
         )
         self.stdout, self.stderr = (stdout.read(), stderr.read())
-        self.state_messages.extend(self.stdout.split("\n"))
+        self.state_messages.extend(self._clean_sync_output(self.stdout))
 
     def _execute_sync(
-        self, target: Target, input: io.StringIO | None, finalize: bool = True
+        self, target: Target, input: IO[str], finalize: bool = True
     ) -> tuple[io.StringIO, io.StringIO]:
         """Invoke the target with the provided input.
 

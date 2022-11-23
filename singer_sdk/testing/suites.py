@@ -45,16 +45,16 @@ from .templates import TapTestTemplate, TargetTestTemplate, TestTemplate
 class TestSuite:
     """Test Suite container class."""
 
-    type: str
+    kind: str
     tests: list[type[TestTemplate] | type[TapTestTemplate] | type[TargetTestTemplate]]
 
 
 # Tap Test Suites
 tap_tests = TestSuite(
-    type="tap", tests=[TapCLIPrintsTest, TapDiscoveryTest, TapStreamConnectionTest]
+    kind="tap", tests=[TapCLIPrintsTest, TapDiscoveryTest, TapStreamConnectionTest]
 )
 tap_stream_tests = TestSuite(
-    type="tap_stream",
+    kind="tap_stream",
     tests=[
         StreamCatalogSchemaMatchesRecordTest,
         StreamRecordSchemaMatchesCatalogTest,
@@ -63,7 +63,7 @@ tap_stream_tests = TestSuite(
     ],
 )
 tap_stream_attribute_tests = TestSuite(
-    type="tap_stream_attribute",
+    kind="tap_stream_attribute",
     tests=[
         AttributeIsBooleanTest,
         AttributeIsDateTimeTest,
@@ -77,7 +77,7 @@ tap_stream_attribute_tests = TestSuite(
 
 # Target Test Suites
 target_tests = TestSuite(
-    type="target",
+    kind="target",
     tests=[
         TargetArrayData,
         TargetCamelcaseComplexSchema,

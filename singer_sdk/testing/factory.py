@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Any
 
 import pytest
 
 from .runners import TapTestRunner, TargetTestRunner
 
 
-def pytest_generate_tests(metafunc: Callable) -> None:
+def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     """Pytest Hook, responsible for parameterizing tests.
 
     Called once per each test function, this hook will check if the function name is
@@ -36,7 +36,7 @@ def pytest_generate_tests(metafunc: Callable) -> None:
 
 
 def get_test_class(
-    test_runner: type[TapTestRunner] | type[TargetTestRunner], test_suites: list
+    test_runner: TapTestRunner | TargetTestRunner, test_suites: list
 ) -> object:
     """Construct a valid pytest test class from given suites.
 
@@ -51,31 +51,31 @@ def get_test_class(
     class BaseTestClass:
         """Base test class."""
 
-        params = {}
-        param_ids = {}
+        params: dict = {}
+        param_ids: dict = {}
 
         @pytest.fixture
         def resource(self) -> Any:  # noqa: ANN401
             yield
 
         @pytest.fixture(scope="class")
-        def runner(self) -> type[TapTestRunner] | type[TargetTestRunner]:
+        def runner(self) -> TapTestRunner | TargetTestRunner:
             return test_runner
 
     for suite in test_suites:
 
-        if suite.type in {"tap", "target"}:
+        if suite.kind in {"tap", "target"}:
             for TestClass in suite.tests:
                 test = TestClass()
-                test_name = f"test_{suite.type}_{test.name}"
-                setattr(BaseTestClass, f"test_{suite.type}_{test.name}", test.run)
+                test_name = f"test_{suite.kind}_{test.name}"
+                setattr(BaseTestClass, f"test_{suite.kind}_{test.name}", test.run)
 
-        if suite.type in {"tap_stream", "tap_stream_attribute"}:
+        if suite.kind in {"tap_stream", "tap_stream_attribute"}:
 
             # Populate runner class with records for use in stream/attribute tests
             test_runner.sync_all()
 
-            if suite.type == "tap_stream":
+            if suite.kind == "tap_stream":
 
                 params = [
                     {
@@ -88,7 +88,7 @@ def get_test_class(
 
                 for TestClass in suite.tests:
                     test = TestClass()
-                    test_name = f"test_{suite.type}_{test.name}"
+                    test_name = f"test_{suite.kind}_{test.name}"
                     setattr(
                         BaseTestClass,
                         test_name,
@@ -97,11 +97,11 @@ def get_test_class(
                     BaseTestClass.params[test_name] = params
                     BaseTestClass.param_ids[test_name] = param_ids
 
-            if suite.type == "tap_stream_attribute":
+            if suite.kind == "tap_stream_attribute":
 
                 for TestClass in suite.tests:
                     test = TestClass()
-                    test_name = f"test_{suite.type}_{test.name}"
+                    test_name = f"test_{suite.kind}_{test.name}"
                     test_params = []
                     test_ids = []
                     for stream in test_runner.tap.streams.values():
