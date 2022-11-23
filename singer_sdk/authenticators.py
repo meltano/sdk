@@ -304,8 +304,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
         Args:
             stream: The stream instance to use with this authenticator.
-            auth_endpoint: API username.
-            oauth_scopes: API password.
+            auth_endpoint: The OAuth 2.0 authorization endpoint.
+            oauth_scopes: A comma-separated list of OAuth scopes.
             default_expiration: Default token expiry in seconds.
         """
         super().__init__(stream=stream)

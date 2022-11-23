@@ -23,8 +23,10 @@ class SampleTapGoogleAnalytics(Tap):
     name: str = "sample-tap-google-analytics"
     config_jsonschema = PropertiesList(
         Property("view_id", StringType(), required=True),
-        Property("client_email", StringType(), required=True),
-        Property("private_key", StringType(), required=True),
+        Property(
+            "client_email", StringType(), required=True, examples=["me@example.com"]
+        ),
+        Property("private_key", StringType(), required=True, secret=True),
     ).to_dict()
 
     def discover_streams(self) -> List[SampleGoogleAnalyticsStream]:

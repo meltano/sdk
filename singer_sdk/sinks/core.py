@@ -13,7 +13,7 @@ from types import MappingProxyType
 from typing import IO, Any, Mapping, Sequence
 
 from dateutil import parser
-from jsonschema import Draft4Validator, FormatChecker
+from jsonschema import Draft7Validator, FormatChecker
 
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
@@ -29,7 +29,7 @@ from singer_sdk.helpers._typing import (
 )
 from singer_sdk.plugin_base import PluginBase
 
-JSONSchemaValidator = Draft4Validator
+JSONSchemaValidator = Draft7Validator
 
 
 class Sink(metaclass=abc.ABCMeta):
@@ -71,7 +71,7 @@ class Sink(metaclass=abc.ABCMeta):
         self.latest_state: dict | None = None
         self._draining_state: dict | None = None
         self.drained_state: dict | None = None
-        self.key_properties = key_properties or []
+        self._key_properties = key_properties or []
 
         # Tally counters
         self._total_records_written: int = 0
@@ -80,7 +80,7 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
-        self._validator = Draft4Validator(schema, format_checker=FormatChecker())
+        self._validator = Draft7Validator(schema, format_checker=FormatChecker())
 
     def _get_context(self, record: dict) -> dict:
         """Return an empty dictionary by default.
@@ -201,6 +201,15 @@ class Sink(metaclass=abc.ABCMeta):
             TODO
         """
         return DatetimeErrorTreatmentEnum.ERROR
+
+    @property
+    def key_properties(self) -> list[str]:
+        """Return key properties.
+
+        Returns:
+            A list of stream key properties.
+        """
+        return self._key_properties
 
     # Record processing
 
@@ -422,6 +431,14 @@ class Sink(metaclass=abc.ABCMeta):
             "ACTIVATE_VERSION message received but not implemented by this target. "
             "Ignoring."
         )
+
+    def setup(self) -> None:
+        """Perform any setup actions at the beginning of a Stream.
+
+        Setup is executed once per Sink instance, after instantiation. If a Schema
+        change is detected, a new Sink is instantiated and this method is called again.
+        """
+        pass
 
     def clean_up(self) -> None:
         """Perform any clean up actions required at end of a stream.

@@ -48,11 +48,6 @@ a:hover {
   top: 1px;
 }
 
-.wy-side-nav-search > a::after {
-  display: inline-block;
-  content: "| SDK";
-}
-
 .wy-side-nav-search > div.version {
   color: hsla(0, 0%, 100%, 0.7);
 }

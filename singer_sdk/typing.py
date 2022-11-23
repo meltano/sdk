@@ -5,13 +5,16 @@ Usage example:
 .. code-block:: python
 
     jsonschema = PropertiesList(
+        Property("username", StringType, required=True),
+        Property("password", StringType, required=True, secret=True),
+
         Property("id", IntegerType, required=True),
-        Property("name", StringType),
-        Property("tags", ArrayType(StringType)),
-        Property("ratio", NumberType),
+        Property("foo_or_bar", StringType, allowed_values=["foo", "bar"]),
+        Property("ratio", NumberType, examples=[0.25, 0.75, 1.0]),
         Property("days_active", IntegerType),
         Property("updated_on", DateTimeType),
         Property("is_deleted", BooleanType),
+
         Property(
             "author",
             ObjectType(
@@ -19,6 +22,7 @@ Usage example:
                 Property("name", StringType),
             )
         ),
+        Property("tags", ArrayType(StringType)),
         Property(
             "groups",
             ArrayType(
@@ -41,14 +45,20 @@ Note:
 
 from __future__ import annotations
 
+import json
 import sys
-from typing import Generic, Mapping, TypeVar, Union, cast
+from typing import Any, Generic, Mapping, TypeVar, Union, cast
 
 import sqlalchemy
 from jsonschema import validators
 
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._typing import append_type, get_datelike_property_type
+from singer_sdk.helpers._typing import (
+    JSONSCHEMA_ANNOTATION_SECRET,
+    JSONSCHEMA_ANNOTATION_WRITEONLY,
+    append_type,
+    get_datelike_property_type,
+)
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
@@ -350,10 +360,19 @@ class Property(JSONTypeHelper, Generic[W]):
         name: str,
         wrapped: W | type[W],
         required: bool = False,
-        default: _JsonValue = None,
-        description: str = None,
+        default: _JsonValue | None = None,
+        description: str | None = None,
+        secret: bool | None = False,
+        allowed_values: list[Any] | None = None,
+        examples: list[Any] | None = None,
     ) -> None:
         """Initialize Property object.
+
+        Note: Properties containing secrets should be specified with `secret=True`.
+        Doing so will add the annotation `writeOnly=True`, in accordance with JSON
+        Schema Draft 7 and later, and `secret=True` as an additional hint to readers.
+
+        More info: https://json-schema.org/draft-07/json-schema-release-notes.html
 
         Args:
             name: Property name.
@@ -361,12 +380,20 @@ class Property(JSONTypeHelper, Generic[W]):
             required: Whether this is a required property.
             default: Default value in the JSON Schema.
             description: Long-text property description.
+            secret: True if this is a credential or other secret.
+            allowed_values: A list of allowed value options, if only specific values
+                are permitted. This will define the type as an 'enum'.
+            examples: Optional. A list of one or more sample values. These may be
+                displayed to the user as hints of the expected format of inputs.
         """
         self.name = name
         self.wrapped = wrapped
         self.optional = not required
         self.default = default
         self.description = description
+        self.secret = secret
+        self.allowed_values = allowed_values or None
+        self.examples = examples or None
 
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
@@ -402,6 +429,17 @@ class Property(JSONTypeHelper, Generic[W]):
             type_dict.update({"default": self.default})
         if self.description:
             type_dict.update({"description": self.description})
+        if self.secret:
+            type_dict.update(
+                {
+                    JSONSCHEMA_ANNOTATION_SECRET: True,
+                    JSONSCHEMA_ANNOTATION_WRITEONLY: True,
+                }
+            )
+        if self.allowed_values:
+            type_dict.update({"enum": self.allowed_values})
+        if self.examples:
+            type_dict.update({"examples": self.examples})
         return {self.name: type_dict}
 
 
@@ -412,6 +450,7 @@ class ObjectType(JSONTypeHelper):
         self,
         *properties: Property,
         additional_properties: W | type[W] | None = None,
+        pattern_properties: Mapping[str, W | type[W]] | None = None,
     ) -> None:
         """Initialize ObjectType from its list of properties.
 
@@ -419,9 +458,12 @@ class ObjectType(JSONTypeHelper):
             properties: Zero or more attributes for this JSON object.
             additional_properties: A schema to match against unnamed properties in
                 this object.
+            pattern_properties: A dictionary of regex patterns to match against
+                property names, and the schema to match against the values.
         """
         self.wrapped: list[Property] = list(properties)
         self.additional_properties = additional_properties
+        self.pattern_properties = pattern_properties
 
     @property
     def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
@@ -444,7 +486,23 @@ class ObjectType(JSONTypeHelper):
         if self.additional_properties:
             result["additionalProperties"] = self.additional_properties.type_dict
 
+        if self.pattern_properties:
+            result["patternProperties"] = {
+                k: v.type_dict for k, v in self.pattern_properties.items()
+            }
+
         return result
+
+    def to_json(self, **kwargs: Any) -> str:
+        """Return a JSON string representation of the object.
+
+        Args:
+            **kwargs: Additional keyword arguments to pass to `json.dumps`.
+
+        Returns:
+            A JSON string.
+        """
+        return json.dumps(self.type_dict, **kwargs)
 
 
 class CustomType(JSONTypeHelper):

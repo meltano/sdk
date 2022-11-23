@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.11.1"
+version = "0.14.0"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 maintainers = ["Meltano Team and Contributors"]
@@ -10,7 +10,9 @@ repository = "https://github.com/meltano/sdk"
 documentation = "https://sdk.meltano.com/en/latest/"
 keywords = [
     "Meltano",
+    "Singer",
     "Meltano SDK",
+    "Singer SDK",
     "ELT",
 ]
 classifiers = [
@@ -21,6 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
@@ -35,7 +38,7 @@ license = "Apache 2.0"
 "Youtube" = "https://www.youtube.com/meltano"
 
 [tool.poetry.dependencies]
-python = "<3.11,>=3.7.1"
+python = "<3.12,>=3.7.1"
 backoff = ">=2.0.0,<3.0"
 pendulum = "^2.1.0"
 click = "~=8.0"
@@ -43,8 +46,8 @@ fs = "^2.4.16"
 PyJWT = "~=2.4"
 requests = "^2.25.1"
 cryptography = ">=3.4.6,<39.0.0"
-importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
-importlib-resources = {version = "^5.9.0", markers = "python_version < \"3.9\""}
+importlib-metadata = {version = "<5.0.0", markers = "python_version < \"3.8\""}
+importlib-resources = {version = "5.9.0", markers = "python_version < \"3.9\""}
 memoization = ">=0.3.2,<0.5.0"
 jsonpath-ng = "^1.5.3"
 joblib = "^1.0.1"
@@ -60,10 +63,13 @@ PyYAML = "^6.0"
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
 sphinx = {version = ">=4.5,<6.0", optional = true}
-sphinx-rtd-theme = {version = ">=0.5.2,<1.1.0", optional = true}
+sphinx-rtd-theme = {version = ">=0.5.2,<1.2.0", optional = true}
 sphinx-copybutton = {version = ">=0.3.1,<0.6.0", optional = true}
 myst-parser = {version = ">=0.17.2,<0.19.0", optional = true}
 sphinx-autobuild = {version = "^2021.3.14", optional = true}
+
+# File storage dependencies installed as optional 'filesystem' extras
+fs-s3fs = { version = "^1.1.1", optional = true}
 
 [tool.poetry.extras]
 docs = [
@@ -73,24 +79,32 @@ docs = [
     "myst-parser",
     "sphinx-autobuild",
 ]
+s3 = ["fs-s3fs"]
+# Mark these as extras so that installs pass on python 3.11
+samples = [
+    "pyarrow",
+]
+debugging = [
+    "viztracer",
+]
 
 [tool.poetry.dev-dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
 commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
-pytest = "^7.1.3"
+pytest = "^7.2.0"
 xdoctest = "^1.1.0"
-mypy = "^0.982"
+mypy = "^0.991"
 cookiecutter = "^2.1.1"
 PyYAML = "^6.0"
-pyarrow = "^9.0.0"
+pyarrow = {version = "^10.0.0", optional = true, python = "<3.11"}
 freezegun = "^1.2.2"
-viztracer = "^0.15.4"
+viztracer = {version = "^0.15.6", optional = true, python = "<3.11"}
 requests-mock = "^1.10.0"
-sqlalchemy2-stubs = {version = "^0.0.2a27", allow-prereleases = true}
+sqlalchemy2-stubs = {version = "^0.0.2a29", allow-prereleases = true}
 types-python-dateutil = "^2.8.19"
-types-pytz = "^2022.4.0.0"
+types-pytz = "^2022.6.0.1"
 types-requests = "^2.28.11"
-types-simplejson = "^3.17.7"
+types-simplejson = "^3.18.0"
 types-PyYAML = "^6.0.12"
 coverage = {extras = ["toml"], version = "^6.5"}
 
@@ -100,6 +114,9 @@ darglint = "^1.8.0"
 flake8 = "^3.9.0"
 flake8-annotations = "^2.9.1"
 flake8-docstrings = "^1.6.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest-snapshot = "^0.9.0"
 
 [tool.black]
 exclude = ".*simpleeval.*"
@@ -115,11 +132,12 @@ addopts = '-vvv --ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
 markers = [
     "external: Tests relying on external resources",
     "windows: Tests that only run on Windows",
+    "snapshot: Tests that use pytest-snapshot",
 ]
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.11.1"
+version = "0.14.0"
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
     "docs/conf.py",

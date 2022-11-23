@@ -12,10 +12,13 @@ from __future__ import annotations
 
 {%- set sinkclass = sinkclass_mapping[cookiecutter.serialization_method] %}
 
-from singer_sdk.sinks import {% if sinkclass == "SQLSink" %}SQLConnector, {% endif %}{{ sinkclass }}
+from singer_sdk.sinks import {{ sinkclass }}
 
 {%- if sinkclass == "SQLSink" %}
+from singer_sdk.connectors import SQLConnector
+{% endif %}
 
+{%- if sinkclass == "SQLSink" %}
 
 class {{ cookiecutter.destination_name }}Connector(SQLConnector):
     """The connector for {{ cookiecutter.destination_name }}.
