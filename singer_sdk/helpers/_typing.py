@@ -44,10 +44,11 @@ def append_type(type_dict: dict, new_type: str) -> dict:
         return result
 
     elif "type" in result:
-        if isinstance(result["type"], list) and new_type not in result["type"]:
-            result["type"].append(new_type)
-        elif new_type != result["type"]:
-            result["type"] = [result["type"], new_type]
+        type_array = (
+            result["type"] if isinstance(result["type"], list) else [result["type"]]
+        )
+        if new_type not in type_array:
+            result["type"] = [*type_array, new_type]
         return result
 
     raise ValueError(
