@@ -779,14 +779,22 @@ class SQLConnector:
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
                 ):
                     # If length None or 0 then is varchar max ?
-                    if (opt_len is None) or (opt_len == 0):
+                    if (
+                        (opt_len is None)
+                        or (opt_len == 0)
+                        or (opt_len >= (current_type.length or (opt_len + 1)))
+                    ):
                         return opt
                 elif isinstance(
                     generic_type,
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
                 ):
                     # If length None or 0 then is varchar max ?
-                    if (opt_len is None) or (opt_len == 0):
+                    if (
+                        (opt_len is None)
+                        or (opt_len == 0)
+                        or (opt_len >= (current_type.length or (opt_len + 1)))
+                    ):
                         return opt
                 # If best conversion class is equal to current type
                 # return the best conversion class
@@ -994,6 +1002,8 @@ class SQLConnector:
         self.logger.info(f"comtible_sql_type: {compatible_sql_type}")
         if str(compatible_sql_type) == str(current_type):
             # Nothing to do
+            # my logger
+            self.logger.info("Not got to change anything")
             return
         # my logger
         self.logger.info(f"Lets change the column to type: {compatible_sql_type}")
@@ -1002,8 +1012,7 @@ class SQLConnector:
             if collation_removed:
                 setattr(compatible_sql_type, "collation", current_type_collation)
                 self.logger.info(
-                    "Lets change the column to",
-                    f"type with collation: {compatible_sql_type}",
+                    f"Compatible type with collation: {compatible_sql_type}",
                 )
 
         if not self.allow_column_alter:
