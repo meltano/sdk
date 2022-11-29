@@ -1,6 +1,6 @@
 # Testing Taps & Targets
 
-The Meltano SDK includes suits of standard tests for both Taps and Targets to help you get started.
+The Meltano SDK includes suites of standard tests for both Taps and Targets to help you get started.
 These suites cover most common cases out-of-the-box, and tests are added to the standard suites as new errors are encountered by users in their deployments.
 
 ## Test Framework
