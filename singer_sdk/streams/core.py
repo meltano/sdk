@@ -1268,10 +1268,9 @@ class Stream(metaclass=abc.ABCMeta):
                     if batch_config.encoding.format == BatchFileFormat.PARQUET:
                         df = pd.DataFrame([record for record in chunk])
                         fastparquet.write(
-                            filename=fs.geturl(filename),
+                            filename=f,
                             data=df,
                             compression="GZIP",
-                            open_with=fs.open,
                         )
                         # df.to_parquet(
                         #     path=f.name, engine="fastparquet", compression="gzip"
