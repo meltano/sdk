@@ -429,8 +429,11 @@ class CustomStreamMap(StreamMap):
                 transformed_schema["properties"].pop(prop_key, None)
             elif isinstance(prop_def, str):
                 default_type: JSONTypeHelper = StringType()  # Fallback to string
-                existing_schema: dict = transformed_schema["properties"].get(
-                    prop_key, {}
+                existing_schema: dict = (
+                    # Use transformed schema if available
+                    transformed_schema["properties"].get(prop_key, {})
+                    # ...or original schema for passthrough
+                    or self.raw_schema["properties"].get(prop_def, {})
                 )
                 if existing_schema:
                     # Set default type if property exists already in JSON Schema
