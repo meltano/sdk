@@ -5,7 +5,7 @@ These suites cover most common cases out-of-the-box, and tests are added to the 
 
 ## Test Framework
 
-The Meltano SDK test framwrok consists of 4 main components:
+The Meltano SDK test framework consists of 4 main components:
 
 1. A runner class (`TapTestRunner` and `TargetTestRunner`), responsible for executing Taps/Targets and capturing their output.
 1. A suite dataclass, containing a list of tests.
