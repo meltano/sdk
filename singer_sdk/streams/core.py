@@ -15,6 +15,7 @@ from types import MappingProxyType
 from typing import Any, Generator, Iterable, Iterator, Mapping, TypeVar, cast
 from uuid import uuid4
 
+import fastparquet
 import pandas as pd
 import pendulum
 
@@ -1266,9 +1267,15 @@ class Stream(metaclass=abc.ABCMeta):
                 if batch_config.encoding.compression == "gzip":
                     if batch_config.encoding.format == BatchFileFormat.PARQUET:
                         df = pd.DataFrame([record for record in chunk])
-                        df.to_parquet(
-                            path=f.name, engine="fastparquet", compression="gzip"
+                        fastparquet.write(
+                            filename=filename,
+                            data=df,
+                            compression="GZIP",
+                            open_with=fs.open,
                         )
+                        # df.to_parquet(
+                        #     path=f.name, engine="fastparquet", compression="gzip"
+                        # )
                     else:
                         with gzip.GzipFile(fileobj=f, mode="wb") as gz:
                             gz.writelines(
