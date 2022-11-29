@@ -89,7 +89,7 @@ class TestTargetExample(StandardTargetTests):
 ## Writing New Tests
 
 Writing new tests is as easy as subclassing the appropriate class.
-Check out [`singer_sdk/testing/tap_tests.py`](https://github.com/meltano/sdk/tree/main/singer_sdk/testing/tap_tests.py)` and [`singer_sdk/testing/target_tests.py`](https://github.com/meltano/sdk/tree/main/singer_sdk/testing/target_tests.py) for inspiration.
+Check out [`singer_sdk/testing/tap_tests.py`](https://github.com/meltano/sdk/tree/main/singer_sdk/testing/tap_tests.py) and [`singer_sdk/testing/target_tests.py`](https://github.com/meltano/sdk/tree/main/singer_sdk/testing/target_tests.py) for inspiration.
 
 ```python
 class TapCLIPrintsTest(TapTestTemplate):
