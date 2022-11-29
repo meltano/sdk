@@ -1271,7 +1271,7 @@ class Stream(metaclass=abc.ABCMeta):
                             filename=filename,
                             data=df,
                             compression="GZIP",
-                            open_with=fs.open,
+                            open_with=f,
                         )
                         # df.to_parquet(
                         #     path=f.name, engine="fastparquet", compression="gzip"
