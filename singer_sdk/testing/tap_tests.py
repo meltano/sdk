@@ -86,7 +86,7 @@ class StreamRecordSchemaMatchesCatalogTest(StreamTestTemplate):
         stream_catalog_keys = set(self.stream.schema["properties"].keys())
         stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
         diff = stream_record_keys - stream_catalog_keys
-        assert diff == set(), f"Fields in records but not in catalog: ({diff})"
+        assert not diff, f"Fields in records but not in catalog: ({diff})"
 
 
 class StreamPrimaryKeysTest(StreamTestTemplate):
