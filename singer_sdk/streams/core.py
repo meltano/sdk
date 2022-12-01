@@ -17,6 +17,7 @@ from uuid import uuid4
 
 import pendulum
 import pyarrow as pa
+import pyarrow.parquet as pq
 
 import singer_sdk._singerlib as singer
 from singer_sdk import metrics
@@ -1267,7 +1268,7 @@ class Stream(metaclass=abc.ABCMeta):
                     if batch_config.encoding.format == BatchFileFormat.PARQUET:
                         pylist = list(chunk)
                         table = pa.Table.from_pylist(pylist)
-                        pa.parquet.write_table(table, f, compression="GZIP")
+                        pq.write_table(table, f, compression="GZIP")
                     else:
                         with gzip.GzipFile(fileobj=f, mode="wb") as gz:
                             gz.writelines(
