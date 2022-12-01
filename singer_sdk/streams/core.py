@@ -15,9 +15,8 @@ from types import MappingProxyType
 from typing import Any, Generator, Iterable, Iterator, Mapping, TypeVar, cast
 from uuid import uuid4
 
-import fastparquet
-import pandas as pd
 import pendulum
+import pyarrow as pa
 
 import singer_sdk._singerlib as singer
 from singer_sdk import metrics
@@ -1266,16 +1265,9 @@ class Stream(metaclass=abc.ABCMeta):
             with fs.open(filename, "wb") as f:
                 if batch_config.encoding.compression == "gzip":
                     if batch_config.encoding.format == BatchFileFormat.PARQUET:
-                        df = pd.DataFrame([record for record in chunk])
-                        fastparquet.write(
-                            filename=filename,
-                            data=df,
-                            compression="GZIP",
-                            open_with=fs.open,
-                        )
-                        # df.to_parquet(
-                        #     path=f.name, engine="fastparquet", compression="gzip"
-                        # )
+                        pylist = list(chunk)
+                        table = pa.Table.from_pylist(pylist)
+                        pa.parquet.write_table(table, f, compression="GZIP")
                     else:
                         with gzip.GzipFile(fileobj=f, mode="wb") as gz:
                             gz.writelines(
