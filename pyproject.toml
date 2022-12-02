@@ -57,7 +57,6 @@ python-dotenv = ">=0.20,<0.22"
 typing-extensions = "^4.2.0"
 simplejson = "^3.17.6"
 jsonschema = "^4.16.0"
-pytest = "^7.2.0"
 pytz = "^2022.2.1"
 PyYAML = "^6.0"
 
@@ -71,6 +70,10 @@ sphinx-autobuild = {version = "^2021.3.14", optional = true}
 
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = { version = "^1.1.1", optional = true}
+
+# Testing dependencies installed as optional 'testing' extras
+pytest = "^7.2.0"
+pytest-durations = {version = "^1.2.0"}
 
 [tool.poetry.extras]
 docs = [
@@ -87,6 +90,10 @@ samples = [
 ]
 debugging = [
     "viztracer",
+]
+testing = [
+    "pytest",
+    "pytest-durations"
 ]
 
 [tool.poetry.dev-dependencies]

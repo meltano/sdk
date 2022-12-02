@@ -32,6 +32,7 @@ test_dependencies = [
     "coverage[toml]",
     "pytest",
     "pytest-snapshot",
+    "pytest-durations",
     "freezegun",
     "pandas",
     "requests-mock",
@@ -87,6 +88,7 @@ def tests(session: Session) -> None:
             "-m",
             "pytest",
             "-v",
+            "--duration=0",
             *session.posargs,
         )
     finally:
