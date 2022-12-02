@@ -27,10 +27,14 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
             else None
         )
         if funcarglist:
-            argnames = funcarglist[0].keys()
+            arg_names = list(funcarglist[0].keys())
+            parameters = [
+                pytest.param(*tuple(funcargs[name] for name in arg_names))
+                for funcargs in funcarglist
+            ]
             metafunc.parametrize(
-                ",".join(argnames),
-                [[funcargs[name] for name in argnames] for funcargs in funcarglist],
+                ",".join(arg_names),
+                parameters,
                 ids=funcargids,
             )
 
@@ -60,6 +64,8 @@ def get_test_class(
 
         @pytest.fixture(scope="class")
         def runner(self) -> TapTestRunner | TargetTestRunner:
+            # Populate runner class with cached records for use in tests
+            test_runner.sync_all()
             return test_runner
 
     for suite in test_suites:
@@ -86,15 +92,11 @@ def get_test_class(
 
         if suite.kind in {"tap_stream", "tap_stream_attribute"}:
 
-            # Populate runner class with records for use in stream/attribute tests
-            test_runner.sync_all()
-
             if suite.kind == "tap_stream":
 
                 params = [
                     {
                         "stream": stream,
-                        "stream_records": test_runner.records[stream.name],
                     }
                     for stream in test_runner.tap.streams.values()
                 ]
@@ -123,7 +125,6 @@ def get_test_class(
                             [
                                 {
                                     "stream": stream,
-                                    "stream_records": test_runner.records[stream.name],
                                     "attribute_name": property_name,
                                 }
                                 for property_name, property_schema in stream.schema[

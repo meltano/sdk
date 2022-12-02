@@ -22,7 +22,6 @@ class TestTemplate:
     Possible Args:
         stream (obj, optional): Initialized stream object to be tested.
         stream_name (str, optional): Name of the stream to be tested.
-        stream_records (list[obj]): Array of records output by the stream sync.
         attribute_name (str, optional): Name of the attribute to be tested.
 
     Raises:
@@ -142,7 +141,7 @@ class StreamTestTemplate(TestTemplate):
     """Base Tap Stream test template."""
 
     type = "stream"
-    required_kwargs = ["stream", "stream_records"]
+    required_kwargs = ["stream"]
 
     @property
     def id(self) -> str:
@@ -158,7 +157,6 @@ class StreamTestTemplate(TestTemplate):
         resource: Any,
         runner: TapTestRunner,
         stream: Stream,
-        stream_records: list[dict],
     ) -> None:
         """Test main run method.
 
@@ -166,11 +164,9 @@ class StreamTestTemplate(TestTemplate):
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap runner instance, to use with this test.
             stream: A Tap Stream instance, to use with this test.
-            stream_records: The records returned by the given Stream,
-                to use with this test.
         """
         self.stream = stream
-        self.stream_records = stream_records
+        self.stream_records = runner.records[stream.name]
         super().run(resource, runner)
 
 
@@ -193,7 +189,6 @@ class AttributeTestTemplate(TestTemplate):
         resource: Any,
         runner: TapTestRunner,
         stream: Stream,
-        stream_records: list[dict],
         attribute_name: str,
     ) -> None:
         """Test main run method.
@@ -202,12 +197,11 @@ class AttributeTestTemplate(TestTemplate):
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap runner instance, to use with this test.
             stream: A Tap Stream instance, to use with this test.
-            stream_records: The records returned by the given Stream,
                 to use with this test.
             attribute_name: The name of the attribute to test.
         """
         self.stream = stream
-        self.stream_records = stream_records
+        self.stream_records = runner.records[stream.name]
         self.attribute_name = attribute_name
         super().run(resource, runner)
 
