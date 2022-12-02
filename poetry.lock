@@ -1417,7 +1417,7 @@ samples = ["pyarrow"]
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.12,>=3.7.1"
-content-hash = "89b57005f314a49f34ceaab2ef8e0abcaf2f382d6d0a66974cf979a6ec78b097"
+content-hash = "83a7edd65e48af9db103843059b38f9d1d3dd7ecc46fb6270edc7de275b1cc7d"
 
 [metadata.files]
 alabaster = [

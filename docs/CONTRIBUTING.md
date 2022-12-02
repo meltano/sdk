@@ -114,10 +114,41 @@ Supported platform markers are `windows`, `darwin`, and `linux`.
 ### Snapshot Testing
 
 We use [pytest-snapshot](https://pypi.org/project/pytest-snapshot/) for snapshot testing.
-To update snapshots, run:
+
+#### Adding a new snapshot
+
+To add a new snapshot, use the `snapshot` fixture and mark the test with the
+`@pytest.mark.snapshot` decorator. The fixture will create a new snapshot file
+if one does not already exist. If a snapshot file already exists, the fixture
+will compare the snapshot to the actual value and fail the test if they do not
+match.
+
+The `tests/snapshots` directory is where snapshot files should be stored and
+it's available as the `snapshot_dir` fixture.
+
+```python
+@pytest.mark.snapshot
+def test_snapshot(snapshot, snapshot_dir):
+    # Configure the snapshot directory
+    snapshot.snapshot_dir = snapshot_dir.joinpath("test_snapshot_subdir")
+
+    snapshot_name = "test_snapshot"
+    expected_content = "Hello, World!"
+    snapshot.assert_match(expected_content, snapshot_name)
+```
+
+#### Generating or updating snapshots
+
+To update or generate snapshots, run the nox `update_snapshots` session
 
 ```bash
 nox -rs update_snapshots
+```
+
+or use the `--snapshot-update` flag
+
+```bash
+poetry run pytest --snapshot-update -m 'snapshot'
 ```
 
 This will run all tests with the `snapshot` marker and update any snapshots that have changed.
