@@ -1247,12 +1247,15 @@ class Stream(metaclass=abc.ABCMeta):
             ),
             start=1,
         ):
-            if batch_config.encoding.format == BatchFileFormat.PARQUET:
-                filename = f"{prefix}{sync_id}-{i}.parquet"
+            file_formats = [member.value for member in BatchFileFormat]
+            if batch_config.encoding.format in file_formats:
+                filename = f"{prefix}{sync_id}-{i}.{batch_config.encoding.format}"
+                if batch_config.encoding.compression == "gzip":
+                    filename = f"{filename}.gz"
             else:
                 filename = f"{prefix}{sync_id}-{i}.json"
-            if batch_config.encoding.compression == "gzip":
-                filename = f"{filename}.gz"
+                if batch_config.encoding.compression == "gzip":
+                    filename = f"{filename}.gz"
             file_url = self._write_batch_file(chunk, filename, batch_config)
             yield batch_config.encoding, [file_url]
 
@@ -1264,23 +1267,23 @@ class Stream(metaclass=abc.ABCMeta):
     ) -> str:
         with batch_config.storage.fs() as fs:
             with fs.open(filename, "wb") as f:
-                if batch_config.encoding.compression == "gzip":
-                    if batch_config.encoding.format == BatchFileFormat.PARQUET:
-                        pylist = list(chunk)
-                        table = pa.Table.from_pylist(pylist)
+                if batch_config.encoding.format == BatchFileFormat.PARQUET:
+                    pylist = list(chunk)
+                    table = pa.Table.from_pylist(pylist)
+                    if batch_config.encoding.compression == "gzip":
                         pq.write_table(table, f, compression="GZIP")
                     else:
+                        pq.write_table(table, f)
+                else:
+                    if batch_config.encoding.compression == "gzip":
                         with gzip.GzipFile(fileobj=f, mode="wb") as gz:
                             gz.writelines(
                                 (json.dumps(record) + "\n").encode() for record in chunk
                             )
-                elif batch_config.encoding.compression:
-                    raise NotImplementedError(
-                        f"Unsupported batch compression format: "
-                        f"{batch_config.encoding.compression}"
-                    )
-                else:
-                    f.writelines(record for record in chunk)
+                    else:
+                        f.writelines(
+                            (json.dumps(record) + "\n").encode() for record in chunk
+                        )
             file_url = fs.geturl(filename)
         return file_url
 
