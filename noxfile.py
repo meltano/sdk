@@ -55,6 +55,7 @@ def mypy(session: Session) -> None:
     session.install(".")
     session.install(
         "mypy",
+        "pytest",
         "sqlalchemy2-stubs",
         "types-python-dateutil",
         "types-requests",
