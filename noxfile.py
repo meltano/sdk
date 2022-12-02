@@ -88,7 +88,7 @@ def tests(session: Session) -> None:
             "-m",
             "pytest",
             "-v",
-            "--duration=0",
+            "--durations=10",
             *session.posargs,
         )
     finally:
