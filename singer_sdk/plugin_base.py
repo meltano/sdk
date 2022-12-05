@@ -48,7 +48,8 @@ JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    name: str  # The executable name of the tap or target plugin.
+    name: str  # The executable name of the plugin. e.g. tap-csv
+    package_name: str  # The package name of the plugin. e.g. meltanolabs-tap-csv
 
     config_jsonschema: dict = {}
     # A JSON Schema object defining the config options that this tap will accept.
@@ -165,7 +166,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             The package version number.
         """
         try:
-            version = metadata.version(cls.name)
+            version = metadata.version(cls.package_name or cls.name)
         except metadata.PackageNotFoundError:
             version = "[could not be detected]"
         return version
