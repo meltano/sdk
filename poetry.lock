@@ -668,7 +668,7 @@ name = "numpy"
 version = "1.21.1"
 description = "NumPy is the fundamental package for array computing with Python."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.7"
 
 [[package]]
@@ -758,7 +758,7 @@ name = "pyarrow"
 version = "10.0.1"
 description = "Python library for Apache Arrow"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.7"
 
 [package.dependencies]
@@ -1412,12 +1412,11 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 debugging = []
 docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser", "sphinx-autobuild"]
 s3 = ["fs-s3fs"]
-samples = ["pyarrow"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.12,>=3.7.1"
-content-hash = "83a7edd65e48af9db103843059b38f9d1d3dd7ecc46fb6270edc7de275b1cc7d"
+content-hash = "d72db45610452815cf7272a6924d8f7c8dd24363cc8c24451198405248e5a704"
 
 [metadata.files]
 alabaster = [
