@@ -50,10 +50,11 @@ JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    name: str  # The executable name of the plugin. e.g. tap-csv
-    package_name: str | None = (
-        None  # The package name of the plugin. e.g. meltanolabs-tap-csv
-    )
+    #: The executable name of the plugin. e.g. tap-csv
+    name: str
+
+    #: The package name of the plugin. e.g. meltanolabs-tap-csv
+    package_name: str | None = None
 
     config_jsonschema: dict = {}
     # A JSON Schema object defining the config options that this tap will accept.
