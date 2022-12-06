@@ -1,9 +1,9 @@
 [tool.poetry]
 {%- if cookiecutter.variant != "None (Skip)" %}
 name = "{{cookiecutter.variant}}-{{cookiecutter.target_id}}"
-{% else %}
+{%- else %}
 name = "{{cookiecutter.target_id}}"
-{% endif %}
+{%- endif %}
 version = "0.0.1"
 description = "`{{cookiecutter.target_id}}` is a Singer target for {{cookiecutter.destination_name}}, built with the Meltano Singer SDK."
 readme = "README.md"

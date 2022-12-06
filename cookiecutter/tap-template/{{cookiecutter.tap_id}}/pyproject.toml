@@ -1,7 +1,7 @@
 [tool.poetry]
 {%- if cookiecutter.variant != "None (Skip)" %}
 name = "{{cookiecutter.variant}}-{{cookiecutter.tap_id}}"
-{% else %}
+{%- else %}
 name = "{{cookiecutter.tap_id}}"
 {%- endif %}
 version = "0.0.1"
