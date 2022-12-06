@@ -1,13 +1,23 @@
 [tool.poetry]
+{%- if cookiecutter.variant != "None (Skip)" %}
+name = "{{cookiecutter.variant}}-{{cookiecutter.tap_id}}"
+{% else %}
 name = "{{cookiecutter.tap_id}}"
+{%- endif %}
 version = "0.0.1"
 description = "`{{cookiecutter.tap_id}}` is a Singer tap for {{cookiecutter.source_name}}, built with the Meltano Singer SDK."
+readme = "README.md"
 authors = ["{{ cookiecutter.admin_name }}"]
 keywords = [
     "ELT",
     "{{cookiecutter.source_name}}",
 ]
 license = "Apache 2.0"
+{%- if cookiecutter.variant != "None (Skip)" %}
+packages = [
+    { include = "{{cookiecutter.library_name}}" },
+]
+{%- endif %}
 
 [tool.poetry.dependencies]
 python = "<3.11,>=3.7.1"
