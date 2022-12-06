@@ -16,6 +16,11 @@ class Target{{ cookiecutter.destination_name }}({{ target_class }}):
     """Sample target for {{ cookiecutter.destination_name }}."""
 
     name = "{{ cookiecutter.target_id }}"
+
+{%- if cookiecutter.variant != "None (Skip)"  %}
+    variant = "{{ cookiecutter.variant }}"
+{%- endif %}
+
     config_jsonschema = th.PropertiesList(
         {%- if cookiecutter.serialization_method == "SQL" %}
         th.Property(

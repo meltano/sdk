@@ -42,8 +42,8 @@ class PluginBase(metaclass=abc.ABCMeta):
     #: The executable name of the plugin. e.g. tap-csv
     name: str
 
-    #: The package name of the plugin. e.g. meltanolabs-tap-csv
-    package_name: str | None = None
+    #: The variant name of the plugin. e.g. meltanolabs
+    variant: str | None = None
 
     config_jsonschema: dict = {}
     # A JSON Schema object defining the config options that this tap will accept.
@@ -153,6 +153,20 @@ class PluginBase(metaclass=abc.ABCMeta):
     # Core plugin metadata:
 
     @classproperty
+    def package_name(cls) -> str:
+        """Get package name.
+
+        Package name is the distribution name (wheel name or pip install name)
+        of this plugin. By convention it is a concatenation of the variant and name.
+
+        e.g. "meltanolabs-tap-csv"
+
+        Returns:
+            The package name.
+        """
+        return f"{cls.variant}-{cls.name}" if cls.variant else cls.name
+
+    @classproperty
     def plugin_version(cls) -> str:
         """Get version.
 
@@ -160,7 +174,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             The package version number.
         """
         try:
-            version = metadata.version(cls.package_name or cls.name)
+            version = metadata.version(cls.package_name)
         except metadata.PackageNotFoundError:
             version = "[could not be detected]"
         return version
