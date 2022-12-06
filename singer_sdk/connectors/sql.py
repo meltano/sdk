@@ -738,6 +738,46 @@ class SQLConnector:
 
         Raises:
             ValueError: If sql_types argument has zero members.
+
+                 4) If the <cast operand> is a <value expression>, then the valid
+            combinations of TD and SD in a <cast specification> are given by
+            the following table. Y indicates that the combination is syntac-
+            tically valid without restriction; M indicates that the combi-
+            nation is valid subject to other syntax rules in this Subclause
+            being satisfied; and N indicates that the combination is not
+            valid:
+
+              <data type>
+              SD of                 <data type> of TD
+              <value
+
+            <expression>   EN   AN   VC   FC   VB   FB   D    T    TS   YM   DT
+
+                  EN        Y    Y    Y    Y    N    N    N    N    N    M    M
+                  AN        Y    Y    Y    Y    N    N    N    N    N    N    N
+                  C         Y    Y    M    M    Y    Y    Y    Y    Y    Y    Y
+                  B         N    N    Y    Y    Y    Y    N    N    N    N    N
+                  D         N    N    Y    Y    N    N    Y    N    Y    N    N
+                  T         N    N    Y    Y    N    N    N    Y    Y    N    N
+                  TS        N    N    Y    Y    N    N    Y    Y    Y    N    N
+                  YM        M    N    Y    Y    N    N    N    N    N    Y    N
+                  DT        M    N    Y    Y    N    N    N    N    N    N    Y
+
+              Where:
+
+                  EN = Exact Numeric
+                  AN = Approximate Numeric
+                  C  = Character (Fixed- or Variable-length)
+                  FC = Fixed-length Character
+                  VC = Variable-length Character
+                  B  = Bit String (Fixed- or Variable-length)
+                  FB = Fixed-length Bit String
+                  VB = Variable-length Bit String
+                  D  = Date
+                  T  = Time
+                  TS = Timestamp
+                  YM = Year-Month Interval
+                  DT = Day-Time Interval
         """
         if not sql_types:
             raise ValueError("Expected at least one member in `sql_types` argument.")
