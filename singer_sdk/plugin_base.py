@@ -63,17 +63,15 @@ class PluginBase(metaclass=abc.ABCMeta):
             Plugin logger.
         """
         # Get the level from <PLUGIN_NAME>_LOGLEVEL or LOGLEVEL environment variables
-        LOGLEVEL = (
-            os.environ.get(f"{cls.name.upper()}_LOGLEVEL")
-            or os.environ.get("LOGLEVEL")
-            or "INFO"
-        ).upper()
+        LOGLEVEL = os.environ.get(f"{cls.name.upper()}_LOGLEVEL") or os.environ.get(
+            "LOGLEVEL"
+        )
 
-        assert (
-            LOGLEVEL in logging._levelToName.values()
-        ), f"Invalid LOGLEVEL configuration: {LOGLEVEL}"
         logger = logging.getLogger(cls.name)
-        logger.setLevel(LOGLEVEL)
+
+        if LOGLEVEL is not None and LOGLEVEL.upper() in logging._levelToName.values():
+            logger.setLevel(LOGLEVEL.upper())
+
         return logger
 
     # Constructor
