@@ -220,6 +220,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         decorator: Callable = backoff.on_exception(
             self.backoff_wait_generator,
             (
+                ConnectionResetError,
                 RetriableAPIError,
                 requests.exceptions.ReadTimeout,
                 requests.exceptions.ConnectionError,
