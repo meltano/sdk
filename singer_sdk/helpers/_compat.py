@@ -1,5 +1,5 @@
 """Compatibility helpers."""
-from __future__ import typing
+from __future__ import annotations
 
 import pathlib
 
