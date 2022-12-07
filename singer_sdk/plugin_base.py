@@ -1,7 +1,5 @@
 """Shared parent class for Tap, Target (future), and Transform (future)."""
 
-from __future__ import annotations
-
 import abc
 import json
 import logging
@@ -9,7 +7,18 @@ import os
 from collections import OrderedDict
 from pathlib import PurePath
 from types import MappingProxyType
-from typing import Any, Callable, Dict, Mapping, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import click
 from jsonschema import Draft7Validator, SchemaError, ValidationError
@@ -39,11 +48,7 @@ JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    #: The executable name of the plugin. e.g. tap-csv
-    name: str
-
-    #: The variant name of the plugin. e.g. meltanolabs
-    variant: str | None = None
+    name: str  # The executable name of the tap or target plugin.
 
     config_jsonschema: dict = {}
     # A JSON Schema object defining the config options that this tap will accept.
@@ -58,24 +63,22 @@ class PluginBase(metaclass=abc.ABCMeta):
             Plugin logger.
         """
         # Get the level from <PLUGIN_NAME>_LOGLEVEL or LOGLEVEL environment variables
-        LOGLEVEL = (
-            os.environ.get(f"{cls.name.upper()}_LOGLEVEL")
-            or os.environ.get("LOGLEVEL")
-            or "INFO"
-        ).upper()
+        LOGLEVEL = os.environ.get(f"{cls.name.upper()}_LOGLEVEL") or os.environ.get(
+            "LOGLEVEL"
+        )
 
-        assert (
-            LOGLEVEL in logging._levelToName.values()
-        ), f"Invalid LOGLEVEL configuration: {LOGLEVEL}"
         logger = logging.getLogger(cls.name)
-        logger.setLevel(LOGLEVEL)
+
+        if LOGLEVEL is not None and LOGLEVEL.upper() in logging._levelToName.values():
+            logger.setLevel(LOGLEVEL.upper())
+
         return logger
 
     # Constructor
 
     def __init__(
         self,
-        config: dict | PurePath | str | list[PurePath | str] | None = None,
+        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
@@ -120,7 +123,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         self.metrics_logger = metrics.get_metrics_logger()
 
     @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:
+    def capabilities(self) -> List[CapabilitiesEnum]:
         """Get capabilities.
 
         Developers may override this property in oder to add or remove
@@ -135,7 +138,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         ]
 
     @classproperty
-    def _env_var_config(cls) -> dict[str, Any]:
+    def _env_var_config(cls) -> Dict[str, Any]:
         """Return any config specified in environment variables.
 
         Variables must match the convention "<PLUGIN_NAME>_<SETTING_NAME>",
@@ -153,20 +156,6 @@ class PluginBase(metaclass=abc.ABCMeta):
     # Core plugin metadata:
 
     @classproperty
-    def package_name(cls) -> str:
-        """Get package name.
-
-        Package name is the distribution name (wheel name or pip install name)
-        of this plugin. By convention it is a concatenation of the variant and name.
-
-        e.g. "meltanolabs-tap-csv"
-
-        Returns:
-            The package name.
-        """
-        return f"{cls.variant}-{cls.name}" if cls.variant else cls.name
-
-    @classproperty
     def plugin_version(cls) -> str:
         """Get version.
 
@@ -174,7 +163,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             The package version number.
         """
         try:
-            version = metadata.version(cls.package_name)
+            version = metadata.version(cls.name)
         except metadata.PackageNotFoundError:
             version = "[could not be detected]"
         return version
@@ -230,7 +219,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     def _validate_config(
         self, raise_errors: bool = True, warnings_as_errors: bool = False
-    ) -> tuple[list[str], list[str]]:
+    ) -> Tuple[List[str], List[str]]:
         """Validate configuration input against the plugin configuration JSON schema.
 
         Args:
@@ -243,8 +232,8 @@ class PluginBase(metaclass=abc.ABCMeta):
         Raises:
             ConfigValidationError: If raise_errors is True and validation fails.
         """
-        warnings: list[str] = []
-        errors: list[str] = []
+        warnings: List[str] = []
+        errors: List[str] = []
         log_fn = self.logger.info
         config_jsonschema = self.config_jsonschema
         if config_jsonschema:
@@ -279,25 +268,27 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     @classmethod
     def print_version(
-        cls: type[PluginBase],
+        cls: Type["PluginBase"],
         print_fn: Callable[[Any], None] = print,
     ) -> None:
         """Print help text for the tap.
 
         Args:
             print_fn: A function to use to display the plugin version.
-                Defaults to :function:`print`.
+                Defaults to `print`_.
+
+        .. _print: https://docs.python.org/3/library/functions.html#print
         """
         print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version}")
 
     @classmethod
-    def _get_about_info(cls: type[PluginBase]) -> dict[str, Any]:
+    def _get_about_info(cls: Type["PluginBase"]) -> Dict[str, Any]:
         """Returns capabilities and other tap metadata.
 
         Returns:
             A dictionary containing the relevant 'about' information.
         """
-        info: dict[str, Any] = OrderedDict({})
+        info: Dict[str, Any] = OrderedDict({})
         info["name"] = cls.name
         info["description"] = cls.__doc__
         info["version"] = cls.plugin_version
@@ -310,7 +301,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         return info
 
     @classmethod
-    def append_builtin_config(cls: type[PluginBase], config_jsonschema: dict) -> None:
+    def append_builtin_config(cls: Type["PluginBase"], config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
         To customize or disable this behavior, developers may either override this class
@@ -340,7 +331,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             _merge_missing(FLATTENING_CONFIG, config_jsonschema)
 
     @classmethod
-    def print_about(cls: type[PluginBase], format: str | None = None) -> None:
+    def print_about(cls: Type["PluginBase"], format: Optional[str] = None) -> None:
         """Print capabilities and other tap metadata.
 
         Args:
