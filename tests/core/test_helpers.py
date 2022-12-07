@@ -12,7 +12,7 @@ def test_get_project_distribution():
     be used in stead.
     """
     site_package_paths = site.getsitepackages()
-    singer_sdk_dependency_path = Path(site_package_paths[0]) / "github" / "__init__.py"
+    singer_sdk_dependency_path = Path(site_package_paths[0]) / "click" / "__init__.py"
     discovered_dst = get_project_distribution(singer_sdk_dependency_path)
     assert discovered_dst
-    assert discovered_dst.name == "PyGithub"
+    assert discovered_dst.name == "click"
