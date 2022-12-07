@@ -8,7 +8,7 @@ Plugin Classes
 
 .. autosummary::
     :toctree: classes
-    :template: class.rst
+    :template: plugin_class.rst
 
     Tap
     Target
