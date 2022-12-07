@@ -1,9 +1,19 @@
 import logging
 import time
+from textwrap import dedent
 
 import pytest
 
 from singer_sdk import metrics
+
+
+class CustomObject:
+    def __init__(self, name: str, value: int):
+        self.name = name
+        self.value = value
+
+    def __str__(self) -> str:
+        return f"{self.name}={self.value}"
 
 
 def test_meter():
@@ -28,10 +38,13 @@ def test_meter():
 
 def test_record_counter(caplog: pytest.LogCaptureFixture):
     caplog.set_level(logging.INFO, logger=metrics.METRICS_LOGGER_NAME)
+    custom_object = CustomObject("test", 1)
+
     with metrics.record_counter(
         "test_stream",
         endpoint="test_endpoint",
         custom_tag="pytest",
+        custom_obj=custom_object,
     ) as counter:
         for _ in range(100):
             counter.last_log_time = 0
@@ -46,6 +59,7 @@ def test_record_counter(caplog: pytest.LogCaptureFixture):
     for record in caplog.records:
         assert record.levelname == "INFO"
         assert record.msg == "INFO METRIC: %s"
+        assert "test=1" in record.message
 
         point: metrics.Point[int] = record.args[0]
         assert point.metric_type == "counter"
@@ -54,6 +68,7 @@ def test_record_counter(caplog: pytest.LogCaptureFixture):
             metrics.Tag.STREAM: "test_stream",
             metrics.Tag.ENDPOINT: "test_endpoint",
             "custom_tag": "pytest",
+            "custom_obj": custom_object,
         }
 
         total += point.value
