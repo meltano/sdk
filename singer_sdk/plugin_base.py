@@ -27,7 +27,7 @@ from singer_sdk import metrics
 from singer_sdk.configuration._dict_config import parse_environment_config
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._compat import metadata
+from singer_sdk.helpers._compat import get_project_distribution, metadata
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -162,10 +162,14 @@ class PluginBase(metaclass=abc.ABCMeta):
         Returns:
             The package version number.
         """
-        try:
-            version = metadata.version(cls.name)
-        except metadata.PackageNotFoundError:
-            version = "[could not be detected]"
+        distribution = get_project_distribution(__file__)
+        if distribution:
+            version = distribution.metadata["Version"]
+        else:
+            try:
+                version = metadata.version(cls.name)
+            except metadata.PackageNotFoundError:
+                version = "[could not be detected]"
         return version
 
     @classproperty
