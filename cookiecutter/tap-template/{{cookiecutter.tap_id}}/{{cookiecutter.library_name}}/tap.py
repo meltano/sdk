@@ -33,10 +33,6 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
 
     name = "{{ cookiecutter.tap_id }}"
 
-{%- if cookiecutter.variant != "None (Skip)"  %}
-    variant = "{{ cookiecutter.variant }}"
-{%- endif %}
-
     # TODO: Update this section with the actual config values you expect:
     config_jsonschema = th.PropertiesList(
         th.Property(
