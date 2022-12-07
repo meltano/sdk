@@ -37,7 +37,7 @@ def get_project_distribution(file_path=None) -> metadata.Distribution | None:
         except ValueError:
             pass
         else:
-            if relative in dist.files:
+            if dist.files and relative in dist.files:
                 return dist
     return None
 

@@ -164,7 +164,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         distribution = get_project_distribution(__file__)
         if distribution:
-            version = distribution.metadata["Version"]
+            version = str(distribution.metadata["Version"])
         else:
             try:
                 version = metadata.version(cls.name)
