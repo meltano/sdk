@@ -11,7 +11,10 @@ def test_get_project_distribution():
     Any similar singer_sdk dependency could be used in stead.
     """
     site_package_paths = site.getsitepackages()
-    singer_sdk_dependency_path = Path(site_package_paths[0]) / "click" / "__init__.py"
+    site_package_path = next(
+        pth for pth in site_package_paths if Path(pth).parts[-1] == "site-packages"
+    )
+    singer_sdk_dependency_path = Path(site_package_path) / "click" / "__init__.py"
     discovered_dst = get_project_distribution(singer_sdk_dependency_path)
     assert discovered_dst
     assert discovered_dst.name == "click"
