@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.15.0 (2022-12-08)
+
+### ✨ New
+
+- [#1188](https://github.com/meltano/sdk/issues/1188) Support boolean `additional_properties` in JSON schema helper objects
+- [#1237](https://github.com/meltano/sdk/issues/1237) Catch and retry `ConnectionResetError` exceptions in HTTP taps
+- [#1087](https://github.com/meltano/sdk/issues/1087) S3 batch storage -- _**Thanks @jamielxcarter!**_
+- [#1197](https://github.com/meltano/sdk/issues/1197) Support `patternProperties` in JSON schema helpers
+- [#1157](https://github.com/meltano/sdk/issues/1157) Built-in handling of `default-target-schema` for SQL Targets -- _**Thanks @BuzzCutNorman!**_
+
+### 🐛 Fixes
+
+- [#1238](https://github.com/meltano/sdk/issues/1238) Ensure metric tags coming from stream context can be JSON-serialized
+- [#1233](https://github.com/meltano/sdk/issues/1233) Add level and logger name to default log format
+- [#1219](https://github.com/meltano/sdk/issues/1219) Schema passthrough for whitelisted fields
+- [#1174](https://github.com/meltano/sdk/issues/1174) Do not emit log message if no record properties were ignored
+- [#1192](https://github.com/meltano/sdk/issues/1192) Change max record age for emitting state messages to 5 instead of 30 mins -- _**Thanks @spacecowboy!**_
+
+### ⚡ Performance Improvements
+
+- [#1196](https://github.com/meltano/sdk/issues/1196) Improve performance of record message serialization -- _**Thanks @Jack-Burnett!**_
+
+### 📚 Documentation Improvements
+
+- [#1243](https://github.com/meltano/sdk/issues/1243) Document inherited `PluginBase` attributes and methods
+- [#1209](https://github.com/meltano/sdk/issues/1209) Fix argument descriptions for `OAuthAuthenticator`
+
 ## v0.14.0 (2022-11-16)
 
 ### ✨ New
