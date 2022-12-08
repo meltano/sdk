@@ -4,6 +4,7 @@ import abc
 import json
 import logging
 import os
+import sys
 from collections import OrderedDict
 from pathlib import PurePath
 from types import MappingProxyType
@@ -162,7 +163,9 @@ class PluginBase(metaclass=abc.ABCMeta):
         Returns:
             The package version number.
         """
-        distribution = get_project_distribution(__file__)
+        # get the file location of the subclass
+        path = sys.modules[cls.__module__].__file__
+        distribution = get_project_distribution(path)
         if distribution:
             version = str(distribution.metadata["Version"])
         else:

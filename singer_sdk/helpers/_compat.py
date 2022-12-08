@@ -16,6 +16,9 @@ except ImportError:
     import importlib_metadata as metadata  # type: ignore
 
 
+__all__ = ["metadata", "get_project_distribution", "final"]
+
+
 # Future: replace with `importlib.metadata.packages_distributions()` introduced in 3.10
 def get_project_distribution(file_path=None) -> metadata.Distribution | None:
     """Get project distribution.
@@ -40,6 +43,3 @@ def get_project_distribution(file_path=None) -> metadata.Distribution | None:
             if dist.files and relative in dist.files:
                 return dist
     return None
-
-
-__all__ = ["metadata", "get_project_distribution", "final"]
