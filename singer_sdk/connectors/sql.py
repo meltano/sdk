@@ -725,6 +725,107 @@ class SQLConnector:
         )
         self.connection.execute(column_rename_ddl)
 
+    def accept_sql_type(
+        self,
+        trg_sql_type: sqlalchemy.types.TypeEngine,
+        sql_type: sqlalchemy.types.TypeEngine,
+    ) -> bool:
+        """Return True if the SQL Type can be implicitly converted.
+
+        Args:
+            trg_sql_type: Target column data type.
+            sql_type: Source data type.
+
+        Returns:
+            A Boolen value. Default is True
+
+        """
+        can_except_type: bool = True
+        trg_sql_type_name: str = trg_sql_type.__visit_name__
+        sql_type_name: str = sql_type.__visit_name__
+
+        self.logger.info(f"trg_sql_type: {trg_sql_type}, sql_type: {sql_type}")
+        self.logger.info(
+            f"trg_sql_type_name: {trg_sql_type_name}, sql_type_name: {sql_type_name}"
+        )
+
+        not_accepted_type_lookup = {
+            "BIGINT": ["DATE", "TIME", "TEXT", "JSON"],
+            "BINARY": ["DATE", "FLOAT", "REAL", "TIME", "TEXT", "JSON"],
+            "BLOB": ["DATE", "FLOAT", "REAL", "TIME", "TEXT", "JSON"],
+            "BOOLEAN": ["DATE", "TIME", "TEXT", "JSON"],
+            "CHAR": ["BINARY", "BLOB", "TIMESTAMP", "VARBINARY"],
+            "DATE": [
+                "BINARY",
+                "BLOB",
+                "BOOLEAN",
+                "TIME",
+                "DECIMAL",
+                "FLOAT",
+                "INTEGER",
+                "NUMERIC",
+                "REAL",
+                "SMALLINT",
+                "TEXT",
+                "TIMESTAMP",
+                "BIGINT",
+                "SMALLINT",
+                "JSON",
+            ],
+            "DATETIME": [
+                "BINARY",
+                "BLOB",
+                "BOOLEAN",
+                "DECIMAL",
+                "FLOAT",
+                "INTEGER",
+                "NUMERIC",
+                "REAL",
+                "SMALLINT",
+                "TEXT",
+                "TIMESTAMP",
+                "BIGINT",
+                "SMALLINT",
+                "JSON",
+            ],
+            "DECIMAL": ["DATE", "TIME", "DATETIME", "TEXT", "JSON"],
+            "FLOAT": ["DATE", "TIME", "DATETIME", "TIMESTAMP", "TEXT", "JSON"],
+            "INTEGER": ["DATE", "TIME", "DATETIME", "TEXT", "JSON"],
+            "NCHAR": ["BINARY", "BLOB", "TIMESTAMP", "VARBINARY"],
+            "NUMERIC": ["DATE", "TIME", "DATETIME", "TEXT", "JSON"],
+            "NVARCHAR": ["BINARY", "BLOB", "TIMESTAMP", "VARBINARY"],
+            "REAL": ["DATE", "TIME", "DATETIME", "TIMESTAMP", "TEXT", "JSON"],
+            "SMALLINT": ["DATE", "TIME", "DATETIME", "TEXT", "JSON"],
+            "TEXT": ["BINARY", "BLOB", "TIMESTAMP", "VARBINARY"],
+            "TIME": [
+                "BINARY",
+                "BLOB",
+                "BOOLEAN",
+                "DATE",
+                "DECIMAL",
+                "FLOAT",
+                "INTEGER",
+                "NUMERIC",
+                "REAL",
+                "SMALLINT",
+                "TEXT",
+                "TIMESTAMP",
+                "BIGINT",
+                "SMALLINT",
+                "JSON",
+            ],
+            "TIMESTAMP": ["DATE", "TIME", "DATETIME", "TEXT", "JSON"],
+            "VARBINARY": ["DATE", "TIME", "DATETIME", "FLOAT", "REAL", "TEXT", "JSON"],
+            "VARCHAR": ["BINARY", "BLOB", "TIMESTAMP", "VARBINARY"],
+        }
+
+        not_accepted_types = not_accepted_type_lookup.get(trg_sql_type_name)
+        if not_accepted_types:
+            if sql_type_name in not_accepted_types:
+                can_except_type = False
+
+        return can_except_type
+
     def merge_sql_types(
         self, sql_types: list[sqlalchemy.types.TypeEngine]
     ) -> sqlalchemy.types.TypeEngine:
@@ -739,45 +840,6 @@ class SQLConnector:
         Raises:
             ValueError: If sql_types argument has zero members.
 
-                 4) If the <cast operand> is a <value expression>, then the valid
-            combinations of TD and SD in a <cast specification> are given by
-            the following table. Y indicates that the combination is syntac-
-            tically valid without restriction; M indicates that the combi-
-            nation is valid subject to other syntax rules in this Subclause
-            being satisfied; and N indicates that the combination is not
-            valid:
-
-              <data type>
-              SD of                 <data type> of TD
-              <value
-
-            <expression>   EN   AN   VC   FC   VB   FB   D    T    TS   YM   DT
-
-                  EN        Y    Y    Y    Y    N    N    N    N    N    M    M
-                  AN        Y    Y    Y    Y    N    N    N    N    N    N    N
-                  C         Y    Y    M    M    Y    Y    Y    Y    Y    Y    Y
-                  B         N    N    Y    Y    Y    Y    N    N    N    N    N
-                  D         N    N    Y    Y    N    N    Y    N    Y    N    N
-                  T         N    N    Y    Y    N    N    N    Y    Y    N    N
-                  TS        N    N    Y    Y    N    N    Y    Y    Y    N    N
-                  YM        M    N    Y    Y    N    N    N    N    N    Y    N
-                  DT        M    N    Y    Y    N    N    N    N    N    N    Y
-
-              Where:
-
-                  EN = Exact Numeric
-                  AN = Approximate Numeric
-                  C  = Character (Fixed- or Variable-length)
-                  FC = Fixed-length Character
-                  VC = Variable-length Character
-                  B  = Bit String (Fixed- or Variable-length)
-                  FB = Fixed-length Bit String
-                  VB = Variable-length Bit String
-                  D  = Date
-                  T  = Time
-                  TS = Timestamp
-                  YM = Year-Month Interval
-                  DT = Day-Time Interval
         """
         if not sql_types:
             raise ValueError("Expected at least one member in `sql_types` argument.")
@@ -787,11 +849,11 @@ class SQLConnector:
 
         # Gathering Type to match variables
         # sent in _adapt_column_type
-        current_type = sql_types[0]
+        trg_sql_type = sql_types[0]
         # sql_type = sql_types[1]
 
         # Getting the length of each type
-        # current_type_len: int = getattr(sql_types[0], "length", 0)
+        # trg_sql_type_len: int = getattr(sql_types[0], "length", 0)
         sql_type_len: int = getattr(sql_types[1], "length", 0)
         if sql_type_len is None:
             sql_type_len = 0
@@ -822,7 +884,7 @@ class SQLConnector:
                     if (
                         (opt_len is None)
                         or (opt_len == 0)
-                        or (opt_len >= (current_type.length or (opt_len + 1)))
+                        or (opt_len >= (trg_sql_type.length or (opt_len + 1)))
                     ):
                         return opt
                 elif isinstance(
@@ -833,12 +895,12 @@ class SQLConnector:
                     if (
                         (opt_len is None)
                         or (opt_len == 0)
-                        or (opt_len >= (current_type.length or (opt_len + 1)))
+                        or (opt_len >= (trg_sql_type.length or (opt_len + 1)))
                     ):
                         return opt
                 # If best conversion class is equal to current type
                 # return the best conversion class
-                elif str(opt) == str(current_type):
+                elif str(opt) == str(trg_sql_type):
                     return opt
 
         raise ValueError(
@@ -1008,39 +1070,54 @@ class SQLConnector:
             NotImplementedError: if altering columns is not supported.
         """
         collation_removed = False
-        current_type: sqlalchemy.types.TypeEngine = self._get_column_type(
+        trg_sql_type: sqlalchemy.types.TypeEngine = self._get_column_type(
             full_table_name, column_name
         )
         # my logger
-        self.logger.info(f"current_type: {current_type}, sql_type: {sql_type}")
+        self.logger.info(f"trg_sql_type: {trg_sql_type}, sql_type: {sql_type}")
 
-        # remove collation if present and save it for a rainy day
-        if hasattr(current_type, "collation"):
-            if current_type.collation:
-                current_type_collation = current_type.collation
-                setattr(current_type, "collation", None)
+        # remove collation if present and save it
+        if hasattr(trg_sql_type, "collation"):
+            if trg_sql_type.collation:
+                trg_sql_type_collation = trg_sql_type.collation
+                setattr(trg_sql_type, "collation", None)
                 collation_removed = True
                 self.logger.info(
-                    f"new current_type: {current_type}, sql_type: {sql_type}"
+                    f"new trg_sql_type: {trg_sql_type}, sql_type: {sql_type}"
                 )
-        if hasattr(sql_type, "collation"):
-            if column_name == "lastname":
-                setattr(sql_type, "length", 255)
-        # my logger
-        self.logger.info(f"current_type: {current_type}, sql_type: {sql_type}")
+        # this elese and logger can be removed only for testing
+        else:
+            # my logger
+            self.logger.info(f"trg_sql_type: {trg_sql_type}, sql_type: {sql_type}")
+        # Testing purposed can be removed later
+        # if hasattr(sql_type, "collation"):
+        #     if column_name == "lastname":
+        #         setattr(sql_type, "length", 255)
+
         # Check if the existing column type and the sql type are the same
-        if str(sql_type) == str(current_type):
+        if str(trg_sql_type) == str(sql_type):
             # The current column and sql type are the same
             # Nothing to do
+            # my logger
+            self.logger.info("trg_sql_type and sql_type are the same!!!")
             return
+
+        # Check if the existing column type accept the sql type
+        if self.accept_sql_type(trg_sql_type, sql_type):
+            # The current column will accept the sql type
+            # Nothing to do
+            # my logger
+            self.logger.info("sqltype was acceptable hotdog!!!")
+            return
+
         # my logger
         self.logger.info("I am going to call for help!!!")
         # Not the same type, generic type or compatible types
         # calling merge_sql_types for assistnace
-        compatible_sql_type = self.merge_sql_types([current_type, sql_type])
+        compatible_sql_type = self.merge_sql_types([trg_sql_type, sql_type])
         # my logger
-        self.logger.info(f"comtible_sql_type: {compatible_sql_type}")
-        if str(compatible_sql_type) == str(current_type):
+        self.logger.info(f"compatible_sql_type: {compatible_sql_type}")
+        if str(compatible_sql_type) == str(trg_sql_type):
             # Nothing to do
             # my logger
             self.logger.info("Not got to change anything")
@@ -1050,7 +1127,7 @@ class SQLConnector:
         # Put the collation level back before altering the column
         if hasattr(compatible_sql_type, "collation"):
             if collation_removed:
-                setattr(compatible_sql_type, "collation", current_type_collation)
+                setattr(compatible_sql_type, "collation", trg_sql_type_collation)
                 self.logger.info(
                     f"Compatible type with collation: {compatible_sql_type}",
                 )
@@ -1059,7 +1136,7 @@ class SQLConnector:
             raise NotImplementedError(
                 "Altering columns is not supported. "
                 f"Could not convert column '{full_table_name}.{column_name}' "
-                f"from '{current_type}' to '{compatible_sql_type}'."
+                f"from '{trg_sql_type}' to '{compatible_sql_type}'."
             )
 
         alter_column_ddl = self.get_column_alter_ddl(
