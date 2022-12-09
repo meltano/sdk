@@ -796,7 +796,23 @@ class SQLConnector:
             "NVARCHAR": ["BINARY", "BLOB", "TIMESTAMP", "VARBINARY"],
             "REAL": ["DATE", "TIME", "DATETIME", "TIMESTAMP", "TEXT", "JSON"],
             "SMALLINT": ["DATE", "TIME", "DATETIME", "TEXT", "JSON"],
-            "TEXT": ["BINARY", "BLOB", "TIMESTAMP", "VARBINARY"],
+            "TEXT": [
+                "BIGINT",
+                "BINARY",
+                "BLOB",
+                "BOOLEAN",
+                "DATE",
+                "DATETIME",
+                "DECIMAL",
+                "FLOAT",
+                "INTEGER",
+                "NUMERIC",
+                "REAL",
+                "SMALLINT",
+                "TIMESTAMP",
+                "SMALLINT",
+                "VARBINARY",
+            ],
             "TIME": [
                 "BINARY",
                 "BLOB",
@@ -820,6 +836,7 @@ class SQLConnector:
         }
 
         not_accepted_types = not_accepted_type_lookup.get(trg_sql_type_name)
+        self.logger.info(not_accepted_types)
         if not_accepted_types:
             if sql_type_name in not_accepted_types:
                 can_except_type = False
@@ -1085,10 +1102,10 @@ class SQLConnector:
                 self.logger.info(
                     f"new trg_sql_type: {trg_sql_type}, sql_type: {sql_type}"
                 )
-        # this elese and logger can be removed only for testing
-        else:
-            # my logger
-            self.logger.info(f"trg_sql_type: {trg_sql_type}, sql_type: {sql_type}")
+        # # this elese and logger can be removed only for testing
+        # else:
+        #     # my logger
+        #     self.logger.info(f"trg_sql_type: {trg_sql_type}, sql_type: {sql_type}")
         # Testing purposed can be removed later
         # if hasattr(sql_type, "collation"):
         #     if column_name == "lastname":
@@ -1108,6 +1125,8 @@ class SQLConnector:
             # Nothing to do
             # my logger
             self.logger.info("sqltype was acceptable hotdog!!!")
+
+            # Now will if fit
             return
 
         # my logger
