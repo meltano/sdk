@@ -37,6 +37,7 @@ MAPPER_FILTER_OPTION = "__filter__"
 MAPPER_SOURCE_OPTION = "__source__"
 MAPPER_ALIAS_OPTION = "__alias__"
 MAPPER_KEY_PROPERTIES_OPTION = "__key_properties__"
+NULL_STRING = "__NULL__"
 
 
 def md5(input: str) -> str:
@@ -393,7 +394,7 @@ class CustomStreamMap(StreamMap):
             )
 
         if stream_map and MAPPER_ELSE_OPTION in stream_map:
-            if stream_map[MAPPER_ELSE_OPTION] is None:
+            if stream_map[MAPPER_ELSE_OPTION] in {None, NULL_STRING}:
                 logging.info(
                     f"Detected `{MAPPER_ELSE_OPTION}=None` rule. "
                     "Unmapped, non-key properties will be excluded from output."
@@ -417,7 +418,7 @@ class CustomStreamMap(StreamMap):
             transformed_schema["properties"] = {}
 
         for prop_key, prop_def in list(stream_map.items()):
-            if prop_def is None:
+            if prop_def in {None, NULL_STRING}:
                 if prop_key in (self.transformed_key_properties or []):
                     raise StreamMapConfigError(
                         f"Removing key property '{prop_key}' is not permitted in "
@@ -510,7 +511,7 @@ class CustomStreamMap(StreamMap):
                         result[key_property] = record[key_property]
 
             for prop_key, prop_def in list(stream_map.items()):
-                if prop_def is None:
+                if prop_def in {None, NULL_STRING}:
                     # Remove property from result
                     result.pop(prop_key, None)
                     continue
@@ -555,11 +556,11 @@ class PluginMapper:
         self.default_mapper_type: type[DefaultStreamMap] = SameRecordTransform
         self.logger = logger
 
-        self.stream_maps_dict: dict[str, str | dict] = plugin_config.get(
+        self.stream_maps_dict: dict[str, str | dict | None] = plugin_config.get(
             "stream_maps", {}
         )
         if MAPPER_ELSE_OPTION in self.stream_maps_dict:
-            if self.stream_maps_dict[MAPPER_ELSE_OPTION] is None:
+            if self.stream_maps_dict[MAPPER_ELSE_OPTION] in {None, NULL_STRING}:
                 logging.info(
                     f"Found '{MAPPER_ELSE_OPTION}=None' default mapper. "
                     "Unmapped streams will be excluded from output."
@@ -640,7 +641,7 @@ class PluginMapper:
         for stream_map_key, stream_def in self.stream_maps_dict.items():
             stream_alias: str = stream_map_key
             source_stream: str = stream_map_key
-            if isinstance(stream_def, str):
+            if isinstance(stream_def, str) and stream_def != NULL_STRING:
                 if stream_name == stream_map_key:
                     # TODO: Add any expected cases for str expressions (currently none)
                     pass
@@ -649,7 +650,7 @@ class PluginMapper:
                     f"Option '{stream_map_key}:{stream_def}' is not expected."
                 )
 
-            if stream_def is None:
+            if stream_def is None or stream_def == NULL_STRING:
                 if stream_name != stream_map_key:
                     continue
 
