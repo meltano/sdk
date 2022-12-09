@@ -10,7 +10,8 @@ import copy
 import datetime
 import hashlib
 import logging
-from typing import Any, Callable
+import sys
+from typing import Any, Callable, Dict, Union
 
 from singer_sdk._singerlib.catalog import Catalog
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
@@ -32,6 +33,12 @@ from singer_sdk.typing import (
     StringType,
 )
 
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
+
+
 MAPPER_ELSE_OPTION = "__else__"
 MAPPER_FILTER_OPTION = "__filter__"
 MAPPER_SOURCE_OPTION = "__source__"
@@ -50,6 +57,9 @@ def md5(input: str) -> str:
         A string digested into MD5.
     """
     return hashlib.md5(input.encode("utf-8")).hexdigest()
+
+
+StreamMapsDict: TypeAlias = Dict[str, Union[str, dict, None]]
 
 
 class StreamMap(metaclass=abc.ABCMeta):
@@ -538,7 +548,7 @@ class PluginMapper:
 
     def __init__(
         self,
-        plugin_config: dict[str, dict[str, str | dict]],
+        plugin_config: dict[str, StreamMapsDict],
         logger: logging.Logger,
     ) -> None:
         """Initialize mapper.
@@ -556,9 +566,7 @@ class PluginMapper:
         self.default_mapper_type: type[DefaultStreamMap] = SameRecordTransform
         self.logger = logger
 
-        self.stream_maps_dict: dict[str, str | dict | None] = plugin_config.get(
-            "stream_maps", {}
-        )
+        self.stream_maps_dict: StreamMapsDict = plugin_config.get("stream_maps", {})
         if MAPPER_ELSE_OPTION in self.stream_maps_dict:
             if self.stream_maps_dict[MAPPER_ELSE_OPTION] in {None, NULL_STRING}:
                 logging.info(
