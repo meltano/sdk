@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 import sqlalchemy
 from sqlalchemy.dialects import sqlite
@@ -91,3 +93,37 @@ class TestConnectorSQL:
             )
         )
         assert statement == rendered_statement
+
+    @pytest.mark.parametrize(
+        "method_name,kwargs,expected_name",
+        [
+            (
+                "get_unconformed_column_name",
+                {
+                    "full_table_name": "test_table",
+                    "column_name": "id",
+                },
+                "Id",
+            ),
+            (
+                "get_unconformed_column_name",
+                {
+                    "full_table_name": "test_table",
+                    "column_name": "test_column",
+                },
+                "TestColumn",
+            ),
+        ],
+    )
+    @patch(
+        "singer_sdk.connectors.SQLConnector.get_table_columns",
+        return_value={"Id": "Id", "TestColumn": "TestColumn"},
+        autospec=True,
+    )
+    def test_get_unconformed_column_name(
+        self, patch, connector, method_name, kwargs, expected_name
+    ):
+        method = getattr(connector, method_name)
+        column_name = method(**kwargs)
+        # column_name = "Id"
+        assert column_name == expected_name
