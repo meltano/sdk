@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from textwrap import dedent
 from typing import Callable
 
 import pytest
@@ -79,6 +80,48 @@ class ConfigTestTap(Tap):
 
     def discover_streams(self) -> list[Stream]:
         return []
+
+
+def test_to_json():
+    schema = PropertiesList(
+        Property(
+            "test_property",
+            StringType,
+            description="A test property",
+            required=True,
+        ),
+        Property(
+            "test_property_2",
+            StringType,
+            description="A test property",
+        ),
+        additional_properties=False,
+    )
+    assert schema.to_json(indent=4) == dedent(
+        """\
+        {
+            "type": "object",
+            "properties": {
+                "test_property": {
+                    "type": [
+                        "string"
+                    ],
+                    "description": "A test property"
+                },
+                "test_property_2": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "A test property"
+                }
+            },
+            "required": [
+                "test_property"
+            ],
+            "additionalProperties": false
+        }"""
+    )
 
 
 def test_nested_complex_objects():
@@ -472,6 +515,16 @@ def test_array_type():
         pytest.param(
             ObjectType(
                 Property("id", StringType),
+                Property("email", StringType),
+                Property("username", StringType),
+                Property("phone_number", StringType),
+                additional_properties=False,
+            ),
+            "no_additional_properties.json",
+        ),
+        pytest.param(
+            ObjectType(
+                Property("id", StringType),
                 Property("id", StringType),
                 Property("email", StringType),
                 Property("username", StringType),
@@ -491,6 +544,18 @@ def test_array_type():
             ),
             "duplicates_additional_properties.json",
             id="no required, duplicates, additional properties",
+        ),
+        pytest.param(
+            ObjectType(
+                Property("id", StringType),
+                Property("id", StringType),
+                Property("email", StringType),
+                Property("username", StringType),
+                Property("phone_number", StringType),
+                additional_properties=False,
+            ),
+            "duplicates_no_additional_properties.json",
+            id="no required, duplicates, no additional properties allowed",
         ),
         pytest.param(
             ObjectType(
@@ -517,6 +582,17 @@ def test_array_type():
             ObjectType(
                 Property("id", StringType),
                 Property("email", StringType, required=True),
+                Property("username", StringType, required=True),
+                Property("phone_number", StringType),
+                additional_properties=False,
+            ),
+            "required_no_additional_properties.json",
+            id="required, no duplicates, no additional properties allowed",
+        ),
+        pytest.param(
+            ObjectType(
+                Property("id", StringType),
+                Property("email", StringType, required=True),
                 Property("email", StringType, required=True),
                 Property("username", StringType, required=True),
                 Property("phone_number", StringType),
@@ -535,6 +611,18 @@ def test_array_type():
             ),
             "required_duplicates_additional_properties.json",
             id="required, duplicates, additional properties",
+        ),
+        pytest.param(
+            ObjectType(
+                Property("id", StringType),
+                Property("email", StringType, True),
+                Property("email", StringType, True),
+                Property("username", StringType, True),
+                Property("phone_number", StringType),
+                additional_properties=False,
+            ),
+            "required_duplicates_no_additional_properties.json",
+            id="required, duplicates, no additional properties allowed",
         ),
         pytest.param(
             ObjectType(
