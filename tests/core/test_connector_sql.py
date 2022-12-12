@@ -95,7 +95,7 @@ class TestConnectorSQL:
         assert statement == rendered_statement
 
     @pytest.mark.parametrize(
-        "method_name,kwargs,expected_name",
+        "method_name,kwargs,expected_value",
         [
             (
                 "get_unconformed_column_name",
@@ -113,17 +113,71 @@ class TestConnectorSQL:
                 },
                 "TestColumn",
             ),
+            (
+                "get_unconformed_column_name",
+                {
+                    "full_table_name": "test_table",
+                    "column_name": "test_id",
+                },
+                None,
+            ),
         ],
     )
     @patch(
         "singer_sdk.connectors.SQLConnector.get_table_columns",
-        return_value={"Id": "Id", "TestColumn": "TestColumn"},
+        return_value={
+            "Id": "Column('Id', INTEGER(), table=None, nullable=False)",
+            "TestColumn": "Column('TestColumn',  VARCHAR(), table=None)",
+        },
         autospec=True,
     )
     def test_get_unconformed_column_name(
-        self, patch, connector, method_name, kwargs, expected_name
+        self, patch, connector, method_name, kwargs, expected_value
     ):
         method = getattr(connector, method_name)
-        column_name = method(**kwargs)
-        # column_name = "Id"
-        assert column_name == expected_name
+        method_value = method(**kwargs)
+        assert method_value == expected_value
+
+    @pytest.mark.parametrize(
+        "method_name,kwargs,expected_value",
+        [
+            (
+                "unconformed_column_exists",
+                {
+                    "full_table_name": "test_table",
+                    "column_name": "id",
+                },
+                True,
+            ),
+            (
+                "unconformed_column_exists",
+                {
+                    "full_table_name": "test_table",
+                    "column_name": "test_column",
+                },
+                True,
+            ),
+            (
+                "unconformed_column_exists",
+                {
+                    "full_table_name": "test_table",
+                    "column_name": "TestColumn",
+                },
+                False,
+            ),
+        ],
+    )
+    @patch(
+        "singer_sdk.connectors.SQLConnector.get_table_columns",
+        return_value={
+            "Id": "Column('Id', INTEGER(), table=None, nullable=False)",
+            "TestColumn": "Column('TestColumn',  VARCHAR(), table=None)",
+        },
+        autospec=True,
+    )
+    def test_unconformed_column_exists(
+        self, patch, connector, method_name, kwargs, expected_value
+    ):
+        method = getattr(connector, method_name)
+        method_value = method(**kwargs)
+        assert method_value == expected_value
