@@ -42,7 +42,11 @@ from singer_sdk.helpers._state import (
     write_replication_key_signpost,
     write_starting_replication_value,
 )
-from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type
+from singer_sdk.helpers._typing import (
+    conform_record_data_types,
+    is_datetime_type,
+    json_schema_to_arrow,
+)
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
@@ -1269,7 +1273,8 @@ class Stream(metaclass=abc.ABCMeta):
             with fs.open(filename, "wb") as f:
                 if batch_config.encoding.format == BatchFileFormat.PARQUET:
                     pylist = list(chunk)
-                    table = pa.Table.from_pylist(pylist)
+                    schema = json_schema_to_arrow(self.schema)
+                    table = pa.Table.from_pylist(pylist, schema=schema)
                     if batch_config.encoding.compression == "gzip":
                         pq.write_table(table, f, compression="GZIP")
                     else:

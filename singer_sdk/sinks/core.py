@@ -12,6 +12,7 @@ from logging import Logger
 from types import MappingProxyType
 from typing import IO, Any, Mapping, Sequence
 
+import pyarrow.parquet as pq
 from dateutil import parser
 from jsonschema import Draft7Validator, FormatChecker
 
@@ -480,6 +481,12 @@ class Sink(metaclass=abc.ABCMeta):
                         if encoding.compression == "gzip":
                             file = gzip_open(file)
                         context = {"records": [json.loads(line) for line in file]}
+                        self.process_batch(context)
+            elif encoding.format == BatchFileFormat.PARQUET:
+                with storage.fs(create=False) as batch_fs:
+                    with batch_fs.open(tail, mode="rb") as file:
+                        table = pq.read_table(file)
+                        context = {"records": table.to_pylist()}
                         self.process_batch(context)
             else:
                 raise NotImplementedError(

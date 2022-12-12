@@ -199,7 +199,7 @@ PyGithub = "^1.55"
 type = "git"
 url = "https://github.com/meltano/commitizen-version-bump.git"
 reference = "main"
-resolved_reference = "9279480a75c056262ba56f896ef9bca96c3b0c35"
+resolved_reference = "6bbcff841ca62f79a05dc97d2c2175400453e5c2"
 
 [[package]]
 name = "cookiecutter"

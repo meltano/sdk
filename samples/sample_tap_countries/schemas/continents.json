@@ -1,7 +1,7 @@
 {
     "type": "object",
     "properties": {
-        "code": { "type": ["null", "string"] },
-        "name": { "type": ["null", "string"] }
+        "code": { "type": ["string", "null"] },
+        "name": { "type": ["string", "null"] }
     }
 }
