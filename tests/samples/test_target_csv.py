@@ -19,7 +19,6 @@ from singer_sdk.target_base import Target
 from singer_sdk.testing import (
     TargetTestRunner,
     get_test_class,
-    pytest_generate_tests,
     sync_end_to_end,
     tap_sync_test,
     tap_to_target_sync_test,

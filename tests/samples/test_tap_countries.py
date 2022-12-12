@@ -12,7 +12,7 @@ from singer_sdk.helpers._catalog import (
     get_selected_schema,
     pop_deselected_record_properties,
 )
-from singer_sdk.testing import TapTestRunner, get_test_class, pytest_generate_tests
+from singer_sdk.testing import TapTestRunner, get_test_class
 from singer_sdk.testing.suites import (
     tap_stream_attribute_tests,
     tap_stream_tests,

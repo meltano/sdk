@@ -23,8 +23,7 @@ import datetime
 
 from singer_sdk.testing import (
     TapTestRunner,
-    get_test_class,
-    pytest_generate_tests # pytest hook function, required for standard tests
+    get_test_class
 )
 from singer_sdk.testing.suites import (
     tap_stream_attribute_tests,

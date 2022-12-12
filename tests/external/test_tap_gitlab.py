@@ -5,7 +5,7 @@ from samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 from singer_sdk._singerlib import Catalog
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers import _catalog
-from singer_sdk.testing import TapTestRunner, get_test_class, pytest_generate_tests
+from singer_sdk.testing import TapTestRunner, get_test_class
 from singer_sdk.testing.suites import (
     tap_stream_attribute_tests,
     tap_stream_tests,
