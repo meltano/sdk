@@ -1,5 +1,5 @@
 [flake8]
-ignore = W503, C901, ANN101, ANN102, ANN401
+ignore = W503, C901, ANN101, ANN102
 max-line-length = 88
 exclude = cookiecutter
 per-file-ignores =
@@ -13,6 +13,9 @@ per-file-ignores =
     # singer_sdk/helpers/_classproperty.py:D105
     # Ignore unused imports in __init__.py files
     singer_sdk/_singerlib/__init__.py:F401
+    # Runners accept both Tap and Target instances, so require dynamically typed
+    # expressions (typing.Any).
+    singer_sdk/testing/runners.py:ANN401
 max-complexity = 10
 docstring-convention = google
 allow-star-arg-any = true
