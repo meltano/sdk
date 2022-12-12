@@ -153,6 +153,17 @@ class JSONTypeHelper:
         """
         return cast(dict, self.type_dict)
 
+    def to_json(self, **kwargs: Any) -> str:
+        """Convert to JSON.
+
+        Args:
+            kwargs: Additional keyword arguments to pass to json.dumps().
+
+        Returns:
+            A JSON string describing the object.
+        """
+        return json.dumps(self.to_dict(), **kwargs)
+
 
 class StringType(JSONTypeHelper):
     """String type."""
@@ -449,7 +460,7 @@ class ObjectType(JSONTypeHelper):
     def __init__(
         self,
         *properties: Property,
-        additional_properties: W | type[W] | None = None,
+        additional_properties: W | type[W] | bool | None = None,
         pattern_properties: Mapping[str, W | type[W]] | None = None,
     ) -> None:
         """Initialize ObjectType from its list of properties.
@@ -457,9 +468,81 @@ class ObjectType(JSONTypeHelper):
         Args:
             properties: Zero or more attributes for this JSON object.
             additional_properties: A schema to match against unnamed properties in
-                this object.
+                this object, or a boolean indicating if extra properties are allowed.
             pattern_properties: A dictionary of regex patterns to match against
                 property names, and the schema to match against the values.
+
+        Examples:
+            >>> t = ObjectType(
+            ...     Property("name", StringType, required=True),
+            ...     Property("age", IntegerType),
+            ...     Property("height", NumberType),
+            ...     additional_properties=False,
+            ... )
+            >>> print(t.to_json(indent=2))
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "age": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "height": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            }
+            >>> t = ObjectType(
+            ...     Property("name", StringType, required=True),
+            ...     Property("age", IntegerType),
+            ...     Property("height", NumberType),
+            ...     additional_properties=StringType,
+            ... )
+            >>> print(t.to_json(indent=2))
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "age": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "height": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": {
+                "type": [
+                  "string"
+                ]
+              }
+            }
         """
         self.wrapped: list[Property] = list(properties)
         self.additional_properties = additional_properties
@@ -478,13 +561,16 @@ class ObjectType(JSONTypeHelper):
             merged_props.update(w.to_dict())
             if not w.optional:
                 required.append(w.name)
-        result = {"type": "object", "properties": merged_props}
+        result: dict = {"type": "object", "properties": merged_props}
 
         if required:
             result["required"] = required
 
-        if self.additional_properties:
-            result["additionalProperties"] = self.additional_properties.type_dict
+        if self.additional_properties is not None:
+            if isinstance(self.additional_properties, bool):
+                result["additionalProperties"] = self.additional_properties
+            else:
+                result["additionalProperties"] = self.additional_properties.type_dict
 
         if self.pattern_properties:
             result["patternProperties"] = {
@@ -492,17 +578,6 @@ class ObjectType(JSONTypeHelper):
             }
 
         return result
-
-    def to_json(self, **kwargs: Any) -> str:
-        """Return a JSON string representation of the object.
-
-        Args:
-            **kwargs: Additional keyword arguments to pass to `json.dumps`.
-
-        Returns:
-            A JSON string.
-        """
-        return json.dumps(self.type_dict, **kwargs)
 
 
 class CustomType(JSONTypeHelper):
