@@ -321,7 +321,7 @@ def conform_record_data_types(  # noqa: C901
     return rec
 
 
-def json_schema_to_arrow(schema: dict[str, Any]) -> pa.Schema:
+def json_schema_to_arrow(schema: Dict[str, Any]) -> pa.Schema:
     """Convert a JSON Schema to an Arrow schema.
 
     Args:
@@ -334,7 +334,7 @@ def json_schema_to_arrow(schema: dict[str, Any]) -> pa.Schema:
     return pa.schema(fields)
 
 
-def _json_schema_to_arrow_fields(schema: dict[str, Any]) -> pa.StructType:
+def _json_schema_to_arrow_fields(schema: Dict[str, Any]) -> pa.StructType:
     """Convert a JSON Schema to an Arrow struct.
 
     Args:
@@ -350,7 +350,7 @@ def _json_schema_to_arrow_fields(schema: dict[str, Any]) -> pa.StructType:
     return fields
 
 
-def _json_type_to_arrow_field(schema_type: dict[str, Any]) -> pa.DataType:
+def _json_type_to_arrow_field(schema_type: Dict[str, Any]) -> pa.DataType:
     """Convert a JSON Schema to an Arrow struct.
 
     Args:
