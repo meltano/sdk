@@ -4,6 +4,10 @@
 
 SDK-based taps, targets, and mappers automatically support the custom inline mappings feature. Stream mappings can be applied to solve the following real-world applications:
 
+### Note on `null` values
+
+In all examples below where `null` is used as a value, the special string `"__NULL__"` can be used instead.
+
 ### Stream-Level Mapping Applications
 
 - **Stream aliasing:** streams can be aliased to provide custom naming downstream.
