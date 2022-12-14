@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.14.0"
+version = "0.15.0"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 maintainers = ["Meltano Team and Contributors"]
@@ -109,7 +109,7 @@ types-PyYAML = "^6.0.12"
 coverage = {extras = ["toml"], version = "^6.5"}
 
 # Cookiecutter tests
-black = "^22.10"
+black = "^22.12"
 darglint = "^1.8.0"
 flake8 = "^3.9.0"
 flake8-annotations = "^2.9.1"
@@ -137,7 +137,7 @@ markers = [
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.14.0"
+version = "0.15.0"
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
     "docs/conf.py",
