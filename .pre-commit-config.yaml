@@ -6,7 +6,7 @@ ci:
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.3.0
+  rev: v4.4.0
   hooks:
   - id: check-json
   - id: check-toml
@@ -53,7 +53,7 @@ repos:
     exclude: (cookiecutter/.*|singer_sdk/helpers/_simpleeval/.*)
 
 - repo: https://github.com/pycqa/flake8
-  rev: 5.0.4
+  rev: 6.0.0
   hooks:
   - id: flake8
     additional_dependencies:
@@ -63,7 +63,7 @@ repos:
     files: 'singer_sdk/.*'
 
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.2.2
+  rev: v3.3.0
   hooks:
   - id: pyupgrade
     args: [--py37-plus]

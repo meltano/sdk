@@ -77,7 +77,7 @@ class Point(Generic[_TVal]):
         Returns:
             A JSON object.
         """
-        return json.dumps(asdict(self))
+        return json.dumps(asdict(self), default=str)
 
 
 def log(logger: logging.Logger, point: Point) -> None:
