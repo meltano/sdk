@@ -117,7 +117,7 @@ types-PyYAML = "^6.0.12"
 coverage = {extras = ["toml"], version = "^6.5"}
 
 # Cookiecutter tests
-black = "^22.10"
+black = "^22.12"
 darglint = "^1.8.0"
 flake8 = "^3.9.0"
 flake8-annotations = "^2.9.1"
