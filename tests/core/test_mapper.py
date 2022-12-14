@@ -489,6 +489,19 @@ def clear_schema_cache() -> None:
             {
                 "mystream": {
                     "email_hash": "md5(email)",
+                    "fixed_count": "int(count-1)",
+                    "__else__": "__NULL__",
+                }
+            },
+            False,
+            0,
+            "only_mapped_fields_null_string.jsonl",
+            id="only_mapped_fields_null_string",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "email_hash": "md5(email)",
                     "__key_properties__": ["email_hash"],
                     "__else__": None,
                 }
@@ -504,6 +517,13 @@ def clear_schema_cache() -> None:
             0,
             "sourced_stream_1.jsonl",
             id="sourced_stream_1",
+        ),
+        pytest.param(
+            {"mystream": "__NULL__", "sourced_stream_1": {"__source__": "mystream"}},
+            False,
+            0,
+            "sourced_stream_1_null_string.jsonl",
+            id="sourced_stream_1_null_string",
         ),
         pytest.param(
             {"sourced_stream_2": {"__source__": "mystream"}, "__else__": None},
@@ -555,6 +575,13 @@ def clear_schema_cache() -> None:
             0,
             "drop_property.jsonl",
             id="drop_property",
+        ),
+        pytest.param(
+            {"mystream": {"email": "__NULL__"}},
+            False,
+            0,
+            "drop_property_null_string.jsonl",
+            id="drop_property_null_string",
         ),
         pytest.param(
             {
