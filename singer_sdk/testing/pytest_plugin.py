@@ -1,3 +1,5 @@
+"""Pytest Plugin."""
+
 import pytest
 
 
