@@ -142,6 +142,8 @@ markers = [
     "windows: Tests that only run on Windows",
     "snapshot: Tests that use pytest-snapshot",
 ]
+testpaths = ["tests"]
+norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
