@@ -199,7 +199,7 @@ PyGithub = "^1.55"
 type = "git"
 url = "https://github.com/meltano/commitizen-version-bump.git"
 reference = "main"
-resolved_reference = "6bbcff841ca62f79a05dc97d2c2175400453e5c2"
+resolved_reference = "23547d864d5d06e69aa6622e0de9ed9d7ab0a2e3"
 
 [[package]]
 name = "cookiecutter"
@@ -1424,12 +1424,12 @@ debugging = []
 docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser", "sphinx-autobuild"]
 s3 = ["fs-s3fs"]
 samples = []
-testing = ["pytest"]
+testing = ["pytest", "pytest-durations"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.12,>=3.7.1"
-content-hash = "e08d3a1a0e8d94d6846b4912e94748e893caa3bfac598652553a48ece45741a6"
+content-hash = "b3987c1c7a1142e1ab97366c973c816d32c934bc76aefd7b722e979fd48e7612"
 
 [metadata.files]
 alabaster = [

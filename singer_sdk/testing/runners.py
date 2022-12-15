@@ -77,8 +77,6 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
 class TapTestRunner(SingerTestRunner):
     """Utility class to simplify tap testing."""
 
-    type = "tap"
-
     def __init__(
         self,
         tap_class: Type[Tap],
@@ -168,8 +166,6 @@ class TapTestRunner(SingerTestRunner):
 
 class TargetTestRunner(SingerTestRunner):
     """Utility class to simplify target testing."""
-
-    type = "target"
 
     def __init__(
         self,
