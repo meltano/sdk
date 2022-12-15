@@ -148,7 +148,7 @@ def get_tap_test_class(
     include_stream_tests: bool = True,
     include_stream_attribute_tests: bool = True,
     custom_suites: list | None = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> object:
     """Get Tap Test Class.
 
@@ -182,7 +182,7 @@ def get_target_test_class(
     target_class: type[Target],
     config: dict | None = None,
     custom_suites: list | None = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> object:
     """Get Target Test Class.
 
