@@ -6,7 +6,15 @@ from typing import Any, cast
 
 import pytest
 
+from singer_sdk import Tap, Target
+
 from .runners import TapTestRunner, TargetTestRunner
+from .suites import (
+    tap_stream_attribute_tests,
+    tap_stream_tests,
+    tap_tests,
+    target_tests,
+)
 
 
 def get_test_class(
@@ -131,3 +139,68 @@ def get_test_class(
                         BaseTestClass.param_ids[test_name] = test_ids
 
     return BaseTestClass
+
+
+def get_tap_test_class(
+    tap_class: type[Tap],
+    config: dict | None = None,
+    include_tap_tests: bool = True,
+    include_stream_tests: bool = True,
+    include_stream_attribute_tests: bool = True,
+    custom_suites: list | None = None,
+    **kwargs,
+) -> object:
+    """Get Tap Test Class.
+
+    Args:
+        tap_class: Meltano Singer SDK Tap class to test.
+        config: Config dict to use for testing.
+        include_tap_tests: Include tap tests.
+        include_stream_tests: Include Tap stream tests.
+        include_stream_attribute_tests: Include Tap stream attribute tests.
+        custom_suites: Custom test suites to add to standard tests.
+        kwargs: Keyword arguments to pass to the TapRunner.
+
+    Returns:
+        A test class usable by pytest.
+    """
+    suites = custom_suites or []
+    if include_tap_tests:
+        suites.append(tap_tests)
+    if include_stream_tests:
+        suites.append(tap_stream_tests)
+    if include_stream_attribute_tests:
+        suites.append(tap_stream_attribute_tests)
+
+    return get_test_class(
+        test_runner=TapTestRunner(tap_class=tap_class, config=config, **kwargs),
+        test_suites=suites,
+    )
+
+
+def get_target_test_class(
+    target_class: type[Target],
+    config: dict | None = None,
+    custom_suites: list | None = None,
+    **kwargs,
+) -> object:
+    """Get Target Test Class.
+
+    Args:
+        target_class: Meltano Singer SDK Target class to test.
+        config: Config dict to use for testing.
+        custom_suites: Custom test suites to add to standard tests.
+        kwargs: Keyword arguments to pass to the TapRunner.
+
+    Returns:
+        A test class usable by pytest.
+    """
+    suites = custom_suites or []
+    suites.append(target_tests)
+
+    return get_test_class(
+        test_runner=TargetTestRunner(
+            target_class=target_class, config=config, **kwargs
+        ),
+        test_suites=suites,
+    )

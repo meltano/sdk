@@ -17,21 +17,19 @@ from singer_sdk import typing as th
 from singer_sdk.sinks import BatchSink
 from singer_sdk.target_base import Target
 from singer_sdk.testing import (
-    TargetTestRunner,
-    get_test_class,
+    get_target_test_class,
     sync_end_to_end,
     tap_sync_test,
     tap_to_target_sync_test,
     target_sync_test,
 )
-from singer_sdk.testing.suites import target_tests
 
 TEST_OUTPUT_DIR = Path(f".output/test_{uuid.uuid4()}/")
 SAMPLE_CONFIG = {"target_folder": f"{TEST_OUTPUT_DIR}/"}
 
-StandardTests = get_test_class(
-    test_runner=TargetTestRunner(target_class=SampleTargetCSV, config=SAMPLE_CONFIG),
-    test_suites=[target_tests],
+
+StandardTests = get_target_test_class(
+    target_class=SampleTargetCSV, config=SAMPLE_CONFIG
 )
 
 

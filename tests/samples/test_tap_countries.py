@@ -12,20 +12,14 @@ from singer_sdk.helpers._catalog import (
     get_selected_schema,
     pop_deselected_record_properties,
 )
-from singer_sdk.testing import TapTestRunner, get_test_class
-from singer_sdk.testing.suites import (
-    tap_stream_attribute_tests,
-    tap_stream_tests,
-    tap_tests,
-)
+from singer_sdk.testing import get_tap_test_class
 
 SAMPLE_CONFIG = {}
 SAMPLE_CONFIG_BAD = {"not": "correct"}
 
 # standard tap tests
-TestSampleTapCountries = get_test_class(
-    test_runner=TapTestRunner(tap_class=SampleTapCountries, config=SAMPLE_CONFIG),
-    test_suites=[tap_tests, tap_stream_tests, tap_stream_attribute_tests],
+TestSampleTapCountries = get_tap_test_class(
+    tap_class=SampleTapCountries, config=SAMPLE_CONFIG
 )
 
 

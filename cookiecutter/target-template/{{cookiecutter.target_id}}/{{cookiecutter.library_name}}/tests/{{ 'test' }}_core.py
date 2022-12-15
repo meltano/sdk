@@ -3,21 +3,20 @@
 import pytest
 from typing import Dict, Any
 
-from singer_sdk.testing import TargetTestRunner, get_test_class
-from singer_sdk.testing.suites import target_tests
+from singer_sdk.testing import get_target_test_class
 
 from {{ cookiecutter.library_name }}.target import Target{{ cookiecutter.destination_name }}
+
 
 SAMPLE_CONFIG: Dict[str, Any] = {
     # TODO: Initialize minimal target config
 }
 
+
 # Run standard built-in target tests from the SDK:
-StandardTargetTests = get_test_class(
-    test_runner=TargetTestRunner(
-        target_class=Target{{ cookiecutter.destination_name }}, config=SAMPLE_CONFIG
-    ),
-    test_suites=[target_tests],
+StandardTargetTests = get_target_test_class(
+    target_class=Target{{ cookiecutter.destination_name }},
+    config=SAMPLE_CONFIG
 )
 
 

@@ -6,8 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from singer_sdk.testing import TargetTestRunner, get_test_class
-from singer_sdk.testing.suites import target_tests
+from singer_sdk.testing import get_target_test_class
 
 # temporary exclude of python 3.11
 # TODO: remove when pyarrow is supported by 3.11
@@ -19,11 +18,8 @@ if sys.version_info < (3, 11):
     SAMPLE_FILENAME = SAMPLE_FILEPATH / "testfile.parquet"
     SAMPLE_CONFIG = {"filepath": str(SAMPLE_FILENAME)}
 
-    StandardTests = get_test_class(
-        test_runner=TargetTestRunner(
-            target_class=SampleTargetParquet, config=SAMPLE_CONFIG
-        ),
-        test_suites=[target_tests],
+    StandardTests = get_target_test_class(
+        target_class=SampleTargetParquet, config=SAMPLE_CONFIG
     )
 
     class TestSampleTargetParquet(StandardTests):

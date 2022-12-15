@@ -4,23 +4,15 @@ import warnings
 
 from samples.sample_tap_google_analytics.ga_tap import SampleTapGoogleAnalytics
 from singer_sdk.exceptions import ConfigValidationError
-from singer_sdk.testing import TapTestRunner, get_test_class
-from singer_sdk.testing.suites import (
-    tap_stream_attribute_tests,
-    tap_stream_tests,
-    tap_tests,
-)
+from singer_sdk.testing import get_tap_test_class
 
 from .conftest import ga_config
 
 try:
-    TestSampleTapGoogleAnalytics = get_test_class(
-        test_runner=TapTestRunner(
-            tap_class=SampleTapGoogleAnalytics,
-            config=ga_config(),
-            parse_env_config=True,
-        ),
-        test_suites=[tap_tests, tap_stream_tests, tap_stream_attribute_tests],
+    TestSampleTapGoogleAnalytics = get_tap_test_class(
+        tap_class=SampleTapGoogleAnalytics,
+        config=ga_config(),
+        parse_env_config=True,
     )
 except ConfigValidationError as e:
     warnings.warn(
