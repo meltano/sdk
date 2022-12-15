@@ -8,7 +8,7 @@ import json
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
-from typing import IO, Any, Type, cast
+from typing import IO, Any, cast
 
 from singer_sdk import Tap, Target
 
@@ -79,7 +79,7 @@ class TapTestRunner(SingerTestRunner):
 
     def __init__(
         self,
-        tap_class: Type[Tap],
+        tap_class: type[Tap],
         config: dict | None = None,
         **kwargs: Any,
     ) -> None:
@@ -169,7 +169,7 @@ class TargetTestRunner(SingerTestRunner):
 
     def __init__(
         self,
-        target_class: Type[Target],
+        target_class: type[Target],
         config: dict | None = None,
         input_filepath: Path | None = None,
         input_io: io.StringIO | None = None,
