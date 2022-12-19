@@ -47,7 +47,7 @@ from __future__ import annotations
 
 import json
 import sys
-from typing import Any, Generic, Mapping, TypeVar, Union, cast
+from typing import Any, Generic, ItemsView, Mapping, TypeVar, Union, cast
 
 import sqlalchemy
 from jsonschema import validators
@@ -544,7 +544,7 @@ class ObjectType(JSONTypeHelper):
               }
             }
         """
-        self.wrapped: list[Property] = list(properties)
+        self.wrapped: dict[str, Property] = {prop.name: prop for prop in properties}
         self.additional_properties = additional_properties
         self.pattern_properties = pattern_properties
 
@@ -557,7 +557,7 @@ class ObjectType(JSONTypeHelper):
         """
         merged_props = {}
         required = []
-        for w in self.wrapped:
+        for w in self.wrapped.values():
             merged_props.update(w.to_dict())
             if not w.optional:
                 required.append(w.name)
@@ -604,13 +604,13 @@ class CustomType(JSONTypeHelper):
 class PropertiesList(ObjectType):
     """Properties list. A convenience wrapper around the ObjectType class."""
 
-    def items(self) -> list[tuple[str, Property]]:
+    def items(self) -> ItemsView[str, Property]:
         """Get wrapped properties.
 
         Returns:
             List of (name, property) tuples.
         """
-        return [(p.name, p) for p in self.wrapped]
+        return self.wrapped.items()
 
     def append(self, property: Property) -> None:
         """Append a property to the property list.
@@ -618,7 +618,7 @@ class PropertiesList(ObjectType):
         Args:
             property: Property to add
         """
-        self.wrapped.append(property)
+        self.wrapped[property.name] = property
 
 
 def to_jsonschema_type(
