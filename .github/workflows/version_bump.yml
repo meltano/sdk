@@ -41,7 +41,7 @@ jobs:
 
     - name: Set repo file permissions
       run: |
-        chown -R $USER:$USER .
+        chown -R $USER:$USER .git/objects
 
     - name: Set up Python
       uses: actions/setup-python@v4.3.1
