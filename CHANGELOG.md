@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.16.0 (2022-12-19)
+
+### ✨ New
+
+- [#1262](https://github.com/meltano/sdk/issues/1262) Support string `"__NULL__"` whereever null values are allowed in stream maps configuration
+
+### 🐛 Fixes
+
+- [#1281](https://github.com/meltano/sdk/issues/1281) Apply Version bump commit file perms with sudo
+- [#1280](https://github.com/meltano/sdk/issues/1280) Set repo file perms after checkout in Version bump workflow
+- [#1214](https://github.com/meltano/sdk/issues/1214) Avoid duplicate entries in `required` array of JSON schema helpers
+
 ## v0.15.0 (2022-12-08)
 
 ### ✨ New

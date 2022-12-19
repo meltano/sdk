@@ -6,7 +6,7 @@ import abc
 import json
 from enum import Enum
 from pathlib import Path, PurePath
-from typing import Any, Callable, cast
+from typing import Any, Callable, Sequence, cast
 
 import click
 
@@ -251,7 +251,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             for stream in self.streams.values()
         )
 
-    def discover_streams(self) -> list[Stream]:
+    def discover_streams(self) -> Sequence[Stream]:
         """Initialize all available streams and return them as a list.
 
         Return:
