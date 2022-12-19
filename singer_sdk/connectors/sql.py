@@ -782,7 +782,7 @@ class SQLConnector:
                     if (
                         (opt_len is None)
                         or (opt_len == 0)
-                        or (opt_len >= (current_type.length or (opt_len + 1)))
+                        or (current_type.length and (opt_len >= current_type.length))
                     ):
                         return opt
                 elif isinstance(
@@ -793,7 +793,7 @@ class SQLConnector:
                     if (
                         (opt_len is None)
                         or (opt_len == 0)
-                        or (opt_len >= (current_type.length or (opt_len + 1)))
+                        or (current_type.length and (opt_len >= current_type.length))
                     ):
                         return opt
                 # If best conversion class is equal to current type
