@@ -331,7 +331,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         Args:
             message_dict: The newly received schema message.
         """
-        self._assert_line_requires(message_dict, requires={"stream", "schema"})
+        self._assert_line_requires(message_dict, requires={"stream", "schema", "properties"})
 
         stream_name = message_dict["stream"]
         schema = message_dict["schema"]
