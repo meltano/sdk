@@ -35,9 +35,13 @@ jobs:
       pull-requests: write  # to create and update PRs
 
     steps:
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v3.2.0
       with:
         fetch-depth: 0
+
+    - name: Set repo file permissions
+      run: |
+        sudo chown -R $USER:$USER .git/objects
 
     - name: Set up Python
       uses: actions/setup-python@v4.3.1
@@ -89,4 +93,3 @@ jobs:
         base: main
         labels: release
         assignees: "${{ github.actor }}"
-        token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}
