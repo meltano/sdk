@@ -77,7 +77,7 @@ Advanced Topics
 .. _Singer: https://singer.io
 .. _Singer Spec: https://hub.meltano.com/singer/spec
 .. _Meltano: https://www.meltano.com
-.. _Meltano SDK: https://edk.meltano.com
+.. _Meltano EDK: https://edk.meltano.com
 .. _Meltano Hub: https://hub.meltano.com/utilities/
 .. _integrated with Meltano: https://docs.meltano.com/tutorials/custom-extractor#add-the-plugin-to-your-meltano-project
 .. _contribute back: https://github.com/meltano/sdk/issues?q=is%3Aopen+is%3Aissue+label%3A%22accepting+merge+requests%22
