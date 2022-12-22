@@ -14,7 +14,7 @@ from typing import IO, Callable, Counter
 import click
 from joblib import Parallel, delayed, parallel_backend
 
-from singer_sdk.cli import common_options
+from singer_sdk.cli import SingerCommand, common_options
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
@@ -508,6 +508,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         @common_options.PLUGIN_CONFIG
         @common_options.PLUGIN_FILE_INPUT
         @click.command(
+            cls=SingerCommand,
             help="Execute the Singer target.",
             context_settings={"help_option_names": ["--help"]},
         )

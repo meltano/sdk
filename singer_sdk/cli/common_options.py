@@ -2,6 +2,14 @@
 
 import click
 
+__all__ = [
+    "PLUGIN_VERSION",
+    "PLUGIN_ABOUT",
+    "PLUGIN_ABOUT_FORMAT",
+    "PLUGIN_CONFIG",
+    "PLUGIN_FILE_INPUT",
+]
+
 PLUGIN_VERSION = click.option(
     "--version",
     is_flag=True,

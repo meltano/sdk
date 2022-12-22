@@ -9,7 +9,7 @@ from typing import Callable, Iterable
 import click
 
 import singer_sdk._singerlib as singer
-from singer_sdk.cli import common_options
+from singer_sdk.cli import SingerCommand, common_options
 from singer_sdk.configuration._dict_config import merge_config_sources
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
@@ -122,6 +122,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         @common_options.PLUGIN_CONFIG
         @common_options.PLUGIN_FILE_INPUT
         @click.command(
+            cls=SingerCommand,
             help="Execute the Singer mapper.",
             context_settings={"help_option_names": ["--help"]},
         )

@@ -11,7 +11,7 @@ from typing import Any, Callable, Sequence, cast
 import click
 
 from singer_sdk._singerlib import Catalog
-from singer_sdk.cli import common_options
+from singer_sdk.cli import SingerCommand, common_options
 from singer_sdk.exceptions import MaxRecordsLimitException
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
@@ -428,6 +428,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             type=click.Path(),
         )
         @click.command(
+            cls=SingerCommand,
             help="Execute the Singer tap.",
             context_settings={"help_option_names": ["--help"]},
         )

@@ -484,12 +484,12 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             A paginator instance.
         """
         if hasattr(self, "get_next_page_token"):
-            warn(
+            warning = DeprecationWarning(
                 "`RESTStream.get_next_page_token` is deprecated and will not be used "
                 + "in a future version of the Meltano Singer SDK. "
-                + "Override `RESTStream.get_new_paginator` instead.",
-                DeprecationWarning,
+                + "Override `RESTStream.get_new_paginator` instead."
             )
+            warn(warning)
             return LegacyStreamPaginator(self)  # type: ignore
         elif self.next_page_token_jsonpath:
             return JSONPathPaginator(self.next_page_token_jsonpath)
