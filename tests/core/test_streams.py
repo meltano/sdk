@@ -28,6 +28,7 @@ from singer_sdk.typing import (
     Property,
     StringType,
 )
+from singer_sdk.utils.deprecation import SingerSDKDeprecationWarning
 
 CONFIG_START_DATE = "2021-01-01"
 
@@ -461,7 +462,7 @@ def test_next_page_token_jsonpath(
     RestTestStream.next_page_token_jsonpath = path
     stream = RestTestStream(tap)
 
-    with pytest.warns(DeprecationWarning):
+    with pytest.warns(SingerSDKDeprecationWarning):
         paginator = stream.get_new_paginator()
 
     next_page = paginator.get_next(fake_response)

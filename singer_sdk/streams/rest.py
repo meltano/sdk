@@ -26,6 +26,7 @@ from singer_sdk.pagination import (
 )
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
+from singer_sdk.utils.deprecation import SingerSDKDeprecationWarning
 
 if TYPE_CHECKING:
     from backoff.types import Details
@@ -484,7 +485,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             A paginator instance.
         """
         if hasattr(self, "get_next_page_token"):
-            warning = DeprecationWarning(
+            warning = SingerSDKDeprecationWarning(
                 "`RESTStream.get_next_page_token` is deprecated and will not be used "
                 + "in a future version of the Meltano Singer SDK. "
                 + "Override `RESTStream.get_new_paginator` instead."
@@ -535,12 +536,15 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         Yields:
             One item per (possibly processed) record in the API.
         """
+        # warn(SingerSDKDeprecationWarning("Use `request_records` instead."))
         for record in self.request_records(context):
             transformed_record = self.post_process(record, context)
             if transformed_record is None:
                 # Record filtered out during post_process()
                 continue
             yield transformed_record
+
+        self.requests_session.close()
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return an iterator of result records.
