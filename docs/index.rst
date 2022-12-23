@@ -42,6 +42,7 @@ Developer Resources
    :maxdepth: 2
 
    dev_guide
+   guides/index
    python_tips
    code_samples
    cli_commands
@@ -56,23 +57,23 @@ Reference
 
    reference
 
-
-Advanced Topics
----------------
+Advanced Concepts
+-----------------
 
 .. toctree::
    :maxdepth: 1
 
-   parent_streams
-   partitioning
-   context_object
-   stream_maps
-   batch
-   porting
-   sinks
-   CONTRIBUTING
+   advanced/index
    implementation/index
    typing
+
+Development
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   development/index
 
 .. _Singer: https://singer.io
 .. _Singer Spec: https://hub.meltano.com/singer/spec

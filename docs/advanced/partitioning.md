@@ -37,7 +37,7 @@ either for the partition or for the stream.
 
 ## Additional State Partitioning References
 
-- [Tap SDK State](./implementation/state.md)
+- [Tap SDK State](../implementation/state.md)
 - [Tap SDK Parent-Child Streams](./parent_streams.md)
 - [Singer Spec: State Overview](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#state)
 - [Singer Spec: Config and State](https://github.com/singer-io/getting-started/blob/master/docs/CONFIG_AND_STATE.md#state-file)
