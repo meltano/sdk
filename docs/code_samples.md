@@ -41,7 +41,7 @@ class TapCountries(Tap):
     config options and does not require authentication.
     """
     name = "tap-countries"
-    config_jsonschema = PropertiesList([]).to_dict()
+    config_jsonschema = th.PropertiesList([]).to_dict()
 
     def discover_streams(self) -> List[Stream]:
         """Return a list containing the two stream types."""
@@ -127,11 +127,11 @@ class ParquetStream(Stream):
         """Dynamically detect the json schema for the stream.
         This is evaluated prior to any records being retrieved.
         """
-        properties: List[Property] = []
-        for header in FAKECSV.split("\n")[0].split(",")
+        properties: List[th.Property] = []
+        for header in FAKECSV.split("\n")[0].split(","):
             # Assume string type for all fields
-            properties.add(header, StringType())
-        return PropertiesList(*properties).to_dict()
+            properties.append(th.Property(header, th.StringType()))
+        return th.PropertiesList(*properties).to_dict()
 ```
 
 Here is another example from the Parquet tap. This sample uses a
@@ -148,7 +148,7 @@ class ParquetStream(Stream):
         """Dynamically detect the json schema for the stream.
         This is evaluated prior to any records being retrieved.
         """
-        properties: List[Property] = []
+        properties: List[th.Property] = []
         # Get a schema object using the parquet and pyarrow libraries
         parquet_schema = pq.ParquetFile(self.filepath).schema_arrow
 
@@ -160,10 +160,10 @@ class ParquetStream(Stream):
             dtype = get_jsonschema_type(str(parquet_schema.types[i]))
 
             # Add the new property to our list
-            properties.append(Property(name, dtype))
+            properties.append(th.Property(name, dtype))
 
         # Return the list as a JSON Schema dictionary object
-        return PropertiesList(*properties).to_dict()
+        return th.PropertiesList(*properties).to_dict()
 ```
 
 ### Initialize a collection of tap streams with differing types
