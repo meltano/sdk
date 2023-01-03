@@ -284,15 +284,41 @@ def _warn_unmapped_properties(
     )
 
 
+class ConformanceLevel(Enum):
+    """
+        For use when conforming data. Before outputting data as JSON, it is conformed to types that are valid in json,
+        based on the current types and the schema.
+        For example, dates are converted to strings.
+
+        By default, all data is conformed recursively. If this is not necessary (because data is already valid types
+        or you are manually converting it) then it may be more performant to use a weaker conformance level.
+    """
+
+    RECURSIVE = 1
+    """
+    All data is recursively conformed
+    """
+
+    ROOT_ONLY = 2
+    """
+    Only properties on the root object, excluding array elements, are conformed
+    """
+
+    NONE = 3
+    """
+    No conformance is performed
+    """
+
+
 def conform_record_data_types(  # noqa: C901
-    stream_name: str, record: Dict[str, Any], schema: dict, logger: logging.Logger
+    stream_name: str, record: Dict[str, Any], schema: dict, level: ConformanceLevel, logger: logging.Logger
 ) -> Dict[str, Any]:
     """Translate values in record dictionary to singer-compatible data types.
 
     Any property names not found in the schema catalog will be removed, and a single
     warning will be logged listing each unmapped property name.
     """
-    rec, unmapped_properties = _conform_record_data_types(record, schema, None)
+    rec, unmapped_properties = _conform_record_data_types(record, schema, level, None)
 
     if len(unmapped_properties) > 0:
         _warn_unmapped_properties(stream_name, tuple(unmapped_properties), logger)
@@ -301,7 +327,7 @@ def conform_record_data_types(  # noqa: C901
 
 
 def _conform_record_data_types(
-    input_object: Dict[str, Any], schema: dict, parent: Optional[str]
+    input_object: Dict[str, Any], schema: dict, level: ConformanceLevel, parent: Optional[str]
 ) -> Tuple[Dict[str, Any], List[str]]:  # noqa: C901
     """Translate values in record dictionary to singer-compatible data types.
 
@@ -317,6 +343,10 @@ def _conform_record_data_types(
     """
     output_object: Dict[str, Any] = {}
     unmapped_properties: List[str] = []
+
+    if level == ConformanceLevel.NONE:
+        return input_object, unmapped_properties
+
     for property_name, elem in input_object.items():
         property_path = (
             property_name if parent is None else parent + "." + property_name
@@ -327,28 +357,34 @@ def _conform_record_data_types(
 
         property_schema = schema["properties"][property_name]
         if isinstance(elem, list) and is_uniform_list(property_schema):
-            item_schema = property_schema["items"]
-            output = []
-            for item in elem:
-                if is_object_type(item_schema) and isinstance(item, dict):
-                    output_item, sub_unmapped_properties = _conform_record_data_types(
-                        item, item_schema, property_path
-                    )
-                    unmapped_properties.extend(sub_unmapped_properties)
-                    output.append(output_item)
-                else:
-                    output.append(_conform_primitive_property(item, item_schema))
-            output_object[property_name] = output
+            if level == ConformanceLevel.RECURSIVE:
+                item_schema = property_schema["items"]
+                output = []
+                for item in elem:
+                    if is_object_type(item_schema) and isinstance(item, dict):
+                        output_item, sub_unmapped_properties = _conform_record_data_types(
+                            item, item_schema, level, property_path
+                        )
+                        unmapped_properties.extend(sub_unmapped_properties)
+                        output.append(output_item)
+                    else:
+                        output.append(_conform_primitive_property(item, item_schema))
+                output_object[property_name] = output
+            else:
+                output_object[property_name] = elem
         elif (
             isinstance(elem, dict)
             and is_object_type(property_schema)
             and "properties" in property_schema
         ):
-            (
-                output_object[property_name],
-                sub_unmapped_properties,
-            ) = _conform_record_data_types(elem, property_schema, property_path)
-            unmapped_properties.extend(sub_unmapped_properties)
+            if level == ConformanceLevel.RECURSIVE:
+                (
+                    output_object[property_name],
+                    sub_unmapped_properties,
+                ) = _conform_record_data_types(elem, property_schema, level, property_path)
+                unmapped_properties.extend(sub_unmapped_properties)
+            else:
+                output_object[property_name] = elem
         else:
             output_object[property_name] = _conform_primitive_property(
                 elem, property_schema

@@ -39,7 +39,7 @@ from singer_sdk.helpers._state import (
     write_replication_key_signpost,
     write_starting_replication_value,
 )
-from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type
+from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type, ConformanceLevel
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
@@ -79,6 +79,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     STATE_MSG_FREQUENCY = 10000  # Number of records between state messages
     _MAX_RECORDS_LIMIT: int | None = None
+    CONFORMANCE_LEVEL = ConformanceLevel.RECURSIVE
 
     # Used for nested stream relationships
     parent_stream_type: type[Stream] | None = None
@@ -790,6 +791,7 @@ class Stream(metaclass=abc.ABCMeta):
             stream_name=self.name,
             record=record,
             schema=self.schema,
+            level=self.CONFORMANCE_LEVEL,
             logger=self.logger,
         )
         for stream_map in self.stream_maps:
