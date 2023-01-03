@@ -285,13 +285,15 @@ def _warn_unmapped_properties(
 
 
 class ConformanceLevel(Enum):
-    """
-        For use when conforming data. Before outputting data as JSON, it is conformed to types that are valid in json,
-        based on the current types and the schema.
-        For example, dates are converted to strings.
+    """Used to configure how data is conformed to json compatible types.
 
-        By default, all data is conformed recursively. If this is not necessary (because data is already valid types
-        or you are manually converting it) then it may be more performant to use a weaker conformance level.
+    Before outputting data as JSON, it is conformed to types that are valid in json,
+    based on the current types and the schema. For example, dates are converted to
+    strings.
+
+    By default, all data is conformed recursively. If this is not necessary (because
+    data is already valid types, or you are manually converting it) then it may be more
+    performant to use a lesser conformance level.
     """
 
     RECURSIVE = 1
@@ -311,7 +313,11 @@ class ConformanceLevel(Enum):
 
 
 def conform_record_data_types(  # noqa: C901
-    stream_name: str, record: Dict[str, Any], schema: dict, level: ConformanceLevel, logger: logging.Logger
+    stream_name: str,
+    record: Dict[str, Any],
+    schema: dict,
+    level: ConformanceLevel,
+    logger: logging.Logger,
 ) -> Dict[str, Any]:
     """Translate values in record dictionary to singer-compatible data types.
 
@@ -327,7 +333,10 @@ def conform_record_data_types(  # noqa: C901
 
 
 def _conform_record_data_types(
-    input_object: Dict[str, Any], schema: dict, level: ConformanceLevel, parent: Optional[str]
+    input_object: Dict[str, Any],
+    schema: dict,
+    level: ConformanceLevel,
+    parent: Optional[str],
 ) -> Tuple[Dict[str, Any], List[str]]:  # noqa: C901
     """Translate values in record dictionary to singer-compatible data types.
 
@@ -339,6 +348,7 @@ def _conform_record_data_types(
     Args:
         input_object: A single record
         schema: JSON schema the given input_object is expected to meet
+        level:  Specifies how recursive the conformance process should be
         parent: '.' seperated path to this element from the object root (for logging)
     """
     output_object: Dict[str, Any] = {}
@@ -362,7 +372,10 @@ def _conform_record_data_types(
                 output = []
                 for item in elem:
                     if is_object_type(item_schema) and isinstance(item, dict):
-                        output_item, sub_unmapped_properties = _conform_record_data_types(
+                        (
+                            output_item,
+                            sub_unmapped_properties,
+                        ) = _conform_record_data_types(
                             item, item_schema, level, property_path
                         )
                         unmapped_properties.extend(sub_unmapped_properties)
@@ -381,7 +394,9 @@ def _conform_record_data_types(
                 (
                     output_object[property_name],
                     sub_unmapped_properties,
-                ) = _conform_record_data_types(elem, property_schema, level, property_path)
+                ) = _conform_record_data_types(
+                    elem, property_schema, level, property_path
+                )
                 unmapped_properties.extend(sub_unmapped_properties)
             else:
                 output_object[property_name] = elem

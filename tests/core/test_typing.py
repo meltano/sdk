@@ -4,8 +4,9 @@ import logging
 import unittest
 
 from singer_sdk.helpers._typing import (
+    ConformanceLevel,
     _conform_primitive_property,
-    conform_record_data_types, ConformanceLevel,
+    conform_record_data_types,
 )
 from singer_sdk.typing import (
     ArrayType,
@@ -34,7 +35,9 @@ def test_simple_schema_conforms_types():
         "false": False,
     }
 
-    actual_output = conform_record_data_types("test_stream", record, schema, ConformanceLevel.RECURSIVE, logger)
+    actual_output = conform_record_data_types(
+        "test_stream", record, schema, ConformanceLevel.RECURSIVE, logger
+    )
     assert actual_output == expected_output
 
 
@@ -49,7 +52,9 @@ def test_primitive_arrays_are_conformed():
 
     expected_output = {"list": [True, False]}
 
-    actual_output = conform_record_data_types("test_stream", record, schema, ConformanceLevel.RECURSIVE, logger)
+    actual_output = conform_record_data_types(
+        "test_stream", record, schema, ConformanceLevel.RECURSIVE, logger
+    )
     assert actual_output == expected_output
 
 
@@ -63,16 +68,18 @@ def test_only_root_fields_are_conformed_for_root_level():
     record = {
         "primitive": b"\x01",
         "object": {"value": b"\x01"},
-        "list": [b"\x01", b"\x00"]
+        "list": [b"\x01", b"\x00"],
     }
 
     expected_output = {
         "primitive": True,
         "object": {"value": b"\x01"},
-        "list": [b"\x01", b"\x00"]
+        "list": [b"\x01", b"\x00"],
     }
 
-    actual_output = conform_record_data_types("test_stream", record, schema, ConformanceLevel.ROOT_ONLY, logger)
+    actual_output = conform_record_data_types(
+        "test_stream", record, schema, ConformanceLevel.ROOT_ONLY, logger
+    )
     assert actual_output == expected_output
 
 
@@ -86,10 +93,12 @@ def test_no_fields_are_conformed_for_none_level():
     record = {
         "primitive": b"\x01",
         "object": {"value": b"\x01"},
-        "list": [b"\x01", b"\x00"]
+        "list": [b"\x01", b"\x00"],
     }
 
-    actual_output = conform_record_data_types("test_stream", record, schema, ConformanceLevel.NONE, logger)
+    actual_output = conform_record_data_types(
+        "test_stream", record, schema, ConformanceLevel.NONE, logger
+    )
     assert actual_output == record
 
 
@@ -102,7 +111,9 @@ def test_object_arrays_are_conformed():
 
     expected_output = {"list": [{"value": True}, {"value": False}]}
 
-    actual_output = conform_record_data_types("test_stream", record, schema, ConformanceLevel.RECURSIVE, logger)
+    actual_output = conform_record_data_types(
+        "test_stream", record, schema, ConformanceLevel.RECURSIVE, logger
+    )
     assert actual_output == expected_output
 
 
@@ -124,7 +135,9 @@ def test_mixed_arrays_are_conformed():
 
     expected_output = {"list": [{"value": True}, False]}
 
-    actual_output = conform_record_data_types("test_stream", record, schema, ConformanceLevel.RECURSIVE, logger)
+    actual_output = conform_record_data_types(
+        "test_stream", record, schema, ConformanceLevel.RECURSIVE, logger
+    )
     assert actual_output == expected_output
 
 
@@ -137,7 +150,9 @@ def test_nested_objects_are_conformed():
 
     expected_output = {"object": {"value": True}}
 
-    actual_output = conform_record_data_types("test_stream", record, schema, ConformanceLevel.RECURSIVE, logger)
+    actual_output = conform_record_data_types(
+        "test_stream", record, schema, ConformanceLevel.RECURSIVE, logger
+    )
     assert actual_output == expected_output
 
 
@@ -211,20 +226,20 @@ class TestSimpleEval(unittest.TestCase):
 
 def test_conform_primitives():
     assert (
-            _conform_primitive_property(datetime.datetime(2020, 5, 17), {"type": "string"})
-            == "2020-05-17T00:00:00+00:00"
+        _conform_primitive_property(datetime.datetime(2020, 5, 17), {"type": "string"})
+        == "2020-05-17T00:00:00+00:00"
     )
     assert (
-            _conform_primitive_property(datetime.date(2020, 5, 17), {"type": "string"})
-            == "2020-05-17T00:00:00+00:00"
+        _conform_primitive_property(datetime.date(2020, 5, 17), {"type": "string"})
+        == "2020-05-17T00:00:00+00:00"
     )
     assert (
-            _conform_primitive_property(datetime.timedelta(365), {"type": "string"})
-            == "1971-01-01T00:00:00+00:00"
+        _conform_primitive_property(datetime.timedelta(365), {"type": "string"})
+        == "1971-01-01T00:00:00+00:00"
     )
     assert (
-            _conform_primitive_property(datetime.time(12, 0, 0), {"type": "string"})
-            == "12:00:00"
+        _conform_primitive_property(datetime.time(12, 0, 0), {"type": "string"})
+        == "12:00:00"
     )
 
     assert _conform_primitive_property(b"\x00", {"type": "string"}) == "00"

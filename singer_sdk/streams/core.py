@@ -39,7 +39,11 @@ from singer_sdk.helpers._state import (
     write_replication_key_signpost,
     write_starting_replication_value,
 )
-from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type, ConformanceLevel
+from singer_sdk.helpers._typing import (
+    ConformanceLevel,
+    conform_record_data_types,
+    is_datetime_type,
+)
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
