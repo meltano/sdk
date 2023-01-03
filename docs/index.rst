@@ -8,7 +8,9 @@ Meltano Singer SDK
 
 The Meltano_ Singer SDK for Taps and Targets is the fastest way to build custom
 data extractors and loaders! Taps and targets built on the SDK are automatically compliant with the
-`Singer Spec`_, the de-facto open source standard for extract and load pipelines.
+`Singer Spec`_, the de-facto open source standard for extract and load pipelines, and therefore Meltano_.
+
+If you're looking to add support to Meltano for a new data tool that would be listed on the `Meltano Hub`_ as a utility, check out the `Meltano EDK`_ (Extension Development Kit) instead.
 
 Future-proof extractors and loaders, with less code
 ---------------------------------------------------
@@ -76,6 +78,8 @@ Advanced Topics
 .. _Singer: https://singer.io
 .. _Singer Spec: https://hub.meltano.com/singer/spec
 .. _Meltano: https://www.meltano.com
+.. _Meltano EDK: https://edk.meltano.com
+.. _Meltano Hub: https://hub.meltano.com/utilities/
 .. _integrated with Meltano: https://docs.meltano.com/tutorials/custom-extractor#add-the-plugin-to-your-meltano-project
 .. _contribute back: https://github.com/meltano/sdk/issues?q=is%3Aopen+is%3Aissue+label%3A%22accepting+merge+requests%22
 .. _source code: https://github.com/meltano/sdk
