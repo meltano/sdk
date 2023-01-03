@@ -1,7 +1,9 @@
 """Test _typing - specifically conform_record_data_types()."""
+
 import datetime
 import logging
-import unittest
+
+import pytest
 
 from singer_sdk.helpers._typing import (
     ConformanceLevel,
@@ -156,72 +158,64 @@ def test_nested_objects_are_conformed():
     assert actual_output == expected_output
 
 
-class TestSimpleEval(unittest.TestCase):
-    def test_simple_schema_removes_types(self):
-        schema = PropertiesList(
-            Property("keep", StringType),
-        ).to_dict()
+def test_simple_schema_removes_types(caplog: pytest.LogCaptureFixture):
+    schema = PropertiesList(
+        Property("keep", StringType),
+    ).to_dict()
 
-        record = {"keep": "hello", "remove": "goodbye"}
+    record = {"keep": "hello", "remove": "goodbye"}
 
-        expected_output = {"keep": "hello"}
+    expected_output = {"keep": "hello"}
 
-        with self.assertLogs("log", level="WARN") as logs:
-            actual_output = conform_record_data_types(
-                "test_stream", record, schema, ConformanceLevel.RECURSIVE, logger
-            )
-            assert actual_output == expected_output
-            self.assertEqual(
-                logs.output,
-                [
-                    "WARNING:log:Properties ('remove',) were present in the 'test_stream' stream but not found in catalog "
-                    "schema. Ignoring."
-                ],
-            )
+    with caplog.at_level(logging.WARNING):
+        actual_output = conform_record_data_types(
+            "test_stream", record, schema, ConformanceLevel.RECURSIVE, logger
+        )
+        assert actual_output == expected_output
+        assert caplog.records[0].message == (
+            "Properties ('remove',) were present in the 'test_stream' stream but not "
+            "found in catalog schema. Ignoring."
+        )
 
-    def test_nested_objects_remove_types(self):
-        schema = PropertiesList(
-            Property("object", PropertiesList(Property("keep", StringType))),
-        ).to_dict()
 
-        record = {"object": {"keep": "hello", "remove": "goodbye"}}
+def test_nested_objects_remove_types(caplog: pytest.LogCaptureFixture):
+    schema = PropertiesList(
+        Property("object", PropertiesList(Property("keep", StringType))),
+    ).to_dict()
 
-        expected_output = {"object": {"keep": "hello"}}
+    record = {"object": {"keep": "hello", "remove": "goodbye"}}
 
-        with self.assertLogs("log", level="WARN") as logs:
-            actual_output = conform_record_data_types(
-                "test_stream", record, schema, ConformanceLevel.RECURSIVE, logger
-            )
-            assert actual_output == expected_output
-            self.assertEqual(
-                logs.output,
-                [
-                    "WARNING:log:Properties ('object.remove',) were present in the 'test_stream' stream but not found in "
-                    "catalog schema. Ignoring."
-                ],
-            )
+    expected_output = {"object": {"keep": "hello"}}
 
-    def test_object_arrays_remove_types(self):
-        schema = PropertiesList(
-            Property("list", ArrayType(PropertiesList(Property("keep", StringType)))),
-        ).to_dict()
+    with caplog.at_level(logging.WARNING):
+        actual_output = conform_record_data_types(
+            "test_stream", record, schema, ConformanceLevel.RECURSIVE, logger
+        )
+        assert actual_output == expected_output
+        assert caplog.records[0].message == (
+            "Properties ('object.remove',) were present in the 'test_stream' stream "
+            "but not found in catalog schema. Ignoring."
+        )
 
-        record = {"list": [{"keep": "hello", "remove": "goodbye"}]}
 
-        expected_output = {"list": [{"keep": "hello"}]}
+def test_object_arrays_remove_types(caplog: pytest.LogCaptureFixture):
+    schema = PropertiesList(
+        Property("list", ArrayType(PropertiesList(Property("keep", StringType)))),
+    ).to_dict()
 
-        with self.assertLogs("log", level="WARN") as logs:
-            actual_output = conform_record_data_types(
-                "test_stream", record, schema, ConformanceLevel.RECURSIVE, logger
-            )
-            assert actual_output == expected_output
-            self.assertEqual(
-                logs.output,
-                [
-                    "WARNING:log:Properties ('list.remove',) were present in the 'test_stream' stream but not found in "
-                    "catalog schema. Ignoring."
-                ],
-            )
+    record = {"list": [{"keep": "hello", "remove": "goodbye"}]}
+
+    expected_output = {"list": [{"keep": "hello"}]}
+
+    with caplog.at_level(logging.WARNING):
+        actual_output = conform_record_data_types(
+            "test_stream", record, schema, ConformanceLevel.RECURSIVE, logger
+        )
+        assert actual_output == expected_output
+        assert caplog.records[0].message == (
+            "Properties ('list.remove',) were present in the 'test_stream' stream but "
+            "not found in catalog schema. Ignoring."
+        )
 
 
 def test_conform_primitives():
