@@ -10,7 +10,7 @@ import pendulum
 import pytest
 
 from singer_sdk.helpers._typing import (
-    ConformanceLevel,
+    TypeConformanceLevel,
     conform_record_data_types,
     get_datelike_property_type,
     to_json_compatible,
@@ -67,7 +67,7 @@ def test_conform_record_data_types(
 
     with caplog.at_level(logging.INFO, logger=logger.name):
         actual = conform_record_data_types(
-            stream_name, record, schema, ConformanceLevel.RECURSIVE, logger
+            stream_name, record, schema, TypeConformanceLevel.RECURSIVE, logger
         )
         if ignore_props_message:
             assert ignore_props_message in caplog.text

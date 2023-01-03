@@ -284,7 +284,7 @@ def _warn_unmapped_properties(
     )
 
 
-class ConformanceLevel(Enum):
+class TypeConformanceLevel(Enum):
     """Used to configure how data is conformed to json compatible types.
 
     Before outputting data as JSON, it is conformed to types that are valid in json,
@@ -316,7 +316,7 @@ def conform_record_data_types(  # noqa: C901
     stream_name: str,
     record: Dict[str, Any],
     schema: dict,
-    level: ConformanceLevel,
+    level: TypeConformanceLevel,
     logger: logging.Logger,
 ) -> Dict[str, Any]:
     """Translate values in record dictionary to singer-compatible data types.
@@ -335,7 +335,7 @@ def conform_record_data_types(  # noqa: C901
 def _conform_record_data_types(
     input_object: Dict[str, Any],
     schema: dict,
-    level: ConformanceLevel,
+    level: TypeConformanceLevel,
     parent: Optional[str],
 ) -> Tuple[Dict[str, Any], List[str]]:  # noqa: C901
     """Translate values in record dictionary to singer-compatible data types.
@@ -354,7 +354,7 @@ def _conform_record_data_types(
     output_object: Dict[str, Any] = {}
     unmapped_properties: List[str] = []
 
-    if level == ConformanceLevel.NONE:
+    if level == TypeConformanceLevel.NONE:
         return input_object, unmapped_properties
 
     for property_name, elem in input_object.items():
@@ -367,7 +367,7 @@ def _conform_record_data_types(
 
         property_schema = schema["properties"][property_name]
         if isinstance(elem, list) and is_uniform_list(property_schema):
-            if level == ConformanceLevel.RECURSIVE:
+            if level == TypeConformanceLevel.RECURSIVE:
                 item_schema = property_schema["items"]
                 output = []
                 for item in elem:
@@ -390,7 +390,7 @@ def _conform_record_data_types(
             and is_object_type(property_schema)
             and "properties" in property_schema
         ):
-            if level == ConformanceLevel.RECURSIVE:
+            if level == TypeConformanceLevel.RECURSIVE:
                 (
                     output_object[property_name],
                     sub_unmapped_properties,

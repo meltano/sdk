@@ -40,7 +40,7 @@ from singer_sdk.helpers._state import (
     write_starting_replication_value,
 )
 from singer_sdk.helpers._typing import (
-    ConformanceLevel,
+    TypeConformanceLevel,
     conform_record_data_types,
     is_datetime_type,
 )
@@ -81,12 +81,31 @@ def lazy_chunked_generator(
 class Stream(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
-    STATE_MSG_FREQUENCY = 10000  # Number of records between state messages
+    STATE_MSG_FREQUENCY = 10000
+    """Number of records between state messages."""
+
     _MAX_RECORDS_LIMIT: int | None = None
-    CONFORMANCE_LEVEL = ConformanceLevel.RECURSIVE
+
+    TYPE_CONFORMANCE_LEVEL = TypeConformanceLevel.RECURSIVE
+    """Type conformance level for this stream.
+
+    Field types in the schema are used to convert record field values to the correct
+    type.
+
+    Available options are:
+
+    - ``TypeConformanceLevel.NONE``: No conformance is performed.
+    - ``TypeConformanceLevel.RECURSIVE``: Conformance is performed recursively through
+      all nested levels in the record.
+    - ``TypeConformanceLevel.ROOT``: Conformance is performed only on the root level.
+    """
 
     # Used for nested stream relationships
     parent_stream_type: type[Stream] | None = None
+    """Parent stream type for this stream. If this stream is a child stream, this should
+    be set to the parent stream class.
+    """
+
     ignore_parent_replication_key: bool = False
 
     # Internal API cost aggregator
@@ -795,7 +814,7 @@ class Stream(metaclass=abc.ABCMeta):
             stream_name=self.name,
             record=record,
             schema=self.schema,
-            level=self.CONFORMANCE_LEVEL,
+            level=self.TYPE_CONFORMANCE_LEVEL,
             logger=self.logger,
         )
         for stream_map in self.stream_maps:
