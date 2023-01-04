@@ -175,7 +175,7 @@ This repo uses the [semantic-prs](https://github.com/Ezard/semantic-prs) GitHub 
 
 Pull requests should be named according to the conventional commit syntax to streamline changelog and release notes management. We encourage (but do not require) the use of conventional commits in commit messages as well.
 
-In general, PR titles should follow the format "<type>: <desc>", where type is any one of these:
+In general, PR titles should follow the format `<type>: <desc>`, where type is any one of these:
 
 - `ci`
 - `chore`
