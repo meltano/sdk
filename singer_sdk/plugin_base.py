@@ -63,7 +63,8 @@ class PluginBase(metaclass=abc.ABCMeta):
             Plugin logger.
         """
         # Get the level from <PLUGIN_NAME>_LOGLEVEL or LOGLEVEL environment variables
-        LOGLEVEL = os.environ.get(f"{cls.name.upper()}_LOGLEVEL") or os.environ.get(
+        plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
+        LOGLEVEL = os.environ.get(f"{plugin_env_prefix}LOGLEVEL") or os.environ.get(
             "LOGLEVEL"
         )
 
