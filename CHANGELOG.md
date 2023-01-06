@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## v0.17.0 (2023-01-06)
+
+### 🐛 Fixes
+
+- [#1305](https://github.com/meltano/sdk/issues/1305) Install dependencies in CI and bump dev dependencies
+- [#1308](https://github.com/meltano/sdk/issues/1308) Replace hyphens with underscores when generating expected env var name `<PLUGIN_NAME>_LOGLEVEL` -- _**Thanks @adherr!**_
+- [#887](https://github.com/meltano/sdk/issues/887) Make `conform_record_data_types` work on nested objects and arrays -- _**Thanks @Jack-Burnett!**_
+- [#1287](https://github.com/meltano/sdk/issues/1287) Targets to fail gracefully when schema message is missing the `properties` key -- _**Thanks @visch!**_
+
+### 📚 Documentation Improvements
+
+- [#1306](https://github.com/meltano/sdk/issues/1306) Update code samples docs
+- [#1293](https://github.com/meltano/sdk/issues/1293) Add link to EDK
+
 ## v0.16.0 (2022-12-19)
 
 ### ✨ New
