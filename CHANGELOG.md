@@ -77,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🐛 Fixes
 
 - [#1126](https://github.com/meltano/sdk/issues/1126) Resolve failure in `_increment_stream_state()` for cases when `replication_method` is `LOG_BASED`
-- [#1111](https://github.com/meltano/sdk/issues/1111) Push \_MAX_RECORDS_LIMIT down into SQL
+- [#1111](https://github.com/meltano/sdk/issues/1111) Push `_MAX_RECORDS_LIMIT` down into SQL
 
 ### ⚙️ Under the Hood
 
@@ -161,7 +161,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ⚙️ Under the Hood
 
-- Use **future**.annotations on singer_sdk.helpers.\_singer
+- Use `__future__.annotations` on `singer_sdk.helpers._singer`
 
 ### 📚 Documentation Improvements
 
@@ -416,7 +416,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixes
 
-- Tap SDK: Fixed mapped **key_properties** not being passed to the emitted schema message ([#281](https://gitlab.com/meltano/sdk/-/issues/281), [!209](https://gitlab.com/meltano/sdk/-/merge_requests/209))
+- Tap SDK: Fixed mapped `__key_properties__` not being passed to the emitted schema message ([#281](https://gitlab.com/meltano/sdk/-/issues/281), [!209](https://gitlab.com/meltano/sdk/-/merge_requests/209))
 - Tap SDK: Fixed missing schema during development causing sync to fail [#284](https://gitlab.com/meltano/sdk/-/issues/284), [!212](https://gitlab.com/meltano/sdk/-/merge_requests/212) -- _Thanks, **[Fred Reimer](https://gitlab.com/freimer)**!_
 
 ## 0.3.14 - (2021-11-18)
