@@ -91,7 +91,7 @@ debugging = [
 [tool.poetry.dev-dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
 commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
-pytest = "^7.2.0"
+pytest = "^7.2.1"
 xdoctest = "^1.1.0"
 mypy = "^0.991"
 cookiecutter = "^2.1.1"
