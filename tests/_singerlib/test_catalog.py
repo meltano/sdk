@@ -207,6 +207,7 @@ def test_catalog_parsing():
                 "properties": {
                     "first_name": {"type": "string"},
                     "last_name": {"type": "string"},
+                    "updated_at": {"type": "string", "format": "date-time"},
                 },
                 "type": "object",
             },
@@ -265,3 +266,8 @@ def test_standard_metadata(
         pk_metadata = metadata[("properties", pk)]
         assert pk_metadata.inclusion == Metadata.InclusionType.AUTOMATIC
         assert pk_metadata.selected is None
+
+    for rk in valid_replication_keys or []:
+        rk_metadata = metadata[("properties", rk)]
+        assert rk_metadata.inclusion == Metadata.InclusionType.AUTOMATIC
+        assert rk_metadata.selected is None
