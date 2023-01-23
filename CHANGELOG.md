@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.18.0 (2023-01-23)
+
+### ✨ New
+
+- [#1283](https://github.com/meltano/sdk/issues/1283) Automatic catalog selection of replication keys
+
+### 📚 Documentation Improvements
+
+- [#1335](https://github.com/meltano/sdk/issues/1335) Stream maps example for adding property with hardcoded string value
+
 ## v0.17.0 (2023-01-06)
 
 ### 🐛 Fixes
