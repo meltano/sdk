@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from singer_sdk.streams import Stream
+from singer_sdk.testing.suites import SuiteConfig
 
 from .runners import TapTestRunner, TargetTestRunner
 
@@ -80,11 +81,15 @@ class TestTemplate:
         raise NotImplementedError("Method not implemented.")
 
     def run(
-        self, config: dict, resource: Any, runner: TapTestRunner | TargetTestRunner
+        self,
+        config: SuiteConfig,
+        resource: Any,
+        runner: TapTestRunner | TargetTestRunner,
     ) -> None:
         """Test main run method.
 
         Args:
+            config: SuiteConfig instance, to use for test.
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap or Target runner instance, to use with this test.
 
@@ -127,13 +132,14 @@ class TapTestTemplate(TestTemplate):
 
     def run(  # type: ignore[override]
         self,
-        config: dict,
+        config: SuiteConfig,
         resource: Any,
         runner: TapTestRunner,
     ) -> None:
         """Test main run method.
 
         Args:
+            config: SuiteConfig instance, to use for test.
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap or Target runner instance, to use with this test.
         """
@@ -158,7 +164,7 @@ class StreamTestTemplate(TestTemplate):
 
     def run(  # type: ignore[override]
         self,
-        config: dict,
+        config: SuiteConfig,
         resource: Any,
         runner: TapTestRunner,
         stream: Stream,
@@ -166,6 +172,7 @@ class StreamTestTemplate(TestTemplate):
         """Test main run method.
 
         Args:
+            config: SuiteConfig instance, to use for test.
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap runner instance, to use with this test.
             stream: A Tap Stream instance, to use with this test.
@@ -191,7 +198,7 @@ class AttributeTestTemplate(TestTemplate):
 
     def run(  # type: ignore[override]
         self,
-        config: dict,
+        config: SuiteConfig,
         resource: Any,
         runner: TapTestRunner,
         stream: Stream,
@@ -200,6 +207,7 @@ class AttributeTestTemplate(TestTemplate):
         """Test main run method.
 
         Args:
+            config: SuiteConfig instance, to use for test.
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap runner instance, to use with this test.
             stream: A Tap Stream instance, to use with this test.
@@ -257,13 +265,14 @@ class TargetTestTemplate(TestTemplate):
 
     def run(  # type: ignore[override]
         self,
-        config: dict,
+        config: SuiteConfig,
         resource: Any,
         runner: TargetTestRunner,
     ) -> None:
         """Test main run method.
 
         Args:
+            config: SuiteConfig instance, to use for test.
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap runner instance, to use with this test.
         """
@@ -288,13 +297,14 @@ class TargetFileTestTemplate(TargetTestTemplate):
 
     def run(  # type: ignore[override]
         self,
-        config: dict,
+        config: SuiteConfig,
         resource: Any,
         runner: TargetTestRunner,
     ) -> None:
         """Test main run method.
 
         Args:
+            config: SuiteConfig instance, to use for test.
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap runner instance, to use with this test.
         """

@@ -12,6 +12,7 @@ from .legacy import (
     target_sync_test,
 )
 from .runners import SingerTestRunner, TapTestRunner, TargetTestRunner
+from .suites import SuiteConfig
 
 __all__ = [
     "get_tap_test_class",
@@ -28,4 +29,5 @@ __all__ = [
     "SingerTestRunner",
     "TapTestRunner",
     "TargetTestRunner",
+    "SuiteConfig",
 ]

@@ -10,6 +10,7 @@ from singer_sdk import Tap, Target
 
 from .runners import TapTestRunner, TargetTestRunner
 from .suites import (
+    SuiteConfig,
     tap_stream_attribute_tests,
     tap_stream_tests,
     tap_tests,
@@ -20,17 +21,19 @@ from .suites import (
 def get_test_class(
     test_runner: TapTestRunner | TargetTestRunner,
     test_suites: list,
-    suite_config: dict | None,
+    suite_config: SuiteConfig | None,
 ) -> object:
     """Construct a valid pytest test class from given suites.
 
     Args:
         test_runner: A Tap or Target test runner instance.
         test_suites: A list of Test Suits to apply.
+        suite_config: SuiteConfig instance to pass to tests.
 
     Returns:
         A test class usable by pytest.
     """
+    suite_config = suite_config or SuiteConfig()
 
     class BaseTestClass:
         """Base test class."""
@@ -40,7 +43,7 @@ def get_test_class(
 
         @pytest.fixture
         def config(self) -> dict:
-            return suite_config or {}
+            return suite_config
 
         @pytest.fixture
         def resource(self) -> Any:  # noqa: ANN401
@@ -77,9 +80,9 @@ def get_test_class(
         if suite.kind in {"tap_stream", "tap_stream_attribute"}:
 
             streams = list(test_runner.tap.streams.values())
-            if suite_config.get("max_records_limit"):
+            if suite_config.max_records_limit:
                 for stream in streams:
-                    stream._MAX_RECORDS_LIMIT = suite_config.get("max_records_limit")
+                    stream._MAX_RECORDS_LIMIT = suite_config.max_records_limit
 
             if suite.kind == "tap_stream":
 
@@ -160,7 +163,7 @@ def get_tap_test_class(
     include_stream_tests: bool = True,
     include_stream_attribute_tests: bool = True,
     custom_suites: list | None = None,
-    suite_config: dict | None = None,
+    suite_config: SuiteConfig | None = None,
     **kwargs: Any,
 ) -> object:
     """Get Tap Test Class.
@@ -172,6 +175,7 @@ def get_tap_test_class(
         include_stream_tests: Include Tap stream tests.
         include_stream_attribute_tests: Include Tap stream attribute tests.
         custom_suites: Custom test suites to add to standard tests.
+        suite_config: SuiteConfig instance to pass to tests.
         kwargs: Keyword arguments to pass to the TapRunner.
 
     Returns:
@@ -189,9 +193,7 @@ def get_tap_test_class(
     if "parse_env_config" not in kwargs:
         kwargs["parse_env_config"] = True
 
-    suite_config = suite_config or {}
-    if "max_records_limit" not in suite_config:
-        suite_config["max_records_limit"] = 5
+    suite_config = suite_config or SuiteConfig()
 
     return get_test_class(
         test_runner=TapTestRunner(tap_class=tap_class, config=config, **kwargs),
@@ -205,7 +207,7 @@ def get_target_test_class(
     *,
     config: dict | None = None,
     custom_suites: list | None = None,
-    suite_config: dict | None = None,
+    suite_config: SuiteConfig | None = None,
     **kwargs: Any,
 ) -> object:
     """Get Target Test Class.
@@ -214,6 +216,7 @@ def get_target_test_class(
         target_class: Meltano Singer SDK Target class to test.
         config: Config dict to use for testing.
         custom_suites: Custom test suites to add to standard tests.
+        suite_config: SuiteConfig instance to pass to tests.
         kwargs: Keyword arguments to pass to the TapRunner.
 
     Returns:
@@ -226,7 +229,7 @@ def get_target_test_class(
     if "parse_env_config" not in kwargs:
         kwargs["parse_env_config"] = True
 
-    suite_config = suite_config or {}
+    suite_config = suite_config or SuiteConfig()
 
     return get_test_class(
         test_runner=TargetTestRunner(

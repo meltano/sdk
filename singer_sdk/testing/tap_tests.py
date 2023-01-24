@@ -58,16 +58,16 @@ class StreamReturnsRecordTest(StreamTestTemplate):
 
     def test(self) -> None:
         """Run test."""
-        record_count = len(self.stream_records)
-        no_records_message = f"No records returned in stream {self.stream.name}."
-        if self.config.get(
-            "ignore_no_records", False
-        ) or self.stream.name not in self.config.get(
-            "ignore_no_records_for_streams", []
+        no_records_message = f"No records returned in stream '{self.stream.name}'."
+        if (
+            self.config.ignore_no_records
+            or self.stream.name in self.config.ignore_no_records_for_streams
         ):
-            assert record_count > 0, no_records_message
-        else:
+            # only warn if this or all streams are set to ignore no records
             warnings.warn(UserWarning(no_records_message))
+        else:
+            record_count = len(self.stream_records)
+            assert record_count > 0, no_records_message
 
 
 class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
