@@ -273,6 +273,21 @@ Notes:
 - To sync the stream as if it did not contain a primary key, simply set `__key_properties__` to `null`.
 - Key properties _must_ be present in the transformed stream result. Otherwise, an error will be raised.
 
+### Add a property with a string literal value
+
+Some applications, such as multi-tenant, may benefit from adding a property with a hardcoded string literal value.
+These values need to be wrapped in double quotes to differentiate them from property names:
+
+```json
+{
+    "stream_maps": {
+        "customers": {
+            "a_new_field": "\"client-123\""
+        }
+    }
+}
+```
+
 #### Q: What is the difference between `primary_keys` and `key_properties`?
 
 **A:** These two are _generally_ identical - and will only differ in cases like the above where `key_properties` is manually
