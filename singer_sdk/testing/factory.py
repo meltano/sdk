@@ -18,7 +18,9 @@ from .suites import (
 
 
 def get_test_class(
-    test_runner: TapTestRunner | TargetTestRunner, test_suites: list
+    test_runner: TapTestRunner | TargetTestRunner,
+    test_suites: list,
+    max_records_limit: int | None,
 ) -> object:
     """Construct a valid pytest test class from given suites.
 
@@ -70,15 +72,20 @@ def get_test_class(
 
         if suite.kind in {"tap_stream", "tap_stream_attribute"}:
 
+            streams = list(test_runner.tap.streams.values())
+            if max_records_limit:
+                for stream in streams:
+                    stream._MAX_RECORDS_LIMIT = max_records_limit
+
             if suite.kind == "tap_stream":
 
                 params = [
                     {
                         "stream": stream,
                     }
-                    for stream in test_runner.tap.streams.values()
+                    for stream in streams
                 ]
-                param_ids = [stream.name for stream in test_runner.tap.streams.values()]
+                param_ids = [stream.name for stream in streams]
 
                 for TestClass in suite.tests:
                     test = TestClass()
@@ -98,7 +105,7 @@ def get_test_class(
                     test_name = f"test_{suite.kind}_{test.name}"
                     test_params = []
                     test_ids = []
-                    for stream in test_runner.tap.streams.values():
+                    for stream in streams:
                         test_params.extend(
                             [
                                 {
@@ -149,6 +156,7 @@ def get_tap_test_class(
     include_stream_tests: bool = True,
     include_stream_attribute_tests: bool = True,
     custom_suites: list | None = None,
+    max_records_limit: int = 5,
     **kwargs: Any,
 ) -> object:
     """Get Tap Test Class.
@@ -173,9 +181,13 @@ def get_tap_test_class(
     if include_stream_attribute_tests:
         suites.append(tap_stream_attribute_tests)
 
+    if "parse_env_config" not in kwargs:
+        kwargs["parse_env_config"] = True
+
     return get_test_class(
         test_runner=TapTestRunner(tap_class=tap_class, config=config, **kwargs),
         test_suites=suites,
+        max_records_limit=max_records_limit,
     )
 
 
@@ -184,6 +196,7 @@ def get_target_test_class(
     *,
     config: dict | None = None,
     custom_suites: list | None = None,
+    max_records_limit: int = 5,
     **kwargs: Any,
 ) -> object:
     """Get Target Test Class.
@@ -200,9 +213,13 @@ def get_target_test_class(
     suites = custom_suites or []
     suites.append(target_tests)
 
+    if "parse_env_config" not in kwargs:
+        kwargs["parse_env_config"] = True
+
     return get_test_class(
         test_runner=TargetTestRunner(
             target_class=target_class, config=config, **kwargs
         ),
         test_suites=suites,
+        max_records_limit=max_records_limit,
     )
