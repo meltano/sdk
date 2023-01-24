@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import IO, Any, cast
 
 from singer_sdk import Tap, Target
+from singer_sdk.testing.config import SuiteConfig
 
 
 class SingerTestRunner(metaclass=abc.ABCMeta):
@@ -26,6 +27,7 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
         self,
         singer_class: type[Tap] | type[Target],
         config: dict | None = None,
+        suite_config: SuiteConfig | None = None,
         **kwargs: Any,
     ) -> None:
         """Initialize the test runner object.
@@ -33,11 +35,14 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
         Args:
             singer_class (type[PluginBase]): Singer class to be tested.
             config (dict): Tap/Target configuration for testing.
+            suite_config (SuiteConfig): SuiteConfig instance to be used when
+                instantiating tests.
             kwargs (dict): Default arguments to be passed to tap/target on create.
         """
         self.singer_class = singer_class
         self.config = config or {}
         self.default_kwargs = kwargs
+        self.suite_config = suite_config or SuiteConfig()
 
     @staticmethod
     def _clean_sync_output(raw_records: str) -> list[dict]:
@@ -81,6 +86,7 @@ class TapTestRunner(SingerTestRunner):
         self,
         tap_class: type[Tap],
         config: dict | None = None,
+        suite_config: SuiteConfig | None = None,
         **kwargs: Any,
     ) -> None:
         """Initialize Tap instance.
@@ -88,9 +94,16 @@ class TapTestRunner(SingerTestRunner):
         Args:
             tap_class: Tap class to run.
             config: Config dict to pass to Tap class.
+            suite_config (SuiteConfig): SuiteConfig instance to be used when
+                instantiating tests.
             kwargs: Default arguments to be passed to tap on create.
         """
-        super().__init__(singer_class=tap_class, config=config or {}, **kwargs)
+        super().__init__(
+            singer_class=tap_class,
+            config=config or {},
+            suite_config=suite_config,
+            **kwargs,
+        )
 
     @property
     def tap(self) -> Tap:
@@ -99,7 +112,12 @@ class TapTestRunner(SingerTestRunner):
         Returns:
             A configured Tap instance.
         """
-        return cast(Tap, self.create())
+        new_tap = cast(Tap, self.create())
+        # apply max_records_limit if set
+        if self.suite_config.max_records_limit is not None:
+            for stream in new_tap.streams.values():
+                stream._MAX_RECORDS_LIMIT = self.suite_config.max_records_limit
+        return new_tap
 
     def run_discovery(self) -> str:
         """Run tap discovery.
@@ -171,6 +189,7 @@ class TargetTestRunner(SingerTestRunner):
         self,
         target_class: type[Target],
         config: dict | None = None,
+        suite_config: SuiteConfig | None = None,
         input_filepath: Path | None = None,
         input_io: io.StringIO | None = None,
         **kwargs: Any,
@@ -186,7 +205,12 @@ class TargetTestRunner(SingerTestRunner):
                 during testing.
             kwargs: Default arguments to be passed to tap/target on create.
         """
-        super().__init__(singer_class=target_class, config=config or {}, **kwargs)
+        super().__init__(
+            singer_class=target_class,
+            config=config or {},
+            suite_config=suite_config,
+            **kwargs,
+        )
         self.input_filepath = input_filepath
         self.input_io = input_io
         self._input: IO[str] | None = None

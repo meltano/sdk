@@ -80,9 +80,6 @@ def get_test_class(
         if suite.kind in {"tap_stream", "tap_stream_attribute"}:
 
             streams = list(test_runner.tap.streams.values())
-            if suite_config.max_records_limit:
-                for stream in streams:
-                    stream._MAX_RECORDS_LIMIT = suite_config.max_records_limit
 
             if suite.kind == "tap_stream":
 
