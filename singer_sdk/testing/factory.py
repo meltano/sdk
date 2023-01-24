@@ -143,6 +143,7 @@ def get_test_class(
 
 def get_tap_test_class(
     tap_class: type[Tap],
+    *,
     config: dict | None = None,
     include_tap_tests: bool = True,
     include_stream_tests: bool = True,
