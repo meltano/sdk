@@ -42,7 +42,7 @@ def get_test_class(
         param_ids: dict = {}
 
         @pytest.fixture
-        def config(self) -> dict:
+        def config(self) -> SuiteConfig:
             return suite_config
 
         @pytest.fixture
