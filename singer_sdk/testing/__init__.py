@@ -1,5 +1,6 @@
 """Tools and standard tests for Tap/Target implementations."""
 
+from .config import SuiteConfig
 from .factory import get_tap_test_class, get_target_test_class, get_test_class
 from .legacy import (
     _get_tap_catalog,
@@ -12,7 +13,6 @@ from .legacy import (
     target_sync_test,
 )
 from .runners import SingerTestRunner, TapTestRunner, TargetTestRunner
-from .suites import SuiteConfig
 
 __all__ = [
     "get_tap_test_class",

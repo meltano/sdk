@@ -9,8 +9,8 @@ from pathlib import Path
 from typing import Any
 
 from singer_sdk.streams import Stream
-from singer_sdk.testing.suites import SuiteConfig
 
+from .config import SuiteConfig
 from .runners import TapTestRunner, TargetTestRunner
 
 

@@ -8,9 +8,9 @@ import pytest
 
 from singer_sdk import Tap, Target
 
+from .config import SuiteConfig
 from .runners import TapTestRunner, TargetTestRunner
 from .suites import (
-    SuiteConfig,
     tap_stream_attribute_tests,
     tap_stream_tests,
     tap_tests,
