@@ -59,7 +59,15 @@ class StreamReturnsRecordTest(StreamTestTemplate):
     def test(self) -> None:
         """Run test."""
         record_count = len(self.stream_records)
-        assert record_count > 0, "No records returned in stream."
+        no_records_message = f"No records returned in stream {self.stream.name}."
+        if self.config.get(
+            "ignore_no_records", False
+        ) or self.stream.name not in self.config.get(
+            "ignore_no_records_for_streams", []
+        ):
+            assert record_count > 0, no_records_message
+        else:
+            warnings.warn(UserWarning(no_records_message))
 
 
 class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
@@ -73,7 +81,9 @@ class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
         stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
         diff = stream_catalog_keys - stream_record_keys
         if diff:
-            warnings.warn(UserWarning(f"Fields in catalog but not in record: ({diff})"))
+            warnings.warn(
+                UserWarning(f"Fields in catalog but not in records: ({diff})")
+            )
 
 
 class StreamRecordSchemaMatchesCatalogTest(StreamTestTemplate):

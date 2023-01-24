@@ -79,7 +79,9 @@ class TestTemplate:
         """
         raise NotImplementedError("Method not implemented.")
 
-    def run(self, resource: Any, runner: TapTestRunner | TargetTestRunner) -> None:
+    def run(
+        self, config: dict, resource: Any, runner: TapTestRunner | TargetTestRunner
+    ) -> None:
         """Test main run method.
 
         Args:
@@ -92,6 +94,7 @@ class TestTemplate:
         if not self.name or not self.type:
             raise ValueError("Test must have 'name' and 'type' properties.")
 
+        self.config = config
         self.resource = resource
         self.runner = runner
 
@@ -124,6 +127,7 @@ class TapTestTemplate(TestTemplate):
 
     def run(  # type: ignore[override]
         self,
+        config: dict,
         resource: Any,
         runner: TapTestRunner,
     ) -> None:
@@ -134,7 +138,7 @@ class TapTestTemplate(TestTemplate):
             runner: A Tap or Target runner instance, to use with this test.
         """
         self.tap = runner.tap
-        super().run(resource, runner)
+        super().run(config, resource, runner)
 
 
 class StreamTestTemplate(TestTemplate):
@@ -154,6 +158,7 @@ class StreamTestTemplate(TestTemplate):
 
     def run(  # type: ignore[override]
         self,
+        config: dict,
         resource: Any,
         runner: TapTestRunner,
         stream: Stream,
@@ -167,7 +172,7 @@ class StreamTestTemplate(TestTemplate):
         """
         self.stream = stream
         self.stream_records = runner.records[stream.name]
-        super().run(resource, runner)
+        super().run(config, resource, runner)
 
 
 class AttributeTestTemplate(TestTemplate):
@@ -186,6 +191,7 @@ class AttributeTestTemplate(TestTemplate):
 
     def run(  # type: ignore[override]
         self,
+        config: dict,
         resource: Any,
         runner: TapTestRunner,
         stream: Stream,
@@ -203,7 +209,7 @@ class AttributeTestTemplate(TestTemplate):
         self.stream = stream
         self.stream_records = runner.records[stream.name]
         self.attribute_name = attribute_name
-        super().run(resource, runner)
+        super().run(config, resource, runner)
 
     @property
     def non_null_attribute_values(self) -> list[Any]:
@@ -251,6 +257,7 @@ class TargetTestTemplate(TestTemplate):
 
     def run(  # type: ignore[override]
         self,
+        config: dict,
         resource: Any,
         runner: TargetTestRunner,
     ) -> None:
@@ -261,7 +268,7 @@ class TargetTestTemplate(TestTemplate):
             runner: A Tap runner instance, to use with this test.
         """
         self.target = runner.target
-        super().run(resource, runner)
+        super().run(config, resource, runner)
 
     @property
     def id(self) -> str:
@@ -281,6 +288,7 @@ class TargetFileTestTemplate(TargetTestTemplate):
 
     def run(  # type: ignore[override]
         self,
+        config: dict,
         resource: Any,
         runner: TargetTestRunner,
     ) -> None:
@@ -296,7 +304,7 @@ class TargetFileTestTemplate(TargetTestTemplate):
                 self.singer_filepath
             ).exists(), f"Singer file {self.singer_filepath} does not exist."
             runner.input_filepath = self.singer_filepath
-        super().run(resource, runner)
+        super().run(config, resource, runner)
 
     @property
     def singer_filepath(self) -> Path:

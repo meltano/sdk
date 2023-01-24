@@ -20,7 +20,7 @@ from .suites import (
 def get_test_class(
     test_runner: TapTestRunner | TargetTestRunner,
     test_suites: list,
-    max_records_limit: int | None,
+    suite_config: dict | None,
 ) -> object:
     """Construct a valid pytest test class from given suites.
 
@@ -37,6 +37,10 @@ def get_test_class(
 
         params: dict = {}
         param_ids: dict = {}
+
+        @pytest.fixture
+        def config(self) -> dict:
+            return suite_config or {}
 
         @pytest.fixture
         def resource(self) -> Any:  # noqa: ANN401
@@ -73,9 +77,9 @@ def get_test_class(
         if suite.kind in {"tap_stream", "tap_stream_attribute"}:
 
             streams = list(test_runner.tap.streams.values())
-            if max_records_limit:
+            if suite_config.get("max_records_limit"):
                 for stream in streams:
-                    stream._MAX_RECORDS_LIMIT = max_records_limit
+                    stream._MAX_RECORDS_LIMIT = suite_config.get("max_records_limit")
 
             if suite.kind == "tap_stream":
 
@@ -156,7 +160,7 @@ def get_tap_test_class(
     include_stream_tests: bool = True,
     include_stream_attribute_tests: bool = True,
     custom_suites: list | None = None,
-    max_records_limit: int = 5,
+    suite_config: dict | None = None,
     **kwargs: Any,
 ) -> object:
     """Get Tap Test Class.
@@ -181,13 +185,18 @@ def get_tap_test_class(
     if include_stream_attribute_tests:
         suites.append(tap_stream_attribute_tests)
 
+    # set default values
     if "parse_env_config" not in kwargs:
         kwargs["parse_env_config"] = True
+
+    suite_config = suite_config or {}
+    if "max_records_limit" not in suite_config:
+        suite_config["max_records_limit"] = 5
 
     return get_test_class(
         test_runner=TapTestRunner(tap_class=tap_class, config=config, **kwargs),
         test_suites=suites,
-        max_records_limit=max_records_limit,
+        suite_config=suite_config,
     )
 
 
@@ -196,7 +205,7 @@ def get_target_test_class(
     *,
     config: dict | None = None,
     custom_suites: list | None = None,
-    max_records_limit: int = 5,
+    suite_config: dict | None = None,
     **kwargs: Any,
 ) -> object:
     """Get Target Test Class.
@@ -213,13 +222,16 @@ def get_target_test_class(
     suites = custom_suites or []
     suites.append(target_tests)
 
+    # set default values
     if "parse_env_config" not in kwargs:
         kwargs["parse_env_config"] = True
+
+    suite_config = suite_config or {}
 
     return get_test_class(
         test_runner=TargetTestRunner(
             target_class=target_class, config=config, **kwargs
         ),
         test_suites=suites,
-        max_records_limit=max_records_limit,
+        suite_config=suite_config,
     )
