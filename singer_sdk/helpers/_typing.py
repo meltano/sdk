@@ -97,6 +97,20 @@ def is_object_type(property_schema: dict) -> Optional[bool]:
     return False
 
 
+def is_uniform_list(property_schema: dict) -> Optional[bool]:
+    """Return true if the JSON Schema type is an array with a single schema.
+
+    This is as opposed to 'tuples' where different indices have different schemas;
+    https://json-schema.org/understanding-json-schema/reference/array.html#array
+    """
+    return (
+        is_array_type(property_schema) is True
+        and "items" in property_schema
+        and "prefixItems" not in property_schema
+        and isinstance(property_schema["items"], dict)
+    )
+
+
 def is_datetime_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition is a 'date-time' type.
 
@@ -214,7 +228,7 @@ def is_string_array_type(type_dict: dict) -> bool:
 
 
 def is_array_type(type_dict: dict) -> bool:
-    """Return True if JSON Schema type definition is a string array."""
+    """Return True if JSON Schema type is an array."""
     if not type_dict:
         raise ValueError(
             "Could not detect type from empty type_dict. "
@@ -294,57 +308,163 @@ def is_number_type(property_schema: dict) -> Optional[bool]:
 def _warn_unmapped_properties(
     stream_name: str, property_names: Tuple[str], logger: logging.Logger
 ):
-    logger.info(
+    logger.warning(
         f"Properties {property_names} were present in the '{stream_name}' stream but "
         "not found in catalog schema. Ignoring."
     )
 
 
+class TypeConformanceLevel(Enum):
+    """Used to configure how data is conformed to json compatible types.
+
+    Before outputting data as JSON, it is conformed to types that are valid in json,
+    based on the current types and the schema. For example, dates are converted to
+    strings.
+
+    By default, all data is conformed recursively. If this is not necessary (because
+    data is already valid types, or you are manually converting it) then it may be more
+    performant to use a lesser conformance level.
+    """
+
+    RECURSIVE = 1
+    """
+    All data is recursively conformed
+    """
+
+    ROOT_ONLY = 2
+    """
+    Only properties on the root object, excluding array elements, are conformed
+    """
+
+    NONE = 3
+    """
+    No conformance is performed
+    """
+
+
 def conform_record_data_types(  # noqa: C901
-    stream_name: str, record: Dict[str, Any], schema: dict, logger: logging.Logger
+    stream_name: str,
+    record: Dict[str, Any],
+    schema: dict,
+    level: TypeConformanceLevel,
+    logger: logging.Logger,
 ) -> Dict[str, Any]:
     """Translate values in record dictionary to singer-compatible data types.
 
-    Any property names not found in the schema catalog will be removed, and a
-    warning will be logged exactly once per unmapped property name.
+    Any property names not found in the schema catalog will be removed, and a single
+    warning will be logged listing each unmapped property name.
     """
-    rec: Dict[str, Any] = {}
+    rec, unmapped_properties = _conform_record_data_types(record, schema, level, None)
+
+    if len(unmapped_properties) > 0:
+        _warn_unmapped_properties(stream_name, tuple(unmapped_properties), logger)
+
+    return rec
+
+
+def _conform_record_data_types(
+    input_object: Dict[str, Any],
+    schema: dict,
+    level: TypeConformanceLevel,
+    parent: Optional[str],
+) -> Tuple[Dict[str, Any], List[str]]:  # noqa: C901
+    """Translate values in record dictionary to singer-compatible data types.
+
+    Any property names not found in the schema catalog will be removed, and a single
+    warning will be logged listing each unmapped property name.
+
+    This is called recursively to process nested objects and arrays.
+
+    Args:
+        input_object: A single record
+        schema: JSON schema the given input_object is expected to meet
+        level:  Specifies how recursive the conformance process should be
+        parent: '.' seperated path to this element from the object root (for logging)
+    """
+    output_object: Dict[str, Any] = {}
     unmapped_properties: List[str] = []
-    for property_name, elem in record.items():
+
+    if level == TypeConformanceLevel.NONE:
+        return input_object, unmapped_properties
+
+    for property_name, elem in input_object.items():
+        property_path = (
+            property_name if parent is None else parent + "." + property_name
+        )
         if property_name not in schema["properties"]:
-            unmapped_properties.append(property_name)
+            unmapped_properties.append(property_path)
             continue
 
         property_schema = schema["properties"][property_name]
-        if isinstance(elem, (datetime.datetime, pendulum.DateTime)):
-            rec[property_name] = to_json_compatible(elem)
-        elif isinstance(elem, datetime.date):
-            rec[property_name] = elem.isoformat() + "T00:00:00+00:00"
-        elif isinstance(elem, datetime.timedelta):
-            epoch = datetime.datetime.utcfromtimestamp(0)
-            timedelta_from_epoch = epoch + elem
-            rec[property_name] = timedelta_from_epoch.isoformat() + "+00:00"
-        elif isinstance(elem, datetime.time):
-            rec[property_name] = str(elem)
-        elif isinstance(elem, bytes):
-            # for BIT value, treat 0 as False and anything else as True
-            bit_representation: bool
-            if is_boolean_type(property_schema):
-                bit_representation = elem != b"\x00"
-                rec[property_name] = bit_representation
+        if isinstance(elem, list) and is_uniform_list(property_schema):
+            if level == TypeConformanceLevel.RECURSIVE:
+                item_schema = property_schema["items"]
+                output = []
+                for item in elem:
+                    if is_object_type(item_schema) and isinstance(item, dict):
+                        (
+                            output_item,
+                            sub_unmapped_properties,
+                        ) = _conform_record_data_types(
+                            item, item_schema, level, property_path
+                        )
+                        unmapped_properties.extend(sub_unmapped_properties)
+                        output.append(output_item)
+                    else:
+                        output.append(_conform_primitive_property(item, item_schema))
+                output_object[property_name] = output
             else:
-                rec[property_name] = elem.hex()
-        elif is_boolean_type(property_schema):
-            boolean_representation: Optional[bool]
-            if elem is None:
-                boolean_representation = None
-            elif elem == 0:
-                boolean_representation = False
+                output_object[property_name] = elem
+        elif (
+            isinstance(elem, dict)
+            and is_object_type(property_schema)
+            and "properties" in property_schema
+        ):
+            if level == TypeConformanceLevel.RECURSIVE:
+                (
+                    output_object[property_name],
+                    sub_unmapped_properties,
+                ) = _conform_record_data_types(
+                    elem, property_schema, level, property_path
+                )
+                unmapped_properties.extend(sub_unmapped_properties)
             else:
-                boolean_representation = True
-            rec[property_name] = boolean_representation
+                output_object[property_name] = elem
         else:
-            rec[property_name] = elem
-    if unmapped_properties:
-        _warn_unmapped_properties(stream_name, tuple(unmapped_properties), logger)
-    return rec
+            output_object[property_name] = _conform_primitive_property(
+                elem, property_schema
+            )
+    return output_object, unmapped_properties
+
+
+def _conform_primitive_property(elem: Any, property_schema: dict) -> Any:
+    """Converts a primitive (i.e. not object or array) to a json compatible type."""
+    if isinstance(elem, (datetime.datetime, pendulum.DateTime)):
+        return to_json_compatible(elem)
+    elif isinstance(elem, datetime.date):
+        return elem.isoformat() + "T00:00:00+00:00"
+    elif isinstance(elem, datetime.timedelta):
+        epoch = datetime.datetime.utcfromtimestamp(0)
+        timedelta_from_epoch = epoch + elem
+        return timedelta_from_epoch.isoformat() + "+00:00"
+    elif isinstance(elem, datetime.time):
+        return str(elem)
+    elif isinstance(elem, bytes):
+        # for BIT value, treat 0 as False and anything else as True
+        bit_representation: bool
+        if is_boolean_type(property_schema):
+            bit_representation = elem != b"\x00"
+            return bit_representation
+        else:
+            return elem.hex()
+    elif is_boolean_type(property_schema):
+        boolean_representation: Optional[bool]
+        if elem is None:
+            boolean_representation = None
+        elif elem == 0:
+            boolean_representation = False
+        else:
+            boolean_representation = True
+        return boolean_representation
+    else:
+        return elem
