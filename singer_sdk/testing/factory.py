@@ -181,6 +181,7 @@ def get_tap_test_class(
 
 def get_target_test_class(
     target_class: type[Target],
+    *,
     config: dict | None = None,
     custom_suites: list | None = None,
     **kwargs: Any,
