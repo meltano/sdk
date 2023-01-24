@@ -43,7 +43,7 @@ def get_test_class(
 
         @pytest.fixture
         def config(self) -> SuiteConfig:
-            return suite_config
+            return suite_config or SuiteConfig()
 
         @pytest.fixture
         def resource(self) -> Any:  # noqa: ANN401
