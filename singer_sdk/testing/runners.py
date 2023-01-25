@@ -194,6 +194,7 @@ class TargetTestRunner(SingerTestRunner):
         Args:
             target_class: Target Class to instantiate.
             config: Config to pass to instantiated Target.
+            suite_config: Config to pass to tests.
             input_filepath: (optional) Path to a singer file containing records, to pass
                 to the Target during testing.
             input_io: (optional) StringIO containing raw records to pass to the Target
