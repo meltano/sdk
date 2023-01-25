@@ -112,12 +112,7 @@ class TapTestRunner(SingerTestRunner):
         Returns:
             A configured Tap instance.
         """
-        new_tap = cast(Tap, self.create())
-        # apply max_records_limit if set
-        if self.suite_config.max_records_limit is not None:
-            for stream in new_tap.streams.values():
-                stream._MAX_RECORDS_LIMIT = self.suite_config.max_records_limit
-        return new_tap
+        return cast(Tap, self.create())
 
     def run_discovery(self) -> str:
         """Run tap discovery.
