@@ -15,6 +15,13 @@ The Meltano SDK test framework consists of 4 main components:
 ## Example Usage
 
 If you created your Tap/Target using the provided cookiecutter templates, you will find the following snippets in `<library_name>/tests/test_core.py`.
+You will also find a `conftest.py` file containing configuration of the SDK as a `pytest` plugin.
+This is required for tests to collect correctly:
+
+```python
+# register the singer_sdk pytest plugin
+pytest_plugins = ("singer_sdk.testing.pytest_plugin",)
+```
 
 ### Testing Taps
 
@@ -73,6 +80,35 @@ class TestTargetExample(StandardTargetTests):
         """
         yield "resource"
 ```
+
+## Configuring Tests
+
+Test suite behaviors can be configured by passing a `SuiteConfig` instance to the `get_test_class` functions:
+
+```python
+from singer_sdk.testing import SuiteConfig, get_tap_test_class
+
+from tap_stackexchange.tap import TapStackExchange
+
+SAMPLE_CONFIG = {
+    "site": "stackoverflow",
+    "tags": [
+        "meltano",
+        "singer-io",
+    ],
+    "metrics_log_level": "debug",
+}
+
+TEST_SUITE_CONFIG = SuiteConfig(
+    ignore_no_records_for_streams=["tag_synonyms"]
+)
+
+TestTapStackExchange = get_tap_test_class(
+    tap_class=TapStackExchange, config=SAMPLE_CONFIG, suite_config=TEST_SUITE_CONFIG
+)
+```
+
+Check out [`singer_sdk/testing/config.py`](https://github.com/meltano/sdk/tree/main/singer_sdk/testing/config.py) for available config options.
 
 ## Writing New Tests
 
