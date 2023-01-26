@@ -39,16 +39,20 @@ for more information on differences between a target's `Sink` class versus a tap
 
 ## Building a New Tap or Target
 
-First, install [cookiecutter](https://cookiecutter.readthedocs.io) if you haven't
-done so already:
+First, install [cookiecutter](https://cookiecutter.readthedocs.io),
+[Poetry](https://python-poetry.org/docs/), and optionally [Tox](https://tox.wiki/):
 
 ```bash
 # Install pipx if you haven't already
-pip3 install pipx
+pip install pipx
 pipx ensurepath
+
 # Restart your terminal here, if needed, to get the updated PATH
 pipx install cookiecutter
 pipx install poetry
+
+# Optional: Install Tox if you want to use it to run auto-formatters, linters, tests, etc.
+pipx install tox
 ```
 
 Now you can initialize your new project with the Cookiecutter template for taps:
