@@ -55,7 +55,7 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
             A list of raw messages in dict form.
         """
         lines = raw_records.strip().split("\n")
-        return [json.loads(ii) for ii in lines]
+        return [json.loads(ii) for ii in lines if ii]
 
     def create(self, kwargs: dict | None = None) -> Tap | Target:
         """Create a new tap/target from the runner defaults.
