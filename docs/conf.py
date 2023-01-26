@@ -41,6 +41,7 @@ extensions = [
     "sphinx_rtd_theme",
     "sphinx_copybutton",
     "myst_parser",
+    "sphinx_reredirects",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -76,3 +77,14 @@ html_css_files = [
 
 # TODO: set this back to 3 after MyST-Parser 0.18.0 is released
 myst_heading_anchors = 4
+
+redirects = {
+    "batch.html": "advanced/batch.html",
+    "context_object.html": "advanced/context_object.html",
+    "parent_streams.html": "advanced/parent_streams.html",
+    "partitioning.html": "advanced/partitioning.html",
+    "sinks.html": "advanced/sinks.html",
+    "stream_maps.html": "advanced/stream_maps.html",
+    "CONTRIBUTING.html": "development/contributing.html",
+    "porting.html": "guides/migration/porting.html",
+}
