@@ -25,7 +25,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
         ObjectType(),
         description="Config object for stream maps capability. "
         + "For more information check out "
-        + "[Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html).",
+        + "[Stream Maps](https://sdk.meltano.com/en/latest/advanced/stream_maps.html).",
     ),
     Property(
         "stream_map_config",
@@ -171,7 +171,7 @@ class PluginCapabilities(CapabilitiesEnum):
     #: Support plugin capability and setting discovery.
     ABOUT = "about"
 
-    #: Support :doc:`inline stream map transforms</stream_maps>`.
+    #: Support :doc:`inline stream map transforms</advanced/stream_maps>`.
     STREAM_MAPS = "stream-maps"
 
     #: Support schema flattening, aka denesting of complex properties.
