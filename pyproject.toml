@@ -69,7 +69,11 @@ myst-parser = {version = ">=0.17.2,<0.19.0", optional = true}
 sphinx-autobuild = {version = "^2021.3.14", optional = true}
 
 # File storage dependencies installed as optional 'filesystem' extras
-fs-s3fs = { version = "^1.1.1", optional = true}
+fs-s3fs = {version = "^1.1.1", optional = true}
+
+# Testing dependencies installed as optional 'testing' extras
+pytest = {version="^7.2.1", optional = true}
+pytest-durations = {version = "^1.2.0", optional = true}
 
 [tool.poetry.extras]
 docs = [
@@ -87,11 +91,14 @@ samples = [
 debugging = [
     "viztracer",
 ]
+testing = [
+    "pytest",
+    "pytest-durations"
+]
 
 [tool.poetry.dev-dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
 commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
-pytest = "^7.2.1"
 xdoctest = "^1.1.0"
 mypy = "^0.991"
 cookiecutter = "^2.1.1"
@@ -134,6 +141,8 @@ markers = [
     "windows: Tests that only run on Windows",
     "snapshot: Tests that use pytest-snapshot",
 ]
+testpaths = ["tests"]
+norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
@@ -184,5 +193,4 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-# Sample CLI declaration:
-# sdk-tap-countries-sample = 'singer_sdk.samples.sample_tap_countries.countries_tap:SampleTapCountries.cli'
+pytest11 = { callable = "singer_sdk:testing.pytest_plugin", extras = ["testing"] }

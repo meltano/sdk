@@ -140,18 +140,18 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.26.52"
+version = "1.26.55"
 description = "The AWS SDK for Python"
 category = "main"
 optional = true
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.26.52-py3-none-any.whl", hash = "sha256:319ddb274f8f83b035b88a3b127c465bf6fe3e3fc2d668869b489e992c47ca77"},
-    {file = "boto3-1.26.52.tar.gz", hash = "sha256:0b1f82d4565ed875c7975ac0be5665e8d948613c01bcb0e49df6d4f5af670cc8"},
+    {file = "boto3-1.26.55-py3-none-any.whl", hash = "sha256:e8ae1567b0a21d410f9c8a16a17a8028445a52061482272b4a516f5de5abbd92"},
+    {file = "boto3-1.26.55.tar.gz", hash = "sha256:d68576dcb1c520474eafb64b996661068a369f40bbd104ccb9502cad71849e57"},
 ]
 
 [package.dependencies]
-botocore = ">=1.29.52,<1.30.0"
+botocore = ">=1.29.55,<1.30.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -160,14 +160,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.29.52"
+version = "1.29.55"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = true
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.29.52-py3-none-any.whl", hash = "sha256:de55b6333fb13c66da9055972d7e4efff5dcc5a087478a2b70e99d888b29a24c"},
-    {file = "botocore-1.29.52.tar.gz", hash = "sha256:a0b89a33305cfa6251c6e1142deb7567e216e37e25363159f45fb81dc5b474e5"},
+    {file = "botocore-1.29.55-py3-none-any.whl", hash = "sha256:dd8a0868b287015bed086c97b866f9bb8ca57737d15972d3ac773559f4088db8"},
+    {file = "botocore-1.29.55.tar.gz", hash = "sha256:5fe6b8809292bb178a9378fea4f96bc969003d1048cf6de8ad3c5a73690fefa9"},
 ]
 
 [package.dependencies]
@@ -614,7 +614,7 @@ files = [
 name = "exceptiongroup"
 version = "1.1.0"
 description = "Backport of PEP 654 (exception groups)"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -882,7 +882,7 @@ files = [
 name = "iniconfig"
 version = "2.0.0"
 description = "brain-dead simple config-ini parsing"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -1385,7 +1385,7 @@ test = ["appdirs (==1.4.4)", "covdefaults (>=2.2.2)", "pytest (>=7.2)", "pytest-
 name = "pluggy"
 version = "1.0.0"
 description = "plugin and hook calling mechanisms for python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -1627,7 +1627,7 @@ files = [
 name = "pytest"
 version = "7.2.1"
 description = "pytest: simple powerful testing with Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -1647,6 +1647,21 @@ tomli = {version = ">=1.0.0", markers = "python_version < \"3.11\""}
 
 [package.extras]
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "xmlschema"]
+
+[[package]]
+name = "pytest-durations"
+version = "1.2.0"
+description = "Pytest plugin reporting fixtures and test functions execution time."
+category = "main"
+optional = true
+python-versions = ">=3.6.2"
+files = [
+    {file = "pytest-durations-1.2.0.tar.gz", hash = "sha256:75793f7c2c393a947de4a92cc205e8dcb3d7fcde492628926cca97eb8e87077d"},
+    {file = "pytest_durations-1.2.0-py3-none-any.whl", hash = "sha256:210c649d989fdf8e864b7f614966ca2c8be5b58a5224d60089a43618c146d7fb"},
+]
+
+[package.dependencies]
+pytest = ">=4.6"
 
 [[package]]
 name = "pytest-snapshot"
@@ -1847,14 +1862,14 @@ crt = ["botocore[crt] (>=1.20.29,<2.0a.0)"]
 
 [[package]]
 name = "setuptools"
-version = "66.0.0"
+version = "66.1.1"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "setuptools-66.0.0-py3-none-any.whl", hash = "sha256:a78d01d1e2c175c474884671dde039962c9d74c7223db7369771fcf6e29ceeab"},
-    {file = "setuptools-66.0.0.tar.gz", hash = "sha256:bd6eb2d6722568de6d14b87c44a96fac54b2a45ff5e940e639979a3d1792adb6"},
+    {file = "setuptools-66.1.1-py3-none-any.whl", hash = "sha256:6f590d76b713d5de4e49fe4fbca24474469f53c83632d5d0fd056f7ff7e8112b"},
+    {file = "setuptools-66.1.1.tar.gz", hash = "sha256:ac4008d396bc9cd983ea483cb7139c0240a07bbc74ffb6232fceffedc6cf03a8"},
 ]
 
 [package.extras]
@@ -2264,7 +2279,7 @@ files = [
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -2604,8 +2619,9 @@ debugging = []
 docs = ["sphinx", "sphinx-rtd-theme", "sphinx-copybutton", "myst-parser", "sphinx-autobuild"]
 s3 = ["fs-s3fs"]
 samples = []
+testing = ["pytest", "pytest-durations"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "<3.12,>=3.7.1"
-content-hash = "8ee7a9724dd96774a1564f6b58e436570510bf973a5c15eef3057b694f3ba663"
+content-hash = "be94f609a13d426b92dc7c52ee5bf27bbdb88a78a34590654890fb2094a797d9"
