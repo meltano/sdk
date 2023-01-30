@@ -1,1 +1,0 @@
-"""SDK Snowflake sample tests."""
