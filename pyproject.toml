@@ -99,7 +99,7 @@ testing = [
 [tool.poetry.dev-dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
 commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
-xdoctest = "^1.1.0"
+xdoctest = "^1.1.1"
 mypy = "^0.991"
 cookiecutter = "^2.1.1"
 PyYAML = "^6.0"
