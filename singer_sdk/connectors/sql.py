@@ -959,9 +959,17 @@ class SQLConnector:
         Raises:
             NotImplementedError: if altering columns is not supported.
         """
+        collation_removed = False
         current_type: sqlalchemy.types.TypeEngine = self._get_column_type(
             full_table_name, column_name
         )
+
+        # remove collation if present and save it
+        if hasattr(current_type, "collation"):
+            if current_type.collation:
+                current_type_collation = current_type.collation
+                setattr(current_type, "collation", None)
+                collation_removed = True
 
         # Check if the existing column type and the sql type are the same
         if str(sql_type) == str(current_type):
@@ -976,6 +984,11 @@ class SQLConnector:
         if str(compatible_sql_type) == str(current_type):
             # Nothing to do
             return
+
+        # Put the collation level back before altering the column
+        if hasattr(compatible_sql_type, "collation"):
+            if collation_removed:
+                setattr(compatible_sql_type, "collation", current_type_collation)
 
         if not self.allow_column_alter:
             raise NotImplementedError(
