@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 
 import dateutil.parser
 import pytz
@@ -14,9 +14,9 @@ def strptime_to_utc(dtimestr: str) -> datetime:
         dtimestr: a string representation of a datetime
 
     Returns:
-        A UTC datetime object
+        A UTC datetime.datetime object
     """
-    d_object = dateutil.parser.parse(dtimestr)
+    d_object: datetime = dateutil.parser.parse(dtimestr)
     if d_object.tzinfo is None:
         return d_object.replace(tzinfo=pytz.UTC)
     else:
@@ -36,7 +36,7 @@ def strftime(dtime: datetime, format_str: str = DATETIME_FMT) -> str:
     Raises:
         Exception: if the datetime is not UTC (if it has a nonzero time zone offset)
     """
-    if dtime.utcoffset() != datetime.timedelta(0):
+    if dtime.utcoffset() != timedelta(0):
         raise Exception("datetime must be pegged at UTC tzoneinfo")
 
     try:
