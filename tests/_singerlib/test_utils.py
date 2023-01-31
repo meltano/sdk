@@ -4,6 +4,7 @@ import pytest
 import pytz
 
 from singer_sdk._singerlib import strftime, strptime_to_utc
+from singer_sdk._singerlib.utils import NonUTCDatetimeError
 
 
 def test_small_years():
@@ -18,3 +19,23 @@ def test_round_trip():
     parsed_datetime = strptime_to_utc(dtime)
     formatted_datetime = strftime(parsed_datetime)
     assert dtime == formatted_datetime
+
+
+@pytest.mark.parametrize(
+    "dtimestr",
+    [
+        "2021-01-01T00:00:00.000000Z",
+        "2021-01-01T00:00:00.000000+00:00",
+        "2021-01-01T00:00:00.000000+06:00",
+        "2021-01-01T00:00:00.000000-04:00",
+    ],
+    ids=["Z", "offset+0", "offset+6", "offset-4"],
+)
+def test_strptime_to_utc(dtimestr):
+    assert strptime_to_utc(dtimestr).tzinfo == pytz.UTC
+
+
+def test_stftime_non_utc():
+    now = datetime.utcnow().replace(tzinfo=pytz.timezone("America/New_York"))
+    with pytest.raises(NonUTCDatetimeError):
+        strftime(now)

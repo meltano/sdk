@@ -7,6 +7,14 @@ DATETIME_FMT = "%04Y-%m-%dT%H:%M:%S.%fZ"
 DATETIME_FMT_SAFE = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
+class NonUTCDatetimeError(Exception):
+    """Raised when a non-UTC datetime is passed to a function expecting UTC."""
+
+    def __init__(self) -> None:
+        """Initialize the exception."""
+        super().__init__("datetime must be pegged at UTC tzoneinfo")
+
+
 def strptime_to_utc(dtimestr: str) -> datetime:
     """Parses a provide datetime string into a UTC datetime object.
 
@@ -34,10 +42,11 @@ def strftime(dtime: datetime, format_str: str = DATETIME_FMT) -> str:
         A string in the specified format
 
     Raises:
-        Exception: if the datetime is not UTC (if it has a nonzero time zone offset)
+        NonUTCDatetimeError: if the datetime is not UTC (if it has a nonzero time zone
+            offset)
     """
     if dtime.utcoffset() != timedelta(0):
-        raise Exception("datetime must be pegged at UTC tzoneinfo")
+        raise NonUTCDatetimeError()
 
     dt_str = None
     try:
