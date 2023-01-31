@@ -39,9 +39,11 @@ def strftime(dtime: datetime, format_str: str = DATETIME_FMT) -> str:
     if dtime.utcoffset() != timedelta(0):
         raise Exception("datetime must be pegged at UTC tzoneinfo")
 
+    dt_str = None
     try:
         dt_str = dtime.strftime(format_str)
         if dt_str.startswith("4Y"):
-            return dtime.strftime(DATETIME_FMT_SAFE)
+            dt_str = dtime.strftime(DATETIME_FMT_SAFE)
     except ValueError:
-        return dtime.strftime(DATETIME_FMT_SAFE)
+        dt_str = dtime.strftime(DATETIME_FMT_SAFE)
+    return dt_str
