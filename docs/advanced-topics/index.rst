@@ -1,5 +1,6 @@
 .. toctree::
    :maxdepth: 2
+   :hidden:
 
    parent_streams
    partitioning

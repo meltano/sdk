@@ -1,5 +1,6 @@
 .. toctree::
    :maxdepth: 1
+   :hidden:
 
    dev_guide
    python_tips
