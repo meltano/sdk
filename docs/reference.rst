@@ -1,6 +1,3 @@
-SDK Reference
-=============
-
 .. currentmodule:: singer_sdk
 
 Plugin Classes

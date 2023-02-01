@@ -20,7 +20,7 @@ at_least_once
 _**Note:** You should not need to master all of the details here in order
 to build your tap, and the behaviors described here should be automatic
 and/or intuitive. For general guidance on tap development, please instead refer to our
-[Dev Guide](../dev_guide.md)._
+[Dev Guide](../../getting-started/dev_guide.md)._
 
 The specifications provided in this section are documented primarily to support
 advanced use cases, behavior overrides, backwards compatibility with legacy taps,

@@ -50,26 +50,26 @@ poetry install --no-root
 
 First clone, then...
 
-1. Ensure you have the correct test library, formatters, and linters installed:
+1.  Ensure you have the correct test library, formatters, and linters installed:
     - `poetry install`
-1. If you are going to update documentation, install the `docs` extras:
+1.  If you are going to update documentation, install the `docs` extras:
     - `poetry install -E docs`
-1. The project has `pre-commit` hooks. Install them with:
+1.  The project has `pre-commit` hooks. Install them with:
     - `pre-commit install`
-1. Most development tasks you might need should be covered by `nox` sessions. You can use `nox -l` to list all available tasks.
-For example:
+1.  Most development tasks you might need should be covered by `nox` sessions. You can use `nox -l` to list all available tasks.
+    For example:
 
-    - Run unit tests: `nox -r`.
+        - Run unit tests: `nox -r`.
 
-      We use `coverage` for code coverage metrics.
+          We use `coverage` for code coverage metrics.
 
-    - Run pre-commit hooks: `pre-commit run --all`.
+        - Run pre-commit hooks: `pre-commit run --all`.
 
-      We use `black`, `flake8`, `isort`, `mypy` and `pyupgrade`. The project-wide max line length is `88`.
+          We use `black`, `flake8`, `isort`, `mypy` and `pyupgrade`. The project-wide max line length is `88`.
 
-    - Build documentation: `nox -rs docs`
+        - Build documentation: `nox -rs docs`
 
-      We use `sphinx` to build documentation.
+          We use `sphinx` to build documentation.
 
 ### If you are using VSCode
 
@@ -77,7 +77,7 @@ For example:
 1. Set interpreter to match poetry's virtualenv: run
    `Python: Select interpreter` and select the poetry interpreter.
 1. The [pre-commit extension](https://marketplace.visualstudio.com/items?itemName=MarkLarah.pre-commit-vscode)
-will allow to run pre-commit hooks on the current file from the VSCode command palette.
+   will allow to run pre-commit hooks on the current file from the VSCode command palette.
 
 ## Testing Locally
 
@@ -191,11 +191,12 @@ In general, PR titles should follow the format `<type>: <desc>`, where type is a
 
 Optionally, you may use the expanded syntax to specify a scope in the form `<type>(<scope>): <desc>`. Currently scopes are:
 
- scopes:
-  - `taps`       # tap SDK only
-  - `targets`    # target SDK only
-  - `mappers`    # mappers only
-  - `templates`  # cookiecutters
+scopes:
+
+- `taps` # tap SDK only
+- `targets` # target SDK only
+- `mappers` # mappers only
+- `templates` # cookiecutters
 
 More advanced rules and settings can be found within the file [`.github/semantic.yml`](https://github.com/meltano/sdk/blob/main/.github/semantic.yml).
 
@@ -204,7 +205,7 @@ More advanced rules and settings can be found within the file [`.github/semantic
 ### Universal Code Formatting
 
 - From the [Black](https://black.readthedocs.io) website:
-    > By using Black, you agree to cede control over minutiae of hand-formatting. In return, Black gives you speed, determinism, and freedom from pycodestyle nagging about formatting. You will save time and mental energy for more important matters. **Black makes code review faster by producing the smallest diffs possible.** Blackened code looks the same regardless of the project you’re reading. **Formatting becomes transparent after a while and you can focus on the content instead.**
+  > By using Black, you agree to cede control over minutiae of hand-formatting. In return, Black gives you speed, determinism, and freedom from pycodestyle nagging about formatting. You will save time and mental energy for more important matters. **Black makes code review faster by producing the smallest diffs possible.** Blackened code looks the same regardless of the project you’re reading. **Formatting becomes transparent after a while and you can focus on the content instead.**
 
 ### Pervasive Python Type Hints
 
@@ -214,8 +215,7 @@ Type hints allow us to spend less time reading documentation. Public modules are
 
 All public modules in the SDK are checked for the presence of docstrings in classes and functions. We follow the [Google Style convention](https://www.sphinx-doc.org/en/master/usage/extensions/example_google.html) for Python docstrings so functions are required to have a description of every argument and the return value, if applicable.
 
-
 ### What is Poetry and why do we need it?
 
 For more info on `Poetry` and `Pipx`, please see the topic in our
-[python tips](python_tips.md) guide.
+[python tips](../getting-started/python_tips.md) guide.

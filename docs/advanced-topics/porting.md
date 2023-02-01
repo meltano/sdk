@@ -11,7 +11,7 @@ When porting over an existing tap, most developers find it easier to start from 
 1. Within your existing repo, create a new branch.
 1. Move _all_ of the files in the old branch into a subfolder called "archive".
 1. Commit and push the result to your new branch. (You'll do this several times along the way, which creates a fresh tree and a fresh diff for subsequent commits.)
-1. Now follow the steps in the [dev guide](dev_guide.md#building-a-new-tap-or-target) to create a new project using the Tap cookiecutter.
+1. Now follow the steps in the [dev guide](../getting-started/dev_guide.md#building-a-new-tap-or-target) to create a new project using the Tap cookiecutter.
 1. Copy all the files from the cookiecutter output into your main repo and commit the result.
 
 ## Settings and Readme
@@ -103,7 +103,7 @@ _Important: If you've gotten this far, this is a good time to commit your code b
 
 Pagination is generally unique for almost every API. There's no single method that solves for very different API's approach to pagination.
 
-Most likely you will use [get_new_paginator](singer_sdk.RESTStream.get_new_paginator) to instantiate a [pagination class](./classes/singer_sdk.pagination.BaseAPIPaginator) for your source, and you'll use `get_url_params` to define how to pass the "next page" token back to the API when asking for subsequent pages.
+Most likely you will use [get_new_paginator](singer_sdk.RESTStream.get_new_paginator) to instantiate a [pagination class](../classes/singer_sdk.pagination.BaseAPIPaginator) for your source, and you'll use `get_url_params` to define how to pass the "next page" token back to the API when asking for subsequent pages.
 
 When you think you have it right, run `poetry run tap-mysource` again, and debug until you are confident the result is including multiple pages back from the API.
 

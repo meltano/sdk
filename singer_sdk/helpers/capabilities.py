@@ -171,7 +171,7 @@ class PluginCapabilities(CapabilitiesEnum):
     #: Support plugin capability and setting discovery.
     ABOUT = "about"
 
-    #: Support :doc:`inline stream map transforms</stream_maps>`.
+    #: Support :doc:`inline stream map transforms</advanced-topics/stream_maps>`.
     STREAM_MAPS = "stream-maps"
 
     #: Support schema flattening, aka denesting of complex properties.

@@ -35,45 +35,26 @@ read the `source code`_, `log an issue or feature request`_, and `contribute bac
 to the SDK. We also regularly discuss SDK topics in our `Meltano Slack`_ community,
 within the `#singer-tap-development`_ and `#singer-target-development`_ Slack channels.
 
-Developer Resources
--------------------
+.. toctree::
+   :caption: Getting Started
+   :maxdepth: 1
+   :hidden:
+
+   getting-started/index
 
 .. toctree::
-   :maxdepth: 2
+   :caption: Advanced Topics
+   :maxdepth: 1
+   :hidden:
 
-   dev_guide
-   python_tips
-   code_samples
-   cli_commands
-   capabilities
-   faq
-
-Reference
----------
+   advanced-topics/index
 
 .. toctree::
-   :maxdepth: 2
+   :caption: Reference
+   :maxdepth: 1
+   :hidden:
 
    reference
-
-
-Advanced Topics
----------------
-
-.. toctree::
-   :maxdepth: 1
-
-   parent_streams
-   partitioning
-   context_object
-   stream_maps
-   batch
-   porting
-   sinks
-   CONTRIBUTING
-   implementation/index
-   typing
-   testing
 
 .. _Singer: https://singer.io
 .. _Singer Spec: https://hub.meltano.com/singer/spec

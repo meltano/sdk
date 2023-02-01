@@ -1,4 +1,4 @@
-# SDK Dev Guide
+# SDK Developer Guide
 
 ## Tap Development Overview
 
@@ -34,7 +34,7 @@ Create targets with the SDK requires overriding just two classes:
      - `process_record()` to enqueue a record to be written.
      - `process_batch()` to write any queued records and cleanup local resources.
 
-Note: The `Sink` class can receive records from one stream or from many. See the [Sink documentation](./sinks.md)
+Note: The `Sink` class can receive records from one stream or from many. See the [Sink documentation](../advanced-topics/sinks.md)
 for more information on differences between a target's `Sink` class versus a tap's `Stream` class.
 
 ## Building a New Tap or Target
@@ -159,12 +159,12 @@ Some APIs instead return the records as values inside an object where each key i
 
 ### Detailed Class Reference
 
-For a detailed reference, please see the [SDK Reference Guide](./reference.md)
+For a detailed reference, please see the [SDK Reference Guide](../reference.md)
 
 ### Implementation Details
 
 For more information about the SDK's' Singer implementation details, please see the
-[SDK Implementation Details](./implementation/index.md) section.
+[SDK Implementation Details](../advanced-topics/implementation/index.md) section.
 
 ### Code Samples
 
@@ -177,7 +177,7 @@ For a list of sample CLI commands you can run, [click here](./cli_commands.md).
 
 ### Python Tips
 
-We've collected some [Python tips](python_tips.md) which may be helpful for new SDK users.
+We've collected some [Python tips](./python_tips.md) which may be helpful for new SDK users.
 
 ### VSCode Tips
 

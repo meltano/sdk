@@ -398,7 +398,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         Developers may optionally override this method in advanced use cases such
         as unsorted incremental streams or complex hierarchical stream scenarios.
-        For more info: :doc:`/implementation/state`
+        For more info: :doc:`/advanced-topics/implementation/state`
 
         Args:
             context: Stream partition or context dictionary.
@@ -1208,12 +1208,12 @@ class Stream(metaclass=abc.ABCMeta):
 
         This method takes an optional `context` argument, which can be safely ignored
         unless the stream is a child stream or requires partitioning.
-        More info: :doc:`/partitioning`.
+        More info: :doc:`/advanced-topics/partitioning`.
 
         Parent streams can optionally return a tuple, in which
         case the second item in the tuple being a `child_context` dictionary for the
         stream's `context`.
-        More info: :doc:`/parent_streams`
+        More info: :doc:`/advanced-topics/parent_streams`
 
         Args:
             context: Stream partition or context dictionary.
