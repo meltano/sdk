@@ -40,14 +40,29 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
    :maxdepth: 1
    :hidden:
 
-   getting-started/index
+   getting-started/dev_guide
+   getting-started/python_tips
+   getting-started/code_samples
+   getting-started/cli_commands
+   getting-started/capabilities
+   getting-started/faq
 
 .. toctree::
    :caption: Advanced Topics
    :maxdepth: 1
    :hidden:
 
-   advanced-topics/index
+   advanced-topics/parent_streams
+   advanced-topics/partitioning
+   advanced-topics/context_object
+   advanced-topics/stream_maps
+   advanced-topics/batch
+   advanced-topics/porting
+   advanced-topics/sinks
+   advanced-topics/CONTRIBUTING
+   advanced-topics/implementation/index
+   advanced-topics/typing
+   advanced-topics/testing
 
 .. toctree::
    :caption: Reference
