@@ -5,7 +5,6 @@ import io
 import json
 import logging
 from contextlib import redirect_stdout
-from re import I
 from typing import Counter
 
 from samples.sample_tap_countries.countries_tap import SampleTapCountries
@@ -13,14 +12,15 @@ from singer_sdk.helpers._catalog import (
     get_selected_schema,
     pop_deselected_record_properties,
 )
+from singer_sdk.testing import get_tap_test_class
 
+SAMPLE_CONFIG = {}
 SAMPLE_CONFIG_BAD = {"not": "correct"}
 
-
-def test_countries_sync_all():
-    """Test sync_all() for countries sample."""
-    tap = SampleTapCountries(config=None)
-    tap.sync_all()
+# standard tap tests
+TestSampleTapCountries = get_tap_test_class(
+    tap_class=SampleTapCountries, config=SAMPLE_CONFIG
+)
 
 
 def test_countries_primary_key():

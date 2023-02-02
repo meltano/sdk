@@ -73,6 +73,7 @@ Advanced Topics
    CONTRIBUTING
    implementation/index
    typing
+   testing
 
 .. _Singer: https://singer.io
 .. _Singer Spec: https://hub.meltano.com/singer/spec
