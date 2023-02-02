@@ -13,7 +13,7 @@ from sqlalchemy.sql.expression import bindparam
 
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.exceptions import ConformedNameClashException
-from singer_sdk.helpers._conformers import replace_leading_digit, snakecase
+from singer_sdk.helpers._conformers import replace_leading_digit
 from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks.batch import BatchSink
 
@@ -150,10 +150,18 @@ class SQLSink(BatchSink):
         Returns:
             The name transformed to snake case.
         """
-        # strip non-alphanumeric characters, keeping - . _ and spaces
+        # strip non-alphanumeric characters
         name = re.sub(r"[^a-zA-Z0-9_\-\.\s]", "", name)
-        # convert to snakecase
-        name = snakecase(name)
+        # strip leading/trailing whitespace,
+        # transform to lowercase and replace - . and spaces to _
+        name = (
+            name.lower()
+            .lstrip()
+            .rstrip()
+            .replace(".", "_")
+            .replace("-", "_")
+            .replace(" ", "_")
+        )
         # replace leading digit
         return replace_leading_digit(name)
 
