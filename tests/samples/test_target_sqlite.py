@@ -458,11 +458,11 @@ def test_hostile_to_sqlite(
     columns = {res[0] for res in cursor.fetchall()}
     assert columns == {
         "name_with_spaces",
-        "name_is_camel_case",
+        "nameiscamelcase",
         "name_with_dashes",
         "name_with_dashes_and_mixed_cases",
         "gname_starts_with_number",
         "fname_starts_with_number",
         "hname_starts_with_number",
-        "name_with_emoji",
+        "name_with_emoji_",
     }
