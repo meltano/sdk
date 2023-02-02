@@ -98,12 +98,5 @@ html_static_path = ["_static"]
 myst_heading_anchors = 4
 
 redirects = {
-    "batch.html": "advanced/batch.html",
-    "context_object.html": "advanced/context_object.html",
-    "parent_streams.html": "advanced/parent_streams.html",
-    "partitioning.html": "advanced/partitioning.html",
-    "sinks.html": "advanced/sinks.html",
-    "stream_maps.html": "advanced/stream_maps.html",
-    "CONTRIBUTING.html": "development/contributing.html",
-    "porting.html": "guides/migration/porting.html",
+    "porting.html": "guides/porting.html",
 }

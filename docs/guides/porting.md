@@ -197,7 +197,7 @@ Notes:
 
 - As should be expected, you are free to subclass streams in order to have their behavior be inherited from other stream classes.
   - For instance, if 3 streams use one pagination method, and 5 other streams use a different method, you can have each stream created as a subclass of a stream that has desired behavior.
-- If you have streams which invoke each other in a nested layout, please refer to the `parent_stream_class` property and its [related documentation](../../advanced/stream_maps.md).
+- If you have streams which invoke each other in a nested layout, please refer to the `parent_stream_class` property and its [related documentation](../../stream_maps.md).
 - As before, if you do not already have a full JSON Schema file for each stream type, it is generally a good practice to start with just 5-8 properties per stream. You don't have to define all properties up front and before doing so, it is generally more valuable to test that each stream is getting data.
 
 ## Run pytest again, add stream properties, and repeat

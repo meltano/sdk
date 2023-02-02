@@ -54,7 +54,7 @@ here.
 
 ## Partitioned State
 
-The SDK implements a feature called [`state partitioning`](../advanced/partitioning.md) which allows
+The SDK implements a feature called [`state partitioning`](../partitioning.md) which allows
 the same stream to be segmented by one or more partitioning indexes and their values. This
 allows multiple bookmarks to be independently tracked for subsets of the total stream.
 For instance, using state partitioning, you can track a separate stream bookmark for
@@ -64,7 +64,7 @@ being sent downstream to the same target table.
 For streams which are partitioned, the SDK will automatically store their stream state
 under a `partitions` key which exactly matches their `context`.
 
-For [parent-child streams](../advanced/parent_streams.md), the SDK will automatically use the parent's context as the default
+For [parent-child streams](../parent_streams.md), the SDK will automatically use the parent's context as the default
 state partition.
 
 ## Record Duplication
@@ -125,12 +125,12 @@ others.
 
 The SDK's implementation of `replication_key` is intentionally within the
 framework of a _singular_ column comparison. Most of those use cases which previously
-required multiple bookmarks can now be handled using the [partitioning](../advanced/partitioning.md)
+required multiple bookmarks can now be handled using the [partitioning](../partitioning.md)
 feature.
 
 While legacy taps have sometimes supported multiple replication key properties,
 this is not yet a supported use case within the SDK. If your source requires multiple
-bookmark keys, and if it does not align with the [partitioning](../advanced/partitioning.md) feature,
+bookmark keys, and if it does not align with the [partitioning](../partitioning.md) feature,
 please open an issue with a detailed description of the intended use case.
 
 ## The Impact of Sorting on Incremental Sync
@@ -178,7 +178,7 @@ non-timestamp replication keys (e.g. for `binlog` and `event_id` types) by overr
 
 ## Additional Singer State References
 
-- [SDK Partitioning](../advanced/partitioning.md)
-- [SDK Parent-Child Streams](../advanced/parent_streams.md)
+- [SDK Partitioning](../partitioning.md)
+- [SDK Parent-Child Streams](../parent_streams.md)
 - [Singer Spec: State Overview](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#state)
 - [Singer Spec: Config and State](https://github.com/singer-io/getting-started/blob/master/docs/CONFIG_AND_STATE.md#state-file)

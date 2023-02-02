@@ -68,4 +68,4 @@ class EpicIssuesStream(GitlabStream):
 
 ## Additional Parent-Child References
 
-- [Singer State in SDK Taps](../implementation/state.md)
+- [Singer State in SDK Taps](./implementation/state.md)

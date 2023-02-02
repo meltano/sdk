@@ -5,5 +5,6 @@ The following pages contain useful information for developers building on top of
 ```{toctree}
 :maxdepth: 2
 
-migration/index
+porting
+pagination-classes
 ```

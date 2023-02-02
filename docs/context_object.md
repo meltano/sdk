@@ -1,6 +1,6 @@
 # The Context Object
 
-Many of the methods in the [Stream](../classes/singer_sdk.Stream.rst) class and its subclasses accept
+Many of the methods in the [Stream](classes/singer_sdk.Stream) class and its subclasses accept
 a `context` parameter, which is a dictionary that contains information about the stream
 partition or parent stream.
 

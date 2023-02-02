@@ -61,7 +61,12 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
    :maxdepth: 2
    :hidden:
 
-   advanced/index
+   parent_streams
+   partitioning
+   context_object
+   stream_maps
+   batch
+   sinks
    implementation/index
    typing
    testing
@@ -71,6 +76,7 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
    :maxdepth: 1
    :hidden:
 
+   CONTRIBUTING
    development/index
 
 .. _Singer: https://singer.io
