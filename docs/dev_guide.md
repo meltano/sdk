@@ -212,7 +212,7 @@ An example launch configuration, added to your `launch.json`, might be as follow
 The above `module` value relies on an equivalent to the following snippet being added to the end of your `tap.py` or `target.py` file:
 
 ```python
-if __name__ == "__main":
+if __name__ == "__main__":
     TapSnowflake.cli()
 ```
 

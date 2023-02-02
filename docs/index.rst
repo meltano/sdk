@@ -66,6 +66,7 @@ Advanced Concepts
    advanced/index
    implementation/index
    typing
+   testing
 
 Development
 -----------

@@ -15,12 +15,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "award_emoji",
-        "notes",
-        "project",
-        "self"
-      ],
+      "required": ["award_emoji", "notes", "project", "self"],
       "type": "object"
     },
     "assignee": {
@@ -44,15 +39,8 @@
           "type": "string"
         }
       },
-      "required": [
-        "avatar_url",
-        "id",
-        "name",
-        "state",
-        "username",
-        "web_url"
-      ],
-      "type": "object"
+      "required": ["avatar_url", "id", "name", "state", "username", "web_url"],
+      "type": ["object", "null"]
     },
     "assignees": {
       "items": {
@@ -109,14 +97,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "avatar_url",
-        "id",
-        "name",
-        "state",
-        "username",
-        "web_url"
-      ],
+      "required": ["avatar_url", "id", "name", "state", "username", "web_url"],
       "type": "object"
     },
     "closed_at": {
@@ -204,7 +185,7 @@
         "title",
         "updated_at"
       ],
-      "type": "object"
+      "type": ["object", "null"]
     },
     "project_id": {
       "type": "integer"
