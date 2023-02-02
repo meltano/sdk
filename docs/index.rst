@@ -35,11 +35,11 @@ read the `source code`_, `log an issue or feature request`_, and `contribute bac
 to the SDK. We also regularly discuss SDK topics in our `Meltano Slack`_ community,
 within the `#singer-tap-development`_ and `#singer-target-development`_ Slack channels.
 
-Developer Resources
--------------------
 
 .. toctree::
+   :caption: Developer Resources
    :maxdepth: 2
+   :hidden:
 
    dev_guide
    guides/index
@@ -49,30 +49,27 @@ Developer Resources
    capabilities
    faq
 
-Reference
----------
-
 .. toctree::
+   :caption: Reference
    :maxdepth: 2
+   :hidden:
 
    reference
 
-Advanced Concepts
------------------
-
 .. toctree::
-   :maxdepth: 1
+   :caption: Advanced Concepts
+   :maxdepth: 2
+   :hidden:
 
    advanced/index
    implementation/index
    typing
    testing
 
-Development
------------
-
 .. toctree::
+   :caption: Development
    :maxdepth: 1
+   :hidden:
 
    development/index
 
