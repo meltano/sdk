@@ -1,0 +1,6 @@
+{"type": "SCHEMA", "stream": "test_array_data", "key_properties": ["id"], "schema": {"required": ["id"], "type": "object", "properties": {"id": {"type": "integer"}, "fruits": {"type": "array","items": {"type": "string"}}}}}
+{"type": "RECORD", "stream": "test_array_data", "record": {"id": 1, "fruits": [ "apple", "orange", "pear" ]}}
+{"type": "RECORD", "stream": "test_array_data", "record": {"id": 2, "fruits": [ "banana", "apple" ]}}
+{"type": "RECORD", "stream": "test_array_data", "record": {"id": 3, "fruits": [ "pear" ]}}
+{"type": "RECORD", "stream": "test_array_data", "record": {"id": 4, "fruits": [ "orange", "banana", "apple", "pear" ]}}
+{"type": "STATE", "value": {"test_array_data": 4}}

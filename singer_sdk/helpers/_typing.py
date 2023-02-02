@@ -249,27 +249,57 @@ def is_boolean_type(property_schema: dict) -> Optional[bool]:
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
+        if isinstance(property_type, dict):
+            property_type = property_type.get("type")
         if "boolean" in property_type or property_type == "boolean":
             return True
     return False
 
 
 def is_integer_type(property_schema: dict) -> Optional[bool]:
-    """Return true if the JSON Schema type is a boolean or None if detection fails."""
+    """Return true if the JSON Schema type is an integer or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
+        if isinstance(property_type, dict):
+            property_type = property_type.get("type")
         if "integer" in property_type or property_type == "integer":
             return True
     return False
 
 
 def is_string_type(property_schema: dict) -> Optional[bool]:
-    """Return true if the JSON Schema type is a boolean or None if detection fails."""
+    """Return true if the JSON Schema type is a string or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
+        if isinstance(property_type, dict):
+            property_type = property_type.get("type")
         if "string" in property_type or property_type == "string":
+            return True
+    return False
+
+
+def is_null_type(property_schema: dict) -> Optional[bool]:
+    """Return true if the JSON Schema type is a null or None if detection fails."""
+    if "anyOf" not in property_schema and "type" not in property_schema:
+        return None  # Could not detect data type
+    for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
+        if isinstance(property_type, dict):
+            property_type = property_type.get("type")
+        if "null" in property_type or property_type == "null":
+            return True
+    return False
+
+
+def is_number_type(property_schema: dict) -> Optional[bool]:
+    """Return true if the JSON Schema type is a number or None if detection fails."""
+    if "anyOf" not in property_schema and "type" not in property_schema:
+        return None  # Could not detect data type
+    for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
+        if isinstance(property_type, dict):
+            property_type = property_type.get("type")
+        if "number" in property_type or property_type == "number":
             return True
     return False
 

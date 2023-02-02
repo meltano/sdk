@@ -100,7 +100,7 @@ class ReleasesStream(ProjectBasedStream):
 
     name = "releases"
     path = "/projects/{project_id}/releases"
-    primary_keys = ["project_id", "commit_id", "tag_name"]
+    primary_keys = ["project_id", "tag_name"]
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "releases.json"
 
@@ -112,7 +112,7 @@ class IssuesStream(ProjectBasedStream):
     path = "/projects/{project_id}/issues?scope=all&updated_after={start_date}"
     primary_keys = ["id"]
     replication_key = "updated_at"
-    is_sorted = True
+    is_sorted = False
     schema_filepath = SCHEMAS_DIR / "issues.json"
 
 
