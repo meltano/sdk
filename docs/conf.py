@@ -38,7 +38,6 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
-    "sphinx_rtd_theme",
     "sphinx_copybutton",
     "myst_parser",
     "sphinx_reredirects",
@@ -61,19 +60,39 @@ autodoc_class_signature = "separated"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
-html_theme_options = {"logo_only": True, "analytics_id": "GTM-WHJMBX2"}
-
 html_logo = "_static/img/logo.svg"
+html_theme = "furo"
+html_theme_options = {
+    # general
+    "source_repository": "https://github.com/meltano/sdk/",
+    "source_branch": "main",
+    "source_directory": "docs/",
+    "sidebar_hide_name": True,
+    # branding
+    "light_css_variables": {
+        "color-brand-primary": "#3438bf",
+        "color-brand-content": "#3438bf",
+        # sidebar
+        "color-sidebar-background": "#3438bf",
+        "color-sidebar-item-background--hover": "#3438bf",
+        "color-sidebar-brand-text": "white",
+        "color-sidebar-caption-text": "white",
+        "color-sidebar-link-text": "white",
+        "color-sidebar-link-text--top-level": "white",
+    },
+    "dark_css_variables": {
+        "color-brand-primary": "#3438bf",
+        "color-brand-content": "#3438bf",
+        # siderbar
+        "color-sidebar-background": "#3438bf",
+        "color-sidebar-item-background--hover": "#3438bf",
+    },
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-
-html_css_files = [
-    "css/custom.css",
-]
 
 # TODO: set this back to 3 after MyST-Parser 0.19.0 is released
 myst_heading_anchors = 4
