@@ -96,7 +96,7 @@ class TestConnectorSQL:
         remove_collation = SQLConnector.remove_collation
         test_collation = "SQL_Latin1_General_CP1_CI_AS"
         current_type = sqlalchemy.types.Text(collation=test_collation)
-        current_type, current_type_collation = remove_collation(current_type)
+        current_type_collation = remove_collation(current_type)
         # Check collation was set to None by the function
         assert current_type.collation is None
         # Check that we get the same collation we put in back out
@@ -105,7 +105,7 @@ class TestConnectorSQL:
     def test_remove_collation_non_text_type(self):
         remove_collation = SQLConnector.remove_collation
         current_type = sqlalchemy.types.Integer()
-        current_type, current_type_collation = remove_collation(current_type)
+        current_type_collation = remove_collation(current_type)
         # Check there is not a collation attribute
         assert not hasattr(current_type, "collation")
         # Check that we get the same type we put in
@@ -117,7 +117,7 @@ class TestConnectorSQL:
         update_collation = SQLConnector.update_collation
         test_collation = "SQL_Latin1_General_CP1_CI_AS"
         compatible_type = sqlalchemy.types.Text(collation=None)
-        compatible_type = update_collation(compatible_type, test_collation)
+        update_collation(compatible_type, test_collation)
         # Check collation was set to the value we put in
         assert compatible_type.collation == test_collation
 
@@ -125,7 +125,7 @@ class TestConnectorSQL:
         update_collation = SQLConnector.update_collation
         test_collation = "SQL_Latin1_General_CP1_CI_AS"
         compatible_type = sqlalchemy.types.Integer()
-        compatible_type = update_collation(compatible_type, test_collation)
+        update_collation(compatible_type, test_collation)
         # Check there is not a collation attribute
         assert not hasattr(compatible_type, "collation")
         # Check that we get the same type we put in
