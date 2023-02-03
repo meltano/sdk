@@ -956,7 +956,7 @@ class SQLConnector:
              The removed collation as a string.
         """
         if hasattr(column_type, "collation") and column_type.collation:
-            column_type_collation = column_type.collation
+            column_type_collation: str = column_type.collation
             setattr(column_type, "collation", None)
             return column_type_collation
         return None
