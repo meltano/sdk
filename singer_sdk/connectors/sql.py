@@ -946,7 +946,8 @@ class SQLConnector:
     @staticmethod
     def remove_collation(
         column_type: sqlalchemy.types.TypeEngine,
-    ) -> tuple[sqlalchemy.types.TypeEngine, str | None]:
+        # ) -> tuple[sqlalchemy.types.TypeEngine, str | None]:
+    ) -> str | None:
         """Removes collation for the given column TypeEngine instance.
 
         Args:
@@ -958,13 +959,17 @@ class SQLConnector:
         if hasattr(column_type, "collation") and column_type.collation:
             column_type_collation = column_type.collation
             setattr(column_type, "collation", None)
-            return column_type, column_type_collation
-        return column_type, None
+            #     return column_type, column_type_collation
+            # return column_type, None
+            return column_type_collation
+        return None
 
     @staticmethod
     def update_collation(
-        column_type: sqlalchemy.types.TypeEngine, collation: str | None
-    ) -> sqlalchemy.types.TypeEngine:
+        column_type: sqlalchemy.types.TypeEngine,
+        collation: str | None
+        # ) -> sqlalchemy.types.TypeEngine:
+    ) -> None:
         """Sets column collation if column type has a collation attribute.
 
         Args:
@@ -1000,7 +1005,8 @@ class SQLConnector:
         )
 
         # remove collation if present and save it
-        current_type, current_type_collation = self.remove_collation(current_type)
+        # current_type, current_type_collation = self.remove_collation(current_type)
+        current_type_collation = self.remove_collation(current_type)
 
         # Check if the existing column type and the sql type are the same
         if str(sql_type) == str(current_type):
@@ -1018,9 +1024,10 @@ class SQLConnector:
 
         # Put the collation level back before altering the column
         if current_type_collation:
-            compatible_sql_type = self.update_collation(
-                compatible_sql_type, current_type_collation
-            )
+            #     compatible_sql_type = self.update_collation(
+            #         compatible_sql_type, current_type_collation
+            #     )
+            self.update_collation(compatible_sql_type, current_type_collation)
 
         if not self.allow_column_alter:
             raise NotImplementedError(
