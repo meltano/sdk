@@ -959,6 +959,7 @@ class SQLConnector:
             column_type_collation = column_type.collation
             setattr(column_type, "collation", None)
             return column_type_collation
+        return None
 
     @staticmethod
     def update_collation(
