@@ -1001,11 +1001,6 @@ class SQLConnector:
 
         # remove collation if present and save it
         current_type, current_type_collation = self.remove_collation(current_type)
-        # if hasattr(current_type, "collation"):
-        #     if current_type.collation:
-        #         current_type_collation = current_type.collation
-        #         setattr(current_type, "collation", None)
-        #         collation_removed = True
 
         # Check if the existing column type and the sql type are the same
         if str(sql_type) == str(current_type):
@@ -1022,12 +1017,10 @@ class SQLConnector:
             return
 
         # Put the collation level back before altering the column
-        compatible_sql_type = self.update_collation(
-            compatible_sql_type, current_type_collation
-        )
-        # if hasattr(compatible_sql_type, "collation"):
-        #     if collation_removed:
-        #         setattr(compatible_sql_type, "collation", current_type_collation)
+        if current_type_collation:
+            compatible_sql_type = self.update_collation(
+                compatible_sql_type, current_type_collation
+            )
 
         if not self.allow_column_alter:
             raise NotImplementedError(
