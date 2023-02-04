@@ -1,13 +1,15 @@
 """Abstract base class for stream mapper plugins."""
 
+from __future__ import annotations
+
 import abc
 import sys
 from io import FileIO
-from typing import Callable, Iterable, List, Tuple
+from typing import Callable, Iterable
 
 import click
-import singer
 
+import singer_sdk._singerlib as singer
 from singer_sdk.cli import common_options
 from singer_sdk.configuration._dict_config import merge_config_sources
 from singer_sdk.exceptions import ConfigValidationError
@@ -25,7 +27,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         return f"{cls.name.upper().replace('-', '_')}_"
 
     @classproperty
-    def capabilities(self) -> List[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:
         """Get capabilities.
 
         Returns:
@@ -128,9 +130,9 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         def cli(
             version: bool = False,
             about: bool = False,
-            config: Tuple[str, ...] = (),
-            format: str = None,
-            file_input: FileIO = None,
+            config: tuple[str, ...] = (),
+            format: str | None = None,
+            file_input: FileIO | None = None,
         ) -> None:
             """Handle command line execution.
 

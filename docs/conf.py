@@ -20,12 +20,12 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
-project = "Meltano SDK"
+project = "Meltano Singer SDK"
 copyright = "2021, Meltano Core Team and Contributors"
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.10.0"
+release = "0.19.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -61,7 +61,7 @@ autodoc_class_signature = "separated"
 # a list of builtin themes.
 #
 html_theme = "sphinx_rtd_theme"
-html_theme_options = {"logo_only": True, "analytics_id": "G-84WQMSLGTE"}
+html_theme_options = {"logo_only": True, "analytics_id": "GTM-WHJMBX2"}
 
 html_logo = "_static/img/logo.svg"
 
@@ -74,5 +74,5 @@ html_css_files = [
     "css/custom.css",
 ]
 
-# TODO: set this back to 3 after MyST-Parser 0.18.0 is released
+# TODO: set this back to 3 after MyST-Parser 0.19.0 is released
 myst_heading_anchors = 4

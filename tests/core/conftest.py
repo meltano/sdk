@@ -96,9 +96,3 @@ def tap() -> SimpleTestTap:
         },
         parse_env_config=False,
     )
-
-
-@pytest.fixture
-def csv_config(outdir: str) -> dict:
-    """Get configuration dictionary for target-csv."""
-    return {"target_folder": outdir}

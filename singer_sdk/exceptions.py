@@ -47,7 +47,7 @@ class RecordsWithoutSchemaException(Exception):
 class RetriableAPIError(Exception):
     """Exception raised when a failed request can be safely retried."""
 
-    def __init__(self, message: str, response: requests.Response = None) -> None:
+    def __init__(self, message: str, response: requests.Response | None = None) -> None:
         """Extends the default with the failed response as an attribute.
 
         Args:
@@ -68,3 +68,10 @@ class TapStreamConnectionFailure(Exception):
 
 class TooManyRecordsException(Exception):
     """Exception to raise when query returns more records than max_records."""
+
+
+class ConformedNameClashException(Exception):
+    """Raised when name conforming produces clashes.
+
+    e.g. two columns conformed to the same name
+    """

@@ -12,14 +12,13 @@ import logging
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Callable, Generator, Iterable, Iterator, Mapping, TypeVar, cast
+from typing import Any, Generator, Iterable, Iterator, Mapping, TypeVar, cast
 from uuid import uuid4
 
 import pendulum
-import requests
-import singer
-from singer import RecordMessage, Schema, SchemaMessage, StateMessage
 
+import singer_sdk._singerlib as singer
+from singer_sdk import metrics
 from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
@@ -29,13 +28,6 @@ from singer_sdk.helpers._batch import (
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._flattening import get_flattening_options
-from singer_sdk.helpers._schema import SchemaPlus
-from singer_sdk.helpers._singer import (
-    Catalog,
-    CatalogEntry,
-    MetadataMapping,
-    SelectionMask,
-)
 from singer_sdk.helpers._state import (
     finalize_state_progress_markers,
     get_starting_replication_value,
@@ -47,7 +39,11 @@ from singer_sdk.helpers._state import (
     write_replication_key_signpost,
     write_starting_replication_value,
 )
-from singer_sdk.helpers._typing import conform_record_data_types, is_datetime_type
+from singer_sdk.helpers._typing import (
+    TypeConformanceLevel,
+    conform_record_data_types,
+    is_datetime_type,
+)
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
@@ -59,8 +55,6 @@ REPLICATION_LOG_BASED = "LOG_BASED"
 
 FactoryType = TypeVar("FactoryType", bound="Stream")
 _T = TypeVar("_T")
-
-METRICS_LOG_LEVEL_SETTING = "metrics_log_level"
 
 
 def lazy_chunked_generator(
@@ -87,11 +81,31 @@ def lazy_chunked_generator(
 class Stream(metaclass=abc.ABCMeta):
     """Abstract base class for tap streams."""
 
-    STATE_MSG_FREQUENCY = 10000  # Number of records between state messages
+    STATE_MSG_FREQUENCY = 10000
+    """Number of records between state messages."""
+
     _MAX_RECORDS_LIMIT: int | None = None
+
+    TYPE_CONFORMANCE_LEVEL = TypeConformanceLevel.RECURSIVE
+    """Type conformance level for this stream.
+
+    Field types in the schema are used to convert record field values to the correct
+    type.
+
+    Available options are:
+
+    - ``TypeConformanceLevel.NONE``: No conformance is performed.
+    - ``TypeConformanceLevel.RECURSIVE``: Conformance is performed recursively through
+      all nested levels in the record.
+    - ``TypeConformanceLevel.ROOT``: Conformance is performed only on the root level.
+    """
 
     # Used for nested stream relationships
     parent_stream_type: type[Stream] | None = None
+    """Parent stream type for this stream. If this stream is a child stream, this should
+    be set to the parent stream class.
+    """
+
     ignore_parent_replication_key: bool = False
 
     # Internal API cost aggregator
@@ -104,7 +118,7 @@ class Stream(metaclass=abc.ABCMeta):
     def __init__(
         self,
         tap: TapBaseClass,
-        schema: str | PathLike | dict[str, Any] | Schema | None = None,
+        schema: str | PathLike | dict[str, Any] | singer.Schema | None = None,
         name: str | None = None,
     ) -> None:
         """Init tap stream.
@@ -124,19 +138,20 @@ class Stream(metaclass=abc.ABCMeta):
             raise ValueError("Missing argument or class variable 'name'.")
 
         self.logger: logging.Logger = tap.logger
+        self.metrics_logger = tap.metrics_logger
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
         self._tap = tap
         self._tap_state = tap.state
-        self._tap_input_catalog: Catalog | None = None
+        self._tap_input_catalog: singer.Catalog | None = None
         self._stream_maps: list[StreamMap] | None = None
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
         self._primary_keys: list[str] | None = None
         self._state_partitioning_keys: list[str] | None = None
         self._schema_filepath: Path | None = None
-        self._metadata: MetadataMapping | None = None
-        self._mask: SelectionMask | None = None
+        self._metadata: singer.MetadataMapping | None = None
+        self._mask: singer.SelectionMask | None = None
         self._schema: dict
         self.child_streams: list[Stream] = []
         if schema:
@@ -149,7 +164,7 @@ class Stream(metaclass=abc.ABCMeta):
                 self._schema_filepath = Path(schema)
             elif isinstance(schema, dict):
                 self._schema = schema
-            elif isinstance(schema, Schema):
+            elif isinstance(schema, singer.Schema):
                 self._schema = schema.to_dict()
             else:
                 raise ValueError(
@@ -503,7 +518,7 @@ class Stream(metaclass=abc.ABCMeta):
         return True
 
     @property
-    def metadata(self) -> MetadataMapping:
+    def metadata(self) -> singer.MetadataMapping:
         """Get stream metadata.
 
         Metadata attributes (`inclusion`, `selected`, etc.) are part of the Singer spec.
@@ -522,7 +537,7 @@ class Stream(metaclass=abc.ABCMeta):
                 self._metadata = catalog_entry.metadata
                 return self._metadata
 
-        self._metadata = MetadataMapping.get_standard_metadata(
+        self._metadata = singer.MetadataMapping.get_standard_metadata(
             schema=self.schema,
             replication_method=self.forced_replication_method,
             key_properties=self.primary_keys or [],
@@ -539,16 +554,16 @@ class Stream(metaclass=abc.ABCMeta):
         return self._metadata
 
     @property
-    def _singer_catalog_entry(self) -> CatalogEntry:
+    def _singer_catalog_entry(self) -> singer.CatalogEntry:
         """Return catalog entry as specified by the Singer catalog spec.
 
         Returns:
             TODO
         """
-        return CatalogEntry(
+        return singer.CatalogEntry(
             tap_stream_id=self.tap_stream_id,
             stream=self.name,
-            schema=SchemaPlus.from_dict(self.schema),
+            schema=singer.Schema.from_dict(self.schema),
             metadata=self.metadata,
             key_properties=self.primary_keys or [],
             replication_key=self.replication_key,
@@ -561,13 +576,13 @@ class Stream(metaclass=abc.ABCMeta):
         )
 
     @property
-    def _singer_catalog(self) -> Catalog:
+    def _singer_catalog(self) -> singer.Catalog:
         """TODO.
 
         Returns:
             TODO
         """
-        return Catalog([(self.tap_stream_id, self._singer_catalog_entry)])
+        return singer.Catalog([(self.tap_stream_id, self._singer_catalog_entry)])
 
     @property
     def config(self) -> Mapping[str, Any]:
@@ -704,8 +719,11 @@ class Stream(metaclass=abc.ABCMeta):
     ) -> None:
         """Update state of stream or partition with data from the provided record.
 
-        Raises InvalidStreamSortException is self.is_sorted = True and unsorted data is
-        detected.
+        Raises `InvalidStreamSortException` is `self.is_sorted = True` and unsorted data
+        is detected.
+
+        Note: The default implementation does not advance any bookmarks unless
+        `self.replication_method == 'INCREMENTAL'.
 
         Args:
             latest_record: TODO
@@ -714,36 +732,35 @@ class Stream(metaclass=abc.ABCMeta):
         Raises:
             ValueError: TODO
         """
+        # This also creates a state entry if one does not yet exist:
         state_dict = self.get_context_state(context)
-        if latest_record:
-            if self.replication_method in [
-                REPLICATION_INCREMENTAL,
-                REPLICATION_LOG_BASED,
-            ]:
-                if not self.replication_key:
-                    raise ValueError(
-                        f"Could not detect replication key for '{self.name}' stream"
-                        f"(replication method={self.replication_method})"
-                    )
-                treat_as_sorted = self.is_sorted
-                if not treat_as_sorted and self.state_partitioning_keys is not None:
-                    # Streams with custom state partitioning are not resumable.
-                    treat_as_sorted = False
-                increment_state(
-                    state_dict,
-                    replication_key=self.replication_key,
-                    latest_record=latest_record,
-                    is_sorted=treat_as_sorted,
-                    check_sorted=self.check_sorted,
+
+        # Advance state bookmark values if applicable
+        if latest_record and self.replication_method == REPLICATION_INCREMENTAL:
+            if not self.replication_key:
+                raise ValueError(
+                    f"Could not detect replication key for '{self.name}' stream"
+                    f"(replication method={self.replication_method})"
                 )
+            treat_as_sorted = self.is_sorted
+            if not treat_as_sorted and self.state_partitioning_keys is not None:
+                # Streams with custom state partitioning are not resumable.
+                treat_as_sorted = False
+            increment_state(
+                state_dict,
+                replication_key=self.replication_key,
+                latest_record=latest_record,
+                is_sorted=treat_as_sorted,
+                check_sorted=self.check_sorted,
+            )
 
     # Private message authoring methods:
 
     def _write_state_message(self) -> None:
         """Write out a STATE message with the latest state."""
-        singer.write_message(StateMessage(value=self.tap_state))
+        singer.write_message(singer.StateMessage(value=self.tap_state))
 
-    def _generate_schema_messages(self) -> Generator[SchemaMessage, None, None]:
+    def _generate_schema_messages(self) -> Generator[singer.SchemaMessage, None, None]:
         """Generate schema messages from stream maps.
 
         Yields:
@@ -755,7 +772,7 @@ class Stream(metaclass=abc.ABCMeta):
                 # Don't emit schema if the stream's records are all ignored.
                 continue
 
-            schema_message = SchemaMessage(
+            schema_message = singer.SchemaMessage(
                 stream_map.stream_alias,
                 stream_map.transformed_schema,
                 stream_map.transformed_key_properties,
@@ -769,7 +786,7 @@ class Stream(metaclass=abc.ABCMeta):
             singer.write_message(schema_message)
 
     @property
-    def mask(self) -> SelectionMask:
+    def mask(self) -> singer.SelectionMask:
         """Get a boolean mask for stream and property selection.
 
         Returns:
@@ -783,7 +800,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _generate_record_messages(
         self,
         record: dict,
-    ) -> Generator[RecordMessage, None, None]:
+    ) -> Generator[singer.RecordMessage, None, None]:
         """Write out a RECORD message.
 
         Args:
@@ -797,13 +814,14 @@ class Stream(metaclass=abc.ABCMeta):
             stream_name=self.name,
             record=record,
             schema=self.schema,
+            level=self.TYPE_CONFORMANCE_LEVEL,
             logger=self.logger,
         )
         for stream_map in self.stream_maps:
             mapped_record = stream_map.transform(record)
             # Emit record if not filtered
             if mapped_record is not None:
-                record_message = RecordMessage(
+                record_message = singer.RecordMessage(
                     stream=stream_map.stream_alias,
                     record=mapped_record,
                     version=None,
@@ -840,95 +858,13 @@ class Stream(metaclass=abc.ABCMeta):
             )
         )
 
-    @property
-    def _metric_logging_function(self) -> Callable | None:
-        """Return the metrics logging function.
-
-        Returns:
-            The logging function for emitting metrics.
-
-        Raises:
-            ValueError: If logging level setting is an unsupported value.
-        """
-        if METRICS_LOG_LEVEL_SETTING not in self.config:
-            return self.logger.info
-
-        if self.config[METRICS_LOG_LEVEL_SETTING].upper() == "INFO":
-            return self.logger.info
-
-        if self.config[METRICS_LOG_LEVEL_SETTING].upper() == "DEBUG":
-            return self.logger.debug
-
-        if self.config[METRICS_LOG_LEVEL_SETTING].upper() == "NONE":
-            return None
-
-        raise ValueError(
-            "Unexpected logging level for metrics: "
-            + self.config[METRICS_LOG_LEVEL_SETTING]
-        )
-
-    def _write_metric_log(self, metric: dict, extra_tags: dict | None) -> None:
-        """Emit a metric log. Optionally with appended tag info.
+    def _log_metric(self, point: metrics.Point) -> None:
+        """Log a single measurement.
 
         Args:
-            metric: TODO
-            extra_tags: TODO
-
-        Returns:
-            None
+            point: A single measurement value.
         """
-        if not self._metric_logging_function:
-            return None
-
-        if extra_tags:
-            metric["tags"].update(extra_tags)
-        self._metric_logging_function(f"INFO METRIC: {json.dumps(metric)}")
-
-    def _write_record_count_log(self, record_count: int, context: dict | None) -> None:
-        """Emit a metric log. Optionally with appended tag info.
-
-        Args:
-            record_count: TODO
-            context: Stream partition or context dictionary.
-        """
-        extra_tags = {} if not context else {"context": context}
-        counter_metric: dict[str, Any] = {
-            "type": "counter",
-            "metric": "record_count",
-            "value": record_count,
-            "tags": {"stream": self.name},
-        }
-        self._write_metric_log(counter_metric, extra_tags=extra_tags)
-
-    def _write_request_duration_log(
-        self,
-        endpoint: str,
-        response: requests.Response,
-        context: dict | None,
-        extra_tags: dict | None,
-    ) -> None:
-        """TODO.
-
-        Args:
-            endpoint: TODO
-            response: TODO
-            context: Stream partition or context dictionary.
-            extra_tags: TODO
-        """
-        request_duration_metric: dict[str, Any] = {
-            "type": "timer",
-            "metric": "http_request_duration",
-            "value": response.elapsed.total_seconds(),
-            "tags": {
-                "endpoint": endpoint,
-                "http_status_code": response.status_code,
-                "status": "succeeded" if response.status_code < 400 else "failed",
-            },
-        }
-        extra_tags = extra_tags or {}
-        if context:
-            extra_tags["context"] = context
-        self._write_metric_log(metric=request_duration_metric, extra_tags=extra_tags)
+        metrics.log(self.metrics_logger, point=point)
 
     def log_sync_costs(self) -> None:
         """Log a summary of Sync costs.
@@ -1048,70 +984,80 @@ class Stream(metaclass=abc.ABCMeta):
         Yields:
             Each record from the source.
         """
+        # Initialize metrics
+        record_counter = metrics.record_counter(self.name)
+        timer = metrics.sync_timer(self.name)
+
         record_count = 0
         current_context: dict | None
         context_list: list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
-        for current_context in context_list or [{}]:
-            partition_record_count = 0
-            current_context = current_context or None
-            state = self.get_context_state(current_context)
-            state_partition_context = self._get_state_partition_context(current_context)
-            self._write_starting_replication_value(current_context)
-            child_context: dict | None = (
-                None if current_context is None else copy.copy(current_context)
-            )
+        with record_counter, timer:
+            for current_context in context_list or [{}]:
+                record_counter.context = current_context
+                timer.context = current_context
 
-            for record_result in self.get_records(current_context):
-                if isinstance(record_result, tuple):
-                    # Tuple items should be the record and the child context
-                    record, child_context = record_result
-                else:
-                    record = record_result
-                try:
-                    self._process_record(
-                        record,
-                        child_context=child_context,
-                        partition_context=state_partition_context,
-                    )
-                except InvalidStreamSortException as ex:
-                    log_sort_error(
-                        log_fn=self.logger.error,
-                        ex=ex,
-                        record_count=record_count + 1,
-                        partition_record_count=partition_record_count + 1,
-                        current_context=current_context,
-                        state_partition_context=state_partition_context,
-                        stream_name=self.name,
-                    )
-                    raise ex
+                partition_record_count = 0
+                current_context = current_context or None
+                state = self.get_context_state(current_context)
+                state_partition_context = self._get_state_partition_context(
+                    current_context
+                )
+                self._write_starting_replication_value(current_context)
+                child_context: dict | None = (
+                    None if current_context is None else copy.copy(current_context)
+                )
 
-                self._check_max_record_limit(record_count)
+                for record_result in self.get_records(current_context):
+                    if isinstance(record_result, tuple):
+                        # Tuple items should be the record and the child context
+                        record, child_context = record_result
+                    else:
+                        record = record_result
+                    try:
+                        self._process_record(
+                            record,
+                            child_context=child_context,
+                            partition_context=state_partition_context,
+                        )
+                    except InvalidStreamSortException as ex:
+                        log_sort_error(
+                            log_fn=self.logger.error,
+                            ex=ex,
+                            record_count=record_count + 1,
+                            partition_record_count=partition_record_count + 1,
+                            current_context=current_context,
+                            state_partition_context=state_partition_context,
+                            stream_name=self.name,
+                        )
+                        raise ex
 
-                if selected:
-                    if (
-                        record_count - 1
-                    ) % self.STATE_MSG_FREQUENCY == 0 and write_messages:
-                        self._write_state_message()
-                    if write_messages:
-                        self._write_record_message(record)
-                    self._increment_stream_state(record, context=current_context)
+                    self._check_max_record_limit(record_count)
 
-                    yield record
+                    if selected:
+                        if (
+                            record_count - 1
+                        ) % self.STATE_MSG_FREQUENCY == 0 and write_messages:
+                            self._write_state_message()
+                        if write_messages:
+                            self._write_record_message(record)
+                        self._increment_stream_state(record, context=current_context)
 
-                    record_count += 1
-                    partition_record_count += 1
+                        yield record
 
-            if current_context == state_partition_context:
-                # Finalize per-partition state only if 1:1 with context
-                finalize_state_progress_markers(state)
+                        record_counter.increment()
+                        record_count += 1
+                        partition_record_count += 1
+
+                if current_context == state_partition_context:
+                    # Finalize per-partition state only if 1:1 with context
+                    finalize_state_progress_markers(state)
         if not context:
             # Finalize total stream only if we have the full full context.
             # Otherwise will be finalized by tap at end of sync.
             finalize_state_progress_markers(self.stream_state)
-        self._write_record_count_log(record_count=record_count, context=context)
 
         if write_messages:
             # Reset interim bookmarks before emitting final STATE message:
@@ -1128,9 +1074,11 @@ class Stream(metaclass=abc.ABCMeta):
             batch_config: The batch configuration.
             context: Stream partition or context dictionary.
         """
-        for encoding, manifest in self.get_batches(batch_config, context):
-            self._write_batch_message(encoding=encoding, manifest=manifest)
-            self._write_state_message()
+        with metrics.batch_counter(self.name, context=context) as counter:
+            for encoding, manifest in self.get_batches(batch_config, context):
+                counter.increment()
+                self._write_batch_message(encoding=encoding, manifest=manifest)
+                self._write_state_message()
 
     # Public methods ("final", not recommended to be overridden)
 
@@ -1172,7 +1120,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Overridable Methods
 
-    def apply_catalog(self, catalog: Catalog) -> None:
+    def apply_catalog(self, catalog: singer.Catalog) -> None:
         """Apply a catalog dict, updating any settings overridden within the catalog.
 
         Developers may override this method in order to introduce advanced catalog

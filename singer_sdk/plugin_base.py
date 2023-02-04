@@ -10,8 +10,9 @@ from types import MappingProxyType
 from typing import Any, Callable, Dict, List, Mapping, Optional, Type, Union, cast
 
 import click
-from jsonschema import Draft4Validator
+from jsonschema import Draft7Validator
 
+from singer_sdk import metrics
 from singer_sdk.configuration._dict_config import parse_environment_config
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
@@ -30,7 +31,7 @@ from singer_sdk.typing import extend_validator_with_defaults
 SDK_PACKAGE_NAME = "singer_sdk"
 
 
-JSONSchemaValidator = extend_validator_with_defaults(Draft4Validator)
+JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
 
 
 class PluginBase(metaclass=abc.ABCMeta):
@@ -51,17 +52,16 @@ class PluginBase(metaclass=abc.ABCMeta):
             Plugin logger.
         """
         # Get the level from <PLUGIN_NAME>_LOGLEVEL or LOGLEVEL environment variables
-        LOGLEVEL = (
-            os.environ.get(f"{cls.name.upper()}_LOGLEVEL")
-            or os.environ.get("LOGLEVEL")
-            or "INFO"
-        ).upper()
+        plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
+        LOGLEVEL = os.environ.get(f"{plugin_env_prefix}LOGLEVEL") or os.environ.get(
+            "LOGLEVEL"
+        )
 
-        assert (
-            LOGLEVEL in logging._levelToName.values()
-        ), f"Invalid LOGLEVEL configuration: {LOGLEVEL}"
         logger = logging.getLogger(cls.name)
-        logger.setLevel(LOGLEVEL)
+
+        if LOGLEVEL is not None and LOGLEVEL.upper() in logging._levelToName.values():
+            logger.setLevel(LOGLEVEL.upper())
+
         return logger
 
     # Constructor
@@ -108,6 +108,9 @@ class PluginBase(metaclass=abc.ABCMeta):
         self._config = config_dict
         self._validate_config(raise_errors=validate_config)
         self.mapper: PluginMapper
+
+        metrics._setup_logging(self.config)
+        self.metrics_logger = metrics.get_metrics_logger()
 
     @classproperty
     def capabilities(self) -> List[CapabilitiesEnum]:
@@ -160,7 +163,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """Return the package version number.
 
         Returns:
-            Meltano SDK version number.
+            Meltano Singer SDK version number.
         """
         try:
             version = metadata.version(SDK_PACKAGE_NAME)
@@ -248,7 +251,9 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         Args:
             print_fn: A function to use to display the plugin version.
-                Defaults to :function:`print`.
+                Defaults to `print`_.
+
+        .. _print: https://docs.python.org/3/library/functions.html#print
         """
         print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version}")
 
@@ -333,8 +338,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             md_list.append(
                 f"# `{info['name']}`\n\n"
                 f"{info['description']}\n\n"
-                f"Built with the [Meltano SDK](https://sdk.meltano.com) for "
-                "Singer Taps and Targets.\n\n"
+                f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n"
             )
             for key, value in info.items():
 

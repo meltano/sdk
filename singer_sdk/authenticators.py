@@ -8,15 +8,39 @@ import math
 from datetime import datetime, timedelta
 from types import MappingProxyType
 from typing import Any, Mapping
+from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import jwt
 import requests
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
-from singer import utils
 
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.streams import Stream as RESTStreamBase
+
+
+def _add_parameters(initial_url: str, extra_parameters: dict) -> str:
+    """Add parameters to an URL and return the new URL.
+
+    Args:
+        initial_url: The URL to add parameters to.
+        extra_parameters: The parameters to add.
+
+    Returns:
+        The new URL with the parameters added.
+    """
+    scheme, netloc, path, query_string, fragment = urlsplit(initial_url)
+    query_params = parse_qs(query_string)
+    query_params.update(
+        {
+            parameter_name: [parameter_value]
+            for parameter_name, parameter_value in extra_parameters.items()
+        }
+    )
+
+    new_query_string = urlencode(query_params, doseq=True)
+
+    return urlunsplit((scheme, netloc, path, new_query_string, fragment))
 
 
 class SingletonMeta(type):
@@ -95,17 +119,45 @@ class APIAuthenticatorBase:
         """
         return self._auth_params or {}
 
-    def authenticate_request(self, request: requests.Request) -> None:
+    def authenticate_request(
+        self,
+        request: requests.PreparedRequest,
+    ) -> requests.PreparedRequest:
         """Authenticate a request.
 
         Args:
             request: A `request object`_.
 
+        Returns:
+            The authenticated request object.
+
         .. _request object:
-            https://requests.readthedocs.io/en/latest/api/#requests.Request
+            https://requests.readthedocs.io/en/latest/api/#requests.PreparedRequest
         """
         request.headers.update(self.auth_headers)
-        request.params.update(self.auth_params)
+
+        if request.url:
+            request.url = _add_parameters(request.url, self.auth_params)
+
+        return request
+
+    def __call__(self, r: requests.PreparedRequest) -> requests.PreparedRequest:
+        """Authenticate a request.
+
+        Calls
+        :meth:`~singer_sdk.authenticators.APIAuthenticatorBase.authenticate_request`
+        and returns the result.
+
+        Args:
+            r: A `request object`_.
+
+        Returns:
+            The authenticated request object.
+
+        .. _request object:
+            https://requests.readthedocs.io/en/latest/api/#requests.PreparedRequest
+        """
+        return self.authenticate_request(r)
 
 
 class SimpleAuthenticator(APIAuthenticatorBase):
@@ -305,8 +357,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
         Args:
             stream: The stream instance to use with this authenticator.
-            auth_endpoint: API username.
-            oauth_scopes: API password.
+            auth_endpoint: The OAuth 2.0 authorization endpoint.
+            oauth_scopes: A comma-separated list of OAuth scopes.
             default_expiration: Default token expiry in seconds.
         """
         super().__init__(stream=stream)
@@ -426,7 +478,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             return False
         if not self.expires_in:
             return True
-        if self.expires_in > (utils.now() - self.last_refreshed).total_seconds():
+        if self.expires_in > (utc_now() - self.last_refreshed).total_seconds():
             return True
         return False
 

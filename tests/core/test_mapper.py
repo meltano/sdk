@@ -1,15 +1,20 @@
 """Test map transformer."""
 
 import copy
+import io
 import json
 import logging
-from typing import Dict, List, Optional, Set, cast
+from contextlib import redirect_stdout
+from pathlib import Path
+from typing import Dict, List, Optional
 
 import pytest
+from freezegun import freeze_time
+from pytest_snapshot.plugin import Snapshot
 
+from singer_sdk._singerlib import Catalog
 from singer_sdk.exceptions import MapExpressionError
 from singer_sdk.helpers._catalog import get_selected_schema
-from singer_sdk.helpers._singer import Catalog
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
@@ -35,6 +40,7 @@ def sample_catalog_dict() -> dict:
     repositories_schema = PropertiesList(
         Property("name", StringType),
         Property("owner_email", StringType),
+        Property("description", StringType),
         Property("description", StringType),
     ).to_dict()
     foobars_schema = PropertiesList(
@@ -70,21 +76,25 @@ def sample_stream():
                 "name": "tap-something",
                 "owner_email": "sample1@example.com",
                 "description": "Comment A",
+                "create_date": "2019-01-01",
             },
             {
                 "name": "my-tap-something",
                 "owner_email": "sample2@example.com",
                 "description": "Comment B",
+                "create_date": "2020-01-01",
             },
             {
                 "name": "target-something",
                 "owner_email": "sample3@example.com",
                 "description": "Comment C",
+                "create_date": "2021-01-01",
             },
             {
                 "name": "not-atap",
                 "owner_email": "sample4@example.com",
                 "description": "Comment D",
+                "create_date": "2022-01-01",
             },
         ],
         "foobars": [
@@ -107,6 +117,7 @@ def transform_stream_maps():
             "email_hash": "md5(config['hash_seed'] + owner_email)",
             "description": "'[masked]'",
             "description2": "str('[masked]')",
+            "create_year": "int(datetime.date.fromisoformat(create_date).year)",
             "int_test": "int('0')",
             "__else__": None,
         },
@@ -125,6 +136,7 @@ def transformed_result(stream_map_config):
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
+                "create_year": 2019,
                 "int_test": 0,
             },
             {
@@ -135,6 +147,7 @@ def transformed_result(stream_map_config):
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
+                "create_year": 2020,
                 "int_test": 0,
             },
             {
@@ -145,6 +158,7 @@ def transformed_result(stream_map_config):
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
+                "create_year": 2021,
                 "int_test": 0,
             },
             {
@@ -155,6 +169,7 @@ def transformed_result(stream_map_config):
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
+                "create_year": 2022,
                 "int_test": 0,
             },
         ],
@@ -174,6 +189,7 @@ def transformed_schemas():
             Property("email_hash", StringType),
             Property("description", StringType),
             Property("description2", StringType),
+            Property("create_year", IntegerType),
             Property("int_test", IntegerType),
         ).to_dict(),
         "foobars": PropertiesList(
@@ -433,19 +449,19 @@ def clear_schema_cache() -> None:
     get_selected_schema.cache_clear()
 
 
+@freeze_time("2022-01-01T00:00:00Z")
+@pytest.mark.snapshot
 @pytest.mark.parametrize(
-    "stream_alias,stream_maps,flatten,flatten_max_depth,output_fields,key_properties",
+    "stream_maps,flatten,flatten_max_depth,snapshot_name",
     [
-        (
-            "mystream",
+        pytest.param(
             {},
             False,
             0,
-            {"email", "count", "user"},
-            [],
+            "no_map.jsonl",
+            id="no_map",
         ),
-        (
-            "mystream",
+        pytest.param(
             {
                 "mystream": {
                     "email_hash": "md5(email)",
@@ -453,11 +469,10 @@ def clear_schema_cache() -> None:
             },
             False,
             0,
-            {"email", "count", "user", "email_hash"},
-            [],
+            "keep_all_fields.jsonl",
+            id="keep_all_fields",
         ),
-        (
-            "mystream",
+        pytest.param(
             {
                 "mystream": {
                     "email_hash": "md5(email)",
@@ -467,11 +482,23 @@ def clear_schema_cache() -> None:
             },
             False,
             0,
-            {"fixed_count", "email_hash"},
-            [],
+            "only_mapped_fields.jsonl",
+            id="only_mapped_fields",
         ),
-        (
-            "mystream",
+        pytest.param(
+            {
+                "mystream": {
+                    "email_hash": "md5(email)",
+                    "fixed_count": "int(count-1)",
+                    "__else__": "__NULL__",
+                }
+            },
+            False,
+            0,
+            "only_mapped_fields_null_string.jsonl",
+            id="only_mapped_fields_null_string",
+        ),
+        pytest.param(
             {
                 "mystream": {
                     "email_hash": "md5(email)",
@@ -481,51 +508,52 @@ def clear_schema_cache() -> None:
             },
             False,
             0,
-            {"email_hash"},
-            ["email_hash"],
+            "changed_key_properties.jsonl",
+            id="changed_key_properties",
         ),
-        (
-            "sourced_stream_1",
+        pytest.param(
             {"mystream": None, "sourced_stream_1": {"__source__": "mystream"}},
             False,
             0,
-            {"email", "count", "user"},
-            [],
+            "sourced_stream_1.jsonl",
+            id="sourced_stream_1",
         ),
-        (
-            "sourced_stream_2",
+        pytest.param(
+            {"mystream": "__NULL__", "sourced_stream_1": {"__source__": "mystream"}},
+            False,
+            0,
+            "sourced_stream_1_null_string.jsonl",
+            id="sourced_stream_1_null_string",
+        ),
+        pytest.param(
             {"sourced_stream_2": {"__source__": "mystream"}, "__else__": None},
             False,
             0,
-            {"email", "count", "user"},
-            [],
+            "sourced_stream_2.jsonl",
+            id="sourced_stream_2",
         ),
-        (
-            "aliased_stream",
+        pytest.param(
             {"mystream": {"__alias__": "aliased_stream"}},
             False,
             0,
-            {"email", "count", "user"},
-            [],
+            "aliased_stream.jsonl",
+            id="aliased_stream",
         ),
-        (
-            "mystream",
+        pytest.param(
             {},
             True,
             1,
-            {"email", "count", "user__id", "user__sub"},
-            [],
+            "flatten_depth_1.jsonl",
+            id="flatten_depth_1",
         ),
-        (
-            "mystream",
+        pytest.param(
             {},
             True,
             10,
-            {"email", "count", "user__id", "user__sub__num"},
-            [],
+            "flatten_all.jsonl",
+            id="flatten_all",
         ),
-        (
-            "mystream",
+        pytest.param(
             {
                 "mystream": {
                     "email_hash": "md5(email)",
@@ -534,11 +562,10 @@ def clear_schema_cache() -> None:
             },
             True,
             10,
-            {"email", "count", "email_hash", "user__id", "user__sub__num"},
-            ["email_hash"],
+            "map_and_flatten.jsonl",
+            id="map_and_flatten",
         ),
-        (
-            "mystream",
+        pytest.param(
             {
                 "mystream": {
                     "email": None,
@@ -546,33 +573,41 @@ def clear_schema_cache() -> None:
             },
             False,
             0,
-            {"count", "user"},
-            [],
+            "drop_property.jsonl",
+            id="drop_property",
         ),
-    ],
-    ids=[
-        "no_map",
-        "keep_all_fields",
-        "only_mapped_fields",
-        "changed_key_properties",
-        "sourced_stream_1",
-        "sourced_stream_2",
-        "aliased_stream",
-        "flatten_depth_1",
-        "flatten_all",
-        "map_and_flatten",
-        "drop_property",
+        pytest.param(
+            {"mystream": {"email": "__NULL__"}},
+            False,
+            0,
+            "drop_property_null_string.jsonl",
+            id="drop_property_null_string",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "count": "count",
+                    "__else__": None,
+                }
+            },
+            False,
+            0,
+            "non_pk_passthrough.jsonl",
+            id="non_pk_passthrough",
+        ),
     ],
 )
 def test_mapped_stream(
+    snapshot: Snapshot,
+    snapshot_dir: Path,
     clear_schema_cache: None,
-    stream_alias: str,
     stream_maps: dict,
     flatten: bool,
     flatten_max_depth: Optional[int],
-    output_fields: Set[str],
-    key_properties: List[str],
+    snapshot_name: str,
 ):
+    snapshot.snapshot_dir = snapshot_dir.joinpath("mapped_stream")
+
     tap = MappedTap(
         config={
             "stream_maps": stream_maps,
@@ -580,23 +615,9 @@ def test_mapped_stream(
             "flattening_max_depth": flatten_max_depth,
         }
     )
-    stream = tap.streams["mystream"]
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        tap.sync_all()
 
-    schema_messages = list(stream._generate_schema_messages())
-    assert len(schema_messages) == 1, "Incorrect number of schema messages generated."
-    schema_message = schema_messages[0]
-    assert schema_message.stream == stream_alias
-    assert schema_message.key_properties == key_properties
-    assert schema_message.schema["properties"].keys() == output_fields
-
-    for raw_record in stream.get_records(None):
-        record_message = next(stream._generate_record_messages(cast(dict, raw_record)))
-        transformed_record = record_message.record
-
-        assert record_message.stream == stream_alias
-        assert output_fields == set(transformed_record.keys())
-
-        for output_field in output_fields:
-            assert transformed_record[
-                output_field
-            ], f"Value for field '{output_field}' should be nonempty."
+    buf.seek(0)
+    snapshot.assert_match(buf.read(), snapshot_name)

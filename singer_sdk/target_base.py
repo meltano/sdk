@@ -1,5 +1,7 @@
 """Target abstract class."""
 
+from __future__ import annotations
+
 import abc
 import copy
 import json
@@ -7,7 +9,7 @@ import sys
 import time
 from io import FileIO
 from pathlib import Path, PurePath
-from typing import IO, Callable, Counter, Dict, List, Optional, Tuple, Type, Union
+from typing import IO, Callable, Counter
 
 import click
 from joblib import Parallel, delayed, parallel_backend
@@ -17,7 +19,12 @@ from singer_sdk.exceptions import ConfigValidationError, RecordsWithoutSchemaExc
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
-from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
+from singer_sdk.helpers.capabilities import (
+    TARGET_SCHEMA_CONFIG,
+    CapabilitiesEnum,
+    PluginCapabilities,
+    TargetCapabilities,
+)
 from singer_sdk.io_base import SingerMessageType, SingerReader
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
@@ -36,15 +43,15 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     object for that record.
     """
 
-    _MAX_RECORD_AGE_IN_MINUTES: float = 30.0
+    _MAX_RECORD_AGE_IN_MINUTES: float = 5.0
 
     # Default class to use for creating new sink objects.
     # Required if `Target.get_sink_class()` is not defined.
-    default_sink_class: Optional[Type[Sink]] = None
+    default_sink_class: type[Sink] | None = None
 
     def __init__(
         self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
@@ -64,11 +71,11 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             validate_config=validate_config,
         )
 
-        self._latest_state: Dict[str, dict] = {}
-        self._drained_state: Dict[str, dict] = {}
-        self._sinks_active: Dict[str, Sink] = {}
-        self._sinks_to_clear: List[Sink] = []
-        self._max_parallelism: Optional[int] = _MAX_PARALLELISM
+        self._latest_state: dict[str, dict] = {}
+        self._drained_state: dict[str, dict] = {}
+        self._sinks_active: dict[str, Sink] = {}
+        self._sinks_to_clear: list[Sink] = []
+        self._max_parallelism: int | None = _MAX_PARALLELISM
 
         # Approximated for max record age enforcement
         self._last_full_drain_at: float = time.time()
@@ -81,7 +88,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         )
 
     @classproperty
-    def capabilities(self) -> List[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:
         """Get target capabilities.
 
         Returns:
@@ -122,9 +129,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self,
         stream_name: str,
         *,
-        record: Optional[dict] = None,
-        schema: Optional[dict] = None,
-        key_properties: Optional[List[str]] = None,
+        record: dict | None = None,
+        schema: dict | None = None,
+        key_properties: list[str] | None = None,
     ) -> Sink:
         """Return a sink for the given stream name.
 
@@ -170,7 +177,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         return existing_sink
 
-    def get_sink_class(self, stream_name: str) -> Type[Sink]:
+    def get_sink_class(self, stream_name: str) -> type[Sink]:
         """Get sink for a stream.
 
         Developers can override this method to return a custom Sink type depending
@@ -208,7 +215,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     @final
     def add_sink(
-        self, stream_name: str, schema: dict, key_properties: Optional[List[str]] = None
+        self, stream_name: str, schema: dict, key_properties: list[str] | None = None
     ) -> Sink:
         """Create a sink and register it.
 
@@ -224,14 +231,15 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         """
         self.logger.info(f"Initializing '{self.name}' target sink...")
         sink_class = self.get_sink_class(stream_name=stream_name)
-        result = sink_class(
+        sink = sink_class(
             target=self,
             stream_name=stream_name,
             schema=schema,
             key_properties=key_properties,
         )
-        self._sinks_active[stream_name] = result
-        return result
+        sink.setup()
+        self._sinks_active[stream_name] = sink
+        return sink
 
     def _assert_sink_exists(self, stream_name: str) -> None:
         """Raise a RecordsWithoutSchemaException exception if stream doesn't exist.
@@ -324,6 +332,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             message_dict: The newly received schema message.
         """
         self._assert_line_requires(message_dict, requires={"stream", "schema"})
+        self._assert_line_requires(message_dict["schema"], requires={"properties"})
 
         stream_name = message_dict["stream"]
         schema = message_dict["schema"]
@@ -460,7 +469,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         sink.process_batch(draining_status)
         sink.mark_drained()
 
-    def _drain_all(self, sink_list: List[Sink], parallelism: int) -> None:
+    def _drain_all(self, sink_list: list[Sink], parallelism: int) -> None:
         if parallelism == 1:
             for sink in sink_list:
                 self.drain_one(sink)
@@ -505,9 +514,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         def cli(
             version: bool = False,
             about: bool = False,
-            config: Tuple[str, ...] = (),
-            format: str = None,
-            file_input: FileIO = None,
+            config: tuple[str, ...] = (),
+            format: str | None = None,
+            file_input: FileIO | None = None,
         ) -> None:
             """Handle command line execution.
 
@@ -538,7 +547,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             cls.print_version(print_fn=cls.logger.info)
 
             parse_env_config = False
-            config_files: List[PurePath] = []
+            config_files: list[PurePath] = []
             for config_path in config:
                 if config_path == "ENV":
                     # Allow parse from env vars:
@@ -572,5 +581,47 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
 class SQLTarget(Target):
     """Target implementation for SQL destinations."""
+
+    @classproperty
+    def capabilities(self) -> list[CapabilitiesEnum]:
+        """Get target capabilities.
+
+        Returns:
+            A list of capabilities supported by this target.
+        """
+        sql_target_capabilities: list[CapabilitiesEnum] = super().capabilities
+        sql_target_capabilities.extend([TargetCapabilities.TARGET_SCHEMA])
+
+        return sql_target_capabilities
+
+    @classmethod
+    def append_builtin_config(cls: type[SQLTarget], config_jsonschema: dict) -> None:
+        """Appends built-in config to `config_jsonschema` if not already set.
+
+        To customize or disable this behavior, developers may either override this class
+        method or override the `capabilities` property to disabled any unwanted
+        built-in capabilities.
+
+        For all except very advanced use cases, we recommend leaving these
+        implementations "as-is", since this provides the most choice to users and is
+        the most "future proof" in terms of taking advantage of built-in capabilities
+        which may be added in the future.
+
+        Args:
+            config_jsonschema: [description]
+        """
+
+        def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
+            # Append any missing properties in the target with those from source.
+            for k, v in source_jsonschema["properties"].items():
+                if k not in target_jsonschema["properties"]:
+                    target_jsonschema["properties"][k] = v
+
+        capabilities = cls.capabilities
+
+        if TargetCapabilities.TARGET_SCHEMA in capabilities:
+            _merge_missing(TARGET_SCHEMA_CONFIG, config_jsonschema)
+
+        super().append_builtin_config(config_jsonschema)
 
     pass

@@ -41,7 +41,7 @@ class TapCountries(Tap):
     config options and does not require authentication.
     """
     name = "tap-countries"
-    config_jsonschema = PropertiesList([]).to_dict()
+    config_jsonschema = th.PropertiesList([]).to_dict()
 
     def discover_streams(self) -> List[Stream]:
         """Return a list containing the two stream types."""
@@ -127,11 +127,11 @@ class ParquetStream(Stream):
         """Dynamically detect the json schema for the stream.
         This is evaluated prior to any records being retrieved.
         """
-        properties: List[Property] = []
-        for header in FAKECSV.split("\n")[0].split(",")
+        properties: List[th.Property] = []
+        for header in FAKECSV.split("\n")[0].split(","):
             # Assume string type for all fields
-            properties.add(header, StringType())
-        return PropertiesList(*properties).to_dict()
+            properties.append(th.Property(header, th.StringType()))
+        return th.PropertiesList(*properties).to_dict()
 ```
 
 Here is another example from the Parquet tap. This sample uses a
@@ -148,7 +148,7 @@ class ParquetStream(Stream):
         """Dynamically detect the json schema for the stream.
         This is evaluated prior to any records being retrieved.
         """
-        properties: List[Property] = []
+        properties: List[th.Property] = []
         # Get a schema object using the parquet and pyarrow libraries
         parquet_schema = pq.ParquetFile(self.filepath).schema_arrow
 
@@ -160,10 +160,10 @@ class ParquetStream(Stream):
             dtype = get_jsonschema_type(str(parquet_schema.types[i]))
 
             # Add the new property to our list
-            properties.append(Property(name, dtype))
+            properties.append(th.Property(name, dtype))
 
         # Return the list as a JSON Schema dictionary object
-        return PropertiesList(*properties).to_dict()
+        return th.PropertiesList(*properties).to_dict()
 ```
 
 ### Initialize a collection of tap streams with differing types
@@ -254,6 +254,34 @@ class CachedAuthStream(RESTStream):
         """Stream authenticator."""
         return APIAuthenticatorBase(stream=self)
 ```
+
+### Use one of `requests`'s built-in authenticators
+
+```python
+from requests.auth import HTTPDigestAuth
+from singer_sdk.streams import RESTStream
+
+class DigestAuthStream(RESTStream):
+    """A stream with digest authentication."""
+
+    @property
+    def authenticator(self) -> HTTPDigestAuth:
+        """Stream authenticator."""
+        return HTTPDigestAuth(
+            username=self.config["username"],
+            password=self.config["password"],
+        )
+```
+
+[`HTTPBasicAuth`](https://requests.readthedocs.io/en/latest/api/#requests.auth.HTTPBasicAuth) and
+[`HTTPProxyAuth`](https://requests.readthedocs.io/en/latest/api/#requests.auth.HTTPProxyAuth)
+are also available in `requests.auth`. In addition to `requests.auth` classes, the community
+has published a few packages with custom authenticator classes, which are compatible with the SDK.
+For example:
+
+- [`requests-aws4auth`](https://github.com/tedder/requests-aws4auth): AWS v4 authentication
+- [`requests_auth`](https://github.com/Colin-b/requests_auth): A collection of authenticators
+  for various services and protocols including Azure, Okta and NTLM.
 
 ### Custom response validation
 

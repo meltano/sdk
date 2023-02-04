@@ -4,6 +4,10 @@
 
 SDK-based taps, targets, and mappers automatically support the custom inline mappings feature. Stream mappings can be applied to solve the following real-world applications:
 
+### Note on `null` values
+
+In all examples below where `null` is used as a value, the special string `"__NULL__"` can be used instead.
+
 ### Stream-Level Mapping Applications
 
 - **Stream aliasing:** streams can be aliased to provide custom naming downstream.
@@ -69,7 +73,7 @@ Developers simply enable the feature using the instructions below, and then user
 ## Enabling Stream Maps in SDK-Based Plugins
 
 To support inline mapping functions, the developer only needs to declare two plugin settings,
-called `stream_maps` and `stream_map_settings`, and declare both settings as `object` type. (For example:
+called `stream_maps` and `stream_map_config`, and declare both settings as `object` type. (For example:
 `Property("stream_maps, ObjectType())` if using the python helper classes or
 `"stream_maps": {"type": "object"}` if using native JSON Schema declarations.)
 
@@ -160,6 +164,8 @@ can be referenced directly by mapping expressions.
     of the hash's hex digest.
   - This is defined by the SDK internally with native python:
     `hashlib.md5(<input>.encode("utf-8")).hexdigest()`.
+- `datetime` - This is the datetime module object from the Python standard library. You can access
+    datetime.datetime, datetime.timedelta, etc.
 
 #### Built-in Variable Names
 
@@ -266,6 +272,21 @@ Notes:
 
 - To sync the stream as if it did not contain a primary key, simply set `__key_properties__` to `null`.
 - Key properties _must_ be present in the transformed stream result. Otherwise, an error will be raised.
+
+### Add a property with a string literal value
+
+Some applications, such as multi-tenant, may benefit from adding a property with a hardcoded string literal value.
+These values need to be wrapped in double quotes to differentiate them from property names:
+
+```json
+{
+    "stream_maps": {
+        "customers": {
+            "a_new_field": "\"client-123\""
+        }
+    }
+}
+```
 
 #### Q: What is the difference between `primary_keys` and `key_properties`?
 

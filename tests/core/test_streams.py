@@ -9,8 +9,8 @@ import pendulum
 import pytest
 import requests
 
+from singer_sdk._singerlib import Catalog, MetadataMapping
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._singer import Catalog, MetadataMapping
 from singer_sdk.helpers.jsonpath import _compile_jsonpath, extract_jsonpath
 from singer_sdk.pagination import first
 from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMENTAL
