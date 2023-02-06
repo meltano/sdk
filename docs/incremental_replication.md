@@ -1,14 +1,14 @@
 # Incremental Replication
 
-With incremental replication, a Singer tap emits only data that were created or updated since the previous import rather than the full table. 
+With incremental replication, a Singer tap emits only data that were created or updated since the previous import rather than the full table.
 
-To support incremental replication, the tap must first define how its replication state will be tracked, e.g. the id of the newest record or the maximal update timestamp in the previous import. Meltano stores the state and makes it available through the context object on subsequent runs. Using the state, the tap should then skip returning rows where the replication key value is less than previous maximal replication key value stored in the state. 
+To support incremental replication, the tap must first define how its replication state will be tracked, e.g. the id of the newest record or the maximal update timestamp in the previous import. Meltano stores the state and makes it available through the context object on subsequent runs. Using the state, the tap should then skip returning rows where the replication key value is less than previous maximal replication key value stored in the state.
 
 ## Example Code: Timestamp-Based Incremental Replication
 
 ```py
 class CommentsStream(RESTStream):
-    
+
     replication_key = "date_gmt"
     is_sorted = True
 
