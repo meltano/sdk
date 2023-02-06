@@ -951,6 +951,37 @@ class SQLConnector:
             },
         )
 
+    @staticmethod
+    def remove_collation(
+        column_type: sqlalchemy.types.TypeEngine,
+    ) -> str | None:
+        """Removes collation for the given column TypeEngine instance.
+
+        Args:
+            column_type: Column SQLAlchemy type.
+
+        Returns:
+             The removed collation as a string.
+        """
+        if hasattr(column_type, "collation") and column_type.collation:
+            column_type_collation: str = column_type.collation
+            setattr(column_type, "collation", None)
+            return column_type_collation
+        return None
+
+    @staticmethod
+    def update_collation(
+        column_type: sqlalchemy.types.TypeEngine, collation: str | None
+    ) -> None:
+        """Sets column collation if column type has a collation attribute.
+
+        Args:
+            column_type: Column SQLAlchemy type.
+            collation: The colation
+        """
+        if hasattr(column_type, "collation") and collation:
+            setattr(column_type, "collation", collation)
+
     def _adapt_column_type(
         self,
         full_table_name: str,
@@ -971,6 +1002,9 @@ class SQLConnector:
             full_table_name, column_name
         )
 
+        # remove collation if present and save it
+        current_type_collation = self.remove_collation(current_type)
+
         # Check if the existing column type and the sql type are the same
         if str(sql_type) == str(current_type):
             # The current column and sql type are the same
@@ -984,6 +1018,10 @@ class SQLConnector:
         if str(compatible_sql_type) == str(current_type):
             # Nothing to do
             return
+
+        # Put the collation level back before altering the column
+        if current_type_collation:
+            self.update_collation(compatible_sql_type, current_type_collation)
 
         if not self.allow_column_alter:
             raise NotImplementedError(

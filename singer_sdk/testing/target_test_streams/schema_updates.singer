@@ -1,0 +1,11 @@
+{"type": "SCHEMA", "stream": "test_schema_updates", "key_properties": ["id"], "schema": {"type": "object", "properties": {"id": {"type": "integer"}, "a1": {"type": "number"}, "a2": {"type": "string"}}}}
+{"type": "RECORD", "stream": "test_schema_updates", "record": {"id": 1, "a1": 101, "a2": "string1"}}
+{"type": "SCHEMA", "stream": "test_schema_updates", "key_properties": ["id"], "schema": {"type": "object", "properties": {"id": {"type": "integer"}, "a1": {"type": "number"}, "a2": {"type": "string"}, "a3": {"type": "boolean"}}}}
+{"type": "RECORD", "stream": "test_schema_updates", "record": {"id": 2, "a1": 102, "a2": "string2", "a3": true}}
+{"type": "SCHEMA", "stream": "test_schema_updates", "key_properties": ["id"], "schema": {"type": "object", "properties": {"id": {"type": "integer"}, "a1": {"type": "number"}, "a2": {"type": "string"}, "a3": {"type": "boolean"}, "a4": {"type": "object", "properties": {"id": {"type": "integer"}, "value": {"type": "integer"}}}, "a5": {"type": "array", "items": {"type": "string"}}}}}
+{"type": "RECORD", "stream": "test_schema_updates", "record": {"id": 3, "a1": 103, "a2": "string3", "a3": false, "a4": {"id": 1, "value": 1}, "a5": [ "banana", "apple" ]}}
+{"type": "RECORD", "stream": "test_schema_updates", "record": {"id": 4, "a1": 104, "a2": "string4", "a3": true, "a4": {"id": 2, "value": 22}, "a5": [ "orange", "pear" ]}}
+{"type": "SCHEMA", "stream": "test_schema_updates", "key_properties": ["id"], "schema": {"type": "object", "properties": {"id": {"type": "integer"}, "a1": {"type": "number"}, "a2": {"type": "string"}, "a3": {"type": "boolean"}, "a4": {"type": "object", "properties": {"id": {"type": "integer"}, "value": {"type": "integer"}}}, "a5": {"type": "array", "items": {"type": "string"}}, "a6": {"type": "integer"}}}}
+{"type": "RECORD", "stream": "test_schema_updates", "record": {"id": 5, "a1": 105, "a2": "string5", "a3": false, "a4": {"id": 3, "value": 33}, "a5": [ "apple" ], "a6": 985}}
+{"type": "RECORD", "stream": "test_schema_updates", "record": {"id": 6, "a1": 106, "a2": "string6", "a3": true, "a4": {"id": 4, "value": 444}, "a5": [ "banana", "orange" ], "a6": 341}}
+{"type": "STATE", "value": {"test_schema_updates": 6}}

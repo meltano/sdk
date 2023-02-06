@@ -32,6 +32,7 @@ test_dependencies = [
     "coverage[toml]",
     "pytest",
     "pytest-snapshot",
+    "pytest-durations",
     "freezegun",
     "pandas",
     "requests-mock",
@@ -54,6 +55,7 @@ def mypy(session: Session) -> None:
     session.install(".")
     session.install(
         "mypy",
+        "pytest",
         "sqlalchemy2-stubs",
         "types-python-dateutil",
         "types-requests",
@@ -86,8 +88,8 @@ def tests(session: Session) -> None:
             "--parallel",
             "-m",
             "pytest",
-            "-x",
             "-v",
+            "--durations=10",
             *session.posargs,
         )
     finally:

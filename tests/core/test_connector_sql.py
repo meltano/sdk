@@ -91,3 +91,42 @@ class TestConnectorSQL:
             )
         )
         assert statement == rendered_statement
+
+    def test_remove_collation_text_type(self):
+        remove_collation = SQLConnector.remove_collation
+        test_collation = "SQL_Latin1_General_CP1_CI_AS"
+        current_type = sqlalchemy.types.Text(collation=test_collation)
+        current_type_collation = remove_collation(current_type)
+        # Check collation was set to None by the function
+        assert current_type.collation is None
+        # Check that we get the same collation we put in back out
+        assert current_type_collation == test_collation
+
+    def test_remove_collation_non_text_type(self):
+        remove_collation = SQLConnector.remove_collation
+        current_type = sqlalchemy.types.Integer()
+        current_type_collation = remove_collation(current_type)
+        # Check there is not a collation attribute
+        assert not hasattr(current_type, "collation")
+        # Check that we get the same type we put in
+        assert str(current_type) == "INTEGER"
+        # Check that this variable is missing
+        assert current_type_collation is None
+
+    def test_update_collation_text_type(self):
+        update_collation = SQLConnector.update_collation
+        test_collation = "SQL_Latin1_General_CP1_CI_AS"
+        compatible_type = sqlalchemy.types.Text(collation=None)
+        update_collation(compatible_type, test_collation)
+        # Check collation was set to the value we put in
+        assert compatible_type.collation == test_collation
+
+    def test_update_collation_non_text_type(self):
+        update_collation = SQLConnector.update_collation
+        test_collation = "SQL_Latin1_General_CP1_CI_AS"
+        compatible_type = sqlalchemy.types.Integer()
+        update_collation(compatible_type, test_collation)
+        # Check there is not a collation attribute
+        assert not hasattr(compatible_type, "collation")
+        # Check that we get the same type we put in
+        assert str(compatible_type) == "INTEGER"

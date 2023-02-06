@@ -17,6 +17,7 @@ from singer_sdk._singerlib.messages import (
     write_message,
 )
 from singer_sdk._singerlib.schema import Schema, resolve_schema_references
+from singer_sdk._singerlib.utils import strftime, strptime_to_utc
 
 __all__ = [
     "Catalog",
@@ -35,4 +36,6 @@ __all__ = [
     "write_message",
     "Schema",
     "resolve_schema_references",
+    "strftime",
+    "strptime_to_utc",
 ]
