@@ -750,11 +750,6 @@ class SQLConnector:
         current_type = sql_types[0]
         cur_len: int = getattr(current_type, "length", 0)
 
-        # Getting the length of each type
-        sql_type_len: int = getattr(sql_types[1], "length", 0)
-        if sql_type_len is None:
-            sql_type_len = 0
-
         # Convert the two types given into a sorted list
         # containing the best conversion classes
         sql_types = self._sort_types(sql_types)
