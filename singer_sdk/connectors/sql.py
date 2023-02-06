@@ -748,6 +748,7 @@ class SQLConnector:
         # Gathering Type to match variables
         # sent in _adapt_column_type
         current_type = sql_types[0]
+        cur_len: int = getattr(current_type, "length", None)
         # sql_type = sql_types[1]
 
         # Getting the length of each type
@@ -782,7 +783,7 @@ class SQLConnector:
                     if (
                         (opt_len is None)
                         or (opt_len == 0)
-                        or (current_type.length and (opt_len >= current_type.length))
+                        or (cur_len and (opt_len >= cur_len))
                     ):
                         return opt
                 elif isinstance(
@@ -793,7 +794,7 @@ class SQLConnector:
                     if (
                         (opt_len is None)
                         or (opt_len == 0)
-                        or (current_type.length and (opt_len >= current_type.length))
+                        or (cur_len and (opt_len >= cur_len))
                     ):
                         return opt
                 # If best conversion class is equal to current type
