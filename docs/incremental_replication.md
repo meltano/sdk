@@ -12,17 +12,23 @@ class CommentsStream(RESTStream):
     replication_key = "date_gmt"
     is_sorted = True
 
-    base_url = "https://example.com/wp-json/wp/v2/comments"
+    schema = th.PropertiesList(
+        th.Property("date_gmt", th.DateTimeType, description="date"),
+    ).to_dict()
 
     def get_url_params(
-        self, context: dict | None, next_page_token: _TToken | None
+        self, context: dict | None, next_page_token
     ) -> dict[str, Any]:
-        params = []
+        params = {}
         if starting_date := self.get_starting_timestamp(context):
             params["after"] = starting_date.isoformat()
         if next_page_token is not None:
             params["page"] = next_page_token
+        self.logger.info(f"QUERY PARAMS: {params}")
         return params
+
+    url_base = "https://example.com/wp-json/wp/v2/comments"
+    authenticator = None
 ```
 
 First we inform the SDK of the `replication_key`, which automatically triggers incremental import mode. Second, optionally, set `is_sorted` to true; with this setting, Singer will throw an error if a supposedly incremental import sends results older than the starting timestamp.
