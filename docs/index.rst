@@ -62,6 +62,7 @@ Advanced Topics
 
 .. toctree::
    :maxdepth: 1
+
    incremental_replication
    parent_streams
    partitioning
