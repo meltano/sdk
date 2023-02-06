@@ -748,7 +748,7 @@ class SQLConnector:
         # Gathering Type to match variables
         # sent in _adapt_column_type
         current_type = sql_types[0]
-        cur_len: int = getattr(current_type, "length", None)
+        cur_len: int = getattr(current_type, "length", 0)
         # sql_type = sql_types[1]
 
         # Getting the length of each type
