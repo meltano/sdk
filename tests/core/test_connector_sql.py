@@ -130,3 +130,35 @@ class TestConnectorSQL:
         assert not hasattr(compatible_type, "collation")
         # Check that we get the same type we put in
         assert str(compatible_type) == "INTEGER"
+
+    def test_merge_sql_types_text_current_max(self):
+        cls = SQLConnector()
+        current_type = sqlalchemy.types.VARCHAR(length=None)
+        sql_type = sqlalchemy.types.VARCHAR(length=255)
+        compatible_sql_type = cls.merge_sql_types([current_type, sql_type])
+        # Check that the current VARCHAR(MAX) type is kept
+        assert compatible_sql_type is current_type
+
+    def test_merge_sql_types_text_current_greater_than(self):
+        cls = SQLConnector()
+        current_type = sqlalchemy.types.VARCHAR(length=255)
+        sql_type = sqlalchemy.types.VARCHAR(length=64)
+        compatible_sql_type = cls.merge_sql_types([current_type, sql_type])
+        # Check the current greater VARCHAR(255) is kept
+        assert compatible_sql_type is current_type
+
+    def test_merge_sql_types_text_proposed_max(self):
+        cls = SQLConnector()
+        current_type = sqlalchemy.types.VARCHAR(length=64)
+        sql_type = sqlalchemy.types.VARCHAR(length=None)
+        compatible_sql_type = cls.merge_sql_types([current_type, sql_type])
+        # Check the current VARCHAR(64) is chosen over default varcahr(max)
+        assert compatible_sql_type is current_type
+
+    def test_merge_sql_types_text_current_less_than(self):
+        cls = SQLConnector()
+        current_type = sqlalchemy.types.VARCHAR(length=64)
+        sql_type = sqlalchemy.types.VARCHAR(length=255)
+        compatible_sql_type = cls.merge_sql_types([current_type, sql_type])
+        # Check that VARCHAR(255) is chosen over the lesser current VARCHAR(64)
+        assert compatible_sql_type is sql_type
