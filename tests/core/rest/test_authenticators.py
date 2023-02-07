@@ -16,6 +16,7 @@ from cryptography.hazmat.primitives.serialization import (
     PrivateFormat,
     PublicFormat,
 )
+from requests.auth import HTTPProxyAuth, _basic_auth_str
 
 from singer_sdk.authenticators import OAuthAuthenticator, OAuthJWTAuthenticator
 from singer_sdk.streams import RESTStream
@@ -182,3 +183,12 @@ def test_oauth_jwt_authenticator_payload(
     token = payload["assertion"]
 
     assert jwt.decode(token, public_key_string, algorithms=["RS256"]) == body
+
+
+def test_requests_library_auth(rest_tap: Tap):
+    """Validate that a requests.auth object can be used as an authenticator."""
+    stream: RESTStream = rest_tap.streams["proxy_auth_stream"]
+    r = stream.prepare_request(None, None)
+
+    assert isinstance(stream.authenticator, HTTPProxyAuth)
+    assert r.headers["Proxy-Authorization"] == _basic_auth_str("username", "password")
