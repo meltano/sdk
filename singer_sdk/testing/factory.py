@@ -56,7 +56,6 @@ def get_test_class(
             return test_runner
 
     for suite in test_suites:
-
         # make sure given runner is of type TapTestRunner
         expected_runner_class = (  # type: ignore[valid-type]
             TapTestRunner
@@ -78,11 +77,9 @@ def get_test_class(
                 setattr(BaseTestClass, f"test_{suite.kind}_{test.name}", test.run)
 
         if suite.kind in {"tap_stream", "tap_stream_attribute"}:
-
             streams = list(test_runner.tap.streams.values())
 
             if suite.kind == "tap_stream":
-
                 params = [
                     {
                         "stream": stream,
@@ -103,7 +100,6 @@ def get_test_class(
                     BaseTestClass.param_ids[test_name] = param_ids
 
             if suite.kind == "tap_stream_attribute":
-
                 for TestClass in suite.tests:
                     test = TestClass()
                     test_name = f"test_{suite.kind}_{test.name}"

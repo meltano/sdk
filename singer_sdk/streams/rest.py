@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import copy
 import logging
+import sys
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, Generator, Generic, Iterable, TypeVar
 from urllib.parse import urlparse
@@ -15,7 +16,7 @@ import requests
 
 from singer_sdk import metrics
 from singer_sdk._singerlib import Schema
-from singer_sdk.authenticators import APIAuthenticatorBase, SimpleAuthenticator
+from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import (
@@ -27,6 +28,11 @@ from singer_sdk.pagination import (
 from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
+
 if TYPE_CHECKING:
     from backoff.types import Details
 
@@ -34,6 +40,7 @@ DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 _TToken = TypeVar("_TToken")
+_Auth: TypeAlias = Callable[[requests.PreparedRequest], requests.PreparedRequest]
 
 
 class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
@@ -294,11 +301,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             https://requests.readthedocs.io/en/latest/api/#requests.Request
         """
         request = requests.Request(*args, **kwargs)
-
-        if self.authenticator:
-            authenticator = self.authenticator
-            authenticator.authenticate_request(request)
-
+        self.requests_session.auth = self.authenticator
         return self.requests_session.prepare_request(request)
 
     def prepare_request(
@@ -559,7 +562,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
     # Abstract methods:
 
     @property
-    def authenticator(self) -> APIAuthenticatorBase | None:
+    def authenticator(self) -> _Auth:
         """Return or set the authenticator for managing HTTP auth headers.
 
         If an authenticator is not specified, REST-based taps will simply pass

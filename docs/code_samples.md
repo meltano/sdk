@@ -255,6 +255,34 @@ class CachedAuthStream(RESTStream):
         return APIAuthenticatorBase(stream=self)
 ```
 
+### Use one of `requests`'s built-in authenticators
+
+```python
+from requests.auth import HTTPDigestAuth
+from singer_sdk.streams import RESTStream
+
+class DigestAuthStream(RESTStream):
+    """A stream with digest authentication."""
+
+    @property
+    def authenticator(self) -> HTTPDigestAuth:
+        """Stream authenticator."""
+        return HTTPDigestAuth(
+            username=self.config["username"],
+            password=self.config["password"],
+        )
+```
+
+[`HTTPBasicAuth`](https://requests.readthedocs.io/en/latest/api/#requests.auth.HTTPBasicAuth) and
+[`HTTPProxyAuth`](https://requests.readthedocs.io/en/latest/api/#requests.auth.HTTPProxyAuth)
+are also available in `requests.auth`. In addition to `requests.auth` classes, the community
+has published a few packages with custom authenticator classes, which are compatible with the SDK.
+For example:
+
+- [`requests-aws4auth`](https://github.com/tedder/requests-aws4auth): AWS v4 authentication
+- [`requests_auth`](https://github.com/Colin-b/requests_auth): A collection of authenticators
+  for various services and protocols including Azure, Okta and NTLM.
+
 ### Custom response validation
 
 Some APIs deviate from HTTP status codes to report failures. For those cases,
