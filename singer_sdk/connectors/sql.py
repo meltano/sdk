@@ -97,7 +97,7 @@ class SQLConnector:
             "If you need to execute something that isn't available "
             "on the connector currently, make a child class and "
             "add your required method on that connector.",
-            DeprecationWarning
+            DeprecationWarning,
         )
         return self._engine.connect().execution_options(stream_results=True)
 
@@ -112,7 +112,7 @@ class SQLConnector:
         """
         warnings.warn(
             "`create_sqlalchemy_engine` is deprecated. Override `sqlalchemy_engine` or sqlalchemy_url` instead.",
-            DeprecationWarning
+            DeprecationWarning,
         )
         return self._engine
 
@@ -131,7 +131,7 @@ class SQLConnector:
             "`connection` is deprecated. If you need to execute something "
             "that isn't available on the connector currently, make a child "
             "class and add your required method on that connector.",
-            DeprecationWarning
+            DeprecationWarning,
         )
         return self.create_sqlalchemy_connection()
 
