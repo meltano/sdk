@@ -111,7 +111,8 @@ class SQLConnector:
             A newly created SQLAlchemy engine object.
         """
         warnings.warn(
-            "`create_sqlalchemy_engine` is deprecated. Override `sqlalchemy_engine` or sqlalchemy_url` instead.",
+            "`create_sqlalchemy_engine` is deprecated. Override"
+            "`_engine` or sqlalchemy_url` instead.",
             DeprecationWarning,
         )
         return self._engine
@@ -281,7 +282,7 @@ class SQLConnector:
         """Return the engine object.
 
         Returns:
-            The dialect object.
+            The SQLAlchemy Engine that's attached to this SQLConnector instance.
         """
         if not self._cached_engine:
             self._cached_engine = sqlalchemy.create_engine(
