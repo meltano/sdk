@@ -17,6 +17,6 @@ class SuiteConfig:
              no records, for named streams.
     """
 
-    max_records_limit: int | None = 5
+    max_records_limit: int | None = None
     ignore_no_records: bool = False
     ignore_no_records_for_streams: list[str] = field(default_factory=list)
