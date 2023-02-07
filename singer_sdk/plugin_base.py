@@ -366,7 +366,6 @@ class PluginBase(metaclass=abc.ABCMeta):
                 f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n"
             )
             for key, value in info.items():
-
                 if key == "capabilities":
                     capabilities = f"## {key.title()}\n\n"
                     capabilities += "\n".join([f"* `{v}`" for v in value])
