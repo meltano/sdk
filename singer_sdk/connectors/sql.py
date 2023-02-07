@@ -93,7 +93,7 @@ class SQLConnector:
             A newly created SQLAlchemy engine object.
         """
         warnings.warn(
-            "`create_sqlalchemy_connection` is deprecated. "
+            "`SQLConnector.create_sqlalchemy_connection` is deprecated. "
             "If you need to execute something that isn't available "
             "on the connector currently, make a child class and "
             "add your required method on that connector.",
@@ -111,7 +111,7 @@ class SQLConnector:
             A newly created SQLAlchemy engine object.
         """
         warnings.warn(
-            "`create_sqlalchemy_engine` is deprecated. Override"
+            "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override"
             "`_engine` or sqlalchemy_url` instead.",
             DeprecationWarning,
         )
@@ -129,7 +129,7 @@ class SQLConnector:
             The active SQLAlchemy connection object.
         """
         warnings.warn(
-            "`connection` is deprecated. If you need to execute something "
+            "`SQLConnector.connection` is deprecated. If you need to execute something "
             "that isn't available on the connector currently, make a child "
             "class and add your required method on that connector.",
             DeprecationWarning,
