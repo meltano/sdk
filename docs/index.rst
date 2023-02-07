@@ -43,8 +43,8 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
 
    dev_guide
    guides/index
-   python_tips
-   code_samples
+   Python Tips <python_tips>
+   Code Samples <code_samples>
    cli_commands
    capabilities
    faq
@@ -68,7 +68,6 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
    batch
    sinks
    implementation/index
-   typing
    testing
 
 .. toctree::
