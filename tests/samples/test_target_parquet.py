@@ -11,7 +11,6 @@ from singer_sdk.testing import get_target_test_class
 # temporary exclude of python 3.11
 # TODO: remove when pyarrow is supported by 3.11
 if sys.version_info < (3, 11):
-
     from samples.sample_target_parquet.parquet_target import SampleTargetParquet
 
     SAMPLE_FILEPATH = Path(f".output/test_{uuid.uuid4()}/")
