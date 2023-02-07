@@ -33,7 +33,6 @@ def get_test_class(
     Returns:
         A test class usable by pytest.
     """
-    suite_config = suite_config or SuiteConfig()
 
     class BaseTestClass:
         """Base test class."""
@@ -43,7 +42,7 @@ def get_test_class(
 
         @pytest.fixture
         def config(self) -> SuiteConfig:
-            return suite_config or SuiteConfig()
+            return suite_config if suite_config is not None else SuiteConfig()
 
         @pytest.fixture
         def resource(self) -> Any:  # noqa: ANN401
@@ -190,10 +189,10 @@ def get_tap_test_class(
     if "parse_env_config" not in kwargs:
         kwargs["parse_env_config"] = True
 
-    suite_config = suite_config or SuiteConfig()
-
     return get_test_class(
-        test_runner=TapTestRunner(tap_class=tap_class, config=config, **kwargs),
+        test_runner=TapTestRunner(
+            tap_class=tap_class, config=config, suite_config=suite_config, **kwargs
+        ),
         test_suites=suites,
         suite_config=suite_config,
     )
@@ -226,11 +225,12 @@ def get_target_test_class(
     if "parse_env_config" not in kwargs:
         kwargs["parse_env_config"] = True
 
-    suite_config = suite_config or SuiteConfig()
-
     return get_test_class(
         test_runner=TargetTestRunner(
-            target_class=target_class, config=config, **kwargs
+            target_class=target_class,
+            config=config,
+            suite_config=suite_config,
+            **kwargs,
         ),
         test_suites=suites,
         suite_config=suite_config,

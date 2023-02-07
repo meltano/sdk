@@ -13,13 +13,15 @@ from singer_sdk.helpers._catalog import (
     pop_deselected_record_properties,
 )
 from singer_sdk.testing import get_tap_test_class
+from singer_sdk.testing.config import SuiteConfig
 
 SAMPLE_CONFIG = {}
 SAMPLE_CONFIG_BAD = {"not": "correct"}
 
 # standard tap tests
 TestSampleTapCountries = get_tap_test_class(
-    tap_class=SampleTapCountries, config=SAMPLE_CONFIG
+    tap_class=SampleTapCountries,
+    config=SAMPLE_CONFIG,
 )
 
 

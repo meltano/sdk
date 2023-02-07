@@ -42,7 +42,7 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
         self.singer_class = singer_class
         self.config = config or {}
         self.default_kwargs = kwargs
-        self.suite_config = suite_config or SuiteConfig()
+        self.suite_config = suite_config if suite_config is not None else SuiteConfig()
 
     @staticmethod
     def _clean_sync_output(raw_records: str) -> list[dict]:
