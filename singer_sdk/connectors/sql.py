@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import functools
 import logging
 from contextlib import contextmanager
 from datetime import datetime
@@ -36,6 +35,7 @@ class SQLConnector:
     allow_column_alter: bool = False  # Whether altering column types is supported.
     allow_merge_upsert: bool = False  # Whether MERGE UPSERT is supported.
     allow_temp_tables: bool = True  # Whether temp tables are supported.
+    _cached_engine: Engine | None = None
 
     def __init__(
         self, config: dict | None = None, sqlalchemy_url: str | None = None
@@ -68,7 +68,7 @@ class SQLConnector:
         return logging.getLogger("sqlconnector")
 
     @contextmanager
-    def _connect(self) -> Iterator[None]:
+    def _connect(self) -> Iterator[sqlalchemy.engine.Connection]:
         with self._engine.connect().execution_options(stream_results=True) as conn:
             yield conn
 
@@ -93,7 +93,7 @@ class SQLConnector:
         """
         return self._engine.connect().execution_options(stream_results=True)
 
-    def create_sqlalchemy_engine(self) -> sqlalchemy.engine.Engine:
+    def create_sqlalchemy_engine(self) -> Engine:
         """(DEPRECATED) Return a new SQLAlchemy engine using the provided config.
 
         Developers can generally override just one of the following:
@@ -259,17 +259,17 @@ class SQLConnector:
         return cast(sqlalchemy.engine.Dialect, self._engine.dialect)
 
     @property
-    @functools.lru_cache()
-    def _engine(self) -> sqlalchemy.engine.Engine:
+    def _engine(self) -> Engine:
         """Return the engine object.
 
         Returns:
             The dialect object.
         """
-        return cast(
-            sqlalchemy.engine.Engine,
-            sqlalchemy.create_engine(self.sqlalchemy_url, echo=False),
-        )
+        if not self._cached_engine:
+            self._cached_engine = sqlalchemy.create_engine(
+                self.sqlalchemy_url, echo=False
+            )
+        return cast(Engine, self._cached_engine)
 
     def quote(self, name: str) -> str:
         """Quote a name if it needs quoting, using '.' as a name-part delimiter.
