@@ -1,4 +1,4 @@
-# [SDK Implementation Details](./index.md) - Catalog Discovery
+# Catalog Discovery
 
 All taps developed using the SDK will automatically support `discovery` as a base
 capability, which is the process of generating and emitting a catalog that describes the

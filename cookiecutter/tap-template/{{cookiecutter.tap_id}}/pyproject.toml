@@ -20,20 +20,23 @@ packages = [
 {%- endif %}
 
 [tool.poetry.dependencies]
-python = "<3.11,>=3.7.1"
-requests = "^2.25.1"
-singer-sdk = { version="^0.15.0"}
+python = "<3.12,>=3.7.1"
+singer-sdk = { version="^0.19.0"}
 fs-s3fs = { version = "^1.1.1", optional = true}
+{%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
+requests = "^2.28.1"
+{%- endif %}
 
-[tool.poetry.dev-dependencies]
-pytest = "^6.2.5"
-tox = "^3.24.4"
-flake8 = "^3.9.2"
-black = "^21.9b0"
-pydocstyle = "^6.1.1"
-mypy = "^0.910"
-types-requests = "^2.26.1"
-isort = "^5.10.1"
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.1"
+flake8 = "^5.0.4"
+black = "^22.12.0"
+pydocstyle = "^6.2.1"
+mypy = "^0.991"
+isort = "^5.12.0"
+{%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
+types-requests = "^2.28.11.7"
+{%- endif %}
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]

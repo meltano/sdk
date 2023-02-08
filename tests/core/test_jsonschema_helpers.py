@@ -18,6 +18,8 @@ from singer_sdk.helpers._typing import (
     is_date_or_datetime_type,
     is_datetime_type,
     is_integer_type,
+    is_null_type,
+    is_number_type,
     is_object_type,
     is_secret_type,
     is_string_array_type,
@@ -149,7 +151,6 @@ def test_default_value():
 
 
 def test_tap_config_default_injection():
-
     config_dict = {"host": "gitlab.com", "username": "foo", "password": "bar"}
 
     tap = ConfigTestTap(config=config_dict, parse_env_config=False, catalog={})
@@ -654,3 +655,98 @@ def test_custom_type():
     }
 
     assert CustomType(json_schema).type_dict == json_schema
+
+
+@pytest.mark.parametrize(
+    "property_schemas,type_check_functions,results",
+    [
+        (
+            [
+                {
+                    "anyOf": [
+                        {"type": "array"},
+                        {"type": "null"},
+                    ]
+                },
+                {"type": "array"},
+                {"type": ["array", "null"]},
+            ],
+            [is_array_type],
+            [True],
+        ),
+        (
+            [
+                {
+                    "anyOf": [
+                        {"type": "boolean"},
+                        {"type": "null"},
+                    ]
+                },
+                {"type": "boolean"},
+                {"type": ["boolean", "null"]},
+            ],
+            [is_boolean_type],
+            [True],
+        ),
+        (
+            [
+                {
+                    "anyOf": [
+                        {"type": "integer"},
+                        {"type": "null"},
+                    ]
+                },
+                {"type": "integer"},
+                {"type": ["integer", "null"]},
+            ],
+            [is_integer_type],
+            [True],
+        ),
+        (
+            [
+                {
+                    "anyOf": [
+                        {"type": "string", "format": "date-time"},
+                        {"type": "null"},
+                    ]
+                },
+                {"type": "string"},
+                {"type": ["string", "null"]},
+            ],
+            [is_string_type],
+            [True],
+        ),
+        (
+            [
+                {
+                    "anyOf": [
+                        {"type": "string", "format": "date-time"},
+                        {"type": "null"},
+                    ]
+                },
+                {"type": "null"},
+                {"type": ["string", "null"]},
+            ],
+            [is_null_type],
+            [True],
+        ),
+        (
+            [
+                {
+                    "anyOf": [
+                        {"type": "string", "format": "date-time"},
+                        {"type": "number"},
+                    ]
+                },
+                {"type": "number"},
+                {"type": ["number", "null"]},
+            ],
+            [is_number_type],
+            [True],
+        ),
+    ],
+)
+def test_type_check_variations(property_schemas, type_check_functions, results):
+    for property_schema in property_schemas:
+        for type_check_function, result in zip(type_check_functions, results):
+            assert type_check_function(property_schema) == result

@@ -1,0 +1,5 @@
+{"type": "SCHEMA", "stream": "test_no_pk", "key_properties": [], "schema": { "type": "object", "properties": {"id": {"type": "integer"}, "metric": {"type": "integer"}}}}
+{"type": "RECORD", "stream": "test_no_pk", "record": {"id": 1, "metric": 11}}
+{"type": "RECORD", "stream": "test_no_pk", "record": {"id": 2, "metric": 22}}
+{"type": "RECORD", "stream": "test_no_pk", "record": {"id": 3, "metric": 33}}
+{"type": "STATE", "value": {"test_no_pk": 3}}

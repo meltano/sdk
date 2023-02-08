@@ -12,6 +12,8 @@ from _pytest.config import Config
 
 SYSTEMS = {"linux", "darwin", "windows"}
 
+pytest_plugins = ("singer_sdk.testing.pytest_plugin",)
+
 
 def pytest_collection_modifyitems(config: Config, items: list[pytest.Item]):
     rootdir = pathlib.Path(config.rootdir)
