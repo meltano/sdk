@@ -61,6 +61,7 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
    :maxdepth: 2
    :hidden:
 
+   incremental_replication
    parent_streams
    partitioning
    context_object
