@@ -2,7 +2,9 @@
 
 With incremental replication, a Singer tap emits only data that were created or updated since the previous import rather than the full table.
 
-To support incremental replication, the tap must first define how its replication state will be tracked, e.g. the id of the newest record or the maximal update timestamp in the previous import. Meltano stores the state and makes it available through the context object on subsequent runs. Using the state, the tap should then skip returning rows where the replication key value is less than previous maximal replication key value stored in the state.
+To support incremental replication, the tap must first define how its replication state will be tracked, e.g. the id of the newest record or the maximal update timestamp in the previous import.
+
+You'll either have to manage your own [state file](https://hub.meltano.com/singer/spec#state-files-1), or use Meltano. The Singer SDK makes the tap state available through the [context object](./context_object.md) on subsequent runs. Using the state, the tap should then skip returning rows where the replication key comes _strictly before_ than previous maximal replication key value stored in the state.
 
 ## Example Code: Timestamp-Based Incremental Replication
 
@@ -16,32 +18,35 @@ class CommentsStream(RESTStream):
         th.Property("date_gmt", th.DateTimeType, description="date"),
     ).to_dict()
 
-    def get_url_params(
-        self, context: dict | None, next_page_token
-    ) -> dict[str, Any]:
+    def get_url_params(self, context, next_page_token):
         params = {}
-        if starting_date := self.get_starting_timestamp(context):
+
+        starting_date = self.get_starting_timestamp(context)
+        if starting_date:
             params["after"] = starting_date.isoformat()
+
         if next_page_token is not None:
             params["page"] = next_page_token
-        self.logger.info(f"QUERY PARAMS: {params}")
-        return params
 
-    url_base = "https://example.com/wp-json/wp/v2/comments"
-    authenticator = None
+        self.logger.info("QUERY PARAMS: %s", params)
+        return params
 ```
 
-First we inform the SDK of the `replication_key`, which automatically triggers incremental import mode. Second, optionally, set `is_sorted` to true; with this setting, Singer will throw an error if a supposedly incremental import sends results older than the starting timestamp.
+1. First we inform the SDK of the `replication_key`, which automatically triggers incremental import mode.
 
-Last, we have to adapt the query to the remote system, in this example by adding a query parameter with the ISO timestamp.
+2. Second, optionally, set `is_sorted` to true if the records are monotonically increasing (i.e. newer records always come later). With this setting, the sync will be resumable if it's interrupted at any point and the state file will reflect this. Otherwise, the tap has to run to completion so the state can safely reflect the largest replication value seen.
 
-Note:
-- unlike a `primary_key`, a `replication_key` does not have to be unique
-- in incremental replication, it is OK to resend rows where the replication key is equal to previous highest key.
+3. Last, we have to adapt the query to the remote system, in this example by adding a query parameter with the ISO timestamp.
+
+
+```{note}
+- The SDK will throw an error if records come out of order when `is_sorted` is true.
+- Unlike a `primary_key`, a `replication_key` does not have to be unique
+- In incremental replication, it is OK and usually recommended to resend rows where the replication key is equal to previous highest key. Targets are expected to update rows that are re-synced.
 
 ## Manually testing incremental import during development
 
-To test the tap stand-alone, manually create a state file and run the tap:
+To test the tap in standalone mode, manually create a state file and run the tap:
 
 ```shell
 $ echo '{"bookmarks": {"documents": {"replication_key": "date_gmt", "replication_key_value": "2023-01-15T12:00:00.120000"}}}' > state_test.json
