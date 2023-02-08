@@ -173,6 +173,7 @@ omit = [
     "tests/*",
     "samples/*",
     "singer_sdk/helpers/_compat.py",
+    "singer_sdk/testing/*",
 ]
 
 [tool.coverage.report]
