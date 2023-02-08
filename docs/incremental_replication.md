@@ -43,6 +43,7 @@ class CommentsStream(RESTStream):
 - The SDK will throw an error if records come out of order when `is_sorted` is true.
 - Unlike a `primary_key`, a `replication_key` does not have to be unique
 - In incremental replication, it is OK and usually recommended to resend rows where the replication key is equal to previous highest key. Targets are expected to update rows that are re-synced.
+```
 
 ## Manually testing incremental import during development
 
