@@ -2,7 +2,7 @@
 
 ## PyPI releases
 
-TODO: This section needs to be updated to reflect the release process.
+Releases are published to PyPi by a GitHub Actions workflow, which in turn is triggered by a GitHub [Release](https://github.com/meltano/sdk/releases) being published.
 
 ### Feature releases
 

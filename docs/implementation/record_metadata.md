@@ -1,4 +1,4 @@
-# [SDK Implementation Details](./index.md) - Record Metadata
+# Record Metadata
 
 The SDK can automatically generate `_sdc_` ("Singer Data Capture") metadata properties when
 performing data loads in SDK-based targets.

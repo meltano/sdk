@@ -46,7 +46,6 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
    Python Tips <python_tips>
    Code Samples <code_samples>
    cli_commands
-   capabilities
    faq
 
 .. toctree::
@@ -55,6 +54,8 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
    :hidden:
 
    reference
+   capabilities
+   implementation/index
 
 .. toctree::
    :caption: Advanced Concepts
@@ -68,16 +69,15 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
    stream_maps
    batch
    sinks
-   implementation/index
    testing
 
 .. toctree::
-   :caption: Development
+   :caption: SDK Development
    :maxdepth: 1
    :hidden:
 
-   CONTRIBUTING
    development/index
+   deprecation
 
 .. _Singer: https://singer.io
 .. _Singer Spec: https://hub.meltano.com/singer/spec
