@@ -279,16 +279,30 @@ class SQLConnector:
 
     @property
     def _engine(self) -> Engine:
-        """Return the engine object.
+        """Return the engine object. This is the correct way to access the
+        Connector's engine, if needed (e.g. to inspect tables).
 
         Returns:
             The SQLAlchemy Engine that's attached to this SQLConnector instance.
         """
         if not self._cached_engine:
-            self._cached_engine = sqlalchemy.create_engine(
-                self.sqlalchemy_url, echo=False
-            )
+            self._cached_engine = self.create_engine()
         return cast(Engine, self._cached_engine)
+
+    def create_engine(self) -> Engine:
+        """Creates and returns a new engine. NOTE: Do not call this method. The
+        only place that this method should be called is inside the self._engine
+        method. If you'd like to access the engine on a connector, use
+        self._engine.
+
+        This method exists solely so that tap/target developers can override it
+        on their subclass of SQLConnector to perform custom engine creation
+        logic.
+
+        Returns:
+            A new SQLAlchemy Engine.
+        """
+        return sqlalchemy.create_engine(self.sqlalchemy_url, echo=False)
 
     def quote(self, name: str) -> str:
         """Quote a name if it needs quoting, using '.' as a name-part delimiter.
