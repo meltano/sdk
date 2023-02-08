@@ -1034,7 +1034,7 @@ class Stream(metaclass=abc.ABCMeta):
                         )
                         raise ex
 
-                    self._check_max_record_limit(record_count)
+                    self._check_max_record_limit(partition_record_count)
 
                     if selected:
                         if (
