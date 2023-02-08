@@ -151,7 +151,6 @@ def test_default_value():
 
 
 def test_tap_config_default_injection():
-
     config_dict = {"host": "gitlab.com", "username": "foo", "password": "bar"}
 
     tap = ConfigTestTap(config=config_dict, parse_env_config=False, catalog={})
