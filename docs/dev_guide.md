@@ -1,4 +1,4 @@
-# SDK Dev Guide
+# Getting Started
 
 ## Tap Development Overview
 

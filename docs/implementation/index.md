@@ -1,4 +1,4 @@
-# SDK Implementation Details
+# Singer Implementation Details
 
 This section documents certain behaviors and expectations of the SDK framework.
 
