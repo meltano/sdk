@@ -218,4 +218,4 @@ All public modules in the SDK are checked for the presence of docstrings in clas
 ### What is Poetry and why do we need it?
 
 For more info on `Poetry` and `Pipx`, please see the topic in our
-[python tips](python_tips.md) guide.
+[python tips](../python_tips.md) guide.
