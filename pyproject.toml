@@ -63,10 +63,11 @@ PyYAML = "^6.0"
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
 sphinx = {version = ">=4.5,<6.0", optional = true}
-sphinx-rtd-theme = {version = ">=0.5.2,<1.2.0", optional = true}
+furo = {version = "^2022.12.7", optional = true}
 sphinx-copybutton = {version = ">=0.3.1,<0.6.0", optional = true}
 myst-parser = {version = ">=0.17.2,<0.19.0", optional = true}
 sphinx-autobuild = {version = "^2021.3.14", optional = true}
+sphinx-reredirects = {version = "^0.1.1", optional = true}
 
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = "^1.1.1", optional = true}
@@ -78,10 +79,11 @@ pytest-durations = {version = "^1.2.0", optional = true}
 [tool.poetry.extras]
 docs = [
     "sphinx",
-    "sphinx-rtd-theme",
+    "furo",
     "sphinx-copybutton",
     "myst-parser",
     "sphinx-autobuild",
+    "sphinx_reredirects",
 ]
 s3 = ["fs-s3fs"]
 # Mark these as extras so that installs pass on python 3.11

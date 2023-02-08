@@ -171,11 +171,13 @@ class StringType(JSONTypeHelper):
     string_format: str | None = None
     """String format.
 
-    See the [formats built into the JSON Schema\
-    specification](https://json-schema.org/understanding-json-schema/reference/string.html#built-in-formats).
+    See the `formats built into the JSON Schema specification`_.
 
     Returns:
         A string describing the format.
+
+    .. _`formats built into the JSON Schema specification`:
+        https://json-schema.org/understanding-json-schema/reference/string.html#built-in-formats
     """
 
     @classproperty
