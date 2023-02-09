@@ -6,6 +6,6 @@ to the Singer SDK or learning more about the release process.
 ```{toctree}
 :maxdepth: 2
 
-contributing
+../CONTRIBUTING
 release_process
 ```
