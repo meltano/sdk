@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 import sqlalchemy
 from sqlalchemy.dialects import sqlite
@@ -142,10 +144,27 @@ class TestConnectorSQL:
         engine2 = connector._cached_engine
         assert engine1 is engine2
 
-    def test_deprecated_functions_raise(self, connector):
+    def test_deprecated_functions_warn(self, connector):
         with pytest.deprecated_call():
             connector.create_sqlalchemy_engine()
         with pytest.deprecated_call():
             connector.create_sqlalchemy_connection()
         with pytest.deprecated_call():
             connector.connection
+
+    def test_connect_calls_engine(self, connector):
+        with mock.patch.object(SQLConnector, "_engine") as mock_engine:
+            with connector._connect() as conn:
+                mock_engine.connect.assert_called_once()
+
+    def test_connect_calls_engine(self, connector):
+        attached_engine = connector._engine
+        with mock.patch.object(attached_engine, "connect") as mock_conn:
+            with connector._connect() as conn:
+                mock_conn.assert_called_once()
+
+    def test_connect_raises_on_operational_failure(self):
+        connector = SQLConnector(config={"sqlalchemy_url": "sqlite:///:memory:"})
+        with pytest.raises(sqlalchemy.exc.OperationalError) as e:
+            with connector._connect() as conn:
+                conn.execute("SELECT * FROM fake_table")
