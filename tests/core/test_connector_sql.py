@@ -14,7 +14,7 @@ class TestConnectorSQL:
 
     @pytest.fixture()
     def connector(self):
-        return SQLConnector()
+        return SQLConnector(config={"sqlalchemy_url": "sqlite:///tmp.db"})
 
     @pytest.mark.parametrize(
         "method_name,kwargs,context,unrendered_statement,rendered_statement",
@@ -130,3 +130,14 @@ class TestConnectorSQL:
         assert not hasattr(compatible_type, "collation")
         # Check that we get the same type we put in
         assert str(compatible_type) == "INTEGER"
+
+    def test_create_engine_returns_new_engine(self, connector):
+        engine1 = connector.create_engine()
+        engine2 = connector.create_engine()
+        assert engine1 is not engine2
+
+    def test_engine_creates_and_returns_cached_engine(self, connector):
+        assert not connector._cached_engine
+        engine1 = connector._engine
+        engine2 = connector._cached_engine
+        assert engine1 is engine2
