@@ -1,4 +1,4 @@
-# Contributor's Guide
+# Contributing Guide
 
 _**Note:** The SDK currently works with Python versions 3.7 through 3.10.x. Python 3.6 is no longer supported._
 
