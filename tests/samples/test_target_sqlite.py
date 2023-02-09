@@ -8,7 +8,6 @@ from copy import deepcopy
 from io import StringIO
 from pathlib import Path
 from textwrap import dedent
-from typing import Dict
 from uuid import uuid4
 
 import pytest
@@ -130,7 +129,11 @@ def test_sync_sqlite_to_sqlite(
 def test_sqlite_schema_addition(
     sqlite_target_test_config: dict, sqlite_sample_target: SQLTarget
 ):
-    """Test that SQL-based targets attempt to create new schema if included in stream name."""
+    """Test that SQL-based targets attempt to create new schema.
+
+    It should attempt to create a schema if one is included in stream name,
+    e.g. "schema_name-table_name".
+    """
     schema_name = f"test_schema_{str(uuid4()).split('-')[-1]}"
     table_name = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
     test_stream_name = f"{schema_name}-{table_name}"

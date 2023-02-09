@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import asdict
-from urllib.parse import urlparse
 
 import pytest
 

@@ -241,9 +241,9 @@ def test_conform_primitives():
     assert _conform_primitive_property(b"\x00", {"type": "string"}) == "00"
     assert _conform_primitive_property(b"\xBC", {"type": "string"}) == "bc"
 
-    assert _conform_primitive_property(b"\x00", {"type": "boolean"}) == False
-    assert _conform_primitive_property(b"\xBC", {"type": "boolean"}) == True
+    assert _conform_primitive_property(b"\x00", {"type": "boolean"}) is False
+    assert _conform_primitive_property(b"\xBC", {"type": "boolean"}) is True
 
     assert _conform_primitive_property(None, {"type": "boolean"}) is None
-    assert _conform_primitive_property(0, {"type": "boolean"}) == False
-    assert _conform_primitive_property(1, {"type": "boolean"}) == True
+    assert _conform_primitive_property(0, {"type": "boolean"}) is False
+    assert _conform_primitive_property(1, {"type": "boolean"}) is True

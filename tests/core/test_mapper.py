@@ -8,7 +8,6 @@ import json
 import logging
 from contextlib import redirect_stdout
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import pytest
 from freezegun import freeze_time

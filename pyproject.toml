@@ -129,15 +129,6 @@ flake8-docstrings = "^1.7.0"
 [tool.black]
 exclude = ".*simpleeval.*"
 
-[tool.isort]
-add_imports = [
-  "from __future__ import annotations",
-]
-profile = "black"
-multi_line_output = 3 # Vertical Hanging Indent
-src_paths = "singer_sdk"
-known_first_party = ["tests", "samples"]
-
 [tool.pytest.ini_options]
 addopts = '-vvv --ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
 markers = [
@@ -220,3 +211,45 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 pytest11 = { callable = "singer_sdk:testing.pytest_plugin", extras = ["testing"] }
+
+[tool.ruff]
+exclude = [
+    "cookiecutter/*",
+]
+ignore = [
+    "ANN101",
+    "ANN102",
+]
+line-length = 88
+select = [
+    "E",
+    "F",
+    "ANN",  # flake8-annotations
+    "D",    # pydocstyle/flake8-docstrings
+    "I",    # isort
+]
+src = ["samples", "singer_sdk", "tests"]
+target-version = "py37"
+
+[tool.ruff.per-file-ignores]
+"docs/conf.py" = ["D", "I002"]
+"noxfile.py" = ["ANN"]
+"tests/*" = ["ANN", "D1", "D2"]
+# Disabled some checks in samples code
+"samples/*" = ["ANN", "D"]
+# Don't require docstrings conventions or type annotations in private modules
+"singer_sdk/helpers/_*.py" = ["ANN", "D105"]
+# Templates support a generic resource of type Any.
+"singer_sdk/testing/templates.py" = ["ANN401"]
+
+[tool.ruff.flake8-annotations]
+allow-star-arg-any = true
+mypy-init-return = true
+suppress-dummy-args = true
+
+[tool.ruff.isort]
+known-first-party = ["singer_sdk", "samples", "tests"]
+required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.pydocstyle]
+convention = "google"
