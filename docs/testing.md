@@ -14,7 +14,7 @@ The Meltano SDK test framework consists of 4 main components:
 
 ## Example Usage
 
-If you created your Tap/Target using the provided cookiecutter templates, you will find the following snippets in `<library_name>/tests/test_core.py`.
+If you created your Tap/Target using the provided cookiecutter templates, you will find the following snippets in `tests/test_core.py`.
 You will also find a `conftest.py` file containing configuration of the SDK as a `pytest` plugin.
 This is required for tests to collect correctly:
 
