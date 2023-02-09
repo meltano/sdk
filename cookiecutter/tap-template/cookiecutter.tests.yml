@@ -57,3 +57,10 @@ tests:
     stream_type: Other
     auth_method: Custom or N/A
     include_cicd_sample_template: GitHub
+
+  - source_name: OtherCustomTemplateTest
+    tap_id: test-tap-other-custom-type
+    variant: meltanolabs
+    stream_type: Other
+    auth_method: Custom or N/A
+    include_cicd_sample_template: "None (Skip)"
