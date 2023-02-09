@@ -2,6 +2,7 @@
 
 import pytest
 from memoization.memoization import cached
+from requests.auth import HTTPProxyAuth
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SingletonMeta
 from singer_sdk.streams import RESTStream
@@ -51,6 +52,15 @@ class CachedAuthStream(SimpleRESTStream):
         return NaiveAuthenticator(stream=self)
 
 
+class ProxyAuthStream(SimpleRESTStream):
+    """A stream with digest authentication."""
+
+    @property
+    def authenticator(self):
+        """Stream authenticator."""
+        return HTTPProxyAuth("username", "password")
+
+
 class SimpleTap(Tap):
     """A REST tap for testing."""
 
@@ -65,6 +75,7 @@ class SimpleTap(Tap):
             SingletonAuthStream(self, name="reused_single_auth_stream"),
             CachedAuthStream(self, name="cached_auth_stream"),
             CachedAuthStream(self, name="other_cached_auth_stream"),
+            ProxyAuthStream(self, name="proxy_auth_stream"),
         ]
 
 

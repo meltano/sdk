@@ -1208,12 +1208,12 @@ class Stream(metaclass=abc.ABCMeta):
 
         This method takes an optional `context` argument, which can be safely ignored
         unless the stream is a child stream or requires partitioning.
-        More info: :doc:`/advanced/partitioning`.
+        More info: :doc:`/partitioning`.
 
         Parent streams can optionally return a tuple, in which
         case the second item in the tuple being a `child_context` dictionary for the
         stream's `context`.
-        More info: :doc:`/advanced/parent_streams`
+        More info: :doc:`/parent_streams`
 
         Args:
             context: Stream partition or context dictionary.
