@@ -2,7 +2,7 @@
 
 This page outlines when various features of the Singer SDK will be removed or changed in a backward
 incompatible way, following their deprecation, as indicated in the
-[deprecation policy](./release-process.md#deprecation-policy).
+[deprecation policy](./development/release_process.md#deprecation-policy).
 
 ## 1.0
 
