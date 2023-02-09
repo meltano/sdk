@@ -5,6 +5,7 @@ import sqlalchemy
 from sqlalchemy.dialects import sqlite
 
 from singer_sdk.connectors import SQLConnector
+from singer_sdk.exceptions import ConfigValidationError
 
 
 def stringify(in_dict):
@@ -164,7 +165,29 @@ class TestConnectorSQL:
                 mock_conn.assert_called_once()
 
     def test_connect_raises_on_operational_failure(self):
+        # Using in-memory db here so we aren't writing anything to disk
         connector = SQLConnector(config={"sqlalchemy_url": "sqlite:///:memory:"})
         with pytest.raises(sqlalchemy.exc.OperationalError) as e:
             with connector._connect() as conn:
                 conn.execute("SELECT * FROM fake_table")
+
+    def test_rename_column_uses_connect_correctly(self, connector):
+        attached_engine = connector._engine
+        # Ends up using the attached engine
+        with mock.patch.object(attached_engine, "connect") as mock_conn:
+            connector.rename_column("fake_table", "old_name", "new_name")
+            mock_conn.assert_called_once()
+        # Uses the _connect method
+        with mock.patch.object(connector, "_connect") as mock_connect_method:
+            connector.rename_column("fake_table", "old_name", "new_name")
+            mock_connect_method.assert_called_once()
+
+    def test_get_slalchemy_url_raises_if_not_in_config(self, connector):
+        with pytest.raises(ConfigValidationError):
+            connector.get_sqlalchemy_url({})
+
+    def test_dialect_uses_engine(self, connector):
+        attached_engine = connector._engine
+        with mock.patch.object(attached_engine, "dialect") as mock_dialect:
+            res = connector._dialect
+            assert res == attached_engine.dialect
