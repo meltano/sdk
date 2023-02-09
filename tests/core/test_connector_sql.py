@@ -141,3 +141,11 @@ class TestConnectorSQL:
         engine1 = connector._engine
         engine2 = connector._cached_engine
         assert engine1 is engine2
+
+    def test_deprecated_functions_raise(self, connector):
+        with pytest.deprecated_call():
+            connector.create_sqlalchemy_engine()
+        with pytest.deprecated_call():
+            connector.create_sqlalchemy_connection()
+        with pytest.deprecated_call():
+            connector.connection
