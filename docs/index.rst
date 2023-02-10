@@ -78,6 +78,7 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
    :hidden:
 
    CONTRIBUTING
+   release_process
    deprecation
 
 .. _Singer: https://singer.io
