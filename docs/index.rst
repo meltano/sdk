@@ -54,8 +54,9 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
    :hidden:
 
    reference
-   capabilities
    implementation/index
+   typing
+   capabilities
 
 .. toctree::
    :caption: Advanced Concepts
@@ -76,7 +77,7 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
    :maxdepth: 1
    :hidden:
 
-   development/index
+   CONTRIBUTING
    deprecation
 
 .. _Singer: https://singer.io
