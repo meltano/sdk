@@ -17,7 +17,7 @@ class TestConnectorSQL:
 
     @pytest.fixture()
     def connector(self):
-        return SQLConnector(config={"sqlalchemy_url": "sqlite:///tmp.db"})
+        return SQLConnector(config={"sqlalchemy_url": "sqlite:///"})
 
     @pytest.mark.parametrize(
         "method_name,kwargs,context,unrendered_statement,rendered_statement",
@@ -164,9 +164,7 @@ class TestConnectorSQL:
             with connector._connect() as conn:
                 mock_conn.assert_called_once()
 
-    def test_connect_raises_on_operational_failure(self):
-        # Using in-memory db here so we aren't writing anything to disk
-        connector = SQLConnector(config={"sqlalchemy_url": "sqlite:///:memory:"})
+    def test_connect_raises_on_operational_failure(self, connector):
         with pytest.raises(sqlalchemy.exc.OperationalError) as e:
             with connector._connect() as conn:
                 conn.execute("SELECT * FROM fake_table")
