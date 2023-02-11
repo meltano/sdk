@@ -1,0 +1,68 @@
+name: E2E Cookiecutters
+
+on:
+  push:
+#    branches: [main]
+#    paths: [cookiecutter/**]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: "1"
+
+jobs:
+  lint:
+    name: Lint ${{ matrix.cookiecutter }}, Replay ${{ matrix.replay }} on ${{ matrix.python-version }} ${{ matrix.python-version }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.9"]
+        os: ["ubuntu-latest"]
+        include:
+          - { cookiecutter: "tap-template", replay: "tap-rest-api_key-github.json"}
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v3.3.0
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4.5.0
+      with:
+        python-version: ${{ matrix.python-version }}
+        architecture: x64
+        cache: 'pip'
+        cache-dependency-path: 'poetry.lock'
+
+    - name: Upgrade pip
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
+      run: |
+        pip install pip
+        pip --version
+
+
+    - name: Install Poetry, Tox & Cookiecutter
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
+      run: |
+        pipx install poetry
+        pipx install cookiecutter
+        pipx install tox
+
+    - name: Build cookiecutter project
+      env:
+        CC_TEMPLATE: cookiecutter/${{ matrix.cookiecutter }}
+        REPLAY_FILE: e2e-tests/cookiecutters/${{ matrix.replay }}
+      run: |
+        bash e2e-tests/cookiecutters/test_cookiecutter.sh $CC_TEMPLATE $REPLAY_FILE 0
+
+    - name: Run lint
+      env:
+        REPLAY_FILE: e2e-tests/cookiecutters/${{ matrix.replay }}
+      run: |
+        CC_OUTPUT_DIR=$(basename $REPLAY_FILE .json)
+        cd /tmp/$CC_OUTPUT_DIR
+        poetry run tox -e lint
