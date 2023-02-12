@@ -49,7 +49,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         for record in resp_json.get("<TODO>"):
             yield record
 
-    def post_process(self, row: dict, context: Optional[dict] = None) -> dict:
+    def post_process(self, row: dict, context: Optional[dict] = None) -> Optional[dict]:
         """As needed, append or transform raw data to match expected structure."""
         # TODO: Delete this method if not needed.
         return row

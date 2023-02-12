@@ -2,9 +2,11 @@
 
 import requests
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, List, Iterable
+from typing import Any, Dict, Iterable, Optional
 
+{%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
 from memoization import cached
+{%- endif %}
 
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
@@ -54,7 +56,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return APIKeyAuthenticator.create_for_stream(
             self,
             key="x-api-key",
-            value=self.config.get("api_key"),
+            value=self.config.get("api_key") or "",
             location="header"
         )
 
@@ -138,7 +140,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         # TODO: Parse response body and return a set of records.
         yield from extract_jsonpath(self.records_jsonpath, input=response.json())
 
-    def post_process(self, row: dict, context: Optional[dict]) -> dict:
+    def post_process(self, row: dict, context: Optional[dict] = None) -> Optional[dict]:
         """As needed, append or transform raw data to match expected structure."""
         # TODO: Delete this method if not needed.
         return row

@@ -22,6 +22,7 @@ from {{ cookiecutter.library_name }}.streams import (
 # TODO: Compile a list of custom stream types here
 #       OR rewrite discover_streams() below with your custom logic.
 STREAM_TYPES = [
+    {{ cookiecutter.source_name }}Stream,
     UsersStream,
     GroupsStream,
 ]
