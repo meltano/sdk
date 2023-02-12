@@ -19,10 +19,9 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.9"]
-        os: ["ubuntu-latest"]
         include:
-          - { cookiecutter: "tap-template", replay: "tap-rest-api_key-github.json"}
+          - { cookiecutter: "tap-template", replay: "tap-rest-api_key-github.json", python-version: "3.9",  os: "ubuntu-latest" }
+          - { cookiecutter: "target-template", replay: "target-per_record.json", python-version: "3.9",  os: "ubuntu-latest" }
 
     steps:
     - name: Check out the repository
