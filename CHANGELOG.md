@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### ✨ New
 
 - [#1365](https://github.com/meltano/sdk/issues/1365) Add `strptime_to_utc` and `strftime` functions to `_singerlib.utils` -- _**Thanks @menzenski!**_
+- [#1394](https://github.com/meltano/sdk/issues/1394) Refactor SQLConnector connection handling -- _**Thanks @qbatten!**_
 - [#1241](https://github.com/meltano/sdk/issues/1241) Support declaring variant for use in package name
 - [#1109](https://github.com/meltano/sdk/issues/1109) Support `requests.auth` authenticators
 
