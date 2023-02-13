@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ New
 
+- [#1365](https://github.com/meltano/sdk/issues/1365) Add `strptime_to_utc` and `strftime` functions to `_singerlib.utils` -- _**Thanks @menzenski!**_
 - [#1241](https://github.com/meltano/sdk/issues/1241) Support declaring variant for use in package name
 - [#1109](https://github.com/meltano/sdk/issues/1109) Support `requests.auth` authenticators
-- [#1365](https://github.com/meltano/sdk/issues/1365) Add `strptime_to_utc` and `strftime` functions to `_singerlib.utils` -- _**Thanks @menzenski!**_
 
 ### 🐛 Fixes
 
@@ -23,9 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📚 Documentation Improvements
 
-- [#1407](https://github.com/meltano/sdk/issues/1407) Docs nav structure reorg follow-up
 - [#1390](https://github.com/meltano/sdk/issues/1390) Add incremental replication example -- _**Thanks @flexponsive!**_
-- [#1353](https://github.com/meltano/sdk/issues/1353) Reorganize docs and add deprecation timeline
 
 ## v0.19.0 (2023-01-30)
 
