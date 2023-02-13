@@ -89,29 +89,29 @@ JSON Schema builder classes
     :toctree: classes/typing
     :template: class.rst
 
-    typing.StringType
+    typing.PropertiesList
+    typing.ArrayType
+    typing.BooleanType
+    typing.CustomType
     typing.DateTimeType
-    typing.TimeType
     typing.DateType
     typing.DurationType
     typing.EmailType
     typing.HostnameType
+    typing.IntegerType
     typing.IPv4Type
     typing.IPv6Type
-    typing.UUIDType
-    typing.URIType
-    typing.URITemplateType
     typing.JSONPointerType
-    typing.RelativeJSONPointerType
-    typing.RegexType
-    typing.BooleanType
-    typing.IntegerType
     typing.NumberType
-    typing.ArrayType
-    typing.Property
     typing.ObjectType
-    typing.CustomType
-    typing.PropertiesList
+    typing.Property
+    typing.RegexType
+    typing.RelativeJSONPointerType
+    typing.StringType
+    typing.TimeType
+    typing.URITemplateType
+    typing.URIType
+    typing.UUIDType
 
 Pagination
 ----------
