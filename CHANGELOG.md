@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.20.0 (2023-02-13)
+
+### ✨ New
+
+- [#1365](https://github.com/meltano/sdk/issues/1365) Add `strptime_to_utc` and `strftime` functions to `_singerlib.utils` -- _**Thanks @menzenski!**_
+- [#1394](https://github.com/meltano/sdk/issues/1394) Refactor SQLConnector connection handling -- _**Thanks @qbatten!**_
+- [#1241](https://github.com/meltano/sdk/issues/1241) Support declaring variant for use in package name
+- [#1109](https://github.com/meltano/sdk/issues/1109) Support `requests.auth` authenticators
+
+### 🐛 Fixes
+
+- [#1380](https://github.com/meltano/sdk/issues/1380) Move tests in cookiecutters to project root to support `pytest_plugins`
+- [#1406](https://github.com/meltano/sdk/issues/1406) Use a version of `isort` compatible with Python 3.8
+- [#1385](https://github.com/meltano/sdk/issues/1385) SQL Targets ignore collation when evaluating column data types -- _**Thanks @BuzzCutNorman!**_
+- [#1342](https://github.com/meltano/sdk/issues/1342) Remove SQLSink snakecase conform in favor of simpler transformations
+- [#1364](https://github.com/meltano/sdk/issues/1364) TapDiscoveryTest remove catalog if one is passed
+
+### 📚 Documentation Improvements
+
+- [#1390](https://github.com/meltano/sdk/issues/1390) Add incremental replication example -- _**Thanks @flexponsive!**_
+
 ## v0.19.0 (2023-01-30)
 
 ### ✨ New
