@@ -1,4 +1,4 @@
-# [SDK Implementation Details](./index.md) - Tap Metrics
+# Tap Metrics
 
 Metrics logging is specified in the
 [Singer Spec](https://hub.meltano.com/singer/spec#metrics). The SDK will automatically
