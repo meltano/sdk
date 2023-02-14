@@ -180,8 +180,7 @@ class TargetTestRunner(SingerTestRunner):
         target_class: type[Target],
         target_kwargs: dict,
         suite_config: SuiteConfig | None = None,
-        input_filepath: Path | None = None,
-        input_io: io.StringIO | None = None,
+        target_runner_kwargs: dict | None = None,
     ) -> None:
         """Initialize TargetTestRunner.
 
@@ -200,8 +199,9 @@ class TargetTestRunner(SingerTestRunner):
             singer_kwargs=target_kwargs,
             suite_config=suite_config,
         )
-        self.input_filepath = input_filepath
-        self.input_io = input_io
+        self.runner_kwargs = target_runner_kwargs or {}
+        self.input_filepath = self.runner_kwargs.get("input_filepath")
+        self.input_io = self.runner_kwargs.get("input_io")
         self._input: IO[str] | None = None
 
     @property

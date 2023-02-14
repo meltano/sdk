@@ -51,6 +51,7 @@ def get_test_class(
     tap_kwargs: dict = {},
     target_class: Target | None = None,
     target_kwargs: dict | None = None,
+    target_runner_kwargs: dict | None = None,
     suite_config: SuiteConfig | None = None,
 ) -> object:
     """Construct a valid pytest test class from given suites.
@@ -69,6 +70,7 @@ def get_test_class(
         tap_kwargs=tap_kwargs,
         target_class=target_class,
         target_kwargs=target_kwargs,
+        target_runner_kwargs=target_runner_kwargs,
         suite_config=suite_config,
     )
 
@@ -94,6 +96,7 @@ def get_test_class(
                 tap_kwargs=tap_kwargs,
                 target_class=target_class,
                 target_kwargs=target_kwargs,
+                target_runner_kwargs=target_runner_kwargs,
                 suite_config=suite_config,
             )
             # populate runner class with cached records for use in tests
