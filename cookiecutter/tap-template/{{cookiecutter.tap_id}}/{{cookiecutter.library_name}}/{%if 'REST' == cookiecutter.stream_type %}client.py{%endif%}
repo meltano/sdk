@@ -56,7 +56,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return APIKeyAuthenticator.create_for_stream(
             self,
             key="x-api-key",
-            value=self.config.get("api_key") or "",
+            value=self.config.get("api_key", ""),
             location="header"
         )
 

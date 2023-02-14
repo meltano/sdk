@@ -44,7 +44,7 @@ poetry run black $LIBRARY_NAME &&
 poetry run isort $LIBRARY_NAME &&
 poetry run flake8 $LIBRARY_NAME &&
 poetry run pydocstyle $LIBRARY_NAME &&
-poetry run mypy $LIBRARY_NAME --exclude="$LIBRARY_NAME/tests"
+poetry run mypy $LIBRARY_NAME
 ##
 
 if [[ $RUN_LINT -eq 1 ]] && [[ $? -eq 0 ]]; then
