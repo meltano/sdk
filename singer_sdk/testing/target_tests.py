@@ -58,7 +58,6 @@ class TargetMultipleStateMessages(TargetFileTestTemplate):
 
     def test(self) -> None:
         """Run test."""
-        self.runner.sync_all()
         state_messages = self.runner.state_messages
         assert state_messages == [
             '{"test_multiple_state_messages_a": 1, "test_multiple_state_messages_b": 0}',  # noqa: E501

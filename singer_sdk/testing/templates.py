@@ -56,7 +56,7 @@ class TestTemplate:
 
     def test(self) -> None:
         """Main Test body, called after `.setup()` and before `.validate()`."""
-        self.runner.sync_all()
+        raise NotImplementedError("Method not implemented.")
 
     def validate(self) -> None:
         """Test validation, called after `.test()`.
