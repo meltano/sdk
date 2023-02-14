@@ -29,6 +29,10 @@ if [[ -d "$CC_TEST_OUTPUT" ]]; then
     rm -fr "$CC_TEST_OUTPUT"
 fi
 
+if [[ -f $GITHUB_ENV ]]; then
+    echo CC_TEST_OUTPUT=$CC_BUILD_PATH/$CC_OUTPUT_DIR >> $GITHUB_ENV
+fi
+
 cookiecutter --replay-file $REPLAY_FILE $TAP_TEMPLATE -o $CC_BUILD_PATH &&
     cd $CC_TEST_OUTPUT &&
     pwd &&

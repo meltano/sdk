@@ -55,10 +55,16 @@ jobs:
       run: |
         bash e2e-tests/cookiecutters/test_cookiecutter.sh $CC_TEMPLATE $REPLAY_FILE 0
 
+    - uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.replay }}
+        path: |
+          ${{ env.CC_TEST_OUTPUT }}/
+          !${{ env.CC_TEST_OUTPUT }}/.mypy_cache/
+
     - name: Run lint
       env:
         REPLAY_FILE: e2e-tests/cookiecutters/${{ matrix.replay }}
       run: |
-        CC_OUTPUT_DIR=$(basename $REPLAY_FILE .json)
-        cd /tmp/$CC_OUTPUT_DIR
+        cd $CC_TEST_OUTPUT
         poetry run tox -e lint
