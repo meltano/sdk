@@ -1,27 +1,46 @@
 """REST client handling, including {{ cookiecutter.source_name }}Stream base class."""
 
-import requests
+from __future__ import annotations
+
+{% if cookiecutter.auth_method in ("OAuth2", "JWT") -%}
+import sys
+{% endif -%}
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Callable, Iterable
 
-{%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
-from memoization import cached
-{%- endif %}
-
+import requests
+{% if cookiecutter.auth_method  == "API Key" -%}
+from singer_sdk.authenticators import APIKeyAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
-{%- if cookiecutter.auth_method  == "API Key" %}
-from singer_sdk.authenticators import APIKeyAuthenticator
-{%- elif cookiecutter.auth_method  == "Bearer Token" %}
+
+{% elif cookiecutter.auth_method  == "Bearer Token" -%}
 from singer_sdk.authenticators import BearerTokenAuthenticator
-{%- elif cookiecutter.auth_method == "Basic Auth" %}
+from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+
+{% elif cookiecutter.auth_method == "Basic Auth" -%}
 from singer_sdk.authenticators import BasicAuthenticator
-{%- elif cookiecutter.auth_method in ("OAuth2", "JWT") %}
+from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+
+{% elif cookiecutter.auth_method in ("OAuth2", "JWT") -%}
+from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
-{%- endif %}
 
+{% endif -%}
 
+{%- if cookiecutter.auth_method in ("OAuth2", "JWT") -%}
+if sys.version_info >= (3, 8):
+    from functools import cached_property
+else:
+    from cached_property import cached_property
+
+{% endif -%}
+
+_Auth = Callable[[requests.PreparedRequest], requests.PreparedRequest]
 SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 
@@ -42,29 +61,40 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
 
-    @property
-    @cached
-    def authenticator(self) -> {{ cookiecutter.source_name }}Authenticator:
-        """Return a new authenticator object."""
+    @cached_property
+    def authenticator(self) -> _Auth:
+        """Return a new authenticator object.
+
+        Returns:
+            An authenticator instance.
+        """
         return {{ cookiecutter.source_name }}Authenticator.create_for_stream(self)
 
 {%- elif cookiecutter.auth_method == "API Key" %}
 
     @property
     def authenticator(self) -> APIKeyAuthenticator:
-        """Return a new authenticator object."""
+        """Return a new authenticator object.
+
+        Returns:
+            An authenticator instance.
+        """
         return APIKeyAuthenticator.create_for_stream(
             self,
             key="x-api-key",
             value=self.config.get("api_key", ""),
-            location="header"
+            location="header",
         )
 
 {%- elif cookiecutter.auth_method == "Bearer Token" %}
 
     @property
     def authenticator(self) -> BearerTokenAuthenticator:
-        """Return a new authenticator object."""
+        """Return a new authenticator object.
+
+        Returns:
+            An authenticator instance.
+        """
         return BearerTokenAuthenticator.create_for_stream(
             self,
             token=self.config.get("api_key")
@@ -74,7 +104,11 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 
     @property
     def authenticator(self) -> BasicAuthenticator:
-        """Return a new authenticator object."""
+        """Return a new authenticator object.
+
+        Returns:
+            An authenticator instance.
+        """
         return BasicAuthenticator.create_for_stream(
             self,
             username=self.config.get("username"),
@@ -85,7 +119,11 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 
     @property
     def http_headers(self) -> dict:
-        """Return the http headers needed."""
+        """Return the http headers needed.
+
+        Returns:
+            A dictionary of HTTP headers.
+        """
         headers = {}
         if "user_agent" in self.config:
             headers["User-Agent"] = self.config.get("user_agent")
@@ -96,9 +134,19 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return headers
 
     def get_next_page_token(
-        self, response: requests.Response, previous_token: Optional[Any]
-    ) -> Optional[Any]:
-        """Return a token for identifying next page or None if no more pages."""
+        self,
+        response: requests.Response,
+        previous_token: Any | None,
+    ) -> Any | None:
+        """Return a token for identifying next page or None if no more pages.
+
+        Args:
+            response: The HTTP ``requests.Response`` object.
+            previous_token: The previous page token value.
+
+        Returns:
+            The next pagination token.
+        """
         # TODO: If pagination is required, return a token which can be used to get the
         #       next page. If this is the final page, return "None" to end the
         #       pagination loop.
@@ -114,9 +162,19 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return next_page_token
 
     def get_url_params(
-        self, context: Optional[dict], next_page_token: Optional[Any]
-    ) -> Dict[str, Any]:
-        """Return a dictionary of values to be used in URL parameterization."""
+        self,
+        context: dict | None,
+        next_page_token: Any | None,
+    ) -> dict[str, Any]:
+        """Return a dictionary of values to be used in URL parameterization.
+
+        Args:
+            context: The stream context.
+            next_page_token: The next page index or value.
+
+        Returns:
+            A dictionary of URL query parameters.
+        """
         params: dict = {}
         if next_page_token:
             params["page"] = next_page_token
@@ -126,21 +184,45 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return params
 
     def prepare_request_payload(
-        self, context: Optional[dict], next_page_token: Optional[Any]
-    ) -> Optional[dict]:
+        self,
+        context: dict | None,
+        next_page_token: Any | None,
+    ) -> dict | None:
         """Prepare the data payload for the REST API request.
 
         By default, no payload will be sent (return None).
+
+        Args:
+            context: The stream context.
+            next_page_token: The next page index or value.
+
+        Returns:
+            A dictionary with the JSON body for a POST requests.
         """
         # TODO: Delete this method if no payload is required. (Most REST APIs.)
         return None
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
-        """Parse the response and return an iterator of result records."""
+        """Parse the response and return an iterator of result records.
+
+        Args:
+            response: The HTTP ``requests.Response`` object.
+
+        Yields:
+            Each record from the source.
+        """
         # TODO: Parse response body and return a set of records.
         yield from extract_jsonpath(self.records_jsonpath, input=response.json())
 
-    def post_process(self, row: dict, context: Optional[dict] = None) -> Optional[dict]:
-        """As needed, append or transform raw data to match expected structure."""
+    def post_process(self, row: dict, context: dict | None = None) -> dict | None:
+        """As needed, append or transform raw data to match expected structure.
+
+        Args:
+            row: An individual record from the stream.
+            context: The stream context.
+
+        Returns:
+            The updated record dictionary, or ``None`` to skip the record.
+        """
         # TODO: Delete this method if not needed.
         return row

@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths: ["cookiecutter/**", "e2e-tests/cookiecutters/**"]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -21,6 +22,7 @@ jobs:
       matrix:
         include:
           - { cookiecutter: "tap-template", replay: "tap-rest-api_key-github.json", python-version: "3.9",  os: "ubuntu-latest" }
+          - { cookiecutter: "tap-template", replay: "tap-rest-jwt-github.json", python-version: "3.9",  os: "ubuntu-latest" }
           - { cookiecutter: "target-template", replay: "target-per_record.json", python-version: "3.9",  os: "ubuntu-latest" }
 
     steps:

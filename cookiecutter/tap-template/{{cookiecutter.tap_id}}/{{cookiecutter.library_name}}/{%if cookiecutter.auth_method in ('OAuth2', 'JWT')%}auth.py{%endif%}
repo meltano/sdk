@@ -1,9 +1,13 @@
 """{{ cookiecutter.source_name }} Authentication."""
 
-{% if cookiecutter.auth_method not in ("Basic Auth", "OAuth2", "JWT") %}
+from __future__ import annotations
+
+{%- if cookiecutter.auth_method not in ("Basic Auth", "OAuth2", "JWT") %}
+
 # TODO: Delete this file or add custom authentication logic as needed.
 
 {%- elif cookiecutter.auth_method == "OAuth2" %}
+
 from singer_sdk.authenticators import OAuthAuthenticator, SingletonMeta
 
 
@@ -27,12 +31,21 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator, metaclass=
 
     @classmethod
     def create_for_stream(cls, stream) -> "{{ cookiecutter.source_name }}Authenticator":
+        """Instantiate an authenticator for a specific Singer stream.
+
+        Args:
+            stream: The Singer stream instance.
+
+        Returns:
+            A new authenticator.
+        """
         return cls(
             stream=stream,
             auth_endpoint="TODO: OAuth Endpoint URL",
             oauth_scopes="TODO: OAuth Scopes",
         )
 {%- elif cookiecutter.auth_method == "JWT" %}
+
 from singer_sdk.authenticators import OAuthJWTAuthenticator
 
 
@@ -41,9 +54,17 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthJWTAuthenticator):
 
     @classmethod
     def create_for_stream(cls, stream) -> "{{ cookiecutter.source_name }}Authenticator":
+        """Instantiate an authenticator for a specific Singer stream.
+
+        Args:
+            stream: The Singer stream instance.
+
+        Returns:
+            A new authenticator.
+        """
         return cls(
             stream=stream,
             auth_endpoint="TODO: OAuth Endpoint URL",
             oauth_scopes="TODO: OAuth Scopes",
         )
-{% endif %}
+{%- endif %}
