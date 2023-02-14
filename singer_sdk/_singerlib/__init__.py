@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from singer_sdk._singerlib.catalog import (
     Catalog,
     CatalogEntry,

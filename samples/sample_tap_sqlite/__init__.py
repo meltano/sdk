@@ -1,5 +1,7 @@
 """A sample implementation for SQLite."""
 
+from __future__ import annotations
+
 from typing import Any, Dict
 
 import sqlalchemy
@@ -16,7 +18,7 @@ class SQLiteConnector(SQLConnector):
     This class handles all DDL and type conversions.
     """
 
-    def get_sqlalchemy_url(self, config: Dict[str, Any]) -> str:
+    def get_sqlalchemy_url(self, config: dict[str, Any]) -> str:
         """Generates a SQLAlchemy URL for SQLite."""
         return f"sqlite:///{config[DB_PATH_CONFIG]}"
 

@@ -1,10 +1,12 @@
 """Sink classes load data to SQL targets."""
 
+from __future__ import annotations
+
 import re
 from collections import defaultdict
 from copy import copy
 from textwrap import dedent
-from typing import Any, Dict, Iterable, List, Optional, Type, Union
+from typing import Any, Iterable
 
 import sqlalchemy
 from pendulum import now
@@ -21,7 +23,7 @@ from singer_sdk.sinks.batch import BatchSink
 class SQLSink(BatchSink):
     """SQL-type sink type."""
 
-    connector_class: Type[SQLConnector]
+    connector_class: type[SQLConnector]
     soft_delete_column_name = "_sdc_deleted_at"
     version_column_name = "_sdc_table_version"
 
@@ -29,9 +31,9 @@ class SQLSink(BatchSink):
         self,
         target: PluginBase,
         stream_name: str,
-        schema: Dict,
-        key_properties: Optional[List[str]],
-        connector: Optional[SQLConnector] = None,
+        schema: dict,
+        key_properties: list[str] | None,
+        connector: SQLConnector | None = None,
     ) -> None:
         """Initialize SQL Sink.
 
@@ -76,7 +78,7 @@ class SQLSink(BatchSink):
         return self.conform_name(table, "table")
 
     @property
-    def schema_name(self) -> Optional[str]:
+    def schema_name(self) -> str | None:
         """Return the schema name or `None` if using names with no schema part.
 
         Returns:
@@ -103,7 +105,7 @@ class SQLSink(BatchSink):
         return None
 
     @property
-    def database_name(self) -> Optional[str]:
+    def database_name(self) -> str | None:
         """Return the DB name or `None` if using names with no database part.
 
         Returns:
@@ -135,7 +137,7 @@ class SQLSink(BatchSink):
             schema_name=self.schema_name, db_name=self.database_name
         )
 
-    def conform_name(self, name: str, object_type: Optional[str] = None) -> str:
+    def conform_name(self, name: str, object_type: str | None = None) -> str:
         """Conform a stream property name to one suitable for the target system.
 
         Transforms names to snake case by default, applicable to most common DBMSs'.
@@ -167,7 +169,7 @@ class SQLSink(BatchSink):
 
     @staticmethod
     def _check_conformed_names_not_duplicated(
-        conformed_property_names: Dict[str, str]
+        conformed_property_names: dict[str, str]
     ) -> None:
         """Check if conformed names produce duplicate keys.
 
@@ -239,7 +241,7 @@ class SQLSink(BatchSink):
         )
 
     @property
-    def key_properties(self) -> List[str]:
+    def key_properties(self) -> list[str]:
         """Return key properties, conformed to target system naming requirements.
 
         Returns:
@@ -268,7 +270,7 @@ class SQLSink(BatchSink):
         self,
         full_table_name: str,
         schema: dict,
-    ) -> Union[str, Executable]:
+    ) -> str | Executable:
         """Generate an insert statement for the given records.
 
         Args:
@@ -292,8 +294,8 @@ class SQLSink(BatchSink):
         self,
         full_table_name: str,
         schema: dict,
-        records: Iterable[Dict[str, Any]],
-    ) -> Optional[int]:
+        records: Iterable[dict[str, Any]],
+    ) -> int | None:
         """Bulk insert records to an existing destination table.
 
         The default implementation uses a generic SQLAlchemy bulk insert operation.
@@ -326,8 +328,8 @@ class SQLSink(BatchSink):
         return len(conformed_records) if isinstance(conformed_records, list) else None
 
     def merge_upsert_from_table(
-        self, target_table_name: str, from_table_name: str, join_keys: List[str]
-    ) -> Optional[int]:
+        self, target_table_name: str, from_table_name: str, join_keys: list[str]
+    ) -> int | None:
         """Merge upsert data from one table to another.
 
         Args:

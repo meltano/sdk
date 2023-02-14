@@ -1,5 +1,7 @@
 """Sample Parquet target stream class, which handles writing streams."""
 
+from __future__ import annotations
+
 import csv
 from pathlib import Path
 

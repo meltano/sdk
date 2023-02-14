@@ -1,5 +1,7 @@
 """Typing tests."""
 
+from __future__ import annotations
+
 import json
 import sqlite3
 from copy import deepcopy
@@ -169,7 +171,7 @@ def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
     - Load a dataset with 2 columns.
     """
     test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
-    props_a: Dict[str, dict] = {"col_a": th.StringType().to_dict()}
+    props_a: dict[str, dict] = {"col_a": th.StringType().to_dict()}
     props_b = deepcopy(props_a)
     props_b["col_b"] = th.IntegerType().to_dict()
     schema_msg_a, schema_msg_b = (
@@ -253,8 +255,8 @@ def test_sqlite_column_morph(sqlite_sample_target: SQLTarget):
       supported by SQLite.
     """
     test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
-    props_a: Dict[str, dict] = {"col_a": th.IntegerType().to_dict()}
-    props_b: Dict[str, dict] = {"col_a": th.StringType().to_dict()}
+    props_a: dict[str, dict] = {"col_a": th.IntegerType().to_dict()}
+    props_b: dict[str, dict] = {"col_a": th.StringType().to_dict()}
     schema_msg_a, schema_msg_b = (
         {
             "type": "SCHEMA",
@@ -348,8 +350,8 @@ def test_sqlite_column_no_morph(sqlite_sample_target: SQLTarget):
     - Ensure int value can still insert.
     """
     test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
-    props_a: Dict[str, dict] = {"col_a": th.StringType().to_dict()}
-    props_b: Dict[str, dict] = {"col_a": th.IntegerType().to_dict()}
+    props_a: dict[str, dict] = {"col_a": th.StringType().to_dict()}
+    props_b: dict[str, dict] = {"col_a": th.IntegerType().to_dict()}
     schema_msg_a, schema_msg_b = (
         {
             "type": "SCHEMA",

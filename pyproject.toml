@@ -131,6 +131,9 @@ pytest-snapshot = "^0.9.0"
 exclude = ".*simpleeval.*"
 
 [tool.isort]
+add_imports = [
+  "from __future__ import annotations",
+]
 profile = "black"
 multi_line_output = 3 # Vertical Hanging Indent
 src_paths = "singer_sdk"

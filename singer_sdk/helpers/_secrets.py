@@ -1,5 +1,7 @@
 """Helpers function for secrets management."""
 
+from __future__ import annotations
+
 COMMON_SECRET_KEYS = [
     "db_password",
     "password",

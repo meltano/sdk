@@ -1,11 +1,13 @@
 """General helper functions for json typing."""
 
+from __future__ import annotations
+
 import copy
 import datetime
 import logging
 from enum import Enum
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, cast
 
 import pendulum
 
@@ -87,7 +89,7 @@ def is_secret_type(type_dict: dict) -> bool:
     return False
 
 
-def is_object_type(property_schema: dict) -> Optional[bool]:
+def is_object_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is an object or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
@@ -97,7 +99,7 @@ def is_object_type(property_schema: dict) -> Optional[bool]:
     return False
 
 
-def is_uniform_list(property_schema: dict) -> Optional[bool]:
+def is_uniform_list(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is an array with a single schema.
 
     This is as opposed to 'tuples' where different indices have different schemas;
@@ -161,7 +163,7 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
     )
 
 
-def get_datelike_property_type(property_schema: Dict) -> Optional[str]:
+def get_datelike_property_type(property_schema: dict) -> str | None:
     """Return one of 'date-time', 'time', or 'date' if property is date-like.
 
     Otherwise return None.
@@ -186,11 +188,11 @@ def _is_string_with_format(type_dict):
 
 def handle_invalid_timestamp_in_record(
     record,
-    key_breadcrumb: List[str],
+    key_breadcrumb: list[str],
     invalid_value: str,
     datelike_typename: str,
     ex: Exception,
-    treatment: Optional[DatetimeErrorTreatmentEnum],
+    treatment: DatetimeErrorTreatmentEnum | None,
     logger: logging.Logger,
 ) -> Any:
     """Apply treatment or raise an error for invalid time values."""
@@ -244,7 +246,7 @@ def is_array_type(type_dict: dict) -> bool:
     return "array" in type_dict["type"]
 
 
-def is_boolean_type(property_schema: dict) -> Optional[bool]:
+def is_boolean_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is a boolean or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
@@ -256,7 +258,7 @@ def is_boolean_type(property_schema: dict) -> Optional[bool]:
     return False
 
 
-def is_integer_type(property_schema: dict) -> Optional[bool]:
+def is_integer_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is an integer or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
@@ -268,7 +270,7 @@ def is_integer_type(property_schema: dict) -> Optional[bool]:
     return False
 
 
-def is_string_type(property_schema: dict) -> Optional[bool]:
+def is_string_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is a string or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
@@ -280,7 +282,7 @@ def is_string_type(property_schema: dict) -> Optional[bool]:
     return False
 
 
-def is_null_type(property_schema: dict) -> Optional[bool]:
+def is_null_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is a null or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
@@ -292,7 +294,7 @@ def is_null_type(property_schema: dict) -> Optional[bool]:
     return False
 
 
-def is_number_type(property_schema: dict) -> Optional[bool]:
+def is_number_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is a number or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
@@ -306,7 +308,7 @@ def is_number_type(property_schema: dict) -> Optional[bool]:
 
 @lru_cache()
 def _warn_unmapped_properties(
-    stream_name: str, property_names: Tuple[str], logger: logging.Logger
+    stream_name: str, property_names: tuple[str], logger: logging.Logger
 ):
     logger.warning(
         f"Properties {property_names} were present in the '{stream_name}' stream but "
@@ -344,11 +346,11 @@ class TypeConformanceLevel(Enum):
 
 def conform_record_data_types(  # noqa: C901
     stream_name: str,
-    record: Dict[str, Any],
+    record: dict[str, Any],
     schema: dict,
     level: TypeConformanceLevel,
     logger: logging.Logger,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Translate values in record dictionary to singer-compatible data types.
 
     Any property names not found in the schema catalog will be removed, and a single
@@ -363,11 +365,11 @@ def conform_record_data_types(  # noqa: C901
 
 
 def _conform_record_data_types(
-    input_object: Dict[str, Any],
+    input_object: dict[str, Any],
     schema: dict,
     level: TypeConformanceLevel,
-    parent: Optional[str],
-) -> Tuple[Dict[str, Any], List[str]]:  # noqa: C901
+    parent: str | None,
+) -> tuple[dict[str, Any], list[str]]:  # noqa: C901
     """Translate values in record dictionary to singer-compatible data types.
 
     Any property names not found in the schema catalog will be removed, and a single
@@ -381,8 +383,8 @@ def _conform_record_data_types(
         level:  Specifies how recursive the conformance process should be
         parent: '.' seperated path to this element from the object root (for logging)
     """
-    output_object: Dict[str, Any] = {}
-    unmapped_properties: List[str] = []
+    output_object: dict[str, Any] = {}
+    unmapped_properties: list[str] = []
 
     if level == TypeConformanceLevel.NONE:
         return input_object, unmapped_properties
@@ -458,7 +460,7 @@ def _conform_primitive_property(elem: Any, property_schema: dict) -> Any:
         else:
             return elem.hex()
     elif is_boolean_type(property_schema):
-        boolean_representation: Optional[bool]
+        boolean_representation: bool | None
         if elem is None:
             boolean_representation = None
         elif elem == 0:

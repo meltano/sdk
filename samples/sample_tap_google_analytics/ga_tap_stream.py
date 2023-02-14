@@ -1,5 +1,7 @@
 """Sample tap stream test for tap-google-analytics."""
 
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Any, Iterable, List, Optional, cast
 
@@ -30,8 +32,8 @@ class SampleGoogleAnalyticsStream(RESTStream):
     rest_method = "POST"
 
     # Child class overrides:
-    dimensions: List[str] = []
-    metrics: List[str] = []
+    dimensions: list[str] = []
+    metrics: list[str] = []
 
     @property
     def authenticator(self) -> GoogleJWTAuthenticator:
@@ -43,8 +45,8 @@ class SampleGoogleAnalyticsStream(RESTStream):
         )
 
     def prepare_request_payload(
-        self, context: Optional[dict], next_page_token: Optional[Any]
-    ) -> Optional[dict]:
+        self, context: dict | None, next_page_token: Any | None
+    ) -> dict | None:
         """Prepare the data payload for the REST API request."""
         # params = self.get_url_params(context, next_page_token)
         request_def = {

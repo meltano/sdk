@@ -1,5 +1,7 @@
 """Tools and standard tests for Tap/Target implementations."""
 
+from __future__ import annotations
+
 from .config import SuiteConfig
 from .factory import get_tap_test_class, get_target_test_class, get_test_class
 from .legacy import (
