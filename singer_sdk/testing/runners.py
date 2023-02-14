@@ -26,9 +26,8 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
     def __init__(
         self,
         singer_class: type[Tap] | type[Target],
-        config: dict | None = None,
+        singer_kwargs: dict | None = None,
         suite_config: SuiteConfig | None = None,
-        **kwargs: Any,
     ) -> None:
         """Initialize the test runner object.
 
@@ -40,8 +39,7 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
             kwargs (dict): Default arguments to be passed to tap/target on create.
         """
         self.singer_class = singer_class
-        self.config = config or {}
-        self.default_kwargs = kwargs
+        self.singer_kwargs = singer_kwargs or {}
         self.suite_config = suite_config or SuiteConfig()
 
     @staticmethod
@@ -67,8 +65,8 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
             An instantiated Tap or Target.
         """
         if not kwargs:
-            kwargs = self.default_kwargs
-        return self.singer_class(config=self.config, **kwargs)
+            kwargs = self.singer_kwargs
+        return self.singer_class(**kwargs)
 
     @abc.abstractmethod
     def sync_all(self, **kwargs: Any) -> None:
@@ -85,24 +83,21 @@ class TapTestRunner(SingerTestRunner):
     def __init__(
         self,
         tap_class: type[Tap],
-        config: dict | None = None,
+        tap_kwargs: dict | None = None,
         suite_config: SuiteConfig | None = None,
-        **kwargs: Any,
     ) -> None:
         """Initialize Tap instance.
 
         Args:
             tap_class: Tap class to run.
-            config: Config dict to pass to Tap class.
+            tap_kwargs: Dict of keyword arguments to pass to Tap class.
             suite_config (SuiteConfig): SuiteConfig instance to be used when
                 instantiating tests.
-            kwargs: Default arguments to be passed to tap on create.
         """
         super().__init__(
             singer_class=tap_class,
-            config=config or {},
+            singer_kwargs=tap_kwargs,
             suite_config=suite_config,
-            **kwargs,
         )
 
     @property
@@ -183,11 +178,10 @@ class TargetTestRunner(SingerTestRunner):
     def __init__(
         self,
         target_class: type[Target],
-        config: dict | None = None,
+        target_kwargs: dict,
         suite_config: SuiteConfig | None = None,
         input_filepath: Path | None = None,
         input_io: io.StringIO | None = None,
-        **kwargs: Any,
     ) -> None:
         """Initialize TargetTestRunner.
 
@@ -203,9 +197,8 @@ class TargetTestRunner(SingerTestRunner):
         """
         super().__init__(
             singer_class=target_class,
-            config=config or {},
+            singer_kwargs=target_kwargs,
             suite_config=suite_config,
-            **kwargs,
         )
         self.input_filepath = input_filepath
         self.input_io = input_io
