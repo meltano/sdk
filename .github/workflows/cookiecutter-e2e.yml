@@ -2,8 +2,8 @@ name: E2E Cookiecutters
 
 on:
   push:
-#    branches: [main]
-#    paths: [cookiecutter/**]
+    branches: [main]
+    paths: ["cookiecutter/**", "e2e-tests/cookiecutters/**"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
