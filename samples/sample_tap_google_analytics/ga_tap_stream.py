@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Iterable, List, Optional, cast
+from typing import Any, Iterable, cast
 
 import pendulum
 

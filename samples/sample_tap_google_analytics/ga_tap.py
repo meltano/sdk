@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import List
 
 from samples.sample_tap_google_analytics.ga_tap_stream import (
     GASimpleSampleStream,

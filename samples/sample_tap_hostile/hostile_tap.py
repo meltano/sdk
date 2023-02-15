@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import List
-
 from samples.sample_tap_hostile.hostile_streams import HostilePropertyNamesStream
 from singer_sdk import Stream, Tap
 from singer_sdk.typing import PropertiesList

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import List
-
 from samples.sample_tap_gitlab.gitlab_rest_streams import (
     CommitsStream,
     EpicIssuesStream,

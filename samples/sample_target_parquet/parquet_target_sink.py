@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Union
+from typing import Any
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -109,8 +109,8 @@ class SampleParquetTargetSink(BatchSink):
             return pa.date64
         return pa.string
 
-    def _get_parquet_schema(self) -> List[Tuple[str, Any]]:
-        col_list: List[Tuple[str, Any]] = []
+    def _get_parquet_schema(self) -> list[tuple[str, Any]]:
+        col_list: list[tuple[str, Any]] = []
         for property in self.schema["properties"]:
             col_list.append(
                 (property["name"], self.translate_data_type(property["type"]))

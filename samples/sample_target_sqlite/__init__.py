@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Any
 
 import sqlalchemy
-from sqlalchemy.dialects.sqlite import insert
 
 from singer_sdk import SQLConnector, SQLSink, SQLTarget
 from singer_sdk import typing as th

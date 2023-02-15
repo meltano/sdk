@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import List, Tuple, Type
-
 from singer_sdk import SQLConnector, SQLStream, SQLTap
 from singer_sdk import typing as th  # JSON schema typing helpers
 

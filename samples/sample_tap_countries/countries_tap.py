@@ -8,8 +8,6 @@ See the online explorer and query builder here:
 
 from __future__ import annotations
 
-from typing import List
-
 from samples.sample_tap_countries.countries_streams import (
     ContinentsStream,
     CountriesStream,

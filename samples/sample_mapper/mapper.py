@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import PurePath
-from typing import Generator, List, Optional, Union
+from typing import Generator
 
 import singer_sdk._singerlib as singer
 import singer_sdk.typing as th
