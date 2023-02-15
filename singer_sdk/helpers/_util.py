@@ -1,13 +1,15 @@
 """General helper functions, helper classes, and decorators."""
 
+from __future__ import annotations
+
 import json
 from pathlib import Path, PurePath
-from typing import Any, Dict, Union, cast
+from typing import Any, cast
 
 import pendulum
 
 
-def read_json_file(path: Union[PurePath, str]) -> Dict[str, Any]:
+def read_json_file(path: PurePath | str) -> dict[str, Any]:
     """Read json file, thowing an error if missing."""
     if not path:
         raise RuntimeError("Could not open file. Filepath not provided.")

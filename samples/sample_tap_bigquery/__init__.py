@@ -1,6 +1,6 @@
 """A sample implementation for BigQuery."""
 
-from typing import List, Tuple, Type
+from __future__ import annotations
 
 from singer_sdk import SQLConnector, SQLStream, SQLTap
 from singer_sdk import typing as th  # JSON schema typing helpers
@@ -15,7 +15,7 @@ class BigQueryConnector(SQLConnector):
 
     def get_object_names(
         self, engine, inspected, schema_name: str
-    ) -> List[Tuple[str, bool]]:
+    ) -> list[tuple[str, bool]]:
         """Return discoverable object names."""
         # Bigquery inspections returns table names in the form
         # `schema_name.table_name` which later results in the project name
@@ -48,7 +48,7 @@ class TapBigQuery(SQLTap):
         ),
     ).to_dict()
 
-    default_stream_class: Type[SQLStream] = BigQueryStream
+    default_stream_class: type[SQLStream] = BigQueryStream
 
 
 __all__ = ["TapBigQuery", "BigQueryConnector", "BigQueryStream"]

@@ -4,6 +4,8 @@
 #  - https://gitlab.com/-/graphql-explorer
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 from singer_sdk.streams import GraphQLStream

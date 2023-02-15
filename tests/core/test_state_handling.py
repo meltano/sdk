@@ -1,5 +1,7 @@
 """Test catalog selection features."""
 
+from __future__ import annotations
+
 import pytest
 
 from singer_sdk.helpers import _state

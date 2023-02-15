@@ -1,4 +1,6 @@
 """Test tap-to-target sync."""
+from __future__ import annotations
+
 import json
 import os
 import shutil
@@ -48,8 +50,8 @@ class TestSampleTargetCSV(StandardTests):
 
 
 SAMPLE_FILENAME = "/tmp/testfile.countries"
-SAMPLE_TAP_CONFIG: Dict[str, Any] = {}
-COUNTRIES_STREAM_MAPS_CONFIG: Dict[str, Any] = {
+SAMPLE_TAP_CONFIG: dict[str, Any] = {}
+COUNTRIES_STREAM_MAPS_CONFIG: dict[str, Any] = {
     "stream_maps": {"continents": {}, "__else__": None}
 }
 
@@ -61,10 +63,10 @@ class BatchSinkMock(BatchSink):
 
     def __init__(
         self,
-        target: "TargetMock",
+        target: TargetMock,
         stream_name: str,
-        schema: Dict,
-        key_properties: Optional[List[str]],
+        schema: dict,
+        key_properties: list[str] | None,
     ):
         """Create the Mock batch-based sink."""
         super().__init__(target, stream_name, schema, key_properties)
@@ -91,8 +93,8 @@ class TargetMock(Target):
     def __init__(self):
         """Create the Mock target sync."""
         super().__init__(config={})
-        self.state_messages_written: List[dict] = []
-        self.records_written: List[dict] = []
+        self.state_messages_written: list[dict] = []
+        self.records_written: list[dict] = []
         self.num_records_processed: int = 0
         self.num_batches_processed: int = 0
 

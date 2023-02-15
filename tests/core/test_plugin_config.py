@@ -1,13 +1,15 @@
 """Test plugin config functions."""
 
 
+from __future__ import annotations
+
 from typing import Any, Dict, List
 
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import BooleanType, PropertiesList, Property
 
-SAMPLE_CONFIG: Dict[str, Any] = {}
+SAMPLE_CONFIG: dict[str, Any] = {}
 
 
 class TapConfigTest(Tap):
@@ -19,7 +21,7 @@ class TapConfigTest(Tap):
         Property("default_false", BooleanType, default=False),
     ).to_dict()
 
-    def discover_streams(self) -> List[Stream]:
+    def discover_streams(self) -> list[Stream]:
         """Noop."""
         return []
 

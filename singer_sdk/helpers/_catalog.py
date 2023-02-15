@@ -1,8 +1,10 @@
 """Private helper functions for catalog and selection logic."""
 
+from __future__ import annotations
+
 from copy import deepcopy
 from logging import Logger
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 from memoization import cached
 
@@ -26,7 +28,7 @@ def _pop_deselected_schema(
     schema: dict,
     mask: SelectionMask,
     stream_name: str,
-    breadcrumb: Tuple[str, ...],
+    breadcrumb: tuple[str, ...],
     logger: Logger,
 ) -> None:
     """Remove anything from schema that is not selected.
@@ -49,7 +51,7 @@ def _pop_deselected_schema(
         return
 
     for property_name, property_def in list(schema_at_breadcrumb["properties"].items()):
-        property_breadcrumb: Tuple[str, ...] = tuple(
+        property_breadcrumb: tuple[str, ...] = tuple(
             list(breadcrumb) + ["properties", property_name]
         )
         selected = mask[property_breadcrumb]
@@ -65,11 +67,11 @@ def _pop_deselected_schema(
 
 
 def pop_deselected_record_properties(
-    record: Dict[str, Any],
+    record: dict[str, Any],
     schema: dict,
     mask: SelectionMask,
     logger: Logger,
-    breadcrumb: Tuple[str, ...] = (),
+    breadcrumb: tuple[str, ...] = (),
 ) -> None:
     """Remove anything from record properties that is not selected.
 
@@ -100,7 +102,7 @@ def set_catalog_stream_selected(
     catalog: Catalog,
     stream_name: str,
     selected: bool,
-    breadcrumb: Optional[Tuple[str, ...]] = None,
+    breadcrumb: tuple[str, ...] | None = None,
 ) -> None:
     """Return True if the property is selected for extract.
 

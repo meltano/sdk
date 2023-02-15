@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from singer_sdk._singerlib import Schema, resolve_schema_references

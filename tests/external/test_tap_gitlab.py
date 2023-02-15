@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import warnings
 from typing import Optional
 
@@ -26,7 +28,7 @@ COUNTER = 0
 SAMPLE_CONFIG_BAD = {"not": "correct"}
 
 
-def test_gitlab_replication_keys(gitlab_config: Optional[dict]):
+def test_gitlab_replication_keys(gitlab_config: dict | None):
     stream_name = "issues"
     expected_replication_key = "updated_at"
     tap = SampleTapGitlab(config=gitlab_config, state=None, parse_env_config=True)
@@ -54,7 +56,7 @@ def test_gitlab_replication_keys(gitlab_config: Optional[dict]):
     ].is_timestamp_replication_key, "Failed to detect `is_timestamp_replication_key`"
 
 
-def test_gitlab_sync_epic_issues(gitlab_config: Optional[dict]):
+def test_gitlab_sync_epic_issues(gitlab_config: dict | None):
     """Test sync for just the 'epic_issues' child stream."""
     # Initialize with basic config
     stream_name = "epic_issues"
