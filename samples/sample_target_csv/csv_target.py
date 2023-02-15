@@ -1,5 +1,7 @@
 """Sample target test for target-csv."""
 
+from __future__ import annotations
+
 from samples.sample_target_csv.csv_target_sink import SampleCSVTargetSink
 from singer_sdk import typing as th
 from singer_sdk.target_base import Target

@@ -1,5 +1,7 @@
 """Sink classes for targets."""
 
+from __future__ import annotations
+
 from singer_sdk.sinks.batch import BatchSink
 from singer_sdk.sinks.core import Sink
 from singer_sdk.sinks.record import RecordSink

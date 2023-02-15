@@ -1,8 +1,9 @@
 """Sample tap test for tap-google-analytics."""
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
-from typing import List
 
 from samples.sample_tap_google_analytics.ga_tap_stream import (
     GASimpleSampleStream,
@@ -29,6 +30,6 @@ class SampleTapGoogleAnalytics(Tap):
         Property("private_key", StringType(), required=True, secret=True),
     ).to_dict()
 
-    def discover_streams(self) -> List[SampleGoogleAnalyticsStream]:
+    def discover_streams(self) -> list[SampleGoogleAnalyticsStream]:
         """Return a list of all streams."""
         return [GASimpleSampleStream(tap=self)]

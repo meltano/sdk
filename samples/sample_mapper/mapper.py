@@ -1,7 +1,9 @@
 """A sample inline mapper app."""
 
+from __future__ import annotations
+
 from pathlib import PurePath
-from typing import Generator, List, Optional, Union
+from typing import Generator
 
 import singer_sdk._singerlib as singer
 import singer_sdk.typing as th
@@ -42,7 +44,7 @@ class StreamTransform(InlineMapper):
 
     def __init__(
         self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
@@ -120,7 +122,7 @@ class StreamTransform(InlineMapper):
                 self.logger.info(stream_map.stream_alias)
                 yield record_message
 
-    def map_state_message(self, message_dict: dict) -> List[singer.Message]:
+    def map_state_message(self, message_dict: dict) -> list[singer.Message]:
         """Do nothing to the message.
 
         Args:

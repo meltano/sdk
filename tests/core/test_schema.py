@@ -29,6 +29,8 @@ Some might need more thinking if they can contain schemas (though, note that we 
 'anyOf' and' patternProperties' as SIMPLE even though they can contain schemas.
 """
 
+from __future__ import annotations
+
 from singer_sdk._singerlib import Schema
 
 

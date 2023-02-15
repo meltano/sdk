@@ -1,5 +1,7 @@
 """Standard Target tests."""
 
+from __future__ import annotations
+
 from .templates import TargetFileTestTemplate, TargetTestTemplate
 
 

@@ -1,5 +1,7 @@
 """Test map transformer."""
 
+from __future__ import annotations
+
 import copy
 import io
 import json
@@ -359,7 +361,7 @@ def _test_transform(
     sample_stream,
     sample_catalog_obj,
 ):
-    output: Dict[str, List[dict]] = {}
+    output: dict[str, list[dict]] = {}
     mapper = PluginMapper(
         plugin_config={
             "stream_maps": stream_maps,
@@ -603,7 +605,7 @@ def test_mapped_stream(
     clear_schema_cache: None,
     stream_maps: dict,
     flatten: bool,
-    flatten_max_depth: Optional[int],
+    flatten_max_depth: int | None,
     snapshot_name: str,
 ):
     snapshot.snapshot_dir = snapshot_dir.joinpath("mapped_stream")

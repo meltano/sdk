@@ -1,7 +1,9 @@
 """Helper functions for state and bookmark management."""
 
+from __future__ import annotations
+
 import datetime
-from typing import Any, Callable, List, Optional, Union, cast
+from typing import Any, Callable, cast
 
 from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.helpers._typing import to_json_compatible
@@ -15,9 +17,9 @@ STARTING_MARKER = "starting_replication_value"
 def get_state_if_exists(
     tap_state: dict,
     tap_stream_id: str,
-    state_partition_context: Optional[dict] = None,
-    key: Optional[str] = None,
-) -> Optional[Any]:
+    state_partition_context: dict | None = None,
+    key: str | None = None,
+) -> Any | None:
     """Return the stream or partition state, creating a new one if it does not exist.
 
     Parameters
@@ -65,16 +67,14 @@ def get_state_if_exists(
     return matched_partition
 
 
-def get_state_partitions_list(
-    tap_state: dict, tap_stream_id: str
-) -> Optional[List[dict]]:
+def get_state_partitions_list(tap_state: dict, tap_stream_id: str) -> list[dict] | None:
     """Return a list of partitions defined in the state, or None if not defined."""
     return (get_state_if_exists(tap_state, tap_stream_id) or {}).get("partitions", None)
 
 
 def _find_in_partitions_list(
-    partitions: List[dict], state_partition_context: dict
-) -> Optional[dict]:
+    partitions: list[dict], state_partition_context: dict
+) -> dict | None:
     found = [
         partition_state
         for partition_state in partitions
@@ -93,7 +93,7 @@ def _find_in_partitions_list(
 
 
 def _create_in_partitions_list(
-    partitions: List[dict], state_partition_context: dict
+    partitions: list[dict], state_partition_context: dict
 ) -> dict:
     # Existing partition not found. Creating new state entry in partitions list...
     new_partition_state = {"context": state_partition_context}
@@ -102,7 +102,7 @@ def _create_in_partitions_list(
 
 
 def get_writeable_state_dict(
-    tap_state: dict, tap_stream_id: str, state_partition_context: Optional[dict] = None
+    tap_state: dict, tap_stream_id: str, state_partition_context: dict | None = None
 ) -> dict:
     """Return the stream or partition state, creating a new one if it does not exist.
 
@@ -139,7 +139,7 @@ def get_writeable_state_dict(
 
     if "partitions" not in stream_state:
         stream_state["partitions"] = []
-    stream_state_partitions: List[dict] = stream_state["partitions"]
+    stream_state_partitions: list[dict] = stream_state["partitions"]
     found = _find_in_partitions_list(stream_state_partitions, state_partition_context)
     if found:
         return found
@@ -153,7 +153,7 @@ def write_stream_state(
     key,
     val,
     *,
-    state_partition_context: Optional[dict] = None,
+    state_partition_context: dict | None = None,
 ) -> None:
     """Write stream state."""
     state_dict = get_writeable_state_dict(
@@ -162,7 +162,7 @@ def write_stream_state(
     state_dict[key] = val
 
 
-def reset_state_progress_markers(stream_or_partition_state: dict) -> Optional[dict]:
+def reset_state_progress_markers(stream_or_partition_state: dict) -> dict | None:
     """Wipe the state once sync is complete.
 
     For logging purposes, return the wiped 'progress_markers' object if it existed.
@@ -231,8 +231,8 @@ def increment_state(
 
 
 def _greater_than_signpost(
-    signpost: Union[datetime.datetime, str, int, float],
-    new_value: Union[datetime.datetime, str, int, float],
+    signpost: datetime.datetime | str | int | float,
+    new_value: datetime.datetime | str | int | float,
 ) -> bool:
     """Compare and return True if new_value is greater than signpost."""
     return (  # fails if signpost and bookmark are incompatible types
@@ -240,7 +240,7 @@ def _greater_than_signpost(
     )
 
 
-def finalize_state_progress_markers(stream_or_partition_state: dict) -> Optional[dict]:
+def finalize_state_progress_markers(stream_or_partition_state: dict) -> dict | None:
     """Promote or wipe progress markers once sync is complete."""
     signpost_value = stream_or_partition_state.pop(SIGNPOST_MARKER, None)
     stream_or_partition_state.pop(STARTING_MARKER, None)
@@ -263,8 +263,8 @@ def log_sort_error(
     ex: Exception,
     log_fn: Callable,
     stream_name: str,
-    current_context: Optional[dict],
-    state_partition_context: Optional[dict],
+    current_context: dict | None,
+    state_partition_context: dict | None,
     record_count: int,
     partition_record_count: int,
 ) -> None:

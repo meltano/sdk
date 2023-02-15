@@ -60,7 +60,11 @@ repos:
     - darglint==1.8.1
     - flake8-annotations==2.9.0
     - flake8-docstrings==1.6.0
-    files: 'singer_sdk/.*'
+    files: |
+        (?x)^(
+          singer_sdk/.*|
+          samples/.*
+        )$
 
 - repo: https://github.com/asottile/pyupgrade
   rev: v3.3.1

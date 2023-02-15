@@ -1,5 +1,7 @@
 """Compatibility helpers."""
 
+from __future__ import annotations
+
 try:
     from typing import final
 except ImportError:

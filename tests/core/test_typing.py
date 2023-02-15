@@ -1,5 +1,7 @@
 """Test _typing - specifically conform_record_data_types()."""
 
+from __future__ import annotations
+
 import datetime
 import logging
 
