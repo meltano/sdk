@@ -30,8 +30,9 @@ requests = "^2.28.2"
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.1"
 flake8 = "^5.0.4"
+darglint = "^1.8.1"
 black = "^23.1.0"
-pydocstyle = "^6.3.0"
+pyupgrade = "^3.3.1"
 mypy = "^1.0.0"
 isort = "^5.11.5"
 {%- if cookiecutter.serialization_method != "SQL" %}

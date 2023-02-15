@@ -1,0 +1,14 @@
+{
+    "cookiecutter": {
+      "source_name": "GraphQLJWTTemplateTest",
+      "admin_name": "Automatic Tester",
+      "tap_id": "tap-graphql-jwt",
+      "library_name": "tap_graphql_jwt",
+      "variant": "None (Skip)",
+      "stream_type": "GraphQL",
+      "auth_method": "JWT",
+      "include_cicd_sample_template": "None (Skip)",
+      "_template": "../tap-template/",
+      "_output_dir": "."
+    }
+}
