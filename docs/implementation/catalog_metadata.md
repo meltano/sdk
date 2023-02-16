@@ -1,4 +1,4 @@
-# [SDK Implementation Details](./index.md) - Catalog Metadata
+# Catalog Metadata
 
 The SDK automatically generates catalog metadata during catalog discovery. Selection rules overrided by a user will be respected.
 

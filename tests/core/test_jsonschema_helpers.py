@@ -151,7 +151,6 @@ def test_default_value():
 
 
 def test_tap_config_default_injection():
-
     config_dict = {"host": "gitlab.com", "username": "foo", "password": "bar"}
 
     tap = ConfigTestTap(config=config_dict, parse_env_config=False, catalog={})
@@ -525,6 +524,7 @@ def test_array_type():
         pytest.param(
             ObjectType(
                 Property("id", StringType),
+                Property("id", StringType),
                 Property("email", StringType),
                 Property("username", StringType),
                 Property("phone_number", StringType),
@@ -614,6 +614,7 @@ def test_array_type():
         pytest.param(
             ObjectType(
                 Property("id", StringType),
+                Property("email", StringType, True),
                 Property("email", StringType, True),
                 Property("username", StringType, True),
                 Property("phone_number", StringType),

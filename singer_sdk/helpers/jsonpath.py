@@ -1,15 +1,15 @@
 """JSONPath helpers."""
 
-from typing import Any, Generator, Union
+from __future__ import annotations
+
+from typing import Any, Generator
 
 import jsonpath_ng
 import memoization
 from jsonpath_ng.ext import parse
 
 
-def extract_jsonpath(
-    expression: str, input: Union[dict, list]
-) -> Generator[Any, None, None]:
+def extract_jsonpath(expression: str, input: dict | list) -> Generator[Any, None, None]:
     """Extract records from an input based on a JSONPath expression.
 
     Args:

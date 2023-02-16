@@ -1,5 +1,7 @@
 """Sink classes load data to a target."""
 
+from __future__ import annotations
+
 import abc
 
 from singer_sdk.helpers._compat import final

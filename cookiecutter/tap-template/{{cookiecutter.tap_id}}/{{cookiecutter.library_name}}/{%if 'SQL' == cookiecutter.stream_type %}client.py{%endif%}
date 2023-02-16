@@ -3,6 +3,8 @@
 This includes {{ cookiecutter.source_name }}Stream and {{ cookiecutter.source_name }}Connector.
 """
 
+from __future__ import annotations
+
 import sqlalchemy
 
 from singer_sdk import SQLConnector, SQLStream

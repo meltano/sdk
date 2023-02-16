@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.19.0"
+version = "0.20.0"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 maintainers = ["Meltano Team and Contributors"]
@@ -63,10 +63,11 @@ PyYAML = "^6.0"
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
 sphinx = {version = ">=4.5,<6.0", optional = true}
-sphinx-rtd-theme = {version = ">=0.5.2,<1.2.0", optional = true}
+furo = {version = "^2022.12.7", optional = true}
 sphinx-copybutton = {version = ">=0.3.1,<0.6.0", optional = true}
 myst-parser = {version = ">=0.17.2,<0.19.0", optional = true}
 sphinx-autobuild = {version = "^2021.3.14", optional = true}
+sphinx-reredirects = {version = "^0.1.1", optional = true}
 
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = "^1.1.1", optional = true}
@@ -78,10 +79,11 @@ pytest-durations = {version = "^1.2.0", optional = true}
 [tool.poetry.extras]
 docs = [
     "sphinx",
-    "sphinx-rtd-theme",
+    "furo",
     "sphinx-copybutton",
     "myst-parser",
     "sphinx-autobuild",
+    "sphinx_reredirects",
 ]
 s3 = ["fs-s3fs"]
 # Mark these as extras so that installs pass on python 3.11
@@ -100,7 +102,7 @@ testing = [
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
 commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
 xdoctest = "^1.1.1"
-mypy = "^0.991"
+mypy = "^1.0"
 cookiecutter = "^2.1.1"
 PyYAML = "^6.0"
 pyarrow = {version = "^11.0.0", optional = true, python = "<3.11"}
@@ -129,6 +131,9 @@ pytest-snapshot = "^0.9.0"
 exclude = ".*simpleeval.*"
 
 [tool.isort]
+add_imports = [
+  "from __future__ import annotations",
+]
 profile = "black"
 multi_line_output = 3 # Vertical Hanging Indent
 src_paths = "singer_sdk"
@@ -146,7 +151,7 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.19.0"
+version = "0.20.0"
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
     "docs/conf.py",

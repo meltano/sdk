@@ -1,5 +1,7 @@
 """Sink classes load data to a target."""
 
+from __future__ import annotations
+
 import abc
 import datetime
 import uuid

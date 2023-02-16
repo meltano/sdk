@@ -1,6 +1,6 @@
 """Sample tap test for tap-gitlab."""
 
-from typing import List
+from __future__ import annotations
 
 from samples.sample_tap_gitlab.gitlab_rest_streams import (
     CommitsStream,
@@ -40,6 +40,6 @@ class SampleTapGitlab(Tap):
         Property("start_date", DateTimeType, required=True),
     ).to_dict()
 
-    def discover_streams(self) -> List[Stream]:
+    def discover_streams(self) -> list[Stream]:
         """Return a list of discovered streams."""
         return [stream_class(tap=self) for stream_class in STREAM_TYPES]

@@ -1,5 +1,7 @@
 """Shared parent class for Tap, Target (future), and Transform (future)."""
 
+from __future__ import annotations
+
 import abc
 import json
 import logging
@@ -7,7 +9,7 @@ import os
 from collections import OrderedDict
 from pathlib import PurePath
 from types import MappingProxyType
-from typing import Any, Callable, Dict, List, Mapping, Optional, Type, Union, cast
+from typing import Any, Callable, Mapping, cast
 
 import click
 from jsonschema import Draft7Validator
@@ -68,7 +70,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
@@ -113,7 +115,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         self.metrics_logger = metrics.get_metrics_logger()
 
     @classproperty
-    def capabilities(self) -> List[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:
         """Get capabilities.
 
         Developers may override this property in oder to add or remove
@@ -128,7 +130,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         ]
 
     @classproperty
-    def _env_var_config(cls) -> Dict[str, Any]:
+    def _env_var_config(cls) -> dict[str, Any]:
         """Return any config specified in environment variables.
 
         Variables must match the convention "<PLUGIN_NAME>_<SETTING_NAME>",
@@ -191,7 +193,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         Returns:
             A frozen (read-only) config dictionary map.
         """
-        return cast(Dict, MappingProxyType(self._config))
+        return cast(dict, MappingProxyType(self._config))
 
     @staticmethod
     def _is_secret_config(config_key: str) -> bool:
@@ -207,7 +209,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         return is_common_secret_key(config_key)
 
-    def _validate_config(self, raise_errors: bool = True) -> List[str]:
+    def _validate_config(self, raise_errors: bool = True) -> list[str]:
         """Validate configuration input against the plugin configuration JSON schema.
 
         Args:
@@ -220,7 +222,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             ConfigValidationError: If raise_errors is True and validation fails.
         """
         config_jsonschema = self.config_jsonschema
-        errors: List[str] = []
+        errors: list[str] = []
 
         if config_jsonschema:
             self.append_builtin_config(config_jsonschema)
@@ -232,7 +234,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         if errors:
             summary = (
-                f"Config validation failed: {f'; '.join(errors)}\n"
+                f"Config validation failed: {'; '.join(errors)}\n"
                 f"JSONSchema was: {config_jsonschema}"
             )
             if raise_errors:
@@ -244,7 +246,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     @classmethod
     def print_version(
-        cls: Type["PluginBase"],
+        cls: type[PluginBase],
         print_fn: Callable[[Any], None] = print,
     ) -> None:
         """Print help text for the tap.
@@ -258,13 +260,13 @@ class PluginBase(metaclass=abc.ABCMeta):
         print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version}")
 
     @classmethod
-    def _get_about_info(cls: Type["PluginBase"]) -> Dict[str, Any]:
+    def _get_about_info(cls: type[PluginBase]) -> dict[str, Any]:
         """Returns capabilities and other tap metadata.
 
         Returns:
             A dictionary containing the relevant 'about' information.
         """
-        info: Dict[str, Any] = OrderedDict({})
+        info: dict[str, Any] = OrderedDict({})
         info["name"] = cls.name
         info["description"] = cls.__doc__
         info["version"] = cls.plugin_version
@@ -277,7 +279,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         return info
 
     @classmethod
-    def append_builtin_config(cls: Type["PluginBase"], config_jsonschema: dict) -> None:
+    def append_builtin_config(cls: type[PluginBase], config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
         To customize or disable this behavior, developers may either override this class
@@ -307,7 +309,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             _merge_missing(FLATTENING_CONFIG, config_jsonschema)
 
     @classmethod
-    def print_about(cls: Type["PluginBase"], format: Optional[str] = None) -> None:
+    def print_about(cls: type[PluginBase], format: str | None = None) -> None:
         """Print capabilities and other tap metadata.
 
         Args:
@@ -341,7 +343,6 @@ class PluginBase(metaclass=abc.ABCMeta):
                 f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n"
             )
             for key, value in info.items():
-
                 if key == "capabilities":
                     capabilities = f"## {key.title()}\n\n"
                     capabilities += "\n".join([f"* `{v}`" for v in value])

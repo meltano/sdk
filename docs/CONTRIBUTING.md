@@ -1,4 +1,4 @@
-# Contributing to the SDK
+# Contributing Guide
 
 _**Note:** The SDK currently works with Python versions 3.7 through 3.10.x. Python 3.6 is no longer supported._
 
@@ -214,8 +214,7 @@ Type hints allow us to spend less time reading documentation. Public modules are
 
 All public modules in the SDK are checked for the presence of docstrings in classes and functions. We follow the [Google Style convention](https://www.sphinx-doc.org/en/master/usage/extensions/example_google.html) for Python docstrings so functions are required to have a description of every argument and the return value, if applicable.
 
-
 ### What is Poetry and why do we need it?
 
 For more info on `Poetry` and `Pipx`, please see the topic in our
-[python tips](python_tips.md) guide.
+[python tips](../python_tips.md) guide.

@@ -1,0 +1,12 @@
+{
+    "cookiecutter": {
+      "destination_name": "MyDestinationName",
+      "admin_name": "FirstName LastName",
+      "target_id": "target-per_record",
+      "library_name": "target_per_record",
+      "variant": "None (Skip)",
+      "serialization_method": "Per record",
+      "_template": "./sdk/cookiecutter/target-template",
+      "_output_dir": "."
+    }
+  }

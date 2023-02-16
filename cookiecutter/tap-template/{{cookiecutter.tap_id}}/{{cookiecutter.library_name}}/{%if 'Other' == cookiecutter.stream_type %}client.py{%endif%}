@@ -1,8 +1,10 @@
 """Custom client handling, including {{ cookiecutter.source_name }}Stream base class."""
 
+from __future__ import annotations
+
 import requests
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, List, Iterable
+from typing import Any, Iterable
 
 from singer_sdk.streams import Stream
 
@@ -10,7 +12,7 @@ from singer_sdk.streams import Stream
 class {{ cookiecutter.source_name }}Stream(Stream):
     """Stream class for {{ cookiecutter.source_name }} streams."""
 
-    def get_records(self, context: Optional[dict]) -> Iterable[dict]:
+    def get_records(self, context: dict | None) -> Iterable[dict]:
         """Return a generator of record-type dictionary objects.
 
         The optional `context` argument is used to identify a specific slice of the
