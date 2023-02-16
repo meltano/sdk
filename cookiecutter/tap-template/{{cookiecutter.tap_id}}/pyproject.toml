@@ -41,6 +41,9 @@ isort = "^5.11.5"
 {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
 types-requests = "^2.28.11.12"
 {%- endif %}
+{%- if cookiecutter.stream_type == 'SQL' %}
+sqlalchemy-stubs = "^0.4"
+{%- endif %}
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
@@ -53,6 +56,9 @@ src_paths = "{{cookiecutter.library_name}}"
 [tool.mypy]
 python_version = "3.9"
 warn_unused_configs = true
+{%- if cookiecutter.stream_type == 'SQL' %}
+plugins = "sqlmypy"
+{%- endif %}
 
 [build-system]
 requires = ["poetry-core>=1.0.8"]
