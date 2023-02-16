@@ -115,8 +115,8 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """
         return BasicAuthenticator.create_for_stream(
             self,
-            username=self.config.get("username"),
-            password=self.config.get("password"),
+            username=self.config.get("username", ""),
+            password=self.config.get("password", ""),
         )
 
 {%- endif %}
