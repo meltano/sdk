@@ -17,11 +17,11 @@ usage() {
 
 if [[ ! -d $TAP_TEMPLATE ]]; then
     usage "Tap template folder not found"
-    exit
+    exit 1
 fi
 if [[ ! -f $REPLAY_FILE ]]; then
     usage "Replay file not found"
-    exit
+    exit 1
 fi
 
 CC_TEST_OUTPUT=$CC_BUILD_PATH/$CC_OUTPUT_DIR

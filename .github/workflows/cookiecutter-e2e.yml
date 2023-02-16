@@ -1,6 +1,9 @@
 name: E2E Cookiecutters
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths: ["cookiecutter/**", "e2e-tests/cookiecutters/**"]
   push:
     branches: [main]
     paths: ["cookiecutter/**", "e2e-tests/cookiecutters/**"]
@@ -21,8 +24,13 @@ jobs:
       fail-fast: true
       matrix:
         include:
+          - { cookiecutter: "tap-template", replay: "tap-graphql-jwt.json", python-version: "3.9",  os: "ubuntu-latest" }
           - { cookiecutter: "tap-template", replay: "tap-rest-api_key-github.json", python-version: "3.9",  os: "ubuntu-latest" }
-          - { cookiecutter: "tap-template", replay: "tap-rest-jwt-github.json", python-version: "3.9",  os: "ubuntu-latest" }
+          - { cookiecutter: "tap-template", replay: "tap-rest-basic_auth.json", python-version: "3.9",  os: "ubuntu-latest" }
+          - { cookiecutter: "tap-template", replay: "tap-rest-bearer_token.json", python-version: "3.9",  os: "ubuntu-latest" }
+          - { cookiecutter: "tap-template", replay: "tap-rest-custom.json", python-version: "3.9",  os: "ubuntu-latest" }
+          - { cookiecutter: "tap-template", replay: "tap-rest-jwt.json", python-version: "3.9",  os: "ubuntu-latest" }
+          - { cookiecutter: "tap-template", replay: "tap-rest-oauth2.json", python-version: "3.9",  os: "ubuntu-latest" }
           - { cookiecutter: "target-template", replay: "target-per_record.json", python-version: "3.9",  os: "ubuntu-latest" }
 
     steps:
@@ -55,7 +63,8 @@ jobs:
         CC_TEMPLATE: cookiecutter/${{ matrix.cookiecutter }}
         REPLAY_FILE: e2e-tests/cookiecutters/${{ matrix.replay }}
       run: |
-        bash e2e-tests/cookiecutters/test_cookiecutter.sh $CC_TEMPLATE $REPLAY_FILE 0
+        chmod +x ./e2e-tests/cookiecutters/test_cookiecutter.sh
+        ./e2e-tests/cookiecutters/test_cookiecutter.sh $CC_TEMPLATE $REPLAY_FILE 0
 
     - uses: actions/upload-artifact@v3
       with:
