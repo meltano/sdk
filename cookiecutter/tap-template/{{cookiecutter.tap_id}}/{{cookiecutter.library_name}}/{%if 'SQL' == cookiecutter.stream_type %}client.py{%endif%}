@@ -4,6 +4,7 @@ This includes {{ cookiecutter.source_name }}Stream and {{ cookiecutter.source_na
 """
 
 from __future__ import annotations
+from typing import Any, Iterable
 
 import sqlalchemy
 
@@ -14,7 +15,14 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
     """Connects to the {{ cookiecutter.source_name }} SQL source."""
 
     def get_sqlalchemy_url(cls, config: dict) -> str:
-        """Concatenate a SQLAlchemy URL for use in connecting to the source."""
+        """Concatenate a SQLAlchemy URL for use in connecting to the source.
+
+        Args:
+            config: A dict with connection parameters
+
+        Returns:
+            SQLAlchemy connection string
+        """
         # TODO: Replace this with a valid connection string for your source:
         return (
             f"awsathena+rest://{config['aws_access_key_id']}:"
@@ -30,6 +38,12 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
 
         Developers may optionally add custom logic before calling the default
         implementation inherited from the base class.
+
+        Args:
+            sql_type: SQLAlchemy type
+
+        Returns:
+            A dict
         """
         # Optionally, add custom logic before calling the parent SQLConnector method.
         # You may delete this method if overrides are not needed.
@@ -41,6 +55,12 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
 
         Developers may optionally add custom logic before calling the default
         implementation inherited from the base class.
+
+        Args:
+            jsonschema_type: A dict
+
+        Returns:
+            SQLAlchemy type
         """
         # Optionally, add custom logic before calling the parent SQLConnector method.
         # You may delete this method if overrides are not needed.
@@ -52,7 +72,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
 
     connector_class = {{ cookiecutter.source_name }}Connector
 
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
+    def get_records(self, partition:  dict | None) -> Iterable[dict[str, Any]]:
         """Return a generator of record-type dictionary objects.
 
         Developers may optionally add custom logic before calling the default
