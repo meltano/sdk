@@ -24,6 +24,10 @@ from singer_sdk.authenticators import BasicAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
+{% elif cookiecutter.auth_method == "Custom or N/A" -%}
+from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+
 {% elif cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
