@@ -47,7 +47,12 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
 
     {% if sinkclass == "RecordSink" -%}
     def process_record(self, record: dict, context: dict) -> None:
-        """Process the record."""
+        """Process the record.  
+
+        Args:
+            record: Individual record in the stream.
+            context: Stream partition or context dictionary.
+        """
         # Sample:
         # ------
         # client.write(record)
@@ -61,6 +66,9 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
 
         Developers may optionally add additional markers to the `context` dict,
         which is unique to this batch.
+
+        Args:
+            context: Stream partition or context dictionary.
         """
         # Sample:
         # ------
@@ -72,6 +80,10 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
 
         Developers may optionally read or write additional markers within the
         passed `context` dict from the current batch.
+
+        Args:
+            record: Individual record in the stream.
+            context: Stream partition or context dictionary.
         """
         # Sample:
         # ------
@@ -79,7 +91,11 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
         #     csvfile.write(record)
 
     def process_batch(self, context: dict) -> None:
-        """Write out any prepped records and return once fully written."""
+        """Write out any prepped records and return once fully written.
+
+        Args:
+            context: Stream partition or context dictionary.
+        """
         # Sample:
         # ------
         # client.upload(context["file_path"])  # Upload file
