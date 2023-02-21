@@ -871,6 +871,7 @@ class Stream(metaclass=abc.ABCMeta):
                 manifest=manifest,
             )
         )
+        self._is_state_flushed = False
 
     def _log_metric(self, point: metrics.Point) -> None:
         """Log a single measurement.
