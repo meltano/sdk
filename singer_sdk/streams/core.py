@@ -893,7 +893,7 @@ class Stream(metaclass=abc.ABCMeta):
             self.logger.info(msg)
 
     def _check_max_record_limit(self, current_record_index: int) -> None:
-        """Raise `MaxRecordsLimitException` if dry run record limit exceeded.
+        """Raise an exception if dry run record limit exceeded.
 
         Raised if we find dry run record limit exceeded,
         aka `current_record_index > self.ABORT_AT_RECORD_COUNT - 1`.
@@ -911,16 +911,16 @@ class Stream(metaclass=abc.ABCMeta):
             and current_record_index > self.ABORT_AT_RECORD_COUNT - 1
         ):
             try:
-                self._handle_sync_abort(
+                self._abort_sync(
                     abort_reason=MaxRecordsLimitException(
-                        "Stream prematurely aborted due to the stream's max dry run record "
-                        f"limit ({self.ABORT_AT_RECORD_COUNT}) being reached."
+                        "Stream prematurely aborted due to the stream's max dry run "
+                        f"record limit ({self.ABORT_AT_RECORD_COUNT}) being reached."
                     )
                 )
             except (AbortedSyncFailedException, AbortedSyncPausedException) as ex:
                 raise ex
 
-    def _handle_sync_abort(self, abort_reason: Exception) -> None:
+    def _abort_sync(self, abort_reason: Exception) -> None:
         """Handle a sync operation being aborted.
 
         This method will attempt to close out the sync operation as gracefully as
@@ -1074,10 +1074,7 @@ class Stream(metaclass=abc.ABCMeta):
                 )
 
                 for record_result in self.get_records(current_context):
-                    try:
-                        self._check_max_record_limit(current_record_index=record_index)
-                    except MaxRecordsLimitException as ex:
-                        self._handle_sync_abort(abort_reason=ex)
+                    self._check_max_record_limit(current_record_index=record_index)
 
                     if isinstance(record_result, tuple):
                         # Tuple items should be the record and the child context
