@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.21.0 (2023-02-21)
+
+### 🐛 Fixes
+
+- [#1410](https://github.com/meltano/sdk/issues/1410) Tap template: fix style, types and imports; and also catch more errors by building from replay files in CI -- _**Thanks @flexponsive!**_
+- [#1428](https://github.com/meltano/sdk/issues/1428) Tap template: cover all REST authentication cases, and one GraphQL case -- _**Thanks @flexponsive!**_
+
 ## v0.20.0 (2023-02-13)
 
 ### ✨ New
