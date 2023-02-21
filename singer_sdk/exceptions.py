@@ -35,7 +35,7 @@ class MaxRecordsLimitException(RequestedAbortException):
     """Exception indicating the sync aborted due to too many records."""
 
 
-class AbortedSyncExceptionBase(Exception, abc.ABCMeta):
+class AbortedSyncExceptionBase(Exception, metaclass=abc.ABCMeta):
     """Base exception to raise when a stream sync is aborted.
 
     Developers should not raise this directly, and instead should use:
@@ -48,8 +48,8 @@ class AbortedSyncExceptionBase(Exception, abc.ABCMeta):
     - `FULL_TABLE` sync operations cannot be paused and will always trigger a fatal
       exception if aborted.
     - `INCREMENTAL` and `LOG_BASED` streams are able to be paused only if a number of
-      preconditions are met, specifically, `state_partitioning_keys` cannot be overriden
-      and the stream must be declared with `is_sorted=True`.
+      preconditions are met, specifically, `state_partitioning_keys` cannot be
+      overridden and the stream must be declared with `is_sorted=True`.
     """
 
 
