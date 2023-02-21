@@ -2693,10 +2693,9 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 debugging = []
 docs = ["sphinx", "furo", "sphinx-copybutton", "myst-parser", "sphinx-autobuild", "sphinx-reredirects"]
 s3 = ["fs-s3fs"]
-samples = []
 testing = ["pytest", "pytest-durations"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "<3.12,>=3.7.1"
-content-hash = "5aabceb4611d6b9ee3e7767a74a2c22c3ec319b183b6fb673d55a0ed2eb828a0"
+content-hash = "5fee226023fa80eb8b4f949da5bc80c58a256e09b83503a45bf4d984813d3b65"

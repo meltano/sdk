@@ -87,9 +87,6 @@ docs = [
 ]
 s3 = ["fs-s3fs"]
 # Mark these as extras so that installs pass on python 3.11
-samples = [
-    "pyarrow",
-]
 debugging = [
     "viztracer",
 ]
