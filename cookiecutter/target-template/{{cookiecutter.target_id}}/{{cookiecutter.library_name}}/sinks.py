@@ -47,7 +47,7 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
 
     {% if sinkclass == "RecordSink" -%}
     def process_record(self, record: dict, context: dict) -> None:
-        """Process the record.  
+        """Process the record.
 
         Args:
             record: Individual record in the stream.
