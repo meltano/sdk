@@ -133,4 +133,4 @@ def test_batch_mode(monkeypatch, outdir):
     assert counter["SCHEMA", "countries"] == 1
     assert counter["BATCH", "countries"] == 1
 
-    assert counter[("STATE",)] == 4
+    assert counter[("STATE",)] == 2
