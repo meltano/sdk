@@ -31,6 +31,8 @@ jobs:
           - { cookiecutter: "tap-template", replay: "tap-rest-custom.json", python-version: "3.9",  os: "ubuntu-latest" }
           - { cookiecutter: "tap-template", replay: "tap-rest-jwt.json", python-version: "3.9",  os: "ubuntu-latest" }
           - { cookiecutter: "tap-template", replay: "tap-rest-oauth2.json", python-version: "3.9",  os: "ubuntu-latest" }
+          - { cookiecutter: "tap-template", replay: "tap-other-custom.json", python-version: "3.9",  os: "ubuntu-latest" }
+          - { cookiecutter: "tap-template", replay: "tap-sql-custom.json", python-version: "3.9",  os: "ubuntu-latest" }
           - { cookiecutter: "target-template", replay: "target-per_record.json", python-version: "3.9",  os: "ubuntu-latest" }
 
     steps:
