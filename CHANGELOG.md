@@ -7,13 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.21.0 (2023-02-21)
 
-### ✨ New
-
-- [#1410](https://github.com/meltano/sdk/issues/1410) Build empty cookiecutters and run lint task during CI -- _**Thanks @flexponsive!**_
-
 ### 🐛 Fixes
 
-- [#1428](https://github.com/meltano/sdk/issues/1428) E2E Cookiecutter - Cover all REST authentication cases + one GraphQL case -- _**Thanks @flexponsive!**_
+- [#1410](https://github.com/meltano/sdk/issues/1410) Tap template: fix style, types and imports; and also catch more errors by building from replay files in CI -- _**Thanks @flexponsive!**_
+- [#1428](https://github.com/meltano/sdk/issues/1428) Tap template: cover all REST authentication cases, and one GraphQL case -- _**Thanks @flexponsive!**_
 
 ## v0.20.0 (2023-02-13)
 
