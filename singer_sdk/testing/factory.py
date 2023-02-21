@@ -76,7 +76,7 @@ def get_test_class(
                 setattr(BaseTestClass, f"test_{suite.kind}_{test.name}", test.run)
 
         if suite.kind in {"tap_stream", "tap_stream_attribute"}:
-            streams = list(test_runner.tap.streams.values())
+            streams = list(test_runner.new_tap().streams.values())
 
             if suite.kind == "tap_stream":
                 params = [

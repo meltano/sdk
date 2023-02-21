@@ -6,13 +6,13 @@ import abc
 import json
 from enum import Enum
 from pathlib import Path, PurePath
-from typing import Any, Callable, Sequence, cast
+from typing import Any, Callable, Iterable, Sequence, cast
 
 import click
 
 from singer_sdk._singerlib import Catalog
 from singer_sdk.cli import common_options
-from singer_sdk.exceptions import MaxRecordsLimitException
+from singer_sdk.exceptions import AbortedSyncFailedException, AbortedSyncPausedException
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
@@ -176,30 +176,60 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             PluginCapabilities.FLATTENING,
         ]
 
-    # Connection test:
+    # Connection and sync tests:
 
     @final
     def run_connection_test(self) -> bool:
-        """Run connection test.
+        """Run connection test, aborting each stream after 1 record.
 
         Returns:
             True if the test succeeded.
         """
-        for stream in self.streams.values():
-            # Initialize streams' record limits before beginning the sync test.
-            stream._MAX_RECORDS_LIMIT = 1
+        return self.run_sync_dry_run(
+            dry_run_record_limit=1, streams=self.streams.values()
+        )
 
-        for stream in self.streams.values():
+    @final
+    def run_sync_dry_run(
+        self,
+        dry_run_record_limit: int | None = 1,
+        streams: Iterable[Stream] | None = None,
+    ) -> bool:
+        """Run connection test.
+
+        Exceptions of type `MaxRecordsLimitException` and
+        `PartialSyncSuccessException` will be ignored.
+
+        Args:
+            dry_run_record_limit: The max number of records to sync per stream object.
+            streams: The streams to test. If omitted, all streams will be tested.
+
+        Returns:
+            True if the test succeeded.
+        """
+        if streams is None:
+            streams = self.streams.values()
+
+        for stream in streams:
+            # Initialize streams' record limits before beginning the sync test.
+            stream.ABORT_AT_RECORD_COUNT = dry_run_record_limit
+
+        for stream in streams:
             if stream.parent_stream_type:
                 self.logger.debug(
-                    f"Child stream '{type(stream).__name__}' should be called by "
-                    f"parent stream '{stream.parent_stream_type.__name__}'. "
-                    "Skipping direct invocation."
+                    "Child stream '{child}' should be called by "
+                    "parent stream '{parent}'. "
+                    "Skipping direct invocation.",
+                    child=type(stream).__name__,
+                    parent=stream.parent_stream_type.__name__,
                 )
                 continue
             try:
                 stream.sync()
-            except MaxRecordsLimitException:
+            except (
+                AbortedSyncFailedException,
+                AbortedSyncPausedException,
+            ):
                 pass
         return True
 
