@@ -67,7 +67,6 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """Parse the response and return an iterator of result records.
 
         Args:
-        -----
             response: The HTTP ``requests.Response`` object.
 
         Yields
@@ -84,7 +83,6 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """As needed, append or transform raw data to match expected structure.
 
         Args:
-        -----
             row: An individual record from the stream.
             context: The stream context.
 

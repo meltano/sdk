@@ -153,7 +153,6 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """Return a token for identifying next page or None if no more pages.
 
         Args:
-        -----
             response: The HTTP ``requests.Response`` object.
             previous_token: The previous page token value.
 
@@ -184,7 +183,6 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """Return a dictionary of values to be used in URL parameterization.
 
         Args:
-        -----
             context: The stream context.
             next_page_token: The next page index or value.
 
@@ -226,7 +224,6 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """Parse the response and return an iterator of result records.
 
         Args:
-        -----
             response: The HTTP ``requests.Response`` object.
 
         Yields
@@ -241,7 +238,6 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """As needed, append or transform raw data to match expected structure.
 
         Args:
-        -----
             row: An individual record from the stream.
             context: The stream context.
 

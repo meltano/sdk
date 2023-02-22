@@ -40,7 +40,6 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator, metaclass=
         """Instantiate an authenticator for a specific Singer stream.
 
         Args:
-        -----
             stream: The Singer stream instance.
 
         Returns
@@ -66,12 +65,12 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthJWTAuthenticator):
         """Instantiate an authenticator for a specific Singer stream.
 
         Args:
-        -----
             stream: The Singer stream instance.
 
         Returns
-        ------
+        -------
             A new authenticator.
+
         """
         return cls(
             stream=stream,
