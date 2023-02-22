@@ -97,7 +97,7 @@ class Stream(metaclass=abc.ABCMeta):
     - ``TypeConformanceLevel.NONE``: No conformance is performed.
     - ``TypeConformanceLevel.RECURSIVE``: Conformance is performed recursively through
       all nested levels in the record.
-    - ``TypeConformanceLevel.ROOT_ONLY``: Conformance is performed only on the 
+    - ``TypeConformanceLevel.ROOT_ONLY``: Conformance is performed only on the
       root level.
     """
 
