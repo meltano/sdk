@@ -229,8 +229,8 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         -----
             response: The HTTP ``requests.Response`` object.
 
-        Yields:
-        -------
+        Yields
+        ------
             Each record from the source.
 
         """
