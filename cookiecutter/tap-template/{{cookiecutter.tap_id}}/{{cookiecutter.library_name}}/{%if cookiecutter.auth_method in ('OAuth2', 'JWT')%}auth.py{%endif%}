@@ -18,7 +18,11 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator, metaclass=
 
     @property
     def oauth_request_body(self) -> dict:
-        """Define the OAuth request body for the {{ cookiecutter.source_name }} API."""
+        """Define the OAuth request body for the AutomaticTestTap API.
+
+        Returns:
+            A dict with the request body
+        """
         # TODO: Define the request body needed for the API.
         return {
             'resource': 'https://analysis.windows.net/powerbi/api',
