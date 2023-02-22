@@ -52,8 +52,10 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
     def discover_streams(self) -> list[streams.{{ cookiecutter.source_name }}Stream]:
         """Return a list of discovered streams.
 
-        Returns:
+        Returns
+        -------
             A list of discovered streams.
+
         """
         return [
             streams.GroupsStream(self),

@@ -69,8 +69,10 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     def authenticator(self) -> _Auth:
         """Return a new authenticator object.
 
-        Returns:
+        Returns
+        -------
             An authenticator instance.
+
         """
         return {{ cookiecutter.source_name }}Authenticator.create_for_stream(self)
 
@@ -80,8 +82,10 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     def authenticator(self) -> APIKeyAuthenticator:
         """Return a new authenticator object.
 
-        Returns:
+        Returns
+        -------
             An authenticator instance.
+
         """
         return APIKeyAuthenticator.create_for_stream(
             self,
@@ -96,8 +100,10 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     def authenticator(self) -> BearerTokenAuthenticator:
         """Return a new authenticator object.
 
-        Returns:
+        Returns
+        -------
             An authenticator instance.
+
         """
         return BearerTokenAuthenticator.create_for_stream(
             self,
@@ -125,8 +131,10 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     def http_headers(self) -> dict:
         """Return the http headers needed.
 
-        Returns:
+        Returns
+        -------
             A dictionary of HTTP headers.
+
         """
         headers = {}
         if "user_agent" in self.config:
@@ -145,11 +153,14 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """Return a token for identifying next page or None if no more pages.
 
         Args:
+        -----
             response: The HTTP ``requests.Response`` object.
             previous_token: The previous page token value.
 
-        Returns:
+        Returns
+        -------
             The next pagination token.
+
         """
         # TODO: If pagination is required, return a token which can be used to get the
         #       next page. If this is the final page, return "None" to end the
@@ -173,11 +184,14 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """Return a dictionary of values to be used in URL parameterization.
 
         Args:
+        -----
             context: The stream context.
             next_page_token: The next page index or value.
 
-        Returns:
+        Returns
+        -------
             A dictionary of URL query parameters.
+
         """
         params: dict = {}
         if next_page_token:
@@ -200,8 +214,10 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
             context: The stream context.
             next_page_token: The next page index or value.
 
-        Returns:
+        Returns
+        -------
             A dictionary with the JSON body for a POST requests.
+
         """
         # TODO: Delete this method if no payload is required. (Most REST APIs.)
         return None
@@ -210,10 +226,13 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """Parse the response and return an iterator of result records.
 
         Args:
+        -----
             response: The HTTP ``requests.Response`` object.
 
         Yields:
+        -------
             Each record from the source.
+
         """
         # TODO: Parse response body and return a set of records.
         yield from extract_jsonpath(self.records_jsonpath, input=response.json())
@@ -222,11 +241,14 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """As needed, append or transform raw data to match expected structure.
 
         Args:
+        -----
             row: An individual record from the stream.
             context: The stream context.
 
-        Returns:
+        Returns
+        -------
             The updated record dictionary, or ``None`` to skip the record.
+
         """
         # TODO: Delete this method if not needed.
         return row

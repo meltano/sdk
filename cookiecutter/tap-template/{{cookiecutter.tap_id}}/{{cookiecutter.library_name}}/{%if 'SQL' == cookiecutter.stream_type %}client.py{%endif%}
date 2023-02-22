@@ -18,10 +18,13 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
         """Concatenate a SQLAlchemy URL for use in connecting to the source.
 
         Args:
+        -----
             config: A dict with connection parameters
 
-        Returns:
+        Returns
+        -------
             SQLAlchemy connection string
+
         """
         # TODO: Replace this with a valid connection string for your source:
         return (
@@ -44,11 +47,14 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
         implementation inherited from the base class.
 
         Args:
+        -----
             from_type: The SQL type as a string or as a TypeEngine. If a TypeEngine is
                 provided, it may be provided as a class or a specific object instance.
 
-        Returns:
+        Returns
+        -------
             A compatible JSON Schema type definition.
+
         """
         # Optionally, add custom logic before calling the parent SQLConnector method.
         # You may delete this method if overrides are not needed.
@@ -62,10 +68,13 @@ class {{ cookiecutter.source_name }}Connector(SQLConnector):
         implementation inherited from the base class.
 
         Args:
+        -----
             jsonschema_type: A dict
 
-        Returns:
+        Returns
+        -------
             SQLAlchemy type
+
         """
         # Optionally, add custom logic before calling the parent SQLConnector method.
         # You may delete this method if overrides are not needed.
@@ -84,10 +93,13 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
         implementation inherited from the base class.
 
         Args:
+        -----
             partition: If provided, will read specifically from this data slice.
 
-        Yields:
+        Yields
+        ------
             One dict per record.
+
         """
         # Optionally, add custom logic instead of calling the super().
         # This is helpful if the source database provides batch-optimized record

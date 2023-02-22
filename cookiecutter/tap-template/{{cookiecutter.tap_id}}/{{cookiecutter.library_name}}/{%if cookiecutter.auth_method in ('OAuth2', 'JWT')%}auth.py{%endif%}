@@ -20,8 +20,10 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator, metaclass=
     def oauth_request_body(self) -> dict:
         """Define the OAuth request body for the AutomaticTestTap API.
 
-        Returns:
+        Returns
+        -------
             A dict with the request body
+
         """
         # TODO: Define the request body needed for the API.
         return {
@@ -38,10 +40,13 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator, metaclass=
         """Instantiate an authenticator for a specific Singer stream.
 
         Args:
+        -----
             stream: The Singer stream instance.
 
-        Returns:
+        Returns
+        -------
             A new authenticator.
+
         """
         return cls(
             stream=stream,
@@ -61,9 +66,11 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthJWTAuthenticator):
         """Instantiate an authenticator for a specific Singer stream.
 
         Args:
+        -----
             stream: The Singer stream instance.
 
-        Returns:
+        Returns
+        ------
             A new authenticator.
         """
         return cls(

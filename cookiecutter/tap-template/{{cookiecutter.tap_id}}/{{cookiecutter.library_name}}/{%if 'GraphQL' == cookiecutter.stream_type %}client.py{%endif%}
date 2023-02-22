@@ -21,8 +21,10 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     def url_base(self) -> str:
         """Return the API URL root, configurable via tap settings.
 
-        Returns:
+        Returns
+        -------
             The base URL for all requests.
+
         """
         return self.config["api_url"]
 
@@ -34,8 +36,10 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     def authenticator(self) -> {{ cookiecutter.source_name }}Authenticator:
         """Return a new authenticator object.
 
-        Returns:
+        Returns
+        -------
             An authenticator instance.
+
         """
         return {{ cookiecutter.source_name }}Authenticator.create_for_stream(self)
 
@@ -45,8 +49,10 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     def http_headers(self) -> dict:
         """Return the http headers needed.
 
-        Returns:
+        Returns
+        -------
             A dictionary of HTTP headers.
+
         """
         headers = {}
         if "user_agent" in self.config:
@@ -61,10 +67,13 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """Parse the response and return an iterator of result records.
 
         Args:
+        -----
             response: The HTTP ``requests.Response`` object.
 
-        Yields:
+        Yields
+        ------
             Each record from the source.
+
         """
         # TODO: Parse response body and return a set of records.
         resp_json = response.json()
@@ -75,11 +84,14 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """As needed, append or transform raw data to match expected structure.
 
         Args:
+        -----
             row: An individual record from the stream.
             context: The stream context.
 
-        Returns:
+        Returns
+        -------
             The updated record dictionary, or ``None`` to skip the record.
+
         """
         # TODO: Delete this method if not needed.
         return row
