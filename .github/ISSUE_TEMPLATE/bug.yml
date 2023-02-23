@@ -22,9 +22,9 @@ body:
     id: regression
     attributes:
       label: Is this a regression?
-      descripti: Meaning this is something that previously worked correctly
+      description: Meaning this is something that previously worked correctly
       options:
-        - label: Yes
+        - label: "Yes"
   - type: dropdown
     id: python_version
     attributes:
