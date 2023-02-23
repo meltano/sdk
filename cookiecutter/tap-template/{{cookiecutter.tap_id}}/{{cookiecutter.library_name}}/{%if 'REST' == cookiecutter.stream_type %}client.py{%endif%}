@@ -86,7 +86,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return APIKeyAuthenticator.create_for_stream(
             self,
             key="x-api-key",
-            value=self.config.get("api_key", ""),
+            value=self.config.get("auth_token", ""),
             location="header",
         )
 
@@ -101,7 +101,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """
         return BearerTokenAuthenticator.create_for_stream(
             self,
-            token=self.config.get("api_key", ""),
+            token=self.config.get("auth_token", ""),
         )
 
 {%- elif cookiecutter.auth_method == "Basic Auth" %}
