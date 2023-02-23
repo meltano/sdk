@@ -2,6 +2,7 @@
 CC_BUILD_PATH=/tmp
 TAP_TEMPLATE=$(realpath $1)
 REPLAY_FILE=$(realpath $2)
+SDK_DIR=$(realpath $1/../..)
 CC_OUTPUT_DIR=$(basename $REPLAY_FILE .json) # name of replay file without .json
 RUN_LINT=${3:-1}
 
@@ -36,6 +37,7 @@ fi
 cookiecutter --replay-file $REPLAY_FILE $TAP_TEMPLATE -o $CC_BUILD_PATH &&
     cd $CC_TEST_OUTPUT &&
     pwd &&
+    sed -i.bak "s|singer-sdk =.*|singer-sdk = \{ path = \"$SDK_DIR\", develop = true \}|" pyproject.toml &&
     poetry lock &&
     poetry install
 
