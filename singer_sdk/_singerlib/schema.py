@@ -119,7 +119,7 @@ class _SchemaKey:
 
 def resolve_schema_references(
     schema: dict[str, t.Any],
-    refs: dict[str, dict] | None = None,
+    refs: dict[str, str] | None = None,
 ) -> dict:
     """Resolves and replaces json-schema $refs with the appropriate dict.
 

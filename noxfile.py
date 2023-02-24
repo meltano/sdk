@@ -58,9 +58,10 @@ def mypy(session: Session) -> None:
         "pytest",
         "importlib-resources",
         "sqlalchemy2-stubs",
+        "types-jsonschema",
         "types-python-dateutil",
-        "types-requests",
         "types-pytz",
+        "types-requests",
         "types-simplejson",
         "types-PyYAML",
     )
