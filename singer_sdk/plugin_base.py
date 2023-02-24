@@ -12,7 +12,7 @@ from types import MappingProxyType
 from typing import Any, Callable, Mapping, cast
 
 import click
-from jsonschema import Draft7Validator, SchemaError, ValidationError
+from jsonschema import Draft7Validator
 
 from singer_sdk import metrics
 from singer_sdk.configuration._dict_config import parse_environment_config
@@ -228,19 +228,18 @@ class PluginBase(metaclass=abc.ABCMeta):
         errors: list[str] = []
         log_fn = self.logger.info
         config_jsonschema = self.config_jsonschema
+
         if config_jsonschema:
             self.append_builtin_config(config_jsonschema)
-            try:
-                self.logger.debug(
-                    f"Validating config using jsonschema: {config_jsonschema}"
-                )
-                validator = JSONSchemaValidator(config_jsonschema)
-                validator.validate(self._config)
-            except (ValidationError, SchemaError) as ex:
-                errors.append(str(ex.message))
+            self.logger.debug(
+                f"Validating config using jsonschema: {config_jsonschema}"
+            )
+            validator = JSONSchemaValidator(config_jsonschema)
+            errors = [e.message for e in validator.iter_errors(self._config)]
+
         if errors:
             summary = (
-                f"Config validation failed: {f'; '.join(errors)}\n"
+                f"Config validation failed: {'; '.join(errors)}\n"
                 f"JSONSchema was: {config_jsonschema}"
             )
             if raise_errors:
@@ -251,6 +250,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             summary = f"Config validation passed with {len(warnings)} warnings."
             for warning in warnings:
                 summary += f"\n{warning}"
+
         if warnings_as_errors and raise_errors and warnings:
             raise ConfigValidationError(
                 f"One or more warnings ocurred during validation: {warnings}"
