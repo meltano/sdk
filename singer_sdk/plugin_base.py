@@ -221,8 +221,8 @@ class PluginBase(metaclass=abc.ABCMeta):
         Raises:
             ConfigValidationError: If raise_errors is True and validation fails.
         """
-        config_jsonschema = self.config_jsonschema
         errors: list[str] = []
+        config_jsonschema = self.config_jsonschema
 
         if config_jsonschema:
             self.append_builtin_config(config_jsonschema)
@@ -230,7 +230,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                 f"Validating config using jsonschema: {config_jsonschema}"
             )
             validator = JSONSchemaValidator(config_jsonschema)
-            errors = [error.message for error in validator.iter_errors(self._config)]
+            errors = [e.message for e in validator.iter_errors(self._config)]
 
         if errors:
             summary = (

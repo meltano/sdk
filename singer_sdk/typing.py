@@ -47,10 +47,20 @@ from __future__ import annotations
 
 import json
 import sys
-from typing import Any, Generic, ItemsView, Mapping, TypeVar, Union, cast
+from typing import (
+    Any,
+    Generator,
+    Generic,
+    ItemsView,
+    Mapping,
+    MutableMapping,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import sqlalchemy
-from jsonschema import validators
+from jsonschema import ValidationError, Validator, validators
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._typing import (
@@ -107,18 +117,29 @@ _JsonValue: TypeAlias = Union[
 ]
 
 
-def extend_validator_with_defaults(validator_class):  # noqa
+def extend_validator_with_defaults(validator_class):  # noqa: ANN001, ANN201
     """Fill in defaults, before validating with the provided JSON Schema Validator.
 
     See https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance  # noqa
     for details.
+
+    Args:
+        validator_class: The JSON Schema Validator class to extend.
+
+    Returns:
+        The extended JSON Schema Validator class.
     """
     validate_properties = validator_class.VALIDATORS["properties"]
 
-    def set_defaults(validator, properties, instance, schema):  # noqa
-        for property, subschema in properties.items():
+    def set_defaults(
+        validator: Validator,
+        properties: Mapping[str, dict],
+        instance: MutableMapping[str, Any],
+        schema: dict,
+    ) -> Generator[ValidationError, None, None]:
+        for prop, subschema in properties.items():
             if "default" in subschema:
-                instance.setdefault(property, subschema["default"])
+                instance.setdefault(prop, subschema["default"])
 
         yield from validate_properties(
             validator,
