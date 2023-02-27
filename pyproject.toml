@@ -138,6 +138,7 @@ markers = [
 ]
 testpaths = ["tests"]
 norecursedirs = "cookiecutter"
+xfail_strict = true
 
 [tool.commitizen]
 name = "cz_version_bump"

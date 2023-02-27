@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import abc
-import datetime
 import uuid
 
+from singer_sdk.helpers._util import utc_now
 from singer_sdk.sinks.core import Sink
 
 
@@ -29,7 +29,7 @@ class BatchSink(Sink):
         if self._pending_batch is None:
             new_context = {
                 "batch_id": str(uuid.uuid4()),
-                "batch_start_time": datetime.datetime.now(),
+                "batch_start_time": utc_now(),
             }
             self.start_batch(new_context)
             self._pending_batch = new_context

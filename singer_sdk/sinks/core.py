@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 import abc
-import datetime
 import json
 import time
 from gzip import GzipFile
 from gzip import open as gzip_open
-from logging import Logger
 from types import MappingProxyType
-from typing import IO, Any, Mapping, Sequence
+from typing import IO, TYPE_CHECKING, Any, Mapping, Sequence
 
 from dateutil import parser
 from jsonschema import Draft7Validator, FormatChecker
@@ -27,9 +25,14 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
     handle_invalid_timestamp_in_record,
 )
-from singer_sdk.plugin_base import PluginBase
+from singer_sdk.helpers._util import utc_now
 
 JSONSchemaValidator = Draft7Validator
+
+if TYPE_CHECKING:
+    from logging import Logger
+
+    from singer_sdk.plugin_base import PluginBase
 
 
 class Sink(metaclass=abc.ABCMeta):
@@ -80,7 +83,43 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
-        self._validator = Draft7Validator(schema, format_checker=FormatChecker())
+        self._validator = Draft7Validator(
+            schema,
+            format_checker=self.get_format_checker(),
+        )
+
+    def get_format_checker(self) -> FormatChecker:
+        """Get format checker for JSON schema.
+
+        Override this method to add custom string format checkers to the JSON schema
+        validator.
+
+        This is useful when, for example, the target requires a specific format for a
+        date or datetime field.
+
+        Example:
+            .. code-block:: python
+
+                def get_format_checker(self):
+                    format_checker = super().get_format_checker()
+
+                    def is_simple_date(value):
+                        try:
+                            datetime.datetime.strptime(value, "%Y-%m-%d")
+                        except ValueError:
+                            return False
+                        return True
+
+                    format_checker.checks("date")(is_simple_date)
+                    return format_checker
+
+        Returns:
+            An instance of `jsonschema.FormatChecker`_.
+
+        .. _jsonschema.FormatChecker:
+            https://python-jsonschema.readthedocs.io/en/stable/validate/#jsonschema.FormatChecker
+        """
+        return FormatChecker(formats=())  # Don't check any formats by default
 
     def _get_context(self, record: dict) -> dict:
         """Return an empty dictionary by default.
@@ -227,9 +266,9 @@ class Sink(metaclass=abc.ABCMeta):
             context: Stream partition or context dictionary.
         """
         record["_sdc_extracted_at"] = message.get("time_extracted")
-        record["_sdc_received_at"] = datetime.datetime.now().isoformat()
+        record["_sdc_received_at"] = utc_now().isoformat()
         record["_sdc_batched_at"] = (
-            context.get("batch_start_time", None) or datetime.datetime.now()
+            context.get("batch_start_time", None) or utc_now()
         ).isoformat()
         record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
         record["_sdc_sequence"] = int(round(time.time() * 1000))
