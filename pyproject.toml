@@ -192,6 +192,28 @@ exclude_lines = [
 ]
 fail_under = 82
 
+[tool.mypy]
+exclude = "tests"
+files = "singer_sdk"
+plugins = [
+    "sqlalchemy.ext.mypy.plugin",
+]
+python_version = "3.8"
+warn_unused_configs = true
+warn_return_any = true
+
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
+module = [
+    "bcrypt.*",
+    "joblib.*",
+    "pyarrow.*",
+    "pandas.*",
+    "jsonpath_ng.*",
+    "samples.*",
+    "sqlalchemy.*",
+]
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
