@@ -11,7 +11,7 @@ When porting over an existing tap, most developers find it easier to start from 
 1. Within your existing repo, create a new branch.
 1. Move _all_ of the files in the old branch into a subfolder called "archive".
 1. Commit and push the result to your new branch. (You'll do this several times along the way, which creates a fresh tree and a fresh diff for subsequent commits.)
-1. Now follow the steps in the [dev guide](dev_guide.md#building-a-new-tap-or-target) to create a new project using the Tap cookiecutter.
+1. Now follow the steps in the [dev guide](../dev_guide.md#building-a-new-tap-or-target) to create a new project using the Tap cookiecutter.
 1. Copy all the files from the cookiecutter output into your main repo and commit the result.
 
 ## Settings and Readme
@@ -103,7 +103,7 @@ _Important: If you've gotten this far, this is a good time to commit your code b
 
 Pagination is generally unique for almost every API. There's no single method that solves for very different API's approach to pagination.
 
-Most likely you will use [get_new_paginator](singer_sdk.RESTStream.get_new_paginator) to instantiate a [pagination class](./../../classes/singer_sdk.pagination.BaseAPIPaginator.rst) for your source, and you'll use `get_url_params` to define how to pass the "next page" token back to the API when asking for subsequent pages.
+Most likely you will use [get_new_paginator](singer_sdk.RESTStream.get_new_paginator) to instantiate a [pagination class](./../classes/singer_sdk.pagination.BaseAPIPaginator.rst) for your source, and you'll use `get_url_params` to define how to pass the "next page" token back to the API when asking for subsequent pages.
 
 When you think you have it right, run `poetry run tap-mysource` again, and debug until you are confident the result is including multiple pages back from the API.
 
@@ -197,7 +197,7 @@ Notes:
 
 - As should be expected, you are free to subclass streams in order to have their behavior be inherited from other stream classes.
   - For instance, if 3 streams use one pagination method, and 5 other streams use a different method, you can have each stream created as a subclass of a stream that has desired behavior.
-- If you have streams which invoke each other in a nested layout, please refer to the `parent_stream_class` property and its [related documentation](../../stream_maps.md).
+- If you have streams which invoke each other in a nested layout, please refer to the `parent_stream_class` property and its [related documentation](../stream_maps.md).
 - As before, if you do not already have a full JSON Schema file for each stream type, it is generally a good practice to start with just 5-8 properties per stream. You don't have to define all properties up front and before doing so, it is generally more valuable to test that each stream is getting data.
 
 ## Run pytest again, add stream properties, and repeat
@@ -218,7 +218,7 @@ poetry run pytest
 
 The SDK will automatically handle `STATE` for you 99% of the time. However, it is very likely that the legacy version of the tap has a different `STATE` format in comparison with the SDK format. If you want to seamlessly support both old and new STATE formats, you'll need to define a conversion operation.
 
-To handle the conversion operation, you'll override [`Tap.load_state()`](singer_sdk.Tap.load_state). The exact process of converting state is outside of this guide, but please check the [STATE implementation docs](../../implementation/state.md) for an explanation of general format expectations.
+To handle the conversion operation, you'll override [`Tap.load_state()`](singer_sdk.Tap.load_state). The exact process of converting state is outside of this guide, but please check the [STATE implementation docs](../implementation/state.md) for an explanation of general format expectations.
 
 ### Leverage Auto Generated README
 
