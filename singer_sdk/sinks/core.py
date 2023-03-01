@@ -11,7 +11,7 @@ from types import MappingProxyType
 from typing import IO, TYPE_CHECKING, Any, Mapping, Sequence
 
 from dateutil import parser
-from jsonschema import Draft7Validator, FormatChecker
+from jsonschema import Draft7Validator, FormatChecker, Validator
 
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
@@ -83,7 +83,23 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
-        self._validator = Draft7Validator(
+        self._validator = self.get_record_validator(self.schema)
+
+    def get_record_validator(self, schema: dict) -> Validator:
+        """Get JSON schema validator for a given schema.
+
+        Override this method to customize the JSON schema validator.
+
+        Args:
+            schema: JSON schema to validate records against.
+
+        Returns:
+            A ``jsonschema`` `validator`_.
+
+        .. _validator:
+            https://python-jsonschema.readthedocs.io/en/stable/api/jsonschema/validators/
+        """
+        return Draft7Validator(  # type: ignore[return-value]
             schema,
             format_checker=self.get_format_checker(),
         )
