@@ -6,7 +6,7 @@ import os
 import shutil
 import uuid
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import pytest
 from click.testing import CliRunner

@@ -65,7 +65,11 @@ For example:
 
     - Run pre-commit hooks: `pre-commit run --all`.
 
-      We use `black`, `flake8`, `isort`, `mypy` and `pyupgrade`. The project-wide max line length is `88`.
+      We use [Ruff](https://github.com/charliermarsh/ruff),
+      [black](https://black.readthedocs.io/en/stable/index.html),
+      [flake8](https://flake8.pycqa.org/en/latest/) and
+      [mypy](https://mypy.readthedocs.io/en/stable/).
+      The project-wide max line length is `88`.
 
     - Build documentation: `nox -rs docs`
 

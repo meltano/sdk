@@ -217,7 +217,7 @@ def _flatten_schema(
 
     Args:
         schema_node: The schema node to flatten.
-        parent_key: The parent's key, provided as a list of node names.
+        parent_keys: The parent's key, provided as a list of node names.
         separator: The string to use when concatenating key names.
         level: The current recursion level (zero-based).
         max_level: The max recursion level (zero-based, exclusive).
@@ -357,7 +357,7 @@ def _should_jsondump_value(key: str, value: Any, flattened_schema=None) -> bool:
     Args:
         key: [description]
         value: [description]
-        schema: [description]. Defaults to None.
+        flattened_schema: [description]. Defaults to None.
 
     Returns:
         [description]
