@@ -225,8 +225,9 @@ select = [
     "E",
     "F",
     "ANN",  # flake8-annotations
-    "D",    # pydocstyle/flake8-docstrings
     "I",    # isort
+    "D",    # pydocstyle/flake8-docstrings
+    "UP",   # pyupgrade
 ]
 src = ["samples", "singer_sdk", "tests"]
 target-version = "py37"

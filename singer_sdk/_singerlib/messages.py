@@ -50,7 +50,10 @@ class Message:
         return asdict(self, dict_factory=exclude_null_dict)
 
     @classmethod
-    def from_dict(cls: t.Type[Message], data: dict[str, t.Any]) -> Message:
+    def from_dict(
+        cls: t.Type[Message],  # noqa: UP006
+        data: dict[str, t.Any],
+    ) -> Message:
         """Create an encoding from a dictionary.
 
         Args:
