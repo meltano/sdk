@@ -596,7 +596,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return 5
 
-    def backoff_jitter(self, value: float) -> float | None:
+    def backoff_jitter(self, value: float) -> float:
         """Amount of jitter to add.
 
         For more inforamtion see
