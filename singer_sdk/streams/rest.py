@@ -607,8 +607,6 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         but it's still relatively close to the default value that's passed in
         to make tap developers life easier.
 
-        To disable override this function to return None.
-
         Args:
             value: Base amount to wait in seconds
 
