@@ -596,7 +596,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return 5
     
-    def backoff_jitter(self, value: float) -> float:
+    def backoff_jitter(self, value: float) -> float | None:
         """Amount of jitter to add. 
 
         For more inforamtion see https://github.com/litl/backoff/blob/master/backoff/_jitter.py
@@ -605,6 +605,8 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         some level of default jitter to be "nice" to downstream apis
         but it's still relatively close to the default value that's passed in 
         to make tap developers life easier.
+
+        To disable override this function to return None.
 
         Args:
             value: Base amount to wait in seconds
@@ -637,6 +639,9 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
 
         It is based on parsing the thrown exception of the decorated method, making it
         possible for response values to be in scope.
+
+        You may want to review `backoff_jitter`(singer_sdk.RESTStream.backoff_jitter)
+        if you're overriding this function.
 
         Args:
             value: a callable which takes as input the decorated
