@@ -234,6 +234,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             ),
             max_tries=self.backoff_max_tries,
             on_backoff=self.backoff_handler,
+            jitter=self.backoff_jitter
         )(func)
         return decorator
 
@@ -594,6 +595,24 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             Number of max retries.
         """
         return 5
+    
+    def backoff_jitter(self, value: float) -> float:
+        """Amount of jitter to add. 
+
+        For more inforamtion see https://github.com/litl/backoff/blob/master/backoff/_jitter.py
+
+        We chose to default to random_jitter instead of full_jitter as we keep
+        some level of default jitter to be "nice" to downstream apis
+        but it's still relatively close to the default value that's passed in 
+        to make tap developers life easier.
+
+        Args:
+            value: Base amount to wait in seconds
+        
+        Returns:
+            Time in seconds to wait between the next request
+        """
+        return backoff.random_jitter(value)
 
     def backoff_handler(self, details: Details) -> None:
         """Adds additional behaviour prior to retry.
