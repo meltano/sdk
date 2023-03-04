@@ -599,7 +599,8 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
     def backoff_jitter(self, value: float) -> float | None:
         """Amount of jitter to add.
 
-        For more inforamtion see https://github.com/litl/backoff/blob/master/backoff/_jitter.py
+        For more inforamtion see
+        https://github.com/litl/backoff/blob/master/backoff/_jitter.py
 
         We chose to default to random_jitter instead of full_jitter as we keep
         some level of default jitter to be "nice" to downstream apis
