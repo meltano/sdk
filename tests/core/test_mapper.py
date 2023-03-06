@@ -444,14 +444,15 @@ class MappedTap(Tap):
 
 
 @pytest.fixture
-def clear_schema_cache() -> None:
+def _clear_schema_cache() -> None:
     """Schemas are cached, so the cache needs to be cleared between test invocations."""
     yield
     get_selected_schema.cache_clear()
 
 
 @freeze_time("2022-01-01T00:00:00Z")
-@pytest.mark.snapshot
+@pytest.mark.snapshot()
+@pytest.mark.usefixtures("_clear_schema_cache")
 @pytest.mark.parametrize(
     "stream_maps,flatten,flatten_max_depth,snapshot_name",
     [
@@ -601,7 +602,6 @@ def clear_schema_cache() -> None:
 def test_mapped_stream(
     snapshot: Snapshot,
     snapshot_dir: Path,
-    clear_schema_cache: None,
     stream_maps: dict,
     flatten: bool,
     flatten_max_depth: int | None,

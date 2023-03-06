@@ -17,7 +17,7 @@ def stringify(in_dict):
 class TestConnectorSQL:
     """Test the SQLConnector class."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def connector(self):
         return SQLConnector(config={"sqlalchemy_url": "sqlite:///"})
 
@@ -167,9 +167,10 @@ class TestConnectorSQL:
                 mock_conn.assert_called_once()
 
     def test_connect_raises_on_operational_failure(self, connector):
-        with pytest.raises(sqlalchemy.exc.OperationalError) as _:
-            with connector._connect() as conn:
-                conn.execute("SELECT * FROM fake_table")
+        with pytest.raises(
+            sqlalchemy.exc.OperationalError
+        ) as _, connector._connect() as conn:
+            conn.execute("SELECT * FROM fake_table")
 
     def test_rename_column_uses_connect_correctly(self, connector):
         attached_engine = connector._engine

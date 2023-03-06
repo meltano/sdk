@@ -224,10 +224,15 @@ line-length = 88
 select = [
     "E",
     "F",
-    "ANN",  # flake8-annotations
     "I",    # isort
     "D",    # pydocstyle/flake8-docstrings
     "UP",   # pyupgrade
+    "YTT",  # flake8-2020
+    "ANN",  # flake8-annotations
+    "T10",  # flake8-debugger
+    "ICN",  # flake8-import-conventions
+    "PIE",  # flake8-pie
+    "PT",   # flake8-pytest-style
 ]
 src = ["samples", "singer_sdk", "tests"]
 target-version = "py37"
@@ -247,6 +252,10 @@ target-version = "py37"
 allow-star-arg-any = true
 mypy-init-return = true
 suppress-dummy-args = true
+
+[tool.ruff.flake8-pytest-style]
+fixture-parentheses = false
+parametrize-names-type = "csv"
 
 [tool.ruff.isort]
 known-first-party = ["singer_sdk", "samples", "tests"]
