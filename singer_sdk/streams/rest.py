@@ -639,8 +639,8 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         It is based on parsing the thrown exception of the decorated method, making it
         possible for response values to be in scope.
 
-        You may want to review `backoff_jitter`(singer_sdk.RESTStream.backoff_jitter)
-        if you're overriding this function.
+        You may want to review :meth:`~singer_sdk.RESTStream.backoff_jitter` if you're
+        overriding this function.
 
         Args:
             value: a callable which takes as input the decorated
