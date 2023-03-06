@@ -46,8 +46,8 @@ def get_test_class(
             return suite_config or SuiteConfig()
 
         @pytest.fixture
-        def resource(self) -> Any:  # noqa: ANN401
-            yield
+        def resource(self) -> Any:  # noqa: ANN401, PT004
+            yield  # noqa: PT022
 
         @pytest.fixture(scope="class")
         def runner(self) -> TapTestRunner | TargetTestRunner:

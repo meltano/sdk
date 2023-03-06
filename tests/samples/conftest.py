@@ -18,7 +18,7 @@ def csv_config(outdir: str) -> dict:
 
 
 @pytest.fixture
-def sqlite_sample_db(sqlite_connector):
+def _sqlite_sample_db(sqlite_connector):
     """Return a path to a newly constructed sample DB."""
     for t in range(3):
         sqlite_connector.connection.execute(f"DROP TABLE IF EXISTS t{t}")
@@ -32,8 +32,8 @@ def sqlite_sample_db(sqlite_connector):
 
 
 @pytest.fixture
-def sqlite_sample_tap(sqlite_sample_db, sqlite_sample_db_config) -> SQLiteTap:
-    _ = sqlite_sample_db
+def sqlite_sample_tap(_sqlite_sample_db, sqlite_sample_db_config) -> SQLiteTap:
+    _ = _sqlite_sample_db
     catalog_obj = Catalog.from_dict(
         _get_tap_catalog(SQLiteTap, config=sqlite_sample_db_config, select_all=True)
     )

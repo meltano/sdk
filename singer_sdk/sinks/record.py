@@ -34,7 +34,6 @@ class RecordSink(Sink):
         Args:
             context: Stream partition or context dictionary.
         """
-        pass
 
     @final
     def start_batch(self, context: dict) -> None:
@@ -47,7 +46,6 @@ class RecordSink(Sink):
         Args:
             context: Stream partition or context dictionary.
         """
-        pass
 
     @abc.abstractmethod
     def process_record(self, record: dict, context: dict) -> None:
@@ -65,4 +63,3 @@ class RecordSink(Sink):
             record: Individual record in the stream.
             context: Stream partition or context dictionary.
         """
-        pass

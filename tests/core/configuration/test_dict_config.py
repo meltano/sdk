@@ -52,14 +52,20 @@ def test_get_env_var_config():
         assert env_config["prop1"] == "hello"
         assert env_config["prop3"] == ["val1", "val2"]
         assert "PROP1" not in env_config
-        assert "prop2" not in env_config and "PROP2" not in env_config
-        assert "prop4" not in env_config and "PROP4" not in env_config
+        assert "prop2" not in env_config
+        assert "PROP2" not in env_config
+        assert "prop4" not in env_config
+        assert "PROP4" not in env_config
 
     no_env_config = parse_environment_config(CONFIG_JSONSCHEMA, "PLUGIN_TEST_")
-    assert "prop1" not in no_env_config and "PROP1" not in env_config
-    assert "prop2" not in no_env_config and "PROP2" not in env_config
-    assert "prop3" not in no_env_config and "PROP3" not in env_config
-    assert "prop4" not in no_env_config and "PROP4" not in env_config
+    assert "prop1" not in no_env_config
+    assert "PROP1" not in env_config
+    assert "prop2" not in no_env_config
+    assert "PROP2" not in env_config
+    assert "prop3" not in no_env_config
+    assert "PROP3" not in env_config
+    assert "prop4" not in no_env_config
+    assert "PROP4" not in env_config
 
 
 def test_get_dotenv_config(tmpdir, monkeypatch: pytest.MonkeyPatch):
@@ -84,7 +90,7 @@ def test_get_env_var_config_not_parsable():
             "PLUGIN_TEST_PROP3": '["repeated"]',
         },
     ):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="A bracketed list was detected"):
             parse_environment_config(CONFIG_JSONSCHEMA, "PLUGIN_TEST_")
 
 
