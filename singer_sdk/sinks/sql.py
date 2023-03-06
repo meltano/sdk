@@ -374,8 +374,10 @@ class SQLSink(BatchSink):
         if self.config.get("hard_delete", True):
             with self.connector._connect() as conn, conn.begin():
                 conn.execute(
-                    f"DELETE FROM {self.full_table_name} "
-                    f"WHERE {self.version_column_name} <= {new_version}"
+                    sqlalchemy.text(
+                        f"DELETE FROM {self.full_table_name} "
+                        f"WHERE {self.version_column_name} <= {new_version}"
+                    )
                 )
             return
 
