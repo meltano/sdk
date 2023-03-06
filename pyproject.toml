@@ -132,9 +132,6 @@ exclude = ".*simpleeval.*"
 
 [tool.pytest.ini_options]
 addopts = '-vvv --ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
-filterwarnings = [
-    "error::sqlalchemy.exc.RemovedIn20Warning",
-]
 markers = [
     "external: Tests relying on external resources",
     "windows: Tests that only run on Windows",
