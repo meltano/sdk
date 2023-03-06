@@ -221,7 +221,7 @@ def is_string_array_type(type_dict: dict) -> bool:
         )
 
     if "anyOf" in type_dict:
-        return any([is_string_array_type(t) for t in type_dict["anyOf"]])
+        return any(is_string_array_type(t) for t in type_dict["anyOf"])
 
     if "type" not in type_dict:
         raise ValueError(f"Could not detect type from schema '{type_dict}'")
@@ -238,7 +238,7 @@ def is_array_type(type_dict: dict) -> bool:
         )
 
     if "anyOf" in type_dict:
-        return any([is_array_type(t) for t in type_dict["anyOf"]])
+        return any(is_array_type(t) for t in type_dict["anyOf"])
 
     if "type" not in type_dict:
         raise ValueError(f"Could not detect type from schema '{type_dict}'")
