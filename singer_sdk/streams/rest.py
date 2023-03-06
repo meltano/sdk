@@ -231,6 +231,8 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
                 RetriableAPIError,
                 requests.exceptions.ReadTimeout,
                 requests.exceptions.ConnectionError,
+                requests.exceptions.ChunkedEncodingError,
+                requests.exceptions.ContentDecodingError,
             ),
             max_tries=self.backoff_max_tries,
             on_backoff=self.backoff_handler,
