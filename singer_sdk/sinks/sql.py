@@ -324,7 +324,8 @@ class SQLSink(BatchSink):
             else (self.conform_record(record) for record in records)
         )
         self.logger.info("Inserting with SQL: %s", insert_sql)
-        self.connector.connection.execute(insert_sql, conformed_records)
+        with self.connector._connect() as conn, conn.begin():
+            conn.execute(insert_sql, conformed_records)
         return len(conformed_records) if isinstance(conformed_records, list) else None
 
     def merge_upsert_from_table(
@@ -371,10 +372,13 @@ class SQLSink(BatchSink):
             )
 
         if self.config.get("hard_delete", True):
-            self.connection.execute(
-                f"DELETE FROM {self.full_table_name} "
-                f"WHERE {self.version_column_name} <= {new_version}"
-            )
+            with self.connector._connect() as conn, conn.begin():
+                conn.execute(
+                    sqlalchemy.text(
+                        f"DELETE FROM {self.full_table_name} "
+                        f"WHERE {self.version_column_name} <= {new_version}"
+                    )
+                )
             return
 
         if not self.connector.column_exists(
@@ -397,7 +401,8 @@ class SQLSink(BatchSink):
             bindparam("deletedate", value=deleted_at, type_=sqlalchemy.types.DateTime),
             bindparam("version", value=new_version, type_=sqlalchemy.types.Integer),
         )
-        self.connector.connection.execute(query)
+        with self.connector._connect() as conn, conn.begin():
+            conn.execute(query)
 
 
 __all__ = ["SQLSink", "SQLConnector"]

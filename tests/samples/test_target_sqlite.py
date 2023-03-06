@@ -47,10 +47,7 @@ def sqlite_sample_target(sqlite_target_test_config):
 @pytest.fixture
 def sqlite_sample_target_soft_delete(sqlite_target_test_config):
     """Get a sample target object with hard_delete disabled."""
-    conf = sqlite_target_test_config
-    conf["hard_delete"] = False
-
-    return SQLiteTarget(conf)
+    return SQLiteTarget({**sqlite_target_test_config, "hard_delete": False})
 
 
 @pytest.fixture

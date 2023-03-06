@@ -683,7 +683,7 @@ class SQLConnector:
         column_add_ddl = self.get_column_add_ddl(
             table_name=full_table_name, column_name=column_name, column_type=sql_type
         )
-        with self._connect() as conn:
+        with self._connect() as conn, conn.begin():
             conn.execute(column_add_ddl)
 
     def prepare_schema(self, schema_name: str) -> None:

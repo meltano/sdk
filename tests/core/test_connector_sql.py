@@ -170,7 +170,7 @@ class TestConnectorSQL:
         with pytest.raises(
             sqlalchemy.exc.OperationalError
         ) as _, connector._connect() as conn:
-            conn.execute("SELECT * FROM fake_table")
+            conn.execute(sqlalchemy.text("SELECT * FROM fake_table"))
 
     def test_rename_column_uses_connect_correctly(self, connector):
         attached_engine = connector._engine
