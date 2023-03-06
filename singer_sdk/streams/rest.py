@@ -599,19 +599,19 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
     def backoff_jitter(self, value: float) -> float:
         """Amount of jitter to add.
 
-        For more inforamtion see
+        For more information see
         https://github.com/litl/backoff/blob/master/backoff/_jitter.py
 
-        We chose to default to random_jitter instead of full_jitter as we keep
-        some level of default jitter to be "nice" to downstream apis
-        but it's still relatively close to the default value that's passed in
-        to make tap developers life easier.
+        We chose to default to ``random_jitter`` instead of ``full_jitter`` as we keep
+        some level of default jitter to be "nice" to downstream APIs but it's still
+        relatively close to the default value that's passed in to make tap developers'
+        life easier.
 
         Args:
             value: Base amount to wait in seconds
 
         Returns:
-            Time in seconds to wait between the next request
+            Time in seconds to wait until the next request.
         """
         return backoff.random_jitter(value)
 
