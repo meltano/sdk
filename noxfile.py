@@ -92,6 +92,9 @@ def tests(session: Session) -> None:
             "-v",
             "--durations=10",
             *session.posargs,
+            env={
+                "SQLALCHEMY_WARN_20": "1",
+            },
         )
     finally:
         if session.interactive:
