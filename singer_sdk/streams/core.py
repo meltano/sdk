@@ -1219,7 +1219,6 @@ class Stream(metaclass=abc.ABCMeta):
         Args:
             context: Stream partition or context dictionary.
         """
-        pass
 
     def get_batch_config(self, config: Mapping) -> BatchConfig | None:
         """Return the batch config for this stream.

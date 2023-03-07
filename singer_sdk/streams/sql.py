@@ -197,8 +197,9 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         if self._MAX_RECORDS_LIMIT is not None:
             query = query.limit(self._MAX_RECORDS_LIMIT)
 
-        for record in self.connector.connection.execute(query):
-            yield dict(record)
+        with self.connector._connect() as conn:
+            for record in conn.execute(query):
+                yield dict(record._mapping)
 
 
 __all__ = ["SQLStream", "SQLConnector"]

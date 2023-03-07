@@ -22,27 +22,19 @@ def get_state_if_exists(
 ) -> Any | None:
     """Return the stream or partition state, creating a new one if it does not exist.
 
-    Parameters
-    ----------
-    tap_state : dict
-        the existing state dict which contains all streams.
-    tap_stream_id : str
-        the id of the stream
-    state_partition_context : Optional[dict], optional
-        keys which identify the partition context, by default None (not partitioned)
-    key : Optional[str], optional
-        name of the key searched for, by default None (return entire state if found)
+    Args:
+        tap_state: the existing state dict which contains all streams.
+        tap_stream_id: the id of the stream
+        state_partition_context: keys which identify the partition context,
+            by default None (not partitioned)
+        key: name of the key searched for, by default None (return entire state if
+            found)
 
-    Returns
-    -------
-    Optional[Any]
+    Returns:
         Returns the state if exists, otherwise None
 
-    Raises
-    ------
-    ValueError
-        Raised if state is invalid or cannot be parsed.
-
+    Raises:
+        ValueError: Raised if state is invalid or cannot be parsed.
     """
     if "bookmarks" not in tap_state:
         return None
@@ -106,25 +98,17 @@ def get_writeable_state_dict(
 ) -> dict:
     """Return the stream or partition state, creating a new one if it does not exist.
 
-    Parameters
-    ----------
-    tap_state : dict
-        the existing state dict which contains all streams.
-    tap_stream_id : str
-        the id of the stream
-    state_partition_context : Optional[dict], optional
-        keys which identify the partition context, by default None (not partitioned)
+    Args:
+        tap_state: the existing state dict which contains all streams.
+        tap_stream_id: the id of the stream
+        state_partition_context: keys which identify the partition context,
+            by default None (not partitioned)
 
-    Returns
-    -------
-    dict
+    Returns:
         Returns a writeable dict at the stream or partition level.
 
-    Raises
-    ------
-    ValueError
-        Raise an error if duplicate entries are found.
-
+    Raises:
+        ValueError: Raise an error if duplicate entries are found.
     """
     if tap_state is None:
         raise ValueError("Cannot write state to missing state dictionary.")

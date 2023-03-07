@@ -73,7 +73,6 @@ def mypy(session: Session) -> None:
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
-
     session.install(".[s3]")
     session.install(*test_dependencies)
 
@@ -93,6 +92,9 @@ def tests(session: Session) -> None:
             "-v",
             "--durations=10",
             *session.posargs,
+            env={
+                "SQLALCHEMY_WARN_20": "1",
+            },
         )
     finally:
         if session.interactive:

@@ -83,7 +83,11 @@ class Schema:
         return result
 
     @classmethod
-    def from_dict(cls: t.Type[Schema], data: dict, **schema_defaults: t.Any) -> Schema:
+    def from_dict(
+        cls: t.Type[Schema],  # noqa: UP006
+        data: dict,
+        **schema_defaults: t.Any,
+    ) -> Schema:
         """Initialize a Schema object based on the JSON Schema structure.
 
         Args:

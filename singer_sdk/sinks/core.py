@@ -344,7 +344,6 @@ class Sink(metaclass=abc.ABCMeta):
         Args:
             context: Stream partition or context dictionary.
         """
-        pass
 
     # SDK developer overrides:
 
@@ -379,7 +378,6 @@ class Sink(metaclass=abc.ABCMeta):
             record: Individual record in the stream.
             context: Stream partition or context dictionary.
         """
-        pass
 
     def start_drain(self) -> dict:
         """Set and return `self._context_draining`.
@@ -438,7 +436,6 @@ class Sink(metaclass=abc.ABCMeta):
         Setup is executed once per Sink instance, after instantiation. If a Schema
         change is detected, a new Sink is instantiated and this method is called again.
         """
-        pass
 
     def clean_up(self) -> None:
         """Perform any clean up actions required at end of a stream.
@@ -447,7 +444,6 @@ class Sink(metaclass=abc.ABCMeta):
         that may be in use from other instances of the same sink. Stream name alone
         should not be relied on, it's recommended to use a uuid as well.
         """
-        pass
 
     def process_batch_files(
         self,

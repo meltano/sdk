@@ -140,7 +140,10 @@ def test_nested_complex_objects():
         ),
     )
     test2b = test2a.to_dict()
-    assert test1a and test1b and test2a and test2b
+    assert test1a
+    assert test1b
+    assert test2a
+    assert test2b
 
 
 def test_default_value():
@@ -486,7 +489,7 @@ def test_array_type():
     assert ArrayType(wrapped_type).type_dict == expected_json_schema
 
 
-@pytest.mark.snapshot
+@pytest.mark.snapshot()
 @pytest.mark.parametrize(
     "schema_obj,snapshot_name",
     [

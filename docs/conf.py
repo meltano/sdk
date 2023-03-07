@@ -97,8 +97,7 @@ html_theme_options = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
-# TODO: set this back to 3 after MyST-Parser 0.21.0 is released
-myst_heading_anchors = 4
+myst_heading_anchors = 3
 
 redirects = {
     "porting.html": "guides/porting.html",

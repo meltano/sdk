@@ -69,7 +69,6 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def url_base(self) -> str:
         """Return the base url, e.g. ``https://api.mysite.com/v3/``."""
-        pass
 
     def __init__(
         self,
@@ -231,9 +230,12 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
                 RetriableAPIError,
                 requests.exceptions.ReadTimeout,
                 requests.exceptions.ConnectionError,
+                requests.exceptions.ChunkedEncodingError,
+                requests.exceptions.ContentDecodingError,
             ),
             max_tries=self.backoff_max_tries,
             on_backoff=self.backoff_handler,
+            jitter=self.backoff_jitter,
         )(func)
         return decorator
 
@@ -595,6 +597,25 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return 5
 
+    def backoff_jitter(self, value: float) -> float:
+        """Amount of jitter to add.
+
+        For more information see
+        https://github.com/litl/backoff/blob/master/backoff/_jitter.py
+
+        We chose to default to ``random_jitter`` instead of ``full_jitter`` as we keep
+        some level of default jitter to be "nice" to downstream APIs but it's still
+        relatively close to the default value that's passed in to make tap developers'
+        life easier.
+
+        Args:
+            value: Base amount to wait in seconds
+
+        Returns:
+            Time in seconds to wait until the next request.
+        """
+        return backoff.random_jitter(value)
+
     def backoff_handler(self, details: Details) -> None:
         """Adds additional behaviour prior to retry.
 
@@ -618,6 +639,9 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
 
         It is based on parsing the thrown exception of the decorated method, making it
         possible for response values to be in scope.
+
+        You may want to review :meth:`~singer_sdk.RESTStream.backoff_jitter` if you're
+        overriding this function.
 
         Args:
             value: a callable which takes as input the decorated

@@ -49,7 +49,6 @@ class BatchSink(Sink):
         Args:
             context: Stream partition or context dictionary.
         """
-        pass
 
     def process_record(self, record: dict, context: dict) -> None:
         """Load the latest record from the stream.
@@ -89,4 +88,3 @@ class BatchSink(Sink):
         Args:
             context: Stream partition or context dictionary.
         """
-        pass
