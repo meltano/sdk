@@ -99,6 +99,10 @@ mypy = "^1.0"
 cookiecutter = "^2.1.1"
 PyYAML = "^6.0"
 freezegun = "^1.2.2"
+numpy = [
+    { version = "<1.22", python = "<3.8" },
+    { version = ">=1.22", python = ">=3.8" },
+]
 requests-mock = "^1.10.0"
 sqlalchemy2-stubs = {version = "^0.0.2a32", allow-prereleases = true}
 types-jsonschema = "^4.17.0.6"
