@@ -50,7 +50,7 @@ class MyStream(RESTStream):
 ```python
 # New implementation
 
-from singer_sdk.paginators import BaseHATEOASPaginator
+from singer_sdk.pagination import BaseHATEOASPaginator
 
 class MyPaginator(BaseHATEOASPaginator):
     def get_next_url(self, response, previous_token):
@@ -81,7 +81,7 @@ class can be used to handle this pattern.
 ```python
 # New implementation
 
-from singer_sdk.paginators import BaseOffsetPaginator
+from singer_sdk.pagination import BaseOffsetPaginator
 
 class MyPaginator(BaseOffsetPaginator):
     def has_more(self, response):
