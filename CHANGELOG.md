@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.22.0 (2023-03-14)
+
+### ✨ New
+
+- [#1478](https://github.com/meltano/sdk/issues/1478) Retry some streaming and decoding request errors -- _**Thanks @visch!**_
+- [#1480](https://github.com/meltano/sdk/issues/1480) Added `RESTStream.backoff_jitter` to support custom backoff jitter generators -- _**Thanks @visch!**_
+- [#1438](https://github.com/meltano/sdk/issues/1438) Cookiecutter target tox ini -- _**Thanks @mkranna!**_
+
+### 🐛 Fixes
+
+- [#1467](https://github.com/meltano/sdk/issues/1467) Move `pyarrow` and `viztracer` extras to main dependencies
+- [#1487](https://github.com/meltano/sdk/issues/1487) Address SQLAlchemy 2.0 deprecation warnings
+- [#1482](https://github.com/meltano/sdk/issues/1482) Use pipx to run tox in CI template
+- [#1454](https://github.com/meltano/sdk/issues/1454) Cookiecutter bearer auth config -- _**Thanks @radbrt!**_
+- [#1434](https://github.com/meltano/sdk/issues/1434) Tap template: fix style and docstrings, and add test cases for SQL and "Other" sources -- _**Thanks @flexponsive!**_
+
+### 📚 Documentation Improvements
+
+- [#1492](https://github.com/meltano/sdk/issues/1492) Fix imports in pagination guide
+- [#1446](https://github.com/meltano/sdk/issues/1446) Property conformance doc typo fix -- _**Thanks @radbrt!**_
+
 ## v0.21.0 (2023-02-21)
 
 ### 🐛 Fixes

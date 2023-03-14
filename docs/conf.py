@@ -28,7 +28,7 @@ copyright = "2021, Meltano Core Team and Contributors"
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.21.0"
+release = "0.22.0"
 
 
 # -- General configuration ---------------------------------------------------
