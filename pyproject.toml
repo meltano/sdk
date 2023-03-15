@@ -232,6 +232,7 @@ select = [
     "T10",  # flake8-debugger
     "ISC",  # flake8-implicit-str-concat
     "ICN",  # flake8-import-conventions
+    "INP",  # flake8-no-pep420
     "PIE",  # flake8-pie
     "PT",   # flake8-pytest-style
 ]
@@ -239,7 +240,11 @@ src = ["samples", "singer_sdk", "tests"]
 target-version = "py37"
 
 [tool.ruff.per-file-ignores]
-"docs/conf.py" = ["D", "I002"]
+"docs/conf.py" = [
+    "D",      # pydocstyle/flake8-docstrings
+    "I002",   # isort: missing-required-import
+    "INP001", # flake8-no-pep420: implicit-namespace-package
+]
 "noxfile.py" = ["ANN"]
 "tests/*" = ["ANN", "D1", "D2"]
 # Disabled some checks in samples code
