@@ -260,7 +260,7 @@ def log_sort_error(
     partition_record_count: int,
 ) -> None:
     """Log a sort error."""
-    msg = f"Sorting error detected in '{stream_name}'." f"on record #{record_count}. "
+    msg = f"Sorting error detected in '{stream_name}' on record #{record_count}. "
     if partition_record_count != record_count:
         msg += (
             f"Record was partition record "

@@ -413,8 +413,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             default=CliTestOptionValue.Disabled,
             help=(
                 "Use --test to sync a single record for each stream. "
-                + "Use --test=schema to test schema output without syncing "
-                + "records."
+                "Use --test=schema to test schema output without syncing "
+                "records."
             ),
         )
         @click.option(
