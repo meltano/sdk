@@ -60,10 +60,12 @@ def flatten_key(key_name: str, parent_keys: list[str], separator: str = "__") ->
     inflected_key = full_key.copy()
     reducer_index = 0
     while len(separator.join(inflected_key)) >= 255 and reducer_index < len(
-        inflected_key
+        inflected_key,
     ):
         reduced_key = re.sub(
-            r"[a-z]", "", inflection.camelize(inflected_key[reducer_index])
+            r"[a-z]",
+            "",
+            inflection.camelize(inflected_key[reducer_index]),
         )
         inflected_key[reducer_index] = (
             reduced_key if len(reduced_key) > 1 else inflected_key[reducer_index][0:3]
@@ -243,7 +245,7 @@ def _flatten_schema(
                         separator=separator,
                         level=level + 1,
                         max_level=max_level,
-                    ).items()
+                    ).items(),
                 )
             else:
                 items.append((new_key, v))
@@ -336,7 +338,7 @@ def _flatten_record(
                     separator=separator,
                     level=level + 1,
                     max_level=max_level,
-                ).items()
+                ).items(),
             )
         else:
             items.append(
@@ -345,7 +347,7 @@ def _flatten_record(
                     json.dumps(v)
                     if _should_jsondump_value(k, v, flattened_schema)
                     else v,
-                )
+                ),
             )
 
     return dict(items)

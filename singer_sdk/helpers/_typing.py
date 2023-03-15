@@ -55,7 +55,7 @@ def append_type(type_dict: dict, new_type: str) -> dict:
 
     raise ValueError(
         "Could not append type because the JSON schema for the dictionary "
-        f"`{type_dict}` appears to be invalid."
+        f"`{type_dict}` appears to be invalid.",
     )
 
 
@@ -75,7 +75,7 @@ def is_secret_type(type_dict: dict) -> bool:
         True if we detect any sensitive property nodes.
     """
     if type_dict.get(JSONSCHEMA_ANNOTATION_WRITEONLY) or type_dict.get(
-        JSONSCHEMA_ANNOTATION_SECRET
+        JSONSCHEMA_ANNOTATION_SECRET,
     ):
         return True
 
@@ -121,7 +121,7 @@ def is_datetime_type(type_dict: dict) -> bool:
     if not type_dict:
         raise ValueError(
             "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?"
+            "Did you forget to define a property in the stream schema?",
         )
     if "anyOf" in type_dict:
         for type_dict in type_dict["anyOf"]:
@@ -131,7 +131,7 @@ def is_datetime_type(type_dict: dict) -> bool:
     elif "type" in type_dict:
         return type_dict.get("format") == "date-time"
     raise ValueError(
-        f"Could not detect type of replication key using schema '{type_dict}'"
+        f"Could not detect type of replication key using schema '{type_dict}'",
     )
 
 
@@ -159,7 +159,7 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
         return type_dict.get("format") in {"date", "date-time"}
 
     raise ValueError(
-        f"Could not detect type of replication key using schema '{type_dict}'"
+        f"Could not detect type of replication key using schema '{type_dict}'",
     )
 
 
@@ -217,7 +217,7 @@ def is_string_array_type(type_dict: dict) -> bool:
     if not type_dict:
         raise ValueError(
             "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?"
+            "Did you forget to define a property in the stream schema?",
         )
 
     if "anyOf" in type_dict:
@@ -234,7 +234,7 @@ def is_array_type(type_dict: dict) -> bool:
     if not type_dict:
         raise ValueError(
             "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?"
+            "Did you forget to define a property in the stream schema?",
         )
 
     if "anyOf" in type_dict:
@@ -308,11 +308,13 @@ def is_number_type(property_schema: dict) -> bool | None:
 
 @lru_cache()
 def _warn_unmapped_properties(
-    stream_name: str, property_names: tuple[str], logger: logging.Logger
+    stream_name: str,
+    property_names: tuple[str],
+    logger: logging.Logger,
 ):
     logger.warning(
         f"Properties {property_names} were present in the '{stream_name}' stream but "
-        "not found in catalog schema. Ignoring."
+        "not found in catalog schema. Ignoring.",
     )
 
 
@@ -408,7 +410,10 @@ def _conform_record_data_types(
                             output_item,
                             sub_unmapped_properties,
                         ) = _conform_record_data_types(
-                            item, item_schema, level, property_path
+                            item,
+                            item_schema,
+                            level,
+                            property_path,
                         )
                         unmapped_properties.extend(sub_unmapped_properties)
                         output.append(output_item)
@@ -427,14 +432,18 @@ def _conform_record_data_types(
                     output_object[property_name],
                     sub_unmapped_properties,
                 ) = _conform_record_data_types(
-                    elem, property_schema, level, property_path
+                    elem,
+                    property_schema,
+                    level,
+                    property_path,
                 )
                 unmapped_properties.extend(sub_unmapped_properties)
             else:
                 output_object[property_name] = elem
         else:
             output_object[property_name] = _conform_primitive_property(
-                elem, property_schema
+                elem,
+                property_schema,
             )
     return output_object, unmapped_properties
 

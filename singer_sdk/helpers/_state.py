@@ -50,7 +50,8 @@ def get_state_if_exists(
         return None  # No partitions defined
 
     matched_partition = _find_in_partitions_list(
-        stream_state["partitions"], state_partition_context
+        stream_state["partitions"],
+        state_partition_context,
     )
     if matched_partition is None:
         return None  # Partition definition not present
@@ -65,7 +66,8 @@ def get_state_partitions_list(tap_state: dict, tap_stream_id: str) -> list[dict]
 
 
 def _find_in_partitions_list(
-    partitions: list[dict], state_partition_context: dict
+    partitions: list[dict],
+    state_partition_context: dict,
 ) -> dict | None:
     found = [
         partition_state
@@ -76,7 +78,7 @@ def _find_in_partitions_list(
         raise ValueError(
             f"State file contains duplicate entries for partition: "
             "{state_partition_context}.\n"
-            f"Matching state values were: {str(found)}"
+            f"Matching state values were: {str(found)}",
         )
     if found:
         return cast(dict, found[0])
@@ -85,7 +87,8 @@ def _find_in_partitions_list(
 
 
 def _create_in_partitions_list(
-    partitions: list[dict], state_partition_context: dict
+    partitions: list[dict],
+    state_partition_context: dict,
 ) -> dict:
     # Existing partition not found. Creating new state entry in partitions list...
     new_partition_state = {"context": state_partition_context}
@@ -94,7 +97,9 @@ def _create_in_partitions_list(
 
 
 def get_writeable_state_dict(
-    tap_state: dict, tap_stream_id: str, state_partition_context: dict | None = None
+    tap_state: dict,
+    tap_stream_id: str,
+    state_partition_context: dict | None = None,
 ) -> dict:
     """Return the stream or partition state, creating a new one if it does not exist.
 
@@ -141,7 +146,9 @@ def write_stream_state(
 ) -> None:
     """Write stream state."""
     state_dict = get_writeable_state_dict(
-        tap_state, tap_stream_id, state_partition_context=state_partition_context
+        tap_state,
+        tap_stream_id,
+        state_partition_context=state_partition_context,
     )
     state_dict[key] = val
 
@@ -197,7 +204,7 @@ def increment_state(
     if not is_sorted:
         if PROGRESS_MARKERS not in stream_or_partition_state:
             stream_or_partition_state[PROGRESS_MARKERS] = {
-                PROGRESS_MARKER_NOTE: "Progress is not resumable if interrupted."
+                PROGRESS_MARKER_NOTE: "Progress is not resumable if interrupted.",
             }
         progress_dict = stream_or_partition_state[PROGRESS_MARKERS]
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
@@ -210,7 +217,7 @@ def increment_state(
     if is_sorted:
         raise InvalidStreamSortException(
             f"Unsorted data detected in stream. Latest value '{new_rk_value}' is "
-            f"smaller than previous max '{old_rk_value}'."
+            f"smaller than previous max '{old_rk_value}'.",
         )
 
 
@@ -233,7 +240,7 @@ def finalize_state_progress_markers(stream_or_partition_state: dict) -> dict | N
             # Replication keys valid (only) after sync is complete
             progress_markers = stream_or_partition_state[PROGRESS_MARKERS]
             stream_or_partition_state["replication_key"] = progress_markers.pop(
-                "replication_key"
+                "replication_key",
             )
             new_rk_value = progress_markers.pop("replication_key_value")
             if signpost_value and _greater_than_signpost(signpost_value, new_rk_value):

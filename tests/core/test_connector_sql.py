@@ -37,7 +37,7 @@ class TestConnectorSQL:
                         sqlalchemy.Column(
                             "column_name",
                             sqlalchemy.types.Text(),
-                        )
+                        ),
                     ),
                 },
                 "ALTER TABLE %(table_name)s ADD COLUMN %(create_column_clause)s",
@@ -92,8 +92,9 @@ class TestConnectorSQL:
 
         statement = str(
             column_ddl.compile(
-                dialect=sqlite.dialect(), compile_kwargs={"literal_binds": True}
-            )
+                dialect=sqlite.dialect(),
+                compile_kwargs={"literal_binds": True},
+            ),
         )
         assert statement == rendered_statement
 
@@ -168,7 +169,7 @@ class TestConnectorSQL:
 
     def test_connect_raises_on_operational_failure(self, connector):
         with pytest.raises(
-            sqlalchemy.exc.OperationalError
+            sqlalchemy.exc.OperationalError,
         ) as _, connector._connect() as conn:
             conn.execute(sqlalchemy.text("SELECT * FROM fake_table"))
 

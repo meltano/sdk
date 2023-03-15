@@ -120,7 +120,7 @@ def test_to_json():
                 "test_property"
             ],
             "additionalProperties": false
-        }"""
+        }""",
     )
 
 
@@ -136,7 +136,7 @@ def test_nested_complex_objects():
             ObjectType(
                 Property("DatasetId", StringType),
                 Property("DatasetName", StringType),
-            )
+            ),
         ),
     )
     test2b = test2a.to_dict()
@@ -149,7 +149,7 @@ def test_nested_complex_objects():
 def test_default_value():
     prop = Property("test_property", StringType, default="test_property_value")
     assert prop.to_dict() == {
-        "test_property": {"type": ["string", "null"], "default": "test_property_value"}
+        "test_property": {"type": ["string", "null"], "default": "test_property_value"},
     }
 
 
@@ -186,7 +186,7 @@ def test_property_description():
         "test_property": {
             "type": ["string", "null"],
             "description": text,
-        }
+        },
     }
 
 
@@ -348,7 +348,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                     "type": ["string", "null"],
                     JSONSCHEMA_ANNOTATION_SECRET: True,
                     JSONSCHEMA_ANNOTATION_WRITEONLY: True,
-                }
+                },
             },
             {is_secret_type, is_string_type},
         ),
@@ -358,7 +358,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                 "my_prop4": {
                     "description": "This is a property.",
                     "type": ["string", "null"],
-                }
+                },
             },
             {is_string_type},
         ),
@@ -368,7 +368,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                 "my_prop5": {
                     "default": "some_val",
                     "type": ["string", "null"],
-                }
+                },
             },
             {is_string_type},
         ),
@@ -378,7 +378,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                 "my_prop6": {
                     "type": ["array", "null"],
                     "items": {"type": ["string"]},
-                }
+                },
             },
             {is_array_type, is_string_array_type},
         ),
@@ -401,7 +401,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                             "writeOnly": True,
                         },
                     },
-                }
+                },
             },
             {is_object_type, is_secret_type},
         ),
@@ -410,7 +410,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
             {
                 "my_prop8": {
                     "type": ["integer", "null"],
-                }
+                },
             },
             {is_integer_type},
         ),
@@ -426,7 +426,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                     "type": ["integer", "null"],
                     "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9],
                     "examples": [1, 2, 3],
-                }
+                },
             },
             {is_integer_type},
         ),
@@ -457,7 +457,7 @@ def test_wrapped_type_dict():
         ValueError,
         match=re.escape(
             "Type dict for <class 'singer_sdk.typing.ArrayType'> is not defined. "
-            + "Try instantiating it with a nested type such as ArrayType(StringType)."
+            + "Try instantiating it with a nested type such as ArrayType(StringType).",
         ),
     ):
         Property("bad_array_prop", ArrayType).to_dict()
@@ -466,7 +466,7 @@ def test_wrapped_type_dict():
         ValueError,
         match=re.escape(
             "Type dict for <class 'singer_sdk.typing.ObjectType'> is not defined. "
-            + "Try instantiating it with a nested type such as ObjectType(StringType)."
+            + "Try instantiating it with a nested type such as ObjectType(StringType).",
         ),
     ):
         Property("bad_object_prop", ObjectType).to_dict()
@@ -475,7 +475,7 @@ def test_wrapped_type_dict():
         "good_array_prop": {
             "type": ["array", "null"],
             "items": {"type": ["string"]},
-        }
+        },
     }
 
 
@@ -669,7 +669,7 @@ def test_custom_type():
                     "anyOf": [
                         {"type": "array"},
                         {"type": "null"},
-                    ]
+                    ],
                 },
                 {"type": "array"},
                 {"type": ["array", "null"]},
@@ -683,7 +683,7 @@ def test_custom_type():
                     "anyOf": [
                         {"type": "boolean"},
                         {"type": "null"},
-                    ]
+                    ],
                 },
                 {"type": "boolean"},
                 {"type": ["boolean", "null"]},
@@ -697,7 +697,7 @@ def test_custom_type():
                     "anyOf": [
                         {"type": "integer"},
                         {"type": "null"},
-                    ]
+                    ],
                 },
                 {"type": "integer"},
                 {"type": ["integer", "null"]},
@@ -711,7 +711,7 @@ def test_custom_type():
                     "anyOf": [
                         {"type": "string", "format": "date-time"},
                         {"type": "null"},
-                    ]
+                    ],
                 },
                 {"type": "string"},
                 {"type": ["string", "null"]},
@@ -725,7 +725,7 @@ def test_custom_type():
                     "anyOf": [
                         {"type": "string", "format": "date-time"},
                         {"type": "null"},
-                    ]
+                    ],
                 },
                 {"type": "null"},
                 {"type": ["string", "null"]},
@@ -739,7 +739,7 @@ def test_custom_type():
                     "anyOf": [
                         {"type": "string", "format": "date-time"},
                         {"type": "number"},
-                    ]
+                    ],
                 },
                 {"type": "number"},
                 {"type": ["number", "null"]},

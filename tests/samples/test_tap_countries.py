@@ -21,7 +21,8 @@ SAMPLE_CONFIG_BAD = {"not": "correct"}
 
 # standard tap tests
 TestSampleTapCountries = get_tap_test_class(
-    tap_class=SampleTapCountries, config=SAMPLE_CONFIG
+    tap_class=SampleTapCountries,
+    config=SAMPLE_CONFIG,
 )
 
 
@@ -104,8 +105,8 @@ def test_batch_mode(monkeypatch, outdir):
                     "root": outdir,
                     "prefix": "pytest-countries-",
                 },
-            }
-        }
+            },
+        },
     )
 
     buf = io.StringIO()

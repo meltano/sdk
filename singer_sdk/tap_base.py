@@ -194,7 +194,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 self.logger.debug(
                     f"Child stream '{type(stream).__name__}' should be called by "
                     f"parent stream '{stream.parent_stream_type.__name__}'. "
-                    "Skipping direct invocation."
+                    "Skipping direct invocation.",
                 )
                 continue
             try:
@@ -263,7 +263,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """
         raise NotImplementedError(
             f"Tap '{self.name}' does not support discovery. "
-            "Please set the '--catalog' command line argument and try again."
+            "Please set the '--catalog' command line argument and try again.",
         )
 
     @final
@@ -294,7 +294,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     for stream in streams:
                         parent.child_streams.append(stream)
                         self.logger.info(
-                            f"Added '{stream.name}' as child stream to '{parent.name}'"
+                            f"Added '{stream.name}' as child stream to '{parent.name}'",
                         )
 
         streams = [stream for streams in streams_by_type.values() for stream in streams]
@@ -352,7 +352,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                         f"Stream descendent '{descendent.name}' is selected and "
                         f"its parent '{stream.name}' does not use inclusive "
                         f"replication keys. "
-                        f"Forcing full table replication for '{stream.name}'."
+                        f"Forcing full table replication for '{stream.name}'.",
                     )
                     stream.replication_key = None
                     stream.forced_replication_method = "FULL_TABLE"
@@ -374,7 +374,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 self.logger.debug(
                     f"Child stream '{type(stream).__name__}' is expected to be called "
                     f"by parent stream '{stream.parent_stream_type.__name__}'. "
-                    "Skipping direct invocation."
+                    "Skipping direct invocation.",
                 )
                 continue
 
@@ -484,7 +484,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 if not Path(config_path).is_file():
                     raise FileNotFoundError(
                         f"Could not locate config file at '{config_path}'."
-                        "Please check that the file exists."
+                        "Please check that the file exists.",
                     )
 
                 config_files.append(Path(config_path))

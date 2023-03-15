@@ -31,7 +31,8 @@ SAMPLE_CONFIG = {"target_folder": f"{TEST_OUTPUT_DIR}/"}
 
 
 StandardTests = get_target_test_class(
-    target_class=SampleTargetCSV, config=SAMPLE_CONFIG
+    target_class=SampleTargetCSV,
+    config=SAMPLE_CONFIG,
 )
 
 
@@ -52,7 +53,7 @@ class TestSampleTargetCSV(StandardTests):
 SAMPLE_FILENAME = "/tmp/testfile.countries"
 SAMPLE_TAP_CONFIG: dict[str, Any] = {}
 COUNTRIES_STREAM_MAPS_CONFIG: dict[str, Any] = {
-    "stream_maps": {"continents": {}, "__else__": None}
+    "stream_maps": {"continents": {}, "__else__": None},
 }
 
 
@@ -171,7 +172,7 @@ def test_target_batching():
     assert target.num_records_processed == countries_record_count * 3
     assert len(target.state_messages_written) == 3
     assert target.state_messages_written[-1] == {
-        "bookmarks": {"continents": {}, "countries": {}}
+        "bookmarks": {"continents": {}, "countries": {}},
     }
 
 

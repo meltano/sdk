@@ -25,7 +25,7 @@ def _sqlite_sample_db(sqlite_connector):
         for t in range(3):
             conn.execute(text(f"DROP TABLE IF EXISTS t{t}"))
             conn.execute(
-                text(f"CREATE TABLE t{t} (c1 int PRIMARY KEY, c2 varchar(10))")
+                text(f"CREATE TABLE t{t} (c1 int PRIMARY KEY, c2 varchar(10))"),
             )
             for x in range(100):
                 conn.execute(text(f"INSERT INTO t{t} VALUES ({x}, 'x={x}')"))
@@ -35,7 +35,7 @@ def _sqlite_sample_db(sqlite_connector):
 def sqlite_sample_tap(_sqlite_sample_db, sqlite_sample_db_config) -> SQLiteTap:
     _ = _sqlite_sample_db
     catalog_obj = Catalog.from_dict(
-        _get_tap_catalog(SQLiteTap, config=sqlite_sample_db_config, select_all=True)
+        _get_tap_catalog(SQLiteTap, config=sqlite_sample_db_config, select_all=True),
     )
 
     # Set stream `t1` to use incremental replication.

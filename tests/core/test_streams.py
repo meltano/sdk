@@ -173,10 +173,10 @@ def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
                         "schema": stream.schema,
                         "replication_method": REPLICATION_FULL_TABLE,
                         "replication_key": None,
-                    }
-                ]
-            }
-        )
+                    },
+                ],
+            },
+        ),
     )
 
     assert stream.primary_keys == ["id"]
@@ -264,9 +264,9 @@ def test_stream_starting_timestamp(
                 stream_name: {
                     "replication_key": stream.replication_key,
                     "replication_key_value": bookmark_value,
-                }
-            }
-        }
+                },
+            },
+        },
     )
     stream._write_starting_replication_value(None)
     assert get_starting_value(None) == expected_starting_value
@@ -330,7 +330,10 @@ def test_stream_starting_timestamp(
     ],
 )
 def test_jsonpath_rest_stream(
-    tap: SimpleTestTap, path: str, content: str, result: list[dict]
+    tap: SimpleTestTap,
+    path: str,
+    content: str,
+    result: list[dict],
 ):
     """Validate records are extracted correctly from the API response."""
     fake_response = requests.Response()
@@ -451,7 +454,11 @@ def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
     ],
 )
 def test_next_page_token_jsonpath(
-    tap: SimpleTestTap, path: str, content: str, headers: dict, result: str
+    tap: SimpleTestTap,
+    path: str,
+    content: str,
+    headers: dict,
+    result: str,
 ):
     """Validate pagination token is extracted correctly from API response."""
     fake_response = requests.Response()

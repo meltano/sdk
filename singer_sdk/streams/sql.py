@@ -128,7 +128,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         catalog_entry = self._singer_catalog_entry
         if not catalog_entry.table:
             raise ValueError(
-                f"Missing table name in catalog entry: {catalog_entry.to_dict()}"
+                f"Missing table name in catalog entry: {catalog_entry.to_dict()}",
             )
 
         return self.connector.get_fully_qualified_name(
@@ -172,7 +172,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         if context:
             raise NotImplementedError(
-                f"Stream '{self.name}' does not support partitioning."
+                f"Stream '{self.name}' does not support partitioning.",
             )
 
         selected_column_names = self.get_selected_schema()["properties"].keys()
@@ -190,8 +190,9 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             if start_val:
                 query = query.where(
                     sqlalchemy.text(":replication_key >= :start_val").bindparams(
-                        replication_key=replication_key_col, start_val=start_val
-                    )
+                        replication_key=replication_key_col,
+                        start_val=start_val,
+                    ),
                 )
 
         if self._MAX_RECORDS_LIMIT is not None:

@@ -41,14 +41,14 @@ def pytest_generate_tests(metafunc):
 def test_cookiecutter(outdir: str, cookiecutter_dir: str, cookiecutter_input: dict):
     """Generate and validate project from Cookiecutter."""
     style_guide_easy = flake8.get_style_guide(
-        ignore=["E302", "E303", "E305", "F401", "W391"]
+        ignore=["E302", "E303", "E305", "F401", "W391"],
     )
     style_guide_strict = flake8.get_style_guide(
         ignore=[
             "F401",  # "imported but unused"
             "W292",  # "no newline at end of file"
             "W391",  # "blank line at end of file"
-        ]
+        ],
     )
     cookiecutter(
         template=cookiecutter_dir,

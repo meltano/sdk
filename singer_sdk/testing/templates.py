@@ -254,7 +254,7 @@ class AttributeTestTemplate(TestTemplate):
         """
         raise NotImplementedError(
             "The 'evaluate' method is required for attribute tests, "
-            "but not implemented."
+            "but not implemented.",
         )
 
 
@@ -311,7 +311,7 @@ class TargetFileTestTemplate(TargetTestTemplate):
         # get input from file
         if getattr(self, "singer_filepath", None):
             assert Path(
-                self.singer_filepath
+                self.singer_filepath,
             ).exists(), f"Singer file {self.singer_filepath} does not exist."
             runner.input_filepath = self.singer_filepath
         super().run(config, resource, runner)

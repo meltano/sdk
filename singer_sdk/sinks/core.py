@@ -214,7 +214,10 @@ class Sink(metaclass=abc.ABCMeta):
     # Record processing
 
     def _add_sdc_metadata_to_record(
-        self, record: dict, message: dict, context: dict
+        self,
+        record: dict,
+        message: dict,
+        context: dict,
     ) -> None:
         """Populate metadata _sdc columns from incoming record message.
 
@@ -301,12 +304,17 @@ class Sink(metaclass=abc.ABCMeta):
         """
         self._validator.validate(record)
         self._parse_timestamps_in_record(
-            record=record, schema=self.schema, treatment=self.datetime_error_treatment
+            record=record,
+            schema=self.schema,
+            treatment=self.datetime_error_treatment,
         )
         return record
 
     def _parse_timestamps_in_record(
-        self, record: dict, schema: dict, treatment: DatetimeErrorTreatmentEnum
+        self,
+        record: dict,
+        schema: dict,
+        treatment: DatetimeErrorTreatmentEnum,
     ) -> None:
         """Parse strings to datetime.datetime values, repairing or erroring on failure.
 
@@ -411,7 +419,7 @@ class Sink(metaclass=abc.ABCMeta):
         self._context_draining = None
         if self._batch_records_read:
             self.tally_record_written(
-                self._batch_records_read - self._batch_dupe_records_merged
+                self._batch_records_read - self._batch_dupe_records_merged,
             )
         self._batch_records_read = 0
 
@@ -427,7 +435,7 @@ class Sink(metaclass=abc.ABCMeta):
         _ = new_version
         self.logger.warning(
             "ACTIVATE_VERSION message received but not implemented by this target. "
-            "Ignoring."
+            "Ignoring.",
         )
 
     def setup(self) -> None:
@@ -479,5 +487,5 @@ class Sink(metaclass=abc.ABCMeta):
                         self.process_batch(context)
             else:
                 raise NotImplementedError(
-                    f"Unsupported batch encoding format: {encoding.format}"
+                    f"Unsupported batch encoding format: {encoding.format}",
                 )

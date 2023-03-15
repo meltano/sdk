@@ -51,7 +51,7 @@ class SQLiteTarget(SQLTarget):
             DB_PATH_CONFIG,
             th.StringType,
             description="The path to your SQLite database file(s).",
-        )
+        ),
     ).to_dict()
 
 

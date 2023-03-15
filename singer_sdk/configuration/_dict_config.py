@@ -57,7 +57,7 @@ def parse_environment_config(
                     raise ValueError(
                         "A bracketed list was detected in the environment variable "
                         f"'{env_var_name}'. This syntax is no longer supported. "
-                        "Please remove the brackets and try again."
+                        "Please remove the brackets and try again.",
                     )
                 result[config_key] = env_var_value.split(",")
             else:
@@ -93,7 +93,7 @@ def merge_config_sources(
         if not Path(config_path).is_file():
             raise FileNotFoundError(
                 f"Could not locate config file at '{config_path}'."
-                "Please check that the file exists."
+                "Please check that the file exists.",
             )
 
         config.update(read_json_file(config_path))

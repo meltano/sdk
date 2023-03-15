@@ -34,12 +34,12 @@ class StreamTransform(InlineMapper):
                             },
                         },
                         "additionalProperties": {"type": ["string", "null"]},
-                    }
-                )
+                    },
+                ),
             ),
             required=True,
             description="Stream maps",
-        )
+        ),
     ).to_dict()
 
     def __init__(

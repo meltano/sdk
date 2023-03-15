@@ -228,6 +228,7 @@ select = [
     "UP",   # pyupgrade
     "YTT",  # flake8-2020
     "ANN",  # flake8-annotations
+    "COM",  # flake8-commas
     "T10",  # flake8-debugger
     "ICN",  # flake8-import-conventions
     "PIE",  # flake8-pie
