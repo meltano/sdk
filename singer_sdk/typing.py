@@ -445,8 +445,8 @@ class Property(JSONTypeHelper, Generic[W]):
         if isinstance(wrapped, type) and not isinstance(wrapped.type_dict, Mapping):
             raise ValueError(
                 f"Type dict for {wrapped} is not defined. "
-                + "Try instantiating it with a nested type such as "
-                + f"{wrapped.__name__}(StringType).",
+                "Try instantiating it with a nested type such as "
+                f"{wrapped.__name__}(StringType).",
             )
 
         return cast(dict, wrapped.type_dict)

@@ -190,7 +190,7 @@ class SQLSink(BatchSink):
         if duplicates:
             raise ConformedNameClashException(
                 "Duplicate stream properties produced when "
-                + f"conforming property names: {duplicates}",
+                f"conforming property names: {duplicates}",
             )
 
     def conform_schema(self, schema: dict) -> dict:

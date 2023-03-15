@@ -457,7 +457,7 @@ def test_wrapped_type_dict():
         ValueError,
         match=re.escape(
             "Type dict for <class 'singer_sdk.typing.ArrayType'> is not defined. "
-            + "Try instantiating it with a nested type such as ArrayType(StringType).",
+            "Try instantiating it with a nested type such as ArrayType(StringType).",
         ),
     ):
         Property("bad_array_prop", ArrayType).to_dict()
@@ -466,7 +466,7 @@ def test_wrapped_type_dict():
         ValueError,
         match=re.escape(
             "Type dict for <class 'singer_sdk.typing.ObjectType'> is not defined. "
-            + "Try instantiating it with a nested type such as ObjectType(StringType).",
+            "Try instantiating it with a nested type such as ObjectType(StringType).",
         ),
     ):
         Property("bad_object_prop", ObjectType).to_dict()
