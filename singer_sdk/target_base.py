@@ -170,7 +170,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ):
             self.logger.info(
                 f"Schema or key properties for '{stream_name}' stream have changed. "
-                f"Initializing a new '{stream_name}' sink..."
+                f"Initializing a new '{stream_name}' sink...",
             )
             self._sinks_to_clear.append(self._sinks_active.pop(stream_name))
             return self.add_sink(stream_name, schema, key_properties)
@@ -197,7 +197,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         raise ValueError(
             f"No sink class defined for '{stream_name}' "
-            "and no default sink class available."
+            "and no default sink class available.",
         )
 
     def sink_exists(self, stream_name: str) -> bool:
@@ -215,7 +215,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     @final
     def add_sink(
-        self, stream_name: str, schema: dict, key_properties: list[str] | None = None
+        self,
+        stream_name: str,
+        schema: dict,
+        key_properties: list[str] | None = None,
     ) -> Sink:
         """Create a sink and register it.
 
@@ -254,7 +257,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         if not self.sink_exists(stream_name):
             raise RecordsWithoutSchemaException(
                 f"A record for stream '{stream_name}' was encountered before a "
-                "corresponding schema."
+                "corresponding schema.",
             )
 
     # Message handling
@@ -277,7 +280,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             f"Target '{self.name}' completed reading {line_count} lines of input "
             f"({counter[SingerMessageType.RECORD]} records, "
             f"({counter[SingerMessageType.BATCH]} batch manifests, "
-            f"{counter[SingerMessageType.STATE]} state messages)."
+            f"{counter[SingerMessageType.STATE]} state messages).",
         )
 
         return counter
@@ -307,7 +310,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             context = sink._get_context(transformed_record)
             if sink.include_sdc_metadata_properties:
                 sink._add_sdc_metadata_to_record(
-                    transformed_record, message_dict, context
+                    transformed_record,
+                    message_dict,
+                    context,
                 )
             else:
                 sink._remove_sdc_metadata_from_record(transformed_record)
@@ -321,7 +326,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             if sink.is_full:
                 self.logger.info(
-                    f"Target sink for '{sink.stream_name}' is full. Draining..."
+                    f"Target sink for '{sink.stream_name}' is full. Draining...",
                 )
                 self.drain_one(sink)
 
@@ -343,7 +348,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         elif self.mapper.stream_maps[stream_name][0].raw_schema != schema:
             self.logger.info(
                 f"Schema has changed for stream '{stream_name}'. "
-                "Mapping definitions will be reset."
+                "Mapping definitions will be reset.",
             )
             do_registration = True
         elif (
@@ -351,14 +356,14 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ):
             self.logger.info(
                 f"Key properties have changed for stream '{stream_name}'. "
-                "Mapping definitions will be reset."
+                "Mapping definitions will be reset.",
             )
             do_registration = True
 
         if not do_registration:
             self.logger.debug(
                 f"No changes detected in SCHEMA message for stream '{stream_name}'. "
-                "Ignoring."
+                "Ignoring.",
             )
             return
 
@@ -398,7 +403,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         if self._max_record_age_in_minutes > self._MAX_RECORD_AGE_IN_MINUTES:
             self.logger.info(
                 "One or more records have exceeded the max age of "
-                f"{self._MAX_RECORD_AGE_IN_MINUTES} minutes. Draining all sinks."
+                f"{self._MAX_RECORD_AGE_IN_MINUTES} minutes. Draining all sinks.",
             )
             self.drain_all()
 
@@ -558,7 +563,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 if not Path(config_path).is_file():
                     raise FileNotFoundError(
                         f"Could not locate config file at '{config_path}'."
-                        "Please check that the file exists."
+                        "Please check that the file exists.",
                     )
 
                 config_files.append(Path(config_path))

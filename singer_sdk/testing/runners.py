@@ -248,13 +248,18 @@ class TargetTestRunner(SingerTestRunner):
         """
         target = cast(Target, self.create())
         stdout, stderr = self._execute_sync(
-            target=target, input=self.input, finalize=finalize
+            target=target,
+            input=self.input,
+            finalize=finalize,
         )
         self.stdout, self.stderr = (stdout.read(), stderr.read())
         self.state_messages.extend(self._clean_sync_output(self.stdout))
 
     def _execute_sync(
-        self, target: Target, input: IO[str], finalize: bool = True
+        self,
+        target: Target,
+        input: IO[str],
+        finalize: bool = True,
     ) -> tuple[io.StringIO, io.StringIO]:
         """Invoke the target with the provided input.
 

@@ -112,7 +112,7 @@ class RecordMessage(Message):
         if self.time_extracted and not self.time_extracted.tzinfo:
             raise ValueError(
                 "'time_extracted' must be either None "
-                + "or an aware datetime (with a time zone)"
+                + "or an aware datetime (with a time zone)",
             )
 
         if self.time_extracted:

@@ -13,7 +13,8 @@ from singer_sdk.target_base import Target
 
 
 def get_standard_tap_tests(
-    tap_class: type[Tap], config: dict | None = None
+    tap_class: type[Tap],
+    config: dict | None = None,
 ) -> list[Callable]:
     """Return callable pytest which executes simple discovery and connection tests.
 
@@ -127,7 +128,9 @@ def tap_sync_test(tap: Tap) -> tuple[io.StringIO, io.StringIO]:
 
 
 def _get_tap_catalog(
-    tap_class: type[Tap], config: dict, select_all: bool = False
+    tap_class: type[Tap],
+    config: dict,
+    select_all: bool = False,
 ) -> dict:
     """Return a catalog dict by running discovery.
 
@@ -167,7 +170,9 @@ def _select_all(catalog_dict: dict) -> dict:
 
 
 def target_sync_test(
-    target: Target, input: io.StringIO | None, finalize: bool = True
+    target: Target,
+    input: io.StringIO | None,
+    finalize: bool = True,
 ) -> tuple[io.StringIO, io.StringIO]:
     """Invoke the target with the provided input.
 
@@ -195,7 +200,8 @@ def target_sync_test(
 
 
 def tap_to_target_sync_test(
-    tap: Tap, target: Target
+    tap: Tap,
+    target: Target,
 ) -> tuple[io.StringIO, io.StringIO, io.StringIO, io.StringIO]:
     """Test and end-to-end sink from the tap to the target.
 

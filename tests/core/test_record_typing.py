@@ -67,7 +67,11 @@ def test_conform_record_data_types(
 
     with caplog.at_level(logging.INFO, logger=logger.name):
         actual = conform_record_data_types(
-            stream_name, record, schema, TypeConformanceLevel.RECURSIVE, logger
+            stream_name,
+            record,
+            schema,
+            TypeConformanceLevel.RECURSIVE,
+            logger,
         )
         if ignore_props_message:
             assert ignore_props_message in caplog.text
@@ -120,7 +124,7 @@ def test_to_json_compatible(datetime_val, expected):
                         "items": {"type": "string", "format": "date-time"},
                     },
                     {"type": "null"},
-                ]
+                ],
             },
             None,
         ),

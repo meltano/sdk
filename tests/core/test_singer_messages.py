@@ -27,7 +27,7 @@ from singer_sdk.helpers._batch import JSONLinesEncoding, SDKBatchMessage
                     "path/to/file2.jsonl.gz",
                 ],
             },
-        )
+        ),
     ],
     ids=["batch-message-jsonl"],
 )

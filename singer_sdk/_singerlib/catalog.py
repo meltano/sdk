@@ -67,7 +67,7 @@ class Metadata:
             **{
                 object_field.name: value.get(object_field.name.replace("_", "-"))
                 for object_field in fields(cls)
-            }
+            },
         )
 
     def to_dict(self) -> dict[str, t.Any]:

@@ -62,7 +62,8 @@ def sqlite_sample_target_batch(sqlite_target_test_config):
 
 
 def test_sync_sqlite_to_sqlite(
-    sqlite_sample_tap: SQLTap, sqlite_sample_target: SQLTarget
+    sqlite_sample_tap: SQLTap,
+    sqlite_sample_target: SQLTarget,
 ):
     """End-to-end-to-end test for SQLite tap and target.
 
@@ -75,7 +76,8 @@ def test_sync_sqlite_to_sqlite(
       STDOUT from the re-tapped target DB.
     """
     orig_stdout, _, _, _ = tap_to_target_sync_test(
-        sqlite_sample_tap, sqlite_sample_target
+        sqlite_sample_tap,
+        sqlite_sample_target,
     )
     orig_stdout.seek(0)
     tapped_config = dict(sqlite_sample_target.config)
@@ -92,20 +94,22 @@ def test_sync_sqlite_to_sqlite(
 
     line_num = 0
     for line_num, orig_out, new_out in zip(
-        range(len(orig_lines)), orig_lines, new_lines
+        range(len(orig_lines)),
+        orig_lines,
+        new_lines,
     ):
         try:
             orig_json = json.loads(orig_out)
         except json.JSONDecodeError:
             raise RuntimeError(
-                f"Could not parse JSON in orig line {line_num}: {orig_out}"
+                f"Could not parse JSON in orig line {line_num}: {orig_out}",
             )
 
         try:
             tapped_json = json.loads(new_out)
         except json.JSONDecodeError:
             raise RuntimeError(
-                f"Could not parse JSON in new line {line_num}: {new_out}"
+                f"Could not parse JSON in new line {line_num}: {new_out}",
             )
 
         assert (
@@ -124,7 +128,8 @@ def test_sync_sqlite_to_sqlite(
 
 
 def test_sqlite_schema_addition(
-    sqlite_target_test_config: dict, sqlite_sample_target: SQLTarget
+    sqlite_target_test_config: dict,
+    sqlite_sample_target: SQLTarget,
 ):
     """Test that SQL-based targets attempt to create new schema.
 
@@ -156,7 +161,9 @@ def test_sqlite_schema_addition(
     # sqlite doesn't support schema creation
     with pytest.raises(sqlalchemy.exc.OperationalError) as excinfo:
         target_sync_test(
-            sqlite_sample_target, input=StringIO(tap_output), finalize=True
+            sqlite_sample_target,
+            input=StringIO(tap_output),
+            finalize=True,
         )
     # check the target at least tried to create the schema
     assert excinfo.value.statement == f"CREATE SCHEMA {schema_name}"
@@ -208,7 +215,8 @@ def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
 
 
 def test_sqlite_activate_version(
-    sqlite_sample_target: SQLTarget, sqlite_sample_target_soft_delete: SQLTarget
+    sqlite_sample_target: SQLTarget,
+    sqlite_sample_target_soft_delete: SQLTarget,
 ):
     """Test handling the activate_version message for the SQLite target.
 
@@ -240,7 +248,9 @@ def test_sqlite_activate_version(
 
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output), finalize=True)
     target_sync_test(
-        sqlite_sample_target_soft_delete, input=StringIO(tap_output), finalize=True
+        sqlite_sample_target_soft_delete,
+        input=StringIO(tap_output),
+        finalize=True,
     )
 
 
@@ -290,7 +300,9 @@ def test_sqlite_column_morph(sqlite_sample_target: SQLTarget):
     with pytest.raises(NotImplementedError):
         # SQLite does not support altering column types.
         target_sync_test(
-            sqlite_sample_target, input=StringIO(tap_output_b), finalize=True
+            sqlite_sample_target,
+            input=StringIO(tap_output_b),
+            finalize=True,
         )
 
 
@@ -403,7 +415,7 @@ def test_sqlite_column_no_morph(sqlite_sample_target: SQLTarget):
                 """\
                 INSERT INTO test_stream
                 (id, name)
-                VALUES (:id, :name)"""
+                VALUES (:id, :name)""",
             ),
         ),
     ],
@@ -433,7 +445,8 @@ def test_sqlite_generate_insert_statement(
 
 
 def test_hostile_to_sqlite(
-    sqlite_sample_target: SQLTarget, sqlite_target_test_config: dict
+    sqlite_sample_target: SQLTarget,
+    sqlite_target_test_config: dict,
 ):
     tap = SampleTapHostile()
     tap_to_target_sync_test(tap, sqlite_sample_target)
@@ -454,8 +467,8 @@ def test_hostile_to_sqlite(
                 on m.name <> p.name
             where m.name = 'hostile_property_names_stream'
             ;
-            """
-        )
+            """,
+        ),
     )
     columns = {res[0] for res in cursor.fetchall()}
     assert columns == {

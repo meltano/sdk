@@ -240,7 +240,9 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         return decorator
 
     def _request(
-        self, prepared_request: requests.PreparedRequest, context: dict | None
+        self,
+        prepared_request: requests.PreparedRequest,
+        context: dict | None,
     ) -> requests.Response:
         """TODO.
 
@@ -265,7 +267,9 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         return response
 
     def get_url_params(
-        self, context: dict | None, next_page_token: _TToken | None
+        self,
+        context: dict | None,
+        next_page_token: _TToken | None,
     ) -> dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization.
 
@@ -307,7 +311,9 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         return self.requests_session.prepare_request(request)
 
     def prepare_request(
-        self, context: dict | None, next_page_token: _TToken | None
+        self,
+        context: dict | None,
+        next_page_token: _TToken | None,
     ) -> requests.PreparedRequest:
         """Prepare a request object for this stream.
 
@@ -462,7 +468,9 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         return {}
 
     def prepare_request_payload(
-        self, context: dict | None, next_page_token: _TToken | None
+        self,
+        context: dict | None,
+        next_page_token: _TToken | None,
     ) -> dict | None:
         """Prepare the data payload for the REST API request.
 
@@ -629,11 +637,13 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         logging.error(
             "Backing off {wait:0.1f} seconds after {tries} tries "
             "calling function {target} with args {args} and kwargs "
-            "{kwargs}".format(**details)
+            "{kwargs}".format(**details),
         )
 
     def backoff_runtime(
-        self, *, value: Callable[[Any], int]
+        self,
+        *,
+        value: Callable[[Any], int],
     ) -> Generator[int, None, None]:
         """Optional backoff wait generator that can replace the default `backoff.expo`.
 

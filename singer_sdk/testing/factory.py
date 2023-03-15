@@ -67,7 +67,8 @@ def get_test_class(
             f"but test runner if of type {type(test_runner)}."
         )
         test_runner = cast(
-            expected_runner_class, test_runner  # type: ignore[valid-type]
+            expected_runner_class,  # type: ignore[valid-type]
+            test_runner,
         )
 
         if suite.kind in {"tap", "target"}:
@@ -120,7 +121,7 @@ def get_test_class(
                                     property_name=property_name,
                                     property_schema=property_schema,
                                 )
-                            ]
+                            ],
                         )
                         test_ids.extend(
                             [
@@ -133,7 +134,7 @@ def get_test_class(
                                     property_name=property_name,
                                     property_schema=property_schema,
                                 )
-                            ]
+                            ],
                         )
 
                     if test_params:
@@ -226,7 +227,9 @@ def get_target_test_class(
 
     return get_test_class(
         test_runner=TargetTestRunner(
-            target_class=target_class, config=config, **kwargs
+            target_class=target_class,
+            config=config,
+            **kwargs,
         ),
         test_suites=suites,
         suite_config=suite_config,

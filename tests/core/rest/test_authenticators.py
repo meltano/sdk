@@ -67,7 +67,10 @@ from singer_sdk.tap_base import Tap
     ],
 )
 def test_authenticator_is_reused(
-    rest_tap: Tap, stream_name: str, other_stream_name: str, auth_reused: bool
+    rest_tap: Tap,
+    stream_name: str,
+    other_stream_name: str,
+    auth_reused: bool,
 ):
     """Validate that the stream's authenticator is a singleton."""
     stream: RESTStream = rest_tap.streams[stream_name]

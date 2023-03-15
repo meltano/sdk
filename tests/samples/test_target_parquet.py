@@ -15,7 +15,8 @@ SAMPLE_FILENAME = SAMPLE_FILEPATH / "testfile.parquet"
 SAMPLE_CONFIG = {"filepath": str(SAMPLE_FILENAME)}
 
 StandardTests = get_target_test_class(
-    target_class=SampleTargetParquet, config=SAMPLE_CONFIG
+    target_class=SampleTargetParquet,
+    config=SAMPLE_CONFIG,
 )
 
 

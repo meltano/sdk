@@ -113,6 +113,6 @@ class SampleParquetTargetSink(BatchSink):
         col_list: list[tuple[str, Any]] = []
         for property in self.schema["properties"]:
             col_list.append(
-                (property["name"], self.translate_data_type(property["type"]))
+                (property["name"], self.translate_data_type(property["type"])),
             )
         return col_list

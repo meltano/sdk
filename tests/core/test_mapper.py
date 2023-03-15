@@ -60,7 +60,7 @@ def sample_catalog_dict() -> dict:
                 "tap_stream_id": "foobars",
                 "schema": foobars_schema,
             },
-        ]
+        ],
     }
 
 
@@ -133,7 +133,7 @@ def transformed_result(stream_map_config):
                 "repo_name": "tap-something",
                 "email_domain": "example.com",
                 "email_hash": md5(
-                    stream_map_config["hash_seed"] + "sample1@example.com"
+                    stream_map_config["hash_seed"] + "sample1@example.com",
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
@@ -144,7 +144,7 @@ def transformed_result(stream_map_config):
                 "repo_name": "my-tap-something",
                 "email_domain": "example.com",
                 "email_hash": md5(
-                    stream_map_config["hash_seed"] + "sample2@example.com"
+                    stream_map_config["hash_seed"] + "sample2@example.com",
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
@@ -155,7 +155,7 @@ def transformed_result(stream_map_config):
                 "repo_name": "target-something",
                 "email_domain": "example.com",
                 "email_hash": md5(
-                    stream_map_config["hash_seed"] + "sample3@example.com"
+                    stream_map_config["hash_seed"] + "sample3@example.com",
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
@@ -166,7 +166,7 @@ def transformed_result(stream_map_config):
                 "repo_name": "not-atap",
                 "email_domain": "example.com",
                 "email_hash": md5(
-                    stream_map_config["hash_seed"] + "sample4@example.com"
+                    stream_map_config["hash_seed"] + "sample4@example.com",
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
@@ -467,7 +467,7 @@ def _clear_schema_cache() -> None:
             {
                 "mystream": {
                     "email_hash": "md5(email)",
-                }
+                },
             },
             False,
             0,
@@ -480,7 +480,7 @@ def _clear_schema_cache() -> None:
                     "email_hash": "md5(email)",
                     "fixed_count": "int(count-1)",
                     "__else__": None,
-                }
+                },
             },
             False,
             0,
@@ -493,7 +493,7 @@ def _clear_schema_cache() -> None:
                     "email_hash": "md5(email)",
                     "fixed_count": "int(count-1)",
                     "__else__": "__NULL__",
-                }
+                },
             },
             False,
             0,
@@ -506,7 +506,7 @@ def _clear_schema_cache() -> None:
                     "email_hash": "md5(email)",
                     "__key_properties__": ["email_hash"],
                     "__else__": None,
-                }
+                },
             },
             False,
             0,
@@ -560,7 +560,7 @@ def _clear_schema_cache() -> None:
                 "mystream": {
                     "email_hash": "md5(email)",
                     "__key_properties__": ["email_hash"],
-                }
+                },
             },
             True,
             10,
@@ -571,7 +571,7 @@ def _clear_schema_cache() -> None:
             {
                 "mystream": {
                     "email": None,
-                }
+                },
             },
             False,
             0,
@@ -590,7 +590,7 @@ def _clear_schema_cache() -> None:
                 "mystream": {
                     "count": "count",
                     "__else__": None,
-                }
+                },
             },
             False,
             0,
@@ -614,7 +614,7 @@ def test_mapped_stream(
             "stream_maps": stream_maps,
             "flattening_enabled": flatten,
             "flattening_max_depth": flatten_max_depth,
-        }
+        },
     )
     buf = io.StringIO()
     with redirect_stdout(buf):
