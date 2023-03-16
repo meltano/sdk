@@ -169,7 +169,7 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
             The next page token or index. Return `None` from this method to indicate
                 the end of pagination.
         """
-        return None
+        return
 
 
 class BaseHATEOASPaginator(BaseAPIPaginator[Optional[ParseResult]], metaclass=ABCMeta):

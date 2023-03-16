@@ -34,8 +34,8 @@ class SelectionMask(t.Dict[Breadcrumb, bool]):
         if len(breadcrumb) >= 2:
             parent = breadcrumb[:-2]
             return self[parent]
-        else:
-            return True
+
+        return True
 
 
 @dataclass
