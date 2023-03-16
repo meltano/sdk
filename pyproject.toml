@@ -202,6 +202,7 @@ module = [
     "pandas.*",
     "jsonpath_ng.*",
     "samples.*",
+    "simpleeval.*",
     "sqlalchemy.*",
 ]
 
