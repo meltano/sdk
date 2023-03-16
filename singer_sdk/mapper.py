@@ -9,9 +9,9 @@ import abc
 import copy
 import datetime
 import hashlib
+import json
 import logging
 import sys
-import json
 from typing import Any, Callable, Dict, Union
 
 from singer_sdk._singerlib.catalog import Catalog
