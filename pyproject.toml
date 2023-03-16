@@ -216,6 +216,7 @@ exclude = [
     "cookiecutter/*",
 ]
 ignore = [
+    "B904",
     "ANN101",
     "ANN102",
 ]
