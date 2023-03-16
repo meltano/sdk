@@ -40,7 +40,7 @@ jobs:
     name: Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     env:
-      NOXSESSION: ${{ matrix.session }}
+      NOXSESSION: ${{ matrix.session }}-${{ matrix.python-version }}
     strategy:
       fail-fast: false
       matrix:
@@ -48,6 +48,23 @@ jobs:
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
         include:
+        - { session: tests,   python-version: "3.7",  os: "ubuntu-latest",  keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.8",  os: "ubuntu-latest",  keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.9",  os: "ubuntu-latest",  keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.10", os: "ubuntu-latest",  keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.11", os: "ubuntu-latest",  keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.7",  os: "macos-latest",   keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.8",  os: "macos-latest",   keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.9",  os: "macos-latest",   keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.10", os: "macos-latest",   keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.11", os: "macos-latest",   keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.7",  os: "windows-latest", keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.8",  os: "windows-latest", keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.9",  os: "windows-latest", keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.10", os: "windows-latest", keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.11", os: "windows-latest", keywords: sqlalchemy2 }
+        - { session: tests,   python-version: "3.10", os: "ubuntu-latest",  keywords: sqlalchemy1 }
+        - { session: tests,   python-version: "3.11", os: "ubuntu-latest",  keywords: sqlalchemy1 }
         - { session: doctest, python-version: "3.10", os: "ubuntu-latest" }
         - { session: mypy,    python-version: "3.8",  os: "ubuntu-latest" }
 
@@ -87,7 +104,7 @@ jobs:
 
     - name: Run Nox
       run: |
-        nox --python=${{ matrix.python-version }}
+        nox
 
     - name: Upload coverage data
       if: always() && (matrix.session == 'tests')
@@ -101,6 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.head.repo.fork }}
     env:
+      NOXSESSION: tests-${{ matrix.python-version }}
       SAMPLE_TAP_GITLAB_AUTH_TOKEN: ${{ secrets.SAMPLE_TAP_GITLAB_AUTH_TOKEN }}
       SAMPLE_TAP_GITLAB_GROUP_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_GROUP_IDS }}
       SAMPLE_TAP_GITLAB_PROJECT_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_PROJECT_IDS }}
@@ -145,12 +163,14 @@ jobs:
 
     - name: Run Nox
       run: |
-        nox -s tests -p 3.10 -- -m "external"
+        nox -- -m "external"
 
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
     needs: tests
+    env:
+      NOXSESSION: coverage
     steps:
     - name: Check out the repository
       uses: actions/checkout@v3.5.3
@@ -187,11 +207,11 @@ jobs:
 
     - name: Combine coverage data and display human readable report
       run: |
-        nox --session=coverage
+        nox
 
     - name: Create coverage report
       run: |
-        nox --session=coverage -- xml
+        nox -- xml
 
     - name: Upload coverage report
       uses: codecov/codecov-action@v3.1.4
