@@ -13,9 +13,10 @@ import logging
 import sys
 from typing import Any, Callable, Dict, Union
 
+import simpleeval
+
 from singer_sdk._singerlib.catalog import Catalog
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
-from singer_sdk.helpers import _simpleeval as simpleeval
 from singer_sdk.helpers._catalog import get_selected_schema
 from singer_sdk.helpers._flattening import (
     FlatteningOptions,
