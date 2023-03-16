@@ -11,6 +11,7 @@ import datetime
 import hashlib
 import logging
 import sys
+import json
 from typing import Any, Callable, Dict, Union
 
 from singer_sdk._singerlib.catalog import Catalog
@@ -297,7 +298,7 @@ class CustomStreamMap(StreamMap):
 
     @property
     def functions(self) -> dict[str, Callable]:
-        """Get availabale transformation functions.
+        """Get available transformation functions.
 
         Returns:
             Functions which should be available for expression evaluation.
@@ -306,6 +307,17 @@ class CustomStreamMap(StreamMap):
         funcs["md5"] = md5
         funcs["datetime"] = datetime
         return funcs
+
+    @property
+    def module_names(self) -> dict[str, Any]:
+        """Get available modules.
+
+        Returns:
+            Modules which should be available for expression evaluation.
+        """
+        return {
+            "json": json,
+        }
 
     def _eval(
         self,
@@ -326,7 +338,8 @@ class CustomStreamMap(StreamMap):
         Raises:
             MapExpressionError: If the mapping expression failed to evaluate.
         """
-        names = record.copy()  # Start with names from record properties
+        names = self.module_names  # Start with the module names
+        names.update(record.copy())  # Add top-level record properties
         names["_"] = record  # Add a shorthand alias in case of reserved words in names
         names["record"] = record  # ...and a longhand alias
         names["config"] = self.map_config  # Allow map config access within transform

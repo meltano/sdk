@@ -78,24 +78,28 @@ def sample_stream():
                 "owner_email": "sample1@example.com",
                 "description": "Comment A",
                 "create_date": "2019-01-01",
+                "json_text": '{"some": "val"}',
             },
             {
                 "name": "my-tap-something",
                 "owner_email": "sample2@example.com",
                 "description": "Comment B",
                 "create_date": "2020-01-01",
+                "json_text": '{"some": "val"}',
             },
             {
                 "name": "target-something",
                 "owner_email": "sample3@example.com",
                 "description": "Comment C",
                 "create_date": "2021-01-01",
+                "json_text": '{"some": "val"}',
             },
             {
                 "name": "not-atap",
                 "owner_email": "sample4@example.com",
                 "description": "Comment D",
                 "create_date": "2022-01-01",
+                "json_text": '{"some": "val"}',
             },
         ],
         "foobars": [
@@ -120,6 +124,7 @@ def transform_stream_maps():
             "description2": "str('[masked]')",
             "create_year": "int(datetime.date.fromisoformat(create_date).year)",
             "int_test": "int('0')",
+            "json_test": "json.loads(json_text)['some']",
             "__else__": None,
         },
     }
@@ -139,6 +144,7 @@ def transformed_result(stream_map_config):
                 "description2": "[masked]",
                 "create_year": 2019,
                 "int_test": 0,
+                "json_test": "val",
             },
             {
                 "repo_name": "my-tap-something",
@@ -150,6 +156,7 @@ def transformed_result(stream_map_config):
                 "description2": "[masked]",
                 "create_year": 2020,
                 "int_test": 0,
+                "json_test": "val",
             },
             {
                 "repo_name": "target-something",
@@ -161,6 +168,7 @@ def transformed_result(stream_map_config):
                 "description2": "[masked]",
                 "create_year": 2021,
                 "int_test": 0,
+                "json_test": "val",
             },
             {
                 "repo_name": "not-atap",
@@ -172,6 +180,7 @@ def transformed_result(stream_map_config):
                 "description2": "[masked]",
                 "create_year": 2022,
                 "int_test": 0,
+                "json_test": "val",
             },
         ],
         "foobars": [  # should be unchanged
