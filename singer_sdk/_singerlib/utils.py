@@ -48,7 +48,7 @@ def strftime(dtime: datetime, format_str: str = DATETIME_FMT) -> str:
             offset)
     """
     if dtime.utcoffset() != timedelta(0):
-        raise NonUTCDatetimeError()
+        raise NonUTCDatetimeError
 
     dt_str = None
     try:
