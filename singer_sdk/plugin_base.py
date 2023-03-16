@@ -182,7 +182,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: If the derived plugin doesn't override this method.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     # Core plugin config:
 

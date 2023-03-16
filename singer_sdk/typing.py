@@ -165,7 +165,7 @@ class JSONTypeHelper:
         Raises:
             NotImplementedError: If the derived class does not override this method.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def to_dict(self) -> dict:
         """Convert to dictionary.

@@ -350,7 +350,7 @@ class SQLSink(BatchSink):
             NotImplementedError: if the merge upsert capability does not exist or is
                 undefined.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def activate_version(self, new_version: int) -> None:
         """Bump the active version of the target table.
