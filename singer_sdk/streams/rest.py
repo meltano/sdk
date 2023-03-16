@@ -182,7 +182,8 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         ):
             msg = self.response_error_message(response)
             raise RetriableAPIError(msg, response)
-        elif 400 <= response.status_code < 500:
+
+        if 400 <= response.status_code < 500:
             msg = self.response_error_message(response)
             raise FatalAPIError(msg)
 
@@ -484,11 +485,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             context: Stream partition or context dictionary.
             next_page_token: Token, page number or any request argument to request the
                 next page of data.
-
-        Returns:
-            Dictionary with the body to use for the request.
         """
-        return None
 
     def get_new_paginator(self) -> BaseAPIPaginator:
         """Get a fresh paginator for this API endpoint.
@@ -504,10 +501,11 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
                 DeprecationWarning,
             )
             return LegacyStreamPaginator(self)  # type: ignore
-        elif self.next_page_token_jsonpath:
+
+        if self.next_page_token_jsonpath:
             return JSONPathPaginator(self.next_page_token_jsonpath)
-        else:
-            return SimpleHeaderPaginator("X-Next-Page")
+
+        return SimpleHeaderPaginator("X-Next-Page")
 
     @property
     def http_headers(self) -> dict:

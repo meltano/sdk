@@ -904,11 +904,11 @@ class SQLConnector:
             _pytype = cast(type, sql_type.python_type)
             if issubclass(_pytype, (str, bytes)):
                 return 900, _len
-            elif issubclass(_pytype, datetime):
+            if issubclass(_pytype, datetime):
                 return 600, _len
-            elif issubclass(_pytype, float):
+            if issubclass(_pytype, float):
                 return 400, _len
-            elif issubclass(_pytype, int):
+            if issubclass(_pytype, int):
                 return 300, _len
 
             return 0, _len

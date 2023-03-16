@@ -62,13 +62,15 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
             ValueError: If the `query` property is not set in the request body.
         """
         params = self.get_url_params(context, next_page_token)
-        if self.query is None:
+        query = self.query
+
+        if query is None:
             raise ValueError("Graphql `query` property not set.")
-        else:
-            query = self.query
+
         if not query.lstrip().startswith("query"):
             # Wrap text in "query { }" if not already wrapped
             query = "query { " + query + " }"
+
         query = query.lstrip()
         request_data = {
             "query": (" ".join([line.strip() for line in query.splitlines()])),

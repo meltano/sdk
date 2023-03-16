@@ -31,7 +31,7 @@ def to_json_compatible(val: Any) -> Any:
     If given a naive datetime object, pendulum automatically makes it utc
     """
     if isinstance(val, (datetime.datetime, pendulum.DateTime)):
-        val = pendulum.instance(val).isoformat()
+        return pendulum.instance(val).isoformat()
     return val
 
 
@@ -45,7 +45,7 @@ def append_type(type_dict: dict, new_type: str) -> dict:
             result["anyOf"] = [result["anyOf"], new_type]
         return result
 
-    elif "type" in result:
+    if "type" in result:
         type_array = (
             result["type"] if isinstance(result["type"], list) else [result["type"]]
         )
@@ -128,7 +128,7 @@ def is_datetime_type(type_dict: dict) -> bool:
             if is_datetime_type(type_dict):
                 return True
         return False
-    elif "type" in type_dict:
+    if "type" in type_dict:
         return type_dict.get("format") == "date-time"
     raise ValueError(
         f"Could not detect type of replication key using schema '{type_dict}'",
@@ -170,7 +170,7 @@ def get_datelike_property_type(property_schema: dict) -> str | None:
     """
     if _is_string_with_format(property_schema):
         return cast(str, property_schema["format"])
-    elif "anyOf" in property_schema:
+    if "anyOf" in property_schema:
         for type_dict in property_schema["anyOf"]:
             if _is_string_with_format(type_dict):
                 return cast(str, type_dict["format"])
@@ -184,6 +184,7 @@ def _is_string_with_format(type_dict):
         "date",
     }:
         return True
+    return None
 
 
 def handle_invalid_timestamp_in_record(
@@ -452,23 +453,22 @@ def _conform_primitive_property(elem: Any, property_schema: dict) -> Any:
     """Converts a primitive (i.e. not object or array) to a json compatible type."""
     if isinstance(elem, (datetime.datetime, pendulum.DateTime)):
         return to_json_compatible(elem)
-    elif isinstance(elem, datetime.date):
+    if isinstance(elem, datetime.date):
         return elem.isoformat() + "T00:00:00+00:00"
-    elif isinstance(elem, datetime.timedelta):
+    if isinstance(elem, datetime.timedelta):
         epoch = datetime.datetime.utcfromtimestamp(0)
         timedelta_from_epoch = epoch + elem
         return timedelta_from_epoch.isoformat() + "+00:00"
-    elif isinstance(elem, datetime.time):
+    if isinstance(elem, datetime.time):
         return str(elem)
-    elif isinstance(elem, bytes):
+    if isinstance(elem, bytes):
         # for BIT value, treat 0 as False and anything else as True
         bit_representation: bool
         if is_boolean_type(property_schema):
             bit_representation = elem != b"\x00"
             return bit_representation
-        else:
-            return elem.hex()
-    elif is_boolean_type(property_schema):
+        return elem.hex()
+    if is_boolean_type(property_schema):
         boolean_representation: bool | None
         if elem is None:
             boolean_representation = None
@@ -477,5 +477,5 @@ def _conform_primitive_property(elem: Any, property_schema: dict) -> Any:
         else:
             boolean_representation = True
         return boolean_representation
-    else:
-        return elem
+
+    return elem

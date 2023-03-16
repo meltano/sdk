@@ -236,6 +236,7 @@ select = [
     "PIE",  # flake8-pie
     "PT",   # flake8-pytest-style
     "RSE",  # flake8-raise
+    "RET",  # flake8-return
 ]
 src = ["samples", "singer_sdk", "tests"]
 target-version = "py37"

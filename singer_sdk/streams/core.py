@@ -359,8 +359,8 @@ class Stream(metaclass=abc.ABCMeta):
         """
         if self.is_timestamp_replication_key:
             return max(value, start_date_value, key=pendulum.parse)
-        else:
-            return value
+
+        return value
 
     def _write_starting_replication_value(self, context: dict | None) -> None:
         """Write the starting replication value, if available.

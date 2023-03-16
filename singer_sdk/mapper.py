@@ -191,7 +191,7 @@ class RemoveRecordTransform(DefaultStreamMap):
             None
         """
         _ = record  # Drop the record
-        return None
+        return
 
     def get_filter_result(self, record: dict) -> bool:
         """Exclude all records.
