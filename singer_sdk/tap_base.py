@@ -218,7 +218,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             The catalog as a string of JSON.
         """
         catalog_text = self.catalog_json_text
-        print(catalog_text)
+        print(catalog_text)  # noqa: T201
         return catalog_text
 
     @property

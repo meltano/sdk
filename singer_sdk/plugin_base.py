@@ -334,7 +334,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         info = cls._get_about_info()
 
         if format == "json":
-            print(json.dumps(info, indent=2, default=str))
+            print(json.dumps(info, indent=2, default=str))  # noqa: T201
 
         elif format == "markdown":
             max_setting_len = cast(
@@ -389,10 +389,10 @@ class PluginBase(metaclass=abc.ABCMeta):
                     )
                     md_list.append(setting)
 
-            print("".join(md_list))
+            print("".join(md_list))  # noqa: T201
         else:
             formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
-            print(formatted)
+            print(formatted)  # noqa: T201
 
     @classproperty
     def cli(cls) -> Callable:
