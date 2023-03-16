@@ -87,7 +87,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         if not config:
             config_dict = {}
-        elif isinstance(config, str) or isinstance(config, PurePath):
+        elif isinstance(config, (str, PurePath)):
             config_dict = read_json_file(config)
         elif isinstance(config, list):
             config_dict = {}
@@ -339,7 +339,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         elif format == "markdown":
             max_setting_len = cast(
                 int,
-                max(len(k) for k in info["settings"]["properties"].keys()),
+                max(len(k) for k in info["settings"]["properties"]),
             )
 
             # Set table base for markdown

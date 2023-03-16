@@ -199,7 +199,7 @@ class SQLSink(BatchSink):
         """
         conformed_schema = copy(schema)
         conformed_property_names = {
-            key: self.conform_name(key) for key in conformed_schema["properties"].keys()
+            key: self.conform_name(key) for key in conformed_schema["properties"]
         }
         self._check_conformed_names_not_duplicated(conformed_property_names)
         conformed_schema["properties"] = {

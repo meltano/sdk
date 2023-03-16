@@ -124,10 +124,7 @@ def is_datetime_type(type_dict: dict) -> bool:
             "Did you forget to define a property in the stream schema?",
         )
     if "anyOf" in type_dict:
-        for type_dict in type_dict["anyOf"]:
-            if is_datetime_type(type_dict):
-                return True
-        return False
+        return any(is_datetime_type(type_dict) for type_dict in type_dict["anyOf"])
     if "type" in type_dict:
         return type_dict.get("format") == "date-time"
     raise ValueError(

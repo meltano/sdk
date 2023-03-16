@@ -191,10 +191,12 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
             if schema_name:
                 root.schema_name = schema_name
 
-            for field_name in schema.get("properties", {}).keys():
-                if key_properties and field_name in key_properties:
-                    entry = Metadata(inclusion=Metadata.InclusionType.AUTOMATIC)
-                elif valid_replication_keys and field_name in valid_replication_keys:
+            for field_name in schema.get("properties", {}):
+                if (
+                    key_properties
+                    and field_name in key_properties
+                    or (valid_replication_keys and field_name in valid_replication_keys)
+                ):
                     entry = Metadata(inclusion=Metadata.InclusionType.AUTOMATIC)
                 else:
                     entry = Metadata(inclusion=Metadata.InclusionType.AVAILABLE)

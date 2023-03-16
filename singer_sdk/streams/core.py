@@ -1266,12 +1266,13 @@ class Stream(metaclass=abc.ABCMeta):
         ):
             filename = f"{prefix}{sync_id}-{i}.json.gz"
             with batch_config.storage.fs() as fs:
-                with fs.open(filename, "wb") as f:
-                    # TODO: Determine compression from config.
-                    with gzip.GzipFile(fileobj=f, mode="wb") as gz:
-                        gz.writelines(
-                            (json.dumps(record) + "\n").encode() for record in chunk
-                        )
+                with fs.open(filename, "wb") as f, gzip.GzipFile(
+                    fileobj=f,
+                    mode="wb",
+                ) as gz:
+                    gz.writelines(
+                        (json.dumps(record) + "\n").encode() for record in chunk
+                    )
                 file_url = fs.geturl(filename)
 
             yield batch_config.encoding, [file_url]

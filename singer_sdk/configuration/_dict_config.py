@@ -43,7 +43,7 @@ def parse_environment_config(
     logger.debug("Loading configuration from %s", dotenv_path)
     DotEnv(dotenv_path).set_as_environment_variables()
 
-    for config_key in config_schema["properties"].keys():
+    for config_key in config_schema["properties"]:
         env_var_name = prefix + config_key.upper().replace("-", "_")
         if env_var_name in os.environ:
             env_var_value = os.environ[env_var_name]

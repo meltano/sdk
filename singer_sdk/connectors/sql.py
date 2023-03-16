@@ -854,11 +854,7 @@ class SQLConnector:
                 if issubclass(
                     generic_type,
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
-                ):
-                    # If length None or 0 then is varchar max ?
-                    if (opt_len is None) or (opt_len == 0):
-                        return opt
-                elif isinstance(
+                ) or issubclass(
                     generic_type,
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
                 ):

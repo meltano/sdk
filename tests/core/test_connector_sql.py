@@ -157,15 +157,19 @@ class TestConnectorSQL:
             connector.connection
 
     def test_connect_calls_engine(self, connector):
-        with mock.patch.object(SQLConnector, "_engine") as mock_engine:
-            with connector._connect() as _:
-                mock_engine.connect.assert_called_once()
+        with mock.patch.object(
+            SQLConnector,
+            "_engine",
+        ) as mock_engine, connector._connect() as _:
+            mock_engine.connect.assert_called_once()
 
     def test_connect_calls_connect(self, connector):
         attached_engine = connector._engine
-        with mock.patch.object(attached_engine, "connect") as mock_conn:
-            with connector._connect() as _:
-                mock_conn.assert_called_once()
+        with mock.patch.object(
+            attached_engine,
+            "connect",
+        ) as mock_conn, connector._connect() as _:
+            mock_conn.assert_called_once()
 
     def test_connect_raises_on_operational_failure(self, connector):
         with pytest.raises(
