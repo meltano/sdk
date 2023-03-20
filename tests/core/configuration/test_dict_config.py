@@ -89,9 +89,8 @@ def test_get_env_var_config_not_parsable():
             "PLUGIN_TEST_PROP1": "hello",
             "PLUGIN_TEST_PROP3": '["repeated"]',
         },
-    ):
-        with pytest.raises(ValueError, match="A bracketed list was detected"):
-            parse_environment_config(CONFIG_JSONSCHEMA, "PLUGIN_TEST_")
+    ), pytest.raises(ValueError, match="A bracketed list was detected"):
+        parse_environment_config(CONFIG_JSONSCHEMA, "PLUGIN_TEST_")
 
 
 def test_merge_config_sources(config_file1, config_file2):

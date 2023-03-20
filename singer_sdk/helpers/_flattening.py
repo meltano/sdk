@@ -236,7 +236,7 @@ def _flatten_schema(
 
     for k, v in schema_node["properties"].items():
         new_key = flatten_key(k, parent_keys, separator)
-        if "type" in v.keys():
+        if "type" in v:
             if "object" in v["type"] and "properties" in v and level < max_level:
                 items.extend(
                     _flatten_schema(

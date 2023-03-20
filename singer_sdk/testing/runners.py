@@ -231,7 +231,7 @@ class TargetTestRunner(SingerTestRunner):
             if self.input_io:
                 self._input = self.input_io
             elif self.input_filepath:
-                self._input = open(self.input_filepath)
+                self._input = open(self.input_filepath)  # noqa: SIM115
         return cast(IO[str], self._input)
 
     @input.setter

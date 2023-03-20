@@ -34,7 +34,7 @@ class HostilePropertyNamesStream(Stream):
         return (
             {
                 key: self.get_random_lowercase_string()
-                for key in self.schema["properties"].keys()
+                for key in self.schema["properties"]
             }
             for _ in range(10)
         )

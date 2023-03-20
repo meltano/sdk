@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import contextlib
 import json
 from enum import Enum
 from pathlib import Path, PurePath
@@ -197,10 +198,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     "Skipping direct invocation.",
                 )
                 continue
-            try:
+            with contextlib.suppress(MaxRecordsLimitException):
                 stream.sync()
-            except MaxRecordsLimitException:
-                pass
         return True
 
     @final

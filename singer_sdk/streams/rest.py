@@ -103,11 +103,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         Returns:
             TODO
         """
-        if isinstance(val, str):
-            result = val.replace("/", "%2F")
-        else:
-            result = str(val)
-        return result
+        return val.replace("/", "%2F") if isinstance(val, str) else str(val)
 
     def get_url(self, context: dict | None) -> str:
         """Get stream entity URL.
@@ -199,10 +195,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             str: The error message
         """
         full_path = urlparse(response.url).path or self.path
-        if 400 <= response.status_code < 500:
-            error_type = "Client"
-        else:
-            error_type = "Server"
+        error_type = "Client" if 400 <= response.status_code < 500 else "Server"
 
         return (
             f"{response.status_code} {error_type} Error: "
@@ -430,8 +423,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         call_costs = self.calculate_sync_cost(request, response, context)
         self._sync_costs = {
-            k: self._sync_costs.get(k, 0) + call_costs.get(k, 0)
-            for k in call_costs.keys()
+            k: self._sync_costs.get(k, 0) + call_costs.get(k, 0) for k in call_costs
         }
         return self._sync_costs
 
