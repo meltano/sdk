@@ -7,15 +7,17 @@ import warnings
 from contextlib import contextmanager
 from datetime import datetime
 from functools import lru_cache
-from typing import Any, Iterable, Iterator, cast
+from typing import TYPE_CHECKING, Any, Iterable, Iterator, cast
 
 import sqlalchemy
 from sqlalchemy.engine import Engine
-from sqlalchemy.engine.reflection import Inspector
 
 from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine.reflection import Inspector
 
 
 class SQLConnector:

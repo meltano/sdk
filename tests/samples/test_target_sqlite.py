@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import typing as t
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
@@ -17,14 +18,16 @@ from samples.sample_tap_hostile import SampleTapHostile
 from samples.sample_tap_sqlite import SQLiteTap
 from samples.sample_target_sqlite import SQLiteSink, SQLiteTarget
 from singer_sdk import typing as th
-from singer_sdk.tap_base import SQLTap
-from singer_sdk.target_base import SQLTarget
 from singer_sdk.testing import (
     _get_tap_catalog,
     tap_sync_test,
     tap_to_target_sync_test,
     target_sync_test,
 )
+
+if t.TYPE_CHECKING:
+    from singer_sdk.tap_base import SQLTap
+    from singer_sdk.target_base import SQLTarget
 
 
 @pytest.fixture

@@ -8,9 +8,8 @@ import json
 import time
 from gzip import GzipFile
 from gzip import open as gzip_open
-from logging import Logger
 from types import MappingProxyType
-from typing import IO, Any, Mapping, Sequence
+from typing import IO, TYPE_CHECKING, Any, Mapping, Sequence
 
 from dateutil import parser
 from jsonschema import Draft7Validator, FormatChecker
@@ -27,7 +26,11 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
     handle_invalid_timestamp_in_record,
 )
-from singer_sdk.plugin_base import PluginBase
+
+if TYPE_CHECKING:
+    from logging import Logger
+
+    from singer_sdk.plugin_base import PluginBase
 
 JSONSchemaValidator = Draft7Validator
 

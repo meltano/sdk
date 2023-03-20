@@ -6,12 +6,13 @@ import contextlib
 import os
 import warnings
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from singer_sdk.streams import Stream
+if TYPE_CHECKING:
+    from singer_sdk.streams import Stream
 
-from .config import SuiteConfig
-from .runners import TapTestRunner, TargetTestRunner
+    from .config import SuiteConfig
+    from .runners import TapTestRunner, TargetTestRunner
 
 
 class TestTemplate:

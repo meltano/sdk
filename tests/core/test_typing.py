@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import datetime
 import logging
-
-import pytest
+import typing as t
 
 from singer_sdk.helpers._typing import (
     TypeConformanceLevel,
@@ -19,6 +18,9 @@ from singer_sdk.typing import (
     Property,
     StringType,
 )
+
+if t.TYPE_CHECKING:
+    import pytest
 
 logger = logging.getLogger("log")
 

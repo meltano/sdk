@@ -7,9 +7,8 @@ import copy
 import json
 import sys
 import time
-from io import FileIO
 from pathlib import Path, PurePath
-from typing import IO, Callable, Counter
+from typing import IO, TYPE_CHECKING, Callable, Counter
 
 import click
 from joblib import Parallel, delayed, parallel_backend
@@ -28,7 +27,11 @@ from singer_sdk.helpers.capabilities import (
 from singer_sdk.io_base import SingerMessageType, SingerReader
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
-from singer_sdk.sinks import Sink
+
+if TYPE_CHECKING:
+    from io import FileIO
+
+    from singer_sdk.sinks import Sink
 
 _MAX_PARALLELISM = 8
 

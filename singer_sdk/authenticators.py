@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import base64
-import logging
 import math
 from datetime import datetime, timedelta
 from types import MappingProxyType
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import jwt
@@ -16,7 +15,11 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
 from singer_sdk.helpers._util import utc_now
-from singer_sdk.streams import Stream as RESTStreamBase
+
+if TYPE_CHECKING:
+    import logging
+
+    from singer_sdk.streams import Stream as RESTStreamBase
 
 
 def _add_parameters(initial_url: str, extra_parameters: dict) -> str:

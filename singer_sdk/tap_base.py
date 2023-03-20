@@ -7,7 +7,7 @@ import contextlib
 import json
 from enum import Enum
 from pathlib import Path, PurePath
-from typing import Any, Callable, Sequence, cast
+from typing import TYPE_CHECKING, Any, Callable, Sequence, cast
 
 import click
 
@@ -26,7 +26,9 @@ from singer_sdk.helpers.capabilities import (
 )
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
-from singer_sdk.streams import SQLStream, Stream
+
+if TYPE_CHECKING:
+    from singer_sdk.streams import SQLStream, Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
 

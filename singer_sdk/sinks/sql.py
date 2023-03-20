@@ -6,18 +6,21 @@ import re
 from collections import defaultdict
 from copy import copy
 from textwrap import dedent
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
 import sqlalchemy
 from pendulum import now
-from sqlalchemy.sql import Executable
 from sqlalchemy.sql.expression import bindparam
 
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.exceptions import ConformedNameClashException
 from singer_sdk.helpers._conformers import replace_leading_digit
-from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks.batch import BatchSink
+
+if TYPE_CHECKING:
+    from sqlalchemy.sql import Executable
+
+    from singer_sdk.plugin_base import PluginBase
 
 
 class SQLSink(BatchSink):

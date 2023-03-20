@@ -6,12 +6,11 @@ import copy
 import io
 import json
 import logging
+import typing as t
 from contextlib import redirect_stdout
-from pathlib import Path
 
 import pytest
 from freezegun import freeze_time
-from pytest_snapshot.plugin import Snapshot
 
 from singer_sdk._singerlib import Catalog
 from singer_sdk.exceptions import MapExpressionError
@@ -26,6 +25,11 @@ from singer_sdk.typing import (
     Property,
     StringType,
 )
+
+if t.TYPE_CHECKING:
+    from pathlib import Path
+
+    from pytest_snapshot.plugin import Snapshot
 
 
 @pytest.fixture

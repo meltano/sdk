@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-from pathlib import PurePath
-from typing import Generator
+from typing import TYPE_CHECKING, Generator
 
 import singer_sdk._singerlib as singer
 import singer_sdk.typing as th
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.mapper_base import InlineMapper
+
+if TYPE_CHECKING:
+    from pathlib import PurePath
 
 
 class StreamTransform(InlineMapper):

@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
 from textwrap import dedent
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 import pytest
-from pytest_snapshot.plugin import Snapshot
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -25,7 +23,6 @@ from singer_sdk.helpers._typing import (
     is_string_array_type,
     is_string_type,
 )
-from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
     ArrayType,
@@ -54,6 +51,13 @@ from singer_sdk.typing import (
     URIType,
     UUIDType,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from pytest_snapshot.plugin import Snapshot
+
+    from singer_sdk.streams.core import Stream
 
 TYPE_FN_CHECKS: set[Callable] = {
     is_array_type,

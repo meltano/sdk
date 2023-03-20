@@ -7,11 +7,13 @@ import io
 import json
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
-from pathlib import Path
-from typing import IO, Any, cast
+from typing import IO, TYPE_CHECKING, Any, cast
 
 from singer_sdk import Tap, Target
 from singer_sdk.testing.config import SuiteConfig
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class SingerTestRunner(metaclass=abc.ABCMeta):

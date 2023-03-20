@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import copy
 import datetime
-import logging
 from enum import Enum
 from functools import lru_cache
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import pendulum
+
+if TYPE_CHECKING:
+    import logging
 
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"

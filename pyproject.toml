@@ -239,6 +239,7 @@ select = [
     "RSE",  # flake8-raise
     "RET",  # flake8-return
     "SIM",  # flake8-simplify
+    "TCH",  # flake8-type-checking
 ]
 src = ["samples", "singer_sdk", "tests"]
 target-version = "py37"
