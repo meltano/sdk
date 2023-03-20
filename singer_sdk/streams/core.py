@@ -1266,6 +1266,7 @@ class Stream(metaclass=abc.ABCMeta):
         ):
             filename = f"{prefix}{sync_id}-{i}.json.gz"
             with batch_config.storage.fs() as fs:
+                # TODO: Determine compression from config.
                 with fs.open(filename, "wb") as f, gzip.GzipFile(
                     fileobj=f,
                     mode="wb",
