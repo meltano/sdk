@@ -85,7 +85,7 @@ class Sink(metaclass=abc.ABCMeta):
 
         self._validator = Draft7Validator(schema, format_checker=FormatChecker())
 
-    def _get_context(self, record: dict) -> dict:
+    def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return an empty dictionary by default.
 
         NOTE: Future versions of the SDK may expand the available context attributes.
@@ -358,7 +358,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     # SDK developer overrides:
 
-    def preprocess_record(self, record: dict, context: dict) -> dict:
+    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: ARG002
         """Process incoming record and return a modified result.
 
         Args:

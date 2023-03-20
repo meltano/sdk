@@ -264,8 +264,8 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
 
     def get_url_params(
         self,
-        context: dict | None,
-        next_page_token: _TToken | None,
+        context: dict | None,  # noqa: ARG002
+        next_page_token: _TToken | None,  # noqa: ARG002
     ) -> dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization.
 
@@ -371,7 +371,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
 
     def _write_request_duration_log(
         self,
-        endpoint: str,
+        endpoint: str,  # noqa: ARG002
         response: requests.Response,
         context: dict | None,
         extra_tags: dict | None,
@@ -394,7 +394,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             value=response.elapsed.total_seconds(),
             tags={
                 metrics.Tag.STREAM: self.name,
-                metrics.Tag.ENDPOINT: self.path,
+                metrics.Tag.ENDPOINT: endpoint,
                 metrics.Tag.HTTP_STATUS_CODE: response.status_code,
                 metrics.Tag.STATUS: (
                     metrics.Status.SUCCEEDED
@@ -433,9 +433,9 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
 
     def calculate_sync_cost(
         self,
-        request: requests.PreparedRequest,
-        response: requests.Response,
-        context: dict | None,
+        request: requests.PreparedRequest,  # noqa: ARG002
+        response: requests.Response,  # noqa: ARG002
+        context: dict | None,  # noqa: ARG002
     ) -> dict[str, int]:
         """Calculate the cost of the last API call made.
 

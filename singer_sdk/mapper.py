@@ -196,7 +196,7 @@ class RemoveRecordTransform(DefaultStreamMap):
         _ = record  # Drop the record
         return
 
-    def get_filter_result(self, record: dict) -> bool:
+    def get_filter_result(self, record: dict) -> bool:  # noqa: ARG002
         """Exclude all records.
 
         Args:
@@ -222,7 +222,7 @@ class SameRecordTransform(DefaultStreamMap):
         """
         return super().transform(record)
 
-    def get_filter_result(self, record: dict) -> bool:
+    def get_filter_result(self, record: dict) -> bool:  # noqa: ARG002
         """Return True (always include).
 
         Args:

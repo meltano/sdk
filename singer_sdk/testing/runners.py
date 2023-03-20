@@ -132,7 +132,7 @@ class TapTestRunner(SingerTestRunner):
         """
         return self.tap.run_connection_test()
 
-    def sync_all(self, **kwargs: Any) -> None:
+    def sync_all(self, **kwargs: Any) -> None:  # noqa: ARG002
         """Run a full tap sync, assigning output to the runner object.
 
         Args:
@@ -240,7 +240,7 @@ class TargetTestRunner(SingerTestRunner):
     def input(self, value: IO[str]) -> None:
         self._input = value
 
-    def sync_all(self, finalize: bool = True, **kwargs: Any) -> None:
+    def sync_all(self, finalize: bool = True, **kwargs: Any) -> None:  # noqa: ARG002
         """Run a full tap sync, assigning output to the runner object.
 
         Args:

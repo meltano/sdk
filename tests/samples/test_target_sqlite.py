@@ -130,10 +130,7 @@ def test_sync_sqlite_to_sqlite(
     assert line_num > 0, "No lines read."
 
 
-def test_sqlite_schema_addition(
-    sqlite_target_test_config: dict,
-    sqlite_sample_target: SQLTarget,
-):
+def test_sqlite_schema_addition(sqlite_sample_target: SQLTarget):
     """Test that SQL-based targets attempt to create new schema.
 
     It should attempt to create a schema if one is included in stream name,

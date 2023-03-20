@@ -402,7 +402,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     def get_replication_key_signpost(
         self,
-        context: dict | None,
+        context: dict | None,  # noqa: ARG002
     ) -> datetime.datetime | Any | None:
         """Get the replication signpost.
 
@@ -1290,7 +1290,11 @@ class Stream(metaclass=abc.ABCMeta):
 
             yield batch_config.encoding, [file_url]
 
-    def post_process(self, row: dict, context: dict | None = None) -> dict | None:
+    def post_process(
+        self,
+        row: dict,
+        context: dict | None = None,  # noqa: ARG002
+    ) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
 
         Optional. This method gives developers an opportunity to "clean up" the results

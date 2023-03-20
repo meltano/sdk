@@ -339,7 +339,11 @@ class SQLConnector:
             "Streams list may be incomplete or `is_view` may be unpopulated.",
         )
 
-    def get_schema_names(self, engine: Engine, inspected: Inspector) -> list[str]:
+    def get_schema_names(
+        self,
+        engine: Engine,  # noqa: ARG002
+        inspected: Inspector,
+    ) -> list[str]:
         """Return a list of schema names in DB.
 
         Args:
@@ -353,7 +357,7 @@ class SQLConnector:
 
     def get_object_names(
         self,
-        engine: Engine,
+        engine: Engine,  # noqa: ARG002
         inspected: Inspector,
         schema_name: str,
     ) -> list[tuple[str, bool]]:
@@ -380,7 +384,7 @@ class SQLConnector:
     # TODO maybe should be splitted into smaller parts?
     def discover_catalog_entry(
         self,
-        engine: Engine,
+        engine: Engine,  # noqa: ARG002
         inspected: Inspector,
         schema_name: str,
         table_name: str,

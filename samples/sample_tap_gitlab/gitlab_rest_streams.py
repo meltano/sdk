@@ -42,7 +42,7 @@ class GitlabStream(RESTStream[str]):
 
     def get_url_params(
         self,
-        context: dict | None,
+        context: dict | None,  # noqa: ARG002
         next_page_token: str | None,
     ) -> dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization."""
@@ -165,7 +165,11 @@ class EpicsStream(ProjectBasedStream):
 
     # schema_filepath = SCHEMAS_DIR / "epics.json"
 
-    def get_child_context(self, record: dict, context: dict | None) -> dict:
+    def get_child_context(
+        self,
+        record: dict,
+        context: dict | None,  # noqa: ARG002
+    ) -> dict:
         """Perform post processing, including queuing up any child stream types."""
         # Ensure child state record(s) are created
         return {

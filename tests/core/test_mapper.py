@@ -218,7 +218,7 @@ def clone_and_alias_stream_maps():
 
 
 @pytest.fixture
-def cloned_and_aliased_result(stream_map_config, sample_stream):
+def cloned_and_aliased_result(sample_stream):
     return {
         "repositories_aliased": sample_stream["repositories"],
         "repositories_clone_1": sample_stream["repositories"],
@@ -419,7 +419,7 @@ class MappedStream(Stream):
         ),
     ).to_dict()
 
-    def get_records(self, context):
+    def get_records(self, context):  # noqa: ARG002
         yield {
             "email": "alice@example.com",
             "count": 21,

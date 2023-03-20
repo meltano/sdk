@@ -92,7 +92,7 @@ def test_with_catalog_entry():
     assert new_schema == stream.schema
 
 
-def test_batch_mode(monkeypatch, outdir):
+def test_batch_mode(outdir):
     """Test batch mode."""
     tap = SampleTapCountries(
         config={

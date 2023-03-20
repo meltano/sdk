@@ -13,7 +13,7 @@ class RecordSink(Sink):
 
     current_size = 0  # Records are always written directly
 
-    def _after_process_record(self, context: dict) -> None:
+    def _after_process_record(self, context: dict) -> None:  # noqa: ARG002
         """Perform post-processing and record keeping. Internal hook.
 
         The RecordSink class uses this method to tally each record written.
