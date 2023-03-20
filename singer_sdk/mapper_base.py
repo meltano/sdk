@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import abc
-from io import FileIO
-from typing import Callable, Iterable
+from typing import TYPE_CHECKING, Callable, Iterable
 
 import click
 
@@ -15,6 +14,9 @@ from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import PluginBase
+
+if TYPE_CHECKING:
+    from io import FileIO
 
 
 class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):

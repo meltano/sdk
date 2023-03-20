@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from logging import Logger
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from memoization import cached
 
-from singer_sdk._singerlib import Catalog, SelectionMask
 from singer_sdk.helpers._typing import is_object_type
+
+if TYPE_CHECKING:
+    from logging import Logger
+
+    from singer_sdk._singerlib import Catalog, SelectionMask
 
 _MAX_LRU_CACHE = 500
 

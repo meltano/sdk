@@ -1,16 +1,19 @@
 from __future__ import annotations
 
-from pathlib import Path
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk import SQLStream
 from singer_sdk._singerlib import MetadataMapping, StreamMetadata
-from singer_sdk.tap_base import SQLTap
 from singer_sdk.testing import (
     get_standard_tap_tests,
     tap_to_target_sync_test,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from singer_sdk.tap_base import SQLTap
 
 
 def _discover_and_select_all(tap: SQLTap) -> None:

@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import pytest
-
-from singer_sdk import Tap, Target
 
 from .config import SuiteConfig
 from .runners import TapTestRunner, TargetTestRunner
@@ -16,6 +14,9 @@ from .suites import (
     tap_tests,
     target_tests,
 )
+
+if TYPE_CHECKING:
+    from singer_sdk import Tap, Target
 
 
 def get_test_class(

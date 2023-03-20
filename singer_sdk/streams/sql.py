@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Iterable, cast
+from typing import TYPE_CHECKING, Any, Iterable, cast
 
 import sqlalchemy
 
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
-from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
+
+if TYPE_CHECKING:
+    from singer_sdk.plugin_base import PluginBase as TapBaseClass
 
 
 class SQLStream(Stream, metaclass=abc.ABCMeta):

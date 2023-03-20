@@ -10,10 +10,8 @@ import copy
 import datetime
 import hashlib
 import logging
-import sys
-from typing import Any, Callable, Dict, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Union
 
-from singer_sdk._singerlib.catalog import Catalog
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
 from singer_sdk.helpers import _simpleeval as simpleeval
 from singer_sdk.helpers._catalog import get_selected_schema
@@ -33,10 +31,15 @@ from singer_sdk.typing import (
     StringType,
 )
 
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
+if TYPE_CHECKING:
+    import sys
+
+    if sys.version_info >= (3, 10):
+        from typing import TypeAlias
+    else:
+        from typing_extensions import TypeAlias
+
+    from singer_sdk._singerlib.catalog import Catalog
 
 
 MAPPER_ELSE_OPTION = "__else__"

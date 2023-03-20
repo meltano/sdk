@@ -6,10 +6,12 @@ import enum
 import sys
 import typing as t
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
 
 import pytz
 import simplejson as json
+
+if t.TYPE_CHECKING:
+    from datetime import datetime
 
 
 class SingerMessageType(str, enum.Enum):

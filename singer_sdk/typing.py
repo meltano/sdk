@@ -46,8 +46,8 @@ Note:
 from __future__ import annotations
 
 import json
-import sys
 from typing import (
+    TYPE_CHECKING,
     Any,
     Generator,
     Generic,
@@ -70,10 +70,14 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
 )
 
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
+if TYPE_CHECKING:
+    import sys
+
+    if sys.version_info >= (3, 10):
+        from typing import TypeAlias
+    else:
+        from typing_extensions import TypeAlias
+
 
 __all__ = [
     "extend_validator_with_defaults",

@@ -5,8 +5,6 @@ from __future__ import annotations
 import abc
 import copy
 import logging
-import sys
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, Generator, Generic, Iterable, TypeVar
 from urllib.parse import urlparse
 from warnings import warn
@@ -15,7 +13,6 @@ import backoff
 import requests
 
 from singer_sdk import metrics
-from singer_sdk._singerlib import Schema
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.helpers.jsonpath import extract_jsonpath
@@ -25,16 +22,21 @@ from singer_sdk.pagination import (
     LegacyStreamPaginator,
     SimpleHeaderPaginator,
 )
-from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
 
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
-
 if TYPE_CHECKING:
+    import sys
+    from datetime import datetime
+
     from backoff.types import Details
+
+    from singer_sdk._singerlib import Schema
+    from singer_sdk.plugin_base import PluginBase as TapBaseClass
+
+    if sys.version_info >= (3, 10):
+        from typing import TypeAlias
+    else:
+        from typing_extensions import TypeAlias
 
 DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes

@@ -9,7 +9,7 @@ import os
 from collections import OrderedDict
 from pathlib import PurePath
 from types import MappingProxyType
-from typing import Any, Callable, Mapping, cast
+from typing import TYPE_CHECKING, Any, Callable, Mapping, cast
 
 import click
 from jsonschema import Draft7Validator
@@ -27,8 +27,10 @@ from singer_sdk.helpers.capabilities import (
     CapabilitiesEnum,
     PluginCapabilities,
 )
-from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import extend_validator_with_defaults
+
+if TYPE_CHECKING:
+    from singer_sdk.mapper import PluginMapper
 
 SDK_PACKAGE_NAME = "singer_sdk"
 

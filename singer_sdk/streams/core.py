@@ -8,11 +8,19 @@ import datetime
 import gzip
 import itertools
 import json
-import logging
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Generator, Iterable, Iterator, Mapping, TypeVar, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Generator,
+    Iterable,
+    Iterator,
+    Mapping,
+    TypeVar,
+    cast,
+)
 from uuid import uuid4
 
 import pendulum
@@ -46,7 +54,11 @@ from singer_sdk.helpers._typing import (
 )
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
-from singer_sdk.plugin_base import PluginBase as TapBaseClass
+
+if TYPE_CHECKING:
+    import logging
+
+    from singer_sdk.plugin_base import PluginBase as TapBaseClass
 
 # Replication methods
 REPLICATION_FULL_TABLE = "FULL_TABLE"

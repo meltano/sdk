@@ -6,9 +6,12 @@ import os
 import pathlib
 import platform
 import shutil
+import typing as t
 
 import pytest
-from _pytest.config import Config
+
+if t.TYPE_CHECKING:
+    from _pytest.config import Config
 
 SYSTEMS = {"linux", "darwin", "windows"}
 

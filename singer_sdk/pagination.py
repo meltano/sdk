@@ -4,10 +4,8 @@ from __future__ import annotations
 
 import sys
 from abc import ABCMeta, abstractmethod
-from typing import Any, Generic, Iterable, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, Iterable, Optional, TypeVar
 from urllib.parse import ParseResult, urlparse
-
-from requests import Response
 
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 
@@ -15,6 +13,9 @@ if sys.version_info >= (3, 8):
     from typing import Protocol
 else:
     from typing_extensions import Protocol
+
+if TYPE_CHECKING:
+    from requests import Response
 
 T = TypeVar("T")
 TPageToken = TypeVar("TPageToken")

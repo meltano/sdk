@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import warnings
-from typing import Type, cast
+from typing import TYPE_CHECKING, Type, cast
 
 from dateutil import parser
 
 import singer_sdk.helpers._typing as th
 from singer_sdk import Tap
-from singer_sdk.streams.core import Stream
 
 from .templates import AttributeTestTemplate, StreamTestTemplate, TapTestTemplate
+
+if TYPE_CHECKING:
+    from singer_sdk.streams.core import Stream
 
 
 class TapCLIPrintsTest(TapTestTemplate):
