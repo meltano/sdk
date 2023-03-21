@@ -7,13 +7,11 @@ import io
 import json
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
-from typing import IO, TYPE_CHECKING, Any, cast
+from pathlib import Path
+from typing import IO, Any, cast
 
 from singer_sdk import Tap, Target
 from singer_sdk.testing.config import SuiteConfig
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 class SingerTestRunner(metaclass=abc.ABCMeta):
@@ -233,7 +231,7 @@ class TargetTestRunner(SingerTestRunner):
             if self.input_io:
                 self._input = self.input_io
             elif self.input_filepath:
-                self._input = open(self.input_filepath)  # noqa: SIM115
+                self._input = Path(self.input_filepath).open()  # noqa: SIM115
         return cast(IO[str], self._input)
 
     @input.setter

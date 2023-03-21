@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import os
 import shutil
 import uuid
 from pathlib import Path
@@ -197,11 +196,11 @@ def cli_runner():
 def config_file_path(target):
     try:
         path = Path(target.config["target_folder"]) / "./config.json"
-        with open(path, "w") as f:
+        with path.open("w") as f:
             f.write(json.dumps(dict(target.config)))
         yield path
     finally:
-        os.remove(path)
+        path.unlink()
 
 
 def test_input_arg(cli_runner, config_file_path, target):
@@ -218,5 +217,5 @@ def test_input_arg(cli_runner, config_file_path, target):
     assert result.exit_code == 0
 
     output = Path(target.config["target_folder"]) / "./users.csv"
-    with open(output) as f:
+    with output.open() as f:
         assert f.read() == EXPECTED_OUTPUT
