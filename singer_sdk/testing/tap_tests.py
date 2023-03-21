@@ -156,8 +156,8 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,
-        property_name: str,
+        stream: Stream,  # noqa: ARG003
+        property_name: str,  # noqa: ARG003
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -189,8 +189,8 @@ class AttributeIsBooleanTest(AttributeTestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,
-        property_name: str,
+        stream: Stream,  # noqa: ARG003
+        property_name: str,  # noqa: ARG003
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -219,8 +219,8 @@ class AttributeIsObjectTest(AttributeTestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,
-        property_name: str,
+        stream: Stream,  # noqa: ARG003
+        property_name: str,  # noqa: ARG003
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -252,8 +252,8 @@ class AttributeIsIntegerTest(AttributeTestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,
-        property_name: str,
+        stream: Stream,  # noqa: ARG003
+        property_name: str,  # noqa: ARG003
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -290,8 +290,8 @@ class AttributeIsNumberTest(AttributeTestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,
-        property_name: str,
+        stream: Stream,  # noqa: ARG003
+        property_name: str,  # noqa: ARG003
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -322,8 +322,8 @@ class AttributeNotNullTest(AttributeTestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,
-        property_name: str,
+        stream: Stream,  # noqa: ARG003
+        property_name: str,  # noqa: ARG003
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.

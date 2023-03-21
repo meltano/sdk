@@ -12,7 +12,7 @@ from singer_sdk.sinks.core import Sink
 class BatchSink(Sink):
     """Base class for batched record writers."""
 
-    def _get_context(self, record: dict) -> dict:
+    def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return a batch context. If no batch is active, return a new batch context.
 
         The SDK-generated context will contain `batch_id` (GUID string) and

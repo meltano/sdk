@@ -47,7 +47,10 @@ class SimpleTestStream(Stream):
         """Create a new stream."""
         super().__init__(tap, schema=self.schema, name=self.name)
 
-    def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
+    def get_records(
+        self,
+        context: dict | None,  # noqa: ARG002
+    ) -> Iterable[dict[str, Any]]:
         """Generate records."""
         yield {"id": 1, "value": "Egypt"}
         yield {"id": 2, "value": "Germany"}
@@ -89,7 +92,7 @@ class RestTestStream(RESTStream):
     def get_next_page_token(
         self,
         response: requests.Response,
-        previous_token: str | None,
+        previous_token: str | None,  # noqa: ARG002
     ) -> str | None:
         if self.next_page_token_jsonpath:
             all_matches = extract_jsonpath(
@@ -154,7 +157,7 @@ def unix_timestamp_stream(tap: SimpleTestTap) -> UnixTimestampIncrementalStream:
     return cast(UnixTimestampIncrementalStream, tap.load_streams()[1])
 
 
-def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
+def test_stream_apply_catalog(stream: SimpleTestStream):
     """Applying a catalog to a stream should overwrite fields."""
     assert stream.primary_keys == []
     assert stream.replication_key == "updatedAt"
@@ -494,9 +497,9 @@ def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
     stream = RestTestStream(tap)
 
     def calculate_test_cost(
-        request: requests.PreparedRequest,
-        response: requests.Response,
-        context: dict | None,
+        request: requests.PreparedRequest,  # noqa: ARG001
+        response: requests.Response,  # noqa: ARG001
+        context: dict | None,  # noqa: ARG001
     ):
         return {"dim1": 1, "dim2": 2}
 

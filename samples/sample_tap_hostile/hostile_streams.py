@@ -30,7 +30,10 @@ class HostilePropertyNamesStream(Stream):
     def get_random_lowercase_string():
         return "".join(random.choice(string.ascii_lowercase) for _ in range(10))
 
-    def get_records(self, context: dict | None) -> Iterable[dict | tuple[dict, dict]]:
+    def get_records(
+        self,
+        context: dict | None,  # noqa: ARG002
+    ) -> Iterable[dict | tuple[dict, dict]]:
         return (
             {
                 key: self.get_random_lowercase_string()

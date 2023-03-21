@@ -123,7 +123,7 @@ class BaseAPIPaginator(Generic[TPageToken], metaclass=ABCMeta):
         else:
             self._value = new_value
 
-    def has_more(self, response: Response) -> bool:
+    def has_more(self, response: Response) -> bool:  # noqa: ARG002
         """Override this method to check if the endpoint has any pages left.
 
         Args:
@@ -160,7 +160,7 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
         """
         super().__init__(None, *args, **kwargs)
 
-    def get_next(self, response: Response) -> None:
+    def get_next(self, response: Response) -> None:  # noqa: ARG002
         """Get the next pagination token or index from the API response.
 
         Args:
@@ -345,7 +345,7 @@ class BasePageNumberPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         """
         ...
 
-    def get_next(self, response: Response) -> int | None:
+    def get_next(self, response: Response) -> int | None:  # noqa: ARG002
         """Get the next page number.
 
         Args:
@@ -390,7 +390,7 @@ class BaseOffsetPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         """
         ...
 
-    def get_next(self, response: Response) -> int | None:
+    def get_next(self, response: Response) -> int | None:  # noqa: ARG002
         """Get the next page offset.
 
         Args:

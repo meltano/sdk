@@ -96,8 +96,8 @@ def get_standard_tap_tests(
 
 
 def get_standard_target_tests(
-    target_class: type[Target],
-    config: dict | None = None,
+    target_class: type[Target],  # noqa: ARG001
+    config: dict | None = None,  # noqa: ARG001
 ) -> list[Callable]:
     """Return callable pytest which executes simple discovery and connection tests.
 
