@@ -242,6 +242,7 @@ select = [
     "TCH",  # flake8-type-checking
     "ARG",  # flake8-unused-arguments
     "PTH",  # flake8-use-pathlib
+    "ERA",  # eradicate
 ]
 src = ["samples", "singer_sdk", "tests"]
 target-version = "py37"
