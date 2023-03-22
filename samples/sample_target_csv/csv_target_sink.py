@@ -35,7 +35,7 @@ class SampleCSVTargetSink(BatchSink):
             self.logger.info(f"Writing to new file: {outpath}")
             newfile = True
             openmode = "w"
-        with open(outpath, openmode, newline="\n", encoding="utf-8") as csvfile:
+        with outpath.open(openmode, newline="\n", encoding="utf-8") as csvfile:
             writer = csv.writer(
                 csvfile,
                 delimiter="\t",

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import pathlib
 import platform
 import shutil
@@ -41,11 +40,11 @@ def outdir() -> str:
     """Create a temporary directory for cookiecutters and target output."""
     name = ".output/"
     try:
-        os.mkdir(name)
+        pathlib.Path(name).mkdir(parents=True)
     except FileExistsError:
         # Directory already exists
         shutil.rmtree(name)
-        os.mkdir(name)
+        pathlib.Path(name).mkdir(parents=True)
 
     yield name
     shutil.rmtree(name)

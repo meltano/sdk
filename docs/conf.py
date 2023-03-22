@@ -13,10 +13,10 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 
-import os
 import sys
+from pathlib import Path
 
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, str(Path("..").resolve()))
 # sys.path.insert(0, os.path.abspath("../singer_sdk"))
 # sys.path.insert(0, os.path.abspath("/Users/ajsteers/Source/sdk"))
 

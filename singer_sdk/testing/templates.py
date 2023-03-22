@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import contextlib
-import os
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -326,5 +325,5 @@ class TargetFileTestTemplate(TargetTestTemplate):
         Returns:
             The expected Path to this tests singer file.
         """
-        current_dir = Path(os.path.dirname(os.path.abspath(__file__)))
+        current_dir = Path(__file__).resolve().parent
         return current_dir / "target_test_streams" / f"{self.name}.singer"
