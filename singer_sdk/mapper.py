@@ -667,8 +667,7 @@ class PluginMapper:
 
         for stream_map_key, stream_def in self.stream_maps_dict.items():
             stream_def = (
-                stream_def if not stream_def or isinstance(stream_def, str)
-                else dict(stream_def)
+                dict(stream_def) if isinstance(stream_def, dict) else stream_def
             )
             stream_alias: str = stream_map_key
             source_stream: str = stream_map_key
