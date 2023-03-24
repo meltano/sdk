@@ -751,6 +751,18 @@ def test_custom_type():
             [is_number_type],
             [True],
         ),
+        (
+            [
+                {
+                    "anyOf": [
+                        {"enum": ["developer", "team", "enterprise"]},
+                        {"type": "string"},
+                    ],
+                },
+            ],
+            [is_string_type],
+            [True],
+        ),
     ],
 )
 def test_type_check_variations(property_schemas, type_check_functions, results):
