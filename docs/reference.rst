@@ -96,7 +96,7 @@ JSON Schema builder classes
     typing.CustomType
     typing.DateTimeType
     typing.DateType
-    typing.Discriminator
+    typing.DiscriminatedUnion
     typing.DurationType
     typing.EmailType
     typing.HostnameType
