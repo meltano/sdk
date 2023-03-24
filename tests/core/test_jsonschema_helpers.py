@@ -31,7 +31,7 @@ from singer_sdk.typing import (
     CustomType,
     DateTimeType,
     DateType,
-    Discriminator,
+    DiscriminatedUnion,
     DurationType,
     EmailType,
     HostnameType,
@@ -773,8 +773,8 @@ def test_type_check_variations(property_schemas, type_check_functions, results):
             assert type_check_function(property_schema) == result
 
 
-def test_one_of_discrimination():
-    th = Discriminator(
+def test_discriminated_union():
+    th = DiscriminatedUnion(
         "flow",
         oauth=ObjectType(
             Property("client_id", StringType, required=True, secret=True),

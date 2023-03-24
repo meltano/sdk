@@ -650,7 +650,7 @@ class Constant(JSONTypeHelper):
         return {"const": self.value}
 
 
-class Discriminator(OneOf):
+class DiscriminatedUnion(OneOf):
     """A discriminator property.
 
     This is a special case of :class:`singer_sdk.typing.OneOf`, where values are
@@ -662,14 +662,14 @@ class Discriminator(OneOf):
     """
 
     def __init__(self, key: str, **options: ObjectType) -> None:
-        """Initialize Discriminator.
+        """Initialize a discriminated union type.
 
         Args:
             key: Name of the discriminator property.
             options: Mapping of discriminator values to object types.
 
         Examples:
-            >>> t = Discriminator("species", cat=ObjectType(), dog=ObjectType())
+            >>> t = DiscriminatedUnion("species", cat=ObjectType(), dog=ObjectType())
             >>> print(t.to_json(indent=2))
             {
               "oneOf": [
