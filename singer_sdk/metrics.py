@@ -11,12 +11,14 @@ import os
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from time import time
-from types import TracebackType
-from typing import Any, Generic, Mapping, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, Mapping, TypeVar
 
 import yaml
 
 from singer_sdk.helpers._resources import Traversable, get_package_files
+
+if TYPE_CHECKING:
+    from types import TracebackType
 
 DEFAULT_LOG_INTERVAL = 60.0
 METRICS_LOGGER_NAME = __name__

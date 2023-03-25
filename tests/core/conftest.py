@@ -32,7 +32,10 @@ class SimpleTestStream(Stream):
         """Create a new stream."""
         super().__init__(tap, schema=self.schema, name=self.name)
 
-    def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
+    def get_records(
+        self,
+        context: dict | None,  # noqa: ARG002
+    ) -> Iterable[dict[str, Any]]:
         """Generate records."""
         yield {"id": 1, "value": "Egypt"}
         yield {"id": 2, "value": "Germany"}

@@ -222,7 +222,9 @@ def test_schema_selection(
 
 
 def test_record_selection(
-    catalog_entry_obj: singer.CatalogEntry, selection_test_cases, caplog
+    catalog_entry_obj: singer.CatalogEntry,
+    selection_test_cases,
+    caplog,
 ):
     """Test that record selection rules are correctly applied to SCHEMA messages."""
     caplog.set_level(logging.DEBUG)

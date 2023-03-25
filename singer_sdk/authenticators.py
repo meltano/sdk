@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import base64
-import logging
 import math
 from datetime import datetime, timedelta
 from types import MappingProxyType
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import jwt
@@ -16,7 +15,11 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
 from singer_sdk.helpers._util import utc_now
-from singer_sdk.streams import Stream as RESTStreamBase
+
+if TYPE_CHECKING:
+    import logging
+
+    from singer_sdk.streams import Stream as RESTStreamBase
 
 
 def _add_parameters(initial_url: str, extra_parameters: dict) -> str:
@@ -35,7 +38,7 @@ def _add_parameters(initial_url: str, extra_parameters: dict) -> str:
         {
             parameter_name: [parameter_value]
             for parameter_name, parameter_value in extra_parameters.items()
-        }
+        },
     )
 
     new_query_string = urlencode(query_params, doseq=True)
@@ -277,7 +280,9 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
 
     @classmethod
     def create_for_stream(
-        cls: type[BearerTokenAuthenticator], stream: RESTStreamBase, token: str
+        cls: type[BearerTokenAuthenticator],
+        stream: RESTStreamBase,
+        token: str,
     ) -> BearerTokenAuthenticator:
         """Create an Authenticator object specific to the Stream class.
 
@@ -443,7 +448,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             NotImplementedError: If derived class does not override this method.
         """
         raise NotImplementedError(
-            "The `oauth_request_body` property was not defined in the subclass."
+            "The `oauth_request_body` property was not defined in the subclass.",
         )
 
     @property
@@ -497,7 +502,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             self.logger.info("OAuth authorization attempt was successful.")
         except Exception as ex:
             raise RuntimeError(
-                f"Failed OAuth login, response was '{token_response.json()}'. {ex}"
+                f"Failed OAuth login, response was '{token_response.json()}'. {ex}",
             )
         token_json = token_response.json()
         self.access_token = token_json["access_token"]
@@ -506,7 +511,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             self.logger.debug(
                 "No expires_in receied in OAuth response and no "
                 "default_expiration set. Token will be treated as if it never "
-                "expires."
+                "expires.",
             )
         self.last_refreshed = request_time
 
@@ -573,6 +578,8 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         return {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": jwt.encode(
-                self.oauth_request_body, private_key_string, "RS256"
+                self.oauth_request_body,
+                private_key_string,
+                "RS256",
             ),
         }

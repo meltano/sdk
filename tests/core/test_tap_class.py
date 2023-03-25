@@ -55,7 +55,7 @@ def test_config_errors(
         assert exc.value.errors == errors
 
 
-def test_cli(tap_class: type[Tap], tmp_path):
+def test_cli(tap_class: type[Tap]):
     """Test the CLI."""
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(tap_class.cli, ["--help"])

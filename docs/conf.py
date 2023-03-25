@@ -13,10 +13,10 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 
-import os
 import sys
+from pathlib import Path
 
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, str(Path("..").resolve()))
 # sys.path.insert(0, os.path.abspath("../singer_sdk"))
 # sys.path.insert(0, os.path.abspath("/Users/ajsteers/Source/sdk"))
 
@@ -28,7 +28,7 @@ copyright = "2021, Meltano Core Team and Contributors"
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.21.0"
+release = "0.22.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -97,8 +97,7 @@ html_theme_options = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
-# TODO: set this back to 3 after MyST-Parser 0.21.0 is released
-myst_heading_anchors = 4
+myst_heading_anchors = 3
 
 redirects = {
     "porting.html": "guides/porting.html",

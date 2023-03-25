@@ -8,9 +8,8 @@ import json
 import time
 from gzip import GzipFile
 from gzip import open as gzip_open
-from logging import Logger
 from types import MappingProxyType
-from typing import IO, Any, Mapping, Sequence
+from typing import IO, TYPE_CHECKING, Any, Mapping, Sequence
 
 from dateutil import parser
 from jsonschema import Draft7Validator, FormatChecker
@@ -27,7 +26,11 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
     handle_invalid_timestamp_in_record,
 )
-from singer_sdk.plugin_base import PluginBase
+
+if TYPE_CHECKING:
+    from logging import Logger
+
+    from singer_sdk.plugin_base import PluginBase
 
 JSONSchemaValidator = Draft7Validator
 
@@ -82,7 +85,7 @@ class Sink(metaclass=abc.ABCMeta):
 
         self._validator = Draft7Validator(schema, format_checker=FormatChecker())
 
-    def _get_context(self, record: dict) -> dict:
+    def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return an empty dictionary by default.
 
         NOTE: Future versions of the SDK may expand the available context attributes.
@@ -214,7 +217,10 @@ class Sink(metaclass=abc.ABCMeta):
     # Record processing
 
     def _add_sdc_metadata_to_record(
-        self, record: dict, message: dict, context: dict
+        self,
+        record: dict,
+        message: dict,
+        context: dict,
     ) -> None:
         """Populate metadata _sdc columns from incoming record message.
 
@@ -301,12 +307,17 @@ class Sink(metaclass=abc.ABCMeta):
         """
         self._validator.validate(record)
         self._parse_timestamps_in_record(
-            record=record, schema=self.schema, treatment=self.datetime_error_treatment
+            record=record,
+            schema=self.schema,
+            treatment=self.datetime_error_treatment,
         )
         return record
 
     def _parse_timestamps_in_record(
-        self, record: dict, schema: dict, treatment: DatetimeErrorTreatmentEnum
+        self,
+        record: dict,
+        schema: dict,
+        treatment: DatetimeErrorTreatmentEnum,
     ) -> None:
         """Parse strings to datetime.datetime values, repairing or erroring on failure.
 
@@ -319,7 +330,7 @@ class Sink(metaclass=abc.ABCMeta):
             schema: TODO
             treatment: TODO
         """
-        for key in record.keys():
+        for key in record:
             datelike_type = get_datelike_property_type(schema["properties"][key])
             if datelike_type:
                 try:
@@ -344,11 +355,10 @@ class Sink(metaclass=abc.ABCMeta):
         Args:
             context: Stream partition or context dictionary.
         """
-        pass
 
     # SDK developer overrides:
 
-    def preprocess_record(self, record: dict, context: dict) -> dict:
+    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: ARG002
         """Process incoming record and return a modified result.
 
         Args:
@@ -379,7 +389,6 @@ class Sink(metaclass=abc.ABCMeta):
             record: Individual record in the stream.
             context: Stream partition or context dictionary.
         """
-        pass
 
     def start_drain(self) -> dict:
         """Set and return `self._context_draining`.
@@ -413,7 +422,7 @@ class Sink(metaclass=abc.ABCMeta):
         self._context_draining = None
         if self._batch_records_read:
             self.tally_record_written(
-                self._batch_records_read - self._batch_dupe_records_merged
+                self._batch_records_read - self._batch_dupe_records_merged,
             )
         self._batch_records_read = 0
 
@@ -429,7 +438,7 @@ class Sink(metaclass=abc.ABCMeta):
         _ = new_version
         self.logger.warning(
             "ACTIVATE_VERSION message received but not implemented by this target. "
-            "Ignoring."
+            "Ignoring.",
         )
 
     def setup(self) -> None:
@@ -438,7 +447,6 @@ class Sink(metaclass=abc.ABCMeta):
         Setup is executed once per Sink instance, after instantiation. If a Schema
         change is detected, a new Sink is instantiated and this method is called again.
         """
-        pass
 
     def clean_up(self) -> None:
         """Perform any clean up actions required at end of a stream.
@@ -447,7 +455,6 @@ class Sink(metaclass=abc.ABCMeta):
         that may be in use from other instances of the same sink. Stream name alone
         should not be relied on, it's recommended to use a uuid as well.
         """
-        pass
 
     def process_batch_files(
         self,
@@ -475,13 +482,15 @@ class Sink(metaclass=abc.ABCMeta):
                 storage = StorageTarget.from_url(head)
 
             if encoding.format == BatchFileFormat.JSONL:
-                with storage.fs(create=False) as batch_fs:
-                    with batch_fs.open(tail, mode="rb") as file:
-                        if encoding.compression == "gzip":
-                            file = gzip_open(file)
-                        context = {"records": [json.loads(line) for line in file]}
-                        self.process_batch(context)
+                with storage.fs(create=False) as batch_fs, batch_fs.open(
+                    tail,
+                    mode="rb",
+                ) as file:
+                    if encoding.compression == "gzip":
+                        file = gzip_open(file)
+                    context = {"records": [json.loads(line) for line in file]}
+                    self.process_batch(context)
             else:
                 raise NotImplementedError(
-                    f"Unsupported batch encoding format: {encoding.format}"
+                    f"Unsupported batch encoding format: {encoding.format}",
                 )

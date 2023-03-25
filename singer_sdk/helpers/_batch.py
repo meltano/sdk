@@ -135,8 +135,8 @@ class StorageTarget:
             # Augemnted slitly to properly Windows paths
             split = url.rsplit("\\", 1)
             return (split[0] or "\\", split[1])
-        else:
-            return fs.path.split(url)
+
+        return fs.path.split(url)
 
     @classmethod
     def from_url(cls, url: str) -> StorageTarget:

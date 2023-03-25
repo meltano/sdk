@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import sys
-from types import ModuleType
-from typing import cast
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from types import ModuleType
 
 if sys.version_info < (3, 9):
     import importlib_resources

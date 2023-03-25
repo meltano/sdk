@@ -83,7 +83,11 @@ class Schema:
         return result
 
     @classmethod
-    def from_dict(cls: t.Type[Schema], data: dict, **schema_defaults: t.Any) -> Schema:
+    def from_dict(
+        cls: t.Type[Schema],  # noqa: UP006
+        data: dict,
+        **schema_defaults: t.Any,
+    ) -> Schema:
         """Initialize a Schema object based on the JSON Schema structure.
 
         Args:
@@ -156,12 +160,14 @@ def _resolve_schema_references(
     if _SchemaKey.pattern_properties in schema:
         for k, val in schema[_SchemaKey.pattern_properties].items():
             schema[_SchemaKey.pattern_properties][k] = _resolve_schema_references(
-                val, resolver
+                val,
+                resolver,
             )
 
     if _SchemaKey.items in schema:
         schema[_SchemaKey.items] = _resolve_schema_references(
-            schema[_SchemaKey.items], resolver
+            schema[_SchemaKey.items],
+            resolver,
         )
 
     if _SchemaKey.any_of in schema:

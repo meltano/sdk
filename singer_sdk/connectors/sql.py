@@ -7,15 +7,17 @@ import warnings
 from contextlib import contextmanager
 from datetime import datetime
 from functools import lru_cache
-from typing import Any, Iterable, Iterator, cast
+from typing import TYPE_CHECKING, Any, Iterable, Iterator, cast
 
 import sqlalchemy
 from sqlalchemy.engine import Engine
-from sqlalchemy.engine.reflection import Inspector
 
 from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine.reflection import Inspector
 
 
 class SQLConnector:
@@ -39,7 +41,9 @@ class SQLConnector:
     _cached_engine: Engine | None = None
 
     def __init__(
-        self, config: dict | None = None, sqlalchemy_url: str | None = None
+        self,
+        config: dict | None = None,
+        sqlalchemy_url: str | None = None,
     ) -> None:
         """Initialize the SQL connector.
 
@@ -165,7 +169,7 @@ class SQLConnector:
         """
         if "sqlalchemy_url" not in config:
             raise ConfigValidationError(
-                "Could not find or create 'sqlalchemy_url' for connection."
+                "Could not find or create 'sqlalchemy_url' for connection.",
             )
 
         return cast(str, config["sqlalchemy_url"])
@@ -262,8 +266,8 @@ class SQLConnector:
                         db_name or "(unknown-db)",
                         schema_name or "(unknown-schema)",
                         table_name or "(unknown-table-name)",
-                    ]
-                )
+                    ],
+                ),
             )
 
         return delimiter.join(parts)
@@ -324,7 +328,7 @@ class SQLConnector:
             [
                 self._dialect.identifier_preparer.quote(name_part)
                 for name_part in name.split(".")
-            ]
+            ],
         )
 
     @lru_cache()
@@ -332,10 +336,14 @@ class SQLConnector:
         """Print a warning, but only the first time."""
         self.logger.warning(
             "Provider does not support get_view_names(). "
-            "Streams list may be incomplete or `is_view` may be unpopulated."
+            "Streams list may be incomplete or `is_view` may be unpopulated.",
         )
 
-    def get_schema_names(self, engine: Engine, inspected: Inspector) -> list[str]:
+    def get_schema_names(
+        self,
+        engine: Engine,  # noqa: ARG002
+        inspected: Inspector,
+    ) -> list[str]:
         """Return a list of schema names in DB.
 
         Args:
@@ -348,7 +356,10 @@ class SQLConnector:
         return inspected.get_schema_names()
 
     def get_object_names(
-        self, engine: Engine, inspected: Inspector, schema_name: str
+        self,
+        engine: Engine,  # noqa: ARG002
+        inspected: Inspector,
+        schema_name: str,
     ) -> list[tuple[str, bool]]:
         """Return a list of syncable objects.
 
@@ -373,7 +384,7 @@ class SQLConnector:
     # TODO maybe should be splitted into smaller parts?
     def discover_catalog_entry(
         self,
-        engine: Engine,
+        engine: Engine,  # noqa: ARG002
         inspected: Inspector,
         schema_name: str,
         table_name: str,
@@ -419,14 +430,14 @@ class SQLConnector:
             column_name = column_def["name"]
             is_nullable = column_def.get("nullable", False)
             jsonschema_type: dict = self.to_jsonschema_type(
-                cast(sqlalchemy.types.TypeEngine, column_def["type"])
+                cast(sqlalchemy.types.TypeEngine, column_def["type"]),
             )
             table_schema.append(
                 th.Property(
                     name=column_name,
                     wrapped=th.CustomType(jsonschema_type),
                     required=not is_nullable,
-                )
+                ),
             )
         schema = table_schema.to_dict()
 
@@ -473,17 +484,24 @@ class SQLConnector:
         for schema_name in self.get_schema_names(engine, inspected):
             # Iterate through each table and view
             for table_name, is_view in self.get_object_names(
-                engine, inspected, schema_name
+                engine,
+                inspected,
+                schema_name,
             ):
                 catalog_entry = self.discover_catalog_entry(
-                    engine, inspected, schema_name, table_name, is_view
+                    engine,
+                    inspected,
+                    schema_name,
+                    table_name,
+                    is_view,
                 )
                 result.append(catalog_entry.to_dict())
 
         return result
 
     def parse_full_table_name(
-        self, full_table_name: str
+        self,
+        full_table_name: str,
     ) -> tuple[str | None, str | None, str]:
         """Parse a fully qualified table name into its parts.
 
@@ -544,7 +562,9 @@ class SQLConnector:
         return schema_name in schema_names
 
     def get_table_columns(
-        self, full_table_name: str, column_names: list[str] | None = None
+        self,
+        full_table_name: str,
+        column_names: list[str] | None = None,
     ) -> dict[str, sqlalchemy.Column]:
         """Return a list of table columns.
 
@@ -571,7 +591,9 @@ class SQLConnector:
         }
 
     def get_table(
-        self, full_table_name: str, column_names: list[str] | None = None
+        self,
+        full_table_name: str,
+        column_names: list[str] | None = None,
     ) -> sqlalchemy.Table:
         """Return a table object.
 
@@ -583,12 +605,16 @@ class SQLConnector:
             A table object with column list.
         """
         columns = self.get_table_columns(
-            full_table_name=full_table_name, column_names=column_names
+            full_table_name=full_table_name,
+            column_names=column_names,
         ).values()
         _, schema_name, table_name = self.parse_full_table_name(full_table_name)
         meta = sqlalchemy.MetaData()
         return sqlalchemy.schema.Table(
-            table_name, meta, *list(columns), schema=schema_name
+            table_name,
+            meta,
+            *list(columns),
+            schema=schema_name,
         )
 
     def column_exists(self, full_table_name: str, column_name: str) -> bool:
@@ -646,7 +672,7 @@ class SQLConnector:
             properties: dict = schema["properties"]
         except KeyError:
             raise RuntimeError(
-                f"Schema for '{full_table_name}' does not define properties: {schema}"
+                f"Schema for '{full_table_name}' does not define properties: {schema}",
             )
         for property_name, property_jsonschema in properties.items():
             is_primary_key = property_name in primary_keys
@@ -655,7 +681,7 @@ class SQLConnector:
                     property_name,
                     self.to_sql_type(property_jsonschema),
                     primary_key=is_primary_key,
-                )
+                ),
             )
 
         _ = sqlalchemy.Table(table_name, meta, *columns)
@@ -681,9 +707,11 @@ class SQLConnector:
             raise NotImplementedError("Adding columns is not supported.")
 
         column_add_ddl = self.get_column_add_ddl(
-            table_name=full_table_name, column_name=column_name, column_type=sql_type
+            table_name=full_table_name,
+            column_name=column_name,
+            column_type=sql_type,
         )
-        with self._connect() as conn:
+        with self._connect() as conn, conn.begin():
             conn.execute(column_add_ddl)
 
     def prepare_schema(self, schema_name: str) -> None:
@@ -725,7 +753,9 @@ class SQLConnector:
 
         for property_name, property_def in schema["properties"].items():
             self.prepare_column(
-                full_table_name, property_name, self.to_sql_type(property_def)
+                full_table_name,
+                property_name,
+                self.to_sql_type(property_def),
             )
 
     def prepare_column(
@@ -770,13 +800,16 @@ class SQLConnector:
             raise NotImplementedError("Renaming columns is not supported.")
 
         column_rename_ddl = self.get_column_rename_ddl(
-            table_name=full_table_name, column_name=old_name, new_column_name=new_name
+            table_name=full_table_name,
+            column_name=old_name,
+            new_column_name=new_name,
         )
         with self._connect() as conn:
             conn.execute(column_rename_ddl)
 
     def merge_sql_types(
-        self, sql_types: list[sqlalchemy.types.TypeEngine]
+        self,
+        sql_types: list[sqlalchemy.types.TypeEngine],
     ) -> sqlalchemy.types.TypeEngine:
         """Return a compatible SQL type for the selected type list.
 
@@ -813,7 +846,7 @@ class SQLConnector:
         # If greater than two evaluate the first pair then on down the line
         if len(sql_types) > 2:
             return self.merge_sql_types(
-                [self.merge_sql_types([sql_types[0], sql_types[1]])] + sql_types[2:]
+                [self.merge_sql_types([sql_types[0], sql_types[1]])] + sql_types[2:],
             )
 
         assert len(sql_types) == 2
@@ -827,11 +860,7 @@ class SQLConnector:
                 if issubclass(
                     generic_type,
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
-                ):
-                    # If length None or 0 then is varchar max ?
-                    if (opt_len is None) or (opt_len == 0):
-                        return opt
-                elif isinstance(
+                ) or issubclass(
                     generic_type,
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
                 ):
@@ -844,7 +873,7 @@ class SQLConnector:
                     return opt
 
         raise ValueError(
-            f"Unable to merge sql types: {', '.join([str(t) for t in sql_types])}"
+            f"Unable to merge sql types: {', '.join([str(t) for t in sql_types])}",
         )
 
     def _sort_types(
@@ -877,11 +906,11 @@ class SQLConnector:
             _pytype = cast(type, sql_type.python_type)
             if issubclass(_pytype, (str, bytes)):
                 return 900, _len
-            elif issubclass(_pytype, datetime):
+            if issubclass(_pytype, datetime):
                 return 600, _len
-            elif issubclass(_pytype, float):
+            if issubclass(_pytype, float):
                 return 400, _len
-            elif issubclass(_pytype, int):
+            if issubclass(_pytype, int):
                 return 300, _len
 
             return 0, _len
@@ -889,7 +918,9 @@ class SQLConnector:
         return sorted(sql_types, key=_get_type_sort_key, reverse=True)
 
     def _get_column_type(
-        self, full_table_name: str, column_name: str
+        self,
+        full_table_name: str,
+        column_name: str,
     ) -> sqlalchemy.types.TypeEngine:
         """Get the SQL type of the declared column.
 
@@ -907,14 +938,16 @@ class SQLConnector:
             column = self.get_table_columns(full_table_name)[column_name]
         except KeyError as ex:
             raise KeyError(
-                f"Column `{column_name}` does not exist in table `{full_table_name}`."
+                f"Column `{column_name}` does not exist in table `{full_table_name}`.",
             ) from ex
 
         return cast(sqlalchemy.types.TypeEngine, column.type)
 
     @staticmethod
     def get_column_add_ddl(
-        table_name: str, column_name: str, column_type: sqlalchemy.types.TypeEngine
+        table_name: str,
+        column_name: str,
+        column_type: sqlalchemy.types.TypeEngine,
     ) -> sqlalchemy.DDL:
         """Get the create column DDL statement.
 
@@ -932,7 +965,7 @@ class SQLConnector:
             sqlalchemy.Column(
                 column_name,
                 column_type,
-            )
+            ),
         )
         return sqlalchemy.DDL(
             "ALTER TABLE %(table_name)s ADD COLUMN %(create_column_clause)s",
@@ -944,7 +977,9 @@ class SQLConnector:
 
     @staticmethod
     def get_column_rename_ddl(
-        table_name: str, column_name: str, new_column_name: str
+        table_name: str,
+        column_name: str,
+        new_column_name: str,
     ) -> sqlalchemy.DDL:
         """Get the create column DDL statement.
 
@@ -970,7 +1005,9 @@ class SQLConnector:
 
     @staticmethod
     def get_column_alter_ddl(
-        table_name: str, column_name: str, column_type: sqlalchemy.types.TypeEngine
+        table_name: str,
+        column_name: str,
+        column_type: sqlalchemy.types.TypeEngine,
     ) -> sqlalchemy.DDL:
         """Get the alter column DDL statement.
 
@@ -1013,7 +1050,8 @@ class SQLConnector:
 
     @staticmethod
     def update_collation(
-        column_type: sqlalchemy.types.TypeEngine, collation: str | None
+        column_type: sqlalchemy.types.TypeEngine,
+        collation: str | None,
     ) -> None:
         """Sets column collation if column type has a collation attribute.
 
@@ -1041,7 +1079,8 @@ class SQLConnector:
             NotImplementedError: if altering columns is not supported.
         """
         current_type: sqlalchemy.types.TypeEngine = self._get_column_type(
-            full_table_name, column_name
+            full_table_name,
+            column_name,
         )
 
         # remove collation if present and save it
@@ -1069,7 +1108,7 @@ class SQLConnector:
             raise NotImplementedError(
                 "Altering columns is not supported. "
                 f"Could not convert column '{full_table_name}.{column_name}' "
-                f"from '{current_type}' to '{compatible_sql_type}'."
+                f"from '{current_type}' to '{compatible_sql_type}'.",
             )
 
         alter_column_ddl = self.get_column_alter_ddl(

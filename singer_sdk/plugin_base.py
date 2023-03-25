@@ -9,7 +9,7 @@ import os
 from collections import OrderedDict
 from pathlib import PurePath
 from types import MappingProxyType
-from typing import Any, Callable, Mapping, cast
+from typing import TYPE_CHECKING, Any, Callable, Mapping, cast
 
 import click
 from jsonschema import Draft7Validator
@@ -27,8 +27,10 @@ from singer_sdk.helpers.capabilities import (
     CapabilitiesEnum,
     PluginCapabilities,
 )
-from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import extend_validator_with_defaults
+
+if TYPE_CHECKING:
+    from singer_sdk.mapper import PluginMapper
 
 SDK_PACKAGE_NAME = "singer_sdk"
 
@@ -56,7 +58,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         # Get the level from <PLUGIN_NAME>_LOGLEVEL or LOGLEVEL environment variables
         plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
         LOGLEVEL = os.environ.get(f"{plugin_env_prefix}LOGLEVEL") or os.environ.get(
-            "LOGLEVEL"
+            "LOGLEVEL",
         )
 
         logger = logging.getLogger(cls.name)
@@ -87,7 +89,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         if not config:
             config_dict = {}
-        elif isinstance(config, str) or isinstance(config, PurePath):
+        elif isinstance(config, (str, PurePath)):
             config_dict = read_json_file(config)
         elif isinstance(config, list):
             config_dict = {}
@@ -182,7 +184,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: If the derived plugin doesn't override this method.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     # Core plugin config:
 
@@ -227,7 +229,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         if config_jsonschema:
             self.append_builtin_config(config_jsonschema)
             self.logger.debug(
-                f"Validating config using jsonschema: {config_jsonschema}"
+                f"Validating config using jsonschema: {config_jsonschema}",
             )
             validator = JSONSchemaValidator(config_jsonschema)
             errors = [e.message for e in validator.iter_errors(self._config)]
@@ -318,11 +320,12 @@ class PluginBase(metaclass=abc.ABCMeta):
         info = cls._get_about_info()
 
         if format == "json":
-            print(json.dumps(info, indent=2, default=str))
+            print(json.dumps(info, indent=2, default=str))  # noqa: T201
 
         elif format == "markdown":
             max_setting_len = cast(
-                int, max(len(k) for k in info["settings"]["properties"].keys())
+                int,
+                max(len(k) for k in info["settings"]["properties"]),
             )
 
             # Set table base for markdown
@@ -340,7 +343,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             md_list.append(
                 f"# `{info['name']}`\n\n"
                 f"{info['description']}\n\n"
-                f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n"
+                f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n",
             )
             for key, value in info.items():
                 if key == "capabilities":
@@ -365,17 +368,17 @@ class PluginBase(metaclass=abc.ABCMeta):
                         + "\n".join(
                             [
                                 "A full list of supported settings and capabilities "
-                                f"is available by running: `{info['name']} --about`"
-                            ]
+                                f"is available by running: `{info['name']} --about`",
+                            ],
                         )
                         + "\n"
                     )
                     md_list.append(setting)
 
-            print("".join(md_list))
+            print("".join(md_list))  # noqa: T201
         else:
             formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
-            print(formatted)
+            print(formatted)  # noqa: T201
 
     @classproperty
     def cli(cls) -> Callable:

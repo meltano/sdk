@@ -159,7 +159,7 @@ Some APIs instead return the records as values inside an object where each key i
 
 ### Detailed Class Reference
 
-For a detailed reference, please see the [SDK Reference Guide](./reference.md)
+For a detailed reference, please see the [SDK Reference Guide](./reference.rst)
 
 ### Implementation Details
 
