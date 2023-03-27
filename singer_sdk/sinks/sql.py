@@ -182,7 +182,7 @@ class SQLSink(BatchSink):
         Raises:
             ConformedNameClashException: if duplicates found.
         """
-        # group: {'_a': ['1_a'], 'abc': ['aBc', 'abC']}
+        # group: {'_a': ['1_a'], 'abc': ['aBc', 'abC']}  # noqa: ERA001
         grouped = defaultdict(list)
         for k, v in conformed_property_names.items():
             grouped[v].append(k)

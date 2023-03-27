@@ -302,7 +302,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         stream_name = message_dict["stream"]
         for stream_map in self.mapper.stream_maps[stream_name]:
-            # new_schema = helpers._float_to_decimal(new_schema)
             raw_record = copy.copy(message_dict["record"])
             transformed_record = stream_map.transform(raw_record)
             if transformed_record is None:
@@ -376,7 +375,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             key_properties,
         )
         for stream_map in self.mapper.stream_maps[stream_name]:
-            # new_schema = helpers._float_to_decimal(new_schema)
             _ = self.get_sink(
                 stream_map.stream_alias,
                 schema=stream_map.transformed_schema,
