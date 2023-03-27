@@ -71,6 +71,7 @@ html_theme_options = {
     "source_branch": "main",
     "source_directory": "docs/",
     "sidebar_hide_name": True,
+    "analytics_id": "G-NYV2096KBJ",
     # branding
     "light_css_variables": {
         "font-stack": "Hanken Grotesk,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji",
@@ -101,7 +102,7 @@ html_theme_options = {
         "color-link-underline--hover": "#18c3fa",
         # brand
         "color-brand-primary": "#311772",
-        "color-brand-content": "#311772",
+        "color-brand-content": "rgba(255, 255, 255, 0.7)",
         # sidebar
         "color-sidebar-background": "#311772",
         "color-sidebar-search-background": "#080216",
