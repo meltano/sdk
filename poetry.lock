@@ -2479,14 +2479,14 @@ files = [
 
 [[package]]
 name = "types-pytz"
-version = "2022.7.1.2"
+version = "2023.2.0.0"
 description = "Typing stubs for pytz"
 category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "types-pytz-2022.7.1.2.tar.gz", hash = "sha256:487d3e8e9f4071eec8081746d53fa982bbc05812e719dcbf2ebf3d55a1a4cd28"},
-    {file = "types_pytz-2022.7.1.2-py3-none-any.whl", hash = "sha256:40ca448a928d566f7d44ddfde0066e384f7ffbd4da2778e42a4570eaca572446"},
+    {file = "types-pytz-2023.2.0.0.tar.gz", hash = "sha256:eec7c806220776cde7b2fb20371853ddd0d14fa7544ca3c6862433ade37469df"},
+    {file = "types_pytz-2023.2.0.0-py3-none-any.whl", hash = "sha256:a6cca439e1f87be0ce745181543b58587f4e685d6b14627255dced68004ba05e"},
 ]
 
 [[package]]
@@ -2695,4 +2695,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = "<3.12,>=3.7.1"
-content-hash = "21aa0327760cc16945bfefea88dad1a8b1de7afed240874853cd9bcb1e5a6cd4"
+content-hash = "f4f941854ed4b37daa184da10bb901bf9a3e838c5a485ee7e982aee103ff63c6"
