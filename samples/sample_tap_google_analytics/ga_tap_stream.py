@@ -50,14 +50,19 @@ class SampleGoogleAnalyticsStream(RESTStream):
         next_page_token: Any | None,  # noqa: ARG002
     ) -> dict | None:
         """Prepare the data payload for the REST API request."""
-        # params = self.get_url_params(context, next_page_token)
         request_def = {
             "viewId": self.config["view_id"],
             "metrics": [{"expression": m} for m in self.metrics],
             "dimensions": [{"name": d} for d in self.dimensions],
             # "orderBys": [
-            #     {"fieldName": "ga:sessions", "sortOrder": "DESCENDING"},
-            #     {"fieldName": "ga:pageviews", "sortOrder": "DESCENDING"},
+            #     {  # noqa: ERA001
+            #         "fieldName": "ga:sessions",  # noqa: ERA001
+            #         "sortOrder": "DESCENDING",  # noqa: ERA001
+            #     },
+            #     {  # noqa: ERA001
+            #         "fieldName": "ga:pageviews",  # noqa: ERA001
+            #         "sortOrder": "DESCENDING",  # noqa: ERA001
+            #     },
             # ],
         }
         if self.config.get("start_date"):

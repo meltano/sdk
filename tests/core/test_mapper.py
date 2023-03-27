@@ -116,7 +116,6 @@ def sample_stream():
 def transform_stream_maps():
     return {
         "repositories": {
-            # "__source__": "repositories",
             "repo_name": "_['name']",
             "email_domain": "owner_email.split('@')[1]",
             "email_hash": "md5(config['hash_seed'] + owner_email)",

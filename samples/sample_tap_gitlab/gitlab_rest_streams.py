@@ -163,8 +163,6 @@ class EpicsStream(ProjectBasedStream):
         Property("downvotes", IntegerType),
     ).to_dict()
 
-    # schema_filepath = SCHEMAS_DIR / "epics.json"
-
     def get_child_context(
         self,
         record: dict,
