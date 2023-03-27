@@ -75,13 +75,16 @@ html_theme_options = {
     "light_css_variables": {
         "color-foreground-primary": "#080216",
         "color-background-primary": "#E9E5FB",
-        "color-background-secondary": "#311772",
-        # "color-link": "#18c3fa",
+        "color-link": "#f963bc",
+        "color-link-underline": "transparent",
+        "color-link--hover": "#f963bc",
+        "color-link-underline--hover": "#f963bc",
         # brand
         "color-brand-primary": "#311772",
         "color-brand-content": "#311772",
         # sidebar
         "color-sidebar-background": "#311772",
+        "color-sidebar-search-background": "#E9E5FB",
         "color-sidebar-item-background--hover": "#311772",
         "color-sidebar-item-expander-background--hover": "#311772",
         "color-sidebar-brand-text": "white",
@@ -90,15 +93,15 @@ html_theme_options = {
         "color-sidebar-link-text--top-level": "white",
     },
     "dark_css_variables": {
-        "color-brand-primary": "#311772",
-        "color-brand-content": "#311772",
-        # link
+        "color-background-primary": "#080216",
         "color-link": "#18c3fa",
         "color-link-underline": "transparent",
         "color-link--hover": "#18c3fa",
         "color-link-underline--hover": "#18c3fa",
-        # background
-        "color-background-primary": "#080216",
+        # brand
+        "color-brand-primary": "#311772",
+        "color-brand-content": "#311772",
+        # link
         # sidebar
         "color-sidebar-background": "#311772",
         "color-sidebar-item-background--hover": "#311772",
