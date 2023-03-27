@@ -71,22 +71,39 @@ html_theme_options = {
     "sidebar_hide_name": True,
     # branding
     "light_css_variables": {
-        "color-brand-primary": "#3438bf",
-        "color-brand-content": "#3438bf",
+        "font-stack": "Hanken Grotesk,-apple-system,Helvetica,sans-serif",
+        "color-foreground-primary": "#080216",
+        "color-background-primary": "#E9E5FB",
+        "color-link": "#f963bc",
+        "color-link-underline": "transparent",
+        "color-link--hover": "#f963bc",
+        "color-link-underline--hover": "#f963bc",
+        # brand
+        "color-brand-primary": "#311772",
+        "color-brand-content": "#311772",
         # sidebar
-        "color-sidebar-background": "#3438bf",
-        "color-sidebar-item-background--hover": "#3438bf",
+        "color-sidebar-background": "#311772",
+        "color-sidebar-search-background": "#E9E5FB",
+        "color-sidebar-item-background--hover": "#311772",
+        "color-sidebar-item-expander-background--hover": "#311772",
         "color-sidebar-brand-text": "white",
-        "color-sidebar-caption-text": "white",
+        "color-sidebar-caption-text": "rgba(255, 255, 255, 0.7)",
         "color-sidebar-link-text": "white",
         "color-sidebar-link-text--top-level": "white",
     },
     "dark_css_variables": {
-        "color-brand-primary": "#3438bf",
-        "color-brand-content": "#3438bf",
-        # siderbar
-        "color-sidebar-background": "#3438bf",
-        "color-sidebar-item-background--hover": "#3438bf",
+        "color-background-primary": "#080216",
+        "color-link": "#18c3fa",
+        "color-link-underline": "transparent",
+        "color-link--hover": "#18c3fa",
+        "color-link-underline--hover": "#18c3fa",
+        # brand
+        "color-brand-primary": "#311772",
+        "color-brand-content": "rgba(255, 255, 255, 0.7)",
+        # sidebar
+        "color-sidebar-background": "#311772",
+        "color-sidebar-search-background": "#080216",
+        "color-sidebar-item-background--hover": "#311772",
     },
 }
 
@@ -94,6 +111,10 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+
+html_css_files = [
+    "css/custom.css",
+]
 
 myst_heading_anchors = 3
 
