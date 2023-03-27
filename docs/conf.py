@@ -73,22 +73,27 @@ html_theme_options = {
     "sidebar_hide_name": True,
     # branding
     "light_css_variables": {
-        "color-brand-primary": "#3438bf",
-        "color-brand-content": "#3438bf",
+        # brand
+        "color-brand-primary": "#311772",
+        "color-brand-content": "#311772",
+        # foreground
+        "color-foreground-primary": "#080216",
+        # background
+        "color-background-primary": "#E9E5FB",
         # sidebar
-        "color-sidebar-background": "#3438bf",
-        "color-sidebar-item-background--hover": "#3438bf",
+        "color-sidebar-background": "#311772",
+        "color-sidebar-item-background--hover": "#311772",
         "color-sidebar-brand-text": "white",
-        "color-sidebar-caption-text": "white",
+        "color-sidebar-caption-text": "rgba(255, 255, 255, 0.7)",
         "color-sidebar-link-text": "white",
         "color-sidebar-link-text--top-level": "white",
     },
     "dark_css_variables": {
-        "color-brand-primary": "#3438bf",
-        "color-brand-content": "#3438bf",
-        # siderbar
-        "color-sidebar-background": "#3438bf",
-        "color-sidebar-item-background--hover": "#3438bf",
+        "color-brand-primary": "#311772",
+        "color-brand-content": "#311772",
+        # sidebar
+        "color-sidebar-background": "#311772",
+        "color-sidebar-item-background--hover": "#311772",
     },
 }
 
