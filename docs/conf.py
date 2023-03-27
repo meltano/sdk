@@ -84,7 +84,7 @@ html_theme_options = {
         # sidebar
         "color-sidebar-background": "#311772",
         "color-sidebar-search-background": "#E9E5FB",
-        "color-sidebar-item-background--hover": "#311772",
+        "color-sidebar-item-background--hover": "#18c3fa",
         "color-sidebar-item-expander-background--hover": "#311772",
         "color-sidebar-brand-text": "white",
         "color-sidebar-caption-text": "rgba(255, 255, 255, 0.7)",
