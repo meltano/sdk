@@ -73,7 +73,7 @@ html_theme_options = {
     "sidebar_hide_name": True,
     # branding
     "light_css_variables": {
-        "font-stack": "Hanken Grotesk,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji",
+        "font-stack": "Hanken Grotesk,-apple-system,Helvetica,sans-serif",
         "color-foreground-primary": "#080216",
         "color-background-primary": "#E9E5FB",
         "color-link": "#f963bc",
