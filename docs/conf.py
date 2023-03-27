@@ -71,7 +71,6 @@ html_theme_options = {
     "source_branch": "main",
     "source_directory": "docs/",
     "sidebar_hide_name": True,
-    "analytics_id": "G-NYV2096KBJ",
     # branding
     "light_css_variables": {
         "font-stack": "Hanken Grotesk,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji",
