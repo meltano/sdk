@@ -73,6 +73,7 @@ html_theme_options = {
     "sidebar_hide_name": True,
     # branding
     "light_css_variables": {
+        "font-stack": "Hanken Grotesk,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji",
         "color-foreground-primary": "#080216",
         "color-background-primary": "#E9E5FB",
         "color-link": "#f963bc",
@@ -101,9 +102,9 @@ html_theme_options = {
         # brand
         "color-brand-primary": "#311772",
         "color-brand-content": "#311772",
-        # link
         # sidebar
         "color-sidebar-background": "#311772",
+        "color-sidebar-search-background": "#080216",
         "color-sidebar-item-background--hover": "#311772",
     },
 }
@@ -112,6 +113,10 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+
+html_css_files = [
+    "css/fonts.css",
+]
 
 myst_heading_anchors = 3
 
