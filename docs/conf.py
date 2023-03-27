@@ -115,7 +115,7 @@ html_theme_options = {
 html_static_path = ["_static"]
 
 html_css_files = [
-    "css/fonts.css",
+    "css/custom.css",
 ]
 
 myst_heading_anchors = 3
