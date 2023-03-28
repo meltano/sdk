@@ -74,7 +74,7 @@ class SingletonMeta(type):
         """
         if cls.__single_instance:
             return cls.__single_instance
-        single_obj = cls.__new__(cls, None)  # type: ignore
+        single_obj = cls.__new__(cls, None)  # type: ignore[call-overload]
         single_obj.__init__(*args, **kwargs)
         cls.__single_instance = single_obj
         return single_obj

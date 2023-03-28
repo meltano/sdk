@@ -190,6 +190,7 @@ plugins = [
 ]
 python_version = "3.8"
 warn_unused_configs = true
+warn_unused_ignores = true
 warn_return_any = true
 
 [[tool.mypy.overrides]]
@@ -249,6 +250,7 @@ select = [
     "ARG",  # flake8-unused-arguments
     "PTH",  # flake8-use-pathlib
     "ERA",  # eradicate
+    "PGH",  # pygrep-hooks
 ]
 src = ["samples", "singer_sdk", "tests"]
 target-version = "py37"

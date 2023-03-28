@@ -22,7 +22,7 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
     rest_method = "POST"
 
     @classproperty
-    def records_jsonpath(cls) -> str:  # type: ignore  # OK: str vs @classproperty
+    def records_jsonpath(cls) -> str:  # type: ignore[override]
         """Get the JSONPath expression to extract records from an API response.
 
         Returns:

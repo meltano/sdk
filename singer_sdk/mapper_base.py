@@ -164,7 +164,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 cls._env_prefix,
             )
 
-            mapper = cls(  # type: ignore  # Ignore 'type not callable'
+            mapper = cls(  # type: ignore[operator]
                 config=config_dict,
                 validate_config=validate_config,
             )
