@@ -342,7 +342,7 @@ class CustomStreamMap(StreamMap):
                 functions=self.functions,
                 names=names,
             )
-        except simpleeval.InvalidExpression as ex:
+        except (simpleeval.InvalidExpression, SyntaxError) as ex:
             raise MapExpressionError(
                 f"Failed to evaluate simpleeval expressions {expr}.",
             ) from ex
