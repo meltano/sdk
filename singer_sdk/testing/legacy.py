@@ -173,7 +173,7 @@ def _select_all(catalog_dict: dict) -> dict:
 
 def target_sync_test(
     target: Target,
-    input: io.StringIO | None,
+    input: io.StringIO | None,  # noqa: A002
     finalize: bool = True,
 ) -> tuple[io.StringIO, io.StringIO]:
     """Invoke the target with the provided input.

@@ -111,8 +111,8 @@ class SampleParquetTargetSink(BatchSink):
 
     def _get_parquet_schema(self) -> list[tuple[str, Any]]:
         col_list: list[tuple[str, Any]] = []
-        for property in self.schema["properties"]:
+        for prop in self.schema["properties"]:
             col_list.append(
-                (property["name"], self.translate_data_type(property["type"])),
+                (prop["name"], self.translate_data_type(prop["type"])),
             )
         return col_list

@@ -640,7 +640,7 @@ class PropertiesList(ObjectType):
         """
         return self.wrapped.items()
 
-    def append(self, property: Property) -> None:
+    def append(self, property: Property) -> None:  # noqa: A002
         """Append a property to the property list.
 
         Args:
