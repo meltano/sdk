@@ -382,7 +382,7 @@ class ArrayType(JSONTypeHelper, Generic[W]):
         self.wrapped_type = wrapped_type
 
     @property
-    def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
+    def type_dict(self) -> dict:  # type: ignore[override]
         """Get type dictionary.
 
         Returns:
@@ -435,7 +435,7 @@ class Property(JSONTypeHelper, Generic[W]):
         self.examples = examples or None
 
     @property
-    def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
+    def type_dict(self) -> dict:  # type: ignore[override]
         """Get type dictionary.
 
         Returns:
@@ -577,7 +577,7 @@ class ObjectType(JSONTypeHelper):
         self.pattern_properties = pattern_properties
 
     @property
-    def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
+    def type_dict(self) -> dict:  # type: ignore[override]
         """Get type dictionary.
 
         Returns:
@@ -620,7 +620,7 @@ class CustomType(JSONTypeHelper):
         self._jsonschema_type_dict = jsonschema_type_dict
 
     @property
-    def type_dict(self) -> dict:  # type: ignore  # OK: @classproperty vs @property
+    def type_dict(self) -> dict:  # type: ignore[override]
         """Get type dictionary.
 
         Returns:
@@ -640,7 +640,7 @@ class PropertiesList(ObjectType):
         """
         return self.wrapped.items()
 
-    def append(self, property: Property) -> None:
+    def append(self, property: Property) -> None:  # noqa: A002
         """Append a property to the property list.
 
         Args:

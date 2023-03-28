@@ -86,7 +86,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         if isinstance(catalog, Catalog):
             self._input_catalog = catalog
         elif isinstance(catalog, dict):
-            self._input_catalog = Catalog.from_dict(catalog)  # type: ignore
+            self._input_catalog = Catalog.from_dict(catalog)  # type: ignore[arg-type]
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
 
@@ -440,7 +440,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             config: tuple[str, ...] = (),
             state: str | None = None,
             catalog: str | None = None,
-            format: str | None = None,
+            about_format: str | None = None,
         ) -> None:
             """Handle command line execution.
 
@@ -449,7 +449,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 about: Display package metadata and settings.
                 discover: Run the tap in discovery mode.
                 test: Test connectivity by syncing a single record and exiting.
-                format: Specify output style for `--about`.
+                about_format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
                     variables. Accepts multiple inputs as a tuple.
                 catalog: Use a Singer catalog file with the tap.",
@@ -465,7 +465,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             if not about:
                 cls.print_version(print_fn=cls.logger.info)
             else:
-                cls.print_about(format=format)
+                cls.print_about(output_format=about_format)
                 return
 
             validate_config: bool = True
@@ -490,7 +490,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
                 config_files.append(Path(config_path))
 
-            tap = cls(  # type: ignore  # Ignore 'type not callable'
+            tap = cls(  # type: ignore[operator]
                 config=config_files or None,
                 state=state,
                 catalog=catalog,

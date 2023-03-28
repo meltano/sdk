@@ -225,3 +225,36 @@ class TestConnectorSQL:
         compatible_sql_type = connector.merge_sql_types([current_type, sql_type])
         # Check that VARCHAR(255) is chosen over the lesser current VARCHAR(64)
         assert compatible_sql_type is sql_type
+
+    @pytest.mark.parametrize(
+        "types,expected_type",
+        [
+            pytest.param(
+                [sqlalchemy.types.Integer(), sqlalchemy.types.Numeric()],
+                sqlalchemy.types.Integer,
+                id="integer-numeric",
+            ),
+            pytest.param(
+                [sqlalchemy.types.Numeric(), sqlalchemy.types.Integer()],
+                sqlalchemy.types.Numeric,
+                id="numeric-integer",
+            ),
+            pytest.param(
+                [
+                    sqlalchemy.types.Integer(),
+                    sqlalchemy.types.String(),
+                    sqlalchemy.types.Numeric(),
+                ],
+                sqlalchemy.types.String,
+                id="integer-string-numeric",
+            ),
+        ],
+    )
+    def test_merge_generic_sql_types(
+        self,
+        connector: SQLConnector,
+        types: list[sqlalchemy.types.TypeEngine],
+        expected_type: type[sqlalchemy.types.TypeEngine],
+    ):
+        merged_type = connector.merge_sql_types(types)
+        assert isinstance(merged_type, expected_type)

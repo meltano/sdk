@@ -131,7 +131,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             version: bool = False,
             about: bool = False,
             config: tuple[str, ...] = (),
-            format: str | None = None,
+            about_format: str | None = None,
             file_input: FileIO | None = None,
         ) -> None:
             """Handle command line execution.
@@ -139,7 +139,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             Args:
                 version: Display the package version.
                 about: Display package metadata and settings.
-                format: Specify output style for `--about`.
+                about_format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
                     variables. Accepts multiple inputs as a tuple.
                 file_input: Specify a path to an input file to read messages from.
@@ -164,13 +164,13 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 cls._env_prefix,
             )
 
-            mapper = cls(  # type: ignore  # Ignore 'type not callable'
+            mapper = cls(  # type: ignore[operator]
                 config=config_dict,
                 validate_config=validate_config,
             )
 
             if about:
-                mapper.print_about(format)
+                mapper.print_about(about_format)
             else:
                 mapper.listen(file_input)
 

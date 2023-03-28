@@ -32,7 +32,7 @@ class BaseBatchFileEncoding:
     __encoding_format__: ClassVar[str] = "OVERRIDE_ME"
 
     # Base encoding fields
-    format: str = field(init=False)
+    format: str = field(init=False)  # noqa: A003
     """The format of the batch file."""
 
     compression: str | None = None
@@ -176,7 +176,11 @@ class StorageTarget:
         filesystem.close()
 
     @contextmanager
-    def open(self, filename: str, mode: str = "rb") -> Generator[IO, None, None]:
+    def open(  # noqa: A003
+        self,
+        filename: str,
+        mode: str = "rb",
+    ) -> Generator[IO, None, None]:
         """Open a file in the storage target.
 
         Args:

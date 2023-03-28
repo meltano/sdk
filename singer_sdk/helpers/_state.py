@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, cast
+from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast
 
 from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.helpers._typing import to_json_compatible
 
 if TYPE_CHECKING:
     import datetime
+
+    _T = TypeVar("_T", datetime.datetime, str, int, float)
 
 PROGRESS_MARKERS = "progress_markers"
 PROGRESS_MARKER_NOTE = "Note"
@@ -224,13 +226,12 @@ def increment_state(
 
 
 def _greater_than_signpost(
-    signpost: datetime.datetime | str | int | float,
-    new_value: datetime.datetime | str | int | float,
+    signpost: _T,
+    new_value: _T,
 ) -> bool:
     """Compare and return True if new_value is greater than signpost."""
-    return (  # fails if signpost and bookmark are incompatible types
-        new_value > signpost  # type: ignore
-    )
+    # fails if signpost and bookmark are incompatible types
+    return new_value > signpost
 
 
 def finalize_state_progress_markers(stream_or_partition_state: dict) -> dict | None:
