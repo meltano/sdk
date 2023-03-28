@@ -834,11 +834,7 @@ class SQLConnector:
         # Gathering Type to match variables
         # sent in _adapt_column_type
         current_type = sql_types[0]
-
-        # Getting the length of each type
-        sql_type_len: int = getattr(sql_types[1], "length", 0)
-        if sql_type_len is None:
-            sql_type_len = 0
+        cur_len: int = getattr(current_type, "length", 0)
 
         # Convert the two types given into a sorted list
         # containing the best conversion classes
@@ -865,7 +861,11 @@ class SQLConnector:
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
                 ):
                     # If length None or 0 then is varchar max ?
-                    if (opt_len is None) or (opt_len == 0):
+                    if (
+                        (opt_len is None)
+                        or (opt_len == 0)
+                        or (cur_len and (opt_len >= cur_len))
+                    ):
                         return opt
                 # If best conversion class is equal to current type
                 # return the best conversion class
