@@ -74,10 +74,10 @@ html_theme_options = {
         "font-stack": "Hanken Grotesk,-apple-system,Helvetica,sans-serif",
         "color-foreground-primary": "#080216",
         "color-background-primary": "#E9E5FB",
-        "color-link": "#f963bc",
+        "color-link": "#3A64FA",
         "color-link-underline": "transparent",
-        "color-link--hover": "#f963bc",
-        "color-link-underline--hover": "#f963bc",
+        "color-link--hover": "#3A64FA",
+        "color-link-underline--hover": "#3A64FA",
         # brand
         "color-brand-primary": "#311772",
         "color-brand-content": "#311772",
@@ -94,16 +94,12 @@ html_theme_options = {
     "dark_css_variables": {
         "color-background-primary": "#080216",
         "color-link": "#18c3fa",
-        "color-link-underline": "transparent",
         "color-link--hover": "#18c3fa",
         "color-link-underline--hover": "#18c3fa",
         # brand
-        "color-brand-primary": "#311772",
         "color-brand-content": "rgba(255, 255, 255, 0.7)",
         # sidebar
-        "color-sidebar-background": "#311772",
         "color-sidebar-search-background": "#080216",
-        "color-sidebar-item-background--hover": "#311772",
     },
 }
 
