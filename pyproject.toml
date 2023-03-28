@@ -221,14 +221,18 @@ ignore = [
 ]
 line-length = 88
 select = [
-    "E",
-    "F",
+    "F",    # Pyflakes
+    "E",    # pycodestyle (error)
+    "W",    # pycodestyle (warning)
     "I",    # isort
     "D",    # pydocstyle/flake8-docstrings
     "UP",   # pyupgrade
     "YTT",  # flake8-2020
     "ANN",  # flake8-annotations
+    "BLE",  # flake8-blind-except
+    "B",    # flake8-bugbear
     "COM",  # flake8-commas
+    "C4",   # flake8-comprehensions
     "T10",  # flake8-debugger
     "ISC",  # flake8-implicit-str-concat
     "ICN",  # flake8-import-conventions
