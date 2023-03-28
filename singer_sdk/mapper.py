@@ -59,7 +59,7 @@ def md5(string: str) -> str:
     Returns:
         A string digested into MD5.
     """
-    return hashlib.md5(string.encode("utf-8")).hexdigest()
+    return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
 
 
 StreamMapsDict: TypeAlias = Dict[str, Union[str, dict, None]]
@@ -360,12 +360,16 @@ class CustomStreamMap(StreamMap):
 
         Args:
             expr: String expression to evaluate.
-            default: TODO.
+            default: Default type.
 
         Returns:
-            TODO
+            The evaluated expression's type.
+
+        Raises:
+            ValueError: If the expression is ``None``.
         """
-        assert expr is not None, "Expression should be str, not None"
+        if expr is None:
+            raise ValueError("Expression should be str, not None")
 
         default = default or StringType()
 

@@ -28,7 +28,9 @@ def _sqlite_sample_db(sqlite_connector):
                 text(f"CREATE TABLE t{t} (c1 int PRIMARY KEY, c2 varchar(10))"),
             )
             for x in range(100):
-                conn.execute(text(f"INSERT INTO t{t} VALUES ({x}, 'x={x}')"))
+                conn.execute(
+                    text(f"INSERT INTO t{t} VALUES ({x}, 'x={x}')"),  # noqa: S608
+                )
 
 
 @pytest.fixture
