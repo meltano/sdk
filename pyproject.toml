@@ -246,6 +246,7 @@ select = [
     "RSE",  # flake8-raise
     "RET",  # flake8-return
     "SIM",  # flake8-simplify
+    "TID",  # flake8-tidy-imports
     "TCH",  # flake8-type-checking
     "ARG",  # flake8-unused-arguments
     "PTH",  # flake8-use-pathlib
