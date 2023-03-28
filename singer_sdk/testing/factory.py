@@ -58,7 +58,7 @@ def get_test_class(
 
     for suite in test_suites:
         # make sure given runner is of type TapTestRunner
-        expected_runner_class = (  # type: ignore[valid-type]
+        expected_runner_class = (
             TapTestRunner
             if suite.kind in {"tap", "tap_stream", "tap_stream_attribute"}
             else TargetTestRunner

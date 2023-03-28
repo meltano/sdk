@@ -86,7 +86,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         if isinstance(catalog, Catalog):
             self._input_catalog = catalog
         elif isinstance(catalog, dict):
-            self._input_catalog = Catalog.from_dict(catalog)  # type: ignore
+            self._input_catalog = Catalog.from_dict(catalog)  # type: ignore[arg-type]
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
 
@@ -490,7 +490,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
                 config_files.append(Path(config_path))
 
-            tap = cls(  # type: ignore  # Ignore 'type not callable'
+            tap = cls(  # type: ignore[operator]
                 config=config_files or None,
                 state=state,
                 catalog=catalog,

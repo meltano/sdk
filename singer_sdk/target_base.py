@@ -569,7 +569,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
                 config_files.append(Path(config_path))
 
-            target = cls(  # type: ignore  # Ignore 'type not callable'
+            target = cls(  # type: ignore[operator]
                 config=config_files or None,
                 parse_env_config=parse_env_config,
                 validate_config=validate_config,
