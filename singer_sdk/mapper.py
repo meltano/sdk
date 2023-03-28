@@ -342,11 +342,13 @@ class CustomStreamMap(StreamMap):
                 functions=self.functions,
                 names=names,
             )
-            logging.debug(f"Eval result: {expr} = {result}")
-        except Exception as ex:
+        except (simpleeval.InvalidExpression, SyntaxError) as ex:
             raise MapExpressionError(
                 f"Failed to evaluate simpleeval expressions {expr}.",
             ) from ex
+
+        logging.debug(f"Eval result: {expr} = {result}")
+
         return result
 
     def _eval_type(

@@ -333,11 +333,11 @@ class Sink(metaclass=abc.ABCMeta):
         for key in record:
             datelike_type = get_datelike_property_type(schema["properties"][key])
             if datelike_type:
+                date_val = record[key]
                 try:
-                    date_val = record[key]
                     if record[key] is not None:
                         date_val = parser.parse(date_val)
-                except Exception as ex:
+                except parser.ParserError as ex:
                     date_val = handle_invalid_timestamp_in_record(
                         record,
                         [key],

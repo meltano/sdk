@@ -281,11 +281,9 @@ class AttributeIsNumberTest(AttributeTestTemplate):
             AssertionError: if value cannot be cast to float type.
         """
         for v in self.non_null_attribute_values:
-            try:
-                error_message = f"Unable to cast value ('{v}') to float type."
-                assert isinstance(v, (float, int)), error_message
-            except Exception as e:
-                raise AssertionError(error_message) from e
+            error_message = f"Unable to cast value ('{v}') to float type."
+            if not isinstance(v, (float, int)):
+                raise AssertionError(error_message)
 
     @classmethod
     def evaluate(

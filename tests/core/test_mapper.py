@@ -256,9 +256,9 @@ def filter_stream_maps():
 
 @pytest.fixture
 def filter_stream_map_w_error(filter_stream_maps):
-    restult = copy.copy(filter_stream_maps)
-    restult["repositories"]["__filter__"] = "this should raise an er!ror"
-    return restult
+    result = copy.copy(filter_stream_maps)
+    result["repositories"]["__filter__"] = "this should raise an er!ror"
+    return result
 
 
 @pytest.fixture
