@@ -333,11 +333,11 @@ class Sink(metaclass=abc.ABCMeta):
         for key in record:
             datelike_type = get_datelike_property_type(schema["properties"][key])
             if datelike_type:
+                date_val = record[key]
                 try:
-                    date_val = record[key]
                     if record[key] is not None:
                         date_val = parser.parse(date_val)
-                except Exception as ex:
+                except parser.ParserError as ex:
                     date_val = handle_invalid_timestamp_in_record(
                         record,
                         [key],
@@ -355,6 +355,7 @@ class Sink(metaclass=abc.ABCMeta):
         Args:
             context: Stream partition or context dictionary.
         """
+        self.logger.debug("Processed record: %s", context)
 
     # SDK developer overrides:
 
@@ -447,6 +448,7 @@ class Sink(metaclass=abc.ABCMeta):
         Setup is executed once per Sink instance, after instantiation. If a Schema
         change is detected, a new Sink is instantiated and this method is called again.
         """
+        self.logger.info("Setting up %s", self.stream_name)
 
     def clean_up(self) -> None:
         """Perform any clean up actions required at end of a stream.
@@ -455,6 +457,7 @@ class Sink(metaclass=abc.ABCMeta):
         that may be in use from other instances of the same sink. Stream name alone
         should not be relied on, it's recommended to use a uuid as well.
         """
+        self.logger.info("Cleaning up %s", self.stream_name)
 
     def process_batch_files(
         self,

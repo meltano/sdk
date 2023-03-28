@@ -493,6 +493,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
                 "in a future version of the Meltano Singer SDK. "
                 "Override `RESTStream.get_new_paginator` instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             return LegacyStreamPaginator(self)  # type: ignore
 
