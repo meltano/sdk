@@ -221,8 +221,9 @@ ignore = [
 ]
 line-length = 88
 select = [
-    "E",
-    "F",
+    "F",    # Pyflakes
+    "E",    # pycodestyle (error)
+    "W",    # pycodestyle (warning)
     "I",    # isort
     "D",    # pydocstyle/flake8-docstrings
     "UP",   # pyupgrade
