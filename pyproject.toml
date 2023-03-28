@@ -229,6 +229,7 @@ select = [
     "UP",   # pyupgrade
     "YTT",  # flake8-2020
     "ANN",  # flake8-annotations
+    "S",    # flake8-bandit
     "BLE",  # flake8-blind-except
     "B",    # flake8-bugbear
     "A",    # flake8-builtins
@@ -259,12 +260,13 @@ target-version = "py37"
     "INP001", # flake8-no-pep420: implicit-namespace-package
 ]
 "noxfile.py" = ["ANN"]
-"tests/*" = ["ANN", "D1", "D2"]
+"tests/*" = ["ANN", "D1", "D2", "S101"]
 # Disabled some checks in samples code
 "samples/*" = ["ANN", "D"]
 # Don't require docstrings conventions or type annotations in private modules
 "singer_sdk/helpers/_*.py" = ["ANN", "D105"]
 # Templates support a generic resource of type Any.
+"singer_sdk/testing/*.py" = ["S101"]
 "singer_sdk/testing/templates.py" = ["ANN401"]
 
 [tool.ruff.flake8-annotations]

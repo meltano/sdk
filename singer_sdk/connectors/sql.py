@@ -850,7 +850,12 @@ class SQLConnector:
                 [self.merge_sql_types([sql_types[0], sql_types[1]])] + sql_types[2:],
             )
 
-        assert len(sql_types) == 2
+        if len(sql_types) != 2:
+            errmsg = (
+                f"Unable to merge sql types: {', '.join([str(t) for t in sql_types])}"
+            )
+            raise ValueError(errmsg)
+
         # Get the generic type class
         for opt in sql_types:
             # Get the length

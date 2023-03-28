@@ -496,7 +496,11 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         """
         request_time = utc_now()
         auth_request_payload = self.oauth_request_payload
-        token_response = requests.post(self.auth_endpoint, data=auth_request_payload)
+        token_response = requests.post(
+            self.auth_endpoint,
+            data=auth_request_payload,
+            timeout=60,
+        )
         try:
             token_response.raise_for_status()
         except requests.HTTPError as ex:
