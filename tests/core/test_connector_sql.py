@@ -216,7 +216,7 @@ class TestConnectorSQL:
         current_type = sqlalchemy.types.VARCHAR(length=64)
         sql_type = sqlalchemy.types.VARCHAR(length=None)
         compatible_sql_type = connector.merge_sql_types([current_type, sql_type])
-        # Check the current VARCHAR(64) is chosen over default varcahr(max)
+        # Check the current VARCHAR(64) is chosen over default VARCHAR(max)
         assert compatible_sql_type is current_type
 
     def test_merge_sql_types_text_current_less_than(self, connector):
