@@ -327,18 +327,21 @@ class PluginBase(metaclass=abc.ABCMeta):
             _merge_missing(FLATTENING_CONFIG, config_jsonschema)
 
     @classmethod
-    def print_about(cls: type[PluginBase], format: str | None = None) -> None:
+    def print_about(
+        cls: type[PluginBase],
+        output_format: str | None = None,
+    ) -> None:
         """Print capabilities and other tap metadata.
 
         Args:
-            format: Render option for the plugin information.
+            output_format: Render option for the plugin information.
         """
         info = cls._get_about_info()
 
-        if format == "json":
+        if output_format == "json":
             print(json.dumps(info, indent=2, default=str))  # noqa: T201
 
-        elif format == "markdown":
+        elif output_format == "markdown":
             max_setting_len = cast(
                 int,
                 max(len(k) for k in info["settings"]["properties"]),

@@ -25,7 +25,7 @@ class TapCLIPrintsTest(TapTestTemplate):
         """Run test."""
         self.tap.print_version()
         self.tap.print_about()
-        self.tap.print_about(format="json")
+        self.tap.print_about(output_format="json")
 
 
 class TapDiscoveryTest(TapTestTemplate):

@@ -50,16 +50,16 @@ MAPPER_KEY_PROPERTIES_OPTION = "__key_properties__"
 NULL_STRING = "__NULL__"
 
 
-def md5(input: str) -> str:
+def md5(string: str) -> str:
     """Digest a string using MD5. This is a function for inline calculations.
 
     Args:
-        input: String to digest.
+        string: String to digest.
 
     Returns:
         A string digested into MD5.
     """
-    return hashlib.md5(input.encode("utf-8")).hexdigest()
+    return hashlib.md5(string.encode("utf-8")).hexdigest()
 
 
 StreamMapsDict: TypeAlias = Dict[str, Union[str, dict, None]]
