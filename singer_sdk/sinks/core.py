@@ -355,6 +355,7 @@ class Sink(metaclass=abc.ABCMeta):
         Args:
             context: Stream partition or context dictionary.
         """
+        self.logger.debug("Processed record: %s", context)
 
     # SDK developer overrides:
 
@@ -447,6 +448,7 @@ class Sink(metaclass=abc.ABCMeta):
         Setup is executed once per Sink instance, after instantiation. If a Schema
         change is detected, a new Sink is instantiated and this method is called again.
         """
+        self.logger.info("Setting up %s", self.stream_name)
 
     def clean_up(self) -> None:
         """Perform any clean up actions required at end of a stream.
@@ -455,6 +457,7 @@ class Sink(metaclass=abc.ABCMeta):
         that may be in use from other instances of the same sink. Stream name alone
         should not be relied on, it's recommended to use a uuid as well.
         """
+        self.logger.info("Cleaning up %s", self.stream_name)
 
     def process_batch_files(
         self,

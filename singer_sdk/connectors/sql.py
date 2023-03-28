@@ -102,6 +102,7 @@ class SQLConnector:
             "on the connector currently, make a child class and "
             "add your required method on that connector.",
             DeprecationWarning,
+            stacklevel=2,
         )
         return self._engine.connect().execution_options(stream_results=True)
 
@@ -118,6 +119,7 @@ class SQLConnector:
             "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override"
             "`_engine` or sqlalchemy_url` instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
         return self._engine
 
@@ -137,6 +139,7 @@ class SQLConnector:
             "that isn't available on the connector currently, make a child "
             "class and add your required method on that connector.",
             DeprecationWarning,
+            stacklevel=2,
         )
         return self.create_sqlalchemy_connection()
 
@@ -331,7 +334,7 @@ class SQLConnector:
             ],
         )
 
-    @lru_cache()
+    @lru_cache()  # noqa: B019
     def _warn_no_view_detection(self) -> None:
         """Print a warning, but only the first time."""
         self.logger.warning(
@@ -670,10 +673,10 @@ class SQLConnector:
         primary_keys = primary_keys or []
         try:
             properties: dict = schema["properties"]
-        except KeyError:
+        except KeyError as e:
             raise RuntimeError(
                 f"Schema for '{full_table_name}' does not define properties: {schema}",
-            )
+            ) from e
         for property_name, property_jsonschema in properties.items():
             is_primary_key = property_name in primary_keys
             columns.append(
@@ -1042,7 +1045,7 @@ class SQLConnector:
         """
         if hasattr(column_type, "collation") and column_type.collation:
             column_type_collation: str = column_type.collation
-            setattr(column_type, "collation", None)
+            column_type.collation = None
             return column_type_collation
         return None
 
@@ -1058,7 +1061,7 @@ class SQLConnector:
             collation: The colation
         """
         if hasattr(column_type, "collation") and collation:
-            setattr(column_type, "collation", collation)
+            column_type.collation = collation
 
     def _adapt_column_type(
         self,

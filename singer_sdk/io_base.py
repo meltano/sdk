@@ -129,4 +129,4 @@ class SingerReader(metaclass=abc.ABCMeta):
         raise ValueError(f"Unknown message type '{record_type}' in message.")
 
     def _process_endofpipe(self) -> None:
-        pass
+        logger.debug("End of pipe reached")

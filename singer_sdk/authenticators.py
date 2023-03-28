@@ -502,7 +502,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         except requests.HTTPError as ex:
             raise RuntimeError(
                 f"Failed OAuth login, response was '{token_response.json()}'. {ex}",
-            )
+            ) from ex
 
         self.logger.info("OAuth authorization attempt was successful.")
 

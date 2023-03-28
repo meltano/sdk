@@ -149,10 +149,7 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
         True if date or date-time, else False.
     """
     if "anyOf" in type_dict:
-        for type_dict in type_dict["anyOf"]:
-            if is_date_or_datetime_type(type_dict):
-                return True
-        return False
+        return any(is_date_or_datetime_type(option) for option in type_dict["anyOf"])
 
     if "type" in type_dict:
         return type_dict.get("format") in {"date", "date-time"}

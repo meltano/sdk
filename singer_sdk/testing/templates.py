@@ -232,7 +232,10 @@ class AttributeTestTemplate(TestTemplate):
             if r.get(self.attribute_name) is not None
         ]
         if not values:
-            warnings.warn(UserWarning("No records were available to test."))
+            warnings.warn(
+                UserWarning("No records were available to test."),
+                stacklevel=2,
+            )
         return values
 
     @classmethod
