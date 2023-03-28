@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import abc
+import contextlib
 import json
 from enum import Enum
 from pathlib import Path, PurePath
-from typing import Any, Callable, Sequence, cast
+from typing import TYPE_CHECKING, Any, Callable, Sequence, cast
 
 import click
 
@@ -25,7 +26,9 @@ from singer_sdk.helpers.capabilities import (
 )
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
-from singer_sdk.streams import SQLStream, Stream
+
+if TYPE_CHECKING:
+    from singer_sdk.streams import SQLStream, Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
 
@@ -194,13 +197,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 self.logger.debug(
                     f"Child stream '{type(stream).__name__}' should be called by "
                     f"parent stream '{stream.parent_stream_type.__name__}'. "
-                    "Skipping direct invocation."
+                    "Skipping direct invocation.",
                 )
                 continue
-            try:
+            with contextlib.suppress(MaxRecordsLimitException):
                 stream.sync()
-            except MaxRecordsLimitException:
-                pass
         return True
 
     @final
@@ -218,7 +219,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             The catalog as a string of JSON.
         """
         catalog_text = self.catalog_json_text
-        print(catalog_text)
+        print(catalog_text)  # noqa: T201
         return catalog_text
 
     @property
@@ -263,7 +264,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """
         raise NotImplementedError(
             f"Tap '{self.name}' does not support discovery. "
-            "Please set the '--catalog' command line argument and try again."
+            "Please set the '--catalog' command line argument and try again.",
         )
 
     @final
@@ -294,7 +295,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     for stream in streams:
                         parent.child_streams.append(stream)
                         self.logger.info(
-                            f"Added '{stream.name}' as child stream to '{parent.name}'"
+                            f"Added '{stream.name}' as child stream to '{parent.name}'",
                         )
 
         streams = [stream for streams in streams_by_type.values() for stream in streams]
@@ -352,7 +353,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                         f"Stream descendent '{descendent.name}' is selected and "
                         f"its parent '{stream.name}' does not use inclusive "
                         f"replication keys. "
-                        f"Forcing full table replication for '{stream.name}'."
+                        f"Forcing full table replication for '{stream.name}'.",
                     )
                     stream.replication_key = None
                     stream.forced_replication_method = "FULL_TABLE"
@@ -374,7 +375,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 self.logger.debug(
                     f"Child stream '{type(stream).__name__}' is expected to be called "
                     f"by parent stream '{stream.parent_stream_type.__name__}'. "
-                    "Skipping direct invocation."
+                    "Skipping direct invocation.",
                 )
                 continue
 
@@ -413,8 +414,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             default=CliTestOptionValue.Disabled,
             help=(
                 "Use --test to sync a single record for each stream. "
-                + "Use --test=schema to test schema output without syncing "
-                + "records."
+                "Use --test=schema to test schema output without syncing "
+                "records."
             ),
         )
         @click.option(
@@ -484,7 +485,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 if not Path(config_path).is_file():
                     raise FileNotFoundError(
                         f"Could not locate config file at '{config_path}'."
-                        "Please check that the file exists."
+                        "Please check that the file exists.",
                     )
 
                 config_files.append(Path(config_path))

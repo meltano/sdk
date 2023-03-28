@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import contextlib
-import os
 import warnings
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from singer_sdk.streams import Stream
+if TYPE_CHECKING:
+    from singer_sdk.streams import Stream
 
-from .config import SuiteConfig
-from .runners import TapTestRunner, TargetTestRunner
+    from .config import SuiteConfig
+    from .runners import TapTestRunner, TargetTestRunner
 
 
 class TestTemplate:
@@ -254,7 +254,7 @@ class AttributeTestTemplate(TestTemplate):
         """
         raise NotImplementedError(
             "The 'evaluate' method is required for attribute tests, "
-            "but not implemented."
+            "but not implemented.",
         )
 
 
@@ -311,7 +311,7 @@ class TargetFileTestTemplate(TargetTestTemplate):
         # get input from file
         if getattr(self, "singer_filepath", None):
             assert Path(
-                self.singer_filepath
+                self.singer_filepath,
             ).exists(), f"Singer file {self.singer_filepath} does not exist."
             runner.input_filepath = self.singer_filepath
         super().run(config, resource, runner)
@@ -325,5 +325,5 @@ class TargetFileTestTemplate(TargetTestTemplate):
         Returns:
             The expected Path to this tests singer file.
         """
-        current_dir = Path(os.path.dirname(os.path.abspath(__file__)))
+        current_dir = Path(__file__).resolve().parent
         return current_dir / "target_test_streams" / f"{self.name}.singer"

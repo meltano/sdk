@@ -6,6 +6,8 @@ See the online explorer and query builder here:
   - https://countries.trevorblades.com/
 """
 
+from __future__ import annotations
+
 import abc
 from pathlib import Path
 
@@ -69,7 +71,7 @@ class CountriesStream(CountriesAPIStream):
                 th.ObjectType(
                     th.Property("code", th.StringType),
                     th.Property("name", th.StringType),
-                )
+                ),
             ),
         ),
     ).to_dict()

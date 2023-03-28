@@ -1,4 +1,4 @@
-# [SDK Implementation Details](./index.md) - "At Least Once" Delivery Promise
+# "At Least Once" Delivery Promise
 
 The Singer Spec promises that each record in the source system will be processed successfully in the target _at least once_. This promises that no record will ever go missing or be omitted, but it _does not_ guarantee that all records will be received _exactly once_.
 

@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from dataclasses import asdict
-from urllib.parse import urlparse
 
 import pytest
 
@@ -38,7 +39,7 @@ def test_storage_get_s3_url():
     with storage.fs(create=True) as fs:
         url = fs.geturl("prefix--file.jsonl.gz")
         assert url.startswith(
-            "https://s3.amazonaws.com/test_bucket/prefix--file.jsonl.gz"
+            "https://s3.amazonaws.com/test_bucket/prefix--file.jsonl.gz",
         )
 
 

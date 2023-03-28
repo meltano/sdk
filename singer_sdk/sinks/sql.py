@@ -1,27 +1,32 @@
 """Sink classes load data to SQL targets."""
 
+from __future__ import annotations
+
 import re
 from collections import defaultdict
 from copy import copy
 from textwrap import dedent
-from typing import Any, Dict, Iterable, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Iterable
 
 import sqlalchemy
 from pendulum import now
-from sqlalchemy.sql import Executable
 from sqlalchemy.sql.expression import bindparam
 
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.exceptions import ConformedNameClashException
 from singer_sdk.helpers._conformers import replace_leading_digit
-from singer_sdk.plugin_base import PluginBase
 from singer_sdk.sinks.batch import BatchSink
+
+if TYPE_CHECKING:
+    from sqlalchemy.sql import Executable
+
+    from singer_sdk.plugin_base import PluginBase
 
 
 class SQLSink(BatchSink):
     """SQL-type sink type."""
 
-    connector_class: Type[SQLConnector]
+    connector_class: type[SQLConnector]
     soft_delete_column_name = "_sdc_deleted_at"
     version_column_name = "_sdc_table_version"
 
@@ -29,9 +34,9 @@ class SQLSink(BatchSink):
         self,
         target: PluginBase,
         stream_name: str,
-        schema: Dict,
-        key_properties: Optional[List[str]],
-        connector: Optional[SQLConnector] = None,
+        schema: dict,
+        key_properties: list[str] | None,
+        connector: SQLConnector | None = None,
     ) -> None:
         """Initialize SQL Sink.
 
@@ -76,7 +81,7 @@ class SQLSink(BatchSink):
         return self.conform_name(table, "table")
 
     @property
-    def schema_name(self) -> Optional[str]:
+    def schema_name(self) -> str | None:
         """Return the schema name or `None` if using names with no schema part.
 
         Returns:
@@ -96,20 +101,15 @@ class SQLSink(BatchSink):
         if len(parts) in {2, 3}:
             # Stream name is a two-part or three-part identifier.
             # Use the second-to-last part as the schema name.
-            stream_schema = self.conform_name(parts[-2], "schema")
-            return stream_schema
+            return self.conform_name(parts[-2], "schema")
 
         # Schema name not detected.
         return None
 
     @property
-    def database_name(self) -> Optional[str]:
-        """Return the DB name or `None` if using names with no database part.
-
-        Returns:
-            The target database name.
-        """
-        return None  # Assumes single-DB target context.
+    def database_name(self) -> str | None:
+        """Return the DB name or `None` if using names with no database part."""
+        # Assumes single-DB target context.
 
     @property
     def full_table_name(self) -> str:
@@ -132,10 +132,15 @@ class SQLSink(BatchSink):
             The fully qualified schema name.
         """
         return self.connector.get_fully_qualified_name(
-            schema_name=self.schema_name, db_name=self.database_name
+            schema_name=self.schema_name,
+            db_name=self.database_name,
         )
 
-    def conform_name(self, name: str, object_type: Optional[str] = None) -> str:
+    def conform_name(
+        self,
+        name: str,
+        object_type: str | None = None,  # noqa: ARG002
+    ) -> str:
         """Conform a stream property name to one suitable for the target system.
 
         Transforms names to snake case by default, applicable to most common DBMSs'.
@@ -167,7 +172,7 @@ class SQLSink(BatchSink):
 
     @staticmethod
     def _check_conformed_names_not_duplicated(
-        conformed_property_names: Dict[str, str]
+        conformed_property_names: dict[str, str],
     ) -> None:
         """Check if conformed names produce duplicate keys.
 
@@ -177,7 +182,7 @@ class SQLSink(BatchSink):
         Raises:
             ConformedNameClashException: if duplicates found.
         """
-        # group: {'_a': ['1_a'], 'abc': ['aBc', 'abC']}
+        # group: {'_a': ['1_a'], 'abc': ['aBc', 'abC']}  # noqa: ERA001
         grouped = defaultdict(list)
         for k, v in conformed_property_names.items():
             grouped[v].append(k)
@@ -187,7 +192,7 @@ class SQLSink(BatchSink):
         if duplicates:
             raise ConformedNameClashException(
                 "Duplicate stream properties produced when "
-                + f"conforming property names: {duplicates}"
+                f"conforming property names: {duplicates}",
             )
 
     def conform_schema(self, schema: dict) -> dict:
@@ -201,7 +206,7 @@ class SQLSink(BatchSink):
         """
         conformed_schema = copy(schema)
         conformed_property_names = {
-            key: self.conform_name(key) for key in conformed_schema["properties"].keys()
+            key: self.conform_name(key) for key in conformed_schema["properties"]
         }
         self._check_conformed_names_not_duplicated(conformed_property_names)
         conformed_schema["properties"] = {
@@ -239,7 +244,7 @@ class SQLSink(BatchSink):
         )
 
     @property
-    def key_properties(self) -> List[str]:
+    def key_properties(self) -> list[str]:
         """Return key properties, conformed to target system naming requirements.
 
         Returns:
@@ -268,7 +273,7 @@ class SQLSink(BatchSink):
         self,
         full_table_name: str,
         schema: dict,
-    ) -> Union[str, Executable]:
+    ) -> str | Executable:
         """Generate an insert statement for the given records.
 
         Args:
@@ -284,7 +289,7 @@ class SQLSink(BatchSink):
             INSERT INTO {full_table_name}
             ({", ".join(property_names)})
             VALUES ({", ".join([f":{name}" for name in property_names])})
-            """
+            """,
         )
         return statement.rstrip()
 
@@ -292,8 +297,8 @@ class SQLSink(BatchSink):
         self,
         full_table_name: str,
         schema: dict,
-        records: Iterable[Dict[str, Any]],
-    ) -> Optional[int]:
+        records: Iterable[dict[str, Any]],
+    ) -> int | None:
         """Bulk insert records to an existing destination table.
 
         The default implementation uses a generic SQLAlchemy bulk insert operation.
@@ -322,12 +327,16 @@ class SQLSink(BatchSink):
             else (self.conform_record(record) for record in records)
         )
         self.logger.info("Inserting with SQL: %s", insert_sql)
-        self.connector.connection.execute(insert_sql, conformed_records)
+        with self.connector._connect() as conn, conn.begin():
+            conn.execute(insert_sql, conformed_records)
         return len(conformed_records) if isinstance(conformed_records, list) else None
 
     def merge_upsert_from_table(
-        self, target_table_name: str, from_table_name: str, join_keys: List[str]
-    ) -> Optional[int]:
+        self,
+        target_table_name: str,
+        from_table_name: str,
+        join_keys: list[str],
+    ) -> int | None:
         """Merge upsert data from one table to another.
 
         Args:
@@ -343,7 +352,7 @@ class SQLSink(BatchSink):
             NotImplementedError: if the merge upsert capability does not exist or is
                 undefined.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def activate_version(self, new_version: int) -> None:
         """Bump the active version of the target table.
@@ -369,10 +378,13 @@ class SQLSink(BatchSink):
             )
 
         if self.config.get("hard_delete", True):
-            self.connection.execute(
-                f"DELETE FROM {self.full_table_name} "
-                f"WHERE {self.version_column_name} <= {new_version}"
-            )
+            with self.connector._connect() as conn, conn.begin():
+                conn.execute(
+                    sqlalchemy.text(
+                        f"DELETE FROM {self.full_table_name} "
+                        f"WHERE {self.version_column_name} <= {new_version}",
+                    ),
+                )
             return
 
         if not self.connector.column_exists(
@@ -389,13 +401,14 @@ class SQLSink(BatchSink):
             f"UPDATE {self.full_table_name}\n"
             f"SET {self.soft_delete_column_name} = :deletedate \n"
             f"WHERE {self.version_column_name} < :version \n"
-            f"  AND {self.soft_delete_column_name} IS NULL\n"
+            f"  AND {self.soft_delete_column_name} IS NULL\n",
         )
         query = query.bindparams(
             bindparam("deletedate", value=deleted_at, type_=sqlalchemy.types.DateTime),
             bindparam("version", value=new_version, type_=sqlalchemy.types.Integer),
         )
-        self.connector.connection.execute(query)
+        with self.connector._connect() as conn, conn.begin():
+            conn.execute(query)
 
 
 __all__ = ["SQLSink", "SQLConnector"]

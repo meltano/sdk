@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import warnings
-from typing import Optional
 
 from samples.sample_tap_gitlab.gitlab_tap import SampleTapGitlab
 from singer_sdk._singerlib import Catalog
@@ -12,21 +13,23 @@ from .conftest import gitlab_config
 try:
     config = gitlab_config()
     TestSampleTapGitlab = get_tap_test_class(
-        tap_class=SampleTapGitlab, config=config, parse_env_config=True
+        tap_class=SampleTapGitlab,
+        config=config,
+        parse_env_config=True,
     )
 except ConfigValidationError as e:
     warnings.warn(
         UserWarning(
             "Could not configure external gitlab tests. "
-            f"Config in CI is expected via env vars.\n{e}"
-        )
+            f"Config in CI is expected via env vars.\n{e}",
+        ),
     )
 
 COUNTER = 0
 SAMPLE_CONFIG_BAD = {"not": "correct"}
 
 
-def test_gitlab_replication_keys(gitlab_config: Optional[dict]):
+def test_gitlab_replication_keys(gitlab_config: dict | None):
     stream_name = "issues"
     expected_replication_key = "updated_at"
     tap = SampleTapGitlab(config=gitlab_config, state=None, parse_env_config=True)
@@ -54,7 +57,7 @@ def test_gitlab_replication_keys(gitlab_config: Optional[dict]):
     ].is_timestamp_replication_key, "Failed to detect `is_timestamp_replication_key`"
 
 
-def test_gitlab_sync_epic_issues(gitlab_config: Optional[dict]):
+def test_gitlab_sync_epic_issues(gitlab_config: dict | None):
     """Test sync for just the 'epic_issues' child stream."""
     # Initialize with basic config
     stream_name = "epic_issues"
@@ -71,6 +74,8 @@ def test_gitlab_sync_epic_issues(gitlab_config: Optional[dict]):
     )
     tap1 = None
     tap2 = SampleTapGitlab(
-        config=gitlab_config, parse_env_config=True, catalog=catalog1.to_dict()
+        config=gitlab_config,
+        parse_env_config=True,
+        catalog=catalog1.to_dict(),
     )
     tap2.sync_all()

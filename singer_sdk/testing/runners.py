@@ -130,7 +130,7 @@ class TapTestRunner(SingerTestRunner):
         """
         return self.tap.run_connection_test()
 
-    def sync_all(self, **kwargs: Any) -> None:
+    def sync_all(self, **kwargs: Any) -> None:  # noqa: ARG002
         """Run a full tap sync, assigning output to the runner object.
 
         Args:
@@ -231,14 +231,14 @@ class TargetTestRunner(SingerTestRunner):
             if self.input_io:
                 self._input = self.input_io
             elif self.input_filepath:
-                self._input = open(self.input_filepath)
+                self._input = Path(self.input_filepath).open()  # noqa: SIM115
         return cast(IO[str], self._input)
 
     @input.setter
     def input(self, value: IO[str]) -> None:
         self._input = value
 
-    def sync_all(self, finalize: bool = True, **kwargs: Any) -> None:
+    def sync_all(self, finalize: bool = True, **kwargs: Any) -> None:  # noqa: ARG002
         """Run a full tap sync, assigning output to the runner object.
 
         Args:
@@ -248,13 +248,18 @@ class TargetTestRunner(SingerTestRunner):
         """
         target = cast(Target, self.create())
         stdout, stderr = self._execute_sync(
-            target=target, input=self.input, finalize=finalize
+            target=target,
+            input=self.input,
+            finalize=finalize,
         )
         self.stdout, self.stderr = (stdout.read(), stderr.read())
         self.state_messages.extend(self._clean_sync_output(self.stdout))
 
     def _execute_sync(
-        self, target: Target, input: IO[str], finalize: bool = True
+        self,
+        target: Target,
+        input: IO[str],
+        finalize: bool = True,
     ) -> tuple[io.StringIO, io.StringIO]:
         """Invoke the target with the provided input.
 

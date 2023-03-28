@@ -1,5 +1,5 @@
-SDK Reference
-=============
+Classes Reference
+=================
 
 .. currentmodule:: singer_sdk
 
@@ -86,10 +86,32 @@ JSON Schema builder classes
 ---------------------------
 
 .. autosummary::
-    :template: module.rst
+    :toctree: classes/typing
+    :template: class.rst
 
-    typing
-
+    typing.PropertiesList
+    typing.ArrayType
+    typing.BooleanType
+    typing.CustomType
+    typing.DateTimeType
+    typing.DateType
+    typing.DurationType
+    typing.EmailType
+    typing.HostnameType
+    typing.IntegerType
+    typing.IPv4Type
+    typing.IPv6Type
+    typing.JSONPointerType
+    typing.NumberType
+    typing.ObjectType
+    typing.Property
+    typing.RegexType
+    typing.RelativeJSONPointerType
+    typing.StringType
+    typing.TimeType
+    typing.URITemplateType
+    typing.URIType
+    typing.UUIDType
 
 Pagination
 ----------

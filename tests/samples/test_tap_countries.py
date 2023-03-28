@@ -1,5 +1,7 @@
 """Test sample sync."""
 
+from __future__ import annotations
+
 import copy
 import io
 import json
@@ -19,7 +21,8 @@ SAMPLE_CONFIG_BAD = {"not": "correct"}
 
 # standard tap tests
 TestSampleTapCountries = get_tap_test_class(
-    tap_class=SampleTapCountries, config=SAMPLE_CONFIG
+    tap_class=SampleTapCountries,
+    config=SAMPLE_CONFIG,
 )
 
 
@@ -89,7 +92,7 @@ def test_with_catalog_entry():
     assert new_schema == stream.schema
 
 
-def test_batch_mode(monkeypatch, outdir):
+def test_batch_mode(outdir):
     """Test batch mode."""
     tap = SampleTapCountries(
         config={
@@ -102,8 +105,8 @@ def test_batch_mode(monkeypatch, outdir):
                     "root": outdir,
                     "prefix": "pytest-countries-",
                 },
-            }
-        }
+            },
+        },
     )
 
     buf = io.StringIO()

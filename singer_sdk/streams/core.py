@@ -8,11 +8,19 @@ import datetime
 import gzip
 import itertools
 import json
-import logging
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Generator, Iterable, Iterator, Mapping, TypeVar, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Generator,
+    Iterable,
+    Iterator,
+    Mapping,
+    TypeVar,
+    cast,
+)
 from uuid import uuid4
 
 import pendulum
@@ -46,7 +54,11 @@ from singer_sdk.helpers._typing import (
 )
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
-from singer_sdk.plugin_base import PluginBase as TapBaseClass
+
+if TYPE_CHECKING:
+    import logging
+
+    from singer_sdk.plugin_base import PluginBase as TapBaseClass
 
 # Replication methods
 REPLICATION_FULL_TABLE = "FULL_TABLE"
@@ -97,7 +109,8 @@ class Stream(metaclass=abc.ABCMeta):
     - ``TypeConformanceLevel.NONE``: No conformance is performed.
     - ``TypeConformanceLevel.RECURSIVE``: Conformance is performed recursively through
       all nested levels in the record.
-    - ``TypeConformanceLevel.ROOT``: Conformance is performed only on the root level.
+    - ``TypeConformanceLevel.ROOT_ONLY``: Conformance is performed only on the
+      root level.
     """
 
     # Used for nested stream relationships
@@ -158,7 +171,7 @@ class Stream(metaclass=abc.ABCMeta):
             if isinstance(schema, (PathLike, str)):
                 if not Path(schema).is_file():
                     raise FileNotFoundError(
-                        f"Could not find schema file '{self.schema_filepath}'."
+                        f"Could not find schema file '{self.schema_filepath}'.",
                     )
 
                 self._schema_filepath = Path(schema)
@@ -168,7 +181,7 @@ class Stream(metaclass=abc.ABCMeta):
                 self._schema = schema.to_dict()
             else:
                 raise ValueError(
-                    f"Unexpected type {type(schema).__name__} for arg 'schema'."
+                    f"Unexpected type {type(schema).__name__} for arg 'schema'.",
                 )
 
         if self.schema_filepath:
@@ -177,7 +190,7 @@ class Stream(metaclass=abc.ABCMeta):
         if not self.schema:
             raise ValueError(
                 f"Could not initialize schema for stream '{self.name}'. "
-                "A valid schema object or filepath was not provided."
+                "A valid schema object or filepath was not provided.",
             )
 
     @property
@@ -195,12 +208,13 @@ class Stream(metaclass=abc.ABCMeta):
         if self._tap.mapper:
             self._stream_maps = self._tap.mapper.stream_maps[self.name]
             self.logger.info(
-                f"Tap has custom mapper. Using {len(self.stream_maps)} provided map(s)."
+                "Tap has custom mapper. Using %d provided map(s).",
+                len(self.stream_maps),
             )
         else:
             self.logger.info(
                 f"No custom mapper provided for '{self.name}'. "
-                "Using SameRecordTransform."
+                "Using SameRecordTransform.",
             )
             self._stream_maps = [
                 SameRecordTransform(
@@ -208,7 +222,7 @@ class Stream(metaclass=abc.ABCMeta):
                     raw_schema=self.schema,
                     key_properties=self.primary_keys,
                     flattening_options=get_flattening_options(self.config),
-                )
+                ),
             ]
         return self._stream_maps
 
@@ -275,7 +289,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         if not self.is_timestamp_replication_key:
             raise ValueError(
-                f"The replication key {self.replication_key} is not of timestamp type"
+                f"The replication key {self.replication_key} is not of timestamp type",
             )
 
         return cast(datetime.datetime, pendulum.parse(value))
@@ -357,8 +371,8 @@ class Stream(metaclass=abc.ABCMeta):
         """
         if self.is_timestamp_replication_key:
             return max(value, start_date_value, key=pendulum.parse)
-        else:
-            return value
+
+        return value
 
     def _write_starting_replication_value(self, context: dict | None) -> None:
         """Write the starting replication value, if available.
@@ -372,7 +386,7 @@ class Stream(metaclass=abc.ABCMeta):
         if self.replication_key:
             replication_key_value = state.get("replication_key_value")
             if replication_key_value and self.replication_key == state.get(
-                "replication_key"
+                "replication_key",
             ):
                 value = replication_key_value
 
@@ -387,7 +401,8 @@ class Stream(metaclass=abc.ABCMeta):
         write_starting_replication_value(state, value)
 
     def get_replication_key_signpost(
-        self, context: dict | None
+        self,
+        context: dict | None,  # noqa: ARG002
     ) -> datetime.datetime | Any | None:
         """Get the replication signpost.
 
@@ -715,7 +730,10 @@ class Stream(metaclass=abc.ABCMeta):
     # Private bookmarking methods
 
     def _increment_stream_state(
-        self, latest_record: dict[str, Any], *, context: dict | None = None
+        self,
+        latest_record: dict[str, Any],
+        *,
+        context: dict | None = None,
     ) -> None:
         """Update state of stream or partition with data from the provided record.
 
@@ -740,7 +758,7 @@ class Stream(metaclass=abc.ABCMeta):
             if not self.replication_key:
                 raise ValueError(
                     f"Could not detect replication key for '{self.name}' stream"
-                    f"(replication method={self.replication_method})"
+                    f"(replication method={self.replication_method})",
                 )
             treat_as_sorted = self.is_sorted
             if not treat_as_sorted and self.state_partitioning_keys is not None:
@@ -855,7 +873,7 @@ class Stream(metaclass=abc.ABCMeta):
                 stream=self.name,
                 encoding=encoding,
                 manifest=manifest,
-            )
+            ),
         )
 
     def _log_metric(self, point: metrics.Point) -> None:
@@ -893,7 +911,7 @@ class Stream(metaclass=abc.ABCMeta):
         ):
             raise MaxRecordsLimitException(
                 "Stream prematurely aborted due to the stream's max record "
-                f"limit ({self._MAX_RECORDS_LIMIT}) being reached."
+                f"limit ({self._MAX_RECORDS_LIMIT}) being reached.",
             )
 
     # Handle interim stream state
@@ -956,7 +974,7 @@ class Stream(metaclass=abc.ABCMeta):
         """
         partition_context = partition_context or {}
         child_context = copy.copy(
-            self.get_child_context(record=record, context=child_context)
+            self.get_child_context(record=record, context=child_context),
         )
         for key, val in partition_context.items():
             # Add state context to records if not already present
@@ -1003,7 +1021,7 @@ class Stream(metaclass=abc.ABCMeta):
                 current_context = current_context or None
                 state = self.get_context_state(current_context)
                 state_partition_context = self._get_state_partition_context(
-                    current_context
+                    current_context,
                 )
                 self._write_starting_replication_value(current_context)
                 child_context: dict | None = (
@@ -1186,7 +1204,7 @@ class Stream(metaclass=abc.ABCMeta):
                         f"'{self.name}' and child stream '{child_stream.name}'."
                         "The parent stream must define "
                         f"`{parent_type}.get_child_context()` and/or the child stream "
-                        f"must define `{child_type}.state_partitioning_keys`."
+                        f"must define `{child_type}.state_partitioning_keys`.",
                     )
 
         return context or record
@@ -1218,7 +1236,6 @@ class Stream(metaclass=abc.ABCMeta):
         Args:
             context: Stream partition or context dictionary.
         """
-        pass
 
     def get_batch_config(self, config: Mapping) -> BatchConfig | None:
         """Return the batch config for this stream.
@@ -1261,17 +1278,23 @@ class Stream(metaclass=abc.ABCMeta):
         ):
             filename = f"{prefix}{sync_id}-{i}.json.gz"
             with batch_config.storage.fs() as fs:
-                with fs.open(filename, "wb") as f:
-                    # TODO: Determine compression from config.
-                    with gzip.GzipFile(fileobj=f, mode="wb") as gz:
-                        gz.writelines(
-                            (json.dumps(record) + "\n").encode() for record in chunk
-                        )
+                # TODO: Determine compression from config.
+                with fs.open(filename, "wb") as f, gzip.GzipFile(
+                    fileobj=f,
+                    mode="wb",
+                ) as gz:
+                    gz.writelines(
+                        (json.dumps(record) + "\n").encode() for record in chunk
+                    )
                 file_url = fs.geturl(filename)
 
             yield batch_config.encoding, [file_url]
 
-    def post_process(self, row: dict, context: dict | None = None) -> dict | None:
+    def post_process(
+        self,
+        row: dict,
+        context: dict | None = None,  # noqa: ARG002
+    ) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
 
         Optional. This method gives developers an opportunity to "clean up" the results

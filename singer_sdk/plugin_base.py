@@ -1,5 +1,7 @@
 """Shared parent class for Tap, Target (future), and Transform (future)."""
 
+from __future__ import annotations
+
 import abc
 import json
 import logging
@@ -7,21 +9,10 @@ import os
 from collections import OrderedDict
 from pathlib import PurePath
 from types import MappingProxyType
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Callable, Mapping, cast
 
 import click
-from jsonschema import Draft7Validator, SchemaError, ValidationError
+from jsonschema import Draft7Validator
 
 from singer_sdk import metrics
 from singer_sdk.configuration._dict_config import parse_environment_config
@@ -36,8 +27,10 @@ from singer_sdk.helpers.capabilities import (
     CapabilitiesEnum,
     PluginCapabilities,
 )
-from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import extend_validator_with_defaults
+
+if TYPE_CHECKING:
+    from singer_sdk.mapper import PluginMapper
 
 SDK_PACKAGE_NAME = "singer_sdk"
 
@@ -65,7 +58,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         # Get the level from <PLUGIN_NAME>_LOGLEVEL or LOGLEVEL environment variables
         plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
         LOGLEVEL = os.environ.get(f"{plugin_env_prefix}LOGLEVEL") or os.environ.get(
-            "LOGLEVEL"
+            "LOGLEVEL",
         )
 
         logger = logging.getLogger(cls.name)
@@ -79,7 +72,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
@@ -96,7 +89,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         if not config:
             config_dict = {}
-        elif isinstance(config, str) or isinstance(config, PurePath):
+        elif isinstance(config, (str, PurePath)):
             config_dict = read_json_file(config)
         elif isinstance(config, list):
             config_dict = {}
@@ -124,7 +117,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         self.metrics_logger = metrics.get_metrics_logger()
 
     @classproperty
-    def capabilities(self) -> List[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:
         """Get capabilities.
 
         Developers may override this property in oder to add or remove
@@ -139,7 +132,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         ]
 
     @classproperty
-    def _env_var_config(cls) -> Dict[str, Any]:
+    def _env_var_config(cls) -> dict[str, Any]:
         """Return any config specified in environment variables.
 
         Variables must match the convention "<PLUGIN_NAME>_<SETTING_NAME>",
@@ -191,7 +184,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: If the derived plugin doesn't override this method.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     # Core plugin config:
 
@@ -202,7 +195,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         Returns:
             A frozen (read-only) config dictionary map.
         """
-        return cast(Dict, MappingProxyType(self._config))
+        return cast(dict, MappingProxyType(self._config))
 
     @staticmethod
     def _is_secret_config(config_key: str) -> bool:
@@ -219,8 +212,10 @@ class PluginBase(metaclass=abc.ABCMeta):
         return is_common_secret_key(config_key)
 
     def _validate_config(
-        self, raise_errors: bool = True, warnings_as_errors: bool = False
-    ) -> Tuple[List[str], List[str]]:
+        self,
+        raise_errors: bool = True,
+        warnings_as_errors: bool = False,
+    ) -> tuple[list[str], list[str]]:
         """Validate configuration input against the plugin configuration JSON schema.
 
         Args:
@@ -233,23 +228,22 @@ class PluginBase(metaclass=abc.ABCMeta):
         Raises:
             ConfigValidationError: If raise_errors is True and validation fails.
         """
-        warnings: List[str] = []
-        errors: List[str] = []
+        warnings: list[str] = []
+        errors: list[str] = []
         log_fn = self.logger.info
         config_jsonschema = self.config_jsonschema
+
         if config_jsonschema:
             self.append_builtin_config(config_jsonschema)
-            try:
-                self.logger.debug(
-                    f"Validating config using jsonschema: {config_jsonschema}"
-                )
-                validator = JSONSchemaValidator(config_jsonschema)
-                validator.validate(self._config)
-            except (ValidationError, SchemaError) as ex:
-                errors.append(str(ex.message))
+            self.logger.debug(
+                f"Validating config using jsonschema: {config_jsonschema}",
+            )
+            validator = JSONSchemaValidator(config_jsonschema)
+            errors = [e.message for e in validator.iter_errors(self._config)]
+
         if errors:
             summary = (
-                f"Config validation failed: {f'; '.join(errors)}\n"
+                f"Config validation failed: {'; '.join(errors)}\n"
                 f"JSONSchema was: {config_jsonschema}"
             )
             if raise_errors:
@@ -260,16 +254,17 @@ class PluginBase(metaclass=abc.ABCMeta):
             summary = f"Config validation passed with {len(warnings)} warnings."
             for warning in warnings:
                 summary += f"\n{warning}"
+
         if warnings_as_errors and raise_errors and warnings:
             raise ConfigValidationError(
-                f"One or more warnings ocurred during validation: {warnings}"
+                f"One or more warnings ocurred during validation: {warnings}",
             )
         log_fn(summary)
         return warnings, errors
 
     @classmethod
     def print_version(
-        cls: Type["PluginBase"],
+        cls: type[PluginBase],
         print_fn: Callable[[Any], None] = print,
     ) -> None:
         """Print help text for the tap.
@@ -283,13 +278,13 @@ class PluginBase(metaclass=abc.ABCMeta):
         print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version}")
 
     @classmethod
-    def _get_about_info(cls: Type["PluginBase"]) -> Dict[str, Any]:
+    def _get_about_info(cls: type[PluginBase]) -> dict[str, Any]:
         """Returns capabilities and other tap metadata.
 
         Returns:
             A dictionary containing the relevant 'about' information.
         """
-        info: Dict[str, Any] = OrderedDict({})
+        info: dict[str, Any] = OrderedDict({})
         info["name"] = cls.name
         info["description"] = cls.__doc__
         info["version"] = cls.plugin_version
@@ -302,7 +297,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         return info
 
     @classmethod
-    def append_builtin_config(cls: Type["PluginBase"], config_jsonschema: dict) -> None:
+    def append_builtin_config(cls: type[PluginBase], config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
         To customize or disable this behavior, developers may either override this class
@@ -332,7 +327,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             _merge_missing(FLATTENING_CONFIG, config_jsonschema)
 
     @classmethod
-    def print_about(cls: Type["PluginBase"], format: Optional[str] = None) -> None:
+    def print_about(cls: type[PluginBase], format: str | None = None) -> None:
         """Print capabilities and other tap metadata.
 
         Args:
@@ -341,11 +336,12 @@ class PluginBase(metaclass=abc.ABCMeta):
         info = cls._get_about_info()
 
         if format == "json":
-            print(json.dumps(info, indent=2, default=str))
+            print(json.dumps(info, indent=2, default=str))  # noqa: T201
 
         elif format == "markdown":
             max_setting_len = cast(
-                int, max(len(k) for k in info["settings"]["properties"].keys())
+                int,
+                max(len(k) for k in info["settings"]["properties"]),
             )
 
             # Set table base for markdown
@@ -363,10 +359,9 @@ class PluginBase(metaclass=abc.ABCMeta):
             md_list.append(
                 f"# `{info['name']}`\n\n"
                 f"{info['description']}\n\n"
-                f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n"
+                f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n",
             )
             for key, value in info.items():
-
                 if key == "capabilities":
                     capabilities = f"## {key.title()}\n\n"
                     capabilities += "\n".join([f"* `{v}`" for v in value])
@@ -389,17 +384,17 @@ class PluginBase(metaclass=abc.ABCMeta):
                         + "\n".join(
                             [
                                 "A full list of supported settings and capabilities "
-                                f"is available by running: `{info['name']} --about`"
-                            ]
+                                f"is available by running: `{info['name']} --about`",
+                            ],
                         )
                         + "\n"
                     )
                     md_list.append(setting)
 
-            print("".join(md_list))
+            print("".join(md_list))  # noqa: T201
         else:
             formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
-            print(formatted)
+            print(formatted)  # noqa: T201
 
     @classproperty
     def cli(cls) -> Callable:

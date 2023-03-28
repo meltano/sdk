@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from singer_sdk._singerlib import Schema, resolve_schema_references
@@ -107,7 +109,7 @@ def test_schema_from_dict(pydict, expected):
             {
                 "type": "object",
                 "properties": {
-                    "name": {"$ref": "references.json#/definitions/string_type"}
+                    "name": {"$ref": "references.json#/definitions/string_type"},
                 },
             },
             {"references.json": {"definitions": {"string_type": {"type": "string"}}}},
@@ -135,7 +137,7 @@ def test_schema_from_dict(pydict, expected):
             {
                 "type": "object",
                 "properties": {
-                    "dogs": {"type": "array", "items": {"$ref": "doggie.json#/dogs"}}
+                    "dogs": {"type": "array", "items": {"$ref": "doggie.json#/dogs"}},
                 },
             },
             {
@@ -146,8 +148,8 @@ def test_schema_from_dict(pydict, expected):
                             "breed": {"type": "string"},
                             "name": {"type": "string"},
                         },
-                    }
-                }
+                    },
+                },
             },
             {
                 "type": "object",
@@ -161,7 +163,7 @@ def test_schema_from_dict(pydict, expected):
                                 "name": {"type": "string"},
                             },
                         },
-                    }
+                    },
                 },
             },
             id="resolve_schema_references_with_items",
@@ -173,9 +175,11 @@ def test_schema_from_dict(pydict, expected):
                     "thing": {
                         "type": "object",
                         "properties": {
-                            "name": {"$ref": "references.json#/definitions/string_type"}
+                            "name": {
+                                "$ref": "references.json#/definitions/string_type",
+                            },
                         },
-                    }
+                    },
                 },
             },
             {"references.json": {"definitions": {"string_type": {"type": "string"}}}},
@@ -185,7 +189,7 @@ def test_schema_from_dict(pydict, expected):
                     "thing": {
                         "type": "object",
                         "properties": {"name": {"type": "string"}},
-                    }
+                    },
                 },
             },
             id="resolve_schema_nested_references",
@@ -194,12 +198,12 @@ def test_schema_from_dict(pydict, expected):
             {
                 "type": "object",
                 "properties": {
-                    "name": {"$ref": "references.json#/definitions/string_type"}
+                    "name": {"$ref": "references.json#/definitions/string_type"},
                 },
             },
             {
                 "references.json": {
-                    "definitions": {"string_type": {"$ref": "second_reference.json"}}
+                    "definitions": {"string_type": {"$ref": "second_reference.json"}},
                 },
                 "second_reference.json": {"type": "string"},
             },
@@ -213,7 +217,7 @@ def test_schema_from_dict(pydict, expected):
                     "name": {
                         "$ref": "references.json#/definitions/string_type",
                         "still_here": "yep",
-                    }
+                    },
                 },
             },
             {"references.json": {"definitions": {"string_type": {"type": "string"}}}},
@@ -228,15 +232,15 @@ def test_schema_from_dict(pydict, expected):
                 "anyOf": [
                     {"$ref": "references.json#/definitions/first_type"},
                     {"$ref": "references.json#/definitions/second_type"},
-                ]
+                ],
             },
             {
                 "references.json": {
                     "definitions": {
                         "first_type": {"type": "string"},
                         "second_type": {"type": "integer"},
-                    }
-                }
+                    },
+                },
             },
             {"anyOf": [{"type": "string"}, {"type": "integer"}]},
             id="resolve_schema_any_of",

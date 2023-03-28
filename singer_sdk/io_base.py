@@ -48,7 +48,7 @@ class SingerReader(metaclass=abc.ABCMeta):
         if not requires.issubset(line_dict):
             missing = requires - set(line_dict)
             raise Exception(
-                f"Line is missing required {', '.join(missing)} key(s): {line_dict}"
+                f"Line is missing required {', '.join(missing)} key(s): {line_dict}",
             )
 
     def _process_lines(self, file_input: IO[str]) -> CounterType[str]:

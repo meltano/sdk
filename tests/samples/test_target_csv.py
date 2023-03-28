@@ -1,10 +1,11 @@
 """Test tap-to-target sync."""
+from __future__ import annotations
+
 import json
-import os
 import shutil
 import uuid
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import pytest
 from click.testing import CliRunner
@@ -29,7 +30,8 @@ SAMPLE_CONFIG = {"target_folder": f"{TEST_OUTPUT_DIR}/"}
 
 
 StandardTests = get_target_test_class(
-    target_class=SampleTargetCSV, config=SAMPLE_CONFIG
+    target_class=SampleTargetCSV,
+    config=SAMPLE_CONFIG,
 )
 
 
@@ -48,9 +50,9 @@ class TestSampleTargetCSV(StandardTests):
 
 
 SAMPLE_FILENAME = "/tmp/testfile.countries"
-SAMPLE_TAP_CONFIG: Dict[str, Any] = {}
-COUNTRIES_STREAM_MAPS_CONFIG: Dict[str, Any] = {
-    "stream_maps": {"continents": {}, "__else__": None}
+SAMPLE_TAP_CONFIG: dict[str, Any] = {}
+COUNTRIES_STREAM_MAPS_CONFIG: dict[str, Any] = {
+    "stream_maps": {"continents": {}, "__else__": None},
 }
 
 
@@ -61,10 +63,10 @@ class BatchSinkMock(BatchSink):
 
     def __init__(
         self,
-        target: "TargetMock",
+        target: TargetMock,
         stream_name: str,
-        schema: Dict,
-        key_properties: Optional[List[str]],
+        schema: dict,
+        key_properties: list[str] | None,
     ):
         """Create the Mock batch-based sink."""
         super().__init__(target, stream_name, schema, key_properties)
@@ -91,8 +93,8 @@ class TargetMock(Target):
     def __init__(self):
         """Create the Mock target sync."""
         super().__init__(config={})
-        self.state_messages_written: List[dict] = []
-        self.records_written: List[dict] = []
+        self.state_messages_written: list[dict] = []
+        self.records_written: list[dict] = []
         self.num_records_processed: int = 0
         self.num_batches_processed: int = 0
 
@@ -169,7 +171,7 @@ def test_target_batching():
     assert target.num_records_processed == countries_record_count * 3
     assert len(target.state_messages_written) == 3
     assert target.state_messages_written[-1] == {
-        "bookmarks": {"continents": {}, "countries": {}}
+        "bookmarks": {"continents": {}, "countries": {}},
     }
 
 
@@ -194,11 +196,11 @@ def cli_runner():
 def config_file_path(target):
     try:
         path = Path(target.config["target_folder"]) / "./config.json"
-        with open(path, "w") as f:
+        with path.open("w") as f:
             f.write(json.dumps(dict(target.config)))
         yield path
     finally:
-        os.remove(path)
+        path.unlink()
 
 
 def test_input_arg(cli_runner, config_file_path, target):
@@ -215,5 +217,5 @@ def test_input_arg(cli_runner, config_file_path, target):
     assert result.exit_code == 0
 
     output = Path(target.config["target_folder"]) / "./users.csv"
-    with open(output) as f:
+    with output.open() as f:
         assert f.read() == EXPECTED_OUTPUT

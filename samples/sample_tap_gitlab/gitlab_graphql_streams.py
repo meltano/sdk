@@ -4,6 +4,8 @@
 #  - https://gitlab.com/-/graphql-explorer
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 from singer_sdk.streams import GraphQLStream
@@ -53,4 +55,4 @@ class GraphQLProjectsStream(GitlabGraphQLStream):
     @property
     def query(self) -> str:
         """Return dynamic GraphQL query."""
-        return f"project(fullPath: {self.config['project_id']}" " { name }"
+        return f"project(fullPath: {self.config['project_id']} {{ name }}"

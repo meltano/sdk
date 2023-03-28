@@ -1,5 +1,7 @@
 """Common CLI options for plugins."""
 
+from __future__ import annotations
+
 import click
 
 PLUGIN_VERSION = click.option(

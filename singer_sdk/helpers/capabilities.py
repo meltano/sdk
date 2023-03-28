@@ -23,9 +23,11 @@ STREAM_MAPS_CONFIG = PropertiesList(
     Property(
         "stream_maps",
         ObjectType(),
-        description="Config object for stream maps capability. "
-        + "For more information check out "
-        + "[Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html).",
+        description=(
+            "Config object for stream maps capability. "
+            "For more information check out "
+            "[Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html)."
+        ),
     ),
     Property(
         "stream_map_config",

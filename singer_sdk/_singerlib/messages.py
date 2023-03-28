@@ -6,10 +6,12 @@ import enum
 import sys
 import typing as t
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
 
 import pytz
 import simplejson as json
+
+if t.TYPE_CHECKING:
+    from datetime import datetime
 
 
 class SingerMessageType(str, enum.Enum):
@@ -50,7 +52,10 @@ class Message:
         return asdict(self, dict_factory=exclude_null_dict)
 
     @classmethod
-    def from_dict(cls: t.Type[Message], data: dict[str, t.Any]) -> Message:
+    def from_dict(
+        cls: t.Type[Message],  # noqa: UP006
+        data: dict[str, t.Any],
+    ) -> Message:
         """Create an encoding from a dictionary.
 
         Args:
@@ -109,7 +114,7 @@ class RecordMessage(Message):
         if self.time_extracted and not self.time_extracted.tzinfo:
             raise ValueError(
                 "'time_extracted' must be either None "
-                + "or an aware datetime (with a time zone)"
+                "or an aware datetime (with a time zone)",
             )
 
         if self.time_extracted:

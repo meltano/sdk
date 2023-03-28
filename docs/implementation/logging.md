@@ -1,4 +1,4 @@
-# [SDK Implementation Details](./index.md) - Logging
+# Logging
 
 ## Logging levels
 

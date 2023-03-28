@@ -1,9 +1,10 @@
 """Test _typing - specifically conform_record_data_types()."""
 
+from __future__ import annotations
+
 import datetime
 import logging
-
-import pytest
+import typing as t
 
 from singer_sdk.helpers._typing import (
     TypeConformanceLevel,
@@ -17,6 +18,9 @@ from singer_sdk.typing import (
     Property,
     StringType,
 )
+
+if t.TYPE_CHECKING:
+    import pytest
 
 logger = logging.getLogger("log")
 
@@ -38,7 +42,11 @@ def test_simple_schema_conforms_types():
     }
 
     actual_output = conform_record_data_types(
-        "test_stream", record, schema, TypeConformanceLevel.RECURSIVE, logger
+        "test_stream",
+        record,
+        schema,
+        TypeConformanceLevel.RECURSIVE,
+        logger,
     )
     assert actual_output == expected_output
 
@@ -55,7 +63,11 @@ def test_primitive_arrays_are_conformed():
     expected_output = {"list": [True, False]}
 
     actual_output = conform_record_data_types(
-        "test_stream", record, schema, TypeConformanceLevel.RECURSIVE, logger
+        "test_stream",
+        record,
+        schema,
+        TypeConformanceLevel.RECURSIVE,
+        logger,
     )
     assert actual_output == expected_output
 
@@ -80,7 +92,11 @@ def test_only_root_fields_are_conformed_for_root_level():
     }
 
     actual_output = conform_record_data_types(
-        "test_stream", record, schema, TypeConformanceLevel.ROOT_ONLY, logger
+        "test_stream",
+        record,
+        schema,
+        TypeConformanceLevel.ROOT_ONLY,
+        logger,
     )
     assert actual_output == expected_output
 
@@ -99,7 +115,11 @@ def test_no_fields_are_conformed_for_none_level():
     }
 
     actual_output = conform_record_data_types(
-        "test_stream", record, schema, TypeConformanceLevel.NONE, logger
+        "test_stream",
+        record,
+        schema,
+        TypeConformanceLevel.NONE,
+        logger,
     )
     assert actual_output == record
 
@@ -114,7 +134,11 @@ def test_object_arrays_are_conformed():
     expected_output = {"list": [{"value": True}, {"value": False}]}
 
     actual_output = conform_record_data_types(
-        "test_stream", record, schema, TypeConformanceLevel.RECURSIVE, logger
+        "test_stream",
+        record,
+        schema,
+        TypeConformanceLevel.RECURSIVE,
+        logger,
     )
     assert actual_output == expected_output
 
@@ -129,7 +153,7 @@ def test_mixed_arrays_are_conformed():
                     "type": ["object", "boolean"],
                     "properties": {"value": {"type": ["boolean", "null"]}},
                 },
-            }
+            },
         },
     }
 
@@ -138,7 +162,11 @@ def test_mixed_arrays_are_conformed():
     expected_output = {"list": [{"value": True}, False]}
 
     actual_output = conform_record_data_types(
-        "test_stream", record, schema, TypeConformanceLevel.RECURSIVE, logger
+        "test_stream",
+        record,
+        schema,
+        TypeConformanceLevel.RECURSIVE,
+        logger,
     )
     assert actual_output == expected_output
 
@@ -153,7 +181,11 @@ def test_nested_objects_are_conformed():
     expected_output = {"object": {"value": True}}
 
     actual_output = conform_record_data_types(
-        "test_stream", record, schema, TypeConformanceLevel.RECURSIVE, logger
+        "test_stream",
+        record,
+        schema,
+        TypeConformanceLevel.RECURSIVE,
+        logger,
     )
     assert actual_output == expected_output
 
@@ -169,7 +201,11 @@ def test_simple_schema_removes_types(caplog: pytest.LogCaptureFixture):
 
     with caplog.at_level(logging.WARNING):
         actual_output = conform_record_data_types(
-            "test_stream", record, schema, TypeConformanceLevel.RECURSIVE, logger
+            "test_stream",
+            record,
+            schema,
+            TypeConformanceLevel.RECURSIVE,
+            logger,
         )
         assert actual_output == expected_output
         assert caplog.records[0].message == (
@@ -189,7 +225,11 @@ def test_nested_objects_remove_types(caplog: pytest.LogCaptureFixture):
 
     with caplog.at_level(logging.WARNING):
         actual_output = conform_record_data_types(
-            "test_stream", record, schema, TypeConformanceLevel.RECURSIVE, logger
+            "test_stream",
+            record,
+            schema,
+            TypeConformanceLevel.RECURSIVE,
+            logger,
         )
         assert actual_output == expected_output
         assert caplog.records[0].message == (
@@ -209,7 +249,11 @@ def test_object_arrays_remove_types(caplog: pytest.LogCaptureFixture):
 
     with caplog.at_level(logging.WARNING):
         actual_output = conform_record_data_types(
-            "test_stream", record, schema, TypeConformanceLevel.RECURSIVE, logger
+            "test_stream",
+            record,
+            schema,
+            TypeConformanceLevel.RECURSIVE,
+            logger,
         )
         assert actual_output == expected_output
         assert caplog.records[0].message == (
@@ -239,9 +283,9 @@ def test_conform_primitives():
     assert _conform_primitive_property(b"\x00", {"type": "string"}) == "00"
     assert _conform_primitive_property(b"\xBC", {"type": "string"}) == "bc"
 
-    assert _conform_primitive_property(b"\x00", {"type": "boolean"}) == False
-    assert _conform_primitive_property(b"\xBC", {"type": "boolean"}) == True
+    assert _conform_primitive_property(b"\x00", {"type": "boolean"}) is False
+    assert _conform_primitive_property(b"\xBC", {"type": "boolean"}) is True
 
     assert _conform_primitive_property(None, {"type": "boolean"}) is None
-    assert _conform_primitive_property(0, {"type": "boolean"}) == False
-    assert _conform_primitive_property(1, {"type": "boolean"}) == True
+    assert _conform_primitive_property(0, {"type": "boolean"}) is False
+    assert _conform_primitive_property(1, {"type": "boolean"}) is True

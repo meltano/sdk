@@ -1,15 +1,19 @@
 """Standard Tap Tests."""
 
+from __future__ import annotations
+
 import warnings
-from typing import Type, cast
+from typing import TYPE_CHECKING, Type, cast
 
 from dateutil import parser
 
 import singer_sdk.helpers._typing as th
 from singer_sdk import Tap
-from singer_sdk.streams.core import Stream
 
 from .templates import AttributeTestTemplate, StreamTestTemplate, TapTestTemplate
+
+if TYPE_CHECKING:
+    from singer_sdk.streams.core import Stream
 
 
 class TapCLIPrintsTest(TapTestTemplate):
@@ -37,7 +41,9 @@ class TapDiscoveryTest(TapTestTemplate):
         # Reset and re-initialize with discovered catalog
         kwargs = {k: v for k, v in self.runner.default_kwargs.items() if k != "catalog"}
         tap2: Tap = cast(Type[Tap], self.runner.singer_class)(
-            config=self.runner.config, catalog=catalog, **kwargs
+            config=self.runner.config,
+            catalog=catalog,
+            **kwargs,
         )
         assert tap2
 
@@ -83,7 +89,7 @@ class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
         diff = stream_catalog_keys - stream_record_keys
         if diff:
             warnings.warn(
-                UserWarning(f"Fields in catalog but not in records: ({diff})")
+                UserWarning(f"Fields in catalog but not in records: ({diff})"),
             )
 
 
@@ -150,8 +156,8 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,
-        property_name: str,
+        stream: Stream,  # noqa: ARG003
+        property_name: str,  # noqa: ARG003
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -183,8 +189,8 @@ class AttributeIsBooleanTest(AttributeTestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,
-        property_name: str,
+        stream: Stream,  # noqa: ARG003
+        property_name: str,  # noqa: ARG003
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -213,8 +219,8 @@ class AttributeIsObjectTest(AttributeTestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,
-        property_name: str,
+        stream: Stream,  # noqa: ARG003
+        property_name: str,  # noqa: ARG003
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -239,14 +245,15 @@ class AttributeIsIntegerTest(AttributeTestTemplate):
         """Run test."""
         for v in self.non_null_attribute_values:
             assert isinstance(v, int) or isinstance(
-                int(v), int
+                int(v),
+                int,
             ), f"Unable to cast value ('{v}') to int type."
 
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,
-        property_name: str,
+        stream: Stream,  # noqa: ARG003
+        property_name: str,  # noqa: ARG003
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -283,8 +290,8 @@ class AttributeIsNumberTest(AttributeTestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,
-        property_name: str,
+        stream: Stream,  # noqa: ARG003
+        property_name: str,  # noqa: ARG003
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
@@ -315,8 +322,8 @@ class AttributeNotNullTest(AttributeTestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,
-        property_name: str,
+        stream: Stream,  # noqa: ARG003
+        property_name: str,  # noqa: ARG003
         property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.

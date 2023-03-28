@@ -1,8 +1,13 @@
+from __future__ import annotations
+
+from unittest import mock
+
 import pytest
 import sqlalchemy
 from sqlalchemy.dialects import sqlite
 
 from singer_sdk.connectors import SQLConnector
+from singer_sdk.exceptions import ConfigValidationError
 
 
 def stringify(in_dict):
@@ -12,9 +17,9 @@ def stringify(in_dict):
 class TestConnectorSQL:
     """Test the SQLConnector class."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def connector(self):
-        return SQLConnector()
+        return SQLConnector(config={"sqlalchemy_url": "sqlite:///"})
 
     @pytest.mark.parametrize(
         "method_name,kwargs,context,unrendered_statement,rendered_statement",
@@ -32,7 +37,7 @@ class TestConnectorSQL:
                         sqlalchemy.Column(
                             "column_name",
                             sqlalchemy.types.Text(),
-                        )
+                        ),
                     ),
                 },
                 "ALTER TABLE %(table_name)s ADD COLUMN %(create_column_clause)s",
@@ -50,7 +55,7 @@ class TestConnectorSQL:
                     "column_name": "old_name",
                     "new_column_name": "new_name",
                 },
-                "ALTER TABLE %(table_name)s RENAME COLUMN %(column_name)s to %(new_column_name)s",
+                "ALTER TABLE %(table_name)s RENAME COLUMN %(column_name)s to %(new_column_name)s",  # noqa: E501
                 "ALTER TABLE full.table.name RENAME COLUMN old_name to new_name",
             ),
             (
@@ -65,7 +70,7 @@ class TestConnectorSQL:
                     "column_name": "column_name",
                     "column_type": sqlalchemy.types.String(),
                 },
-                "ALTER TABLE %(table_name)s ALTER COLUMN %(column_name)s (%(column_type)s)",
+                "ALTER TABLE %(table_name)s ALTER COLUMN %(column_name)s (%(column_type)s)",  # noqa: E501
                 "ALTER TABLE full.table.name ALTER COLUMN column_name (VARCHAR)",
             ),
         ],
@@ -87,8 +92,9 @@ class TestConnectorSQL:
 
         statement = str(
             column_ddl.compile(
-                dialect=sqlite.dialect(), compile_kwargs={"literal_binds": True}
-            )
+                dialect=sqlite.dialect(),
+                compile_kwargs={"literal_binds": True},
+            ),
         )
         assert statement == rendered_statement
 
@@ -130,6 +136,67 @@ class TestConnectorSQL:
         assert not hasattr(compatible_type, "collation")
         # Check that we get the same type we put in
         assert str(compatible_type) == "INTEGER"
+
+    def test_create_engine_returns_new_engine(self, connector):
+        engine1 = connector.create_engine()
+        engine2 = connector.create_engine()
+        assert engine1 is not engine2
+
+    def test_engine_creates_and_returns_cached_engine(self, connector):
+        assert not connector._cached_engine
+        engine1 = connector._engine
+        engine2 = connector._cached_engine
+        assert engine1 is engine2
+
+    def test_deprecated_functions_warn(self, connector):
+        with pytest.deprecated_call():
+            connector.create_sqlalchemy_engine()
+        with pytest.deprecated_call():
+            connector.create_sqlalchemy_connection()
+        with pytest.deprecated_call():
+            connector.connection
+
+    def test_connect_calls_engine(self, connector):
+        with mock.patch.object(
+            SQLConnector,
+            "_engine",
+        ) as mock_engine, connector._connect() as _:
+            mock_engine.connect.assert_called_once()
+
+    def test_connect_calls_connect(self, connector):
+        attached_engine = connector._engine
+        with mock.patch.object(
+            attached_engine,
+            "connect",
+        ) as mock_conn, connector._connect() as _:
+            mock_conn.assert_called_once()
+
+    def test_connect_raises_on_operational_failure(self, connector):
+        with pytest.raises(
+            sqlalchemy.exc.OperationalError,
+        ) as _, connector._connect() as conn:
+            conn.execute(sqlalchemy.text("SELECT * FROM fake_table"))
+
+    def test_rename_column_uses_connect_correctly(self, connector):
+        attached_engine = connector._engine
+        # Ends up using the attached engine
+        with mock.patch.object(attached_engine, "connect") as mock_conn:
+            connector.rename_column("fake_table", "old_name", "new_name")
+            mock_conn.assert_called_once()
+        # Uses the _connect method
+        with mock.patch.object(connector, "_connect") as mock_connect_method:
+            connector.rename_column("fake_table", "old_name", "new_name")
+            mock_connect_method.assert_called_once()
+
+    def test_get_slalchemy_url_raises_if_not_in_config(self, connector):
+        with pytest.raises(ConfigValidationError):
+            connector.get_sqlalchemy_url({})
+
+    def test_dialect_uses_engine(self, connector):
+        attached_engine = connector._engine
+        with mock.patch.object(attached_engine, "dialect") as _:
+            res = connector._dialect
+            assert res == attached_engine.dialect
 
     def test_merge_sql_types_text_current_max(self):
         cls = SQLConnector()

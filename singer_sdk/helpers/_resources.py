@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import sys
-from types import ModuleType
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
-if sys.version_info >= (3, 9):
-    import importlib.resources as importlib_resources
-    from importlib.abc import Traversable
-else:
+if TYPE_CHECKING:
+    from types import ModuleType
+
+if sys.version_info < (3, 9):
     import importlib_resources
     from importlib_resources.abc import Traversable
+else:
+    import importlib.resources as importlib_resources
+    from importlib.abc import Traversable
 
 
 def get_package_files(package: str | ModuleType) -> Traversable:

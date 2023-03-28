@@ -1,5 +1,7 @@
 """REST fixtures."""
 
+from __future__ import annotations
+
 import pytest
 from memoization.memoization import cached
 from requests.auth import HTTPProxyAuth

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from singer_sdk._singerlib import SingerMessageType
@@ -25,7 +27,7 @@ from singer_sdk.helpers._batch import JSONLinesEncoding, SDKBatchMessage
                     "path/to/file2.jsonl.gz",
                 ],
             },
-        )
+        ),
     ],
     ids=["batch-message-jsonl"],
 )

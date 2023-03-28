@@ -46,11 +46,21 @@ Note:
 from __future__ import annotations
 
 import json
-import sys
-from typing import Any, Generic, ItemsView, Mapping, TypeVar, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Generator,
+    Generic,
+    ItemsView,
+    Mapping,
+    MutableMapping,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import sqlalchemy
-from jsonschema import validators
+from jsonschema import ValidationError, Validator, validators
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._typing import (
@@ -60,10 +70,14 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
 )
 
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
+if TYPE_CHECKING:
+    import sys
+
+    if sys.version_info >= (3, 10):
+        from typing import TypeAlias
+    else:
+        from typing_extensions import TypeAlias
+
 
 __all__ = [
     "extend_validator_with_defaults",
@@ -107,18 +121,30 @@ _JsonValue: TypeAlias = Union[
 ]
 
 
-def extend_validator_with_defaults(validator_class):  # noqa
+def extend_validator_with_defaults(validator_class):  # noqa: ANN001, ANN201
     """Fill in defaults, before validating with the provided JSON Schema Validator.
 
-    See https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance  # noqa
+    See
+    https://python-jsonschema.readthedocs.io/en/latest/faq/#why-doesn-t-my-schema-s-default-property-set-the-default-on-my-instance
     for details.
+
+    Args:
+        validator_class: The JSON Schema Validator class to extend.
+
+    Returns:
+        The extended JSON Schema Validator class.
     """
     validate_properties = validator_class.VALIDATORS["properties"]
 
-    def set_defaults(validator, properties, instance, schema):  # noqa
-        for property, subschema in properties.items():
+    def set_defaults(
+        validator: Validator,
+        properties: Mapping[str, dict],
+        instance: MutableMapping[str, Any],
+        schema: dict,
+    ) -> Generator[ValidationError, None, None]:
+        for prop, subschema in properties.items():
             if "default" in subschema:
-                instance.setdefault(property, subschema["default"])
+                instance.setdefault(prop, subschema["default"])
 
         yield from validate_properties(
             validator,
@@ -143,7 +169,7 @@ class JSONTypeHelper:
         Raises:
             NotImplementedError: If the derived class does not override this method.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def to_dict(self) -> dict:
         """Convert to dictionary.
@@ -171,11 +197,13 @@ class StringType(JSONTypeHelper):
     string_format: str | None = None
     """String format.
 
-    See the [formats built into the JSON Schema\
-    specification](https://json-schema.org/understanding-json-schema/reference/string.html#built-in-formats).
+    See the `formats built into the JSON Schema specification`_.
 
     Returns:
         A string describing the format.
+
+    .. _`formats built into the JSON Schema specification`:
+        https://json-schema.org/understanding-json-schema/reference/string.html#built-in-formats
     """
 
     @classproperty
@@ -421,8 +449,8 @@ class Property(JSONTypeHelper, Generic[W]):
         if isinstance(wrapped, type) and not isinstance(wrapped.type_dict, Mapping):
             raise ValueError(
                 f"Type dict for {wrapped} is not defined. "
-                + "Try instantiating it with a nested type such as "
-                + f"{wrapped.__name__}(StringType)."
+                "Try instantiating it with a nested type such as "
+                f"{wrapped.__name__}(StringType).",
             )
 
         return cast(dict, wrapped.type_dict)
@@ -445,7 +473,7 @@ class Property(JSONTypeHelper, Generic[W]):
                 {
                     JSONSCHEMA_ANNOTATION_SECRET: True,
                     JSONSCHEMA_ANNOTATION_WRITEONLY: True,
-                }
+                },
             )
         if self.allowed_values:
             type_dict.update({"enum": self.allowed_values})
@@ -659,7 +687,8 @@ def to_jsonschema_type(
     elif isinstance(from_type, sqlalchemy.types.TypeEngine):
         type_name = type(from_type).__name__
     elif isinstance(from_type, type) and issubclass(
-        from_type, sqlalchemy.types.TypeEngine
+        from_type,
+        sqlalchemy.types.TypeEngine,
     ):
         type_name = from_type.__name__
     else:

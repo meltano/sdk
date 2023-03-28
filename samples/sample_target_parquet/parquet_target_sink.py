@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Union
+from typing import Any
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -62,22 +62,22 @@ def _json_type_to_arrow_field(schema_type: dict[str, Any]) -> pa.DataType:
         items = schema_type.get("items", {})
         return pa.list_(_json_type_to_arrow_field(items))
 
-    elif main_type == "object":
+    if main_type == "object":
         return pa.struct(_json_schema_to_arrow_fields(schema_type))
 
-    elif main_type == "string":
+    if main_type == "string":
         return pa.string()
 
-    elif main_type == "integer":
+    if main_type == "integer":
         return pa.int64()
 
-    elif main_type == "number":
+    if main_type == "number":
         return pa.float64()
 
-    elif main_type == "boolean":
+    if main_type == "boolean":
         return pa.bool_()
 
-    elif main_type == "null":
+    if main_type == "null":
         return pa.null()
 
     return pa.null()
@@ -109,10 +109,10 @@ class SampleParquetTargetSink(BatchSink):
             return pa.date64
         return pa.string
 
-    def _get_parquet_schema(self) -> List[Tuple[str, Any]]:
-        col_list: List[Tuple[str, Any]] = []
+    def _get_parquet_schema(self) -> list[tuple[str, Any]]:
+        col_list: list[tuple[str, Any]] = []
         for property in self.schema["properties"]:
             col_list.append(
-                (property["name"], self.translate_data_type(property["type"]))
+                (property["name"], self.translate_data_type(property["type"])),
             )
         return col_list

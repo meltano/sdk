@@ -6,7 +6,7 @@ Most likely you should delete the project and start over.
 
 ## What are all of the Property options?
 
-The property types are documented in the [JSON Schema builder docs](./typing).
+The property types are documented in the [JSON Schema helper classes](./reference.rst).
 However, if you're using an IDE such as VSCode, you should be able to set up the environment to give you autocompletion prompts or hints.
 Ensure your interpreter is set to poetry if you've followed the [Dev Guide](./dev_guide.md).
 Checkout this [gif](https://visualstudiomagazine.com/articles/2021/04/20/~/media/ECG/visualstudiomagazine/Images/2021/04/poetry.ashx) for how to change your interpreter.

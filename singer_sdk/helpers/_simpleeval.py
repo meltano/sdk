@@ -98,6 +98,7 @@ well:
 
 """
 # flake8: noqa  # Ignoring flake errors in imported module
+# isort: dont-add-imports
 
 import ast
 import operator as op
