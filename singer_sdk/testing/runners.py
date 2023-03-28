@@ -277,7 +277,7 @@ class TargetTestRunner(SingerTestRunner):
         stderr_buf = io.StringIO()
 
         with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
-            if input is not None:
+            if target_input is not None:
                 target._process_lines(target_input)
             if finalize:
                 target._process_endofpipe()

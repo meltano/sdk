@@ -465,7 +465,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             if not about:
                 cls.print_version(print_fn=cls.logger.info)
             else:
-                cls.print_about(format=about_format)
+                cls.print_about(output_format=about_format)
                 return
 
             validate_config: bool = True

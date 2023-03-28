@@ -32,7 +32,7 @@ class TargetCliPrintsTest(TargetTestTemplate):
         """Run test."""
         self.target.print_version()
         self.target.print_about()
-        self.target.print_about(format="json")
+        self.target.print_about(output_format="json")
 
 
 class TargetDuplicateRecords(TargetFileTestTemplate):

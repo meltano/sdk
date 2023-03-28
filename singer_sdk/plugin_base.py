@@ -327,7 +327,10 @@ class PluginBase(metaclass=abc.ABCMeta):
             _merge_missing(FLATTENING_CONFIG, config_jsonschema)
 
     @classmethod
-    def print_about(cls: type[PluginBase], output_format: str | None = None) -> None:
+    def print_about(
+        cls: type[PluginBase],
+        output_format: str | None = None,
+    ) -> None:
         """Print capabilities and other tap metadata.
 
         Args:

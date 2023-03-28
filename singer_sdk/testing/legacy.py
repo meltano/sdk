@@ -34,7 +34,7 @@ def get_standard_tap_tests(
         # Test CLI prints
         tap1.print_version()
         tap1.print_about()
-        tap1.print_about(format="json")
+        tap1.print_about(output_format="json")
 
     def _test_discovery() -> None:
         catalog1 = _get_tap_catalog(tap_class, config or {})
