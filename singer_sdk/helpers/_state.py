@@ -2,18 +2,20 @@
 
 from __future__ import annotations
 
-import datetime
-from typing import Any, Callable, TypeVar, cast
+from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast
 
 from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.helpers._typing import to_json_compatible
+
+if TYPE_CHECKING:
+    import datetime
+
+    _T = TypeVar("_T", datetime.datetime, str, int, float)
 
 PROGRESS_MARKERS = "progress_markers"
 PROGRESS_MARKER_NOTE = "Note"
 SIGNPOST_MARKER = "replication_key_signpost"
 STARTING_MARKER = "starting_replication_value"
-
-_T = TypeVar("_T", datetime.datetime, str, int, float)
 
 
 def get_state_if_exists(
