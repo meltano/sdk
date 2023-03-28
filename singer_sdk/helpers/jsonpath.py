@@ -11,7 +11,10 @@ if TYPE_CHECKING:
     import jsonpath_ng
 
 
-def extract_jsonpath(expression: str, input: dict | list) -> Generator[Any, None, None]:
+def extract_jsonpath(
+    expression: str,
+    input: dict | list,  # noqa: A002
+) -> Generator[Any, None, None]:
     """Extract records from an input based on a JSONPath expression.
 
     Args:

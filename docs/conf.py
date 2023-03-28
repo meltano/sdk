@@ -22,7 +22,7 @@ sys.path.insert(0, str(Path("..").resolve()))
 # -- Project information -----------------------------------------------------
 
 project = "Meltano Singer SDK"
-copyright = "2021, Meltano Core Team and Contributors"
+copyright = "2021, Meltano Core Team and Contributors"  # noqa: A001
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags

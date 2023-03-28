@@ -18,6 +18,7 @@ PLUGIN_ABOUT = click.option(
 
 PLUGIN_ABOUT_FORMAT = click.option(
     "--format",
+    "about_format",
     help="Specify output style for --about",
     type=click.Choice(["json", "markdown"], case_sensitive=False),
     default=None,
