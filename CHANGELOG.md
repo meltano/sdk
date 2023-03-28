@@ -16,9 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 📚 Documentation Improvements
 
 - [#1553](https://github.com/meltano/sdk/issues/1553) Change link color from pink to blue
-- Add sidebar hover styling
 - [#1544](https://github.com/meltano/sdk/issues/1544) Update branding colors in docs site
-- Add logo to readme
 - [#1518](https://github.com/meltano/sdk/issues/1518) Fix HATEOAS pagination example
 
 ## v0.22.0 (2023-03-14)
