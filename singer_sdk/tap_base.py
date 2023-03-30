@@ -1,5 +1,6 @@
 """Tap abstract class."""
 
+
 from __future__ import annotations
 
 import abc
@@ -189,7 +190,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             True if the test succeeded.
         """
         return self.run_sync_dry_run(
-            dry_run_record_limit=1, streams=self.streams.values()
+            dry_run_record_limit=1,
+            streams=self.streams.values(),
         )
 
     @final
@@ -225,13 +227,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     "Skipping direct invocation.",
                 )
                 continue
-            with contextlib.suppress(MaxRecordsLimitException):
-                stream.sync()
-            except (
+            with contextlib.suppress(
                 AbortedSyncFailedException,
                 AbortedSyncPausedException,
             ):
-                pass
+                stream.sync()
         return True
 
     @final
