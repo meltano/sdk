@@ -21,13 +21,17 @@ class Parent(Stream):
         },
     }
 
-    def get_child_context(self, record: dict, context: dict | None) -> dict:
+    def get_child_context(
+        self,
+        record: dict,
+        context: dict | None,  # noqa: ARG002
+    ) -> dict:
         """Create context for children streams."""
         return {
             "pid": record["id"],
         }
 
-    def get_records(self, context: dict | None):
+    def get_records(self, context: dict | None):  # noqa: ARG002
         """Get dummy records."""
         yield {"id": 1}
         yield {"id": 2}
@@ -47,7 +51,7 @@ class Child(Stream):
     }
     parent_stream_type = Parent
 
-    def get_records(self, context: dict | None):
+    def get_records(self, context: dict | None):  # noqa: ARG002
         """Get dummy records."""
         yield {"id": 1}
         yield {"id": 2}

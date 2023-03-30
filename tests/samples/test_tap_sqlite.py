@@ -1,33 +1,19 @@
 from __future__ import annotations
 
-import json
-import sqlite3
-from copy import deepcopy
-from io import StringIO
-from pathlib import Path
-from textwrap import dedent
-from typing import Dict, cast
-from uuid import uuid4
+from typing import TYPE_CHECKING, cast
 
-import pytest
-import sqlalchemy
-
-from samples.sample_tap_hostile import SampleTapHostile
-from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
 from samples.sample_target_csv.csv_target import SampleTargetCSV
-from samples.sample_target_sqlite import SQLiteSink, SQLiteTarget
 from singer_sdk import SQLStream
-from singer_sdk import typing as th
-from singer_sdk._singerlib import Catalog, MetadataMapping, StreamMetadata
-from singer_sdk.tap_base import SQLTap
-from singer_sdk.target_base import SQLTarget
+from singer_sdk._singerlib import MetadataMapping, StreamMetadata
 from singer_sdk.testing import (
-    _get_tap_catalog,
     get_standard_tap_tests,
-    tap_sync_test,
     tap_to_target_sync_test,
-    target_sync_test,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from singer_sdk.tap_base import SQLTap
 
 
 def _discover_and_select_all(tap: SQLTap) -> None:
@@ -96,7 +82,8 @@ def test_sqlite_input_catalog(sqlite_sample_tap: SQLTap):
 def test_sqlite_tap_standard_tests(sqlite_sample_tap: SQLTap):
     """Run standard tap tests against Countries tap."""
     tests = get_standard_tap_tests(
-        type(sqlite_sample_tap), dict(sqlite_sample_tap.config)
+        type(sqlite_sample_tap),
+        dict(sqlite_sample_tap.config),
     )
     for test in tests:
         test()
@@ -105,5 +92,6 @@ def test_sqlite_tap_standard_tests(sqlite_sample_tap: SQLTap):
 def test_sync_sqlite_to_csv(sqlite_sample_tap: SQLTap, tmp_path: Path):
     _discover_and_select_all(sqlite_sample_tap)
     orig_stdout, _, _, _ = tap_to_target_sync_test(
-        sqlite_sample_tap, SampleTargetCSV(config={"target_folder": f"{tmp_path}/"})
+        sqlite_sample_tap,
+        SampleTargetCSV(config={"target_folder": f"{tmp_path}/"}),
     )

@@ -146,7 +146,10 @@ def test_status_message_api(custom_validation_stream, message, expectation):
     ],
 )
 def test_rate_limiting_status_override(
-    basic_rest_stream, rate_limit_codes, response_status, expectation
+    basic_rest_stream,
+    rate_limit_codes,
+    response_status,
+    expectation,
 ):
     fake_response = requests.Response()
     fake_response.status_code = response_status

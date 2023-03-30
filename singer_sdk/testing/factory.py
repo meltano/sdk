@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import pytest
-
-from singer_sdk import Tap, Target
 
 from .config import SuiteConfig
 from .runners import TapTestRunner, TargetTestRunner
@@ -16,6 +14,9 @@ from .suites import (
     tap_tests,
     target_tests,
 )
+
+if TYPE_CHECKING:
+    from singer_sdk import Tap, Target
 
 
 def get_test_class(
@@ -45,8 +46,8 @@ def get_test_class(
             return suite_config or SuiteConfig()
 
         @pytest.fixture
-        def resource(self) -> Any:  # noqa: ANN401
-            yield
+        def resource(self) -> Any:  # noqa: ANN401, PT004
+            yield  # noqa: PT022
 
         @pytest.fixture(scope="class")
         def runner(self) -> TapTestRunner | TargetTestRunner:
@@ -56,7 +57,7 @@ def get_test_class(
 
     for suite in test_suites:
         # make sure given runner is of type TapTestRunner
-        expected_runner_class = (  # type: ignore[valid-type]
+        expected_runner_class = (
             TapTestRunner
             if suite.kind in {"tap", "tap_stream", "tap_stream_attribute"}
             else TargetTestRunner
@@ -66,7 +67,8 @@ def get_test_class(
             f"but test runner if of type {type(test_runner)}."
         )
         test_runner = cast(
-            expected_runner_class, test_runner  # type: ignore[valid-type]
+            expected_runner_class,  # type: ignore[valid-type]
+            test_runner,
         )
 
         if suite.kind in {"tap", "target"}:
@@ -119,7 +121,7 @@ def get_test_class(
                                     property_name=property_name,
                                     property_schema=property_schema,
                                 )
-                            ]
+                            ],
                         )
                         test_ids.extend(
                             [
@@ -132,7 +134,7 @@ def get_test_class(
                                     property_name=property_name,
                                     property_schema=property_schema,
                                 )
-                            ]
+                            ],
                         )
 
                     if test_params:
@@ -187,7 +189,10 @@ def get_tap_test_class(
 
     return get_test_class(
         test_runner=TapTestRunner(
-            tap_class=tap_class, config=config, suite_config=suite_config, **kwargs
+            tap_class=tap_class,
+            config=config,
+            suite_config=suite_config,
+            **kwargs,
         ),
         test_suites=suites,
         suite_config=suite_config,
@@ -225,7 +230,6 @@ def get_target_test_class(
         test_runner=TargetTestRunner(
             target_class=target_class,
             config=config,
-            suite_config=suite_config,
             **kwargs,
         ),
         test_suites=suites,

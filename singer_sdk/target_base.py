@@ -7,9 +7,8 @@ import copy
 import json
 import sys
 import time
-from io import FileIO
 from pathlib import Path, PurePath
-from typing import IO, Callable, Counter
+from typing import IO, TYPE_CHECKING, Callable, Counter
 
 import click
 from joblib import Parallel, delayed, parallel_backend
@@ -28,7 +27,11 @@ from singer_sdk.helpers.capabilities import (
 from singer_sdk.io_base import SingerMessageType, SingerReader
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
-from singer_sdk.sinks import Sink
+
+if TYPE_CHECKING:
+    from io import FileIO
+
+    from singer_sdk.sinks import Sink
 
 _MAX_PARALLELISM = 8
 
@@ -170,7 +173,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ):
             self.logger.info(
                 f"Schema or key properties for '{stream_name}' stream have changed. "
-                f"Initializing a new '{stream_name}' sink..."
+                f"Initializing a new '{stream_name}' sink...",
             )
             self._sinks_to_clear.append(self._sinks_active.pop(stream_name))
             return self.add_sink(stream_name, schema, key_properties)
@@ -197,7 +200,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         raise ValueError(
             f"No sink class defined for '{stream_name}' "
-            "and no default sink class available."
+            "and no default sink class available.",
         )
 
     def sink_exists(self, stream_name: str) -> bool:
@@ -215,7 +218,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     @final
     def add_sink(
-        self, stream_name: str, schema: dict, key_properties: list[str] | None = None
+        self,
+        stream_name: str,
+        schema: dict,
+        key_properties: list[str] | None = None,
     ) -> Sink:
         """Create a sink and register it.
 
@@ -254,7 +260,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         if not self.sink_exists(stream_name):
             raise RecordsWithoutSchemaException(
                 f"A record for stream '{stream_name}' was encountered before a "
-                "corresponding schema."
+                "corresponding schema.",
             )
 
     # Message handling
@@ -286,7 +292,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             f"Target '{self.name}' completed reading {line_count} lines of input "
             f"({counter[SingerMessageType.RECORD]} records, "
             f"({counter[SingerMessageType.BATCH]} batch manifests, "
-            f"{counter[SingerMessageType.STATE]} state messages)."
+            f"{counter[SingerMessageType.STATE]} state messages).",
         )
 
         return counter
@@ -305,7 +311,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         stream_name = message_dict["stream"]
         for stream_map in self.mapper.stream_maps[stream_name]:
-            # new_schema = helpers._float_to_decimal(new_schema)
             raw_record = copy.copy(message_dict["record"])
             transformed_record = stream_map.transform(raw_record)
             if transformed_record is None:
@@ -316,7 +321,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             context = sink._get_context(transformed_record)
             if sink.include_sdc_metadata_properties:
                 sink._add_sdc_metadata_to_record(
-                    transformed_record, message_dict, context
+                    transformed_record,
+                    message_dict,
+                    context,
                 )
             else:
                 sink._remove_sdc_metadata_from_record(transformed_record)
@@ -330,7 +337,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             if sink.is_full:
                 self.logger.info(
-                    f"Target sink for '{sink.stream_name}' is full. Draining..."
+                    f"Target sink for '{sink.stream_name}' is full. Draining...",
                 )
                 self.drain_one(sink)
 
@@ -354,7 +361,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         elif self.mapper.stream_maps[stream_name][0].raw_schema != schema:
             self.logger.info(
                 f"Schema has changed for stream '{stream_name}'. "
-                "Mapping definitions will be reset."
+                "Mapping definitions will be reset.",
             )
             do_registration = True
         elif (
@@ -362,14 +369,14 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ):
             self.logger.info(
                 f"Key properties have changed for stream '{stream_name}'. "
-                "Mapping definitions will be reset."
+                "Mapping definitions will be reset.",
             )
             do_registration = True
 
         if not do_registration:
             self.logger.debug(
                 f"No changes detected in SCHEMA message for stream '{stream_name}'. "
-                "Ignoring."
+                "Ignoring.",
             )
             return
 
@@ -379,7 +386,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             key_properties,
         )
         for stream_map in self.mapper.stream_maps[stream_name]:
-            # new_schema = helpers._float_to_decimal(new_schema)
             _ = self.get_sink(
                 stream_map.stream_alias,
                 schema=stream_map.transformed_schema,
@@ -521,7 +527,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             version: bool = False,
             about: bool = False,
             config: tuple[str, ...] = (),
-            format: str | None = None,
+            about_format: str | None = None,
             file_input: FileIO | None = None,
         ) -> None:
             """Handle command line execution.
@@ -529,7 +535,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             Args:
                 version: Display the package version.
                 about: Display package metadata and settings.
-                format: Specify output style for `--about`.
+                about_format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
                     variables. Accepts multiple inputs as a tuple.
                 file_input: Specify a path to an input file to read messages from.
@@ -545,7 +551,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             if not about:
                 cls.print_version(print_fn=cls.logger.info)
             else:
-                cls.print_about(format=format)
+                cls.print_about(output_format=about_format)
                 return
 
             validate_config: bool = True
@@ -564,12 +570,12 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 if not Path(config_path).is_file():
                     raise FileNotFoundError(
                         f"Could not locate config file at '{config_path}'."
-                        "Please check that the file exists."
+                        "Please check that the file exists.",
                     )
 
                 config_files.append(Path(config_path))
 
-            target = cls(  # type: ignore  # Ignore 'type not callable'
+            target = cls(  # type: ignore[operator]
                 config=config_files or None,
                 parse_env_config=parse_env_config,
                 validate_config=validate_config,

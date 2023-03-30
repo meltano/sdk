@@ -10,4 +10,4 @@ incompatible way, following their deprecation, as indicated in the
   as part of the stream pagination process. It is replaced by the
   [`RESTStream.get_new_paginator`](singer_sdk.RESTStream.get_new_paginator).
 
-  See the [migration guide](../guides/pagination-classes.md) for more information.
+  See the [migration guide](./guides/pagination-classes.md) for more information.

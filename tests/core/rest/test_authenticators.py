@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import typing as t
+
 import jwt
 import pytest
-import requests_mock
 from cryptography.hazmat.primitives.asymmetric.rsa import (
     RSAPrivateKey,
     RSAPublicKey,
@@ -19,8 +20,12 @@ from cryptography.hazmat.primitives.serialization import (
 from requests.auth import HTTPProxyAuth, _basic_auth_str
 
 from singer_sdk.authenticators import OAuthAuthenticator, OAuthJWTAuthenticator
-from singer_sdk.streams import RESTStream
-from singer_sdk.tap_base import Tap
+
+if t.TYPE_CHECKING:
+    import requests_mock
+
+    from singer_sdk.streams import RESTStream
+    from singer_sdk.tap_base import Tap
 
 
 @pytest.mark.parametrize(
@@ -67,7 +72,10 @@ from singer_sdk.tap_base import Tap
     ],
 )
 def test_authenticator_is_reused(
-    rest_tap: Tap, stream_name: str, other_stream_name: str, auth_reused: bool
+    rest_tap: Tap,
+    stream_name: str,
+    other_stream_name: str,
+    auth_reused: bool,
 ):
     """Validate that the stream's authenticator is a singleton."""
     stream: RESTStream = rest_tap.streams[stream_name]

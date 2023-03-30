@@ -7,7 +7,7 @@ from singer_sdk import typing as th  # JSON schema typing helpers
 
 {%- if cookiecutter.stream_type == "SQL" %}
 
-from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }}Stream
+# from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }}Stream
 {%- else %}
 
 # TODO: Import your custom stream types here:
