@@ -933,8 +933,8 @@ class Stream(metaclass=abc.ABCMeta):
                 self._abort_sync(
                     abort_reason=MaxRecordsLimitException(
                         "Stream prematurely aborted due to the stream's max dry run "
-                        f"record limit ({self.ABORT_AT_RECORD_COUNT}) being reached."
-                    )
+                        f"record limit ({self.ABORT_AT_RECORD_COUNT}) being reached.",
+                    ),
                 )
             except (AbortedSyncFailedException, AbortedSyncPausedException) as ex:
                 raise ex
@@ -965,12 +965,12 @@ class Stream(metaclass=abc.ABCMeta):
 
         if self.replication_method == "FULL_TABLE":
             raise AbortedSyncFailedException(
-                "Sync operation aborted for stream in 'FULL_TABLE' replication mode."
+                "Sync operation aborted for stream in 'FULL_TABLE' replication mode.",
             ) from abort_reason
 
         if is_state_non_resumable(self.stream_state):
             raise AbortedSyncFailedException(
-                "Sync operation aborted and state is not in a resumable state."
+                "Sync operation aborted and state is not in a resumable state.",
             ) from abort_reason
 
         # Else, the sync operation can be assumed to be in a valid resumable state.

@@ -189,7 +189,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             True if the test succeeded.
         """
         return self.run_sync_dry_run(
-            dry_run_record_limit=1, streams=self.streams.values()
+            dry_run_record_limit=1, streams=self.streams.values(),
         )
 
     @final

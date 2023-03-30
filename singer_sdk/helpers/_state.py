@@ -255,7 +255,7 @@ def finalize_state_progress_markers(stream_or_partition_state: dict) -> dict | N
             # Replication keys valid (only) after sync is complete
             progress_markers = stream_or_partition_state[PROGRESS_MARKERS]
             stream_or_partition_state["replication_key"] = progress_markers.pop(
-                "replication_key"
+                "replication_key",
             )
             new_rk_value = progress_markers.pop("replication_key_value")
             if signpost_value and _greater_than_signpost(signpost_value, new_rk_value):

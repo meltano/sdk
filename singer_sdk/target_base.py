@@ -270,7 +270,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         if self._max_record_age_in_minutes > self._MAX_RECORD_AGE_IN_MINUTES:
             self.logger.info(
                 "One or more records have exceeded the max age of "
-                f"{self._MAX_RECORD_AGE_IN_MINUTES} minutes. Draining all sinks."
+                f"{self._MAX_RECORD_AGE_IN_MINUTES} minutes. Draining all sinks.",
             )
             self.drain_all()
 
