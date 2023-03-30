@@ -16,7 +16,7 @@ def test_small_years():
 
 
 def test_round_trip():
-    now = datetime.utcnow().replace(tzinfo=pytz.UTC)
+    now = datetime.now(tz=pytz.UTC)
     dtime = strftime(now)
     parsed_datetime = strptime_to_utc(dtime)
     formatted_datetime = strftime(parsed_datetime)
@@ -38,6 +38,6 @@ def test_strptime_to_utc(dtimestr):
 
 
 def test_stftime_non_utc():
-    now = datetime.utcnow().replace(tzinfo=pytz.timezone("America/New_York"))
+    now = datetime.now(tz=pytz.timezone("America/New_York"))
     with pytest.raises(NonUTCDatetimeError):
         strftime(now)

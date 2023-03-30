@@ -17,6 +17,7 @@ _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"
 JSONSCHEMA_ANNOTATION_SECRET = "secret"  # noqa: S105
 JSONSCHEMA_ANNOTATION_WRITEONLY = "writeOnly"
+UTC = datetime.timezone.utc
 
 
 class DatetimeErrorTreatmentEnum(Enum):
@@ -452,9 +453,11 @@ def _conform_primitive_property(elem: Any, property_schema: dict) -> Any:
     if isinstance(elem, datetime.date):
         return elem.isoformat() + "T00:00:00+00:00"
     if isinstance(elem, datetime.timedelta):
-        epoch = datetime.datetime.utcfromtimestamp(0)
+        epoch = datetime.datetime.fromtimestamp(0, UTC)
         timedelta_from_epoch = epoch + elem
-        return timedelta_from_epoch.isoformat() + "+00:00"
+        if timedelta_from_epoch.tzinfo is None:
+            timedelta_from_epoch = timedelta_from_epoch.replace(tzinfo=UTC)
+        return timedelta_from_epoch.isoformat()
     if isinstance(elem, datetime.time):
         return str(elem)
     if isinstance(elem, bytes):

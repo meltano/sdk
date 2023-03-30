@@ -238,6 +238,7 @@ select = [
     "A",    # flake8-builtins
     "COM",  # flake8-commas
     "C4",   # flake8-comprehensions
+    "DTZ",  # flake8-datetimezs
     "T10",  # flake8-debugger
     "ISC",  # flake8-implicit-str-concat
     "ICN",  # flake8-import-conventions
