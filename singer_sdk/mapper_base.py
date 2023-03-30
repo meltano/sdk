@@ -23,7 +23,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     """Abstract base class for inline mappers."""
 
     @classproperty
-    def _env_prefix(cls) -> str:
+    def _env_prefix(cls) -> str:  # noqa: N805
         return f"{cls.name.upper().replace('-', '_')}_"
 
     @classproperty
@@ -111,7 +111,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         raise NotImplementedError("BATCH messages are not supported by mappers.")
 
     @classproperty
-    def cli(cls) -> Callable:
+    def cli(cls) -> Callable:  # noqa: N805
         """Execute standard CLI handler for inline mappers.
 
         Returns:

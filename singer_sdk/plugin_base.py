@@ -49,7 +49,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     _config: dict
 
     @classproperty
-    def logger(cls) -> logging.Logger:
+    def logger(cls) -> logging.Logger:  # noqa: N805
         """Get logger.
 
         Returns:
@@ -57,14 +57,14 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         # Get the level from <PLUGIN_NAME>_LOGLEVEL or LOGLEVEL environment variables
         plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
-        LOGLEVEL = os.environ.get(f"{plugin_env_prefix}LOGLEVEL") or os.environ.get(
+        log_level = os.environ.get(f"{plugin_env_prefix}LOGLEVEL") or os.environ.get(
             "LOGLEVEL",
         )
 
         logger = logging.getLogger(cls.name)
 
-        if LOGLEVEL is not None and LOGLEVEL.upper() in logging._levelToName.values():
-            logger.setLevel(LOGLEVEL.upper())
+        if log_level is not None and log_level.upper() in logging._levelToName.values():
+            logger.setLevel(log_level.upper())
 
         return logger
 
@@ -132,7 +132,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         ]
 
     @classproperty
-    def _env_var_config(cls) -> dict[str, Any]:
+    def _env_var_config(cls) -> dict[str, Any]:  # noqa: N805
         """Return any config specified in environment variables.
 
         Variables must match the convention "<PLUGIN_NAME>_<SETTING_NAME>",
@@ -150,7 +150,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     # Core plugin metadata:
 
     @classproperty
-    def plugin_version(cls) -> str:
+    def plugin_version(cls) -> str:  # noqa: N805
         """Get version.
 
         Returns:
@@ -163,7 +163,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         return version
 
     @classproperty
-    def sdk_version(cls) -> str:
+    def sdk_version(cls) -> str:  # noqa: N805
         """Return the package version number.
 
         Returns:
@@ -400,7 +400,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             print(formatted)  # noqa: T201
 
     @classproperty
-    def cli(cls) -> Callable:
+    def cli(cls) -> Callable:  # noqa: N805
         """Handle command line execution.
 
         Returns:
