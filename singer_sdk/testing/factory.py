@@ -189,7 +189,10 @@ def get_tap_test_class(
 
     return get_test_class(
         test_runner=TapTestRunner(
-            tap_class=tap_class, config=config, suite_config=suite_config, **kwargs
+            tap_class=tap_class,
+            config=config,
+            suite_config=suite_config,
+            **kwargs,
         ),
         test_suites=suites,
         suite_config=suite_config,
