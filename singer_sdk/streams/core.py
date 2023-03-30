@@ -1041,9 +1041,8 @@ class Stream(metaclass=abc.ABCMeta):
             write_messages: Whether to write Singer messages to stdout.
 
         Raises:
-            AbortedSyncFailedException: Raised if sync could not reach a valid state.
-            AbortedSyncPausedException: Raised if sync was able to be transitioned into
-                a valid state without data loss or corruption.
+            InvalidStreamSortException: Raised if sorting errors are found while
+                syncing the records.
 
         Yields:
             Each record from the source.
