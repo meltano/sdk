@@ -143,7 +143,7 @@ class TapTestTemplate(TestTemplate):
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap or Target runner instance, to use with this test.
         """
-        self.tap = runner.tap
+        self.tap = runner.new_tap()
         super().run(config, resource, runner)
 
 
@@ -279,7 +279,7 @@ class TargetTestTemplate(TestTemplate):
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap runner instance, to use with this test.
         """
-        self.target = runner.target
+        self.target = runner.new_target()
         super().run(config, resource, runner)
 
     @property

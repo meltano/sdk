@@ -27,7 +27,12 @@ import pendulum
 
 import singer_sdk._singerlib as singer
 from singer_sdk import metrics
-from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
+from singer_sdk.exceptions import (
+    AbortedSyncFailedException,
+    AbortedSyncPausedException,
+    InvalidStreamSortException,
+    MaxRecordsLimitException,
+)
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
@@ -42,6 +47,7 @@ from singer_sdk.helpers._state import (
     get_state_partitions_list,
     get_writeable_state_dict,
     increment_state,
+    is_state_non_resumable,
     log_sort_error,
     reset_state_progress_markers,
     write_replication_key_signpost,
@@ -96,7 +102,10 @@ class Stream(metaclass=abc.ABCMeta):
     STATE_MSG_FREQUENCY = 10000
     """Number of records between state messages."""
 
-    _MAX_RECORDS_LIMIT: int | None = None
+    ABORT_AT_RECORD_COUNT: int | None = None
+    """
+    If set, raise `MaxRecordsLimitException` if the limit is exceeded.
+    """
 
     TYPE_CONFORMANCE_LEVEL = TypeConformanceLevel.RECURSIVE
     """Type conformance level for this stream.
@@ -166,6 +175,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._metadata: singer.MetadataMapping | None = None
         self._mask: singer.SelectionMask | None = None
         self._schema: dict
+        self._is_state_flushed: bool = True
         self.child_streams: list[Stream] = []
         if schema:
             if isinstance(schema, (PathLike, str)):
@@ -776,7 +786,9 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _write_state_message(self) -> None:
         """Write out a STATE message with the latest state."""
-        singer.write_message(singer.StateMessage(value=self.tap_state))
+        if not self._is_state_flushed:
+            singer.write_message(singer.StateMessage(value=self.tap_state))
+            self._is_state_flushed = True
 
     def _generate_schema_messages(self) -> Generator[singer.SchemaMessage, None, None]:
         """Generate schema messages from stream maps.
@@ -857,6 +869,8 @@ class Stream(metaclass=abc.ABCMeta):
         for record_message in self._generate_record_messages(record):
             singer.write_message(record_message)
 
+        self._is_state_flushed = False
+
     def _write_batch_message(
         self,
         encoding: BaseBatchFileEncoding,
@@ -875,6 +889,7 @@ class Stream(metaclass=abc.ABCMeta):
                 manifest=manifest,
             ),
         )
+        self._is_state_flushed = False
 
     def _log_metric(self, point: metrics.Point) -> None:
         """Log a single measurement.
@@ -896,23 +911,70 @@ class Stream(metaclass=abc.ABCMeta):
             msg = f"Total Sync costs for stream {self.name}: {self._sync_costs}"
             self.logger.info(msg)
 
-    def _check_max_record_limit(self, record_count: int) -> None:
-        """TODO.
+    def _check_max_record_limit(self, current_record_index: int) -> None:
+        """Raise an exception if dry run record limit exceeded.
+
+        Raised if we find dry run record limit exceeded,
+        aka `current_record_index > self.ABORT_AT_RECORD_COUNT - 1`.
 
         Args:
-            record_count: TODO.
+            current_record_index: The zero-based index of the current record.
 
         Raises:
-            MaxRecordsLimitException: TODO.
+            AbortedSyncFailedException: Raised if sync could not reach a valid state.
+            AbortedSyncPausedException: Raised if sync was able to be transitioned into
+                a valid state without data loss or corruption.
         """
         if (
-            self._MAX_RECORDS_LIMIT is not None
-            and record_count >= self._MAX_RECORDS_LIMIT
+            self.ABORT_AT_RECORD_COUNT is not None
+            and current_record_index > self.ABORT_AT_RECORD_COUNT - 1
         ):
-            raise MaxRecordsLimitException(
-                "Stream prematurely aborted due to the stream's max record "
-                f"limit ({self._MAX_RECORDS_LIMIT}) being reached.",
-            )
+            try:
+                self._abort_sync(
+                    abort_reason=MaxRecordsLimitException(
+                        "Stream prematurely aborted due to the stream's max dry run "
+                        f"record limit ({self.ABORT_AT_RECORD_COUNT}) being reached.",
+                    ),
+                )
+            except (AbortedSyncFailedException, AbortedSyncPausedException) as ex:
+                raise ex
+
+    def _abort_sync(self, abort_reason: Exception) -> None:
+        """Handle a sync operation being aborted.
+
+        This method will attempt to close out the sync operation as gracefully as
+        possible - for instance, if a max runtime or record count is reached. This can
+        also be called for `SIGTERM` and KeyboardInterrupt events.
+
+        If a state message is pending, we will attempt to write it to STDOUT before
+        shutting down.
+
+        If the stream can reach a valid resumable state, then we will raise
+        `AbortedSyncPausedException`. Otherwise, `AbortedSyncFailedException` will be
+        raised.
+
+        Args:
+            abort_reason: The exception that triggered the sync to be aborted.
+
+        Raises:
+            AbortedSyncFailedException: Raised if sync could not reach a valid state.
+            AbortedSyncPausedException: Raised if sync was able to be transitioned into
+                a valid state without data loss or corruption.
+        """
+        self._write_state_message()  # Write out state message if pending.
+
+        if self.replication_method == "FULL_TABLE":
+            raise AbortedSyncFailedException(
+                "Sync operation aborted for stream in 'FULL_TABLE' replication mode.",
+            ) from abort_reason
+
+        if is_state_non_resumable(self.stream_state):
+            raise AbortedSyncFailedException(
+                "Sync operation aborted and state is not in a resumable state.",
+            ) from abort_reason
+
+        # Else, the sync operation can be assumed to be in a valid resumable state.
+        raise AbortedSyncPausedException from abort_reason
 
     # Handle interim stream state
 
@@ -997,7 +1059,8 @@ class Stream(metaclass=abc.ABCMeta):
             write_messages: Whether to write Singer messages to stdout.
 
         Raises:
-            InvalidStreamSortException: TODO
+            InvalidStreamSortException: Raised if sorting errors are found while
+                syncing the records.
 
         Yields:
             Each record from the source.
@@ -1006,7 +1069,7 @@ class Stream(metaclass=abc.ABCMeta):
         record_counter = metrics.record_counter(self.name)
         timer = metrics.sync_timer(self.name)
 
-        record_count = 0
+        record_index = 0
         current_context: dict | None
         context_list: list[dict] | None
         context_list = [context] if context is not None else self.partitions
@@ -1017,7 +1080,7 @@ class Stream(metaclass=abc.ABCMeta):
                 record_counter.context = current_context
                 timer.context = current_context
 
-                partition_record_count = 0
+                partition_record_index = 0
                 current_context = current_context or None
                 state = self.get_context_state(current_context)
                 state_partition_context = self._get_state_partition_context(
@@ -1029,6 +1092,8 @@ class Stream(metaclass=abc.ABCMeta):
                 )
 
                 for record_result in self.get_records(current_context):
+                    self._check_max_record_limit(current_record_index=record_index)
+
                     if isinstance(record_result, tuple):
                         # Tuple items should be the record and the child context
                         record, child_context = record_result
@@ -1044,30 +1109,29 @@ class Stream(metaclass=abc.ABCMeta):
                         log_sort_error(
                             log_fn=self.logger.error,
                             ex=ex,
-                            record_count=record_count + 1,
-                            partition_record_count=partition_record_count + 1,
+                            record_count=record_index + 1,
+                            partition_record_count=partition_record_index + 1,
                             current_context=current_context,
                             state_partition_context=state_partition_context,
                             stream_name=self.name,
                         )
                         raise ex
 
-                    self._check_max_record_limit(record_count)
-
                     if selected:
-                        if (
-                            record_count - 1
-                        ) % self.STATE_MSG_FREQUENCY == 0 and write_messages:
-                            self._write_state_message()
                         if write_messages:
                             self._write_record_message(record)
-                        self._increment_stream_state(record, context=current_context)
 
-                        yield record
+                        self._increment_stream_state(record, context=current_context)
+                        if (
+                            record_index + 1
+                        ) % self.STATE_MSG_FREQUENCY == 0 and write_messages:
+                            self._write_state_message()
 
                         record_counter.increment()
-                        record_count += 1
-                        partition_record_count += 1
+                        yield record
+
+                    record_index += 1
+                    partition_record_index += 1
 
                 if current_context == state_partition_context:
                     # Finalize per-partition state only if 1:1 with context
