@@ -111,8 +111,8 @@ def test_parent_context_fields_in_child(tap: MyTap):
     assert messages[1]["stream"] == child_stream.name
     assert messages[1]["schema"] == child_stream.schema
 
-    # Child records are emitted, skip state message in between
-    child_record_messages = messages[2], *messages[4:6]
+    # Child records are emitted
+    child_record_messages = messages[2:5]
     assert child_record_messages
     assert all(msg["type"] == SingerMessageType.RECORD for msg in child_record_messages)
     assert all(msg["stream"] == child_stream.name for msg in child_record_messages)
@@ -141,8 +141,8 @@ def test_child_deselected_parent(tap_with_deselected_parent: MyTap):
     assert messages[0]["stream"] == child_stream.name
     assert messages[0]["schema"] == child_stream.schema
 
-    # Child records are emitted, skip state message in between
-    child_record_messages = messages[1], *messages[3:5]
+    # Child records are emitted
+    child_record_messages = messages[1:4]
     assert child_record_messages
     assert all(msg["type"] == SingerMessageType.RECORD for msg in child_record_messages)
     assert all(msg["stream"] == child_stream.name for msg in child_record_messages)

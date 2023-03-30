@@ -15,6 +15,7 @@ from singer_sdk.helpers._catalog import (
     pop_deselected_record_properties,
 )
 from singer_sdk.testing import get_tap_test_class
+from singer_sdk.testing.config import SuiteConfig
 
 SAMPLE_CONFIG = {}
 SAMPLE_CONFIG_BAD = {"not": "correct"}
@@ -23,6 +24,7 @@ SAMPLE_CONFIG_BAD = {"not": "correct"}
 TestSampleTapCountries = get_tap_test_class(
     tap_class=SampleTapCountries,
     config=SAMPLE_CONFIG,
+    suite_config=SuiteConfig(max_records_limit=5),
 )
 
 
@@ -133,4 +135,4 @@ def test_batch_mode(outdir):
     assert counter["SCHEMA", "countries"] == 1
     assert counter["BATCH", "countries"] == 1
 
-    assert counter[("STATE",)] == 4
+    assert counter[("STATE",)] == 2
