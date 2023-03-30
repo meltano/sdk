@@ -217,8 +217,9 @@ exclude = [
     "cookiecutter/*",
 ]
 ignore = [
-    "ANN101",
-    "ANN102",
+    "ANN101",  # Missing type annotation for `self` in method
+    "ANN102",  # Missing type annotation for `cls` in class method
+    "N818",    # Exception name should be named with an Error suffix
 ]
 line-length = 88
 select = [
