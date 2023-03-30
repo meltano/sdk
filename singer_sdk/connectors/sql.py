@@ -451,7 +451,7 @@ class SQLConnector:
         #   a replication_key value.
         # - 'LOG_BASED' replication must be enabled by the developer, according
         #   to source-specific implementation capabilities.
-        replication_method = next(reversed(["FULL_TABLE"] + addl_replication_methods))
+        replication_method = next(reversed(["FULL_TABLE", *addl_replication_methods]))
 
         # Create the catalog entry object
         return CatalogEntry(

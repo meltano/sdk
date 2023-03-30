@@ -18,13 +18,13 @@ class DummyCapabilitiesEnum(CapabilitiesEnum):
 def test_deprecated_capabilities():
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        DummyCapabilitiesEnum.MY_SUPPORTED_FEATURE
+        _ = DummyCapabilitiesEnum.MY_SUPPORTED_FEATURE
 
     with pytest.warns(
         DeprecationWarning,
         match="is deprecated. No longer supported",
     ) as record:
-        DummyCapabilitiesEnum.MY_DEPRECATED_FEATURE
+        _ = DummyCapabilitiesEnum.MY_DEPRECATED_FEATURE
 
     warning = record.list[0]
     frameinfo = getframeinfo(currentframe())

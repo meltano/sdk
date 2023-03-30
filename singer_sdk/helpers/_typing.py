@@ -343,7 +343,7 @@ class TypeConformanceLevel(Enum):
     """
 
 
-def conform_record_data_types(  # noqa: C901
+def conform_record_data_types(
     stream_name: str,
     record: dict[str, Any],
     schema: dict,
@@ -368,7 +368,7 @@ def _conform_record_data_types(
     schema: dict,
     level: TypeConformanceLevel,
     parent: str | None,
-) -> tuple[dict[str, Any], list[str]]:  # noqa: C901
+) -> tuple[dict[str, Any], list[str]]:
     """Translate values in record dictionary to singer-compatible data types.
 
     Any property names not found in the schema catalog will be removed, and a single

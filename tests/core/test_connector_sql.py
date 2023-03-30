@@ -154,7 +154,7 @@ class TestConnectorSQL:
         with pytest.deprecated_call():
             connector.create_sqlalchemy_connection()
         with pytest.deprecated_call():
-            connector.connection
+            _ = connector.connection
 
     def test_connect_calls_engine(self, connector):
         with mock.patch.object(
