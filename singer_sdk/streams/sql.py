@@ -197,8 +197,12 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                     ),
                 )
 
-        if self._MAX_RECORDS_LIMIT is not None:
-            query = query.limit(self._MAX_RECORDS_LIMIT)
+        if self.ABORT_AT_RECORD_COUNT is not None:
+            # Limit record count to one greater than the abort threshold. This ensures
+            # `MaxRecordsLimitException` exception is properly raised by caller
+            # `Stream._sync_records()` if more records are available than can be
+            # processed.
+            query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
 
         with self.connector._connect() as conn:
             for record in conn.execute(query):

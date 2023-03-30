@@ -56,7 +56,7 @@ def flatten_key(key_name: str, parent_keys: list[str], separator: str = "__") ->
     >>> flatten_key("foo", ["bar", "baz"], separator=".")
     'bar.baz.foo'
     """
-    full_key = parent_keys + [key_name]
+    full_key = [*parent_keys, key_name]
     inflected_key = full_key.copy()
     reducer_index = 0
     while len(separator.join(inflected_key)) >= 255 and reducer_index < len(
@@ -241,7 +241,7 @@ def _flatten_schema(
                 items.extend(
                     _flatten_schema(
                         v,
-                        parent_keys + [k],
+                        [*parent_keys, k],
                         separator=separator,
                         level=level + 1,
                         max_level=max_level,
@@ -334,7 +334,7 @@ def _flatten_record(
                 _flatten_record(
                     v,
                     flattened_schema,
-                    parent_key + [k],
+                    [*parent_key, k],
                     separator=separator,
                     level=level + 1,
                     max_level=max_level,

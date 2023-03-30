@@ -34,7 +34,6 @@ def get_test_class(
     Returns:
         A test class usable by pytest.
     """
-    suite_config = suite_config or SuiteConfig()
 
     class BaseTestClass:
         """Base test class."""
@@ -73,13 +72,13 @@ def get_test_class(
         )
 
         if suite.kind in {"tap", "target"}:
-            for TestClass in suite.tests:
-                test = TestClass()
+            for test_class in suite.tests:
+                test = test_class()
                 test_name = f"test_{suite.kind}_{test.name}"
                 setattr(BaseTestClass, f"test_{suite.kind}_{test.name}", test.run)
 
         if suite.kind in {"tap_stream", "tap_stream_attribute"}:
-            streams = list(test_runner.tap.streams.values())
+            streams = list(test_runner.new_tap().streams.values())
 
             if suite.kind == "tap_stream":
                 params = [
@@ -90,8 +89,8 @@ def get_test_class(
                 ]
                 param_ids = [stream.name for stream in streams]
 
-                for TestClass in suite.tests:
-                    test = TestClass()
+                for test_class in suite.tests:
+                    test = test_class()
                     test_name = f"test_{suite.kind}_{test.name}"
                     setattr(
                         BaseTestClass,
@@ -102,8 +101,8 @@ def get_test_class(
                     BaseTestClass.param_ids[test_name] = param_ids
 
             if suite.kind == "tap_stream_attribute":
-                for TestClass in suite.tests:
-                    test = TestClass()
+                for test_class in suite.tests:
+                    test = test_class()
                     test_name = f"test_{suite.kind}_{test.name}"
                     test_params = []
                     test_ids = []
@@ -117,7 +116,7 @@ def get_test_class(
                                 for property_name, property_schema in stream.schema[
                                     "properties"
                                 ].items()
-                                if TestClass.evaluate(
+                                if test_class.evaluate(
                                     stream=stream,
                                     property_name=property_name,
                                     property_schema=property_schema,
@@ -130,7 +129,7 @@ def get_test_class(
                                 for property_name, property_schema in stream.schema[
                                     "properties"
                                 ].items()
-                                if TestClass.evaluate(
+                                if test_class.evaluate(
                                     stream=stream,
                                     property_name=property_name,
                                     property_schema=property_schema,
@@ -188,10 +187,13 @@ def get_tap_test_class(
     if "parse_env_config" not in kwargs:
         kwargs["parse_env_config"] = True
 
-    suite_config = suite_config or SuiteConfig()
-
     return get_test_class(
-        test_runner=TapTestRunner(tap_class=tap_class, config=config, **kwargs),
+        test_runner=TapTestRunner(
+            tap_class=tap_class,
+            config=config,
+            suite_config=suite_config,
+            **kwargs,
+        ),
         test_suites=suites,
         suite_config=suite_config,
     )
@@ -223,8 +225,6 @@ def get_target_test_class(
     # set default values
     if "parse_env_config" not in kwargs:
         kwargs["parse_env_config"] = True
-
-    suite_config = suite_config or SuiteConfig()
 
     return get_test_class(
         test_runner=TargetTestRunner(

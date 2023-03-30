@@ -105,8 +105,7 @@ class TapTestRunner(SingerTestRunner):
             **kwargs,
         )
 
-    @property
-    def tap(self) -> Tap:
+    def new_tap(self) -> Tap:
         """Get new Tap instance.
 
         Returns:
@@ -120,7 +119,7 @@ class TapTestRunner(SingerTestRunner):
         Returns:
             The catalog as a string.
         """
-        return self.tap.run_discovery()
+        return self.new_tap().run_discovery()
 
     def run_connection_test(self) -> bool:
         """Run tap connection test.
@@ -128,7 +127,21 @@ class TapTestRunner(SingerTestRunner):
         Returns:
             True if connection test passes, else False.
         """
-        return self.tap.run_connection_test()
+        new_tap = self.new_tap()
+        return new_tap.run_connection_test()
+
+    def run_sync_dry_run(self) -> bool:
+        """Run tap sync dry run.
+
+        Returns:
+            True if dry run test passes, else False.
+        """
+        new_tap = self.new_tap()
+        dry_run_record_limit = None
+        if self.suite_config.max_records_limit is not None:
+            dry_run_record_limit = self.suite_config.max_records_limit
+
+        return new_tap.run_sync_dry_run(dry_run_record_limit=dry_run_record_limit)
 
     def sync_all(self, **kwargs: Any) -> None:  # noqa: ARG002
         """Run a full tap sync, assigning output to the runner object.
@@ -171,7 +184,7 @@ class TapTestRunner(SingerTestRunner):
         stdout_buf = io.StringIO()
         stderr_buf = io.StringIO()
         with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
-            self.tap.sync_all()
+            self.run_sync_dry_run()
         stdout_buf.seek(0)
         stderr_buf.seek(0)
         return stdout_buf.read(), stderr_buf.read()
@@ -211,8 +224,7 @@ class TargetTestRunner(SingerTestRunner):
         self.input_io = input_io
         self._input: IO[str] | None = None
 
-    @property
-    def target(self) -> Target:
+    def new_target(self) -> Target:
         """Get new Target instance.
 
         Returns:
@@ -231,7 +243,7 @@ class TargetTestRunner(SingerTestRunner):
             if self.input_io:
                 self._input = self.input_io
             elif self.input_filepath:
-                self._input = Path(self.input_filepath).open()  # noqa: SIM115
+                self._input = Path(self.input_filepath).open()
         return cast(IO[str], self._input)
 
     @target_input.setter
@@ -246,7 +258,7 @@ class TargetTestRunner(SingerTestRunner):
                 False to keep the sink operation open for further records.
             kwargs: Unused keyword arguments.
         """
-        target = cast(Target, self.create())
+        target = self.new_target()
         stdout, stderr = self._execute_sync(
             target=target,
             target_input=self.target_input,

@@ -265,6 +265,15 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     # Message handling
 
+    def _handle_max_record_age(self) -> None:
+        """Check if _MAX_RECORD_AGE_IN_MINUTES reached, and if so trigger drain."""
+        if self._max_record_age_in_minutes > self._MAX_RECORD_AGE_IN_MINUTES:
+            self.logger.info(
+                "One or more records have exceeded the max age of "
+                f"{self._MAX_RECORD_AGE_IN_MINUTES} minutes. Draining all sinks.",
+            )
+            self.drain_all()
+
     def _process_lines(self, file_input: IO[str]) -> Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
@@ -331,6 +340,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                     f"Target sink for '{sink.stream_name}' is full. Draining...",
                 )
                 self.drain_one(sink)
+
+        self._handle_max_record_age()
 
     def _process_schema_message(self, message_dict: dict) -> None:
         """Process a SCHEMA messages.
@@ -401,12 +412,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         if self._latest_state == state:
             return
         self._latest_state = state
-        if self._max_record_age_in_minutes > self._MAX_RECORD_AGE_IN_MINUTES:
-            self.logger.info(
-                "One or more records have exceeded the max age of "
-                f"{self._MAX_RECORD_AGE_IN_MINUTES} minutes. Draining all sinks.",
-            )
-            self.drain_all()
 
     def _process_activate_version_message(self, message_dict: dict) -> None:
         """Handle the optional ACTIVATE_VERSION message extension.
@@ -431,6 +436,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             encoding,
             message_dict["manifest"],
         )
+        self._handle_max_record_age()
 
     # Sink drain methods
 
@@ -501,7 +507,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     # CLI handler
 
     @classproperty
-    def cli(cls) -> Callable:
+    def cli(cls) -> Callable:  # noqa: N805
         """Execute standard CLI handler for taps.
 
         Returns:

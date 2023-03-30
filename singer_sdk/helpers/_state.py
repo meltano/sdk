@@ -234,12 +234,24 @@ def _greater_than_signpost(
     return new_value > signpost
 
 
+def is_state_non_resumable(stream_or_partition_state: dict) -> bool:
+    """Return True when state is non-resumable.
+
+    This is determined by checking for a "progress marker" tag in the state artifact.
+    """
+    return PROGRESS_MARKERS in stream_or_partition_state
+
+
 def finalize_state_progress_markers(stream_or_partition_state: dict) -> dict | None:
-    """Promote or wipe progress markers once sync is complete."""
+    """Promote or wipe progress markers once sync is complete.
+
+    This marks any non-resumable progress markers as finalized. If there are
+    valid bookmarks present, they will be promoted to be resumable.
+    """
     signpost_value = stream_or_partition_state.pop(SIGNPOST_MARKER, None)
     stream_or_partition_state.pop(STARTING_MARKER, None)
     if (
-        PROGRESS_MARKERS in stream_or_partition_state
+        is_state_non_resumable(stream_or_partition_state)
         and "replication_key" in stream_or_partition_state[PROGRESS_MARKERS]
     ):
         # Replication keys valid (only) after sync is complete

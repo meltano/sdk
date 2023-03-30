@@ -217,8 +217,9 @@ exclude = [
     "cookiecutter/*",
 ]
 ignore = [
-    "ANN101",
-    "ANN102",
+    "ANN101",  # Missing type annotation for `self` in method
+    "ANN102",  # Missing type annotation for `cls` in class method
+    "N818",    # Exception name should be named with an Error suffix
 ]
 line-length = 88
 select = [
@@ -226,6 +227,7 @@ select = [
     "E",    # pycodestyle (error)
     "W",    # pycodestyle (warning)
     "I",    # isort
+    "N",    # pep8-naming
     "D",    # pydocstyle/flake8-docstrings
     "UP",   # pyupgrade
     "YTT",  # flake8-2020
@@ -252,6 +254,7 @@ select = [
     "PTH",  # flake8-use-pathlib
     "ERA",  # eradicate
     "PGH",  # pygrep-hooks
+    "RUF",  # ruff
 ]
 src = ["samples", "singer_sdk", "tests"]
 target-version = "py37"
