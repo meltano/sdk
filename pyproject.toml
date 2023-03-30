@@ -226,6 +226,7 @@ select = [
     "E",    # pycodestyle (error)
     "W",    # pycodestyle (warning)
     "I",    # isort
+    "N",    # pep8-naming
     "D",    # pydocstyle/flake8-docstrings
     "UP",   # pyupgrade
     "YTT",  # flake8-2020

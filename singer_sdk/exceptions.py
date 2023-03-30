@@ -16,7 +16,7 @@ class FatalAPIError(Exception):
     """Exception raised when a failed request should not be considered retriable."""
 
 
-class InvalidStreamSortException(Exception):
+class InvalidStreamSortException(Exception):  # noqa: N818
     """Exception to raise if sorting errors are found while syncing the records."""
 
 
@@ -24,11 +24,11 @@ class MapExpressionError(Exception):
     """Failed map expression evaluation."""
 
 
-class MaxRecordsLimitException(Exception):
+class MaxRecordsLimitException(Exception):  # noqa: N818
     """Exception to raise if the maximum number of allowable records is exceeded."""
 
 
-class RecordsWithoutSchemaException(Exception):
+class RecordsWithoutSchemaException(Exception):  # noqa: N818
     """Raised if a target receives RECORD messages prior to a SCHEMA message."""
 
 
@@ -50,15 +50,15 @@ class StreamMapConfigError(Exception):
     """Raised when a stream map has an invalid configuration."""
 
 
-class TapStreamConnectionFailure(Exception):
+class TapStreamConnectionFailure(Exception):  # noqa: N818
     """Exception to raise when stream connection fails or stream is disconnected."""
 
 
-class TooManyRecordsException(Exception):
+class TooManyRecordsException(Exception):  # noqa: N818
     """Exception to raise when query returns more records than max_records."""
 
 
-class ConformedNameClashException(Exception):
+class ConformedNameClashException(Exception):  # noqa: N818
     """Raised when name conforming produces clashes.
 
     e.g. two columns conformed to the same name

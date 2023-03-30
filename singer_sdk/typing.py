@@ -163,7 +163,7 @@ class JSONTypeHelper:
     """Type helper base class for JSONSchema types."""
 
     @classproperty
-    def type_dict(cls) -> dict:
+    def type_dict(cls) -> dict:  # noqa: N805
         """Return dict describing the type.
 
         Raises:
@@ -207,11 +207,11 @@ class StringType(JSONTypeHelper):
     """
 
     @classproperty
-    def _format(cls) -> dict:
+    def _format(cls) -> dict:  # noqa: N805
         return {"format": cls.string_format} if cls.string_format else {}
 
     @classproperty
-    def type_dict(cls) -> dict:
+    def type_dict(cls) -> dict:  # noqa: N805
         """Get type dictionary.
 
         Returns:
@@ -332,7 +332,7 @@ class BooleanType(JSONTypeHelper):
     """Boolean type."""
 
     @classproperty
-    def type_dict(cls) -> dict:
+    def type_dict(cls) -> dict:  # noqa: N805
         """Get type dictionary.
 
         Returns:
@@ -345,7 +345,7 @@ class IntegerType(JSONTypeHelper):
     """Integer type."""
 
     @classproperty
-    def type_dict(cls) -> dict:
+    def type_dict(cls) -> dict:  # noqa: N805
         """Get type dictionary.
 
         Returns:
@@ -358,7 +358,7 @@ class NumberType(JSONTypeHelper):
     """Number type."""
 
     @classproperty
-    def type_dict(cls) -> dict:
+    def type_dict(cls) -> dict:  # noqa: N805
         """Get type dictionary.
 
         Returns:
