@@ -2518,14 +2518,14 @@ types-urllib3 = "<1.27"
 
 [[package]]
 name = "types-simplejson"
-version = "3.18.0.2"
+version = "3.18.0.3"
 description = "Typing stubs for simplejson"
 category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "types-simplejson-3.18.0.2.tar.gz", hash = "sha256:aef48dda777edcf46d129052e056bb114f4146de1d7abdfbe5590c9c8b55d90e"},
-    {file = "types_simplejson-3.18.0.2-py3-none-any.whl", hash = "sha256:11ce44427819d3234beb3757d76a5e4b944ed89289cc66c9b6e861429ddcfd64"},
+    {file = "types-simplejson-3.18.0.3.tar.gz", hash = "sha256:c05a81a80c5b78567cd374b23d3e2151fec7398513295b656ddb57cb8e99f2fb"},
+    {file = "types_simplejson-3.18.0.3-py3-none-any.whl", hash = "sha256:69b949674af0aec90b0eef7f1a76bcbd7582a74329911ec668824e76e70bd3f2"},
 ]
 
 [[package]]
