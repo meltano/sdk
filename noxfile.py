@@ -177,9 +177,9 @@ def docs_serve(session: Session) -> None:
 @nox.parametrize("replay_file_path", glob.glob("./e2e-tests/cookiecutters/*.json"))
 @session(python=main_python_version)
 def test_cookiecutter(session: Session, replay_file_path) -> None:
-    """Uses the tap template to build an empty cookiecutter,.
+    """Uses the tap template to build an empty cookiecutter.
 
-    and runs the lint task on the created test project.
+    Runs the lint task on the created test project.
     """
     args = session.posargs or ["1"]
 
@@ -213,8 +213,8 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
     session.run(
         "cookiecutter",
         "--replay-file",
-        replay_file,
-        tap_template,
+        str(replay_file),
+        str(tap_template),
         "-o",
         cc_build_path,
     )
