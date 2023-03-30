@@ -371,7 +371,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
 
     def _write_request_duration_log(
         self,
-        endpoint: str,  # noqa: ARG002
+        endpoint: str,
         response: requests.Response,
         context: dict | None,
         extra_tags: dict | None,

@@ -254,6 +254,7 @@ select = [
     "PTH",  # flake8-use-pathlib
     "ERA",  # eradicate
     "PGH",  # pygrep-hooks
+    "RUF",  # ruff
 ]
 src = ["samples", "singer_sdk", "tests"]
 target-version = "py37"

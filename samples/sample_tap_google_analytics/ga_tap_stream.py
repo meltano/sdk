@@ -54,16 +54,6 @@ class SampleGoogleAnalyticsStream(RESTStream):
             "viewId": self.config["view_id"],
             "metrics": [{"expression": m} for m in self.metrics],
             "dimensions": [{"name": d} for d in self.dimensions],
-            # "orderBys": [
-            #     {  # noqa: ERA001
-            #         "fieldName": "ga:sessions",  # noqa: ERA001
-            #         "sortOrder": "DESCENDING",  # noqa: ERA001
-            #     },
-            #     {  # noqa: ERA001
-            #         "fieldName": "ga:pageviews",  # noqa: ERA001
-            #         "sortOrder": "DESCENDING",  # noqa: ERA001
-            #     },
-            # ],
         }
         if self.config.get("start_date"):
             request_def["dateRanges"] = [
