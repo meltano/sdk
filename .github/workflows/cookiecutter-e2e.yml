@@ -51,7 +51,7 @@ jobs:
       run: |
         pip install pip
         pip --version
-  
+
     - name: Install Nox
       env:
         PIP_CONSTRAINT: .github/workflows/constraints.txt
@@ -59,7 +59,7 @@ jobs:
         pipx install --pip-args=--constraint=.github/workflows/constraints.txt nox
         pipx inject --pip-args=--constraint=.github/workflows/constraints.txt nox nox-poetry
         nox --version
-      
+
     - name: Run Nox
       run: |
         nox --python=${{ matrix.python-version }} --session=test_cookiecutter

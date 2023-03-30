@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
+import glob
 import os
 import shutil
 import sys
 from pathlib import Path
 from textwrap import dedent
-import glob
 
 import nox
 
@@ -28,7 +28,7 @@ nox.options.sessions = (
     "mypy",
     "tests",
     "doctest",
-    "test_cookiecutter"
+    "test_cookiecutter",
 )
 test_dependencies = [
     "coverage[toml]",
@@ -174,51 +174,68 @@ def docs_serve(session: Session) -> None:
     session.run("sphinx-autobuild", *args)
 
 
-@nox.parametrize('replay_file_path', glob.glob('./e2e-tests/cookiecutters/*.json'))
+@nox.parametrize("replay_file_path", glob.glob("./e2e-tests/cookiecutters/*.json"))
 @session(python=main_python_version)
 def test_cookiecutter(session: Session, replay_file_path) -> None:
-    """Uses the tap template to build an empty cookiecutter, and runs the lint task on the created test project."""
+    """Uses the tap template to build an empty cookiecutter,.
+
+    and runs the lint task on the created test project.
+    """
     args = session.posargs or ["1"]
 
-    cc_build_path = "/tmp"
+    cc_build_path = "/tmp"  # noqa: S108
     folder_base_path = "./cookiecutter"
 
-    target_folder = "tap-template" if os.path.basename(
-        replay_file_path).startswith("tap") else "target-template"
-    tap_template = os.path.abspath(folder_base_path + "/" + target_folder)
-    replay_file = os.path.abspath(replay_file_path)
+    target_folder = (
+        "tap-template"
+        if Path(replay_file_path).name.startswith("tap")
+        else "target-template"
+    )
+    tap_template = Path(folder_base_path + "/" + target_folder).resolve()
+    replay_file = Path(replay_file_path).resolve()
 
-    if not os.path.exists(tap_template):
-        print("Tap template folder not found")
+    if not Path(tap_template).exists():
         return
 
-    if not os.path.isfile(replay_file):
-        print("Replay file not found")
+    if not Path(replay_file).is_file():
         return
 
-    sdk_dir = os.path.dirname(os.path.dirname(tap_template))
-    cc_output_dir = os.path.basename(replay_file_path).replace(".json", "")
-    cc_test_output = (cc_build_path + "/" + cc_output_dir)
+    sdk_dir = Path(Path(tap_template).parent).parent
+    cc_output_dir = Path(replay_file_path).name.replace(".json", "")
+    cc_test_output = cc_build_path + "/" + cc_output_dir
 
-    if os.path.exists(cc_test_output):
+    if Path(cc_test_output).exists():
         session.run("rm", "-fr", cc_test_output, external=True)
 
     session.install(".")
     session.install("cookiecutter", "pythonsed")
 
-    session.run("cookiecutter", "--replay-file", replay_file,
-                tap_template, "-o", cc_build_path)
+    session.run(
+        "cookiecutter",
+        "--replay-file",
+        replay_file,
+        tap_template,
+        "-o",
+        cc_build_path,
+    )
     os.chdir(cc_test_output)
-    print(os.getcwd())
 
-    session.run("pythonsed", "-i.bak",
-                "s|singer-sdk =.*|singer-sdk = \{ path = \"" + sdk_dir + "\", develop = true \}|", "pyproject.toml")
+    session.run(
+        "pythonsed",
+        "-i.bak",
+        's|singer-sdk =.*|singer-sdk = \\{ path = "'
+        + sdk_dir
+        + '", develop = true \\}|',
+        "pyproject.toml",
+    )
     session.run("poetry", "lock", external=True)
     session.run("poetry", "install", external=True)
 
-    for path in glob.glob(f'{os.getcwd()}/*', recursive=True):
-        if os.path.basename(path).startswith("tap") or os.path.basename(path).startswith("target"):
-            library_name = os.path.basename(path)
+    for path in glob.glob(f"{Path.cwd()}/*", recursive=True):
+        if Path(path).name.startswith("tap") or Path(
+            path,
+        ).name.startswith("target"):
+            library_name = Path(path).name
 
     for argument in ["black", "isort", "flake8", "mypy"]:
         session.run("poetry", "run", argument, library_name, external=True)
