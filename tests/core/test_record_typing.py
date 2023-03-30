@@ -87,7 +87,10 @@ def test_conform_record_data_types(
         (pendulum.parse("2021-08-25T20:05:28+00:00"), "2021-08-25T20:05:28+00:00"),
         (pendulum.parse("2021-08-25T20:05:28+07:00"), "2021-08-25T20:05:28+07:00"),
         (
-            datetime.strptime("2021-08-25T20:05:28", "%Y-%m-%dT%H:%M:%S"),
+            datetime.strptime(  # noqa: DTZ007
+                "2021-08-25T20:05:28",
+                "%Y-%m-%dT%H:%M:%S",
+            ),
             "2021-08-25T20:05:28+00:00",
         ),
         (
