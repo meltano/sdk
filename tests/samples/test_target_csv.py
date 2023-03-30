@@ -49,7 +49,6 @@ class TestSampleTargetCSV(StandardTests):
         shutil.rmtree(test_output_dir)
 
 
-SAMPLE_FILENAME = "/tmp/testfile.countries"
 SAMPLE_TAP_CONFIG: dict[str, Any] = {}
 COUNTRIES_STREAM_MAPS_CONFIG: dict[str, Any] = {
     "stream_maps": {"continents": {}, "__else__": None},

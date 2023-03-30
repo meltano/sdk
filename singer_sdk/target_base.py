@@ -302,7 +302,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         stream_name = message_dict["stream"]
         for stream_map in self.mapper.stream_maps[stream_name]:
-            # new_schema = helpers._float_to_decimal(new_schema)
             raw_record = copy.copy(message_dict["record"])
             transformed_record = stream_map.transform(raw_record)
             if transformed_record is None:
@@ -376,7 +375,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             key_properties,
         )
         for stream_map in self.mapper.stream_maps[stream_name]:
-            # new_schema = helpers._float_to_decimal(new_schema)
             _ = self.get_sink(
                 stream_map.stream_alias,
                 schema=stream_map.transformed_schema,
@@ -523,7 +521,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             version: bool = False,
             about: bool = False,
             config: tuple[str, ...] = (),
-            format: str | None = None,
+            about_format: str | None = None,
             file_input: FileIO | None = None,
         ) -> None:
             """Handle command line execution.
@@ -531,7 +529,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             Args:
                 version: Display the package version.
                 about: Display package metadata and settings.
-                format: Specify output style for `--about`.
+                about_format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
                     variables. Accepts multiple inputs as a tuple.
                 file_input: Specify a path to an input file to read messages from.
@@ -547,7 +545,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             if not about:
                 cls.print_version(print_fn=cls.logger.info)
             else:
-                cls.print_about(format=format)
+                cls.print_about(output_format=about_format)
                 return
 
             validate_config: bool = True
@@ -571,7 +569,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
                 config_files.append(Path(config_path))
 
-            target = cls(  # type: ignore  # Ignore 'type not callable'
+            target = cls(  # type: ignore[operator]
                 config=config_files or None,
                 parse_env_config=parse_env_config,
                 validate_config=validate_config,

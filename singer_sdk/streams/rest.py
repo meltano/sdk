@@ -493,8 +493,9 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
                 "in a future version of the Meltano Singer SDK. "
                 "Override `RESTStream.get_new_paginator` instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
-            return LegacyStreamPaginator(self)  # type: ignore
+            return LegacyStreamPaginator(self)
 
         if self.next_page_token_jsonpath:
             return JSONPathPaginator(self.next_page_token_jsonpath)
@@ -587,7 +588,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         Returns:
             The wait generator
         """
-        return backoff.expo(factor=2)  # type: ignore # ignore 'Returning Any'
+        return backoff.expo(factor=2)
 
     def backoff_max_tries(self) -> int:
         """The number of attempts before giving up when retrying requests.

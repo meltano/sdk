@@ -50,16 +50,16 @@ MAPPER_KEY_PROPERTIES_OPTION = "__key_properties__"
 NULL_STRING = "__NULL__"
 
 
-def md5(input: str) -> str:
+def md5(string: str) -> str:
     """Digest a string using MD5. This is a function for inline calculations.
 
     Args:
-        input: String to digest.
+        string: String to digest.
 
     Returns:
         A string digested into MD5.
     """
-    return hashlib.md5(input.encode("utf-8")).hexdigest()
+    return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
 
 
 StreamMapsDict: TypeAlias = Dict[str, Union[str, dict, None]]
@@ -342,11 +342,13 @@ class CustomStreamMap(StreamMap):
                 functions=self.functions,
                 names=names,
             )
-            logging.debug(f"Eval result: {expr} = {result}")
-        except Exception as ex:
+        except (simpleeval.InvalidExpression, SyntaxError) as ex:
             raise MapExpressionError(
                 f"Failed to evaluate simpleeval expressions {expr}.",
             ) from ex
+
+        logging.debug(f"Eval result: {expr} = {result}")
+
         return result
 
     def _eval_type(
@@ -358,12 +360,16 @@ class CustomStreamMap(StreamMap):
 
         Args:
             expr: String expression to evaluate.
-            default: TODO.
+            default: Default type.
 
         Returns:
-            TODO
+            The evaluated expression's type.
+
+        Raises:
+            ValueError: If the expression is ``None``.
         """
-        assert expr is not None, "Expression should be str, not None"
+        if expr is None:
+            raise ValueError("Expression should be str, not None")
 
         default = default or StringType()
 

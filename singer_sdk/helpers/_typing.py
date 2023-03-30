@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"
-JSONSCHEMA_ANNOTATION_SECRET = "secret"
+JSONSCHEMA_ANNOTATION_SECRET = "secret"  # noqa: S105
 JSONSCHEMA_ANNOTATION_WRITEONLY = "writeOnly"
 
 
@@ -149,10 +149,7 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
         True if date or date-time, else False.
     """
     if "anyOf" in type_dict:
-        for type_dict in type_dict["anyOf"]:
-            if is_date_or_datetime_type(type_dict):
-                return True
-        return False
+        return any(is_date_or_datetime_type(option) for option in type_dict["anyOf"])
 
     if "type" in type_dict:
         return type_dict.get("format") in {"date", "date-time"}

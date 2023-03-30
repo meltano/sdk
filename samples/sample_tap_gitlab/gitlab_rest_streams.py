@@ -71,7 +71,8 @@ class ProjectBasedStream(GitlabStream):
         """Return a list of partition key dicts (if applicable), otherwise None."""
         if "{project_id}" in self.path:
             return [
-                {"project_id": id} for id in cast(list, self.config.get("project_ids"))
+                {"project_id": pid}
+                for pid in cast(list, self.config.get("project_ids"))
             ]
         if "{group_id}" in self.path:
             if "group_ids" not in self.config:
@@ -79,7 +80,9 @@ class ProjectBasedStream(GitlabStream):
                     f"Missing `group_ids` setting which is required for the "
                     f"'{self.name}' stream.",
                 )
-            return [{"group_id": id} for id in cast(list, self.config.get("group_ids"))]
+            return [
+                {"group_id": gid} for gid in cast(list, self.config.get("group_ids"))
+            ]
         raise ValueError(
             "Could not detect partition type for Gitlab stream "
             f"'{self.name}' ({self.path}). "
@@ -162,8 +165,6 @@ class EpicsStream(ProjectBasedStream):
         Property("upvotes", IntegerType),
         Property("downvotes", IntegerType),
     ).to_dict()
-
-    # schema_filepath = SCHEMAS_DIR / "epics.json"
 
     def get_child_context(
         self,

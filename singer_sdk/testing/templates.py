@@ -32,10 +32,10 @@ class TestTemplate:
     """
 
     name: str | None = None
-    type: str | None = None
+    plugin_type: str | None = None
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Raises:
@@ -96,7 +96,7 @@ class TestTemplate:
         Raises:
             ValueError: if Test instance does not have `name` and `type` properties.
         """
-        if not self.name or not self.type:
+        if not self.name or not self.plugin_type:
             raise ValueError("Test must have 'name' and 'type' properties.")
 
         self.config = config
@@ -119,10 +119,10 @@ class TestTemplate:
 class TapTestTemplate(TestTemplate):
     """Base Tap test template."""
 
-    type = "tap"
+    plugin_type = "tap"
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Returns:
@@ -150,11 +150,11 @@ class TapTestTemplate(TestTemplate):
 class StreamTestTemplate(TestTemplate):
     """Base Tap Stream test template."""
 
-    type = "stream"
+    plugin_type = "stream"
     required_kwargs = ["stream"]
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Returns:
@@ -185,10 +185,10 @@ class StreamTestTemplate(TestTemplate):
 class AttributeTestTemplate(TestTemplate):
     """Base Tap Stream Attribute template."""
 
-    type = "attribute"
+    plugin_type = "attribute"
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Returns:
@@ -232,7 +232,10 @@ class AttributeTestTemplate(TestTemplate):
             if r.get(self.attribute_name) is not None
         ]
         if not values:
-            warnings.warn(UserWarning("No records were available to test."))
+            warnings.warn(
+                UserWarning("No records were available to test."),
+                stacklevel=2,
+            )
         return values
 
     @classmethod
@@ -261,7 +264,7 @@ class AttributeTestTemplate(TestTemplate):
 class TargetTestTemplate(TestTemplate):
     """Base Target test template."""
 
-    type = "target"
+    plugin_type = "target"
 
     def run(  # type: ignore[override]
         self,
@@ -280,7 +283,7 @@ class TargetTestTemplate(TestTemplate):
         super().run(config, resource, runner)
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Returns:

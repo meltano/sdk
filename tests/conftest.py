@@ -36,7 +36,7 @@ def pytest_runtest_setup(item):
 
 
 @pytest.fixture(scope="class")
-def outdir() -> str:
+def outdir() -> t.Generator[str, None, None]:
     """Create a temporary directory for cookiecutters and target output."""
     name = ".output/"
     try:

@@ -182,7 +182,7 @@ class SQLSink(BatchSink):
         Raises:
             ConformedNameClashException: if duplicates found.
         """
-        # group: {'_a': ['1_a'], 'abc': ['aBc', 'abC']}
+        # group: {'_a': ['1_a'], 'abc': ['aBc', 'abC']}  # noqa: ERA001
         grouped = defaultdict(list)
         for k, v in conformed_property_names.items():
             grouped[v].append(k)
@@ -289,7 +289,7 @@ class SQLSink(BatchSink):
             INSERT INTO {full_table_name}
             ({", ".join(property_names)})
             VALUES ({", ".join([f":{name}" for name in property_names])})
-            """,
+            """,  # noqa: S608
         )
         return statement.rstrip()
 
@@ -381,7 +381,7 @@ class SQLSink(BatchSink):
             with self.connector._connect() as conn, conn.begin():
                 conn.execute(
                     sqlalchemy.text(
-                        f"DELETE FROM {self.full_table_name} "
+                        f"DELETE FROM {self.full_table_name} "  # noqa: S608
                         f"WHERE {self.version_column_name} <= {new_version}",
                     ),
                 )
@@ -398,7 +398,7 @@ class SQLSink(BatchSink):
             )
 
         query = sqlalchemy.text(
-            f"UPDATE {self.full_table_name}\n"
+            f"UPDATE {self.full_table_name}\n"  # noqa: S608
             f"SET {self.soft_delete_column_name} = :deletedate \n"
             f"WHERE {self.version_column_name} < :version \n"
             f"  AND {self.soft_delete_column_name} IS NULL\n",

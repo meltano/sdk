@@ -74,7 +74,7 @@ class SingletonMeta(type):
         """
         if cls.__single_instance:
             return cls.__single_instance
-        single_obj = cls.__new__(cls, None)  # type: ignore
+        single_obj = cls.__new__(cls, None)  # type: ignore[call-overload]
         single_obj.__init__(*args, **kwargs)
         cls.__single_instance = single_obj
         return single_obj
@@ -496,14 +496,20 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         """
         request_time = utc_now()
         auth_request_payload = self.oauth_request_payload
-        token_response = requests.post(self.auth_endpoint, data=auth_request_payload)
+        token_response = requests.post(
+            self.auth_endpoint,
+            data=auth_request_payload,
+            timeout=60,
+        )
         try:
             token_response.raise_for_status()
-            self.logger.info("OAuth authorization attempt was successful.")
-        except Exception as ex:
+        except requests.HTTPError as ex:
             raise RuntimeError(
                 f"Failed OAuth login, response was '{token_response.json()}'. {ex}",
-            )
+            ) from ex
+
+        self.logger.info("OAuth authorization attempt was successful.")
+
         token_json = token_response.json()
         self.access_token = token_json["access_token"]
         self.expires_in = token_json.get("expires_in", self._default_expiration)

@@ -102,6 +102,7 @@ class SQLConnector:
             "on the connector currently, make a child class and "
             "add your required method on that connector.",
             DeprecationWarning,
+            stacklevel=2,
         )
         return self._engine.connect().execution_options(stream_results=True)
 
@@ -118,6 +119,7 @@ class SQLConnector:
             "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override"
             "`_engine` or sqlalchemy_url` instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
         return self._engine
 
@@ -137,6 +139,7 @@ class SQLConnector:
             "that isn't available on the connector currently, make a child "
             "class and add your required method on that connector.",
             DeprecationWarning,
+            stacklevel=2,
         )
         return self.create_sqlalchemy_connection()
 
@@ -331,7 +334,7 @@ class SQLConnector:
             ],
         )
 
-    @lru_cache()
+    @lru_cache()  # noqa: B019
     def _warn_no_view_detection(self) -> None:
         """Print a warning, but only the first time."""
         self.logger.warning(
@@ -670,10 +673,10 @@ class SQLConnector:
         primary_keys = primary_keys or []
         try:
             properties: dict = schema["properties"]
-        except KeyError:
+        except KeyError as e:
             raise RuntimeError(
                 f"Schema for '{full_table_name}' does not define properties: {schema}",
-            )
+            ) from e
         for property_name, property_jsonschema in properties.items():
             is_primary_key = property_name in primary_keys
             columns.append(
@@ -831,13 +834,7 @@ class SQLConnector:
         # Gathering Type to match variables
         # sent in _adapt_column_type
         current_type = sql_types[0]
-        # sql_type = sql_types[1]
-
-        # Getting the length of each type
-        # current_type_len: int = getattr(sql_types[0], "length", 0)
-        sql_type_len: int = getattr(sql_types[1], "length", 0)
-        if sql_type_len is None:
-            sql_type_len = 0
+        cur_len: int = getattr(current_type, "length", 0)
 
         # Convert the two types given into a sorted list
         # containing the best conversion classes
@@ -849,7 +846,6 @@ class SQLConnector:
                 [self.merge_sql_types([sql_types[0], sql_types[1]])] + sql_types[2:],
             )
 
-        assert len(sql_types) == 2
         # Get the generic type class
         for opt in sql_types:
             # Get the length
@@ -865,7 +861,11 @@ class SQLConnector:
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
                 ):
                     # If length None or 0 then is varchar max ?
-                    if (opt_len is None) or (opt_len == 0):
+                    if (
+                        (opt_len is None)
+                        or (opt_len == 0)
+                        or (cur_len and (opt_len >= cur_len))
+                    ):
                         return opt
                 # If best conversion class is equal to current type
                 # return the best conversion class
@@ -1044,7 +1044,7 @@ class SQLConnector:
         """
         if hasattr(column_type, "collation") and column_type.collation:
             column_type_collation: str = column_type.collation
-            setattr(column_type, "collation", None)
+            column_type.collation = None
             return column_type_collation
         return None
 
@@ -1060,7 +1060,7 @@ class SQLConnector:
             collation: The colation
         """
         if hasattr(column_type, "collation") and collation:
-            setattr(column_type, "collation", collation)
+            column_type.collation = collation
 
     def _adapt_column_type(
         self,

@@ -155,7 +155,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
         Returns:
             Stream metadata.
         """
-        return self[()]  # type: ignore
+        return self[()]  # type: ignore[return-value]
 
     @classmethod
     def get_standard_metadata(
