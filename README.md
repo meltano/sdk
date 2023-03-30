@@ -11,13 +11,7 @@ de-facto open source standard for extract and load pipelines.
 
 </br>
 
-<div align="center">
-  <picture align="center">
-    <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/16805946/227660678-6e5fae45-a916-44f2-a222-379c76121584.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/16805946/227660675-922ffca3-6b89-4d27-a3f2-a2a8ab2ebaf1.svg">
-  <img alt="Meltano Singer SDK Logo" src="https://user-images.githubusercontent.com/16805946/227660678-6e5fae45-a916-44f2-a222-379c76121584.svg" width="600"/>
-  </picture>
-</div>
+<img alt="Meltano Singer SDK Logo" src="https://user-images.githubusercontent.com/16805946/227660675-922ffca3-6b89-4d27-a3f2-a2a8ab2ebaf1.svg" width="600"/>
 
 </br>
 
