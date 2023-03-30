@@ -224,7 +224,7 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
         "pythonsed",
         "-i.bak",
         's|singer-sdk =.*|singer-sdk = \\{ path = "'
-        + sdk_dir
+        + str(sdk_dir)
         + '", develop = true \\}|',
         "pyproject.toml",
     )
