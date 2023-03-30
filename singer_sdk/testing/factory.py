@@ -73,8 +73,8 @@ def get_test_class(
         )
 
         if suite.kind in {"tap", "target"}:
-            for TestClass in suite.tests:
-                test = TestClass()
+            for test_class in suite.tests:
+                test = test_class()
                 test_name = f"test_{suite.kind}_{test.name}"
                 setattr(BaseTestClass, f"test_{suite.kind}_{test.name}", test.run)
 
@@ -90,8 +90,8 @@ def get_test_class(
                 ]
                 param_ids = [stream.name for stream in streams]
 
-                for TestClass in suite.tests:
-                    test = TestClass()
+                for test_class in suite.tests:
+                    test = test_class()
                     test_name = f"test_{suite.kind}_{test.name}"
                     setattr(
                         BaseTestClass,
@@ -102,8 +102,8 @@ def get_test_class(
                     BaseTestClass.param_ids[test_name] = param_ids
 
             if suite.kind == "tap_stream_attribute":
-                for TestClass in suite.tests:
-                    test = TestClass()
+                for test_class in suite.tests:
+                    test = test_class()
                     test_name = f"test_{suite.kind}_{test.name}"
                     test_params = []
                     test_ids = []
@@ -117,7 +117,7 @@ def get_test_class(
                                 for property_name, property_schema in stream.schema[
                                     "properties"
                                 ].items()
-                                if TestClass.evaluate(
+                                if test_class.evaluate(
                                     stream=stream,
                                     property_name=property_name,
                                     property_schema=property_schema,
@@ -130,7 +130,7 @@ def get_test_class(
                                 for property_name, property_schema in stream.schema[
                                     "properties"
                                 ].items()
-                                if TestClass.evaluate(
+                                if test_class.evaluate(
                                     stream=stream,
                                     property_name=property_name,
                                     property_schema=property_schema,

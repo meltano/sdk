@@ -391,7 +391,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Command Line Execution
 
     @classproperty
-    def cli(cls) -> Callable:
+    def cli(cls) -> Callable:  # noqa: N805
         """Execute standard CLI handler for taps.
 
         Returns:

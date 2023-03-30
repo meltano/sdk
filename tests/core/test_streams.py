@@ -383,7 +383,7 @@ def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
 
     class GraphQLJSONPathOverride(GraphqlTestStream):
         @classproperty
-        def records_jsonpath(cls):
+        def records_jsonpath(cls):  # noqa: N805
             return "$[*]"
 
     stream = GraphQLJSONPathOverride(tap)
