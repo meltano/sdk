@@ -25,7 +25,7 @@ The new pagination classes are designed to be more flexible, easier to understan
 
 ### Example: HATEOAS pagination, a.k.a. "next" links
 
-Acommon pattern in REST APIs is to use a `next` field in the response to indicate the
+A common pattern in REST APIs is to use a `next` field in the response to indicate the
 URL of the next page of results. The [`BaseHATEOASPaginator`](../../classes/singer_sdk.pagination.BaseHATEOASPaginator)
 class can be used to handle this pattern.
 
@@ -50,7 +50,7 @@ class MyStream(RESTStream):
 ```python
 # New implementation
 
-from singer_sdk.paginators import BaseHATEOASPaginator
+from singer_sdk.pagination import BaseHATEOASPaginator
 
 class MyPaginator(BaseHATEOASPaginator):
     def get_next_url(self, response, previous_token):
@@ -59,8 +59,8 @@ class MyPaginator(BaseHATEOASPaginator):
 
 
 class MyStream(RESTStream):
-    def get_new_paginator(self) -> RESTPaginator:
-        return BaseHATEOASPaginator()
+    def get_new_paginator(self):
+        return MyPaginator()
 
     def get_url_params(self, context, next_page_token):
         params = {}
@@ -81,7 +81,7 @@ class can be used to handle this pattern.
 ```python
 # New implementation
 
-from singer_sdk.paginators import BaseOffsetPaginator
+from singer_sdk.pagination import BaseOffsetPaginator
 
 class MyPaginator(BaseOffsetPaginator):
     def has_more(self, response):
@@ -90,7 +90,7 @@ class MyPaginator(BaseOffsetPaginator):
 
 
 class MyStream(RESTStream):
-    def get_new_paginator(self) -> RESTPaginator:
+    def get_new_paginator(self):
         return BaseOffsetPaginator(start_value=0, page_size=250)
 
     def get_url_params(self, context, next_page_token):

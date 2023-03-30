@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-import datetime
-from typing import Any, Callable, cast
+from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast
 
 from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.helpers._typing import to_json_compatible
+
+if TYPE_CHECKING:
+    import datetime
+
+    _T = TypeVar("_T", datetime.datetime, str, int, float)
 
 PROGRESS_MARKERS = "progress_markers"
 PROGRESS_MARKER_NOTE = "Note"
@@ -22,27 +26,19 @@ def get_state_if_exists(
 ) -> Any | None:
     """Return the stream or partition state, creating a new one if it does not exist.
 
-    Parameters
-    ----------
-    tap_state : dict
-        the existing state dict which contains all streams.
-    tap_stream_id : str
-        the id of the stream
-    state_partition_context : Optional[dict], optional
-        keys which identify the partition context, by default None (not partitioned)
-    key : Optional[str], optional
-        name of the key searched for, by default None (return entire state if found)
+    Args:
+        tap_state: the existing state dict which contains all streams.
+        tap_stream_id: the id of the stream
+        state_partition_context: keys which identify the partition context,
+            by default None (not partitioned)
+        key: name of the key searched for, by default None (return entire state if
+            found)
 
-    Returns
-    -------
-    Optional[Any]
+    Returns:
         Returns the state if exists, otherwise None
 
-    Raises
-    ------
-    ValueError
-        Raised if state is invalid or cannot be parsed.
-
+    Raises:
+        ValueError: Raised if state is invalid or cannot be parsed.
     """
     if "bookmarks" not in tap_state:
         return None
@@ -58,7 +54,8 @@ def get_state_if_exists(
         return None  # No partitions defined
 
     matched_partition = _find_in_partitions_list(
-        stream_state["partitions"], state_partition_context
+        stream_state["partitions"],
+        state_partition_context,
     )
     if matched_partition is None:
         return None  # Partition definition not present
@@ -73,7 +70,8 @@ def get_state_partitions_list(tap_state: dict, tap_stream_id: str) -> list[dict]
 
 
 def _find_in_partitions_list(
-    partitions: list[dict], state_partition_context: dict
+    partitions: list[dict],
+    state_partition_context: dict,
 ) -> dict | None:
     found = [
         partition_state
@@ -84,7 +82,7 @@ def _find_in_partitions_list(
         raise ValueError(
             f"State file contains duplicate entries for partition: "
             "{state_partition_context}.\n"
-            f"Matching state values were: {str(found)}"
+            f"Matching state values were: {str(found)}",
         )
     if found:
         return cast(dict, found[0])
@@ -93,7 +91,8 @@ def _find_in_partitions_list(
 
 
 def _create_in_partitions_list(
-    partitions: list[dict], state_partition_context: dict
+    partitions: list[dict],
+    state_partition_context: dict,
 ) -> dict:
     # Existing partition not found. Creating new state entry in partitions list...
     new_partition_state = {"context": state_partition_context}
@@ -102,29 +101,23 @@ def _create_in_partitions_list(
 
 
 def get_writeable_state_dict(
-    tap_state: dict, tap_stream_id: str, state_partition_context: dict | None = None
+    tap_state: dict,
+    tap_stream_id: str,
+    state_partition_context: dict | None = None,
 ) -> dict:
     """Return the stream or partition state, creating a new one if it does not exist.
 
-    Parameters
-    ----------
-    tap_state : dict
-        the existing state dict which contains all streams.
-    tap_stream_id : str
-        the id of the stream
-    state_partition_context : Optional[dict], optional
-        keys which identify the partition context, by default None (not partitioned)
+    Args:
+        tap_state: the existing state dict which contains all streams.
+        tap_stream_id: the id of the stream
+        state_partition_context: keys which identify the partition context,
+            by default None (not partitioned)
 
-    Returns
-    -------
-    dict
+    Returns:
         Returns a writeable dict at the stream or partition level.
 
-    Raises
-    ------
-    ValueError
-        Raise an error if duplicate entries are found.
-
+    Raises:
+        ValueError: Raise an error if duplicate entries are found.
     """
     if tap_state is None:
         raise ValueError("Cannot write state to missing state dictionary.")
@@ -157,7 +150,9 @@ def write_stream_state(
 ) -> None:
     """Write stream state."""
     state_dict = get_writeable_state_dict(
-        tap_state, tap_stream_id, state_partition_context=state_partition_context
+        tap_state,
+        tap_stream_id,
+        state_partition_context=state_partition_context,
     )
     state_dict[key] = val
 
@@ -213,7 +208,7 @@ def increment_state(
     if not is_sorted:
         if PROGRESS_MARKERS not in stream_or_partition_state:
             stream_or_partition_state[PROGRESS_MARKERS] = {
-                PROGRESS_MARKER_NOTE: "Progress is not resumable if interrupted."
+                PROGRESS_MARKER_NOTE: "Progress is not resumable if interrupted.",
             }
         progress_dict = stream_or_partition_state[PROGRESS_MARKERS]
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
@@ -226,35 +221,36 @@ def increment_state(
     if is_sorted:
         raise InvalidStreamSortException(
             f"Unsorted data detected in stream. Latest value '{new_rk_value}' is "
-            f"smaller than previous max '{old_rk_value}'."
+            f"smaller than previous max '{old_rk_value}'.",
         )
 
 
 def _greater_than_signpost(
-    signpost: datetime.datetime | str | int | float,
-    new_value: datetime.datetime | str | int | float,
+    signpost: _T,
+    new_value: _T,
 ) -> bool:
     """Compare and return True if new_value is greater than signpost."""
-    return (  # fails if signpost and bookmark are incompatible types
-        new_value > signpost  # type: ignore
-    )
+    # fails if signpost and bookmark are incompatible types
+    return new_value > signpost
 
 
 def finalize_state_progress_markers(stream_or_partition_state: dict) -> dict | None:
     """Promote or wipe progress markers once sync is complete."""
     signpost_value = stream_or_partition_state.pop(SIGNPOST_MARKER, None)
     stream_or_partition_state.pop(STARTING_MARKER, None)
-    if PROGRESS_MARKERS in stream_or_partition_state:
-        if "replication_key" in stream_or_partition_state[PROGRESS_MARKERS]:
-            # Replication keys valid (only) after sync is complete
-            progress_markers = stream_or_partition_state[PROGRESS_MARKERS]
-            stream_or_partition_state["replication_key"] = progress_markers.pop(
-                "replication_key"
-            )
-            new_rk_value = progress_markers.pop("replication_key_value")
-            if signpost_value and _greater_than_signpost(signpost_value, new_rk_value):
-                new_rk_value = signpost_value
-            stream_or_partition_state["replication_key_value"] = new_rk_value
+    if (
+        PROGRESS_MARKERS in stream_or_partition_state
+        and "replication_key" in stream_or_partition_state[PROGRESS_MARKERS]
+    ):
+        # Replication keys valid (only) after sync is complete
+        progress_markers = stream_or_partition_state[PROGRESS_MARKERS]
+        stream_or_partition_state["replication_key"] = progress_markers.pop(
+            "replication_key",
+        )
+        new_rk_value = progress_markers.pop("replication_key_value")
+        if signpost_value and _greater_than_signpost(signpost_value, new_rk_value):
+            new_rk_value = signpost_value
+        stream_or_partition_state["replication_key_value"] = new_rk_value
     # Wipe and return any markers that have not been promoted
     return reset_state_progress_markers(stream_or_partition_state)
 
@@ -269,7 +265,7 @@ def log_sort_error(
     partition_record_count: int,
 ) -> None:
     """Log a sort error."""
-    msg = f"Sorting error detected in '{stream_name}'." f"on record #{record_count}. "
+    msg = f"Sorting error detected in '{stream_name}' on record #{record_count}. "
     if partition_record_count != record_count:
         msg += (
             f"Record was partition record "

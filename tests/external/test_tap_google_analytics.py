@@ -20,6 +20,7 @@ except ConfigValidationError as e:
     warnings.warn(
         UserWarning(
             "Could not configure external gitlab tests. "
-            f"Config in CI is expected via env vars.\n{e}"
-        )
+            f"Config in CI is expected via env vars.\n{e}",
+        ),
+        stacklevel=2,
     )

@@ -71,7 +71,7 @@ class CountriesStream(CountriesAPIStream):
                 th.ObjectType(
                     th.Property("code", th.StringType),
                     th.Property("name", th.StringType),
-                )
+                ),
             ),
         ),
     ).to_dict()

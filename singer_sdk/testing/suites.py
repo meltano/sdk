@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import typing as t
 from dataclasses import dataclass
 
 from .tap_tests import (
@@ -38,7 +39,9 @@ from .target_tests import (
     TargetSchemaUpdates,
     TargetSpecialCharsInAttributes,
 )
-from .templates import TapTestTemplate, TargetTestTemplate, TestTemplate
+
+if t.TYPE_CHECKING:
+    from .templates import TapTestTemplate, TargetTestTemplate, TestTemplate
 
 
 @dataclass
@@ -51,7 +54,8 @@ class TestSuite:
 
 # Tap Test Suites
 tap_tests = TestSuite(
-    kind="tap", tests=[TapCLIPrintsTest, TapDiscoveryTest, TapStreamConnectionTest]
+    kind="tap",
+    tests=[TapCLIPrintsTest, TapDiscoveryTest, TapStreamConnectionTest],
 )
 tap_stream_tests = TestSuite(
     kind="tap_stream",

@@ -36,11 +36,14 @@ class GitlabStream(RESTStream[str]):
     def authenticator(self) -> SimpleAuthenticator:
         """Return an authenticator for REST API requests."""
         return SimpleAuthenticator(
-            stream=self, auth_headers={"Private-Token": self.config.get("auth_token")}
+            stream=self,
+            auth_headers={"Private-Token": self.config.get("auth_token")},
         )
 
     def get_url_params(
-        self, context: dict | None, next_page_token: str | None
+        self,
+        context: dict | None,  # noqa: ARG002
+        next_page_token: str | None,
     ) -> dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization."""
         params: dict = {}
@@ -68,19 +71,22 @@ class ProjectBasedStream(GitlabStream):
         """Return a list of partition key dicts (if applicable), otherwise None."""
         if "{project_id}" in self.path:
             return [
-                {"project_id": id} for id in cast(list, self.config.get("project_ids"))
+                {"project_id": pid}
+                for pid in cast(list, self.config.get("project_ids"))
             ]
         if "{group_id}" in self.path:
             if "group_ids" not in self.config:
                 raise ValueError(
                     f"Missing `group_ids` setting which is required for the "
-                    f"'{self.name}' stream."
+                    f"'{self.name}' stream.",
                 )
-            return [{"group_id": id} for id in cast(list, self.config.get("group_ids"))]
+            return [
+                {"group_id": gid} for gid in cast(list, self.config.get("group_ids"))
+            ]
         raise ValueError(
             "Could not detect partition type for Gitlab stream "
             f"'{self.name}' ({self.path}). "
-            "Expected a URL path containing '{project_id}' or '{group_id}'. "
+            "Expected a URL path containing '{project_id}' or '{group_id}'. ",
         )
 
 
@@ -160,9 +166,11 @@ class EpicsStream(ProjectBasedStream):
         Property("downvotes", IntegerType),
     ).to_dict()
 
-    # schema_filepath = SCHEMAS_DIR / "epics.json"
-
-    def get_child_context(self, record: dict, context: dict | None) -> dict:
+    def get_child_context(
+        self,
+        record: dict,
+        context: dict | None,  # noqa: ARG002
+    ) -> dict:
         """Perform post processing, including queuing up any child stream types."""
         # Ensure child state record(s) are created
         return {
@@ -183,7 +191,9 @@ class EpicIssuesStream(GitlabStream):
     parent_stream_type = EpicsStream  # Stream should wait for parents to complete.
 
     def get_url_params(
-        self, context: dict | None, next_page_token: str | None
+        self,
+        context: dict | None,
+        next_page_token: str | None,
     ) -> dict[str, Any]:
         """Return a dictionary of values to be used in parameterization."""
         result = super().get_url_params(context, next_page_token)

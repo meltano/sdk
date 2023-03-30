@@ -24,6 +24,10 @@ from singer_sdk.authenticators import BasicAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
+{% elif cookiecutter.auth_method == "Custom or N/A" -%}
+from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+
 {% elif cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
@@ -82,7 +86,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return APIKeyAuthenticator.create_for_stream(
             self,
             key="x-api-key",
-            value=self.config.get("api_key", ""),
+            value=self.config.get("auth_token", ""),
             location="header",
         )
 
@@ -97,7 +101,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """
         return BearerTokenAuthenticator.create_for_stream(
             self,
-            token=self.config.get("api_key")
+            token=self.config.get("auth_token", ""),
         )
 
 {%- elif cookiecutter.auth_method == "Basic Auth" %}
@@ -111,8 +115,8 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """
         return BasicAuthenticator.create_for_stream(
             self,
-            username=self.config.get("username"),
-            password=self.config.get("password"),
+            username=self.config.get("username", ""),
+            password=self.config.get("password", ""),
         )
 
 {%- endif %}

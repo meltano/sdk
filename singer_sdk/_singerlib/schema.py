@@ -43,7 +43,7 @@ class Schema:
     This is because we wanted to expand it with extra STANDARD_KEYS.
     """
 
-    type: str | list[str] | None = None
+    type: str | list[str] | None = None  # noqa: A003
     properties: dict | None = None
     items: t.Any | None = None
     description: str | None = None
@@ -55,7 +55,7 @@ class Schema:
     maxLength: int | None = None
     minLength: int | None = None
     anyOf: t.Any | None = None
-    format: str | None = None
+    format: str | None = None  # noqa: A003
     additionalProperties: t.Any | None = None
     patternProperties: t.Any | None = None
     required: list[str] | None = None
@@ -83,7 +83,11 @@ class Schema:
         return result
 
     @classmethod
-    def from_dict(cls: t.Type[Schema], data: dict, **schema_defaults: t.Any) -> Schema:
+    def from_dict(
+        cls: t.Type[Schema],  # noqa: UP006
+        data: dict,
+        **schema_defaults: t.Any,
+    ) -> Schema:
         """Initialize a Schema object based on the JSON Schema structure.
 
         Args:
@@ -119,7 +123,7 @@ class _SchemaKey:
 
 def resolve_schema_references(
     schema: dict[str, t.Any],
-    refs: dict[str, dict] | None = None,
+    refs: dict[str, str] | None = None,
 ) -> dict:
     """Resolves and replaces json-schema $refs with the appropriate dict.
 
@@ -156,12 +160,14 @@ def _resolve_schema_references(
     if _SchemaKey.pattern_properties in schema:
         for k, val in schema[_SchemaKey.pattern_properties].items():
             schema[_SchemaKey.pattern_properties][k] = _resolve_schema_references(
-                val, resolver
+                val,
+                resolver,
             )
 
     if _SchemaKey.items in schema:
         schema[_SchemaKey.items] = _resolve_schema_references(
-            schema[_SchemaKey.items], resolver
+            schema[_SchemaKey.items],
+            resolver,
         )
 
     if _SchemaKey.any_of in schema:

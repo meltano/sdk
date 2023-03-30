@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import sqlalchemy
-
 from singer_sdk import SQLConnector, SQLSink, SQLTarget
 from singer_sdk import typing as th
 
@@ -25,21 +23,6 @@ class SQLiteConnector(SQLConnector):
     def get_sqlalchemy_url(self, config: dict[str, Any]) -> str:
         """Generates a SQLAlchemy URL for SQLite."""
         return f"sqlite:///{config[DB_PATH_CONFIG]}"
-
-    def create_sqlalchemy_connection(self) -> sqlalchemy.engine.Connection:
-        """Return a new SQLAlchemy connection using the provided config.
-
-        This override simply provides a more helpful error message on failure.
-
-        Returns:
-            A newly created SQLAlchemy engine object.
-        """
-        try:
-            return super().create_sqlalchemy_connection()
-        except Exception as ex:
-            raise RuntimeError(
-                f"Error connecting to DB at '{self.config[DB_PATH_CONFIG]}'"
-            ) from ex
 
 
 class SQLiteSink(SQLSink):
@@ -68,7 +51,7 @@ class SQLiteTarget(SQLTarget):
             DB_PATH_CONFIG,
             th.StringType,
             description="The path to your SQLite database file(s).",
-        )
+        ),
     ).to_dict()
 
 
