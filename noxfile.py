@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import glob
 import os
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 from textwrap import dedent
 
@@ -27,6 +29,7 @@ nox.options.sessions = (
     "mypy",
     "tests",
     "doctest",
+    "test_cookiecutter",
 )
 test_dependencies = [
     "coverage[toml]",
@@ -170,3 +173,73 @@ def docs_serve(session: Session) -> None:
         shutil.rmtree(build_dir)
 
     session.run("sphinx-autobuild", *args)
+
+
+@nox.parametrize("replay_file_path", glob.glob("./e2e-tests/cookiecutters/*.json"))
+@session(python=main_python_version)
+def test_cookiecutter(session: Session, replay_file_path) -> None:
+    """Uses the tap template to build an empty cookiecutter.
+
+    Runs the lint task on the created test project.
+    """
+    args = session.posargs or ["1"]
+
+    cc_build_path = tempfile.gettempdir()
+    folder_base_path = "./cookiecutter"
+
+    target_folder = (
+        "tap-template"
+        if Path(replay_file_path).name.startswith("tap")
+        else "target-template"
+    )
+    tap_template = Path(folder_base_path + "/" + target_folder).resolve()
+    replay_file = Path(replay_file_path).resolve()
+
+    if not Path(tap_template).exists():
+        return
+
+    if not Path(replay_file).is_file():
+        return
+
+    sdk_dir = Path(Path(tap_template).parent).parent
+    cc_output_dir = Path(replay_file_path).name.replace(".json", "")
+    cc_test_output = cc_build_path + "/" + cc_output_dir
+
+    if Path(cc_test_output).exists():
+        session.run("rm", "-fr", cc_test_output, external=True)
+
+    session.install(".")
+    session.install("cookiecutter", "pythonsed")
+
+    session.run(
+        "cookiecutter",
+        "--replay-file",
+        str(replay_file),
+        str(tap_template),
+        "-o",
+        cc_build_path,
+    )
+    session.chdir(cc_test_output)
+
+    session.run(
+        "pythonsed",
+        "-i.bak",
+        's|singer-sdk =.*|singer-sdk = \\{ path = "'
+        + str(sdk_dir)
+        + '", develop = true \\}|',
+        "pyproject.toml",
+    )
+    session.run("poetry", "lock", external=True)
+    session.run("poetry", "install", external=True)
+
+    for path in glob.glob(f"{Path.cwd()}/*", recursive=True):
+        if Path(path).name.startswith("tap") or Path(
+            path,
+        ).name.startswith("target"):
+            library_name = Path(path).name
+
+    for argument in ["black", "isort", "flake8", "mypy"]:
+        session.run("poetry", "run", argument, library_name, external=True)
+
+    if int(args[0]) == 1:
+        session.run("poetry", "run", "tox", "-e", "lint", external=True)
