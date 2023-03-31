@@ -6,6 +6,7 @@ import glob
 import os
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 from textwrap import dedent
 
@@ -183,7 +184,7 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
     """
     args = session.posargs or ["1"]
 
-    cc_build_path = "/tmp"  # noqa: S108
+    cc_build_path = tempfile.gettempdir()
     folder_base_path = "./cookiecutter"
 
     target_folder = (
