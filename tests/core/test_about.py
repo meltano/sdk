@@ -14,6 +14,12 @@ if t.TYPE_CHECKING:
 
     from pytest_snapshot.plugin import Snapshot
 
+_format_to_extension = {
+    "text": "txt",
+    "json": "json",
+    "markdown": "md",
+}
+
 
 @pytest.fixture(scope="module")
 def about_info() -> AboutInfo:
@@ -63,4 +69,5 @@ def test_about_format(
 
     formatter = AboutFormatter.get_formatter(about_format)
     output = formatter.format_about(about_info)
-    snapshot.assert_match(output, about_format)
+    snapshot_name = f"{about_format}.snap.{_format_to_extension[about_format]}"
+    snapshot.assert_match(output, snapshot_name)
