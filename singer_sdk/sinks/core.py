@@ -233,9 +233,12 @@ class Sink(metaclass=abc.ABCMeta):
             context: Stream partition or context dictionary.
         """
         record["_sdc_extracted_at"] = message.get("time_extracted")
-        record["_sdc_received_at"] = datetime.datetime.now().isoformat()
+        record["_sdc_received_at"] = datetime.datetime.now(
+            tz=datetime.timezone.utc,
+        ).isoformat()
         record["_sdc_batched_at"] = (
-            context.get("batch_start_time", None) or datetime.datetime.now()
+            context.get("batch_start_time", None)
+            or datetime.datetime.now(tz=datetime.timezone.utc)
         ).isoformat()
         record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
         record["_sdc_sequence"] = int(round(time.time() * 1000))

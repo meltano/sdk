@@ -34,7 +34,6 @@ def get_test_class(
     Returns:
         A test class usable by pytest.
     """
-    suite_config = suite_config or SuiteConfig()
 
     class BaseTestClass:
         """Base test class."""
@@ -79,7 +78,7 @@ def get_test_class(
                 setattr(BaseTestClass, f"test_{suite.kind}_{test.name}", test.run)
 
         if suite.kind in {"tap_stream", "tap_stream_attribute"}:
-            streams = list(test_runner.tap.streams.values())
+            streams = list(test_runner.new_tap().streams.values())
 
             if suite.kind == "tap_stream":
                 params = [
@@ -188,10 +187,13 @@ def get_tap_test_class(
     if "parse_env_config" not in kwargs:
         kwargs["parse_env_config"] = True
 
-    suite_config = suite_config or SuiteConfig()
-
     return get_test_class(
-        test_runner=TapTestRunner(tap_class=tap_class, config=config, **kwargs),
+        test_runner=TapTestRunner(
+            tap_class=tap_class,
+            config=config,
+            suite_config=suite_config,
+            **kwargs,
+        ),
         test_suites=suites,
         suite_config=suite_config,
     )
@@ -223,8 +225,6 @@ def get_target_test_class(
     # set default values
     if "parse_env_config" not in kwargs:
         kwargs["parse_env_config"] = True
-
-    suite_config = suite_config or SuiteConfig()
 
     return get_test_class(
         test_runner=TargetTestRunner(
