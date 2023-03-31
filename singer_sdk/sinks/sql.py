@@ -30,7 +30,7 @@ class SQLSink(BatchSink):
     soft_delete_column_name = "_sdc_deleted_at"
     version_column_name = "_sdc_table_version"
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         target: PluginBase,
         stream_name: str,

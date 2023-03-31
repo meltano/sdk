@@ -173,7 +173,6 @@ class TapTestRunner(SingerTestRunner):
                     self.record_messages.append(message)
                     self.records[stream_name].append(message["record"])
                     continue
-        return
 
     def _execute_sync(self) -> tuple[str, str]:
         """Invoke a Tap object and return STDOUT and STDERR results in StringIO buffers.
@@ -193,7 +192,7 @@ class TapTestRunner(SingerTestRunner):
 class TargetTestRunner(SingerTestRunner):
     """Utility class to simplify target testing."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         target_class: type[Target],
         config: dict | None = None,

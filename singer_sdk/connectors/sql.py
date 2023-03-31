@@ -385,7 +385,7 @@ class SQLConnector:
         return [(t, False) for t in table_names] + [(v, True) for v in view_names]
 
     # TODO maybe should be splitted into smaller parts?
-    def discover_catalog_entry(
+    def discover_catalog_entry(  # noqa: PLR0913
         self,
         engine: Engine,  # noqa: ARG002
         inspected: Inspector,
@@ -529,9 +529,9 @@ class SQLConnector:
         parts = full_table_name.split(".")
         if len(parts) == 1:
             table_name = full_table_name
-        if len(parts) == 2:
+        if len(parts) == 2:  # noqa: PLR2004
             schema_name, table_name = parts
-        if len(parts) == 3:
+        if len(parts) == 3:  # noqa: PLR2004
             db_name, schema_name, table_name = parts
 
         return db_name, schema_name, table_name
@@ -641,7 +641,7 @@ class SQLConnector:
         with self._connect() as conn:
             conn.execute(sqlalchemy.schema.CreateSchema(schema_name))
 
-    def create_empty_table(
+    def create_empty_table(  # noqa: PLR0913
         self,
         full_table_name: str,
         schema: dict,
@@ -727,7 +727,7 @@ class SQLConnector:
         if not schema_exists:
             self.create_schema(schema_name)
 
-    def prepare_table(
+    def prepare_table(  # noqa: PLR0913
         self,
         full_table_name: str,
         schema: dict,
@@ -841,7 +841,7 @@ class SQLConnector:
         sql_types = self._sort_types(sql_types)
 
         # If greater than two evaluate the first pair then on down the line
-        if len(sql_types) > 2:
+        if len(sql_types) > 2:  # noqa: PLR2004
             return self.merge_sql_types(
                 [self.merge_sql_types([sql_types[0], sql_types[1]])] + sql_types[2:],
             )

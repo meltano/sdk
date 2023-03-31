@@ -59,7 +59,9 @@ def flatten_key(key_name: str, parent_keys: list[str], separator: str = "__") ->
     full_key = [*parent_keys, key_name]
     inflected_key = full_key.copy()
     reducer_index = 0
-    while len(separator.join(inflected_key)) >= 255 and reducer_index < len(
+    while len(
+        separator.join(inflected_key),
+    ) >= 255 and reducer_index < len(  # noqa: PLR2004
         inflected_key,
     ):
         reduced_key = re.sub(
@@ -250,7 +252,7 @@ def _flatten_schema(
             else:
                 items.append((new_key, v))
         else:
-            if len(v.values()) > 0:
+            if len(v.values()) > 0:  # noqa: PLR5501
                 if list(v.values())[0][0]["type"] == "string":
                     list(v.values())[0][0]["type"] = ["null", "string"]
                     items.append((new_key, list(v.values())[0][0]))
@@ -299,7 +301,7 @@ def flatten_record(
     )
 
 
-def _flatten_record(
+def _flatten_record(  # noqa: PLR0913
     record_node: MutableMapping[Any, Any],
     flattened_schema: dict | None = None,
     parent_key: list[str] | None = None,
