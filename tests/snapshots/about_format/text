@@ -1,0 +1,6 @@
+Name: tap-example
+Description: Example tap for Singer SDK
+Version: 0.1.1
+SDK Version: 1.0.0
+Capabilities: [catalog, discover, state]
+Settings: {'properties': {'start_date': {'type': 'string', 'format': 'date-time', 'description': 'Start date for the tap to extract data from.'}, 'api_key': {'type': 'string', 'description': 'API key for the tap to use.'}}, 'required': ['api_key']}

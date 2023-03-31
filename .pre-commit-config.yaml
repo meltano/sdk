@@ -25,7 +25,7 @@ repos:
         cookiecutter/.*|
         docs/.*|
         samples/.*\.json|
-        tests/snapshots/.*/.*\.json
+        tests/snapshots/.*
       )$
   - id: trailing-whitespace
     exclude: |
