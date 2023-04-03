@@ -196,7 +196,7 @@ class AttributeTestTemplate(TestTemplate):
         """
         return f"{self.stream.name}__{self.attribute_name}__{self.name}"
 
-    def run(  # type: ignore[override]  # noqa: PLR0913
+    def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
         resource: Any,

@@ -300,8 +300,9 @@ def flatten_record(
     )
 
 
-def _flatten_record(  # noqa: PLR0913
+def _flatten_record(
     record_node: MutableMapping[Any, Any],
+    *,
     flattened_schema: dict | None = None,
     parent_key: list[str] | None = None,
     separator: str = "__",
@@ -334,8 +335,8 @@ def _flatten_record(  # noqa: PLR0913
             items.extend(
                 _flatten_record(
                     v,
-                    flattened_schema,
-                    [*parent_key, k],
+                    flattened_schema=flattened_schema,
+                    parent_key=[*parent_key, k],
                     separator=separator,
                     level=level + 1,
                     max_level=max_level,

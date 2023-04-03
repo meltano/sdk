@@ -184,7 +184,7 @@ def _is_string_with_format(type_dict):
     return None
 
 
-def handle_invalid_timestamp_in_record(  # noqa: PLR0913
+def handle_invalid_timestamp_in_record(
     record,  # noqa: ARG001
     key_breadcrumb: list[str],
     invalid_value: str,

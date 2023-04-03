@@ -192,7 +192,7 @@ class TapTestRunner(SingerTestRunner):
 class TargetTestRunner(SingerTestRunner):
     """Utility class to simplify target testing."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         target_class: type[Target],
         config: dict | None = None,

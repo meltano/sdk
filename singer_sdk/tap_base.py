@@ -51,7 +51,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     # Constructor
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         config: dict | PurePath | str | list[PurePath | str] | None = None,
         catalog: PurePath | str | dict | Catalog | None = None,
@@ -462,7 +462,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             help="Execute the Singer tap.",
             context_settings={"help_option_names": ["--help"]},
         )
-        def cli(  # noqa: PLR0913
+        def cli(
             version: bool = False,
             about: bool = False,
             discover: bool = False,
@@ -548,7 +548,7 @@ class SQLTap(Tap):
     # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: type[SQLStream]
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         config: dict | PurePath | str | list[PurePath | str] | None = None,
         catalog: PurePath | str | dict | None = None,

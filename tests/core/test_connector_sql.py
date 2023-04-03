@@ -75,7 +75,7 @@ class TestConnectorSQL:
             ),
         ],
     )
-    def test_get_column_ddl(  # noqa: PLR0913
+    def test_get_column_ddl(
         self,
         connector,
         method_name,

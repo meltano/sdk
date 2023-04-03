@@ -233,7 +233,7 @@ class SameRecordTransform(DefaultStreamMap):
 class CustomStreamMap(StreamMap):
     """Defines transformation logic for a singer stream map."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         stream_alias: str,
         map_config: dict,

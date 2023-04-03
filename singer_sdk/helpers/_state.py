@@ -267,7 +267,8 @@ def finalize_state_progress_markers(stream_or_partition_state: dict) -> dict | N
     return reset_state_progress_markers(stream_or_partition_state)
 
 
-def log_sort_error(  # noqa: PLR0913
+def log_sort_error(
+    *,
     ex: Exception,
     log_fn: Callable,
     stream_name: str,

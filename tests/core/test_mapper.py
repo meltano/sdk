@@ -277,7 +277,7 @@ def filtered_schemas():
     return {"repositories": PropertiesList(Property("name", StringType)).to_dict()}
 
 
-def test_map_transforms(  # noqa: PLR0913
+def test_map_transforms(
     sample_stream,
     sample_catalog_obj,
     transform_stream_maps,
@@ -296,7 +296,7 @@ def test_map_transforms(  # noqa: PLR0913
     )
 
 
-def test_clone_and_alias_transforms(  # noqa: PLR0913
+def test_clone_and_alias_transforms(
     sample_stream,
     sample_catalog_obj,
     clone_and_alias_stream_maps,
@@ -315,7 +315,7 @@ def test_clone_and_alias_transforms(  # noqa: PLR0913
     )
 
 
-def test_filter_transforms(  # noqa: PLR0913
+def test_filter_transforms(
     sample_stream,
     sample_catalog_obj,
     filter_stream_maps,
@@ -334,7 +334,7 @@ def test_filter_transforms(  # noqa: PLR0913
     )
 
 
-def test_filter_transforms_w_error(  # noqa: PLR0913
+def test_filter_transforms_w_error(
     sample_stream,
     sample_catalog_obj,
     filter_stream_map_w_error,
@@ -354,8 +354,9 @@ def test_filter_transforms_w_error(  # noqa: PLR0913
         )
 
 
-def _test_transform(  # noqa: PLR0913
+def _test_transform(
     test_name: str,
+    *,
     stream_maps,
     stream_map_config,
     expected_result,
@@ -602,7 +603,7 @@ def _clear_schema_cache() -> None:
         ),
     ],
 )
-def test_mapped_stream(  # noqa: PLR0913
+def test_mapped_stream(
     snapshot: Snapshot,
     snapshot_dir: Path,
     stream_maps: dict,

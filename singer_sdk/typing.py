@@ -394,7 +394,8 @@ class ArrayType(JSONTypeHelper, Generic[W]):
 class Property(JSONTypeHelper, Generic[W]):
     """Generic Property. Should be nested within a `PropertiesList`."""
 
-    def __init__(  # noqa: PLR0913
+    # TODO: Make some of these arguments keyword-only. This is a breaking change.
+    def __init__(
         self,
         name: str,
         wrapped: W | type[W],

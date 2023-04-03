@@ -158,8 +158,9 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
         return self[()]  # type: ignore[return-value]
 
     @classmethod
-    def get_standard_metadata(  # noqa: PLR0913
+    def get_standard_metadata(
         cls: type[MetadataMapping],
+        *,
         schema: dict[str, t.Any] | None = None,
         schema_name: str | None = None,
         key_properties: list[str] | None = None,

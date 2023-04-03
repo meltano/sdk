@@ -385,7 +385,7 @@ class SQLConnector:
         return [(t, False) for t in table_names] + [(v, True) for v in view_names]
 
     # TODO maybe should be splitted into smaller parts?
-    def discover_catalog_entry(  # noqa: PLR0913
+    def discover_catalog_entry(
         self,
         engine: Engine,  # noqa: ARG002
         inspected: Inspector,
@@ -641,7 +641,7 @@ class SQLConnector:
         with self._connect() as conn:
             conn.execute(sqlalchemy.schema.CreateSchema(schema_name))
 
-    def create_empty_table(  # noqa: PLR0913
+    def create_empty_table(
         self,
         full_table_name: str,
         schema: dict,
@@ -727,7 +727,7 @@ class SQLConnector:
         if not schema_exists:
             self.create_schema(schema_name)
 
-    def prepare_table(  # noqa: PLR0913
+    def prepare_table(
         self,
         full_table_name: str,
         schema: dict,
