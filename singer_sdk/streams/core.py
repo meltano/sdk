@@ -989,8 +989,7 @@ class Stream(metaclass=abc.ABCMeta):
         if state is None or state == {}:
             context: dict | None
             for context in self.partitions or [{}]:
-                context = context or None
-                state = self.get_context_state(context)
+                state = self.get_context_state(context or None)
                 reset_state_progress_markers(state)
             return
 
@@ -1012,8 +1011,7 @@ class Stream(metaclass=abc.ABCMeta):
 
             context: dict | None
             for context in self.partitions or [{}]:
-                context = context or None
-                state = self.get_context_state(context)
+                state = self.get_context_state(context or None)
                 finalize_state_progress_markers(state)
             return
 
@@ -1070,18 +1068,18 @@ class Stream(metaclass=abc.ABCMeta):
         timer = metrics.sync_timer(self.name)
 
         record_index = 0
-        current_context: dict | None
+        context_element: dict | None
         context_list: list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
         with record_counter, timer:
-            for current_context in context_list or [{}]:
-                record_counter.context = current_context
-                timer.context = current_context
+            for context_element in context_list or [{}]:
+                record_counter.context = context_element
+                timer.context = context_element
 
                 partition_record_index = 0
-                current_context = current_context or None
+                current_context = context_element or None
                 state = self.get_context_state(current_context)
                 state_partition_context = self._get_state_partition_context(
                     current_context,

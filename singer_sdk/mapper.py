@@ -189,12 +189,8 @@ class RemoveRecordTransform(DefaultStreamMap):
 
         Args:
             record: An individual record dictionary in a stream.
-
-        Returns:
-            None
         """
         _ = record  # Drop the record
-        return
 
     def get_filter_result(self, record: dict) -> bool:  # noqa: ARG002
         """Exclude all records.
@@ -387,7 +383,7 @@ class CustomStreamMap(StreamMap):
 
         return default
 
-    def _init_functions_and_schema(
+    def _init_functions_and_schema(  # noqa: PLR0912, PLR0915
         self,
         stream_map: dict,
     ) -> tuple[Callable[[dict], bool], Callable[[dict], dict | None], dict]:
@@ -631,7 +627,7 @@ class PluginMapper:
                 catalog_entry.key_properties,
             )
 
-    def register_raw_stream_schema(
+    def register_raw_stream_schema(  # noqa: PLR0912
         self,
         stream_name: str,
         schema: dict,
@@ -671,9 +667,11 @@ class PluginMapper:
                 ),
             ]
 
-        for stream_map_key, stream_def in self.stream_maps_dict.items():
+        for stream_map_key, stream_map_val in self.stream_maps_dict.items():
             stream_def = (
-                stream_def.copy() if isinstance(stream_def, dict) else stream_def
+                stream_map_val.copy()
+                if isinstance(stream_map_val, dict)
+                else stream_map_val
             )
             stream_alias: str = stream_map_key
             source_stream: str = stream_map_key

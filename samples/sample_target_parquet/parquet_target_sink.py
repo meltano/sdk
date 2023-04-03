@@ -39,7 +39,9 @@ def _json_schema_to_arrow_fields(schema: dict[str, Any]) -> pa.StructType:
     return fields
 
 
-def _json_type_to_arrow_field(schema_type: dict[str, Any]) -> pa.DataType:
+def _json_type_to_arrow_field(  # noqa: PLR0911
+    schema_type: dict[str, Any],
+) -> pa.DataType:
     """Convert a JSON Schema to an Arrow struct.
 
     Args:
