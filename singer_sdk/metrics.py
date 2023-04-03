@@ -97,7 +97,7 @@ def log(logger: logging.Logger, point: Point) -> None:
         logger: An logger instance.
         point: A measurement.
     """
-    logger.info("INFO METRIC: %s", point)
+    logger.info("METRIC: %s", point)
 
 
 class Meter(metaclass=abc.ABCMeta):
