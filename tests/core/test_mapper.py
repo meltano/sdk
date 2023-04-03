@@ -356,6 +356,7 @@ def test_filter_transforms_w_error(
 
 def _test_transform(
     test_name: str,
+    *,
     stream_maps,
     stream_map_config,
     expected_result,

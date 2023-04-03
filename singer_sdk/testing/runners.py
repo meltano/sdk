@@ -173,7 +173,6 @@ class TapTestRunner(SingerTestRunner):
                     self.record_messages.append(message)
                     self.records[stream_name].append(message["record"])
                     continue
-        return
 
     def _execute_sync(self) -> tuple[str, str]:
         """Invoke a Tap object and return STDOUT and STDERR results in StringIO buffers.

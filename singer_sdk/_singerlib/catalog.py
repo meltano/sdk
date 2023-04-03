@@ -31,7 +31,7 @@ class SelectionMask(t.Dict[Breadcrumb, bool]):
         Returns:
             True if the breadcrumb is selected, False otherwise.
         """
-        if len(breadcrumb) >= 2:
+        if len(breadcrumb) >= 2:  # noqa: PLR2004
             parent = breadcrumb[:-2]
             return self[parent]
 
@@ -160,6 +160,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
     @classmethod
     def get_standard_metadata(
         cls: type[MetadataMapping],
+        *,
         schema: dict[str, t.Any] | None = None,
         schema_name: str | None = None,
         key_properties: list[str] | None = None,
@@ -218,7 +219,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
             for breadcrumb in self
         )
 
-    def _breadcrumb_is_selected(self, breadcrumb: Breadcrumb) -> bool:
+    def _breadcrumb_is_selected(self, breadcrumb: Breadcrumb) -> bool:  # noqa: PLR0911
         """Determine if a property breadcrumb is selected based on existing metadata.
 
         An empty breadcrumb (empty tuple) indicates the stream itself. Otherwise, the
