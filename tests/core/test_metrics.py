@@ -59,7 +59,7 @@ def test_record_counter(caplog: pytest.LogCaptureFixture):
 
     for record in caplog.records:
         assert record.levelname == "INFO"
-        assert record.msg == "INFO METRIC: %s"
+        assert record.msg == "METRIC: %s"
         assert "test=1" in record.message
 
         point: metrics.Point[int] = record.args[0]
@@ -89,7 +89,7 @@ def test_sync_timer(caplog: pytest.LogCaptureFixture):
 
     record = caplog.records[0]
     assert record.levelname == "INFO"
-    assert record.msg == "INFO METRIC: %s"
+    assert record.msg == "METRIC: %s"
 
     point: metrics.Point[float] = record.args[0]
     assert point.metric_type == "timer"
