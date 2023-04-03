@@ -23,6 +23,9 @@ STANDARD_KEYS = [
     "type",
     "required",
     "enum",
+    "pattern",
+    "contentMediaType",
+    "contentEncoding",
     # These are NOT simple keys (they can contain schemas themselves). We could
     # consider adding extra handling to them.
     "additionalProperties",
@@ -61,6 +64,9 @@ class Schema:
     required: list[str] | None = None
     enum: list[t.Any] | None = None
     title: str | None = None
+    pattern: str | None = None
+    contentMediaType: str | None = None  # noqa: N815
+    contentEncoding: str | None = None  # noqa: N815
 
     def to_dict(self) -> dict[str, t.Any]:
         """Return the raw JSON Schema as a (possibly nested) dict.
