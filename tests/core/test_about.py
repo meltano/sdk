@@ -6,8 +6,8 @@ import typing as t
 
 import pytest
 
+from singer_sdk.about import AboutFormatter, AboutInfo
 from singer_sdk.helpers.capabilities import TapCapabilities
-from singer_sdk.internal.about import AboutFormatter, AboutInfo
 
 if t.TYPE_CHECKING:
     from pathlib import Path

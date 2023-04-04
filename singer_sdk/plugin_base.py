@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Callable, Mapping, cast
 import click
 from jsonschema import Draft7Validator
 
-from singer_sdk import metrics
+from singer_sdk import about, metrics
 from singer_sdk.configuration._dict_config import parse_environment_config
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
@@ -25,7 +25,6 @@ from singer_sdk.helpers.capabilities import (
     CapabilitiesEnum,
     PluginCapabilities,
 )
-from singer_sdk.internal import about
 from singer_sdk.typing import extend_validator_with_defaults
 
 if TYPE_CHECKING:
