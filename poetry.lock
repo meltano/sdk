@@ -2361,14 +2361,14 @@ sqlcipher = ["sqlcipher3-binary"]
 
 [[package]]
 name = "sqlalchemy2-stubs"
-version = "0.0.2a32"
+version = "0.0.2a33"
 description = "Typing Stubs for SQLAlchemy 1.4"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "sqlalchemy2-stubs-0.0.2a32.tar.gz", hash = "sha256:2a2cfab71d35ac63bf21ad841d8610cd93a3bd4c6562848c538fa975585c2739"},
-    {file = "sqlalchemy2_stubs-0.0.2a32-py3-none-any.whl", hash = "sha256:7f5fb30b0cf7c6b74c50c1d94df77ff32007afee8d80499752eb3fedffdbdfb8"},
+    {file = "sqlalchemy2-stubs-0.0.2a33.tar.gz", hash = "sha256:5a35a096964dfd985651662b7f175fe1ddcbf5ed4f2d0203e637cec38bed64b4"},
+    {file = "sqlalchemy2_stubs-0.0.2a33-py3-none-any.whl", hash = "sha256:9809e7d8ea72cd92ac35aca4b43f588ae24b20376c55a0ef0112a08a6b537180"},
 ]
 
 [package.dependencies]
