@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import abc
-import json
 import logging
 import os
-from collections import OrderedDict
 from pathlib import PurePath
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Callable, Mapping, cast
@@ -14,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Callable, Mapping, cast
 import click
 from jsonschema import Draft7Validator
 
-from singer_sdk import metrics
+from singer_sdk import about, metrics
 from singer_sdk.configuration._dict_config import parse_environment_config
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
@@ -149,6 +147,40 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     # Core plugin metadata:
 
+    @staticmethod
+    def _get_package_version(package: str) -> str:
+        """Return the package version number.
+
+        Args:
+            package: The package name.
+
+        Returns:
+            The package version number.
+        """
+        try:
+            version = metadata.version(package)
+        except metadata.PackageNotFoundError:
+            version = "[could not be detected]"
+        return version
+
+    @classmethod
+    def get_plugin_version(cls) -> str:
+        """Return the package version number.
+
+        Returns:
+            The package version number.
+        """
+        return cls._get_package_version(cls.name)
+
+    @classmethod
+    def get_sdk_version(cls) -> str:
+        """Return the package version number.
+
+        Returns:
+            The package version number.
+        """
+        return cls._get_package_version(SDK_PACKAGE_NAME)
+
     @classproperty
     def plugin_version(cls) -> str:  # noqa: N805
         """Get version.
@@ -156,11 +188,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         Returns:
             The package version number.
         """
-        try:
-            version = metadata.version(cls.name)
-        except metadata.PackageNotFoundError:
-            version = "[could not be detected]"
-        return version
+        return cls.get_plugin_version()
 
     @classproperty
     def sdk_version(cls) -> str:  # noqa: N805
@@ -169,11 +197,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         Returns:
             Meltano Singer SDK version number.
         """
-        try:
-            version = metadata.version(SDK_PACKAGE_NAME)
-        except metadata.PackageNotFoundError:
-            version = "[could not be detected]"
-        return version
+        return cls.get_sdk_version()
 
     # Abstract methods:
 
@@ -278,23 +302,23 @@ class PluginBase(metaclass=abc.ABCMeta):
         print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version}")
 
     @classmethod
-    def _get_about_info(cls: type[PluginBase]) -> dict[str, Any]:
+    def _get_about_info(cls: type[PluginBase]) -> about.AboutInfo:
         """Returns capabilities and other tap metadata.
 
         Returns:
             A dictionary containing the relevant 'about' information.
         """
-        info: dict[str, Any] = OrderedDict({})
-        info["name"] = cls.name
-        info["description"] = cls.__doc__
-        info["version"] = cls.plugin_version
-        info["sdk_version"] = cls.sdk_version
-        info["capabilities"] = cls.capabilities
-
         config_jsonschema = cls.config_jsonschema
         cls.append_builtin_config(config_jsonschema)
-        info["settings"] = config_jsonschema
-        return info
+
+        return about.AboutInfo(
+            name=cls.name,
+            description=cls.__doc__,
+            version=cls.get_plugin_version(),
+            sdk_version=cls.get_sdk_version(),
+            capabilities=cls.capabilities,
+            settings=config_jsonschema,
+        )
 
     @classmethod
     def append_builtin_config(cls: type[PluginBase], config_jsonschema: dict) -> None:
@@ -337,67 +361,8 @@ class PluginBase(metaclass=abc.ABCMeta):
             output_format: Render option for the plugin information.
         """
         info = cls._get_about_info()
-
-        if output_format == "json":
-            print(json.dumps(info, indent=2, default=str))  # noqa: T201
-
-        elif output_format == "markdown":
-            max_setting_len = cast(
-                int,
-                max(len(k) for k in info["settings"]["properties"]),
-            )
-
-            # Set table base for markdown
-            table_base = (
-                f"| {'Setting':{max_setting_len}}| Required | Default | Description |\n"
-                f"|:{'-' * max_setting_len}|:--------:|:-------:|:------------|\n"
-            )
-
-            # Empty list for string parts
-            md_list = []
-            # Get required settings for table
-            required_settings = info["settings"].get("required", [])
-
-            # Iterate over Dict to set md
-            md_list.append(
-                f"# `{info['name']}`\n\n"
-                f"{info['description']}\n\n"
-                f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n",
-            )
-            for key, value in info.items():
-                if key == "capabilities":
-                    capabilities = f"## {key.title()}\n\n"
-                    capabilities += "\n".join([f"* `{v}`" for v in value])
-                    capabilities += "\n\n"
-                    md_list.append(capabilities)
-
-                if key == "settings":
-                    setting = f"## {key.title()}\n\n"
-                    for k, v in info["settings"].get("properties", {}).items():
-                        md_description = v.get("description", "").replace("\n", "<BR/>")
-                        table_base += (
-                            f"| {k}{' ' * (max_setting_len - len(k))}"
-                            f"| {'True' if k in required_settings else 'False':8} | "
-                            f"{v.get('default', 'None'):7} | "
-                            f"{md_description:11} |\n"
-                        )
-                    setting += table_base
-                    setting += (
-                        "\n"
-                        + "\n".join(
-                            [
-                                "A full list of supported settings and capabilities "
-                                f"is available by running: `{info['name']} --about`",
-                            ],
-                        )
-                        + "\n"
-                    )
-                    md_list.append(setting)
-
-            print("".join(md_list))  # noqa: T201
-        else:
-            formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
-            print(formatted)  # noqa: T201
+        formatter = about.AboutFormatter.get_formatter(output_format or "text")
+        print(formatter.format_about(info))  # noqa: T201
 
     @classproperty
     def cli(cls) -> Callable:  # noqa: N805
