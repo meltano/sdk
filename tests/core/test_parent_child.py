@@ -25,7 +25,7 @@ class Parent(Stream):
         self,
         record: dict,
         context: dict | None,  # noqa: ARG002
-    ) -> dict:
+    ) -> dict | None:
         """Create context for children streams."""
         return {
             "pid": record["id"],
@@ -86,18 +86,21 @@ def tap_with_deselected_parent(tap: MyTap):
     tap.catalog["parent"].metadata[()].selected = original
 
 
+def _get_messages(tap: Tap):
+    """Redirect stdout to a buffer."""
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        tap.sync_all()
+    buf.seek(0)
+    lines = buf.read().splitlines()
+    return [json.loads(line) for line in lines]
+
+
 def test_parent_context_fields_in_child(tap: MyTap):
     """Test that parent context fields are available in child streams."""
     parent_stream = tap.streams["parent"]
     child_stream = tap.streams["child"]
-
-    buf = io.StringIO()
-    with redirect_stdout(buf):
-        tap.sync_all()
-
-    buf.seek(0)
-    lines = buf.read().splitlines()
-    messages = [json.loads(line) for line in lines]
+    messages = _get_messages(tap)
 
     # Parent schema is emitted
     assert messages[0]
@@ -119,6 +122,19 @@ def test_parent_context_fields_in_child(tap: MyTap):
     assert all("pid" in msg["record"] for msg in child_record_messages)
 
 
+def test_skip_deleted_parent_child_streams(tap: MyTap):
+    """Test tap output with parent stream deselected."""
+    parent_stream = tap.streams["parent"]
+
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        parent_stream._sync_children(None)
+
+    buf.seek(0)
+
+    assert not buf.read().splitlines()
+
+
 def test_child_deselected_parent(tap_with_deselected_parent: MyTap):
     """Test tap output with parent stream deselected."""
     parent_stream = tap_with_deselected_parent.streams["parent"]
@@ -127,13 +143,7 @@ def test_child_deselected_parent(tap_with_deselected_parent: MyTap):
     assert not parent_stream.selected
     assert parent_stream.has_selected_descendents
 
-    buf = io.StringIO()
-    with redirect_stdout(buf):
-        tap_with_deselected_parent.sync_all()
-
-    buf.seek(0)
-    lines = buf.read().splitlines()
-    messages = [json.loads(line) for line in lines]
+    messages = _get_messages(tap_with_deselected_parent)
 
     # First message is a schema for the child stream, not the parent
     assert messages[0]
