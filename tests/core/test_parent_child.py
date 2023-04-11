@@ -122,17 +122,26 @@ def test_parent_context_fields_in_child(tap: MyTap):
     assert all("pid" in msg["record"] for msg in child_record_messages)
 
 
-def test_skip_deleted_parent_child_streams(tap: MyTap):
+def test_skip_deleted_parent_child_streams(
+    tap: MyTap,
+    caplog: pytest.LogCaptureFixture,
+):
     """Test tap output with parent stream deselected."""
     parent_stream = tap.streams["parent"]
 
     buf = io.StringIO()
-    with redirect_stdout(buf):
+    with redirect_stdout(buf), caplog.at_level("WARNING"):
         parent_stream._sync_children(None)
 
     buf.seek(0)
 
     assert not buf.read().splitlines()
+    assert len(caplog.records) == 1
+    assert caplog.records[0].levelname == "WARNING"
+    assert caplog.records[0].message == (
+        "Context for child streams of 'parent' is null, "
+        "skipping sync of any child streams"
+    )
 
 
 def test_child_deselected_parent(tap_with_deselected_parent: MyTap):
