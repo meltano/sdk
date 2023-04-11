@@ -194,6 +194,7 @@ def get_starting_replication_value(stream_or_partition_state: dict):
 
 def increment_state(
     stream_or_partition_state: dict,
+    *,
     latest_record: dict,
     replication_key: str,
     is_sorted: bool,

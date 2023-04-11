@@ -234,6 +234,7 @@ select = [
     "ANN",  # flake8-annotations
     "S",    # flake8-bandit
     "BLE",  # flake8-blind-except
+    "FBT",  # flake8-boolean-trap
     "B",    # flake8-bugbear
     "A",    # flake8-builtins
     "COM",  # flake8-commas
@@ -271,7 +272,7 @@ target-version = "py37"
     "INP001", # flake8-no-pep420: implicit-namespace-package
 ]
 "noxfile.py" = ["ANN"]
-"tests/*" = ["ANN", "D1", "D2", "PLR2004", "S101"]
+"tests/*" = ["ANN", "D1", "D2", "FBT001", "FBT003", "PLR2004", "S101"]
 # Disabled some checks in samples code
 "samples/*" = ["ANN", "D"]
 # Don't require docstrings conventions or type annotations in private modules

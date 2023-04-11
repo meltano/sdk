@@ -399,10 +399,10 @@ class Property(JSONTypeHelper, Generic[W]):
         self,
         name: str,
         wrapped: W | type[W],
-        required: bool = False,
+        required: bool = False,  # noqa: FBT001, FBT002
         default: _JsonValue | None = None,
         description: str | None = None,
-        secret: bool | None = False,
+        secret: bool | None = False,  # noqa: FBT002
         allowed_values: list[Any] | None = None,
         examples: list[Any] | None = None,
     ) -> None:

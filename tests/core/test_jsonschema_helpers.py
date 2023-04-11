@@ -621,9 +621,9 @@ def test_array_type():
         pytest.param(
             ObjectType(
                 Property("id", StringType),
-                Property("email", StringType, True),
-                Property("email", StringType, True),
-                Property("username", StringType, True),
+                Property("email", StringType, required=True),
+                Property("email", StringType, required=True),
+                Property("username", StringType, required=True),
                 Property("phone_number", StringType),
                 additional_properties=False,
             ),
