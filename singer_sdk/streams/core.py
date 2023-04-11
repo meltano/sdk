@@ -1048,6 +1048,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _sync_records(
         self,
         context: dict | None = None,
+        *,
         write_messages: bool = True,
     ) -> Generator[dict, Any, Any]:
         """Sync records, emitting RECORD and STATE messages.

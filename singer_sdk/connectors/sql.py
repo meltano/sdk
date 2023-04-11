@@ -391,7 +391,7 @@ class SQLConnector:
         inspected: Inspector,
         schema_name: str,
         table_name: str,
-        is_view: bool,
+        is_view: bool,  # noqa: FBT001
     ) -> CatalogEntry:
         """Create `CatalogEntry` object for the given table or a view.
 
@@ -647,7 +647,7 @@ class SQLConnector:
         schema: dict,
         primary_keys: list[str] | None = None,
         partition_keys: list[str] | None = None,
-        as_temp_table: bool = False,
+        as_temp_table: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Create an empty target table.
 
@@ -733,7 +733,7 @@ class SQLConnector:
         schema: dict,
         primary_keys: list[str],
         partition_keys: list[str] | None = None,
-        as_temp_table: bool = False,
+        as_temp_table: bool = False,  # noqa: FBT002, FBT001
     ) -> None:
         """Adapt target table to provided schema if possible.
 

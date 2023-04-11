@@ -70,6 +70,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
+        *,
         config: dict | PurePath | str | list[PurePath | str] | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
@@ -237,6 +238,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     def _validate_config(
         self,
+        *,
         raise_errors: bool = True,
         warnings_as_errors: bool = False,
     ) -> tuple[list[str], list[str]]:

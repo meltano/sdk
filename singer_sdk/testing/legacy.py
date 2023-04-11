@@ -132,6 +132,7 @@ def tap_sync_test(tap: Tap) -> tuple[io.StringIO, io.StringIO]:
 def _get_tap_catalog(
     tap_class: type[Tap],
     config: dict,
+    *,
     select_all: bool = False,
 ) -> dict:
     """Return a catalog dict by running discovery.
@@ -174,6 +175,7 @@ def _select_all(catalog_dict: dict) -> dict:
 def target_sync_test(
     target: Target,
     input: io.StringIO | None,  # noqa: A002
+    *,
     finalize: bool = True,
 ) -> tuple[io.StringIO, io.StringIO]:
     """Invoke the target with the provided input.

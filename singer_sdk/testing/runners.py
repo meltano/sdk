@@ -249,7 +249,7 @@ class TargetTestRunner(SingerTestRunner):
     def target_input(self, value: IO[str]) -> None:
         self._input = value
 
-    def sync_all(self, finalize: bool = True, **kwargs: Any) -> None:  # noqa: ARG002
+    def sync_all(self, *, finalize: bool = True, **kwargs: Any) -> None:  # noqa: ARG002
         """Run a full tap sync, assigning output to the runner object.
 
         Args:
@@ -270,6 +270,7 @@ class TargetTestRunner(SingerTestRunner):
         self,
         target: Target,
         target_input: IO[str],
+        *,
         finalize: bool = True,
     ) -> tuple[io.StringIO, io.StringIO]:
         """Invoke the target with the provided input.
