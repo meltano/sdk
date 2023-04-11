@@ -10,6 +10,12 @@ Usage example:
 
         Property("id", IntegerType, required=True),
         Property("foo_or_bar", StringType, allowed_values=["foo", "bar"]),
+        Property(
+            "permissions",
+            ArrayType(th.StringType),
+            allowed_values=["create", "delete", "insert", "update"],
+            examples=["insert", "update"],
+        ),
         Property("ratio", NumberType, examples=[0.25, 0.75, 1.0]),
         Property("days_active", IntegerType),
         Property("updated_on", DateTimeType),
@@ -68,6 +74,7 @@ from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_WRITEONLY,
     append_type,
     get_datelike_property_type,
+    is_array_type,
 )
 
 if TYPE_CHECKING:
@@ -477,7 +484,12 @@ class Property(JSONTypeHelper, Generic[W]):
                 },
             )
         if self.allowed_values:
-            type_dict.update({"enum": self.allowed_values})
+            type_enum = {"enum": self.allowed_values}
+
+            if is_array_type(self.type_dict):
+                type_dict["items"].update(type_enum)
+            else:
+                type_dict.update(type_enum)
         if self.examples:
             type_dict.update({"examples": self.examples})
         return {self.name: type_dict}
