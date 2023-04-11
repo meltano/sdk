@@ -1287,7 +1287,10 @@ class Stream(metaclass=abc.ABCMeta):
     # Abstract Methods
 
     @abc.abstractmethod
-    def get_records(self, context: dict | None) -> Iterable[dict | tuple[dict, dict]]:
+    def get_records(
+        self,
+        context: dict | None,
+    ) -> Iterable[dict | tuple[dict, dict | None]]:
         """Abstract record generator function. Must be overridden by the child class.
 
         Each record emitted should be a dictionary of property names to their values.
@@ -1306,6 +1309,11 @@ class Stream(metaclass=abc.ABCMeta):
         Parent streams can optionally return a tuple, in which
         case the second item in the tuple being a `child_context` dictionary for the
         stream's `context`.
+
+        If the child context object in the tuple is ``None``, the child streams will
+        be skipped. This is useful for cases where the parent record was deleted and
+        the child records can no longer be synced.
+
         More info: :doc:`/parent_streams`
 
         Args:
