@@ -459,20 +459,20 @@ class ArrayType(JSONTypeHelper[list], Generic[W]):
         return {"type": "array", "items": self.wrapped_type.type_dict, **self.extras}
 
 
-class Property(JSONTypeHelper, Generic[W]):
+class Property(JSONTypeHelper[T], Generic[T]):
     """Generic Property. Should be nested within a `PropertiesList`."""
 
     # TODO: Make some of these arguments keyword-only. This is a breaking change.
     def __init__(
         self,
         name: str,
-        wrapped: W | type[W],
+        wrapped: JSONTypeHelper[T] | type[JSONTypeHelper[T]],
         required: bool = False,  # noqa: FBT001, FBT002
-        default: _JsonValue | None = None,
+        default: T | None = None,
         description: str | None = None,
         secret: bool | None = False,  # noqa: FBT002
-        allowed_values: list[Any] | None = None,
-        examples: list[Any] | None = None,
+        allowed_values: list[T] | None = None,
+        examples: list[T] | None = None,
     ) -> None:
         """Initialize Property object.
 
@@ -661,7 +661,7 @@ class ObjectType(JSONTypeHelper):
             merged_props.update(w.to_dict())
             if not w.optional:
                 required.append(w.name)
-        result: dict = {"type": "object", "properties": merged_props}
+        result: dict[str, Any] = {"type": "object", "properties": merged_props}
 
         if required:
             result["required"] = required
