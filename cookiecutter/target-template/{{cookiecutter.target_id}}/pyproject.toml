@@ -21,7 +21,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "<3.12,>=3.7.1"
-singer-sdk = { version="^0.23.0" }
+singer-sdk = { version="^0.24.0" }
 fs-s3fs = { version = "^1.1.1", optional = true }
 {%- if cookiecutter.serialization_method != "SQL" %}
 requests = "^2.28.2"
@@ -35,7 +35,7 @@ black = "^23.1.0"
 pyupgrade = "^3.3.1"
 mypy = "^1.0.0"
 isort = "^5.11.5"
-singer-sdk = { version="^0.23.0", extras = ["testing"] }
+singer-sdk = { version="^0.24.0", extras = ["testing"] }
 {%- if cookiecutter.serialization_method != "SQL" %}
 types-requests = "^2.28.11.12"
 {%- endif %}
