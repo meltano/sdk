@@ -413,7 +413,14 @@ class RegexType(StringType):
 
 
 class BooleanType(JSONTypeHelper[bool]):
-    """Boolean type."""
+    """Boolean type.
+
+    Examples:
+        >>> BooleanType.type_dict
+        {'type': ['boolean']}
+        >>> BooleanType().type_dict
+        {'type': ['boolean']}
+    """
 
     @DefaultInstanceProperty
     def type_dict(self) -> dict:
@@ -426,7 +433,16 @@ class BooleanType(JSONTypeHelper[bool]):
 
 
 class IntegerType(JSONTypeHelper):
-    """Integer type."""
+    """Integer type.
+
+    Examples:
+        >>> IntegerType.type_dict
+        {'type': ['integer']}
+        >>> IntegerType().type_dict
+        {'type': ['integer']}
+        >>> IntegerType(allowed_values=[1, 2]).type_dict
+        {'type': ['integer'], 'enum': [1, 2]}
+    """
 
     @DefaultInstanceProperty
     def type_dict(self) -> dict:
@@ -439,7 +455,16 @@ class IntegerType(JSONTypeHelper):
 
 
 class NumberType(JSONTypeHelper[float]):
-    """Number type."""
+    """Number type.
+
+    Examples:
+        >>> NumberType.type_dict
+        {'type': ['number']}
+        >>> NumberType().type_dict
+        {'type': ['number']}
+        >>> NumberType(allowed_values=[1.0, 2.0]).type_dict
+        {'type': ['number'], 'enum': [1.0, 2.0]}
+    """
 
     @DefaultInstanceProperty
     def type_dict(self) -> dict:
