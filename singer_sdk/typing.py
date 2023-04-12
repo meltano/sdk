@@ -13,7 +13,7 @@ Usage example:
         Property(
             "permissions",
             ArrayType(
-                th.StringType(
+                StringType(
                     allowed_values=["create", "delete", "insert", "update"],
                     examples=["insert", "update"],
                 ),
