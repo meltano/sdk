@@ -10,6 +10,15 @@ Usage example:
 
         Property("id", IntegerType, required=True),
         Property("foo_or_bar", StringType, allowed_values=["foo", "bar"]),
+        Property(
+            "permissions",
+            ArrayType(
+                th.StringType(
+                    allowed_values=["create", "delete", "insert", "update"],
+                    examples=["insert", "update"],
+                ),
+            ),
+        ),
         Property("ratio", NumberType, examples=[0.25, 0.75, 1.0]),
         Property("days_active", IntegerType),
         Property("updated_on", DateTimeType),
@@ -257,7 +266,16 @@ class JSONTypeHelper(Generic[T]):
 
 
 class StringType(JSONTypeHelper[str]):
-    """String type."""
+    """String type.
+
+    Examples:
+        >>> StringType.type_dict
+        {'type': ['string']}
+        >>> StringType().type_dict
+        {'type': ['string']}
+        >>> StringType(allowed_values=["a", "b"]).type_dict
+        {'type': ['string'], 'enum': ['a', 'b']}
+    """
 
     string_format: str | None = None
     """String format.
