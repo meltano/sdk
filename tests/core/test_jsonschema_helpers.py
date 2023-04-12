@@ -434,6 +434,50 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
             },
             {is_integer_type},
         ),
+        (
+            Property(
+                "my_prop10",
+                ArrayType(
+                    StringType(
+                        allowed_values=["create", "delete", "insert", "update"],
+                        examples=["insert", "update"],
+                    ),
+                ),
+            ),
+            {
+                "my_prop10": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": ["string"],
+                        "enum": ["create", "delete", "insert", "update"],
+                        "examples": ["insert", "update"],
+                    },
+                },
+            },
+            {is_array_type, is_string_array_type},
+        ),
+        (
+            Property(
+                "my_prop11",
+                ArrayType(
+                    StringType,
+                    allowed_values=[
+                        ["create", "delete"],
+                        ["insert", "update"],
+                    ],
+                ),
+            ),
+            {
+                "my_prop11": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": ["string"],
+                    },
+                    "enum": [["create", "delete"], ["insert", "update"]],
+                },
+            },
+            {is_array_type, is_string_array_type},
+        ),
     ],
 )
 def test_property_creation(

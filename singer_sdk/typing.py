@@ -49,6 +49,7 @@ import json
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     Generator,
     Generic,
     ItemsView,
@@ -62,7 +63,6 @@ from typing import (
 import sqlalchemy
 from jsonschema import ValidationError, Validator, validators
 
-from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
     JSONSCHEMA_ANNOTATION_WRITEONLY,
@@ -120,6 +120,9 @@ _JsonValue: TypeAlias = Union[
     None,
 ]
 
+T = TypeVar("T", bound=_JsonValue)
+P = TypeVar("P")
+
 
 def extend_validator_with_defaults(validator_class):  # noqa: ANN001, ANN201
     """Fill in defaults, before validating with the provided JSON Schema Validator.
@@ -159,11 +162,57 @@ def extend_validator_with_defaults(validator_class):  # noqa: ANN001, ANN201
     )
 
 
-class JSONTypeHelper:
+class DefaultInstanceProperty:
+    """Property of default instance.
+
+    Descriptor similar to ``property`` that decorates an instance method to retrieve
+    a property from the instance initialized with default parameters, if the called on
+    the class.
+    """
+
+    def __init__(self, fget: Callable) -> None:
+        """Initialize the decorator.
+
+        Args:
+            fget: The function to decorate.
+        """
+        self.fget = fget
+
+    def __get__(self, instance: P, owner: type[P]) -> Any:  # noqa: ANN401
+        """Get the property value.
+
+        Args:
+            instance: The instance to get the property value from.
+            owner: The class to get the property value from.
+
+        Returns:
+            The property value.
+        """
+        if instance is None:
+            instance = owner()
+        return self.fget(instance)
+
+
+class JSONTypeHelper(Generic[T]):
     """Type helper base class for JSONSchema types."""
 
-    @classproperty
-    def type_dict(cls) -> dict:  # noqa: N805
+    def __init__(
+        self,
+        *,
+        allowed_values: list[T] | None = None,
+        examples: list[T] | None = None,
+    ) -> None:
+        """Initialize the type helper.
+
+        Args:
+            allowed_values: A list of allowed values.
+            examples: A list of example values.
+        """
+        self.allowed_values = allowed_values
+        self.examples = examples
+
+    @DefaultInstanceProperty
+    def type_dict(self) -> dict:
         """Return dict describing the type.
 
         Raises:
@@ -171,13 +220,29 @@ class JSONTypeHelper:
         """
         raise NotImplementedError
 
+    @property
+    def extras(self) -> dict:
+        """Return dict describing the JSON Schema extras.
+
+        Returns:
+            A dictionary containing the JSON Schema extras.
+        """
+        result = {}
+        if self.allowed_values:
+            result["enum"] = self.allowed_values
+
+        if self.examples:
+            result["examples"] = self.examples
+
+        return result
+
     def to_dict(self) -> dict:
         """Convert to dictionary.
 
         Returns:
             A JSON Schema dictionary describing the object.
         """
-        return cast(dict, self.type_dict)
+        return self.type_dict  # type: ignore[no-any-return]
 
     def to_json(self, **kwargs: Any) -> str:
         """Convert to JSON.
@@ -191,7 +256,7 @@ class JSONTypeHelper:
         return json.dumps(self.to_dict(), **kwargs)
 
 
-class StringType(JSONTypeHelper):
+class StringType(JSONTypeHelper[str]):
     """String type."""
 
     string_format: str | None = None
@@ -206,12 +271,12 @@ class StringType(JSONTypeHelper):
         https://json-schema.org/understanding-json-schema/reference/string.html#built-in-formats
     """
 
-    @classproperty
-    def _format(cls) -> dict:  # noqa: N805
-        return {"format": cls.string_format} if cls.string_format else {}
+    @property
+    def _format(self) -> dict:
+        return {"format": self.string_format} if self.string_format else {}
 
-    @classproperty
-    def type_dict(cls) -> dict:  # noqa: N805
+    @DefaultInstanceProperty
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
@@ -219,7 +284,8 @@ class StringType(JSONTypeHelper):
         """
         return {
             "type": ["string"],
-            **cls._format,
+            **self._format,
+            **self.extras,
         }
 
 
@@ -328,58 +394,60 @@ class RegexType(StringType):
     string_format = "regex"
 
 
-class BooleanType(JSONTypeHelper):
+class BooleanType(JSONTypeHelper[bool]):
     """Boolean type."""
 
-    @classproperty
-    def type_dict(cls) -> dict:  # noqa: N805
+    @DefaultInstanceProperty
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
             A dictionary describing the type.
         """
-        return {"type": ["boolean"]}
+        return {"type": ["boolean"], **self.extras}
 
 
 class IntegerType(JSONTypeHelper):
     """Integer type."""
 
-    @classproperty
-    def type_dict(cls) -> dict:  # noqa: N805
+    @DefaultInstanceProperty
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
             A dictionary describing the type.
         """
-        return {"type": ["integer"]}
+        return {"type": ["integer"], **self.extras}
 
 
-class NumberType(JSONTypeHelper):
+class NumberType(JSONTypeHelper[float]):
     """Number type."""
 
-    @classproperty
-    def type_dict(cls) -> dict:  # noqa: N805
+    @DefaultInstanceProperty
+    def type_dict(self) -> dict:
         """Get type dictionary.
 
         Returns:
             A dictionary describing the type.
         """
-        return {"type": ["number"]}
+        return {"type": ["number"], **self.extras}
 
 
 W = TypeVar("W", bound=JSONTypeHelper)
 
 
-class ArrayType(JSONTypeHelper, Generic[W]):
+class ArrayType(JSONTypeHelper[list], Generic[W]):
     """Array type."""
 
-    def __init__(self, wrapped_type: W | type[W]) -> None:
+    def __init__(self, wrapped_type: W | type[W], **kwargs: Any) -> None:
         """Initialize Array type with wrapped inner type.
 
         Args:
             wrapped_type: JSON Schema item type inside the array.
+            **kwargs: Additional keyword arguments to pass to the parent class.
         """
         self.wrapped_type = wrapped_type
+        super().__init__(**kwargs)
 
     @property
     def type_dict(self) -> dict:  # type: ignore[override]
@@ -388,7 +456,7 @@ class ArrayType(JSONTypeHelper, Generic[W]):
         Returns:
             A dictionary describing the type.
         """
-        return {"type": "array", "items": self.wrapped_type.type_dict}
+        return {"type": "array", "items": self.wrapped_type.type_dict, **self.extras}
 
 
 class Property(JSONTypeHelper, Generic[W]):
@@ -491,6 +559,7 @@ class ObjectType(JSONTypeHelper):
         *properties: Property,
         additional_properties: W | type[W] | bool | None = None,
         pattern_properties: Mapping[str, W | type[W]] | None = None,
+        **kwargs: Any,
     ) -> None:
         """Initialize ObjectType from its list of properties.
 
@@ -500,6 +569,7 @@ class ObjectType(JSONTypeHelper):
                 this object, or a boolean indicating if extra properties are allowed.
             pattern_properties: A dictionary of regex patterns to match against
                 property names, and the schema to match against the values.
+            **kwargs: Additional keyword arguments to pass to the `JSONTypeHelper`.
 
         Examples:
             >>> t = ObjectType(
@@ -576,6 +646,7 @@ class ObjectType(JSONTypeHelper):
         self.wrapped: dict[str, Property] = {prop.name: prop for prop in properties}
         self.additional_properties = additional_properties
         self.pattern_properties = pattern_properties
+        super().__init__(**kwargs)
 
     @property
     def type_dict(self) -> dict:  # type: ignore[override]
