@@ -492,9 +492,15 @@ class Sink(metaclass=abc.ABCMeta):
                     tail,
                     mode="rb",
                 ) as file:
-                    if encoding.compression == "gzip":
-                        file = gzip_open(file)
-                    context = {"records": [json.loads(line) for line in file]}
+                    open_file = (
+                        gzip_open(file) if encoding.compression == "gzip" else file
+                    )
+                    context = {
+                        "records": [
+                            json.loads(line)
+                            for line in open_file  # type: ignore[attr-defined]
+                        ],
+                    }
                     self.process_batch(context)
             else:
                 raise NotImplementedError(

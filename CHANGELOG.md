@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.24.0 (2023-04-12)
+
+### ✨ New
+
+- [#1601](https://github.com/meltano/sdk/issues/1601) Allow skipping child streams by returning an empty child context from parent stream
+- [#1581](https://github.com/meltano/sdk/issues/1581) Add `pattern`, `contentMediaType`, and `contentEncoding` to Schema data class -- _**Thanks @BuzzCutNorman!**_
+
+### 🐛 Fixes
+
+- [#1587](https://github.com/meltano/sdk/issues/1587) Update cookiecutter tests path
+
+### ⚙️ Under the Hood
+
+- [#1570](https://github.com/meltano/sdk/issues/1570) Move "about" formatting logic into dedicated classes
+
+## v0.23.0 (2023-04-04)
+
+### ✨ New
+
+- [#1563](https://github.com/meltano/sdk/issues/1563) Migrate shell scripts for cookiecutter e2e tests to Nox -- _**Thanks @mkranna!**_
+
+### 🐛 Fixes
+
+- [#1574](https://github.com/meltano/sdk/issues/1574) Conform metric field `type` to Singer spec
+- [#1436](https://github.com/meltano/sdk/issues/1436) Handle sync abort, reduce duplicate `STATE` messages, rename `_MAX_RECORD_LIMIT` as `ABORT_AT_RECORD_COUNT`
+
 ## v0.22.1 (2023-03-28)
 
 ### 🐛 Fixes

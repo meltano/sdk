@@ -53,6 +53,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
+        *,
         config: dict | PurePath | str | list[PurePath | str] | None = None,
         catalog: PurePath | str | dict | Catalog | None = None,
         state: PurePath | str | dict | None = None,
@@ -463,6 +464,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             context_settings={"help_option_names": ["--help"]},
         )
         def cli(
+            *,
             version: bool = False,
             about: bool = False,
             discover: bool = False,
@@ -550,6 +552,7 @@ class SQLTap(Tap):
 
     def __init__(
         self,
+        *,
         config: dict | PurePath | str | list[PurePath | str] | None = None,
         catalog: PurePath | str | dict | None = None,
         state: PurePath | str | dict | None = None,

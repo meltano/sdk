@@ -989,8 +989,7 @@ class Stream(metaclass=abc.ABCMeta):
         if state is None or state == {}:
             context: dict | None
             for context in self.partitions or [{}]:
-                context = context or None
-                state = self.get_context_state(context)
+                state = self.get_context_state(context or None)
                 reset_state_progress_markers(state)
             return
 
@@ -1012,8 +1011,7 @@ class Stream(metaclass=abc.ABCMeta):
 
             context: dict | None
             for context in self.partitions or [{}]:
-                context = context or None
-                state = self.get_context_state(context)
+                state = self.get_context_state(context or None)
                 finalize_state_progress_markers(state)
             return
 
@@ -1050,6 +1048,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _sync_records(
         self,
         context: dict | None = None,
+        *,
         write_messages: bool = True,
     ) -> Generator[dict, Any, Any]:
         """Sync records, emitting RECORD and STATE messages.
@@ -1070,18 +1069,18 @@ class Stream(metaclass=abc.ABCMeta):
         timer = metrics.sync_timer(self.name)
 
         record_index = 0
-        current_context: dict | None
+        context_element: dict | None
         context_list: list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
         with record_counter, timer:
-            for current_context in context_list or [{}]:
-                record_counter.context = current_context
-                timer.context = current_context
+            for context_element in context_list or [{}]:
+                record_counter.context = context_element
+                timer.context = context_element
 
                 partition_record_index = 0
-                current_context = current_context or None
+                current_context = context_element or None
                 state = self.get_context_state(current_context)
                 state_partition_context = self._get_state_partition_context(
                     current_context,
@@ -1195,7 +1194,15 @@ class Stream(metaclass=abc.ABCMeta):
             for _ in self._sync_records(context=context):
                 pass
 
-    def _sync_children(self, child_context: dict) -> None:
+    def _sync_children(self, child_context: dict | None) -> None:
+        if child_context is None:
+            self.logger.warning(
+                "Context for child streams of '%s' is null, "
+                "skipping sync of any child streams",
+                self.name,
+            )
+            return
+
         for child_stream in self.child_streams:
             if child_stream.selected or child_stream.has_selected_descendents:
                 child_stream.sync(context=child_context)
@@ -1239,7 +1246,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         return {k: v for k, v in context.items() if k in self.state_partitioning_keys}
 
-    def get_child_context(self, record: dict, context: dict | None) -> dict:
+    def get_child_context(self, record: dict, context: dict | None) -> dict | None:
         """Return a child context object from the record and optional provided context.
 
         By default, will return context if provided and otherwise the record dict.
@@ -1247,12 +1254,16 @@ class Stream(metaclass=abc.ABCMeta):
         Developers may override this behavior to send specific information to child
         streams for context.
 
+        Return ``None`` if no child streams should be synced, for example if the
+        parent record was deleted and the child records can no longer be synced.
+
         Args:
             record: Individual record in the stream.
             context: Stream partition or context dictionary.
 
         Returns:
-            A dictionary with context values for a child stream.
+            A dictionary with context values for a child stream, or None if no child
+            streams should be synced.
 
         Raises:
             NotImplementedError: If the stream has children but this method is not
@@ -1276,7 +1287,10 @@ class Stream(metaclass=abc.ABCMeta):
     # Abstract Methods
 
     @abc.abstractmethod
-    def get_records(self, context: dict | None) -> Iterable[dict | tuple[dict, dict]]:
+    def get_records(
+        self,
+        context: dict | None,
+    ) -> Iterable[dict | tuple[dict, dict | None]]:
         """Abstract record generator function. Must be overridden by the child class.
 
         Each record emitted should be a dictionary of property names to their values.
@@ -1295,6 +1309,11 @@ class Stream(metaclass=abc.ABCMeta):
         Parent streams can optionally return a tuple, in which
         case the second item in the tuple being a `child_context` dictionary for the
         stream's `context`.
+
+        If the child context object in the tuple is ``None``, the child streams will
+        be skipped. This is useful for cases where the parent record was deleted and
+        the child records can no longer be synced.
+
         More info: :doc:`/parent_streams`
 
         Args:

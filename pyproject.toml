@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.22.1"
+version = "0.24.0"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 maintainers = ["Meltano Team and Contributors"]
@@ -140,7 +140,7 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.22.1"
+version = "0.24.0"
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
     "docs/conf.py",
@@ -234,6 +234,7 @@ select = [
     "ANN",  # flake8-annotations
     "S",    # flake8-bandit
     "BLE",  # flake8-blind-except
+    "FBT",  # flake8-boolean-trap
     "B",    # flake8-bugbear
     "A",    # flake8-builtins
     "COM",  # flake8-commas
@@ -255,6 +256,10 @@ select = [
     "PTH",  # flake8-use-pathlib
     "ERA",  # eradicate
     "PGH",  # pygrep-hooks
+    "PLC",  # pylint (convention)
+    "PLE",  # pylint (error)
+    "PLR",  # pylint (refactor)
+    "PLW",  # pylint (warning)
     "RUF",  # ruff
 ]
 src = ["samples", "singer_sdk", "tests"]
@@ -267,7 +272,7 @@ target-version = "py37"
     "INP001", # flake8-no-pep420: implicit-namespace-package
 ]
 "noxfile.py" = ["ANN"]
-"tests/*" = ["ANN", "D1", "D2", "S101"]
+"tests/*" = ["ANN", "D1", "D2", "FBT001", "FBT003", "PLR2004", "S101"]
 # Disabled some checks in samples code
 "samples/*" = ["ANN", "D"]
 # Don't require docstrings conventions or type annotations in private modules
@@ -291,3 +296,6 @@ required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.pydocstyle]
 convention = "google"
+
+[tool.ruff.pylint]
+max-args = 9

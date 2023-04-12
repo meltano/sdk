@@ -173,7 +173,6 @@ class TapTestRunner(SingerTestRunner):
                     self.record_messages.append(message)
                     self.records[stream_name].append(message["record"])
                     continue
-        return
 
     def _execute_sync(self) -> tuple[str, str]:
         """Invoke a Tap object and return STDOUT and STDERR results in StringIO buffers.
@@ -250,7 +249,7 @@ class TargetTestRunner(SingerTestRunner):
     def target_input(self, value: IO[str]) -> None:
         self._input = value
 
-    def sync_all(self, finalize: bool = True, **kwargs: Any) -> None:  # noqa: ARG002
+    def sync_all(self, *, finalize: bool = True, **kwargs: Any) -> None:  # noqa: ARG002
         """Run a full tap sync, assigning output to the runner object.
 
         Args:
@@ -271,6 +270,7 @@ class TargetTestRunner(SingerTestRunner):
         self,
         target: Target,
         target_input: IO[str],
+        *,
         finalize: bool = True,
     ) -> tuple[io.StringIO, io.StringIO]:
         """Invoke the target with the provided input.

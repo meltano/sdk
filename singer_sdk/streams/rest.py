@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import copy
 import logging
+from http import HTTPStatus
 from typing import TYPE_CHECKING, Any, Callable, Generator, Generic, Iterable, TypeVar
 from urllib.parse import urlparse
 from warnings import warn
@@ -56,7 +57,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
     records_jsonpath: str = "$[*]"
 
     #: Response code reference for rate limit retries
-    extra_retry_statuses: list[int] = [429]
+    extra_retry_statuses: list[int] = [HTTPStatus.TOO_MANY_REQUESTS]
 
     #: Optional JSONPath expression to extract a pagination token from the API response.
     #: Example: `"$.next_page"`
@@ -176,12 +177,18 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         if (
             response.status_code in self.extra_retry_statuses
-            or 500 <= response.status_code < 600
+            or HTTPStatus.INTERNAL_SERVER_ERROR
+            <= response.status_code
+            <= max(HTTPStatus)
         ):
             msg = self.response_error_message(response)
             raise RetriableAPIError(msg, response)
 
-        if 400 <= response.status_code < 500:
+        if (
+            HTTPStatus.BAD_REQUEST
+            <= response.status_code
+            < HTTPStatus.INTERNAL_SERVER_ERROR
+        ):
             msg = self.response_error_message(response)
             raise FatalAPIError(msg)
 
@@ -197,7 +204,13 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
             str: The error message
         """
         full_path = urlparse(response.url).path or self.path
-        error_type = "Client" if 400 <= response.status_code < 500 else "Server"
+        error_type = (
+            "Client"
+            if HTTPStatus.BAD_REQUEST
+            <= response.status_code
+            < HTTPStatus.INTERNAL_SERVER_ERROR
+            else "Server"
+        )
 
         return (
             f"{response.status_code} {error_type} Error: "
@@ -398,7 +411,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
                 metrics.Tag.HTTP_STATUS_CODE: response.status_code,
                 metrics.Tag.STATUS: (
                     metrics.Status.SUCCEEDED
-                    if response.status_code < 400
+                    if response.status_code < HTTPStatus.BAD_REQUEST
                     else metrics.Status.FAILED
                 ),
                 **extra_tags,
