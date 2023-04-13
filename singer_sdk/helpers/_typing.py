@@ -249,9 +249,12 @@ def is_boolean_type(property_schema: dict) -> bool | None:
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
-        if isinstance(property_type, dict):
-            property_type = property_type.get("type", [])
-        if "boolean" in property_type or property_type == "boolean":
+        schema_type = (
+            property_type.get("type", [])
+            if isinstance(property_type, dict)
+            else property_type
+        )
+        if "boolean" in schema_type or schema_type == "boolean":
             return True
     return False
 
@@ -261,9 +264,12 @@ def is_integer_type(property_schema: dict) -> bool | None:
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
-        if isinstance(property_type, dict):
-            property_type = property_type.get("type", [])
-        if "integer" in property_type or property_type == "integer":
+        schema_type = (
+            property_type.get("type", [])
+            if isinstance(property_type, dict)
+            else property_type
+        )
+        if "integer" in schema_type or schema_type == "integer":
             return True
     return False
 
@@ -273,9 +279,12 @@ def is_string_type(property_schema: dict) -> bool | None:
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
-        if isinstance(property_type, dict):
-            property_type = property_type.get("type", [])
-        if "string" in property_type or property_type == "string":
+        schema_type = (
+            property_type.get("type", [])
+            if isinstance(property_type, dict)
+            else property_type
+        )
+        if "string" in schema_type or schema_type == "string":
             return True
     return False
 
@@ -285,9 +294,12 @@ def is_null_type(property_schema: dict) -> bool | None:
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
-        if isinstance(property_type, dict):
-            property_type = property_type.get("type", [])
-        if "null" in property_type or property_type == "null":
+        schema_type = (
+            property_type.get("type", [])
+            if isinstance(property_type, dict)
+            else property_type
+        )
+        if "null" in schema_type or schema_type == "null":
             return True
     return False
 
@@ -297,9 +309,12 @@ def is_number_type(property_schema: dict) -> bool | None:
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
-        if isinstance(property_type, dict):
-            property_type = property_type.get("type", [])
-        if "number" in property_type or property_type == "number":
+        schema_type = (
+            property_type.get("type", [])
+            if isinstance(property_type, dict)
+            else property_type
+        )
+        if "number" in schema_type or schema_type == "number":
             return True
     return False
 
@@ -364,7 +379,7 @@ def conform_record_data_types(
     return rec
 
 
-def _conform_record_data_types(
+def _conform_record_data_types(  # noqa: PLR0912
     input_object: dict[str, Any],
     schema: dict,
     level: TypeConformanceLevel,
@@ -446,7 +461,10 @@ def _conform_record_data_types(
     return output_object, unmapped_properties
 
 
-def _conform_primitive_property(elem: Any, property_schema: dict) -> Any:
+def _conform_primitive_property(  # noqa: PLR0911
+    elem: Any,
+    property_schema: dict,
+) -> Any:
     """Converts a primitive (i.e. not object or array) to a json compatible type."""
     if isinstance(elem, (datetime.datetime, pendulum.DateTime)):
         return to_json_compatible(elem)

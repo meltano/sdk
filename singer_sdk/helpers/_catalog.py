@@ -117,6 +117,7 @@ def deselect_all_streams(catalog: Catalog) -> None:
 def set_catalog_stream_selected(
     catalog: Catalog,
     stream_name: str,
+    *,
     selected: bool,
     breadcrumb: tuple[str, ...] | None = None,
 ) -> None:

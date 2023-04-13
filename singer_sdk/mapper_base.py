@@ -128,6 +128,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             context_settings={"help_option_names": ["--help"]},
         )
         def cli(
+            *,
             version: bool = False,
             about: bool = False,
             config: tuple[str, ...] = (),

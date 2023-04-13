@@ -18,7 +18,7 @@ SIGNPOST_MARKER = "replication_key_signpost"
 STARTING_MARKER = "starting_replication_value"
 
 
-def get_state_if_exists(
+def get_state_if_exists(  # noqa: PLR0911
     tap_state: dict,
     tap_stream_id: str,
     state_partition_context: dict | None = None,
@@ -194,6 +194,7 @@ def get_starting_replication_value(stream_or_partition_state: dict):
 
 def increment_state(
     stream_or_partition_state: dict,
+    *,
     latest_record: dict,
     replication_key: str,
     is_sorted: bool,
@@ -268,6 +269,7 @@ def finalize_state_progress_markers(stream_or_partition_state: dict) -> dict | N
 
 
 def log_sort_error(
+    *,
     ex: Exception,
     log_fn: Callable,
     stream_name: str,

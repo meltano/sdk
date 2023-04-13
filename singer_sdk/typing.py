@@ -394,14 +394,15 @@ class ArrayType(JSONTypeHelper, Generic[W]):
 class Property(JSONTypeHelper, Generic[W]):
     """Generic Property. Should be nested within a `PropertiesList`."""
 
+    # TODO: Make some of these arguments keyword-only. This is a breaking change.
     def __init__(
         self,
         name: str,
         wrapped: W | type[W],
-        required: bool = False,
+        required: bool = False,  # noqa: FBT001, FBT002
         default: _JsonValue | None = None,
         description: str | None = None,
-        secret: bool | None = False,
+        secret: bool | None = False,  # noqa: FBT002
         allowed_values: list[Any] | None = None,
         examples: list[Any] | None = None,
     ) -> None:
@@ -831,7 +832,7 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
                 if t in type_check:
                     return True
         else:
-            if jsonschema_type.get("type") in type_check:
+            if jsonschema_type.get("type") in type_check:  # noqa: PLR5501
                 return True
 
     if any(t in type_check for t in jsonschema_type.get("anyOf", ())):
@@ -840,7 +841,7 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
     return False
 
 
-def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
+def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:  # noqa: PLR0911
     """Convert JSON Schema type to a SQL type.
 
     Args:

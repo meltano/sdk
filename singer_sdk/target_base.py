@@ -54,6 +54,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
+        *,
         config: dict | PurePath | str | list[PurePath | str] | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
@@ -441,7 +442,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     # Sink drain methods
 
     @final
-    def drain_all(self, is_endofpipe: bool = False) -> None:
+    def drain_all(self, *, is_endofpipe: bool = False) -> None:
         """Drains all sinks, starting with those cleared due to changed schema.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -524,6 +525,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             context_settings={"help_option_names": ["--help"]},
         )
         def cli(
+            *,
             version: bool = False,
             about: bool = False,
             config: tuple[str, ...] = (),

@@ -18,32 +18,32 @@ env:
 
 jobs:
   lint:
-    name: Lint ${{ matrix.cookiecutter }}, Replay ${{ matrix.replay }} on ${{ matrix.python-version }} ${{ matrix.python-version }} / ${{ matrix.os }}
+    name: Cookiecutter E2E ${{ matrix.python-version }} ${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
       matrix:
         include:
-          - { cookiecutter: "tap-template", replay: "tap-graphql-jwt.json", python-version: "3.9",  os: "ubuntu-latest" }
-          - { cookiecutter: "tap-template", replay: "tap-rest-api_key-github.json", python-version: "3.9",  os: "ubuntu-latest" }
-          - { cookiecutter: "tap-template", replay: "tap-rest-basic_auth.json", python-version: "3.9",  os: "ubuntu-latest" }
-          - { cookiecutter: "tap-template", replay: "tap-rest-bearer_token.json", python-version: "3.9",  os: "ubuntu-latest" }
-          - { cookiecutter: "tap-template", replay: "tap-rest-custom.json", python-version: "3.9",  os: "ubuntu-latest" }
-          - { cookiecutter: "tap-template", replay: "tap-rest-jwt.json", python-version: "3.9",  os: "ubuntu-latest" }
-          - { cookiecutter: "tap-template", replay: "tap-rest-oauth2.json", python-version: "3.9",  os: "ubuntu-latest" }
-          - { cookiecutter: "tap-template", replay: "tap-other-custom.json", python-version: "3.9",  os: "ubuntu-latest" }
-          - { cookiecutter: "tap-template", replay: "tap-sql-custom.json", python-version: "3.9",  os: "ubuntu-latest" }
-          - { cookiecutter: "target-template", replay: "target-per_record.json", python-version: "3.9",  os: "ubuntu-latest" }
+          - { python-version: "3.10",  os: "ubuntu-latest" }
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.4.0
+      uses: actions/checkout@v3.5.0
 
+    - name: Install Poetry & Tox
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
+      run: |
+        pipx install poetry
+        poetry --version
+        pipx install tox
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4.5.0
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
+        cache: 'pip'
+        cache-dependency-path: 'poetry.lock'
 
     - name: Upgrade pip
       env:
@@ -52,32 +52,25 @@ jobs:
         pip install pip
         pip --version
 
-    - name: Install Poetry, Tox & Cookiecutter
+    - name: Install Nox
       env:
         PIP_CONSTRAINT: .github/workflows/constraints.txt
       run: |
-        pipx install poetry
-        pipx install cookiecutter
-        pipx install tox
+        pipx install --pip-args=--constraint=.github/workflows/constraints.txt nox
+        pipx inject --pip-args=--constraint=.github/workflows/constraints.txt nox nox-poetry
+        nox --version
 
-    - name: Build cookiecutter project
-      env:
-        CC_TEMPLATE: cookiecutter/${{ matrix.cookiecutter }}
-        REPLAY_FILE: e2e-tests/cookiecutters/${{ matrix.replay }}
+    - name: Run Nox
       run: |
-        chmod +x ./e2e-tests/cookiecutters/test_cookiecutter.sh
-        ./e2e-tests/cookiecutters/test_cookiecutter.sh $CC_TEMPLATE $REPLAY_FILE 0
-
-    - uses: actions/upload-artifact@v3
+        nox --python=${{ matrix.python-version }} --session=test_cookiecutter
+    - name: Upload build artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
       with:
-        name: ${{ matrix.replay }}
         path: |
-          ${{ env.CC_TEST_OUTPUT }}/
-          !${{ env.CC_TEST_OUTPUT }}/.mypy_cache/
-
-    - name: Run lint
-      env:
-        REPLAY_FILE: e2e-tests/cookiecutters/${{ matrix.replay }}
-      run: |
-        cd $CC_TEST_OUTPUT
-        poetry run tox -e lint
+          /tmp/tap-*
+          /tmp/target-*
+          !/tmp/tap-*/.mypy_cache/
+          !/tmp/target-*/.mypy_cache/
+          !/tmp/tap-*/.tox/
+          !/tmp/target-*/.tox/
