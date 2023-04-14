@@ -5,7 +5,7 @@ from __future__ import annotations
 import abc
 import logging
 import os
-from pathlib import PurePath
+from pathlib import Path, PurePath
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Callable, Mapping, cast
 
@@ -365,6 +365,40 @@ class PluginBase(metaclass=abc.ABCMeta):
         info = cls._get_about_info()
         formatter = about.AboutFormatter.get_formatter(output_format or "text")
         print(formatter.format_about(info))  # noqa: T201
+
+    @staticmethod
+    def config_from_cli_args(*args: str) -> tuple[list[Path], bool]:
+        """Parse CLI arguments into a config dictionary.
+
+        Args:
+            args: CLI arguments.
+
+        Raises:
+            FileNotFoundError: If the config file does not exist.
+
+        Returns:
+            A tuple containing the config dictionary and a boolean indicating whether
+            the config file was found.
+        """
+        config_files = []
+        parse_env_config = False
+
+        for config_path in args:
+            if config_path == "ENV":
+                # Allow parse from env vars:
+                parse_env_config = True
+                continue
+
+            # Validate config file paths before adding to list
+            if not Path(config_path).is_file():
+                raise FileNotFoundError(
+                    f"Could not locate config file at '{config_path}'."
+                    "Please check that the file exists.",
+                )
+
+            config_files.append(Path(config_path))
+
+        return config_files, parse_env_config
 
     @classproperty
     def cli(cls) -> Callable:  # noqa: N805
