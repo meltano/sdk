@@ -724,7 +724,28 @@ class ObjectType(JSONTypeHelper):
 
 
 class OneOf(JSONPointerType):
-    """OneOf type."""
+    """OneOf type.
+
+    This type allows for a value to be one of a set of types.
+
+    Examples:
+        >>> t = OneOf(StringType, IntegerType)
+        >>> print(t.to_json(indent=2))
+        {
+            "oneOf": [
+                {
+                    "type": [
+                        "string"
+                    ]
+                },
+                {
+                    "type": [
+                        "integer"
+                    ]
+                }
+            ]
+        }
+    """
 
     def __init__(self, *types: W | type[W]) -> None:
         """Initialize OneOf type.
@@ -745,7 +766,17 @@ class OneOf(JSONPointerType):
 
 
 class Constant(JSONTypeHelper):
-    """A constant property."""
+    """A constant property.
+
+    A property that is always the same value.
+
+    Examples:
+        >>> t = Constant("foo")
+        >>> print(t.to_json(indent=2))
+        {
+            "const": "foo"
+        }
+    """
 
     def __init__(self, value: _JsonValue) -> None:
         """Initialize Constant.
