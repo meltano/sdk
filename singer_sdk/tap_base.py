@@ -595,10 +595,8 @@ class SQLTap(Tap):
         if self.input_catalog:
             return self.input_catalog.to_dict()
 
-        connector = self.default_stream_class.connector_class(dict(self.config))
-
         result: dict[str, list[dict]] = {"streams": []}
-        result["streams"].extend(connector.discover_catalog_entries())
+        result["streams"].extend(self.connector.discover_catalog_entries())
 
         self._catalog_dict = result
         return self._catalog_dict
