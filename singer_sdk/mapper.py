@@ -12,6 +12,7 @@ import hashlib
 import logging
 from typing import TYPE_CHECKING, Any, Callable, Dict, Union
 
+import openai
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
 from singer_sdk.helpers import _simpleeval as simpleeval
 from singer_sdk.helpers._catalog import get_selected_schema
@@ -61,6 +62,14 @@ def md5(string: str) -> str:
     """
     return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
 
+def openai_generate(*args, model="gpt-3.5-turbo", api_key = None) -> str:
+    messages = [{"role": "user", "content": arg} for arg in args]
+
+    if api_key:
+        openai.api_key = api_key
+    completion = openai.ChatCompletion.create(model=model, messages=messages)
+
+    return completion.choices[0].message.content
 
 StreamMapsDict: TypeAlias = Dict[str, Union[str, dict, None]]
 
@@ -304,6 +313,7 @@ class CustomStreamMap(StreamMap):
         funcs: dict[str, Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
         funcs["md5"] = md5
         funcs["datetime"] = datetime
+        funcs["openai"] = lambda *args, **kwargs: openai_generate(*args, **kwargs, api_key=self.map_config.get("openai_api_key"))
         return funcs
 
     def _eval(
