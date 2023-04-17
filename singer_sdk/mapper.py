@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Union
 
 import backoff
 import openai
+
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
 from singer_sdk.helpers import _simpleeval as simpleeval
 from singer_sdk.helpers._catalog import get_selected_schema
@@ -64,6 +65,7 @@ def md5(string: str) -> str:
     """
     return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
 
+
 @backoff.on_exception(backoff.expo, openai.error.RateLimitError, max_time=120)
 def openai_generate(*args, model="gpt-3.5-turbo", api_key=None) -> str:
     messages = [{"role": "user", "content": arg} for arg in args]
@@ -74,7 +76,10 @@ def openai_generate(*args, model="gpt-3.5-turbo", api_key=None) -> str:
 
     return completion.choices[0].message.content
 
-def openai_extract(source, subject, format=None, key=None, example_value=None, **kwargs):
+
+def openai_extract(
+    source, subject, format=None, key=None, example_value=None, **kwargs
+):
     if not key:
         key = subject.lower()
     if not example_value:
@@ -82,7 +87,11 @@ def openai_extract(source, subject, format=None, key=None, example_value=None, *
         if format:
             example_value += f" as {format}"
 
-    raw_response = openai_generate(f'Extract the {subject} from the following message. Respond only with JSON. Example response: {{"{key}": "<{example_value}>"}}', source, **kwargs)
+    raw_response = openai_generate(
+        f'Extract the {subject} from the following message. Respond only with JSON. Example response: {{"{key}": "<{example_value}>"}}',
+        source,
+        **kwargs,
+    )
 
     try:
         response = json.loads(raw_response)
@@ -90,7 +99,9 @@ def openai_extract(source, subject, format=None, key=None, example_value=None, *
     except json.JSONDecodeError as e:
         raise Exception(f"OpenAI response is not valid JSON: {raw_response}") from e
     except KeyError as e:
-        raise Exception(f"OpenAI response does not include '{key}' key: {raw_response}") from e
+        raise Exception(
+            f"OpenAI response does not include '{key}' key: {raw_response}"
+        ) from e
 
     return value
 
@@ -337,8 +348,12 @@ class CustomStreamMap(StreamMap):
         funcs: dict[str, Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
         funcs["md5"] = md5
         funcs["datetime"] = datetime
-        funcs["openai"] = lambda *args, **kwargs: openai_generate(*args, **kwargs, api_key=self.map_config.get("openai_api_key"))
-        funcs["extract"] = lambda *args, **kwargs: openai_extract(*args, **kwargs, api_key=self.map_config.get("openai_api_key"))
+        funcs["openai"] = lambda *args, **kwargs: openai_generate(
+            *args, **kwargs, api_key=self.map_config.get("openai_api_key")
+        )
+        funcs["extract"] = lambda *args, **kwargs: openai_extract(
+            *args, **kwargs, api_key=self.map_config.get("openai_api_key")
+        )
         return funcs
 
     def _eval(
