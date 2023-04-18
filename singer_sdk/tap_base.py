@@ -7,7 +7,6 @@ import abc
 import contextlib
 import json
 from enum import Enum
-from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, cast
 
 import click
@@ -29,6 +28,8 @@ from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 
 if TYPE_CHECKING:
+    from pathlib import PurePath
+
     from singer_sdk.streams import SQLStream, Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
@@ -495,9 +496,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     variables. Accepts multiple inputs as a tuple.
                 catalog: Use a Singer catalog file with the tap.",
                 state: Use a bookmarks file for incremental replication.
-
-            Raises:
-                FileNotFoundError: If the config file does not exist.
             """
             if version:
                 cls.print_version()
@@ -514,23 +512,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 # Don't abort on validation failures
                 validate_config = False
 
-            parse_env_config = False
-            config_files: list[PurePath] = []
-            for config_path in config:
-                if config_path == "ENV":
-                    # Allow parse from env vars:
-                    parse_env_config = True
-                    continue
-
-                # Validate config file paths before adding to list
-                if not Path(config_path).is_file():
-                    raise FileNotFoundError(
-                        f"Could not locate config file at '{config_path}'."
-                        "Please check that the file exists.",
-                    )
-
-                config_files.append(Path(config_path))
-
+            config_files, parse_env_config = cls.config_from_cli_args(*config)
             tap = cls(  # type: ignore[operator]
                 config=config_files or None,
                 state=state,
