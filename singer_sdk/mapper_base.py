@@ -8,14 +8,10 @@ import typing as t
 import click
 
 import singer_sdk._singerlib as singer
-from singer_sdk.cli import common_options
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import PluginBase
-
-if t.TYPE_CHECKING:
-    from io import FileIO
 
 
 class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
@@ -105,65 +101,54 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         """
         raise NotImplementedError("BATCH messages are not supported by mappers.")
 
-    @classproperty
-    def cli(cls) -> t.Callable:  # noqa: N805
+    # CLI handler
+
+    @classmethod
+    def invoke(  # type: ignore[override]
+        cls: type[InlineMapper],
+        *,
+        about: bool = False,
+        about_format: str | None = None,
+        config: tuple[str, ...] = (),
+        file_input: t.IO[str] | None = None,
+    ) -> None:
+        """Invoke the mapper.
+
+        Args:
+            about: Display package metadata and settings.
+            about_format: Specify output style for `--about`.
+            config: Configuration file location or 'ENV' to use environment
+                variables. Accepts multiple inputs as a tuple.
+            file_input: Optional file to read input from.
+        """
+        super().invoke(about=about, about_format=about_format)
+        cls.print_version(print_fn=cls.logger.info)
+        config_files, parse_env_config = cls.config_from_cli_args(*config)
+
+        mapper = cls(
+            config=config_files,  # type: ignore[arg-type]
+            validate_config=True,
+            parse_env_config=parse_env_config,
+        )
+        mapper.listen(file_input)
+
+    @classmethod
+    def get_command(cls: type[InlineMapper]) -> click.Command:
         """Execute standard CLI handler for inline mappers.
 
         Returns:
-            A callable CLI object.
+            A click.Command object.
         """
-
-        @common_options.PLUGIN_VERSION
-        @common_options.PLUGIN_ABOUT
-        @common_options.PLUGIN_ABOUT_FORMAT
-        @common_options.PLUGIN_CONFIG
-        @common_options.PLUGIN_FILE_INPUT
-        @click.command(
-            help="Execute the Singer mapper.",
-            context_settings={"help_option_names": ["--help"]},
+        command = super().get_command()
+        command.help = "Execute the Singer mapper."
+        command.params.extend(
+            [
+                click.Option(
+                    ["--input", "file_input"],
+                    help="A path to read messages from instead of from standard in.",
+                    type=click.File("r"),
+                ),
+            ],
         )
-        def cli(
-            *,
-            version: bool = False,
-            about: bool = False,
-            config: tuple[str, ...] = (),
-            about_format: str | None = None,
-            file_input: FileIO | None = None,
-        ) -> None:
-            """Handle command line execution.
 
-            Args:
-                version: Display the package version.
-                about: Display package metadata and settings.
-                about_format: Specify output style for `--about`.
-                config: Configuration file location or 'ENV' to use environment
-                    variables. Accepts multiple inputs as a tuple.
-                file_input: Specify a path to an input file to read messages from.
-                    Defaults to standard in if unspecified.
-            """
-            if version:
-                cls.print_version()
-                return
-
-            if not about:
-                cls.print_version(print_fn=cls.logger.info)
-
-            validate_config: bool = True
-            if about:
-                validate_config = False
-
-            cls.print_version(print_fn=cls.logger.info)
-
-            config_files, parse_env_config = cls.config_from_cli_args(*config)
-            mapper = cls(  # type: ignore[operator]
-                config=config_files or None,
-                validate_config=validate_config,
-                parse_env_config=parse_env_config,
-            )
-
-            if about:
-                mapper.print_about(about_format)
-            else:
-                mapper.listen(file_input)
-
-        return cli
+        return command

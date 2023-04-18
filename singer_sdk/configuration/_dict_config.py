@@ -84,13 +84,15 @@ def merge_config_sources(
         A single configuration dictionary.
     """
     config: dict[str, t.Any] = {}
-    for config_path in inputs:
-        if config_path == "ENV":
+    for config_input in inputs:
+        if config_input == "ENV":
             env_config = parse_environment_config(config_schema, prefix=env_prefix)
             config.update(env_config)
             continue
 
-        if not Path(config_path).is_file():
+        config_path = Path(config_input)
+
+        if not config_path.is_file():
             raise FileNotFoundError(
                 f"Could not locate config file at '{config_path}'."
                 "Please check that the file exists.",

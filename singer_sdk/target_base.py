@@ -12,7 +12,6 @@ import typing as t
 import click
 from joblib import Parallel, delayed, parallel_backend
 
-from singer_sdk.cli import common_options
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
@@ -28,7 +27,6 @@ from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:
-    from io import FileIO
     from pathlib import PurePath
 
     from singer_sdk.sinks import Sink
@@ -516,66 +514,55 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     # CLI handler
 
-    @classproperty
-    def cli(cls) -> t.Callable:  # noqa: N805
+    @classmethod
+    def invoke(  # type: ignore[override]
+        cls: type[Target],
+        *,
+        about: bool = False,
+        about_format: str | None = None,
+        config: tuple[str, ...] = (),
+        file_input: t.IO[str] | None = None,
+    ) -> None:
+        """Invoke the target.
+
+        Args:
+            about: Display package metadata and settings.
+            about_format: Specify output style for `--about`.
+            config: Configuration file location or 'ENV' to use environment
+                variables. Accepts multiple inputs as a tuple.
+            file_input: Optional file to read input from.
+        """
+        super().invoke(about=about, about_format=about_format)
+        cls.print_version(print_fn=cls.logger.info)
+        config_files, parse_env_config = cls.config_from_cli_args(*config)
+
+        target = cls(
+            config=config_files,  # type: ignore[arg-type]
+            validate_config=True,
+            parse_env_config=parse_env_config,
+        )
+        target.listen(file_input)
+
+    @classmethod
+    def get_command(cls: type[Target]) -> click.Command:
         """Execute standard CLI handler for taps.
 
         Returns:
-            A callable CLI object.
+            A click.Command object.
         """
-
-        @common_options.PLUGIN_VERSION
-        @common_options.PLUGIN_ABOUT
-        @common_options.PLUGIN_ABOUT_FORMAT
-        @common_options.PLUGIN_CONFIG
-        @common_options.PLUGIN_FILE_INPUT
-        @click.command(
-            help="Execute the Singer target.",
-            context_settings={"help_option_names": ["--help"]},
+        command = super().get_command()
+        command.help = "Execute the Singer target."
+        command.params.extend(
+            [
+                click.Option(
+                    ["--input", "file_input"],
+                    help="A path to read messages from instead of from standard in.",
+                    type=click.File("r"),
+                ),
+            ],
         )
-        def cli(
-            *,
-            version: bool = False,
-            about: bool = False,
-            config: tuple[str, ...] = (),
-            about_format: str | None = None,
-            file_input: FileIO | None = None,
-        ) -> None:
-            """Handle command line execution.
 
-            Args:
-                version: Display the package version.
-                about: Display package metadata and settings.
-                about_format: Specify output style for `--about`.
-                config: Configuration file location or 'ENV' to use environment
-                    variables. Accepts multiple inputs as a tuple.
-                file_input: Specify a path to an input file to read messages from.
-                    Defaults to standard in if unspecified.
-            """
-            if version:
-                cls.print_version()
-                return
-
-            if not about:
-                cls.print_version(print_fn=cls.logger.info)
-            else:
-                cls.print_about(output_format=about_format)
-                return
-
-            validate_config: bool = True
-
-            cls.print_version(print_fn=cls.logger.info)
-
-            config_files, parse_env_config = cls.config_from_cli_args(*config)
-            target = cls(  # type: ignore[operator]
-                config=config_files or None,
-                parse_env_config=parse_env_config,
-                validate_config=validate_config,
-            )
-
-            target.listen(file_input)
-
-        return cli
+        return command
 
 
 class SQLTarget(Target):
