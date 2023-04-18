@@ -9,8 +9,12 @@ import abc
 import copy
 import datetime
 import hashlib
+import json
 import logging
 from typing import TYPE_CHECKING, Any, Callable, Dict, Union
+
+import backoff
+import openai
 
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
 from singer_sdk.helpers import _simpleeval as simpleeval
@@ -22,6 +26,7 @@ from singer_sdk.helpers._flattening import (
     get_flattening_options,
 )
 from singer_sdk.typing import (
+    ArrayType,
     CustomType,
     IntegerType,
     JSONTypeHelper,
@@ -60,6 +65,68 @@ def md5(string: str) -> str:
         A string digested into MD5.
     """
     return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
+
+
+@backoff.on_exception(backoff.expo, openai.error.RateLimitError, max_time=120)
+def openai_generate(*args, model="gpt-3.5-turbo", api_key=None) -> str:
+    messages = [{"role": "user", "content": arg} for arg in args]
+
+    if api_key:
+        openai.api_key = api_key
+    completion = openai.ChatCompletion.create(model=model, messages=messages)
+
+    return completion.choices[0].message.content
+
+
+def openai_extract(
+    source,
+    subject,
+    format=None,
+    key=None,
+    examples=None,
+    **kwargs,
+):
+    if not key:
+        key = subject.lower()
+
+    prompts = [
+        f"Extract the {subject} from the message that follows.",
+        f'Respond with a JSON dictionary with key "{key}".',
+    ]
+
+    if format:
+        prompts.append(f"Format the extracted value as {format}.")
+
+    if examples:
+        example = examples[0]
+
+        examples_text = ", ".join(json.dumps(example) for example in examples)
+        prompts.append(f"Example values: {examples_text}")
+    else:
+        example = f"<{key.upper()}"
+
+    example_response = {key: example}
+    example_response_json = json.dumps(example_response)
+    prompts.extend(
+        [
+            f"Example response: {example_response_json}" "Message:",
+            source,
+        ]
+    )
+
+    raw_response = openai_generate(*prompts, **kwargs)
+
+    try:
+        response = json.loads(raw_response)
+        value = response[key]
+    except json.JSONDecodeError as e:
+        raise Exception(f"OpenAI response is not valid JSON: {raw_response}") from e
+    except KeyError as e:
+        raise Exception(
+            f"OpenAI response does not include '{key}' key: {raw_response}",
+        ) from e
+
+    return value
 
 
 StreamMapsDict: TypeAlias = Dict[str, Union[str, dict, None]]
@@ -304,6 +371,17 @@ class CustomStreamMap(StreamMap):
         funcs: dict[str, Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
         funcs["md5"] = md5
         funcs["datetime"] = datetime
+        funcs["list"] = lambda *args: [*args]
+        funcs["openai"] = lambda *args, **kwargs: openai_generate(
+            *args,
+            **kwargs,
+            api_key=self.map_config.get("openai_api_key"),
+        )
+        funcs["extract"] = lambda *args, **kwargs: openai_extract(
+            *args,
+            **kwargs,
+            api_key=self.map_config.get("openai_api_key"),
+        )
         return funcs
 
     def _eval(
@@ -377,6 +455,9 @@ class CustomStreamMap(StreamMap):
 
         if expr.startswith("str("):
             return StringType()
+
+        if expr.startswith("list("):
+            return ArrayType()
 
         if expr[0] == "'" and expr[-1] == "'":
             return StringType()
@@ -649,11 +730,14 @@ class PluginMapper:
         if stream_name in self.stream_maps:
             primary_mapper = self.stream_maps[stream_name][0]
             if (
-                primary_mapper.raw_schema != schema
-                or primary_mapper.raw_key_properties != key_properties
+                isinstance(primary_mapper, self.default_mapper_type)
+                and primary_mapper.raw_schema == schema
+                and primary_mapper.raw_key_properties == key_properties
             ):
-                # Unload/reset stream maps if schema or key properties have changed.
-                self.stream_maps.pop(stream_name)
+                return
+
+            # Unload/reset stream maps if schema or key properties have changed.
+            self.stream_maps.pop(stream_name)
 
         if stream_name not in self.stream_maps:
             # The 0th mapper should be the same-named treatment.
