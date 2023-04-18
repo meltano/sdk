@@ -262,7 +262,8 @@ class PluginBase(metaclass=abc.ABCMeta):
         if config_jsonschema:
             self.append_builtin_config(config_jsonschema)
             self.logger.debug(
-                f"Validating config using jsonschema: {config_jsonschema}",
+                "Validating config using jsonschema: %s",
+                config_jsonschema,
             )
             validator = JSONSchemaValidator(config_jsonschema)
             errors = [e.message for e in validator.iter_errors(self._config)]
