@@ -67,12 +67,14 @@ class SampleGoogleAnalyticsStream(RESTStream):
     def parse_response(self, response) -> Iterable[dict]:
         """Parse Google Analytics API response into individual records."""
         self.logger.info(
-            f"Received raw Google Analytics query response: {response.json()}",
+            "Received raw Google Analytics query response: %s",
+            response.json(),
         )
         report_data = response.json().get("reports", [{}])[0].get("data")
         if not report_data:
             self.logger.info(
-                f"Received empty Google Analytics query response: {response.json()}",
+                "Received empty Google Analytics query response: %s",
+                response.json(),
             )
         for total in report_data["totals"]:
             yield {"totals": total["values"]}

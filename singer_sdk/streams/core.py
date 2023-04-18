@@ -223,8 +223,8 @@ class Stream(metaclass=abc.ABCMeta):
             )
         else:
             self.logger.info(
-                f"No custom mapper provided for '{self.name}'. "
-                "Using SameRecordTransform.",
+                "No custom mapper provided for '%s'. Using SameRecordTransform.",
+                self.name,
             )
             self._stream_maps = [
                 SameRecordTransform(
@@ -1175,7 +1175,7 @@ class Stream(metaclass=abc.ABCMeta):
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
             msg += f" with context: {context}"
-        self.logger.info(f"{msg}...")
+        self.logger.info("%s...", msg)
 
         # Use a replication signpost, if available
         signpost = self.get_replication_key_signpost(context)
