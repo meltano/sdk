@@ -699,11 +699,14 @@ class PluginMapper:
         if stream_name in self.stream_maps:
             primary_mapper = self.stream_maps[stream_name][0]
             if (
-                primary_mapper.raw_schema != schema
-                or primary_mapper.raw_key_properties != key_properties
+                isinstance(primary_mapper, self.default_mapper_type)
+                and primary_mapper.raw_schema == schema
+                and primary_mapper.raw_key_properties == key_properties
             ):
-                # Unload/reset stream maps if schema or key properties have changed.
-                self.stream_maps.pop(stream_name)
+                return
+
+            # Unload/reset stream maps if schema or key properties have changed.
+            self.stream_maps.pop(stream_name)
 
         if stream_name not in self.stream_maps:
             # The 0th mapper should be the same-named treatment.
