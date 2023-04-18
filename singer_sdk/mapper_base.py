@@ -9,7 +9,6 @@ import click
 
 import singer_sdk._singerlib as singer
 from singer_sdk.cli import common_options
-from singer_sdk.configuration._dict_config import merge_config_sources
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerReader
@@ -21,10 +20,6 @@ if TYPE_CHECKING:
 
 class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     """Abstract base class for inline mappers."""
-
-    @classproperty
-    def _env_prefix(cls) -> str:  # noqa: N805
-        return f"{cls.name.upper().replace('-', '_')}_"
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
@@ -159,15 +154,11 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             cls.print_version(print_fn=cls.logger.info)
 
-            config_dict = merge_config_sources(
-                config,
-                cls.config_jsonschema,
-                cls._env_prefix,
-            )
-
+            config_files, parse_env_config = cls.config_from_cli_args(*config)
             mapper = cls(  # type: ignore[operator]
-                config=config_dict,
+                config=config_files or None,
                 validate_config=validate_config,
+                parse_env_config=parse_env_config,
             )
 
             if about:
