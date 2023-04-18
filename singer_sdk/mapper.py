@@ -28,6 +28,7 @@ from singer_sdk.helpers._flattening import (
 from singer_sdk.typing import (
     CustomType,
     IntegerType,
+    ArrayType,
     JSONTypeHelper,
     NumberType,
     PropertiesList,
@@ -78,20 +79,36 @@ def openai_generate(*args, model="gpt-3.5-turbo", api_key=None) -> str:
 
 
 def openai_extract(
-    source, subject, format=None, key=None, example_value=None, **kwargs
+    source, subject, format=None, key=None, examples=None, **kwargs
 ):
     if not key:
         key = subject.lower()
-    if not example_value:
-        example_value = subject.upper()
-        if format:
-            example_value += f" as {format}"
 
-    raw_response = openai_generate(
-        f'Extract the {subject} from the following message. Respond only with JSON. Example response: {{"{key}": "<{example_value}>"}}',
+    prompts = [
+        f'Extract the {subject} from the message that follows.',
+        f'Respond with a JSON dictionary with key "{key}".',
+    ]
+
+    if format:
+        prompts.append(f'Format the extracted value as {format}.')
+
+    if examples:
+        example = examples[0]
+
+        examples_text = ", ".join(json.dumps(example) for example in examples)
+        prompts.append(f'Example values: {examples_text}')
+    else:
+        example = f"<{key.upper()}"
+
+    example_response = {key: example}
+    example_response_json = json.dumps(example_response)
+    prompts.extend([
+        f'Example response: {example_response_json}'
+        'Message:',
         source,
-        **kwargs,
-    )
+    ])
+
+    raw_response = openai_generate(*prompts, **kwargs)
 
     try:
         response = json.loads(raw_response)
@@ -348,6 +365,7 @@ class CustomStreamMap(StreamMap):
         funcs: dict[str, Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
         funcs["md5"] = md5
         funcs["datetime"] = datetime
+        funcs["list"] = lambda *args: [*args]
         funcs["openai"] = lambda *args, **kwargs: openai_generate(
             *args, **kwargs, api_key=self.map_config.get("openai_api_key")
         )
@@ -427,6 +445,9 @@ class CustomStreamMap(StreamMap):
 
         if expr.startswith("str("):
             return StringType()
+
+        if expr.startswith("list("):
+            return ArrayType()
 
         if expr[0] == "'" and expr[-1] == "'":
             return StringType()
