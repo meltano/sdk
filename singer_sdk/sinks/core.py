@@ -63,7 +63,10 @@ class Sink(metaclass=abc.ABCMeta):
         self._config = dict(target.config)
         self._pending_batch: dict | None = None
         self.stream_name = stream_name
-        self.logger.info(f"Initializing target sink for stream '{stream_name}'...")
+        self.logger.info(
+            "Initializing target sink for stream '%s'...",
+            stream_name,
+        )
         self.schema = schema
         if self.include_sdc_metadata_properties:
             self._add_sdc_metadata_to_schema()

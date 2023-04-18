@@ -641,9 +641,14 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
                 https://github.com/litl/backoff#event-handlers
         """
         logging.error(
-            "Backing off {wait:0.1f} seconds after {tries} tries "
-            "calling function {target} with args {args} and kwargs "
-            "{kwargs}".format(**details),
+            "Backing off %(wait)0.2f seconds after %(tries)d tries "
+            "calling function %(target)s with args %(args)s and kwargs "
+            "%(kwargs)s",
+            details.get("wait"),
+            details.get("tries"),
+            details.get("target"),
+            details.get("args"),
+            details.get("kwargs"),
         )
 
     def backoff_runtime(

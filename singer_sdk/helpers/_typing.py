@@ -200,11 +200,11 @@ def handle_invalid_timestamp_in_record(
         f"field '{':'.join(key_breadcrumb)}'."
     )
     if treatment == DatetimeErrorTreatmentEnum.MAX:
-        logger.warning(f"{msg}. Replacing with MAX value.\n{ex}\n")
+        logger.warning("%s. Replacing with MAX value.\n%s\n", msg, ex)
         return _MAX_TIMESTAMP if datelike_typename != "time" else _MAX_TIME
 
     if treatment == DatetimeErrorTreatmentEnum.NULL:
-        logger.warning(f"{msg}. Replacing with NULL.\n{ex}\n")
+        logger.warning("%s. Replacing with NULL.\n%s\n", msg, ex)
         return None
 
     raise ValueError(msg)
@@ -326,8 +326,10 @@ def _warn_unmapped_properties(
     logger: logging.Logger,
 ):
     logger.warning(
-        f"Properties {property_names} were present in the '{stream_name}' stream but "
+        "Properties %s were present in the '%s' stream but "
         "not found in catalog schema. Ignoring.",
+        property_names,
+        stream_name,
     )
 
 
