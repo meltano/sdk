@@ -26,9 +26,9 @@ from singer_sdk.helpers._flattening import (
     get_flattening_options,
 )
 from singer_sdk.typing import (
+    ArrayType,
     CustomType,
     IntegerType,
-    ArrayType,
     JSONTypeHelper,
     NumberType,
     PropertiesList,
@@ -79,34 +79,40 @@ def openai_generate(*args, model="gpt-3.5-turbo", api_key=None) -> str:
 
 
 def openai_extract(
-    source, subject, format=None, key=None, examples=None, **kwargs
+    source,
+    subject,
+    format=None,
+    key=None,
+    examples=None,
+    **kwargs,
 ):
     if not key:
         key = subject.lower()
 
     prompts = [
-        f'Extract the {subject} from the message that follows.',
+        f"Extract the {subject} from the message that follows.",
         f'Respond with a JSON dictionary with key "{key}".',
     ]
 
     if format:
-        prompts.append(f'Format the extracted value as {format}.')
+        prompts.append(f"Format the extracted value as {format}.")
 
     if examples:
         example = examples[0]
 
         examples_text = ", ".join(json.dumps(example) for example in examples)
-        prompts.append(f'Example values: {examples_text}')
+        prompts.append(f"Example values: {examples_text}")
     else:
         example = f"<{key.upper()}"
 
     example_response = {key: example}
     example_response_json = json.dumps(example_response)
-    prompts.extend([
-        f'Example response: {example_response_json}'
-        'Message:',
-        source,
-    ])
+    prompts.extend(
+        [
+            f"Example response: {example_response_json}" "Message:",
+            source,
+        ]
+    )
 
     raw_response = openai_generate(*prompts, **kwargs)
 
@@ -117,7 +123,7 @@ def openai_extract(
         raise Exception(f"OpenAI response is not valid JSON: {raw_response}") from e
     except KeyError as e:
         raise Exception(
-            f"OpenAI response does not include '{key}' key: {raw_response}"
+            f"OpenAI response does not include '{key}' key: {raw_response}",
         ) from e
 
     return value
@@ -367,10 +373,14 @@ class CustomStreamMap(StreamMap):
         funcs["datetime"] = datetime
         funcs["list"] = lambda *args: [*args]
         funcs["openai"] = lambda *args, **kwargs: openai_generate(
-            *args, **kwargs, api_key=self.map_config.get("openai_api_key")
+            *args,
+            **kwargs,
+            api_key=self.map_config.get("openai_api_key"),
         )
         funcs["extract"] = lambda *args, **kwargs: openai_extract(
-            *args, **kwargs, api_key=self.map_config.get("openai_api_key")
+            *args,
+            **kwargs,
+            api_key=self.map_config.get("openai_api_key"),
         )
         return funcs
 
