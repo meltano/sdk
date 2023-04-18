@@ -45,7 +45,7 @@ jobs:
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.0
+      uses: actions/checkout@v3.5.2
 
     - name: Install Poetry
       env:
@@ -103,7 +103,7 @@ jobs:
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.0
+      uses: actions/checkout@v3.5.2
 
     - name: Install Poetry
       env:
@@ -145,7 +145,7 @@ jobs:
     needs: tests
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.0
+      uses: actions/checkout@v3.5.2
 
     - name: Install Poetry
       run: |
@@ -186,4 +186,4 @@ jobs:
         nox --session=coverage -- xml
 
     - name: Upload coverage report
-      uses: codecov/codecov-action@v3.1.1
+      uses: codecov/codecov-action@v3.1.2
