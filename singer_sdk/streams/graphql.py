@@ -76,5 +76,5 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
             "query": (" ".join([line.strip() for line in query.splitlines()])),
             "variables": params,
         }
-        self.logger.debug(f"Attempting query:\n{query}")
+        self.logger.debug("Attempting query:\n%s", query)
         return request_data

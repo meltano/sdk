@@ -173,8 +173,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             or existing_sink.key_properties != key_properties
         ):
             self.logger.info(
-                f"Schema or key properties for '{stream_name}' stream have changed. "
-                f"Initializing a new '{stream_name}' sink...",
+                "Schema or key properties for '%s' stream have changed. "
+                "Initializing a new '%s' sink...",
+                stream_name,
+                stream_name,
             )
             self._sinks_to_clear.append(self._sinks_active.pop(stream_name))
             return self.add_sink(stream_name, schema, key_properties)
@@ -236,7 +238,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         Returns:
             A new sink for the stream.
         """
-        self.logger.info(f"Initializing '{self.name}' target sink...")
+        self.logger.info("Initializing '%s' target sink...", self.name)
         sink_class = self.get_sink_class(stream_name=stream_name)
         sink = sink_class(
             target=self,
@@ -270,8 +272,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         """Check if _MAX_RECORD_AGE_IN_MINUTES reached, and if so trigger drain."""
         if self._max_record_age_in_minutes > self._MAX_RECORD_AGE_IN_MINUTES:
             self.logger.info(
-                "One or more records have exceeded the max age of "
-                f"{self._MAX_RECORD_AGE_IN_MINUTES} minutes. Draining all sinks.",
+                "One or more records have exceeded the max age of %d minutes. "
+                "Draining all sinks.",
+                self._MAX_RECORD_AGE_IN_MINUTES,
             )
             self.drain_all()
 
@@ -284,16 +287,19 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         Returns:
             A counter object for the processed lines.
         """
-        self.logger.info(f"Target '{self.name}' is listening for input from tap.")
+        self.logger.info("Target '%s' is listening for input from tap.", self.name)
         counter = super()._process_lines(file_input)
 
         line_count = sum(counter.values())
 
         self.logger.info(
-            f"Target '{self.name}' completed reading {line_count} lines of input "
-            f"({counter[SingerMessageType.RECORD]} records, "
-            f"({counter[SingerMessageType.BATCH]} batch manifests, "
-            f"{counter[SingerMessageType.STATE]} state messages).",
+            "Target '%s' completed reading %d lines of input "
+            "(%d records, %d batch manifests, %d state messages).",
+            self.name,
+            line_count,
+            counter[SingerMessageType.RECORD],
+            counter[SingerMessageType.BATCH],
+            counter[SingerMessageType.STATE],
         )
 
         return counter
@@ -338,7 +344,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             if sink.is_full:
                 self.logger.info(
-                    f"Target sink for '{sink.stream_name}' is full. Draining...",
+                    "Target sink for '%s' is full. Draining...",
+                    sink.stream_name,
                 )
                 self.drain_one(sink)
 
@@ -361,23 +368,25 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             do_registration = True
         elif self.mapper.stream_maps[stream_name][0].raw_schema != schema:
             self.logger.info(
-                f"Schema has changed for stream '{stream_name}'. "
+                "Schema has changed for stream '%s'. "
                 "Mapping definitions will be reset.",
+                stream_name,
             )
             do_registration = True
         elif (
             self.mapper.stream_maps[stream_name][0].raw_key_properties != key_properties
         ):
             self.logger.info(
-                f"Key properties have changed for stream '{stream_name}'. "
+                "Key properties have changed for stream '%s'. "
                 "Mapping definitions will be reset.",
+                stream_name,
             )
             do_registration = True
 
         if not do_registration:
             self.logger.debug(
-                f"No changes detected in SCHEMA message for stream '{stream_name}'. "
-                "Ignoring.",
+                "No changes detected in SCHEMA message for stream '%s'. Ignoring.",
+                stream_name,
             )
             return
 
@@ -501,7 +510,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             state: TODO
         """
         state_json = json.dumps(state)
-        self.logger.info(f"Emitting completed target state {state_json}")
+        self.logger.info("Emitting completed target state %s", state_json)
         sys.stdout.write(f"{state_json}\n")
         sys.stdout.flush()
 

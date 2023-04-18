@@ -223,9 +223,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         for stream in streams:
             if stream.parent_stream_type:
                 self.logger.debug(
-                    f"Child stream '{type(stream).__name__}' should be called by "
-                    f"parent stream '{stream.parent_stream_type.__name__}'. "
+                    "Child stream '%s' should be called by "
+                    "parent stream '%s'. "
                     "Skipping direct invocation.",
+                    type(stream).__name__,
+                    stream.parent_stream_type.__name__,
                 )
                 continue
             with contextlib.suppress(
@@ -326,7 +328,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     for stream in streams:
                         parent.child_streams.append(stream)
                         self.logger.info(
-                            f"Added '{stream.name}' as child stream to '{parent.name}'",
+                            "Added '%s' as child stream to '%s'",
+                            stream.name,
+                            parent.name,
                         )
 
         streams = [stream for streams in streams_by_type.values() for stream in streams]
@@ -381,10 +385,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             for descendent in stream.descendent_streams:
                 if descendent.selected and descendent.ignore_parent_replication_key:
                     self.logger.warning(
-                        f"Stream descendent '{descendent.name}' is selected and "
-                        f"its parent '{stream.name}' does not use inclusive "
-                        f"replication keys. "
-                        f"Forcing full table replication for '{stream.name}'.",
+                        "Stream descendent '%s' is selected and "
+                        "its parent '%s' does not use inclusive "
+                        "replication keys. "
+                        "Forcing full table replication for '%s'.",
+                        descendent.name,
+                        stream.name,
+                        stream.name,
                     )
                     stream.replication_key = None
                     stream.forced_replication_method = "FULL_TABLE"
@@ -399,14 +406,16 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         stream: Stream
         for stream in self.streams.values():
             if not stream.selected and not stream.has_selected_descendents:
-                self.logger.info(f"Skipping deselected stream '{stream.name}'.")
+                self.logger.info("Skipping deselected stream '%s'.", stream.name)
                 continue
 
             if stream.parent_stream_type:
                 self.logger.debug(
-                    f"Child stream '{type(stream).__name__}' is expected to be called "
-                    f"by parent stream '{stream.parent_stream_type.__name__}'. "
+                    "Child stream '%s' is expected to be called "
+                    "by parent stream '%s'. "
                     "Skipping direct invocation.",
+                    type(stream).__name__,
+                    stream.parent_stream_type.__name__,
                 )
                 continue
 

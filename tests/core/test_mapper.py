@@ -377,7 +377,7 @@ def _test_transform(
     for stream_name, stream in sample_stream.items():
         for stream_map in mapper.stream_maps[stream_name]:
             if isinstance(stream_map, RemoveRecordTransform):
-                logging.info(f"Skipping ignored stream '{stream_name}'")
+                logging.info("Skipping ignored stream '%s'", stream_name)
                 continue
 
             assert (

@@ -343,7 +343,7 @@ class CustomStreamMap(StreamMap):
                 f"Failed to evaluate simpleeval expressions {expr}.",
             ) from ex
 
-        logging.debug(f"Eval result: {expr} = {result}")
+        logging.debug("Eval result: %s = %s", expr, result)
 
         return result
 
@@ -405,22 +405,28 @@ class CustomStreamMap(StreamMap):
         include_by_default = True
         if stream_map and MAPPER_FILTER_OPTION in stream_map:
             filter_rule = stream_map.pop(MAPPER_FILTER_OPTION)
-            logging.info(f"Found '{self.stream_alias}' filter rule: {filter_rule}")
+            logging.info(
+                "Found '%s' filter rule: %s",
+                self.stream_alias,
+                filter_rule,
+            )
 
         if stream_map and MAPPER_KEY_PROPERTIES_OPTION in stream_map:
             self.transformed_key_properties: list[str] = stream_map.pop(
                 MAPPER_KEY_PROPERTIES_OPTION,
             )
             logging.info(
-                f"Found stream map override for '{self.stream_alias}' key properties: "
-                f"{str(self.transformed_key_properties)}",
+                "Found stream map override for '%s' key properties: %s",
+                self.stream_alias,
+                self.transformed_key_properties,
             )
 
         if stream_map and MAPPER_ELSE_OPTION in stream_map:
             if stream_map[MAPPER_ELSE_OPTION] in {None, NULL_STRING}:
                 logging.info(
-                    f"Detected `{MAPPER_ELSE_OPTION}=None` rule. "
+                    "Detected `%s=None` rule. "
                     "Unmapped, non-key properties will be excluded from output.",
+                    MAPPER_ELSE_OPTION,
                 )
                 include_by_default = False
             else:
@@ -496,8 +502,9 @@ class CustomStreamMap(StreamMap):
                     property_name=None,
                 )
                 logging.debug(
-                    f"Filter result for '{filter_rule}' "
-                    "in '{self.name}' stream: {filter_result}",
+                    "Filter result for '%s' in '{self.name}' stream: %s",
+                    filter_rule,
+                    filter_result,
                 )
                 if not filter_result:
                     logging.debug("Excluding record due to filter.")
@@ -588,8 +595,9 @@ class PluginMapper:
         if MAPPER_ELSE_OPTION in self.stream_maps_dict:
             if self.stream_maps_dict[MAPPER_ELSE_OPTION] in {None, NULL_STRING}:
                 logging.info(
-                    f"Found '{MAPPER_ELSE_OPTION}=None' default mapper. "
+                    "Found '%s=None' default mapper. "
                     "Unmapped streams will be excluded from output.",
+                    MAPPER_ELSE_OPTION,
                 )
                 self.default_mapper_type = RemoveRecordTransform
                 self.stream_maps_dict.pop(MAPPER_ELSE_OPTION)
@@ -600,8 +608,9 @@ class PluginMapper:
                 )
         else:
             logging.debug(
-                f"Operator '{MAPPER_ELSE_OPTION}=None' was not found. "
+                "Operator '%s=None' was not found. "
                 "Unmapped streams will be included in output.",
+                MAPPER_ELSE_OPTION,
             )
         for stream_map_key, stream_def in self.stream_maps_dict.items():
             if stream_map_key.startswith("__"):
@@ -694,7 +703,7 @@ class PluginMapper:
                     key_properties=None,
                     flattening_options=self.flattening_options,
                 )
-                logging.info(f"Set null tansform as default for '{stream_name}'")
+                logging.info("Set null tansform as default for '%s'", stream_name)
                 continue
 
             if not isinstance(stream_def, dict):
