@@ -4,7 +4,7 @@
 # nested in that directory, on any level
 
 # Default owners
-* @edgarrmondragon @cjohnhanson @aaronsteers
+* @edgarrmondragon @cjohnhanson
 
 # CI/CD
 /.github/workflows/ @edgarrmondragon @meltano/engineering
