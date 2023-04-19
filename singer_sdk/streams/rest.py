@@ -284,7 +284,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
 
         If paging is supported, developers may override with specific paging logic.
 
-        If you source needs special handling so, for example, parenthesis are not
+        If your source needs special handling and, for example, parentheses should not be
         encoded, you can return a string constructed with `urllib.parse.urlencode`_:
 
         .. code-block:: python
