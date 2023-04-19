@@ -288,6 +288,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         encoded, you can return a string constructed with `urllib.parse.urlencode`_:
 
         .. code-block:: python
+
            from urllib.parse import urlencode
 
            class MyStream(RESTStream):
