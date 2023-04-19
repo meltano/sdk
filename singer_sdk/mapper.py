@@ -68,14 +68,15 @@ def md5(string: str) -> str:
 
 
 @backoff.on_exception(backoff.expo, openai.error.RateLimitError, max_time=120)
-def openai_generate(*args, model="gpt-3.5-turbo", api_key=None) -> str:
-    messages = [{"role": "user", "content": arg} for arg in args]
-
+def openai_generate(*args, model="gpt-3.5-turbo", api_key=None, **kwargs) -> str:
     if api_key:
         openai.api_key = api_key
-    completion = openai.ChatCompletion.create(model=model, messages=messages)
 
-    return completion.choices[0].message.content
+    messages = [{"role": "user", "content": arg} for arg in args]
+    completion = openai.ChatCompletion.create(model=model, messages=messages, **kwargs)
+    response = completion.choices[0].message.content
+
+    return response
 
 
 def openai_extract(
@@ -108,7 +109,7 @@ def openai_extract(
         source,
     ])
 
-    raw_response = openai_generate(*prompts, **kwargs)
+    raw_response = openai_generate(*prompts, **kwargs, temperature=0.2)
 
     try:
         response = json.loads(raw_response)
