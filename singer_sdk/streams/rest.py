@@ -279,10 +279,21 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         self,
         context: dict | None,  # noqa: ARG002
         next_page_token: _TToken | None,  # noqa: ARG002
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | str:
         """Return a dictionary of values to be used in URL parameterization.
 
         If paging is supported, developers may override with specific paging logic.
+
+        If you source needs special handling so, for example, parenthesis are not
+        encoded, you can return a string constructed with `urllib.parse.urlencode`_:
+
+        .. code-block:: python
+           from urllib.parse import urlencode
+
+           class MyStream(RESTStream):
+               def get_url_params(self, context, next_page_token):
+                   params = {"key": "(a,b,c)"}
+                   return urlencode(params, safe="()")
 
         Args:
             context: Stream partition or context dictionary.
@@ -290,7 +301,11 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
                 next page of data.
 
         Returns:
-            Dictionary of URL query parameters to use in the request.
+            Dictionary or encoded string with URL query parameters to use in the
+                request.
+
+        .. _urllib.parse.urlencode:
+           https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlencode
         """
         return {}
 
@@ -341,7 +356,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         """
         http_method = self.rest_method
         url: str = self.get_url(context)
-        params: dict = self.get_url_params(context, next_page_token)
+        params: dict | str = self.get_url_params(context, next_page_token)
         request_data = self.prepare_request_payload(context, next_page_token)
         headers = self.http_headers
 
