@@ -280,7 +280,7 @@ class RESTStream(Stream, Generic[_TToken], metaclass=abc.ABCMeta):
         context: dict | None,  # noqa: ARG002
         next_page_token: _TToken | None,  # noqa: ARG002
     ) -> dict[str, Any] | str:
-        """Return a dictionary of values to be used in URL parameterization.
+        """Return a dictionary or string of URL query parameters.
 
         If paging is supported, developers may override with specific paging logic.
 
