@@ -56,14 +56,18 @@ def flatten_key(key_name: str, parent_keys: list[str], separator: str = "__") ->
     >>> flatten_key("foo", ["bar", "baz"], separator=".")
     'bar.baz.foo'
     """
-    full_key = parent_keys + [key_name]
+    full_key = [*parent_keys, key_name]
     inflected_key = full_key.copy()
     reducer_index = 0
-    while len(separator.join(inflected_key)) >= 255 and reducer_index < len(
-        inflected_key
+    while len(
+        separator.join(inflected_key),
+    ) >= 255 and reducer_index < len(  # noqa: PLR2004
+        inflected_key,
     ):
         reduced_key = re.sub(
-            r"[a-z]", "", inflection.camelize(inflected_key[reducer_index])
+            r"[a-z]",
+            "",
+            inflection.camelize(inflected_key[reducer_index]),
         )
         inflected_key[reducer_index] = (
             reduced_key if len(reduced_key) > 1 else inflected_key[reducer_index][0:3]
@@ -234,30 +238,29 @@ def _flatten_schema(
 
     for k, v in schema_node["properties"].items():
         new_key = flatten_key(k, parent_keys, separator)
-        if "type" in v.keys():
+        if "type" in v:
             if "object" in v["type"] and "properties" in v and level < max_level:
                 items.extend(
                     _flatten_schema(
                         v,
-                        parent_keys + [k],
+                        [*parent_keys, k],
                         separator=separator,
                         level=level + 1,
                         max_level=max_level,
-                    ).items()
+                    ).items(),
                 )
             else:
                 items.append((new_key, v))
-        else:
-            if len(v.values()) > 0:
-                if list(v.values())[0][0]["type"] == "string":
-                    list(v.values())[0][0]["type"] = ["null", "string"]
-                    items.append((new_key, list(v.values())[0][0]))
-                elif list(v.values())[0][0]["type"] == "array":
-                    list(v.values())[0][0]["type"] = ["null", "array"]
-                    items.append((new_key, list(v.values())[0][0]))
-                elif list(v.values())[0][0]["type"] == "object":
-                    list(v.values())[0][0]["type"] = ["null", "object"]
-                    items.append((new_key, list(v.values())[0][0]))
+        elif len(v.values()) > 0:
+            if list(v.values())[0][0]["type"] == "string":
+                list(v.values())[0][0]["type"] = ["null", "string"]
+                items.append((new_key, list(v.values())[0][0]))
+            elif list(v.values())[0][0]["type"] == "array":
+                list(v.values())[0][0]["type"] = ["null", "array"]
+                items.append((new_key, list(v.values())[0][0]))
+            elif list(v.values())[0][0]["type"] == "object":
+                list(v.values())[0][0]["type"] = ["null", "object"]
+                items.append((new_key, list(v.values())[0][0]))
 
     # Sort and check for duplicates
     def _key_func(item):
@@ -299,6 +302,7 @@ def flatten_record(
 
 def _flatten_record(
     record_node: MutableMapping[Any, Any],
+    *,
     flattened_schema: dict | None = None,
     parent_key: list[str] | None = None,
     separator: str = "__",
@@ -331,12 +335,12 @@ def _flatten_record(
             items.extend(
                 _flatten_record(
                     v,
-                    flattened_schema,
-                    parent_key + [k],
+                    flattened_schema=flattened_schema,
+                    parent_key=[*parent_key, k],
                     separator=separator,
                     level=level + 1,
                     max_level=max_level,
-                ).items()
+                ).items(),
             )
         else:
             items.append(
@@ -345,7 +349,7 @@ def _flatten_record(
                     json.dumps(v)
                     if _should_jsondump_value(k, v, flattened_schema)
                     else v,
-                )
+                ),
             )
 
     return dict(items)

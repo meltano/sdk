@@ -39,7 +39,9 @@ def _json_schema_to_arrow_fields(schema: dict[str, Any]) -> pa.StructType:
     return fields
 
 
-def _json_type_to_arrow_field(schema_type: dict[str, Any]) -> pa.DataType:
+def _json_type_to_arrow_field(  # noqa: PLR0911
+    schema_type: dict[str, Any],
+) -> pa.DataType:
     """Convert a JSON Schema to an Arrow struct.
 
     Args:
@@ -62,22 +64,22 @@ def _json_type_to_arrow_field(schema_type: dict[str, Any]) -> pa.DataType:
         items = schema_type.get("items", {})
         return pa.list_(_json_type_to_arrow_field(items))
 
-    elif main_type == "object":
+    if main_type == "object":
         return pa.struct(_json_schema_to_arrow_fields(schema_type))
 
-    elif main_type == "string":
+    if main_type == "string":
         return pa.string()
 
-    elif main_type == "integer":
+    if main_type == "integer":
         return pa.int64()
 
-    elif main_type == "number":
+    if main_type == "number":
         return pa.float64()
 
-    elif main_type == "boolean":
+    if main_type == "boolean":
         return pa.bool_()
 
-    elif main_type == "null":
+    if main_type == "null":
         return pa.null()
 
     return pa.null()
@@ -111,8 +113,8 @@ class SampleParquetTargetSink(BatchSink):
 
     def _get_parquet_schema(self) -> list[tuple[str, Any]]:
         col_list: list[tuple[str, Any]] = []
-        for property in self.schema["properties"]:
+        for prop in self.schema["properties"]:
             col_list.append(
-                (property["name"], self.translate_data_type(property["type"]))
+                (prop["name"], self.translate_data_type(prop["type"])),
             )
         return col_list

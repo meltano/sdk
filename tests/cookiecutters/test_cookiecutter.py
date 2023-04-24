@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import os
 from logging import getLogger
 from pathlib import Path
 
@@ -22,11 +21,11 @@ def pytest_generate_tests(metafunc):
     argvalues = []
 
     for template in ["tap", "target"]:
-        template_dir = f"cookiecutter/{template}-template"
+        template_dir = Path(f"cookiecutter/{template}-template")
         case_key = f"{template}_id"
-        test_input_file = os.path.join(template_dir, "cookiecutter.tests.yml")
+        test_input_file = template_dir.joinpath("cookiecutter.tests.yml")
 
-        for case in yaml.safe_load(Path(test_input_file).read_text())["tests"]:
+        for case in yaml.safe_load(test_input_file.read_text())["tests"]:
             id_list.append(case[case_key])
             argvalues.append([template_dir, case])
 
@@ -38,20 +37,20 @@ def pytest_generate_tests(metafunc):
     )
 
 
-def test_cookiecutter(outdir: str, cookiecutter_dir: str, cookiecutter_input: dict):
+def test_cookiecutter(outdir: str, cookiecutter_dir: Path, cookiecutter_input: dict):
     """Generate and validate project from Cookiecutter."""
     style_guide_easy = flake8.get_style_guide(
-        ignore=["E302", "E303", "E305", "F401", "W391"]
+        ignore=["E302", "E303", "E305", "F401", "W391"],
     )
     style_guide_strict = flake8.get_style_guide(
         ignore=[
             "F401",  # "imported but unused"
             "W292",  # "no newline at end of file"
             "W391",  # "blank line at end of file"
-        ]
+        ],
     )
     cookiecutter(
-        template=cookiecutter_dir,
+        template=str(cookiecutter_dir),
         output_dir=outdir,
         extra_context=cookiecutter_input,
         overwrite_if_exists=True,
@@ -67,7 +66,7 @@ def test_cookiecutter(outdir: str, cookiecutter_dir: str, cookiecutter_input: di
         mypy_out = api.run([filepath, "--config", str(Path(outdir) / Path("tox.ini"))])
         mypy_msg = str(mypy_out[0])
         if not mypy_msg.startswith("Success:"):
-            logging.exception(f"MyPy validation failed: {mypy_msg}")
+            logging.exception("MyPy validation failed: %s", mypy_msg)
             assert not mypy_msg, f"MyPy validation failed for file {filepath}"
         report = style_guide_strict.check_files([filepath])
         errors = report.get_statistics("E")

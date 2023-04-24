@@ -172,7 +172,7 @@ def test_paginator_offset():
                     extract_jsonpath(
                         self._records_jsonpath,
                         response.json(),
-                    )
+                    ),
                 )
             except StopIteration:
                 return False
@@ -273,7 +273,7 @@ def test_paginator_header_links():
             "Link": (
                 f"<https://{api_hostname}{resource_path}?page=3&limit=100>;rel=next,"
                 f"<https://{api_hostname}{resource_path}?page=2&limit=100>;rel=back"
-            )
+            ),
         },
     )
     paginator.advance(response)
@@ -303,7 +303,7 @@ def test_paginator_custom_hateoas():
                     extract_jsonpath(
                         "$.links[?(@.rel=='next')].href",
                         response.json(),
-                    )
+                    ),
                 )
             except StopIteration:
                 return None
@@ -322,9 +322,9 @@ def test_paginator_custom_hateoas():
                 {
                     "rel": "next",
                     "href": f"{resource_path}?page=2&limit=100",
-                }
-            ]
-        }
+                },
+            ],
+        },
     ).encode()
     paginator.advance(response)
     assert not paginator.finished
@@ -338,9 +338,9 @@ def test_paginator_custom_hateoas():
                 {
                     "rel": "next",
                     "href": f"{resource_path}?page=3&limit=100",
-                }
-            ]
-        }
+                },
+            ],
+        },
     ).encode()
     paginator.advance(response)
     assert not paginator.finished

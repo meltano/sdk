@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
 from textwrap import dedent
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 import pytest
-from pytest_snapshot.plugin import Snapshot
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -25,7 +23,6 @@ from singer_sdk.helpers._typing import (
     is_string_array_type,
     is_string_type,
 )
-from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
     ArrayType,
@@ -54,6 +51,13 @@ from singer_sdk.typing import (
     URIType,
     UUIDType,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from pytest_snapshot.plugin import Snapshot
+
+    from singer_sdk.streams.core import Stream
 
 TYPE_FN_CHECKS: set[Callable] = {
     is_array_type,
@@ -120,7 +124,7 @@ def test_to_json():
                 "test_property"
             ],
             "additionalProperties": false
-        }"""
+        }""",
     )
 
 
@@ -136,17 +140,20 @@ def test_nested_complex_objects():
             ObjectType(
                 Property("DatasetId", StringType),
                 Property("DatasetName", StringType),
-            )
+            ),
         ),
     )
     test2b = test2a.to_dict()
-    assert test1a and test1b and test2a and test2b
+    assert test1a
+    assert test1b
+    assert test2a
+    assert test2b
 
 
 def test_default_value():
     prop = Property("test_property", StringType, default="test_property_value")
     assert prop.to_dict() == {
-        "test_property": {"type": ["string", "null"], "default": "test_property_value"}
+        "test_property": {"type": ["string", "null"], "default": "test_property_value"},
     }
 
 
@@ -183,7 +190,7 @@ def test_property_description():
         "test_property": {
             "type": ["string", "null"],
             "description": text,
-        }
+        },
     }
 
 
@@ -345,7 +352,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                     "type": ["string", "null"],
                     JSONSCHEMA_ANNOTATION_SECRET: True,
                     JSONSCHEMA_ANNOTATION_WRITEONLY: True,
-                }
+                },
             },
             {is_secret_type, is_string_type},
         ),
@@ -355,7 +362,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                 "my_prop4": {
                     "description": "This is a property.",
                     "type": ["string", "null"],
-                }
+                },
             },
             {is_string_type},
         ),
@@ -365,7 +372,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                 "my_prop5": {
                     "default": "some_val",
                     "type": ["string", "null"],
-                }
+                },
             },
             {is_string_type},
         ),
@@ -375,7 +382,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                 "my_prop6": {
                     "type": ["array", "null"],
                     "items": {"type": ["string"]},
-                }
+                },
             },
             {is_array_type, is_string_array_type},
         ),
@@ -398,7 +405,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                             "writeOnly": True,
                         },
                     },
-                }
+                },
             },
             {is_object_type, is_secret_type},
         ),
@@ -407,7 +414,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
             {
                 "my_prop8": {
                     "type": ["integer", "null"],
-                }
+                },
             },
             {is_integer_type},
         ),
@@ -423,9 +430,53 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                     "type": ["integer", "null"],
                     "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9],
                     "examples": [1, 2, 3],
-                }
+                },
             },
             {is_integer_type},
+        ),
+        (
+            Property(
+                "my_prop10",
+                ArrayType(
+                    StringType(
+                        allowed_values=["create", "delete", "insert", "update"],
+                        examples=["insert", "update"],
+                    ),
+                ),
+            ),
+            {
+                "my_prop10": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": ["string"],
+                        "enum": ["create", "delete", "insert", "update"],
+                        "examples": ["insert", "update"],
+                    },
+                },
+            },
+            {is_array_type, is_string_array_type},
+        ),
+        (
+            Property(
+                "my_prop11",
+                ArrayType(
+                    StringType,
+                    allowed_values=[
+                        ["create", "delete"],
+                        ["insert", "update"],
+                    ],
+                ),
+            ),
+            {
+                "my_prop11": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": ["string"],
+                    },
+                    "enum": [["create", "delete"], ["insert", "update"]],
+                },
+            },
+            {is_array_type, is_string_array_type},
         ),
     ],
 )
@@ -454,7 +505,7 @@ def test_wrapped_type_dict():
         ValueError,
         match=re.escape(
             "Type dict for <class 'singer_sdk.typing.ArrayType'> is not defined. "
-            + "Try instantiating it with a nested type such as ArrayType(StringType)."
+            "Try instantiating it with a nested type such as ArrayType(StringType).",
         ),
     ):
         Property("bad_array_prop", ArrayType).to_dict()
@@ -463,7 +514,7 @@ def test_wrapped_type_dict():
         ValueError,
         match=re.escape(
             "Type dict for <class 'singer_sdk.typing.ObjectType'> is not defined. "
-            + "Try instantiating it with a nested type such as ObjectType(StringType)."
+            "Try instantiating it with a nested type such as ObjectType(StringType).",
         ),
     ):
         Property("bad_object_prop", ObjectType).to_dict()
@@ -472,7 +523,7 @@ def test_wrapped_type_dict():
         "good_array_prop": {
             "type": ["array", "null"],
             "items": {"type": ["string"]},
-        }
+        },
     }
 
 
@@ -486,7 +537,7 @@ def test_array_type():
     assert ArrayType(wrapped_type).type_dict == expected_json_schema
 
 
-@pytest.mark.snapshot
+@pytest.mark.snapshot()
 @pytest.mark.parametrize(
     "schema_obj,snapshot_name",
     [
@@ -614,9 +665,9 @@ def test_array_type():
         pytest.param(
             ObjectType(
                 Property("id", StringType),
-                Property("email", StringType, True),
-                Property("email", StringType, True),
-                Property("username", StringType, True),
+                Property("email", StringType, required=True),
+                Property("email", StringType, required=True),
+                Property("username", StringType, required=True),
                 Property("phone_number", StringType),
                 additional_properties=False,
             ),
@@ -666,7 +717,7 @@ def test_custom_type():
                     "anyOf": [
                         {"type": "array"},
                         {"type": "null"},
-                    ]
+                    ],
                 },
                 {"type": "array"},
                 {"type": ["array", "null"]},
@@ -680,7 +731,7 @@ def test_custom_type():
                     "anyOf": [
                         {"type": "boolean"},
                         {"type": "null"},
-                    ]
+                    ],
                 },
                 {"type": "boolean"},
                 {"type": ["boolean", "null"]},
@@ -694,7 +745,7 @@ def test_custom_type():
                     "anyOf": [
                         {"type": "integer"},
                         {"type": "null"},
-                    ]
+                    ],
                 },
                 {"type": "integer"},
                 {"type": ["integer", "null"]},
@@ -708,7 +759,7 @@ def test_custom_type():
                     "anyOf": [
                         {"type": "string", "format": "date-time"},
                         {"type": "null"},
-                    ]
+                    ],
                 },
                 {"type": "string"},
                 {"type": ["string", "null"]},
@@ -722,7 +773,7 @@ def test_custom_type():
                     "anyOf": [
                         {"type": "string", "format": "date-time"},
                         {"type": "null"},
-                    ]
+                    ],
                 },
                 {"type": "null"},
                 {"type": ["string", "null"]},
@@ -736,12 +787,24 @@ def test_custom_type():
                     "anyOf": [
                         {"type": "string", "format": "date-time"},
                         {"type": "number"},
-                    ]
+                    ],
                 },
                 {"type": "number"},
                 {"type": ["number", "null"]},
             ],
             [is_number_type],
+            [True],
+        ),
+        (
+            [
+                {
+                    "anyOf": [
+                        {"enum": ["developer", "team", "enterprise"]},
+                        {"type": "string"},
+                    ],
+                },
+            ],
+            [is_string_type],
             [True],
         ),
     ],

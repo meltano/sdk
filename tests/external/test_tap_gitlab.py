@@ -13,14 +13,17 @@ from .conftest import gitlab_config
 try:
     config = gitlab_config()
     TestSampleTapGitlab = get_tap_test_class(
-        tap_class=SampleTapGitlab, config=config, parse_env_config=True
+        tap_class=SampleTapGitlab,
+        config=config,
+        parse_env_config=True,
     )
 except ConfigValidationError as e:
     warnings.warn(
         UserWarning(
             "Could not configure external gitlab tests. "
-            f"Config in CI is expected via env vars.\n{e}"
-        )
+            f"Config in CI is expected via env vars.\n{e}",
+        ),
+        stacklevel=2,
     )
 
 COUNTER = 0
@@ -72,6 +75,8 @@ def test_gitlab_sync_epic_issues(gitlab_config: dict | None):
     )
     tap1 = None
     tap2 = SampleTapGitlab(
-        config=gitlab_config, parse_env_config=True, catalog=catalog1.to_dict()
+        config=gitlab_config,
+        parse_env_config=True,
+        catalog=catalog1.to_dict(),
     )
     tap2.sync_all()

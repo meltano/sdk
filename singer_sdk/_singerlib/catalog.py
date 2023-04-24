@@ -31,11 +31,11 @@ class SelectionMask(t.Dict[Breadcrumb, bool]):
         Returns:
             True if the breadcrumb is selected, False otherwise.
         """
-        if len(breadcrumb) >= 2:
+        if len(breadcrumb) >= 2:  # noqa: PLR2004
             parent = breadcrumb[:-2]
             return self[parent]
-        else:
-            return True
+
+        return True
 
 
 @dataclass
@@ -54,7 +54,7 @@ class Metadata:
     selected_by_default: bool | None = None
 
     @classmethod
-    def from_dict(cls: t.Type[Metadata], value: dict[str, t.Any]) -> Metadata:
+    def from_dict(cls: type[Metadata], value: dict[str, t.Any]) -> Metadata:
         """Parse metadata dictionary.
 
         Args:
@@ -67,7 +67,7 @@ class Metadata:
             **{
                 object_field.name: value.get(object_field.name.replace("_", "-"))
                 for object_field in fields(cls)
-            }
+            },
         )
 
     def to_dict(self) -> dict[str, t.Any]:
@@ -104,7 +104,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
 
     @classmethod
     def from_iterable(
-        cls: t.Type[MetadataMapping],
+        cls: type[MetadataMapping],
         iterable: t.Iterable[dict[str, t.Any]],
     ) -> MetadataMapping:
         """Create a metadata mapping from an iterable of metadata dictionaries.
@@ -155,11 +155,12 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
         Returns:
             Stream metadata.
         """
-        return self[()]  # type: ignore
+        return self[()]  # type: ignore[return-value]
 
     @classmethod
     def get_standard_metadata(
-        cls: t.Type[MetadataMapping],
+        cls: type[MetadataMapping],
+        *,
         schema: dict[str, t.Any] | None = None,
         schema_name: str | None = None,
         key_properties: list[str] | None = None,
@@ -191,10 +192,12 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
             if schema_name:
                 root.schema_name = schema_name
 
-            for field_name in schema.get("properties", {}).keys():
-                if key_properties and field_name in key_properties:
-                    entry = Metadata(inclusion=Metadata.InclusionType.AUTOMATIC)
-                elif valid_replication_keys and field_name in valid_replication_keys:
+            for field_name in schema.get("properties", {}):
+                if (
+                    key_properties
+                    and field_name in key_properties
+                    or (valid_replication_keys and field_name in valid_replication_keys)
+                ):
                     entry = Metadata(inclusion=Metadata.InclusionType.AUTOMATIC)
                 else:
                     entry = Metadata(inclusion=Metadata.InclusionType.AVAILABLE)
@@ -216,7 +219,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
             for breadcrumb in self
         )
 
-    def _breadcrumb_is_selected(self, breadcrumb: Breadcrumb) -> bool:
+    def _breadcrumb_is_selected(self, breadcrumb: Breadcrumb) -> bool:  # noqa: PLR0911
         """Determine if a property breadcrumb is selected based on existing metadata.
 
         An empty breadcrumb (empty tuple) indicates the stream itself. Otherwise, the
@@ -293,7 +296,7 @@ class CatalogEntry:
     replication_method: str | None = None
 
     @classmethod
-    def from_dict(cls: t.Type[CatalogEntry], stream: dict[str, t.Any]) -> CatalogEntry:
+    def from_dict(cls: type[CatalogEntry], stream: dict[str, t.Any]) -> CatalogEntry:
         """Create a catalog entry from a dictionary.
 
         Args:
@@ -357,7 +360,7 @@ class Catalog(t.Dict[str, CatalogEntry]):
 
     @classmethod
     def from_dict(
-        cls: t.Type[Catalog],
+        cls: type[Catalog],
         data: dict[str, list[dict[str, t.Any]]],
     ) -> Catalog:
         """Create a catalog from a dictionary.

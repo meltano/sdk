@@ -47,7 +47,10 @@ class SimpleTestStream(Stream):
         """Create a new stream."""
         super().__init__(tap, schema=self.schema, name=self.name)
 
-    def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
+    def get_records(
+        self,
+        context: dict | None,  # noqa: ARG002
+    ) -> Iterable[dict[str, Any]]:
         """Generate records."""
         yield {"id": 1, "value": "Egypt"}
         yield {"id": 2, "value": "Germany"}
@@ -89,7 +92,7 @@ class RestTestStream(RESTStream):
     def get_next_page_token(
         self,
         response: requests.Response,
-        previous_token: str | None,
+        previous_token: str | None,  # noqa: ARG002
     ) -> str | None:
         if self.next_page_token_jsonpath:
             all_matches = extract_jsonpath(
@@ -154,7 +157,7 @@ def unix_timestamp_stream(tap: SimpleTestTap) -> UnixTimestampIncrementalStream:
     return cast(UnixTimestampIncrementalStream, tap.load_streams()[1])
 
 
-def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
+def test_stream_apply_catalog(stream: SimpleTestStream):
     """Applying a catalog to a stream should overwrite fields."""
     assert stream.primary_keys == []
     assert stream.replication_key == "updatedAt"
@@ -173,10 +176,10 @@ def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
                         "schema": stream.schema,
                         "replication_method": REPLICATION_FULL_TABLE,
                         "replication_key": None,
-                    }
-                ]
-            }
-        )
+                    },
+                ],
+            },
+        ),
     )
 
     assert stream.primary_keys == ["id"]
@@ -264,9 +267,9 @@ def test_stream_starting_timestamp(
                 stream_name: {
                     "replication_key": stream.replication_key,
                     "replication_key_value": bookmark_value,
-                }
-            }
-        }
+                },
+            },
+        },
     )
     stream._write_starting_replication_value(None)
     assert get_starting_value(None) == expected_starting_value
@@ -330,7 +333,10 @@ def test_stream_starting_timestamp(
     ],
 )
 def test_jsonpath_rest_stream(
-    tap: SimpleTestTap, path: str, content: str, result: list[dict]
+    tap: SimpleTestTap,
+    path: str,
+    content: str,
+    result: list[dict],
 ):
     """Validate records are extracted correctly from the API response."""
     fake_response = requests.Response()
@@ -377,7 +383,7 @@ def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
 
     class GraphQLJSONPathOverride(GraphqlTestStream):
         @classproperty
-        def records_jsonpath(cls):
+        def records_jsonpath(cls):  # noqa: N805
             return "$[*]"
 
     stream = GraphQLJSONPathOverride(tap)
@@ -451,7 +457,11 @@ def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
     ],
 )
 def test_next_page_token_jsonpath(
-    tap: SimpleTestTap, path: str, content: str, headers: dict, result: str
+    tap: SimpleTestTap,
+    path: str,
+    content: str,
+    headers: dict,
+    result: str,
 ):
     """Validate pagination token is extracted correctly from API response."""
     fake_response = requests.Response()
@@ -487,9 +497,9 @@ def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
     stream = RestTestStream(tap)
 
     def calculate_test_cost(
-        request: requests.PreparedRequest,
-        response: requests.Response,
-        context: dict | None,
+        request: requests.PreparedRequest,  # noqa: ARG001
+        response: requests.Response,  # noqa: ARG001
+        context: dict | None,  # noqa: ARG001
     ):
         return {"dim1": 1, "dim2": 2}
 

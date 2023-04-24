@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from sqlalchemy import text
 
 from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
 from singer_sdk._singerlib import Catalog
@@ -18,24 +19,25 @@ def csv_config(outdir: str) -> dict:
 
 
 @pytest.fixture
-def sqlite_sample_db(sqlite_connector):
+def _sqlite_sample_db(sqlite_connector):
     """Return a path to a newly constructed sample DB."""
-    for t in range(3):
-        sqlite_connector.connection.execute(f"DROP TABLE IF EXISTS t{t}")
-        sqlite_connector.connection.execute(
-            f"CREATE TABLE t{t} (c1 int PRIMARY KEY, c2 varchar(10))"
-        )
-        for x in range(100):
-            sqlite_connector.connection.execute(
-                f"INSERT INTO t{t} VALUES ({x}, 'x={x}')"
+    with sqlite_connector._connect() as conn, conn.begin():
+        for t in range(3):
+            conn.execute(text(f"DROP TABLE IF EXISTS t{t}"))
+            conn.execute(
+                text(f"CREATE TABLE t{t} (c1 int PRIMARY KEY, c2 varchar(10))"),
             )
+            for x in range(100):
+                conn.execute(
+                    text(f"INSERT INTO t{t} VALUES ({x}, 'x={x}')"),  # noqa: S608
+                )
 
 
 @pytest.fixture
-def sqlite_sample_tap(sqlite_sample_db, sqlite_sample_db_config) -> SQLiteTap:
-    _ = sqlite_sample_db
+def sqlite_sample_tap(_sqlite_sample_db, sqlite_sample_db_config) -> SQLiteTap:
+    _ = _sqlite_sample_db
     catalog_obj = Catalog.from_dict(
-        _get_tap_catalog(SQLiteTap, config=sqlite_sample_db_config, select_all=True)
+        _get_tap_catalog(SQLiteTap, config=sqlite_sample_db_config, select_all=True),
     )
 
     # Set stream `t1` to use incremental replication.

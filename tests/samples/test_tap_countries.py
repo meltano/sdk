@@ -15,13 +15,16 @@ from singer_sdk.helpers._catalog import (
     pop_deselected_record_properties,
 )
 from singer_sdk.testing import get_tap_test_class
+from singer_sdk.testing.config import SuiteConfig
 
 SAMPLE_CONFIG = {}
 SAMPLE_CONFIG_BAD = {"not": "correct"}
 
 # standard tap tests
 TestSampleTapCountries = get_tap_test_class(
-    tap_class=SampleTapCountries, config=SAMPLE_CONFIG
+    tap_class=SampleTapCountries,
+    config=SAMPLE_CONFIG,
+    suite_config=SuiteConfig(max_records_limit=5),
 )
 
 
@@ -91,7 +94,7 @@ def test_with_catalog_entry():
     assert new_schema == stream.schema
 
 
-def test_batch_mode(monkeypatch, outdir):
+def test_batch_mode(outdir):
     """Test batch mode."""
     tap = SampleTapCountries(
         config={
@@ -104,8 +107,8 @@ def test_batch_mode(monkeypatch, outdir):
                     "root": outdir,
                     "prefix": "pytest-countries-",
                 },
-            }
-        }
+            },
+        },
     )
 
     buf = io.StringIO()
@@ -132,4 +135,4 @@ def test_batch_mode(monkeypatch, outdir):
     assert counter["SCHEMA", "countries"] == 1
     assert counter["BATCH", "countries"] == 1
 
-    assert counter[("STATE",)] == 4
+    assert counter[("STATE",)] == 2

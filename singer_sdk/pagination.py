@@ -4,10 +4,8 @@ from __future__ import annotations
 
 import sys
 from abc import ABCMeta, abstractmethod
-from typing import Any, Generic, Iterable, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, Iterable, Optional, TypeVar
 from urllib.parse import ParseResult, urlparse
-
-from requests import Response
 
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 
@@ -15,6 +13,9 @@ if sys.version_info >= (3, 8):
     from typing import Protocol
 else:
     from typing_extensions import Protocol
+
+if TYPE_CHECKING:
+    from requests import Response
 
 T = TypeVar("T")
 TPageToken = TypeVar("TPageToken")
@@ -113,7 +114,7 @@ class BaseAPIPaginator(Generic[TPageToken], metaclass=ABCMeta):
         if new_value and new_value == self._value:
             raise RuntimeError(
                 f"Loop detected in pagination. "
-                f"Pagination token {new_value} is identical to prior token."
+                f"Pagination token {new_value} is identical to prior token.",
             )
 
         # Stop if new value None, empty string, 0, etc.
@@ -122,7 +123,7 @@ class BaseAPIPaginator(Generic[TPageToken], metaclass=ABCMeta):
         else:
             self._value = new_value
 
-    def has_more(self, response: Response) -> bool:
+    def has_more(self, response: Response) -> bool:  # noqa: ARG002
         """Override this method to check if the endpoint has any pages left.
 
         Args:
@@ -159,7 +160,7 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
         """
         super().__init__(None, *args, **kwargs)
 
-    def get_next(self, response: Response) -> None:
+    def get_next(self, response: Response) -> None:  # noqa: ARG002
         """Get the next pagination token or index from the API response.
 
         Args:
@@ -169,7 +170,7 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
             The next page token or index. Return `None` from this method to indicate
                 the end of pagination.
         """
-        return None
+        return
 
 
 class BaseHATEOASPaginator(BaseAPIPaginator[Optional[ParseResult]], metaclass=ABCMeta):
@@ -344,7 +345,7 @@ class BasePageNumberPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         """
         ...
 
-    def get_next(self, response: Response) -> int | None:
+    def get_next(self, response: Response) -> int | None:  # noqa: ARG002
         """Get the next page number.
 
         Args:
@@ -389,7 +390,7 @@ class BaseOffsetPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         """
         ...
 
-    def get_next(self, response: Response) -> int | None:
+    def get_next(self, response: Response) -> int | None:  # noqa: ARG002
         """Get the next page offset.
 
         Args:

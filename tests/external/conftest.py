@@ -10,7 +10,6 @@ import pytest
 
 def gitlab_config() -> dict | None:
     """Create a tap-gitlab config object."""
-    config: dict | None = None
 
     path = Path("singer_sdk/tests/external/.secrets/gitlab-config.json")
     if not path.exists():
@@ -18,9 +17,9 @@ def gitlab_config() -> dict | None:
         path = Path("tests/external/.secrets/gitlab-config.json")
 
     if path.exists():
-        config = json.loads(path.read_text())
+        return json.loads(path.read_text())
 
-    return config
+    return None
 
 
 @pytest.fixture(name="gitlab_config")
@@ -30,13 +29,12 @@ def gitlab_config_fixture() -> dict | None:
 
 def ga_config() -> dict | None:
     """Create a tap-google-analytics config object."""
-    config: dict | None = None
     path = Path("singer_sdk/tests/external/.secrets/google-analytics-config.json")
 
     if path.exists():
-        config = json.loads(path.read_text())
+        return json.loads(path.read_text())
 
-    return config
+    return None
 
 
 @pytest.fixture(name="ga_config")

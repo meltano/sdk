@@ -29,8 +29,8 @@ def strptime_to_utc(dtimestr: str) -> datetime:
     d_object: datetime = dateutil.parser.parse(dtimestr)
     if d_object.tzinfo is None:
         return d_object.replace(tzinfo=pytz.UTC)
-    else:
-        return d_object.astimezone(tz=pytz.UTC)
+
+    return d_object.astimezone(tz=pytz.UTC)
 
 
 def strftime(dtime: datetime, format_str: str = DATETIME_FMT) -> str:
@@ -48,7 +48,7 @@ def strftime(dtime: datetime, format_str: str = DATETIME_FMT) -> str:
             offset)
     """
     if dtime.utcoffset() != timedelta(0):
-        raise NonUTCDatetimeError()
+        raise NonUTCDatetimeError
 
     dt_str = None
     try:

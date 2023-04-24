@@ -6,12 +6,11 @@ import copy
 import io
 import json
 import logging
+import typing as t
 from contextlib import redirect_stdout
-from pathlib import Path
 
 import pytest
 from freezegun import freeze_time
-from pytest_snapshot.plugin import Snapshot
 
 from singer_sdk._singerlib import Catalog
 from singer_sdk.exceptions import MapExpressionError
@@ -26,6 +25,11 @@ from singer_sdk.typing import (
     Property,
     StringType,
 )
+
+if t.TYPE_CHECKING:
+    from pathlib import Path
+
+    from pytest_snapshot.plugin import Snapshot
 
 
 @pytest.fixture
@@ -60,7 +64,7 @@ def sample_catalog_dict() -> dict:
                 "tap_stream_id": "foobars",
                 "schema": foobars_schema,
             },
-        ]
+        ],
     }
 
 
@@ -112,7 +116,6 @@ def sample_stream():
 def transform_stream_maps():
     return {
         "repositories": {
-            # "__source__": "repositories",
             "repo_name": "_['name']",
             "email_domain": "owner_email.split('@')[1]",
             "email_hash": "md5(config['hash_seed'] + owner_email)",
@@ -133,7 +136,7 @@ def transformed_result(stream_map_config):
                 "repo_name": "tap-something",
                 "email_domain": "example.com",
                 "email_hash": md5(
-                    stream_map_config["hash_seed"] + "sample1@example.com"
+                    stream_map_config["hash_seed"] + "sample1@example.com",
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
@@ -144,7 +147,7 @@ def transformed_result(stream_map_config):
                 "repo_name": "my-tap-something",
                 "email_domain": "example.com",
                 "email_hash": md5(
-                    stream_map_config["hash_seed"] + "sample2@example.com"
+                    stream_map_config["hash_seed"] + "sample2@example.com",
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
@@ -155,7 +158,7 @@ def transformed_result(stream_map_config):
                 "repo_name": "target-something",
                 "email_domain": "example.com",
                 "email_hash": md5(
-                    stream_map_config["hash_seed"] + "sample3@example.com"
+                    stream_map_config["hash_seed"] + "sample3@example.com",
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
@@ -166,7 +169,7 @@ def transformed_result(stream_map_config):
                 "repo_name": "not-atap",
                 "email_domain": "example.com",
                 "email_hash": md5(
-                    stream_map_config["hash_seed"] + "sample4@example.com"
+                    stream_map_config["hash_seed"] + "sample4@example.com",
                 ),
                 "description": "[masked]",
                 "description2": "[masked]",
@@ -214,7 +217,7 @@ def clone_and_alias_stream_maps():
 
 
 @pytest.fixture
-def cloned_and_aliased_result(stream_map_config, sample_stream):
+def cloned_and_aliased_result(sample_stream):
     return {
         "repositories_aliased": sample_stream["repositories"],
         "repositories_clone_1": sample_stream["repositories"],
@@ -253,9 +256,9 @@ def filter_stream_maps():
 
 @pytest.fixture
 def filter_stream_map_w_error(filter_stream_maps):
-    restult = copy.copy(filter_stream_maps)
-    restult["repositories"]["__filter__"] = "this should raise an er!ror"
-    return restult
+    result = copy.copy(filter_stream_maps)
+    result["repositories"]["__filter__"] = "this should raise an er!ror"
+    return result
 
 
 @pytest.fixture
@@ -353,6 +356,7 @@ def test_filter_transforms_w_error(
 
 def _test_transform(
     test_name: str,
+    *,
     stream_maps,
     stream_map_config,
     expected_result,
@@ -373,7 +377,7 @@ def _test_transform(
     for stream_name, stream in sample_stream.items():
         for stream_map in mapper.stream_maps[stream_name]:
             if isinstance(stream_map, RemoveRecordTransform):
-                logging.info(f"Skipping ignored stream '{stream_name}'")
+                logging.info("Skipping ignored stream '%s'", stream_name)
                 continue
 
             assert (
@@ -415,7 +419,7 @@ class MappedStream(Stream):
         ),
     ).to_dict()
 
-    def get_records(self, context):
+    def get_records(self, context):  # noqa: ARG002
         yield {
             "email": "alice@example.com",
             "count": 21,
@@ -444,14 +448,15 @@ class MappedTap(Tap):
 
 
 @pytest.fixture
-def clear_schema_cache() -> None:
+def _clear_schema_cache() -> None:
     """Schemas are cached, so the cache needs to be cleared between test invocations."""
     yield
     get_selected_schema.cache_clear()
 
 
 @freeze_time("2022-01-01T00:00:00Z")
-@pytest.mark.snapshot
+@pytest.mark.snapshot()
+@pytest.mark.usefixtures("_clear_schema_cache")
 @pytest.mark.parametrize(
     "stream_maps,flatten,flatten_max_depth,snapshot_name",
     [
@@ -466,7 +471,7 @@ def clear_schema_cache() -> None:
             {
                 "mystream": {
                     "email_hash": "md5(email)",
-                }
+                },
             },
             False,
             0,
@@ -479,7 +484,7 @@ def clear_schema_cache() -> None:
                     "email_hash": "md5(email)",
                     "fixed_count": "int(count-1)",
                     "__else__": None,
-                }
+                },
             },
             False,
             0,
@@ -492,7 +497,7 @@ def clear_schema_cache() -> None:
                     "email_hash": "md5(email)",
                     "fixed_count": "int(count-1)",
                     "__else__": "__NULL__",
-                }
+                },
             },
             False,
             0,
@@ -505,7 +510,7 @@ def clear_schema_cache() -> None:
                     "email_hash": "md5(email)",
                     "__key_properties__": ["email_hash"],
                     "__else__": None,
-                }
+                },
             },
             False,
             0,
@@ -559,7 +564,7 @@ def clear_schema_cache() -> None:
                 "mystream": {
                     "email_hash": "md5(email)",
                     "__key_properties__": ["email_hash"],
-                }
+                },
             },
             True,
             10,
@@ -570,7 +575,7 @@ def clear_schema_cache() -> None:
             {
                 "mystream": {
                     "email": None,
-                }
+                },
             },
             False,
             0,
@@ -589,7 +594,7 @@ def clear_schema_cache() -> None:
                 "mystream": {
                     "count": "count",
                     "__else__": None,
-                }
+                },
             },
             False,
             0,
@@ -601,7 +606,6 @@ def clear_schema_cache() -> None:
 def test_mapped_stream(
     snapshot: Snapshot,
     snapshot_dir: Path,
-    clear_schema_cache: None,
     stream_maps: dict,
     flatten: bool,
     flatten_max_depth: int | None,
@@ -614,7 +618,7 @@ def test_mapped_stream(
             "stream_maps": stream_maps,
             "flattening_enabled": flatten,
             "flattening_max_depth": flatten_max_depth,
-        }
+        },
     )
     buf = io.StringIO()
     with redirect_stdout(buf):

@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-import os
 import pathlib
 import platform
 import shutil
+import typing as t
 
 import pytest
-from _pytest.config import Config
+
+if t.TYPE_CHECKING:
+    from _pytest.config import Config
 
 SYSTEMS = {"linux", "darwin", "windows"}
 
@@ -34,15 +36,15 @@ def pytest_runtest_setup(item):
 
 
 @pytest.fixture(scope="class")
-def outdir() -> str:
+def outdir() -> t.Generator[str, None, None]:
     """Create a temporary directory for cookiecutters and target output."""
     name = ".output/"
     try:
-        os.mkdir(name)
+        pathlib.Path(name).mkdir(parents=True)
     except FileExistsError:
         # Directory already exists
         shutil.rmtree(name)
-        os.mkdir(name)
+        pathlib.Path(name).mkdir(parents=True)
 
     yield name
     shutil.rmtree(name)

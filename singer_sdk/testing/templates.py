@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import contextlib
-import os
 import warnings
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from singer_sdk.streams import Stream
+if TYPE_CHECKING:
+    from singer_sdk.streams import Stream
 
-from .config import SuiteConfig
-from .runners import TapTestRunner, TargetTestRunner
+    from .config import SuiteConfig
+    from .runners import TapTestRunner, TargetTestRunner
 
 
 class TestTemplate:
@@ -32,10 +32,10 @@ class TestTemplate:
     """
 
     name: str | None = None
-    type: str | None = None
+    plugin_type: str | None = None
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Raises:
@@ -96,7 +96,7 @@ class TestTemplate:
         Raises:
             ValueError: if Test instance does not have `name` and `type` properties.
         """
-        if not self.name or not self.type:
+        if not self.name or not self.plugin_type:
             raise ValueError("Test must have 'name' and 'type' properties.")
 
         self.config = config
@@ -119,10 +119,10 @@ class TestTemplate:
 class TapTestTemplate(TestTemplate):
     """Base Tap test template."""
 
-    type = "tap"
+    plugin_type = "tap"
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Returns:
@@ -143,18 +143,18 @@ class TapTestTemplate(TestTemplate):
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap or Target runner instance, to use with this test.
         """
-        self.tap = runner.tap
+        self.tap = runner.new_tap()
         super().run(config, resource, runner)
 
 
 class StreamTestTemplate(TestTemplate):
     """Base Tap Stream test template."""
 
-    type = "stream"
+    plugin_type = "stream"
     required_kwargs = ["stream"]
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Returns:
@@ -185,10 +185,10 @@ class StreamTestTemplate(TestTemplate):
 class AttributeTestTemplate(TestTemplate):
     """Base Tap Stream Attribute template."""
 
-    type = "attribute"
+    plugin_type = "attribute"
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Returns:
@@ -232,7 +232,10 @@ class AttributeTestTemplate(TestTemplate):
             if r.get(self.attribute_name) is not None
         ]
         if not values:
-            warnings.warn(UserWarning("No records were available to test."))
+            warnings.warn(
+                UserWarning("No records were available to test."),
+                stacklevel=2,
+            )
         return values
 
     @classmethod
@@ -254,14 +257,14 @@ class AttributeTestTemplate(TestTemplate):
         """
         raise NotImplementedError(
             "The 'evaluate' method is required for attribute tests, "
-            "but not implemented."
+            "but not implemented.",
         )
 
 
 class TargetTestTemplate(TestTemplate):
     """Base Target test template."""
 
-    type = "target"
+    plugin_type = "target"
 
     def run(  # type: ignore[override]
         self,
@@ -276,11 +279,11 @@ class TargetTestTemplate(TestTemplate):
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap runner instance, to use with this test.
         """
-        self.target = runner.target
+        self.target = runner.new_target()
         super().run(config, resource, runner)
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Returns:
@@ -311,7 +314,7 @@ class TargetFileTestTemplate(TargetTestTemplate):
         # get input from file
         if getattr(self, "singer_filepath", None):
             assert Path(
-                self.singer_filepath
+                self.singer_filepath,
             ).exists(), f"Singer file {self.singer_filepath} does not exist."
             runner.input_filepath = self.singer_filepath
         super().run(config, resource, runner)
@@ -325,5 +328,5 @@ class TargetFileTestTemplate(TargetTestTemplate):
         Returns:
             The expected Path to this tests singer file.
         """
-        current_dir = Path(os.path.dirname(os.path.abspath(__file__)))
+        current_dir = Path(__file__).resolve().parent
         return current_dir / "target_test_streams" / f"{self.name}.singer"

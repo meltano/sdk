@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-from pathlib import PurePath
-from typing import Generator
+from typing import TYPE_CHECKING, Generator
 
 import singer_sdk._singerlib as singer
 import singer_sdk.typing as th
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.mapper_base import InlineMapper
+
+if TYPE_CHECKING:
+    from pathlib import PurePath
 
 
 class StreamTransform(InlineMapper):
@@ -34,16 +36,17 @@ class StreamTransform(InlineMapper):
                             },
                         },
                         "additionalProperties": {"type": ["string", "null"]},
-                    }
-                )
+                    },
+                ),
             ),
             required=True,
             description="Stream maps",
-        )
+        ),
     ).to_dict()
 
     def __init__(
         self,
+        *,
         config: dict | PurePath | str | list[PurePath | str] | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,

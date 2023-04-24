@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Iterable, cast
+from typing import TYPE_CHECKING, Any, Iterable, cast
 
 import sqlalchemy
 
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
-from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
+
+if TYPE_CHECKING:
+    from singer_sdk.plugin_base import PluginBase as TapBaseClass
 
 
 class SQLStream(Stream, metaclass=abc.ABCMeta):
@@ -128,7 +130,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         catalog_entry = self._singer_catalog_entry
         if not catalog_entry.table:
             raise ValueError(
-                f"Missing table name in catalog entry: {catalog_entry.to_dict()}"
+                f"Missing table name in catalog entry: {catalog_entry.to_dict()}",
             )
 
         return self.connector.get_fully_qualified_name(
@@ -172,7 +174,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         if context:
             raise NotImplementedError(
-                f"Stream '{self.name}' does not support partitioning."
+                f"Stream '{self.name}' does not support partitioning.",
             )
 
         selected_column_names = self.get_selected_schema()["properties"].keys()
@@ -190,15 +192,21 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             if start_val:
                 query = query.where(
                     sqlalchemy.text(":replication_key >= :start_val").bindparams(
-                        replication_key=replication_key_col, start_val=start_val
-                    )
+                        replication_key=replication_key_col,
+                        start_val=start_val,
+                    ),
                 )
 
-        if self._MAX_RECORDS_LIMIT is not None:
-            query = query.limit(self._MAX_RECORDS_LIMIT)
+        if self.ABORT_AT_RECORD_COUNT is not None:
+            # Limit record count to one greater than the abort threshold. This ensures
+            # `MaxRecordsLimitException` exception is properly raised by caller
+            # `Stream._sync_records()` if more records are available than can be
+            # processed.
+            query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
 
-        for record in self.connector.connection.execute(query):
-            yield dict(record)
+        with self.connector._connect() as conn:
+            for record in conn.execute(query):
+                yield dict(record._mapping)
 
 
 __all__ = ["SQLStream", "SQLConnector"]

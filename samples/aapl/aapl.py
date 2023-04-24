@@ -18,7 +18,7 @@ class AAPL(Stream):
 
     def get_records(self, _):
         """Generate a single record."""
-        with open(PROJECT_DIR / "AAPL.json") as f:
+        with PROJECT_DIR.joinpath("AAPL.json").open() as f:
             record = json.load(f)
 
         yield record

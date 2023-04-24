@@ -23,6 +23,9 @@ STANDARD_KEYS = [
     "type",
     "required",
     "enum",
+    "pattern",
+    "contentMediaType",
+    "contentEncoding",
     # These are NOT simple keys (they can contain schemas themselves). We could
     # consider adding extra handling to them.
     "additionalProperties",
@@ -43,24 +46,27 @@ class Schema:
     This is because we wanted to expand it with extra STANDARD_KEYS.
     """
 
-    type: str | list[str] | None = None
+    type: str | list[str] | None = None  # noqa: A003
     properties: dict | None = None
     items: t.Any | None = None
     description: str | None = None
     minimum: float | None = None
     maximum: float | None = None
-    exclusiveMinimum: float | None = None
-    exclusiveMaximum: float | None = None
-    multipleOf: float | None = None
-    maxLength: int | None = None
-    minLength: int | None = None
-    anyOf: t.Any | None = None
-    format: str | None = None
-    additionalProperties: t.Any | None = None
-    patternProperties: t.Any | None = None
+    exclusiveMinimum: float | None = None  # noqa: N815
+    exclusiveMaximum: float | None = None  # noqa: N815
+    multipleOf: float | None = None  # noqa: N815
+    maxLength: int | None = None  # noqa: N815
+    minLength: int | None = None  # noqa: N815
+    anyOf: t.Any | None = None  # noqa: N815
+    format: str | None = None  # noqa: A003
+    additionalProperties: t.Any | None = None  # noqa: N815
+    patternProperties: t.Any | None = None  # noqa: N815
     required: list[str] | None = None
     enum: list[t.Any] | None = None
     title: str | None = None
+    pattern: str | None = None
+    contentMediaType: str | None = None  # noqa: N815
+    contentEncoding: str | None = None  # noqa: N815
 
     def to_dict(self) -> dict[str, t.Any]:
         """Return the raw JSON Schema as a (possibly nested) dict.
@@ -83,7 +89,11 @@ class Schema:
         return result
 
     @classmethod
-    def from_dict(cls: t.Type[Schema], data: dict, **schema_defaults: t.Any) -> Schema:
+    def from_dict(
+        cls: t.Type[Schema],  # noqa: UP006
+        data: dict,
+        **schema_defaults: t.Any,
+    ) -> Schema:
         """Initialize a Schema object based on the JSON Schema structure.
 
         Args:
@@ -156,12 +166,14 @@ def _resolve_schema_references(
     if _SchemaKey.pattern_properties in schema:
         for k, val in schema[_SchemaKey.pattern_properties].items():
             schema[_SchemaKey.pattern_properties][k] = _resolve_schema_references(
-                val, resolver
+                val,
+                resolver,
             )
 
     if _SchemaKey.items in schema:
         schema[_SchemaKey.items] = _resolve_schema_references(
-            schema[_SchemaKey.items], resolver
+            schema[_SchemaKey.items],
+            resolver,
         )
 
     if _SchemaKey.any_of in schema:

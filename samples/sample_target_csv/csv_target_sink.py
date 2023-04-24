@@ -32,12 +32,15 @@ class SampleCSVTargetSink(BatchSink):
         openmode = "a"
         outpath = self.target_filepath.absolute()
         if not outpath.is_file():
-            self.logger.info(f"Writing to new file: {outpath}")
+            self.logger.info("Writing to new file: %s", outpath)
             newfile = True
             openmode = "w"
-        with open(outpath, openmode, newline="\n", encoding="utf-8") as csvfile:
+        with outpath.open(openmode, newline="\n", encoding="utf-8") as csvfile:
             writer = csv.writer(
-                csvfile, delimiter="\t", quotechar='"', quoting=csv.QUOTE_NONNUMERIC
+                csvfile,
+                delimiter="\t",
+                quotechar='"',
+                quoting=csv.QUOTE_NONNUMERIC,
             )
             for record in records_to_drain:
                 if newfile and not records_written:

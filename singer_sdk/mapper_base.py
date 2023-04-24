@@ -3,26 +3,23 @@
 from __future__ import annotations
 
 import abc
-from io import FileIO
-from typing import Callable, Iterable
+from typing import TYPE_CHECKING, Callable, Iterable
 
 import click
 
 import singer_sdk._singerlib as singer
 from singer_sdk.cli import common_options
-from singer_sdk.configuration._dict_config import merge_config_sources
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import PluginBase
 
+if TYPE_CHECKING:
+    from io import FileIO
+
 
 class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     """Abstract base class for inline mappers."""
-
-    @classproperty
-    def _env_prefix(cls) -> str:
-        return f"{cls.name.upper().replace('-', '_')}_"
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
@@ -109,7 +106,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         raise NotImplementedError("BATCH messages are not supported by mappers.")
 
     @classproperty
-    def cli(cls) -> Callable:
+    def cli(cls) -> Callable:  # noqa: N805
         """Execute standard CLI handler for inline mappers.
 
         Returns:
@@ -126,10 +123,11 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             context_settings={"help_option_names": ["--help"]},
         )
         def cli(
+            *,
             version: bool = False,
             about: bool = False,
             config: tuple[str, ...] = (),
-            format: str | None = None,
+            about_format: str | None = None,
             file_input: FileIO | None = None,
         ) -> None:
             """Handle command line execution.
@@ -137,7 +135,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             Args:
                 version: Display the package version.
                 about: Display package metadata and settings.
-                format: Specify output style for `--about`.
+                about_format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
                     variables. Accepts multiple inputs as a tuple.
                 file_input: Specify a path to an input file to read messages from.
@@ -156,19 +154,15 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             cls.print_version(print_fn=cls.logger.info)
 
-            config_dict = merge_config_sources(
-                config,
-                cls.config_jsonschema,
-                cls._env_prefix,
-            )
-
-            mapper = cls(  # type: ignore  # Ignore 'type not callable'
-                config=config_dict,
+            config_files, parse_env_config = cls.config_from_cli_args(*config)
+            mapper = cls(  # type: ignore[operator]
+                config=config_files or None,
                 validate_config=validate_config,
+                parse_env_config=parse_env_config,
             )
 
             if about:
-                mapper.print_about(format)
+                mapper.print_about(about_format)
             else:
                 mapper.listen(file_input)
 

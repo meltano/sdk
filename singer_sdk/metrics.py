@@ -8,15 +8,17 @@ import json
 import logging
 import logging.config
 import os
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from pathlib import Path
 from time import time
-from types import TracebackType
-from typing import Any, Generic, Mapping, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, Mapping, TypeVar
 
 import yaml
 
 from singer_sdk.helpers._resources import Traversable, get_package_files
+
+if TYPE_CHECKING:
+    from types import TracebackType
 
 DEFAULT_LOG_INTERVAL = 60.0
 METRICS_LOGGER_NAME = __name__
@@ -77,7 +79,15 @@ class Point(Generic[_TVal]):
         Returns:
             A JSON object.
         """
-        return json.dumps(asdict(self), default=str)
+        return json.dumps(
+            {
+                "type": self.metric_type,
+                "metric": self.metric.value,
+                "value": self.value,
+                "tags": self.tags,
+            },
+            default=str,
+        )
 
 
 def log(logger: logging.Logger, point: Point) -> None:
@@ -87,7 +97,7 @@ def log(logger: logging.Logger, point: Point) -> None:
         logger: An logger instance.
         point: A measurement.
     """
-    logger.info("INFO METRIC: %s", point)
+    logger.info("METRIC: %s", point)
 
 
 class Meter(metaclass=abc.ABCMeta):

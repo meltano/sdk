@@ -23,9 +23,11 @@ STREAM_MAPS_CONFIG = PropertiesList(
     Property(
         "stream_maps",
         ObjectType(),
-        description="Config object for stream maps capability. "
-        + "For more information check out "
-        + "[Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html).",
+        description=(
+            "Config object for stream maps capability. "
+            "For more information check out "
+            "[Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html)."
+        ),
     ),
     Property(
         "stream_map_config",
@@ -115,7 +117,7 @@ class DeprecatedEnumMeta(EnumMeta):
             obj.emit_warning()
         return obj
 
-    def __getattribute__(cls, name: str) -> Any:  # noqa: ANN401
+    def __getattribute__(cls, name: str) -> Any:  # noqa: ANN401, N805
         """Retrieve enum attribute.
 
         Args:

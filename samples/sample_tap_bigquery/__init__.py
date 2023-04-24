@@ -9,12 +9,15 @@ from singer_sdk import typing as th  # JSON schema typing helpers
 class BigQueryConnector(SQLConnector):
     """Connects to the BigQuery SQL source."""
 
-    def get_sqlalchemy_url(cls, config: dict) -> str:
+    def get_sqlalchemy_url(self, config: dict) -> str:
         """Concatenate a SQLAlchemy URL for use in connecting to the source."""
         return f"bigquery://{config['project_id']}"
 
     def get_object_names(
-        self, engine, inspected, schema_name: str
+        self,
+        engine,
+        inspected,
+        schema_name: str,
     ) -> list[tuple[str, bool]]:
         """Return discoverable object names."""
         # Bigquery inspections returns table names in the form
@@ -26,7 +29,9 @@ class BigQueryConnector(SQLConnector):
         return [
             (table_name.split(".")[-1], is_view)
             for (table_name, is_view) in super().get_object_names(
-                engine, inspected, schema_name
+                engine,
+                inspected,
+                schema_name,
             )
         ]
 
@@ -44,7 +49,10 @@ class TapBigQuery(SQLTap):
 
     config_jsonschema = th.PropertiesList(
         th.Property(
-            "project_id", th.StringType, required=True, description="GCP Project"
+            "project_id",
+            th.StringType,
+            required=True,
+            description="GCP Project",
         ),
     ).to_dict()
 

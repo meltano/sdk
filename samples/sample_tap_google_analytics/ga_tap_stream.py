@@ -45,37 +45,36 @@ class SampleGoogleAnalyticsStream(RESTStream):
         )
 
     def prepare_request_payload(
-        self, context: dict | None, next_page_token: Any | None
+        self,
+        context: dict | None,  # noqa: ARG002
+        next_page_token: Any | None,  # noqa: ARG002
     ) -> dict | None:
         """Prepare the data payload for the REST API request."""
-        # params = self.get_url_params(context, next_page_token)
         request_def = {
             "viewId": self.config["view_id"],
             "metrics": [{"expression": m} for m in self.metrics],
             "dimensions": [{"name": d} for d in self.dimensions],
-            # "orderBys": [
-            #     {"fieldName": "ga:sessions", "sortOrder": "DESCENDING"},
-            #     {"fieldName": "ga:pageviews", "sortOrder": "DESCENDING"},
-            # ],
         }
         if self.config.get("start_date"):
             request_def["dateRanges"] = [
                 {
                     "startDate": self.config.get("start_date"),
                     "endDate": pendulum.now(tz="UTC"),
-                }
+                },
             ]
         return {"reportRequests": [request_def]}
 
     def parse_response(self, response) -> Iterable[dict]:
         """Parse Google Analytics API response into individual records."""
         self.logger.info(
-            f"Received raw Google Analytics query response: {response.json()}"
+            "Received raw Google Analytics query response: %s",
+            response.json(),
         )
         report_data = response.json().get("reports", [{}])[0].get("data")
         if not report_data:
             self.logger.info(
-                f"Received empty Google Analytics query response: {response.json()}"
+                "Received empty Google Analytics query response: %s",
+                response.json(),
             )
         for total in report_data["totals"]:
             yield {"totals": total["values"]}

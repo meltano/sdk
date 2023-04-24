@@ -32,7 +32,7 @@ class BaseBatchFileEncoding:
     __encoding_format__: ClassVar[str] = "OVERRIDE_ME"
 
     # Base encoding fields
-    format: str = field(init=False)
+    format: str = field(init=False)  # noqa: A003
     """The format of the batch file."""
 
     compression: str | None = None
@@ -135,8 +135,8 @@ class StorageTarget:
             # Augemnted slitly to properly Windows paths
             split = url.rsplit("\\", 1)
             return (split[0] or "\\", split[1])
-        else:
-            return fs.path.split(url)
+
+        return fs.path.split(url)
 
     @classmethod
     def from_url(cls, url: str) -> StorageTarget:
@@ -176,7 +176,11 @@ class StorageTarget:
         filesystem.close()
 
     @contextmanager
-    def open(self, filename: str, mode: str = "rb") -> Generator[IO, None, None]:
+    def open(  # noqa: A003
+        self,
+        filename: str,
+        mode: str = "rb",
+    ) -> Generator[IO, None, None]:
         """Open a file in the storage target.
 
         Args:

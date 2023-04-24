@@ -37,7 +37,7 @@ def dirty_state():
                     "replication_key_value": "2021-05-11T18:07:11Z",
                 },
             },
-        }
+        },
     }
 
 
@@ -56,7 +56,7 @@ def cleared_state():
                     {"context": {"org": "VirusEnabled", "repo": "Athena"}},
                 ],
             },
-        }
+        },
     }
 
 
@@ -81,7 +81,7 @@ def finalized_state():
                 "replication_key": "updated_at",
                 "replication_key_value": "2021-05-11T18:07:11Z",
             },
-        }
+        },
     }
 
 

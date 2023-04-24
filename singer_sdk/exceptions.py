@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
-import requests
+import abc
+import typing as t
+
+if t.TYPE_CHECKING:
+    import requests
 
 
 class ConfigValidationError(Exception):
@@ -21,8 +25,59 @@ class MapExpressionError(Exception):
     """Failed map expression evaluation."""
 
 
-class MaxRecordsLimitException(Exception):
-    """Exception to raise if the maximum number of allowable records is exceeded."""
+class RequestedAbortException(Exception):
+    """Base class for abort and interrupt requests.
+
+    Whenever this exception is raised, streams will attempt to shut down gracefully and
+    will emit a final resumable `STATE` message if it is possible to do so.
+    """
+
+
+class MaxRecordsLimitException(RequestedAbortException):
+    """Exception indicating the sync aborted due to too many records."""
+
+
+class AbortedSyncExceptionBase(Exception, metaclass=abc.ABCMeta):
+    """Base exception to raise when a stream sync is aborted.
+
+    Developers should not raise this directly, and instead should use:
+    1. `FatalAbortedSyncException` - Indicates the stream aborted abnormally and was not
+       able to reach a stable and resumable state.
+    2. `PausedSyncException` - Indicates the stream aborted abnormally and successfully
+       reached a 'paused' and resumable state.
+
+    Notes:
+    - `FULL_TABLE` sync operations cannot be paused and will always trigger a fatal
+      exception if aborted.
+    - `INCREMENTAL` and `LOG_BASED` streams are able to be paused only if a number of
+      preconditions are met, specifically, `state_partitioning_keys` cannot be
+      overridden and the stream must be declared with `is_sorted=True`.
+    """
+
+
+class AbortedSyncFailedException(AbortedSyncExceptionBase):
+    """Exception to raise when sync is aborted and unable to reach a stable state.
+
+    This signifies that `FULL_TABLE` streams (if applicable) were successfully
+    completed, and any bookmarks from `INCREMENTAL` and `LOG_BASED` streams were
+    advanced and finalized successfully.
+    """
+
+
+class AbortedSyncPausedException(AbortedSyncExceptionBase):
+    """Exception to raise when an aborted sync operation is paused successfully.
+
+    This exception indicates the stream aborted abnormally and successfully
+       reached a 'paused' status, and emitted a resumable state artifact before exiting.
+
+    Streams synced with `FULL_TABLE` replication can never have partial success or
+    'paused' status.
+
+    If this exception is raised, this signifies that additional records were left
+    on the source system and the sync operation aborted before reaching the end of the
+    stream. This exception signifies that bookmarks from `INCREMENTAL`
+    and `LOG_BASED` streams were successfully emitted and are resumable.
+    """
 
 
 class RecordsWithoutSchemaException(Exception):

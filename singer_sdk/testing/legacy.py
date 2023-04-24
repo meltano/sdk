@@ -4,16 +4,19 @@ from __future__ import annotations
 
 import io
 from contextlib import redirect_stderr, redirect_stdout
-from typing import Callable, cast
+from typing import TYPE_CHECKING, Callable, cast
 
 import singer_sdk._singerlib as singer
-from singer_sdk.mapper_base import InlineMapper
-from singer_sdk.tap_base import Tap
-from singer_sdk.target_base import Target
+
+if TYPE_CHECKING:
+    from singer_sdk.mapper_base import InlineMapper
+    from singer_sdk.tap_base import Tap
+    from singer_sdk.target_base import Target
 
 
 def get_standard_tap_tests(
-    tap_class: type[Tap], config: dict | None = None
+    tap_class: type[Tap],
+    config: dict | None = None,
 ) -> list[Callable]:
     """Return callable pytest which executes simple discovery and connection tests.
 
@@ -31,7 +34,7 @@ def get_standard_tap_tests(
         # Test CLI prints
         tap1.print_version()
         tap1.print_about()
-        tap1.print_about(format="json")
+        tap1.print_about(output_format="json")
 
     def _test_discovery() -> None:
         catalog1 = _get_tap_catalog(tap_class, config or {})
@@ -93,8 +96,8 @@ def get_standard_tap_tests(
 
 
 def get_standard_target_tests(
-    target_class: type[Target],
-    config: dict | None = None,
+    target_class: type[Target],  # noqa: ARG001
+    config: dict | None = None,  # noqa: ARG001
 ) -> list[Callable]:
     """Return callable pytest which executes simple discovery and connection tests.
 
@@ -127,7 +130,10 @@ def tap_sync_test(tap: Tap) -> tuple[io.StringIO, io.StringIO]:
 
 
 def _get_tap_catalog(
-    tap_class: type[Tap], config: dict, select_all: bool = False
+    tap_class: type[Tap],
+    config: dict,
+    *,
+    select_all: bool = False,
 ) -> dict:
     """Return a catalog dict by running discovery.
 
@@ -167,7 +173,10 @@ def _select_all(catalog_dict: dict) -> dict:
 
 
 def target_sync_test(
-    target: Target, input: io.StringIO | None, finalize: bool = True
+    target: Target,
+    input: io.StringIO | None,  # noqa: A002
+    *,
+    finalize: bool = True,
 ) -> tuple[io.StringIO, io.StringIO]:
     """Invoke the target with the provided input.
 
@@ -195,7 +204,8 @@ def target_sync_test(
 
 
 def tap_to_target_sync_test(
-    tap: Tap, target: Target
+    tap: Tap,
+    target: Target,
 ) -> tuple[io.StringIO, io.StringIO, io.StringIO, io.StringIO]:
     """Test and end-to-end sink from the tap to the target.
 

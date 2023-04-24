@@ -330,6 +330,7 @@ Custom backoff and retry behaviour can be added by overriding the methods:
 - [`backoff_wait_generator`](singer_sdk.RESTStream.backoff_wait_generator)
 - [`backoff_max_tries`](singer_sdk.RESTStream.backoff_max_tries)
 - [`backoff_handler`](singer_sdk.RESTStream.backoff_handler)
+- [`backoff_jitter`](singer_sdk.RESTStream.backoff_jitter)
 
 For example, to use a constant retry:
 ```
@@ -338,6 +339,11 @@ def backoff_wait_generator() -> Callable[..., Generator[int, Any, None]]:
 ```
 
 To utilise a response header as a wait value you can use [`backoff_runtime`](singer_sdk.RESTStream.backoff_runtime), and pass a method that returns a wait value:
+
+**Note**: By default jitter makes this function wait a bit longer than the value provided.
+To disable jitter override [`backoff_jitter`](singer_sdk.RESTStream.backoff_jitter).
+In sdk versions <=0.21.0 the default jitter function will make the function below not work as you would expect without disabling jitter,
+([here](https://github.com/meltano/sdk/issues/1477) for more information) to disable jitter override the `request_decorator` and pass `jitter=None` to the `backoff.on_exception` function.
 
 ```
 def backoff_wait_generator() -> Callable[..., Generator[int, Any, None]]:
