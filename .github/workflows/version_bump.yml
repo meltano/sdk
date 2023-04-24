@@ -44,7 +44,7 @@ jobs:
         sudo chown -R $USER:$USER .git/objects
 
     - name: Set up Python
-      uses: actions/setup-python@v4.5.0
+      uses: actions/setup-python@v4.6.0
       with:
         python-version: "3.10"
         architecture: x64
