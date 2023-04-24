@@ -59,7 +59,7 @@ jobs:
         push: "false"
         changelog: "true"
         github_token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}
-        extra_requirements: 'git+https://github.com/meltano/commitizen-version-bump@main'
+        extra_requirements: 'git+https://github.com/meltano/commitizen-version-bump@feat/support-commitizen-3'
         changelog_increment_filename: _changelog_fragment.md
 
     - name: Draft Release
