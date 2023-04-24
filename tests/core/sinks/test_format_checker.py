@@ -11,6 +11,7 @@ from singer_sdk.sinks.core import Sink
 from singer_sdk.target_base import Target
 
 ISOFORMAT = "%Y-%m-%dT%H:%M:%S.%f%z"
+UTC = datetime.timezone.utc
 
 
 @pytest.fixture(scope="module")
@@ -42,18 +43,18 @@ def default_sink(target):
 @pytest.fixture(scope="module")
 def default_checker(default_sink: Sink) -> FormatChecker:
     """Return a default format checker."""
-    return default_sink.get_format_checker()
+    return default_sink.get_record_validator_class().FORMAT_CHECKER
 
 
 @pytest.fixture(scope="module")
 def datetime_checker(default_sink: Sink) -> FormatChecker:
     """Return a custom 'date-time' format checker."""
-    checker = default_sink.get_format_checker()
+    checker = default_sink.get_record_validator_class().FORMAT_CHECKER
 
     @checker.checks("date-time", raises=ValueError)
     def check_time(instance: object) -> bool:
         try:
-            datetime.datetime.strptime(instance, ISOFORMAT)
+            datetime.datetime.strptime(instance, ISOFORMAT).replace(tzinfo=UTC)
         except ValueError:
             return False
         return True
@@ -62,7 +63,7 @@ def datetime_checker(default_sink: Sink) -> FormatChecker:
 
 
 @pytest.mark.parametrize(
-    ("fmt", "value"),
+    "fmt,value",
     [
         pytest.param(
             "any string",
@@ -84,7 +85,7 @@ def test_default_checks(default_checker: FormatChecker, value: str, fmt: str):
 
 
 @pytest.mark.parametrize(
-    ("fmt", "value"),
+    "fmt,value",
     [
         pytest.param(
             "date-time",

@@ -12,7 +12,7 @@ from types import MappingProxyType
 from typing import IO, TYPE_CHECKING, Any, Mapping, Sequence
 
 from dateutil import parser
-from jsonschema import Draft7Validator, FormatChecker, Validator
+from jsonschema import Draft7Validator, Validator
 
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
@@ -91,54 +91,34 @@ class Sink(metaclass=abc.ABCMeta):
     def get_record_validator(self, schema: dict) -> Validator:
         """Get JSON schema validator for a given schema.
 
-        Override this method to customize the JSON schema validator.
+        Override this method to customize the JSON schema validator or to use a
+        different string format checker.
 
         Args:
             schema: JSON schema to validate records against.
 
         Returns:
-            A ``jsonschema`` `validator`_.
+            A ``jsonschema`` `validator`_ instance.
 
         .. _validator:
             https://python-jsonschema.readthedocs.io/en/stable/api/jsonschema/validators/
         """
-        return Draft7Validator(  # type: ignore[return-value]
-            schema,
-            format_checker=self.get_format_checker(),
-        )
+        cls = self.get_record_validator_class()
+        return cls(schema, format_checker=cls.FORMAT_CHECKER)
 
-    def get_format_checker(self) -> FormatChecker:
-        """Get format checker for JSON schema.
+    def get_record_validator_class(self) -> type[Validator]:
+        """Get JSON schema validator class.
 
-        Override this method to add custom string format checkers to the JSON schema
-        validator.
-
-        This is useful when, for example, the target requires a specific format for a
-        date or datetime field.
-
-        Example:
-            .. code-block:: python
-
-                def get_format_checker(self):
-                    format_checker = super().get_format_checker()
-
-                    def is_simple_date(value):
-                        try:
-                            datetime.datetime.strptime(value, "%Y-%m-%d")
-                        except ValueError:
-                            return False
-                        return True
-
-                    format_checker.checks("date")(is_simple_date)
-                    return format_checker
+        Defaults to JSON schema Draft 7. Override this method to customize the JSON
+        schema validator.
 
         Returns:
-            An instance of `jsonschema.FormatChecker`_.
+            A ``jsonschema`` `validator`_ class.
 
-        .. _jsonschema.FormatChecker:
-            https://python-jsonschema.readthedocs.io/en/stable/validate/#jsonschema.FormatChecker
+        .. _validator:
+            https://python-jsonschema.readthedocs.io/en/stable/api/jsonschema/validators/
         """
-        return FormatChecker(formats=())  # Don't check any formats by default
+        return Draft7Validator  # type: ignore[return-value]
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return an empty dictionary by default.
