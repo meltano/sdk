@@ -43,13 +43,13 @@ def default_sink(target):
 @pytest.fixture(scope="module")
 def default_checker(default_sink: Sink) -> FormatChecker:
     """Return a default format checker."""
-    return default_sink.get_record_validator_class().FORMAT_CHECKER
+    return default_sink.get_format_checker()
 
 
 @pytest.fixture(scope="module")
 def datetime_checker(default_sink: Sink) -> FormatChecker:
     """Return a custom 'date-time' format checker."""
-    checker = default_sink.get_record_validator_class().FORMAT_CHECKER
+    checker = default_sink.get_format_checker()
 
     @checker.checks("date-time", raises=ValueError)
     def check_time(instance: object) -> bool:
