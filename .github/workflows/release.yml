@@ -4,10 +4,15 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: write  # Needed to upload artifacts to the release
+  id-token: write  # Needed for OIDC PyPI publishing
+
 jobs:
   release:
     name: Publish to PyPI
     runs-on: ubuntu-latest
+    environment: publishing
 
     steps:
     - name: Checkout code
@@ -19,13 +24,17 @@ jobs:
         python-version: "3.10"
 
     - name: Upgrade pip
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
       run: |
-        pip install --constraint=.github/workflows/constraints.txt pip
+        pip install pip
         pip --version
 
     - name: Install Poetry
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
       run: |
-        pipx install --pip-args=--constraint=.github/workflows/constraints.txt poetry
+        pipx install poetry
         poetry --version
 
     - name: Check version
@@ -48,6 +57,3 @@ jobs:
 
     - name: Publish
       uses: pypa/gh-action-pypi-publish@v1.8.5
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_SECRET_TOKEN }}
