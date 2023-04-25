@@ -6,9 +6,8 @@ import abc
 import json
 import logging
 import sys
+import typing as t
 from collections import Counter, defaultdict
-from typing import IO
-from typing import Counter as CounterType
 
 from singer_sdk._singerlib import SingerMessageType
 from singer_sdk.helpers._compat import final
@@ -20,7 +19,7 @@ class SingerReader(metaclass=abc.ABCMeta):
     """Interface for all plugins reading Singer messages from stdin."""
 
     @final
-    def listen(self, file_input: IO[str] | None = None) -> None:
+    def listen(self, file_input: t.IO[str] | None = None) -> None:
         """Read from input until all messages are processed.
 
         Args:
@@ -51,7 +50,7 @@ class SingerReader(metaclass=abc.ABCMeta):
                 f"Line is missing required {', '.join(missing)} key(s): {line_dict}",
             )
 
-    def _process_lines(self, file_input: IO[str]) -> CounterType[str]:
+    def _process_lines(self, file_input: t.IO[str]) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Any
+import typing as t
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.streams.rest import RESTStream
@@ -42,7 +42,7 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
     def prepare_request_payload(
         self,
         context: dict | None,
-        next_page_token: Any | None,
+        next_page_token: t.Any | None,
     ) -> dict | None:
         """Prepare the data payload for the GraphQL API request.
 

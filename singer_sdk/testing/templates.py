@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import contextlib
+import typing as t
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.streams import Stream
 
     from .config import SuiteConfig
@@ -83,7 +83,7 @@ class TestTemplate:
     def run(
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TapTestRunner | TargetTestRunner,
     ) -> None:
         """Test main run method.
@@ -133,7 +133,7 @@ class TapTestTemplate(TestTemplate):
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TapTestRunner,
     ) -> None:
         """Test main run method.
@@ -165,7 +165,7 @@ class StreamTestTemplate(TestTemplate):
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TapTestRunner,
         stream: Stream,
     ) -> None:
@@ -199,7 +199,7 @@ class AttributeTestTemplate(TestTemplate):
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TapTestRunner,
         stream: Stream,
         attribute_name: str,
@@ -220,7 +220,7 @@ class AttributeTestTemplate(TestTemplate):
         super().run(config, resource, runner)
 
     @property
-    def non_null_attribute_values(self) -> list[Any]:
+    def non_null_attribute_values(self) -> list[t.Any]:
         """Extract attribute values from stream records.
 
         Returns:
@@ -269,7 +269,7 @@ class TargetTestTemplate(TestTemplate):
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TargetTestRunner,
     ) -> None:
         """Test main run method.
@@ -301,7 +301,7 @@ class TargetFileTestTemplate(TargetTestTemplate):
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TargetTestRunner,
     ) -> None:
         """Test main run method.

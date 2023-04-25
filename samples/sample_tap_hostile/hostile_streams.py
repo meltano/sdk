@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 import string
-from typing import Iterable
+import typing as t
 
 from singer_sdk import typing as th
 from singer_sdk.streams import Stream
@@ -35,7 +35,7 @@ class HostilePropertyNamesStream(Stream):
     def get_records(
         self,
         context: dict | None,  # noqa: ARG002
-    ) -> Iterable[dict | tuple[dict, dict]]:
+    ) -> t.Iterable[dict | tuple[dict, dict]]:
         return (
             {
                 key: self.get_random_lowercase_string()

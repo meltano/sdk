@@ -287,6 +287,12 @@ allow-star-arg-any = true
 mypy-init-return = true
 suppress-dummy-args = true
 
+[tool.ruff.flake8-import-conventions]
+banned-from = ["typing"]
+
+[tool.ruff.flake8-import-conventions.extend-aliases]
+typing = "t"
+
 [tool.ruff.flake8-pytest-style]
 fixture-parentheses = false
 parametrize-names-type = "csv"

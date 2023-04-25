@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import logging
+import typing as t
 import warnings
 from contextlib import contextmanager
 from datetime import datetime
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, Iterable, Iterator, cast
 
 import sqlalchemy
 from sqlalchemy.engine import Engine
@@ -16,7 +16,7 @@ from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
 
 
@@ -51,7 +51,7 @@ class SQLConnector:
             config: The parent tap or target object's config.
             sqlalchemy_url: Optional URL for the connection.
         """
-        self._config: dict[str, Any] = config or {}
+        self._config: dict[str, t.Any] = config or {}
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
 
     @property
@@ -73,7 +73,7 @@ class SQLConnector:
         return logging.getLogger("sqlconnector")
 
     @contextmanager
-    def _connect(self) -> Iterator[sqlalchemy.engine.Connection]:
+    def _connect(self) -> t.Iterator[sqlalchemy.engine.Connection]:
         with self._engine.connect().execution_options(stream_results=True) as conn:
             yield conn
 
@@ -155,7 +155,7 @@ class SQLConnector:
 
         return self._sqlalchemy_url
 
-    def get_sqlalchemy_url(self, config: dict[str, Any]) -> str:
+    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:
         """Return the SQLAlchemy URL string.
 
         Developers can generally override just one of the following:
@@ -175,12 +175,15 @@ class SQLConnector:
                 "Could not find or create 'sqlalchemy_url' for connection.",
             )
 
-        return cast(str, config["sqlalchemy_url"])
+        return t.cast(str, config["sqlalchemy_url"])
 
     @staticmethod
     def to_jsonschema_type(
         sql_type: (
-            str | sqlalchemy.types.TypeEngine | type[sqlalchemy.types.TypeEngine] | Any
+            str
+            | sqlalchemy.types.TypeEngine
+            | type[sqlalchemy.types.TypeEngine]
+            | t.Any
         ),
     ) -> dict:
         """Return a JSON Schema representation of the provided type.
@@ -282,7 +285,7 @@ class SQLConnector:
         Returns:
             The dialect object.
         """
-        return cast(sqlalchemy.engine.Dialect, self._engine.dialect)
+        return t.cast(sqlalchemy.engine.Dialect, self._engine.dialect)
 
     @property
     def _engine(self) -> Engine:
@@ -296,7 +299,7 @@ class SQLConnector:
         """
         if not self._cached_engine:
             self._cached_engine = self.create_engine()
-        return cast(Engine, self._cached_engine)
+        return t.cast(Engine, self._cached_engine)
 
     def create_engine(self) -> Engine:
         """Creates and returns a new engine. Do not call outside of _engine.
@@ -433,7 +436,7 @@ class SQLConnector:
             column_name = column_def["name"]
             is_nullable = column_def.get("nullable", False)
             jsonschema_type: dict = self.to_jsonschema_type(
-                cast(sqlalchemy.types.TypeEngine, column_def["type"]),
+                t.cast(sqlalchemy.types.TypeEngine, column_def["type"]),
             )
             table_schema.append(
                 th.Property(
@@ -547,7 +550,7 @@ class SQLConnector:
         """
         _, schema_name, table_name = self.parse_full_table_name(full_table_name)
 
-        return cast(
+        return t.cast(
             bool,
             sqlalchemy.inspect(self._engine).has_table(table_name, schema_name),
         )
@@ -878,7 +881,7 @@ class SQLConnector:
 
     def _sort_types(
         self,
-        sql_types: Iterable[sqlalchemy.types.TypeEngine],
+        sql_types: t.Iterable[sqlalchemy.types.TypeEngine],
     ) -> list[sqlalchemy.types.TypeEngine]:
         """Return the input types sorted from most to least compatible.
 
@@ -903,7 +906,7 @@ class SQLConnector:
 
             _len = int(getattr(sql_type, "length", 0) or 0)
 
-            _pytype = cast(type, sql_type.python_type)
+            _pytype = t.cast(type, sql_type.python_type)
             if issubclass(_pytype, (str, bytes)):
                 return 900, _len
             if issubclass(_pytype, datetime):
@@ -941,7 +944,7 @@ class SQLConnector:
                 f"Column `{column_name}` does not exist in table `{full_table_name}`.",
             ) from ex
 
-        return cast(sqlalchemy.types.TypeEngine, column.type)
+        return t.cast(sqlalchemy.types.TypeEngine, column.type)
 
     @staticmethod
     def get_column_add_ddl(

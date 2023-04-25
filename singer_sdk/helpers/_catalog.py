@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
+import typing as t
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any
 
 from memoization import cached
 
 from singer_sdk.helpers._typing import is_object_type
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from logging import Logger
 
     from singer_sdk._singerlib import Catalog, SelectionMask
@@ -79,7 +79,7 @@ def _pop_deselected_schema(
 
 
 def pop_deselected_record_properties(
-    record: dict[str, Any],
+    record: dict[str, t.Any],
     schema: dict,
     mask: SelectionMask,
     logger: Logger,

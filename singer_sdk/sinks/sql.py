@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import re
+import typing as t
 from collections import defaultdict
 from copy import copy
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Iterable
 
 import sqlalchemy
 from pendulum import now
@@ -17,7 +17,7 @@ from singer_sdk.exceptions import ConformedNameClashException
 from singer_sdk.helpers._conformers import replace_leading_digit
 from singer_sdk.sinks.batch import BatchSink
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from sqlalchemy.sql import Executable
 
     from singer_sdk.plugin_base import PluginBase
@@ -297,7 +297,7 @@ class SQLSink(BatchSink):
         self,
         full_table_name: str,
         schema: dict,
-        records: Iterable[dict[str, Any]],
+        records: t.Iterable[dict[str, t.Any]],
     ) -> int | None:
         """Bulk insert records to an existing destination table.
 

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+import typing as t
 from pathlib import Path
-from typing import Any, cast
 
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.pagination import SimpleHeaderPaginator
@@ -44,7 +44,7 @@ class GitlabStream(RESTStream[str]):
         self,
         context: dict | None,  # noqa: ARG002
         next_page_token: str | None,
-    ) -> dict[str, Any]:
+    ) -> dict[str, t.Any]:
         """Return a dictionary of values to be used in URL parameterization."""
         params: dict = {}
         if next_page_token:
@@ -72,7 +72,7 @@ class ProjectBasedStream(GitlabStream):
         if "{project_id}" in self.path:
             return [
                 {"project_id": pid}
-                for pid in cast(list, self.config.get("project_ids"))
+                for pid in t.cast(list, self.config.get("project_ids"))
             ]
         if "{group_id}" in self.path:
             if "group_ids" not in self.config:
@@ -81,7 +81,7 @@ class ProjectBasedStream(GitlabStream):
                     f"'{self.name}' stream.",
                 )
             return [
-                {"group_id": gid} for gid in cast(list, self.config.get("group_ids"))
+                {"group_id": gid} for gid in t.cast(list, self.config.get("group_ids"))
             ]
         raise ValueError(
             "Could not detect partition type for Gitlab stream "
@@ -194,7 +194,7 @@ class EpicIssuesStream(GitlabStream):
         self,
         context: dict | None,
         next_page_token: str | None,
-    ) -> dict[str, Any]:
+    ) -> dict[str, t.Any]:
         """Return a dictionary of values to be used in parameterization."""
         result = super().get_url_params(context, next_page_token)
         if not context or "epic_id" not in context:

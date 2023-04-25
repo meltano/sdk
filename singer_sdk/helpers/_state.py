@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast
+import typing as t
 
 from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.helpers._typing import to_json_compatible
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import datetime
 
-    _T = TypeVar("_T", datetime.datetime, str, int, float)
+    _T = t.TypeVar("_T", datetime.datetime, str, int, float)
 
 PROGRESS_MARKERS = "progress_markers"
 PROGRESS_MARKER_NOTE = "Note"
@@ -23,7 +23,7 @@ def get_state_if_exists(  # noqa: PLR0911
     tap_stream_id: str,
     state_partition_context: dict | None = None,
     key: str | None = None,
-) -> Any | None:
+) -> t.Any | None:
     """Return the stream or partition state, creating a new one if it does not exist.
 
     Args:
@@ -85,7 +85,7 @@ def _find_in_partitions_list(
             f"Matching state values were: {str(found)}",
         )
     if found:
-        return cast(dict, found[0])
+        return t.cast(dict, found[0])
 
     return None
 
@@ -126,7 +126,7 @@ def get_writeable_state_dict(
         tap_state["bookmarks"] = {}
     if tap_stream_id not in tap_state["bookmarks"]:
         tap_state["bookmarks"][tap_stream_id] = {}
-    stream_state = cast(dict, tap_state["bookmarks"][tap_stream_id])
+    stream_state = t.cast(dict, tap_state["bookmarks"][tap_stream_id])
     if not state_partition_context:
         return stream_state
 
@@ -171,7 +171,7 @@ def reset_state_progress_markers(stream_or_partition_state: dict) -> dict | None
 
 def write_replication_key_signpost(
     stream_or_partition_state: dict,
-    new_signpost_value: Any,
+    new_signpost_value: t.Any,
 ) -> None:
     """Write signpost value."""
     stream_or_partition_state[SIGNPOST_MARKER] = to_json_compatible(new_signpost_value)
@@ -179,7 +179,7 @@ def write_replication_key_signpost(
 
 def write_starting_replication_value(
     stream_or_partition_state: dict,
-    initial_value: Any,
+    initial_value: t.Any,
 ) -> None:
     """Write initial replication value to state."""
     stream_or_partition_state[STARTING_MARKER] = to_json_compatible(initial_value)
@@ -271,7 +271,7 @@ def finalize_state_progress_markers(stream_or_partition_state: dict) -> dict | N
 def log_sort_error(
     *,
     ex: Exception,
-    log_fn: Callable,
+    log_fn: t.Callable,
     stream_name: str,
     current_context: dict | None,
     state_partition_context: dict | None,

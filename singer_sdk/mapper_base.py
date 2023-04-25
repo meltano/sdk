@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import abc
-from typing import TYPE_CHECKING, Callable, Iterable
+import typing as t
 
 import click
 
@@ -14,7 +14,7 @@ from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import PluginBase
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from io import FileIO
 
 
@@ -33,7 +33,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ]
 
     @staticmethod
-    def _write_messages(messages: Iterable[singer.Message]) -> None:
+    def _write_messages(messages: t.Iterable[singer.Message]) -> None:
         for message in messages:
             singer.write_message(message)
 
@@ -53,7 +53,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._write_messages(self.map_batch_message(message_dict))
 
     @abc.abstractmethod
-    def map_schema_message(self, message_dict: dict) -> Iterable[singer.Message]:
+    def map_schema_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
         """Map a schema message to zero or more new messages.
 
         Args:
@@ -62,7 +62,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def map_record_message(self, message_dict: dict) -> Iterable[singer.Message]:
+    def map_record_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
         """Map a record message to zero or more new messages.
 
         Args:
@@ -71,7 +71,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def map_state_message(self, message_dict: dict) -> Iterable[singer.Message]:
+    def map_state_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
         """Map a state message to zero or more new messages.
 
         Args:
@@ -83,7 +83,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     def map_activate_version_message(
         self,
         message_dict: dict,
-    ) -> Iterable[singer.Message]:
+    ) -> t.Iterable[singer.Message]:
         """Map a version message to zero or more new messages.
 
         Args:
@@ -94,7 +94,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     def map_batch_message(
         self,
         message_dict: dict,
-    ) -> Iterable[singer.Message]:
+    ) -> t.Iterable[singer.Message]:
         """Map a batch message to zero or more new messages.
 
         Args:
@@ -106,7 +106,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         raise NotImplementedError("BATCH messages are not supported by mappers.")
 
     @classproperty
-    def cli(cls) -> Callable:  # noqa: N805
+    def cli(cls) -> t.Callable:  # noqa: N805
         """Execute standard CLI handler for inline mappers.
 
         Returns:

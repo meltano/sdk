@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import base64
 import math
+import typing as t
 from datetime import datetime, timedelta
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Mapping
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import jwt
@@ -16,7 +16,7 @@ from cryptography.hazmat.primitives import serialization
 
 from singer_sdk.helpers._util import utc_now
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import logging
 
     from singer_sdk.streams import Stream as RESTStreamBase
@@ -62,7 +62,7 @@ class SingletonMeta(type):
         cls.__single_instance = None
         super().__init__(name, bases, dic)
 
-    def __call__(cls, *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
+    def __call__(cls, *args: t.Any, **kwargs: t.Any) -> t.Any:  # noqa: ANN401
         """Create or reuse the singleton.
 
         Args:
@@ -90,13 +90,13 @@ class APIAuthenticatorBase:
             stream: A stream for a RESTful endpoint.
         """
         self.tap_name: str = stream.tap_name
-        self._config: dict[str, Any] = dict(stream.config)
-        self._auth_headers: dict[str, Any] = {}
-        self._auth_params: dict[str, Any] = {}
+        self._config: dict[str, t.Any] = dict(stream.config)
+        self._auth_headers: dict[str, t.Any] = {}
+        self._auth_params: dict[str, t.Any] = {}
         self.logger: logging.Logger = stream.logger
 
     @property
-    def config(self) -> Mapping[str, Any]:
+    def config(self) -> t.Mapping[str, t.Any]:
         """Get stream or tap config.
 
         Returns:
@@ -572,7 +572,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         if not self.private_key:
             raise ValueError("Missing 'private_key' property for OAuth payload.")
 
-        private_key: bytes | Any = bytes(self.private_key, "UTF-8")
+        private_key: bytes | t.Any = bytes(self.private_key, "UTF-8")
         if self.private_key_passphrase:
             passphrase = bytes(self.private_key_passphrase, "UTF-8")
             private_key = serialization.load_pem_private_key(
@@ -580,7 +580,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
                 password=passphrase,
                 backend=default_backend(),
             )
-        private_key_string: str | Any = private_key.decode("UTF-8")
+        private_key_string: str | t.Any = private_key.decode("UTF-8")
         return {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": jwt.encode(

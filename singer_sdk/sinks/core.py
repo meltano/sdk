@@ -6,10 +6,10 @@ import abc
 import datetime
 import json
 import time
+import typing as t
 from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
-from typing import IO, TYPE_CHECKING, Any, Mapping, Sequence
 
 from dateutil import parser
 from jsonschema import Draft7Validator, FormatChecker
@@ -27,7 +27,7 @@ from singer_sdk.helpers._typing import (
     handle_invalid_timestamp_in_record,
 )
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from logging import Logger
 
     from singer_sdk.plugin_base import PluginBase
@@ -72,7 +72,7 @@ class Sink(metaclass=abc.ABCMeta):
             self._add_sdc_metadata_to_schema()
         else:
             self._remove_sdc_metadata_from_schema()
-        self.records_to_drain: list[dict] | Any = []
+        self.records_to_drain: list[dict] | t.Any = []
         self._context_draining: dict | None = None
         self.latest_state: dict | None = None
         self._draining_state: dict | None = None
@@ -172,7 +172,7 @@ class Sink(metaclass=abc.ABCMeta):
     # Properties
 
     @property
-    def config(self) -> Mapping[str, Any]:
+    def config(self) -> t.Mapping[str, t.Any]:
         """Get plugin configuration.
 
         Returns:
@@ -468,7 +468,7 @@ class Sink(metaclass=abc.ABCMeta):
     def process_batch_files(
         self,
         encoding: BaseBatchFileEncoding,
-        files: Sequence[str],
+        files: t.Sequence[str],
     ) -> None:
         """Process a batch file with the given batch context.
 
@@ -479,7 +479,7 @@ class Sink(metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: If the batch file encoding is not supported.
         """
-        file: GzipFile | IO
+        file: GzipFile | t.IO
         storage: StorageTarget | None = None
 
         for path in files:

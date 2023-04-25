@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+import typing as t
 
 import pytest
 
@@ -15,7 +15,7 @@ from .suites import (
     target_tests,
 )
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk import Tap, Target
 
 
@@ -46,7 +46,7 @@ def get_test_class(
             return suite_config or SuiteConfig()
 
         @pytest.fixture
-        def resource(self) -> Any:  # noqa: ANN401, PT004
+        def resource(self) -> t.Any:  # noqa: ANN401, PT004
             yield  # noqa: PT022
 
         @pytest.fixture(scope="class")
@@ -66,7 +66,7 @@ def get_test_class(
             f"Test suite of kind {suite.kind} passed, "
             f"but test runner if of type {type(test_runner)}."
         )
-        test_runner = cast(
+        test_runner = t.cast(
             expected_runner_class,  # type: ignore[valid-type]
             test_runner,
         )
@@ -158,7 +158,7 @@ def get_tap_test_class(
     include_stream_attribute_tests: bool = True,
     custom_suites: list | None = None,
     suite_config: SuiteConfig | None = None,
-    **kwargs: Any,
+    **kwargs: t.Any,
 ) -> object:
     """Get Tap Test Class.
 
@@ -205,7 +205,7 @@ def get_target_test_class(
     config: dict | None = None,
     custom_suites: list | None = None,
     suite_config: SuiteConfig | None = None,
-    **kwargs: Any,
+    **kwargs: t.Any,
 ) -> object:
     """Get Target Test Class.
 
