@@ -576,7 +576,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 )
             except ConfigValidationError as exc:
                 for error in exc.errors:
-                    click.secho(error, fg="red", err=True)
+                    click.secho(error, err=True)
                 sys.exit(1)
 
             target.listen(file_input)

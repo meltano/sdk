@@ -529,7 +529,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 )
             except ConfigValidationError as exc:
                 for error in exc.errors:
-                    click.secho(error, fg="red", err=True)
+                    click.secho(error, err=True)
                 sys.exit(1)
 
             if discover:
