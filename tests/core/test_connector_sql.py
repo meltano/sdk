@@ -154,7 +154,7 @@ class TestConnectorSQL:
         with pytest.deprecated_call():
             connector.create_sqlalchemy_connection()
         with pytest.deprecated_call():
-            connector.connection
+            _ = connector.connection
 
     def test_connect_calls_engine(self, connector):
         with mock.patch.object(
@@ -197,3 +197,64 @@ class TestConnectorSQL:
         with mock.patch.object(attached_engine, "dialect") as _:
             res = connector._dialect
             assert res == attached_engine.dialect
+
+    def test_merge_sql_types_text_current_max(self, connector):
+        current_type = sqlalchemy.types.VARCHAR(length=None)
+        sql_type = sqlalchemy.types.VARCHAR(length=255)
+        compatible_sql_type = connector.merge_sql_types([current_type, sql_type])
+        # Check that the current VARCHAR(MAX) type is kept
+        assert compatible_sql_type is current_type
+
+    def test_merge_sql_types_text_current_greater_than(self, connector):
+        current_type = sqlalchemy.types.VARCHAR(length=255)
+        sql_type = sqlalchemy.types.VARCHAR(length=64)
+        compatible_sql_type = connector.merge_sql_types([current_type, sql_type])
+        # Check the current greater VARCHAR(255) is kept
+        assert compatible_sql_type is current_type
+
+    def test_merge_sql_types_text_proposed_max(self, connector):
+        current_type = sqlalchemy.types.VARCHAR(length=64)
+        sql_type = sqlalchemy.types.VARCHAR(length=None)
+        compatible_sql_type = connector.merge_sql_types([current_type, sql_type])
+        # Check the current VARCHAR(64) is chosen over default VARCHAR(max)
+        assert compatible_sql_type is current_type
+
+    def test_merge_sql_types_text_current_less_than(self, connector):
+        current_type = sqlalchemy.types.VARCHAR(length=64)
+        sql_type = sqlalchemy.types.VARCHAR(length=255)
+        compatible_sql_type = connector.merge_sql_types([current_type, sql_type])
+        # Check that VARCHAR(255) is chosen over the lesser current VARCHAR(64)
+        assert compatible_sql_type is sql_type
+
+    @pytest.mark.parametrize(
+        "types,expected_type",
+        [
+            pytest.param(
+                [sqlalchemy.types.Integer(), sqlalchemy.types.Numeric()],
+                sqlalchemy.types.Integer,
+                id="integer-numeric",
+            ),
+            pytest.param(
+                [sqlalchemy.types.Numeric(), sqlalchemy.types.Integer()],
+                sqlalchemy.types.Numeric,
+                id="numeric-integer",
+            ),
+            pytest.param(
+                [
+                    sqlalchemy.types.Integer(),
+                    sqlalchemy.types.String(),
+                    sqlalchemy.types.Numeric(),
+                ],
+                sqlalchemy.types.String,
+                id="integer-string-numeric",
+            ),
+        ],
+    )
+    def test_merge_generic_sql_types(
+        self,
+        connector: SQLConnector,
+        types: list[sqlalchemy.types.TypeEngine],
+        expected_type: type[sqlalchemy.types.TypeEngine],
+    ):
+        merged_type = connector.merge_sql_types(types)
+        assert isinstance(merged_type, expected_type)

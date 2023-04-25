@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import logging
+import typing as t
 import warnings
 from contextlib import contextmanager
 from datetime import datetime
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, Iterable, Iterator, cast
 
 import sqlalchemy
 from sqlalchemy.engine import Engine
@@ -16,7 +16,7 @@ from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
 
 
@@ -51,7 +51,7 @@ class SQLConnector:
             config: The parent tap or target object's config.
             sqlalchemy_url: Optional URL for the connection.
         """
-        self._config: dict[str, Any] = config or {}
+        self._config: dict[str, t.Any] = config or {}
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
 
     @property
@@ -73,7 +73,7 @@ class SQLConnector:
         return logging.getLogger("sqlconnector")
 
     @contextmanager
-    def _connect(self) -> Iterator[sqlalchemy.engine.Connection]:
+    def _connect(self) -> t.Iterator[sqlalchemy.engine.Connection]:
         with self._engine.connect().execution_options(stream_results=True) as conn:
             yield conn
 
@@ -102,6 +102,7 @@ class SQLConnector:
             "on the connector currently, make a child class and "
             "add your required method on that connector.",
             DeprecationWarning,
+            stacklevel=2,
         )
         return self._engine.connect().execution_options(stream_results=True)
 
@@ -118,6 +119,7 @@ class SQLConnector:
             "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override"
             "`_engine` or sqlalchemy_url` instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
         return self._engine
 
@@ -137,6 +139,7 @@ class SQLConnector:
             "that isn't available on the connector currently, make a child "
             "class and add your required method on that connector.",
             DeprecationWarning,
+            stacklevel=2,
         )
         return self.create_sqlalchemy_connection()
 
@@ -152,7 +155,7 @@ class SQLConnector:
 
         return self._sqlalchemy_url
 
-    def get_sqlalchemy_url(self, config: dict[str, Any]) -> str:
+    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:
         """Return the SQLAlchemy URL string.
 
         Developers can generally override just one of the following:
@@ -172,12 +175,15 @@ class SQLConnector:
                 "Could not find or create 'sqlalchemy_url' for connection.",
             )
 
-        return cast(str, config["sqlalchemy_url"])
+        return t.cast(str, config["sqlalchemy_url"])
 
     @staticmethod
     def to_jsonschema_type(
         sql_type: (
-            str | sqlalchemy.types.TypeEngine | type[sqlalchemy.types.TypeEngine] | Any
+            str
+            | sqlalchemy.types.TypeEngine
+            | type[sqlalchemy.types.TypeEngine]
+            | t.Any
         ),
     ) -> dict:
         """Return a JSON Schema representation of the provided type.
@@ -279,7 +285,7 @@ class SQLConnector:
         Returns:
             The dialect object.
         """
-        return cast(sqlalchemy.engine.Dialect, self._engine.dialect)
+        return t.cast(sqlalchemy.engine.Dialect, self._engine.dialect)
 
     @property
     def _engine(self) -> Engine:
@@ -293,7 +299,7 @@ class SQLConnector:
         """
         if not self._cached_engine:
             self._cached_engine = self.create_engine()
-        return cast(Engine, self._cached_engine)
+        return t.cast(Engine, self._cached_engine)
 
     def create_engine(self) -> Engine:
         """Creates and returns a new engine. Do not call outside of _engine.
@@ -331,7 +337,7 @@ class SQLConnector:
             ],
         )
 
-    @lru_cache()
+    @lru_cache()  # noqa: B019
     def _warn_no_view_detection(self) -> None:
         """Print a warning, but only the first time."""
         self.logger.warning(
@@ -388,7 +394,7 @@ class SQLConnector:
         inspected: Inspector,
         schema_name: str,
         table_name: str,
-        is_view: bool,
+        is_view: bool,  # noqa: FBT001
     ) -> CatalogEntry:
         """Create `CatalogEntry` object for the given table or a view.
 
@@ -430,7 +436,7 @@ class SQLConnector:
             column_name = column_def["name"]
             is_nullable = column_def.get("nullable", False)
             jsonschema_type: dict = self.to_jsonschema_type(
-                cast(sqlalchemy.types.TypeEngine, column_def["type"]),
+                t.cast(sqlalchemy.types.TypeEngine, column_def["type"]),
             )
             table_schema.append(
                 th.Property(
@@ -448,7 +454,7 @@ class SQLConnector:
         #   a replication_key value.
         # - 'LOG_BASED' replication must be enabled by the developer, according
         #   to source-specific implementation capabilities.
-        replication_method = next(reversed(["FULL_TABLE"] + addl_replication_methods))
+        replication_method = next(reversed(["FULL_TABLE", *addl_replication_methods]))
 
         # Create the catalog entry object
         return CatalogEntry(
@@ -526,9 +532,9 @@ class SQLConnector:
         parts = full_table_name.split(".")
         if len(parts) == 1:
             table_name = full_table_name
-        if len(parts) == 2:
+        if len(parts) == 2:  # noqa: PLR2004
             schema_name, table_name = parts
-        if len(parts) == 3:
+        if len(parts) == 3:  # noqa: PLR2004
             db_name, schema_name, table_name = parts
 
         return db_name, schema_name, table_name
@@ -544,7 +550,7 @@ class SQLConnector:
         """
         _, schema_name, table_name = self.parse_full_table_name(full_table_name)
 
-        return cast(
+        return t.cast(
             bool,
             sqlalchemy.inspect(self._engine).has_table(table_name, schema_name),
         )
@@ -644,7 +650,7 @@ class SQLConnector:
         schema: dict,
         primary_keys: list[str] | None = None,
         partition_keys: list[str] | None = None,
-        as_temp_table: bool = False,
+        as_temp_table: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Create an empty target table.
 
@@ -670,10 +676,10 @@ class SQLConnector:
         primary_keys = primary_keys or []
         try:
             properties: dict = schema["properties"]
-        except KeyError:
+        except KeyError as e:
             raise RuntimeError(
                 f"Schema for '{full_table_name}' does not define properties: {schema}",
-            )
+            ) from e
         for property_name, property_jsonschema in properties.items():
             is_primary_key = property_name in primary_keys
             columns.append(
@@ -730,7 +736,7 @@ class SQLConnector:
         schema: dict,
         primary_keys: list[str],
         partition_keys: list[str] | None = None,
-        as_temp_table: bool = False,
+        as_temp_table: bool = False,  # noqa: FBT002, FBT001
     ) -> None:
         """Adapt target table to provided schema if possible.
 
@@ -831,25 +837,18 @@ class SQLConnector:
         # Gathering Type to match variables
         # sent in _adapt_column_type
         current_type = sql_types[0]
-        # sql_type = sql_types[1]
-
-        # Getting the length of each type
-        # current_type_len: int = getattr(sql_types[0], "length", 0)
-        sql_type_len: int = getattr(sql_types[1], "length", 0)
-        if sql_type_len is None:
-            sql_type_len = 0
+        cur_len: int = getattr(current_type, "length", 0)
 
         # Convert the two types given into a sorted list
         # containing the best conversion classes
         sql_types = self._sort_types(sql_types)
 
         # If greater than two evaluate the first pair then on down the line
-        if len(sql_types) > 2:
+        if len(sql_types) > 2:  # noqa: PLR2004
             return self.merge_sql_types(
                 [self.merge_sql_types([sql_types[0], sql_types[1]])] + sql_types[2:],
             )
 
-        assert len(sql_types) == 2
         # Get the generic type class
         for opt in sql_types:
             # Get the length
@@ -865,7 +864,11 @@ class SQLConnector:
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
                 ):
                     # If length None or 0 then is varchar max ?
-                    if (opt_len is None) or (opt_len == 0):
+                    if (
+                        (opt_len is None)
+                        or (opt_len == 0)
+                        or (cur_len and (opt_len >= cur_len))
+                    ):
                         return opt
                 # If best conversion class is equal to current type
                 # return the best conversion class
@@ -878,7 +881,7 @@ class SQLConnector:
 
     def _sort_types(
         self,
-        sql_types: Iterable[sqlalchemy.types.TypeEngine],
+        sql_types: t.Iterable[sqlalchemy.types.TypeEngine],
     ) -> list[sqlalchemy.types.TypeEngine]:
         """Return the input types sorted from most to least compatible.
 
@@ -903,7 +906,7 @@ class SQLConnector:
 
             _len = int(getattr(sql_type, "length", 0) or 0)
 
-            _pytype = cast(type, sql_type.python_type)
+            _pytype = t.cast(type, sql_type.python_type)
             if issubclass(_pytype, (str, bytes)):
                 return 900, _len
             if issubclass(_pytype, datetime):
@@ -941,7 +944,7 @@ class SQLConnector:
                 f"Column `{column_name}` does not exist in table `{full_table_name}`.",
             ) from ex
 
-        return cast(sqlalchemy.types.TypeEngine, column.type)
+        return t.cast(sqlalchemy.types.TypeEngine, column.type)
 
     @staticmethod
     def get_column_add_ddl(
@@ -1044,7 +1047,7 @@ class SQLConnector:
         """
         if hasattr(column_type, "collation") and column_type.collation:
             column_type_collation: str = column_type.collation
-            setattr(column_type, "collation", None)
+            column_type.collation = None
             return column_type_collation
         return None
 
@@ -1060,7 +1063,7 @@ class SQLConnector:
             collation: The colation
         """
         if hasattr(column_type, "collation") and collation:
-            setattr(column_type, "collation", collation)
+            column_type.collation = collation
 
     def _adapt_column_type(
         self,

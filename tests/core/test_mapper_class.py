@@ -29,7 +29,7 @@ from singer_sdk.exceptions import ConfigValidationError
 )
 def test_config_errors(config_dict: dict, expectation, errors: list[str]):
     with expectation as exc:
-        StreamTransform(config_dict, validate_config=True)
+        StreamTransform(config=config_dict, validate_config=True)
 
     if isinstance(exc, pytest.ExceptionInfo):
         assert exc.value.errors == errors
@@ -50,5 +50,5 @@ def test_cli_config_validation(tmp_path):
     config_path.write_text(json.dumps({}))
     result = runner.invoke(StreamTransform.cli, ["--config", str(config_path)])
     assert result.exit_code == 1
-    assert result.stdout == ""
+    assert not result.stdout
     assert "'stream_maps' is a required property" in result.stderr

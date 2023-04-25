@@ -6,8 +6,8 @@ import copy
 import io
 import json
 import logging
+import typing as t
 from contextlib import redirect_stdout
-from typing import Counter
 
 from samples.sample_tap_countries.countries_tap import SampleTapCountries
 from singer_sdk.helpers._catalog import (
@@ -15,6 +15,7 @@ from singer_sdk.helpers._catalog import (
     pop_deselected_record_properties,
 )
 from singer_sdk.testing import get_tap_test_class
+from singer_sdk.testing.config import SuiteConfig
 
 SAMPLE_CONFIG = {}
 SAMPLE_CONFIG_BAD = {"not": "correct"}
@@ -23,6 +24,7 @@ SAMPLE_CONFIG_BAD = {"not": "correct"}
 TestSampleTapCountries = get_tap_test_class(
     tap_class=SampleTapCountries,
     config=SAMPLE_CONFIG,
+    suite_config=SuiteConfig(max_records_limit=5),
 )
 
 
@@ -117,9 +119,9 @@ def test_batch_mode(outdir):
     lines = buf.read().splitlines()
     messages = [json.loads(line) for line in lines]
 
-    def tally_messages(messages: list) -> Counter:
+    def tally_messages(messages: list) -> t.Counter:
         """Tally messages."""
-        return Counter(
+        return t.Counter(
             (message["type"], message["stream"])
             if message["type"] != "STATE"
             else (message["type"],)
@@ -133,4 +135,4 @@ def test_batch_mode(outdir):
     assert counter["SCHEMA", "countries"] == 1
     assert counter["BATCH", "countries"] == 1
 
-    assert counter[("STATE",)] == 4
+    assert counter[("STATE",)] == 2

@@ -22,4 +22,5 @@ except ConfigValidationError as e:
             "Could not configure external gitlab tests. "
             f"Config in CI is expected via env vars.\n{e}",
         ),
+        stacklevel=2,
     )

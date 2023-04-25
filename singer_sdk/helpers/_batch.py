@@ -4,16 +4,16 @@ from __future__ import annotations
 
 import enum
 import platform
+import typing as t
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
-from typing import IO, TYPE_CHECKING, Any, ClassVar, Generator
 from urllib.parse import ParseResult, urlencode, urlparse
 
 import fs
 
 from singer_sdk._singerlib.messages import Message, SingerMessageType
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from fs.base import FS
 
 
@@ -28,17 +28,17 @@ class BatchFileFormat(str, enum.Enum):
 class BaseBatchFileEncoding:
     """Base class for batch file encodings."""
 
-    registered_encodings: ClassVar[dict[str, type[BaseBatchFileEncoding]]] = {}
-    __encoding_format__: ClassVar[str] = "OVERRIDE_ME"
+    registered_encodings: t.ClassVar[dict[str, type[BaseBatchFileEncoding]]] = {}
+    __encoding_format__: t.ClassVar[str] = "OVERRIDE_ME"
 
     # Base encoding fields
-    format: str = field(init=False)
+    format: str = field(init=False)  # noqa: A003
     """The format of the batch file."""
 
     compression: str | None = None
     """The compression of the batch file."""
 
-    def __init_subclass__(cls, **kwargs: Any) -> None:
+    def __init_subclass__(cls, **kwargs: t.Any) -> None:
         """Register subclasses.
 
         Args:
@@ -52,7 +52,7 @@ class BaseBatchFileEncoding:
         self.format = self.__encoding_format__
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> BaseBatchFileEncoding:
+    def from_dict(cls, data: dict[str, t.Any]) -> BaseBatchFileEncoding:
         """Create an encoding from a dictionary."""
         data = data.copy()
         encoding_format = data.pop("format")
@@ -109,7 +109,7 @@ class StorageTarget:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> StorageTarget:
+    def from_dict(cls, data: dict[str, t.Any]) -> StorageTarget:
         """Create an encoding from a dictionary.
 
         Args:
@@ -162,7 +162,7 @@ class StorageTarget:
         return urlparse(self.root)._replace(query=urlencode(self.params))
 
     @contextmanager
-    def fs(self, **kwargs: Any) -> Generator[FS, None, None]:
+    def fs(self, **kwargs: t.Any) -> t.Generator[FS, None, None]:
         """Get a filesystem object for the storage target.
 
         Args:
@@ -176,7 +176,11 @@ class StorageTarget:
         filesystem.close()
 
     @contextmanager
-    def open(self, filename: str, mode: str = "rb") -> Generator[IO, None, None]:
+    def open(  # noqa: A003
+        self,
+        filename: str,
+        mode: str = "rb",
+    ) -> t.Generator[t.IO, None, None]:
         """Open a file in the storage target.
 
         Args:
@@ -221,7 +225,7 @@ class BatchConfig:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> BatchConfig:
+    def from_dict(cls, data: dict[str, t.Any]) -> BatchConfig:
         """Create an encoding from a dictionary.
 
         Args:

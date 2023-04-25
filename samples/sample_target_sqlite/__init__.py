@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+import typing as t
 
 from singer_sdk import SQLConnector, SQLSink, SQLTarget
 from singer_sdk import typing as th
@@ -20,7 +20,7 @@ class SQLiteConnector(SQLConnector):
     allow_column_alter = False
     allow_merge_upsert = True
 
-    def get_sqlalchemy_url(self, config: dict[str, Any]) -> str:
+    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:
         """Generates a SQLAlchemy URL for SQLite."""
         return f"sqlite:///{config[DB_PATH_CONFIG]}"
 

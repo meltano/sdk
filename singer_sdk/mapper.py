@@ -10,7 +10,7 @@ import copy
 import datetime
 import hashlib
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, Union
+import typing as t
 
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
 from singer_sdk.helpers import _simpleeval as simpleeval
@@ -31,11 +31,11 @@ from singer_sdk.typing import (
     StringType,
 )
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import sys
 
     if sys.version_info >= (3, 10):
-        from typing import TypeAlias
+        from typing import TypeAlias  # noqa: ICN003
     else:
         from typing_extensions import TypeAlias
 
@@ -50,19 +50,19 @@ MAPPER_KEY_PROPERTIES_OPTION = "__key_properties__"
 NULL_STRING = "__NULL__"
 
 
-def md5(input: str) -> str:
+def md5(string: str) -> str:
     """Digest a string using MD5. This is a function for inline calculations.
 
     Args:
-        input: String to digest.
+        string: String to digest.
 
     Returns:
         A string digested into MD5.
     """
-    return hashlib.md5(input.encode("utf-8")).hexdigest()
+    return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
 
 
-StreamMapsDict: TypeAlias = Dict[str, Union[str, dict, None]]
+StreamMapsDict: TypeAlias = t.Dict[str, t.Union[str, dict, None]]
 
 
 class StreamMap(metaclass=abc.ABCMeta):
@@ -189,12 +189,8 @@ class RemoveRecordTransform(DefaultStreamMap):
 
         Args:
             record: An individual record dictionary in a stream.
-
-        Returns:
-            None
         """
         _ = record  # Drop the record
-        return
 
     def get_filter_result(self, record: dict) -> bool:  # noqa: ARG002
         """Exclude all records.
@@ -264,8 +260,8 @@ class CustomStreamMap(StreamMap):
         )
 
         self.map_config = map_config
-        self._transform_fn: Callable[[dict], dict | None]
-        self._filter_fn: Callable[[dict], bool]
+        self._transform_fn: t.Callable[[dict], dict | None]
+        self._filter_fn: t.Callable[[dict], bool]
         (
             self._filter_fn,
             self._transform_fn,
@@ -299,13 +295,13 @@ class CustomStreamMap(StreamMap):
         return self._filter_fn(record)
 
     @property
-    def functions(self) -> dict[str, Callable]:
+    def functions(self) -> dict[str, t.Callable]:
         """Get availabale transformation functions.
 
         Returns:
             Functions which should be available for expression evaluation.
         """
-        funcs: dict[str, Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
+        funcs: dict[str, t.Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
         funcs["md5"] = md5
         funcs["datetime"] = datetime
         return funcs
@@ -342,11 +338,13 @@ class CustomStreamMap(StreamMap):
                 functions=self.functions,
                 names=names,
             )
-            logging.debug(f"Eval result: {expr} = {result}")
-        except Exception as ex:
+        except (simpleeval.InvalidExpression, SyntaxError) as ex:
             raise MapExpressionError(
                 f"Failed to evaluate simpleeval expressions {expr}.",
             ) from ex
+
+        logging.debug("Eval result: %s = %s", expr, result)
+
         return result
 
     def _eval_type(
@@ -358,12 +356,16 @@ class CustomStreamMap(StreamMap):
 
         Args:
             expr: String expression to evaluate.
-            default: TODO.
+            default: Default type.
 
         Returns:
-            TODO
+            The evaluated expression's type.
+
+        Raises:
+            ValueError: If the expression is ``None``.
         """
-        assert expr is not None, "Expression should be str, not None"
+        if expr is None:
+            raise ValueError("Expression should be str, not None")
 
         default = default or StringType()
 
@@ -381,10 +383,10 @@ class CustomStreamMap(StreamMap):
 
         return default
 
-    def _init_functions_and_schema(
+    def _init_functions_and_schema(  # noqa: PLR0912, PLR0915
         self,
         stream_map: dict,
-    ) -> tuple[Callable[[dict], bool], Callable[[dict], dict | None], dict]:
+    ) -> tuple[t.Callable[[dict], bool], t.Callable[[dict], dict | None], dict]:
         """Return a tuple: filter_fn, transform_fn, transformed_schema.
 
         Args:
@@ -403,22 +405,28 @@ class CustomStreamMap(StreamMap):
         include_by_default = True
         if stream_map and MAPPER_FILTER_OPTION in stream_map:
             filter_rule = stream_map.pop(MAPPER_FILTER_OPTION)
-            logging.info(f"Found '{self.stream_alias}' filter rule: {filter_rule}")
+            logging.info(
+                "Found '%s' filter rule: %s",
+                self.stream_alias,
+                filter_rule,
+            )
 
         if stream_map and MAPPER_KEY_PROPERTIES_OPTION in stream_map:
             self.transformed_key_properties: list[str] = stream_map.pop(
                 MAPPER_KEY_PROPERTIES_OPTION,
             )
             logging.info(
-                f"Found stream map override for '{self.stream_alias}' key properties: "
-                f"{str(self.transformed_key_properties)}",
+                "Found stream map override for '%s' key properties: %s",
+                self.stream_alias,
+                self.transformed_key_properties,
             )
 
         if stream_map and MAPPER_ELSE_OPTION in stream_map:
             if stream_map[MAPPER_ELSE_OPTION] in {None, NULL_STRING}:
                 logging.info(
-                    f"Detected `{MAPPER_ELSE_OPTION}=None` rule. "
+                    "Detected `%s=None` rule. "
                     "Unmapped, non-key properties will be excluded from output.",
+                    MAPPER_ELSE_OPTION,
                 )
                 include_by_default = False
             else:
@@ -486,7 +494,7 @@ class CustomStreamMap(StreamMap):
 
         # Declare function variables
 
-        def eval_filter(filter_rule: str) -> Callable[[dict], bool]:
+        def eval_filter(filter_rule: str) -> t.Callable[[dict], bool]:
             def _inner(record: dict) -> bool:
                 filter_result = self._eval(
                     expr=filter_rule,
@@ -494,8 +502,9 @@ class CustomStreamMap(StreamMap):
                     property_name=None,
                 )
                 logging.debug(
-                    f"Filter result for '{filter_rule}' "
-                    "in '{self.name}' stream: {filter_result}",
+                    "Filter result for '%s' in '{self.name}' stream: %s",
+                    filter_rule,
+                    filter_result,
                 )
                 if not filter_result:
                     logging.debug("Excluding record due to filter.")
@@ -586,8 +595,9 @@ class PluginMapper:
         if MAPPER_ELSE_OPTION in self.stream_maps_dict:
             if self.stream_maps_dict[MAPPER_ELSE_OPTION] in {None, NULL_STRING}:
                 logging.info(
-                    f"Found '{MAPPER_ELSE_OPTION}=None' default mapper. "
+                    "Found '%s=None' default mapper. "
                     "Unmapped streams will be excluded from output.",
+                    MAPPER_ELSE_OPTION,
                 )
                 self.default_mapper_type = RemoveRecordTransform
                 self.stream_maps_dict.pop(MAPPER_ELSE_OPTION)
@@ -598,8 +608,9 @@ class PluginMapper:
                 )
         else:
             logging.debug(
-                f"Operator '{MAPPER_ELSE_OPTION}=None' was not found. "
+                "Operator '%s=None' was not found. "
                 "Unmapped streams will be included in output.",
+                MAPPER_ELSE_OPTION,
             )
         for stream_map_key, stream_def in self.stream_maps_dict.items():
             if stream_map_key.startswith("__"):
@@ -625,7 +636,7 @@ class PluginMapper:
                 catalog_entry.key_properties,
             )
 
-    def register_raw_stream_schema(
+    def register_raw_stream_schema(  # noqa: PLR0912
         self,
         stream_name: str,
         schema: dict,
@@ -665,9 +676,11 @@ class PluginMapper:
                 ),
             ]
 
-        for stream_map_key, stream_def in self.stream_maps_dict.items():
+        for stream_map_key, stream_map_val in self.stream_maps_dict.items():
             stream_def = (
-                stream_def.copy() if isinstance(stream_def, dict) else stream_def
+                stream_map_val.copy()
+                if isinstance(stream_map_val, dict)
+                else stream_map_val
             )
             stream_alias: str = stream_map_key
             source_stream: str = stream_map_key
@@ -690,7 +703,7 @@ class PluginMapper:
                     key_properties=None,
                     flattening_options=self.flattening_options,
                 )
-                logging.info(f"Set null tansform as default for '{stream_name}'")
+                logging.info("Set null tansform as default for '%s'", stream_name)
                 continue
 
             if not isinstance(stream_def, dict):

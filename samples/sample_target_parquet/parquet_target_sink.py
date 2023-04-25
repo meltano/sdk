@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+import typing as t
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -10,7 +10,7 @@ import pyarrow.parquet as pq
 from singer_sdk.sinks import BatchSink
 
 
-def json_schema_to_arrow(schema: dict[str, Any]) -> pa.Schema:
+def json_schema_to_arrow(schema: dict[str, t.Any]) -> pa.Schema:
     """Convert a JSON Schema to an Arrow schema.
 
     Args:
@@ -23,7 +23,7 @@ def json_schema_to_arrow(schema: dict[str, Any]) -> pa.Schema:
     return pa.schema(fields)
 
 
-def _json_schema_to_arrow_fields(schema: dict[str, Any]) -> pa.StructType:
+def _json_schema_to_arrow_fields(schema: dict[str, t.Any]) -> pa.StructType:
     """Convert a JSON Schema to an Arrow struct.
 
     Args:
@@ -39,7 +39,9 @@ def _json_schema_to_arrow_fields(schema: dict[str, Any]) -> pa.StructType:
     return fields
 
 
-def _json_type_to_arrow_field(schema_type: dict[str, Any]) -> pa.DataType:
+def _json_type_to_arrow_field(  # noqa: PLR0911
+    schema_type: dict[str, t.Any],
+) -> pa.DataType:
     """Convert a JSON Schema to an Arrow struct.
 
     Args:
@@ -99,7 +101,7 @@ class SampleParquetTargetSink(BatchSink):
         writer.close()
 
     @staticmethod
-    def translate_data_type(singer_type: str | dict) -> Any:
+    def translate_data_type(singer_type: str | dict) -> t.Any:
         """Translate from singer_type to a native type."""
         if singer_type in ["decimal", "float", "double"]:
             return pa.decimal128
@@ -109,10 +111,10 @@ class SampleParquetTargetSink(BatchSink):
             return pa.date64
         return pa.string
 
-    def _get_parquet_schema(self) -> list[tuple[str, Any]]:
-        col_list: list[tuple[str, Any]] = []
-        for property in self.schema["properties"]:
+    def _get_parquet_schema(self) -> list[tuple[str, t.Any]]:
+        col_list: list[tuple[str, t.Any]] = []
+        for prop in self.schema["properties"]:
             col_list.append(
-                (property["name"], self.translate_data_type(property["type"])),
+                (prop["name"], self.translate_data_type(prop["type"])),
             )
         return col_list

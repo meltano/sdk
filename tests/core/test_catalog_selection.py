@@ -203,7 +203,6 @@ def test_schema_selection(
         mask,
         logging.getLogger(),
     )
-    # selected_schema["properties"]["required"] = []
     assert (
         selected_schema["properties"]
         == PropertiesList(

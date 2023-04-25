@@ -29,7 +29,7 @@ class BatchSink(Sink):
         if self._pending_batch is None:
             new_context = {
                 "batch_id": str(uuid.uuid4()),
-                "batch_start_time": datetime.datetime.now(),
+                "batch_start_time": datetime.datetime.now(tz=datetime.timezone.utc),
             }
             self.start_batch(new_context)
             self._pending_batch = new_context

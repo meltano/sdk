@@ -264,7 +264,10 @@ def test_object_arrays_remove_types(caplog: pytest.LogCaptureFixture):
 
 def test_conform_primitives():
     assert (
-        _conform_primitive_property(datetime.datetime(2020, 5, 17), {"type": "string"})
+        _conform_primitive_property(
+            datetime.datetime(2020, 5, 17, tzinfo=datetime.timezone.utc),
+            {"type": "string"},
+        )
         == "2020-05-17T00:00:00+00:00"
     )
     assert (

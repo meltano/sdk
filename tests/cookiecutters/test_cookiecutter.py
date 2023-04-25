@@ -66,7 +66,7 @@ def test_cookiecutter(outdir: str, cookiecutter_dir: Path, cookiecutter_input: d
         mypy_out = api.run([filepath, "--config", str(Path(outdir) / Path("tox.ini"))])
         mypy_msg = str(mypy_out[0])
         if not mypy_msg.startswith("Success:"):
-            logging.exception(f"MyPy validation failed: {mypy_msg}")
+            logging.exception("MyPy validation failed: %s", mypy_msg)
             assert not mypy_msg, f"MyPy validation failed for file {filepath}"
         report = style_guide_strict.check_files([filepath])
         errors = report.get_statistics("E")

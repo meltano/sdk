@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+import typing as t
 import warnings
-from typing import TYPE_CHECKING, Type, cast
 
 from dateutil import parser
 
@@ -12,7 +12,7 @@ from singer_sdk import Tap
 
 from .templates import AttributeTestTemplate, StreamTestTemplate, TapTestTemplate
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.streams.core import Stream
 
 
@@ -25,7 +25,7 @@ class TapCLIPrintsTest(TapTestTemplate):
         """Run test."""
         self.tap.print_version()
         self.tap.print_about()
-        self.tap.print_about(format="json")
+        self.tap.print_about(output_format="json")
 
 
 class TapDiscoveryTest(TapTestTemplate):
@@ -40,7 +40,7 @@ class TapDiscoveryTest(TapTestTemplate):
         catalog = tap1.catalog_dict
         # Reset and re-initialize with discovered catalog
         kwargs = {k: v for k, v in self.runner.default_kwargs.items() if k != "catalog"}
-        tap2: Tap = cast(Type[Tap], self.runner.singer_class)(
+        tap2: Tap = t.cast(t.Type[Tap], self.runner.singer_class)(
             config=self.runner.config,
             catalog=catalog,
             **kwargs,
@@ -71,7 +71,7 @@ class StreamReturnsRecordTest(StreamTestTemplate):
             or self.stream.name in self.config.ignore_no_records_for_streams
         ):
             # only warn if this or all streams are set to ignore no records
-            warnings.warn(UserWarning(no_records_message))
+            warnings.warn(UserWarning(no_records_message), stacklevel=2)
         else:
             record_count = len(self.stream_records)
             assert record_count > 0, no_records_message
@@ -90,6 +90,7 @@ class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
         if diff:
             warnings.warn(
                 UserWarning(f"Fields in catalog but not in records: ({diff})"),
+                stacklevel=2,
             )
 
 
@@ -123,7 +124,7 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
                 (r[k] for k in primary_keys or []) for r in self.stream_records
             ]
         except KeyError as e:
-            raise AssertionError(f"Record missing primary key: {str(e)}")
+            raise AssertionError(f"Record missing primary key: {str(e)}") from e
         count_unique_records = len(set(record_ids))
         count_records = len(self.stream_records)
         assert count_unique_records == count_records, (
@@ -281,11 +282,9 @@ class AttributeIsNumberTest(AttributeTestTemplate):
             AssertionError: if value cannot be cast to float type.
         """
         for v in self.non_null_attribute_values:
-            try:
-                error_message = f"Unable to cast value ('{v}') to float type."
-                assert isinstance(v, (float, int)), error_message
-            except Exception as e:
-                raise AssertionError(error_message) from e
+            error_message = f"Unable to cast value ('{v}') to float type."
+            if not isinstance(v, (float, int)):
+                raise AssertionError(error_message)
 
     @classmethod
     def evaluate(

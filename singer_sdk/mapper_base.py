@@ -4,29 +4,24 @@ from __future__ import annotations
 
 import abc
 import sys
-from typing import TYPE_CHECKING, Callable, Iterable
+import typing as t
 
 import click
 
 import singer_sdk._singerlib as singer
 from singer_sdk.cli import common_options
-from singer_sdk.configuration._dict_config import merge_config_sources
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import PluginBase
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from io import FileIO
 
 
 class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     """Abstract base class for inline mappers."""
-
-    @classproperty
-    def _env_prefix(cls) -> str:
-        return f"{cls.name.upper().replace('-', '_')}_"
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
@@ -40,7 +35,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ]
 
     @staticmethod
-    def _write_messages(messages: Iterable[singer.Message]) -> None:
+    def _write_messages(messages: t.Iterable[singer.Message]) -> None:
         for message in messages:
             singer.write_message(message)
 
@@ -60,7 +55,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._write_messages(self.map_batch_message(message_dict))
 
     @abc.abstractmethod
-    def map_schema_message(self, message_dict: dict) -> Iterable[singer.Message]:
+    def map_schema_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
         """Map a schema message to zero or more new messages.
 
         Args:
@@ -69,7 +64,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def map_record_message(self, message_dict: dict) -> Iterable[singer.Message]:
+    def map_record_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
         """Map a record message to zero or more new messages.
 
         Args:
@@ -78,7 +73,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def map_state_message(self, message_dict: dict) -> Iterable[singer.Message]:
+    def map_state_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
         """Map a state message to zero or more new messages.
 
         Args:
@@ -90,7 +85,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     def map_activate_version_message(
         self,
         message_dict: dict,
-    ) -> Iterable[singer.Message]:
+    ) -> t.Iterable[singer.Message]:
         """Map a version message to zero or more new messages.
 
         Args:
@@ -101,7 +96,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     def map_batch_message(
         self,
         message_dict: dict,
-    ) -> Iterable[singer.Message]:
+    ) -> t.Iterable[singer.Message]:
         """Map a batch message to zero or more new messages.
 
         Args:
@@ -113,7 +108,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         raise NotImplementedError("BATCH messages are not supported by mappers.")
 
     @classproperty
-    def cli(cls) -> Callable:
+    def cli(cls) -> t.Callable:  # noqa: N805
         """Execute standard CLI handler for inline mappers.
 
         Returns:
@@ -130,10 +125,11 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             context_settings={"help_option_names": ["--help"]},
         )
         def cli(
+            *,
             version: bool = False,
             about: bool = False,
             config: tuple[str, ...] = (),
-            format: str | None = None,
+            about_format: str | None = None,
             file_input: FileIO | None = None,
         ) -> None:
             """Handle command line execution.
@@ -141,7 +137,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             Args:
                 version: Display the package version.
                 about: Display package metadata and settings.
-                format: Specify output style for `--about`.
+                about_format: Specify output style for `--about`.
                 config: Configuration file location or 'ENV' to use environment
                     variables. Accepts multiple inputs as a tuple.
                 file_input: Specify a path to an input file to read messages from.
@@ -160,16 +156,13 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             cls.print_version(print_fn=cls.logger.info)
 
-            config_dict = merge_config_sources(
-                config,
-                cls.config_jsonschema,
-                cls._env_prefix,
-            )
+            config_files, parse_env_config = cls.config_from_cli_args(*config)
 
             try:
-                mapper = cls(  # type: ignore  # Ignore 'type not callable'
-                    config=config_dict,
+                mapper = cls(  # type: ignore[operator]
+                    config=config_files or None,
                     validate_config=validate_config,
+                    parse_env_config=parse_env_config,
                 )
             except ConfigValidationError as exc:
                 for error in exc.errors:
@@ -177,7 +170,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 sys.exit(1)
 
             if about:
-                mapper.print_about(format)
+                mapper.print_about(about_format)
             else:
                 mapper.listen(file_input)
 

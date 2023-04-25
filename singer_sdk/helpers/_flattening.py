@@ -6,15 +6,15 @@ import collections
 import itertools
 import json
 import re
+import typing as t
 from copy import deepcopy
-from typing import Any, Mapping, MutableMapping, NamedTuple
 
 import inflection
 
 DEFAULT_FLATTENING_SEPARATOR = "__"
 
 
-class FlatteningOptions(NamedTuple):
+class FlatteningOptions(t.NamedTuple):
     """A stream map which performs the flattening role."""
 
     max_level: int
@@ -23,7 +23,7 @@ class FlatteningOptions(NamedTuple):
 
 
 def get_flattening_options(
-    plugin_config: Mapping,
+    plugin_config: t.Mapping,
 ) -> FlatteningOptions | None:
     """Get flattening options, if flattening is enabled.
 
@@ -56,10 +56,12 @@ def flatten_key(key_name: str, parent_keys: list[str], separator: str = "__") ->
     >>> flatten_key("foo", ["bar", "baz"], separator=".")
     'bar.baz.foo'
     """
-    full_key = parent_keys + [key_name]
+    full_key = [*parent_keys, key_name]
     inflected_key = full_key.copy()
     reducer_index = 0
-    while len(separator.join(inflected_key)) >= 255 and reducer_index < len(
+    while len(
+        separator.join(inflected_key),
+    ) >= 255 and reducer_index < len(  # noqa: PLR2004
         inflected_key,
     ):
         reduced_key = re.sub(
@@ -241,7 +243,7 @@ def _flatten_schema(
                 items.extend(
                     _flatten_schema(
                         v,
-                        parent_keys + [k],
+                        [*parent_keys, k],
                         separator=separator,
                         level=level + 1,
                         max_level=max_level,
@@ -249,17 +251,16 @@ def _flatten_schema(
                 )
             else:
                 items.append((new_key, v))
-        else:
-            if len(v.values()) > 0:
-                if list(v.values())[0][0]["type"] == "string":
-                    list(v.values())[0][0]["type"] = ["null", "string"]
-                    items.append((new_key, list(v.values())[0][0]))
-                elif list(v.values())[0][0]["type"] == "array":
-                    list(v.values())[0][0]["type"] = ["null", "array"]
-                    items.append((new_key, list(v.values())[0][0]))
-                elif list(v.values())[0][0]["type"] == "object":
-                    list(v.values())[0][0]["type"] = ["null", "object"]
-                    items.append((new_key, list(v.values())[0][0]))
+        elif len(v.values()) > 0:
+            if list(v.values())[0][0]["type"] == "string":
+                list(v.values())[0][0]["type"] = ["null", "string"]
+                items.append((new_key, list(v.values())[0][0]))
+            elif list(v.values())[0][0]["type"] == "array":
+                list(v.values())[0][0]["type"] = ["null", "array"]
+                items.append((new_key, list(v.values())[0][0]))
+            elif list(v.values())[0][0]["type"] == "object":
+                list(v.values())[0][0]["type"] = ["null", "object"]
+                items.append((new_key, list(v.values())[0][0]))
 
     # Sort and check for duplicates
     def _key_func(item):
@@ -300,7 +301,8 @@ def flatten_record(
 
 
 def _flatten_record(
-    record_node: MutableMapping[Any, Any],
+    record_node: t.MutableMapping[t.Any, t.Any],
+    *,
     flattened_schema: dict | None = None,
     parent_key: list[str] | None = None,
     separator: str = "__",
@@ -326,15 +328,15 @@ def _flatten_record(
     if parent_key is None:
         parent_key = []
 
-    items: list[tuple[str, Any]] = []
+    items: list[tuple[str, t.Any]] = []
     for k, v in record_node.items():
         new_key = flatten_key(k, parent_key, separator)
         if isinstance(v, collections.abc.MutableMapping) and level < max_level:
             items.extend(
                 _flatten_record(
                     v,
-                    flattened_schema,
-                    parent_key + [k],
+                    flattened_schema=flattened_schema,
+                    parent_key=[*parent_key, k],
                     separator=separator,
                     level=level + 1,
                     max_level=max_level,
@@ -353,7 +355,7 @@ def _flatten_record(
     return dict(items)
 
 
-def _should_jsondump_value(key: str, value: Any, flattened_schema=None) -> bool:
+def _should_jsondump_value(key: str, value: t.Any, flattened_schema=None) -> bool:
     """Return True if json.dump() should be used to serialize the value.
 
     Args:

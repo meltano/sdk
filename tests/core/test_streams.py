@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+import typing as t
 
 import pendulum
 import pytest
@@ -20,7 +20,7 @@ from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 
 CONFIG_START_DATE = "2021-01-01"
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk import Stream, Tap
 
 
@@ -168,7 +168,7 @@ def test_stream_starting_timestamp(
     tap: Tap,
     stream_name: str,
     bookmark_value: str,
-    expected_starting_value: Any,
+    expected_starting_value: t.Any,
 ):
     """Test the starting timestamp for a stream."""
     stream = tap.streams[stream_name]
@@ -295,7 +295,7 @@ def test_jsonpath_graphql_stream_override(tap: Tap):
 
     class GraphQLJSONPathOverride(GraphqlTestStream):
         @classproperty
-        def records_jsonpath(cls):
+        def records_jsonpath(cls):  # noqa: N805
             return "$[*]"
 
     stream = GraphQLJSONPathOverride(tap)

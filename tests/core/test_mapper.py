@@ -116,7 +116,6 @@ def sample_stream():
 def transform_stream_maps():
     return {
         "repositories": {
-            # "__source__": "repositories",
             "repo_name": "_['name']",
             "email_domain": "owner_email.split('@')[1]",
             "email_hash": "md5(config['hash_seed'] + owner_email)",
@@ -257,9 +256,9 @@ def filter_stream_maps():
 
 @pytest.fixture
 def filter_stream_map_w_error(filter_stream_maps):
-    restult = copy.copy(filter_stream_maps)
-    restult["repositories"]["__filter__"] = "this should raise an er!ror"
-    return restult
+    result = copy.copy(filter_stream_maps)
+    result["repositories"]["__filter__"] = "this should raise an er!ror"
+    return result
 
 
 @pytest.fixture
@@ -357,6 +356,7 @@ def test_filter_transforms_w_error(
 
 def _test_transform(
     test_name: str,
+    *,
     stream_maps,
     stream_map_config,
     expected_result,
@@ -377,7 +377,7 @@ def _test_transform(
     for stream_name, stream in sample_stream.items():
         for stream_map in mapper.stream_maps[stream_name]:
             if isinstance(stream_map, RemoveRecordTransform):
-                logging.info(f"Skipping ignored stream '{stream_name}'")
+                logging.info("Skipping ignored stream '%s'", stream_name)
                 continue
 
             assert (

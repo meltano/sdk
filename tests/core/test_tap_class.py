@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 import json
+import typing as t
 from contextlib import nullcontext
-from typing import TYPE_CHECKING
 
 import pytest
 from click.testing import CliRunner
 
 from singer_sdk.exceptions import ConfigValidationError
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk import Tap
 
 
@@ -49,7 +49,7 @@ def test_config_errors(
     errors: list[str],
 ):
     with expectation as exc:
-        tap_class(config_dict, validate_config=True)
+        tap_class(config=config_dict, validate_config=True)
 
     if isinstance(exc, pytest.ExceptionInfo):
         assert exc.value.errors == errors
@@ -70,7 +70,7 @@ def test_cli_config_validation(tap_class: type[Tap], tmp_path):
     config_path.write_text(json.dumps({}))
     result = runner.invoke(tap_class.cli, ["--config", str(config_path)])
     assert result.exit_code == 1
-    assert result.stdout == ""
+    assert not result.stdout
     assert "'username' is a required property" in result.stderr
     assert "'password' is a required property" in result.stderr
 
@@ -90,4 +90,4 @@ def test_cli_discover(tap_class: type[Tap], tmp_path):
     )
     assert result.exit_code == 0
     assert "streams" in json.loads(result.stdout)
-    assert result.stderr == ""
+    assert not result.stderr

@@ -5,6 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.25.0 (2023-04-25)
+
+### ✨ New
+
+- [#1603](https://github.com/meltano/sdk/issues/1603) Allow `allowed_values` and `examples` in any JSON schema type constructor
+
+### ⚙️ Under the Hood
+
+- [#1610](https://github.com/meltano/sdk/issues/1610) Consolidate config parsing for all plugin base classes
+
+## v0.24.0 (2023-04-12)
+
+### ✨ New
+
+- [#1601](https://github.com/meltano/sdk/issues/1601) Allow skipping child streams by returning an empty child context from parent stream
+- [#1581](https://github.com/meltano/sdk/issues/1581) Add `pattern`, `contentMediaType`, and `contentEncoding` to Schema data class -- _**Thanks @BuzzCutNorman!**_
+
+### 🐛 Fixes
+
+- [#1587](https://github.com/meltano/sdk/issues/1587) Update cookiecutter tests path
+
+### ⚙️ Under the Hood
+
+- [#1570](https://github.com/meltano/sdk/issues/1570) Move "about" formatting logic into dedicated classes
+
+## v0.23.0 (2023-04-04)
+
+### ✨ New
+
+- [#1563](https://github.com/meltano/sdk/issues/1563) Migrate shell scripts for cookiecutter e2e tests to Nox -- _**Thanks @mkranna!**_
+
+### 🐛 Fixes
+
+- [#1574](https://github.com/meltano/sdk/issues/1574) Conform metric field `type` to Singer spec
+- [#1436](https://github.com/meltano/sdk/issues/1436) Handle sync abort, reduce duplicate `STATE` messages, rename `_MAX_RECORD_LIMIT` as `ABORT_AT_RECORD_COUNT`
+
+## v0.22.1 (2023-03-28)
+
+### 🐛 Fixes
+
+- [#1172](https://github.com/meltano/sdk/issues/1172) Handle merging of SQL types when character column lengths are less than the max -- _**Thanks @BuzzCutNorman!**_
+- [#1524](https://github.com/meltano/sdk/issues/1524) Preserve `__alias__` when mapping streams with repeated schema messages -- _**Thanks @DanilJr!**_
+- [#1526](https://github.com/meltano/sdk/issues/1526) Handle missing `type` value when checking JSON schema types
+
+### 📚 Documentation Improvements
+
+- [#1553](https://github.com/meltano/sdk/issues/1553) Change link color from pink to blue
+- [#1544](https://github.com/meltano/sdk/issues/1544) Update branding colors in docs site
+- [#1518](https://github.com/meltano/sdk/issues/1518) Fix HATEOAS pagination example
+
 ## v0.22.0 (2023-03-14)
 
 ### ✨ New

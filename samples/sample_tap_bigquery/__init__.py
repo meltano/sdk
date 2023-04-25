@@ -9,7 +9,7 @@ from singer_sdk import typing as th  # JSON schema typing helpers
 class BigQueryConnector(SQLConnector):
     """Connects to the BigQuery SQL source."""
 
-    def get_sqlalchemy_url(cls, config: dict) -> str:
+    def get_sqlalchemy_url(self, config: dict) -> str:
         """Concatenate a SQLAlchemy URL for use in connecting to the source."""
         return f"bigquery://{config['project_id']}"
 

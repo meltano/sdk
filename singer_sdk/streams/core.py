@@ -8,26 +8,22 @@ import datetime
 import gzip
 import itertools
 import json
+import typing as t
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Generator,
-    Iterable,
-    Iterator,
-    Mapping,
-    TypeVar,
-    cast,
-)
 from uuid import uuid4
 
 import pendulum
 
 import singer_sdk._singerlib as singer
 from singer_sdk import metrics
-from singer_sdk.exceptions import InvalidStreamSortException, MaxRecordsLimitException
+from singer_sdk.exceptions import (
+    AbortedSyncFailedException,
+    AbortedSyncPausedException,
+    InvalidStreamSortException,
+    MaxRecordsLimitException,
+)
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
@@ -42,6 +38,7 @@ from singer_sdk.helpers._state import (
     get_state_partitions_list,
     get_writeable_state_dict,
     increment_state,
+    is_state_non_resumable,
     log_sort_error,
     reset_state_progress_markers,
     write_replication_key_signpost,
@@ -55,7 +52,7 @@ from singer_sdk.helpers._typing import (
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import logging
 
     from singer_sdk.plugin_base import PluginBase as TapBaseClass
@@ -65,14 +62,14 @@ REPLICATION_FULL_TABLE = "FULL_TABLE"
 REPLICATION_INCREMENTAL = "INCREMENTAL"
 REPLICATION_LOG_BASED = "LOG_BASED"
 
-FactoryType = TypeVar("FactoryType", bound="Stream")
-_T = TypeVar("_T")
+FactoryType = t.TypeVar("FactoryType", bound="Stream")
+_T = t.TypeVar("_T")
 
 
 def lazy_chunked_generator(
-    iterable: Iterable[_T],
+    iterable: t.Iterable[_T],
     chunk_size: int,
-) -> Generator[Iterator[_T], None, None]:
+) -> t.Generator[t.Iterator[_T], None, None]:
     """Yield a generator for each chunk of the given iterable.
 
     Args:
@@ -96,7 +93,10 @@ class Stream(metaclass=abc.ABCMeta):
     STATE_MSG_FREQUENCY = 10000
     """Number of records between state messages."""
 
-    _MAX_RECORDS_LIMIT: int | None = None
+    ABORT_AT_RECORD_COUNT: int | None = None
+    """
+    If set, raise `MaxRecordsLimitException` if the limit is exceeded.
+    """
 
     TYPE_CONFORMANCE_LEVEL = TypeConformanceLevel.RECURSIVE
     """Type conformance level for this stream.
@@ -131,7 +131,7 @@ class Stream(metaclass=abc.ABCMeta):
     def __init__(
         self,
         tap: TapBaseClass,
-        schema: str | PathLike | dict[str, Any] | singer.Schema | None = None,
+        schema: str | PathLike | dict[str, t.Any] | singer.Schema | None = None,
         name: str | None = None,
     ) -> None:
         """Init tap stream.
@@ -166,6 +166,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._metadata: singer.MetadataMapping | None = None
         self._mask: singer.SelectionMask | None = None
         self._schema: dict
+        self._is_state_flushed: bool = True
         self.child_streams: list[Stream] = []
         if schema:
             if isinstance(schema, (PathLike, str)):
@@ -213,8 +214,8 @@ class Stream(metaclass=abc.ABCMeta):
             )
         else:
             self.logger.info(
-                f"No custom mapper provided for '{self.name}'. "
-                "Using SameRecordTransform.",
+                "No custom mapper provided for '%s'. Using SameRecordTransform.",
+                self.name,
             )
             self._stream_maps = [
                 SameRecordTransform(
@@ -242,7 +243,7 @@ class Stream(metaclass=abc.ABCMeta):
         type_dict = self.schema.get("properties", {}).get(self.replication_key)
         return is_datetime_type(type_dict)
 
-    def get_starting_replication_key_value(self, context: dict | None) -> Any | None:
+    def get_starting_replication_key_value(self, context: dict | None) -> t.Any | None:
         """Get starting replication key.
 
         Will return the value of the stream's replication key when `--state` is passed.
@@ -292,7 +293,7 @@ class Stream(metaclass=abc.ABCMeta):
                 f"The replication key {self.replication_key} is not of timestamp type",
             )
 
-        return cast(datetime.datetime, pendulum.parse(value))
+        return t.cast(datetime.datetime, pendulum.parse(value))
 
     @final
     @property
@@ -403,7 +404,7 @@ class Stream(metaclass=abc.ABCMeta):
     def get_replication_key_signpost(
         self,
         context: dict | None,  # noqa: ARG002
-    ) -> datetime.datetime | Any | None:
+    ) -> datetime.datetime | t.Any | None:
         """Get the replication signpost.
 
         For timestamp-based replication keys, this defaults to `utc_now()`. For
@@ -600,7 +601,7 @@ class Stream(metaclass=abc.ABCMeta):
         return singer.Catalog([(self.tap_stream_id, self._singer_catalog_entry)])
 
     @property
-    def config(self) -> Mapping[str, Any]:
+    def config(self) -> t.Mapping[str, t.Any]:
         """Get stream configuration.
 
         Returns:
@@ -731,7 +732,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _increment_stream_state(
         self,
-        latest_record: dict[str, Any],
+        latest_record: dict[str, t.Any],
         *,
         context: dict | None = None,
     ) -> None:
@@ -776,9 +777,13 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _write_state_message(self) -> None:
         """Write out a STATE message with the latest state."""
-        singer.write_message(singer.StateMessage(value=self.tap_state))
+        if not self._is_state_flushed:
+            singer.write_message(singer.StateMessage(value=self.tap_state))
+            self._is_state_flushed = True
 
-    def _generate_schema_messages(self) -> Generator[singer.SchemaMessage, None, None]:
+    def _generate_schema_messages(
+        self,
+    ) -> t.Generator[singer.SchemaMessage, None, None]:
         """Generate schema messages from stream maps.
 
         Yields:
@@ -818,7 +823,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _generate_record_messages(
         self,
         record: dict,
-    ) -> Generator[singer.RecordMessage, None, None]:
+    ) -> t.Generator[singer.RecordMessage, None, None]:
         """Write out a RECORD message.
 
         Args:
@@ -857,6 +862,8 @@ class Stream(metaclass=abc.ABCMeta):
         for record_message in self._generate_record_messages(record):
             singer.write_message(record_message)
 
+        self._is_state_flushed = False
+
     def _write_batch_message(
         self,
         encoding: BaseBatchFileEncoding,
@@ -875,6 +882,7 @@ class Stream(metaclass=abc.ABCMeta):
                 manifest=manifest,
             ),
         )
+        self._is_state_flushed = False
 
     def _log_metric(self, point: metrics.Point) -> None:
         """Log a single measurement.
@@ -896,23 +904,70 @@ class Stream(metaclass=abc.ABCMeta):
             msg = f"Total Sync costs for stream {self.name}: {self._sync_costs}"
             self.logger.info(msg)
 
-    def _check_max_record_limit(self, record_count: int) -> None:
-        """TODO.
+    def _check_max_record_limit(self, current_record_index: int) -> None:
+        """Raise an exception if dry run record limit exceeded.
+
+        Raised if we find dry run record limit exceeded,
+        aka `current_record_index > self.ABORT_AT_RECORD_COUNT - 1`.
 
         Args:
-            record_count: TODO.
+            current_record_index: The zero-based index of the current record.
 
         Raises:
-            MaxRecordsLimitException: TODO.
+            AbortedSyncFailedException: Raised if sync could not reach a valid state.
+            AbortedSyncPausedException: Raised if sync was able to be transitioned into
+                a valid state without data loss or corruption.
         """
         if (
-            self._MAX_RECORDS_LIMIT is not None
-            and record_count >= self._MAX_RECORDS_LIMIT
+            self.ABORT_AT_RECORD_COUNT is not None
+            and current_record_index > self.ABORT_AT_RECORD_COUNT - 1
         ):
-            raise MaxRecordsLimitException(
-                "Stream prematurely aborted due to the stream's max record "
-                f"limit ({self._MAX_RECORDS_LIMIT}) being reached.",
-            )
+            try:
+                self._abort_sync(
+                    abort_reason=MaxRecordsLimitException(
+                        "Stream prematurely aborted due to the stream's max dry run "
+                        f"record limit ({self.ABORT_AT_RECORD_COUNT}) being reached.",
+                    ),
+                )
+            except (AbortedSyncFailedException, AbortedSyncPausedException) as ex:
+                raise ex
+
+    def _abort_sync(self, abort_reason: Exception) -> None:
+        """Handle a sync operation being aborted.
+
+        This method will attempt to close out the sync operation as gracefully as
+        possible - for instance, if a max runtime or record count is reached. This can
+        also be called for `SIGTERM` and KeyboardInterrupt events.
+
+        If a state message is pending, we will attempt to write it to STDOUT before
+        shutting down.
+
+        If the stream can reach a valid resumable state, then we will raise
+        `AbortedSyncPausedException`. Otherwise, `AbortedSyncFailedException` will be
+        raised.
+
+        Args:
+            abort_reason: The exception that triggered the sync to be aborted.
+
+        Raises:
+            AbortedSyncFailedException: Raised if sync could not reach a valid state.
+            AbortedSyncPausedException: Raised if sync was able to be transitioned into
+                a valid state without data loss or corruption.
+        """
+        self._write_state_message()  # Write out state message if pending.
+
+        if self.replication_method == "FULL_TABLE":
+            raise AbortedSyncFailedException(
+                "Sync operation aborted for stream in 'FULL_TABLE' replication mode.",
+            ) from abort_reason
+
+        if is_state_non_resumable(self.stream_state):
+            raise AbortedSyncFailedException(
+                "Sync operation aborted and state is not in a resumable state.",
+            ) from abort_reason
+
+        # Else, the sync operation can be assumed to be in a valid resumable state.
+        raise AbortedSyncPausedException from abort_reason
 
     # Handle interim stream state
 
@@ -927,8 +982,7 @@ class Stream(metaclass=abc.ABCMeta):
         if state is None or state == {}:
             context: dict | None
             for context in self.partitions or [{}]:
-                context = context or None
-                state = self.get_context_state(context)
+                state = self.get_context_state(context or None)
                 reset_state_progress_markers(state)
             return
 
@@ -950,8 +1004,7 @@ class Stream(metaclass=abc.ABCMeta):
 
             context: dict | None
             for context in self.partitions or [{}]:
-                context = context or None
-                state = self.get_context_state(context)
+                state = self.get_context_state(context or None)
                 finalize_state_progress_markers(state)
             return
 
@@ -988,8 +1041,9 @@ class Stream(metaclass=abc.ABCMeta):
     def _sync_records(
         self,
         context: dict | None = None,
+        *,
         write_messages: bool = True,
-    ) -> Generator[dict, Any, Any]:
+    ) -> t.Generator[dict, t.Any, t.Any]:
         """Sync records, emitting RECORD and STATE messages.
 
         Args:
@@ -997,7 +1051,8 @@ class Stream(metaclass=abc.ABCMeta):
             write_messages: Whether to write Singer messages to stdout.
 
         Raises:
-            InvalidStreamSortException: TODO
+            InvalidStreamSortException: Raised if sorting errors are found while
+                syncing the records.
 
         Yields:
             Each record from the source.
@@ -1006,19 +1061,19 @@ class Stream(metaclass=abc.ABCMeta):
         record_counter = metrics.record_counter(self.name)
         timer = metrics.sync_timer(self.name)
 
-        record_count = 0
-        current_context: dict | None
+        record_index = 0
+        context_element: dict | None
         context_list: list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
         with record_counter, timer:
-            for current_context in context_list or [{}]:
-                record_counter.context = current_context
-                timer.context = current_context
+            for context_element in context_list or [{}]:
+                record_counter.context = context_element
+                timer.context = context_element
 
-                partition_record_count = 0
-                current_context = current_context or None
+                partition_record_index = 0
+                current_context = context_element or None
                 state = self.get_context_state(current_context)
                 state_partition_context = self._get_state_partition_context(
                     current_context,
@@ -1029,6 +1084,8 @@ class Stream(metaclass=abc.ABCMeta):
                 )
 
                 for record_result in self.get_records(current_context):
+                    self._check_max_record_limit(current_record_index=record_index)
+
                     if isinstance(record_result, tuple):
                         # Tuple items should be the record and the child context
                         record, child_context = record_result
@@ -1044,30 +1101,29 @@ class Stream(metaclass=abc.ABCMeta):
                         log_sort_error(
                             log_fn=self.logger.error,
                             ex=ex,
-                            record_count=record_count + 1,
-                            partition_record_count=partition_record_count + 1,
+                            record_count=record_index + 1,
+                            partition_record_count=partition_record_index + 1,
                             current_context=current_context,
                             state_partition_context=state_partition_context,
                             stream_name=self.name,
                         )
                         raise ex
 
-                    self._check_max_record_limit(record_count)
-
                     if selected:
-                        if (
-                            record_count - 1
-                        ) % self.STATE_MSG_FREQUENCY == 0 and write_messages:
-                            self._write_state_message()
                         if write_messages:
                             self._write_record_message(record)
-                        self._increment_stream_state(record, context=current_context)
 
-                        yield record
+                        self._increment_stream_state(record, context=current_context)
+                        if (
+                            record_index + 1
+                        ) % self.STATE_MSG_FREQUENCY == 0 and write_messages:
+                            self._write_state_message()
 
                         record_counter.increment()
-                        record_count += 1
-                        partition_record_count += 1
+                        yield record
+
+                    record_index += 1
+                    partition_record_index += 1
 
                 if current_context == state_partition_context:
                     # Finalize per-partition state only if 1:1 with context
@@ -1112,7 +1168,7 @@ class Stream(metaclass=abc.ABCMeta):
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
             msg += f" with context: {context}"
-        self.logger.info(f"{msg}...")
+        self.logger.info("%s...", msg)
 
         # Use a replication signpost, if available
         signpost = self.get_replication_key_signpost(context)
@@ -1131,7 +1187,15 @@ class Stream(metaclass=abc.ABCMeta):
             for _ in self._sync_records(context=context):
                 pass
 
-    def _sync_children(self, child_context: dict) -> None:
+    def _sync_children(self, child_context: dict | None) -> None:
+        if child_context is None:
+            self.logger.warning(
+                "Context for child streams of '%s' is null, "
+                "skipping sync of any child streams",
+                self.name,
+            )
+            return
+
         for child_stream in self.child_streams:
             if child_stream.selected or child_stream.has_selected_descendents:
                 child_stream.sync(context=child_context)
@@ -1175,7 +1239,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         return {k: v for k, v in context.items() if k in self.state_partitioning_keys}
 
-    def get_child_context(self, record: dict, context: dict | None) -> dict:
+    def get_child_context(self, record: dict, context: dict | None) -> dict | None:
         """Return a child context object from the record and optional provided context.
 
         By default, will return context if provided and otherwise the record dict.
@@ -1183,12 +1247,16 @@ class Stream(metaclass=abc.ABCMeta):
         Developers may override this behavior to send specific information to child
         streams for context.
 
+        Return ``None`` if no child streams should be synced, for example if the
+        parent record was deleted and the child records can no longer be synced.
+
         Args:
             record: Individual record in the stream.
             context: Stream partition or context dictionary.
 
         Returns:
-            A dictionary with context values for a child stream.
+            A dictionary with context values for a child stream, or None if no child
+            streams should be synced.
 
         Raises:
             NotImplementedError: If the stream has children but this method is not
@@ -1212,7 +1280,10 @@ class Stream(metaclass=abc.ABCMeta):
     # Abstract Methods
 
     @abc.abstractmethod
-    def get_records(self, context: dict | None) -> Iterable[dict | tuple[dict, dict]]:
+    def get_records(
+        self,
+        context: dict | None,
+    ) -> t.Iterable[dict | tuple[dict, dict | None]]:
         """Abstract record generator function. Must be overridden by the child class.
 
         Each record emitted should be a dictionary of property names to their values.
@@ -1231,13 +1302,18 @@ class Stream(metaclass=abc.ABCMeta):
         Parent streams can optionally return a tuple, in which
         case the second item in the tuple being a `child_context` dictionary for the
         stream's `context`.
+
+        If the child context object in the tuple is ``None``, the child streams will
+        be skipped. This is useful for cases where the parent record was deleted and
+        the child records can no longer be synced.
+
         More info: :doc:`/parent_streams`
 
         Args:
             context: Stream partition or context dictionary.
         """
 
-    def get_batch_config(self, config: Mapping) -> BatchConfig | None:
+    def get_batch_config(self, config: t.Mapping) -> BatchConfig | None:
         """Return the batch config for this stream.
 
         Args:
@@ -1253,7 +1329,7 @@ class Stream(metaclass=abc.ABCMeta):
         self,
         batch_config: BatchConfig,
         context: dict | None = None,
-    ) -> Iterable[tuple[BaseBatchFileEncoding, list[str]]]:
+    ) -> t.Iterable[tuple[BaseBatchFileEncoding, list[str]]]:
         """Batch generator function.
 
         Developers are encouraged to override this method to customize batching

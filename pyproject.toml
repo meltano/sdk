@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.22.0"
+version = "0.25.0"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 maintainers = ["Meltano Team and Contributors"]
@@ -57,7 +57,7 @@ python-dotenv = ">=0.20,<0.22"
 typing-extensions = "^4.2.0"
 simplejson = "^3.17.6"
 jsonschema = "^4.16.0"
-pytz = "^2022.2.1"
+pytz = ">=2022.2.1,<2024.0.0"
 PyYAML = "^6.0"
 
 # Sphinx dependencies installed as optional 'docs' extras
@@ -107,7 +107,7 @@ requests-mock = "^1.10.0"
 sqlalchemy2-stubs = {version = "^0.0.2a32", allow-prereleases = true}
 types-jsonschema = "^4.17.0.6"
 types-python-dateutil = "^2.8.19"
-types-pytz = "^2022.7.1.2"
+types-pytz = ">=2022.7.1.2,<2024.0.0.0"
 types-requests = "^2.28.11"
 types-simplejson = "^3.18.0"
 types-PyYAML = "^6.0.12"
@@ -140,7 +140,7 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.22.0"
+version = "0.25.0"
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
     "docs/conf.py",
@@ -190,6 +190,7 @@ plugins = [
 ]
 python_version = "3.8"
 warn_unused_configs = true
+warn_unused_ignores = true
 warn_return_any = true
 
 [[tool.mypy.overrides]]
@@ -216,22 +217,33 @@ exclude = [
     "cookiecutter/*",
 ]
 ignore = [
-    "ANN101",
-    "ANN102",
+    "ANN101",  # Missing type annotation for `self` in method
+    "ANN102",  # Missing type annotation for `cls` in class method
+    "N818",    # Exception name should be named with an Error suffix
 ]
 line-length = 88
 select = [
-    "E",
-    "F",
+    "F",    # Pyflakes
+    "E",    # pycodestyle (error)
+    "W",    # pycodestyle (warning)
     "I",    # isort
+    "N",    # pep8-naming
     "D",    # pydocstyle/flake8-docstrings
     "UP",   # pyupgrade
     "YTT",  # flake8-2020
     "ANN",  # flake8-annotations
+    "S",    # flake8-bandit
+    "BLE",  # flake8-blind-except
+    "FBT",  # flake8-boolean-trap
+    "B",    # flake8-bugbear
+    "A",    # flake8-builtins
     "COM",  # flake8-commas
+    "C4",   # flake8-comprehensions
+    "DTZ",  # flake8-datetimezs
     "T10",  # flake8-debugger
     "ISC",  # flake8-implicit-str-concat
     "ICN",  # flake8-import-conventions
+    "G",    # flake8-logging-format
     "INP",  # flake8-no-pep420
     "PIE",  # flake8-pie
     "T20",  # flake8-print
@@ -239,9 +251,17 @@ select = [
     "RSE",  # flake8-raise
     "RET",  # flake8-return
     "SIM",  # flake8-simplify
+    "TID",  # flake8-tidy-imports
     "TCH",  # flake8-type-checking
     "ARG",  # flake8-unused-arguments
     "PTH",  # flake8-use-pathlib
+    "ERA",  # eradicate
+    "PGH",  # pygrep-hooks
+    "PLC",  # pylint (convention)
+    "PLE",  # pylint (error)
+    "PLR",  # pylint (refactor)
+    "PLW",  # pylint (warning)
+    "RUF",  # ruff
 ]
 src = ["samples", "singer_sdk", "tests"]
 target-version = "py37"
@@ -253,18 +273,25 @@ target-version = "py37"
     "INP001", # flake8-no-pep420: implicit-namespace-package
 ]
 "noxfile.py" = ["ANN"]
-"tests/*" = ["ANN", "D1", "D2"]
+"tests/*" = ["ANN", "D1", "D2", "FBT001", "FBT003", "PLR2004", "S101"]
 # Disabled some checks in samples code
 "samples/*" = ["ANN", "D"]
 # Don't require docstrings conventions or type annotations in private modules
 "singer_sdk/helpers/_*.py" = ["ANN", "D105"]
 # Templates support a generic resource of type Any.
+"singer_sdk/testing/*.py" = ["S101"]
 "singer_sdk/testing/templates.py" = ["ANN401"]
 
 [tool.ruff.flake8-annotations]
 allow-star-arg-any = true
 mypy-init-return = true
 suppress-dummy-args = true
+
+[tool.ruff.flake8-import-conventions]
+banned-from = ["typing"]
+
+[tool.ruff.flake8-import-conventions.extend-aliases]
+typing = "t"
 
 [tool.ruff.flake8-pytest-style]
 fixture-parentheses = false
@@ -276,3 +303,6 @@ required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.pydocstyle]
 convention = "google"
+
+[tool.ruff.pylint]
+max-args = 9

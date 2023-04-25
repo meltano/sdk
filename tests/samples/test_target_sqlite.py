@@ -44,13 +44,13 @@ def sqlite_target_test_config(path_to_target_db: str) -> dict:
 @pytest.fixture
 def sqlite_sample_target(sqlite_target_test_config):
     """Get a sample target object."""
-    return SQLiteTarget(sqlite_target_test_config)
+    return SQLiteTarget(config=sqlite_target_test_config)
 
 
 @pytest.fixture
 def sqlite_sample_target_soft_delete(sqlite_target_test_config):
     """Get a sample target object with hard_delete disabled."""
-    return SQLiteTarget({**sqlite_target_test_config, "hard_delete": False})
+    return SQLiteTarget(config={**sqlite_target_test_config, "hard_delete": False})
 
 
 @pytest.fixture
@@ -58,7 +58,7 @@ def sqlite_sample_target_batch(sqlite_target_test_config):
     """Get a sample target object with hard_delete disabled."""
     conf = sqlite_target_test_config
 
-    return SQLiteTarget(conf)
+    return SQLiteTarget(config=conf)
 
 
 # SQLite Target Tests
@@ -103,17 +103,17 @@ def test_sync_sqlite_to_sqlite(
     ):
         try:
             orig_json = json.loads(orig_out)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
             raise RuntimeError(
                 f"Could not parse JSON in orig line {line_num}: {orig_out}",
-            )
+            ) from e
 
         try:
             tapped_json = json.loads(new_out)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
             raise RuntimeError(
                 f"Could not parse JSON in new line {line_num}: {new_out}",
-            )
+            ) from e
 
         assert (
             tapped_json["type"] == orig_json["type"]

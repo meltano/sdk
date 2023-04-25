@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import contextlib
+import typing as t
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.streams import Stream
 
     from .config import SuiteConfig
@@ -32,10 +32,10 @@ class TestTemplate:
     """
 
     name: str | None = None
-    type: str | None = None
+    plugin_type: str | None = None
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Raises:
@@ -83,7 +83,7 @@ class TestTemplate:
     def run(
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TapTestRunner | TargetTestRunner,
     ) -> None:
         """Test main run method.
@@ -96,7 +96,7 @@ class TestTemplate:
         Raises:
             ValueError: if Test instance does not have `name` and `type` properties.
         """
-        if not self.name or not self.type:
+        if not self.name or not self.plugin_type:
             raise ValueError("Test must have 'name' and 'type' properties.")
 
         self.config = config
@@ -119,10 +119,10 @@ class TestTemplate:
 class TapTestTemplate(TestTemplate):
     """Base Tap test template."""
 
-    type = "tap"
+    plugin_type = "tap"
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Returns:
@@ -133,7 +133,7 @@ class TapTestTemplate(TestTemplate):
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TapTestRunner,
     ) -> None:
         """Test main run method.
@@ -143,18 +143,18 @@ class TapTestTemplate(TestTemplate):
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap or Target runner instance, to use with this test.
         """
-        self.tap = runner.tap
+        self.tap = runner.new_tap()
         super().run(config, resource, runner)
 
 
 class StreamTestTemplate(TestTemplate):
     """Base Tap Stream test template."""
 
-    type = "stream"
+    plugin_type = "stream"
     required_kwargs = ["stream"]
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Returns:
@@ -165,7 +165,7 @@ class StreamTestTemplate(TestTemplate):
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TapTestRunner,
         stream: Stream,
     ) -> None:
@@ -185,10 +185,10 @@ class StreamTestTemplate(TestTemplate):
 class AttributeTestTemplate(TestTemplate):
     """Base Tap Stream Attribute template."""
 
-    type = "attribute"
+    plugin_type = "attribute"
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Returns:
@@ -199,7 +199,7 @@ class AttributeTestTemplate(TestTemplate):
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TapTestRunner,
         stream: Stream,
         attribute_name: str,
@@ -220,7 +220,7 @@ class AttributeTestTemplate(TestTemplate):
         super().run(config, resource, runner)
 
     @property
-    def non_null_attribute_values(self) -> list[Any]:
+    def non_null_attribute_values(self) -> list[t.Any]:
         """Extract attribute values from stream records.
 
         Returns:
@@ -232,7 +232,10 @@ class AttributeTestTemplate(TestTemplate):
             if r.get(self.attribute_name) is not None
         ]
         if not values:
-            warnings.warn(UserWarning("No records were available to test."))
+            warnings.warn(
+                UserWarning("No records were available to test."),
+                stacklevel=2,
+            )
         return values
 
     @classmethod
@@ -261,12 +264,12 @@ class AttributeTestTemplate(TestTemplate):
 class TargetTestTemplate(TestTemplate):
     """Base Target test template."""
 
-    type = "target"
+    plugin_type = "target"
 
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TargetTestRunner,
     ) -> None:
         """Test main run method.
@@ -276,11 +279,11 @@ class TargetTestTemplate(TestTemplate):
             resource: A generic external resource, provided by a pytest fixture.
             runner: A Tap runner instance, to use with this test.
         """
-        self.target = runner.target
+        self.target = runner.new_target()
         super().run(config, resource, runner)
 
     @property
-    def id(self) -> str:
+    def id(self) -> str:  # noqa: A003
         """Test ID.
 
         Returns:
@@ -298,7 +301,7 @@ class TargetFileTestTemplate(TargetTestTemplate):
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TargetTestRunner,
     ) -> None:
         """Test main run method.

@@ -61,13 +61,13 @@ def test_record_message_naive_time_extracted():
         singer.RecordMessage(
             stream="test",
             record={"id": 1, "name": "test"},
-            time_extracted=datetime(2021, 1, 1),
+            time_extracted=datetime(2021, 1, 1),  # noqa: DTZ001
         )
 
 
 def test_record_message_time_extracted_to_utc():
     """Check that record message's time_extracted is converted to UTC."""
-    naive = datetime(2021, 1, 1, 12)
+    naive = datetime(2021, 1, 1, 12)  # noqa: DTZ001
     nairobi = timezone("Africa/Nairobi")
 
     record = singer.RecordMessage(
