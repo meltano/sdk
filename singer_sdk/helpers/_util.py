@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import json
+import typing as t
 from pathlib import Path, PurePath
-from typing import Any, cast
 
 import pendulum
 
 
-def read_json_file(path: PurePath | str) -> dict[str, Any]:
+def read_json_file(path: PurePath | str) -> dict[str, t.Any]:
     """Read json file, thowing an error if missing."""
     if not path:
         raise RuntimeError("Could not open file. Filepath not provided.")
@@ -21,7 +21,7 @@ def read_json_file(path: PurePath | str) -> dict[str, Any]:
                 msg += f"\nFor more info, please see the sample template at: {template}"
         raise FileExistsError(msg)
 
-    return cast(dict, json.loads(Path(path).read_text()))
+    return t.cast(dict, json.loads(Path(path).read_text()))
 
 
 def utc_now() -> pendulum.DateTime:

@@ -3,9 +3,9 @@ from __future__ import annotations
 
 import json
 import shutil
+import typing as t
 import uuid
 from pathlib import Path
-from typing import Any
 
 import pytest
 from click.testing import CliRunner
@@ -49,8 +49,8 @@ class TestSampleTargetCSV(StandardTests):
         shutil.rmtree(test_output_dir)
 
 
-SAMPLE_TAP_CONFIG: dict[str, Any] = {}
-COUNTRIES_STREAM_MAPS_CONFIG: dict[str, Any] = {
+SAMPLE_TAP_CONFIG: dict[str, t.Any] = {}
+COUNTRIES_STREAM_MAPS_CONFIG: dict[str, t.Any] = {
     "stream_maps": {"continents": {}, "__else__": None},
 }
 

@@ -9,6 +9,6 @@ if sys.version_info < (3, 8):
     from typing_extensions import final
 else:
     from importlib import metadata
-    from typing import final
+    from typing import final  # noqa: ICN003
 
 __all__ = ["metadata", "final"]

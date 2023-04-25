@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import re
+import typing as t
 from textwrap import dedent
-from typing import TYPE_CHECKING, Callable
 
 import pytest
 
@@ -52,14 +52,14 @@ from singer_sdk.typing import (
     UUIDType,
 )
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from pathlib import Path
 
     from pytest_snapshot.plugin import Snapshot
 
     from singer_sdk.streams.core import Stream
 
-TYPE_FN_CHECKS: set[Callable] = {
+TYPE_FN_CHECKS: set[t.Callable] = {
     is_array_type,
     is_boolean_type,
     is_date_or_datetime_type,
@@ -483,7 +483,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
 def test_property_creation(
     property_obj: Property,
     expected_jsonschema: dict,
-    type_fn_checks_true: set[Callable],
+    type_fn_checks_true: set[t.Callable],
 ) -> None:
     property_dict = property_obj.to_dict()
     assert property_dict == expected_jsonschema

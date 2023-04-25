@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+import typing as t
 import warnings
-from typing import TYPE_CHECKING, Type, cast
 
 from dateutil import parser
 
@@ -12,7 +12,7 @@ from singer_sdk import Tap
 
 from .templates import AttributeTestTemplate, StreamTestTemplate, TapTestTemplate
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.streams.core import Stream
 
 
@@ -40,7 +40,7 @@ class TapDiscoveryTest(TapTestTemplate):
         catalog = tap1.catalog_dict
         # Reset and re-initialize with discovered catalog
         kwargs = {k: v for k, v in self.runner.default_kwargs.items() if k != "catalog"}
-        tap2: Tap = cast(Type[Tap], self.runner.singer_class)(
+        tap2: Tap = t.cast(t.Type[Tap], self.runner.singer_class)(
             config=self.runner.config,
             catalog=catalog,
             **kwargs,

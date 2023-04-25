@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import copy
 import datetime
+import typing as t
 from enum import Enum
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, cast
 
 import pendulum
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import logging
 
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
@@ -28,7 +28,7 @@ class DatetimeErrorTreatmentEnum(Enum):
     NULL = "null"
 
 
-def to_json_compatible(val: Any) -> Any:
+def to_json_compatible(val: t.Any) -> t.Any:
     """Return as string if datetime. JSON does not support proper datetime types.
 
     If given a naive datetime object, pendulum automatically makes it utc
@@ -166,11 +166,11 @@ def get_datelike_property_type(property_schema: dict) -> str | None:
     Otherwise return None.
     """
     if _is_string_with_format(property_schema):
-        return cast(str, property_schema["format"])
+        return t.cast(str, property_schema["format"])
     if "anyOf" in property_schema:
         for type_dict in property_schema["anyOf"]:
             if _is_string_with_format(type_dict):
-                return cast(str, type_dict["format"])
+                return t.cast(str, type_dict["format"])
     return None
 
 
@@ -192,7 +192,7 @@ def handle_invalid_timestamp_in_record(
     ex: Exception,
     treatment: DatetimeErrorTreatmentEnum | None,
     logger: logging.Logger,
-) -> Any:
+) -> t.Any:
     """Apply treatment or raise an error for invalid time values."""
     treatment = treatment or DatetimeErrorTreatmentEnum.ERROR
     msg = (
@@ -363,11 +363,11 @@ class TypeConformanceLevel(Enum):
 
 def conform_record_data_types(
     stream_name: str,
-    record: dict[str, Any],
+    record: dict[str, t.Any],
     schema: dict,
     level: TypeConformanceLevel,
     logger: logging.Logger,
-) -> dict[str, Any]:
+) -> dict[str, t.Any]:
     """Translate values in record dictionary to singer-compatible data types.
 
     Any property names not found in the schema catalog will be removed, and a single
@@ -382,11 +382,11 @@ def conform_record_data_types(
 
 
 def _conform_record_data_types(  # noqa: PLR0912
-    input_object: dict[str, Any],
+    input_object: dict[str, t.Any],
     schema: dict,
     level: TypeConformanceLevel,
     parent: str | None,
-) -> tuple[dict[str, Any], list[str]]:
+) -> tuple[dict[str, t.Any], list[str]]:
     """Translate values in record dictionary to singer-compatible data types.
 
     Any property names not found in the schema catalog will be removed, and a single
@@ -400,7 +400,7 @@ def _conform_record_data_types(  # noqa: PLR0912
         level:  Specifies how recursive the conformance process should be
         parent: '.' seperated path to this element from the object root (for logging)
     """
-    output_object: dict[str, Any] = {}
+    output_object: dict[str, t.Any] = {}
     unmapped_properties: list[str] = []
 
     if level == TypeConformanceLevel.NONE:
@@ -464,9 +464,9 @@ def _conform_record_data_types(  # noqa: PLR0912
 
 
 def _conform_primitive_property(  # noqa: PLR0911
-    elem: Any,
+    elem: t.Any,
     property_schema: dict,
-) -> Any:
+) -> t.Any:
     """Converts a primitive (i.e. not object or array) to a json compatible type."""
     if isinstance(elem, (datetime.datetime, pendulum.DateTime)):
         return to_json_compatible(elem)

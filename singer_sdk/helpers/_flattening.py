@@ -6,15 +6,15 @@ import collections
 import itertools
 import json
 import re
+import typing as t
 from copy import deepcopy
-from typing import Any, Mapping, MutableMapping, NamedTuple
 
 import inflection
 
 DEFAULT_FLATTENING_SEPARATOR = "__"
 
 
-class FlatteningOptions(NamedTuple):
+class FlatteningOptions(t.NamedTuple):
     """A stream map which performs the flattening role."""
 
     max_level: int
@@ -23,7 +23,7 @@ class FlatteningOptions(NamedTuple):
 
 
 def get_flattening_options(
-    plugin_config: Mapping,
+    plugin_config: t.Mapping,
 ) -> FlatteningOptions | None:
     """Get flattening options, if flattening is enabled.
 
@@ -301,7 +301,7 @@ def flatten_record(
 
 
 def _flatten_record(
-    record_node: MutableMapping[Any, Any],
+    record_node: t.MutableMapping[t.Any, t.Any],
     *,
     flattened_schema: dict | None = None,
     parent_key: list[str] | None = None,
@@ -328,7 +328,7 @@ def _flatten_record(
     if parent_key is None:
         parent_key = []
 
-    items: list[tuple[str, Any]] = []
+    items: list[tuple[str, t.Any]] = []
     for k, v in record_node.items():
         new_key = flatten_key(k, parent_key, separator)
         if isinstance(v, collections.abc.MutableMapping) and level < max_level:
@@ -355,7 +355,7 @@ def _flatten_record(
     return dict(items)
 
 
-def _should_jsondump_value(key: str, value: Any, flattened_schema=None) -> bool:
+def _should_jsondump_value(key: str, value: t.Any, flattened_schema=None) -> bool:
     """Return True if json.dump() should be used to serialize the value.
 
     Args:

@@ -8,23 +8,23 @@ import json
 import logging
 import logging.config
 import os
+import typing as t
 from dataclasses import dataclass, field
 from pathlib import Path
 from time import time
-from typing import TYPE_CHECKING, Any, Generic, Mapping, TypeVar
 
 import yaml
 
 from singer_sdk.helpers._resources import Traversable, get_package_files
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from types import TracebackType
 
 DEFAULT_LOG_INTERVAL = 60.0
 METRICS_LOGGER_NAME = __name__
 METRICS_LOG_LEVEL_SETTING = "metrics_log_level"
 
-_TVal = TypeVar("_TVal")
+_TVal = t.TypeVar("_TVal")
 
 
 class Status(str, enum.Enum):
@@ -57,13 +57,13 @@ class Metric(str, enum.Enum):
 
 
 @dataclass
-class Point(Generic[_TVal]):
+class Point(t.Generic[_TVal]):
     """An individual metric measurement."""
 
     metric_type: str
     metric: Metric
     value: _TVal
-    tags: dict[str, Any] = field(default_factory=dict)
+    tags: dict[str, t.Any] = field(default_factory=dict)
 
     def __str__(self) -> str:
         """Get string representation of this measurement.
@@ -291,7 +291,7 @@ def record_counter(
     stream: str,
     endpoint: str | None = None,
     log_interval: float = DEFAULT_LOG_INTERVAL,
-    **tags: Any,
+    **tags: t.Any,
 ) -> Counter:
     """Use for counting records retrieved from the source.
 
@@ -315,7 +315,7 @@ def record_counter(
     return Counter(Metric.RECORD_COUNT, tags, log_interval=log_interval)
 
 
-def batch_counter(stream: str, **tags: Any) -> Counter:
+def batch_counter(stream: str, **tags: t.Any) -> Counter:
     """Use for counting batches sent to the target.
 
     with batch_counter("my_stream") as counter:
@@ -338,7 +338,7 @@ def http_request_counter(
     stream: str,
     endpoint: str,
     log_interval: float = DEFAULT_LOG_INTERVAL,
-    **tags: Any,
+    **tags: t.Any,
 ) -> Counter:
     """Use for counting HTTP requests.
 
@@ -360,7 +360,7 @@ def http_request_counter(
     return Counter(Metric.HTTP_REQUEST_COUNT, tags, log_interval=log_interval)
 
 
-def sync_timer(stream: str, **tags: Any) -> Timer:
+def sync_timer(stream: str, **tags: t.Any) -> Timer:
     """Use for timing the sync of a stream.
 
     with singer.metrics.sync_timer() as timer:
@@ -378,7 +378,7 @@ def sync_timer(stream: str, **tags: Any) -> Timer:
     return Timer(Metric.SYNC_DURATION, tags)
 
 
-def _load_yaml_logging_config(path: Traversable | Path) -> Any:  # noqa: ANN401
+def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN401
     """Load the logging config from the YAML file.
 
     Args:
@@ -391,7 +391,7 @@ def _load_yaml_logging_config(path: Traversable | Path) -> Any:  # noqa: ANN401
         return yaml.safe_load(f)
 
 
-def _get_default_config() -> Any:  # noqa: ANN401
+def _get_default_config() -> t.Any:  # noqa: ANN401
     """Get a logging configuration.
 
     Returns:
@@ -401,7 +401,7 @@ def _get_default_config() -> Any:  # noqa: ANN401
     return _load_yaml_logging_config(log_config_path)
 
 
-def _setup_logging(config: Mapping[str, Any]) -> None:
+def _setup_logging(config: t.Mapping[str, t.Any]) -> None:
     """Setup logging.
 
     Args:

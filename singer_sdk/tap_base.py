@@ -6,8 +6,8 @@ from __future__ import annotations
 import abc
 import contextlib
 import json
+import typing as t
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, cast
 
 import click
 
@@ -27,7 +27,7 @@ from singer_sdk.helpers.capabilities import (
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from pathlib import PurePath
 
     from singer_sdk.streams import SQLStream, Stream
@@ -200,7 +200,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     def run_sync_dry_run(
         self,
         dry_run_record_limit: int | None = 1,
-        streams: Iterable[Stream] | None = None,
+        streams: t.Iterable[Stream] | None = None,
     ) -> bool:
         """Run connection test.
 
@@ -263,7 +263,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         Returns:
             The tap's catalog as a dict
         """
-        return cast(dict, self._singer_catalog.to_dict())
+        return t.cast(dict, self._singer_catalog.to_dict())
 
     @property
     def catalog_json_text(self) -> str:
@@ -286,7 +286,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             for stream in self.streams.values()
         )
 
-    def discover_streams(self) -> Sequence[Stream]:
+    def discover_streams(self) -> t.Sequence[Stream]:
         """Initialize all available streams and return them as a list.
 
         Return:
@@ -343,7 +343,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     # Bookmarks and state management
 
-    def load_state(self, state: dict[str, Any]) -> None:
+    def load_state(self, state: dict[str, t.Any]) -> None:
         """Merge or initialize stream state with the provided state dictionary input.
 
         Override this method to perform validation and backwards-compatibility patches
@@ -432,7 +432,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Command Line Execution
 
     @classproperty
-    def cli(cls) -> Callable:  # noqa: N805
+    def cli(cls) -> t.Callable:  # noqa: N805
         """Execute standard CLI handler for taps.
 
         Returns:

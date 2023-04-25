@@ -7,7 +7,7 @@ import copy
 import json
 import sys
 import time
-from typing import IO, TYPE_CHECKING, Callable, Counter
+import typing as t
 
 import click
 from joblib import Parallel, delayed, parallel_backend
@@ -27,7 +27,7 @@ from singer_sdk.io_base import SingerMessageType, SingerReader
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from io import FileIO
     from pathlib import PurePath
 
@@ -278,7 +278,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             )
             self.drain_all()
 
-    def _process_lines(self, file_input: IO[str]) -> Counter[str]:
+    def _process_lines(self, file_input: t.IO[str]) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:
@@ -517,7 +517,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     # CLI handler
 
     @classproperty
-    def cli(cls) -> Callable:  # noqa: N805
+    def cli(cls) -> t.Callable:  # noqa: N805
         """Execute standard CLI handler for taps.
 
         Returns:

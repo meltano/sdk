@@ -10,7 +10,7 @@ import copy
 import datetime
 import hashlib
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, Union
+import typing as t
 
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
 from singer_sdk.helpers import _simpleeval as simpleeval
@@ -31,11 +31,11 @@ from singer_sdk.typing import (
     StringType,
 )
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import sys
 
     if sys.version_info >= (3, 10):
-        from typing import TypeAlias
+        from typing import TypeAlias  # noqa: ICN003
     else:
         from typing_extensions import TypeAlias
 
@@ -62,7 +62,7 @@ def md5(string: str) -> str:
     return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
 
 
-StreamMapsDict: TypeAlias = Dict[str, Union[str, dict, None]]
+StreamMapsDict: TypeAlias = t.Dict[str, t.Union[str, dict, None]]
 
 
 class StreamMap(metaclass=abc.ABCMeta):
@@ -260,8 +260,8 @@ class CustomStreamMap(StreamMap):
         )
 
         self.map_config = map_config
-        self._transform_fn: Callable[[dict], dict | None]
-        self._filter_fn: Callable[[dict], bool]
+        self._transform_fn: t.Callable[[dict], dict | None]
+        self._filter_fn: t.Callable[[dict], bool]
         (
             self._filter_fn,
             self._transform_fn,
@@ -295,13 +295,13 @@ class CustomStreamMap(StreamMap):
         return self._filter_fn(record)
 
     @property
-    def functions(self) -> dict[str, Callable]:
+    def functions(self) -> dict[str, t.Callable]:
         """Get availabale transformation functions.
 
         Returns:
             Functions which should be available for expression evaluation.
         """
-        funcs: dict[str, Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
+        funcs: dict[str, t.Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
         funcs["md5"] = md5
         funcs["datetime"] = datetime
         return funcs
@@ -386,7 +386,7 @@ class CustomStreamMap(StreamMap):
     def _init_functions_and_schema(  # noqa: PLR0912, PLR0915
         self,
         stream_map: dict,
-    ) -> tuple[Callable[[dict], bool], Callable[[dict], dict | None], dict]:
+    ) -> tuple[t.Callable[[dict], bool], t.Callable[[dict], dict | None], dict]:
         """Return a tuple: filter_fn, transform_fn, transformed_schema.
 
         Args:
@@ -494,7 +494,7 @@ class CustomStreamMap(StreamMap):
 
         # Declare function variables
 
-        def eval_filter(filter_rule: str) -> Callable[[dict], bool]:
+        def eval_filter(filter_rule: str) -> t.Callable[[dict], bool]:
             def _inner(record: dict) -> bool:
                 filter_result = self._eval(
                     expr=filter_rule,

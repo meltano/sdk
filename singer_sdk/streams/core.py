@@ -8,19 +8,10 @@ import datetime
 import gzip
 import itertools
 import json
+import typing as t
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Generator,
-    Iterable,
-    Iterator,
-    Mapping,
-    TypeVar,
-    cast,
-)
 from uuid import uuid4
 
 import pendulum
@@ -61,7 +52,7 @@ from singer_sdk.helpers._typing import (
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import logging
 
     from singer_sdk.plugin_base import PluginBase as TapBaseClass
@@ -71,14 +62,14 @@ REPLICATION_FULL_TABLE = "FULL_TABLE"
 REPLICATION_INCREMENTAL = "INCREMENTAL"
 REPLICATION_LOG_BASED = "LOG_BASED"
 
-FactoryType = TypeVar("FactoryType", bound="Stream")
-_T = TypeVar("_T")
+FactoryType = t.TypeVar("FactoryType", bound="Stream")
+_T = t.TypeVar("_T")
 
 
 def lazy_chunked_generator(
-    iterable: Iterable[_T],
+    iterable: t.Iterable[_T],
     chunk_size: int,
-) -> Generator[Iterator[_T], None, None]:
+) -> t.Generator[t.Iterator[_T], None, None]:
     """Yield a generator for each chunk of the given iterable.
 
     Args:
@@ -140,7 +131,7 @@ class Stream(metaclass=abc.ABCMeta):
     def __init__(
         self,
         tap: TapBaseClass,
-        schema: str | PathLike | dict[str, Any] | singer.Schema | None = None,
+        schema: str | PathLike | dict[str, t.Any] | singer.Schema | None = None,
         name: str | None = None,
     ) -> None:
         """Init tap stream.
@@ -252,7 +243,7 @@ class Stream(metaclass=abc.ABCMeta):
         type_dict = self.schema.get("properties", {}).get(self.replication_key)
         return is_datetime_type(type_dict)
 
-    def get_starting_replication_key_value(self, context: dict | None) -> Any | None:
+    def get_starting_replication_key_value(self, context: dict | None) -> t.Any | None:
         """Get starting replication key.
 
         Will return the value of the stream's replication key when `--state` is passed.
@@ -302,7 +293,7 @@ class Stream(metaclass=abc.ABCMeta):
                 f"The replication key {self.replication_key} is not of timestamp type",
             )
 
-        return cast(datetime.datetime, pendulum.parse(value))
+        return t.cast(datetime.datetime, pendulum.parse(value))
 
     @final
     @property
@@ -413,7 +404,7 @@ class Stream(metaclass=abc.ABCMeta):
     def get_replication_key_signpost(
         self,
         context: dict | None,  # noqa: ARG002
-    ) -> datetime.datetime | Any | None:
+    ) -> datetime.datetime | t.Any | None:
         """Get the replication signpost.
 
         For timestamp-based replication keys, this defaults to `utc_now()`. For
@@ -610,7 +601,7 @@ class Stream(metaclass=abc.ABCMeta):
         return singer.Catalog([(self.tap_stream_id, self._singer_catalog_entry)])
 
     @property
-    def config(self) -> Mapping[str, Any]:
+    def config(self) -> t.Mapping[str, t.Any]:
         """Get stream configuration.
 
         Returns:
@@ -741,7 +732,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _increment_stream_state(
         self,
-        latest_record: dict[str, Any],
+        latest_record: dict[str, t.Any],
         *,
         context: dict | None = None,
     ) -> None:
@@ -790,7 +781,9 @@ class Stream(metaclass=abc.ABCMeta):
             singer.write_message(singer.StateMessage(value=self.tap_state))
             self._is_state_flushed = True
 
-    def _generate_schema_messages(self) -> Generator[singer.SchemaMessage, None, None]:
+    def _generate_schema_messages(
+        self,
+    ) -> t.Generator[singer.SchemaMessage, None, None]:
         """Generate schema messages from stream maps.
 
         Yields:
@@ -830,7 +823,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _generate_record_messages(
         self,
         record: dict,
-    ) -> Generator[singer.RecordMessage, None, None]:
+    ) -> t.Generator[singer.RecordMessage, None, None]:
         """Write out a RECORD message.
 
         Args:
@@ -1050,7 +1043,7 @@ class Stream(metaclass=abc.ABCMeta):
         context: dict | None = None,
         *,
         write_messages: bool = True,
-    ) -> Generator[dict, Any, Any]:
+    ) -> t.Generator[dict, t.Any, t.Any]:
         """Sync records, emitting RECORD and STATE messages.
 
         Args:
@@ -1290,7 +1283,7 @@ class Stream(metaclass=abc.ABCMeta):
     def get_records(
         self,
         context: dict | None,
-    ) -> Iterable[dict | tuple[dict, dict | None]]:
+    ) -> t.Iterable[dict | tuple[dict, dict | None]]:
         """Abstract record generator function. Must be overridden by the child class.
 
         Each record emitted should be a dictionary of property names to their values.
@@ -1320,7 +1313,7 @@ class Stream(metaclass=abc.ABCMeta):
             context: Stream partition or context dictionary.
         """
 
-    def get_batch_config(self, config: Mapping) -> BatchConfig | None:
+    def get_batch_config(self, config: t.Mapping) -> BatchConfig | None:
         """Return the batch config for this stream.
 
         Args:
@@ -1336,7 +1329,7 @@ class Stream(metaclass=abc.ABCMeta):
         self,
         batch_config: BatchConfig,
         context: dict | None = None,
-    ) -> Iterable[tuple[BaseBatchFileEncoding, list[str]]]:
+    ) -> t.Iterable[tuple[BaseBatchFileEncoding, list[str]]]:
         """Batch generator function.
 
         Developers are encouraged to override this method to customize batching

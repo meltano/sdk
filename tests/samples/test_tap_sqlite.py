@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+import typing as t
 
 from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk import SQLStream
@@ -10,7 +10,7 @@ from singer_sdk.testing import (
     tap_to_target_sync_test,
 )
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from pathlib import Path
 
     from singer_sdk.tap_base import SQLTap
@@ -25,7 +25,7 @@ def _discover_and_select_all(tap: SQLTap) -> None:
 
 
 def test_sql_metadata(sqlite_sample_tap: SQLTap):
-    stream = cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
+    stream = t.cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
     detected_metadata = stream.catalog_entry["metadata"]
     detected_root_md = [md for md in detected_metadata if md["breadcrumb"] == []][0]
     detected_root_md = detected_root_md["metadata"]
@@ -40,7 +40,7 @@ def test_sql_metadata(sqlite_sample_tap: SQLTap):
 def test_sqlite_discovery(sqlite_sample_tap: SQLTap):
     _discover_and_select_all(sqlite_sample_tap)
     sqlite_sample_tap.sync_all()
-    stream = cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
+    stream = t.cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
     schema = stream.schema
     assert len(schema["properties"]) == 2
     assert stream.name == stream.tap_stream_id == "main-t1"
@@ -59,7 +59,7 @@ def test_sqlite_discovery(sqlite_sample_tap: SQLTap):
 
 def test_sqlite_input_catalog(sqlite_sample_tap: SQLTap):
     sqlite_sample_tap.sync_all()
-    stream = cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
+    stream = t.cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
     assert len(stream.schema["properties"]) == 2
     assert len(stream.stream_maps[0].transformed_schema["properties"]) == 2
 

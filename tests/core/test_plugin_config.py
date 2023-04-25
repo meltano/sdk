@@ -3,15 +3,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+import typing as t
 
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import BooleanType, PropertiesList, Property
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.streams.core import Stream
 
-SAMPLE_CONFIG: dict[str, Any] = {}
+SAMPLE_CONFIG: dict[str, t.Any] = {}
 
 
 class TapConfigTest(Tap):

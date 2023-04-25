@@ -5,9 +5,9 @@ from __future__ import annotations
 import abc
 import logging
 import os
+import typing as t
 from pathlib import Path, PurePath
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Callable, Mapping, cast
 
 import click
 from jsonschema import Draft7Validator
@@ -27,7 +27,7 @@ from singer_sdk.helpers.capabilities import (
 )
 from singer_sdk.typing import extend_validator_with_defaults
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.mapper import PluginMapper
 
 SDK_PACKAGE_NAME = "singer_sdk"
@@ -131,7 +131,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         ]
 
     @classproperty
-    def _env_var_config(cls) -> dict[str, Any]:  # noqa: N805
+    def _env_var_config(cls) -> dict[str, t.Any]:  # noqa: N805
         """Return any config specified in environment variables.
 
         Variables must match the convention "<PLUGIN_NAME>_<SETTING_NAME>",
@@ -214,13 +214,13 @@ class PluginBase(metaclass=abc.ABCMeta):
     # Core plugin config:
 
     @property
-    def config(self) -> Mapping[str, Any]:
+    def config(self) -> t.Mapping[str, t.Any]:
         """Get config.
 
         Returns:
             A frozen (read-only) config dictionary map.
         """
-        return cast(dict, MappingProxyType(self._config))
+        return t.cast(dict, MappingProxyType(self._config))
 
     @staticmethod
     def _is_secret_config(config_key: str) -> bool:
@@ -292,7 +292,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     @classmethod
     def print_version(
         cls: type[PluginBase],
-        print_fn: Callable[[Any], None] = print,
+        print_fn: t.Callable[[t.Any], None] = print,
     ) -> None:
         """Print help text for the tap.
 
@@ -402,7 +402,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         return config_files, parse_env_config
 
     @classproperty
-    def cli(cls) -> Callable:  # noqa: N805
+    def cli(cls) -> t.Callable:  # noqa: N805
         """Handle command line execution.
 
         Returns:

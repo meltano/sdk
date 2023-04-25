@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import abc
-from typing import TYPE_CHECKING, Any, Iterable, cast
+import typing as t
 
 import sqlalchemy
 
@@ -12,7 +12,7 @@ from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.streams.core import Stream
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.plugin_base import PluginBase as TapBaseClass
 
 
@@ -52,7 +52,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             A CatalogEntry object.
         """
-        return cast(CatalogEntry, CatalogEntry.from_dict(self.catalog_entry))
+        return t.cast(CatalogEntry, CatalogEntry.from_dict(self.catalog_entry))
 
     @property
     def connector(self) -> SQLConnector:
@@ -83,7 +83,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             The schema object.
         """
-        return cast(dict, self._singer_catalog_entry.schema.to_dict())
+        return t.cast(dict, self._singer_catalog_entry.schema.to_dict())
 
     @property
     def tap_stream_id(self) -> str:
@@ -154,7 +154,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         )
 
     # Get records from stream
-    def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
+    def get_records(self, context: dict | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
 
         If the stream has a replication_key value defined, records will be sorted by the
