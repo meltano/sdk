@@ -14,6 +14,7 @@ import click
 from jsonschema import Draft7Validator
 
 from singer_sdk import about, metrics
+from singer_sdk.cli import plugin_cli
 from singer_sdk.configuration._dict_config import parse_environment_config
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
@@ -37,25 +38,6 @@ SDK_PACKAGE_NAME = "singer_sdk"
 JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
 
 
-class PluginCLI:
-    """A descriptor for the plugin's CLI command."""
-
-    def __get__(self, instance: PluginBase, owner: type[PluginBase]) -> click.Command:
-        """Get the plugin's CLI command.
-
-        Args:
-            instance: The plugin instance.
-            owner: The plugin class.
-
-        Returns:
-            The plugin's CLI command.
-        """
-        if instance is None:
-            return owner.get_command()
-
-        return instance.get_command()
-
-
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
@@ -65,8 +47,6 @@ class PluginBase(metaclass=abc.ABCMeta):
     # A JSON Schema object defining the config options that this tap will accept.
 
     _config: dict
-
-    cli = PluginCLI()
 
     @classproperty
     def logger(cls) -> logging.Logger:  # noqa: N805
@@ -462,7 +442,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         ctx.exit()
 
     @classmethod
-    def get_command(cls: type[PluginBase]) -> click.Command:
+    def get_singer_command(cls: type[PluginBase]) -> click.Command:
         """Handle command line execution.
 
         Returns:
@@ -510,3 +490,12 @@ class PluginBase(metaclass=abc.ABCMeta):
                 ),
             ],
         )
+
+    @plugin_cli
+    def cli(cls) -> click.Command:
+        """Handle command line execution.
+
+        Returns:
+            A callable CLI object.
+        """
+        return cls.get_singer_command()

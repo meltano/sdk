@@ -523,13 +523,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         ctx.exit()
 
     @classmethod
-    def get_command(cls: type[Tap]) -> click.Command:
+    def get_singer_command(cls: type[Tap]) -> click.Command:
         """Execute standard CLI handler for taps.
 
         Returns:
             A click.Command object.
         """
-        command = super().get_command()
+        command = super().get_singer_command()
         command.help = "Execute the Singer tap."
         command.params.extend(
             [

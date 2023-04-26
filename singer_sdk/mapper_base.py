@@ -133,13 +133,13 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         mapper.listen(file_input)
 
     @classmethod
-    def get_command(cls: type[InlineMapper]) -> click.Command:
+    def get_singer_command(cls: type[InlineMapper]) -> click.Command:
         """Execute standard CLI handler for inline mappers.
 
         Returns:
             A click.Command object.
         """
-        command = super().get_command()
+        command = super().get_singer_command()
         command.help = "Execute the Singer mapper."
         command.params.extend(
             [
