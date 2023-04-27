@@ -12,24 +12,29 @@ import requests
 {% if cookiecutter.auth_method  == "API Key" -%}
 from singer_sdk.authenticators import APIKeyAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.pagination import BaseAPIPaginator
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {% elif cookiecutter.auth_method  == "Bearer Token" -%}
 from singer_sdk.authenticators import BearerTokenAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.pagination import BaseAPIPaginator
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {% elif cookiecutter.auth_method == "Basic Auth" -%}
 from singer_sdk.authenticators import BasicAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.pagination import BaseAPIPaginator
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {% elif cookiecutter.auth_method == "Custom or N/A" -%}
 from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.pagination import BaseAPIPaginator
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {% elif cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.pagination import BaseAPIPaginator
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
@@ -61,7 +66,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     #     return self.config["api_url"]
 
     records_jsonpath = "$[*]"  # Or override `parse_response`.
-    next_page_token_jsonpath = "$.next_page"  # Or override `get_next_page_token`.
+    next_page_token_jsonpath = "$.next_page"  # Or override `get_new_paginator`.
 
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
 
@@ -137,33 +142,20 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 {%- endif %}
         return headers
 
-    def get_next_page_token(
-        self,
-        response: requests.Response,
-        previous_token: Any | None,
-    ) -> Any | None:
-        """Return a token for identifying next page or None if no more pages.
+    def get_new_paginator(self) -> BaseAPIPaginator:
+        """Create a new pagination helper instance.
 
-        Args:
-            response: The HTTP ``requests.Response`` object.
-            previous_token: The previous page token value.
+        If the source API can make use of the `next_page_token_jsonpath`
+        attribute, or it contains a `X-Next-Page` header in the response
+        then you can remove this method.
+
+        If you need custom pagination that uses page numbers, "next" links, or
+        other approaches, please read the guide: https://sdk.meltano.com/en/v0.25.0/guides/pagination-classes.html.
 
         Returns:
-            The next pagination token.
+            A pagination helper instance.
         """
-        # TODO: If pagination is required, return a token which can be used to get the
-        #       next page. If this is the final page, return "None" to end the
-        #       pagination loop.
-        if self.next_page_token_jsonpath:
-            all_matches = extract_jsonpath(
-                self.next_page_token_jsonpath, response.json()
-            )
-            first_match = next(iter(all_matches), None)
-            next_page_token = first_match
-        else:
-            next_page_token = response.headers.get("X-Next-Page", None)
-
-        return next_page_token
+        return super().get_new_paginator()
 
     def get_url_params(
         self,
