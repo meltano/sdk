@@ -154,7 +154,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 
         Returns:
             A pagination helper instance.
-        """
+        """  # noqa: E501
         return super().get_new_paginator()
 
     def get_url_params(
