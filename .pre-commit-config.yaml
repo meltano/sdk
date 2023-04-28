@@ -16,7 +16,8 @@ repos:
   - id: check-yaml
     exclude: |
         (?x)^(
-            cookiecutter/.*/meltano.yml
+            cookiecutter/.*/meltano.yml|
+            cookiecutter/.*/.pre-commit-config.yaml
         )$
   - id: end-of-file-fixer
     exclude: |

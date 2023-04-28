@@ -55,7 +55,7 @@ class {{ cookiecutter.destination_name }}Sink({{ sinkclass }}):
         """
         # Sample:
         # ------
-        # client.write(record)
+        # client.write(record)  # noqa: ERA001
 
     {%- elif sinkclass == "BatchSink" -%}
 
