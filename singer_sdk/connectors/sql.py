@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 import typing as t
 import warnings
-from contextlib import contextmanager
 from datetime import datetime
 from functools import lru_cache
 
@@ -14,13 +13,14 @@ from sqlalchemy.engine import Engine
 
 from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
+from singer_sdk.connectors.base import BaseConnector
 from singer_sdk.exceptions import ConfigValidationError
 
 if t.TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
 
 
-class SQLConnector:
+class SQLConnector(BaseConnector):
     """Base class for SQLAlchemy-based connectors.
 
     The connector class serves as a wrapper around the SQL connection.
@@ -42,7 +42,7 @@ class SQLConnector:
 
     def __init__(
         self,
-        config: dict | None = None,
+        config: t.Mapping[str, t.Any] | None = None,
         sqlalchemy_url: str | None = None,
     ) -> None:
         """Initialize the SQL connector.
@@ -51,17 +51,8 @@ class SQLConnector:
             config: The parent tap or target object's config.
             sqlalchemy_url: Optional URL for the connection.
         """
-        self._config: dict[str, t.Any] = config or {}
+        super().__init__(config=config)
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
-
-    @property
-    def config(self) -> dict:
-        """If set, provides access to the tap or target config.
-
-        Returns:
-            The settings as a dict.
-        """
-        return self._config
 
     @property
     def logger(self) -> logging.Logger:
@@ -72,10 +63,20 @@ class SQLConnector:
         """
         return logging.getLogger("sqlconnector")
 
-    @contextmanager
-    def _connect(self) -> t.Iterator[sqlalchemy.engine.Connection]:
-        with self._engine.connect().execution_options(stream_results=True) as conn:
-            yield conn
+    def get_connection(
+        self,
+        *,
+        stream_results: bool = True,
+    ) -> sqlalchemy.engine.Connection:
+        """Return a new SQLAlchemy connection using the provided config.
+
+        Args:
+            stream_results: Whether to stream results from the database.
+
+        Returns:
+            A newly created SQLAlchemy connection object.
+        """
+        return self._engine.connect().execution_options(stream_results=stream_results)
 
     def create_sqlalchemy_connection(self) -> sqlalchemy.engine.Connection:
         """(DEPRECATED) Return a new SQLAlchemy connection using the provided config.
@@ -155,7 +156,7 @@ class SQLConnector:
 
         return self._sqlalchemy_url
 
-    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:
+    def get_sqlalchemy_url(self, config: t.Mapping[str, t.Any]) -> str:
         """Return the SQLAlchemy URL string.
 
         Developers can generally override just one of the following:

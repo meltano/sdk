@@ -39,8 +39,9 @@ nox.options.sessions = (
 test_dependencies = [
     "coverage[toml]",
     "pytest",
-    "pytest-snapshot",
     "pytest-durations",
+    "pytest-httpserver",
+    "pytest-snapshot",
     "freezegun",
     "pandas",
     "pyarrow",
