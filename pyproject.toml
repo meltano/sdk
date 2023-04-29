@@ -121,6 +121,8 @@ darglint = "^1.8.0"
 flake8 = "^3.9.0"
 flake8-annotations = "^2.9.1"
 flake8-docstrings = "^1.7.0"
+moto = "^4.1.8"
+boto3 = "^1.26.123"
 
 [tool.black]
 exclude = ".*simpleeval.*"
