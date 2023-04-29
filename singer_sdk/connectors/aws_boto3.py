@@ -220,7 +220,9 @@ class AWSBoto3Connector:
                 service_name,
             )
 
-    def _get_resource(self, session: boto3.session, service_name: str) -> boto3.resource:
+    def _get_resource(
+        self, session: boto3.session, service_name: str
+    ) -> boto3.resource:
         """Return the boto3 resource for the service.
 
         Args:

@@ -98,6 +98,7 @@ def test_get_session_assume_role():
     )
     auth._get_session()
 
+
 @mock_dynamodb
 @mock_sts
 def test_get_session_assume_role():
@@ -111,6 +112,7 @@ def test_get_session_assume_role():
         "dynamodb",
     )
     auth._get_session()
+
 
 @mock_dynamodb
 def test_get_client():
@@ -139,6 +141,7 @@ def test_get_resource():
     session = auth._get_session()
     auth._get_resource(session, "dynamodb")
 
+
 @patch(
     "singer_sdk.connectors.aws_boto3.AWSBoto3Connector._get_client",
     return_value="mock_client",
@@ -156,6 +159,7 @@ def test_client_property(patch):
     assert auth.client == auth._client
     auth.client
     patch.assert_called_once()
+
 
 @patch(
     "singer_sdk.connectors.aws_boto3.AWSBoto3Connector._get_resource",
@@ -175,8 +179,8 @@ def test_resource_property(patch):
     auth.resource
     patch.assert_called_once()
 
+
 @patch(
-        
     "singer_sdk.connectors.aws_boto3.boto3.session.Session.resource",
 )
 @mock_dynamodb
@@ -193,8 +197,10 @@ def test_resource_property_endpoint(patch):
     auth.resource
     patch.assert_called_with("dynamodb", endpoint_url="http://localhost:8000")
 
+
 def test_use_env_vars():
     import os
+
     with patch.dict(
         os.environ,
         {
@@ -203,7 +209,7 @@ def test_use_env_vars():
             "AWS_SESSION_TOKEN": "token",
             "AWS_PROFILE": "profile",
             "AWS_DEFAULT_REGION": "region",
-        }
+        },
     ):
         auth = AWSBoto3Connector(
             {
