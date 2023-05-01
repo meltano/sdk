@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from unittest.mock import patch
 
 from moto import mock_dynamodb, mock_sts

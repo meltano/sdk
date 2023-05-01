@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import logging
 import os
-from typing import Union
 
 from singer_sdk import typing as th  # JSON schema typing helpers
 
@@ -9,7 +10,7 @@ try:
 except ImportError:
     raise Exception(
         "boto3 is required for this authenticator. "
-        "Please install it with `poetry add boto3`."
+        "Please install it with `poetry add boto3`.",
     )
 
 AWS_AUTH_CONFIG = th.PropertiesList(
@@ -178,10 +179,8 @@ class AWSBoto3Connector:
                 region_name=self.aws_default_region,
             )
             self.logger.info(
-                (
-                    "Authenticating using access key id, secret access key, and "
-                    "session token."
-                )
+                "Authenticating using access key id, secret access key, and "
+                "session token.",
             )
         elif (
             self.aws_access_key_id
@@ -194,7 +193,7 @@ class AWSBoto3Connector:
                 region_name=self.aws_default_region,
             )
             self.logger.info(
-                "Authenticating using access key id and secret access key."
+                "Authenticating using access key id and secret access key.",
             )
         elif self.aws_profile:
             session = boto3.Session(profile_name=self.aws_profile)
@@ -208,8 +207,10 @@ class AWSBoto3Connector:
         return session
 
     def _factory(
-        self, aws_obj, service_name: str
-    ) -> Union[boto3.resource, boto3.client]:
+        self,
+        aws_obj,
+        service_name: str,
+    ) -> boto3.resource | boto3.client:
         if self.aws_endpoint_url:
             return aws_obj(
                 service_name,
@@ -221,7 +222,9 @@ class AWSBoto3Connector:
             )
 
     def _get_resource(
-        self, session: boto3.session, service_name: str
+        self,
+        session: boto3.session,
+        service_name: str,
     ) -> boto3.resource:
         """Return the boto3 resource for the service.
 
@@ -235,7 +238,9 @@ class AWSBoto3Connector:
         return self._factory(session.resource, service_name)
 
     def _get_client(
-        self, session: boto3.session.Session, service_name: str
+        self,
+        session: boto3.session.Session,
+        service_name: str,
     ) -> boto3.client:
         """Return the boto3 client for the service.
 
@@ -249,12 +254,15 @@ class AWSBoto3Connector:
         return self._factory(session.client, service_name)
 
     def _assume_role(
-        self, session: boto3.session.Session, role_arn: str
+        self,
+        session: boto3.session.Session,
+        role_arn: str,
     ) -> boto3.session.Session:
         # TODO: use for auto refresh https://github.com/benkehoe/aws-assume-role-lib
         sts_client = self._get_client(session, "sts")
         response = sts_client.assume_role(
-            RoleArn=role_arn, RoleSessionName="tap-dynamodb"
+            RoleArn=role_arn,
+            RoleSessionName="tap-dynamodb",
         )
         return boto3.Session(
             aws_access_key_id=response["Credentials"]["AccessKeyId"],
