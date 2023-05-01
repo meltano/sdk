@@ -1,3 +1,5 @@
+"""AWS Boto3 Connector."""
+
 from __future__ import annotations
 
 import logging
@@ -74,12 +76,13 @@ class AWSBoto3Connector:
 
     The functions of the connector are:
     - initializing a client, resource, or session with a simple interface
-    - accessing AWS credentials via config, env vars, or profile and supports assuming roles.
+    - accessing AWS credentials via config, env vars, or profile
+    - supports assuming roles
     - enables configurable endpoint_url for testing
     """
 
     def __init__(
-        self,
+        self: AWSBoto3Connector,
         config: dict,
         service_name: str,
     ) -> None:
@@ -111,7 +114,7 @@ class AWSBoto3Connector:
         self.aws_assume_role_arn = config.get("aws_assume_role_arn")
 
     @property
-    def config(self) -> dict:
+    def config(self: AWSBoto3Connector) -> dict:
         """If set, provides access to the tap or target config.
 
         Returns:
@@ -120,7 +123,7 @@ class AWSBoto3Connector:
         return self._config
 
     @property
-    def logger(self) -> logging.Logger:
+    def logger(self: AWSBoto3Connector) -> logging.Logger:
         """Get logger.
 
         Returns:
@@ -129,7 +132,7 @@ class AWSBoto3Connector:
         return logging.getLogger("aws_boto_connector")
 
     @property
-    def client(self) -> boto3.client:
+    def client(self: AWSBoto3Connector) -> boto3.client:
         """Return the boto3 client for the service.
 
         Returns:
@@ -143,7 +146,7 @@ class AWSBoto3Connector:
             return self._client
 
     @property
-    def resource(self) -> boto3.resource:
+    def resource(self: AWSBoto3Connector) -> boto3.resource:
         """Return the boto3 resource for the service.
 
         Returns:
@@ -156,14 +159,11 @@ class AWSBoto3Connector:
             self._resource = self._get_resource(session, self._service_name)
             return self._resource
 
-    def _get_session(self) -> boto3.session:
+    def _get_session(self: AWSBoto3Connector) -> boto3.session:
         """Return the boto3 session.
 
         Returns:
             boto3.session: The boto3 session.
-
-        Raises:
-            Exception: If no credentials are provided.
         """
         session = None
         if (
@@ -207,8 +207,8 @@ class AWSBoto3Connector:
         return session
 
     def _factory(
-        self,
-        aws_obj,
+        self: AWSBoto3Connector,
+        aws_obj: boto3.resource | boto3.client,
         service_name: str,
     ) -> boto3.resource | boto3.client:
         if self.aws_endpoint_url:
@@ -222,7 +222,7 @@ class AWSBoto3Connector:
             )
 
     def _get_resource(
-        self,
+        self: AWSBoto3Connector,
         session: boto3.session,
         service_name: str,
     ) -> boto3.resource:
@@ -238,7 +238,7 @@ class AWSBoto3Connector:
         return self._factory(session.resource, service_name)
 
     def _get_client(
-        self,
+        self: AWSBoto3Connector,
         session: boto3.session.Session,
         service_name: str,
     ) -> boto3.client:
@@ -254,7 +254,7 @@ class AWSBoto3Connector:
         return self._factory(session.client, service_name)
 
     def _assume_role(
-        self,
+        self: AWSBoto3Connector,
         session: boto3.session.Session,
         role_arn: str,
     ) -> boto3.session.Session:

@@ -102,21 +102,6 @@ def test_get_session_assume_role():
 
 
 @mock_dynamodb
-@mock_sts
-def test_get_session_assume_role():
-    auth = AWSBoto3Connector(
-        {
-            "aws_access_key_id": "foo",
-            "aws_secret_access_key": "bar",
-            "aws_default_region": "baz",
-            "aws_assume_role_arn": "arn:aws:iam::123456778910:role/my-role-name",
-        },
-        "dynamodb",
-    )
-    auth._get_session()
-
-
-@mock_dynamodb
 def test_get_client():
     auth = AWSBoto3Connector(
         {
@@ -159,7 +144,7 @@ def test_client_property(patch):
         "dynamodb",
     )
     assert auth.client == auth._client
-    auth.client
+    assert auth.client == auth._client
     patch.assert_called_once()
 
 
@@ -178,7 +163,7 @@ def test_resource_property(patch):
         "dynamodb",
     )
     assert auth.resource == auth._resource
-    auth.resource
+    assert auth.resource == auth._resource
     patch.assert_called_once()
 
 
@@ -196,7 +181,7 @@ def test_resource_property_endpoint(patch):
         },
         "dynamodb",
     )
-    auth.resource
+    assert auth.resource == auth._resource
     patch.assert_called_with("dynamodb", endpoint_url="http://localhost:8000")
 
 
