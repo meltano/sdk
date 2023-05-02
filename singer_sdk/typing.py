@@ -547,11 +547,11 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         wrapped = self.wrapped
 
         if isinstance(wrapped, type) and not isinstance(wrapped.type_dict, t.Mapping):
-            raise ValueError(
-                f"Type dict for {wrapped} is not defined. "
-                "Try instantiating it with a nested type such as "
-                f"{wrapped.__name__}(StringType).",
+            msg = (
+                f"Type dict for {wrapped} is not defined. Try instantiating it with a "
+                f"nested type such as {wrapped.__name__}(StringType)."
             )
+            raise ValueError(msg)
 
         return t.cast(dict, wrapped.type_dict)
 
@@ -795,7 +795,8 @@ def to_jsonschema_type(
     ):
         type_name = from_type.__name__
     else:
-        raise ValueError("Expected `str` or a SQLAlchemy `TypeEngine` object or type.")
+        msg = "Expected `str` or a SQLAlchemy `TypeEngine` object or type."
+        raise ValueError(msg)
 
     # Look for the type name within the known SQL type names:
     for sqltype, jsonschema_type in sqltype_lookup.items():

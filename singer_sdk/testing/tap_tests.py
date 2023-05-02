@@ -124,7 +124,8 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
                 (r[k] for k in primary_keys or []) for r in self.stream_records
             ]
         except KeyError as e:
-            raise AssertionError(f"Record missing primary key: {str(e)}") from e
+            msg = f"Record missing primary key: {str(e)}"
+            raise AssertionError(msg) from e
         count_unique_records = len(set(record_ids))
         count_records = len(self.stream_records)
         assert count_unique_records == count_records, (

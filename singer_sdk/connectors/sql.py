@@ -171,9 +171,8 @@ class SQLConnector:
             ConfigValidationError: If no valid sqlalchemy_url can be found.
         """
         if "sqlalchemy_url" not in config:
-            raise ConfigValidationError(
-                "Could not find or create 'sqlalchemy_url' for connection.",
-            )
+            msg = "Could not find or create 'sqlalchemy_url' for connection."
+            raise ConfigValidationError(msg)
 
         return t.cast(str, config["sqlalchemy_url"])
 
@@ -211,9 +210,11 @@ class SQLConnector:
             if issubclass(sql_type, sqlalchemy.types.TypeEngine):
                 return th.to_jsonschema_type(sql_type)
 
-            raise ValueError(f"Unexpected type received: '{sql_type.__name__}'")
+            msg = f"Unexpected type received: '{sql_type.__name__}'"
+            raise ValueError(msg)
 
-        raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
+        msg = f"Unexpected type received: '{type(sql_type).__name__}'"
+        raise ValueError(msg)
 
     @staticmethod
     def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
@@ -666,7 +667,8 @@ class SQLConnector:
             RuntimeError: if a variant schema is passed with no properties defined.
         """
         if as_temp_table:
-            raise NotImplementedError("Temporary tables are not supported.")
+            msg = "Temporary tables are not supported."
+            raise NotImplementedError(msg)
 
         _ = partition_keys  # Not supported in generic implementation.
 
@@ -677,9 +679,8 @@ class SQLConnector:
         try:
             properties: dict = schema["properties"]
         except KeyError as e:
-            raise RuntimeError(
-                f"Schema for '{full_table_name}' does not define properties: {schema}",
-            ) from e
+            msg = f"Schema for '{full_table_name}' does not define properties: {schema}"
+            raise RuntimeError(msg) from e
         for property_name, property_jsonschema in properties.items():
             is_primary_key = property_name in primary_keys
             columns.append(
@@ -710,7 +711,8 @@ class SQLConnector:
             NotImplementedError: if adding columns is not supported.
         """
         if not self.allow_column_add:
-            raise NotImplementedError("Adding columns is not supported.")
+            msg = "Adding columns is not supported."
+            raise NotImplementedError(msg)
 
         column_add_ddl = self.get_column_add_ddl(
             table_name=full_table_name,
@@ -803,7 +805,8 @@ class SQLConnector:
             NotImplementedError: If `self.allow_column_rename` is false.
         """
         if not self.allow_column_rename:
-            raise NotImplementedError("Renaming columns is not supported.")
+            msg = "Renaming columns is not supported."
+            raise NotImplementedError(msg)
 
         column_rename_ddl = self.get_column_rename_ddl(
             table_name=full_table_name,
@@ -829,7 +832,8 @@ class SQLConnector:
             ValueError: If sql_types argument has zero members.
         """
         if not sql_types:
-            raise ValueError("Expected at least one member in `sql_types` argument.")
+            msg = "Expected at least one member in `sql_types` argument."
+            raise ValueError(msg)
 
         if len(sql_types) == 1:
             return sql_types[0]
@@ -875,9 +879,8 @@ class SQLConnector:
                 elif str(opt) == str(current_type):
                     return opt
 
-        raise ValueError(
-            f"Unable to merge sql types: {', '.join([str(t) for t in sql_types])}",
-        )
+        msg = f"Unable to merge sql types: {', '.join([str(t) for t in sql_types])}"
+        raise ValueError(msg)
 
     def _sort_types(
         self,
@@ -940,9 +943,8 @@ class SQLConnector:
         try:
             column = self.get_table_columns(full_table_name)[column_name]
         except KeyError as ex:
-            raise KeyError(
-                f"Column `{column_name}` does not exist in table `{full_table_name}`.",
-            ) from ex
+            msg = f"Column `{column_name}` does not exist in table `{full_table_name}`."
+            raise KeyError(msg) from ex
 
         return t.cast(sqlalchemy.types.TypeEngine, column.type)
 
@@ -1108,11 +1110,12 @@ class SQLConnector:
             self.update_collation(compatible_sql_type, current_type_collation)
 
         if not self.allow_column_alter:
-            raise NotImplementedError(
-                "Altering columns is not supported. "
-                f"Could not convert column '{full_table_name}.{column_name}' "
-                f"from '{current_type}' to '{compatible_sql_type}'.",
+            msg = (
+                "Altering columns is not supported. Could not convert column "
+                f"'{full_table_name}.{column_name}' from '{current_type}' to "
+                f"'{compatible_sql_type}'."
             )
+            raise NotImplementedError(msg)
 
         alter_column_ddl = self.get_column_alter_ddl(
             table_name=full_table_name,
