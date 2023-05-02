@@ -420,7 +420,8 @@ class Sink(metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: If derived class does not override this method.
         """
-        raise NotImplementedError("No handling exists for process_batch().")
+        msg = "No handling exists for process_batch()."
+        raise NotImplementedError(msg)
 
     def mark_drained(self) -> None:
         """Reset `records_to_drain` and any other tracking."""
@@ -506,6 +507,5 @@ class Sink(metaclass=abc.ABCMeta):
                     }
                     self.process_batch(context)
             else:
-                raise NotImplementedError(
-                    f"Unsupported batch encoding format: {encoding.format}",
-                )
+                msg = f"Unsupported batch encoding format: {encoding.format}"
+                raise NotImplementedError(msg)

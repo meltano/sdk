@@ -129,9 +129,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         catalog_entry = self._singer_catalog_entry
         if not catalog_entry.table:
-            raise ValueError(
-                f"Missing table name in catalog entry: {catalog_entry.to_dict()}",
-            )
+            msg = f"Missing table name in catalog entry: {catalog_entry.to_dict()}"
+            raise ValueError(msg)
 
         return self.connector.get_fully_qualified_name(
             table_name=catalog_entry.table,
@@ -173,9 +172,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 not support partitioning.
         """
         if context:
-            raise NotImplementedError(
-                f"Stream '{self.name}' does not support partitioning.",
-            )
+            msg = f"Stream '{self.name}' does not support partitioning."
+            raise NotImplementedError(msg)
 
         selected_column_names = self.get_selected_schema()["properties"].keys()
         table = self.connector.get_table(
