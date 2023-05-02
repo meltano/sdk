@@ -12,11 +12,10 @@ from __future__ import annotations
 
 {%- set sinkclass = sinkclass_mapping[cookiecutter.serialization_method] %}
 
-from singer_sdk.sinks import {{ sinkclass }}
-
 {%- if sinkclass == "SQLSink" %}
 from singer_sdk.connectors import SQLConnector
 {% endif %}
+from singer_sdk.sinks import {{ sinkclass }}
 
 {%- if sinkclass == "SQLSink" %}
 
