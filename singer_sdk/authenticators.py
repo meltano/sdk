@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import base64
 import math
+import typing as t
 from datetime import datetime, timedelta
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Mapping
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import jwt
@@ -16,7 +16,7 @@ from cryptography.hazmat.primitives import serialization
 
 from singer_sdk.helpers._util import utc_now
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import logging
 
     from singer_sdk.streams import Stream as RESTStreamBase
@@ -62,7 +62,7 @@ class SingletonMeta(type):
         cls.__single_instance = None
         super().__init__(name, bases, dic)
 
-    def __call__(cls, *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
+    def __call__(cls, *args: t.Any, **kwargs: t.Any) -> t.Any:  # noqa: ANN401
         """Create or reuse the singleton.
 
         Args:
@@ -90,13 +90,13 @@ class APIAuthenticatorBase:
             stream: A stream for a RESTful endpoint.
         """
         self.tap_name: str = stream.tap_name
-        self._config: dict[str, Any] = dict(stream.config)
-        self._auth_headers: dict[str, Any] = {}
-        self._auth_params: dict[str, Any] = {}
+        self._config: dict[str, t.Any] = dict(stream.config)
+        self._auth_headers: dict[str, t.Any] = {}
+        self._auth_params: dict[str, t.Any] = {}
         self.logger: logging.Logger = stream.logger
 
     @property
-    def config(self) -> Mapping[str, Any]:
+    def config(self) -> t.Mapping[str, t.Any]:
         """Get stream or tap config.
 
         Returns:
@@ -222,7 +222,8 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
         auth_credentials = {key: value}
 
         if location not in ["header", "params"]:
-            raise ValueError("`type` must be one of 'header' or 'params'.")
+            msg = "`type` must be one of 'header' or 'params'."
+            raise ValueError(msg)
 
         if location == "header":
             if self._auth_headers is None:
@@ -403,7 +404,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             ValueError: If the endpoint is not set.
         """
         if not self._auth_endpoint:
-            raise ValueError("Authorization endpoint not set.")
+            msg = "Authorization endpoint not set."
+            raise ValueError(msg)
         return self._auth_endpoint
 
     @property
@@ -447,9 +449,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         Raises:
             NotImplementedError: If derived class does not override this method.
         """
-        raise NotImplementedError(
-            "The `oauth_request_body` property was not defined in the subclass.",
-        )
+        msg = "The `oauth_request_body` property was not defined in the subclass."
+        raise NotImplementedError(msg)
 
     @property
     def client_id(self) -> str | None:
@@ -504,9 +505,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         try:
             token_response.raise_for_status()
         except requests.HTTPError as ex:
-            raise RuntimeError(
-                f"Failed OAuth login, response was '{token_response.json()}'. {ex}",
-            ) from ex
+            msg = f"Failed OAuth login, response was '{token_response.json()}'. {ex}"
+            raise RuntimeError(msg) from ex
 
         self.logger.info("OAuth authorization attempt was successful.")
 
@@ -570,9 +570,10 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             ValueError: If the private key is not set.
         """
         if not self.private_key:
-            raise ValueError("Missing 'private_key' property for OAuth payload.")
+            msg = "Missing 'private_key' property for OAuth payload."
+            raise ValueError(msg)
 
-        private_key: bytes | Any = bytes(self.private_key, "UTF-8")
+        private_key: bytes | t.Any = bytes(self.private_key, "UTF-8")
         if self.private_key_passphrase:
             passphrase = bytes(self.private_key_passphrase, "UTF-8")
             private_key = serialization.load_pem_private_key(
@@ -580,7 +581,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
                 password=passphrase,
                 backend=default_backend(),
             )
-        private_key_string: str | Any = private_key.decode("UTF-8")
+        private_key_string: str | t.Any = private_key.decode("UTF-8")
         return {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": jwt.encode(

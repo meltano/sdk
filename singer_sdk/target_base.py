@@ -7,7 +7,7 @@ import copy
 import json
 import sys
 import time
-from typing import IO, TYPE_CHECKING, Callable, Counter
+import typing as t
 
 import click
 from joblib import Parallel, delayed, parallel_backend
@@ -27,7 +27,7 @@ from singer_sdk.io_base import SingerMessageType, SingerReader
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from io import FileIO
     from pathlib import PurePath
 
@@ -201,10 +201,11 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         if self.default_sink_class:
             return self.default_sink_class
 
-        raise ValueError(
-            f"No sink class defined for '{stream_name}' "
-            "and no default sink class available.",
+        msg = (
+            f"No sink class defined for '{stream_name}' and no default sink class "
+            "available."
         )
+        raise ValueError(msg)
 
     def sink_exists(self, stream_name: str) -> bool:
         """Check sink for a stream.
@@ -261,10 +262,11 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 is not sent.
         """
         if not self.sink_exists(stream_name):
-            raise RecordsWithoutSchemaException(
+            msg = (
                 f"A record for stream '{stream_name}' was encountered before a "
-                "corresponding schema.",
+                "corresponding schema."
             )
+            raise RecordsWithoutSchemaException(msg)
 
     # Message handling
 
@@ -278,7 +280,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             )
             self.drain_all()
 
-    def _process_lines(self, file_input: IO[str]) -> Counter[str]:
+    def _process_lines(self, file_input: t.IO[str]) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:
@@ -517,7 +519,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     # CLI handler
 
     @classproperty
-    def cli(cls) -> Callable:  # noqa: N805
+    def cli(cls) -> t.Callable:  # noqa: N805
         """Execute standard CLI handler for taps.
 
         Returns:

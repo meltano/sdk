@@ -2,19 +2,19 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generator
+import typing as t
 
 import memoization
 from jsonpath_ng.ext import parse
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import jsonpath_ng
 
 
 def extract_jsonpath(
     expression: str,
     input: dict | list,  # noqa: A002
-) -> Generator[Any, None, None]:
+) -> t.Generator[t.Any, None, None]:
     """Extract records from an input based on a JSONPath expression.
 
     Args:

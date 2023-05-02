@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+import typing as t
 import warnings
-from typing import TYPE_CHECKING, Type, cast
 
 from dateutil import parser
 
@@ -12,7 +12,7 @@ from singer_sdk import Tap
 
 from .templates import AttributeTestTemplate, StreamTestTemplate, TapTestTemplate
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.streams.core import Stream
 
 
@@ -40,7 +40,7 @@ class TapDiscoveryTest(TapTestTemplate):
         catalog = tap1.catalog_dict
         # Reset and re-initialize with discovered catalog
         kwargs = {k: v for k, v in self.runner.default_kwargs.items() if k != "catalog"}
-        tap2: Tap = cast(Type[Tap], self.runner.singer_class)(
+        tap2: Tap = t.cast(t.Type[Tap], self.runner.singer_class)(
             config=self.runner.config,
             catalog=catalog,
             **kwargs,
@@ -124,7 +124,8 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
                 (r[k] for k in primary_keys or []) for r in self.stream_records
             ]
         except KeyError as e:
-            raise AssertionError(f"Record missing primary key: {str(e)}") from e
+            msg = f"Record missing primary key: {str(e)}"
+            raise AssertionError(msg) from e
         count_unique_records = len(set(record_ids))
         count_records = len(self.stream_records)
         assert count_unique_records == count_records, (

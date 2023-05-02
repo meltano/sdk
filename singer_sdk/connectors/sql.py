@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import logging
+import typing as t
 import warnings
 from contextlib import contextmanager
 from datetime import datetime
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, Iterable, Iterator, cast
 
 import sqlalchemy
 from sqlalchemy.engine import Engine
@@ -16,7 +16,7 @@ from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
 
 
@@ -51,7 +51,7 @@ class SQLConnector:
             config: The parent tap or target object's config.
             sqlalchemy_url: Optional URL for the connection.
         """
-        self._config: dict[str, Any] = config or {}
+        self._config: dict[str, t.Any] = config or {}
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
 
     @property
@@ -73,7 +73,7 @@ class SQLConnector:
         return logging.getLogger("sqlconnector")
 
     @contextmanager
-    def _connect(self) -> Iterator[sqlalchemy.engine.Connection]:
+    def _connect(self) -> t.Iterator[sqlalchemy.engine.Connection]:
         with self._engine.connect().execution_options(stream_results=True) as conn:
             yield conn
 
@@ -155,7 +155,7 @@ class SQLConnector:
 
         return self._sqlalchemy_url
 
-    def get_sqlalchemy_url(self, config: dict[str, Any]) -> str:
+    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:
         """Return the SQLAlchemy URL string.
 
         Developers can generally override just one of the following:
@@ -171,16 +171,18 @@ class SQLConnector:
             ConfigValidationError: If no valid sqlalchemy_url can be found.
         """
         if "sqlalchemy_url" not in config:
-            raise ConfigValidationError(
-                "Could not find or create 'sqlalchemy_url' for connection.",
-            )
+            msg = "Could not find or create 'sqlalchemy_url' for connection."
+            raise ConfigValidationError(msg)
 
-        return cast(str, config["sqlalchemy_url"])
+        return t.cast(str, config["sqlalchemy_url"])
 
     @staticmethod
     def to_jsonschema_type(
         sql_type: (
-            str | sqlalchemy.types.TypeEngine | type[sqlalchemy.types.TypeEngine] | Any
+            str
+            | sqlalchemy.types.TypeEngine
+            | type[sqlalchemy.types.TypeEngine]
+            | t.Any
         ),
     ) -> dict:
         """Return a JSON Schema representation of the provided type.
@@ -208,9 +210,11 @@ class SQLConnector:
             if issubclass(sql_type, sqlalchemy.types.TypeEngine):
                 return th.to_jsonschema_type(sql_type)
 
-            raise ValueError(f"Unexpected type received: '{sql_type.__name__}'")
+            msg = f"Unexpected type received: '{sql_type.__name__}'"
+            raise ValueError(msg)
 
-        raise ValueError(f"Unexpected type received: '{type(sql_type).__name__}'")
+        msg = f"Unexpected type received: '{type(sql_type).__name__}'"
+        raise ValueError(msg)
 
     @staticmethod
     def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:
@@ -282,7 +286,7 @@ class SQLConnector:
         Returns:
             The dialect object.
         """
-        return cast(sqlalchemy.engine.Dialect, self._engine.dialect)
+        return t.cast(sqlalchemy.engine.Dialect, self._engine.dialect)
 
     @property
     def _engine(self) -> Engine:
@@ -296,7 +300,7 @@ class SQLConnector:
         """
         if not self._cached_engine:
             self._cached_engine = self.create_engine()
-        return cast(Engine, self._cached_engine)
+        return t.cast(Engine, self._cached_engine)
 
     def create_engine(self) -> Engine:
         """Creates and returns a new engine. Do not call outside of _engine.
@@ -433,7 +437,7 @@ class SQLConnector:
             column_name = column_def["name"]
             is_nullable = column_def.get("nullable", False)
             jsonschema_type: dict = self.to_jsonschema_type(
-                cast(sqlalchemy.types.TypeEngine, column_def["type"]),
+                t.cast(sqlalchemy.types.TypeEngine, column_def["type"]),
             )
             table_schema.append(
                 th.Property(
@@ -547,7 +551,7 @@ class SQLConnector:
         """
         _, schema_name, table_name = self.parse_full_table_name(full_table_name)
 
-        return cast(
+        return t.cast(
             bool,
             sqlalchemy.inspect(self._engine).has_table(table_name, schema_name),
         )
@@ -663,7 +667,8 @@ class SQLConnector:
             RuntimeError: if a variant schema is passed with no properties defined.
         """
         if as_temp_table:
-            raise NotImplementedError("Temporary tables are not supported.")
+            msg = "Temporary tables are not supported."
+            raise NotImplementedError(msg)
 
         _ = partition_keys  # Not supported in generic implementation.
 
@@ -674,9 +679,8 @@ class SQLConnector:
         try:
             properties: dict = schema["properties"]
         except KeyError as e:
-            raise RuntimeError(
-                f"Schema for '{full_table_name}' does not define properties: {schema}",
-            ) from e
+            msg = f"Schema for '{full_table_name}' does not define properties: {schema}"
+            raise RuntimeError(msg) from e
         for property_name, property_jsonschema in properties.items():
             is_primary_key = property_name in primary_keys
             columns.append(
@@ -707,7 +711,8 @@ class SQLConnector:
             NotImplementedError: if adding columns is not supported.
         """
         if not self.allow_column_add:
-            raise NotImplementedError("Adding columns is not supported.")
+            msg = "Adding columns is not supported."
+            raise NotImplementedError(msg)
 
         column_add_ddl = self.get_column_add_ddl(
             table_name=full_table_name,
@@ -800,7 +805,8 @@ class SQLConnector:
             NotImplementedError: If `self.allow_column_rename` is false.
         """
         if not self.allow_column_rename:
-            raise NotImplementedError("Renaming columns is not supported.")
+            msg = "Renaming columns is not supported."
+            raise NotImplementedError(msg)
 
         column_rename_ddl = self.get_column_rename_ddl(
             table_name=full_table_name,
@@ -826,7 +832,8 @@ class SQLConnector:
             ValueError: If sql_types argument has zero members.
         """
         if not sql_types:
-            raise ValueError("Expected at least one member in `sql_types` argument.")
+            msg = "Expected at least one member in `sql_types` argument."
+            raise ValueError(msg)
 
         if len(sql_types) == 1:
             return sql_types[0]
@@ -872,13 +879,12 @@ class SQLConnector:
                 elif str(opt) == str(current_type):
                     return opt
 
-        raise ValueError(
-            f"Unable to merge sql types: {', '.join([str(t) for t in sql_types])}",
-        )
+        msg = f"Unable to merge sql types: {', '.join([str(t) for t in sql_types])}"
+        raise ValueError(msg)
 
     def _sort_types(
         self,
-        sql_types: Iterable[sqlalchemy.types.TypeEngine],
+        sql_types: t.Iterable[sqlalchemy.types.TypeEngine],
     ) -> list[sqlalchemy.types.TypeEngine]:
         """Return the input types sorted from most to least compatible.
 
@@ -903,7 +909,7 @@ class SQLConnector:
 
             _len = int(getattr(sql_type, "length", 0) or 0)
 
-            _pytype = cast(type, sql_type.python_type)
+            _pytype = t.cast(type, sql_type.python_type)
             if issubclass(_pytype, (str, bytes)):
                 return 900, _len
             if issubclass(_pytype, datetime):
@@ -937,11 +943,10 @@ class SQLConnector:
         try:
             column = self.get_table_columns(full_table_name)[column_name]
         except KeyError as ex:
-            raise KeyError(
-                f"Column `{column_name}` does not exist in table `{full_table_name}`.",
-            ) from ex
+            msg = f"Column `{column_name}` does not exist in table `{full_table_name}`."
+            raise KeyError(msg) from ex
 
-        return cast(sqlalchemy.types.TypeEngine, column.type)
+        return t.cast(sqlalchemy.types.TypeEngine, column.type)
 
     @staticmethod
     def get_column_add_ddl(
@@ -1105,11 +1110,12 @@ class SQLConnector:
             self.update_collation(compatible_sql_type, current_type_collation)
 
         if not self.allow_column_alter:
-            raise NotImplementedError(
-                "Altering columns is not supported. "
-                f"Could not convert column '{full_table_name}.{column_name}' "
-                f"from '{current_type}' to '{compatible_sql_type}'.",
+            msg = (
+                "Altering columns is not supported. Could not convert column "
+                f"'{full_table_name}.{column_name}' from '{current_type}' to "
+                f"'{compatible_sql_type}'."
             )
+            raise NotImplementedError(msg)
 
         alter_column_ddl = self.get_column_alter_ddl(
             table_name=full_table_name,

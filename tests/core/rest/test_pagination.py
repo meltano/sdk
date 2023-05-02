@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+import typing as t
 
 import pytest
 from requests import Response
@@ -152,8 +152,8 @@ def test_paginator_offset():
             start_value: int,
             page_size: int,
             records_jsonpath: str,
-            *args: Any,
-            **kwargs: Any,
+            *args: t.Any,
+            **kwargs: t.Any,
         ) -> None:
             super().__init__(start_value, page_size, *args, **kwargs)
             self._records_jsonpath = records_jsonpath

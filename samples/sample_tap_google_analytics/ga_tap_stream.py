@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+import typing as t
 from pathlib import Path
-from typing import Any, Iterable, cast
 
 import pendulum
 
@@ -21,7 +21,7 @@ class GoogleJWTAuthenticator(OAuthJWTAuthenticator):
     @property
     def client_id(self) -> str:
         """Override since Google auth uses email, not numeric client ID."""
-        return cast(str, self.config["client_email"])
+        return t.cast(str, self.config["client_email"])
 
 
 class SampleGoogleAnalyticsStream(RESTStream):
@@ -47,7 +47,7 @@ class SampleGoogleAnalyticsStream(RESTStream):
     def prepare_request_payload(
         self,
         context: dict | None,  # noqa: ARG002
-        next_page_token: Any | None,  # noqa: ARG002
+        next_page_token: t.Any | None,  # noqa: ARG002
     ) -> dict | None:
         """Prepare the data payload for the REST API request."""
         request_def = {
@@ -64,7 +64,7 @@ class SampleGoogleAnalyticsStream(RESTStream):
             ]
         return {"reportRequests": [request_def]}
 
-    def parse_response(self, response) -> Iterable[dict]:
+    def parse_response(self, response) -> t.Iterable[dict]:
         """Parse Google Analytics API response into individual records."""
         self.logger.info(
             "Received raw Google Analytics query response: %s",

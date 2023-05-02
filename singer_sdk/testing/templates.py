@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import contextlib
+import typing as t
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.streams import Stream
 
     from .config import SuiteConfig
@@ -41,7 +41,8 @@ class TestTemplate:
         Raises:
             NotImplementedError: if not implemented.
         """
-        raise NotImplementedError("ID not implemented.")
+        msg = "ID not implemented."
+        raise NotImplementedError(msg)
 
     def setup(self) -> None:
         """Test setup, called before `.test()`.
@@ -52,7 +53,8 @@ class TestTemplate:
         Raises:
             NotImplementedError: if not implemented.
         """
-        raise NotImplementedError("Setup method not implemented.")
+        msg = "Setup method not implemented."
+        raise NotImplementedError(msg)
 
     def test(self) -> None:
         """Main Test body, called after `.setup()` and before `.validate()`."""
@@ -67,7 +69,8 @@ class TestTemplate:
         Raises:
             NotImplementedError: if not implemented.
         """
-        raise NotImplementedError("Method not implemented.")
+        msg = "Method not implemented."
+        raise NotImplementedError(msg)
 
     def teardown(self) -> None:
         """Test Teardown.
@@ -78,12 +81,13 @@ class TestTemplate:
         Raises:
             NotImplementedError: if not implemented.
         """
-        raise NotImplementedError("Method not implemented.")
+        msg = "Method not implemented."
+        raise NotImplementedError(msg)
 
     def run(
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TapTestRunner | TargetTestRunner,
     ) -> None:
         """Test main run method.
@@ -97,7 +101,8 @@ class TestTemplate:
             ValueError: if Test instance does not have `name` and `type` properties.
         """
         if not self.name or not self.plugin_type:
-            raise ValueError("Test must have 'name' and 'type' properties.")
+            msg = "Test must have 'name' and 'type' properties."
+            raise ValueError(msg)
 
         self.config = config
         self.resource = resource
@@ -133,7 +138,7 @@ class TapTestTemplate(TestTemplate):
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TapTestRunner,
     ) -> None:
         """Test main run method.
@@ -165,7 +170,7 @@ class StreamTestTemplate(TestTemplate):
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TapTestRunner,
         stream: Stream,
     ) -> None:
@@ -199,7 +204,7 @@ class AttributeTestTemplate(TestTemplate):
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TapTestRunner,
         stream: Stream,
         attribute_name: str,
@@ -220,7 +225,7 @@ class AttributeTestTemplate(TestTemplate):
         super().run(config, resource, runner)
 
     @property
-    def non_null_attribute_values(self) -> list[Any]:
+    def non_null_attribute_values(self) -> list[t.Any]:
         """Extract attribute values from stream records.
 
         Returns:
@@ -241,9 +246,9 @@ class AttributeTestTemplate(TestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,
-        property_name: str,
-        property_schema: dict,
+        stream: Stream,  # noqa: ARG003
+        property_name: str,  # noqa: ARG003
+        property_schema: dict,  # noqa: ARG003
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
 
@@ -255,10 +260,11 @@ class AttributeTestTemplate(TestTemplate):
         Raises:
             NotImplementedError: if not implemented.
         """
-        raise NotImplementedError(
-            "The 'evaluate' method is required for attribute tests, "
-            "but not implemented.",
+        msg = (
+            "The 'evaluate' method is required for attribute tests, but not "
+            "implemented."
         )
+        raise NotImplementedError(msg)
 
 
 class TargetTestTemplate(TestTemplate):
@@ -269,7 +275,7 @@ class TargetTestTemplate(TestTemplate):
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TargetTestRunner,
     ) -> None:
         """Test main run method.
@@ -301,7 +307,7 @@ class TargetFileTestTemplate(TargetTestTemplate):
     def run(  # type: ignore[override]
         self,
         config: SuiteConfig,
-        resource: Any,
+        resource: t.Any,
         runner: TargetTestRunner,
     ) -> None:
         """Test main run method.

@@ -39,12 +39,8 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Set repo file permissions
-      run: |
-        sudo chown -R $USER:$USER .git/objects
-
     - name: Set up Python
-      uses: actions/setup-python@v4.5.0
+      uses: actions/setup-python@v4.6.0
       with:
         python-version: "3.10"
         architecture: x64
@@ -72,6 +68,10 @@ jobs:
         prerelease: ${{ github.event.inputs.prerelease != 'none' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set repo file permissions
+      run: |
+        sudo chown -R $USER:$USER .git/objects
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5

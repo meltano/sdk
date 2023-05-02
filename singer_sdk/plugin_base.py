@@ -5,9 +5,9 @@ from __future__ import annotations
 import abc
 import logging
 import os
+import typing as t
 from pathlib import Path, PurePath
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Callable, Mapping, cast
 
 import click
 from jsonschema import Draft7Validator
@@ -27,7 +27,7 @@ from singer_sdk.helpers.capabilities import (
 )
 from singer_sdk.typing import extend_validator_with_defaults
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.mapper import PluginMapper
 
 SDK_PACKAGE_NAME = "singer_sdk"
@@ -99,7 +99,8 @@ class PluginBase(metaclass=abc.ABCMeta):
         elif isinstance(config, dict):
             config_dict = config
         else:
-            raise ValueError(f"Error parsing config of type '{type(config).__name__}'.")
+            msg = f"Error parsing config of type '{type(config).__name__}'."
+            raise ValueError(msg)
         if parse_env_config:
             self.logger.info("Parsing env var for settings config...")
             config_dict.update(self._env_var_config)
@@ -131,7 +132,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         ]
 
     @classproperty
-    def _env_var_config(cls) -> dict[str, Any]:  # noqa: N805
+    def _env_var_config(cls) -> dict[str, t.Any]:  # noqa: N805
         """Return any config specified in environment variables.
 
         Variables must match the convention "<PLUGIN_NAME>_<SETTING_NAME>",
@@ -214,13 +215,13 @@ class PluginBase(metaclass=abc.ABCMeta):
     # Core plugin config:
 
     @property
-    def config(self) -> Mapping[str, Any]:
+    def config(self) -> t.Mapping[str, t.Any]:
         """Get config.
 
         Returns:
             A frozen (read-only) config dictionary map.
         """
-        return cast(dict, MappingProxyType(self._config))
+        return t.cast(dict, MappingProxyType(self._config))
 
     @staticmethod
     def _is_secret_config(config_key: str) -> bool:
@@ -283,16 +284,15 @@ class PluginBase(metaclass=abc.ABCMeta):
                 summary += f"\n{warning}"
 
         if warnings_as_errors and raise_errors and warnings:
-            raise ConfigValidationError(
-                f"One or more warnings ocurred during validation: {warnings}",
-            )
+            msg = f"One or more warnings ocurred during validation: {warnings}"
+            raise ConfigValidationError(msg)
         log_fn(summary)
         return warnings, errors
 
     @classmethod
     def print_version(
         cls: type[PluginBase],
-        print_fn: Callable[[Any], None] = print,
+        print_fn: t.Callable[[t.Any], None] = print,
     ) -> None:
         """Print help text for the tap.
 
@@ -392,17 +392,18 @@ class PluginBase(metaclass=abc.ABCMeta):
 
             # Validate config file paths before adding to list
             if not Path(config_path).is_file():
-                raise FileNotFoundError(
-                    f"Could not locate config file at '{config_path}'."
-                    "Please check that the file exists.",
+                msg = (
+                    f"Could not locate config file at '{config_path}'.Please check "
+                    "that the file exists."
                 )
+                raise FileNotFoundError(msg)
 
             config_files.append(Path(config_path))
 
         return config_files, parse_env_config
 
     @classproperty
-    def cli(cls) -> Callable:  # noqa: N805
+    def cli(cls) -> t.Callable:  # noqa: N805
         """Handle command line execution.
 
         Returns:
