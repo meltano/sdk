@@ -61,7 +61,6 @@ def mypy(session: Session) -> None:
         "mypy",
         "pytest",
         "importlib-resources",
-        "sqlalchemy2-stubs",
         "types-jsonschema",
         "types-python-dateutil",
         "types-pytz",
@@ -90,9 +89,6 @@ def tests(session: Session) -> None:
             "-v",
             "--durations=10",
             *session.posargs,
-            env={
-                "SQLALCHEMY_WARN_20": "1",
-            },
         )
     finally:
         if session.interactive:

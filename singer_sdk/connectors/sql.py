@@ -424,7 +424,11 @@ class SQLConnector:
             possible_primary_keys.append(pk_def["constrained_columns"])
 
         possible_primary_keys.extend(
-            index_def["column_names"]
+            [
+                column_name
+                for column_name in index_def["column_names"]
+                if column_name is not None
+            ]
             for index_def in inspected.get_indexes(table_name, schema=schema_name)
             if index_def.get("unique", False)
         )
