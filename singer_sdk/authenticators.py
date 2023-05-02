@@ -222,7 +222,8 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
         auth_credentials = {key: value}
 
         if location not in ["header", "params"]:
-            raise ValueError("`type` must be one of 'header' or 'params'.")
+            msg = "`type` must be one of 'header' or 'params'."
+            raise ValueError(msg)
 
         if location == "header":
             if self._auth_headers is None:
@@ -403,7 +404,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             ValueError: If the endpoint is not set.
         """
         if not self._auth_endpoint:
-            raise ValueError("Authorization endpoint not set.")
+            msg = "Authorization endpoint not set."
+            raise ValueError(msg)
         return self._auth_endpoint
 
     @property
@@ -447,9 +449,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         Raises:
             NotImplementedError: If derived class does not override this method.
         """
-        raise NotImplementedError(
-            "The `oauth_request_body` property was not defined in the subclass.",
-        )
+        msg = "The `oauth_request_body` property was not defined in the subclass."
+        raise NotImplementedError(msg)
 
     @property
     def client_id(self) -> str | None:
@@ -504,9 +505,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         try:
             token_response.raise_for_status()
         except requests.HTTPError as ex:
-            raise RuntimeError(
-                f"Failed OAuth login, response was '{token_response.json()}'. {ex}",
-            ) from ex
+            msg = f"Failed OAuth login, response was '{token_response.json()}'. {ex}"
+            raise RuntimeError(msg) from ex
 
         self.logger.info("OAuth authorization attempt was successful.")
 
@@ -570,7 +570,8 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             ValueError: If the private key is not set.
         """
         if not self.private_key:
-            raise ValueError("Missing 'private_key' property for OAuth payload.")
+            msg = "Missing 'private_key' property for OAuth payload."
+            raise ValueError(msg)
 
         private_key: bytes | t.Any = bytes(self.private_key, "UTF-8")
         if self.private_key_passphrase:
