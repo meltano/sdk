@@ -101,7 +101,8 @@ class PluginBase(metaclass=abc.ABCMeta):
         elif isinstance(config, dict):
             config_dict = config
         else:
-            raise ValueError(f"Error parsing config of type '{type(config).__name__}'.")
+            msg = f"Error parsing config of type '{type(config).__name__}'."
+            raise ValueError(msg)
         if parse_env_config:
             self.logger.info("Parsing env var for settings config...")
             config_dict.update(self._env_var_config)
@@ -285,9 +286,8 @@ class PluginBase(metaclass=abc.ABCMeta):
                 summary += f"\n{warning}"
 
         if warnings_as_errors and raise_errors and warnings:
-            raise ConfigValidationError(
-                f"One or more warnings ocurred during validation: {warnings}",
-            )
+            msg = f"One or more warnings ocurred during validation: {warnings}"
+            raise ConfigValidationError(msg)
         log_fn(summary)
         return warnings, errors
 
@@ -394,10 +394,11 @@ class PluginBase(metaclass=abc.ABCMeta):
 
             # Validate config file paths before adding to list
             if not Path(config_path).is_file():
-                raise FileNotFoundError(
-                    f"Could not locate config file at '{config_path}'."
-                    "Please check that the file exists.",
+                msg = (
+                    f"Could not locate config file at '{config_path}'.Please check "
+                    "that the file exists."
                 )
+                raise FileNotFoundError(msg)
 
             config_files.append(Path(config_path))
 

@@ -141,7 +141,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             RuntimeError: If state has not been initialized.
         """
         if self._state is None:
-            raise RuntimeError("Could not read from uninitialized state.")
+            msg = "Could not read from uninitialized state."
+            raise RuntimeError(msg)
         return self._state
 
     @property
@@ -295,10 +296,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             NotImplementedError: If the tap implementation does not override this
                 method.
         """
-        raise NotImplementedError(
-            f"Tap '{self.name}' does not support discovery. "
-            "Please set the '--catalog' command line argument and try again.",
+        msg = (
+            f"Tap '{self.name}' does not support discovery. Please set the '--catalog' "
+            "command line argument and try again."
         )
+        raise NotImplementedError(msg)
 
     @final
     def load_streams(self) -> list[Stream]:
@@ -357,7 +359,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 initialized.
         """
         if self.state is None:
-            raise ValueError("Cannot write to uninitialized state dictionary.")
+            msg = "Cannot write to uninitialized state dictionary."
+            raise ValueError(msg)
 
         for stream_name, stream_state in state.get("bookmarks", {}).items():
             for key, val in stream_state.items():

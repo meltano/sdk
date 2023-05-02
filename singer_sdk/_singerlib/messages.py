@@ -112,10 +112,11 @@ class RecordMessage(Message):
         """
         self.type = SingerMessageType.RECORD
         if self.time_extracted and not self.time_extracted.tzinfo:
-            raise ValueError(
-                "'time_extracted' must be either None "
-                "or an aware datetime (with a time zone)",
+            msg = (
+                "'time_extracted' must be either None or an aware datetime (with a "
+                "time zone)"
             )
+            raise ValueError(msg)
 
         if self.time_extracted:
             self.time_extracted = self.time_extracted.astimezone(pytz.utc)
@@ -148,7 +149,8 @@ class SchemaMessage(Message):
         if isinstance(self.bookmark_properties, (str, bytes)):
             self.bookmark_properties = [self.bookmark_properties]
         if self.bookmark_properties and not isinstance(self.bookmark_properties, list):
-            raise ValueError("bookmark_properties must be a string or list of strings")
+            msg = "bookmark_properties must be a string or list of strings"
+            raise ValueError(msg)
 
 
 @dataclass

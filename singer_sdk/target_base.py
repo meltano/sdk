@@ -199,10 +199,11 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         if self.default_sink_class:
             return self.default_sink_class
 
-        raise ValueError(
-            f"No sink class defined for '{stream_name}' "
-            "and no default sink class available.",
+        msg = (
+            f"No sink class defined for '{stream_name}' and no default sink class "
+            "available."
         )
+        raise ValueError(msg)
 
     def sink_exists(self, stream_name: str) -> bool:
         """Check sink for a stream.
@@ -259,10 +260,11 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 is not sent.
         """
         if not self.sink_exists(stream_name):
-            raise RecordsWithoutSchemaException(
+            msg = (
                 f"A record for stream '{stream_name}' was encountered before a "
-                "corresponding schema.",
+                "corresponding schema."
             )
+            raise RecordsWithoutSchemaException(msg)
 
     # Message handling
 

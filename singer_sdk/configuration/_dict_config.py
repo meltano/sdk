@@ -54,11 +54,12 @@ def parse_environment_config(
             )
             if is_string_array_type(config_schema["properties"][config_key]):
                 if env_var_value[0] == "[" and env_var_value[-1] == "]":
-                    raise ValueError(
+                    msg = (
                         "A bracketed list was detected in the environment variable "
-                        f"'{env_var_name}'. This syntax is no longer supported. "
-                        "Please remove the brackets and try again.",
+                        f"'{env_var_name}'. This syntax is no longer supported. Please "
+                        "remove the brackets and try again."
                     )
+                    raise ValueError(msg)
                 result[config_key] = env_var_value.split(",")
             else:
                 result[config_key] = env_var_value
@@ -93,10 +94,11 @@ def merge_config_sources(
         config_path = Path(config_input)
 
         if not config_path.is_file():
-            raise FileNotFoundError(
-                f"Could not locate config file at '{config_path}'."
-                "Please check that the file exists.",
+            msg = (
+                f"Could not locate config file at '{config_path}'.Please check that "
+                "the file exists."
             )
+            raise FileNotFoundError(msg)
 
         config.update(read_json_file(config_path))
 

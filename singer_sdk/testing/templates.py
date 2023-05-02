@@ -41,7 +41,8 @@ class TestTemplate:
         Raises:
             NotImplementedError: if not implemented.
         """
-        raise NotImplementedError("ID not implemented.")
+        msg = "ID not implemented."
+        raise NotImplementedError(msg)
 
     def setup(self) -> None:
         """Test setup, called before `.test()`.
@@ -52,7 +53,8 @@ class TestTemplate:
         Raises:
             NotImplementedError: if not implemented.
         """
-        raise NotImplementedError("Setup method not implemented.")
+        msg = "Setup method not implemented."
+        raise NotImplementedError(msg)
 
     def test(self) -> None:
         """Main Test body, called after `.setup()` and before `.validate()`."""
@@ -67,7 +69,8 @@ class TestTemplate:
         Raises:
             NotImplementedError: if not implemented.
         """
-        raise NotImplementedError("Method not implemented.")
+        msg = "Method not implemented."
+        raise NotImplementedError(msg)
 
     def teardown(self) -> None:
         """Test Teardown.
@@ -78,7 +81,8 @@ class TestTemplate:
         Raises:
             NotImplementedError: if not implemented.
         """
-        raise NotImplementedError("Method not implemented.")
+        msg = "Method not implemented."
+        raise NotImplementedError(msg)
 
     def run(
         self,
@@ -97,7 +101,8 @@ class TestTemplate:
             ValueError: if Test instance does not have `name` and `type` properties.
         """
         if not self.name or not self.plugin_type:
-            raise ValueError("Test must have 'name' and 'type' properties.")
+            msg = "Test must have 'name' and 'type' properties."
+            raise ValueError(msg)
 
         self.config = config
         self.resource = resource
@@ -241,9 +246,9 @@ class AttributeTestTemplate(TestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,
-        property_name: str,
-        property_schema: dict,
+        stream: Stream,  # noqa: ARG003
+        property_name: str,  # noqa: ARG003
+        property_schema: dict,  # noqa: ARG003
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
 
@@ -255,10 +260,11 @@ class AttributeTestTemplate(TestTemplate):
         Raises:
             NotImplementedError: if not implemented.
         """
-        raise NotImplementedError(
-            "The 'evaluate' method is required for attribute tests, "
-            "but not implemented.",
+        msg = (
+            "The 'evaluate' method is required for attribute tests, but not "
+            "implemented."
         )
+        raise NotImplementedError(msg)
 
 
 class TargetTestTemplate(TestTemplate):

@@ -89,7 +89,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     def map_batch_message(
         self,
-        message_dict: dict,
+        message_dict: dict,  # noqa: ARG002
     ) -> t.Iterable[singer.Message]:
         """Map a batch message to zero or more new messages.
 
@@ -99,7 +99,8 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: if not implemented by subclass.
         """
-        raise NotImplementedError("BATCH messages are not supported by mappers.")
+        msg = "BATCH messages are not supported by mappers."
+        raise NotImplementedError(msg)
 
     # CLI handler
 

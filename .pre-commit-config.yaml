@@ -16,7 +16,8 @@ repos:
   - id: check-yaml
     exclude: |
         (?x)^(
-            cookiecutter/.*/meltano.yml
+            cookiecutter/.*/meltano.yml|
+            cookiecutter/.*/.pre-commit-config.yaml
         )$
   - id: end-of-file-fixer
     exclude: |
@@ -35,7 +36,7 @@ repos:
         )$
 
 - repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: v0.0.263
+  rev: v0.0.264
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix]
