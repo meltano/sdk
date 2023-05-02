@@ -30,13 +30,18 @@ jobs:
     - name: Check out the repository
       uses: actions/checkout@v3.5.2
 
-    - name: Install Poetry & Tox
+    - name: Upgrade pip
       env:
         PIP_CONSTRAINT: .github/workflows/constraints.txt
       run: |
+        pip install pip
+        pip --version
+
+    - name: Install Poetry
+      run: |
         pipx install poetry
         poetry --version
-        pipx install tox
+
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4.6.0
       with:
@@ -45,12 +50,10 @@ jobs:
         cache: 'pip'
         cache-dependency-path: 'poetry.lock'
 
-    - name: Upgrade pip
-      env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
+    - name: Install pre-commit
       run: |
-        pip install pip
-        pip --version
+        pipx install pre-commit
+        pre-commit --version
 
     - name: Install Nox
       env:
@@ -63,6 +66,7 @@ jobs:
     - name: Run Nox
       run: |
         nox --python=${{ matrix.python-version }} --session=test_cookiecutter
+
     - name: Upload build artifacts
       if: always()
       uses: actions/upload-artifact@v3

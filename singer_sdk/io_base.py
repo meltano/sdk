@@ -46,9 +46,8 @@ class SingerReader(metaclass=abc.ABCMeta):
         """
         if not requires.issubset(line_dict):
             missing = requires - set(line_dict)
-            raise Exception(
-                f"Line is missing required {', '.join(missing)} key(s): {line_dict}",
-            )
+            msg = f"Line is missing required {', '.join(missing)} key(s): {line_dict}"
+            raise Exception(msg)
 
     def _process_lines(self, file_input: t.IO[str]) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
@@ -125,7 +124,8 @@ class SingerReader(metaclass=abc.ABCMeta):
             ValueError: raised if a message type is not recognized
         """
         record_type = message_dict["type"]
-        raise ValueError(f"Unknown message type '{record_type}' in message.")
+        msg = f"Unknown message type '{record_type}' in message."
+        raise ValueError(msg)
 
     def _process_endofpipe(self) -> None:
         logger.debug("End of pipe reached")

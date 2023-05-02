@@ -148,7 +148,8 @@ class Stream(metaclass=abc.ABCMeta):
         if name:
             self.name: str = name
         if not self.name:
-            raise ValueError("Missing argument or class variable 'name'.")
+            msg = "Missing argument or class variable 'name'."
+            raise ValueError(msg)
 
         self.logger: logging.Logger = tap.logger
         self.metrics_logger = tap.metrics_logger
@@ -171,9 +172,8 @@ class Stream(metaclass=abc.ABCMeta):
         if schema:
             if isinstance(schema, (PathLike, str)):
                 if not Path(schema).is_file():
-                    raise FileNotFoundError(
-                        f"Could not find schema file '{self.schema_filepath}'.",
-                    )
+                    msg = f"Could not find schema file '{self.schema_filepath}'."
+                    raise FileNotFoundError(msg)
 
                 self._schema_filepath = Path(schema)
             elif isinstance(schema, dict):
@@ -181,18 +181,18 @@ class Stream(metaclass=abc.ABCMeta):
             elif isinstance(schema, singer.Schema):
                 self._schema = schema.to_dict()
             else:
-                raise ValueError(
-                    f"Unexpected type {type(schema).__name__} for arg 'schema'.",
-                )
+                msg = f"Unexpected type {type(schema).__name__} for arg 'schema'."
+                raise ValueError(msg)
 
         if self.schema_filepath:
             self._schema = json.loads(Path(self.schema_filepath).read_text())
 
         if not self.schema:
-            raise ValueError(
-                f"Could not initialize schema for stream '{self.name}'. "
-                "A valid schema object or filepath was not provided.",
+            msg = (
+                f"Could not initialize schema for stream '{self.name}'. A valid schema "
+                "object or filepath was not provided."
             )
+            raise ValueError(msg)
 
     @property
     def stream_maps(self) -> list[StreamMap]:
@@ -289,9 +289,8 @@ class Stream(metaclass=abc.ABCMeta):
             return None
 
         if not self.is_timestamp_replication_key:
-            raise ValueError(
-                f"The replication key {self.replication_key} is not of timestamp type",
-            )
+            msg = f"The replication key {self.replication_key} is not of timestamp type"
+            raise ValueError(msg)
 
         return t.cast(datetime.datetime, pendulum.parse(value))
 
@@ -757,10 +756,11 @@ class Stream(metaclass=abc.ABCMeta):
         # Advance state bookmark values if applicable
         if latest_record and self.replication_method == REPLICATION_INCREMENTAL:
             if not self.replication_key:
-                raise ValueError(
-                    f"Could not detect replication key for '{self.name}' stream"
-                    f"(replication method={self.replication_method})",
+                msg = (
+                    f"Could not detect replication key for '{self.name}' "
+                    f"stream(replication method={self.replication_method})"
                 )
+                raise ValueError(msg)
             treat_as_sorted = self.is_sorted
             if not treat_as_sorted and self.state_partitioning_keys is not None:
                 # Streams with custom state partitioning are not resumable.
@@ -957,14 +957,12 @@ class Stream(metaclass=abc.ABCMeta):
         self._write_state_message()  # Write out state message if pending.
 
         if self.replication_method == "FULL_TABLE":
-            raise AbortedSyncFailedException(
-                "Sync operation aborted for stream in 'FULL_TABLE' replication mode.",
-            ) from abort_reason
+            msg = "Sync operation aborted for stream in 'FULL_TABLE' replication mode."
+            raise AbortedSyncFailedException(msg) from abort_reason
 
         if is_state_non_resumable(self.stream_state):
-            raise AbortedSyncFailedException(
-                "Sync operation aborted and state is not in a resumable state.",
-            ) from abort_reason
+            msg = "Sync operation aborted and state is not in a resumable state."
+            raise AbortedSyncFailedException(msg) from abort_reason
 
         # Else, the sync operation can be assumed to be in a valid resumable state.
         raise AbortedSyncPausedException from abort_reason
@@ -1267,13 +1265,14 @@ class Stream(metaclass=abc.ABCMeta):
                 if child_stream.state_partitioning_keys is None:
                     parent_type = type(self).__name__
                     child_type = type(child_stream).__name__
-                    raise NotImplementedError(
+                    msg = (
                         "No child context behavior was defined between parent stream "
-                        f"'{self.name}' and child stream '{child_stream.name}'."
-                        "The parent stream must define "
+                        f"'{self.name}' and child stream '{child_stream.name}'. "
+                        f"The parent stream must define "
                         f"`{parent_type}.get_child_context()` and/or the child stream "
-                        f"must define `{child_type}.state_partitioning_keys`.",
+                        f"must define `{child_type}.state_partitioning_keys`."
                     )
+                    raise NotImplementedError(msg)
 
         return context or record
 

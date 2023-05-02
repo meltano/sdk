@@ -28,6 +28,17 @@ class DatetimeErrorTreatmentEnum(Enum):
     NULL = "null"
 
 
+class EmptySchemaTypeError(Exception):
+    """Exception for when trying to detect type from empty type_dict."""
+
+    def __init__(self, *args: object) -> None:
+        msg = (
+            "Could not detect type from empty type_dict. Did you forget to define a "
+            "property in the stream schema?"
+        )
+        super().__init__(msg, *args)
+
+
 def to_json_compatible(val: t.Any) -> t.Any:
     """Return as string if datetime. JSON does not support proper datetime types.
 
@@ -56,10 +67,11 @@ def append_type(type_dict: dict, new_type: str) -> dict:
             result["type"] = [*type_array, new_type]
         return result
 
-    raise ValueError(
+    msg = (
         "Could not append type because the JSON schema for the dictionary "
-        f"`{type_dict}` appears to be invalid.",
+        f"`{type_dict}` appears to be invalid."
     )
+    raise ValueError(msg)
 
 
 def is_secret_type(type_dict: dict) -> bool:
@@ -122,17 +134,13 @@ def is_datetime_type(type_dict: dict) -> bool:
     Also returns True if 'date-time' is nested within an 'anyOf' type Array.
     """
     if not type_dict:
-        raise ValueError(
-            "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?",
-        )
+        raise EmptySchemaTypeError
     if "anyOf" in type_dict:
         return any(is_datetime_type(type_dict) for type_dict in type_dict["anyOf"])
     if "type" in type_dict:
         return type_dict.get("format") == "date-time"
-    raise ValueError(
-        f"Could not detect type of replication key using schema '{type_dict}'",
-    )
+    msg = f"Could not detect type of replication key using schema '{type_dict}'"
+    raise ValueError(msg)
 
 
 def is_date_or_datetime_type(type_dict: dict) -> bool:
@@ -155,9 +163,8 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
     if "type" in type_dict:
         return type_dict.get("format") in {"date", "date-time"}
 
-    raise ValueError(
-        f"Could not detect type of replication key using schema '{type_dict}'",
-    )
+    msg = f"Could not detect type of replication key using schema '{type_dict}'"
+    raise ValueError(msg)
 
 
 def get_datelike_property_type(property_schema: dict) -> str | None:
@@ -213,16 +220,14 @@ def handle_invalid_timestamp_in_record(
 def is_string_array_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition is a string array."""
     if not type_dict:
-        raise ValueError(
-            "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?",
-        )
+        raise EmptySchemaTypeError
 
     if "anyOf" in type_dict:
         return any(is_string_array_type(t) for t in type_dict["anyOf"])
 
     if "type" not in type_dict:
-        raise ValueError(f"Could not detect type from schema '{type_dict}'")
+        msg = f"Could not detect type from schema '{type_dict}'"
+        raise ValueError(msg)
 
     return "array" in type_dict["type"] and bool(is_string_type(type_dict["items"]))
 
@@ -230,16 +235,14 @@ def is_string_array_type(type_dict: dict) -> bool:
 def is_array_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type is an array."""
     if not type_dict:
-        raise ValueError(
-            "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?",
-        )
+        raise EmptySchemaTypeError
 
     if "anyOf" in type_dict:
         return any(is_array_type(t) for t in type_dict["anyOf"])
 
     if "type" not in type_dict:
-        raise ValueError(f"Could not detect type from schema '{type_dict}'")
+        msg = f"Could not detect type from schema '{type_dict}'"
+        raise ValueError(msg)
 
     return "array" in type_dict["type"]
 

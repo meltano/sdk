@@ -25,16 +25,16 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator, metaclass=
         """
         # TODO: Define the request body needed for the API.
         return {
-            'resource': 'https://analysis.windows.net/powerbi/api',
-            'scope': self.oauth_scopes,
-            'client_id': self.config["client_id"],
-            'username': self.config["username"],
-            'password': self.config["password"],
-            'grant_type': 'password',
+            "resource": "https://analysis.windows.net/powerbi/api",
+            "scope": self.oauth_scopes,
+            "client_id": self.config["client_id"],
+            "username": self.config["username"],
+            "password": self.config["password"],
+            "grant_type": "password",
         }
 
     @classmethod
-    def create_for_stream(cls, stream) -> "{{ cookiecutter.source_name }}Authenticator":
+    def create_for_stream(cls, stream) -> {{ cookiecutter.source_name }}Authenticator:  # noqa: ANN001
         """Instantiate an authenticator for a specific Singer stream.
 
         Args:
@@ -57,7 +57,10 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthJWTAuthenticator):
     """Authenticator class for {{ cookiecutter.source_name }}."""
 
     @classmethod
-    def create_for_stream(cls, stream) -> "{{ cookiecutter.source_name }}Authenticator":
+    def create_for_stream(
+        cls,
+        stream,  # noqa: ANN001
+    ) -> {{ cookiecutter.source_name }}Authenticator:
         """Instantiate an authenticator for a specific Singer stream.
 
         Args:

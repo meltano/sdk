@@ -35,9 +35,11 @@ class CustomResponseValidationStream(RESTStream):
         super().validate_response(response)
         data = response.json()
         if data["status"] == self.StatusMessage.ERROR:
-            raise FatalAPIError("Error message found :(")
+            msg = "Error message found :("
+            raise FatalAPIError(msg)
         if data["status"] == self.StatusMessage.UNAVAILABLE:
-            raise RetriableAPIError("API is unavailable")
+            msg = "API is unavailable"
+            raise RetriableAPIError(msg)
 
 
 @pytest.fixture
