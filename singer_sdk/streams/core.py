@@ -55,7 +55,7 @@ from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, Stream
 if t.TYPE_CHECKING:
     import logging
 
-    from singer_sdk.plugin_base import PluginBase as TapBaseClass
+    from singer_sdk.tap_base import Tap
 
 # Replication methods
 REPLICATION_FULL_TABLE = "FULL_TABLE"
@@ -130,7 +130,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        tap: TapBaseClass,
+        tap: Tap,
         schema: str | PathLike | dict[str, t.Any] | singer.Schema | None = None,
         name: str | None = None,
     ) -> None:
