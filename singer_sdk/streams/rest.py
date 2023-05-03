@@ -32,7 +32,7 @@ if t.TYPE_CHECKING:
     from backoff.types import Details
 
     from singer_sdk._singerlib import Schema
-    from singer_sdk.plugin_base import PluginBase as TapBaseClass
+    from singer_sdk.tap_base import Tap
 
     if sys.version_info >= (3, 10):
         from typing import TypeAlias  # noqa: ICN003
@@ -75,7 +75,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        tap: TapBaseClass,
+        tap: Tap,
         name: str | None = None,
         schema: dict[str, t.Any] | Schema | None = None,
         path: str | None = None,
