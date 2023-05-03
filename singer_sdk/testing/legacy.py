@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import io
+import typing as t
 from contextlib import redirect_stderr, redirect_stdout
-from typing import TYPE_CHECKING, Callable, cast
 
 import singer_sdk._singerlib as singer
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.mapper_base import InlineMapper
     from singer_sdk.tap_base import Tap
     from singer_sdk.target_base import Target
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 def get_standard_tap_tests(
     tap_class: type[Tap],
     config: dict | None = None,
-) -> list[Callable]:
+) -> list[t.Callable]:
     """Return callable pytest which executes simple discovery and connection tests.
 
     Args:
@@ -98,7 +98,7 @@ def get_standard_tap_tests(
 def get_standard_target_tests(
     target_class: type[Target],  # noqa: ARG001
     config: dict | None = None,  # noqa: ARG001
-) -> list[Callable]:
+) -> list[t.Callable]:
     """Return callable pytest which executes simple discovery and connection tests.
 
     Args:
@@ -169,7 +169,7 @@ def _select_all(catalog_dict: dict) -> dict:
     for catalog_entry in catalog.streams:
         catalog_entry.metadata.root.selected = True
 
-    return cast(dict, catalog.to_dict())
+    return t.cast(dict, catalog.to_dict())
 
 
 def target_sync_test(

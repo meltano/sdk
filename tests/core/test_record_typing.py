@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import logging
+import typing as t
 from datetime import datetime
-from typing import Any
 
 import pendulum
 import pytest
@@ -56,7 +56,7 @@ from singer_sdk.helpers._typing import (
     ],
 )
 def test_conform_record_data_types(
-    record: dict[str, Any],
+    record: dict[str, t.Any],
     schema: dict,
     expected_row: dict,
     ignore_props_message: str,

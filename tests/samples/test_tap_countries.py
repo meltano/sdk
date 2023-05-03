@@ -6,8 +6,8 @@ import copy
 import io
 import json
 import logging
+import typing as t
 from contextlib import redirect_stdout
-from typing import Counter
 
 from samples.sample_tap_countries.countries_tap import SampleTapCountries
 from singer_sdk.helpers._catalog import (
@@ -119,9 +119,9 @@ def test_batch_mode(outdir):
     lines = buf.read().splitlines()
     messages = [json.loads(line) for line in lines]
 
-    def tally_messages(messages: list) -> Counter:
+    def tally_messages(messages: list) -> t.Counter:
         """Tally messages."""
-        return Counter(
+        return t.Counter(
             (message["type"], message["stream"])
             if message["type"] != "STATE"
             else (message["type"],)

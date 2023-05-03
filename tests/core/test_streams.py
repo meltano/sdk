@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Iterable, cast
+import typing as t
 
 import pendulum
 import pytest
@@ -50,7 +50,7 @@ class SimpleTestStream(Stream):
     def get_records(
         self,
         context: dict | None,  # noqa: ARG002
-    ) -> Iterable[dict[str, Any]]:
+    ) -> t.Iterable[dict[str, t.Any]]:
         """Generate records."""
         yield {"id": 1, "value": "Egypt"}
         yield {"id": 2, "value": "Germany"}
@@ -148,13 +148,13 @@ def tap() -> SimpleTestTap:
 @pytest.fixture
 def stream(tap: SimpleTestTap) -> SimpleTestStream:
     """Create a new stream instance."""
-    return cast(SimpleTestStream, tap.load_streams()[0])
+    return t.cast(SimpleTestStream, tap.load_streams()[0])
 
 
 @pytest.fixture
 def unix_timestamp_stream(tap: SimpleTestTap) -> UnixTimestampIncrementalStream:
     """Create a new stream instance."""
-    return cast(UnixTimestampIncrementalStream, tap.load_streams()[1])
+    return t.cast(UnixTimestampIncrementalStream, tap.load_streams()[1])
 
 
 def test_stream_apply_catalog(stream: SimpleTestStream):
@@ -251,7 +251,7 @@ def test_stream_starting_timestamp(
     tap: SimpleTestTap,
     stream_name: str,
     bookmark_value: str,
-    expected_starting_value: Any,
+    expected_starting_value: t.Any,
 ):
     """Test the starting timestamp for a stream."""
     stream = tap.streams[stream_name]

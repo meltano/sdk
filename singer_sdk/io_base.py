@@ -6,9 +6,8 @@ import abc
 import json
 import logging
 import sys
+import typing as t
 from collections import Counter, defaultdict
-from typing import IO
-from typing import Counter as CounterType
 
 from singer_sdk._singerlib import SingerMessageType
 from singer_sdk.helpers._compat import final
@@ -20,7 +19,7 @@ class SingerReader(metaclass=abc.ABCMeta):
     """Interface for all plugins reading Singer messages from stdin."""
 
     @final
-    def listen(self, file_input: IO[str] | None = None) -> None:
+    def listen(self, file_input: t.IO[str] | None = None) -> None:
         """Read from input until all messages are processed.
 
         Args:
@@ -47,11 +46,10 @@ class SingerReader(metaclass=abc.ABCMeta):
         """
         if not requires.issubset(line_dict):
             missing = requires - set(line_dict)
-            raise Exception(
-                f"Line is missing required {', '.join(missing)} key(s): {line_dict}",
-            )
+            msg = f"Line is missing required {', '.join(missing)} key(s): {line_dict}"
+            raise Exception(msg)
 
-    def _process_lines(self, file_input: IO[str]) -> CounterType[str]:
+    def _process_lines(self, file_input: t.IO[str]) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:
@@ -126,7 +124,8 @@ class SingerReader(metaclass=abc.ABCMeta):
             ValueError: raised if a message type is not recognized
         """
         record_type = message_dict["type"]
-        raise ValueError(f"Unknown message type '{record_type}' in message.")
+        msg = f"Unknown message type '{record_type}' in message."
+        raise ValueError(msg)
 
     def _process_endofpipe(self) -> None:
         logger.debug("End of pipe reached")
