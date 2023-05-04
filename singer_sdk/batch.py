@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import gzip
 import itertools
 import json
@@ -35,14 +37,18 @@ class BaseBatcher(ABC):
     """Base Record Batcher."""
 
     def __init__(
-        self, tap_name: str, stream_name: str, batch_config: BatchConfig
+        self,
+        tap_name: str,
+        stream_name: str,
+        batch_config: BatchConfig,
     ) -> None:
         self.tap_name = tap_name
         self.stream_name = stream_name
         self.batch_config = batch_config
 
     def get_batches(
-        self, records: t.Generator[dict, t.Any, t.Any]
+        self,
+        records: t.Generator[dict, t.Any, t.Any],
     ) -> t.Generator[list[str]]:
         """Yield manifest of batches.
 
@@ -52,14 +58,15 @@ class BaseBatcher(ABC):
         Raises:
             NotImplementedError: If the method is not implemented.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 class JSONLinesBatcher(BaseBatcher):
     """JSON Lines Record Batcher."""
 
     def get_batches(
-        self, records: t.Generator[dict, t.Any, t.Any]
+        self,
+        records: t.Generator[dict, t.Any, t.Any],
     ) -> t.Generator[list[str], t.Any, t.Any]:
         """Yield manifest of batches.
 
