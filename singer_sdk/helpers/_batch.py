@@ -16,6 +16,8 @@ from singer_sdk._singerlib.messages import Message, SingerMessageType
 if t.TYPE_CHECKING:
     from fs.base import FS
 
+DEFAULT_BATCH_SIZE = 10000
+
 
 class BatchFileFormat(str, enum.Enum):
     """Batch file format."""
@@ -209,12 +211,18 @@ class BatchConfig:
     storage: StorageTarget
     """The storage target of the batch file."""
 
+    batch_size: int
+    """The max number of records in a batch."""
+
     def __post_init__(self):
         if isinstance(self.encoding, dict):
             self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
 
         if isinstance(self.storage, dict):
             self.storage = StorageTarget.from_dict(self.storage)
+
+        if self.batch_size is None:
+            self.batch_size = DEFAULT_BATCH_SIZE
 
     def asdict(self):
         """Return a dictionary representation of the message.

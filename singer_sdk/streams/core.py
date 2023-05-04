@@ -5,19 +5,17 @@ from __future__ import annotations
 import abc
 import copy
 import datetime
-import gzip
-import itertools
 import json
 import typing as t
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
-from uuid import uuid4
 
 import pendulum
 
 import singer_sdk._singerlib as singer
 from singer_sdk import metrics
+from singer_sdk.batch import JSONLinesBatcher
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
@@ -63,28 +61,6 @@ REPLICATION_INCREMENTAL = "INCREMENTAL"
 REPLICATION_LOG_BASED = "LOG_BASED"
 
 FactoryType = t.TypeVar("FactoryType", bound="Stream")
-_T = t.TypeVar("_T")
-
-
-def lazy_chunked_generator(
-    iterable: t.Iterable[_T],
-    chunk_size: int,
-) -> t.Generator[t.Iterator[_T], None, None]:
-    """Yield a generator for each chunk of the given iterable.
-
-    Args:
-        iterable: The iterable to chunk.
-        chunk_size: The size of each chunk.
-
-    Yields:
-        A generator for each chunk of the given iterable.
-    """
-    iterator = iter(iterable)
-    while True:
-        chunk = list(itertools.islice(iterator, chunk_size))
-        if not chunk:
-            break
-        yield iter(chunk)
 
 
 class Stream(metaclass=abc.ABCMeta):
@@ -1341,29 +1317,14 @@ class Stream(metaclass=abc.ABCMeta):
         Yields:
             A tuple of (encoding, manifest) for each batch.
         """
-        sync_id = f"{self.tap_name}--{self.name}-{uuid4()}"
-        prefix = batch_config.storage.prefix or ""
-
-        for i, chunk in enumerate(
-            lazy_chunked_generator(
-                self._sync_records(context, write_messages=False),
-                self.batch_size,
-            ),
-            start=1,
-        ):
-            filename = f"{prefix}{sync_id}-{i}.json.gz"
-            with batch_config.storage.fs() as fs:
-                # TODO: Determine compression from config.
-                with fs.open(filename, "wb") as f, gzip.GzipFile(
-                    fileobj=f,
-                    mode="wb",
-                ) as gz:
-                    gz.writelines(
-                        (json.dumps(record) + "\n").encode() for record in chunk
-                    )
-                file_url = fs.geturl(filename)
-
-            yield batch_config.encoding, [file_url]
+        batcher = JSONLinesBatcher(
+            tap_name=self.tap_name,
+            stream_name=self.name,
+            batch_config=batch_config,
+        )
+        records = self._sync_records(context, write_messages=False)
+        for manifest in batcher.get_batches(records=records):
+            yield batch_config.encoding, manifest
 
     def post_process(
         self,
