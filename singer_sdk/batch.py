@@ -58,8 +58,8 @@ class BaseBatcher(ABC):
     @abstractmethod
     def get_batches(
         self,
-        records: t.Generator[dict, t.Any, t.Any],
-    ) -> t.Generator[list[str]]:
+        records: t.Iterator[dict],
+    ) -> t.Iterator[list[str]]:
         """Yield manifest of batches.
 
         Args:
