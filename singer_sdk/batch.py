@@ -44,7 +44,13 @@ class BaseBatcher(ABC):
         stream_name: str,
         batch_config: BatchConfig,
     ) -> None:
-        """Initialize the batcher."""
+        """Initialize the batcher.
+
+        Args:
+            tap_name: The name of the tap.
+            stream_name: The name of the stream.
+            batch_config: The batch configuration.
+        """
         self.tap_name = tap_name
         self.stream_name = stream_name
         self.batch_config = batch_config
