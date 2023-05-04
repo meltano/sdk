@@ -1,11 +1,14 @@
+"""Batching utilities for Singer SDK."""
+
 import gzip
 import itertools
 import json
 import typing as t
-from abc import ABC
+from abc import ABC, abstractmethod
 from uuid import uuid4
 
-from singer_sdk.helpers._batch import BatchConfig
+if t.TYPE_CHECKING:
+    from singer_sdk.helpers._batch import BatchConfig
 
 _T = t.TypeVar("_T")
 
@@ -37,10 +40,12 @@ class BaseBatcher(ABC):
     def __init__(
         self, tap_name: str, stream_name: str, batch_config: BatchConfig
     ) -> None:
+        """Initialize the batcher."""
         self.tap_name = tap_name
         self.stream_name = stream_name
         self.batch_config = batch_config
 
+    @abstractmethod
     def get_batches(
         self, records: t.Generator[dict, t.Any, t.Any]
     ) -> t.Generator[list[str]]:

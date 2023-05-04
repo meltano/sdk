@@ -100,10 +100,6 @@ class Stream(metaclass=abc.ABCMeta):
     # Internal API cost aggregator
     _sync_costs: dict[str, int] = {}
 
-    # Batch attributes
-    batch_size: int = 1000
-    """Max number of records to write to each batch file."""
-
     def __init__(
         self,
         tap: Tap,
