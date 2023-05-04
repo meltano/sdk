@@ -43,6 +43,7 @@ class Sink(metaclass=abc.ABCMeta):
     logger: Logger
 
     MAX_SIZE_DEFAULT = 10000
+    record_validator: type[Validator] = Draft7Validator  # type: ignore[assignment]
 
     def __init__(
         self,
@@ -86,24 +87,8 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
-        self._validator = self.get_record_validator(self.schema)
-
-    def get_record_validator(self, schema: dict) -> Validator:
-        """Get JSON schema validator for a given schema.
-
-        Override this method to customize the JSON schema validator.
-
-        Args:
-            schema: JSON schema to validate records against.
-
-        Returns:
-            A ``jsonschema`` `validator`_.
-
-        .. _validator:
-            https://python-jsonschema.readthedocs.io/en/stable/api/jsonschema/validators/
-        """
-        return Draft7Validator(  # type: ignore[return-value]
-            schema,
+        self._validator = self.record_validator(
+            self.schema,
             format_checker=self.get_format_checker(),
         )
 
