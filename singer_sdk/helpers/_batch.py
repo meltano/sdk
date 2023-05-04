@@ -211,7 +211,7 @@ class BatchConfig:
     storage: StorageTarget
     """The storage target of the batch file."""
 
-    batch_size: int | None = DEFAULT_BATCH_SIZE
+    batch_size: int = DEFAULT_BATCH_SIZE
     """The max number of records in a batch."""
 
     def __post_init__(self):
