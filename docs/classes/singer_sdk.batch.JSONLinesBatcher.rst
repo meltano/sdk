@@ -1,10 +1,8 @@
-singer_sdk.batch.JSONLinesBatcher
+﻿singer_sdk.batch.JSONLinesBatcher
 =================================
 
 .. currentmodule:: singer_sdk.batch
 
 .. autoclass:: JSONLinesBatcher
     :members:
-    :show-inheritance:
-    :inherited-members:
-    :special-members: __init__
+    :special-members: __init__, __call__

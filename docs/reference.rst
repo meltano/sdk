@@ -138,4 +138,5 @@ Batch
     :toctree: classes
     :template: class.rst
 
-    batch.JSONLineBatcher
+    batch.BaseBatcher
+    batch.JSONLinesBatcher
