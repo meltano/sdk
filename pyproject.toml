@@ -44,7 +44,7 @@ pendulum = "^2.1.0"
 click = "~=8.0"
 fs = "^2.4.16"
 PyJWT = "~=2.4"
-requests = ">=2.25.1,<2.30"
+requests = "^2.25.1"
 cryptography = ">=3.4.6,<41.0.0"
 importlib-metadata = {version = "<5.0.0", markers = "python_version < \"3.8\""}
 importlib-resources = {version = "5.12.0", markers = "python_version < \"3.9\""}
@@ -59,6 +59,8 @@ simplejson = "^3.17.6"
 jsonschema = "^4.16.0"
 pytz = ">=2022.2.1,<2024.0.0"
 PyYAML = "^6.0"
+# urllib3 2.0 is not compatible with botocore
+urllib3 = ">=1.26,<2"
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
