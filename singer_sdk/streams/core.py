@@ -539,7 +539,9 @@ class Stream(metaclass=abc.ABCMeta):
         )
 
         # If there's no input catalog, select all streams
-        self._metadata.root.selected = self._tap_input_catalog is None
+        self._metadata.root.selected = (
+            self._tap_input_catalog is None and self.selected_by_default
+        )
 
         return self._metadata
 
