@@ -100,6 +100,9 @@ class Stream(metaclass=abc.ABCMeta):
     # Internal API cost aggregator
     _sync_costs: dict[str, int] = {}
 
+    selected_by_default: bool = True
+    """Whether this stream is selected by default in the catalog."""
+
     def __init__(
         self,
         tap: Tap,
@@ -428,7 +431,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._primary_keys
 
     @primary_keys.setter
-    def primary_keys(self, new_value: list[str]) -> None:
+    def primary_keys(self, new_value: list[str] | None) -> None:
         """Set primary key(s) for the stream.
 
         Args:
@@ -472,7 +475,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._replication_key
 
     @replication_key.setter
-    def replication_key(self, new_value: str) -> None:
+    def replication_key(self, new_value: str | None) -> None:
         """Set replication key for the stream.
 
         Args:
@@ -532,11 +535,13 @@ class Stream(metaclass=abc.ABCMeta):
                 [self.replication_key] if self.replication_key else None
             ),
             schema_name=None,
+            selected_by_default=self.selected_by_default,
         )
 
         # If there's no input catalog, select all streams
-        if self._tap_input_catalog is None:
-            self._metadata.root.selected = True
+        self._metadata.root.selected = (
+            self._tap_input_catalog is None and self.selected_by_default
+        )
 
         return self._metadata
 
