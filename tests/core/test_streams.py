@@ -516,3 +516,81 @@ def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
     for record in caplog.records:
         assert record.levelname == "INFO"
         assert f"Total Sync costs for stream {stream.name}" in record.message
+
+
+@pytest.mark.parametrize(
+    "input_catalog,selection",
+    [
+        pytest.param(
+            None,
+            {
+                "selected_stream": True,
+                "unselected_stream": False,
+            },
+            id="no_catalog",
+        ),
+        pytest.param(
+            {
+                "streams": [],
+            },
+            {
+                "selected_stream": False,
+                "unselected_stream": False,
+            },
+            id="empty_catalog",
+        ),
+        pytest.param(
+            {
+                "streams": [
+                    {
+                        "tap_stream_id": "selected_stream",
+                        "metadata": [
+                            {
+                                "breadcrumb": [],
+                                "metadata": {
+                                    "selected": True,
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        "tap_stream_id": "unselected_stream",
+                        "metadata": [
+                            {
+                                "breadcrumb": [],
+                                "metadata": {
+                                    "selected": True,
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                "selected_stream": True,
+                "unselected_stream": True,
+            },
+            id="catalog_with_selection",
+        ),
+    ],
+)
+def test_stream_class_selection(input_catalog, selection):
+    """Test stream class selection."""
+
+    class SelectedStream(RESTStream):
+        name = "selected_stream"
+        url_base = "https://example.com"
+        schema = {"type": "object", "properties": {}}
+
+    class UnselectedStream(SelectedStream):
+        name = "unselected_stream"
+        selected_by_default = False
+
+    class MyTap(SimpleTestTap):
+        def discover_streams(self):
+            return [SelectedStream(self), UnselectedStream(self)]
+
+    # Check that the selected stream is selected
+    tap = MyTap(config=None, catalog=input_catalog)
+    for stream in selection:
+        assert tap.streams[stream].selected is selection[stream]
