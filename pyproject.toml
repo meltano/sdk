@@ -59,6 +59,8 @@ simplejson = "^3.17.6"
 jsonschema = "^4.16.0"
 pytz = ">=2022.2.1,<2024.0.0"
 PyYAML = "^6.0"
+# urllib3 2.0 is not compatible with botocore
+urllib3 = ">=1.26,<2"
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
