@@ -506,7 +506,6 @@ def _conform_primitive_property(  # noqa: PLR0911
         if is_boolean_type(property_schema):
             bit_representation = elem != b"\x00"
             return bit_representation
-        # if property_schema.get("contentEncoding"):
         if is_encoded_string_type(property_schema):
             return elem
         return elem.hex()
