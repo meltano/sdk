@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import datetime
 import logging
 import typing as t
@@ -285,6 +286,13 @@ def test_conform_primitives():
 
     assert _conform_primitive_property(b"\x00", {"type": "string"}) == "00"
     assert _conform_primitive_property(b"\xBC", {"type": "string"}) == "bc"
+    assert (
+        _conform_primitive_property(
+            base64.b64encode(b"Melty"),
+            {"type": "string", "contentEncoding": "base64"},
+        )
+        == b"TWVsdHk="
+    )
 
     assert _conform_primitive_property(b"\x00", {"type": "boolean"}) is False
     assert _conform_primitive_property(b"\xBC", {"type": "boolean"}) is True
