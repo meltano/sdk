@@ -204,7 +204,11 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         with self.connector._connect() as conn:
             for record in conn.execute(query):
-                yield dict(record._mapping)
+                transformed_record = self.post_process(dict(record._mapping))
+                if transformed_record is None:
+                    # Record filtered out during post_process()
+                    continue
+                yield transformed_record
 
 
 __all__ = ["SQLStream", "SQLConnector"]
