@@ -5,8 +5,6 @@ from __future__ import annotations
 import abc
 import typing as t
 
-import sqlalchemy
-
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
@@ -188,12 +186,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
             start_val = self.get_starting_replication_key_value(context)
             if start_val:
-                query = query.where(
-                    sqlalchemy.text(":replication_key >= :start_val").bindparams(
-                        replication_key=replication_key_col,
-                        start_val=start_val,
-                    ),
-                )
+                query = query.where(replication_key_col >= start_val)
 
         if self.ABORT_AT_RECORD_COUNT is not None:
             # Limit record count to one greater than the abort threshold. This ensures
