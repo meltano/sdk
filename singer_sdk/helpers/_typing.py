@@ -292,6 +292,23 @@ def is_string_type(property_schema: dict) -> bool | None:
     return False
 
 
+def is_encoded_string_type(property_schema: dict) -> bool | None:
+    """Return true if the JSON Schema type is a string or None if detection fails."""
+    if is_string_type(property_schema):
+        for property_contentencoding in property_schema.get(
+            "anyOf",
+            [property_schema.get("contentEncoding")],
+        ):
+            schema_contentencoding = (
+                property_contentencoding.get("contentEncoding", [])
+                if isinstance(property_contentencoding, dict)
+                else property_contentencoding
+            )
+            if schema_contentencoding:
+                return True
+    return False
+
+
 def is_null_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is a null or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
@@ -489,7 +506,8 @@ def _conform_primitive_property(  # noqa: PLR0911
         if is_boolean_type(property_schema):
             bit_representation = elem != b"\x00"
             return bit_representation
-        if property_schema.get("contentEncoding"):
+        # if property_schema.get("contentEncoding"):
+        if is_encoded_string_type(property_schema):
             return elem
         return elem.hex()
     if is_boolean_type(property_schema):
