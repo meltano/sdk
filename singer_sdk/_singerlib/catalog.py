@@ -166,6 +166,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
         key_properties: list[str] | None = None,
         valid_replication_keys: list[str] | None = None,
         replication_method: str | None = None,
+        selected_by_default: bool | None = None,
     ) -> MetadataMapping:
         """Get default metadata for a stream.
 
@@ -175,6 +176,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
             key_properties: Stream key properties.
             valid_replication_keys: Stream valid replication keys.
             replication_method: Stream replication method.
+            selected_by_default: Whether the stream is selected by default.
 
         Returns:
             Metadata mapping.
@@ -184,6 +186,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
             table_key_properties=key_properties,
             forced_replication_method=replication_method,
             valid_replication_keys=valid_replication_keys,
+            selected_by_default=selected_by_default,
         )
 
         if schema:
