@@ -246,6 +246,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             # Initialize streams' record limits before beginning the sync test.
             stream.ABORT_AT_RECORD_COUNT = dry_run_record_limit
 
+            # Force selection of streams.
+            stream.selected = True
+
         for stream in streams:
             if stream.parent_stream_type:
                 self.logger.debug(
@@ -267,6 +270,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     def write_schemas(self) -> None:
         """Write a SCHEMA message for all known streams to STDOUT."""
         for stream in self.streams.values():
+            stream.selected = True
             stream._write_schema_message()
 
     # Stream detection:
