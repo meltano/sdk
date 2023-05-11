@@ -506,8 +506,8 @@ def _conform_primitive_property(  # noqa: PLR0911
         if is_boolean_type(property_schema):
             bit_representation = elem != b"\x00"
             return bit_representation
-        if is_encoded_string_type(property_schema):
-            return elem
+        if is_encoded_string_type(property_schema) and elem.isascii():
+            return elem.decode(encoding="utf-8", errors="strict")
         return elem.hex()
     if is_boolean_type(property_schema):
         boolean_representation: bool | None
