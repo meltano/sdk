@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ⚙️ Under the Hood
 
-- [#1668](https://github.com/meltano/sdk/issues/1668) Break out default batch file writer into separate class
+- [#1668](https://github.com/meltano/sdk/issues/1668) Break out default batch file writer into a separate class
 
 ### 📚 Documentation Improvements
 
