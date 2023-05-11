@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.27.0 (2023-05-11)
+
+### ✨ New
+
+- [#1681](https://github.com/meltano/sdk/issues/1681) Allow SQL tap developers to leverage `post_process` -- _**Thanks @BuzzCutNorman!**_
+- [#1672](https://github.com/meltano/sdk/issues/1672) Support deselecting streams by default
+- [#1648](https://github.com/meltano/sdk/issues/1648) Use Ruff to lint projects generated with Cookiecutter templates
+
+### 🐛 Fixes
+
+- [#1680](https://github.com/meltano/sdk/issues/1680) Pin `urllib3` to `<2` to avoid incompatibility issues with botocore
+- [#1646](https://github.com/meltano/sdk/issues/1646) Use `get_new_paginator` in REST tap cookiecutter template
+
+### ⚙️ Under the Hood
+
+- [#1668](https://github.com/meltano/sdk/issues/1668) Break out default batch file writer into separate class
+
+### 📚 Documentation Improvements
+
+- [#1685](https://github.com/meltano/sdk/issues/1685) Add PyCharm debugging tips to docs
+- [#1673](https://github.com/meltano/sdk/issues/1673) Fix docs build by specifying OS in RTD config file
+
 ## v0.26.0 (2023-05-02)
 
 ### ✨ New
