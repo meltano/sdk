@@ -831,7 +831,9 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
     return False
 
 
-def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:  # noqa: PLR0911
+def to_sql_type(  # noqa: PLR0911, C901
+    jsonschema_type: dict,
+) -> sqlalchemy.types.TypeEngine:
     """Convert JSON Schema type to a SQL type.
 
     Args:

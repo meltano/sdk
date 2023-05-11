@@ -466,7 +466,7 @@ def _conform_record_data_types(  # noqa: PLR0912
     return output_object, unmapped_properties
 
 
-def _conform_primitive_property(  # noqa: PLR0911
+def _conform_primitive_property(  # noqa: PLR0911, C901
     elem: t.Any,
     property_schema: dict,
 ) -> t.Any:

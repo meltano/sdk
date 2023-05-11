@@ -383,7 +383,7 @@ class CustomStreamMap(StreamMap):
 
         return default
 
-    def _init_functions_and_schema(  # noqa: PLR0912, PLR0915
+    def _init_functions_and_schema(  # noqa: PLR0912, PLR0915, C901
         self,
         stream_map: dict,
     ) -> tuple[t.Callable[[dict], bool], t.Callable[[dict], dict | None], dict]:
@@ -642,7 +642,7 @@ class PluginMapper:
                 catalog_entry.key_properties,
             )
 
-    def register_raw_stream_schema(  # noqa: PLR0912
+    def register_raw_stream_schema(  # noqa: PLR0912, C901
         self,
         stream_name: str,
         schema: dict,
