@@ -506,6 +506,8 @@ def _conform_primitive_property(  # noqa: PLR0911
         if is_boolean_type(property_schema):
             bit_representation = elem != b"\x00"
             return bit_representation
+        # this is to detect bytes that have been encoded
+        # but not truned into utf-8 strings yet.
         if is_encoded_string_type(property_schema) and elem.isascii():
             return elem.decode(encoding="utf-8", errors="strict")
         return elem.hex()
