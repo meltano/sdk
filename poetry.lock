@@ -2574,14 +2574,14 @@ files = [
 
 [[package]]
 name = "types-python-dateutil"
-version = "2.8.19.12"
+version = "2.8.19.13"
 description = "Typing stubs for python-dateutil"
 category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "types-python-dateutil-2.8.19.12.tar.gz", hash = "sha256:355b2cb82b31e556fd18e7b074de7c350c680ab80608f0cc55ba6770d986d67d"},
-    {file = "types_python_dateutil-2.8.19.12-py3-none-any.whl", hash = "sha256:fe5b545e678ec13e3ddc83a0eee1545c1b5e2fba4cfc39b276ab6f4e7604a923"},
+    {file = "types-python-dateutil-2.8.19.13.tar.gz", hash = "sha256:09a0275f95ee31ce68196710ed2c3d1b9dc42e0b61cc43acc369a42cb939134f"},
+    {file = "types_python_dateutil-2.8.19.13-py3-none-any.whl", hash = "sha256:0b0e7c68e7043b0354b26a1e0225cb1baea7abb1b324d02b50e2d08f1221043f"},
 ]
 
 [[package]]
@@ -2625,14 +2625,14 @@ types-urllib3 = "*"
 
 [[package]]
 name = "types-simplejson"
-version = "3.19.0.0"
+version = "3.19.0.1"
 description = "Typing stubs for simplejson"
 category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "types-simplejson-3.19.0.0.tar.gz", hash = "sha256:64aff3d151104e0458bfc9d64ffb78efd0157ff740a9f00904a30a5465f7c013"},
-    {file = "types_simplejson-3.19.0.0-py3-none-any.whl", hash = "sha256:38982991785db84c78f9012f5b9a03069ec3be020f468fb8fcd950b23e3a3341"},
+    {file = "types-simplejson-3.19.0.1.tar.gz", hash = "sha256:0233df016477bd58a2525df79ac8a34b079910d51ca45ec4f09a94ae58222f02"},
+    {file = "types_simplejson-3.19.0.1-py3-none-any.whl", hash = "sha256:0083e84d43b6b36e8af6eb77e6b41440f2aec8842d16cee0f828fb5622196f4f"},
 ]
 
 [[package]]
