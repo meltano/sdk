@@ -80,31 +80,35 @@ def openai_generate(*args, model="gpt-3.5-turbo", api_key=None, **kwargs) -> str
 
 
 def openai_extract(
-    source, subject, format=None, key=None, examples=None, **kwargs
+    source, subject, format=None, key=None, rules=None, examples=None, **kwargs
 ):
     if not key:
         key = subject.lower()
 
     prompts = [
-        f'Extract the {subject} from the message that follows.',
-        f'Respond with a JSON dictionary with key "{key}".',
+        f"Extract the {subject} from the (email) message that follows after 'Message:'."
+        f"Respond only with a JSON dictionary with key '{key}' mapping to the extracted value.",
     ]
 
     if format:
         prompts.append(f'Format the extracted value as {format}.')
 
-    if examples:
-        example = examples[0]
+    if rules:
+        prompts.extend(['', f'Extraction rules:'])
+        for rule in rules:
+            prompts.append(f"- {rule}")
 
-        examples_text = ", ".join(json.dumps(example) for example in examples)
-        prompts.append(f'Example values: {examples_text}')
-    else:
-        example = f"<{key.upper()}"
+    if not examples:
+        examples = [f"<{key.upper()}"]
 
-    example_response = {key: example}
-    example_response_json = json.dumps(example_response)
+    prompts.extend(['', f'Example responses:'])
+    for example in examples:
+        example_response = {key: example}
+        example_response_json = json.dumps(example_response)
+        prompts.append(f"- {example_response_json}")
+
     prompts.extend([
-        f'Example response: {example_response_json}'
+        '',
         'Message:',
         source,
     ])
