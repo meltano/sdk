@@ -529,7 +529,7 @@ class CustomStreamMap(StreamMap):
         else:
             msg = (
                 f"Unexpected filter rule type '{type(filter_rule).__name__}' in "
-                f"expression {str(filter_rule)}. Expected 'str' or 'None'."
+                f"expression {filter_rule!s}. Expected 'str' or 'None'."
             )
             raise StreamMapConfigError(msg)
 
