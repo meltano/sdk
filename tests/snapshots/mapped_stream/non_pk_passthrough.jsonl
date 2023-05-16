@@ -3,3 +3,4 @@
 {"type": "RECORD", "stream": "mystream", "record": {"count": 13}, "time_extracted": "2022-01-01T00:00:00+00:00"}
 {"type": "RECORD", "stream": "mystream", "record": {"count": 19}, "time_extracted": "2022-01-01T00:00:00+00:00"}
 {"type": "STATE", "value": {"bookmarks": {"mystream": {}}}}
+{"type": "STATE", "value": {"bookmarks": {"mystream": {}}}}

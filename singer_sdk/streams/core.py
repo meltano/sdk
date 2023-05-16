@@ -968,11 +968,9 @@ class Stream(metaclass=abc.ABCMeta):
         reset_state_progress_markers(state)
 
     def finalize_state_progress_markers(self, state: dict | None = None) -> None:
-        """Reset progress markers. If all=True, all state contexts will be finalized.
+        """Reset progress markers.
 
         This method is internal to the SDK and should not need to be overridden.
-
-        If all=True and the stream has children, child streams will also be finalized.
 
         Args:
             state: State object to promote progress markers with.

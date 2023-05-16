@@ -3,3 +3,4 @@
 {"type": "RECORD", "stream": "mystream", "record": {"email_hash": "4b9bb80620f03eb3719e0a061c14283d", "fixed_count": 12}, "time_extracted": "2022-01-01T00:00:00+00:00"}
 {"type": "RECORD", "stream": "mystream", "record": {"email_hash": "426b189df1e2f359efe6ee90f2d2030f", "fixed_count": 18}, "time_extracted": "2022-01-01T00:00:00+00:00"}
 {"type": "STATE", "value": {"bookmarks": {"mystream": {}}}}
+{"type": "STATE", "value": {"bookmarks": {"mystream": {}}}}
