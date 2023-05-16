@@ -143,6 +143,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._mask: singer.SelectionMask | None = None
         self._schema: dict
         self._is_state_flushed: bool = True
+        self._last_emitted_state: dict | None = None
         self.child_streams: list[Stream] = []
         if schema:
             if isinstance(schema, (PathLike, str)):
@@ -752,14 +753,13 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Private message authoring methods:
 
-    def _write_state_message(self, *, force: bool = False) -> None:
-        """Write out a STATE message with the latest state.
-
-        Args:
-            force: If True, always write the state message.
-        """
-        if not self._is_state_flushed or force:
+    def _write_state_message(self) -> None:
+        """Write out a STATE message with the latest state."""
+        if (not self._is_state_flushed) and (
+            self.tap_state != self._last_emitted_state
+        ):
             singer.write_message(singer.StateMessage(value=self.tap_state))
+            self._last_emitted_state = copy.deepcopy(self.tap_state)
             self._is_state_flushed = True
 
     def _generate_schema_messages(

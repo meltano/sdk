@@ -425,7 +425,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
             stream.sync()
             stream.finalize_state_progress_markers()
-            stream._write_state_message(force=True)
+            # state may have changed during finalization
+            stream._is_state_flushed = False
+            stream._write_state_message()
 
         # this second loop is needed for all streams to print out their costs
         # including child streams which are otherwise skipped in the loop above

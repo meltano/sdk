@@ -3,4 +3,3 @@
 {"type": "RECORD", "stream": "mystream", "record": {"email": "bob@example.com", "count": 13, "user__id": 2, "user__sub__num": 2}, "time_extracted": "2022-01-01T00:00:00+00:00"}
 {"type": "RECORD", "stream": "mystream", "record": {"email": "charlie@example.com", "count": 19, "user__id": 3, "user__sub__num": 3}, "time_extracted": "2022-01-01T00:00:00+00:00"}
 {"type": "STATE", "value": {"bookmarks": {"mystream": {}}}}
-{"type": "STATE", "value": {"bookmarks": {"mystream": {}}}}
