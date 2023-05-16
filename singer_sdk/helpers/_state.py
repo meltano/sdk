@@ -81,7 +81,7 @@ def _find_in_partitions_list(
     if len(found) > 1:
         msg = (
             "State file contains duplicate entries for partition: "
-            f"{{state_partition_context}}.\nMatching state values were: {str(found)}"
+            f"{{state_partition_context}}.\nMatching state values were: {found!s}"
         )
         raise ValueError(msg)
     if found:
@@ -289,6 +289,6 @@ def log_sort_error(
             f" state partition context {state_partition_context}. "
         )
     if current_context:
-        msg += f"Context was {str(current_context)}. "
+        msg += f"Context was {current_context!s}. "
     msg += str(ex)
     log_fn(msg)

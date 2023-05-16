@@ -50,7 +50,7 @@ def _pop_deselected_schema(
         msg = (
             "Expected dictionary type instead of "
             f"'{type(schema_at_breadcrumb).__name__}' '{schema_at_breadcrumb}' for "
-            f"'{stream_name}' bookmark '{str(breadcrumb)}' in '{schema}'"
+            f"'{stream_name}' bookmark '{breadcrumb!s}' in '{schema}'"
         )
         raise ValueError(msg)
 
