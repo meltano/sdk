@@ -1107,11 +1107,17 @@ class Stream(metaclass=abc.ABCMeta):
                 if current_context == state_partition_context:
                     # Finalize per-partition state only if 1:1 with context
                     finalize_state_progress_markers(state)
+                    self._is_state_flushed = False
 
         if not context:
             # Finalize total stream only if we have the full context.
             # Otherwise will be finalized by tap at end of sync.
             finalize_state_progress_markers(self.stream_state)
+            self._is_state_flushed = False
+
+        if write_messages:
+            # Write final state message if we haven't already
+            self._write_state_message()
 
     def _sync_batches(
         self,
