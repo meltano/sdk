@@ -4,5 +4,6 @@
   "target_id": "target-{{ cookiecutter.destination_name.lower() }}",
   "library_name": "{{ cookiecutter.target_id.replace('-', '_') }}",
   "variant": "None (Skip)",
-  "serialization_method": ["Per record", "Per batch", "SQL"]
+  "serialization_method": ["Per record", "Per batch", "SQL"],
+  "license": ["Apache-2.0"]
 }
