@@ -12,7 +12,7 @@ keywords = [
     "ELT",
     "{{cookiecutter.destination_name}}",
 ]
-license = "Apache 2.0"
+license = "Apache-2.0"
 {%- if cookiecutter.variant != "None (Skip)" %}
 packages = [
     { include = "{{cookiecutter.library_name}}" },

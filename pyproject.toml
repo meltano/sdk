@@ -28,7 +28,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
 ]
-license = "Apache 2.0"
+license = "Apache-2.0"
 
 [tool.poetry.urls]
 "Issue Tracker" = "https://github.com/meltano/sdk/issues"
