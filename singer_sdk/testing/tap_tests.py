@@ -123,7 +123,11 @@ class StreamRecordMatchesStreamSchema(StreamTestTemplate):
         for record in self.stream_records:
             errors = list(validator.iter_errors(record))
             error_messages = "\n".join(
-                [f"{e.message} (path: {'.'.join(e.path)})" for e in errors if e.path],
+                [
+                    f"{e.message} (path: {'.'.join(str(p) for p in e.path)})"
+                    for e in errors
+                    if e.path
+                ],
             )
             assert not errors, f"Record does not match stream schema: {error_messages}"
 
