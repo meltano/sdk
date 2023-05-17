@@ -198,10 +198,10 @@
     "time_stats": {
       "properties": {
         "human_time_estimate": {
-          "type": "null"
+          "type": ["string", "null"]
         },
         "human_total_time_spent": {
-          "type": "null"
+          "type": ["string", "null"]
         },
         "time_estimate": {
           "type": "integer"
