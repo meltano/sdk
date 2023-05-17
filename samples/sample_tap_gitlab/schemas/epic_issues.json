@@ -101,7 +101,8 @@
       "type": "object"
     },
     "closed_at": {
-      "type": "null"
+      "type": ["string", "null"],
+      "format": "date-time"
     },
     "confidential": {
       "type": "boolean"
@@ -120,7 +121,8 @@
       "type": "integer"
     },
     "due_date": {
-      "type": "null"
+      "type": ["string", "null"],
+      "format": "date-time"
     },
     "epic_issue_id": {
       "type": "integer"
@@ -133,8 +135,7 @@
     },
     "labels": {
       "items": {
-        "properties": {},
-        "type": "object"
+        "type": "string"
       },
       "type": "array"
     },
@@ -148,7 +149,8 @@
           "type": "string"
         },
         "due_date": {
-          "type": "null"
+          "type": ["string", "null"],
+          "format": "date-time"
         },
         "id": {
           "type": "integer"
@@ -160,7 +162,8 @@
           "type": "integer"
         },
         "start_date": {
-          "type": "null"
+          "type": ["string", "null"],
+          "format": "date-time"
         },
         "state": {
           "type": "string"
@@ -179,7 +182,6 @@
         "due_date",
         "id",
         "iid",
-        "project_id",
         "start_date",
         "state",
         "title",
