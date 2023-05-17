@@ -979,7 +979,7 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             The state object with progress markers reset.
         """
-        state = finalize_state_progress_markers(state)
+        state: dict | None = finalize_state_progress_markers(state)
         self._is_state_flushed = False
         return state
 
