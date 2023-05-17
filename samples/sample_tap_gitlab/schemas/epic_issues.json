@@ -235,7 +235,7 @@
       "type": "string"
     },
     "weight": {
-      "type": "null"
+      "type": ["integer", "null"]
     }
   },
   "required": [
