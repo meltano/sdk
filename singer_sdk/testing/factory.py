@@ -19,7 +19,7 @@ if t.TYPE_CHECKING:
     from singer_sdk import Tap, Target
 
 
-def get_test_class(
+def get_test_class(  # noqa: C901
     test_runner: TapTestRunner | TargetTestRunner,
     test_suites: list,
     suite_config: SuiteConfig | None,
