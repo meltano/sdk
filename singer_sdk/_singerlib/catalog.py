@@ -323,7 +323,7 @@ class CatalogEntry:
             replication_method=stream.get("replication_method"),
         )
 
-    def to_dict(self) -> dict[str, t.Any]:
+    def to_dict(self) -> dict[str, t.Any]:  # noqa: C901
         """Convert entry to a dictionary.
 
         Returns:
