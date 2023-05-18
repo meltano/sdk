@@ -8,6 +8,7 @@
       "stream_type": "REST",
       "auth_method": "Basic Auth",
       "include_cicd_sample_template": "None (Skip)",
+      "license": "Apache-2.0",
       "_template": "../tap-template/",
       "_output_dir": "."
     }

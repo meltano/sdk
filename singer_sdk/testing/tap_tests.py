@@ -6,6 +6,7 @@ import typing as t
 import warnings
 
 from dateutil import parser
+from jsonschema import Draft7Validator
 
 import singer_sdk.helpers._typing as th
 from singer_sdk import Tap
@@ -105,6 +106,30 @@ class StreamRecordSchemaMatchesCatalogTest(StreamTestTemplate):
         stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
         diff = stream_record_keys - stream_catalog_keys
         assert not diff, f"Fields in records but not in catalog: ({diff})"
+
+
+class StreamRecordMatchesStreamSchema(StreamTestTemplate):
+    """Test all attributes in the record schema are present in the catalog schema."""
+
+    name = "record_matches_stream_schema"
+
+    def test(self) -> None:
+        """Run test."""
+        schema = self.stream.schema
+        validator = Draft7Validator(
+            schema,
+            format_checker=Draft7Validator.FORMAT_CHECKER,
+        )
+        for record in self.stream_records:
+            errors = list(validator.iter_errors(record))
+            error_messages = "\n".join(
+                [
+                    f"{e.message} (path: {'.'.join(str(p) for p in e.path)})"
+                    for e in errors
+                    if e.path
+                ],
+            )
+            assert not errors, f"Record does not match stream schema: {error_messages}"
 
 
 class StreamPrimaryKeysTest(StreamTestTemplate):
