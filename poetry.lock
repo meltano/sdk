@@ -2255,14 +2255,14 @@ rtd = ["ipython", "myst-nb", "sphinx", "sphinx-book-theme", "sphinx-examples"]
 
 [[package]]
 name = "sphinx-reredirects"
-version = "0.1.1"
+version = "0.1.2"
 description = "Handles redirects for moved pages in Sphinx documentation projects"
 category = "main"
 optional = true
 python-versions = ">=3.5"
 files = [
-    {file = "sphinx_reredirects-0.1.1-py3-none-any.whl", hash = "sha256:fab84a6e859db462c7d79eb03043eeea8d5efe1c3d078ad05e097f8b17f45641"},
-    {file = "sphinx_reredirects-0.1.1.tar.gz", hash = "sha256:4519a45d316c921c46327b72fe410e1e7a32fe51694741296020b0ca008fbcee"},
+    {file = "sphinx_reredirects-0.1.2-py3-none-any.whl", hash = "sha256:3a22161771aadd448bb608a4fe7277252182a337af53c18372b7104531d71489"},
+    {file = "sphinx_reredirects-0.1.2.tar.gz", hash = "sha256:a0e7213304759b01edc22f032f1715a1c61176fc8f167164e7a52b9feec9ac64"},
 ]
 
 [package.dependencies]
