@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast
+import typing as t
 
 from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.helpers._typing import to_json_compatible
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import datetime
 
-    _T = TypeVar("_T", datetime.datetime, str, int, float)
+    _T = t.TypeVar("_T", datetime.datetime, str, int, float)
 
 PROGRESS_MARKERS = "progress_markers"
 PROGRESS_MARKER_NOTE = "Note"
@@ -18,12 +18,12 @@ SIGNPOST_MARKER = "replication_key_signpost"
 STARTING_MARKER = "starting_replication_value"
 
 
-def get_state_if_exists(
+def get_state_if_exists(  # noqa: PLR0911
     tap_state: dict,
     tap_stream_id: str,
     state_partition_context: dict | None = None,
     key: str | None = None,
-) -> Any | None:
+) -> t.Any | None:
     """Return the stream or partition state, creating a new one if it does not exist.
 
     Args:
@@ -79,13 +79,13 @@ def _find_in_partitions_list(
         if partition_state["context"] == state_partition_context
     ]
     if len(found) > 1:
-        raise ValueError(
-            f"State file contains duplicate entries for partition: "
-            "{state_partition_context}.\n"
-            f"Matching state values were: {str(found)}",
+        msg = (
+            "State file contains duplicate entries for partition: "
+            f"{{state_partition_context}}.\nMatching state values were: {found!s}"
         )
+        raise ValueError(msg)
     if found:
-        return cast(dict, found[0])
+        return t.cast(dict, found[0])
 
     return None
 
@@ -120,13 +120,14 @@ def get_writeable_state_dict(
         ValueError: Raise an error if duplicate entries are found.
     """
     if tap_state is None:
-        raise ValueError("Cannot write state to missing state dictionary.")
+        msg = "Cannot write state to missing state dictionary."
+        raise ValueError(msg)
 
     if "bookmarks" not in tap_state:
         tap_state["bookmarks"] = {}
     if tap_stream_id not in tap_state["bookmarks"]:
         tap_state["bookmarks"][tap_stream_id] = {}
-    stream_state = cast(dict, tap_state["bookmarks"][tap_stream_id])
+    stream_state = t.cast(dict, tap_state["bookmarks"][tap_stream_id])
     if not state_partition_context:
         return stream_state
 
@@ -171,7 +172,7 @@ def reset_state_progress_markers(stream_or_partition_state: dict) -> dict | None
 
 def write_replication_key_signpost(
     stream_or_partition_state: dict,
-    new_signpost_value: Any,
+    new_signpost_value: t.Any,
 ) -> None:
     """Write signpost value."""
     stream_or_partition_state[SIGNPOST_MARKER] = to_json_compatible(new_signpost_value)
@@ -179,7 +180,7 @@ def write_replication_key_signpost(
 
 def write_starting_replication_value(
     stream_or_partition_state: dict,
-    initial_value: Any,
+    initial_value: t.Any,
 ) -> None:
     """Write initial replication value to state."""
     stream_or_partition_state[STARTING_MARKER] = to_json_compatible(initial_value)
@@ -194,6 +195,7 @@ def get_starting_replication_value(stream_or_partition_state: dict):
 
 def increment_state(
     stream_or_partition_state: dict,
+    *,
     latest_record: dict,
     replication_key: str,
     is_sorted: bool,
@@ -219,10 +221,11 @@ def increment_state(
         return
 
     if is_sorted:
-        raise InvalidStreamSortException(
+        msg = (
             f"Unsorted data detected in stream. Latest value '{new_rk_value}' is "
-            f"smaller than previous max '{old_rk_value}'.",
+            f"smaller than previous max '{old_rk_value}'."
         )
+        raise InvalidStreamSortException(msg)
 
 
 def _greater_than_signpost(
@@ -268,8 +271,9 @@ def finalize_state_progress_markers(stream_or_partition_state: dict) -> dict | N
 
 
 def log_sort_error(
+    *,
     ex: Exception,
-    log_fn: Callable,
+    log_fn: t.Callable,
     stream_name: str,
     current_context: dict | None,
     state_partition_context: dict | None,
@@ -285,6 +289,6 @@ def log_sort_error(
             f" state partition context {state_partition_context}. "
         )
     if current_context:
-        msg += f"Context was {str(current_context)}. "
+        msg += f"Context was {current_context!s}. "
     msg += str(ex)
     log_fn(msg)

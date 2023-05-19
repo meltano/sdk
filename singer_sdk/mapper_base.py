@@ -3,28 +3,23 @@
 from __future__ import annotations
 
 import abc
-from typing import TYPE_CHECKING, Callable, Iterable
+import typing as t
 
 import click
 
 import singer_sdk._singerlib as singer
 from singer_sdk.cli import common_options
-from singer_sdk.configuration._dict_config import merge_config_sources
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import PluginBase
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from io import FileIO
 
 
 class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     """Abstract base class for inline mappers."""
-
-    @classproperty
-    def _env_prefix(cls) -> str:  # noqa: N805
-        return f"{cls.name.upper().replace('-', '_')}_"
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
@@ -38,7 +33,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ]
 
     @staticmethod
-    def _write_messages(messages: Iterable[singer.Message]) -> None:
+    def _write_messages(messages: t.Iterable[singer.Message]) -> None:
         for message in messages:
             singer.write_message(message)
 
@@ -58,7 +53,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._write_messages(self.map_batch_message(message_dict))
 
     @abc.abstractmethod
-    def map_schema_message(self, message_dict: dict) -> Iterable[singer.Message]:
+    def map_schema_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
         """Map a schema message to zero or more new messages.
 
         Args:
@@ -67,7 +62,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def map_record_message(self, message_dict: dict) -> Iterable[singer.Message]:
+    def map_record_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
         """Map a record message to zero or more new messages.
 
         Args:
@@ -76,7 +71,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def map_state_message(self, message_dict: dict) -> Iterable[singer.Message]:
+    def map_state_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
         """Map a state message to zero or more new messages.
 
         Args:
@@ -88,7 +83,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     def map_activate_version_message(
         self,
         message_dict: dict,
-    ) -> Iterable[singer.Message]:
+    ) -> t.Iterable[singer.Message]:
         """Map a version message to zero or more new messages.
 
         Args:
@@ -98,8 +93,8 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     def map_batch_message(
         self,
-        message_dict: dict,
-    ) -> Iterable[singer.Message]:
+        message_dict: dict,  # noqa: ARG002
+    ) -> t.Iterable[singer.Message]:
         """Map a batch message to zero or more new messages.
 
         Args:
@@ -108,10 +103,11 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: if not implemented by subclass.
         """
-        raise NotImplementedError("BATCH messages are not supported by mappers.")
+        msg = "BATCH messages are not supported by mappers."
+        raise NotImplementedError(msg)
 
     @classproperty
-    def cli(cls) -> Callable:  # noqa: N805
+    def cli(cls) -> t.Callable:  # noqa: N805
         """Execute standard CLI handler for inline mappers.
 
         Returns:
@@ -128,6 +124,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             context_settings={"help_option_names": ["--help"]},
         )
         def cli(
+            *,
             version: bool = False,
             about: bool = False,
             config: tuple[str, ...] = (),
@@ -158,15 +155,11 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             cls.print_version(print_fn=cls.logger.info)
 
-            config_dict = merge_config_sources(
-                config,
-                cls.config_jsonschema,
-                cls._env_prefix,
-            )
-
+            config_files, parse_env_config = cls.config_from_cli_args(*config)
             mapper = cls(  # type: ignore[operator]
-                config=config_dict,
+                config=config_files or None,
                 validate_config=validate_config,
+                parse_env_config=parse_env_config,
             )
 
             if about:

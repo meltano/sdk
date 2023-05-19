@@ -10,7 +10,7 @@ The Meltano SDK test framework consists of 4 main components:
 1. A runner class (`TapTestRunner` and `TargetTestRunner`), responsible for executing Taps/Targets and capturing their output.
 1. A suite dataclass, containing a list of tests.
 1. A test template classes (`TapTestTemplate`, `StreamTestTemplate`, `AttributeTestTemplate` and `TargetTestTemplate`), with methods to `.setup()`, `.test()`, `.validate()` and `.teardown()` (called in that order using `.run()`).
-1. `get_tap_test_class` and `get_target_test_class` factory methods. These wrap a `get_test_class` factory method, which takes a runner and a list of suits and return a `pytest` test class.
+1. `get_tap_test_class` and `get_target_test_class` factory methods. These wrap a `get_test_class` factory method, which takes a runner and a list of suites and return a `pytest` test class.
 
 ## Example Usage
 
@@ -130,7 +130,7 @@ Once you have created some tests, add them to a suite:
 
 ```python
 my_custom_tap_tests = TestSuite(
-    type="tap", tests=[TapCLIPrintsTest]
+    kind="tap", tests=[TapCLIPrintsTest]
 )
 ```
 

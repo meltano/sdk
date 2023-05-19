@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
+import typing as t
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any
 
 from memoization import cached
 
 from singer_sdk.helpers._typing import is_object_type
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from logging import Logger
 
     from singer_sdk._singerlib import Catalog, SelectionMask
@@ -47,11 +47,12 @@ def _pop_deselected_schema(
         schema_at_breadcrumb = schema_at_breadcrumb.get(crumb, {})
 
     if not isinstance(schema_at_breadcrumb, dict):
-        raise ValueError(
-            f"Expected dictionary type instead of "
-            f"'{type(schema_at_breadcrumb).__name__}' '{schema_at_breadcrumb}' "
-            f"for '{stream_name}' bookmark '{str(breadcrumb)}' in '{schema}'",
+        msg = (
+            "Expected dictionary type instead of "
+            f"'{type(schema_at_breadcrumb).__name__}' '{schema_at_breadcrumb}' for "
+            f"'{stream_name}' bookmark '{breadcrumb!s}' in '{schema}'"
         )
+        raise ValueError(msg)
 
     if "properties" not in schema_at_breadcrumb:
         return
@@ -79,7 +80,7 @@ def _pop_deselected_schema(
 
 
 def pop_deselected_record_properties(
-    record: dict[str, Any],
+    record: dict[str, t.Any],
     schema: dict,
     mask: SelectionMask,
     logger: Logger,
@@ -117,6 +118,7 @@ def deselect_all_streams(catalog: Catalog) -> None:
 def set_catalog_stream_selected(
     catalog: Catalog,
     stream_name: str,
+    *,
     selected: bool,
     breadcrumb: tuple[str, ...] | None = None,
 ) -> None:
@@ -127,14 +129,16 @@ def set_catalog_stream_selected(
     """
     breadcrumb = breadcrumb or ()
     if not isinstance(breadcrumb, tuple):
-        raise ValueError(
-            f"Expected tuple value for breadcrumb '{breadcrumb}'. "
-            f"Got {type(breadcrumb).__name__}",
+        msg = (
+            f"Expected tuple value for breadcrumb '{breadcrumb}'. Got "
+            f"{type(breadcrumb).__name__}"
         )
+        raise ValueError(msg)
 
     catalog_entry = catalog.get_stream(stream_name)
     if not catalog_entry:
-        raise ValueError(f"Catalog entry missing for '{stream_name}'. Skipping.")
+        msg = f"Catalog entry missing for '{stream_name}'. Skipping."
+        raise ValueError(msg)
 
     md_entry = catalog_entry.metadata[breadcrumb]
     md_entry.selected = selected

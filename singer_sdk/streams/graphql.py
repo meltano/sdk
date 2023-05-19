@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Any
+import typing as t
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.streams.rest import RESTStream
@@ -37,12 +37,13 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: If the derived class doesn't define this property.
         """
-        raise NotImplementedError("GraphQLStream `query` is not defined.")
+        msg = "GraphQLStream `query` is not defined."
+        raise NotImplementedError(msg)
 
     def prepare_request_payload(
         self,
         context: dict | None,
-        next_page_token: Any | None,
+        next_page_token: t.Any | None,
     ) -> dict | None:
         """Prepare the data payload for the GraphQL API request.
 
@@ -65,7 +66,8 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
         query = self.query
 
         if query is None:
-            raise ValueError("Graphql `query` property not set.")
+            msg = "Graphql `query` property not set."
+            raise ValueError(msg)
 
         if not query.lstrip().startswith("query"):
             # Wrap text in "query { }" if not already wrapped
@@ -76,5 +78,5 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
             "query": (" ".join([line.strip() for line in query.splitlines()])),
             "variables": params,
         }
-        self.logger.debug(f"Attempting query:\n{query}")
+        self.logger.debug("Attempting query:\n%s", query)
         return request_data

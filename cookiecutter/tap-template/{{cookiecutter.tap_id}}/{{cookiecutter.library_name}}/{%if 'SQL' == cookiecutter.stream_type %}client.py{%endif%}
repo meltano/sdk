@@ -4,17 +4,17 @@ This includes {{ cookiecutter.source_name }}Stream and {{ cookiecutter.source_na
 """
 
 from __future__ import annotations
+
 from typing import Any, Iterable
 
-import sqlalchemy
-
+import sqlalchemy  # noqa: TCH002
 from singer_sdk import SQLConnector, SQLStream
 
 
 class {{ cookiecutter.source_name }}Connector(SQLConnector):
     """Connects to the {{ cookiecutter.source_name }} SQL source."""
 
-    def get_sqlalchemy_url(cls, config: dict) -> str:
+    def get_sqlalchemy_url(self, config: dict) -> str:
         """Concatenate a SQLAlchemy URL for use in connecting to the source.
 
         Args:

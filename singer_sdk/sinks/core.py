@@ -6,10 +6,10 @@ import abc
 import datetime
 import json
 import time
+import typing as t
 from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
-from typing import IO, TYPE_CHECKING, Any, Mapping, Sequence
 
 from dateutil import parser
 from jsonschema import Draft7Validator, FormatChecker
@@ -27,7 +27,7 @@ from singer_sdk.helpers._typing import (
     handle_invalid_timestamp_in_record,
 )
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from logging import Logger
 
     from singer_sdk.plugin_base import PluginBase
@@ -63,13 +63,16 @@ class Sink(metaclass=abc.ABCMeta):
         self._config = dict(target.config)
         self._pending_batch: dict | None = None
         self.stream_name = stream_name
-        self.logger.info(f"Initializing target sink for stream '{stream_name}'...")
+        self.logger.info(
+            "Initializing target sink for stream '%s'...",
+            stream_name,
+        )
         self.schema = schema
         if self.include_sdc_metadata_properties:
             self._add_sdc_metadata_to_schema()
         else:
             self._remove_sdc_metadata_from_schema()
-        self.records_to_drain: list[dict] | Any = []
+        self.records_to_drain: list[dict] | t.Any = []
         self._context_draining: dict | None = None
         self.latest_state: dict | None = None
         self._draining_state: dict | None = None
@@ -169,7 +172,7 @@ class Sink(metaclass=abc.ABCMeta):
     # Properties
 
     @property
-    def config(self) -> Mapping[str, Any]:
+    def config(self) -> t.Mapping[str, t.Any]:
         """Get plugin configuration.
 
         Returns:
@@ -225,7 +228,7 @@ class Sink(metaclass=abc.ABCMeta):
         """Populate metadata _sdc columns from incoming record message.
 
         Record metadata specs documented at:
-        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.html
 
         Args:
             record: Individual record in the stream.
@@ -248,7 +251,7 @@ class Sink(metaclass=abc.ABCMeta):
         """Add _sdc metadata columns.
 
         Record metadata specs documented at:
-        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.html
         """
         properties_dict = self.schema["properties"]
         for col in {
@@ -268,7 +271,7 @@ class Sink(metaclass=abc.ABCMeta):
         """Remove _sdc metadata columns.
 
         Record metadata specs documented at:
-        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.html
         """
         properties_dict = self.schema["properties"]
         for col in {
@@ -285,7 +288,7 @@ class Sink(metaclass=abc.ABCMeta):
         """Remove metadata _sdc columns from incoming record message.
 
         Record metadata specs documented at:
-        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.html
 
         Args:
             record: Individual record in the stream.
@@ -417,7 +420,8 @@ class Sink(metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: If derived class does not override this method.
         """
-        raise NotImplementedError("No handling exists for process_batch().")
+        msg = "No handling exists for process_batch()."
+        raise NotImplementedError(msg)
 
     def mark_drained(self) -> None:
         """Reset `records_to_drain` and any other tracking."""
@@ -465,7 +469,7 @@ class Sink(metaclass=abc.ABCMeta):
     def process_batch_files(
         self,
         encoding: BaseBatchFileEncoding,
-        files: Sequence[str],
+        files: t.Sequence[str],
     ) -> None:
         """Process a batch file with the given batch context.
 
@@ -476,7 +480,7 @@ class Sink(metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: If the batch file encoding is not supported.
         """
-        file: GzipFile | IO
+        file: GzipFile | t.IO
         storage: StorageTarget | None = None
 
         for path in files:
@@ -492,11 +496,16 @@ class Sink(metaclass=abc.ABCMeta):
                     tail,
                     mode="rb",
                 ) as file:
-                    if encoding.compression == "gzip":
-                        file = gzip_open(file)
-                    context = {"records": [json.loads(line) for line in file]}
+                    open_file = (
+                        gzip_open(file) if encoding.compression == "gzip" else file
+                    )
+                    context = {
+                        "records": [
+                            json.loads(line)
+                            for line in open_file  # type: ignore[attr-defined]
+                        ],
+                    }
                     self.process_batch(context)
             else:
-                raise NotImplementedError(
-                    f"Unsupported batch encoding format: {encoding.format}",
-                )
+                msg = f"Unsupported batch encoding format: {encoding.format}"
+                raise NotImplementedError(msg)

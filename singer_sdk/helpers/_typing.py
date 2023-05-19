@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import copy
 import datetime
+import typing as t
 from enum import Enum
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, cast
 
 import pendulum
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import logging
 
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
@@ -28,7 +28,18 @@ class DatetimeErrorTreatmentEnum(Enum):
     NULL = "null"
 
 
-def to_json_compatible(val: Any) -> Any:
+class EmptySchemaTypeError(Exception):
+    """Exception for when trying to detect type from empty type_dict."""
+
+    def __init__(self, *args: object) -> None:
+        msg = (
+            "Could not detect type from empty type_dict. Did you forget to define a "
+            "property in the stream schema?"
+        )
+        super().__init__(msg, *args)
+
+
+def to_json_compatible(val: t.Any) -> t.Any:
     """Return as string if datetime. JSON does not support proper datetime types.
 
     If given a naive datetime object, pendulum automatically makes it utc
@@ -56,10 +67,11 @@ def append_type(type_dict: dict, new_type: str) -> dict:
             result["type"] = [*type_array, new_type]
         return result
 
-    raise ValueError(
+    msg = (
         "Could not append type because the JSON schema for the dictionary "
-        f"`{type_dict}` appears to be invalid.",
+        f"`{type_dict}` appears to be invalid."
     )
+    raise ValueError(msg)
 
 
 def is_secret_type(type_dict: dict) -> bool:
@@ -122,17 +134,13 @@ def is_datetime_type(type_dict: dict) -> bool:
     Also returns True if 'date-time' is nested within an 'anyOf' type Array.
     """
     if not type_dict:
-        raise ValueError(
-            "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?",
-        )
+        raise EmptySchemaTypeError
     if "anyOf" in type_dict:
         return any(is_datetime_type(type_dict) for type_dict in type_dict["anyOf"])
     if "type" in type_dict:
         return type_dict.get("format") == "date-time"
-    raise ValueError(
-        f"Could not detect type of replication key using schema '{type_dict}'",
-    )
+    msg = f"Could not detect type of replication key using schema '{type_dict}'"
+    raise ValueError(msg)
 
 
 def is_date_or_datetime_type(type_dict: dict) -> bool:
@@ -155,9 +163,8 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
     if "type" in type_dict:
         return type_dict.get("format") in {"date", "date-time"}
 
-    raise ValueError(
-        f"Could not detect type of replication key using schema '{type_dict}'",
-    )
+    msg = f"Could not detect type of replication key using schema '{type_dict}'"
+    raise ValueError(msg)
 
 
 def get_datelike_property_type(property_schema: dict) -> str | None:
@@ -166,11 +173,11 @@ def get_datelike_property_type(property_schema: dict) -> str | None:
     Otherwise return None.
     """
     if _is_string_with_format(property_schema):
-        return cast(str, property_schema["format"])
+        return t.cast(str, property_schema["format"])
     if "anyOf" in property_schema:
         for type_dict in property_schema["anyOf"]:
             if _is_string_with_format(type_dict):
-                return cast(str, type_dict["format"])
+                return t.cast(str, type_dict["format"])
     return None
 
 
@@ -192,7 +199,7 @@ def handle_invalid_timestamp_in_record(
     ex: Exception,
     treatment: DatetimeErrorTreatmentEnum | None,
     logger: logging.Logger,
-) -> Any:
+) -> t.Any:
     """Apply treatment or raise an error for invalid time values."""
     treatment = treatment or DatetimeErrorTreatmentEnum.ERROR
     msg = (
@@ -200,11 +207,11 @@ def handle_invalid_timestamp_in_record(
         f"field '{':'.join(key_breadcrumb)}'."
     )
     if treatment == DatetimeErrorTreatmentEnum.MAX:
-        logger.warning(f"{msg}. Replacing with MAX value.\n{ex}\n")
+        logger.warning("%s. Replacing with MAX value.\n%s\n", msg, ex)
         return _MAX_TIMESTAMP if datelike_typename != "time" else _MAX_TIME
 
     if treatment == DatetimeErrorTreatmentEnum.NULL:
-        logger.warning(f"{msg}. Replacing with NULL.\n{ex}\n")
+        logger.warning("%s. Replacing with NULL.\n%s\n", msg, ex)
         return None
 
     raise ValueError(msg)
@@ -213,16 +220,14 @@ def handle_invalid_timestamp_in_record(
 def is_string_array_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition is a string array."""
     if not type_dict:
-        raise ValueError(
-            "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?",
-        )
+        raise EmptySchemaTypeError
 
     if "anyOf" in type_dict:
         return any(is_string_array_type(t) for t in type_dict["anyOf"])
 
     if "type" not in type_dict:
-        raise ValueError(f"Could not detect type from schema '{type_dict}'")
+        msg = f"Could not detect type from schema '{type_dict}'"
+        raise ValueError(msg)
 
     return "array" in type_dict["type"] and bool(is_string_type(type_dict["items"]))
 
@@ -230,16 +235,14 @@ def is_string_array_type(type_dict: dict) -> bool:
 def is_array_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type is an array."""
     if not type_dict:
-        raise ValueError(
-            "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?",
-        )
+        raise EmptySchemaTypeError
 
     if "anyOf" in type_dict:
         return any(is_array_type(t) for t in type_dict["anyOf"])
 
     if "type" not in type_dict:
-        raise ValueError(f"Could not detect type from schema '{type_dict}'")
+        msg = f"Could not detect type from schema '{type_dict}'"
+        raise ValueError(msg)
 
     return "array" in type_dict["type"]
 
@@ -249,9 +252,12 @@ def is_boolean_type(property_schema: dict) -> bool | None:
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
-        if isinstance(property_type, dict):
-            property_type = property_type.get("type", [])
-        if "boolean" in property_type or property_type == "boolean":
+        schema_type = (
+            property_type.get("type", [])
+            if isinstance(property_type, dict)
+            else property_type
+        )
+        if "boolean" in schema_type or schema_type == "boolean":
             return True
     return False
 
@@ -261,9 +267,12 @@ def is_integer_type(property_schema: dict) -> bool | None:
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
-        if isinstance(property_type, dict):
-            property_type = property_type.get("type", [])
-        if "integer" in property_type or property_type == "integer":
+        schema_type = (
+            property_type.get("type", [])
+            if isinstance(property_type, dict)
+            else property_type
+        )
+        if "integer" in schema_type or schema_type == "integer":
             return True
     return False
 
@@ -273,9 +282,12 @@ def is_string_type(property_schema: dict) -> bool | None:
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
-        if isinstance(property_type, dict):
-            property_type = property_type.get("type", [])
-        if "string" in property_type or property_type == "string":
+        schema_type = (
+            property_type.get("type", [])
+            if isinstance(property_type, dict)
+            else property_type
+        )
+        if "string" in schema_type or schema_type == "string":
             return True
     return False
 
@@ -285,9 +297,12 @@ def is_null_type(property_schema: dict) -> bool | None:
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
-        if isinstance(property_type, dict):
-            property_type = property_type.get("type", [])
-        if "null" in property_type or property_type == "null":
+        schema_type = (
+            property_type.get("type", [])
+            if isinstance(property_type, dict)
+            else property_type
+        )
+        if "null" in schema_type or schema_type == "null":
             return True
     return False
 
@@ -297,9 +312,12 @@ def is_number_type(property_schema: dict) -> bool | None:
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
     for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
-        if isinstance(property_type, dict):
-            property_type = property_type.get("type", [])
-        if "number" in property_type or property_type == "number":
+        schema_type = (
+            property_type.get("type", [])
+            if isinstance(property_type, dict)
+            else property_type
+        )
+        if "number" in schema_type or schema_type == "number":
             return True
     return False
 
@@ -311,8 +329,10 @@ def _warn_unmapped_properties(
     logger: logging.Logger,
 ):
     logger.warning(
-        f"Properties {property_names} were present in the '{stream_name}' stream but "
+        "Properties %s were present in the '%s' stream but "
         "not found in catalog schema. Ignoring.",
+        property_names,
+        stream_name,
     )
 
 
@@ -346,11 +366,11 @@ class TypeConformanceLevel(Enum):
 
 def conform_record_data_types(
     stream_name: str,
-    record: dict[str, Any],
+    record: dict[str, t.Any],
     schema: dict,
     level: TypeConformanceLevel,
     logger: logging.Logger,
-) -> dict[str, Any]:
+) -> dict[str, t.Any]:
     """Translate values in record dictionary to singer-compatible data types.
 
     Any property names not found in the schema catalog will be removed, and a single
@@ -364,12 +384,12 @@ def conform_record_data_types(
     return rec
 
 
-def _conform_record_data_types(
-    input_object: dict[str, Any],
+def _conform_record_data_types(  # noqa: PLR0912
+    input_object: dict[str, t.Any],
     schema: dict,
     level: TypeConformanceLevel,
     parent: str | None,
-) -> tuple[dict[str, Any], list[str]]:
+) -> tuple[dict[str, t.Any], list[str]]:
     """Translate values in record dictionary to singer-compatible data types.
 
     Any property names not found in the schema catalog will be removed, and a single
@@ -383,7 +403,7 @@ def _conform_record_data_types(
         level:  Specifies how recursive the conformance process should be
         parent: '.' seperated path to this element from the object root (for logging)
     """
-    output_object: dict[str, Any] = {}
+    output_object: dict[str, t.Any] = {}
     unmapped_properties: list[str] = []
 
     if level == TypeConformanceLevel.NONE:
@@ -446,7 +466,10 @@ def _conform_record_data_types(
     return output_object, unmapped_properties
 
 
-def _conform_primitive_property(elem: Any, property_schema: dict) -> Any:
+def _conform_primitive_property(  # noqa: PLR0911, C901
+    elem: t.Any,
+    property_schema: dict,
+) -> t.Any:
     """Converts a primitive (i.e. not object or array) to a json compatible type."""
     if isinstance(elem, (datetime.datetime, pendulum.DateTime)):
         return to_json_compatible(elem)

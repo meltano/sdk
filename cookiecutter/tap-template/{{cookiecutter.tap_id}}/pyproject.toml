@@ -12,7 +12,7 @@ keywords = [
     "ELT",
     "{{cookiecutter.source_name}}",
 ]
-license = "Apache 2.0"
+license = "Apache-2.0"
 {%- if cookiecutter.variant != "None (Skip)" %}
 packages = [
     { include = "{{cookiecutter.library_name}}" },
@@ -21,7 +21,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "<3.12,>=3.7.1"
-singer-sdk = { version="^0.22.1" }
+singer-sdk = { version="^0.27.0" }
 fs-s3fs = { version = "^1.1.1", optional = true }
 {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
 requests = "^2.28.2"
@@ -32,27 +32,10 @@ cached-property = "^1" # Remove after Python 3.7 support is dropped
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
-flake8 = "^5.0.4"
-darglint = "^1.8.1"
-black = "^23.1.0"
-pyupgrade = "^3.3.1"
-mypy = "^1.0.0"
-isort = "^5.11.5"
-singer-sdk = { version="^0.22.1", extras = ["testing"] }
-{%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
-types-requests = "^2.28.11.12"
-{%- endif %}
-{%- if cookiecutter.stream_type == 'SQL' %}
-sqlalchemy-stubs = "^0.4"
-{%- endif %}
+singer-sdk = { version="^0.27.0", extras = ["testing"] }
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
-
-[tool.isort]
-profile = "black"
-multi_line_output = 3 # Vertical Hanging Indent
-src_paths = "{{cookiecutter.library_name}}"
 
 [tool.mypy]
 python_version = "3.9"
@@ -60,6 +43,25 @@ warn_unused_configs = true
 {%- if cookiecutter.stream_type == 'SQL' %}
 plugins = "sqlmypy"
 {%- endif %}
+
+[tool.ruff]
+ignore = [
+    "ANN101",  # missing-type-self
+    "ANN102",  # missing-type-cls
+]
+select = ["ALL"]
+src = ["{{cookiecutter.library_name}}"]
+target-version = "py37"
+
+
+[tool.ruff.flake8-annotations]
+allow-star-arg-any = true
+
+[tool.ruff.isort]
+known-first-party = ["{{cookiecutter.library_name}}"]
+
+[tool.ruff.pydocstyle]
+convention = "google"
 
 [build-system]
 requires = ["poetry-core>=1.0.8"]

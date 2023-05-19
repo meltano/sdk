@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
+import typing as t
 import warnings
-from typing import TYPE_CHECKING, Type, cast
 
 from dateutil import parser
+from jsonschema import Draft7Validator
 
 import singer_sdk.helpers._typing as th
 from singer_sdk import Tap
 
 from .templates import AttributeTestTemplate, StreamTestTemplate, TapTestTemplate
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.streams.core import Stream
 
 
@@ -40,7 +41,7 @@ class TapDiscoveryTest(TapTestTemplate):
         catalog = tap1.catalog_dict
         # Reset and re-initialize with discovered catalog
         kwargs = {k: v for k, v in self.runner.default_kwargs.items() if k != "catalog"}
-        tap2: Tap = cast(Type[Tap], self.runner.singer_class)(
+        tap2: Tap = t.cast(t.Type[Tap], self.runner.singer_class)(
             config=self.runner.config,
             catalog=catalog,
             **kwargs,
@@ -107,6 +108,30 @@ class StreamRecordSchemaMatchesCatalogTest(StreamTestTemplate):
         assert not diff, f"Fields in records but not in catalog: ({diff})"
 
 
+class StreamRecordMatchesStreamSchema(StreamTestTemplate):
+    """Test all attributes in the record schema are present in the catalog schema."""
+
+    name = "record_matches_stream_schema"
+
+    def test(self) -> None:
+        """Run test."""
+        schema = self.stream.schema
+        validator = Draft7Validator(
+            schema,
+            format_checker=Draft7Validator.FORMAT_CHECKER,
+        )
+        for record in self.stream_records:
+            errors = list(validator.iter_errors(record))
+            error_messages = "\n".join(
+                [
+                    f"{e.message} (path: {'.'.join(str(p) for p in e.path)})"
+                    for e in errors
+                    if e.path
+                ],
+            )
+            assert not errors, f"Record does not match stream schema: {error_messages}"
+
+
 class StreamPrimaryKeysTest(StreamTestTemplate):
     """Test all records for a stream's primary key are unique and non-null."""
 
@@ -124,7 +149,8 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
                 (r[k] for k in primary_keys or []) for r in self.stream_records
             ]
         except KeyError as e:
-            raise AssertionError(f"Record missing primary key: {str(e)}") from e
+            msg = f"Record missing primary key: {e!s}"
+            raise AssertionError(msg) from e
         count_unique_records = len(set(record_ids))
         count_records = len(self.stream_records)
         assert count_unique_records == count_records, (

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+import typing as t
 from enum import Enum, EnumMeta
-from typing import Any, TypeVar
 from warnings import warn
 
 from singer_sdk.typing import (
@@ -15,7 +15,7 @@ from singer_sdk.typing import (
     StringType,
 )
 
-_EnumMemberT = TypeVar("_EnumMemberT")
+_EnumMemberT = t.TypeVar("_EnumMemberT")
 
 # Default JSON Schema to support config for built-in capabilities:
 
@@ -131,7 +131,7 @@ class DeprecatedEnum(Enum):
 class DeprecatedEnumMeta(EnumMeta):
     """Metaclass for enumeration with deprecation support."""
 
-    def __getitem__(self, name: str) -> Any:  # noqa: ANN401
+    def __getitem__(self, name: str) -> t.Any:  # noqa: ANN401
         """Retrieve mapping item.
 
         Args:
@@ -145,7 +145,7 @@ class DeprecatedEnumMeta(EnumMeta):
             obj.emit_warning()
         return obj
 
-    def __getattribute__(cls, name: str) -> Any:  # noqa: ANN401, N805
+    def __getattribute__(cls, name: str) -> t.Any:  # noqa: ANN401, N805
         """Retrieve enum attribute.
 
         Args:
@@ -159,7 +159,7 @@ class DeprecatedEnumMeta(EnumMeta):
             obj.emit_warning()
         return obj
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
+    def __call__(self, *args: t.Any, **kwargs: t.Any) -> t.Any:  # noqa: ANN401
         """Call enum member.
 
         Args:

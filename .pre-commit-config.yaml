@@ -2,7 +2,6 @@ ci:
   autofix_prs: true
   autoupdate_schedule: weekly
   autoupdate_commit_msg: 'chore: pre-commit autoupdate'
-  skip: [poetry-lock]
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -17,7 +16,8 @@ repos:
   - id: check-yaml
     exclude: |
         (?x)^(
-            cookiecutter/.*/meltano.yml
+            cookiecutter/.*/meltano.yml|
+            cookiecutter/.*/.pre-commit-config.yaml
         )$
   - id: end-of-file-fixer
     exclude: |
@@ -25,7 +25,7 @@ repos:
         cookiecutter/.*|
         docs/.*|
         samples/.*\.json|
-        tests/snapshots/.*/.*\.json
+        tests/snapshots/.*
       )$
   - id: trailing-whitespace
     exclude: |
@@ -36,7 +36,7 @@ repos:
         )$
 
 - repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: v0.0.259
+  rev: v0.0.267
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix]
@@ -46,7 +46,7 @@ repos:
       )$
 
 - repo: https://github.com/psf/black
-  rev: 23.1.0
+  rev: 23.3.0
   hooks:
   - id: black
     exclude: |
@@ -72,5 +72,3 @@ repos:
   rev: 1.4.0
   hooks:
   - id: poetry-check
-  - id: poetry-lock
-    args: [--no-update]

@@ -6,9 +6,8 @@ from __future__ import annotations
 import abc
 import contextlib
 import json
+import typing as t
 from enum import Enum
-from pathlib import Path, PurePath
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, cast
 
 import click
 
@@ -30,7 +29,9 @@ from singer_sdk.helpers.capabilities import (
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
+    from pathlib import PurePath
+
     from singer_sdk.streams import SQLStream, Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
@@ -55,6 +56,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
+        *,
         config: dict | PurePath | str | list[PurePath | str] | None = None,
         catalog: PurePath | str | dict | Catalog | None = None,
         state: PurePath | str | dict | None = None,
@@ -142,7 +144,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             RuntimeError: If state has not been initialized.
         """
         if self._state is None:
-            raise RuntimeError("Could not read from uninitialized state.")
+            msg = "Could not read from uninitialized state."
+            raise RuntimeError(msg)
         return self._state
 
     @property
@@ -222,7 +225,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     def run_sync_dry_run(
         self,
         dry_run_record_limit: int | None = 1,
-        streams: Iterable[Stream] | None = None,
+        streams: t.Iterable[Stream] | None = None,
     ) -> bool:
         """Run connection test.
 
@@ -246,9 +249,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         for stream in streams:
             if stream.parent_stream_type:
                 self.logger.debug(
-                    f"Child stream '{type(stream).__name__}' should be called by "
-                    f"parent stream '{stream.parent_stream_type.__name__}'. "
+                    "Child stream '%s' should be called by "
+                    "parent stream '%s'. "
                     "Skipping direct invocation.",
+                    type(stream).__name__,
+                    stream.parent_stream_type.__name__,
                 )
                 continue
             with contextlib.suppress(
@@ -283,7 +288,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         Returns:
             The tap's catalog as a dict
         """
-        return cast(dict, self._singer_catalog.to_dict())
+        return t.cast(dict, self._singer_catalog.to_dict())
 
     @property
     def catalog_json_text(self) -> str:
@@ -306,7 +311,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             for stream in self.streams.values()
         )
 
-    def discover_streams(self) -> Sequence[Stream]:
+    def discover_streams(self) -> t.Sequence[Stream]:
         """Initialize all available streams and return them as a list.
 
         Return:
@@ -316,10 +321,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             NotImplementedError: If the tap implementation does not override this
                 method.
         """
-        raise NotImplementedError(
-            f"Tap '{self.name}' does not support discovery. "
-            "Please set the '--catalog' command line argument and try again.",
+        msg = (
+            f"Tap '{self.name}' does not support discovery. Please set the '--catalog' "
+            "command line argument and try again."
         )
+        raise NotImplementedError(msg)
 
     @final
     def load_streams(self) -> list[Stream]:
@@ -349,7 +355,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     for stream in streams:
                         parent.child_streams.append(stream)
                         self.logger.info(
-                            f"Added '{stream.name}' as child stream to '{parent.name}'",
+                            "Added '%s' as child stream to '%s'",
+                            stream.name,
+                            parent.name,
                         )
 
         streams = [stream for streams in streams_by_type.values() for stream in streams]
@@ -361,7 +369,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     # Bookmarks and state management
 
-    def load_state(self, state: dict[str, Any]) -> None:
+    def load_state(self, state: dict[str, t.Any]) -> None:
         """Merge or initialize stream state with the provided state dictionary input.
 
         Override this method to perform validation and backwards-compatibility patches
@@ -376,7 +384,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 initialized.
         """
         if self.state is None:
-            raise ValueError("Cannot write to uninitialized state dictionary.")
+            msg = "Cannot write to uninitialized state dictionary."
+            raise ValueError(msg)
 
         for stream_name, stream_state in state.get("bookmarks", {}).items():
             for key, val in stream_state.items():
@@ -404,10 +413,13 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             for descendent in stream.descendent_streams:
                 if descendent.selected and descendent.ignore_parent_replication_key:
                     self.logger.warning(
-                        f"Stream descendent '{descendent.name}' is selected and "
-                        f"its parent '{stream.name}' does not use inclusive "
-                        f"replication keys. "
-                        f"Forcing full table replication for '{stream.name}'.",
+                        "Stream descendent '%s' is selected and "
+                        "its parent '%s' does not use inclusive "
+                        "replication keys. "
+                        "Forcing full table replication for '%s'.",
+                        descendent.name,
+                        stream.name,
+                        stream.name,
                     )
                     stream.replication_key = None
                     stream.forced_replication_method = "FULL_TABLE"
@@ -422,14 +434,16 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         stream: Stream
         for stream in self.streams.values():
             if not stream.selected and not stream.has_selected_descendents:
-                self.logger.info(f"Skipping deselected stream '{stream.name}'.")
+                self.logger.info("Skipping deselected stream '%s'.", stream.name)
                 continue
 
             if stream.parent_stream_type:
                 self.logger.debug(
-                    f"Child stream '{type(stream).__name__}' is expected to be called "
-                    f"by parent stream '{stream.parent_stream_type.__name__}'. "
+                    "Child stream '%s' is expected to be called "
+                    "by parent stream '%s'. "
                     "Skipping direct invocation.",
+                    type(stream).__name__,
+                    stream.parent_stream_type.__name__,
                 )
                 continue
 
@@ -445,7 +459,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     # Command Line Execution
 
     @classproperty
-    def cli(cls) -> Callable:  # noqa: N805
+    def cli(cls) -> t.Callable:  # noqa: N805
         """Execute standard CLI handler for taps.
 
         Returns:
@@ -487,6 +501,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             context_settings={"help_option_names": ["--help"]},
         )
         def cli(
+            *,
             version: bool = False,
             about: bool = False,
             discover: bool = False,
@@ -508,9 +523,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                     variables. Accepts multiple inputs as a tuple.
                 catalog: Use a Singer catalog file with the tap.",
                 state: Use a bookmarks file for incremental replication.
-
-            Raises:
-                FileNotFoundError: If the config file does not exist.
             """
             if version:
                 cls.print_version()
@@ -527,23 +539,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
                 # Don't abort on validation failures
                 validate_config = False
 
-            parse_env_config = False
-            config_files: list[PurePath] = []
-            for config_path in config:
-                if config_path == "ENV":
-                    # Allow parse from env vars:
-                    parse_env_config = True
-                    continue
-
-                # Validate config file paths before adding to list
-                if not Path(config_path).is_file():
-                    raise FileNotFoundError(
-                        f"Could not locate config file at '{config_path}'."
-                        "Please check that the file exists.",
-                    )
-
-                config_files.append(Path(config_path))
-
+            config_files, parse_env_config = cls.config_from_cli_args(*config)
             tap = cls(  # type: ignore[operator]
                 config=config_files or None,
                 state=state,
@@ -574,6 +570,7 @@ class SQLTap(Tap):
 
     def __init__(
         self,
+        *,
         config: dict | PurePath | str | list[PurePath | str] | None = None,
         catalog: PurePath | str | dict | None = None,
         state: PurePath | str | dict | None = None,

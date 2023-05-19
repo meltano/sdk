@@ -3,21 +3,21 @@
 from __future__ import annotations
 
 import io
+import typing as t
 from contextlib import redirect_stderr, redirect_stdout
-from typing import TYPE_CHECKING, Callable, cast
 
 import singer_sdk._singerlib as singer
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.mapper_base import InlineMapper
     from singer_sdk.tap_base import Tap
     from singer_sdk.target_base import Target
 
 
-def get_standard_tap_tests(
+def get_standard_tap_tests(  # noqa: C901
     tap_class: type[Tap],
     config: dict | None = None,
-) -> list[Callable]:
+) -> list[t.Callable]:
     """Return callable pytest which executes simple discovery and connection tests.
 
     Args:
@@ -98,7 +98,7 @@ def get_standard_tap_tests(
 def get_standard_target_tests(
     target_class: type[Target],  # noqa: ARG001
     config: dict | None = None,  # noqa: ARG001
-) -> list[Callable]:
+) -> list[t.Callable]:
     """Return callable pytest which executes simple discovery and connection tests.
 
     Args:
@@ -132,6 +132,7 @@ def tap_sync_test(tap: Tap) -> tuple[io.StringIO, io.StringIO]:
 def _get_tap_catalog(
     tap_class: type[Tap],
     config: dict,
+    *,
     select_all: bool = False,
 ) -> dict:
     """Return a catalog dict by running discovery.
@@ -168,12 +169,13 @@ def _select_all(catalog_dict: dict) -> dict:
     for catalog_entry in catalog.streams:
         catalog_entry.metadata.root.selected = True
 
-    return cast(dict, catalog.to_dict())
+    return t.cast(dict, catalog.to_dict())
 
 
 def target_sync_test(
     target: Target,
     input: io.StringIO | None,  # noqa: A002
+    *,
     finalize: bool = True,
 ) -> tuple[io.StringIO, io.StringIO]:
     """Invoke the target with the provided input.

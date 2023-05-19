@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import logging
 import os
+import typing as t
 from pathlib import Path
-from typing import Any, Iterable
 
 from dotenv import find_dotenv
 from dotenv.main import DotEnv
@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 def parse_environment_config(
-    config_schema: dict[str, Any],
+    config_schema: dict[str, t.Any],
     prefix: str,
     dotenv_path: str | None = None,
-) -> dict[str, Any]:
+) -> dict[str, t.Any]:
     """Parse configuration from environment variables.
 
     Args:
@@ -35,7 +35,7 @@ def parse_environment_config(
     Returns:
         A configuration dictionary.
     """
-    result: dict[str, Any] = {}
+    result: dict[str, t.Any] = {}
 
     if not dotenv_path:
         dotenv_path = find_dotenv()
@@ -54,11 +54,12 @@ def parse_environment_config(
             )
             if is_string_array_type(config_schema["properties"][config_key]):
                 if env_var_value[0] == "[" and env_var_value[-1] == "]":
-                    raise ValueError(
+                    msg = (
                         "A bracketed list was detected in the environment variable "
-                        f"'{env_var_name}'. This syntax is no longer supported. "
-                        "Please remove the brackets and try again.",
+                        f"'{env_var_name}'. This syntax is no longer supported. Please "
+                        "remove the brackets and try again."
                     )
+                    raise ValueError(msg)
                 result[config_key] = env_var_value.split(",")
             else:
                 result[config_key] = env_var_value
@@ -66,10 +67,10 @@ def parse_environment_config(
 
 
 def merge_config_sources(
-    inputs: Iterable[str],
-    config_schema: dict[str, Any],
+    inputs: t.Iterable[str],
+    config_schema: dict[str, t.Any],
     env_prefix: str,
-) -> dict[str, Any]:
+) -> dict[str, t.Any]:
     """Merge configuration from multiple sources into a single dictionary.
 
     Args:
@@ -83,7 +84,7 @@ def merge_config_sources(
     Returns:
         A single configuration dictionary.
     """
-    config: dict[str, Any] = {}
+    config: dict[str, t.Any] = {}
     for config_path in inputs:
         if config_path == "ENV":
             env_config = parse_environment_config(config_schema, prefix=env_prefix)
@@ -91,10 +92,11 @@ def merge_config_sources(
             continue
 
         if not Path(config_path).is_file():
-            raise FileNotFoundError(
-                f"Could not locate config file at '{config_path}'."
-                "Please check that the file exists.",
+            msg = (
+                f"Could not locate config file at '{config_path}'.Please check that "
+                "the file exists."
             )
+            raise FileNotFoundError(msg)
 
         config.update(read_json_file(config_path))
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Iterable, cast
+import typing as t
 
 import pendulum
 import pytest
@@ -50,7 +50,7 @@ class SimpleTestStream(Stream):
     def get_records(
         self,
         context: dict | None,  # noqa: ARG002
-    ) -> Iterable[dict[str, Any]]:
+    ) -> t.Iterable[dict[str, t.Any]]:
         """Generate records."""
         yield {"id": 1, "value": "Egypt"}
         yield {"id": 2, "value": "Germany"}
@@ -148,13 +148,13 @@ def tap() -> SimpleTestTap:
 @pytest.fixture
 def stream(tap: SimpleTestTap) -> SimpleTestStream:
     """Create a new stream instance."""
-    return cast(SimpleTestStream, tap.load_streams()[0])
+    return t.cast(SimpleTestStream, tap.load_streams()[0])
 
 
 @pytest.fixture
 def unix_timestamp_stream(tap: SimpleTestTap) -> UnixTimestampIncrementalStream:
     """Create a new stream instance."""
-    return cast(UnixTimestampIncrementalStream, tap.load_streams()[1])
+    return t.cast(UnixTimestampIncrementalStream, tap.load_streams()[1])
 
 
 def test_stream_apply_catalog(stream: SimpleTestStream):
@@ -251,7 +251,7 @@ def test_stream_starting_timestamp(
     tap: SimpleTestTap,
     stream_name: str,
     bookmark_value: str,
-    expected_starting_value: Any,
+    expected_starting_value: t.Any,
 ):
     """Test the starting timestamp for a stream."""
     stream = tap.streams[stream_name]
@@ -516,3 +516,81 @@ def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
     for record in caplog.records:
         assert record.levelname == "INFO"
         assert f"Total Sync costs for stream {stream.name}" in record.message
+
+
+@pytest.mark.parametrize(
+    "input_catalog,selection",
+    [
+        pytest.param(
+            None,
+            {
+                "selected_stream": True,
+                "unselected_stream": False,
+            },
+            id="no_catalog",
+        ),
+        pytest.param(
+            {
+                "streams": [],
+            },
+            {
+                "selected_stream": False,
+                "unselected_stream": False,
+            },
+            id="empty_catalog",
+        ),
+        pytest.param(
+            {
+                "streams": [
+                    {
+                        "tap_stream_id": "selected_stream",
+                        "metadata": [
+                            {
+                                "breadcrumb": [],
+                                "metadata": {
+                                    "selected": True,
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        "tap_stream_id": "unselected_stream",
+                        "metadata": [
+                            {
+                                "breadcrumb": [],
+                                "metadata": {
+                                    "selected": True,
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                "selected_stream": True,
+                "unselected_stream": True,
+            },
+            id="catalog_with_selection",
+        ),
+    ],
+)
+def test_stream_class_selection(input_catalog, selection):
+    """Test stream class selection."""
+
+    class SelectedStream(RESTStream):
+        name = "selected_stream"
+        url_base = "https://example.com"
+        schema = {"type": "object", "properties": {}}
+
+    class UnselectedStream(SelectedStream):
+        name = "unselected_stream"
+        selected_by_default = False
+
+    class MyTap(SimpleTestTap):
+        def discover_streams(self):
+            return [SelectedStream(self), UnselectedStream(self)]
+
+    # Check that the selected stream is selected
+    tap = MyTap(config=None, catalog=input_catalog)
+    for stream in selection:
+        assert tap.streams[stream].selected is selection[stream]
