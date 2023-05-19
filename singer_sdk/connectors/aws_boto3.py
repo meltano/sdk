@@ -10,9 +10,9 @@ from singer_sdk import typing as th  # JSON schema typing helpers
 try:
     import boto3
 except ImportError:
+    msg = "boto3 is required for this authenticator. Please install it with `poetry add boto3`."
     raise Exception(
-        "boto3 is required for this authenticator. "
-        "Please install it with `poetry add boto3`.",
+        msg,
     )
 
 AWS_AUTH_CONFIG = th.PropertiesList(
