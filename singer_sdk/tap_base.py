@@ -201,7 +201,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         Args:
             config_jsonschema: [description]
         """
-        super().append_builtin_config(config_jsonschema)
+        PluginBase.append_builtin_config(config_jsonschema)
 
         capabilities = cls.capabilities
         if PluginCapabilities.BATCH in capabilities:
