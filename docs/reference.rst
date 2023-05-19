@@ -133,3 +133,13 @@ Pagination
     pagination.BaseOffsetPaginator
     pagination.LegacyPaginatedStreamProtocol
     pagination.LegacyStreamPaginator
+
+Batch
+-----
+
+.. autosummary::
+    :toctree: classes
+    :template: class.rst
+
+    batch.BaseBatcher
+    batch.JSONLinesBatcher

@@ -5,19 +5,17 @@ from __future__ import annotations
 import abc
 import copy
 import datetime
-import gzip
-import itertools
 import json
 import typing as t
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
-from uuid import uuid4
 
 import pendulum
 
 import singer_sdk._singerlib as singer
 from singer_sdk import metrics
+from singer_sdk.batch import JSONLinesBatcher
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
@@ -63,28 +61,6 @@ REPLICATION_INCREMENTAL = "INCREMENTAL"
 REPLICATION_LOG_BASED = "LOG_BASED"
 
 FactoryType = t.TypeVar("FactoryType", bound="Stream")
-_T = t.TypeVar("_T")
-
-
-def lazy_chunked_generator(
-    iterable: t.Iterable[_T],
-    chunk_size: int,
-) -> t.Generator[t.Iterator[_T], None, None]:
-    """Yield a generator for each chunk of the given iterable.
-
-    Args:
-        iterable: The iterable to chunk.
-        chunk_size: The size of each chunk.
-
-    Yields:
-        A generator for each chunk of the given iterable.
-    """
-    iterator = iter(iterable)
-    while True:
-        chunk = list(itertools.islice(iterator, chunk_size))
-        if not chunk:
-            break
-        yield iter(chunk)
 
 
 class Stream(metaclass=abc.ABCMeta):
@@ -124,9 +100,8 @@ class Stream(metaclass=abc.ABCMeta):
     # Internal API cost aggregator
     _sync_costs: dict[str, int] = {}
 
-    # Batch attributes
-    batch_size: int = 1000
-    """Max number of records to write to each batch file."""
+    selected_by_default: bool = True
+    """Whether this stream is selected by default in the catalog."""
 
     def __init__(
         self,
@@ -456,7 +431,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._primary_keys
 
     @primary_keys.setter
-    def primary_keys(self, new_value: list[str]) -> None:
+    def primary_keys(self, new_value: list[str] | None) -> None:
         """Set primary key(s) for the stream.
 
         Args:
@@ -500,7 +475,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._replication_key
 
     @replication_key.setter
-    def replication_key(self, new_value: str) -> None:
+    def replication_key(self, new_value: str | None) -> None:
         """Set replication key for the stream.
 
         Args:
@@ -560,11 +535,13 @@ class Stream(metaclass=abc.ABCMeta):
                 [self.replication_key] if self.replication_key else None
             ),
             schema_name=None,
+            selected_by_default=self.selected_by_default,
         )
 
         # If there's no input catalog, select all streams
-        if self._tap_input_catalog is None:
-            self._metadata.root.selected = True
+        self._metadata.root.selected = (
+            self._tap_input_catalog is None and self.selected_by_default
+        )
 
         return self._metadata
 
@@ -1036,7 +1013,7 @@ class Stream(metaclass=abc.ABCMeta):
         if self.stream_maps[0].get_filter_result(record):
             self._sync_children(child_context)
 
-    def _sync_records(
+    def _sync_records(  # noqa: C901
         self,
         context: dict | None = None,
         *,
@@ -1341,29 +1318,14 @@ class Stream(metaclass=abc.ABCMeta):
         Yields:
             A tuple of (encoding, manifest) for each batch.
         """
-        sync_id = f"{self.tap_name}--{self.name}-{uuid4()}"
-        prefix = batch_config.storage.prefix or ""
-
-        for i, chunk in enumerate(
-            lazy_chunked_generator(
-                self._sync_records(context, write_messages=False),
-                self.batch_size,
-            ),
-            start=1,
-        ):
-            filename = f"{prefix}{sync_id}-{i}.json.gz"
-            with batch_config.storage.fs() as fs:
-                # TODO: Determine compression from config.
-                with fs.open(filename, "wb") as f, gzip.GzipFile(
-                    fileobj=f,
-                    mode="wb",
-                ) as gz:
-                    gz.writelines(
-                        (json.dumps(record) + "\n").encode() for record in chunk
-                    )
-                file_url = fs.geturl(filename)
-
-            yield batch_config.encoding, [file_url]
+        batcher = JSONLinesBatcher(
+            tap_name=self.tap_name,
+            stream_name=self.name,
+            batch_config=batch_config,
+        )
+        records = self._sync_records(context, write_messages=False)
+        for manifest in batcher.get_batches(records=records):
+            yield batch_config.encoding, manifest
 
     def post_process(
         self,

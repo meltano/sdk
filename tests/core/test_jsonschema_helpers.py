@@ -495,11 +495,11 @@ def test_property_creation(
         if check_fn in type_fn_checks_true:
             assert (
                 check_fn(property_node) is True
-            ), f"{check_fn.__name__} was not True for {repr(property_dict)}"
+            ), f"{check_fn.__name__} was not True for {property_dict!r}"
         else:
             assert (
                 check_fn(property_node) is False
-            ), f"{check_fn.__name__} was not False for {repr(property_dict)}"
+            ), f"{check_fn.__name__} was not False for {property_dict!r}"
 
 
 def test_wrapped_type_dict():

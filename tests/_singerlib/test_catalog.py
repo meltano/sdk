@@ -241,7 +241,7 @@ def test_catalog_parsing():
 )
 def test_standard_metadata(
     schema: dict,
-    key_properties: list[str] | None,
+    key_properties: list[str],
     replication_method: str | None,
     valid_replication_keys: list[str] | None,
     schema_name: str | None,
@@ -256,6 +256,7 @@ def test_standard_metadata(
     )
 
     stream_metadata = metadata[()]
+    assert isinstance(stream_metadata, StreamMetadata)
     assert stream_metadata.table_key_properties == key_properties
     assert stream_metadata.forced_replication_method == replication_method
     assert stream_metadata.valid_replication_keys == valid_replication_keys
