@@ -228,7 +228,7 @@ class Sink(metaclass=abc.ABCMeta):
         """Populate metadata _sdc columns from incoming record message.
 
         Record metadata specs documented at:
-        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.html
 
         Args:
             record: Individual record in the stream.
@@ -251,7 +251,7 @@ class Sink(metaclass=abc.ABCMeta):
         """Add _sdc metadata columns.
 
         Record metadata specs documented at:
-        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.html
         """
         properties_dict = self.schema["properties"]
         for col in {
@@ -271,7 +271,7 @@ class Sink(metaclass=abc.ABCMeta):
         """Remove _sdc metadata columns.
 
         Record metadata specs documented at:
-        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.html
         """
         properties_dict = self.schema["properties"]
         for col in {
@@ -288,7 +288,7 @@ class Sink(metaclass=abc.ABCMeta):
         """Remove metadata _sdc columns from incoming record message.
 
         Record metadata specs documented at:
-        https://sdk.meltano.com/en/latest/implementation/record_metadata.md
+        https://sdk.meltano.com/en/latest/implementation/record_metadata.html
 
         Args:
             record: Individual record in the stream.
@@ -420,7 +420,8 @@ class Sink(metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: If derived class does not override this method.
         """
-        raise NotImplementedError("No handling exists for process_batch().")
+        msg = "No handling exists for process_batch()."
+        raise NotImplementedError(msg)
 
     def mark_drained(self) -> None:
         """Reset `records_to_drain` and any other tracking."""
@@ -506,6 +507,5 @@ class Sink(metaclass=abc.ABCMeta):
                     }
                     self.process_batch(context)
             else:
-                raise NotImplementedError(
-                    f"Unsupported batch encoding format: {encoding.format}",
-                )
+                msg = f"Unsupported batch encoding format: {encoding.format}"
+                raise NotImplementedError(msg)

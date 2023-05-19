@@ -2,10 +2,10 @@
     "cookiecutter": {
       "destination_name": "MyDestinationName",
       "admin_name": "FirstName LastName",
-      "target_id": "target-per_record",
-      "library_name": "target_per_record",
+      "target_id": "target-sql",
+      "library_name": "target_sql",
       "variant": "None (Skip)",
-      "serialization_method": "Per record",
+      "serialization_method": "SQL",
       "license": "Apache-2.0",
       "_template": "./sdk/cookiecutter/target-template",
       "_output_dir": "."

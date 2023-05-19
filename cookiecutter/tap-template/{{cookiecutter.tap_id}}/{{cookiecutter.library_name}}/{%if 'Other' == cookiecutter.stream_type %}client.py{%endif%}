@@ -10,7 +10,10 @@ from singer_sdk.streams import Stream
 class {{ cookiecutter.source_name }}Stream(Stream):
     """Stream class for {{ cookiecutter.source_name }} streams."""
 
-    def get_records(self, context: dict | None) -> Iterable[dict]:
+    def get_records(
+        self,
+        context: dict | None,  # noqa: ARG002
+    ) -> Iterable[dict]:
         """Return a generator of record-type dictionary objects.
 
         The optional `context` argument is used to identify a specific slice of the
@@ -24,7 +27,8 @@ class {{ cookiecutter.source_name }}Stream(Stream):
             NotImplementedError: If the implementation is TODO
         """
         # TODO: Write logic to extract data from the upstream source.
-        # records = mysource.getall()
+        # records = mysource.getall()  # noqa: ERA001
         # for record in records:
-        #     yield record.to_dict()
-        raise NotImplementedError("The method is not yet implemented (TODO)")
+        #     yield record.to_dict()  # noqa: ERA001
+        errmsg = "The method is not yet implemented (TODO)"
+        raise NotImplementedError(errmsg)

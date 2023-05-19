@@ -5,19 +5,17 @@ from __future__ import annotations
 import abc
 import copy
 import datetime
-import gzip
-import itertools
 import json
 import typing as t
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
-from uuid import uuid4
 
 import pendulum
 
 import singer_sdk._singerlib as singer
 from singer_sdk import metrics
+from singer_sdk.batch import JSONLinesBatcher
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
@@ -55,7 +53,7 @@ from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, Stream
 if t.TYPE_CHECKING:
     import logging
 
-    from singer_sdk.plugin_base import PluginBase as TapBaseClass
+    from singer_sdk.tap_base import Tap
 
 # Replication methods
 REPLICATION_FULL_TABLE = "FULL_TABLE"
@@ -63,28 +61,6 @@ REPLICATION_INCREMENTAL = "INCREMENTAL"
 REPLICATION_LOG_BASED = "LOG_BASED"
 
 FactoryType = t.TypeVar("FactoryType", bound="Stream")
-_T = t.TypeVar("_T")
-
-
-def lazy_chunked_generator(
-    iterable: t.Iterable[_T],
-    chunk_size: int,
-) -> t.Generator[t.Iterator[_T], None, None]:
-    """Yield a generator for each chunk of the given iterable.
-
-    Args:
-        iterable: The iterable to chunk.
-        chunk_size: The size of each chunk.
-
-    Yields:
-        A generator for each chunk of the given iterable.
-    """
-    iterator = iter(iterable)
-    while True:
-        chunk = list(itertools.islice(iterator, chunk_size))
-        if not chunk:
-            break
-        yield iter(chunk)
 
 
 class Stream(metaclass=abc.ABCMeta):
@@ -124,13 +100,12 @@ class Stream(metaclass=abc.ABCMeta):
     # Internal API cost aggregator
     _sync_costs: dict[str, int] = {}
 
-    # Batch attributes
-    batch_size: int = 1000
-    """Max number of records to write to each batch file."""
+    selected_by_default: bool = True
+    """Whether this stream is selected by default in the catalog."""
 
     def __init__(
         self,
-        tap: TapBaseClass,
+        tap: Tap,
         schema: str | PathLike | dict[str, t.Any] | singer.Schema | None = None,
         name: str | None = None,
     ) -> None:
@@ -148,7 +123,8 @@ class Stream(metaclass=abc.ABCMeta):
         if name:
             self.name: str = name
         if not self.name:
-            raise ValueError("Missing argument or class variable 'name'.")
+            msg = "Missing argument or class variable 'name'."
+            raise ValueError(msg)
 
         self.logger: logging.Logger = tap.logger
         self.metrics_logger = tap.metrics_logger
@@ -171,9 +147,8 @@ class Stream(metaclass=abc.ABCMeta):
         if schema:
             if isinstance(schema, (PathLike, str)):
                 if not Path(schema).is_file():
-                    raise FileNotFoundError(
-                        f"Could not find schema file '{self.schema_filepath}'.",
-                    )
+                    msg = f"Could not find schema file '{self.schema_filepath}'."
+                    raise FileNotFoundError(msg)
 
                 self._schema_filepath = Path(schema)
             elif isinstance(schema, dict):
@@ -181,18 +156,18 @@ class Stream(metaclass=abc.ABCMeta):
             elif isinstance(schema, singer.Schema):
                 self._schema = schema.to_dict()
             else:
-                raise ValueError(
-                    f"Unexpected type {type(schema).__name__} for arg 'schema'.",
-                )
+                msg = f"Unexpected type {type(schema).__name__} for arg 'schema'."
+                raise ValueError(msg)
 
         if self.schema_filepath:
             self._schema = json.loads(Path(self.schema_filepath).read_text())
 
         if not self.schema:
-            raise ValueError(
-                f"Could not initialize schema for stream '{self.name}'. "
-                "A valid schema object or filepath was not provided.",
+            msg = (
+                f"Could not initialize schema for stream '{self.name}'. A valid schema "
+                "object or filepath was not provided."
             )
+            raise ValueError(msg)
 
     @property
     def stream_maps(self) -> list[StreamMap]:
@@ -289,9 +264,8 @@ class Stream(metaclass=abc.ABCMeta):
             return None
 
         if not self.is_timestamp_replication_key:
-            raise ValueError(
-                f"The replication key {self.replication_key} is not of timestamp type",
-            )
+            msg = f"The replication key {self.replication_key} is not of timestamp type"
+            raise ValueError(msg)
 
         return t.cast(datetime.datetime, pendulum.parse(value))
 
@@ -457,7 +431,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._primary_keys
 
     @primary_keys.setter
-    def primary_keys(self, new_value: list[str]) -> None:
+    def primary_keys(self, new_value: list[str] | None) -> None:
         """Set primary key(s) for the stream.
 
         Args:
@@ -501,7 +475,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._replication_key
 
     @replication_key.setter
-    def replication_key(self, new_value: str) -> None:
+    def replication_key(self, new_value: str | None) -> None:
         """Set replication key for the stream.
 
         Args:
@@ -561,11 +535,13 @@ class Stream(metaclass=abc.ABCMeta):
                 [self.replication_key] if self.replication_key else None
             ),
             schema_name=None,
+            selected_by_default=self.selected_by_default,
         )
 
         # If there's no input catalog, select all streams
-        if self._tap_input_catalog is None:
-            self._metadata.root.selected = True
+        self._metadata.root.selected = (
+            self._tap_input_catalog is None and self.selected_by_default
+        )
 
         return self._metadata
 
@@ -757,10 +733,11 @@ class Stream(metaclass=abc.ABCMeta):
         # Advance state bookmark values if applicable
         if latest_record and self.replication_method == REPLICATION_INCREMENTAL:
             if not self.replication_key:
-                raise ValueError(
-                    f"Could not detect replication key for '{self.name}' stream"
-                    f"(replication method={self.replication_method})",
+                msg = (
+                    f"Could not detect replication key for '{self.name}' "
+                    f"stream(replication method={self.replication_method})"
                 )
+                raise ValueError(msg)
             treat_as_sorted = self.is_sorted
             if not treat_as_sorted and self.state_partitioning_keys is not None:
                 # Streams with custom state partitioning are not resumable.
@@ -957,14 +934,12 @@ class Stream(metaclass=abc.ABCMeta):
         self._write_state_message()  # Write out state message if pending.
 
         if self.replication_method == "FULL_TABLE":
-            raise AbortedSyncFailedException(
-                "Sync operation aborted for stream in 'FULL_TABLE' replication mode.",
-            ) from abort_reason
+            msg = "Sync operation aborted for stream in 'FULL_TABLE' replication mode."
+            raise AbortedSyncFailedException(msg) from abort_reason
 
         if is_state_non_resumable(self.stream_state):
-            raise AbortedSyncFailedException(
-                "Sync operation aborted and state is not in a resumable state.",
-            ) from abort_reason
+            msg = "Sync operation aborted and state is not in a resumable state."
+            raise AbortedSyncFailedException(msg) from abort_reason
 
         # Else, the sync operation can be assumed to be in a valid resumable state.
         raise AbortedSyncPausedException from abort_reason
@@ -1038,7 +1013,7 @@ class Stream(metaclass=abc.ABCMeta):
         if self.stream_maps[0].get_filter_result(record):
             self._sync_children(child_context)
 
-    def _sync_records(
+    def _sync_records(  # noqa: C901
         self,
         context: dict | None = None,
         *,
@@ -1267,13 +1242,14 @@ class Stream(metaclass=abc.ABCMeta):
                 if child_stream.state_partitioning_keys is None:
                     parent_type = type(self).__name__
                     child_type = type(child_stream).__name__
-                    raise NotImplementedError(
+                    msg = (
                         "No child context behavior was defined between parent stream "
-                        f"'{self.name}' and child stream '{child_stream.name}'."
-                        "The parent stream must define "
+                        f"'{self.name}' and child stream '{child_stream.name}'. "
+                        f"The parent stream must define "
                         f"`{parent_type}.get_child_context()` and/or the child stream "
-                        f"must define `{child_type}.state_partitioning_keys`.",
+                        f"must define `{child_type}.state_partitioning_keys`."
                     )
+                    raise NotImplementedError(msg)
 
         return context or record
 
@@ -1342,29 +1318,14 @@ class Stream(metaclass=abc.ABCMeta):
         Yields:
             A tuple of (encoding, manifest) for each batch.
         """
-        sync_id = f"{self.tap_name}--{self.name}-{uuid4()}"
-        prefix = batch_config.storage.prefix or ""
-
-        for i, chunk in enumerate(
-            lazy_chunked_generator(
-                self._sync_records(context, write_messages=False),
-                self.batch_size,
-            ),
-            start=1,
-        ):
-            filename = f"{prefix}{sync_id}-{i}.json.gz"
-            with batch_config.storage.fs() as fs:
-                # TODO: Determine compression from config.
-                with fs.open(filename, "wb") as f, gzip.GzipFile(
-                    fileobj=f,
-                    mode="wb",
-                ) as gz:
-                    gz.writelines(
-                        (json.dumps(record) + "\n").encode() for record in chunk
-                    )
-                file_url = fs.geturl(filename)
-
-            yield batch_config.encoding, [file_url]
+        batcher = JSONLinesBatcher(
+            tap_name=self.tap_name,
+            stream_name=self.name,
+            batch_config=batch_config,
+        )
+        records = self._sync_records(context, write_messages=False)
+        for manifest in batcher.get_batches(records=records):
+            yield batch_config.encoding, manifest
 
     def post_process(
         self,

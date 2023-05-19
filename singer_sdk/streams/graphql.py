@@ -37,7 +37,8 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: If the derived class doesn't define this property.
         """
-        raise NotImplementedError("GraphQLStream `query` is not defined.")
+        msg = "GraphQLStream `query` is not defined."
+        raise NotImplementedError(msg)
 
     def prepare_request_payload(
         self,
@@ -65,7 +66,8 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
         query = self.query
 
         if query is None:
-            raise ValueError("Graphql `query` property not set.")
+            msg = "Graphql `query` property not set."
+            raise ValueError(msg)
 
         if not query.lstrip().startswith("query"):
             # Wrap text in "query { }" if not already wrapped

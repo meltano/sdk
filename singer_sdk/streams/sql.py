@@ -13,7 +13,7 @@ from singer_sdk.connectors import SQLConnector
 from singer_sdk.streams.core import Stream
 
 if t.TYPE_CHECKING:
-    from singer_sdk.plugin_base import PluginBase as TapBaseClass
+    from singer_sdk.tap_base import Tap
 
 
 class SQLStream(Stream, metaclass=abc.ABCMeta):
@@ -23,7 +23,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        tap: TapBaseClass,
+        tap: Tap,
         catalog_entry: dict,
         connector: SQLConnector | None = None,
     ) -> None:
@@ -129,9 +129,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         catalog_entry = self._singer_catalog_entry
         if not catalog_entry.table:
-            raise ValueError(
-                f"Missing table name in catalog entry: {catalog_entry.to_dict()}",
-            )
+            msg = f"Missing table name in catalog entry: {catalog_entry.to_dict()}"
+            raise ValueError(msg)
 
         return self.connector.get_fully_qualified_name(
             table_name=catalog_entry.table,
@@ -173,9 +172,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 not support partitioning.
         """
         if context:
-            raise NotImplementedError(
-                f"Stream '{self.name}' does not support partitioning.",
-            )
+            msg = f"Stream '{self.name}' does not support partitioning."
+            raise NotImplementedError(msg)
 
         selected_column_names = self.get_selected_schema()["properties"].keys()
         table = self.connector.get_table(
@@ -206,7 +204,11 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         with self.connector._connect() as conn:
             for record in conn.execute(query):
-                yield dict(record._mapping)
+                transformed_record = self.post_process(dict(record._mapping))
+                if transformed_record is None:
+                    # Record filtered out during post_process()
+                    continue
+                yield transformed_record
 
 
 __all__ = ["SQLStream", "SQLConnector"]

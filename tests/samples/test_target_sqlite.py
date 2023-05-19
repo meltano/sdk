@@ -104,16 +104,14 @@ def test_sync_sqlite_to_sqlite(
         try:
             orig_json = json.loads(orig_out)
         except json.JSONDecodeError as e:
-            raise RuntimeError(
-                f"Could not parse JSON in orig line {line_num}: {orig_out}",
-            ) from e
+            msg = f"Could not parse JSON in orig line {line_num}: {orig_out}"
+            raise RuntimeError(msg) from e
 
         try:
             tapped_json = json.loads(new_out)
         except json.JSONDecodeError as e:
-            raise RuntimeError(
-                f"Could not parse JSON in new line {line_num}: {new_out}",
-            ) from e
+            msg = f"Could not parse JSON in new line {line_num}: {new_out}"
+            raise RuntimeError(msg) from e
 
         assert (
             tapped_json["type"] == orig_json["type"]

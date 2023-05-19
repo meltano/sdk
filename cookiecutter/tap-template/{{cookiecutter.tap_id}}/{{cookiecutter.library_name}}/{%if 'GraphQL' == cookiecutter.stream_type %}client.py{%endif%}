@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Iterable
 
-import requests
+import requests  # noqa: TCH002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
@@ -16,20 +16,14 @@ from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}A
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
-    # TODO: Set the API's base URL here:
     @property
     def url_base(self) -> str:
-        """Return the API URL root, configurable via tap settings.
-
-        Returns:
-            The base URL for all requests.
-        """
-        return self.config["api_url"]
-
-    # Alternatively, use a static string for url_base:
-    # url_base = "https://api.mysample.com"
+        """Return the API URL root, configurable via tap settings."""
+        # TODO: hardcode a value here, or retrieve it from self.config
+        return "https://api.mysample.com"
 
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
+
     @property
     def authenticator(self) -> {{ cookiecutter.source_name }}Authenticator:
         """Return a new authenticator object.
@@ -68,10 +62,13 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         """
         # TODO: Parse response body and return a set of records.
         resp_json = response.json()
-        for record in resp_json.get("<TODO>"):
-            yield record
+        yield from resp_json.get("<TODO>")
 
-    def post_process(self, row: dict, context: dict | None = None) -> dict | None:
+    def post_process(
+        self,
+        row: dict,
+        context: dict | None = None,  # noqa: ARG002
+    ) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
 
         Args:
