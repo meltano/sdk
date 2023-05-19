@@ -183,6 +183,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             PluginCapabilities.ABOUT,
             PluginCapabilities.STREAM_MAPS,
             PluginCapabilities.FLATTENING,
+            PluginCapabilities.BATCH,
         ]
 
     @classmethod

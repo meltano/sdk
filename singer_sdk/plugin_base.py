@@ -132,6 +132,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         return [
             PluginCapabilities.STREAM_MAPS,
             PluginCapabilities.FLATTENING,
+            PluginCapabilities.BATCH,
         ]
 
     @classproperty
