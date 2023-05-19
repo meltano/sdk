@@ -1013,7 +1013,7 @@ class Stream(metaclass=abc.ABCMeta):
         if self.stream_maps[0].get_filter_result(record):
             self._sync_children(child_context)
 
-    def _sync_records(
+    def _sync_records(  # noqa: C901
         self,
         context: dict | None = None,
         *,

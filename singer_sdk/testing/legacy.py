@@ -14,7 +14,7 @@ if t.TYPE_CHECKING:
     from singer_sdk.target_base import Target
 
 
-def get_standard_tap_tests(
+def get_standard_tap_tests(  # noqa: C901
     tap_class: type[Tap],
     config: dict | None = None,
 ) -> list[t.Callable]:
