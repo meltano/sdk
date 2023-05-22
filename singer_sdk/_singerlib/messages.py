@@ -8,7 +8,7 @@ import typing as t
 from dataclasses import asdict, dataclass, field
 
 import pytz
-import simplejson as json
+import rapidjson as json
 
 if t.TYPE_CHECKING:
     from datetime import datetime
