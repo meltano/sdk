@@ -1,5 +1,5 @@
-{"type": "SCHEMA", "stream": "aliased_stream", "schema": {"properties": {"email": {"type": ["string", "null"]}, "count": {"type": ["integer", "null"]}, "user": {"properties": {"id": {"type": ["integer", "null"]}, "sub": {"properties": {"num": {"type": ["integer", "null"]}}, "type": ["object", "null"]}}, "type": ["object", "null"]}}, "type": "object"}, "key_properties": []}
-{"type": "RECORD", "stream": "aliased_stream", "record": {"email": "alice@example.com", "count": 21, "user": {"id": 1, "sub": {"num": 1}}}, "time_extracted": "2022-01-01T00:00:00+00:00"}
-{"type": "RECORD", "stream": "aliased_stream", "record": {"email": "bob@example.com", "count": 13, "user": {"id": 2, "sub": {"num": 2}}}, "time_extracted": "2022-01-01T00:00:00+00:00"}
-{"type": "RECORD", "stream": "aliased_stream", "record": {"email": "charlie@example.com", "count": 19, "user": {"id": 3, "sub": {"num": 3}}}, "time_extracted": "2022-01-01T00:00:00+00:00"}
-{"type": "STATE", "value": {"bookmarks": {"mystream": {}}}}
+{"type":"SCHEMA","stream":"aliased_stream","schema":{"properties":{"email":{"type":["string","null"]},"count":{"type":["integer","null"]},"user":{"properties":{"id":{"type":["integer","null"]},"sub":{"properties":{"num":{"type":["integer","null"]}},"type":["object","null"]}},"type":["object","null"]}},"type":"object"},"key_properties":[]}
+{"type":"RECORD","stream":"aliased_stream","record":{"email":"alice@example.com","count":21,"user":{"id":1,"sub":{"num":1}}},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"aliased_stream","record":{"email":"bob@example.com","count":13,"user":{"id":2,"sub":{"num":2}}},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"aliased_stream","record":{"email":"charlie@example.com","count":19,"user":{"id":3,"sub":{"num":3}}},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"STATE","value":{"bookmarks":{"mystream":{}}}}
