@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import collections
 import itertools
-import json
 import re
 import typing as t
 from copy import deepcopy
 
 import inflection
+import rapidjson as json
 
 DEFAULT_FLATTENING_SEPARATOR = "__"
 
@@ -326,6 +326,8 @@ def _flatten_record(
     Returns:
         A flattened version of the provided node.
     """
+    fast_and_precise = json.NM_NATIVE | json.NM_DECIMAL | json.NM_NAN
+
     if parent_key is None:
         parent_key = []
 
@@ -347,7 +349,7 @@ def _flatten_record(
             items.append(
                 (
                     new_key,
-                    json.dumps(v)
+                    json.dumps(v, default=str, number_mode=fast_and_precise)
                     if _should_jsondump_value(k, v, flattened_schema)
                     else v,
                 ),
