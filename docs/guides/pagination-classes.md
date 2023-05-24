@@ -53,7 +53,7 @@ class MyStream(RESTStream):
 from singer_sdk.pagination import BaseHATEOASPaginator
 
 class MyPaginator(BaseHATEOASPaginator):
-    def get_next_url(self, response, previous_token):
+    def get_next_url(self, response):
         data = response.json()
         return data.get("next")
 
