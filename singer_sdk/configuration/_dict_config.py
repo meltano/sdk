@@ -101,3 +101,18 @@ def merge_config_sources(
         config.update(read_json_file(config_path))
 
     return config
+
+
+def merge_missing_config_jsonschema(
+    source_jsonschema: dict,
+    target_jsonschema: dict,
+) -> None:
+    """Append any missing properties in the target with those from source.
+
+    Args:
+        source_jsonschema: The source json schema from which to import.
+        target_jsonschema: The json schema to update.
+    """
+    for k, v in source_jsonschema["properties"].items():
+        if k not in target_jsonschema["properties"]:
+            target_jsonschema["properties"][k] = v

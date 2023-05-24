@@ -13,7 +13,10 @@ import click
 from jsonschema import Draft7Validator
 
 from singer_sdk import about, metrics
-from singer_sdk.configuration._dict_config import parse_environment_config
+from singer_sdk.configuration._dict_config import (
+    merge_missing_config_jsonschema,
+    parse_environment_config,
+)
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
@@ -129,6 +132,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         return [
             PluginCapabilities.STREAM_MAPS,
             PluginCapabilities.FLATTENING,
+            PluginCapabilities.BATCH,
         ]
 
     @classproperty
@@ -339,19 +343,12 @@ class PluginBase(metaclass=abc.ABCMeta):
         Args:
             config_jsonschema: [description]
         """
-
-        def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
-            # Append any missing properties in the target with those from source.
-            for k, v in source_jsonschema["properties"].items():
-                if k not in target_jsonschema["properties"]:
-                    target_jsonschema["properties"][k] = v
-
         capabilities = cls.capabilities
         if PluginCapabilities.STREAM_MAPS in capabilities:
-            _merge_missing(STREAM_MAPS_CONFIG, config_jsonschema)
+            merge_missing_config_jsonschema(STREAM_MAPS_CONFIG, config_jsonschema)
 
         if PluginCapabilities.FLATTENING in capabilities:
-            _merge_missing(FLATTENING_CONFIG, config_jsonschema)
+            merge_missing_config_jsonschema(FLATTENING_CONFIG, config_jsonschema)
 
     @classmethod
     def print_about(
