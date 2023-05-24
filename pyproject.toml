@@ -306,6 +306,11 @@ parametrize-names-type = "csv"
 known-first-party = ["singer_sdk", "samples", "tests"]
 required-imports = ["from __future__ import annotations"]
 
+[tool.ruff.pep8-naming]
+classmethod-decorators = [
+    "singer_sdk.cli.plugin_cli",
+]
+
 [tool.ruff.pydocstyle]
 convention = "google"
 
