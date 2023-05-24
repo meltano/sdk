@@ -21,6 +21,11 @@ except ImportError:
     {sys.executable} -m pip install nox-poetry"""
     raise SystemExit(dedent(message)) from None
 
+RUFF_OVERRIDES = """\
+extend = "./pyproject.toml"
+extend-ignore = ["TD002", "TD003"]
+"""
+
 package = "singer_sdk"
 python_versions = ["3.11", "3.10", "3.9", "3.8", "3.7"]
 main_python_version = "3.10"
@@ -218,6 +223,9 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
         cc_build_path,
     )
     session.chdir(cc_test_output)
+
+    with Path("ruff.toml").open("w") as ruff_toml:
+        ruff_toml.write(RUFF_OVERRIDES)
 
     session.run(
         "pythonsed",
