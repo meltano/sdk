@@ -13,6 +13,7 @@ import click
 
 from singer_sdk._singerlib import Catalog
 from singer_sdk.cli import common_options
+from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.exceptions import AbortedSyncFailedException, AbortedSyncPausedException
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
@@ -20,6 +21,7 @@ from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
+    BATCH_CONFIG,
     CapabilitiesEnum,
     PluginCapabilities,
     TapCapabilities,
@@ -181,7 +183,30 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             PluginCapabilities.ABOUT,
             PluginCapabilities.STREAM_MAPS,
             PluginCapabilities.FLATTENING,
+            PluginCapabilities.BATCH,
         ]
+
+    @classmethod
+    def append_builtin_config(cls: type[PluginBase], config_jsonschema: dict) -> None:
+        """Appends built-in config to `config_jsonschema` if not already set.
+
+        To customize or disable this behavior, developers may either override this class
+        method or override the `capabilities` property to disabled any unwanted
+        built-in capabilities.
+
+        For all except very advanced use cases, we recommend leaving these
+        implementations "as-is", since this provides the most choice to users and is
+        the most "future proof" in terms of taking advantage of built-in capabilities
+        which may be added in the future.
+
+        Args:
+            config_jsonschema: [description]
+        """
+        PluginBase.append_builtin_config(config_jsonschema)
+
+        capabilities = cls.capabilities
+        if PluginCapabilities.BATCH in capabilities:
+            merge_missing_config_jsonschema(BATCH_CONFIG, config_jsonschema)
 
     # Connection and sync tests:
 

@@ -13,6 +13,6 @@
     "JWT",
     "Custom or N/A"
   ],
-  "include_cicd_sample_template": ["GitHub", "None (Skip)"],
+  "include_ci_files": ["GitHub", "None (Skip)"],
   "license": ["Apache-2.0"]
 }
