@@ -210,7 +210,7 @@ def flatten_schema(
     return new_schema
 
 
-def _flatten_schema(
+def _flatten_schema(  # noqa: C901
     schema_node: dict,
     parent_keys: list[str] | None = None,
     separator: str = "__",

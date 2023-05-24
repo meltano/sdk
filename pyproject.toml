@@ -28,7 +28,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
 ]
-license = "Apache 2.0"
+license = "Apache-2.0"
 
 [tool.poetry.urls]
 "Issue Tracker" = "https://github.com/meltano/sdk/issues"
@@ -228,6 +228,7 @@ select = [
     "F",    # Pyflakes
     "E",    # pycodestyle (error)
     "W",    # pycodestyle (warning)
+    "C90",  # mccabe
     "I",    # isort
     "N",    # pep8-naming
     "D",    # pydocstyle/flake8-docstrings

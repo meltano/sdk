@@ -1013,7 +1013,7 @@ class Stream(metaclass=abc.ABCMeta):
         if self.stream_maps[0].get_filter_result(record):
             self._sync_children(child_context)
 
-    def _sync_records(
+    def _sync_records(  # noqa: C901
         self,
         context: dict | None = None,
         *,
@@ -1139,6 +1139,9 @@ class Stream(metaclass=abc.ABCMeta):
 
         Args:
             context: Stream partition or context dictionary.
+
+        Raises:
+            Exception: Any exception raised by the sync process.
         """
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
@@ -1154,13 +1157,20 @@ class Stream(metaclass=abc.ABCMeta):
         if self.selected:
             self._write_schema_message()
 
-        batch_config = self.get_batch_config(self.config)
-        if batch_config:
-            self._sync_batches(batch_config, context=context)
-        else:
-            # Sync the records themselves:
-            for _ in self._sync_records(context=context):
-                pass
+        try:
+            batch_config = self.get_batch_config(self.config)
+            if batch_config:
+                self._sync_batches(batch_config, context=context)
+            else:
+                # Sync the records themselves:
+                for _ in self._sync_records(context=context):
+                    pass
+        except Exception as ex:
+            self.logger.exception(
+                "An unhandled error occurred while syncing '%s'",
+                self.name,
+            )
+            raise ex
 
     def _sync_children(self, child_context: dict | None) -> None:
         if child_context is None:
