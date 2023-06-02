@@ -323,11 +323,7 @@ class SQLSink(BatchSink):
         if isinstance(insert_sql, str):
             insert_sql = sqlalchemy.text(insert_sql)
 
-        conformed_records = (
-            [self.conform_record(record) for record in records]
-            if isinstance(records, list)
-            else (self.conform_record(record) for record in records)
-        )
+        conformed_records = [self.conform_record(record) for record in records]
         self.logger.info("Inserting with SQL: %s", insert_sql)
         with self.connector._connect() as conn, conn.begin():
             conn.execute(insert_sql, conformed_records)
