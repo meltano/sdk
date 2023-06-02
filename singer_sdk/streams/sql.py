@@ -5,6 +5,11 @@ from __future__ import annotations
 import abc
 import typing as t
 
+if sys.version_info >= (3, 8):
+    from functools import cached_property
+else:
+    from cached_property import cached_property
+
 import sqlalchemy
 
 import singer_sdk.helpers._catalog as catalog
@@ -74,7 +79,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         return self._singer_catalog_entry.metadata
 
-    @property
+    @cached_property
     def schema(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
