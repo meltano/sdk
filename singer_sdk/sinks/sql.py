@@ -7,7 +7,7 @@ import typing as t
 from collections import defaultdict
 from copy import copy
 from textwrap import dedent
-from typing import Any, Sequence
+from typing import Any, Iterable
 
 import sqlalchemy
 from pendulum import now
@@ -217,7 +217,7 @@ class SQLSink(BatchSink):
         }
         return conformed_schema
 
-    def conform_record(self, record: dict[str, Any]) -> dict[str, Any]:
+    def conform_record(self, record: dict) -> dict:
         """Return record dictionary with property names conformed.
 
         Args:
@@ -299,7 +299,7 @@ class SQLSink(BatchSink):
         self,
         full_table_name: str,
         schema: dict,
-        records: Sequence[dict[str, Any]],
+        records: Iterable[dict[str, Any]],
     ) -> int | None:
         """Bulk insert records to an existing destination table.
 
@@ -323,8 +323,11 @@ class SQLSink(BatchSink):
         if isinstance(insert_sql, str):
             insert_sql = sqlalchemy.text(insert_sql)
 
-        conformed_records = [self.conform_record(record) for record in records]
-
+        conformed_records = (
+            [self.conform_record(record) for record in records]
+            if isinstance(records, list)
+            else (self.conform_record(record) for record in records)
+        )
         self.logger.info("Inserting with SQL: %s", insert_sql)
         with self.connector._connect() as conn, conn.begin():
             conn.execute(insert_sql, conformed_records)
