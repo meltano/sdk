@@ -82,13 +82,14 @@ jobs:
     - name: Install Nox
       env:
         PIP_CONSTRAINT: .github/workflows/constraints.txt
-        SQLALCHEMY_VERSION: ${{ matrix.sqlalchemy }}
       run: |
         pipx install --pip-args=--constraint=.github/workflows/constraints.txt nox
         pipx inject --pip-args=--constraint=.github/workflows/constraints.txt nox nox-poetry
         nox --version
 
     - name: Run Nox
+      env:
+        SQLALCHEMY_VERSION: ${{ matrix.sqlalchemy }}
       run: |
         nox --python=${{ matrix.python-version }}
 
