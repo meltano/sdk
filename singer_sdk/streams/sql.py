@@ -6,10 +6,8 @@ import abc
 import sys
 import typing as t
 
-if sys.version_info >= (3, 8):
-    from functools import cached_property
-else:
-    from cached_property import cached_property
+# TODO: Replace with cached_property when moving to py > 3.7
+from functools import lru_cache
 
 import sqlalchemy
 
@@ -80,7 +78,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         return self._singer_catalog_entry.metadata
 
-    @cached_property
+    @property
+    @lru_cache # TODO: Combine decorators into @cached_property after py > 3.7
     def schema(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
