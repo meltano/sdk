@@ -82,8 +82,14 @@ def mypy(session: Session) -> None:
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
+    sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
+    if sqlalchemy_version:
+        deps = [*test_dependencies, f"sqlalchemy=={sqlalchemy_version}"]
+    else:
+        deps = test_dependencies
+
     session.install(".[s3]")
-    session.install(*test_dependencies)
+    session.install(*deps)
 
     try:
         session.run(
