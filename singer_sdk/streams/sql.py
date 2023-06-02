@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import abc
-import sys
 import typing as t
 
 # TODO: Replace with cached_property when moving to py > 3.7
@@ -79,7 +78,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self._singer_catalog_entry.metadata
 
     @property
-    @lru_cache # TODO: Combine decorators into @cached_property after py > 3.7
+    @lru_cache  # TODO: Combine decorators into @cached_property after py > 3.7
     def schema(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
