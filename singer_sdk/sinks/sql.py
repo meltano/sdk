@@ -399,7 +399,7 @@ class SQLSink(BatchSink):
             )
 
         query = sqlalchemy.text(
-            f"UPDATE {self.full_table_name}\n"  # noqa: S608
+            f"UPDATE {self.full_table_name}\n"
             f"SET {self.soft_delete_column_name} = :deletedate \n"
             f"WHERE {self.version_column_name} < :version \n"
             f"  AND {self.soft_delete_column_name} IS NULL\n",

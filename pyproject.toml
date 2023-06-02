@@ -45,7 +45,7 @@ click = "~=8.0"
 fs = "^2.4.16"
 PyJWT = "~=2.4"
 requests = "^2.25.1"
-cryptography = ">=3.4.6,<41.0.0"
+cryptography = ">=3.4.6,<42.0.0"
 importlib-metadata = {version = "<5.0.0", markers = "python_version < \"3.8\""}
 importlib-resources = {version = "5.12.0", markers = "python_version < \"3.9\""}
 memoization = ">=0.3.2,<0.5.0"
@@ -306,6 +306,11 @@ parametrize-names-type = "csv"
 [tool.ruff.isort]
 known-first-party = ["singer_sdk", "samples", "tests"]
 required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.pep8-naming]
+classmethod-decorators = [
+    "singer_sdk.cli.plugin_cli",
+]
 
 [tool.ruff.pydocstyle]
 convention = "google"

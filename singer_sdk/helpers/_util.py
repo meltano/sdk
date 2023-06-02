@@ -10,7 +10,7 @@ import pendulum
 
 
 def read_json_file(path: PurePath | str) -> dict[str, t.Any]:
-    """Read json file, thowing an error if missing."""
+    """Read json file, throwing an error if missing."""
     if not path:
         msg = "Could not open file. Filepath not provided."
         raise RuntimeError(msg)

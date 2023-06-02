@@ -85,13 +85,15 @@ def merge_config_sources(
         A single configuration dictionary.
     """
     config: dict[str, t.Any] = {}
-    for config_path in inputs:
-        if config_path == "ENV":
+    for config_input in inputs:
+        if config_input == "ENV":
             env_config = parse_environment_config(config_schema, prefix=env_prefix)
             config.update(env_config)
             continue
 
-        if not Path(config_path).is_file():
+        config_path = Path(config_input)
+
+        if not config_path.is_file():
             msg = (
                 f"Could not locate config file at '{config_path}'.Please check that "
                 "the file exists."
@@ -101,3 +103,18 @@ def merge_config_sources(
         config.update(read_json_file(config_path))
 
     return config
+
+
+def merge_missing_config_jsonschema(
+    source_jsonschema: dict,
+    target_jsonschema: dict,
+) -> None:
+    """Append any missing properties in the target with those from source.
+
+    Args:
+        source_jsonschema: The source json schema from which to import.
+        target_jsonschema: The json schema to update.
+    """
+    for k, v in source_jsonschema["properties"].items():
+        if k not in target_jsonschema["properties"]:
+            target_jsonschema["properties"][k] = v
