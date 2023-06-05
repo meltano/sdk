@@ -14,8 +14,12 @@ from singer_sdk.streams.core import Stream
 
 if t.TYPE_CHECKING:
     from singer_sdk.tap_base import Tap
-    F = t.TypeVar('F', Callable)
-    def lru_cache(f: F) -> F: pass
+
+    F = t.TypeVar("F", Callable)
+
+    def lru_cache(f: F) -> F:
+        pass
+
 else:
     # TODO: Replace with cached_property when moving to py > 3.7
     from functools import lru_cache
