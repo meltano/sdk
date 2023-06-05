@@ -12,23 +12,11 @@ from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.streams.core import Stream
 
-if t.TYPE_CHECKING:
-    from singer_sdk.tap_base import Tap
-
-    F = t.TypeVar("F", Callable)
-
-    def lru_cache(f: F) -> F:
-        pass
-
-else:
-    # TODO: Replace with cached_property when moving to py > 3.7
-    from functools import lru_cache
-
-
 class SQLStream(Stream, metaclass=abc.ABCMeta):
     """Base class for SQLAlchemy-based streams."""
 
     connector_class = SQLConnector
+    _cached_schema: dict | None = None
 
     def __init__(
         self,
@@ -83,8 +71,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         return self._singer_catalog_entry.metadata
 
-    @property
-    @lru_cache()  # TODO: Combine decorators into @cached_property after py > 3.7
+    @property # TODO: Investigate @cached_property after py > 3.7
     def schema(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
@@ -93,7 +80,10 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             The schema object.
         """
-        return t.cast(dict, self._singer_catalog_entry.schema.to_dict())
+        if not self._cached_schema:
+          self._cached_schema = t.cast(dict, self._singer_catalog_entry.schema.to_dict()) 
+        
+        return self._cached_schema
 
     @property
     def tap_stream_id(self) -> str:
