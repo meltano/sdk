@@ -5,9 +5,6 @@ from __future__ import annotations
 import abc
 import typing as t
 
-# TODO: Replace with cached_property when moving to py > 3.7
-from functools import lru_cache
-
 import sqlalchemy
 
 import singer_sdk.helpers._catalog as catalog
@@ -17,6 +14,11 @@ from singer_sdk.streams.core import Stream
 
 if t.TYPE_CHECKING:
     from singer_sdk.tap_base import Tap
+    F = t.TypeVar('F', Callable)
+    def lru_cache(f: F) -> F: pass
+else:
+    # TODO: Replace with cached_property when moving to py > 3.7
+    from functools import lru_cache
 
 
 class SQLStream(Stream, metaclass=abc.ABCMeta):
