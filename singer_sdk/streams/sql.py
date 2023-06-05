@@ -12,8 +12,9 @@ from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.streams.core import Stream
 
-if t.TYPE_CHECKING:	
+if t.TYPE_CHECKING:
     from singer_sdk.tap_base import Tap
+
 
 class SQLStream(Stream, metaclass=abc.ABCMeta):
     """Base class for SQLAlchemy-based streams."""
@@ -85,7 +86,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         if not self._cached_schema:
             self._cached_schema = t.cast(
-                dict, self._singer_catalog_entry.schema.to_dict()
+                dict,
+                self._singer_catalog_entry.schema.to_dict(),
             )
 
         return self._cached_schema
