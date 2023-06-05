@@ -270,6 +270,7 @@ class TargetTestRunner(SingerTestRunner):
         )
         self.stdout, self.stderr = (stdout.read(), stderr.read())
         self.state_messages.extend(self._clean_sync_output(self.stdout))
+        self.target_input = None
 
     def _execute_sync(
         self,
