@@ -12,6 +12,7 @@ from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.streams.core import Stream
 
+
 class SQLStream(Stream, metaclass=abc.ABCMeta):
     """Base class for SQLAlchemy-based streams."""
 
@@ -71,7 +72,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         return self._singer_catalog_entry.metadata
 
-    @property # TODO: Investigate @cached_property after py > 3.7
+    @property  # TODO: Investigate @cached_property after py > 3.7
     def schema(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
@@ -81,8 +82,10 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             The schema object.
         """
         if not self._cached_schema:
-          self._cached_schema = t.cast(dict, self._singer_catalog_entry.schema.to_dict()) 
-        
+            self._cached_schema = t.cast(
+                dict, self._singer_catalog_entry.schema.to_dict()
+            )
+
         return self._cached_schema
 
     @property
