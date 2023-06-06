@@ -101,7 +101,7 @@ class TapTestClassFactory:
 
     def _get_empty_test_class(
         self,
-        test_runner: TapTestRunner | TargetTestRunner,
+        test_runner: TapTestRunner,
         suite_config: SuiteConfig | None,
     ) -> type[BaseTestClass]:
         """Get an empty test class.
@@ -135,7 +135,7 @@ class TapTestClassFactory:
 
     def _annotate_test_class(  # noqa: C901
         self,
-        empty_test_class: BaseTestClass,
+        empty_test_class: type[BaseTestClass],
         test_suites: list,
         test_runner: TapTestRunner,
     ) -> type[BaseTestClass]:
@@ -324,7 +324,7 @@ class TargetTestClassFactory:
 
     def _annotate_test_class(
         self,
-        empty_test_class: BaseTestClass,
+        empty_test_class: type[BaseTestClass],
         test_suites: list,
     ) -> type[BaseTestClass]:
         """Annotate test class with test methods.
