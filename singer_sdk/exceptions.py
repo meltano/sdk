@@ -98,6 +98,10 @@ class RetriableAPIError(Exception):
         self.response = response
 
 
+class IgnorableAPIResponseCodeException(Exception):
+    """Raised when an API response code is ignorable."""
+
+
 class StreamMapConfigError(Exception):
     """Raised when a stream map has an invalid configuration."""
 

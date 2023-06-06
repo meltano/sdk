@@ -15,7 +15,11 @@ import requests
 
 from singer_sdk import metrics
 from singer_sdk.authenticators import SimpleAuthenticator
-from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
+from singer_sdk.exceptions import (
+    FatalAPIError,
+    IgnorableAPIResponseCode,
+    RetriableAPIError,
+)
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import (
     BaseAPIPaginator,
@@ -58,6 +62,9 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
 
     #: Response code reference for rate limit retries
     extra_retry_statuses: list[int] = [HTTPStatus.TOO_MANY_REQUESTS]
+
+    #: Ignore these response codes and do not raise an exception.
+    ignorable_response_codes: list[int] | list[None] = []
 
     #: Optional JSONPath expression to extract a pagination token from the API response.
     #: Example: `"$.next_page"`
@@ -159,6 +166,11 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         4xx errors, excluding values found in:
         :attr:`~singer_sdk.RESTStream.extra_retry_statuses`
 
+        In case an error is ignorable, raises a
+        :class:`singer_sdk.exceptions.IgnorableAPIResponseCode`. By default, this
+        applies to values found in:
+        :attr:`~singer_sdk.RESTStream.ignorable_response_codes`
+
         Tap developers are encouraged to override this method if their APIs use HTTP
         status codes in non-conventional ways, or if they communicate errors
         differently (e.g. in the response body).
@@ -171,6 +183,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         Raises:
             FatalAPIError: If the request is not retriable.
             RetriableAPIError: If the request is retriable.
+            IgnorableAPIResponseCode: If the response code is ignorable.
 
         .. _requests.Response:
             https://requests.readthedocs.io/en/latest/api/#requests.Response
@@ -183,6 +196,10 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         ):
             msg = self.response_error_message(response)
             raise RetriableAPIError(msg, response)
+
+        if response.status_code in self.ignorable_error_statuses:
+            msg = f"Ignoring {response.status_code} Error for {self.tap_name}"
+            raise IgnorableAPIResponseCode(response.status_code)
 
         if (
             HTTPStatus.BAD_REQUEST

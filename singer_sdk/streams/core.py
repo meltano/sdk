@@ -19,6 +19,7 @@ from singer_sdk.batch import JSONLinesBatcher
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
+    IgnorableAPIResponseCodeException,
     InvalidStreamSortException,
     MaxRecordsLimitException,
 )
@@ -1165,6 +1166,11 @@ class Stream(metaclass=abc.ABCMeta):
                 # Sync the records themselves:
                 for _ in self._sync_records(context=context):
                     pass
+        except IgnorableAPIResponseCodeException as ex:
+            self.logger.warning(
+                "Ignoring API response code %s",
+                ex.status_code,
+            )
         except Exception as ex:
             self.logger.exception(
                 "An unhandled error occurred while syncing '%s'",
