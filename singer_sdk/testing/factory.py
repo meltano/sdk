@@ -53,7 +53,7 @@ class TapTestClassFactory:
         custom_suites: list | None = None,
         suite_config: SuiteConfig | None = None,
         **kwargs: t.Any,
-    ) -> BaseTestClass:
+    ) -> type[BaseTestClass]:
         """Get a new test class.
 
         Args:
@@ -103,7 +103,7 @@ class TapTestClassFactory:
         self,
         test_runner: TapTestRunner | TargetTestRunner,
         suite_config: SuiteConfig | None,
-    ) -> BaseTestClass:
+    ) -> type[BaseTestClass]:
         """Get an empty test class.
 
         Args:
@@ -138,7 +138,7 @@ class TapTestClassFactory:
         empty_test_class: BaseTestClass,
         test_suites: list,
         test_runner: TapTestRunner,
-    ) -> BaseTestClass:
+    ) -> type[BaseTestClass]:
         """Annotate test class with test methods.
 
         Args:
@@ -248,7 +248,7 @@ class TargetTestClassFactory:
         suite_config: SuiteConfig | None = None,
         include_target_tests: bool = True,
         **kwargs: t.Any,
-    ) -> BaseTestClass:
+    ) -> type[BaseTestClass]:
         """Get a new Target test class.
 
         Args:
@@ -286,7 +286,7 @@ class TargetTestClassFactory:
         suite_config: SuiteConfig | None,
         config: dict | None = None,
         **kwargs: t.Any,
-    ) -> BaseTestClass:
+    ) -> type[BaseTestClass]:
         """Get an empty test class.
 
         Args:
@@ -326,7 +326,7 @@ class TargetTestClassFactory:
         self,
         empty_test_class: BaseTestClass,
         test_suites: list,
-    ) -> BaseTestClass:
+    ) -> type[BaseTestClass]:
         """Annotate test class with test methods.
 
         Args:
@@ -356,7 +356,7 @@ def get_tap_test_class(
     custom_suites: list | None = None,
     suite_config: SuiteConfig | None = None,
     **kwargs: t.Any,
-) -> object:
+) -> type[BaseTestClass]:
     """Get Tap Test Class.
 
     Args:
@@ -394,7 +394,7 @@ def get_target_test_class(
     suite_config: SuiteConfig | None = None,
     include_target_tests: bool = True,
     **kwargs: t.Any,
-) -> object:
+) -> type[BaseTestClass]:
     """Get Target Test Class.
 
     Args:
