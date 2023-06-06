@@ -394,6 +394,7 @@ def get_target_test_class(
     config: dict | None = None,
     custom_suites: list | None = None,
     suite_config: SuiteConfig | None = None,
+    include_target_tests: bool = True,
     **kwargs: t.Any,
 ) -> object:
     """Get Target Test Class.
@@ -403,6 +404,7 @@ def get_target_test_class(
         config: Config dict to use for testing.
         custom_suites: Custom test suites to add to standard tests.
         suite_config: SuiteConfig instance to pass to tests.
+        include_target_tests: Include standard target tests.
         kwargs: Keyword arguments to pass to the TapRunner.
 
     Returns:
@@ -415,5 +417,6 @@ def get_target_test_class(
     return factory.new_test_class(
         custom_suites=custom_suites,
         suite_config=suite_config,
+        include_target_tests=include_target_tests,
         **kwargs,
     )
