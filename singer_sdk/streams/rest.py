@@ -167,8 +167,8 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         :attr:`~singer_sdk.RESTStream.extra_retry_statuses`
 
         In case an error is ignorable, raises a
-        :class:`singer_sdk.exceptions.IgnorableAPIResponseCode`. By default, this
-        applies to values found in:
+        :class:`singer_sdk.exceptions.IgnorableAPIResponseCodeException`.
+        By default, this applies to values found in:
         :attr:`~singer_sdk.RESTStream.ignorable_response_codes`
 
         Tap developers are encouraged to override this method if their APIs use HTTP
