@@ -313,14 +313,12 @@ class TargetTestClassFactory:
             @pytest.fixture
             def runner(self) -> TargetTestRunner:
                 # Instantiate new runner class and populate records for use in tests
-                test_runner = TargetTestRunner(
+                return TargetTestRunner(
                     target_class=target_class,
                     config=config,
                     suite_config=suite_config,
                     **kwargs,
                 )
-                test_runner.sync_all()
-                return test_runner
 
         return TargetTestClass
 

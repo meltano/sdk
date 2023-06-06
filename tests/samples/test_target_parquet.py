@@ -12,7 +12,9 @@ from singer_sdk.testing import get_target_test_class
 
 SAMPLE_FILEPATH = Path(f".output/test_{uuid.uuid4()}/")
 SAMPLE_FILENAME = SAMPLE_FILEPATH / "testfile.parquet"
-SAMPLE_CONFIG = {"filepath": str(SAMPLE_FILENAME)}
+SAMPLE_CONFIG = {
+    "filepath": str(SAMPLE_FILENAME),
+}
 
 StandardTests = get_target_test_class(
     target_class=SampleTargetParquet,

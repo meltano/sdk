@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from .templates import TargetFileTestTemplate, TargetTestTemplate
 
 
@@ -52,6 +54,12 @@ class TargetInvalidSchemaTest(TargetFileTestTemplate):
 
     name = "invalid_schema"
 
+    def test(self) -> None:
+        """Run test."""
+        # TODO: the SDK should raise a better error than Exception in this case
+        with pytest.raises(Exception):  # noqa: PT011, B017
+            super().test()
+
 
 class TargetMultipleStateMessages(TargetFileTestTemplate):
     """Test Target correctly relays multiple received State messages (checkpoints)."""
@@ -85,6 +93,12 @@ class TargetRecordBeforeSchemaTest(TargetFileTestTemplate):
     """Test Target handles records arriving before schema."""
 
     name = "record_before_schema"
+
+    def test(self) -> None:
+        """Run test."""
+        # TODO: the SDK should raise a better error than KeyError in this case
+        with pytest.raises(KeyError):
+            super().test()
 
 
 class TargetRecordMissingKeyProperty(TargetFileTestTemplate):
