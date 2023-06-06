@@ -46,7 +46,6 @@ class TapTestClassFactory:
 
     def new_test_class(
         self,
-        test_suites: list,
         *,
         include_tap_tests: bool = True,
         include_stream_tests: bool = True,
@@ -58,7 +57,6 @@ class TapTestClassFactory:
         """Get a new test class.
 
         Args:
-            test_suites: List of test suites to include in the test class.
             include_tap_tests: Include tap tests in the test class.
             include_stream_tests: Include stream tests in the test class.
             include_stream_attribute_tests:
@@ -97,7 +95,7 @@ class TapTestClassFactory:
         )
         return self._annotate_test_class(
             empty_test_class=empty_test_class,
-            test_suites=test_suites,
+            test_suites=suites,
             test_runner=test_runner,
         )
 
