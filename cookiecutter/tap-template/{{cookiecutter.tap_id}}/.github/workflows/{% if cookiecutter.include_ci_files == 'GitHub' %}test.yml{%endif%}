@@ -6,25 +6,6 @@ name: Test {{cookiecutter.tap_id}}
 on: [push]
 
 jobs:
-  linting:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # Only lint using the primary version used for dev
-        python-version: ["3.9"]
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python {{ '${{ matrix.python-version }}' }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: {{ '${{ matrix.python-version }}' }}
-    - name: Install pipx and Poetry
-      run: |
-        pip install pipx poetry
-    - name: Run lint command from tox.ini
-      run: |
-        pipx run tox -e lint
-
   pytest:
     runs-on: ubuntu-latest
     env:

@@ -35,8 +35,15 @@ repos:
             tests/core/test_simpleeval.py
         )$
 
+- repo: https://github.com/python-jsonschema/check-jsonschema
+  rev: 0.23.1
+  hooks:
+  - id: check-dependabot
+  - id: check-github-workflows
+  - id: check-readthedocs
+
 - repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: v0.0.269
+  rev: v0.0.270
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix]

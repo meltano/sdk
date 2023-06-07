@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.28.0 (2023-06-05)
+
+### ✨ New
+
+- [#1728](https://github.com/meltano/sdk/issues/1728) Add an optional Dependabot file to projects generated from templates
+- [#1572](https://github.com/meltano/sdk/issues/1572) Add `batch_config` handling in `append_builtin_config()` -- _**Thanks @aaronsteers!**_
+- [#1686](https://github.com/meltano/sdk/issues/1686) Log stream errors
+- [#1711](https://github.com/meltano/sdk/issues/1711) Validate records against stream schema in standard tap tests
+- [#1709](https://github.com/meltano/sdk/issues/1709) Add a default Apache 2.0 license to tap and target templates
+
+### 🐛 Fixes
+
+- [#1742](https://github.com/meltano/sdk/issues/1742) Recommend `meltano run` in target cookiecutter README
+
+### ⚙️ Under the Hood
+
+- [#936](https://github.com/meltano/sdk/issues/936) Use inheritance to construct plugin CLI
+
+### 📚 Documentation Improvements
+
+- [#1721](https://github.com/meltano/sdk/issues/1721) Remove unsupported `previous_token` from HATEOAS example
+- [#1703](https://github.com/meltano/sdk/issues/1703) Fix broken docs link for `record_metadata` page -- _**Thanks @menzenski!**_
+
 ## v0.27.0 (2023-05-11)
 
 ### ✨ New
