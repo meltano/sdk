@@ -57,6 +57,7 @@ class TargetInvalidSchemaTest(TargetFileTestTemplate):
     def test(self) -> None:
         """Run test."""
         # TODO: the SDK should raise a better error than Exception in this case
+        # https://github.com/meltano/sdk/issues/1755
         with pytest.raises(Exception):  # noqa: PT011, B017
             super().test()
 
@@ -97,6 +98,7 @@ class TargetRecordBeforeSchemaTest(TargetFileTestTemplate):
     def test(self) -> None:
         """Run test."""
         # TODO: the SDK should raise a better error than KeyError in this case
+        # https://github.com/meltano/sdk/issues/1755
         with pytest.raises(KeyError):
             super().test()
 
