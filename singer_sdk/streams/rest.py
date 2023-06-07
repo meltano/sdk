@@ -17,7 +17,7 @@ from singer_sdk import metrics
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.exceptions import (
     FatalAPIError,
-    IgnorableAPIResponseCode,
+    IgnorableAPIResponseCodeException,
     RetriableAPIError,
 )
 from singer_sdk.helpers.jsonpath import extract_jsonpath
@@ -183,7 +183,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         Raises:
             FatalAPIError: If the request is not retriable.
             RetriableAPIError: If the request is retriable.
-            IgnorableAPIResponseCode: If the response code is ignorable.
+            IgnorableAPIResponseCodeException: If the response code is ignorable.
 
         .. _requests.Response:
             https://requests.readthedocs.io/en/latest/api/#requests.Response
@@ -199,7 +199,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
 
         if response.status_code in self.ignorable_error_statuses:
             msg = f"Ignoring {response.status_code} Error for {self.tap_name}"
-            raise IgnorableAPIResponseCode(response.status_code)
+            raise IgnorableAPIResponseCodeException(response.status_code)
 
         if (
             HTTPStatus.BAD_REQUEST
