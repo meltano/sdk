@@ -135,4 +135,4 @@ def test_batch_mode(outdir):
     assert counter["SCHEMA", "countries"] == 1
     assert counter["BATCH", "countries"] == 1
 
-    assert counter[("STATE",)] == 2
+    assert counter[("STATE",)] == 3
