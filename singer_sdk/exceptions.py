@@ -101,6 +101,16 @@ class RetriableAPIError(Exception):
 class IgnorableAPIResponseCodeException(Exception):
     """Raised when an API response code is ignorable."""
 
+    def __init__(self, message: str, status_code: int | None = None) -> None:
+        """Extends the default with the ignored response's status code as an attribute.
+
+        Args:
+            message (str): The Error Message
+            status_code (int): Ignored status code.
+        """
+        super().__init__(message)
+        self.status_code = status_code
+
 
 class StreamMapConfigError(Exception):
     """Raised when a stream map has an invalid configuration."""
