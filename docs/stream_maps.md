@@ -321,7 +321,7 @@ To override the stream's default primary key properties, add the `__key_properti
 {
     "stream_maps": {
         "customers": {
-            "customer_id": null,     
+            "customer_id": null,
             "customer_id_hashed": "md5(customer_id)",
             "__key_properties__": ["customer_id_hashed"]
         }
