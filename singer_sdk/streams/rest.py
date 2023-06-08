@@ -64,7 +64,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
     extra_retry_statuses: list[int] = [HTTPStatus.TOO_MANY_REQUESTS]
 
     #: Ignore these response codes and do not raise an exception.
-    ignorable_response_codes: list[int] | list[None] = []
+    ignorable_error_statuses: list[int] | list[None] = []
 
     #: Optional JSONPath expression to extract a pagination token from the API response.
     #: Example: `"$.next_page"`
@@ -169,7 +169,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         In case an error is ignorable, raises a
         :class:`singer_sdk.exceptions.IgnorableAPIResponseCodeException`.
         By default, this applies to values found in:
-        :attr:`~singer_sdk.RESTStream.ignorable_response_codes`
+        :attr:`~singer_sdk.RESTStream.ignorable_error_statuses`
 
         Tap developers are encouraged to override this method if their APIs use HTTP
         status codes in non-conventional ways, or if they communicate errors
