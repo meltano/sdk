@@ -1,5 +1,5 @@
 singer_sdk.exceptions.IgnorableAPIResponseCodeException
-================================================
+=======================================================
 
 .. currentmodule:: singer_sdk.exceptions
 
