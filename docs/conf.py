@@ -42,6 +42,7 @@ extensions = [
     "sphinx_copybutton",
     "myst_parser",
     "sphinx_reredirects",
+    "sphinx_inline_tabs",
 ]
 
 # Add any paths that contain templates here, relative to this directory.

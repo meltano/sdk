@@ -324,26 +324,43 @@ To create a new stream as a copy of the original, specify the operation
 `"__source__": "stream_name"`. For example, you can create a copy of the `customers` stream
 which only contains PII properties using the following:
 
-```js
+````{tab} JSON
+```json
 {
     "stream_maps": {
         "customers": {
-            // exclude these since we're capturing them in the pii stream
             "email": null,
             "full_name": null
         },
         "customers_pii": {
             "__source__": "customers",
-            // include just the PII and the customer_id
             "customer_id": "customer_id",
             "email": "email",
             "full_name": "full_name",
-            // exclude anything not declared
             "__else__": null,
         },
     },
 }
 ```
+````
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  customers:
+    # Exclude these since we're capturing them in the pii stream
+    email:
+    full_name:
+  customers_pii:
+    __source__: customers
+    # include just the PII and the customer_id
+    customer_id: customer_id
+    email: email
+    full_name: full_name
+    # exclude anything not declared
+    __else__:
+```
+````
 
 ## Filtering out records from a stream using `__filter__` operation
 
