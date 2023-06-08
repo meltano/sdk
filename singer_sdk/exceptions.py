@@ -101,13 +101,13 @@ class RetriableAPIError(Exception):
 class IgnorableAPIResponseCodeException(Exception):
     """Raised when an API response code is ignorable."""
 
-    def __init__(self, message: str, status_code: int | None = None) -> None:
+    def __init__(self, status_code: int | None = None) -> None:
         """Extends the default with the ignored response's status code as an attribute.
 
         Args:
-            message (str): The Error Message
             status_code (int): Ignored status code.
         """
+        message = f"Ignorable API response code: {status_code}"
         super().__init__(message)
         self.status_code = status_code
 

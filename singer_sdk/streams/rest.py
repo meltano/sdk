@@ -64,7 +64,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
     extra_retry_statuses: list[int] = [HTTPStatus.TOO_MANY_REQUESTS]
 
     #: Ignore these response codes and do not raise an exception.
-    ignorable_error_statuses: list[int] | list[None] = []
+    ignorable_error_statuses: list[int] = []
 
     #: Optional JSONPath expression to extract a pagination token from the API response.
     #: Example: `"$.next_page"`
