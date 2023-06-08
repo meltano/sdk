@@ -41,6 +41,7 @@ class SampleCSVTargetSink(BatchSink):
                 delimiter="\t",
                 quotechar='"',
                 quoting=csv.QUOTE_NONNUMERIC,
+                escapechar="\\",
             )
             for record in records_to_drain:
                 if newfile and not records_written:
