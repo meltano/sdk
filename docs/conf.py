@@ -69,6 +69,7 @@ html_theme_options = {
     "source_branch": "main",
     "source_directory": "docs/",
     "sidebar_hide_name": True,
+    "announcement": "<em>Get 1000 free credits when you sign up for Cloud Beta</em>!",
     # branding
     "light_css_variables": {
         "font-stack": "Hanken Grotesk,-apple-system,Helvetica,sans-serif",
