@@ -73,6 +73,8 @@ html_theme_options = {
     # branding
     "light_css_variables": {
         "font-stack": "Hanken Grotesk,-apple-system,Helvetica,sans-serif",
+        "color-announcement-background": "#3A64FA",
+        "color-announcement-text": "#EEEBEE",
         "color-foreground-primary": "#080216",
         "color-background-primary": "#E9E5FB",
         "color-link": "#3A64FA",
