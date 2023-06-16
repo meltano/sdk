@@ -14,6 +14,7 @@ from types import MappingProxyType
 from dateutil import parser
 from jsonschema import Draft7Validator, FormatChecker
 
+from singer_sdk.exceptions import MissingKeyPropertiesError
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
@@ -318,6 +319,25 @@ class Sink(metaclass=abc.ABCMeta):
             treatment=self.datetime_error_treatment,
         )
         return record
+
+    def _singer_validate_message(self, record: dict) -> None:
+        """Ensure record conforms to Singer Spec.
+
+        Args:
+            record: Record (after parsing, schema validations and transformations).
+
+        Raises:
+            MissingKeyPropertiesError: If record is missing one or more key properties.
+        """
+        if not all(key_property in record for key_property in self.key_properties):
+            msg = (
+                f"Record is missing one or more key_properties. \n"
+                f"Key Properties: {self.key_properties}, "
+                f"Record Keys: {list(record.keys())}"
+            )
+            raise MissingKeyPropertiesError(
+                msg,
+            )
 
     def _parse_timestamps_in_record(
         self,
