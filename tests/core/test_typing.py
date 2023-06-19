@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import datetime
 import logging
-import typing as t
 
+import pytest
 import sqlalchemy
 
 from singer_sdk.helpers._typing import (
@@ -21,9 +21,6 @@ from singer_sdk.typing import (
     StringType,
     to_sql_type,
 )
-
-if t.TYPE_CHECKING:
-    import pytest
 
 logger = logging.getLogger("log")
 
