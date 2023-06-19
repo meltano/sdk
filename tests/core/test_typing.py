@@ -295,24 +295,31 @@ def test_conform_primitives():
     assert _conform_primitive_property(1, {"type": "boolean"}) is True
 
 
-
-import sqlalchemy
 import pytest
+import sqlalchemy
+
+
 @pytest.mark.parametrize(
     "jsonschema_type,expected",
     [
-        ({'type': ['string', 'null']}, sqlalchemy.types.VARCHAR),
-        ({'type': ['integer', 'null']}, sqlalchemy.types.INTEGER),
-        ({'type': ['number', 'null']}, sqlalchemy.types.DECIMAL),
-        ({'type': ['boolean', 'null']}, sqlalchemy.types.BOOLEAN),
-        ({'type': "object", "properties": {}}, sqlalchemy.types.VARCHAR),
-        ({'type': "array"}, sqlalchemy.types.VARCHAR),
-        ({ "format": "date", "type": [ "string", "null" ] }, sqlalchemy.types.DATE),
-        ({ "format": "time", "type": [ "string", "null" ] }, sqlalchemy.types.TIME),
-        ({ "format": "date-time", "type": [ "string", "null" ] }, sqlalchemy.types.DATETIME),
-        ({"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]}, sqlalchemy.types.DATETIME),
-        ({ "anyOf": [ {"type": "integer"}, {"type": "null"}, ], }, sqlalchemy.types.INTEGER),
-    ]
+        ({"type": ["string", "null"]}, sqlalchemy.types.VARCHAR),
+        ({"type": ["integer", "null"]}, sqlalchemy.types.INTEGER),
+        ({"type": ["number", "null"]}, sqlalchemy.types.DECIMAL),
+        ({"type": ["boolean", "null"]}, sqlalchemy.types.BOOLEAN),
+        ({"type": "object", "properties": {}}, sqlalchemy.types.VARCHAR),
+        ({"type": "array"}, sqlalchemy.types.VARCHAR),
+        ({"format": "date", "type": ["string", "null"]}, sqlalchemy.types.DATE),
+        ({"format": "time", "type": ["string", "null"]}, sqlalchemy.types.TIME),
+        (
+            {"format": "date-time", "type": ["string", "null"]},
+            sqlalchemy.types.DATETIME,
+        ),
+        (
+            {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+            sqlalchemy.types.DATETIME,
+        ),
+        ({"anyOf": [{"type": "integer"}, {"type": "null"}]}, sqlalchemy.types.INTEGER),
+    ],
 )
 def test_to_sql_type(jsonschema_type, expected):
     assert isinstance(to_sql_type(jsonschema_type), expected)
