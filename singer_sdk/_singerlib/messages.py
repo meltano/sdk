@@ -8,7 +8,7 @@ import typing as t
 from dataclasses import asdict, dataclass, field
 
 import pytz
-import simplejson as json
+from msgspec import json
 
 if t.TYPE_CHECKING:
     from datetime import datetime
@@ -189,7 +189,7 @@ def format_message(message: Message) -> str:
     Returns:
         The formatted message.
     """
-    return json.dumps(message.to_dict(), use_decimal=True, default=str)
+    return json.encode(message.to_dict())
 
 
 def write_message(message: Message) -> None:
