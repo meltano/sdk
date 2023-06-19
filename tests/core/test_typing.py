@@ -6,6 +6,8 @@ import datetime
 import logging
 import typing as t
 
+import sqlalchemy
+
 from singer_sdk.helpers._typing import (
     TypeConformanceLevel,
     _conform_primitive_property,
@@ -293,10 +295,6 @@ def test_conform_primitives():
     assert _conform_primitive_property(None, {"type": "boolean"}) is None
     assert _conform_primitive_property(0, {"type": "boolean"}) is False
     assert _conform_primitive_property(1, {"type": "boolean"}) is True
-
-
-import pytest
-import sqlalchemy
 
 
 @pytest.mark.parametrize(
