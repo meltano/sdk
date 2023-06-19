@@ -38,7 +38,7 @@ license = "Apache-2.0"
 "Youtube" = "https://www.youtube.com/meltano"
 
 [tool.poetry.dependencies]
-python = "<3.12,>=3.7.1"
+python = "<3.12,>=3.8"
 backoff = ">=2.0.0,<3.0"
 pendulum = "^2.1.0"
 click = "~=8.0"
@@ -77,6 +77,7 @@ fs-s3fs = {version = "^1.1.1", optional = true}
 # Testing dependencies installed as optional 'testing' extras
 pytest = {version="^7.2.1", optional = true}
 pytest-durations = {version = "^1.2.0", optional = true}
+msgspec = "^0.16.0"
 
 [tool.poetry.extras]
 docs = [
