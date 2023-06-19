@@ -33,7 +33,7 @@ jobs:
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.2
+      uses: actions/checkout@v3.5.3
 
     - name: Install Poetry
       env:
@@ -91,7 +91,7 @@ jobs:
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.2
+      uses: actions/checkout@v3.5.3
 
     - name: Install Poetry
       env:
@@ -133,7 +133,7 @@ jobs:
     needs: tests
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.2
+      uses: actions/checkout@v3.5.3
 
     - name: Install Poetry
       run: |
