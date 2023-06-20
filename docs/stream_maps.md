@@ -115,7 +115,7 @@ stream_maps:
   # Apply these transforms to the stream called 'customers'
   customers:
     # drop the PII field from RECORD and SCHEMA messages
-    email: null
+    email: __NULL__
     # capture just the email domain
     email_domain: owner_email.split('@')[-1]
     # for uniqueness checks
@@ -219,7 +219,7 @@ To remove a stream, declare the stream within `stream_maps` config and assign it
 ```yaml
 stream_maps:
   # don't sync the stream called 'addresses'
-  addresses: null
+  addresses: __NULL__
 ```
 ````
 
@@ -241,7 +241,7 @@ assign it the value `null`. For example:
 stream_maps:
   customers:
     # don't sync the 'email' stream property
-    email: null
+    email: __NULL__
 ```
 ````
 
@@ -273,7 +273,7 @@ To remove all streams except the `customers` stream:
 ```yaml
 stream_maps:
   customers: {}
-  __else__: null
+  __else__: __NULL__
 ```
 ````
 
@@ -295,7 +295,7 @@ To remove all fields from the `customers` stream except `customer_id`:
 stream_maps:
   customers:
     customer_id: customer_id
-    __else__: null
+    __else__: __NULL__
 ```
 ````
 
@@ -321,7 +321,7 @@ To override the stream's default primary key properties, add the `__key_properti
 stream_maps:
   customers:
     # Remove the original Customer ID column
-    customer_id: null
+    customer_id: __NULL__
     # Add a new (and still unique) ID column
     customer_id_hashed: md5(customer_id)
     # Updated key to reflect the new name
@@ -425,8 +425,8 @@ which only contains PII properties using the following:
 stream_maps:
   customers:
     # Exclude these since we're capturing them in the pii stream
-    email: null
-    full_name: null
+    email: __NULL__
+    full_name: __NULL__
   customers_pii:
     __source__: customers
     # include just the PII and the customer_id
@@ -434,7 +434,7 @@ stream_maps:
     email: email
     full_name: full_name
     # exclude anything not declared
-    __else__: null
+    __else__: __NULL__
 ```
 ````
 
