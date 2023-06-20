@@ -20,6 +20,8 @@ def test_get_sink():
     sink = BatchSinkMock(target, "foo", input_schema, key_properties)
     target._sinks_active["foo"] = sink
     sink_returned = target.get_sink(
-        "foo", schema=input_schema, key_properties=key_properties
+        "foo",
+        schema=input_schema,
+        key_properties=key_properties,
     )
     assert sink_returned == sink
