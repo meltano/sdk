@@ -69,7 +69,7 @@ html_theme_options = {
     "source_branch": "main",
     "source_directory": "docs/",
     "sidebar_hide_name": True,
-    "announcement": '<a href"https://meltano.com/cloud/?utm_campaign=top_banner_sdk">Sign up for Public Beta today</a>! Get a 20% discount on purchases before 27th of July</a>!',
+    "announcement": '<a href"https://meltano.com/cloud/?utm_campaign=top_banner_sdk">Sign up for Public Beta today</a>! Get a 20% discount on purchases before 27th of July!',
     # branding
     "light_css_variables": {
         "font-stack": "Hanken Grotesk,-apple-system,Helvetica,sans-serif",
