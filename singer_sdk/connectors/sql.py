@@ -53,8 +53,8 @@ class SQLConnector:
         """
         self._config: dict[str, t.Any] = config or {}
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
-        self._table_cols_cache: dict = {}
-        self._schema_cache: dict = {}
+        self._table_cols_cache: dict[str, dict[str, sqlalchemy.Column]] = {}
+        self._schema_cache: list = []
 
     @property
     def config(self) -> dict:
