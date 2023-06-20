@@ -969,7 +969,9 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
             if jsonschema_type.get("type") in type_check:  # noqa: PLR5501
                 return True
 
-    if any(t in type_check for t in jsonschema_type.get("anyOf", ())):
+    if any(
+        _jsonschema_type_check(t, type_check) for t in jsonschema_type.get("anyOf", ())
+    ):
         return True
 
     return False

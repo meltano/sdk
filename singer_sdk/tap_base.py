@@ -11,7 +11,7 @@ from enum import Enum
 
 import click
 
-from singer_sdk._singerlib import Catalog
+from singer_sdk._singerlib import Catalog, StateMessage, write_message
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.exceptions import AbortedSyncFailedException, AbortedSyncPausedException
 from singer_sdk.helpers import _state
@@ -246,6 +246,9 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             # Initialize streams' record limits before beginning the sync test.
             stream.ABORT_AT_RECORD_COUNT = dry_run_record_limit
 
+            # Force selection of streams.
+            stream.selected = True
+
         for stream in streams:
             if stream.parent_stream_type:
                 self.logger.debug(
@@ -267,6 +270,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
     def write_schemas(self) -> None:
         """Write a SCHEMA message for all known streams to STDOUT."""
         for stream in self.streams.values():
+            stream.selected = True
             stream._write_schema_message()
 
     # Stream detection:
@@ -431,6 +435,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Sync all streams."""
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
+        write_message(StateMessage(value=self.state))
+
         stream: Stream
         for stream in self.streams.values():
             if not stream.selected and not stream.has_selected_descendents:

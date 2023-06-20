@@ -59,11 +59,17 @@ BATCH_CONFIG = PropertiesList(
                 "encoding",
                 description="Specifies the format and compression of the batch files.",
                 wrapped=ObjectType(
-                    Property("format", StringType, allowed_values=["jsonl"]),
+                    Property(
+                        "format",
+                        StringType,
+                        allowed_values=["jsonl"],
+                        description="Format to use for batch files.",
+                    ),
                     Property(
                         "compression",
                         StringType,
                         allowed_values=["gzip", "none"],
+                        description="Compression format to use for batch files.",
                     ),
                 ),
             ),
@@ -71,8 +77,16 @@ BATCH_CONFIG = PropertiesList(
                 "storage",
                 description="Defines the storage layer to use when writing batch files",
                 wrapped=ObjectType(
-                    Property("root", StringType),
-                    Property("prefix", StringType),
+                    Property(
+                        "root",
+                        StringType,
+                        description="Root path to use when writing batch files.",
+                    ),
+                    Property(
+                        "prefix",
+                        StringType,
+                        description="Prefix to use when writing batch files.",
+                    ),
                 ),
             ),
         ),
