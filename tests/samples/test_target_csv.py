@@ -21,7 +21,7 @@ from singer_sdk.testing import (
     tap_to_target_sync_test,
     target_sync_test,
 )
-from tests.conftest import TargetMock 
+from tests.conftest import TargetMock
 
 TEST_OUTPUT_DIR = Path(f".output/test_{uuid.uuid4()}/")
 SAMPLE_CONFIG = {"target_folder": f"{TEST_OUTPUT_DIR}/"}
@@ -51,6 +51,7 @@ SAMPLE_TAP_CONFIG: dict[str, t.Any] = {}
 COUNTRIES_STREAM_MAPS_CONFIG: dict[str, t.Any] = {
     "stream_maps": {"continents": {}, "__else__": None},
 }
+
 
 def test_countries_to_csv(csv_config: dict):
     tap = SampleTapCountries(config=SAMPLE_TAP_CONFIG, state=None)
