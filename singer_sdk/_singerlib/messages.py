@@ -189,7 +189,9 @@ def format_message(message: Message) -> str:
     Returns:
         The formatted message.
     """
-    return json.encode(message.to_dict()).decode()
+    enc_msg = json.encode(message.to_dict(), enc_hook=str)
+    formatted = json.format(enc_msg, indent=0)
+    return formatted.decode()
 
 
 def write_message(message: Message) -> None:
