@@ -82,14 +82,17 @@ def mypy(session: Session) -> None:
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
+    session.install(".[s3]")
+    session.install(*test_dependencies)
+
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
     if sqlalchemy_version:
-        deps = [*test_dependencies, f"sqlalchemy=={sqlalchemy_version}"]
-    else:
-        deps = test_dependencies
+        # Bypass nox-poetry use of --constraint so we can install a version of
+        # SQLAlchemy that doesn't match what's in poetry.lock.
+        session.poetry.session.install(f"sqlalchemy=={sqlalchemy_version}")
 
-    session.install(".[s3]")
-    session.install(*deps)
+    # Print the installed version of SQLAlchemy
+    session.run("python", "-c", "import sqlalchemy; print(sqlalchemy.__version__)")
 
     try:
         session.run(
