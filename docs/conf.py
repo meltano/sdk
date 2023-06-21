@@ -69,9 +69,12 @@ html_theme_options = {
     "source_branch": "main",
     "source_directory": "docs/",
     "sidebar_hide_name": True,
+    "announcement": '<a href="https://meltano.com/cloud/?utm_campaign=top_banner_sdk">Sign up for Public Beta today</a>! Get a 20% discount on purchases before 27th of July!',  # noqa: E501
     # branding
     "light_css_variables": {
         "font-stack": "Hanken Grotesk,-apple-system,Helvetica,sans-serif",
+        "color-announcement-background": "#3A64FA",
+        "color-announcement-text": "#EEEBEE",
         "color-foreground-primary": "#080216",
         "color-background-primary": "#E9E5FB",
         "color-link": "#3A64FA",
