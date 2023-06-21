@@ -16,10 +16,11 @@ body:
       label: Feature scope
       description: Functionality this new feature would impact
       options:
-        - Taps (catalog, state, stream maps, etc.)
-        - Targets (data type handling, batching, SQL object generation, etc.)
+        - Taps (catalog, state, stream maps, tests, etc.)
+        - Targets (data type handling, batching, SQL object generation, tests, etc.)
         - Configuration (settings parsing, validation, etc.)
         - CLI (options, error messages, logging, etc.)
+        - Cookiecutter templates
         - Other
     validations:
       required: true

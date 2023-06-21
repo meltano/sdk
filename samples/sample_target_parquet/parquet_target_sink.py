@@ -36,7 +36,8 @@ def _json_schema_to_arrow_fields(schema: dict[str, t.Any]) -> pa.StructType:
     for name, property_schema in schema.get("properties", {}).items():
         field = pa.field(name, _json_type_to_arrow_field(property_schema))
         fields.append(field)
-    return fields
+
+    return fields if fields else [pa.field("dummy", pa.string())]
 
 
 def _json_type_to_arrow_field(  # noqa: PLR0911
@@ -99,22 +100,3 @@ class SampleParquetTargetSink(BatchSink):
         table = pa.Table.from_pylist(records_to_drain, schema=schema)
         writer.write_table(table)
         writer.close()
-
-    @staticmethod
-    def translate_data_type(singer_type: str | dict) -> t.Any:
-        """Translate from singer_type to a native type."""
-        if singer_type in ["decimal", "float", "double"]:
-            return pa.decimal128
-        if singer_type in ["date-time"]:
-            return pa.datetime
-        if singer_type in ["date"]:
-            return pa.date64
-        return pa.string
-
-    def _get_parquet_schema(self) -> list[tuple[str, t.Any]]:
-        col_list: list[tuple[str, t.Any]] = []
-        for prop in self.schema["properties"]:
-            col_list.append(
-                (prop["name"], self.translate_data_type(prop["type"])),
-            )
-        return col_list
