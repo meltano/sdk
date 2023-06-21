@@ -269,7 +269,6 @@ class Stream(metaclass=abc.ABCMeta):
 
         return t.cast(datetime.datetime, pendulum.parse(value))
 
-    @final
     @property
     def selected(self) -> bool:
         """Check if stream is selected.
@@ -278,6 +277,16 @@ class Stream(metaclass=abc.ABCMeta):
             True if the stream is selected.
         """
         return self.mask.get((), True)
+
+    @selected.setter
+    def selected(self, value: bool | None) -> None:
+        """Set stream selection.
+
+        Args:
+            value: True if the stream is selected.
+        """
+        self.metadata.root.selected = value
+        self._mask = self.metadata.resolve_selection()
 
     @final
     @property
