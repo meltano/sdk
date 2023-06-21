@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import copy
 import datetime
 import json
 import time
@@ -67,6 +68,7 @@ class Sink(metaclass=abc.ABCMeta):
             "Initializing target sink for stream '%s'...",
             stream_name,
         )
+        self.original_schema = copy.deepcopy(schema)
         self.schema = schema
         if self.include_sdc_metadata_properties:
             self._add_sdc_metadata_to_schema()
