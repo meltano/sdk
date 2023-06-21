@@ -89,7 +89,9 @@ def tests(session: Session) -> None:
     if sqlalchemy_version:
         # Bypass nox-poetry use of --constraint so we can install a version of
         # SQLAlchemy that doesn't match what's in poetry.lock.
-        session.poetry.session.install(f"sqlalchemy=={sqlalchemy_version}")
+        session.poetry.session.install(  # type: ignore[attr-defined]
+            f"sqlalchemy=={sqlalchemy_version}",
+        )
 
     # Print the installed version of SQLAlchemy
     session.run("python", "-c", "import sqlalchemy; print(sqlalchemy.__version__)")
