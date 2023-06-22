@@ -50,6 +50,48 @@ FLATTENING_CONFIG = PropertiesList(
         description="The max depth to flatten schemas.",
     ),
 ).to_dict()
+BATCH_CONFIG = PropertiesList(
+    Property(
+        "batch_config",
+        description="",
+        wrapped=ObjectType(
+            Property(
+                "encoding",
+                description="Specifies the format and compression of the batch files.",
+                wrapped=ObjectType(
+                    Property(
+                        "format",
+                        StringType,
+                        allowed_values=["jsonl"],
+                        description="Format to use for batch files.",
+                    ),
+                    Property(
+                        "compression",
+                        StringType,
+                        allowed_values=["gzip", "none"],
+                        description="Compression format to use for batch files.",
+                    ),
+                ),
+            ),
+            Property(
+                "storage",
+                description="Defines the storage layer to use when writing batch files",
+                wrapped=ObjectType(
+                    Property(
+                        "root",
+                        StringType,
+                        description="Root path to use when writing batch files.",
+                    ),
+                    Property(
+                        "prefix",
+                        StringType,
+                        description="Prefix to use when writing batch files.",
+                    ),
+                ),
+            ),
+        ),
+    ),
+).to_dict()
 TARGET_SCHEMA_CONFIG = PropertiesList(
     Property(
         "default_target_schema",

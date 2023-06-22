@@ -7,7 +7,7 @@
       "variant": "None (Skip)",
       "stream_type": "GraphQL",
       "auth_method": "JWT",
-      "include_cicd_sample_template": "None (Skip)",
+      "include_ci_files": "None (Skip)",
       "license": "Apache-2.0",
       "_template": "../tap-template/",
       "_output_dir": "."

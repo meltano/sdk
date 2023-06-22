@@ -269,7 +269,6 @@ class Stream(metaclass=abc.ABCMeta):
 
         return t.cast(datetime.datetime, pendulum.parse(value))
 
-    @final
     @property
     def selected(self) -> bool:
         """Check if stream is selected.
@@ -278,6 +277,16 @@ class Stream(metaclass=abc.ABCMeta):
             True if the stream is selected.
         """
         return self.mask.get((), True)
+
+    @selected.setter
+    def selected(self, value: bool | None) -> None:
+        """Set stream selection.
+
+        Args:
+            value: True if the stream is selected.
+        """
+        self.metadata.root.selected = value
+        self._mask = self.metadata.resolve_selection()
 
     @final
     @property
@@ -1139,6 +1148,9 @@ class Stream(metaclass=abc.ABCMeta):
 
         Args:
             context: Stream partition or context dictionary.
+
+        Raises:
+            Exception: Any exception raised by the sync process.
         """
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:
@@ -1154,13 +1166,20 @@ class Stream(metaclass=abc.ABCMeta):
         if self.selected:
             self._write_schema_message()
 
-        batch_config = self.get_batch_config(self.config)
-        if batch_config:
-            self._sync_batches(batch_config, context=context)
-        else:
-            # Sync the records themselves:
-            for _ in self._sync_records(context=context):
-                pass
+        try:
+            batch_config = self.get_batch_config(self.config)
+            if batch_config:
+                self._sync_batches(batch_config, context=context)
+            else:
+                # Sync the records themselves:
+                for _ in self._sync_records(context=context):
+                    pass
+        except Exception as ex:
+            self.logger.exception(
+                "An unhandled error occurred while syncing '%s'",
+                self.name,
+            )
+            raise ex
 
     def _sync_children(self, child_context: dict | None) -> None:
         if child_context is None:

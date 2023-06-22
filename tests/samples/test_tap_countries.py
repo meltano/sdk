@@ -9,6 +9,9 @@ import logging
 import typing as t
 from contextlib import redirect_stdout
 
+import pytest
+from click.testing import CliRunner
+
 from samples.sample_tap_countries.countries_tap import SampleTapCountries
 from singer_sdk.helpers._catalog import (
     get_selected_schema,
@@ -16,6 +19,11 @@ from singer_sdk.helpers._catalog import (
 )
 from singer_sdk.testing import get_tap_test_class
 from singer_sdk.testing.config import SuiteConfig
+
+if t.TYPE_CHECKING:
+    from pathlib import Path
+
+    from pytest_snapshot.plugin import Snapshot
 
 SAMPLE_CONFIG = {}
 SAMPLE_CONFIG_BAD = {"not": "correct"}
@@ -135,4 +143,18 @@ def test_batch_mode(outdir):
     assert counter["SCHEMA", "countries"] == 1
     assert counter["BATCH", "countries"] == 1
 
-    assert counter[("STATE",)] == 2
+    assert counter[("STATE",)] == 3
+
+
+@pytest.mark.snapshot()
+def test_write_schema(
+    snapshot: Snapshot,
+    snapshot_dir: Path,
+):
+    snapshot.snapshot_dir = snapshot_dir.joinpath("countries_write_schemas")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(SampleTapCountries.cli, ["--test", "schema"])
+
+    snapshot_name = "countries_write_schemas"
+    snapshot.assert_match(result.stdout, snapshot_name)

@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import logging
 import os
+import sys
 import typing as t
 from pathlib import Path, PurePath
 from types import MappingProxyType
@@ -13,7 +14,11 @@ import click
 from jsonschema import Draft7Validator
 
 from singer_sdk import about, metrics
-from singer_sdk.configuration._dict_config import parse_environment_config
+from singer_sdk.cli import plugin_cli
+from singer_sdk.configuration._dict_config import (
+    merge_missing_config_jsonschema,
+    parse_environment_config,
+)
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
@@ -129,6 +134,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         return [
             PluginCapabilities.STREAM_MAPS,
             PluginCapabilities.FLATTENING,
+            PluginCapabilities.BATCH,
         ]
 
     @classproperty
@@ -339,19 +345,12 @@ class PluginBase(metaclass=abc.ABCMeta):
         Args:
             config_jsonschema: [description]
         """
-
-        def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
-            # Append any missing properties in the target with those from source.
-            for k, v in source_jsonschema["properties"].items():
-                if k not in target_jsonschema["properties"]:
-                    target_jsonschema["properties"][k] = v
-
         capabilities = cls.capabilities
         if PluginCapabilities.STREAM_MAPS in capabilities:
-            _merge_missing(STREAM_MAPS_CONFIG, config_jsonschema)
+            merge_missing_config_jsonschema(STREAM_MAPS_CONFIG, config_jsonschema)
 
         if PluginCapabilities.FLATTENING in capabilities:
-            _merge_missing(FLATTENING_CONFIG, config_jsonschema)
+            merge_missing_config_jsonschema(FLATTENING_CONFIG, config_jsonschema)
 
     @classmethod
     def print_about(
@@ -402,16 +401,99 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         return config_files, parse_env_config
 
-    @classproperty
-    def cli(cls) -> t.Callable:  # noqa: N805
+    @classmethod
+    def invoke(
+        cls,
+        *,
+        about: bool = False,
+        about_format: str | None = None,
+        **kwargs: t.Any,  # noqa: ARG003
+    ) -> None:
+        """Invoke the plugin.
+
+        Args:
+            about: Display package metadata and settings.
+            about_format: Specify output style for `--about`.
+            kwargs: Plugin keyword arguments.
+        """
+        if about:
+            cls.print_about(about_format)
+            sys.exit(0)
+
+    @classmethod
+    def cb_version(
+        cls: type[PluginBase],
+        ctx: click.Context,
+        param: click.Option,  # noqa: ARG003
+        value: bool,  # noqa: FBT001
+    ) -> None:
+        """CLI callback to print the plugin version and exit.
+
+        Args:
+            ctx: Click context.
+            param: Click parameter.
+            value: Boolean indicating whether to print the version.
+        """
+        if not value:
+            return
+        cls.print_version(print_fn=click.echo)
+        ctx.exit()
+
+    @classmethod
+    def get_singer_command(cls: type[PluginBase]) -> click.Command:
         """Handle command line execution.
 
         Returns:
             A callable CLI object.
         """
+        return click.Command(
+            name=cls.name,
+            callback=cls.invoke,
+            context_settings={"help_option_names": ["--help"]},
+            params=[
+                click.Option(
+                    ["--version"],
+                    is_flag=True,
+                    help="Display the package version.",
+                    is_eager=True,
+                    expose_value=False,
+                    callback=cls.cb_version,
+                ),
+                click.Option(
+                    ["--about"],
+                    help="Display package metadata and settings.",
+                    is_flag=True,
+                    is_eager=False,
+                    expose_value=True,
+                ),
+                click.Option(
+                    ["--format", "about_format"],
+                    help="Specify output style for --about",
+                    type=click.Choice(
+                        ["json", "markdown"],
+                        case_sensitive=False,
+                    ),
+                    default=None,
+                ),
+                click.Option(
+                    ["--config"],
+                    multiple=True,
+                    help=(
+                        "Configuration file location or 'ENV' to use environment "
+                        "variables."
+                    ),
+                    type=click.STRING,
+                    default=(),
+                    is_eager=True,
+                ),
+            ],
+        )
 
-        @click.command()
-        def cli() -> None:
-            pass
+    @plugin_cli
+    def cli(cls) -> click.Command:
+        """Handle command line execution.
 
-        return cli
+        Returns:
+            A callable CLI object.
+        """
+        return cls.get_singer_command()

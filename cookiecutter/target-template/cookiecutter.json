@@ -5,5 +5,6 @@
   "library_name": "{{ cookiecutter.target_id.replace('-', '_') }}",
   "variant": "None (Skip)",
   "serialization_method": ["Per record", "Per batch", "SQL"],
+  "include_ci_files": ["GitHub", "None (Skip)"],
   "license": ["Apache-2.0"]
 }
