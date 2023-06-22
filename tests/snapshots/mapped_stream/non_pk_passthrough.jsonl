@@ -1,4 +1,4 @@
-{"type": "STATE", "value": {}}
+{"type":"STATE","value":{}}
 {"type":"SCHEMA","stream":"mystream","schema":{"type":"object","properties":{"count":{"type":["integer","null"]}}},"key_properties":[]}
 {"type":"RECORD","stream":"mystream","record":{"count":21},"time_extracted":"2022-01-01T00:00:00+00:00"}
 {"type":"RECORD","stream":"mystream","record":{"count":13},"time_extracted":"2022-01-01T00:00:00+00:00"}
