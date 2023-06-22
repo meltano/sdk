@@ -22,7 +22,7 @@ def test_format_message():
         record={"id": 1, "name": "test"},
     )
     assert format_message(message) == (
-        '{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}'
+        '{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}\n'
     )
 
 
