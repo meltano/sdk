@@ -189,7 +189,11 @@ def format_message(message: Message) -> str:
     Returns:
         The formatted message.
     """
-    return json.dumps(message.to_dict(), use_decimal=True, default=str)
+    return json.dumps(
+        message.to_dict(),
+        option=json.OPT_NON_STR_KEYS,
+        default=str,
+    ).decode(encoding="utf-8")
 
 
 def write_message(message: Message) -> None:
