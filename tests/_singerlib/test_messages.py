@@ -35,7 +35,7 @@ def test_write_message():
         singer.write_message(message)
 
     assert out.getvalue() == (
-        '{"type": "RECORD", "stream": "test", "record": {"id": 1, "name": "test"}}\n'
+        '{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}\n'
     )
 
 
