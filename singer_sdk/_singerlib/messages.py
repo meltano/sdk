@@ -191,7 +191,7 @@ def format_message(message: Message) -> str:
     """
     return json.dumps(
         message.to_dict(),
-        option=json.OPT_NON_STR_KEYS,
+        option=json.OPT_APPEND_NEWLINE | json.OPT_NON_STR_KEYS,
         default=str,
     ).decode(encoding="utf-8")
 
@@ -202,5 +202,5 @@ def write_message(message: Message) -> None:
     Args:
         message: The message to write.
     """
-    sys.stdout.write(format_message(message) + "\n")
+    sys.stdout.write(format_message(message))
     sys.stdout.flush()
