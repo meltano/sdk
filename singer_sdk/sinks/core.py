@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import copy
 import datetime
 import json
 import time
@@ -67,6 +68,7 @@ class Sink(metaclass=abc.ABCMeta):
             "Initializing target sink for stream '%s'...",
             stream_name,
         )
+        self.original_schema = copy.deepcopy(schema)
         self.schema = schema
         if self.include_sdc_metadata_properties:
             self._add_sdc_metadata_to_schema()
@@ -254,17 +256,17 @@ class Sink(metaclass=abc.ABCMeta):
         https://sdk.meltano.com/en/latest/implementation/record_metadata.html
         """
         properties_dict = self.schema["properties"]
-        for col in {
+        for col in (
             "_sdc_extracted_at",
             "_sdc_received_at",
             "_sdc_batched_at",
             "_sdc_deleted_at",
-        }:
+        ):
             properties_dict[col] = {
                 "type": ["null", "string"],
                 "format": "date-time",
             }
-        for col in {"_sdc_sequence", "_sdc_table_version"}:
+        for col in ("_sdc_sequence", "_sdc_table_version"):
             properties_dict[col] = {"type": ["null", "integer"]}
 
     def _remove_sdc_metadata_from_schema(self) -> None:
@@ -274,14 +276,14 @@ class Sink(metaclass=abc.ABCMeta):
         https://sdk.meltano.com/en/latest/implementation/record_metadata.html
         """
         properties_dict = self.schema["properties"]
-        for col in {
+        for col in (
             "_sdc_extracted_at",
             "_sdc_received_at",
             "_sdc_batched_at",
             "_sdc_deleted_at",
             "_sdc_sequence",
             "_sdc_table_version",
-        }:
+        ):
             properties_dict.pop(col, None)
 
     def _remove_sdc_metadata_from_record(self, record: dict) -> None:
