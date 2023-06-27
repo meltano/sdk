@@ -34,7 +34,11 @@ def _sqlite_sample_db(sqlite_connector):
 
 
 @pytest.fixture
-def sqlite_sample_tap(_sqlite_sample_db, sqlite_sample_db_config) -> SQLiteTap:
+def sqlite_sample_tap(
+    _sqlite_sample_db,
+    sqlite_sample_db_config,
+    sqlite_sample_db_state,
+) -> SQLiteTap:
     _ = _sqlite_sample_db
     catalog_obj = Catalog.from_dict(
         _get_tap_catalog(SQLiteTap, config=sqlite_sample_db_config, select_all=True),
@@ -51,7 +55,11 @@ def sqlite_sample_tap(_sqlite_sample_db, sqlite_sample_db_config) -> SQLiteTap:
     t2.key_properties = ["c1"]
     t2.replication_key = "c1"
     t2.replication_method = "INCREMENTAL"
-    return SQLiteTap(config=sqlite_sample_db_config, catalog=catalog_obj.to_dict())
+    return SQLiteTap(
+        config=sqlite_sample_db_config,
+        catalog=catalog_obj.to_dict(),
+        state=sqlite_sample_db_state,
+    )
 
 
 @pytest.fixture
@@ -70,4 +78,14 @@ def sqlite_sample_db_config(path_to_sample_data_db: str) -> dict:
     return {
         "path_to_db": str(path_to_sample_data_db),
         "start_date": "2010-01-01T00:00:00Z",
+    }
+
+
+@pytest.fixture
+def sqlite_sample_db_state() -> dict:
+    """Get configuration dictionary for target-csv."""
+    return {
+        "bookmarks": {
+            "main-t0": {"replication_key": "c1", "replication_key_value": 55},
+        },
     }
