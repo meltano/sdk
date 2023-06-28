@@ -172,7 +172,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             try:
                 module = importlib.import_module(package.replace("-", "_"))
                 version = getattr(module, "__version__", "[could not be detected]")
-            except ModuleNotFoundError:
+            except ImportError:
                 version = "[could not be detected]"
 
         return version
