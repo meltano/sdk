@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import importlib
 import logging
 import os
 import sys
@@ -169,6 +170,13 @@ class PluginBase(metaclass=abc.ABCMeta):
             version = metadata.version(package)
         except metadata.PackageNotFoundError:
             version = "[could not be detected]"
+
+        try:
+            module = importlib.import_module(package)
+            version = getattr(module, "__version__", "[could not be detected]")
+        except ModuleNotFoundError:
+            version = "[could not be detected]"
+
         return version
 
     @classmethod
