@@ -169,13 +169,11 @@ class PluginBase(metaclass=abc.ABCMeta):
         try:
             version = metadata.version(package)
         except metadata.PackageNotFoundError:
-            version = "[could not be detected]"
-
-        try:
-            module = importlib.import_module(package)
-            version = getattr(module, "__version__", "[could not be detected]")
-        except ModuleNotFoundError:
-            version = "[could not be detected]"
+            try:
+                module = importlib.import_module(package.replace("-", "_"))
+                version = getattr(module, "__version__", "[could not be detected]")
+            except ModuleNotFoundError:
+                version = "[could not be detected]"
 
         return version
 
