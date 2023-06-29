@@ -56,6 +56,9 @@ CHECK_SUPPORTED_PYTHON_VERSIONS = (
     # future supported versions
     "3.12",
     "3.13",
+    "3.14",
+    "3.15",
+    "3.16",
 )
 
 
