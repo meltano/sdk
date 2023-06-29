@@ -215,6 +215,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             return supported_python_versions
         except metadata.PackageNotFoundError:
             pass
+        return None
 
     @classmethod
     def get_plugin_version(cls) -> str:
