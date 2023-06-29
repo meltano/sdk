@@ -235,7 +235,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         return cls._get_package_version(SDK_PACKAGE_NAME)
 
     @classmethod
-    def get_supported_python_versions(cls) -> list[str]:
+    def get_supported_python_versions(cls) -> list[str] | None:
         """Return the supported Python versions.
 
         Returns:

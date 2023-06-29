@@ -195,11 +195,12 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
 
         # Process Supported Python Versions
 
-        supported_python_versions = "## Supported Python Versions\n\n"
-        supported_python_versions += "\n".join(
-            [f"* {v}" for v in about_info.supported_python_versions],
-        )
-        supported_python_versions += "\n"
-        md_list.append(supported_python_versions)
+        if about_info.supported_python_versions:
+            supported_python_versions = "## Supported Python Versions\n\n"
+            supported_python_versions += "\n".join(
+                [f"* {v}" for v in about_info.supported_python_versions],
+            )
+            supported_python_versions += "\n"
+            md_list.append(supported_python_versions)
 
         return "".join(md_list)
