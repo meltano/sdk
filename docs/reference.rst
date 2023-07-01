@@ -74,7 +74,7 @@ Exception Types
     exceptions.ConfigValidationError
     exceptions.FatalAPIError
     exceptions.InvalidStreamSortException
-    exceptions.IgnorableAPIResponseCodeException
+    exceptions.IgnorableException
     exceptions.MapExpressionError
     exceptions.MaxRecordsLimitException
     exceptions.RecordsWithoutSchemaException
