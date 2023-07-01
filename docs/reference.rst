@@ -93,9 +93,11 @@ JSON Schema builder classes
     typing.PropertiesList
     typing.ArrayType
     typing.BooleanType
+    typing.Constant
     typing.CustomType
     typing.DateTimeType
     typing.DateType
+    typing.DiscriminatedUnion
     typing.DurationType
     typing.EmailType
     typing.HostnameType
@@ -105,6 +107,7 @@ JSON Schema builder classes
     typing.JSONPointerType
     typing.NumberType
     typing.ObjectType
+    typing.OneOf
     typing.Property
     typing.RegexType
     typing.RelativeJSONPointerType

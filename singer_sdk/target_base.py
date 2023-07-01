@@ -167,7 +167,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             return self.add_sink(stream_name, schema, key_properties)
 
         if (
-            existing_sink.schema != schema
+            existing_sink.original_schema != schema
             or existing_sink.key_properties != key_properties
         ):
             self.logger.info(
