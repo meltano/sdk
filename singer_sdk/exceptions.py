@@ -98,7 +98,7 @@ class RetriableAPIError(Exception):
         self.response = response
 
 
-class IgnorableAPIResponseCodeException(Exception):
+class IgnorableException(Exception):
     """Raised when an API response code is ignorable."""
 
     def __init__(self, message: str, status_code: int | None = None) -> None:
