@@ -1,5 +1,5 @@
 singer_sdk.exceptions.IgnorableException
-=======================================================
+========================================
 
 .. currentmodule:: singer_sdk.exceptions
 
