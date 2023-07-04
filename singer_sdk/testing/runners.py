@@ -17,11 +17,11 @@ from singer_sdk.testing.config import SuiteConfig
 class SingerTestRunner(metaclass=abc.ABCMeta):
     """Base Singer Test Runner."""
 
-    raw_messages: list[dict] = []
-    schema_messages: list[dict] = []
-    record_messages: list[dict] = []
-    state_messages: list[dict] = []
-    records: defaultdict = defaultdict(list)
+    raw_messages: t.ClassVar[list[dict]] = []
+    schema_messages: t.ClassVar[list[dict]] = []
+    record_messages: t.ClassVar[list[dict]] = []
+    state_messages: t.ClassVar[list[dict]] = []
+    records: t.ClassVar[defaultdict] = defaultdict(list)
 
     def __init__(
         self,

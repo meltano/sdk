@@ -156,7 +156,7 @@ class StreamTestTemplate(TestTemplate):
     """Base Tap Stream test template."""
 
     plugin_type = "stream"
-    required_kwargs = ["stream"]
+    required_kwargs: t.Sequence[str] = ["stream"]
 
     @property
     def id(self) -> str:  # noqa: A003

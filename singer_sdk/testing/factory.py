@@ -22,8 +22,8 @@ if t.TYPE_CHECKING:
 class BaseTestClass:
     """Base test class."""
 
-    params: dict = {}
-    param_ids: dict = {}
+    params: t.ClassVar[dict] = {}
+    param_ids: t.ClassVar[dict] = {}
 
 
 class TapTestClassFactory:

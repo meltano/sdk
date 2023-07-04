@@ -98,7 +98,7 @@ class Stream(metaclass=abc.ABCMeta):
     ignore_parent_replication_key: bool = False
 
     # Internal API cost aggregator
-    _sync_costs: dict[str, int] = {}
+    _sync_costs: t.ClassVar[dict[str, int]] = {}
 
     selected_by_default: bool = True
     """Whether this stream is selected by default in the catalog."""
@@ -136,7 +136,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._stream_maps: list[StreamMap] | None = None
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
-        self._primary_keys: list[str] | None = None
+        self._primary_keys: t.Sequence[str] | None = None
         self._state_partitioning_keys: list[str] | None = None
         self._schema_filepath: Path | None = None
         self._metadata: singer.MetadataMapping | None = None
@@ -479,9 +479,7 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             Replication key for the stream.
         """
-        if not self._replication_key:
-            return None
-        return self._replication_key
+        return self._replication_key or None
 
     @replication_key.setter
     def replication_key(self, new_value: str | None) -> None:
