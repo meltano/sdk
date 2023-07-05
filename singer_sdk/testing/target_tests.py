@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import pytest
 
-from singer_sdk.exceptions import MissingKeyPropertiesError
+from singer_sdk.exceptions import (
+    MissingKeyPropertiesError,
+    RecordsWithoutSchemaException,
+)
 
 from .templates import TargetFileTestTemplate, TargetTestTemplate
 
