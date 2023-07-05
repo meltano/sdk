@@ -131,3 +131,7 @@ class ConformedNameClashException(Exception):
 
     e.g. two columns conformed to the same name
     """
+
+
+class MissingKeyPropertiesError(Exception):
+    """Raised when a recieved (and/or transformed) record is missing key properties."""

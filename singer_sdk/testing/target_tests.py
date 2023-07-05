@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import pytest
 
-from singer_sdk.exceptions import RecordsWithoutSchemaException
+from singer_sdk.exceptions import (
+    MissingKeyPropertiesError,
+    RecordsWithoutSchemaException,
+)
 
 from .templates import TargetFileTestTemplate, TargetTestTemplate
 
@@ -107,6 +110,11 @@ class TargetRecordMissingKeyProperty(TargetFileTestTemplate):
     """Test Target handles record missing key property."""
 
     name = "record_missing_key_property"
+
+    def test(self) -> None:
+        """Run test."""
+        with pytest.raises(MissingKeyPropertiesError):
+            super().test()
 
 
 class TargetRecordMissingRequiredProperty(TargetFileTestTemplate):

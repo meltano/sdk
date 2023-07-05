@@ -338,9 +338,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 sink._remove_sdc_metadata_from_record(transformed_record)
 
             sink._validate_and_parse(transformed_record)
+            transformed_record = sink.preprocess_record(transformed_record, context)
+            sink._singer_validate_message(transformed_record)
 
             sink.tally_record_read()
-            transformed_record = sink.preprocess_record(transformed_record, context)
             sink.process_record(transformed_record, context)
             sink._after_process_record(context)
 
