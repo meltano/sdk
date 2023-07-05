@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import pytest
 
+from singer_sdk.exceptions import RecordsWithoutSchemaException
+
 from .templates import TargetFileTestTemplate, TargetTestTemplate
 
 
@@ -97,9 +99,7 @@ class TargetRecordBeforeSchemaTest(TargetFileTestTemplate):
 
     def test(self) -> None:
         """Run test."""
-        # TODO: the SDK should raise a better error than KeyError in this case
-        # https://github.com/meltano/sdk/issues/1755
-        with pytest.raises(KeyError):
+        with pytest.raises(RecordsWithoutSchemaException):
             super().test()
 
 
