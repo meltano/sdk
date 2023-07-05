@@ -209,19 +209,17 @@ class PluginBase(metaclass=abc.ABCMeta):
         Returns:
             A list of supported Python versions.
         """
-        package_metadata = {}
-        supported_python_versions = []
-
         try:
             package_metadata = metadata.metadata(package)
         except metadata.PackageNotFoundError:
             return None
 
         reported_python_versions = SpecifierSet(package_metadata["Requires-Python"])
-        for version in CHECK_SUPPORTED_PYTHON_VERSIONS:
-            if version in reported_python_versions:
-                supported_python_versions.append(version)
-        return supported_python_versions
+        return [
+            version
+            for version in CHECK_SUPPORTED_PYTHON_VERSIONS
+            if version in reported_python_versions
+        ]
 
     @classmethod
     def get_plugin_version(cls) -> str:
