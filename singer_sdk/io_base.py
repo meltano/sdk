@@ -63,7 +63,10 @@ class SingerReader(metaclass=abc.ABCMeta):
             json.decoder.JSONDecodeError: raised if any lines are not valid json
         """
         try:
-            return json.loads(line, parse_float=decimal.Decimal)
+            return json.loads(  # type: ignore[no-any-return]
+                line,
+                parse_float=decimal.Decimal,
+            )
         except json.decoder.JSONDecodeError as exc:
             logger.error("Unable to parse:\n%s", line, exc_info=exc)
             raise
