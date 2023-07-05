@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import decimal
+import json
+from contextlib import nullcontext
 
 import pytest
 
@@ -27,19 +29,27 @@ class DummyReader(SingerReader):
 
 
 @pytest.mark.parametrize(
-    "line,expected",
+    "line,expected,exception",
     [
         pytest.param(
-            b'{"type": "RECORD", "stream": "users", "record": {"id": 1, "value": 1.23}}',  # noqa: E501
+            "not-valid-json",
+            None,
+            pytest.raises(json.decoder.JSONDecodeError),
+            id="unparsable",
+        ),
+        pytest.param(
+            '{"type": "RECORD", "stream": "users", "record": {"id": 1, "value": 1.23}}',  # noqa: E501
             {
                 "type": "RECORD",
                 "stream": "users",
                 "record": {"id": 1, "value": decimal.Decimal("1.23")},
             },
+            nullcontext(),
             id="record",
         ),
     ],
 )
-def test_deserialize(line, expected):
+def test_deserialize(line, expected, exception):
     reader = DummyReader()
-    assert reader.deserialize_json(line) == expected
+    with exception:
+        assert reader.deserialize_json(line) == expected
