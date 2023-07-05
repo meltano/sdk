@@ -99,9 +99,7 @@ class TargetRecordBeforeSchemaTest(TargetFileTestTemplate):
 
     def test(self) -> None:
         """Run test."""
-        # TODO: the SDK should raise a better error than KeyError in this case
-        # https://github.com/meltano/sdk/issues/1755
-        with pytest.raises(KeyError):
+        with pytest.raises(RecordsWithoutSchemaException):
             super().test()
 
 
