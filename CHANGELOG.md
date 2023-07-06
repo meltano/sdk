@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.29.0 (2023-07-06)
+
+### ✨ New
+
+- [#1769](https://github.com/meltano/sdk/issues/1769) Validate parsed/transformed record against schema message
+- [#1525](https://github.com/meltano/sdk/issues/1525) Support union schemas
+
+### 🐛 Fixes
+
+- [#1809](https://github.com/meltano/sdk/issues/1809) Deserialize floats as `decimal.Decimal`
+- [#1770](https://github.com/meltano/sdk/issues/1770) Check schema has arrived before record
+- [#1796](https://github.com/meltano/sdk/issues/1796) Create batch directory if missing
+- [#1688](https://github.com/meltano/sdk/issues/1688) Incremental where clause generation from triggering TypeError -- _**Thanks @BuzzCutNorman!**_
+- [#1778](https://github.com/meltano/sdk/issues/1778) Sink schema comparison before adding metadata columns
+- [#1698](https://github.com/meltano/sdk/issues/1698) Force stream selection in tests
+- [#1775](https://github.com/meltano/sdk/issues/1775) Add tests for SQL type conversion from JSON schemas
+- [#1771](https://github.com/meltano/sdk/issues/1771) Add descriptions for `batch_config` properties
+- [#1752](https://github.com/meltano/sdk/issues/1752) Change runner scope to function for target tests
+- [#1753](https://github.com/meltano/sdk/issues/1753) Always emit a STATE message at the start of the sync process
+
+### ⚙️ Under the Hood
+
+- [#1745](https://github.com/meltano/sdk/issues/1745) Change `SQLStream.schema` into a cached property -- _**Thanks @mjsqu!**_
+
+### 📚 Documentation Improvements
+
+- [#1756](https://github.com/meltano/sdk/issues/1756) Fix invalid JSON in Stream Maps page and add `meltano.yml` tabs -- _**Thanks @mjsqu!**_
+- [#1763](https://github.com/meltano/sdk/issues/1763) Add Cloud banner
+
 ## v0.28.0 (2023-06-05)
 
 ### ✨ New
