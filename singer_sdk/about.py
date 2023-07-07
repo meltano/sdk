@@ -28,6 +28,7 @@ class AboutInfo:
     description: str | None
     version: str
     sdk_version: str
+    supported_python_versions: list[str] | None
 
     capabilities: list[CapabilitiesEnum]
     settings: dict
@@ -88,6 +89,7 @@ class TextFormatter(AboutFormatter, format_name="text"):
             Description: {about_info.description}
             Version: {about_info.version}
             SDK Version: {about_info.sdk_version}
+            Supported Python Versions: {about_info.supported_python_versions}
             Capabilities: {about_info.capabilities}
             Settings: {about_info.settings}""",
         )
@@ -116,6 +118,7 @@ class JSONFormatter(AboutFormatter, format_name="json"):
                 ("description", about_info.description),
                 ("version", about_info.version),
                 ("sdk_version", about_info.sdk_version),
+                ("supported_python_versions", about_info.supported_python_versions),
                 ("capabilities", [c.value for c in about_info.capabilities]),
                 ("settings", about_info.settings),
             ],
@@ -187,6 +190,17 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
             )
             + "\n"
         )
+        setting += "\n"
         md_list.append(setting)
+
+        # Process Supported Python Versions
+
+        if about_info.supported_python_versions:
+            supported_python_versions = "## Supported Python Versions\n\n"
+            supported_python_versions += "\n".join(
+                [f"* {v}" for v in about_info.supported_python_versions],
+            )
+            supported_python_versions += "\n"
+            md_list.append(supported_python_versions)
 
         return "".join(md_list)
