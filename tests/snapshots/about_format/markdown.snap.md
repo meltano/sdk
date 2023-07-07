@@ -18,3 +18,9 @@ Built with the [Meltano Singer SDK](https://sdk.meltano.com).
 | api_key   | True     | None    | API key for the tap to use. |
 
 A full list of supported settings and capabilities is available by running: `tap-example --about`
+
+## Supported Python Versions
+
+* 3.6
+* 3.7
+* 3.8
