@@ -7,6 +7,7 @@ import typing as t
 from textwrap import dedent
 
 import pytest
+from jsonschema import Draft6Validator
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -30,6 +31,7 @@ from singer_sdk.typing import (
     CustomType,
     DateTimeType,
     DateType,
+    DiscriminatedUnion,
     DurationType,
     EmailType,
     HostnameType,
@@ -813,3 +815,48 @@ def test_type_check_variations(property_schemas, type_check_functions, results):
     for property_schema in property_schemas:
         for type_check_function, result in zip(type_check_functions, results):
             assert type_check_function(property_schema) == result
+
+
+def test_discriminated_union():
+    th = DiscriminatedUnion(
+        "flow",
+        oauth=ObjectType(
+            Property("client_id", StringType, required=True, secret=True),
+            Property("client_secret", StringType, required=True, secret=True),
+            additional_properties=False,
+        ),
+        password=ObjectType(
+            Property("username", StringType, required=True),
+            Property("password", StringType, required=True, secret=True),
+            additional_properties=False,
+        ),
+    )
+
+    validator = Draft6Validator(th.to_dict())
+
+    assert validator.is_valid(
+        {
+            "flow": "oauth",
+            "client_id": "123",
+            "client_secret": "456",
+        },
+    )
+    assert validator.is_valid(
+        {
+            "flow": "password",
+            "password": "123",
+            "username": "456",
+        },
+    )
+    assert not validator.is_valid(
+        {
+            "flow": "oauth",
+            "client_id": "123",
+        },
+    )
+    assert not validator.is_valid(
+        {
+            "flow": "password",
+            "client_id": "123",
+        },
+    )
