@@ -358,6 +358,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         auth_endpoint: str | None = None,
         oauth_scopes: str | None = None,
         default_expiration: int | None = None,
+        oauth_headers: dict | None = None,
     ) -> None:
         """Create a new authenticator.
 
@@ -377,6 +378,10 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         self.refresh_token: str | None = None
         self.last_refreshed: datetime | None = None
         self.expires_in: int | None = None
+        if self._auth_headers is None:
+            self._auth_headers = {}
+        if oauth_headers:
+            self._auth_headers.update(oauth_headers)
 
     @property
     def auth_headers(self) -> dict:
@@ -499,6 +504,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         auth_request_payload = self.oauth_request_payload
         token_response = requests.post(
             self.auth_endpoint,
+            headers=self._auth_headers,
             data=auth_request_payload,
             timeout=60,
         )
@@ -512,7 +518,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
         token_json = token_response.json()
         self.access_token = token_json["access_token"]
-        self.expires_in = token_json.get("expires_in", self._default_expiration)
+        self.expires_in = int(token_json.get("expires_in", self._default_expiration))
         if self.expires_in is None:
             self.logger.debug(
                 "No expires_in receied in OAuth response and no "
