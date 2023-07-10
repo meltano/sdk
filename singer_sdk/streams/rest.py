@@ -51,6 +51,8 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
 
     _page_size: int = DEFAULT_PAGE_SIZE
     _requests_session: requests.Session | None
+
+    #: HTTP method to use for requests. Defaults to "GET".
     rest_method = "GET"
 
     #: JSONPath expression to extract records from the API response.
