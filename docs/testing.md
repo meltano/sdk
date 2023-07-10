@@ -68,6 +68,7 @@ StandardTargetTests = get_target_test_class(
 class TestTargetExample(StandardTargetTests):
     """Standard Target Tests."""
 
+    @pytest.fixture()
     def resource(self):
         """Generic external resource.
 
