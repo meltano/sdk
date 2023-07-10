@@ -57,6 +57,7 @@ python-dotenv = ">=0.20,<0.22"
 typing-extensions = "^4.2.0"
 simplejson = "^3.17.6"
 jsonschema = "^4.16.0"
+packaging = ">=23.1"
 pytz = ">=2022.2.1,<2024.0.0"
 PyYAML = "^6.0"
 # urllib3 2.0 is not compatible with botocore
