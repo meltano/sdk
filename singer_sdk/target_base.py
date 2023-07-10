@@ -294,9 +294,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         self.logger.info(
             "Target '%s' completed reading %d lines of input "
-            "(%d records, %d batch manifests, %d state messages).",
+            "(%d schemas, %d records, %d batch manifests, %d state messages).",
             self.name,
             line_count,
+            counter[SingerMessageType.SCHEMA],
             counter[SingerMessageType.RECORD],
             counter[SingerMessageType.BATCH],
             counter[SingerMessageType.STATE],
