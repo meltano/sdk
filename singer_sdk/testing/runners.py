@@ -17,12 +17,6 @@ from singer_sdk.testing.config import SuiteConfig
 class SingerTestRunner(metaclass=abc.ABCMeta):
     """Base Singer Test Runner."""
 
-    raw_messages: list[dict] = []
-    schema_messages: list[dict] = []
-    record_messages: list[dict] = []
-    state_messages: list[dict] = []
-    records: defaultdict = defaultdict(list)
-
     def __init__(
         self,
         singer_class: type[Tap] | type[Target],
@@ -43,6 +37,12 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
         self.config = config or {}
         self.default_kwargs = kwargs
         self.suite_config = suite_config or SuiteConfig()
+
+        self.raw_messages: list[dict] = []
+        self.schema_messages: list[dict] = []
+        self.record_messages: list[dict] = []
+        self.state_messages: list[dict] = []
+        self.records: defaultdict = defaultdict(list)
 
     @staticmethod
     def _clean_sync_output(raw_records: str) -> list[dict]:

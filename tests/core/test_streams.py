@@ -580,7 +580,7 @@ def test_stream_class_selection(input_catalog, selection):
     class SelectedStream(RESTStream):
         name = "selected_stream"
         url_base = "https://example.com"
-        schema = {"type": "object", "properties": {}}
+        schema = {"type": "object", "properties": {}}  # noqa: RUF012
 
     class UnselectedStream(SelectedStream):
         name = "unselected_stream"
