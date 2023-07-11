@@ -34,7 +34,7 @@ class GraphQLCurrentUserStream(GitlabGraphQLStream):
     """Gitlab Current User stream."""
 
     name = "currentuser"
-    primary_keys = ["id"]
+    primary_keys = ("id",)
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "currentuser.json"
     query = """
@@ -48,7 +48,7 @@ class GraphQLProjectsStream(GitlabGraphQLStream):
     """Gitlab Projects stream."""
 
     name = "projects"
-    primary_keys = ["id"]
+    primary_keys = ("id",)
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "projects-graphql.json"
 
