@@ -186,9 +186,6 @@ fail_under = 82
 [tool.mypy]
 exclude = "tests"
 files = "singer_sdk"
-plugins = [
-    "sqlalchemy.ext.mypy.plugin",
-]
 python_version = "3.8"
 warn_unused_configs = true
 warn_unused_ignores = true

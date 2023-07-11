@@ -7,7 +7,6 @@ import typing as t
 from collections import defaultdict
 from copy import copy
 from textwrap import dedent
-from typing import Any, Iterable
 
 import sqlalchemy
 from pendulum import now
@@ -299,7 +298,7 @@ class SQLSink(BatchSink):
         self,
         full_table_name: str,
         schema: dict,
-        records: Iterable[dict[str, Any]],
+        records: t.Iterable[dict[str, t.Any]],
     ) -> int | None:
         """Bulk insert records to an existing destination table.
 
