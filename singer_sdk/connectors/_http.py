@@ -32,7 +32,7 @@ class HTTPConnector(BaseConnector[requests.Session]):
             config: Connector configuration parameters.
         """
         super().__init__(config)
-        self._session = self.get_session()
+        self.__session = self.get_session()
         self.refresh_auth()
 
     def get_connection(self, *, authenticate: bool = True) -> requests.Session:
@@ -47,11 +47,11 @@ class HTTPConnector(BaseConnector[requests.Session]):
             A new HTTP session object.
         """
         for prefix, adapter in self.adapters.items():
-            self._session.mount(prefix, adapter)
+            self.__session.mount(prefix, adapter)
 
-        self._session.auth = self._auth if authenticate else None
+        self.__session.auth = self.auth if authenticate else None
 
-        return self._session
+        return self.__session
 
     def get_session(self) -> requests.Session:
         """Return a new HTTP session object.
@@ -71,7 +71,34 @@ class HTTPConnector(BaseConnector[requests.Session]):
 
     def refresh_auth(self) -> None:
         """Refresh the HTTP session authentication."""
-        self._auth = self.get_authenticator()
+        self.auth = self.get_authenticator()
+
+    @property
+    def auth(self) -> _Auth:
+        """Return the HTTP session authenticator.
+
+        Returns:
+            An auth callable.
+        """
+        return self.__auth
+
+    @auth.setter
+    def auth(self, auth: _Auth) -> None:
+        """Set the HTTP session authenticator.
+
+        Args:
+            auth: An auth callable.
+        """
+        self.__auth = auth
+
+    @property
+    def session(self) -> requests.Session:
+        """Return the HTTP session object.
+
+        Returns:
+            The HTTP session object.
+        """
+        return self.__session
 
     @property
     def adapters(self) -> dict[str, BaseAdapter]:
@@ -107,6 +134,6 @@ class HTTPConnector(BaseConnector[requests.Session]):
         Returns:
             The HTTP response object.
         """
-        with self._connect(authenticate=authenticate) as session:
+        with self.connect(authenticate=authenticate) as session:
             kwargs = {**self.default_request_kwargs, **kwargs}
             return session.request(*args, **kwargs)

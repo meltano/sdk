@@ -45,7 +45,7 @@ class BaseConnector(abc.ABC, t.Generic[_C]):
         return self._config
 
     @contextmanager
-    def _connect(self, *args: t.Any, **kwargs: t.Any) -> t.Generator[_C, None, None]:
+    def connect(self, *args: t.Any, **kwargs: t.Any) -> t.Generator[_C, None, None]:
         """Connect to the destination.
 
         Args:

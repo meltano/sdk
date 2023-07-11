@@ -202,7 +202,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             # processed.
             query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
 
-        with self.connector._connect() as conn:
+        with self.connector.connect() as conn:
             for record in conn.execute(query):
                 transformed_record = self.post_process(dict(record._mapping))
                 if transformed_record is None:

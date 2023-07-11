@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import typing as t
 import warnings
+from contextlib import contextmanager
 from datetime import datetime
 from functools import lru_cache
 
@@ -62,6 +63,21 @@ class SQLConnector(BaseConnector):
             Plugin logger.
         """
         return logging.getLogger("sqlconnector")
+
+    @contextmanager
+    def _connect(self):  # noqa: ANN202
+        """Connect to the source.
+
+        Yields:
+            A connection object.
+        """
+        warnings.warn(
+            "`SQLConnector._connect` is deprecated. Use `SQLConnector.connect` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        with self.connect() as connection:
+            yield connection
 
     def get_connection(
         self,
@@ -643,7 +659,7 @@ class SQLConnector(BaseConnector):
         Args:
             schema_name: The target schema to create.
         """
-        with self._connect() as conn:
+        with self.connect() as conn:
             conn.execute(sqlalchemy.schema.CreateSchema(schema_name))
 
     def create_empty_table(
@@ -720,7 +736,7 @@ class SQLConnector(BaseConnector):
             column_name=column_name,
             column_type=sql_type,
         )
-        with self._connect() as conn, conn.begin():
+        with self.connect() as conn, conn.begin():
             conn.execute(column_add_ddl)
 
     def prepare_schema(self, schema_name: str) -> None:
@@ -814,7 +830,7 @@ class SQLConnector(BaseConnector):
             column_name=old_name,
             new_column_name=new_name,
         )
-        with self._connect() as conn:
+        with self.connect() as conn:
             conn.execute(column_rename_ddl)
 
     def merge_sql_types(
@@ -1123,5 +1139,5 @@ class SQLConnector(BaseConnector):
             column_name=column_name,
             column_type=compatible_sql_type,
         )
-        with self._connect() as conn:
+        with self.connect() as conn:
             conn.execute(alter_column_ddl)

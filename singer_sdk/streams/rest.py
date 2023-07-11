@@ -99,9 +99,9 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         self.connector = HTTPConnector(self.config)
 
         # Override the connector's auth with the stream's auth
-        self.connector._auth = self.authenticator
+        self.connector.auth = self.authenticator
 
-        self._requests_session = self.connector._session
+        self._requests_session = self.connector.session
         self._compiled_jsonpath = None
         self._next_page_token_compiled_jsonpath = None
 
@@ -156,7 +156,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             stacklevel=2,
         )
         if not self._requests_session:
-            self._requests_session = self.connector._session
+            self._requests_session = self.connector.session
         return self._requests_session
 
     def validate_response(self, response: requests.Response) -> None:
@@ -277,7 +277,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         Returns:
             TODO
         """
-        with self.connector._connect() as session:
+        with self.connector.connect() as session:
             response = session.send(prepared_request, timeout=self.timeout)
 
         self._write_request_duration_log(
@@ -350,7 +350,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             https://requests.readthedocs.io/en/latest/api/#requests.Request
         """
         request = requests.Request(*args, **kwargs)
-        with self.connector._connect(authenticate=True) as session:
+        with self.connector.connect(authenticate=True) as session:
             return session.prepare_request(request)
 
     def prepare_request(

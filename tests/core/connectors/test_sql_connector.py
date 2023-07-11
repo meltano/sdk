@@ -177,14 +177,14 @@ class TestConnectorSQL:
         ) as _, connector._connect() as conn:
             conn.execute(sqlalchemy.text("SELECT * FROM fake_table"))
 
-    def test_rename_column_uses_connect_correctly(self, connector):
+    def test_rename_column_uses_connect_correctly(self, connector: SQLConnector):
         attached_engine = connector._engine
         # Ends up using the attached engine
         with mock.patch.object(attached_engine, "connect") as mock_conn:
             connector.rename_column("fake_table", "old_name", "new_name")
             mock_conn.assert_called_once()
         # Uses the _connect method
-        with mock.patch.object(connector, "_connect") as mock_connect_method:
+        with mock.patch.object(connector, "connect") as mock_connect_method:
             connector.rename_column("fake_table", "old_name", "new_name")
             mock_connect_method.assert_called_once()
 
