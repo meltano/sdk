@@ -487,8 +487,7 @@ def _conform_primitive_property(  # noqa: PLR0911, C901
         # for BIT value, treat 0 as False and anything else as True
         bit_representation: bool
         if is_boolean_type(property_schema):
-            bit_representation = elem != b"\x00"
-            return bit_representation
+            return elem != b"\x00"
         return elem.hex()
     if is_boolean_type(property_schema):
         boolean_representation: bool | None
