@@ -32,8 +32,8 @@ class SampleGoogleAnalyticsStream(RESTStream):
     rest_method = "POST"
 
     # Child class overrides:
-    dimensions: list[str] = []
-    metrics: list[str] = []
+    dimensions: tuple[str] = ()
+    metrics: tuple[str] = ()
 
     @property
     def authenticator(self) -> GoogleJWTAuthenticator:
@@ -86,5 +86,5 @@ class GASimpleSampleStream(SampleGoogleAnalyticsStream):
     name = "simple_sample"
     schema_filepath = SCHEMAS_DIR / "simple-sample.json"
 
-    dimensions = ["ga:date"]
-    metrics = ["ga:users", "ga:sessions"]
+    dimensions = ("ga:date",)
+    metrics = ("ga:users", "ga:sessions")

@@ -42,12 +42,12 @@ def test_countries_primary_key():
     metadata_root = countries_entry.metadata.root
     key_props_1 = metadata_root.table_key_properties
     key_props_2 = countries_entry.key_properties
-    assert key_props_1 == ["code"], (
+    assert key_props_1 == ("code",), (
         f"Incorrect 'table-key-properties' in catalog: ({key_props_1})\n\n"
         f"Root metadata was: {metadata_root}\n\n"
         f"Catalog entry was: {countries_entry}"
     )
-    assert key_props_2 == ["code"], (
+    assert key_props_2 == ("code",), (
         f"Incorrect 'key_properties' in catalog: ({key_props_2})\n\n"
         "Catalog entry was: {countries_entry}"
     )

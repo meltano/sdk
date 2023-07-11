@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import json
+import typing as t
 from contextlib import redirect_stdout
 
 import pytest
@@ -14,7 +15,7 @@ class Parent(Stream):
     """A parent stream."""
 
     name = "parent"
-    schema = {
+    schema: t.ClassVar[dict] = {
         "type": "object",
         "properties": {
             "id": {"type": "integer"},
@@ -42,7 +43,7 @@ class Child(Stream):
     """A child stream."""
 
     name = "child"
-    schema = {
+    schema: t.ClassVar[dict] = {
         "type": "object",
         "properties": {
             "id": {"type": "integer"},

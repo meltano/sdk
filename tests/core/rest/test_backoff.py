@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import typing as t
 
 try:
     from contextlib import nullcontext
@@ -21,7 +22,7 @@ class CustomResponseValidationStream(RESTStream):
 
     url_base = "https://badapi.test"
     name = "imabadapi"
-    schema = {"type": "object", "properties": {}}
+    schema: t.ClassVar[dict] = {"type": "object", "properties": {}}
     path = "/dummy"
 
     class StatusMessage(str, Enum):
