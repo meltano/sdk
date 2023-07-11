@@ -93,9 +93,6 @@ def tests(session: Session) -> None:
             f"sqlalchemy=={sqlalchemy_version}",
         )
 
-    # Print the installed version of SQLAlchemy
-    session.run("python", "-c", "import sqlalchemy; print(sqlalchemy.__version__)")
-
     try:
         session.run(
             "coverage",
