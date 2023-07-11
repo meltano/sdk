@@ -159,7 +159,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         """
         _ = record  # Custom implementations may use record in sink selection.
         if schema is None:
-            self._assert_sink_exists(stream_name)
             return self._sinks_active[stream_name]
 
         existing_sink = self._sinks_active.get(stream_name, None)
@@ -262,7 +261,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         if not self.sink_exists(stream_name):
             msg = (
                 f"A record for stream '{stream_name}' was encountered before a "
-                "corresponding schema."
+                "corresponding schema. Check that the Tap correctly implements "
+                "the Singer spec."
             )
             raise RecordsWithoutSchemaException(msg)
 
@@ -294,9 +294,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         self.logger.info(
             "Target '%s' completed reading %d lines of input "
-            "(%d records, %d batch manifests, %d state messages).",
+            "(%d schemas, %d records, %d batch manifests, %d state messages).",
             self.name,
             line_count,
+            counter[SingerMessageType.SCHEMA],
             counter[SingerMessageType.RECORD],
             counter[SingerMessageType.BATCH],
             counter[SingerMessageType.STATE],
@@ -317,6 +318,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._assert_line_requires(message_dict, requires={"stream", "record"})
 
         stream_name = message_dict["stream"]
+        self._assert_sink_exists(stream_name)
+
         for stream_map in self.mapper.stream_maps[stream_name]:
             raw_record = copy.copy(message_dict["record"])
             transformed_record = stream_map.transform(raw_record)
@@ -336,9 +339,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 sink._remove_sdc_metadata_from_record(transformed_record)
 
             sink._validate_and_parse(transformed_record)
+            transformed_record = sink.preprocess_record(transformed_record, context)
+            sink._singer_validate_message(transformed_record)
 
             sink.tally_record_read()
-            transformed_record = sink.preprocess_record(transformed_record, context)
             sink.process_record(transformed_record, context)
             sink._after_process_record(context)
 

@@ -3,8 +3,28 @@ name: Test
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - "cookiecutter/**"
+      - "samples/**"
+      - "singer_sdk/**"
+      - "tests/**"
+      - "noxfile.py"
+      - "poetry.lock"
+      - "pyproject.toml"
+      - ".github/workflows/test.yml"
+      - ".github/workflows/constraints.txt"
   push:
     branches: [main]
+    paths:
+      - "cookiecutter/**"
+      - "samples/**"
+      - "singer_sdk/**"
+      - "tests/**"
+      - "noxfile.py"
+      - "poetry.lock"
+      - "pyproject.toml"
+      - ".github/workflows/test.yml"
+      - ".github/workflows/constraints.txt"
   workflow_dispatch:
     inputs: {}
 
@@ -177,3 +197,4 @@ jobs:
       uses: codecov/codecov-action@v3.1.4
       with:
         fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}
