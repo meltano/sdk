@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.29.0"
+version = "0.30.0"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 maintainers = ["Meltano Team and Contributors"]
@@ -57,6 +57,7 @@ python-dotenv = ">=0.20,<0.22"
 typing-extensions = "^4.2.0"
 simplejson = "^3.17.6"
 jsonschema = "^4.16.0"
+packaging = ">=23.1"
 pytz = ">=2022.2.1,<2024.0.0"
 PyYAML = "^6.0"
 # urllib3 2.0 is not compatible with botocore
@@ -145,7 +146,7 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.29.0"
+version = "0.30.0"
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
     "docs/conf.py",
