@@ -1,5 +1,4 @@
 """Test Class Factory."""
-
 from __future__ import annotations
 
 import typing as t
@@ -22,8 +21,8 @@ if t.TYPE_CHECKING:
 class BaseTestClass:
     """Base test class."""
 
-    params: dict = {}
-    param_ids: dict = {}
+    params: t.ClassVar[dict] = {}
+    param_ids: t.ClassVar[dict] = {}
 
 
 class TapTestClassFactory:
