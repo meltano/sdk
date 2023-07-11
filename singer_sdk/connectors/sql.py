@@ -72,7 +72,8 @@ class SQLConnector(BaseConnector):
             A connection object.
         """
         warnings.warn(
-            "`SQLConnector._connect` is deprecated. Use `SQLConnector.connect` instead.",
+            "`SQLConnector._connect` is deprecated. "
+            "Use `SQLConnector.connect` instead.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -878,9 +879,6 @@ class SQLConnector(BaseConnector):
 
             if isinstance(generic_type, type):
                 if issubclass(
-                    generic_type,
-                    (sqlalchemy.types.String, sqlalchemy.types.Unicode),
-                ) or issubclass(
                     generic_type,
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
                 ):

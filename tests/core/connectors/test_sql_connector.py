@@ -148,13 +148,15 @@ class TestConnectorSQL:
         engine2 = connector._cached_engine
         assert engine1 is engine2
 
-    def test_deprecated_functions_warn(self, connector):
+    def test_deprecated_functions_warn(self, connector: SQLConnector):
         with pytest.deprecated_call():
             connector.create_sqlalchemy_engine()
         with pytest.deprecated_call():
             connector.create_sqlalchemy_connection()
         with pytest.deprecated_call():
             _ = connector.connection
+        with pytest.deprecated_call(), connector._connect() as _:
+            pass
 
     def test_connect_calls_engine(self, connector):
         with mock.patch.object(
