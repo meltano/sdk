@@ -182,7 +182,7 @@ def test_oauth_jwt_authenticator_payload(
 ):
     class _FakeOAuthJWTAuthenticator(OAuthJWTAuthenticator):
         private_key = private_key_string
-        oauth_request_body = {"some": "payload"}
+        oauth_request_body = {"some": "payload"}  # noqa: RUF012
 
     authenticator = _FakeOAuthJWTAuthenticator(stream=rest_tap.streams["some_stream"])
 

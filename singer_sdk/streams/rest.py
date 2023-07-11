@@ -59,7 +59,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
     records_jsonpath: str = "$[*]"
 
     #: Response code reference for rate limit retries
-    extra_retry_statuses: list[int] = [HTTPStatus.TOO_MANY_REQUESTS]
+    extra_retry_statuses: t.Sequence[int] = [HTTPStatus.TOO_MANY_REQUESTS]
 
     #: Optional JSONPath expression to extract a pagination token from the API response.
     #: Example: `"$.next_page"`
