@@ -5,14 +5,17 @@ from __future__ import annotations
 import abc
 import logging
 import os
+import sys
 import typing as t
 from pathlib import Path, PurePath
 from types import MappingProxyType
 
 import click
 from jsonschema import Draft7Validator
+from packaging.specifiers import SpecifierSet
 
 from singer_sdk import about, metrics
+from singer_sdk.cli import plugin_cli
 from singer_sdk.configuration._dict_config import (
     merge_missing_config_jsonschema,
     parse_environment_config,
@@ -34,6 +37,29 @@ if t.TYPE_CHECKING:
     from singer_sdk.mapper import PluginMapper
 
 SDK_PACKAGE_NAME = "singer_sdk"
+CHECK_SUPPORTED_PYTHON_VERSIONS = (
+    # unsupported versions
+    "2.7",
+    "3.0",
+    "3.1",
+    "3.2",
+    "3.3",
+    "3.4",
+    "3.5",
+    "3.6",
+    "3.7",
+    # current supported versions
+    "3.8",
+    "3.9",
+    "3.10",
+    "3.11",
+    # future supported versions
+    "3.12",
+    "3.13",
+    "3.14",
+    "3.15",
+    "3.16",
+)
 
 
 JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
@@ -42,9 +68,13 @@ JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    name: str  # The executable name of the tap or target plugin.
+    #: The executable name of the tap or target plugin. e.g. tap-foo
+    name: str
 
-    config_jsonschema: dict = {}
+    #: The package name of the plugin. e.g meltanolabs-tap-foo
+    package_name: str | None = None
+
+    config_jsonschema: t.ClassVar[dict] = {}
     # A JSON Schema object defining the config options that this tap will accept.
 
     _config: dict
@@ -169,6 +199,28 @@ class PluginBase(metaclass=abc.ABCMeta):
             version = "[could not be detected]"
         return version
 
+    @staticmethod
+    def _get_supported_python_versions(package: str) -> list[str] | None:
+        """Return the supported Python versions.
+
+        Args:
+            package: The package name.
+
+        Returns:
+            A list of supported Python versions.
+        """
+        try:
+            package_metadata = metadata.metadata(package)
+        except metadata.PackageNotFoundError:
+            return None
+
+        reported_python_versions = SpecifierSet(package_metadata["Requires-Python"])
+        return [
+            version
+            for version in CHECK_SUPPORTED_PYTHON_VERSIONS
+            if version in reported_python_versions
+        ]
+
     @classmethod
     def get_plugin_version(cls) -> str:
         """Return the package version number.
@@ -176,7 +228,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         Returns:
             The package version number.
         """
-        return cls._get_package_version(cls.name)
+        return cls._get_package_version(cls.package_name or cls.name)
 
     @classmethod
     def get_sdk_version(cls) -> str:
@@ -186,6 +238,15 @@ class PluginBase(metaclass=abc.ABCMeta):
             The package version number.
         """
         return cls._get_package_version(SDK_PACKAGE_NAME)
+
+    @classmethod
+    def get_supported_python_versions(cls) -> list[str] | None:
+        """Return the supported Python versions.
+
+        Returns:
+            A list of supported Python versions.
+        """
+        return cls._get_supported_python_versions(cls.package_name or cls.name)
 
     @classproperty
     def plugin_version(cls) -> str:  # noqa: N805
@@ -323,6 +384,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             description=cls.__doc__,
             version=cls.get_plugin_version(),
             sdk_version=cls.get_sdk_version(),
+            supported_python_versions=cls.get_supported_python_versions(),
             capabilities=cls.capabilities,
             settings=config_jsonschema,
         )
@@ -399,16 +461,99 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         return config_files, parse_env_config
 
-    @classproperty
-    def cli(cls) -> t.Callable:  # noqa: N805
+    @classmethod
+    def invoke(
+        cls,
+        *,
+        about: bool = False,
+        about_format: str | None = None,
+        **kwargs: t.Any,  # noqa: ARG003
+    ) -> None:
+        """Invoke the plugin.
+
+        Args:
+            about: Display package metadata and settings.
+            about_format: Specify output style for `--about`.
+            kwargs: Plugin keyword arguments.
+        """
+        if about:
+            cls.print_about(about_format)
+            sys.exit(0)
+
+    @classmethod
+    def cb_version(
+        cls: type[PluginBase],
+        ctx: click.Context,
+        param: click.Option,  # noqa: ARG003
+        value: bool,  # noqa: FBT001
+    ) -> None:
+        """CLI callback to print the plugin version and exit.
+
+        Args:
+            ctx: Click context.
+            param: Click parameter.
+            value: Boolean indicating whether to print the version.
+        """
+        if not value:
+            return
+        cls.print_version(print_fn=click.echo)
+        ctx.exit()
+
+    @classmethod
+    def get_singer_command(cls: type[PluginBase]) -> click.Command:
         """Handle command line execution.
 
         Returns:
             A callable CLI object.
         """
+        return click.Command(
+            name=cls.name,
+            callback=cls.invoke,
+            context_settings={"help_option_names": ["--help"]},
+            params=[
+                click.Option(
+                    ["--version"],
+                    is_flag=True,
+                    help="Display the package version.",
+                    is_eager=True,
+                    expose_value=False,
+                    callback=cls.cb_version,
+                ),
+                click.Option(
+                    ["--about"],
+                    help="Display package metadata and settings.",
+                    is_flag=True,
+                    is_eager=False,
+                    expose_value=True,
+                ),
+                click.Option(
+                    ["--format", "about_format"],
+                    help="Specify output style for --about",
+                    type=click.Choice(
+                        ["json", "markdown"],
+                        case_sensitive=False,
+                    ),
+                    default=None,
+                ),
+                click.Option(
+                    ["--config"],
+                    multiple=True,
+                    help=(
+                        "Configuration file location or 'ENV' to use environment "
+                        "variables."
+                    ),
+                    type=click.STRING,
+                    default=(),
+                    is_eager=True,
+                ),
+            ],
+        )
 
-        @click.command()
-        def cli() -> None:
-            pass
+    @plugin_cli
+    def cli(cls) -> click.Command:
+        """Handle command line execution.
 
-        return cli
+        Returns:
+            A callable CLI object.
+        """
+        return cls.get_singer_command()

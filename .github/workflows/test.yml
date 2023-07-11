@@ -3,8 +3,28 @@ name: Test
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - "cookiecutter/**"
+      - "samples/**"
+      - "singer_sdk/**"
+      - "tests/**"
+      - "noxfile.py"
+      - "poetry.lock"
+      - "pyproject.toml"
+      - ".github/workflows/test.yml"
+      - ".github/workflows/constraints.txt"
   push:
     branches: [main]
+    paths:
+      - "cookiecutter/**"
+      - "samples/**"
+      - "singer_sdk/**"
+      - "tests/**"
+      - "noxfile.py"
+      - "poetry.lock"
+      - "pyproject.toml"
+      - ".github/workflows/test.yml"
+      - ".github/workflows/constraints.txt"
   workflow_dispatch:
     inputs: {}
 
@@ -33,7 +53,7 @@ jobs:
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.2
+      uses: actions/checkout@v3.5.3
 
     - name: Install Poetry
       env:
@@ -43,7 +63,7 @@ jobs:
         poetry --version
 
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4.6.0
+      uses: actions/setup-python@v4.6.1
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
@@ -91,7 +111,7 @@ jobs:
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.2
+      uses: actions/checkout@v3.5.3
 
     - name: Install Poetry
       env:
@@ -101,7 +121,7 @@ jobs:
         poetry --version
 
     - name: Setup Python 3.10
-      uses: actions/setup-python@v4.6.0
+      uses: actions/setup-python@v4.6.1
       with:
         python-version: '3.10'
         architecture: x64
@@ -133,7 +153,7 @@ jobs:
     needs: tests
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.2
+      uses: actions/checkout@v3.5.3
 
     - name: Install Poetry
       run: |
@@ -141,7 +161,7 @@ jobs:
         poetry --version
 
     - name: Set up Python
-      uses: actions/setup-python@v4.6.0
+      uses: actions/setup-python@v4.6.1
       with:
         python-version: '3.10'
         cache: 'pip'
@@ -177,3 +197,4 @@ jobs:
       uses: codecov/codecov-action@v3.1.4
       with:
         fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}

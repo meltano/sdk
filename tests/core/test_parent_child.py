@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import json
+import typing as t
 from contextlib import redirect_stdout
 
 import pytest
@@ -14,7 +15,7 @@ class Parent(Stream):
     """A parent stream."""
 
     name = "parent"
-    schema = {
+    schema: t.ClassVar[dict] = {
         "type": "object",
         "properties": {
             "id": {"type": "integer"},
@@ -42,7 +43,7 @@ class Child(Stream):
     """A child stream."""
 
     name = "child"
-    schema = {
+    schema: t.ClassVar[dict] = {
         "type": "object",
         "properties": {
             "id": {"type": "integer"},
@@ -103,19 +104,19 @@ def test_parent_context_fields_in_child(tap: MyTap):
     messages = _get_messages(tap)
 
     # Parent schema is emitted
-    assert messages[0]
-    assert messages[0]["type"] == SingerMessageType.SCHEMA
-    assert messages[0]["stream"] == parent_stream.name
-    assert messages[0]["schema"] == parent_stream.schema
-
-    # Child schema is emitted
     assert messages[1]
     assert messages[1]["type"] == SingerMessageType.SCHEMA
-    assert messages[1]["stream"] == child_stream.name
-    assert messages[1]["schema"] == child_stream.schema
+    assert messages[1]["stream"] == parent_stream.name
+    assert messages[1]["schema"] == parent_stream.schema
+
+    # Child schema is emitted
+    assert messages[2]
+    assert messages[2]["type"] == SingerMessageType.SCHEMA
+    assert messages[2]["stream"] == child_stream.name
+    assert messages[2]["schema"] == child_stream.schema
 
     # Child records are emitted
-    child_record_messages = messages[2:5]
+    child_record_messages = messages[3:6]
     assert child_record_messages
     assert all(msg["type"] == SingerMessageType.RECORD for msg in child_record_messages)
     assert all(msg["stream"] == child_stream.name for msg in child_record_messages)
@@ -155,13 +156,13 @@ def test_child_deselected_parent(tap_with_deselected_parent: MyTap):
     messages = _get_messages(tap_with_deselected_parent)
 
     # First message is a schema for the child stream, not the parent
-    assert messages[0]
-    assert messages[0]["type"] == SingerMessageType.SCHEMA
-    assert messages[0]["stream"] == child_stream.name
-    assert messages[0]["schema"] == child_stream.schema
+    assert messages[1]
+    assert messages[1]["type"] == SingerMessageType.SCHEMA
+    assert messages[1]["stream"] == child_stream.name
+    assert messages[1]["schema"] == child_stream.schema
 
     # Child records are emitted
-    child_record_messages = messages[1:4]
+    child_record_messages = messages[2:5]
     assert child_record_messages
     assert all(msg["type"] == SingerMessageType.RECORD for msg in child_record_messages)
     assert all(msg["stream"] == child_stream.name for msg in child_record_messages)

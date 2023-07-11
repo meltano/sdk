@@ -97,9 +97,6 @@ class Stream(metaclass=abc.ABCMeta):
 
     ignore_parent_replication_key: bool = False
 
-    # Internal API cost aggregator
-    _sync_costs: dict[str, int] = {}
-
     selected_by_default: bool = True
     """Whether this stream is selected by default in the catalog."""
 
@@ -143,6 +140,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._mask: singer.SelectionMask | None = None
         self._schema: dict
         self._is_state_flushed: bool = True
+        self._sync_costs: dict[str, int] = {}
         self.child_streams: list[Stream] = []
         if schema:
             if isinstance(schema, (PathLike, str)):
@@ -269,7 +267,6 @@ class Stream(metaclass=abc.ABCMeta):
 
         return t.cast(datetime.datetime, pendulum.parse(value))
 
-    @final
     @property
     def selected(self) -> bool:
         """Check if stream is selected.
@@ -279,6 +276,16 @@ class Stream(metaclass=abc.ABCMeta):
         """
         return self.mask.get((), True)
 
+    @selected.setter
+    def selected(self, value: bool | None) -> None:
+        """Set stream selection.
+
+        Args:
+            value: True if the stream is selected.
+        """
+        self.metadata.root.selected = value
+        self._mask = self.metadata.resolve_selection()
+
     @final
     @property
     def has_selected_descendents(self) -> bool:
@@ -287,11 +294,10 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             True if any child streams are selected, recursively.
         """
-        for child in self.child_streams or []:
-            if child.selected or child.has_selected_descendents:
-                return True
-
-        return False
+        return any(
+            child.selected or child.has_selected_descendents
+            for child in self.child_streams or []
+        )
 
     @final
     @property
@@ -396,10 +402,7 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             Max allowable bookmark value for this stream's replication key.
         """
-        if self.is_timestamp_replication_key:
-            return utc_now()
-
-        return None
+        return utc_now() if self.is_timestamp_replication_key else None
 
     @property
     def schema_filepath(self) -> Path | None:
@@ -426,9 +429,7 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             A list of primary key(s) for the stream.
         """
-        if not self._primary_keys:
-            return []
-        return self._primary_keys
+        return self._primary_keys or []
 
     @primary_keys.setter
     def primary_keys(self, new_value: list[str] | None) -> None:
@@ -470,9 +471,7 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             Replication key for the stream.
         """
-        if not self._replication_key:
-            return None
-        return self._replication_key
+        return self._replication_key or None
 
     @replication_key.setter
     def replication_key(self, new_value: str | None) -> None:
@@ -697,11 +696,12 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             A list of partition key dicts (if applicable), otherwise `None`.
         """
-        result: list[dict] = []
-        for partition_state in (
-            get_state_partitions_list(self.tap_state, self.name) or []
-        ):
-            result.append(partition_state["context"])
+        result: list[dict] = [
+            partition_state["context"]
+            for partition_state in (
+                get_state_partitions_list(self.tap_state, self.name) or []
+            )
+        ]
         return result or None
 
     # Private bookmarking methods
@@ -772,13 +772,12 @@ class Stream(metaclass=abc.ABCMeta):
                 # Don't emit schema if the stream's records are all ignored.
                 continue
 
-            schema_message = singer.SchemaMessage(
+            yield singer.SchemaMessage(
                 stream_map.stream_alias,
                 stream_map.transformed_schema,
                 stream_map.transformed_key_properties,
                 bookmark_keys,
             )
-            yield schema_message
 
     def _write_schema_message(self) -> None:
         """Write out a SCHEMA message with the stream schema."""
@@ -821,14 +820,12 @@ class Stream(metaclass=abc.ABCMeta):
             mapped_record = stream_map.transform(record)
             # Emit record if not filtered
             if mapped_record is not None:
-                record_message = singer.RecordMessage(
+                yield singer.RecordMessage(
                     stream=stream_map.stream_alias,
                     record=mapped_record,
                     version=None,
                     time_extracted=utc_now(),
                 )
-
-                yield record_message
 
     def _write_record_message(self, record: dict) -> None:
         """Write out a RECORD message.

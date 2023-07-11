@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import copy
 import datetime
 import json
 import time
@@ -14,6 +15,7 @@ from types import MappingProxyType
 from dateutil import parser
 from jsonschema import Draft7Validator, FormatChecker
 
+from singer_sdk.exceptions import MissingKeyPropertiesError
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
@@ -67,6 +69,7 @@ class Sink(metaclass=abc.ABCMeta):
             "Initializing target sink for stream '%s'...",
             stream_name,
         )
+        self.original_schema = copy.deepcopy(schema)
         self.schema = schema
         if self.include_sdc_metadata_properties:
             self._add_sdc_metadata_to_schema()
@@ -254,17 +257,17 @@ class Sink(metaclass=abc.ABCMeta):
         https://sdk.meltano.com/en/latest/implementation/record_metadata.html
         """
         properties_dict = self.schema["properties"]
-        for col in {
+        for col in (
             "_sdc_extracted_at",
             "_sdc_received_at",
             "_sdc_batched_at",
             "_sdc_deleted_at",
-        }:
+        ):
             properties_dict[col] = {
                 "type": ["null", "string"],
                 "format": "date-time",
             }
-        for col in {"_sdc_sequence", "_sdc_table_version"}:
+        for col in ("_sdc_sequence", "_sdc_table_version"):
             properties_dict[col] = {"type": ["null", "integer"]}
 
     def _remove_sdc_metadata_from_schema(self) -> None:
@@ -274,14 +277,14 @@ class Sink(metaclass=abc.ABCMeta):
         https://sdk.meltano.com/en/latest/implementation/record_metadata.html
         """
         properties_dict = self.schema["properties"]
-        for col in {
+        for col in (
             "_sdc_extracted_at",
             "_sdc_received_at",
             "_sdc_batched_at",
             "_sdc_deleted_at",
             "_sdc_sequence",
             "_sdc_table_version",
-        }:
+        ):
             properties_dict.pop(col, None)
 
     def _remove_sdc_metadata_from_record(self, record: dict) -> None:
@@ -318,6 +321,25 @@ class Sink(metaclass=abc.ABCMeta):
             treatment=self.datetime_error_treatment,
         )
         return record
+
+    def _singer_validate_message(self, record: dict) -> None:
+        """Ensure record conforms to Singer Spec.
+
+        Args:
+            record: Record (after parsing, schema validations and transformations).
+
+        Raises:
+            MissingKeyPropertiesError: If record is missing one or more key properties.
+        """
+        if not all(key_property in record for key_property in self.key_properties):
+            msg = (
+                f"Record is missing one or more key_properties. \n"
+                f"Key Properties: {self.key_properties}, "
+                f"Record Keys: {list(record.keys())}"
+            )
+            raise MissingKeyPropertiesError(
+                msg,
+            )
 
     def _parse_timestamps_in_record(
         self,

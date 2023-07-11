@@ -5,8 +5,6 @@ from __future__ import annotations
 import abc
 import typing as t
 
-import sqlalchemy
-
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
@@ -20,6 +18,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
     """Base class for SQLAlchemy-based streams."""
 
     connector_class = SQLConnector
+    _cached_schema: dict | None = None
 
     def __init__(
         self,
@@ -74,7 +73,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         return self._singer_catalog_entry.metadata
 
-    @property
+    @property  # TODO: Investigate @cached_property after py > 3.7
     def schema(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
@@ -83,7 +82,13 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             The schema object.
         """
-        return t.cast(dict, self._singer_catalog_entry.schema.to_dict())
+        if not self._cached_schema:
+            self._cached_schema = t.cast(
+                dict,
+                self._singer_catalog_entry.schema.to_dict(),
+            )
+
+        return self._cached_schema
 
     @property
     def tap_stream_id(self) -> str:
@@ -188,12 +193,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
             start_val = self.get_starting_replication_key_value(context)
             if start_val:
-                query = query.where(
-                    sqlalchemy.text(":replication_key >= :start_val").bindparams(
-                        replication_key=replication_key_col,
-                        start_val=start_val,
-                    ),
-                )
+                query = query.where(replication_key_col >= start_val)
 
         if self.ABORT_AT_RECORD_COUNT is not None:
             # Limit record count to one greater than the abort threshold. This ensures
