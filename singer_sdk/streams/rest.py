@@ -155,8 +155,6 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             DeprecationWarning,
             stacklevel=2,
         )
-        if not self._requests_session:
-            self._requests_session = self.connector.session
         return self._requests_session
 
     def validate_response(self, response: requests.Response) -> None:

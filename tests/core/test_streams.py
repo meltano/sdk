@@ -594,3 +594,9 @@ def test_stream_class_selection(input_catalog, selection):
     tap = MyTap(config=None, catalog=input_catalog)
     for stream in selection:
         assert tap.streams[stream].selected is selection[stream]
+
+
+def test_deprecations(tap: SimpleTestTap):
+    stream = RestTestStream(tap=tap)
+    with pytest.deprecated_call():
+        _ = stream.requests_session
