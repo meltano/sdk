@@ -25,12 +25,12 @@ from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
     TapCapabilities,
 )
-from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
 
+    from singer_sdk.mapper import PluginMapper
     from singer_sdk.streams import SQLStream, Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
@@ -42,14 +42,6 @@ class CliTestOptionValue(Enum):
     All = "all"
     Schema = "schema"
     Disabled = "disabled"
-
-
-class MapperNotInitialized(Exception):
-    """Raised when the mapper is not initialized."""
-
-    def __init__(self) -> None:
-        """Initialize the exception."""
-        super().__init__("Mapper not initialized. Please call setup_mapper() first.")
 
 
 class Tap(PluginBase, metaclass=abc.ABCMeta):
@@ -176,27 +168,8 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
-        self._mapper: PluginMapper
-        self._mapper = PluginMapper(
-            plugin_config=dict(self.config),
-            logger=self.logger,
-        )
-
-        self._mapper.register_raw_streams_from_catalog(self.catalog)
-
-    @property
-    def mapper(self) -> PluginMapper:
-        """Plugin mapper for this tap.
-
-        Returns:
-            A PluginMapper object.
-
-        Raises:
-            MapperNotInitialized: If the mapper has not been initialized.
-        """
-        if self._mapper is None:
-            raise MapperNotInitialized
-        return self._mapper
+        super().setup_mapper()
+        self.mapper.register_raw_streams_from_catalog(self.catalog)
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
