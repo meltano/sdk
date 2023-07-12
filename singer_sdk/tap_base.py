@@ -94,15 +94,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
 
-        # Initialize mapper
-        self.mapper: PluginMapper
-        self.mapper = PluginMapper(
-            plugin_config=dict(self.config),
-            logger=self.logger,
-        )
-
-        self.mapper.register_raw_streams_from_catalog(self.catalog)
-
         # Process state
         state_dict: dict = {}
         if isinstance(state, dict):
@@ -167,6 +158,16 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             self._catalog = self.input_catalog or self._singer_catalog
 
         return self._catalog
+
+    def setup_mapper(self) -> None:
+        """Initialize the plugin mapper for this tap."""
+        self.mapper: PluginMapper
+        self.mapper = PluginMapper(
+            plugin_config=dict(self.config),
+            logger=self.logger,
+        )
+
+        self.mapper.register_raw_streams_from_catalog(self.catalog)
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
@@ -495,6 +496,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             parse_env_config=parse_env_config,
             validate_config=True,
         )
+        tap.setup_mapper()
         tap.sync_all()
 
     @classmethod
@@ -548,6 +550,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             parse_env_config=parse_env_config,
             validate_config=True,
         )
+        tap.setup_mapper()
 
         if value == CliTestOptionValue.Schema.value:
             tap.write_schemas()
