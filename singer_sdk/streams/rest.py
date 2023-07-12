@@ -51,7 +51,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
     """Abstract base class for REST API streams."""
 
     _page_size: int = DEFAULT_PAGE_SIZE
-    _requests_session: requests.Session | None
+    _requests_session: requests.Session
 
     #: HTTP method to use for requests. Defaults to "GET".
     rest_method = "GET"
