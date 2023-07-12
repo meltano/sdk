@@ -84,7 +84,6 @@ class PluginBase(metaclass=abc.ABCMeta):
     # A JSON Schema object defining the config options that this tap will accept.
 
     _config: dict
-    _mapper: PluginMapper | None
 
     @classproperty
     def logger(cls) -> logging.Logger:  # noqa: N805
@@ -151,6 +150,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
         self._validate_config(raise_errors=validate_config)
+        self._mapper: PluginMapper | None = None
 
         metrics._setup_logging(self.config)
         self.metrics_logger = metrics.get_metrics_logger()
