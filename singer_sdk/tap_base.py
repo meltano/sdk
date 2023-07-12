@@ -44,6 +44,14 @@ class CliTestOptionValue(Enum):
     Disabled = "disabled"
 
 
+class MapperNotInitialized(Exception):
+    """Raised when the mapper is not initialized."""
+
+    def __init__(self) -> None:
+        """Initialize the exception."""
+        super().__init__("Mapper not initialized. Please call setup_mapper() first.")
+
+
 class Tap(PluginBase, metaclass=abc.ABCMeta):
     """Abstract base class for taps.
 
@@ -61,6 +69,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         state: PurePath | str | dict | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
+        setup_mapper: bool = True,
     ) -> None:
         """Initialize the tap.
 
@@ -73,6 +82,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             parse_env_config: Whether to look for configuration values in environment
                 variables.
             validate_config: True to require validation of config settings.
+            setup_mapper: True to initialize the plugin mapper.
         """
         super().__init__(
             config=config,
@@ -93,6 +103,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             self._input_catalog = Catalog.from_dict(catalog)  # type: ignore[arg-type]
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
+
+        self._mapper: PluginMapper | None = None
+
+        if setup_mapper:
+            self.setup_mapper()
 
         # Process state
         state_dict: dict = {}
@@ -161,13 +176,27 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
-        self.mapper: PluginMapper
-        self.mapper = PluginMapper(
+        self._mapper: PluginMapper
+        self._mapper = PluginMapper(
             plugin_config=dict(self.config),
             logger=self.logger,
         )
 
-        self.mapper.register_raw_streams_from_catalog(self.catalog)
+        self._mapper.register_raw_streams_from_catalog(self.catalog)
+
+    @property
+    def mapper(self) -> PluginMapper:
+        """Plugin mapper for this tap.
+
+        Returns:
+            A PluginMapper object.
+
+        Raises:
+            MapperNotInitialized: If the mapper has not been initialized.
+        """
+        if self._mapper is None:
+            raise MapperNotInitialized
+        return self._mapper
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
@@ -496,7 +525,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             parse_env_config=parse_env_config,
             validate_config=True,
         )
-        tap.setup_mapper()
         tap.sync_all()
 
     @classmethod
@@ -522,6 +550,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             config=config_files,  # type: ignore[arg-type]
             parse_env_config=parse_env_config,
             validate_config=False,
+            setup_mapper=False,
         )
         tap.run_discovery()
         ctx.exit()
@@ -550,7 +579,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             parse_env_config=parse_env_config,
             validate_config=True,
         )
-        tap.setup_mapper()
 
         if value == CliTestOptionValue.Schema.value:
             tap.write_schemas()
