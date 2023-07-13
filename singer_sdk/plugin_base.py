@@ -74,7 +74,7 @@ class PluginBase(metaclass=abc.ABCMeta):
     #: The package name of the plugin. e.g meltanolabs-tap-foo
     package_name: str | None = None
 
-    config_jsonschema: dict = {}
+    config_jsonschema: t.ClassVar[dict] = {}
     # A JSON Schema object defining the config options that this tap will accept.
 
     _config: dict

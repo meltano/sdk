@@ -108,10 +108,13 @@ def is_object_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is an object or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
-    for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
-        if "object" in property_type or property_type == "object":
-            return True
-    return False
+    return any(
+        "object" in property_type or property_type == "object"
+        for property_type in property_schema.get(
+            "anyOf",
+            [property_schema.get("type")],
+        )
+    )
 
 
 def is_uniform_list(property_schema: dict) -> bool | None:
@@ -410,9 +413,7 @@ def _conform_record_data_types(  # noqa: PLR0912
         return input_object, unmapped_properties
 
     for property_name, elem in input_object.items():
-        property_path = (
-            property_name if parent is None else parent + "." + property_name
-        )
+        property_path = property_name if parent is None else f"{parent}.{property_name}"
         if property_name not in schema["properties"]:
             unmapped_properties.append(property_path)
             continue
@@ -466,7 +467,7 @@ def _conform_record_data_types(  # noqa: PLR0912
     return output_object, unmapped_properties
 
 
-def _conform_primitive_property(  # noqa: PLR0911, C901
+def _conform_primitive_property(  # noqa: PLR0911
     elem: t.Any,
     property_schema: dict,
 ) -> t.Any:
@@ -474,7 +475,7 @@ def _conform_primitive_property(  # noqa: PLR0911, C901
     if isinstance(elem, (datetime.datetime, pendulum.DateTime)):
         return to_json_compatible(elem)
     if isinstance(elem, datetime.date):
-        return elem.isoformat() + "T00:00:00+00:00"
+        return f"{elem.isoformat()}T00:00:00+00:00"
     if isinstance(elem, datetime.timedelta):
         epoch = datetime.datetime.fromtimestamp(0, UTC)
         timedelta_from_epoch = epoch + elem
@@ -485,19 +486,7 @@ def _conform_primitive_property(  # noqa: PLR0911, C901
         return str(elem)
     if isinstance(elem, bytes):
         # for BIT value, treat 0 as False and anything else as True
-        bit_representation: bool
-        if is_boolean_type(property_schema):
-            bit_representation = elem != b"\x00"
-            return bit_representation
-        return elem.hex()
+        return elem != b"\x00" if is_boolean_type(property_schema) else elem.hex()
     if is_boolean_type(property_schema):
-        boolean_representation: bool | None
-        if elem is None:
-            boolean_representation = None
-        elif elem == 0:
-            boolean_representation = False
-        else:
-            boolean_representation = True
-        return boolean_representation
-
+        return None if elem is None else elem != 0
     return elem
