@@ -31,10 +31,8 @@ from singer_sdk.helpers.capabilities import (
     CapabilitiesEnum,
     PluginCapabilities,
 )
+from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import extend_validator_with_defaults
-
-if t.TYPE_CHECKING:
-    from singer_sdk.mapper import PluginMapper
 
 SDK_PACKAGE_NAME = "singer_sdk"
 CHECK_SUPPORTED_PYTHON_VERSIONS = (
@@ -63,6 +61,14 @@ CHECK_SUPPORTED_PYTHON_VERSIONS = (
 
 
 JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
+
+
+class MapperNotInitialized(Exception):
+    """Raised when the mapper is not initialized."""
+
+    def __init__(self) -> None:
+        """Initialize the exception."""
+        super().__init__("Mapper not initialized. Please call setup_mapper() first.")
 
 
 class PluginBase(metaclass=abc.ABCMeta):
@@ -144,10 +150,40 @@ class PluginBase(metaclass=abc.ABCMeta):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
         self._validate_config(raise_errors=validate_config)
-        self.mapper: PluginMapper
+        self._mapper: PluginMapper | None = None
 
         metrics._setup_logging(self.config)
         self.metrics_logger = metrics.get_metrics_logger()
+
+    def setup_mapper(self) -> None:
+        """Initialize the plugin mapper for this tap."""
+        self._mapper = PluginMapper(
+            plugin_config=dict(self.config),
+            logger=self.logger,
+        )
+
+    @property
+    def mapper(self) -> PluginMapper:
+        """Plugin mapper for this tap.
+
+        Returns:
+            A PluginMapper object.
+
+        Raises:
+            MapperNotInitialized: If the mapper has not been initialized.
+        """
+        if self._mapper is None:
+            raise MapperNotInitialized
+        return self._mapper
+
+    @mapper.setter
+    def mapper(self, mapper: PluginMapper) -> None:
+        """Set the plugin mapper for this plugin.
+
+        Args:
+            mapper: A PluginMapper object.
+        """
+        self._mapper = mapper
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
