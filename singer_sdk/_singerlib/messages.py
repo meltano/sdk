@@ -189,7 +189,8 @@ def format_message(message: Message) -> bytes:
     Returns:
         The formatted message.
     """
-    return json.encode(message.to_dict(), enc_hook=str)
+    formatted = json.encode(message.to_dict(), enc_hook=str)
+    return formatted.decode()
 
 
 def write_message(message: Message) -> None:
@@ -198,5 +199,5 @@ def write_message(message: Message) -> None:
     Args:
         message: The message to write.
     """
-    sys.stdout.buffer.write(format_message(message) + b"\n")
+    sys.stdout.write(format_message(message) + "\n")
     sys.stdout.flush()
