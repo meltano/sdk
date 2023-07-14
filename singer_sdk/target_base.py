@@ -23,12 +23,12 @@ from singer_sdk.helpers.capabilities import (
     TargetCapabilities,
 )
 from singer_sdk.io_base import SingerMessageType, SingerReader
-from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
 
+    from singer_sdk.mapper import PluginMapper
     from singer_sdk.sinks import Sink
 
 _MAX_PARALLELISM = 8
@@ -56,6 +56,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         config: dict | PurePath | str | list[PurePath | str] | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
+        setup_mapper: bool = True,
     ) -> None:
         """Initialize the target.
 
@@ -66,6 +67,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             parse_env_config: Whether to look for configuration values in environment
                 variables.
             validate_config: True to require validation of config settings.
+            setup_mapper: True to setup the mapper. Set to False if you want to
         """
         super().__init__(
             config=config,
@@ -82,12 +84,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         # Approximated for max record age enforcement
         self._last_full_drain_at: float = time.time()
 
-        # Initialize mapper
-        self.mapper: PluginMapper
-        self.mapper = PluginMapper(
-            plugin_config=dict(self.config),
-            logger=self.logger,
-        )
+        self._mapper: PluginMapper | None = None
+
+        if setup_mapper:
+            self.setup_mapper()
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
@@ -294,9 +294,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         self.logger.info(
             "Target '%s' completed reading %d lines of input "
-            "(%d records, %d batch manifests, %d state messages).",
+            "(%d schemas, %d records, %d batch manifests, %d state messages).",
             self.name,
             line_count,
+            counter[SingerMessageType.SCHEMA],
             counter[SingerMessageType.RECORD],
             counter[SingerMessageType.BATCH],
             counter[SingerMessageType.STATE],

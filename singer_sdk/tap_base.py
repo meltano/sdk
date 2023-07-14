@@ -25,12 +25,12 @@ from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
     TapCapabilities,
 )
-from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
 
+    from singer_sdk.mapper import PluginMapper
     from singer_sdk.streams import SQLStream, Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
@@ -61,6 +61,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         state: PurePath | str | dict | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
+        setup_mapper: bool = True,
     ) -> None:
         """Initialize the tap.
 
@@ -73,6 +74,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             parse_env_config: Whether to look for configuration values in environment
                 variables.
             validate_config: True to require validation of config settings.
+            setup_mapper: True to initialize the plugin mapper.
         """
         super().__init__(
             config=config,
@@ -94,14 +96,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
 
-        # Initialize mapper
-        self.mapper: PluginMapper
-        self.mapper = PluginMapper(
-            plugin_config=dict(self.config),
-            logger=self.logger,
-        )
+        self._mapper: PluginMapper | None = None
 
-        self.mapper.register_raw_streams_from_catalog(self.catalog)
+        if setup_mapper:
+            self.setup_mapper()
 
         # Process state
         state_dict: dict = {}
@@ -167,6 +165,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             self._catalog = self.input_catalog or self._singer_catalog
 
         return self._catalog
+
+    def setup_mapper(self) -> None:
+        """Initialize the plugin mapper for this tap."""
+        super().setup_mapper()
+        self.mapper.register_raw_streams_from_catalog(self.catalog)
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
@@ -519,6 +522,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             config=config_files,  # type: ignore[arg-type]
             parse_env_config=parse_env_config,
             validate_config=False,
+            setup_mapper=False,
         )
         tap.run_discovery()
         ctx.exit()

@@ -30,7 +30,7 @@ class CountriesStream(CountriesAPIStream):
     """Countries API stream."""
 
     name = "countries"
-    primary_keys = ["code"]
+    primary_keys = ("code",)
     query = """
         countries {
             code
@@ -81,7 +81,7 @@ class ContinentsStream(CountriesAPIStream):
     """Continents stream from the Countries API."""
 
     name = "continents"
-    primary_keys = ["code"]
+    primary_keys = ("code",)
     schema_filepath = SCHEMAS_DIR / "continents.json"
     query = """
         continents {

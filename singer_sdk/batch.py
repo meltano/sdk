@@ -104,7 +104,8 @@ class JSONLinesBatcher(BaseBatcher):
                     mode="wb",
                 ) as gz:
                     gz.writelines(
-                        (json.dumps(record) + "\n").encode() for record in chunk
+                        (json.dumps(record, default=str) + "\n").encode()
+                        for record in chunk
                     )
                 file_url = fs.geturl(filename)
             yield [file_url]

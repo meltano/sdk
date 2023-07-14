@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import typing as t
+
 import pytest
 from memoization.memoization import cached
 from requests.auth import HTTPProxyAuth
@@ -19,7 +21,7 @@ class SimpleRESTStream(RESTStream):
     """A REST stream for testing."""
 
     url_base = "https://example.com"
-    schema = {
+    schema: t.ClassVar[dict] = {
         "type": "object",
         "properties": {},
     }
