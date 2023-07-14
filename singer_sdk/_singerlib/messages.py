@@ -13,6 +13,9 @@ from msgspec import json
 if t.TYPE_CHECKING:
     from datetime import datetime
 
+decimal_encoder = json.Encoder(enc_hook=str, decimal_format="number")
+msg_buffer = bytearray(64)
+
 
 class SingerMessageType(str, enum.Enum):
     """Singer specification message types."""
@@ -189,9 +192,9 @@ def format_message(message: Message) -> str:
     Returns:
         The formatted message.
     """
-    decimal_encoder = json.Encoder(enc_hook=str, decimal_format="number")
-    formatted: bytes = decimal_encoder.encode(message.to_dict())
-    return formatted.decode()
+    decimal_encoder.encode_into(message.to_dict(), msg_buffer)
+    msg_buffer.extend(b"\n")
+    return msg_buffer.decode()
 
 
 def write_message(message: Message) -> None:
@@ -200,5 +203,5 @@ def write_message(message: Message) -> None:
     Args:
         message: The message to write.
     """
-    sys.stdout.write(format_message(message) + "\n")
+    sys.stdout.write(format_message(message))
     sys.stdout.flush()
