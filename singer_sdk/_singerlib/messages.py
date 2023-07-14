@@ -189,7 +189,8 @@ def format_message(message: Message) -> str:
     Returns:
         The formatted message.
     """
-    formatted = json.encode(message.to_dict(), enc_hook=str)
+    decimal_encoder = json.Encoder(enc_hook=str, decimal_format="number")
+    formatted: bytes = decimal_encoder.encode(message.to_dict())
     return formatted.decode()
 
 
