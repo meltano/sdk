@@ -964,21 +964,14 @@ class Stream(metaclass=abc.ABCMeta):
 
         reset_state_progress_markers(state)
 
-    def _finalize_state_progress_markers(
-        self,
-        state: dict | None = None,
-    ) -> dict | None:
-        """Reset progress markers.
+    def _finalize_state(self, state: dict | None = None) -> None:
+        """Reset progress markers and state flushed flag to ensure state is written.
 
         Args:
             state: State object to promote progress markers with.
-
-        Returns:
-            The state object with progress markers reset.
         """
         state = finalize_state_progress_markers(state)  # type: ignore[arg-type]
         self._is_state_flushed = False
-        return state
 
     def finalize_state_progress_markers(self, state: dict | None = None) -> None:
         """Reset progress markers and emit state message if necessary.
@@ -995,9 +988,9 @@ class Stream(metaclass=abc.ABCMeta):
             context: dict | None
             for context in self.partitions or [{}]:
                 state = self.get_context_state(context or None)
-                self._finalize_state_progress_markers(state)
+                self._finalize_state(state)
         else:
-            self._finalize_state_progress_markers(state)
+            self._finalize_state(state)
 
         self._write_state_message()
 
@@ -1118,12 +1111,12 @@ class Stream(metaclass=abc.ABCMeta):
 
                 if current_context == state_partition_context:
                     # Finalize per-partition state only if 1:1 with context
-                    self._finalize_state_progress_markers(state)
+                    self._finalize_state(state)
 
         if not context:
             # Finalize total stream only if we have the full context.
             # Otherwise will be finalized by tap at end of sync.
-            self._finalize_state_progress_markers(self.stream_state)
+            self._finalize_state(self.stream_state)
 
         if write_messages:
             # Write final state message if we haven't already
