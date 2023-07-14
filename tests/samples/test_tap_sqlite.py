@@ -1,7 +1,13 @@
 from __future__ import annotations
 
+import json
 import typing as t
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
+from click.testing import CliRunner
+
+from samples.sample_tap_sqlite import SQLiteTap
 from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk import SQLStream
 from singer_sdk._singerlib import MetadataMapping, StreamMetadata
@@ -11,8 +17,6 @@ from singer_sdk.testing import (
 )
 
 if t.TYPE_CHECKING:
-    from pathlib import Path
-
     from singer_sdk.tap_base import SQLTap
 
 
@@ -22,6 +26,21 @@ def _discover_and_select_all(tap: SQLTap) -> None:
         md = MetadataMapping.from_iterable(catalog_entry["metadata"])
         md.root.selected = True
         catalog_entry["metadata"] = md.to_list()
+
+
+def test_tap_sqlite_cli(sqlite_sample_db_config: dict[str, t.Any]):
+    runner = CliRunner()
+    with NamedTemporaryFile() as tmp_file:
+        with Path(tmp_file.name).open("w") as f:
+            json.dump(sqlite_sample_db_config, f)
+        result = runner.invoke(
+            SQLiteTap.cli,
+            ["--discover", "--config", tmp_file.name],
+        )
+    assert result.exit_code == 0
+
+    catalog = json.loads(result.stdout)
+    assert "streams" in catalog
 
 
 def test_sql_metadata(sqlite_sample_tap: SQLTap):
