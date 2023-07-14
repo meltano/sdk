@@ -11,3 +11,11 @@ def test_module_deprecations():
 
     with pytest.deprecated_call():
         from singer_sdk.testing import get_standard_target_tests  # noqa: F401
+
+    from singer_sdk import testing
+
+    with pytest.raises(
+        AttributeError,
+        match="module singer_sdk.testing has no attribute",
+    ):
+        testing.foo  # noqa: B018
