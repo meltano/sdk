@@ -180,7 +180,7 @@ class ActivateVersionMessage(Message):
         self.type = SingerMessageType.ACTIVATE_VERSION
 
 
-def format_message(message: Message) -> bytes:
+def format_message(message: Message) -> str:
     """Format a message as a JSON string.
 
     Args:
