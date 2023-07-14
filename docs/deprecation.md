@@ -12,4 +12,4 @@ incompatible way, following their deprecation, as indicated in the
 
   See the [migration guide](./guides/pagination-classes.md) for more information.
 
-- The `singer_sdk.testing.get_standard_tap_tests` and `singer_sdk.testing.get_standard_target_tests` functions will be removed. Replace them with `singer_sdk.testing.get_standard_tap_target_tests` and `singer_sdk.testing.get_standard_tap_target_tests` functions respective to generate a richer test suite.
+- The `singer_sdk.testing.get_standard_tap_tests` and `singer_sdk.testing.get_standard_target_tests` functions will be removed. Replace them with `singer_sdk.testing.get_tap_test_class` and `singer_sdk.testing.get_target_test_class` functions respective to generate a richer test suite.
