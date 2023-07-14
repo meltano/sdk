@@ -59,6 +59,18 @@ class TapStreamConnectionTest(TapTestTemplate):
         self.tap.run_connection_test()
 
 
+class TapValidFinalStateTest(TapTestTemplate):
+    """Test that the final state is a valid catalog."""
+
+    name = "valid_final_state"
+    message = "Final state has in-progress markers."
+
+    def test(self) -> None:
+        """Run test."""
+        final_state = self.runner.state_messages[-1]
+        assert "progress_markers" not in final_state, self.message
+
+
 class StreamReturnsRecordTest(StreamTestTemplate):
     """Test that a stream sync returns at least 1 record."""
 
