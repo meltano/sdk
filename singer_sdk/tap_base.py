@@ -30,6 +30,7 @@ from singer_sdk.plugin_base import PluginBase
 if t.TYPE_CHECKING:
     from pathlib import PurePath
 
+    from singer_sdk.connectors import SQLConnector
     from singer_sdk.mapper import PluginMapper
     from singer_sdk.streams import SQLStream, Stream
 
@@ -611,6 +612,7 @@ class SQLTap(Tap):
 
     # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: type[SQLStream]
+    default_connector_class: type[SQLConnector]
 
     def __init__(
         self,
