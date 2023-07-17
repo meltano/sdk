@@ -688,6 +688,12 @@ class SQLTap(Tap):
         """
         result: list[Stream] = []
         for catalog_entry in self.catalog_dict["streams"]:
-            result.append(self.default_stream_class(self, catalog_entry))
+            result.append(
+                self.default_stream_class(
+                    tap=self,
+                    catalog_entry=catalog_entry,
+                    connector=self.tap_connector,
+                ),
+            )
 
         return result
