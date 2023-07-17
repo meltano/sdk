@@ -614,6 +614,8 @@ class SQLTap(Tap):
     default_stream_class: type[SQLStream]
     default_connector_class: type[SQLConnector]
 
+    _tap_connector: SQLConnector = None
+
     def __init__(
         self,
         *,
@@ -645,6 +647,17 @@ class SQLTap(Tap):
             parse_env_config=parse_env_config,
             validate_config=validate_config,
         )
+
+    @property
+    def tap_connector(self) -> SQLConnector:
+        """The connector object.
+
+        Returns:
+            The connector object.
+        """
+        if self._tap_connector is None:
+            self._tap_connector = self.default_connector_class(dict(self.config))
+        return self._tap_connector
 
     @property
     def catalog_dict(self) -> dict:
