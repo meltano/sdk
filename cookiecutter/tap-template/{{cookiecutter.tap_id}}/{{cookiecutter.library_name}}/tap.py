@@ -7,7 +7,7 @@ from singer_sdk import typing as th  # JSON schema typing helpers
 
 {%- if cookiecutter.stream_type == "SQL" %}
 
-from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }}Stream
+from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }}Stream, {{ cookiecutter.source_name }}Connector
 {%- else %}
 
 # TODO: Import your custom stream types here:
@@ -22,6 +22,7 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
 
     {%- if cookiecutter.stream_type == "SQL" %}
     default_stream_class = {{ cookiecutter.source_name }}Stream
+    default_connector_class = {{ cookiecutter.source_name }}Connector
     {%- endif %}
 
     # TODO: Update this section with the actual config values you expect:
