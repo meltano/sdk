@@ -101,7 +101,7 @@ testing = [
 commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
 xdoctest = "^1.1.1"
 mypy = "^1.0"
-cookiecutter = ">=2.1.1,<2.2.3"
+cookiecutter = ">=2.1.1,<2.2.4"
 PyYAML = "^6.0"
 freezegun = "^1.2.2"
 numpy = [
