@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Iterable
+import typing as t
 
 import pendulum
 import pytest
@@ -35,7 +35,7 @@ class SimpleTestStream(Stream):
     def get_records(
         self,
         context: dict | None,  # noqa: ARG002
-    ) -> Iterable[dict[str, Any]]:
+    ) -> t.Iterable[dict[str, t.Any]]:
         """Generate records."""
         yield {"id": 1, "value": "Egypt"}
         yield {"id": 2, "value": "Germany"}
