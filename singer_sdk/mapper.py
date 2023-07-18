@@ -67,7 +67,7 @@ def md5(string: str) -> str:
     return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
 
 
-@backoff.on_exception(backoff.expo, (openai.error.RateLimitError, openai.error.Timeout, openai.error.APIError), max_time=120)
+@backoff.on_exception(backoff.expo, (openai.error.APIError, openai.error.APIConnectionError, openai.error.RateLimitError, openai.error.ServiceUnavailableError, openai.error.Timeout), max_time=120)
 def openai_generate(*args, model="gpt-3.5-turbo", api_key=None, **kwargs) -> str:
     if api_key:
         openai.api_key = api_key
