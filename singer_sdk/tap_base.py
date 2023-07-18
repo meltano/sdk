@@ -20,7 +20,6 @@ from singer_sdk.exceptions import (
 )
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -222,7 +221,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
 
     # Connection and sync tests:
 
-    @final
+    @t.final
     def run_connection_test(self) -> bool:
         """Run connection test, aborting each stream after 1 record.
 
@@ -234,7 +233,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
             streams=self.streams.values(),
         )
 
-    @final
+    @t.final
     def run_sync_dry_run(
         self,
         dry_run_record_limit: int | None = 1,
@@ -279,7 +278,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
                 stream.sync()
         return True
 
-    @final
+    @t.final
     def write_schemas(self) -> None:
         """Write a SCHEMA message for all known streams to STDOUT."""
         for stream in self.streams.values():
@@ -344,7 +343,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         )
         raise NotImplementedError(msg)
 
-    @final
+    @t.final
     def load_streams(self) -> list[Stream]:
         """Load streams from discovery and initialize DAG.
 
@@ -443,7 +442,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
 
     # Sync methods
 
-    @final
+    @t.final
     def sync_all(self) -> None:
         """Sync all streams."""
         self._reset_state_progress_markers()

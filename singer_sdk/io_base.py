@@ -13,7 +13,6 @@ from collections import Counter, defaultdict
 from singer_sdk._singerlib.messages import Message, SingerMessageType
 from singer_sdk._singerlib.messages import format_message as singer_format_message
 from singer_sdk._singerlib.messages import write_message as singer_write_message
-from singer_sdk.helpers._compat import final
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +20,7 @@ logger = logging.getLogger(__name__)
 class SingerReader(metaclass=abc.ABCMeta):
     """Interface for all plugins reading Singer messages from stdin."""
 
-    @final
+    @t.final
     def listen(self, file_input: t.IO[str] | None = None) -> None:
         """Read from input until all messages are processed.
 
