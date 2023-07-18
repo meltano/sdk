@@ -82,7 +82,7 @@ Settings: {'type': 'object', 'properties': {}}
 This information can also be printed in JSON format for consumption by other applications
 
 ```console
-$ poetry run sdk-tap-countries-sample --about=json
+$ poetry run sdk-tap-countries-sample --about --format json
 {
   "name": "sample-tap-countries",
   "version": "[could not be detected]",
@@ -179,7 +179,7 @@ plugins:
 | ------------------- | :-----------------------------------------------------------------------------------------: | :------------------------------------------------------------------: |
 | Configuration store | Config JSON file (`--config=path/to/config.json`) or environment variables (`--config=ENV`) | `meltano.yml`, `.env`, environment variables, or Meltano's system db |
 | Simple invocation   | `my-tap --config=...`                                                                       | `meltano invoke my-tap`                                              |
-| Other CLI options   | `my-tap --about=json`                                                                       | `meltano invoke my-tap --about=json`                                 |
+| Other CLI options   | `my-tap --about --format=json`                                                              | `meltano invoke my-tap --about --format=json`                        |
 | ELT                 | `my-tap --config=... \| path/to/target-jsonl --config=...`                                  | `meltano elt my-tap target-jsonl`                                    |
 
 [Meltano]: https://www.meltano.com

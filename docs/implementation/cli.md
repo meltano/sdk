@@ -14,9 +14,7 @@ This page describes how SDK-based taps and targets can be invoked via the comman
     - [`--help`](#--help)
     - [`--version`](#--version)
     - [`--about`](#--about)
-      - [`--about=plain`](#--about-plain)
-      - [`--about=json`](#--about-json)
-      - [`--about=markdown`](#--about-markdown)
+      - [`--format`](#--format)
     - [`--config`](#--config)
       - [`--config=ENV`](#--config-env)
   - [Tap-Specific CLI Options](#tap-specific-cli-options)
@@ -45,19 +43,13 @@ Prints the version of the tap or target along with the SDK version and then exit
 
 Prints important information about the tap or target, including the list of supported CLI commands, the `--version` metadata, and list of supported capabilities.
 
-_Note: By default, the format of `--about` is plain text. You can pass a value to `--about` from one of the options described below._
+_Note: By default, the format of `--about` is plain text. You can invoke `--about` in combination with the `--format` option described below to have the output printed in different formats._
 
-#### `--about plain`
+#### `--format`
 
-Prints the plain text version of the `--about` output. This is the default.
+When `--format=json` is specified, the `--about` information will be printed as `json` in order to easily process the metadata in automated workflows.
 
-#### `--about json`
-
-Information will be printed as `json` in order to easily process the metadata in automated workflows.
-
-#### `--about markdown`
-
-Information will be printed as Markdown, optimized for copy-pasting into the maintainer's `README.md` file. Among other helpful guidance, this automatically creates a markdown table of all settings, their descriptions, and their default values.
+When `--format=markdown` is specified, the `--about` information will be printed as Markdown, optimized for copy-pasting into the maintainer's `README.md` file. Among other helpful guidance, this automatically creates a markdown table of all settings, their descriptions, and their default values.
 
 ### `--config`
 
