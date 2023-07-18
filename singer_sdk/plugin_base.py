@@ -5,15 +5,21 @@ from __future__ import annotations
 import abc
 import logging
 import os
+import sys
 import typing as t
 from pathlib import Path, PurePath
 from types import MappingProxyType
 
 import click
 from jsonschema import Draft7Validator
+from packaging.specifiers import SpecifierSet
 
 from singer_sdk import about, metrics
-from singer_sdk.configuration._dict_config import parse_environment_config
+from singer_sdk.cli import plugin_cli
+from singer_sdk.configuration._dict_config import (
+    merge_missing_config_jsonschema,
+    parse_environment_config,
+)
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
@@ -25,23 +31,77 @@ from singer_sdk.helpers.capabilities import (
     CapabilitiesEnum,
     PluginCapabilities,
 )
+from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import extend_validator_with_defaults
 
-if t.TYPE_CHECKING:
-    from singer_sdk.mapper import PluginMapper
-
 SDK_PACKAGE_NAME = "singer_sdk"
+CHECK_SUPPORTED_PYTHON_VERSIONS = (
+    # unsupported versions
+    "2.7",
+    "3.0",
+    "3.1",
+    "3.2",
+    "3.3",
+    "3.4",
+    "3.5",
+    "3.6",
+    "3.7",
+    # current supported versions
+    "3.8",
+    "3.9",
+    "3.10",
+    "3.11",
+    # future supported versions
+    "3.12",
+    "3.13",
+    "3.14",
+    "3.15",
+    "3.16",
+)
 
 
 JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
 
 
+class MapperNotInitialized(Exception):
+    """Raised when the mapper is not initialized."""
+
+    def __init__(self) -> None:
+        """Initialize the exception."""
+        super().__init__("Mapper not initialized. Please call setup_mapper() first.")
+
+
+class SingerCommand(click.Command):
+    """Custom click command class for Singer packages."""
+
+    def invoke(self, ctx: click.Context) -> t.Any:  # noqa: ANN401
+        """Invoke the command, capturing warnings and logging them.
+
+        Args:
+            ctx: The `click` context.
+
+        Returns:
+            The result of the command invocation.
+        """
+        logging.captureWarnings(capture=True)
+        try:
+            return super().invoke(ctx)
+        except ConfigValidationError as exc:
+            for error in exc.errors:
+                click.secho(f"Error: {error}", err=True)
+            sys.exit(1)
+
+
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    name: str  # The executable name of the tap or target plugin.
+    #: The executable name of the tap or target plugin. e.g. tap-foo
+    name: str
 
-    config_jsonschema: dict = {}
+    #: The package name of the plugin. e.g meltanolabs-tap-foo
+    package_name: str | None = None
+
+    config_jsonschema: t.ClassVar[dict] = {}
     # A JSON Schema object defining the config options that this tap will accept.
 
     _config: dict
@@ -99,7 +159,8 @@ class PluginBase(metaclass=abc.ABCMeta):
         elif isinstance(config, dict):
             config_dict = config
         else:
-            raise ValueError(f"Error parsing config of type '{type(config).__name__}'.")
+            msg = f"Error parsing config of type '{type(config).__name__}'."
+            raise ValueError(msg)
         if parse_env_config:
             self.logger.info("Parsing env var for settings config...")
             config_dict.update(self._env_var_config)
@@ -110,10 +171,40 @@ class PluginBase(metaclass=abc.ABCMeta):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
         self._validate_config(raise_errors=validate_config)
-        self.mapper: PluginMapper
+        self._mapper: PluginMapper | None = None
 
         metrics._setup_logging(self.config)
         self.metrics_logger = metrics.get_metrics_logger()
+
+    def setup_mapper(self) -> None:
+        """Initialize the plugin mapper for this tap."""
+        self._mapper = PluginMapper(
+            plugin_config=dict(self.config),
+            logger=self.logger,
+        )
+
+    @property
+    def mapper(self) -> PluginMapper:
+        """Plugin mapper for this tap.
+
+        Returns:
+            A PluginMapper object.
+
+        Raises:
+            MapperNotInitialized: If the mapper has not been initialized.
+        """
+        if self._mapper is None:
+            raise MapperNotInitialized
+        return self._mapper
+
+    @mapper.setter
+    def mapper(self, mapper: PluginMapper) -> None:
+        """Set the plugin mapper for this plugin.
+
+        Args:
+            mapper: A PluginMapper object.
+        """
+        self._mapper = mapper
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
@@ -128,6 +219,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         return [
             PluginCapabilities.STREAM_MAPS,
             PluginCapabilities.FLATTENING,
+            PluginCapabilities.BATCH,
         ]
 
     @classproperty
@@ -164,6 +256,28 @@ class PluginBase(metaclass=abc.ABCMeta):
             version = "[could not be detected]"
         return version
 
+    @staticmethod
+    def _get_supported_python_versions(package: str) -> list[str] | None:
+        """Return the supported Python versions.
+
+        Args:
+            package: The package name.
+
+        Returns:
+            A list of supported Python versions.
+        """
+        try:
+            package_metadata = metadata.metadata(package)
+        except metadata.PackageNotFoundError:
+            return None
+
+        reported_python_versions = SpecifierSet(package_metadata["Requires-Python"])
+        return [
+            version
+            for version in CHECK_SUPPORTED_PYTHON_VERSIONS
+            if version in reported_python_versions
+        ]
+
     @classmethod
     def get_plugin_version(cls) -> str:
         """Return the package version number.
@@ -171,7 +285,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         Returns:
             The package version number.
         """
-        return cls._get_package_version(cls.name)
+        return cls._get_package_version(cls.package_name or cls.name)
 
     @classmethod
     def get_sdk_version(cls) -> str:
@@ -181,6 +295,15 @@ class PluginBase(metaclass=abc.ABCMeta):
             The package version number.
         """
         return cls._get_package_version(SDK_PACKAGE_NAME)
+
+    @classmethod
+    def get_supported_python_versions(cls) -> list[str] | None:
+        """Return the supported Python versions.
+
+        Returns:
+            A list of supported Python versions.
+        """
+        return cls._get_supported_python_versions(cls.package_name or cls.name)
 
     @classproperty
     def plugin_version(cls) -> str:  # noqa: N805
@@ -302,6 +425,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             description=cls.__doc__,
             version=cls.get_plugin_version(),
             sdk_version=cls.get_sdk_version(),
+            supported_python_versions=cls.get_supported_python_versions(),
             capabilities=cls.capabilities,
             settings=config_jsonschema,
         )
@@ -322,19 +446,12 @@ class PluginBase(metaclass=abc.ABCMeta):
         Args:
             config_jsonschema: [description]
         """
-
-        def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
-            # Append any missing properties in the target with those from source.
-            for k, v in source_jsonschema["properties"].items():
-                if k not in target_jsonschema["properties"]:
-                    target_jsonschema["properties"][k] = v
-
         capabilities = cls.capabilities
         if PluginCapabilities.STREAM_MAPS in capabilities:
-            _merge_missing(STREAM_MAPS_CONFIG, config_jsonschema)
+            merge_missing_config_jsonschema(STREAM_MAPS_CONFIG, config_jsonschema)
 
         if PluginCapabilities.FLATTENING in capabilities:
-            _merge_missing(FLATTENING_CONFIG, config_jsonschema)
+            merge_missing_config_jsonschema(FLATTENING_CONFIG, config_jsonschema)
 
     @classmethod
     def print_about(
@@ -375,25 +492,109 @@ class PluginBase(metaclass=abc.ABCMeta):
 
             # Validate config file paths before adding to list
             if not Path(config_path).is_file():
-                raise FileNotFoundError(
-                    f"Could not locate config file at '{config_path}'."
-                    "Please check that the file exists.",
+                msg = (
+                    f"Could not locate config file at '{config_path}'.Please check "
+                    "that the file exists."
                 )
+                raise FileNotFoundError(msg)
 
             config_files.append(Path(config_path))
 
         return config_files, parse_env_config
 
-    @classproperty
-    def cli(cls) -> t.Callable:  # noqa: N805
+    @classmethod
+    def invoke(
+        cls,
+        *,
+        about: bool = False,
+        about_format: str | None = None,
+        **kwargs: t.Any,  # noqa: ARG003
+    ) -> None:
+        """Invoke the plugin.
+
+        Args:
+            about: Display package metadata and settings.
+            about_format: Specify output style for `--about`.
+            kwargs: Plugin keyword arguments.
+        """
+        if about:
+            cls.print_about(about_format)
+            sys.exit(0)
+
+    @classmethod
+    def cb_version(
+        cls: type[PluginBase],
+        ctx: click.Context,
+        param: click.Option,  # noqa: ARG003
+        value: bool,  # noqa: FBT001
+    ) -> None:
+        """CLI callback to print the plugin version and exit.
+
+        Args:
+            ctx: Click context.
+            param: Click parameter.
+            value: Boolean indicating whether to print the version.
+        """
+        if not value:
+            return
+        cls.print_version(print_fn=click.echo)
+        ctx.exit()
+
+    @classmethod
+    def get_singer_command(cls: type[PluginBase]) -> click.Command:
         """Handle command line execution.
 
         Returns:
             A callable CLI object.
         """
+        return SingerCommand(
+            name=cls.name,
+            callback=cls.invoke,
+            context_settings={"help_option_names": ["--help"]},
+            params=[
+                click.Option(
+                    ["--version"],
+                    is_flag=True,
+                    help="Display the package version.",
+                    is_eager=True,
+                    expose_value=False,
+                    callback=cls.cb_version,
+                ),
+                click.Option(
+                    ["--about"],
+                    help="Display package metadata and settings.",
+                    is_flag=True,
+                    is_eager=False,
+                    expose_value=True,
+                ),
+                click.Option(
+                    ["--format", "about_format"],
+                    help="Specify output style for --about",
+                    type=click.Choice(
+                        ["json", "markdown"],
+                        case_sensitive=False,
+                    ),
+                    default=None,
+                ),
+                click.Option(
+                    ["--config"],
+                    multiple=True,
+                    help=(
+                        "Configuration file location or 'ENV' to use environment "
+                        "variables."
+                    ),
+                    type=click.STRING,
+                    default=(),
+                    is_eager=True,
+                ),
+            ],
+        )
 
-        @click.command()
-        def cli() -> None:
-            pass
+    @plugin_cli
+    def cli(cls) -> click.Command:
+        """Handle command line execution.
 
-        return cli
+        Returns:
+            A callable CLI object.
+        """
+        return cls.get_singer_command()

@@ -5,6 +5,105 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.30.0 (2023-07-10)
+
+### ✨ New
+
+- [#1815](https://github.com/meltano/sdk/issues/1815) Support optional headers for OAuth request -- _**Thanks @s7clarke10!**_
+- [#1800](https://github.com/meltano/sdk/issues/1800) Publish supported python versions in `--about`
+
+### 🐛 Fixes
+
+- [#1829](https://github.com/meltano/sdk/issues/1829) Update cookiecutter copyright assignment to cookiecutter user -- _**Thanks @riordan!**_
+- [#1826](https://github.com/meltano/sdk/issues/1826) Serialization of `decimal.Decimal`
+- [#1827](https://github.com/meltano/sdk/issues/1827) Add explicit dependency on `packaging` library
+- [#1820](https://github.com/meltano/sdk/issues/1820) Include SCHEMA message count in target logs
+
+### 📚 Documentation Improvements
+
+- [#1824](https://github.com/meltano/sdk/issues/1824) Document `RESTStream.rest_method`
+- [#1818](https://github.com/meltano/sdk/issues/1818) Update testing.md
+
+## v0.29.0 (2023-07-06)
+
+### ✨ New
+
+- [#1769](https://github.com/meltano/sdk/issues/1769) Validate parsed/transformed record against schema message
+- [#1525](https://github.com/meltano/sdk/issues/1525) Support union schemas
+
+### 🐛 Fixes
+
+- [#1809](https://github.com/meltano/sdk/issues/1809) Deserialize floats as `decimal.Decimal`
+- [#1770](https://github.com/meltano/sdk/issues/1770) Check schema has arrived before record
+- [#1796](https://github.com/meltano/sdk/issues/1796) Create batch directory if missing
+- [#1688](https://github.com/meltano/sdk/issues/1688) Incremental where clause generation from triggering TypeError -- _**Thanks @BuzzCutNorman!**_
+- [#1778](https://github.com/meltano/sdk/issues/1778) Sink schema comparison before adding metadata columns
+- [#1698](https://github.com/meltano/sdk/issues/1698) Force stream selection in tests
+- [#1775](https://github.com/meltano/sdk/issues/1775) Add tests for SQL type conversion from JSON schemas
+- [#1771](https://github.com/meltano/sdk/issues/1771) Add descriptions for `batch_config` properties
+- [#1752](https://github.com/meltano/sdk/issues/1752) Change runner scope to function for target tests
+- [#1753](https://github.com/meltano/sdk/issues/1753) Always emit a STATE message at the start of the sync process
+
+### ⚙️ Under the Hood
+
+- [#1745](https://github.com/meltano/sdk/issues/1745) Change `SQLStream.schema` into a cached property -- _**Thanks @mjsqu!**_
+
+### 📚 Documentation Improvements
+
+- [#1756](https://github.com/meltano/sdk/issues/1756) Fix invalid JSON in Stream Maps page and add `meltano.yml` tabs -- _**Thanks @mjsqu!**_
+- [#1763](https://github.com/meltano/sdk/issues/1763) Add Cloud banner
+
+## v0.28.0 (2023-06-05)
+
+### ✨ New
+
+- [#1728](https://github.com/meltano/sdk/issues/1728) Add an optional Dependabot file to projects generated from templates
+- [#1572](https://github.com/meltano/sdk/issues/1572) Add `batch_config` handling in `append_builtin_config()` -- _**Thanks @aaronsteers!**_
+- [#1686](https://github.com/meltano/sdk/issues/1686) Log stream errors
+- [#1711](https://github.com/meltano/sdk/issues/1711) Validate records against stream schema in standard tap tests
+- [#1709](https://github.com/meltano/sdk/issues/1709) Add a default Apache 2.0 license to tap and target templates
+
+### 🐛 Fixes
+
+- [#1742](https://github.com/meltano/sdk/issues/1742) Recommend `meltano run` in target cookiecutter README
+
+### ⚙️ Under the Hood
+
+- [#936](https://github.com/meltano/sdk/issues/936) Use inheritance to construct plugin CLI
+
+### 📚 Documentation Improvements
+
+- [#1721](https://github.com/meltano/sdk/issues/1721) Remove unsupported `previous_token` from HATEOAS example
+- [#1703](https://github.com/meltano/sdk/issues/1703) Fix broken docs link for `record_metadata` page -- _**Thanks @menzenski!**_
+
+## v0.27.0 (2023-05-11)
+
+### ✨ New
+
+- [#1681](https://github.com/meltano/sdk/issues/1681) Allow SQL tap developers to leverage `post_process` -- _**Thanks @BuzzCutNorman!**_
+- [#1672](https://github.com/meltano/sdk/issues/1672) Support deselecting streams by default
+- [#1648](https://github.com/meltano/sdk/issues/1648) Use Ruff to lint projects generated with Cookiecutter templates
+
+### 🐛 Fixes
+
+- [#1680](https://github.com/meltano/sdk/issues/1680) Pin `urllib3` to `<2` to avoid incompatibility issues with botocore
+- [#1646](https://github.com/meltano/sdk/issues/1646) Use `get_new_paginator` in REST tap cookiecutter template
+
+### ⚙️ Under the Hood
+
+- [#1668](https://github.com/meltano/sdk/issues/1668) Break out default batch file writer into a separate class
+
+### 📚 Documentation Improvements
+
+- [#1685](https://github.com/meltano/sdk/issues/1685) Add PyCharm debugging tips to docs
+- [#1673](https://github.com/meltano/sdk/issues/1673) Fix docs build by specifying OS in RTD config file
+
+## v0.26.0 (2023-05-02)
+
+### ✨ New
+
+- [#1623](https://github.com/meltano/sdk/issues/1623) Explicitly support URL params in string form
+
 ## v0.25.0 (2023-04-25)
 
 ### ✨ New

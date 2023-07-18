@@ -21,6 +21,11 @@ except ImportError:
     {sys.executable} -m pip install nox-poetry"""
     raise SystemExit(dedent(message)) from None
 
+RUFF_OVERRIDES = """\
+extend = "./pyproject.toml"
+extend-ignore = ["TD002", "TD003"]
+"""
+
 package = "singer_sdk"
 python_versions = ["3.11", "3.10", "3.9", "3.8", "3.7"]
 main_python_version = "3.10"
@@ -182,8 +187,6 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
 
     Runs the lint task on the created test project.
     """
-    args = session.posargs or ["1"]
-
     cc_build_path = tempfile.gettempdir()
     folder_base_path = "./cookiecutter"
 
@@ -221,6 +224,9 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
     )
     session.chdir(cc_test_output)
 
+    with Path("ruff.toml").open("w") as ruff_toml:
+        ruff_toml.write(RUFF_OVERRIDES)
+
     session.run(
         "pythonsed",
         "-i.bak",
@@ -232,14 +238,6 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
     session.run("poetry", "lock", external=True)
     session.run("poetry", "install", external=True)
 
-    for path in glob.glob(f"{Path.cwd()}/*", recursive=True):
-        if Path(path).name.startswith("tap") or Path(
-            path,
-        ).name.startswith("target"):
-            library_name = Path(path).name
-
-    for argument in ["black", "isort", "flake8", "mypy"]:
-        session.run("poetry", "run", argument, library_name, external=True)
-
-    if int(args[0]) == 1:
-        session.run("poetry", "run", "tox", "-e", "lint", external=True)
+    session.run("git", "init", external=True)
+    session.run("git", "add", ".", external=True)
+    session.run("pre-commit", "run", "--all-files", external=True)

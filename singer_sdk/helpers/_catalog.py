@@ -47,11 +47,12 @@ def _pop_deselected_schema(
         schema_at_breadcrumb = schema_at_breadcrumb.get(crumb, {})
 
     if not isinstance(schema_at_breadcrumb, dict):
-        raise ValueError(
-            f"Expected dictionary type instead of "
-            f"'{type(schema_at_breadcrumb).__name__}' '{schema_at_breadcrumb}' "
-            f"for '{stream_name}' bookmark '{str(breadcrumb)}' in '{schema}'",
+        msg = (
+            "Expected dictionary type instead of "
+            f"'{type(schema_at_breadcrumb).__name__}' '{schema_at_breadcrumb}' for "
+            f"'{stream_name}' bookmark '{breadcrumb!s}' in '{schema}'"
         )
+        raise ValueError(msg)
 
     if "properties" not in schema_at_breadcrumb:
         return
@@ -128,14 +129,16 @@ def set_catalog_stream_selected(
     """
     breadcrumb = breadcrumb or ()
     if not isinstance(breadcrumb, tuple):
-        raise ValueError(
-            f"Expected tuple value for breadcrumb '{breadcrumb}'. "
-            f"Got {type(breadcrumb).__name__}",
+        msg = (
+            f"Expected tuple value for breadcrumb '{breadcrumb}'. Got "
+            f"{type(breadcrumb).__name__}"
         )
+        raise ValueError(msg)
 
     catalog_entry = catalog.get_stream(stream_name)
     if not catalog_entry:
-        raise ValueError(f"Catalog entry missing for '{stream_name}'. Skipping.")
+        msg = f"Catalog entry missing for '{stream_name}'. Skipping."
+        raise ValueError(msg)
 
     md_entry = catalog_entry.metadata[breadcrumb]
     md_entry.selected = selected

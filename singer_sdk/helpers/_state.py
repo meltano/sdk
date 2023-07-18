@@ -79,11 +79,11 @@ def _find_in_partitions_list(
         if partition_state["context"] == state_partition_context
     ]
     if len(found) > 1:
-        raise ValueError(
-            f"State file contains duplicate entries for partition: "
-            "{state_partition_context}.\n"
-            f"Matching state values were: {str(found)}",
+        msg = (
+            "State file contains duplicate entries for partition: "
+            f"{{state_partition_context}}.\nMatching state values were: {found!s}"
         )
+        raise ValueError(msg)
     if found:
         return t.cast(dict, found[0])
 
@@ -120,7 +120,8 @@ def get_writeable_state_dict(
         ValueError: Raise an error if duplicate entries are found.
     """
     if tap_state is None:
-        raise ValueError("Cannot write state to missing state dictionary.")
+        msg = "Cannot write state to missing state dictionary."
+        raise ValueError(msg)
 
     if "bookmarks" not in tap_state:
         tap_state["bookmarks"] = {}
@@ -220,10 +221,11 @@ def increment_state(
         return
 
     if is_sorted:
-        raise InvalidStreamSortException(
+        msg = (
             f"Unsorted data detected in stream. Latest value '{new_rk_value}' is "
-            f"smaller than previous max '{old_rk_value}'.",
+            f"smaller than previous max '{old_rk_value}'."
         )
+        raise InvalidStreamSortException(msg)
 
 
 def _greater_than_signpost(
@@ -287,6 +289,6 @@ def log_sort_error(
             f" state partition context {state_partition_context}. "
         )
     if current_context:
-        msg += f"Context was {str(current_context)}. "
+        msg += f"Context was {current_context!s}. "
     msg += str(ex)
     log_fn(msg)

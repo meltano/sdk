@@ -28,6 +28,17 @@ class DatetimeErrorTreatmentEnum(Enum):
     NULL = "null"
 
 
+class EmptySchemaTypeError(Exception):
+    """Exception for when trying to detect type from empty type_dict."""
+
+    def __init__(self, *args: object) -> None:
+        msg = (
+            "Could not detect type from empty type_dict. Did you forget to define a "
+            "property in the stream schema?"
+        )
+        super().__init__(msg, *args)
+
+
 def to_json_compatible(val: t.Any) -> t.Any:
     """Return as string if datetime. JSON does not support proper datetime types.
 
@@ -56,10 +67,11 @@ def append_type(type_dict: dict, new_type: str) -> dict:
             result["type"] = [*type_array, new_type]
         return result
 
-    raise ValueError(
+    msg = (
         "Could not append type because the JSON schema for the dictionary "
-        f"`{type_dict}` appears to be invalid.",
+        f"`{type_dict}` appears to be invalid."
     )
+    raise ValueError(msg)
 
 
 def is_secret_type(type_dict: dict) -> bool:
@@ -96,10 +108,13 @@ def is_object_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is an object or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
         return None  # Could not detect data type
-    for property_type in property_schema.get("anyOf", [property_schema.get("type")]):
-        if "object" in property_type or property_type == "object":
-            return True
-    return False
+    return any(
+        "object" in property_type or property_type == "object"
+        for property_type in property_schema.get(
+            "anyOf",
+            [property_schema.get("type")],
+        )
+    )
 
 
 def is_uniform_list(property_schema: dict) -> bool | None:
@@ -122,17 +137,13 @@ def is_datetime_type(type_dict: dict) -> bool:
     Also returns True if 'date-time' is nested within an 'anyOf' type Array.
     """
     if not type_dict:
-        raise ValueError(
-            "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?",
-        )
+        raise EmptySchemaTypeError
     if "anyOf" in type_dict:
         return any(is_datetime_type(type_dict) for type_dict in type_dict["anyOf"])
     if "type" in type_dict:
         return type_dict.get("format") == "date-time"
-    raise ValueError(
-        f"Could not detect type of replication key using schema '{type_dict}'",
-    )
+    msg = f"Could not detect type of replication key using schema '{type_dict}'"
+    raise ValueError(msg)
 
 
 def is_date_or_datetime_type(type_dict: dict) -> bool:
@@ -155,9 +166,8 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
     if "type" in type_dict:
         return type_dict.get("format") in {"date", "date-time"}
 
-    raise ValueError(
-        f"Could not detect type of replication key using schema '{type_dict}'",
-    )
+    msg = f"Could not detect type of replication key using schema '{type_dict}'"
+    raise ValueError(msg)
 
 
 def get_datelike_property_type(property_schema: dict) -> str | None:
@@ -213,16 +223,14 @@ def handle_invalid_timestamp_in_record(
 def is_string_array_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition is a string array."""
     if not type_dict:
-        raise ValueError(
-            "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?",
-        )
+        raise EmptySchemaTypeError
 
     if "anyOf" in type_dict:
         return any(is_string_array_type(t) for t in type_dict["anyOf"])
 
     if "type" not in type_dict:
-        raise ValueError(f"Could not detect type from schema '{type_dict}'")
+        msg = f"Could not detect type from schema '{type_dict}'"
+        raise ValueError(msg)
 
     return "array" in type_dict["type"] and bool(is_string_type(type_dict["items"]))
 
@@ -230,16 +238,14 @@ def is_string_array_type(type_dict: dict) -> bool:
 def is_array_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type is an array."""
     if not type_dict:
-        raise ValueError(
-            "Could not detect type from empty type_dict. "
-            "Did you forget to define a property in the stream schema?",
-        )
+        raise EmptySchemaTypeError
 
     if "anyOf" in type_dict:
         return any(is_array_type(t) for t in type_dict["anyOf"])
 
     if "type" not in type_dict:
-        raise ValueError(f"Could not detect type from schema '{type_dict}'")
+        msg = f"Could not detect type from schema '{type_dict}'"
+        raise ValueError(msg)
 
     return "array" in type_dict["type"]
 
@@ -407,9 +413,7 @@ def _conform_record_data_types(  # noqa: PLR0912
         return input_object, unmapped_properties
 
     for property_name, elem in input_object.items():
-        property_path = (
-            property_name if parent is None else parent + "." + property_name
-        )
+        property_path = property_name if parent is None else f"{parent}.{property_name}"
         if property_name not in schema["properties"]:
             unmapped_properties.append(property_path)
             continue
@@ -471,7 +475,7 @@ def _conform_primitive_property(  # noqa: PLR0911
     if isinstance(elem, (datetime.datetime, pendulum.DateTime)):
         return to_json_compatible(elem)
     if isinstance(elem, datetime.date):
-        return elem.isoformat() + "T00:00:00+00:00"
+        return f"{elem.isoformat()}T00:00:00+00:00"
     if isinstance(elem, datetime.timedelta):
         epoch = datetime.datetime.fromtimestamp(0, UTC)
         timedelta_from_epoch = epoch + elem
@@ -482,19 +486,7 @@ def _conform_primitive_property(  # noqa: PLR0911
         return str(elem)
     if isinstance(elem, bytes):
         # for BIT value, treat 0 as False and anything else as True
-        bit_representation: bool
-        if is_boolean_type(property_schema):
-            bit_representation = elem != b"\x00"
-            return bit_representation
-        return elem.hex()
+        return elem != b"\x00" if is_boolean_type(property_schema) else elem.hex()
     if is_boolean_type(property_schema):
-        boolean_representation: bool | None
-        if elem is None:
-            boolean_representation = None
-        elif elem == 0:
-            boolean_representation = False
-        else:
-            boolean_representation = True
-        return boolean_representation
-
+        return None if elem is None else elem != 0
     return elem

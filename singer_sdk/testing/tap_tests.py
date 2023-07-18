@@ -6,6 +6,7 @@ import typing as t
 import warnings
 
 from dateutil import parser
+from jsonschema import Draft7Validator
 
 import singer_sdk.helpers._typing as th
 from singer_sdk import Tap
@@ -58,6 +59,18 @@ class TapStreamConnectionTest(TapTestTemplate):
         self.tap.run_connection_test()
 
 
+class TapValidFinalStateTest(TapTestTemplate):
+    """Test that the final state is a valid catalog."""
+
+    name = "valid_final_state"
+    message = "Final state has in-progress markers."
+
+    def test(self) -> None:
+        """Run test."""
+        final_state = self.runner.state_messages[-1]
+        assert "progress_markers" not in final_state, self.message
+
+
 class StreamReturnsRecordTest(StreamTestTemplate):
     """Test that a stream sync returns at least 1 record."""
 
@@ -107,6 +120,30 @@ class StreamRecordSchemaMatchesCatalogTest(StreamTestTemplate):
         assert not diff, f"Fields in records but not in catalog: ({diff})"
 
 
+class StreamRecordMatchesStreamSchema(StreamTestTemplate):
+    """Test all attributes in the record schema are present in the catalog schema."""
+
+    name = "record_matches_stream_schema"
+
+    def test(self) -> None:
+        """Run test."""
+        schema = self.stream.schema
+        validator = Draft7Validator(
+            schema,
+            format_checker=Draft7Validator.FORMAT_CHECKER,
+        )
+        for record in self.stream_records:
+            errors = list(validator.iter_errors(record))
+            error_messages = "\n".join(
+                [
+                    f"{e.message} (path: {'.'.join(str(p) for p in e.path)})"
+                    for e in errors
+                    if e.path
+                ],
+            )
+            assert not errors, f"Record does not match stream schema: {error_messages}"
+
+
 class StreamPrimaryKeysTest(StreamTestTemplate):
     """Test all records for a stream's primary key are unique and non-null."""
 
@@ -124,7 +161,8 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
                 (r[k] for k in primary_keys or []) for r in self.stream_records
             ]
         except KeyError as e:
-            raise AssertionError(f"Record missing primary key: {str(e)}") from e
+            msg = f"Record missing primary key: {e!s}"
+            raise AssertionError(msg) from e
         count_unique_records = len(set(record_ids))
         count_records = len(self.stream_records)
         assert count_unique_records == count_records, (

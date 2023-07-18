@@ -19,7 +19,7 @@ from singer_sdk.helpers._util import utc_now
 if t.TYPE_CHECKING:
     import logging
 
-    from singer_sdk.streams import Stream as RESTStreamBase
+    from singer_sdk.streams.rest import RESTStream
 
 
 def _add_parameters(initial_url: str, extra_parameters: dict) -> str:
@@ -83,7 +83,7 @@ class SingletonMeta(type):
 class APIAuthenticatorBase:
     """Base class for offloading API auth."""
 
-    def __init__(self, stream: RESTStreamBase) -> None:
+    def __init__(self, stream: RESTStream) -> None:
         """Init authenticator.
 
         Args:
@@ -172,7 +172,7 @@ class SimpleAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: RESTStreamBase,
+        stream: RESTStream,
         auth_headers: dict | None = None,
     ) -> None:
         """Create a new authenticator.
@@ -202,7 +202,7 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: RESTStreamBase,
+        stream: RESTStream,
         key: str,
         value: str,
         location: str = "header",
@@ -222,7 +222,8 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
         auth_credentials = {key: value}
 
         if location not in ["header", "params"]:
-            raise ValueError("`type` must be one of 'header' or 'params'.")
+            msg = "`type` must be one of 'header' or 'params'."
+            raise ValueError(msg)
 
         if location == "header":
             if self._auth_headers is None:
@@ -236,7 +237,7 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
     @classmethod
     def create_for_stream(
         cls: type[APIKeyAuthenticator],
-        stream: RESTStreamBase,
+        stream: RESTStream,
         key: str,
         value: str,
         location: str,
@@ -264,7 +265,7 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
     'Bearer '. The token will be merged with HTTP headers on the stream.
     """
 
-    def __init__(self, stream: RESTStreamBase, token: str) -> None:
+    def __init__(self, stream: RESTStream, token: str) -> None:
         """Create a new authenticator.
 
         Args:
@@ -281,7 +282,7 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
     @classmethod
     def create_for_stream(
         cls: type[BearerTokenAuthenticator],
-        stream: RESTStreamBase,
+        stream: RESTStream,
         token: str,
     ) -> BearerTokenAuthenticator:
         """Create an Authenticator object specific to the Stream class.
@@ -307,7 +308,7 @@ class BasicAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: RESTStreamBase,
+        stream: RESTStream,
         username: str,
         password: str,
     ) -> None:
@@ -330,7 +331,7 @@ class BasicAuthenticator(APIAuthenticatorBase):
     @classmethod
     def create_for_stream(
         cls: type[BasicAuthenticator],
-        stream: RESTStreamBase,
+        stream: RESTStream,
         username: str,
         password: str,
     ) -> BasicAuthenticator:
@@ -353,10 +354,11 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: RESTStreamBase,
+        stream: RESTStream,
         auth_endpoint: str | None = None,
         oauth_scopes: str | None = None,
         default_expiration: int | None = None,
+        oauth_headers: dict | None = None,
     ) -> None:
         """Create a new authenticator.
 
@@ -365,11 +367,13 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             auth_endpoint: The OAuth 2.0 authorization endpoint.
             oauth_scopes: A comma-separated list of OAuth scopes.
             default_expiration: Default token expiry in seconds.
+            oauth_headers: An optional dict of headers required to get a token.
         """
         super().__init__(stream=stream)
         self._auth_endpoint = auth_endpoint
         self._default_expiration = default_expiration
         self._oauth_scopes = oauth_scopes
+        self._oauth_headers = oauth_headers or {}
 
         # Initialize internal tracking attributes
         self.access_token: str | None = None
@@ -403,7 +407,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             ValueError: If the endpoint is not set.
         """
         if not self._auth_endpoint:
-            raise ValueError("Authorization endpoint not set.")
+            msg = "Authorization endpoint not set."
+            raise ValueError(msg)
         return self._auth_endpoint
 
     @property
@@ -447,9 +452,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         Raises:
             NotImplementedError: If derived class does not override this method.
         """
-        raise NotImplementedError(
-            "The `oauth_request_body` property was not defined in the subclass.",
-        )
+        msg = "The `oauth_request_body` property was not defined in the subclass."
+        raise NotImplementedError(msg)
 
     @property
     def client_id(self) -> str | None:
@@ -498,21 +502,22 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         auth_request_payload = self.oauth_request_payload
         token_response = requests.post(
             self.auth_endpoint,
+            headers=self._oauth_headers,
             data=auth_request_payload,
             timeout=60,
         )
         try:
             token_response.raise_for_status()
         except requests.HTTPError as ex:
-            raise RuntimeError(
-                f"Failed OAuth login, response was '{token_response.json()}'. {ex}",
-            ) from ex
+            msg = f"Failed OAuth login, response was '{token_response.json()}'. {ex}"
+            raise RuntimeError(msg) from ex
 
         self.logger.info("OAuth authorization attempt was successful.")
 
         token_json = token_response.json()
         self.access_token = token_json["access_token"]
-        self.expires_in = token_json.get("expires_in", self._default_expiration)
+        expiration = token_json.get("expires_in", self._default_expiration)
+        self.expires_in = int(expiration) if expiration else None
         if self.expires_in is None:
             self.logger.debug(
                 "No expires_in receied in OAuth response and no "
@@ -570,7 +575,8 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             ValueError: If the private key is not set.
         """
         if not self.private_key:
-            raise ValueError("Missing 'private_key' property for OAuth payload.")
+            msg = "Missing 'private_key' property for OAuth payload."
+            raise ValueError(msg)
 
         private_key: bytes | t.Any = bytes(self.private_key, "UTF-8")
         if self.private_key_passphrase:

@@ -14,11 +14,13 @@ from .tap_tests import (
     AttributeNotNullTest,
     StreamCatalogSchemaMatchesRecordTest,
     StreamPrimaryKeysTest,
+    StreamRecordMatchesStreamSchema,
     StreamRecordSchemaMatchesCatalogTest,
     StreamReturnsRecordTest,
     TapCLIPrintsTest,
     TapDiscoveryTest,
     TapStreamConnectionTest,
+    TapValidFinalStateTest,
 )
 
 # TODO: add TargetMultipleStateMessages
@@ -55,12 +57,18 @@ class TestSuite:
 # Tap Test Suites
 tap_tests = TestSuite(
     kind="tap",
-    tests=[TapCLIPrintsTest, TapDiscoveryTest, TapStreamConnectionTest],
+    tests=[
+        TapCLIPrintsTest,
+        TapDiscoveryTest,
+        TapStreamConnectionTest,
+        TapValidFinalStateTest,
+    ],
 )
 tap_stream_tests = TestSuite(
     kind="tap_stream",
     tests=[
         StreamCatalogSchemaMatchesRecordTest,
+        StreamRecordMatchesStreamSchema,
         StreamRecordSchemaMatchesCatalogTest,
         StreamReturnsRecordTest,
         StreamPrimaryKeysTest,

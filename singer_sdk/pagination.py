@@ -112,10 +112,11 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
         new_value = self.get_next(response)
 
         if new_value and new_value == self._value:
-            raise RuntimeError(
-                f"Loop detected in pagination. "
-                f"Pagination token {new_value} is identical to prior token.",
+            msg = (
+                f"Loop detected in pagination. Pagination token {new_value} is "
+                "identical to prior token."
             )
+            raise RuntimeError(msg)
 
         # Stop if new value None, empty string, 0, etc.
         if not new_value:

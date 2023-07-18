@@ -9,6 +9,9 @@ import logging
 import typing as t
 from contextlib import redirect_stdout
 
+import pytest
+from click.testing import CliRunner
+
 from samples.sample_tap_countries.countries_tap import SampleTapCountries
 from singer_sdk.helpers._catalog import (
     get_selected_schema,
@@ -16,6 +19,11 @@ from singer_sdk.helpers._catalog import (
 )
 from singer_sdk.testing import get_tap_test_class
 from singer_sdk.testing.config import SuiteConfig
+
+if t.TYPE_CHECKING:
+    from pathlib import Path
+
+    from pytest_snapshot.plugin import Snapshot
 
 SAMPLE_CONFIG = {}
 SAMPLE_CONFIG_BAD = {"not": "correct"}
@@ -34,12 +42,12 @@ def test_countries_primary_key():
     metadata_root = countries_entry.metadata.root
     key_props_1 = metadata_root.table_key_properties
     key_props_2 = countries_entry.key_properties
-    assert key_props_1 == ["code"], (
+    assert key_props_1 == ("code",), (
         f"Incorrect 'table-key-properties' in catalog: ({key_props_1})\n\n"
         f"Root metadata was: {metadata_root}\n\n"
         f"Catalog entry was: {countries_entry}"
     )
-    assert key_props_2 == ["code"], (
+    assert key_props_2 == ("code",), (
         f"Incorrect 'key_properties' in catalog: ({key_props_2})\n\n"
         "Catalog entry was: {countries_entry}"
     )
@@ -135,4 +143,18 @@ def test_batch_mode(outdir):
     assert counter["SCHEMA", "countries"] == 1
     assert counter["BATCH", "countries"] == 1
 
-    assert counter[("STATE",)] == 2
+    assert counter[("STATE",)] == 3
+
+
+@pytest.mark.snapshot()
+def test_write_schema(
+    snapshot: Snapshot,
+    snapshot_dir: Path,
+):
+    snapshot.snapshot_dir = snapshot_dir.joinpath("countries_write_schemas")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(SampleTapCountries.cli, ["--test", "schema"])
+
+    snapshot_name = "countries_write_schemas"
+    snapshot.assert_match(result.stdout, snapshot_name)

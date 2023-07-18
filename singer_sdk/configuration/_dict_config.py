@@ -54,11 +54,12 @@ def parse_environment_config(
             )
             if is_string_array_type(config_schema["properties"][config_key]):
                 if env_var_value[0] == "[" and env_var_value[-1] == "]":
-                    raise ValueError(
+                    msg = (
                         "A bracketed list was detected in the environment variable "
-                        f"'{env_var_name}'. This syntax is no longer supported. "
-                        "Please remove the brackets and try again.",
+                        f"'{env_var_name}'. This syntax is no longer supported. Please "
+                        "remove the brackets and try again."
                     )
+                    raise ValueError(msg)
                 result[config_key] = env_var_value.split(",")
             else:
                 result[config_key] = env_var_value
@@ -84,18 +85,36 @@ def merge_config_sources(
         A single configuration dictionary.
     """
     config: dict[str, t.Any] = {}
-    for config_path in inputs:
-        if config_path == "ENV":
+    for config_input in inputs:
+        if config_input == "ENV":
             env_config = parse_environment_config(config_schema, prefix=env_prefix)
             config.update(env_config)
             continue
 
-        if not Path(config_path).is_file():
-            raise FileNotFoundError(
-                f"Could not locate config file at '{config_path}'."
-                "Please check that the file exists.",
+        config_path = Path(config_input)
+
+        if not config_path.is_file():
+            msg = (
+                f"Could not locate config file at '{config_path}'.Please check that "
+                "the file exists."
             )
+            raise FileNotFoundError(msg)
 
         config.update(read_json_file(config_path))
 
     return config
+
+
+def merge_missing_config_jsonschema(
+    source_jsonschema: dict,
+    target_jsonschema: dict,
+) -> None:
+    """Append any missing properties in the target with those from source.
+
+    Args:
+        source_jsonschema: The source json schema from which to import.
+        target_jsonschema: The json schema to update.
+    """
+    for k, v in source_jsonschema["properties"].items():
+        if k not in target_jsonschema["properties"]:
+            target_jsonschema["properties"][k] = v

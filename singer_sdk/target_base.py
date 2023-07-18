@@ -12,8 +12,7 @@ import typing as t
 import click
 from joblib import Parallel, delayed, parallel_backend
 
-from singer_sdk.cli import common_options
-from singer_sdk.exceptions import ConfigValidationError, RecordsWithoutSchemaException
+from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
@@ -24,13 +23,12 @@ from singer_sdk.helpers.capabilities import (
     TargetCapabilities,
 )
 from singer_sdk.io_base import SingerMessageType, SingerReader
-from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:
-    from io import FileIO
     from pathlib import PurePath
 
+    from singer_sdk.mapper import PluginMapper
     from singer_sdk.sinks import Sink
 
 _MAX_PARALLELISM = 8
@@ -58,6 +56,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         config: dict | PurePath | str | list[PurePath | str] | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
+        setup_mapper: bool = True,
     ) -> None:
         """Initialize the target.
 
@@ -68,6 +67,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             parse_env_config: Whether to look for configuration values in environment
                 variables.
             validate_config: True to require validation of config settings.
+            setup_mapper: True to setup the mapper. Set to False if you want to
         """
         super().__init__(
             config=config,
@@ -84,12 +84,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         # Approximated for max record age enforcement
         self._last_full_drain_at: float = time.time()
 
-        # Initialize mapper
-        self.mapper: PluginMapper
-        self.mapper = PluginMapper(
-            plugin_config=dict(self.config),
-            logger=self.logger,
-        )
+        self._mapper: PluginMapper | None = None
+
+        if setup_mapper:
+            self.setup_mapper()
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
@@ -161,7 +159,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         """
         _ = record  # Custom implementations may use record in sink selection.
         if schema is None:
-            self._assert_sink_exists(stream_name)
             return self._sinks_active[stream_name]
 
         existing_sink = self._sinks_active.get(stream_name, None)
@@ -169,7 +166,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             return self.add_sink(stream_name, schema, key_properties)
 
         if (
-            existing_sink.schema != schema
+            existing_sink.original_schema != schema
             or existing_sink.key_properties != key_properties
         ):
             self.logger.info(
@@ -201,10 +198,11 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         if self.default_sink_class:
             return self.default_sink_class
 
-        raise ValueError(
-            f"No sink class defined for '{stream_name}' "
-            "and no default sink class available.",
+        msg = (
+            f"No sink class defined for '{stream_name}' and no default sink class "
+            "available."
         )
+        raise ValueError(msg)
 
     def sink_exists(self, stream_name: str) -> bool:
         """Check sink for a stream.
@@ -261,10 +259,12 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 is not sent.
         """
         if not self.sink_exists(stream_name):
-            raise RecordsWithoutSchemaException(
+            msg = (
                 f"A record for stream '{stream_name}' was encountered before a "
-                "corresponding schema.",
+                "corresponding schema. Check that the Tap correctly implements "
+                "the Singer spec."
             )
+            raise RecordsWithoutSchemaException(msg)
 
     # Message handling
 
@@ -294,9 +294,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         self.logger.info(
             "Target '%s' completed reading %d lines of input "
-            "(%d records, %d batch manifests, %d state messages).",
+            "(%d schemas, %d records, %d batch manifests, %d state messages).",
             self.name,
             line_count,
+            counter[SingerMessageType.SCHEMA],
             counter[SingerMessageType.RECORD],
             counter[SingerMessageType.BATCH],
             counter[SingerMessageType.STATE],
@@ -317,6 +318,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._assert_line_requires(message_dict, requires={"stream", "record"})
 
         stream_name = message_dict["stream"]
+        self._assert_sink_exists(stream_name)
+
         for stream_map in self.mapper.stream_maps[stream_name]:
             raw_record = copy.copy(message_dict["record"])
             transformed_record = stream_map.transform(raw_record)
@@ -336,9 +339,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 sink._remove_sdc_metadata_from_record(transformed_record)
 
             sink._validate_and_parse(transformed_record)
+            transformed_record = sink.preprocess_record(transformed_record, context)
+            sink._singer_validate_message(transformed_record)
 
             sink.tally_record_read()
-            transformed_record = sink.preprocess_record(transformed_record, context)
             sink.process_record(transformed_record, context)
             sink._after_process_record(context)
 
@@ -516,72 +520,55 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     # CLI handler
 
-    @classproperty
-    def cli(cls) -> t.Callable:  # noqa: N805
+    @classmethod
+    def invoke(  # type: ignore[override]
+        cls: type[Target],
+        *,
+        about: bool = False,
+        about_format: str | None = None,
+        config: tuple[str, ...] = (),
+        file_input: t.IO[str] | None = None,
+    ) -> None:
+        """Invoke the target.
+
+        Args:
+            about: Display package metadata and settings.
+            about_format: Specify output style for `--about`.
+            config: Configuration file location or 'ENV' to use environment
+                variables. Accepts multiple inputs as a tuple.
+            file_input: Optional file to read input from.
+        """
+        super().invoke(about=about, about_format=about_format)
+        cls.print_version(print_fn=cls.logger.info)
+        config_files, parse_env_config = cls.config_from_cli_args(*config)
+
+        target = cls(
+            config=config_files,  # type: ignore[arg-type]
+            validate_config=True,
+            parse_env_config=parse_env_config,
+        )
+        target.listen(file_input)
+
+    @classmethod
+    def get_singer_command(cls: type[Target]) -> click.Command:
         """Execute standard CLI handler for taps.
 
         Returns:
-            A callable CLI object.
+            A click.Command object.
         """
-
-        @common_options.PLUGIN_VERSION
-        @common_options.PLUGIN_ABOUT
-        @common_options.PLUGIN_ABOUT_FORMAT
-        @common_options.PLUGIN_CONFIG
-        @common_options.PLUGIN_FILE_INPUT
-        @click.command(
-            help="Execute the Singer target.",
-            context_settings={"help_option_names": ["--help"]},
+        command = super().get_singer_command()
+        command.help = "Execute the Singer target."
+        command.params.extend(
+            [
+                click.Option(
+                    ["--input", "file_input"],
+                    help="A path to read messages from instead of from standard in.",
+                    type=click.File("r"),
+                ),
+            ],
         )
-        def cli(
-            *,
-            version: bool = False,
-            about: bool = False,
-            config: tuple[str, ...] = (),
-            about_format: str | None = None,
-            file_input: FileIO | None = None,
-        ) -> None:
-            """Handle command line execution.
 
-            Args:
-                version: Display the package version.
-                about: Display package metadata and settings.
-                about_format: Specify output style for `--about`.
-                config: Configuration file location or 'ENV' to use environment
-                    variables. Accepts multiple inputs as a tuple.
-                file_input: Specify a path to an input file to read messages from.
-                    Defaults to standard in if unspecified.
-            """
-            if version:
-                cls.print_version()
-                return
-
-            if not about:
-                cls.print_version(print_fn=cls.logger.info)
-            else:
-                cls.print_about(output_format=about_format)
-                return
-
-            validate_config: bool = True
-
-            cls.print_version(print_fn=cls.logger.info)
-
-            config_files, parse_env_config = cls.config_from_cli_args(*config)
-
-            try:
-                target = cls(  # type: ignore[operator]
-                    config=config_files or None,
-                    parse_env_config=parse_env_config,
-                    validate_config=validate_config,
-                )
-            except ConfigValidationError as exc:
-                for error in exc.errors:
-                    click.secho(error, err=True)
-                sys.exit(1)
-
-            target.listen(file_input)
-
-        return cli
+        return command
 
 
 class SQLTarget(Target):

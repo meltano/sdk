@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from .config import SuiteConfig
-from .factory import get_tap_test_class, get_target_test_class, get_test_class
+from .factory import get_tap_test_class, get_target_test_class
 from .legacy import (
     _get_tap_catalog,
     _select_all,
@@ -19,7 +19,6 @@ from .runners import SingerTestRunner, TapTestRunner, TargetTestRunner
 __all__ = [
     "get_tap_test_class",
     "get_target_test_class",
-    "get_test_class",
     "_get_tap_catalog",
     "_select_all",
     "get_standard_tap_tests",

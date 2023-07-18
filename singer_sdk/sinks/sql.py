@@ -190,10 +190,11 @@ class SQLSink(BatchSink):
         # filter
         duplicates = list(filter(lambda p: len(p[1]) > 1, grouped.items()))
         if duplicates:
-            raise ConformedNameClashException(
-                "Duplicate stream properties produced when "
-                f"conforming property names: {duplicates}",
+            msg = (
+                "Duplicate stream properties produced when conforming property names: "
+                f"{duplicates}"
             )
+            raise ConformedNameClashException(msg)
 
     def conform_schema(self, schema: dict) -> dict:
         """Return schema dictionary with property names conformed.
@@ -398,7 +399,7 @@ class SQLSink(BatchSink):
             )
 
         query = sqlalchemy.text(
-            f"UPDATE {self.full_table_name}\n"  # noqa: S608
+            f"UPDATE {self.full_table_name}\n"
             f"SET {self.soft_delete_column_name} = :deletedate \n"
             f"WHERE {self.version_column_name} < :version \n"
             f"  AND {self.soft_delete_column_name} IS NULL\n",

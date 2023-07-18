@@ -76,18 +76,20 @@ class ProjectBasedStream(GitlabStream):
             ]
         if "{group_id}" in self.path:
             if "group_ids" not in self.config:
-                raise ValueError(
-                    f"Missing `group_ids` setting which is required for the "
-                    f"'{self.name}' stream.",
+                msg = (
+                    "Missing `group_ids` setting which is required for the "
+                    f"'{self.name}' stream."
                 )
+                raise ValueError(msg)
             return [
                 {"group_id": gid} for gid in t.cast(list, self.config.get("group_ids"))
             ]
-        raise ValueError(
-            "Could not detect partition type for Gitlab stream "
-            f"'{self.name}' ({self.path}). "
-            "Expected a URL path containing '{project_id}' or '{group_id}'. ",
+        msg = (
+            f"Could not detect partition type for Gitlab stream '{self.name}' "
+            f"({self.path}). Expected a URL path containing '{{project_id}}' or "
+            "'{{group_id}}'."
         )
+        raise ValueError(msg)
 
 
 class ProjectsStream(ProjectBasedStream):
@@ -95,7 +97,7 @@ class ProjectsStream(ProjectBasedStream):
 
     name = "projects"
     path = "/projects/{project_id}?statistics=1"
-    primary_keys = ["id"]
+    primary_keys = ("id",)
     replication_key = "last_activity_at"
     is_sorted = True
     schema_filepath = SCHEMAS_DIR / "projects.json"
@@ -106,7 +108,7 @@ class ReleasesStream(ProjectBasedStream):
 
     name = "releases"
     path = "/projects/{project_id}/releases"
-    primary_keys = ["project_id", "tag_name"]
+    primary_keys = ("project_id", "tag_name")
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "releases.json"
 
@@ -116,7 +118,7 @@ class IssuesStream(ProjectBasedStream):
 
     name = "issues"
     path = "/projects/{project_id}/issues?scope=all&updated_after={start_date}"
-    primary_keys = ["id"]
+    primary_keys = ("id",)
     replication_key = "updated_at"
     is_sorted = False
     schema_filepath = SCHEMAS_DIR / "issues.json"
@@ -129,7 +131,7 @@ class CommitsStream(ProjectBasedStream):
     path = (
         "/projects/{project_id}/repository/commits?since={start_date}&with_stats=true"
     )
-    primary_keys = ["id"]
+    primary_keys = ("id",)
     replication_key = "created_at"
     is_sorted = False
     schema_filepath = SCHEMAS_DIR / "commits.json"
@@ -144,7 +146,7 @@ class EpicsStream(ProjectBasedStream):
 
     name = "epics"
     path = "/groups/{group_id}/epics?updated_after={start_date}"
-    primary_keys = ["id"]
+    primary_keys = ("id",)
     replication_key = "updated_at"
     is_sorted = True
     schema = PropertiesList(
@@ -185,7 +187,7 @@ class EpicIssuesStream(GitlabStream):
 
     name = "epic_issues"
     path = "/groups/{group_id}/epics/{epic_iid}/issues"
-    primary_keys = ["id"]
+    primary_keys = ("id",)
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "epic_issues.json"
     parent_stream_type = EpicsStream  # Stream should wait for parents to complete.
@@ -198,5 +200,6 @@ class EpicIssuesStream(GitlabStream):
         """Return a dictionary of values to be used in parameterization."""
         result = super().get_url_params(context, next_page_token)
         if not context or "epic_id" not in context:
-            raise ValueError("Cannot sync epic issues without already known epic IDs.")
+            msg = "Cannot sync epic issues without already known epic IDs."
+            raise ValueError(msg)
         return result

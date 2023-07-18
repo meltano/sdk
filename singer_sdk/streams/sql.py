@@ -5,25 +5,24 @@ from __future__ import annotations
 import abc
 import typing as t
 
-import sqlalchemy
-
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.streams.core import Stream
 
 if t.TYPE_CHECKING:
-    from singer_sdk.plugin_base import PluginBase as TapBaseClass
+    from singer_sdk.tap_base import Tap
 
 
 class SQLStream(Stream, metaclass=abc.ABCMeta):
     """Base class for SQLAlchemy-based streams."""
 
     connector_class = SQLConnector
+    _cached_schema: dict | None = None
 
     def __init__(
         self,
-        tap: TapBaseClass,
+        tap: Tap,
         catalog_entry: dict,
         connector: SQLConnector | None = None,
     ) -> None:
@@ -74,7 +73,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         return self._singer_catalog_entry.metadata
 
-    @property
+    @property  # TODO: Investigate @cached_property after py > 3.7
     def schema(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
@@ -83,7 +82,13 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             The schema object.
         """
-        return t.cast(dict, self._singer_catalog_entry.schema.to_dict())
+        if not self._cached_schema:
+            self._cached_schema = t.cast(
+                dict,
+                self._singer_catalog_entry.schema.to_dict(),
+            )
+
+        return self._cached_schema
 
     @property
     def tap_stream_id(self) -> str:
@@ -129,9 +134,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         catalog_entry = self._singer_catalog_entry
         if not catalog_entry.table:
-            raise ValueError(
-                f"Missing table name in catalog entry: {catalog_entry.to_dict()}",
-            )
+            msg = f"Missing table name in catalog entry: {catalog_entry.to_dict()}"
+            raise ValueError(msg)
 
         return self.connector.get_fully_qualified_name(
             table_name=catalog_entry.table,
@@ -173,9 +177,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 not support partitioning.
         """
         if context:
-            raise NotImplementedError(
-                f"Stream '{self.name}' does not support partitioning.",
-            )
+            msg = f"Stream '{self.name}' does not support partitioning."
+            raise NotImplementedError(msg)
 
         selected_column_names = self.get_selected_schema()["properties"].keys()
         table = self.connector.get_table(
@@ -190,12 +193,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
             start_val = self.get_starting_replication_key_value(context)
             if start_val:
-                query = query.where(
-                    sqlalchemy.text(":replication_key >= :start_val").bindparams(
-                        replication_key=replication_key_col,
-                        start_val=start_val,
-                    ),
-                )
+                query = query.where(replication_key_col >= start_val)
 
         if self.ABORT_AT_RECORD_COUNT is not None:
             # Limit record count to one greater than the abort threshold. This ensures
@@ -206,7 +204,11 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         with self.connector._connect() as conn:
             for record in conn.execute(query):
-                yield dict(record._mapping)
+                transformed_record = self.post_process(dict(record._mapping))
+                if transformed_record is None:
+                    # Record filtered out during post_process()
+                    continue
+                yield transformed_record
 
 
 __all__ = ["SQLStream", "SQLConnector"]

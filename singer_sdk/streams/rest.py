@@ -32,7 +32,7 @@ if t.TYPE_CHECKING:
     from backoff.types import Details
 
     from singer_sdk._singerlib import Schema
-    from singer_sdk.plugin_base import PluginBase as TapBaseClass
+    from singer_sdk.tap_base import Tap
 
     if sys.version_info >= (3, 10):
         from typing import TypeAlias  # noqa: ICN003
@@ -51,13 +51,15 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
 
     _page_size: int = DEFAULT_PAGE_SIZE
     _requests_session: requests.Session | None
+
+    #: HTTP method to use for requests. Defaults to "GET".
     rest_method = "GET"
 
     #: JSONPath expression to extract records from the API response.
     records_jsonpath: str = "$[*]"
 
     #: Response code reference for rate limit retries
-    extra_retry_statuses: list[int] = [HTTPStatus.TOO_MANY_REQUESTS]
+    extra_retry_statuses: t.Sequence[int] = [HTTPStatus.TOO_MANY_REQUESTS]
 
     #: Optional JSONPath expression to extract a pagination token from the API response.
     #: Example: `"$.next_page"`
@@ -75,7 +77,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        tap: TapBaseClass,
+        tap: Tap,
         name: str | None = None,
         schema: dict[str, t.Any] | Schema | None = None,
         path: str | None = None,
@@ -658,9 +660,9 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
                 https://github.com/litl/backoff#event-handlers
         """
         logging.error(
-            "Backing off %(wait)0.2f seconds after %(tries)d tries "
-            "calling function %(target)s with args %(args)s and kwargs "
-            "%(kwargs)s",
+            "Backing off %0.2f seconds after %d tries "
+            "calling function %s with args %s and kwargs "
+            "%s",
             details.get("wait"),
             details.get("tries"),
             details.get("target"),

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.25.0"
+version = "0.30.0"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors"]
 maintainers = ["Meltano Team and Contributors"]
@@ -28,7 +28,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
 ]
-license = "Apache 2.0"
+license = "Apache-2.0"
 
 [tool.poetry.urls]
 "Issue Tracker" = "https://github.com/meltano/sdk/issues"
@@ -45,7 +45,7 @@ click = "~=8.0"
 fs = "^2.4.16"
 PyJWT = "~=2.4"
 requests = "^2.25.1"
-cryptography = ">=3.4.6,<41.0.0"
+cryptography = ">=3.4.6,<42.0.0"
 importlib-metadata = {version = "<5.0.0", markers = "python_version < \"3.8\""}
 importlib-resources = {version = "5.12.0", markers = "python_version < \"3.9\""}
 memoization = ">=0.3.2,<0.5.0"
@@ -57,8 +57,11 @@ python-dotenv = ">=0.20,<0.22"
 typing-extensions = "^4.2.0"
 simplejson = "^3.17.6"
 jsonschema = "^4.16.0"
+packaging = ">=23.1"
 pytz = ">=2022.2.1,<2024.0.0"
 PyYAML = "^6.0"
+# urllib3 2.0 is not compatible with botocore
+urllib3 = ">=1.26,<2"
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
@@ -68,6 +71,7 @@ sphinx-copybutton = {version = ">=0.3.1,<0.6.0", optional = true}
 myst-parser = {version = ">=0.17.2,<1.1.0", optional = true}
 sphinx-autobuild = {version = "^2021.3.14", optional = true}
 sphinx-reredirects = {version = "^0.1.1", optional = true}
+sphinx-inline-tabs = {version = ">=2023.4.21", optional = true, markers = "python_version >= \"3.8\""}
 
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = "^1.1.1", optional = true}
@@ -83,7 +87,8 @@ docs = [
     "sphinx-copybutton",
     "myst-parser",
     "sphinx-autobuild",
-    "sphinx_reredirects",
+    "sphinx-reredirects",
+    "sphinx-inline-tabs",
 ]
 s3 = ["fs-s3fs"]
 testing = [
@@ -96,7 +101,7 @@ testing = [
 commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
 xdoctest = "^1.1.1"
 mypy = "^1.0"
-cookiecutter = "^2.1.1"
+cookiecutter = ">=2.1.1,<2.2.3"
 PyYAML = "^6.0"
 freezegun = "^1.2.2"
 numpy = [
@@ -112,7 +117,7 @@ types-requests = "^2.28.11"
 types-simplejson = "^3.18.0"
 types-PyYAML = "^6.0.12"
 coverage = {extras = ["toml"], version = "^7.2"}
-pyarrow = "^11.0.0"
+pyarrow = ">=11,<13"
 pytest-snapshot = "^0.9.0"
 
 # Cookiecutter tests
@@ -140,7 +145,7 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.25.0"
+version = "0.30.0"
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
     "docs/conf.py",
@@ -215,6 +220,8 @@ pytest11 = { callable = "singer_sdk:testing.pytest_plugin", extras = ["testing"]
 [tool.ruff]
 exclude = [
     "cookiecutter/*",
+    "singer_sdk/helpers/_simpleeval.py",
+    "tests/core/test_simpleeval.py",
 ]
 ignore = [
     "ANN101",  # Missing type annotation for `self` in method
@@ -226,6 +233,7 @@ select = [
     "F",    # Pyflakes
     "E",    # pycodestyle (error)
     "W",    # pycodestyle (warning)
+    "C90",  # mccabe
     "I",    # isort
     "N",    # pep8-naming
     "D",    # pydocstyle/flake8-docstrings
@@ -241,6 +249,7 @@ select = [
     "C4",   # flake8-comprehensions
     "DTZ",  # flake8-datetimezs
     "T10",  # flake8-debugger
+    "EM",   # flake8-error-message
     "ISC",  # flake8-implicit-str-concat
     "ICN",  # flake8-import-conventions
     "G",    # flake8-logging-format
@@ -248,6 +257,7 @@ select = [
     "PIE",  # flake8-pie
     "T20",  # flake8-print
     "PT",   # flake8-pytest-style
+    "Q",    # flake8-quotes
     "RSE",  # flake8-raise
     "RET",  # flake8-return
     "SIM",  # flake8-simplify
@@ -300,6 +310,11 @@ parametrize-names-type = "csv"
 [tool.ruff.isort]
 known-first-party = ["singer_sdk", "samples", "tests"]
 required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.pep8-naming]
+classmethod-decorators = [
+    "singer_sdk.cli.plugin_cli",
+]
 
 [tool.ruff.pydocstyle]
 convention = "google"

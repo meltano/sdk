@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
+from singer_sdk.exceptions import (
+    MissingKeyPropertiesError,
+    RecordsWithoutSchemaException,
+)
+
 from .templates import TargetFileTestTemplate, TargetTestTemplate
 
 
@@ -52,6 +59,13 @@ class TargetInvalidSchemaTest(TargetFileTestTemplate):
 
     name = "invalid_schema"
 
+    def test(self) -> None:
+        """Run test."""
+        # TODO: the SDK should raise a better error than Exception in this case
+        # https://github.com/meltano/sdk/issues/1755
+        with pytest.raises(Exception):  # noqa: PT011, B017
+            super().test()
+
 
 class TargetMultipleStateMessages(TargetFileTestTemplate):
     """Test Target correctly relays multiple received State messages (checkpoints)."""
@@ -86,11 +100,21 @@ class TargetRecordBeforeSchemaTest(TargetFileTestTemplate):
 
     name = "record_before_schema"
 
+    def test(self) -> None:
+        """Run test."""
+        with pytest.raises(RecordsWithoutSchemaException):
+            super().test()
+
 
 class TargetRecordMissingKeyProperty(TargetFileTestTemplate):
     """Test Target handles record missing key property."""
 
     name = "record_missing_key_property"
+
+    def test(self) -> None:
+        """Run test."""
+        with pytest.raises(MissingKeyPropertiesError):
+            super().test()
 
 
 class TargetRecordMissingRequiredProperty(TargetFileTestTemplate):

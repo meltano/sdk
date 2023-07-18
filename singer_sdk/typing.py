@@ -547,11 +547,11 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         wrapped = self.wrapped
 
         if isinstance(wrapped, type) and not isinstance(wrapped.type_dict, t.Mapping):
-            raise ValueError(
-                f"Type dict for {wrapped} is not defined. "
-                "Try instantiating it with a nested type such as "
-                f"{wrapped.__name__}(StringType).",
+            msg = (
+                f"Type dict for {wrapped} is not defined. Try instantiating it with a "
+                f"nested type such as {wrapped.__name__}(StringType)."
             )
+            raise ValueError(msg)
 
         return t.cast(dict, wrapped.type_dict)
 
@@ -711,6 +711,150 @@ class ObjectType(JSONTypeHelper):
         return result
 
 
+class OneOf(JSONPointerType):
+    """OneOf type.
+
+    This type allows for a value to be one of a set of types.
+
+    Examples:
+        >>> t = OneOf(StringType, IntegerType)
+        >>> print(t.to_json(indent=2))
+        {
+            "oneOf": [
+                {
+                    "type": [
+                        "string"
+                    ]
+                },
+                {
+                    "type": [
+                        "integer"
+                    ]
+                }
+            ]
+        }
+    """
+
+    def __init__(self, *types: W | type[W]) -> None:
+        """Initialize OneOf type.
+
+        Args:
+            types: Types to choose from.
+        """
+        self.wrapped = types
+
+    @property
+    def type_dict(self) -> dict:  # type: ignore[override]
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        return {"oneOf": [t.type_dict for t in self.wrapped]}
+
+
+class Constant(JSONTypeHelper):
+    """A constant property.
+
+    A property that is always the same value.
+
+    Examples:
+        >>> t = Constant("foo")
+        >>> print(t.to_json(indent=2))
+        {
+            "const": "foo"
+        }
+    """
+
+    def __init__(self, value: _JsonValue) -> None:
+        """Initialize Constant.
+
+        Args:
+            value: Value of the constant.
+        """
+        self.value = value
+
+    @property
+    def type_dict(self) -> dict:  # type: ignore[override]
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        return {"const": self.value}
+
+
+class DiscriminatedUnion(OneOf):
+    """A discriminator property.
+
+    This is a special case of :class:`singer_sdk.typing.OneOf`, where values are
+    JSON objects, and the type of the object is determined by a property in the
+    object.
+
+    The property is a :class:`singer_sdk.typing.Constant` called the discriminator
+    property.
+    """
+
+    def __init__(self, key: str, **options: ObjectType) -> None:
+        """Initialize a discriminated union type.
+
+        Args:
+            key: Name of the discriminator property.
+            options: Mapping of discriminator values to object types.
+
+        Examples:
+            >>> t = DiscriminatedUnion("species", cat=ObjectType(), dog=ObjectType())
+            >>> print(t.to_json(indent=2))
+            {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "species": {
+                      "const": "cat",
+                      "description": "Discriminator for object of type 'cat'."
+                    }
+                  },
+                  "required": [
+                    "species"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "species": {
+                        "const": "dog",
+                        "description": "Discriminator for object of type 'dog'."
+                    }
+                  },
+                  "required": [
+                    "species"
+                  ]
+                }
+              ]
+            }
+        """
+        self.key = key
+        self.options = options
+
+        super().__init__(
+            *(
+                ObjectType(
+                    Property(
+                        key,
+                        Constant(k),
+                        required=True,
+                        description=f"Discriminator for object of type '{k}'.",
+                    ),
+                    *v.wrapped.values(),
+                    additional_properties=v.additional_properties,
+                    pattern_properties=v.pattern_properties,
+                )
+                for k, v in options.items()
+            ),
+        )
+
+
 class CustomType(JSONTypeHelper):
     """Accepts an arbitrary JSON Schema dictionary."""
 
@@ -795,7 +939,8 @@ def to_jsonschema_type(
     ):
         type_name = from_type.__name__
     else:
-        raise ValueError("Expected `str` or a SQLAlchemy `TypeEngine` object or type.")
+        msg = "Expected `str` or a SQLAlchemy `TypeEngine` object or type."
+        raise ValueError(msg)
 
     # Look for the type name within the known SQL type names:
     for sqltype, jsonschema_type in sqltype_lookup.items():
@@ -824,13 +969,17 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
             if jsonschema_type.get("type") in type_check:  # noqa: PLR5501
                 return True
 
-    if any(t in type_check for t in jsonschema_type.get("anyOf", ())):
+    if any(
+        _jsonschema_type_check(t, type_check) for t in jsonschema_type.get("anyOf", ())
+    ):
         return True
 
     return False
 
 
-def to_sql_type(jsonschema_type: dict) -> sqlalchemy.types.TypeEngine:  # noqa: PLR0911
+def to_sql_type(  # noqa: PLR0911, C901
+    jsonschema_type: dict,
+) -> sqlalchemy.types.TypeEngine:
     """Convert JSON Schema type to a SQL type.
 
     Args:
