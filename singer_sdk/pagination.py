@@ -2,17 +2,11 @@
 
 from __future__ import annotations
 
-import sys
 import typing as t
 from abc import ABCMeta, abstractmethod
 from urllib.parse import ParseResult, urlparse
 
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-
-if sys.version_info >= (3, 8):
-    from typing import Protocol  # noqa: ICN003
-else:
-    from typing_extensions import Protocol
 
 if t.TYPE_CHECKING:
     from requests import Response
@@ -406,7 +400,7 @@ class BaseOffsetPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         return self._value + self._page_size
 
 
-class LegacyPaginatedStreamProtocol(Protocol[TPageToken]):
+class LegacyPaginatedStreamProtocol(t.Protocol[TPageToken]):
     """Protocol for legacy paginated streams classes."""
 
     def get_next_page_token(

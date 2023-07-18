@@ -12,6 +12,14 @@ keywords = [
     "ELT",
     "{{cookiecutter.destination_name}}",
 ]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
 license = "Apache-2.0"
 {%- if cookiecutter.variant != "None (Skip)" %}
 packages = [
@@ -41,7 +49,7 @@ ignore = [
 ]
 select = ["ALL"]
 src = ["{{cookiecutter.library_name}}"]
-target-version = "py37"
+target-version = "py38"
 
 [tool.ruff.flake8-annotations]
 allow-star-arg-any = true

@@ -19,7 +19,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -38,12 +37,11 @@ license = "Apache-2.0"
 "Youtube" = "https://www.youtube.com/meltano"
 
 [tool.poetry.dependencies]
-python = ">=3.7.1,<4"
+python = ">=3.8,<4"
 backoff = ">=2.0.0"
 click = "~=8.0"
 cryptography = ">=3.4.6,<42.0.0"
 fs = ">=2.4.16"
-importlib-metadata = {version = "<7.0.0", markers = "python_version < \"3.8\""}
 importlib-resources = {version = ">=5.12.0", markers = "python_version < \"3.9\""}
 inflection = ">=0.5.1"
 joblib = ">=1.0.1"
@@ -72,7 +70,7 @@ sphinx-copybutton = {version = ">=0.3.1", optional = true}
 myst-parser = {version = ">=1", optional = true}
 sphinx-autobuild = {version = ">=2021.3.14", optional = true}
 sphinx-reredirects = {version = ">=0.1.1", optional = true}
-sphinx-inline-tabs = {version = ">=2023.4.21", optional = true, markers = "python_version >= \"3.8\""}
+sphinx-inline-tabs = {version = ">=2023.4.21", optional = true }
 
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = ">=1.1.1", optional = true}
@@ -104,14 +102,8 @@ coverage = {extras = ["toml"], version = ">=7.2"}
 duckdb = ">=0.8.0"
 duckdb-engine = ">=0.9.2"
 mypy = ">=1.0"
-numpy = [
-    { version = "<1.22", python = "<3.8" },
-    { version = ">=1.22", python = ">=3.8" },
-]
-pyarrow = [
-    { version = ">=11", python = "<3.8" },
-    { version = ">=13", python = ">=3.8" }
-]
+numpy = ">=1.22"
+pyarrow = ">=13"
 pytest-benchmark = "^4.0.0"
 pytest-snapshot = ">=0.9.0"
 requests-mock = ">=1.10.0"
@@ -216,13 +208,12 @@ pytest11 = { reference = "singer_sdk:testing.pytest_plugin", extras = ["testing"
 [tool.ruff]
 line-length = 88
 src = ["samples", "singer_sdk", "tests"]
-target-version = "py37"
+target-version = "py38"
 
 [tool.ruff.lint]
 exclude = [
     "cookiecutter/*",
-    "singer_sdk/helpers/_simpleeval.py",
-    "tests/core/test_simpleeval.py",
+    "*simpleeval*",
 ]
 ignore = [
     "ANN101",  # Missing type annotation for `self` in method
@@ -292,8 +283,6 @@ unfixable = [
 "tests/*" = ["ANN", "D1", "D2", "FBT001", "FBT003", "PLR2004", "S101"]
 # Disabled some checks in samples code
 "samples/*" = ["ANN", "D"]
-# Don't require docstrings conventions or type annotations in private modules
-"singer_sdk/helpers/_*.py" = ["ANN", "D105"]
 # Templates support a generic resource of type Any.
 "singer_sdk/testing/*.py" = ["S101"]
 "singer_sdk/testing/templates.py" = ["ANN401"]
