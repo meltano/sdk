@@ -12,6 +12,14 @@ keywords = [
     "ELT",
     "{{cookiecutter.source_name}}",
 ]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
 license = "Apache-2.0"
 {%- if cookiecutter.variant != "None (Skip)" %}
 packages = [
@@ -20,14 +28,13 @@ packages = [
 {%- endif %}
 
 [tool.poetry.dependencies]
-python = "<3.12,>=3.7.1"
-singer-sdk = { version="^0.31.1" }
+python = "<4,>=3.8"
+singer-sdk = { version="^0.31.0" }
 fs-s3fs = { version = "^1.1.1", optional = true }
 {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
 requests = "^2.31.0"
 {%- endif %}
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
-cached-property = "^1" # Remove after Python 3.7 support is dropped
 {%- endif %}
 
 [tool.poetry.group.dev.dependencies]
@@ -51,7 +58,7 @@ ignore = [
 ]
 select = ["ALL"]
 src = ["{{cookiecutter.library_name}}"]
-target-version = "py37"
+target-version = "py38"
 
 
 [tool.ruff.flake8-annotations]

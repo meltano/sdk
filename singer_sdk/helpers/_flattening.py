@@ -70,7 +70,7 @@ def flatten_key(key_name: str, parent_keys: list[str], separator: str = "__") ->
             inflection.camelize(inflected_key[reducer_index]),
         )
         inflected_key[reducer_index] = (
-            reduced_key if len(reduced_key) > 1 else inflected_key[reducer_index][0:3]
+            reduced_key if len(reduced_key) > 1 else inflected_key[reducer_index][:3]
         ).lower()
         reducer_index += 1
 
@@ -263,8 +263,8 @@ def _flatten_schema(  # noqa: C901
                 items.append((new_key, next(iter(v.values()))[0]))
 
     # Sort and check for duplicates
-    def _key_func(item):
-        return item[0]  # first item is tuple is the key name.
+    def _key_func(item: tuple[str, dict]) -> str:
+        return item[0]  # first item in tuple is the key name.
 
     sorted_items = sorted(items, key=_key_func)
     for k, g in itertools.groupby(sorted_items, key=_key_func):
@@ -356,7 +356,11 @@ def _flatten_record(
     return dict(items)
 
 
-def _should_jsondump_value(key: str, value: t.Any, flattened_schema=None) -> bool:
+def _should_jsondump_value(
+    key: str,
+    value: t.Any,  # noqa: ANN401
+    flattened_schema: dict[str, t.Any] | None = None,
+) -> bool:
     """Return True if json.dump() should be used to serialize the value.
 
     Args:

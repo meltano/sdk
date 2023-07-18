@@ -32,10 +32,10 @@ body:
       description: Version of Python you are using
       options:
         - "3.6 (deprecated)"
-        - "3.7"
         - "3.8"
         - "3.9"
         - "3.10"
+        - "3.11"
         - "NA"
     validations:
       required: true
@@ -75,6 +75,6 @@ body:
     attributes:
       label: Code
       description: Paste the failing code and/or traceback, if applicable
-      render: python
+      render: Python
     validations:
       required: false
