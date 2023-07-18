@@ -215,6 +215,9 @@ class Sink(metaclass=abc.ABCMeta):
     def key_properties(self) -> list[str]:
         """Return key properties.
 
+        Override this method to return a list of key properties in a format that is
+        compatible with the target.
+
         Returns:
             A list of stream key properties.
         """
@@ -331,10 +334,10 @@ class Sink(metaclass=abc.ABCMeta):
         Raises:
             MissingKeyPropertiesError: If record is missing one or more key properties.
         """
-        if not all(key_property in record for key_property in self.key_properties):
+        if any(key_property not in record for key_property in self._key_properties):
             msg = (
                 f"Record is missing one or more key_properties. \n"
-                f"Key Properties: {self.key_properties}, "
+                f"Key Properties: {self._key_properties}, "
                 f"Record Keys: {list(record.keys())}"
             )
             raise MissingKeyPropertiesError(
