@@ -28,7 +28,7 @@ extend-ignore = ["TD002", "TD003", "FIX002"]
 COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))
 
 package = "singer_sdk"
-python_versions = ["3.11", "3.10", "3.9", "3.8", "3.7"]
+python_versions = ["3.11", "3.10", "3.9", "3.8"]
 main_python_version = "3.10"
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = (
