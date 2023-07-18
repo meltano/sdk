@@ -503,10 +503,7 @@ def test_stream_class_selection(tap_class, input_catalog, selection):
             return [SelectedStream(self), UnselectedStream(self)]
 
     # Check that the selected stream is selected
-    tap = MyTap(
-        config={"username": "dummy", "password": "s3cr3t"},
-        catalog=input_catalog,
-    )
+    tap = MyTap(config=None, catalog=input_catalog, validate_config=False)
     assert all(
         tap.streams[stream].selected is selection[stream] for stream in selection
     )
