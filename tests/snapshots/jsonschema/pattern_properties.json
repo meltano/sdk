@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "email": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "username": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "phone_number": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "patternProperties": {
+    "^attr_[a-z]+$": {
+      "type": [
+        "string"
+      ]
+    }
+  }
+}

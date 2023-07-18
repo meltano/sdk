@@ -1,0 +1,30 @@
+name: Documentation change
+description: Request a documentation change
+title: "docs: <title>"
+labels: ["Documentation", "valuestream/SDK"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this documentation request!
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Documentation type
+      description: What kind of documentation change are you requesting?
+      options:
+        - Tutorials
+        - How-to guides
+        - Reference
+        - Explanation
+    validations:
+      required: true
+  - type: textarea
+    id: what-you-want
+    attributes:
+      label: Description
+      description: Describe what you want to see in the documentation
+      placeholder: "I was trying to do X, but the documentation didn't tell me how to do it, or it was unclear."
+    validations:
+      required: true

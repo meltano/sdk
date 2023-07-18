@@ -1,18 +1,20 @@
 """Internal helper library for record flatteting functions."""
 
+from __future__ import annotations
+
 import collections
 import itertools
 import json
 import re
+import typing as t
 from copy import deepcopy
-from typing import Any, List, Mapping, MutableMapping, NamedTuple, Optional, Tuple
 
 import inflection
 
 DEFAULT_FLATTENING_SEPARATOR = "__"
 
 
-class FlatteningOptions(NamedTuple):
+class FlatteningOptions(t.NamedTuple):
     """A stream map which performs the flattening role."""
 
     max_level: int
@@ -21,8 +23,8 @@ class FlatteningOptions(NamedTuple):
 
 
 def get_flattening_options(
-    plugin_config: Mapping,
-) -> Optional[FlatteningOptions]:
+    plugin_config: t.Mapping,
+) -> FlatteningOptions | None:
     """Get flattening options, if flattening is enabled.
 
     Args:
@@ -37,7 +39,7 @@ def get_flattening_options(
     return None
 
 
-def flatten_key(key_name: str, parent_keys: List[str], separator: str = "__") -> str:
+def flatten_key(key_name: str, parent_keys: list[str], separator: str = "__") -> str:
     """Concatenate `key_name` with its `parent_keys` using `separator`.
 
     Args:
@@ -54,14 +56,18 @@ def flatten_key(key_name: str, parent_keys: List[str], separator: str = "__") ->
     >>> flatten_key("foo", ["bar", "baz"], separator=".")
     'bar.baz.foo'
     """
-    full_key = parent_keys + [key_name]
+    full_key = [*parent_keys, key_name]
     inflected_key = full_key.copy()
     reducer_index = 0
-    while len(separator.join(inflected_key)) >= 255 and reducer_index < len(
-        inflected_key
+    while len(
+        separator.join(inflected_key),
+    ) >= 255 and reducer_index < len(  # noqa: PLR2004
+        inflected_key,
     ):
         reduced_key = re.sub(
-            r"[a-z]", "", inflection.camelize(inflected_key[reducer_index])
+            r"[a-z]",
+            "",
+            inflection.camelize(inflected_key[reducer_index]),
         )
         inflected_key[reducer_index] = (
             reduced_key if len(reduced_key) > 1 else inflected_key[reducer_index][0:3]
@@ -204,9 +210,9 @@ def flatten_schema(
     return new_schema
 
 
-def _flatten_schema(
+def _flatten_schema(  # noqa: C901
     schema_node: dict,
-    parent_keys: List[str] = None,
+    parent_keys: list[str] | None = None,
     separator: str = "__",
     level: int = 0,
     max_level: int = 0,
@@ -215,7 +221,7 @@ def _flatten_schema(
 
     Args:
         schema_node: The schema node to flatten.
-        parent_key: The parent's key, provided as a list of node names.
+        parent_keys: The parent's key, provided as a list of node names.
         separator: The string to use when concatenating key names.
         level: The current recursion level (zero-based).
         max_level: The max recursion level (zero-based, exclusive).
@@ -226,36 +232,35 @@ def _flatten_schema(
     if parent_keys is None:
         parent_keys = []
 
-    items: List[Tuple[str, dict]] = []
+    items: list[tuple[str, dict]] = []
     if "properties" not in schema_node:
         return {}
 
     for k, v in schema_node["properties"].items():
         new_key = flatten_key(k, parent_keys, separator)
-        if "type" in v.keys():
+        if "type" in v:
             if "object" in v["type"] and "properties" in v and level < max_level:
                 items.extend(
                     _flatten_schema(
                         v,
-                        parent_keys + [k],
+                        [*parent_keys, k],
                         separator=separator,
                         level=level + 1,
                         max_level=max_level,
-                    ).items()
+                    ).items(),
                 )
             else:
                 items.append((new_key, v))
-        else:
-            if len(v.values()) > 0:
-                if list(v.values())[0][0]["type"] == "string":
-                    list(v.values())[0][0]["type"] = ["null", "string"]
-                    items.append((new_key, list(v.values())[0][0]))
-                elif list(v.values())[0][0]["type"] == "array":
-                    list(v.values())[0][0]["type"] = ["null", "array"]
-                    items.append((new_key, list(v.values())[0][0]))
-                elif list(v.values())[0][0]["type"] == "object":
-                    list(v.values())[0][0]["type"] = ["null", "object"]
-                    items.append((new_key, list(v.values())[0][0]))
+        elif len(v.values()) > 0:
+            if list(v.values())[0][0]["type"] == "string":
+                list(v.values())[0][0]["type"] = ["null", "string"]
+                items.append((new_key, list(v.values())[0][0]))
+            elif list(v.values())[0][0]["type"] == "array":
+                list(v.values())[0][0]["type"] = ["null", "array"]
+                items.append((new_key, list(v.values())[0][0]))
+            elif list(v.values())[0][0]["type"] == "object":
+                list(v.values())[0][0]["type"] = ["null", "object"]
+                items.append((new_key, list(v.values())[0][0]))
 
     # Sort and check for duplicates
     def _key_func(item):
@@ -264,7 +269,8 @@ def _flatten_schema(
     sorted_items = sorted(items, key=_key_func)
     for k, g in itertools.groupby(sorted_items, key=_key_func):
         if len(list(g)) > 1:
-            raise ValueError(f"Duplicate column name produced in schema: {k}")
+            msg = f"Duplicate column name produced in schema: {k}"
+            raise ValueError(msg)
 
     # Return the (unsorted) result as a dict.
     return dict(items)
@@ -296,9 +302,10 @@ def flatten_record(
 
 
 def _flatten_record(
-    record_node: MutableMapping[Any, Any],
-    flattened_schema: dict = None,
-    parent_key: List[str] = None,
+    record_node: t.MutableMapping[t.Any, t.Any],
+    *,
+    flattened_schema: dict | None = None,
+    parent_key: list[str] | None = None,
     separator: str = "__",
     level: int = 0,
     max_level: int = 0,
@@ -322,19 +329,19 @@ def _flatten_record(
     if parent_key is None:
         parent_key = []
 
-    items: List[Tuple[str, Any]] = []
+    items: list[tuple[str, t.Any]] = []
     for k, v in record_node.items():
         new_key = flatten_key(k, parent_key, separator)
         if isinstance(v, collections.abc.MutableMapping) and level < max_level:
             items.extend(
                 _flatten_record(
                     v,
-                    flattened_schema,
-                    parent_key + [k],
+                    flattened_schema=flattened_schema,
+                    parent_key=[*parent_key, k],
                     separator=separator,
                     level=level + 1,
                     max_level=max_level,
-                ).items()
+                ).items(),
             )
         else:
             items.append(
@@ -343,19 +350,19 @@ def _flatten_record(
                     json.dumps(v)
                     if _should_jsondump_value(k, v, flattened_schema)
                     else v,
-                )
+                ),
             )
 
     return dict(items)
 
 
-def _should_jsondump_value(key: str, value: Any, flattened_schema=None) -> bool:
+def _should_jsondump_value(key: str, value: t.Any, flattened_schema=None) -> bool:
     """Return True if json.dump() should be used to serialize the value.
 
     Args:
         key: [description]
         value: [description]
-        schema: [description]. Defaults to None.
+        flattened_schema: [description]. Defaults to None.
 
     Returns:
         [description]

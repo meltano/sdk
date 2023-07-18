@@ -1,0 +1,14 @@
+{
+    "cookiecutter": {
+      "destination_name": "MyDestinationName",
+      "admin_name": "FirstName LastName",
+      "target_id": "target-sql",
+      "library_name": "target_sql",
+      "variant": "None (Skip)",
+      "serialization_method": "SQL",
+      "include_ci_files": "None (Skip)",
+      "license": "Apache-2.0",
+      "_template": "./sdk/cookiecutter/target-template",
+      "_output_dir": "."
+    }
+  }

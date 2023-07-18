@@ -1,0 +1,14 @@
+version: 1
+disable_existing_loggers: false
+formatters:
+  console:
+    format: "{asctime:23s} | {levelname:8s} | {name:20s} | {message}"
+    style: "{"
+handlers:
+  default:
+    class: logging.StreamHandler
+    formatter: console
+    stream: ext://sys.stderr
+root:
+  level: INFO
+  handlers: [default]

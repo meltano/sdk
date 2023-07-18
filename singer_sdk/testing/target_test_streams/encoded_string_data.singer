@@ -1,0 +1,32 @@
+{"type": "SCHEMA", "stream": "test_strings", "key_properties": ["id"], "schema": {"required": ["id", "info"], "type": "object", "properties": {"id": {"type": "integer"}, "info": {"type": "string"}}}}
+{"type": "RECORD", "stream": "test_strings", "record": {"id": 1, "info": "simple string 2837"}}
+{"type": "RECORD", "stream": "test_strings", "record": {"id": 2, "info": "απλή συμβολοσειρά"}}
+{"type": "RECORD", "stream": "test_strings", "record": {"id": 3, "info": "简单的字串"}}
+{"type": "RECORD", "stream": "test_strings", "record": {"id": 4, "info": "chaîne simple"}}
+{"type": "RECORD", "stream": "test_strings", "record": {"id": 5, "info": "quoted \"string\""}}
+{"type": "RECORD", "stream": "test_strings", "record": {"id": 6, "info": "various \" \\ \/ \n escape sequences"}}
+{"type": "RECORD", "stream": "test_strings", "record": {"id": 7, "info": "\u006D"}}
+{"type": "RECORD", "stream": "test_strings", "record": {"id": 8, "info": "\u0101"}}
+{"type": "RECORD", "stream": "test_strings", "record": {"id": 9, "info": "\u0199"}}
+{"type": "RECORD", "stream": "test_strings", "record": {"id": 10, "info": "Double quoting: \\u0000 \\u0041 \\u0001"}}
+{"type": "RECORD", "stream": "test_strings", "record": {"id": 11, "info": "Control Characters in string: \u0000 \u0041 \u0001"}}
+{"type": "SCHEMA", "stream": "test_strings_in_objects", "key_properties": ["id"], "schema": {"required": ["id", "info"], "type": "object", "properties": {"id": {"type": "integer"}, "info": {"required": ["name"], "type": "object", "properties": {"name": {"type": "string"}, "value": {"type": "string"}}}}}}
+{"type": "RECORD", "stream": "test_strings_in_objects", "record": {"id": 1, "info": {"name": "simple", "value": "simple string 2837"}}}
+{"type": "RECORD", "stream": "test_strings_in_objects", "record": {"id": 2, "info": {"name": "greek", "value": "απλή συμβολοσειρά"}}}
+{"type": "RECORD", "stream": "test_strings_in_objects", "record": {"id": 3, "info": {"name": "chinese", "value": "简单的字串"}}}
+{"type": "RECORD", "stream": "test_strings_in_objects", "record": {"id": 4, "info": {"name": "french", "value": "chaîne simple"}}}
+{"type": "RECORD", "stream": "test_strings_in_objects", "record": {"id": 5, "info": {"name": "quoted string", "value": "quoted \"string\""}}}
+{"type": "RECORD", "stream": "test_strings_in_objects", "record": {"id": 6, "info": {"name": "escape sequences", "value": "various \" \\ \/ \n escape sequences"}}}
+{"type": "RECORD", "stream": "test_strings_in_objects", "record": {"id": 7, "info": {"name": "unicode", "value": "\u006D"}}}
+{"type": "RECORD", "stream": "test_strings_in_objects", "record": {"id": 8, "info": {"name": "unicode", "value": "\u0101"}}}
+{"type": "RECORD", "stream": "test_strings_in_objects", "record": {"id": 9, "info": {"name": "unicode", "value": "\u0199"}}}
+{"type": "RECORD", "stream": "test_strings_in_objects", "record": {"id": 10, "info": {"name": "Double quoting", "value": " \\u0000 \\u0041 \\u0001"}}}
+{"type": "RECORD", "stream": "test_strings_in_objects", "record": {"id": 11, "info": {"name": "Control Characters in string", "value": "\u0000 \u0041 \u0001"}}}
+{"type": "SCHEMA", "stream": "test_strings_in_arrays", "key_properties": ["id"], "schema": {"required": ["id"], "type": "object", "properties": {"id": {"type": "integer"}, "strings": {"type": "array", "items": {"type": "string"}}}}}
+{"type": "RECORD", "stream": "test_strings_in_arrays", "record": {"id": 1, "strings": ["simple string", "απλή συμβολοσειρά", "简单的字串"]}}
+{"type": "RECORD", "stream": "test_strings_in_arrays", "record": {"id": 2, "strings": ["chaîne simple", "quoted \"string\""]}}
+{"type": "RECORD", "stream": "test_strings_in_arrays", "record": {"id": 3, "strings": ["various \" \\ \/ \n escape sequences"]}}
+{"type": "RECORD", "stream": "test_strings_in_arrays", "record": {"id": 4, "strings": ["\u006D", "\u0101", "\u0199"]}}
+{"type": "RECORD", "stream": "test_strings_in_arrays", "record": {"id": 5, "strings": ["aaa", "Double quoting: \\u0000 \\u0041 \\u0001"]}}
+{"type": "RECORD", "stream": "test_strings_in_arrays", "record": {"id": 6, "strings": ["bbb", "Control Characters in string: \u0000 \u0041 \u0001"]}}
+{"type": "STATE", "value": {"test_strings": 11, "test_strings_in_objects": 11, "test_strings_in_arrays": 6}}

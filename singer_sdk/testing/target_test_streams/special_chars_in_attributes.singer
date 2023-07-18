@@ -1,0 +1,2 @@
+{"type": "SCHEMA", "stream": "test:SpecialChars!in?attributes", "schema": {"type": "object", "properties": {"_id": {"type": "string"}, "d": {"type": "object", "properties": {"env": {"type": "string"}, "agent:type": {"type": "string"}, "agent:os:version": {"type": "string"}}}}}, "key_properties": ["_id"]}
+{"type": "RECORD", "stream": "test:SpecialChars!in?attributes", "record": {"_id": "a2e98886", "d": {"env": "prod", "agent:type": "desktop", "agent:os:version": "10.13.1"}}, "version": 1541199424491, "time_extracted": "2018-11-02T22:57:04.841020Z"}

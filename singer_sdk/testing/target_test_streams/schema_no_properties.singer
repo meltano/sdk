@@ -1,0 +1,6 @@
+{"type": "SCHEMA", "stream": "test_object_schema_with_properties", "key_properties": [], "schema": {"type": "object", "properties": { "object_store": {"type": "object", "properties": {"id": {"type": "integer"}, "metric": {"type": "integer"}}}}}}
+{"type": "RECORD", "stream": "test_object_schema_with_properties", "record": {"object_store": {"id": 1, "metric": 187}}}
+{"type": "RECORD", "stream": "test_object_schema_with_properties", "record": {"object_store": {"id": 2, "metric": 203}}}
+{"type": "SCHEMA", "stream": "test_object_schema_no_properties", "key_properties": [], "schema": {"type": "object", "properties": { "object_store": {"type": "object"}}}}
+{"type": "RECORD", "stream": "test_object_schema_no_properties", "record": {"object_store": {"id": 1, "metric": 1}}}
+{"type": "RECORD", "stream": "test_object_schema_no_properties", "record": {"object_store": {"id": 2, "metric": 2}}}

@@ -161,7 +161,7 @@ plugins:
   extractors:
   - name: my-tap
     namespace: my_tap
-    executable: ./my-tap.sh
+    executable: -e .
     capabilities:
     - state
     - catalog

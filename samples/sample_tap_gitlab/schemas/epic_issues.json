@@ -15,12 +15,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "award_emoji",
-        "notes",
-        "project",
-        "self"
-      ],
+      "required": ["award_emoji", "notes", "project", "self"],
       "type": "object"
     },
     "assignee": {
@@ -44,15 +39,8 @@
           "type": "string"
         }
       },
-      "required": [
-        "avatar_url",
-        "id",
-        "name",
-        "state",
-        "username",
-        "web_url"
-      ],
-      "type": "object"
+      "required": ["avatar_url", "id", "name", "state", "username", "web_url"],
+      "type": ["object", "null"]
     },
     "assignees": {
       "items": {
@@ -109,18 +97,12 @@
           "type": "string"
         }
       },
-      "required": [
-        "avatar_url",
-        "id",
-        "name",
-        "state",
-        "username",
-        "web_url"
-      ],
+      "required": ["avatar_url", "id", "name", "state", "username", "web_url"],
       "type": "object"
     },
     "closed_at": {
-      "type": "null"
+      "type": ["string", "null"],
+      "format": "date-time"
     },
     "confidential": {
       "type": "boolean"
@@ -139,7 +121,8 @@
       "type": "integer"
     },
     "due_date": {
-      "type": "null"
+      "type": ["string", "null"],
+      "format": "date-time"
     },
     "epic_issue_id": {
       "type": "integer"
@@ -152,8 +135,7 @@
     },
     "labels": {
       "items": {
-        "properties": {},
-        "type": "object"
+        "type": "string"
       },
       "type": "array"
     },
@@ -167,7 +149,8 @@
           "type": "string"
         },
         "due_date": {
-          "type": "null"
+          "type": ["string", "null"],
+          "format": "date-time"
         },
         "id": {
           "type": "integer"
@@ -179,7 +162,8 @@
           "type": "integer"
         },
         "start_date": {
-          "type": "null"
+          "type": ["string", "null"],
+          "format": "date-time"
         },
         "state": {
           "type": "string"
@@ -198,13 +182,12 @@
         "due_date",
         "id",
         "iid",
-        "project_id",
         "start_date",
         "state",
         "title",
         "updated_at"
       ],
-      "type": "object"
+      "type": ["object", "null"]
     },
     "project_id": {
       "type": "integer"
@@ -215,10 +198,10 @@
     "time_stats": {
       "properties": {
         "human_time_estimate": {
-          "type": "null"
+          "type": ["string", "null"]
         },
         "human_total_time_spent": {
-          "type": "null"
+          "type": ["string", "null"]
         },
         "time_estimate": {
           "type": "integer"
@@ -252,7 +235,7 @@
       "type": "string"
     },
     "weight": {
-      "type": "null"
+      "type": ["integer", "null"]
     }
   },
   "required": [

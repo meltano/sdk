@@ -1,0 +1,19 @@
+{"type": "SCHEMA", "stream": "test_multiple_state_messages_a", "key_properties": ["id"], "schema": {"required": ["id"], "type": "object", "properties": {"id": {"type": "integer"}, "metric": {"type": "integer"}}}}
+{"type": "SCHEMA", "stream": "test_multiple_state_messages_b", "key_properties": ["id"], "schema": {"required": ["id"], "type": "object", "properties": {"id": {"type": "integer"}, "metric": {"type": "integer"}}}}
+{"type": "RECORD", "stream": "test_multiple_state_messages_a", "record": {"id": 1, "metric": 100}}
+{"type": "STATE", "value": {"test_multiple_state_messages_a": 1, "test_multiple_state_messages_b": 0}}
+{"type": "RECORD", "stream": "test_multiple_state_messages_a", "record": {"id": 2, "metric": 200}}
+{"type": "RECORD", "stream": "test_multiple_state_messages_b", "record": {"id": 1, "metric": 110}}
+{"type": "STATE", "value": {"test_multiple_state_messages_a": 2, "test_multiple_state_messages_b": 1}}
+{"type": "RECORD", "stream": "test_multiple_state_messages_a", "record": {"id": 3, "metric": 300}}
+{"type": "RECORD", "stream": "test_multiple_state_messages_b", "record": {"id": 2, "metric": 220}}
+{"type": "STATE", "value": {"test_multiple_state_messages_a": 3, "test_multiple_state_messages_b": 2}}
+{"type": "RECORD", "stream": "test_multiple_state_messages_a", "record": {"id": 4, "metric": 400}}
+{"type": "RECORD", "stream": "test_multiple_state_messages_a", "record": {"id": 5, "metric": 500}}
+{"type": "RECORD", "stream": "test_multiple_state_messages_b", "record": {"id": 3, "metric": 330}}
+{"type": "STATE", "value": {"test_multiple_state_messages_a": 5, "test_multiple_state_messages_b": 3}}
+{"type": "RECORD", "stream": "test_multiple_state_messages_b", "record": {"id": 4, "metric": 440}}
+{"type": "RECORD", "stream": "test_multiple_state_messages_b", "record": {"id": 5, "metric": 550}}
+{"type": "RECORD", "stream": "test_multiple_state_messages_b", "record": {"id": 6, "metric": 660}}
+{"type": "STATE", "value": {"test_multiple_state_messages_a": 5, "test_multiple_state_messages_b": 6}}
+{"type": "RECORD", "stream": "test_multiple_state_messages_a", "record": {"id": 6, "metric": 600}}

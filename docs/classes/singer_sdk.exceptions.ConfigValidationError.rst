@@ -5,4 +5,4 @@
 
 .. autoclass:: ConfigValidationError
     :members:
-    :special-members: __init__
+    :special-members: __init__, __call__

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import json
+import typing as t
 from contextlib import redirect_stdout
 
 import pytest
@@ -14,20 +15,24 @@ class Parent(Stream):
     """A parent stream."""
 
     name = "parent"
-    schema = {
+    schema: t.ClassVar[dict] = {
         "type": "object",
         "properties": {
             "id": {"type": "integer"},
         },
     }
 
-    def get_child_context(self, record: dict, context: dict | None) -> dict:
+    def get_child_context(
+        self,
+        record: dict,
+        context: dict | None,  # noqa: ARG002
+    ) -> dict | None:
         """Create context for children streams."""
         return {
             "pid": record["id"],
         }
 
-    def get_records(self, context: dict | None):
+    def get_records(self, context: dict | None):  # noqa: ARG002
         """Get dummy records."""
         yield {"id": 1}
         yield {"id": 2}
@@ -38,7 +43,7 @@ class Child(Stream):
     """A child stream."""
 
     name = "child"
-    schema = {
+    schema: t.ClassVar[dict] = {
         "type": "object",
         "properties": {
             "id": {"type": "integer"},
@@ -47,7 +52,7 @@ class Child(Stream):
     }
     parent_stream_type = Parent
 
-    def get_records(self, context: dict | None):
+    def get_records(self, context: dict | None):  # noqa: ARG002
         """Get dummy records."""
         yield {"id": 1}
         yield {"id": 2}
@@ -82,37 +87,62 @@ def tap_with_deselected_parent(tap: MyTap):
     tap.catalog["parent"].metadata[()].selected = original
 
 
+def _get_messages(tap: Tap):
+    """Redirect stdout to a buffer."""
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        tap.sync_all()
+    buf.seek(0)
+    lines = buf.read().splitlines()
+    return [json.loads(line) for line in lines]
+
+
 def test_parent_context_fields_in_child(tap: MyTap):
     """Test that parent context fields are available in child streams."""
     parent_stream = tap.streams["parent"]
     child_stream = tap.streams["child"]
-
-    buf = io.StringIO()
-    with redirect_stdout(buf):
-        tap.sync_all()
-
-    buf.seek(0)
-    lines = buf.read().splitlines()
-    messages = [json.loads(line) for line in lines]
+    messages = _get_messages(tap)
 
     # Parent schema is emitted
-    assert messages[0]
-    assert messages[0]["type"] == SingerMessageType.SCHEMA
-    assert messages[0]["stream"] == parent_stream.name
-    assert messages[0]["schema"] == parent_stream.schema
-
-    # Child schema is emitted
     assert messages[1]
     assert messages[1]["type"] == SingerMessageType.SCHEMA
-    assert messages[1]["stream"] == child_stream.name
-    assert messages[1]["schema"] == child_stream.schema
+    assert messages[1]["stream"] == parent_stream.name
+    assert messages[1]["schema"] == parent_stream.schema
 
-    # Child records are emitted, skip state message in between
-    child_record_messages = messages[2], *messages[4:6]
+    # Child schema is emitted
+    assert messages[2]
+    assert messages[2]["type"] == SingerMessageType.SCHEMA
+    assert messages[2]["stream"] == child_stream.name
+    assert messages[2]["schema"] == child_stream.schema
+
+    # Child records are emitted
+    child_record_messages = messages[3:6]
     assert child_record_messages
     assert all(msg["type"] == SingerMessageType.RECORD for msg in child_record_messages)
     assert all(msg["stream"] == child_stream.name for msg in child_record_messages)
     assert all("pid" in msg["record"] for msg in child_record_messages)
+
+
+def test_skip_deleted_parent_child_streams(
+    tap: MyTap,
+    caplog: pytest.LogCaptureFixture,
+):
+    """Test tap output with parent stream deselected."""
+    parent_stream = tap.streams["parent"]
+
+    buf = io.StringIO()
+    with redirect_stdout(buf), caplog.at_level("WARNING"):
+        parent_stream._sync_children(None)
+
+    buf.seek(0)
+
+    assert not buf.read().splitlines()
+    assert len(caplog.records) == 1
+    assert caplog.records[0].levelname == "WARNING"
+    assert caplog.records[0].message == (
+        "Context for child streams of 'parent' is null, "
+        "skipping sync of any child streams"
+    )
 
 
 def test_child_deselected_parent(tap_with_deselected_parent: MyTap):
@@ -123,22 +153,16 @@ def test_child_deselected_parent(tap_with_deselected_parent: MyTap):
     assert not parent_stream.selected
     assert parent_stream.has_selected_descendents
 
-    buf = io.StringIO()
-    with redirect_stdout(buf):
-        tap_with_deselected_parent.sync_all()
-
-    buf.seek(0)
-    lines = buf.read().splitlines()
-    messages = [json.loads(line) for line in lines]
+    messages = _get_messages(tap_with_deselected_parent)
 
     # First message is a schema for the child stream, not the parent
-    assert messages[0]
-    assert messages[0]["type"] == SingerMessageType.SCHEMA
-    assert messages[0]["stream"] == child_stream.name
-    assert messages[0]["schema"] == child_stream.schema
+    assert messages[1]
+    assert messages[1]["type"] == SingerMessageType.SCHEMA
+    assert messages[1]["stream"] == child_stream.name
+    assert messages[1]["schema"] == child_stream.schema
 
-    # Child records are emitted, skip state message in between
-    child_record_messages = messages[1], *messages[3:5]
+    # Child records are emitted
+    child_record_messages = messages[2:5]
     assert child_record_messages
     assert all(msg["type"] == SingerMessageType.RECORD for msg in child_record_messages)
     assert all(msg["stream"] == child_stream.name for msg in child_record_messages)

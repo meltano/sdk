@@ -4,17 +4,17 @@
 # nested in that directory, on any level
 
 # Default owners
-* @edgarrmondragon @cjohnhanson @aaronsteers
+* @edgarrmondragon @kgpayne
 
 # CI/CD
 /.github/workflows/ @edgarrmondragon @meltano/engineering
 
 # Docs (General)
 /docs/ @meltano/engineering @meltano/marketing
-/README.md @afolson @tayloramurphy @meltano/engineering @meltano/marketing
+/README.md @tayloramurphy @meltano/engineering @meltano/marketing
 
 # Docs (Contributing)
-/docs/CONTRIBUTING.md @afolson @tayloramurphy @meltano/engineering
+/docs/CONTRIBUTING.md @tayloramurphy @meltano/engineering
 
 # Release Ops (see `/.pyproject.toml` for list of bumped files)
 /cookiecutter/*/*/pyproject.toml @meltano/engineering

@@ -3,24 +3,25 @@
 from __future__ import annotations
 
 import sys
+import typing as t
 from abc import ABCMeta, abstractmethod
-from typing import Any, Generic, Iterable, Optional, TypeVar
 from urllib.parse import ParseResult, urlparse
-
-from requests import Response
 
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 
 if sys.version_info >= (3, 8):
-    from typing import Protocol
+    from typing import Protocol  # noqa: ICN003
 else:
     from typing_extensions import Protocol
 
-T = TypeVar("T")
-TPageToken = TypeVar("TPageToken")
+if t.TYPE_CHECKING:
+    from requests import Response
+
+T = t.TypeVar("T")
+TPageToken = t.TypeVar("TPageToken")
 
 
-def first(iterable: Iterable[T]) -> T:
+def first(iterable: t.Iterable[T]) -> T:
     """Return the first element of an iterable or raise an exception.
 
     Args:
@@ -35,7 +36,7 @@ def first(iterable: Iterable[T]) -> T:
     return next(iter(iterable))
 
 
-class BaseAPIPaginator(Generic[TPageToken], metaclass=ABCMeta):
+class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
     """An API paginator object."""
 
     def __init__(self, start_value: TPageToken) -> None:
@@ -111,10 +112,11 @@ class BaseAPIPaginator(Generic[TPageToken], metaclass=ABCMeta):
         new_value = self.get_next(response)
 
         if new_value and new_value == self._value:
-            raise RuntimeError(
-                f"Loop detected in pagination. "
-                f"Pagination token {new_value} is identical to prior token."
+            msg = (
+                f"Loop detected in pagination. Pagination token {new_value} is "
+                "identical to prior token."
             )
+            raise RuntimeError(msg)
 
         # Stop if new value None, empty string, 0, etc.
         if not new_value:
@@ -122,7 +124,7 @@ class BaseAPIPaginator(Generic[TPageToken], metaclass=ABCMeta):
         else:
             self._value = new_value
 
-    def has_more(self, response: Response) -> bool:
+    def has_more(self, response: Response) -> bool:  # noqa: ARG002
         """Override this method to check if the endpoint has any pages left.
 
         Args:
@@ -150,7 +152,7 @@ class BaseAPIPaginator(Generic[TPageToken], metaclass=ABCMeta):
 class SinglePagePaginator(BaseAPIPaginator[None]):
     """A paginator that does works with single-page endpoints."""
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Create a new paginator.
 
         Args:
@@ -159,7 +161,7 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
         """
         super().__init__(None, *args, **kwargs)
 
-    def get_next(self, response: Response) -> None:
+    def get_next(self, response: Response) -> None:  # noqa: ARG002
         """Get the next pagination token or index from the API response.
 
         Args:
@@ -169,10 +171,13 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
             The next page token or index. Return `None` from this method to indicate
                 the end of pagination.
         """
-        return None
+        return
 
 
-class BaseHATEOASPaginator(BaseAPIPaginator[Optional[ParseResult]], metaclass=ABCMeta):
+class BaseHATEOASPaginator(
+    BaseAPIPaginator[t.Optional[ParseResult]],
+    metaclass=ABCMeta,
+):
     """Paginator class for APIs supporting HATEOAS links in their response bodies.
 
     HATEOAS stands for "Hypermedia as the Engine of Application State". See
@@ -180,9 +185,40 @@ class BaseHATEOASPaginator(BaseAPIPaginator[Optional[ParseResult]], metaclass=AB
 
     This paginator expects responses to have a key "next" with a value
     like "https://api.com/link/to/next-item".
+
+    The :attr:`~singer_sdk.pagination.BaseAPIPaginator.current_value` attribute of
+    this paginator is a `urllib.parse.ParseResult`_ object. This object
+    contains the following attributes:
+
+    - scheme
+    - netloc
+    - path
+    - params
+    - query
+    - fragment
+
+    That means you can access and parse the query params in your stream like this:
+
+    .. code-block:: python
+
+       class MyHATEOASPaginator(BaseHATEOASPaginator):
+           def get_next_url(self, response):
+               return response.json().get("next")
+
+       class MyStream(Stream):
+           def get_new_paginator(self):
+               return MyHATEOASPaginator()
+
+           def get_url_params(self, next_page_token) -> dict:
+               if next_page_token:
+                   return dict(parse_qsl(next_page_token.query))
+               return {}
+
+    .. _`urllib.parse.ParseResult`:
+         https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlparse
     """
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Create a new paginator.
 
         Args:
@@ -234,14 +270,14 @@ class HeaderLinkPaginator(BaseHATEOASPaginator):
         return url
 
 
-class JSONPathPaginator(BaseAPIPaginator[Optional[str]]):
+class JSONPathPaginator(BaseAPIPaginator[t.Optional[str]]):
     """Paginator class for APIs returning a pagination token in the response body."""
 
     def __init__(
         self,
         jsonpath: str,
-        *args: Any,
-        **kwargs: Any,
+        *args: t.Any,
+        **kwargs: t.Any,
     ) -> None:
         """Create a new paginator.
 
@@ -266,14 +302,14 @@ class JSONPathPaginator(BaseAPIPaginator[Optional[str]]):
         return next(all_matches, None)
 
 
-class SimpleHeaderPaginator(BaseAPIPaginator[Optional[str]]):
+class SimpleHeaderPaginator(BaseAPIPaginator[t.Optional[str]]):
     """Paginator class for APIs returning a pagination token in the response headers."""
 
     def __init__(
         self,
         key: str,
-        *args: Any,
-        **kwargs: Any,
+        *args: t.Any,
+        **kwargs: t.Any,
     ) -> None:
         """Create a new paginator.
 
@@ -313,7 +349,7 @@ class BasePageNumberPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         """
         ...
 
-    def get_next(self, response: Response) -> int | None:
+    def get_next(self, response: Response) -> int | None:  # noqa: ARG002
         """Get the next page number.
 
         Args:
@@ -332,8 +368,8 @@ class BaseOffsetPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         self,
         start_value: int,
         page_size: int,
-        *args: Any,
-        **kwargs: Any,
+        *args: t.Any,
+        **kwargs: t.Any,
     ) -> None:
         """Create a new paginator.
 
@@ -358,7 +394,7 @@ class BaseOffsetPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         """
         ...
 
-    def get_next(self, response: Response) -> int | None:
+    def get_next(self, response: Response) -> int | None:  # noqa: ARG002
         """Get the next page offset.
 
         Args:
@@ -388,16 +424,16 @@ class LegacyPaginatedStreamProtocol(Protocol[TPageToken]):
 
 
 class LegacyStreamPaginator(
-    BaseAPIPaginator[Optional[TPageToken]],
-    Generic[TPageToken],
+    BaseAPIPaginator[t.Optional[TPageToken]],
+    t.Generic[TPageToken],
 ):
     """Paginator that works with REST streams as they exist today."""
 
     def __init__(
         self,
         stream: LegacyPaginatedStreamProtocol[TPageToken],
-        *args: Any,
-        **kwargs: Any,
+        *args: t.Any,
+        **kwargs: t.Any,
     ) -> None:
         """Create a new paginator.
 

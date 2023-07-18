@@ -6,7 +6,7 @@ See the online explorer and query builder here:
   - https://countries.trevorblades.com/
 """
 
-from typing import List
+from __future__ import annotations
 
 from samples.sample_tap_countries.countries_streams import (
     ContinentsStream,
@@ -22,9 +22,13 @@ class SampleTapCountries(Tap):
     name: str = "sample-tap-countries"
     config_jsonschema = PropertiesList().to_dict()
 
-    def discover_streams(self) -> List[Stream]:
+    def discover_streams(self) -> list[Stream]:
         """Return a list of discovered streams."""
         return [
             CountriesStream(tap=self),
             ContinentsStream(tap=self),
         ]
+
+
+if __name__ == "__main__":
+    SampleTapCountries.cli()

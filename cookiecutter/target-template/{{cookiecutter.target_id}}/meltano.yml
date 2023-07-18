@@ -1,6 +1,9 @@
 version: 1
 send_anonymous_usage_stats: true
 project_id: "{{cookiecutter.target_id}}"
+default_environment: test
+environments:
+- name: test
 plugins:
   extractors: []
   loaders:
@@ -8,9 +11,9 @@ plugins:
     namespace: "{{cookiecutter.library_name}}"
     pip_url: -e .
     capabilities:
-    - state
-    - catalog
-    - discover
+    - about
+    - stream-maps
+    - record-flattening
     config:
       start_date: '2010-01-01T00:00:00Z'
     settings:

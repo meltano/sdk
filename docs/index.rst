@@ -1,14 +1,16 @@
-.. Meltano SDK documentation master file, created by
+.. Meltano Singer SDK documentation master file, created by
    sphinx-quickstart on Thu Jun  3 14:38:15 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Meltano SDK for Taps and Targets
-=======================================
+Meltano Singer SDK
+==================
 
-The Meltano_ SDK for Taps and Targets is the fastest way to build custom
+The Meltano_ Singer SDK for Taps and Targets is the fastest way to build custom
 data extractors and loaders! Taps and targets built on the SDK are automatically compliant with the
-`Singer Spec`_, the de-facto open source standard for extract and load pipelines.
+`Singer Spec`_, the de-facto open source standard for extract and load pipelines, and therefore Meltano_.
+
+If you're looking to add support to Meltano for a new data tool that would be listed on the `Meltano Hub`_ as a utility, check out the `Meltano EDK`_ (Extension Development Kit) instead.
 
 Future-proof extractors and loaders, with less code
 ---------------------------------------------------
@@ -33,46 +35,57 @@ read the `source code`_, `log an issue or feature request`_, and `contribute bac
 to the SDK. We also regularly discuss SDK topics in our `Meltano Slack`_ community,
 within the `#singer-tap-development`_ and `#singer-target-development`_ Slack channels.
 
-Developer Resources
--------------------
 
 .. toctree::
+   :caption: Developer Resources
    :maxdepth: 2
+   :hidden:
 
    dev_guide
-   python_tips
-   code_samples
+   guides/index
+   Python Tips <python_tips>
+   Code Samples <code_samples>
    cli_commands
-   capabilities
    faq
 
-Reference
----------
-
 .. toctree::
+   :caption: Reference
    :maxdepth: 2
+   :hidden:
 
    reference
-
-
-Advanced Topics
----------------
-
-.. toctree::
-   :maxdepth: 1
-
-   parent_streams
-   partitioning
-   stream_maps
-   porting
-   sinks
-   CONTRIBUTING
    implementation/index
    typing
+   capabilities
+
+.. toctree::
+   :caption: Advanced Concepts
+   :maxdepth: 2
+   :hidden:
+
+   incremental_replication
+   parent_streams
+   partitioning
+   context_object
+   stream_maps
+   batch
+   sinks
+   testing
+
+.. toctree::
+   :caption: SDK Development
+   :maxdepth: 1
+   :hidden:
+
+   CONTRIBUTING
+   release_process
+   deprecation
 
 .. _Singer: https://singer.io
 .. _Singer Spec: https://hub.meltano.com/singer/spec
 .. _Meltano: https://www.meltano.com
+.. _Meltano EDK: https://edk.meltano.com
+.. _Meltano Hub: https://hub.meltano.com/utilities/
 .. _integrated with Meltano: https://docs.meltano.com/tutorials/custom-extractor#add-the-plugin-to-your-meltano-project
 .. _contribute back: https://github.com/meltano/sdk/issues?q=is%3Aopen+is%3Aissue+label%3A%22accepting+merge+requests%22
 .. _source code: https://github.com/meltano/sdk

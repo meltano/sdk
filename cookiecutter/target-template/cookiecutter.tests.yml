@@ -8,3 +8,7 @@ tests:
   - destination_name: SQLSinkTest
     target_id: target-sqlsink-test
     serialization_method: SQL
+  - destination_name: TargetRecordSinkTest
+    target_id: target-recordsink-test
+    variant: meltanolabs
+    serialization_method: Per record

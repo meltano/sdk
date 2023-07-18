@@ -1,13 +1,16 @@
 """Typing tests."""
 
+from __future__ import annotations
+
 import logging
+import typing as t
 from datetime import datetime
-from typing import Any, Dict
 
 import pendulum
 import pytest
 
 from singer_sdk.helpers._typing import (
+    TypeConformanceLevel,
     conform_record_data_types,
     get_datelike_property_type,
     to_json_compatible,
@@ -15,31 +18,66 @@ from singer_sdk.helpers._typing import (
 
 
 @pytest.mark.parametrize(
-    "row,schema,expected_row",
+    "record,schema,expected_row,ignore_props_message",
     [
         (
             {"updatedAt": pendulum.parse("2021-08-25T20:05:28+00:00")},
             {"properties": {"updatedAt": True}},
             {"updatedAt": "2021-08-25T20:05:28+00:00"},
+            None,
         ),
         (
             {"updatedAt": pendulum.parse("2021-08-25T20:05:28Z")},
             {"properties": {"updatedAt": True}},
             {"updatedAt": "2021-08-25T20:05:28+00:00"},
+            None,
         ),
         (
             {"updatedAt": pendulum.parse("2021-08-25T20:05:28")},
             {"properties": {"updatedAt": True}},
             {"updatedAt": "2021-08-25T20:05:28+00:00"},
+            None,
+        ),
+        (
+            {"present": 1, "absent": "2"},
+            {"properties": {"present": {"type": "integer"}}},
+            {"present": 1},
+            (
+                "Properties ('absent',) were present in the 'test-stream' stream but "
+                "not found in catalog schema. Ignoring."
+            ),
         ),
     ],
+    ids=[
+        "datetime with offset",
+        "datetime with timezone",
+        "datetime without timezone",
+        "ignored_props_message",
+    ],
 )
-def test_conform_record_data_types(row: Dict[str, Any], schema: dict, expected_row):
+def test_conform_record_data_types(
+    record: dict[str, t.Any],
+    schema: dict,
+    expected_row: dict,
+    ignore_props_message: str,
+    caplog: pytest.LogCaptureFixture,
+):
     stream_name = "test-stream"
-    # TODO: mock this out
-    logger = logging.getLogger()
-    actual = conform_record_data_types(stream_name, row, schema, logger)
-    print(row["updatedAt"].isoformat())
+    logger = logging.getLogger("test-logger")
+
+    with caplog.at_level(logging.INFO, logger=logger.name):
+        actual = conform_record_data_types(
+            stream_name,
+            record,
+            schema,
+            TypeConformanceLevel.RECURSIVE,
+            logger,
+        )
+        if ignore_props_message:
+            assert ignore_props_message in caplog.text
+        else:
+            assert not caplog.text
+
     assert actual == expected_row
 
 
@@ -49,7 +87,10 @@ def test_conform_record_data_types(row: Dict[str, Any], schema: dict, expected_r
         (pendulum.parse("2021-08-25T20:05:28+00:00"), "2021-08-25T20:05:28+00:00"),
         (pendulum.parse("2021-08-25T20:05:28+07:00"), "2021-08-25T20:05:28+07:00"),
         (
-            datetime.strptime("2021-08-25T20:05:28", "%Y-%m-%dT%H:%M:%S"),
+            datetime.strptime(  # noqa: DTZ007
+                "2021-08-25T20:05:28",
+                "%Y-%m-%dT%H:%M:%S",
+            ),
             "2021-08-25T20:05:28+00:00",
         ),
         (
@@ -86,7 +127,7 @@ def test_to_json_compatible(datetime_val, expected):
                         "items": {"type": "string", "format": "date-time"},
                     },
                     {"type": "null"},
-                ]
+                ],
             },
             None,
         ),

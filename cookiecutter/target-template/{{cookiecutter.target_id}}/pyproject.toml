@@ -1,33 +1,56 @@
 [tool.poetry]
+{%- if cookiecutter.variant != "None (Skip)" %}
+name = "{{cookiecutter.variant}}-{{cookiecutter.target_id}}"
+{%- else %}
 name = "{{cookiecutter.target_id}}"
+{%- endif %}
 version = "0.0.1"
-description = "`{{cookiecutter.target_id}}` is a Singer target for {{cookiecutter.destination_name}}, built with the Meltano SDK for Singer Targets."
+description = "`{{cookiecutter.target_id}}` is a Singer target for {{cookiecutter.destination_name}}, built with the Meltano Singer SDK."
+readme = "README.md"
 authors = ["{{ cookiecutter.admin_name }}"]
 keywords = [
     "ELT",
     "{{cookiecutter.destination_name}}",
 ]
-license = "Apache 2.0"
+license = "Apache-2.0"
+{%- if cookiecutter.variant != "None (Skip)" %}
+packages = [
+    { include = "{{cookiecutter.library_name}}" },
+]
+{%- endif %}
 
 [tool.poetry.dependencies]
-python = "<3.11,>=3.7.1"
-requests = "^2.25.1"
-singer-sdk = "^0.9.0"
+python = "<3.12,>=3.7.1"
+singer-sdk = { version="^0.30.0" }
+fs-s3fs = { version = "^1.1.1", optional = true }
+{%- if cookiecutter.serialization_method != "SQL" %}
+requests = "^2.31.0"
+{%- endif %}
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2.5"
-tox = "^3.24.4"
-flake8 = "^3.9.2"
-black = "^21.9b0"
-pydocstyle = "^6.1.1"
-mypy = "^0.910"
-types-requests = "^2.26.1"
-isort = "^5.10.1"
+pytest = "^7.2.1"
+singer-sdk = { version="^0.30.0", extras = ["testing"] }
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3 # Vertical Hanging Indent
-src_paths = "{{cookiecutter.library_name}}"
+[tool.poetry.extras]
+s3 = ["fs-s3fs"]
+
+[tool.ruff]
+ignore = [
+    "ANN101",  # missing-type-self
+    "ANN102",  # missing-type-cls
+]
+select = ["ALL"]
+src = ["{{cookiecutter.library_name}}"]
+target-version = "py37"
+
+[tool.ruff.flake8-annotations]
+allow-star-arg-any = true
+
+[tool.ruff.isort]
+known-first-party = ["{{cookiecutter.library_name}}"]
+
+[tool.ruff.pydocstyle]
+convention = "google"
 
 [build-system]
 requires = ["poetry-core>=1.0.8"]

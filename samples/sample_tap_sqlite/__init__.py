@@ -1,8 +1,8 @@
 """A sample implementation for SQLite."""
 
-from typing import Any, Dict
+from __future__ import annotations
 
-import sqlalchemy
+import typing as t
 
 from singer_sdk import SQLConnector, SQLStream, SQLTap
 from singer_sdk import typing as th
@@ -16,24 +16,9 @@ class SQLiteConnector(SQLConnector):
     This class handles all DDL and type conversions.
     """
 
-    def get_sqlalchemy_url(self, config: Dict[str, Any]) -> str:
+    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:
         """Generates a SQLAlchemy URL for SQLite."""
         return f"sqlite:///{config[DB_PATH_CONFIG]}"
-
-    def create_sqlalchemy_connection(self) -> sqlalchemy.engine.Connection:
-        """Return a new SQLAlchemy connection using the provided config.
-
-        This override simply provides a more helpful error message on failure.
-
-        Returns:
-            A newly created SQLAlchemy engine object.
-        """
-        try:
-            return super().create_sqlalchemy_connection()
-        except Exception as ex:
-            raise RuntimeError(
-                f"Error connecting to DB at '{self.config[DB_PATH_CONFIG]}': {ex}"
-            ) from ex
 
 
 class SQLiteStream(SQLStream):
@@ -61,7 +46,8 @@ class SQLiteTap(SQLTap):
             th.StringType,
             description="The path to your SQLite database file(s).",
             required=True,
-        )
+            examples=["./path/to/my.db", "/absolute/path/to/my.db"],
+        ),
     ).to_dict()
 
 
