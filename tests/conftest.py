@@ -92,6 +92,10 @@ class BatchSinkMock(BatchSink):
         self.target.records_written.extend(context["records"])
         self.target.num_batches_processed += 1
 
+    @property
+    def key_properties(self) -> list[str]:
+        return [key.upper() for key in super().key_properties]
+
 
 class TargetMock(Target):
     """A mock Target class."""

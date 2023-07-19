@@ -213,6 +213,8 @@ pytest11 = { callable = "singer_sdk:testing.pytest_plugin", extras = ["testing"]
 [tool.ruff]
 exclude = [
     "cookiecutter/*",
+    "singer_sdk/helpers/_simpleeval.py",
+    "tests/core/test_simpleeval.py",
 ]
 ignore = [
     "ANN101",  # Missing type annotation for `self` in method

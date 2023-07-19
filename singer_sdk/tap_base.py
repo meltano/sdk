@@ -612,37 +612,17 @@ class SQLTap(Tap):
     # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: type[SQLStream]
 
-    def __init__(
-        self,
-        *,
-        config: dict | PurePath | str | list[PurePath | str] | None = None,
-        catalog: PurePath | str | dict | None = None,
-        state: PurePath | str | dict | None = None,
-        parse_env_config: bool = False,
-        validate_config: bool = True,
-    ) -> None:
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Initialize the SQL tap.
 
         The SQLTap initializer additionally creates a cache variable for _catalog_dict.
 
         Args:
-            config: Tap configuration. Can be a dictionary, a single path to a
-                configuration file, or a list of paths to multiple configuration
-                files.
-            catalog: Tap catalog. Can be a dictionary or a path to the catalog file.
-            state: Tap state. Can be dictionary or a path to the state file.
-            parse_env_config: Whether to look for configuration values in environment
-                variables.
-            validate_config: True to require validation of config settings.
+            *args: Positional arguments for the Tap initializer.
+            **kwargs: Keyword arguments for the Tap initializer.
         """
         self._catalog_dict: dict | None = None
-        super().__init__(
-            config=config,
-            catalog=catalog,
-            state=state,
-            parse_env_config=parse_env_config,
-            validate_config=validate_config,
-        )
+        super().__init__(*args, **kwargs)
 
     @property
     def catalog_dict(self) -> dict:
