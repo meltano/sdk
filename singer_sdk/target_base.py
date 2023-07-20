@@ -575,6 +575,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 class SQLTarget(Target):
     """Target implementation for SQL destinations."""
 
+    # Sink class used to initialize new SQL sink from their stream schema.
+    default_sink_class: SQLSink
+
     _target_connector: SQLConnector | None = None
 
     @property
@@ -663,6 +666,7 @@ class SQLTarget(Target):
         )
         sink.setup()
         self._sinks_active[stream_name] = sink
+
         return sink
 
     def get_sink(
@@ -672,7 +676,7 @@ class SQLTarget(Target):
         record: dict | None = None,
         schema: dict | None = None,
         key_properties: list[str] | None = None,
-    ) -> SQLSink:
+    ) -> Sink | SQLSink:
         """Return a sink for the given stream name.
 
         A new sink will be created if `schema` is provided and if either `schema` or
