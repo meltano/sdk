@@ -2347,20 +2347,6 @@ pymysql = ["pymysql", "pymysql (<1)"]
 sqlcipher = ["sqlcipher3-binary"]
 
 [[package]]
-name = "sqlalchemy2-stubs"
-version = "0.0.2a35"
-description = "Typing Stubs for SQLAlchemy 1.4"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "sqlalchemy2-stubs-0.0.2a35.tar.gz", hash = "sha256:bd5d530697d7e8c8504c7fe792ef334538392a5fb7aa7e4f670bfacdd668a19d"},
-    {file = "sqlalchemy2_stubs-0.0.2a35-py3-none-any.whl", hash = "sha256:593784ff9fc0dc2ded1895e3322591689db3be06f3ca006e3ef47640baf2d38a"},
-]
-
-[package.dependencies]
-typing-extensions = ">=3.7.4"
-
-[[package]]
 name = "termcolor"
 version = "2.3.0"
 description = "ANSI color formatting for output in terminal"
@@ -2712,4 +2698,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = "<3.12,>=3.7.1"
-content-hash = "ef713a1192d52c92e45d00697c48d51df216f225476d2a5744954302b438dc8e"
+content-hash = "9ac1398cdb5cd011452f152cbd95412139f320881bb2d27855dc52253b313332"
