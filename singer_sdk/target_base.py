@@ -28,6 +28,7 @@ from singer_sdk.plugin_base import PluginBase
 if t.TYPE_CHECKING:
     from pathlib import PurePath
 
+    from singer_sdk.connectors import SQLConnector
     from singer_sdk.mapper import PluginMapper
     from singer_sdk.sinks import Sink
 
@@ -573,6 +574,21 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
 class SQLTarget(Target):
     """Target implementation for SQL destinations."""
+
+    _target_connector: SQLConnector | None = None
+
+    @property
+    def target_connector(self) -> SQLConnector:
+        """The connector object.
+
+        Returns:
+            The connector object.
+        """
+        if self._target_connector is None:
+            self._target_connector = self.default_sink_class.connector_class(
+                dict(self.config),
+            )
+        return self._target_connector
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
