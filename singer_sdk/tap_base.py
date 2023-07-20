@@ -613,7 +613,7 @@ class SQLTap(Tap):
     # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: type[SQLStream]
 
-    _tap_connector: type[SQLConnector] = None
+    _tap_connector = None
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Initialize the SQL tap.
