@@ -612,9 +612,8 @@ class SQLTap(Tap):
 
     # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: type[SQLStream]
-    default_connector_class: type[SQLConnector]
 
-    _tap_connector: SQLConnector = None
+    _tap_connector: type[SQLConnector] = None
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Initialize the SQL tap.
@@ -636,7 +635,9 @@ class SQLTap(Tap):
             The connector object.
         """
         if self._tap_connector is None:
-            self._tap_connector = self.default_connector_class(dict(self.config))
+            self._tap_connector = self.default_stream_class.connector_class(
+                dict(self.config),
+            )
         return self._tap_connector
 
     @property
