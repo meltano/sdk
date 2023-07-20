@@ -30,7 +30,7 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.connectors import SQLConnector
     from singer_sdk.mapper import PluginMapper
-    from singer_sdk.sinks import Sink, SQLSink
+    from singer_sdk.sinks import Sink
 
 _MAX_PARALLELISM = 8
 
@@ -575,9 +575,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 class SQLTarget(Target):
     """Target implementation for SQL destinations."""
 
-    # Sink class used to initialize new SQL sink from their stream schema.
-    default_sink_class: SQLSink
-
     _target_connector: SQLConnector | None = None
 
     @property
@@ -642,7 +639,7 @@ class SQLTarget(Target):
         stream_name: str,
         schema: dict,
         key_properties: list[str] | None = None,
-    ) -> SQLSink:
+    ) -> Sink:
         """Create a sink and register it.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -676,7 +673,7 @@ class SQLTarget(Target):
         record: dict | None = None,
         schema: dict | None = None,
         key_properties: list[str] | None = None,
-    ) -> Sink | SQLSink:
+    ) -> Sink:
         """Return a sink for the given stream name.
 
         A new sink will be created if `schema` is provided and if either `schema` or
