@@ -634,6 +634,7 @@ class SQLTarget(Target):
 
     pass
 
+    @final
     def add_sqlsink(
         self,
         stream_name: str,
