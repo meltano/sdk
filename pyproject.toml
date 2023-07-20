@@ -101,7 +101,7 @@ testing = [
 commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
 xdoctest = "^1.1.1"
 mypy = "^1.0"
-cookiecutter = "^2.1.1"
+cookiecutter = ">=2.1.1,<2.2.3"
 PyYAML = "^6.0"
 freezegun = "^1.2.2"
 numpy = [
@@ -215,11 +215,13 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-pytest11 = { callable = "singer_sdk:testing.pytest_plugin", extras = ["testing"] }
+pytest11 = { reference = "singer_sdk:testing.pytest_plugin", extras = ["testing"], type = "console" }
 
 [tool.ruff]
 exclude = [
     "cookiecutter/*",
+    "singer_sdk/helpers/_simpleeval.py",
+    "tests/core/test_simpleeval.py",
 ]
 ignore = [
     "ANN101",  # Missing type annotation for `self` in method
