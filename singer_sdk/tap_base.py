@@ -13,10 +13,7 @@ import click
 
 from singer_sdk._singerlib import Catalog, StateMessage, write_message
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
-from singer_sdk.exceptions import (
-    AbortedSyncFailedException,
-    AbortedSyncPausedException,
-)
+from singer_sdk.exceptions import AbortedSyncFailedException, AbortedSyncPausedException
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
