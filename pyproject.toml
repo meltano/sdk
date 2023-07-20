@@ -215,11 +215,13 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-pytest11 = { callable = "singer_sdk:testing.pytest_plugin", extras = ["testing"] }
+pytest11 = { reference = "singer_sdk:testing.pytest_plugin", extras = ["testing"], type = "console" }
 
 [tool.ruff]
 exclude = [
     "cookiecutter/*",
+    "singer_sdk/helpers/_simpleeval.py",
+    "tests/core/test_simpleeval.py",
 ]
 ignore = [
     "ANN101",  # Missing type annotation for `self` in method
