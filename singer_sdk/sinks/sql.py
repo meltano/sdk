@@ -327,7 +327,7 @@ class SQLSink(BatchSink):
 
         # Create new record dicts with missing properties filled in with None
         new_records = [
-            {name: record.get(name, None) for name in property_names}
+            {name: record.get(name) for name in property_names}
             for record in conformed_records
         ]
 
