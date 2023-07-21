@@ -96,6 +96,11 @@ class StreamMetadata(Metadata):
     schema_name: str | None = None
 
 
+@dataclass
+class SqlMetadata(Metadata):
+    sql_datatype: str | None = None
+
+
 AnyMetadata: TypeAlias = t.Union[Metadata, StreamMetadata]
 
 
@@ -167,6 +172,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
         valid_replication_keys: list[str] | None = None,
         replication_method: str | None = None,
         selected_by_default: bool | None = None,
+        sql_datatypes: dict | None = None,
     ) -> MetadataMapping:
         """Get default metadata for a stream.
 
@@ -177,6 +183,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
             valid_replication_keys: Stream valid replication keys.
             replication_method: Stream replication method.
             selected_by_default: Whether the stream is selected by default.
+            sql_datatypes: SQL datatypes present in the stream.
 
         Returns:
             Metadata mapping.
@@ -196,14 +203,19 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
                 root.schema_name = schema_name
 
             for field_name in schema.get("properties", {}):
+                if sql_datatypes is None:
+                    entry = Metadata()
+                else:
+                    entry = SqlMetadata(sql_datatype=sql_datatypes.get(field_name))
+
                 if (
                     key_properties
                     and field_name in key_properties
                     or (valid_replication_keys and field_name in valid_replication_keys)
                 ):
-                    entry = Metadata(inclusion=Metadata.InclusionType.AUTOMATIC)
+                    entry.inclusion = Metadata.InclusionType.AUTOMATIC
                 else:
-                    entry = Metadata(inclusion=Metadata.InclusionType.AVAILABLE)
+                    entry.inclusion = Metadata.InclusionType.AVAILABLE
 
                 mapping[("properties", field_name)] = entry
 

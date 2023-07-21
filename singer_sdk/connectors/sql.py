@@ -388,6 +388,33 @@ class SQLConnector:
             view_names = []
         return [(t, False) for t in table_names] + [(v, True) for v in view_names]
 
+    def discover_catalog_entry_sql_datatype(
+        self,
+        data_type: sqlalchemy.types.TypeEngine,
+    ) -> str:
+        """Retrun SQL Datatype as a string to utilize in the catalog.
+
+        Args:
+            data_type: given data type as sqlalchemy.types.TypeEngine
+
+        Returns:
+            A string description the given data type example "VARCHAR(length=15)".
+        """
+        datatype_attributes = ("length", "scale", "precision")
+
+        catalog_format = f"{type(data_type).__name__}("
+
+        for attribute in datatype_attributes:
+            if hasattr(data_type, attribute) and getattr(data_type, attribute):
+                catalog_format += f"{attribute}={(getattr(data_type, attribute))}, "
+
+        if catalog_format.endswith(", "):
+            catalog_format = catalog_format[:-2]
+
+        catalog_format += ")"
+
+        return catalog_format
+
     # TODO maybe should be splitted into smaller parts?
     def discover_catalog_entry(
         self,
@@ -448,6 +475,12 @@ class SQLConnector:
             )
         schema = table_schema.to_dict()
 
+        sql_datatypes = {}
+        for column_def in inspected.get_columns(table_name, schema=schema_name):
+            sql_datatypes[
+                str(column_def["name"])
+            ] = self.discover_catalog_entry_sql_datatype(column_def["type"])
+
         # Initialize available replication methods
         addl_replication_methods: list[str] = [""]  # By default an empty list.
         # Notes regarding replication methods:
@@ -472,6 +505,7 @@ class SQLConnector:
                 replication_method=replication_method,
                 key_properties=key_properties,
                 valid_replication_keys=None,  # Must be defined by user
+                sql_datatypes=sql_datatypes,
             ),
             database=None,  # Expects single-database context
             row_count=None,
