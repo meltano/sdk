@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import copy
 
+import pytest
+
+from singer_sdk.exceptions import MissingKeyPropertiesError
 from tests.conftest import BatchSinkMock, TargetMock
 
 
@@ -28,3 +31,25 @@ def test_get_sink():
         key_properties=key_properties,
     )
     assert sink_returned == sink
+
+
+def test_validate_record():
+    target = TargetMock()
+    sink = BatchSinkMock(
+        target=target,
+        stream_name="test",
+        schema={
+            "properties": {
+                "id": {"type": ["integer"]},
+                "name": {"type": ["string"]},
+            },
+        },
+        key_properties=["id"],
+    )
+
+    # Test valid record
+    sink._singer_validate_message({"id": 1, "name": "test"})
+
+    # Test invalid record
+    with pytest.raises(MissingKeyPropertiesError):
+        sink._singer_validate_message({"name": "test"})

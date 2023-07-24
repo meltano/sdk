@@ -73,7 +73,7 @@ def path_to_sample_data_db(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def sqlite_sample_db_config(path_to_sample_data_db: str) -> dict:
+def sqlite_sample_db_config(path_to_sample_data_db: Path) -> dict:
     """Get configuration dictionary for target-csv."""
     return {
         "path_to_db": str(path_to_sample_data_db),

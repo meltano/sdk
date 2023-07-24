@@ -25,12 +25,12 @@ from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
     TapCapabilities,
 )
-from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
 
+    from singer_sdk.mapper import PluginMapper
     from singer_sdk.streams import SQLStream, Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
@@ -61,6 +61,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         state: PurePath | str | dict | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
+        setup_mapper: bool = True,
     ) -> None:
         """Initialize the tap.
 
@@ -73,6 +74,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             parse_env_config: Whether to look for configuration values in environment
                 variables.
             validate_config: True to require validation of config settings.
+            setup_mapper: True to initialize the plugin mapper.
         """
         super().__init__(
             config=config,
@@ -94,14 +96,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
 
-        # Initialize mapper
-        self.mapper: PluginMapper
-        self.mapper = PluginMapper(
-            plugin_config=dict(self.config),
-            logger=self.logger,
-        )
+        self._mapper: PluginMapper | None = None
 
-        self.mapper.register_raw_streams_from_catalog(self.catalog)
+        if setup_mapper:
+            self.setup_mapper()
 
         # Process state
         state_dict: dict = {}
@@ -167,6 +165,11 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             self._catalog = self.input_catalog or self._singer_catalog
 
         return self._catalog
+
+    def setup_mapper(self) -> None:
+        """Initialize the plugin mapper for this tap."""
+        super().setup_mapper()
+        self.mapper.register_raw_streams_from_catalog(self.catalog)
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
@@ -455,7 +458,6 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
             stream.sync()
             stream.finalize_state_progress_markers()
-            stream._write_state_message()
 
         # this second loop is needed for all streams to print out their costs
         # including child streams which are otherwise skipped in the loop above
@@ -520,6 +522,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             config=config_files,  # type: ignore[arg-type]
             parse_env_config=parse_env_config,
             validate_config=False,
+            setup_mapper=False,
         )
         tap.run_discovery()
         ctx.exit()
@@ -609,37 +612,17 @@ class SQLTap(Tap):
     # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: type[SQLStream]
 
-    def __init__(
-        self,
-        *,
-        config: dict | PurePath | str | list[PurePath | str] | None = None,
-        catalog: PurePath | str | dict | None = None,
-        state: PurePath | str | dict | None = None,
-        parse_env_config: bool = False,
-        validate_config: bool = True,
-    ) -> None:
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Initialize the SQL tap.
 
         The SQLTap initializer additionally creates a cache variable for _catalog_dict.
 
         Args:
-            config: Tap configuration. Can be a dictionary, a single path to a
-                configuration file, or a list of paths to multiple configuration
-                files.
-            catalog: Tap catalog. Can be a dictionary or a path to the catalog file.
-            state: Tap state. Can be dictionary or a path to the state file.
-            parse_env_config: Whether to look for configuration values in environment
-                variables.
-            validate_config: True to require validation of config settings.
+            *args: Positional arguments for the Tap initializer.
+            **kwargs: Keyword arguments for the Tap initializer.
         """
         self._catalog_dict: dict | None = None
-        super().__init__(
-            config=config,
-            catalog=catalog,
-            state=state,
-            parse_env_config=parse_env_config,
-            validate_config=validate_config,
-        )
+        super().__init__(*args, **kwargs)
 
     @property
     def catalog_dict(self) -> dict:

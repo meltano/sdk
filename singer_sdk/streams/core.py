@@ -140,6 +140,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._mask: singer.SelectionMask | None = None
         self._schema: dict
         self._is_state_flushed: bool = True
+        self._last_emitted_state: dict | None = None
         self._sync_costs: dict[str, int] = {}
         self.child_streams: list[Stream] = []
         if schema:
@@ -754,8 +755,11 @@ class Stream(metaclass=abc.ABCMeta):
 
     def _write_state_message(self) -> None:
         """Write out a STATE message with the latest state."""
-        if not self._is_state_flushed:
+        if (not self._is_state_flushed) and (
+            self.tap_state != self._last_emitted_state
+        ):
             singer.write_message(singer.StateMessage(value=self.tap_state))
+            self._last_emitted_state = copy.deepcopy(self.tap_state)
             self._is_state_flushed = True
 
     def _generate_schema_messages(
@@ -960,12 +964,19 @@ class Stream(metaclass=abc.ABCMeta):
 
         reset_state_progress_markers(state)
 
+    def _finalize_state(self, state: dict | None = None) -> None:
+        """Reset progress markers and state flushed flag to ensure state is written.
+
+        Args:
+            state: State object to promote progress markers with.
+        """
+        state = finalize_state_progress_markers(state)  # type: ignore[arg-type]
+        self._is_state_flushed = False
+
     def finalize_state_progress_markers(self, state: dict | None = None) -> None:
-        """Reset progress markers. If all=True, all state contexts will be finalized.
+        """Reset progress markers and emit state message if necessary.
 
         This method is internal to the SDK and should not need to be overridden.
-
-        If all=True and the stream has children, child streams will also be finalized.
 
         Args:
             state: State object to promote progress markers with.
@@ -977,10 +988,11 @@ class Stream(metaclass=abc.ABCMeta):
             context: dict | None
             for context in self.partitions or [{}]:
                 state = self.get_context_state(context or None)
-                finalize_state_progress_markers(state)
-            return
+                self._finalize_state(state)
+        else:
+            self._finalize_state(state)
 
-        finalize_state_progress_markers(state)
+        self._write_state_message()
 
     # Private sync methods:
 
@@ -1099,14 +1111,15 @@ class Stream(metaclass=abc.ABCMeta):
 
                 if current_context == state_partition_context:
                     # Finalize per-partition state only if 1:1 with context
-                    finalize_state_progress_markers(state)
+                    self._finalize_state(state)
+
         if not context:
-            # Finalize total stream only if we have the full full context.
+            # Finalize total stream only if we have the full context.
             # Otherwise will be finalized by tap at end of sync.
-            finalize_state_progress_markers(self.stream_state)
+            self._finalize_state(self.stream_state)
 
         if write_messages:
-            # Reset interim bookmarks before emitting final STATE message:
+            # Write final state message if we haven't already
             self._write_state_message()
 
     def _sync_batches(
