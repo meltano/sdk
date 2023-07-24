@@ -52,7 +52,7 @@ memoization = ">=0.3.2,<0.5.0"
 jsonpath-ng = "^1.5.3"
 joblib = "^1.0.1"
 inflection = "^0.5.1"
-sqlalchemy = "^1.4"
+sqlalchemy = ">=1.4,<3.0"
 python-dotenv = ">=0.20,<0.22"
 typing-extensions = "^4.2.0"
 simplejson = "^3.17.6"
@@ -110,7 +110,6 @@ numpy = [
     { version = ">=1.22", python = ">=3.8" },
 ]
 requests-mock = "^1.10.0"
-sqlalchemy2-stubs = {version = "^0.0.2a32", allow-prereleases = true}
 types-jsonschema = "^4.17.0.6"
 types-python-dateutil = "^2.8.19"
 types-pytz = ">=2022.7.1.2,<2024.0.0.0"
@@ -133,9 +132,6 @@ exclude = ".*simpleeval.*"
 
 [tool.pytest.ini_options]
 addopts = '-vvv --ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
-filterwarnings = [
-    "error::sqlalchemy.exc.RemovedIn20Warning",
-]
 markers = [
     "external: Tests relying on external resources",
     "windows: Tests that only run on Windows",
@@ -191,9 +187,6 @@ fail_under = 82
 [tool.mypy]
 exclude = "tests"
 files = "singer_sdk"
-plugins = [
-    "sqlalchemy.ext.mypy.plugin",
-]
 python_version = "3.8"
 warn_unused_configs = true
 warn_unused_ignores = true
@@ -216,11 +209,13 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-pytest11 = { callable = "singer_sdk:testing.pytest_plugin", extras = ["testing"] }
+pytest11 = { reference = "singer_sdk:testing.pytest_plugin", extras = ["testing"], type = "console" }
 
 [tool.ruff]
 exclude = [
     "cookiecutter/*",
+    "singer_sdk/helpers/_simpleeval.py",
+    "tests/core/test_simpleeval.py",
 ]
 ignore = [
     "ANN101",  # Missing type annotation for `self` in method
