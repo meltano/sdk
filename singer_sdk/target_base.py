@@ -30,7 +30,7 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.connectors import SQLConnector
     from singer_sdk.mapper import PluginMapper
-    from singer_sdk.sinks import Sink
+    from singer_sdk.sinks import Sink, SQLSink
 
 _MAX_PARALLELISM = 8
 
@@ -577,6 +577,10 @@ class SQLTarget(Target):
 
     _target_connector: SQLConnector | None = None
 
+    # Default class to use for creating new sink objects.
+    # Required if `SQLTarget.get_sink_class()` is not defined.
+    default_sink_class: SQLSink | None = None
+
     @property
     def target_connector(self) -> SQLConnector:
         """The connector object.
@@ -634,13 +638,37 @@ class SQLTarget(Target):
 
     pass
 
+    def get_sink_class(self, stream_name: str) -> SQLSink:
+        """Get sink for a stream.
+
+        Developers can override this method to return a custom Sink type depending
+        on the value of `stream_name`. Optional when `default_sink_class` is set.
+
+        Args:
+            stream_name: Name of the stream.
+
+        Raises:
+            ValueError: If no :class:`singer_sdk.sinks.Sink` class is defined.
+
+        Returns:
+            The sink class to be used with the stream.
+        """
+        if self.default_sink_class:
+            return self.default_sink_class
+
+        msg = (
+            f"No sink class defined for '{stream_name}' and no default sink class "
+            "available."
+        )
+        raise ValueError(msg)
+
     @final
     def add_sqlsink(
         self,
         stream_name: str,
         schema: dict,
         key_properties: list[str] | None = None,
-    ) -> Sink:
+    ) -> SQLSink:
         """Create a sink and register it.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -674,7 +702,7 @@ class SQLTarget(Target):
         record: dict | None = None,
         schema: dict | None = None,
         key_properties: list[str] | None = None,
-    ) -> Sink:
+    ) -> SQLSink:
         """Return a sink for the given stream name.
 
         A new sink will be created if `schema` is provided and if either `schema` or
