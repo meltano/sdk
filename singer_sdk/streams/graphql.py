@@ -8,8 +8,10 @@ import typing as t
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.streams.rest import RESTStream
 
+_TToken = t.TypeVar("_TToken")
 
-class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
+
+class GraphQLStream(RESTStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
     """Abstract base class for API-type streams.
 
     GraphQL streams inherit from the class `GraphQLStream`, which in turn inherits from
@@ -43,7 +45,7 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
     def prepare_request_payload(
         self,
         context: dict | None,
-        next_page_token: t.Any | None,
+        next_page_token: _TToken | None,
     ) -> dict | None:
         """Prepare the data payload for the GraphQL API request.
 
