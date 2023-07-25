@@ -181,7 +181,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         return existing_sink
 
-    def get_sink_class(self, stream_name: str) -> type[Sink]:
+    def get_sink_class(self, stream_name: str) -> t.Any:  # noqa: ANN401
         """Get sink for a stream.
 
         Developers can override this method to return a custom Sink type depending
@@ -640,7 +640,7 @@ class SQLTarget(Target):
         stream_name: str,
         schema: dict,
         key_properties: list[str] | None = None,
-    ) -> Sink:
+    ) -> t.Any:  # noqa: ANN401
         """Create a sink and register it.
 
         This method is internal to the SDK and should not need to be overridden.
