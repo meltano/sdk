@@ -30,7 +30,7 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.connectors import SQLConnector
     from singer_sdk.mapper import PluginMapper
-    from singer_sdk.sinks import Sink
+    from singer_sdk.sinks import Sink, SQLSink
 
 _MAX_PARALLELISM = 8
 
@@ -49,7 +49,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     # Default class to use for creating new sink objects.
     # Required if `Target.get_sink_class()` is not defined.
-    default_sink_class: type[Sink] | None = None
+    default_sink_class: Sink
 
     def __init__(
         self,
@@ -576,6 +576,8 @@ class SQLTarget(Target):
     """Target implementation for SQL destinations."""
 
     _target_connector: SQLConnector | None = None
+
+    default_sink_class: SQLSink
 
     @property
     def target_connector(self) -> SQLConnector:
