@@ -12,9 +12,9 @@ class PerfTimerError(Exception):
 class PerfTimer:
     """A Basic Performance Timer Class."""
 
-    _start_time: float = None
-    _stop_time: float = None
-    _lap_time: float = None
+    _start_time: float | None = None
+    _stop_time: float | None = None
+    _lap_time: float | None = None
 
     @property
     def start_time(self):
@@ -52,11 +52,11 @@ class BatchPerfTimer(PerfTimer):
 
     def __init__(
         self,
-        max_size: int | None = None,
-        max_perf_counter: float = 1,
+        max_size: int,
+        max_perf_counter: float,
     ) -> None:
         self._sink_max_size: int = max_size
-        self._max_perf_counter = max_perf_counter
+        self._max_perf_counter: float = max_perf_counter
 
     SINK_MAX_SIZE_CELING: int = 100000
     """The max size a bulk insert can be"""
@@ -86,7 +86,7 @@ class BatchPerfTimer(PerfTimer):
         """Difference between wanted elapsed time and actual elpased time."""
         if self._lap_time:
             return self.max_perf_counter - self.lap_time
-        return None
+        return float(0)
 
     def counter_based_max_size(self) -> int:  # noqa: C901
         """Caclulate performance based batch size."""

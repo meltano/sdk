@@ -57,11 +57,12 @@ class SQLSink(BatchSink):
         self._batch_wait_limit_seconds: int | None = target.config.get(
             "batch_wait_limit_seconds",
         )
-        self._sink_timer: BatchSink | None = None
+
+        self._sink_timer: BatchPerfTimer | None = None
 
         if self._batch_wait_limit_seconds is not None:
             self._batch_size_rows = 100
-            self._sink_timer: BatchPerfTimer | None = BatchPerfTimer(
+            self._sink_timer = BatchPerfTimer(
                 self._batch_size_rows,
                 self._batch_wait_limit_seconds,
             )
@@ -105,7 +106,7 @@ class SQLSink(BatchSink):
         self._batch_size_rows = new_value
 
     @property
-    def batch_wait_limit_seconds(self) -> int:
+    def batch_wait_limit_seconds(self) -> int | None:
         """Get batch_wait_limit_seconds object.
 
         Returns:
@@ -114,11 +115,11 @@ class SQLSink(BatchSink):
         return self._batch_wait_limit_seconds
 
     @property
-    def sink_timer(self) -> BatchPerfTimer:
+    def sink_timer(self) -> BatchPerfTimer | None:
         """Get sink_timer object.
 
         Returns:
-            A sink_timer object of type BatchPerfTimer.
+            A sink_timer object.
         """
         return self._sink_timer
 
