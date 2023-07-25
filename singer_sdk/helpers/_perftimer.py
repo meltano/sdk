@@ -62,31 +62,32 @@ class BatchPerfTimer(PerfTimer):
     """The max size a bulk insert can be"""
 
     @property
-    def sink_max_size(self):
+    def sink_max_size(self) -> int:
         """The current MAX_SIZE_DEFAULT."""
         return self._sink_max_size
 
     @property
-    def max_perf_counter(self):
+    def max_perf_counter(self) -> float:
         """How many seconds can pass before a insert."""
         return self._max_perf_counter
 
     @property
-    def perf_diff_allowed_min(self):
+    def perf_diff_allowed_min(self) -> float:
         """The mininum negative variance allowed, 1/3 worse than wanted."""
         return -1.0 * (self.max_perf_counter * 0.33)
 
     @property
-    def perf_diff_allowed_max(self):
+    def perf_diff_allowed_max(self) -> float:
         """The maximum postive variace allowed, # 3/4 better than wanted."""
         return self.max_perf_counter * 0.75
 
     @property
     def perf_diff(self) -> float:
         """Difference between wanted elapsed time and actual elpased time."""
+        diff = 0
         if self._lap_time:
-            return self.max_perf_counter - self.lap_time
-        return float(0)
+            diff = self.max_perf_counter - self.lap_time
+        return float(diff)
 
     def counter_based_max_size(self) -> int:  # noqa: C901
         """Caclulate performance based batch size."""
