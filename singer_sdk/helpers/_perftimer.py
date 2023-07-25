@@ -99,7 +99,7 @@ class BatchPerfTimer(PerfTimer):
             elif self.sink_max_size >= 1000:  # noqa: PLR2004
                 correction = -100
             elif self.sink_max_size > 10:  # noqa: PLR2004
-                correction = 10
+                correction = -10
         if (
             self.perf_diff >= self.perf_diff_allowed_max
             and self.sink_max_size < self.SINK_MAX_SIZE_CELING
