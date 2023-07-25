@@ -49,7 +49,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     # Default class to use for creating new sink objects.
     # Required if `Target.get_sink_class()` is not defined.
-    default_sink_class: t.Any = None
+    default_sink_class: type[Sink] | None = None
 
     def __init__(
         self,
@@ -181,7 +181,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         return existing_sink
 
-    def get_sink_class(self, stream_name: str) -> t.Any:  # noqa: ANN401
+    def get_sink_class(self, stream_name: str) -> type[Sink]:
         """Get sink for a stream.
 
         Developers can override this method to return a custom Sink type depending
@@ -640,7 +640,7 @@ class SQLTarget(Target):
         stream_name: str,
         schema: dict,
         key_properties: list[str] | None = None,
-    ) -> t.Any:  # noqa: ANN401
+    ) -> Sink:
         """Create a sink and register it.
 
         This method is internal to the SDK and should not need to be overridden.
