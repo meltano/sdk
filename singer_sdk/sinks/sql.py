@@ -114,11 +114,11 @@ class SQLSink(BatchSink):
         return self._batch_wait_limit_seconds
 
     @property
-    def sink_timer(self) -> BatchSink:
+    def sink_timer(self) -> BatchPerfTimer:
         """Get sink_timer object.
 
         Returns:
-            A sink_timer object of type BatchSink.
+            A sink_timer object of type BatchPerfTimer.
         """
         return self._sink_timer
 
