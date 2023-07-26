@@ -323,10 +323,20 @@ class SQLSink(BatchSink):
             insert_sql = sqlalchemy.text(insert_sql)
 
         conformed_records = [self.conform_record(record) for record in records]
+        property_names = list(self.conform_schema(schema)["properties"].keys())
+
+        # Create new record dicts with missing properties filled in with None
+        new_records = [
+            {name: record.get(name) for name in property_names}
+            for record in conformed_records
+        ]
+
         self.logger.info("Inserting with SQL: %s", insert_sql)
+
         with self.connector._connect() as conn, conn.begin():
-            conn.execute(insert_sql, conformed_records)
-        return len(conformed_records) if isinstance(conformed_records, list) else None
+            result = conn.execute(insert_sql, new_records)
+
+        return result.rowcount
 
     def merge_upsert_from_table(
         self,
