@@ -86,7 +86,7 @@ def test_sql_get_sink():
         schema=input_schema_2,
         key_properties=key_properties,
     )
-    assert sink_returned == sink
+    assert sink_returned is sink
 
 
 def test_add_sqlsink_and_get_sink():
@@ -114,7 +114,7 @@ def test_add_sqlsink_and_get_sink():
         "foo",
     )
 
-    assert sink_returned == sink
+    assert sink_returned is sink
 
     # Test invalid call
     with pytest.raises(RecordsWithoutSchemaException):
