@@ -337,4 +337,4 @@ class TargetFileTestTemplate(TargetTestTemplate):
         Returns:
             The expected Path to this tests singer file.
         """
-        return resources.files(target_test_streams) / f"{self.name}.singer"
+        return resources.files(target_test_streams).joinpath(f"{self.name}.singer")  # type: ignore[no-any-return]  # noqa: E501
