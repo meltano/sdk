@@ -7,6 +7,9 @@ import typing as t
 import warnings
 from pathlib import Path
 
+from singer_sdk.helpers._compat import resources
+from singer_sdk.testing import target_test_streams
+
 if t.TYPE_CHECKING:
     from singer_sdk.streams import Stream
 
@@ -334,5 +337,4 @@ class TargetFileTestTemplate(TargetTestTemplate):
         Returns:
             The expected Path to this tests singer file.
         """
-        current_dir = Path(__file__).resolve().parent
-        return current_dir / "target_test_streams" / f"{self.name}.singer"
+        return resources.files(target_test_streams) / f"{self.name}.singer"
