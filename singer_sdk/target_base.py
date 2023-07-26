@@ -49,7 +49,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     # Default class to use for creating new sink objects.
     # Required if `Target.get_sink_class()` is not defined.
-    default_sink_class: Sink
+    default_sink_class: type[Sink]
 
     def __init__(
         self,
@@ -577,7 +577,7 @@ class SQLTarget(Target):
 
     _target_connector: SQLConnector | None = None
 
-    default_sink_class: SQLSink
+    default_sink_class: type[SQLSink]
 
     @property
     def target_connector(self) -> SQLConnector:
@@ -656,7 +656,7 @@ class SQLTarget(Target):
             A new sink for the stream.
         """
         self.logger.info("Initializing '%s' target sink...", self.name)
-        sink_class = self.default_sink_class
+        sink_class = self.get_sink_class(stream_name=stream_name)
         sink = sink_class(
             target=self,
             stream_name=stream_name,
@@ -668,6 +668,30 @@ class SQLTarget(Target):
         self._sinks_active[stream_name] = sink
 
         return sink
+
+    def get_sink_class(self, stream_name: str) -> type[SQLSink]:
+        """Get sink for a stream.
+
+        Developers can override this method to return a custom Sink type depending
+        on the value of `stream_name`. Optional when `default_sink_class` is set.
+
+        Args:
+            stream_name: Name of the stream.
+
+        Raises:
+            ValueError: If no :class:`singer_sdk.sinks.Sink` class is defined.
+
+        Returns:
+            The sink class to be used with the stream.
+        """
+        if self.default_sink_class:
+            return self.default_sink_class
+
+        msg = (
+            f"No sink class defined for '{stream_name}' and no default sink class "
+            "available."
+        )
+        raise ValueError(msg)
 
     def get_sink(
         self,
