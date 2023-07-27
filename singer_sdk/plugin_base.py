@@ -6,6 +6,7 @@ import abc
 import logging
 import os
 import sys
+import time
 import typing as t
 from pathlib import Path, PurePath
 from types import MappingProxyType
@@ -24,7 +25,7 @@ from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
-from singer_sdk.helpers._util import read_json_file, utc_now
+from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
     FLATTENING_CONFIG,
     STREAM_MAPS_CONFIG,
@@ -156,7 +157,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         self.metrics_logger = metrics.get_metrics_logger()
 
         # Initialization timestamp
-        self.__initialized_at = int(utc_now().timestamp())
+        self.__initialized_at = int(time.time() * 1000)
 
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
