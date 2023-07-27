@@ -572,7 +572,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         return command
 
     @classmethod
-    def append_builtin_config(cls: type[SQLTarget], config_jsonschema: dict) -> None:
+    def append_builtin_config(cls: type[Target], config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
         To customize or disable this behavior, developers may either override this class
