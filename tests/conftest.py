@@ -107,7 +107,7 @@ class TargetMock(Target):
     name = "target-mock"
     config_jsonschema = th.PropertiesList().to_dict()
     default_sink_class = BatchSinkMock
-    capabilities: t.ClassVar[CapabilitiesEnum] = [
+    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
         *Target.capabilities,
         PluginCapabilities.BATCH,
     ]
