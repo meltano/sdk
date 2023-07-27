@@ -17,6 +17,7 @@ from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers.capabilities import (
+    BATCH_CONFIG,
     TARGET_SCHEMA_CONFIG,
     CapabilitiesEnum,
     PluginCapabilities,
@@ -613,6 +614,9 @@ class SQLTarget(Target):
 
         if TargetCapabilities.TARGET_SCHEMA in capabilities:
             _merge_missing(TARGET_SCHEMA_CONFIG, config_jsonschema)
+
+        if PluginCapabilities.BATCH in capabilities:
+            _merge_missing(BATCH_CONFIG, config_jsonschema)
 
         super().append_builtin_config(config_jsonschema)
 
