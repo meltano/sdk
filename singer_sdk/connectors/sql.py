@@ -21,7 +21,7 @@ if t.TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
 
 
-class SQLConnector(BaseConnector):
+class SQLConnector(BaseConnector[sqlalchemy.engine.Connection]):
     """Base class for SQLAlchemy-based connectors.
 
     The connector class serves as a wrapper around the SQL connection.
