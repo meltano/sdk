@@ -24,7 +24,7 @@ from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
-from singer_sdk.helpers._util import read_json_file
+from singer_sdk.helpers._util import read_json_file, utc_now
 from singer_sdk.helpers.capabilities import (
     FLATTENING_CONFIG,
     STREAM_MAPS_CONFIG,
@@ -155,6 +155,9 @@ class PluginBase(metaclass=abc.ABCMeta):
         metrics._setup_logging(self.config)
         self.metrics_logger = metrics.get_metrics_logger()
 
+        # Initialization timestamp
+        self.__initialized_at = int(utc_now().timestamp())
+
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
         self._mapper = PluginMapper(
@@ -184,6 +187,15 @@ class PluginBase(metaclass=abc.ABCMeta):
             mapper: A PluginMapper object.
         """
         self._mapper = mapper
+
+    @property
+    def initialized_at(self) -> int:
+        """Start time of the plugin.
+
+        Returns:
+            The start time of the plugin.
+        """
+        return self.__initialized_at
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
