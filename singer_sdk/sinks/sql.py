@@ -20,7 +20,7 @@ from singer_sdk.sinks.batch import BatchSink
 if t.TYPE_CHECKING:
     from sqlalchemy.sql import Executable
 
-    from singer_sdk.plugin_base import PluginBase
+    from singer_sdk.target_base import Target
 
 
 class SQLSink(BatchSink):
@@ -32,7 +32,7 @@ class SQLSink(BatchSink):
 
     def __init__(
         self,
-        target: PluginBase,
+        target: Target,
         stream_name: str,
         schema: dict,
         key_properties: list[str] | None,

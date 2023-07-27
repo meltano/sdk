@@ -32,7 +32,7 @@ from singer_sdk.helpers._typing import (
 if t.TYPE_CHECKING:
     from logging import Logger
 
-    from singer_sdk.plugin_base import PluginBase
+    from singer_sdk.target_base import Target
 
 JSONSchemaValidator = Draft7Validator
 
@@ -48,7 +48,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        target: PluginBase,
+        target: Target,
         stream_name: str,
         schema: dict,
         key_properties: list[str] | None,
@@ -62,6 +62,7 @@ class Sink(metaclass=abc.ABCMeta):
             key_properties: Primary key of the stream to sink.
         """
         self.logger = target.logger
+        self.sync_started_at = target.initialized_at
         self._config = dict(target.config)
         self._pending_batch: dict | None = None
         self.stream_name = stream_name
@@ -238,7 +239,7 @@ class Sink(metaclass=abc.ABCMeta):
 
         Args:
             record: Individual record in the stream.
-            message: TODO
+            message: The record message.
             context: Stream partition or context dictionary.
         """
         record["_sdc_extracted_at"] = message.get("time_extracted")
@@ -252,6 +253,7 @@ class Sink(metaclass=abc.ABCMeta):
         record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
         record["_sdc_sequence"] = int(round(time.time() * 1000))
         record["_sdc_table_version"] = message.get("version")
+        record["_sdc_sync_started_at"] = self.sync_started_at
 
     def _add_sdc_metadata_to_schema(self) -> None:
         """Add _sdc metadata columns.
@@ -270,7 +272,7 @@ class Sink(metaclass=abc.ABCMeta):
                 "type": ["null", "string"],
                 "format": "date-time",
             }
-        for col in ("_sdc_sequence", "_sdc_table_version"):
+        for col in ("_sdc_sequence", "_sdc_table_version", "_sdc_sync_started_at"):
             properties_dict[col] = {"type": ["null", "integer"]}
 
     def _remove_sdc_metadata_from_schema(self) -> None:
@@ -287,6 +289,7 @@ class Sink(metaclass=abc.ABCMeta):
             "_sdc_deleted_at",
             "_sdc_sequence",
             "_sdc_table_version",
+            "_sdc_sync_started_at",
         ):
             properties_dict.pop(col, None)
 
@@ -305,6 +308,7 @@ class Sink(metaclass=abc.ABCMeta):
         record.pop("_sdc_deleted_at", None)
         record.pop("_sdc_sequence", None)
         record.pop("_sdc_table_version", None)
+        record.pop("_sdc_sync_started_at", None)
 
     # Record validation
 
