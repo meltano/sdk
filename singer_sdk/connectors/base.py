@@ -8,13 +8,13 @@ from contextlib import contextmanager
 
 from singer_sdk.helpers._compat import Protocol
 
-_T = t.TypeVar("_T", covariant=True)
+_T_co = t.TypeVar("_T_co", covariant=True)
 
 
-class ContextManagerProtocol(Protocol[_T]):
+class ContextManagerProtocol(Protocol[_T_co]):
     """Protocol for context manager enter/exit."""
 
-    def __enter__(self) -> _T:  # noqa: D105
+    def __enter__(self) -> _T_co:  # noqa: D105
         ...  # pragma: no cover
 
     def __exit__(self, *args: t.Any) -> None:  # noqa: D105
