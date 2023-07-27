@@ -8,6 +8,7 @@ import shutil
 import typing as t
 
 import pytest
+from sqlalchemy import __version__ as sqlalchemy_version
 
 from singer_sdk import typing as th
 from singer_sdk.sinks import BatchSink
@@ -37,6 +38,11 @@ def pytest_runtest_setup(item):
     system = platform.system().lower()
     if supported_systems and system not in supported_systems:
         pytest.skip(f"cannot run on platform {system}")
+
+
+def pytest_report_header() -> list[str]:
+    """Return a list of strings to be displayed in the header of the report."""
+    return [f"sqlalchemy: {sqlalchemy_version}"]
 
 
 @pytest.fixture(scope="class")
@@ -85,6 +91,10 @@ class BatchSinkMock(BatchSink):
         """Write to mock trackers."""
         self.target.records_written.extend(context["records"])
         self.target.num_batches_processed += 1
+
+    @property
+    def key_properties(self) -> list[str]:
+        return [key.upper() for key in super().key_properties]
 
 
 class TargetMock(Target):

@@ -86,6 +86,14 @@ def tests(session: Session) -> None:
     session.install(".[s3]")
     session.install(*test_dependencies)
 
+    sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
+    if sqlalchemy_version:
+        # Bypass nox-poetry use of --constraint so we can install a version of
+        # SQLAlchemy that doesn't match what's in poetry.lock.
+        session.poetry.session.install(  # type: ignore[attr-defined]
+            f"sqlalchemy=={sqlalchemy_version}",
+        )
+
     try:
         session.run(
             "coverage",
@@ -96,9 +104,6 @@ def tests(session: Session) -> None:
             "-v",
             "--durations=10",
             *session.posargs,
-            env={
-                "SQLALCHEMY_WARN_20": "1",
-            },
         )
     finally:
         if session.interactive:

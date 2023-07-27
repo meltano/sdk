@@ -197,7 +197,7 @@ class SQLConnector(BaseConnector):
     @staticmethod
     def to_jsonschema_type(
         sql_type: (
-            str
+            str  # noqa: ANN401
             | sqlalchemy.types.TypeEngine
             | type[sqlalchemy.types.TypeEngine]
             | t.Any

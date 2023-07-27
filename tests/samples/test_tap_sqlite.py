@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import json
 import typing as t
 
+from click.testing import CliRunner
+
+from samples.sample_tap_sqlite import SQLiteTap
 from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk import SQLStream
 from singer_sdk._singerlib import MetadataMapping, StreamMetadata
@@ -24,10 +28,27 @@ def _discover_and_select_all(tap: SQLTap) -> None:
         catalog_entry["metadata"] = md.to_list()
 
 
+def test_tap_sqlite_cli(sqlite_sample_db_config: dict[str, t.Any], tmp_path: Path):
+    runner = CliRunner()
+    filepath = tmp_path / "config.json"
+
+    with filepath.open("w") as f:
+        json.dump(sqlite_sample_db_config, f)
+
+    result = runner.invoke(
+        SQLiteTap.cli,
+        ["--discover", "--config", str(filepath)],
+    )
+    assert result.exit_code == 0
+
+    catalog = json.loads(result.stdout)
+    assert "streams" in catalog
+
+
 def test_sql_metadata(sqlite_sample_tap: SQLTap):
     stream = t.cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
     detected_metadata = stream.catalog_entry["metadata"]
-    detected_root_md = [md for md in detected_metadata if md["breadcrumb"] == []][0]
+    detected_root_md = next(md for md in detected_metadata if md["breadcrumb"] == [])
     detected_root_md = detected_root_md["metadata"]
     translated_metadata = StreamMetadata.from_dict(detected_root_md)
     assert detected_root_md["schema-name"] == translated_metadata.schema_name
