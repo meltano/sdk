@@ -72,3 +72,4 @@ def test_target_about_info():
     assert "flattening_enabled" in about.settings["properties"]
     assert "flattening_max_depth" in about.settings["properties"]
     assert "batch_config" in about.settings["properties"]
+    assert "add_record_metadata" in about.settings["properties"]
