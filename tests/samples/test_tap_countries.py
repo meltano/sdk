@@ -119,12 +119,13 @@ def test_batch_mode(outdir):
         },
     )
 
-    buf = io.StringIO()
-    with redirect_stdout(buf):
+    stdout_buff = io.StringIO()
+    stdout_buff.buffer = io.BufferedRandom(raw=io.BytesIO())
+    with redirect_stdout(stdout_buff):
         tap.sync_all()
 
-    buf.seek(0)
-    lines = buf.read().splitlines()
+    stdout_buff.buffer.seek(0)
+    lines = stdout_buff.buffer.read().splitlines()
     messages = [json.loads(line) for line in lines]
 
     def tally_messages(messages: list) -> t.Counter:
