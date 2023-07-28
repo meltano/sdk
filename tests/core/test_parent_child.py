@@ -89,11 +89,12 @@ def tap_with_deselected_parent(tap: MyTap):
 
 def _get_messages(tap: Tap):
     """Redirect stdout to a buffer."""
-    buf = io.StringIO()
-    with redirect_stdout(buf):
+    stdout_buff = io.StringIO()
+    stdout_buff.buffer = io.BufferedRandom(raw=io.BytesIO())
+    with redirect_stdout(stdout_buff):
         tap.sync_all()
-    buf.seek(0)
-    lines = buf.read().splitlines()
+    stdout_buff.buffer.seek(0)
+    lines = stdout_buff.buffer.read().splitlines()
     return [json.loads(line) for line in lines]
 
 
