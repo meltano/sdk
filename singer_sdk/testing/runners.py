@@ -181,9 +181,15 @@ class TapTestRunner(SingerTestRunner):
             A 2-item tuple with StringIO buffers from the Tap's output: (stdout, stderr)
         """
         stdout_buf = io.StringIO()
+        stdout_buf.buffer = io.BufferedRandom(raw=io.BytesIO())
         stderr_buf = io.StringIO()
         with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
             self.run_sync_dry_run()
+
+        # Add decoded buffer items into stdout_buf
+        stdout_buf.buffer.seek(0)
+        stdout_buf.write(stdout_buf.buffer.read().decode())
+
         stdout_buf.seek(0)
         stderr_buf.seek(0)
         return stdout_buf.read(), stderr_buf.read()
