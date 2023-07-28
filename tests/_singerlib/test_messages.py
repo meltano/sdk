@@ -31,9 +31,9 @@ def test_write_message():
         stream="test",
         record={"id": 1, "name": "test"},
     )
-    stdout_buff = io.StringIO()
-    stdout_buff.buffer = io.BufferedRandom(raw=io.BytesIO())
-    with redirect_stdout(stdout_buff) as out:
+    stdout_buf = io.StringIO()
+    stdout_buf.buffer = io.BufferedRandom(raw=io.BytesIO())
+    with redirect_stdout(stdout_buf) as out:
         singer.write_message(message)
     out.buffer.seek(0)
     assert out.buffer.read() == (
