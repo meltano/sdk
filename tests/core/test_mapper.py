@@ -620,9 +620,14 @@ def test_mapped_stream(
             "flattening_max_depth": flatten_max_depth,
         },
     )
-    buf = io.StringIO()
-    with redirect_stdout(buf):
+    stdout_buff = io.StringIO()
+    stdout_buff.buffer = io.BufferedRandom(raw=io.BytesIO())
+    with redirect_stdout(stdout_buff):
         tap.sync_all()
 
-    buf.seek(0)
-    snapshot.assert_match(buf.read(), snapshot_name)
+    # take the BytesIO buffer and decode to match stdin
+    stdout_buff.buffer.seek(0)
+    stdout_buff.write(stdout_buff.buffer.read().decode())
+    # match the decoded json to the files provided via snapshot
+    stdout_buff.seek(0)
+    snapshot.assert_match(stdout_buff.read(), snapshot_name)
