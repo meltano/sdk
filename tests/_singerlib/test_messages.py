@@ -22,7 +22,7 @@ def test_format_message():
         record={"id": 1, "name": "test"},
     )
     assert format_message(message) == (
-        '{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}\n'
+        b'{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}\n'
     )
 
 
@@ -31,11 +31,13 @@ def test_write_message():
         stream="test",
         record={"id": 1, "name": "test"},
     )
-    with redirect_stdout(io.StringIO()) as out:
+    stdout_buff = io.StringIO()
+    stdout_buff.buffer = io.BufferedRandom(raw=io.BytesIO())
+    with redirect_stdout(stdout_buff) as out:
         singer.write_message(message)
-
-    assert out.getvalue() == (
-        '{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}\n'
+    out.buffer.seek(0)
+    assert out.buffer.read() == (
+        b'{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}\n'
     )
 
 
