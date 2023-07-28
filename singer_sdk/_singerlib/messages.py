@@ -183,7 +183,7 @@ class ActivateVersionMessage(Message):
         self.type = SingerMessageType.ACTIVATE_VERSION
 
 
-def format_message(message: Message) -> str:
+def format_message(message: Message) -> bytes:
     """Format a message as a JSON string.
 
     Args:
@@ -194,7 +194,7 @@ def format_message(message: Message) -> str:
     """
     decimal_encoder.encode_into(message.to_dict(), msg_buffer)
     msg_buffer.extend(b"\n")
-    return msg_buffer.decode()
+    return msg_buffer
 
 
 def write_message(message: Message) -> None:
@@ -203,5 +203,5 @@ def write_message(message: Message) -> None:
     Args:
         message: The message to write.
     """
-    sys.stdout.write(format_message(message))
+    sys.stdout.buffer.write(format_message(message))
     sys.stdout.flush()
