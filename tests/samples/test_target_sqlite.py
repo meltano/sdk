@@ -396,6 +396,35 @@ def test_sqlite_column_no_morph(sqlite_sample_target: SQLTarget):
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output_b), finalize=True)
 
 
+def test_record_with_missing_properties(
+    sqlite_sample_target: SQLTarget,
+):
+    """Test handling of records with missing properties."""
+    tap_output = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            {
+                "type": "SCHEMA",
+                "stream": "test_stream",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "integer"},
+                        "name": {"type": "string"},
+                    },
+                },
+                "key_properties": ["id"],
+            },
+            {
+                "type": "RECORD",
+                "stream": "test_stream",
+                "record": {"id": 1},
+            },
+        ]
+    )
+    target_sync_test(sqlite_sample_target, input=StringIO(tap_output), finalize=True)
+
+
 @pytest.mark.parametrize(
     "stream_name,schema,key_properties,expected_dml",
     [

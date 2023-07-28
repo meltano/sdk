@@ -490,7 +490,7 @@ def test_property_creation(
     property_dict = property_obj.to_dict()
     assert property_dict == expected_jsonschema
     for check_fn in TYPE_FN_CHECKS:
-        property_name = list(property_dict.keys())[0]
+        property_name = next(iter(property_dict.keys()))
         property_node = property_dict[property_name]
         if check_fn in type_fn_checks_true:
             assert (
