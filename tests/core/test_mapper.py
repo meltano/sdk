@@ -601,6 +601,18 @@ def _clear_schema_cache() -> None:
             "non_pk_passthrough.jsonl",
             id="non_pk_passthrough",
         ),
+        pytest.param(
+            {
+                "mystream": {
+                    "_data": "record",
+                    "__else__": None,
+                },
+            },
+            False,
+            0,
+            "record_to_column.jsonl",
+            id="record_to_column",
+        ),
     ],
 )
 def test_mapped_stream(
