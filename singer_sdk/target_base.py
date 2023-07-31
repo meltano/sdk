@@ -17,6 +17,8 @@ from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers.capabilities import (
+    ADD_RECORD_METADATA_CONFIG,
+    BATCH_CONFIG,
     TARGET_SCHEMA_CONFIG,
     CapabilitiesEnum,
     PluginCapabilities,
@@ -570,6 +572,40 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         )
 
         return command
+
+    @classmethod
+    def append_builtin_config(cls: type[Target], config_jsonschema: dict) -> None:
+        """Appends built-in config to `config_jsonschema` if not already set.
+
+        To customize or disable this behavior, developers may either override this class
+        method or override the `capabilities` property to disabled any unwanted
+        built-in capabilities.
+
+        For all except very advanced use cases, we recommend leaving these
+        implementations "as-is", since this provides the most choice to users and is
+        the most "future proof" in terms of taking advantage of built-in capabilities
+        which may be added in the future.
+
+        Args:
+            config_jsonschema: [description]
+        """
+
+        def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
+            # Append any missing properties in the target with those from source.
+            for k, v in source_jsonschema["properties"].items():
+                if k not in target_jsonschema["properties"]:
+                    target_jsonschema["properties"][k] = v
+
+        _merge_missing(ADD_RECORD_METADATA_CONFIG, config_jsonschema)
+
+        capabilities = cls.capabilities
+
+        if PluginCapabilities.BATCH in capabilities:
+            _merge_missing(BATCH_CONFIG, config_jsonschema)
+
+        super().append_builtin_config(config_jsonschema)
+
+    pass
 
 
 class SQLTarget(Target):
