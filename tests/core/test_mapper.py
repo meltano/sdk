@@ -46,12 +46,13 @@ def sample_catalog_dict() -> dict:
         Property("name", StringType),
         Property("owner_email", StringType),
         Property("description", StringType),
-        Property("description", StringType),
+        Property("create_date", StringType),
     ).to_dict()
     foobars_schema = PropertiesList(
         Property("the", StringType),
         Property("brown", StringType),
     ).to_dict()
+    singular_schema = PropertiesList(Property("foo", StringType)).to_dict()
     return {
         "streams": [
             {
@@ -63,6 +64,11 @@ def sample_catalog_dict() -> dict:
                 "stream": "foobars",
                 "tap_stream_id": "foobars",
                 "schema": foobars_schema,
+            },
+            {
+                "stream": "singular",
+                "tap_stream_id": "singular",
+                "schema": singular_schema,
             },
         ],
     }
@@ -105,6 +111,9 @@ def sample_stream():
         "foobars": [
             {"the": "quick"},
             {"brown": "fox"},
+        ],
+        "singular": [
+            {"foo": "bar"},
         ],
     }
 
@@ -181,6 +190,7 @@ def transformed_result(stream_map_config):
             {"the": "quick"},
             {"brown": "fox"},
         ],
+        "singular": [{"foo": "bar"}],  # should be unchanged
     }
 
 
@@ -199,6 +209,9 @@ def transformed_schemas():
         "foobars": PropertiesList(
             Property("the", StringType),
             Property("brown", StringType),
+        ).to_dict(),
+        "singular": PropertiesList(
+            Property("foo", StringType),
         ).to_dict(),
     }
 
@@ -231,6 +244,7 @@ def cloned_and_aliased_schemas():
         Property("name", StringType),
         Property("owner_email", StringType),
         Property("description", StringType),
+        Property("create_date", StringType),
     ).to_dict()
     return {
         "repositories_aliased": properties,
@@ -275,6 +289,51 @@ def filtered_result():
 @pytest.fixture
 def filtered_schemas():
     return {"repositories": PropertiesList(Property("name", StringType)).to_dict()}
+
+
+# Wildcard
+
+
+@pytest.fixture
+def wildcard_stream_maps():
+    return {
+        "*s": {
+            "db_name": "'database'",
+        },
+    }
+
+
+@pytest.fixture
+def wildcard_result(sample_stream):
+    return {
+        "repositories": [
+            {**record, "db_name": "database"}
+            for record in sample_stream["repositories"]
+        ],
+        "foobars": [
+            {**record, "db_name": "database"} for record in sample_stream["foobars"]
+        ],
+        "singular": sample_stream["singular"],
+    }
+
+
+@pytest.fixture
+def wildcard_schemas(sample_catalog_dict):
+    return {
+        "repositories": PropertiesList(
+            Property("name", StringType),
+            Property("owner_email", StringType),
+            Property("description", StringType),
+            Property("create_date", StringType),
+            Property("db_name", StringType),
+        ).to_dict(),
+        "foobars": PropertiesList(
+            Property("the", StringType),
+            Property("brown", StringType),
+            Property("db_name", StringType),  # added
+        ).to_dict(),
+        "singular": PropertiesList(Property("foo", StringType)).to_dict(),  # unchanged
+    }
 
 
 def test_map_transforms(
@@ -352,6 +411,25 @@ def test_filter_transforms_w_error(
             sample_stream=sample_stream,
             sample_catalog_obj=sample_catalog_obj,
         )
+
+
+def test_wildcard_transforms(
+    sample_stream,
+    sample_catalog_obj,
+    wildcard_stream_maps,
+    stream_map_config,
+    wildcard_result,
+    wildcard_schemas,
+):
+    _test_transform(
+        "wildcard",
+        stream_maps=wildcard_stream_maps,
+        stream_map_config=stream_map_config,
+        expected_result=wildcard_result,
+        expected_schemas=wildcard_schemas,
+        sample_stream=sample_stream,
+        sample_catalog_obj=sample_catalog_obj,
+    )
 
 
 def _test_transform(
