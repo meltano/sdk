@@ -17,6 +17,7 @@ from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
 from singer_sdk.helpers.capabilities import (
+    ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
     TARGET_SCHEMA_CONFIG,
     CapabilitiesEnum,
@@ -594,6 +595,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             for k, v in source_jsonschema["properties"].items():
                 if k not in target_jsonschema["properties"]:
                     target_jsonschema["properties"][k] = v
+
+        _merge_missing(ADD_RECORD_METADATA_CONFIG, config_jsonschema)
 
         capabilities = cls.capabilities
 
