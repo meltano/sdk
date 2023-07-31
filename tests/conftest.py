@@ -12,11 +12,15 @@ from sqlalchemy import __version__ as sqlalchemy_version
 
 from singer_sdk import SQLConnector
 from singer_sdk import typing as th
+from singer_sdk.helpers.capabilities import PluginCapabilities
 from singer_sdk.sinks import BatchSink, SQLSink
 from singer_sdk.target_base import SQLTarget, Target
 
 if t.TYPE_CHECKING:
     from _pytest.config import Config
+
+    from singer_sdk.helpers.capabilities import CapabilitiesEnum
+
 
 SYSTEMS = {"linux", "darwin", "windows"}
 
@@ -104,6 +108,10 @@ class TargetMock(Target):
     name = "target-mock"
     config_jsonschema = th.PropertiesList().to_dict()
     default_sink_class = BatchSinkMock
+    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+        *Target.capabilities,
+        PluginCapabilities.BATCH,
+    ]
 
     def __init__(self, *args, **kwargs):
         """Create the Mock target sync."""
