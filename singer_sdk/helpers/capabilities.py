@@ -99,6 +99,13 @@ TARGET_SCHEMA_CONFIG = PropertiesList(
         description="The default target database schema name to use for all streams.",
     ),
 ).to_dict()
+ADD_RECORD_METADATA_CONFIG = PropertiesList(
+    Property(
+        "add_record_metadata",
+        BooleanType(),
+        description="Add metadata to records.",
+    ),
+).to_dict()
 
 
 class DeprecatedEnum(Enum):
