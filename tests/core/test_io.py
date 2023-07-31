@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import decimal
-import json
 from contextlib import nullcontext
 
+import msgspec
 import pytest
 
 from singer_sdk.io_base import SingerReader
@@ -34,7 +34,7 @@ class DummyReader(SingerReader):
         pytest.param(
             "not-valid-json",
             None,
-            pytest.raises(json.decoder.JSONDecodeError),
+            pytest.raises(msgspec.DecodeError),
             id="unparsable",
         ),
         pytest.param(
