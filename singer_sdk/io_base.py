@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 import abc
-import decimal
-import json
 import logging
 import sys
 import typing as t
 from collections import Counter, defaultdict
 
+import msgspec
+
 from singer_sdk._singerlib import SingerMessageType
 from singer_sdk.helpers._compat import final
 
 logger = logging.getLogger(__name__)
+json_decoder = msgspec.json.Decoder(dec_hook=str)
 
 
 class SingerReader(metaclass=abc.ABCMeta):
@@ -29,7 +30,7 @@ class SingerReader(metaclass=abc.ABCMeta):
         This method is internal to the SDK and should not need to be overridden.
         """
         if not file_input:
-            file_input = sys.stdin
+            file_input = sys.stdin.buffer
 
         self._process_lines(file_input)
         self._process_endofpipe()
@@ -60,14 +61,13 @@ class SingerReader(metaclass=abc.ABCMeta):
             A dictionary of the deserialized json.
 
         Raises:
-            json.decoder.JSONDecodeError: raised if any lines are not valid json
+            msgspec.DecodeError: raised if any lines are not valid json
         """
         try:
-            return json.loads(  # type: ignore[no-any-return]
+            return json_decoder.decode(  # type: ignore[no-any-return]
                 line,
-                parse_float=decimal.Decimal,
             )
-        except json.decoder.JSONDecodeError as exc:
+        except msgspec.DecodeError as exc:
             logger.error("Unable to parse:\n%s", line, exc_info=exc)
             raise
 
