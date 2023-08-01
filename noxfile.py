@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import glob
 import os
 import shutil
 import sys
@@ -185,7 +184,7 @@ def docs_serve(session: Session) -> None:
     session.run("sphinx-autobuild", *args)
 
 
-@nox.parametrize("replay_file_path", glob.glob("./e2e-tests/cookiecutters/*.json"))
+@nox.parametrize("replay_file_path", Path("./e2e-tests/cookiecutters").glob("*.json"))
 @session(python=main_python_version)
 def test_cookiecutter(session: Session, replay_file_path) -> None:
     """Uses the tap template to build an empty cookiecutter.
