@@ -25,6 +25,8 @@ extend = "./pyproject.toml"
 extend-ignore = ["TD002", "TD003"]
 """
 
+COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))
+
 package = "singer_sdk"
 python_versions = ["3.11", "3.10", "3.9", "3.8", "3.7"]
 main_python_version = "3.10"
@@ -184,7 +186,7 @@ def docs_serve(session: Session) -> None:
     session.run("sphinx-autobuild", *args)
 
 
-@nox.parametrize("replay_file_path", Path("./e2e-tests/cookiecutters").glob("*.json"))
+@nox.parametrize("replay_file_path", COOKIECUTTER_REPLAY_FILES)
 @session(python=main_python_version)
 def test_cookiecutter(session: Session, replay_file_path) -> None:
     """Uses the tap template to build an empty cookiecutter.
