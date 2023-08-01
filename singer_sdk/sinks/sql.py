@@ -12,6 +12,7 @@ import sqlalchemy
 from pendulum import now
 from sqlalchemy.sql.expression import bindparam
 
+from singer_sdk.connectors import SQLConnector
 from singer_sdk.exceptions import ConformedNameClashException
 from singer_sdk.helpers._conformers import replace_leading_digit
 from singer_sdk.sinks.batch import BatchSink
@@ -19,7 +20,6 @@ from singer_sdk.sinks.batch import BatchSink
 if t.TYPE_CHECKING:
     from sqlalchemy.sql import Executable
 
-    from singer_sdk.connectors import SQLConnector
     from singer_sdk.target_base import Target
 
 
