@@ -22,7 +22,7 @@ except ImportError:
 
 RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
-extend-ignore = ["TD002", "TD003"]
+extend-ignore = ["TD002", "TD003", "FIX002"]
 """
 
 COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))
