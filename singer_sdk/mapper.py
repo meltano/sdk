@@ -8,10 +8,10 @@ from __future__ import annotations
 import abc
 import copy
 import datetime
+import fnmatch
 import hashlib
 import logging
 import typing as t
-import fnmatch
 
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
 from singer_sdk.helpers import _simpleeval as simpleeval
@@ -725,7 +725,9 @@ class PluginMapper:
                     key_properties=key_properties,
                     flattening_options=self.flattening_options,
                 )
-            elif stream_def is None or (isinstance(stream_def, str) and stream_def == NULL_STRING):
+            elif stream_def is None or (
+                isinstance(stream_def, str) and stream_def == NULL_STRING
+            ):
                 mapper = RemoveRecordTransform(
                     stream_alias=stream_alias,
                     raw_schema=schema,
