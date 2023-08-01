@@ -242,7 +242,9 @@ class TargetTestRunner(SingerTestRunner):
             if self.input_io:
                 self._input = self.input_io
             elif self.input_filepath:
-                self._input = Path(self.input_filepath).open(encoding="utf8")
+                self._input = Path(self.input_filepath).open(  # noqa: SIM115
+                    encoding="utf8",
+                )
         return t.cast(t.IO[str], self._input)
 
     @target_input.setter
