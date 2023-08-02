@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 import singer_sdk.typing as th
 from singer_sdk import _singerlib as singer
-from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.mapper_base import InlineMapper
 
@@ -62,7 +61,10 @@ class {{ cookiecutter.name }}Mapper(InlineMapper):
         """
         yield singer.SchemaMessage.from_dict(message_dict)
 
-    def map_record_message(self, message_dict: dict) -> t.Iterable[singer.RecordMessage]:
+    def map_record_message(
+        self,
+        message_dict: dict,
+    ) -> t.Iterable[singer.RecordMessage]:
         """Map a record message to zero or more new messages.
 
         Args:

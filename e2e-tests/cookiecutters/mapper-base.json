@@ -3,7 +3,7 @@
       "name": "MyMapperName",
       "admin_name": "Automatic Tester",
       "mapper_id": "mapper-base",
-      "library_name": "tap_sql_custom",
+      "library_name": "mapper_base",
       "variant": "None (Skip)",
       "include_ci_files": "None (Skip)",
       "license": "Apache-2.0",
