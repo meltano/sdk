@@ -74,7 +74,10 @@ jobs:
         path: |
           /tmp/tap-*
           /tmp/target-*
+          /tmp/mapper-*
           !/tmp/tap-*/.mypy_cache/
           !/tmp/target-*/.mypy_cache/
+          !/tmp/mapper-*/.mypy_cache/
           !/tmp/tap-*/.tox/
           !/tmp/target-*/.tox/
+          !/tmp/mapper-*/.tox/

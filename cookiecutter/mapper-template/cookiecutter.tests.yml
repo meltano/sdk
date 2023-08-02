@@ -1,9 +1,0 @@
-tests:
-  - name: MyMapperName
-    mapper_id: mapper-test
-    include_ci_files: "None (Skip)"
-
-  - name: MyMapperName
-    mapper_id: mapper-test
-    include_ci_files: "GitHub"
-    license: "Apache-2.0"
