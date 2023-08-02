@@ -1,4 +1,4 @@
-"""{{ cookiecutter.destination_name }} target class."""
+"""{{ cookiecutter.name }} mapper class."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class {{ cookiecutter.name }}Mapper(InlineMapper):
     """Sample mapper for {{ cookiecutter.name }}."""
 
-    name = "{{ cookiecutter.ammper_id }}"
+    name = "{{ cookiecutter.mapper_id }}"
 
     config_jsonschema = th.PropertiesList(
         # TODO: Replace or remove this example config based on your needs

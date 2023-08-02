@@ -1,1 +1,1 @@
-"""Test suite for {{ cookiecutter.tap_id }}."""
+"""Test suite for {{ cookiecutter.mapper_id }}."""
