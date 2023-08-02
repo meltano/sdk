@@ -91,5 +91,6 @@ class {{ cookiecutter.name }}Mapper(InlineMapper):
         """
         yield singer.ActivateVersionMessage.from_dict(message_dict)
 
+
 if __name__ == "__main__":
     {{ cookiecutter.name }}Mapper.cli()
