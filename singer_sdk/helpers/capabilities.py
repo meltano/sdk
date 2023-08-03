@@ -108,7 +108,7 @@ ADD_RECORD_METADATA_CONFIG = PropertiesList(
 ).to_dict()
 
 
-class TargetLoadMethods(Enum):
+class TargetLoadMethods(str, Enum):
     """Target-specific capabilities."""
 
     # always write all input records whether that records already exists or not
@@ -133,11 +133,11 @@ TARGET_LOAD_METHOD_CONFIG = PropertiesList(
             "input records."
         ),
         allowed_values=[
-            TargetLoadMethods.APPEND_ONLY.value,
-            TargetLoadMethods.UPSERT.value,
-            TargetLoadMethods.OVERWRITE.value,
+            TargetLoadMethods.APPEND_ONLY,
+            TargetLoadMethods.UPSERT,
+            TargetLoadMethods.OVERWRITE,
         ],
-        default=TargetLoadMethods.APPEND_ONLY.value,
+        default=TargetLoadMethods.APPEND_ONLY,
     ),
 ).to_dict()
 

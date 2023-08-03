@@ -797,7 +797,7 @@ class SQLConnector:
                 as_temp_table=as_temp_table,
             )
             return
-        elif self.config.get("load_method") == TargetLoadMethods.OVERWRITE:
+        elif self.config["load_method"] == TargetLoadMethods.OVERWRITE:
             self.truncate_table(full_table_name=full_table_name)
 
         for property_name, property_def in schema["properties"].items():
