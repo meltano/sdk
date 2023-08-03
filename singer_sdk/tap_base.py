@@ -651,8 +651,8 @@ class SQLTap(Tap):
         Returns:
             List of discovered Stream objects.
         """
-        result: list[Stream] = []
-        for catalog_entry in self.catalog_dict["streams"]:
-            result.append(self.default_stream_class(self, catalog_entry))
-
+        result: list[Stream] = [
+            self.default_stream_class(self, catalog_entry)
+            for catalog_entry in self.catalog_dict["streams"]
+        ]
         return result

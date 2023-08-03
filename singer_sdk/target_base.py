@@ -369,7 +369,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         stream_name = message_dict["stream"]
         schema = message_dict["schema"]
-        key_properties = message_dict.get("key_properties", None)
+        key_properties = message_dict.get("key_properties")
         do_registration = False
         if stream_name not in self.mapper.stream_maps:
             do_registration = True

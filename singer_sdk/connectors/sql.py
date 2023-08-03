@@ -496,7 +496,12 @@ class SQLConnector:
         result: list[dict] = []
         engine = self._engine
         inspected = sqlalchemy.inspect(engine)
+        processed_schemas = {}
         for schema_name in self.get_schema_names(engine, inspected):
+            # Skip schemas that have already been seen
+            if schema_name in processed_schemas:
+                continue
+
             # Iterate through each table and view
             for table_name, is_view in self.get_object_names(
                 engine,
@@ -511,6 +516,8 @@ class SQLConnector:
                     is_view,
                 )
                 result.append(catalog_entry.to_dict())
+
+            processed_schemas[schema_name] = True
 
         return result
 
