@@ -1,0 +1,13 @@
+{
+    "database": "needful_things.duckdb",
+    "batch_config": {
+        "batch_size": 10000,
+        "encoding": {
+            "format": "jsonl",
+            "compression": "gzip"
+        },
+        "storage": {
+            "root": "/Users/edgarramirez/Code/meltano/sdk/samples/sample_tap_duckdb/out"
+        }
+    }
+}
