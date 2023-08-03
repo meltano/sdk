@@ -135,11 +135,12 @@ TARGET_LOAD_METHOD_CONFIG = PropertiesList(
         allowed_values=[
             TargetLoadMethods.APPEND_ONLY,
             TargetLoadMethods.UPSERT,
-            TargetLoadMethods.OVERWRITE
+            TargetLoadMethods.OVERWRITE,
         ],
         default=TargetLoadMethods.APPEND_ONLY,
     ),
 ).to_dict()
+
 
 class DeprecatedEnum(Enum):
     """Base class for capabilities enumeration."""
