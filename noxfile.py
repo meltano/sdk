@@ -196,21 +196,22 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
     cc_build_path = tempfile.gettempdir()
     folder_base_path = "./cookiecutter"
 
-    target_folder = (
-        "tap-template"
-        if Path(replay_file_path).name.startswith("tap")
-        else "target-template"
-    )
-    tap_template = Path(folder_base_path + "/" + target_folder).resolve()
+    if Path(replay_file_path).name.startswith("tap"):
+        folder = "tap-template"
+    elif Path(replay_file_path).name.startswith("target"):
+        folder = "target-template"
+    else:
+        folder = "mapper-template"
+    template = Path(folder_base_path + "/" + folder).resolve()
     replay_file = Path(replay_file_path).resolve()
 
-    if not Path(tap_template).exists():
+    if not Path(template).exists():
         return
 
     if not Path(replay_file).is_file():
         return
 
-    sdk_dir = Path(Path(tap_template).parent).parent
+    sdk_dir = Path(Path(template).parent).parent
     cc_output_dir = Path(replay_file_path).name.replace(".json", "")
     cc_test_output = cc_build_path + "/" + cc_output_dir
 
@@ -224,7 +225,7 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
         "cookiecutter",
         "--replay-file",
         str(replay_file),
-        str(tap_template),
+        str(template),
         "-o",
         cc_build_path,
     )
