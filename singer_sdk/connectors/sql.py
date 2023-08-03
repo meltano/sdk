@@ -15,6 +15,7 @@ from sqlalchemy.engine import Engine
 from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.helpers.capabilities import TargetLoadMethods
 
 if t.TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
@@ -37,6 +38,7 @@ class SQLConnector:
     allow_column_rename: bool = True  # Whether RENAME COLUMN is supported.
     allow_column_alter: bool = False  # Whether altering column types is supported.
     allow_merge_upsert: bool = False  # Whether MERGE UPSERT is supported.
+    allow_overwrite: bool = False  # Whether overwrite load method is supported.
     allow_temp_tables: bool = True  # Whether temp tables are supported.
     _cached_engine: Engine | None = None
 
@@ -732,6 +734,43 @@ class SQLConnector:
         if not schema_exists:
             self.create_schema(schema_name)
 
+    @staticmethod
+    def get_truncate_table_ddl(
+        table_name: str,
+    ) -> sqlalchemy.DDL:
+        """Get the truncate table DDL statement.
+
+        Override this if your database uses a different syntax for truncating tables.
+
+        Args:
+            table_name: Fully qualified table name of column to alter.
+
+        Returns:
+            A sqlalchemy DDL instance.
+        """
+        return sqlalchemy.DDL(
+            "TRUNCATE TABLE %(table_name)s",
+            {
+                "table_name": table_name,
+            },
+        )
+
+    def truncate_table(self, full_table_name: str) -> None:
+        """Truncate target table.
+
+        Args:
+            full_table_name: Fully qualified table name of column to alter.
+        """
+        if not self.allow_overwrite:
+            msg = "Truncating tables is not supported."
+            raise NotImplementedError(msg)
+
+        truncate_table_ddl = self.get_truncate_table_ddl(
+            table_name=full_table_name,
+        )
+        with self._connect() as conn:
+            conn.execute(truncate_table_ddl)
+
     def prepare_table(
         self,
         full_table_name: str,
@@ -758,6 +797,8 @@ class SQLConnector:
                 as_temp_table=as_temp_table,
             )
             return
+        elif self.config.get("load_method") == TargetLoadMethods.OVERWRITE:
+            self.truncate_table(full_table_name=full_table_name)
 
         for property_name, property_def in schema["properties"].items():
             self.prepare_column(

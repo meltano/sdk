@@ -19,6 +19,7 @@ class SQLiteConnector(SQLConnector):
     allow_temp_tables = False
     allow_column_alter = False
     allow_merge_upsert = True
+    allow_overwrite: bool = False
 
     def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:
         """Generates a SQLAlchemy URL for SQLite."""
