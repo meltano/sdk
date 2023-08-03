@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 from textwrap import dedent
 
@@ -5,13 +7,14 @@ import sqlalchemy as sa
 
 from singer_sdk import SQLConnector, SQLTap
 from singer_sdk import typing as th
-from singer_sdk.helpers._batch import BaseBatchFileEncoding, BatchConfig
 from singer_sdk.streams import SQLStream
+
+if t.TYPE_CHECKING:
+    from singer_sdk.helpers._batch import BatchConfig
 
 
 class DuckDBBatchError(Exception):
     """DuckDB batch error."""
-    pass
 
 
 class DuckDBConnector(SQLConnector):
@@ -23,9 +26,7 @@ class DuckDBConnector(SQLConnector):
 class DuckDBStream(SQLStream):
     connector_class = DuckDBConnector
 
-    def get_batches(self, batch_config: BatchConfig, context = None):
-        root = batch_config.storage.root
-        prefix = batch_config.storage.prefix or ""
+    def get_batches(self, batch_config: BatchConfig, context=None):
         filepath = "out/out.ndjson"
         table_name = self.fully_qualified_name
         files = []
