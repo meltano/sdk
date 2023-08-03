@@ -141,6 +141,7 @@ TARGET_LOAD_METHOD_CONFIG = PropertiesList(
     ),
 ).to_dict()
 
+
 class DeprecatedEnum(Enum):
     """Base class for capabilities enumeration."""
 
