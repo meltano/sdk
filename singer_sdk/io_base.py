@@ -149,11 +149,15 @@ class SingerReader(metaclass=abc.ABCMeta):
 
             if field_type is not None and is_nullable:
                 field_type = t.Optional[field_type]
+            elif field_type is None and is_nullable:
+                field_type = t.Optional[str]
 
-            if field_type is None:
-                fields.append(field_name)
-            else:
+            if field_type is not None and is_nullable:
+                fields.append((field_name, field_type, None))
+            elif field_type is not None:
                 fields.append((field_name, field_type))
+            elif field_type is None:
+                fields.append(field_name)
 
         self.stream_structs[stream] = msgspec.defstruct(stream, fields=fields)
 
