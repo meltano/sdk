@@ -1,0 +1,4 @@
+{"type": "SCHEMA", "stream": "record_missing_fields", "key_properties": ["id"], "schema": {"type": "object", "properties": {"id": {"type": "integer"}, "optional": {"type": "string"}}, "required": ["id"]}}
+{"type": "RECORD", "stream": "record_missing_fields", "record": {"id": 1, "optional": "now you see me"}}
+{"type": "RECORD", "stream": "record_missing_fields", "record": {"id": 2}}
+{"type": "STATE", "value": {}}

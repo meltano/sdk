@@ -217,7 +217,10 @@ class Stream(metaclass=abc.ABCMeta):
         type_dict = self.schema.get("properties", {}).get(self.replication_key)
         return is_datetime_type(type_dict)
 
-    def get_starting_replication_key_value(self, context: dict | None) -> t.Any | None:
+    def get_starting_replication_key_value(
+        self,
+        context: dict | None,
+    ) -> t.Any | None:  # noqa: ANN401
         """Get starting replication key.
 
         Will return the value of the stream's replication key when `--state` is passed.
@@ -385,7 +388,7 @@ class Stream(metaclass=abc.ABCMeta):
     def get_replication_key_signpost(
         self,
         context: dict | None,  # noqa: ARG002
-    ) -> datetime.datetime | t.Any | None:
+    ) -> datetime.datetime | t.Any | None:  # noqa: ANN401
         """Get the replication signpost.
 
         For timestamp-based replication keys, this defaults to `utc_now()`. For
@@ -1255,7 +1258,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         Raises:
             NotImplementedError: If the stream has children but this method is not
-                overriden.
+                overridden.
         """
         if context is None:
             for child_stream in self.child_streams:

@@ -1,0 +1,9 @@
+{
+  "name": "MyMapperName",
+  "admin_name": "FirstName LastName",
+  "mapper_id": "mapper-{{ cookiecutter.name.lower() }}",
+  "library_name": "{{ cookiecutter.mapper_id.replace('-', '_') }}",
+  "variant": "None (Skip)",
+  "include_ci_files": ["GitHub", "None (Skip)"],
+  "license": ["Apache-2.0"]
+}

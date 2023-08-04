@@ -34,9 +34,3 @@ repos:
   rev: v1.4.1
   hooks:
   - id: mypy
-    additional_dependencies:
-    {%- if cookiecutter.stream_type == "SQL" %}
-    - sqlalchemy-stubs
-    {%- else %}
-    - types-requests
-    {%- endif %}
