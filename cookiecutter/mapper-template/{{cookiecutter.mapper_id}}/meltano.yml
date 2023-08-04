@@ -1,0 +1,31 @@
+version: 1
+send_anonymous_usage_stats: true
+project_id: "{{cookiecutter.mapper_id}}"
+default_environment: test
+environments:
+- name: test
+plugins:
+  extractors:
+  - name: tap-smoke-test
+    variant: meltano
+    pip_url: git+https://github.com/meltano/tap-smoke-test.git
+    config:
+      streams:
+      - stream_name: animals
+        input_filename: https://raw.githubusercontent.com/meltano/tap-smoke-test/main/demo-data/animals-data.jsonl
+  loaders:
+  - name: target-jsonl
+    variant: andyh1203
+    pip_url: target-jsonl
+  mappers:
+  - name: "{{cookiecutter.mapper_id}}"
+    pip_url: -e .
+    namespace: "{{cookiecutter.library_name}}"
+    # TODO: replace these with the actual settings
+    settings:
+    - name: example_config
+      kind: string
+    mappings:
+    - name: example
+      config:
+        example_config: foo
