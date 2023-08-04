@@ -48,7 +48,7 @@ def test_tap_sqlite_cli(sqlite_sample_db_config: dict[str, t.Any], tmp_path: Pat
 def test_sql_metadata(sqlite_sample_tap: SQLTap):
     stream = t.cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
     detected_metadata = stream.catalog_entry["metadata"]
-    detected_root_md = [md for md in detected_metadata if md["breadcrumb"] == []][0]
+    detected_root_md = next(md for md in detected_metadata if md["breadcrumb"] == [])
     detected_root_md = detected_root_md["metadata"]
     translated_metadata = StreamMetadata.from_dict(detected_root_md)
     assert detected_root_md["schema-name"] == translated_metadata.schema_name
