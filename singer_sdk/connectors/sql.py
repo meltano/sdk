@@ -1144,6 +1144,8 @@ class SQLConnector:
 
         Returns:
             The JSON string.
+
+        .. versionadded:: 0.31.0
         """
         return simplejson.dumps(obj, use_decimal=True)
 
@@ -1158,5 +1160,7 @@ class SQLConnector:
 
         Returns:
             The deserialized object.
+
+        .. versionadded:: 0.31.0
         """
         return json.loads(json_str, parse_float=decimal.Decimal)
