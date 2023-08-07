@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import decimal
+import json
 import logging
 import typing as t
 import warnings
@@ -9,6 +11,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from functools import lru_cache
 
+import simplejson
 import sqlalchemy
 from sqlalchemy.engine import Engine
 
@@ -316,7 +319,12 @@ class SQLConnector:
         Returns:
             A new SQLAlchemy Engine.
         """
-        return sqlalchemy.create_engine(self.sqlalchemy_url, echo=False)
+        return sqlalchemy.create_engine(
+            self.sqlalchemy_url,
+            echo=False,
+            json_serializer=self.serialize_json,
+            json_deserializer=self.deserialize_json,
+        )
 
     def quote(self, name: str) -> str:
         """Quote a name if it needs quoting, using '.' as a name-part delimiter.
@@ -1124,3 +1132,31 @@ class SQLConnector:
         )
         with self._connect() as conn:
             conn.execute(alter_column_ddl)
+
+    def serialize_json(self, obj: object) -> str:
+        """Serialize an object to a JSON string.
+
+        Target connectors may override this method to provide custom serialization logic
+        for JSON types.
+
+        Args:
+            obj: The object to serialize.
+
+        Returns:
+            The JSON string.
+        """
+        return simplejson.dumps(obj, use_decimal=True)
+
+    def deserialize_json(self, json_str: str) -> object:
+        """Deserialize a JSON string to an object.
+
+        Tap connectors may override this method to provide custom deserialization
+        logic for JSON types.
+
+        Args:
+            json_str: The JSON string to deserialize.
+
+        Returns:
+            The deserialized object.
+        """
+        return json.loads(json_str, parse_float=decimal.Decimal)
