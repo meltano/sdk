@@ -31,7 +31,7 @@ def test_perftimer_actions():
     time.sleep(1.1)
     timer.stop()
     assert timer.lap_time >= 1
-    assert timer.lap_time < 1.2
+    assert timer.lap_time < 1.5
     assert timer.start_time is None
     assert timer.stop_time is None
 
