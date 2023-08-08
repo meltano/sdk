@@ -23,6 +23,7 @@ from singer_sdk.helpers.capabilities import TargetLoadMethods
 
 if t.TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
+    from sqlalchemy.sql.elements import TextClause
 
 
 class SQLConnector:
@@ -746,7 +747,7 @@ class SQLConnector:
     @staticmethod
     def get_truncate_table_ddl(
         table_name: str,
-    ) -> tuple[text, dict]:
+    ) -> tuple[TextClause, dict]:
         """Get the truncate table SQL statement.
 
         Override this if your database uses a different syntax for truncating tables.
@@ -778,9 +779,8 @@ class SQLConnector:
         truncate_table_ddl, kwargs = self.get_truncate_table_ddl(
             table_name=full_table_name,
         )
-        with self._connect() as conn:
+        with self._connect() as conn, conn.begin():
             conn.execute(truncate_table_ddl, **kwargs)
-            conn.commit()
 
     def prepare_table(
         self,
