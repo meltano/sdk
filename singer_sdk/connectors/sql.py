@@ -468,19 +468,26 @@ class SQLConnector:
 
         # Initialize columns list
         table_schema = th.PropertiesList()
-        for column_def in inspected.get_columns(table_name, schema=schema_name):
-            column_name = column_def["name"]
-            is_nullable = column_def.get("nullable", False)
-            jsonschema_type: dict = self.to_jsonschema_type(
-                t.cast(sqlalchemy.types.TypeEngine, column_def["type"]),
-            )
-            table_schema.append(
-                th.Property(
-                    name=column_name,
-                    wrapped=th.CustomType(jsonschema_type),
-                    required=not is_nullable,
-                ),
-            )
+        with warnings.catch_warnings(record=True) as inspection_warnings:
+            for column_def in inspected.get_columns(table_name, schema=schema_name):
+                column_name = column_def["name"]
+                is_nullable = column_def.get("nullable", False)
+                jsonschema_type: dict = self.to_jsonschema_type(
+                    t.cast(sqlalchemy.types.TypeEngine, column_def["type"]),
+                )
+                table_schema.append(
+                    th.Property(
+                        name=column_name,
+                        wrapped=th.CustomType(jsonschema_type),
+                        required=not is_nullable,
+                    ),
+                )
+        if len(inspection_warnings) > 0:
+            for line in inspection_warnings:
+                expanded_msg: str = (
+                    f"Discovery warning: '{unique_stream_id}' {line.message}"
+                )
+                self.logger.info(expanded_msg)
         schema = table_schema.to_dict()
 
         sql_datatypes = {}
