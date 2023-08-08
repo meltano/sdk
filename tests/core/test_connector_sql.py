@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from decimal import Decimal
 from unittest import mock
 
 import pytest
@@ -258,3 +259,27 @@ class TestConnectorSQL:
     ):
         merged_type = connector.merge_sql_types(types)
         assert isinstance(merged_type, expected_type)
+
+    def test_engine_json_serialization(self, connector: SQLConnector):
+        engine = connector._engine
+        meta = sqlalchemy.MetaData()
+        table = sqlalchemy.Table(
+            "test_table",
+            meta,
+            sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
+            sqlalchemy.Column("attrs", sqlalchemy.JSON),
+        )
+        meta.create_all(engine)
+        with engine.connect() as conn:
+            conn.execute(
+                table.insert(),
+                [
+                    {"attrs": {"x": Decimal("1.0")}},
+                    {"attrs": {"x": Decimal("2.0"), "y": [1, 2, 3]}},
+                ],
+            )
+            result = conn.execute(table.select())
+            assert result.fetchall() == [
+                (1, {"x": Decimal("1.0")}),
+                (2, {"x": Decimal("2.0"), "y": [1, 2, 3]}),
+            ]
