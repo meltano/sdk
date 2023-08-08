@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import typing as t
 
+from sqlalchemy.sql import text
+
 from singer_sdk import SQLConnector, SQLSink, SQLTarget
 from singer_sdk import typing as th
 
@@ -19,11 +21,20 @@ class SQLiteConnector(SQLConnector):
     allow_temp_tables = False
     allow_column_alter = False
     allow_merge_upsert = True
-    allow_overwrite: bool = False
+    allow_overwrite: bool = True
 
     def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:
         """Generates a SQLAlchemy URL for SQLite."""
         return f"sqlite:///{config[DB_PATH_CONFIG]}"
+
+    @staticmethod
+    def get_truncate_table_ddl(
+        table_name: str,
+    ) -> tuple[text, dict]:
+        return (
+            text(f"DELETE FROM {table_name}"),  # noqa: S608
+            {},
+        )
 
 
 class SQLiteSink(SQLSink):
