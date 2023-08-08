@@ -485,7 +485,7 @@ class SQLConnector:
         if len(inspection_warnings) > 0:
             for line in inspection_warnings:
                 expanded_msg: str = (
-                    f"Discovery warning: '{unique_stream_id}' {line.message}"
+                    f"Discovery warning: {line.message} in '{unique_stream_id}'"
                 )
                 self.logger.info(expanded_msg)
         schema = table_schema.to_dict()
