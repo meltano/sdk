@@ -45,6 +45,7 @@ class PerfTimer:
         self._stop_time = time.perf_counter()
         self._lap_time = self._stop_time - self._start_time
         self._start_time = None
+        self._stop_time = None
 
 
 class BatchPerfTimer(PerfTimer):
