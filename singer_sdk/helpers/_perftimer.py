@@ -1,4 +1,4 @@
-"""performace timers which deal with dynamic timing events."""
+"""Performance timers which deal with dynamic timing events."""
 
 from __future__ import annotations
 
@@ -59,7 +59,7 @@ class BatchPerfTimer(PerfTimer):
         self._sink_max_size: int = max_size
         self._max_perf_counter: float = max_perf_counter
 
-    SINK_MAX_SIZE_CELING: int = 100000
+    SINK_MAX_SIZE_CEILING: int = 100000
     """The max size a bulk insert can be"""
 
     @property
@@ -74,24 +74,22 @@ class BatchPerfTimer(PerfTimer):
 
     @property
     def perf_diff_allowed_min(self) -> float:
-        """The mininum negative variance allowed, 1/3 worse than wanted."""
+        """The minimum negative variance allowed, 1/3 worse than wanted."""
         return -1.0 * (self.max_perf_counter * 0.33)
 
     @property
     def perf_diff_allowed_max(self) -> float:
-        """The maximum postive variace allowed, # 3/4 better than wanted."""
+        """The maximum positive variance allowed, # 3/4 better than wanted."""
         return self.max_perf_counter * 0.75
 
     @property
     def perf_diff(self) -> float:
-        """Difference between wanted elapsed time and actual elpased time."""
-        diff = 0
-        if self._lap_time:
-            diff = self.max_perf_counter - self.lap_time
+        """Difference between wanted elapsed time and actual elapsed time."""
+        diff = self.max_perf_counter - self.lap_time if self._lap_time else 0
         return float(diff)
 
     def counter_based_max_size(self) -> int:  # noqa: C901
-        """Caclulate performance based batch size."""
+        """Calculate performance based batch size."""
         correction = 0
         if self.perf_diff < self.perf_diff_allowed_min:
             if self.sink_max_size >= 15000:  # noqa: PLR2004
@@ -104,7 +102,7 @@ class BatchPerfTimer(PerfTimer):
                 correction = -10
         if (
             self.perf_diff >= self.perf_diff_allowed_max
-            and self.sink_max_size < self.SINK_MAX_SIZE_CELING
+            and self.sink_max_size < self.SINK_MAX_SIZE_CEILING
         ):
             if self.sink_max_size >= 10000:  # noqa: PLR2004
                 correction = 10000
