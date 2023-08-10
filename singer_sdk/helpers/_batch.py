@@ -6,7 +6,7 @@ import enum
 import platform
 import typing as t
 from contextlib import contextmanager
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from urllib.parse import ParseResult, urlencode, urlparse
 
 import fs
@@ -24,6 +24,19 @@ class BatchFileFormat(str, enum.Enum):
 
     JSONL = "jsonl"
     """JSON Lines format."""
+
+    CSV = "csv"
+    """CSV format."""
+
+
+class BatchFileCompression(str, enum.Enum):
+    """Batch file compression."""
+
+    NONE = "none"
+    """No compression."""
+
+    GZIP = "gzip"
+    """GZIP compression."""
 
 
 @dataclass
@@ -59,7 +72,11 @@ class BaseBatchFileEncoding:
         data = data.copy()
         encoding_format = data.pop("format")
         encoding_cls = cls.registered_encodings[encoding_format]
-        return encoding_cls(**data)
+        return encoding_cls(
+            **{
+                f.name: data[f.name] for f in fields(encoding_cls) if f.name != "format"
+            },
+        )
 
 
 @dataclass
@@ -67,6 +84,18 @@ class JSONLinesEncoding(BaseBatchFileEncoding):
     """JSON Lines encoding for batch files."""
 
     __encoding_format__ = "jsonl"
+
+
+class CSVEncoding(BaseBatchFileEncoding):
+    """JSON Lines encoding for batch files."""
+
+    __encoding_format__ = "csv"
+
+    delimiter: str = ","
+    """The delimiter of the CSV file."""
+
+    header: bool = True
+    """Whether the CSV file has a header row."""
 
 
 @dataclass

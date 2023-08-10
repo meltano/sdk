@@ -59,6 +59,13 @@ def append_type(type_dict: dict, new_type: str) -> dict:
             result["anyOf"] = [result["anyOf"], new_type]
         return result
 
+    if "oneOf" in result:
+        if isinstance(result["oneOf"], list) and new_type not in result["oneOf"]:
+            result["oneOf"].append({"type": new_type})
+        elif new_type != result["oneOf"]:
+            result["oneOf"] = [result["oneOf"], {"type": new_type}]
+        return result
+
     if "type" in result:
         type_array = (
             result["type"] if isinstance(result["type"], list) else [result["type"]]

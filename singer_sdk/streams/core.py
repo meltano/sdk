@@ -21,10 +21,14 @@ from singer_sdk.exceptions import (
     AbortedSyncPausedException,
     InvalidStreamSortException,
     MaxRecordsLimitException,
+    UnsupportedBatchCompressionError,
+    UnsupportedBatchFormatError,
 )
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
+    BatchFileCompression,
+    BatchFileFormat,
     SDKBatchMessage,
 )
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
@@ -1340,7 +1344,19 @@ class Stream(metaclass=abc.ABCMeta):
 
         Yields:
             A tuple of (encoding, manifest) for each batch.
+
+        Raises:
+            UnsupportedBatchCompressionError: Raised if the batch compression is not
+                supported by the stream.
+            UnsupportedBatchFormatError: Raised if the batch format is not supported
+                by the stream.
         """
+        if batch_config.encoding.format != BatchFileFormat.JSONL:
+            raise UnsupportedBatchFormatError(batch_config.encoding.format)
+
+        if batch_config.encoding.compression != BatchFileCompression.NONE:
+            raise UnsupportedBatchCompressionError(batch_config.encoding.compression)
+
         batcher = JSONLinesBatcher(
             tap_name=self.tap_name,
             stream_name=self.name,

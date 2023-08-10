@@ -8,6 +8,7 @@ from warnings import warn
 
 from singer_sdk.typing import (
     BooleanType,
+    DiscriminatedUnion,
     IntegerType,
     ObjectType,
     PropertiesList,
@@ -58,18 +59,37 @@ BATCH_CONFIG = PropertiesList(
             Property(
                 "encoding",
                 description="Specifies the format and compression of the batch files.",
-                wrapped=ObjectType(
-                    Property(
-                        "format",
-                        StringType,
-                        allowed_values=["jsonl"],
-                        description="Format to use for batch files.",
+                wrapped=DiscriminatedUnion(
+                    "format",
+                    jsonl=ObjectType(
+                        Property(
+                            "compression",
+                            StringType,
+                            allowed_values=["gzip", "none"],
+                            description="Compression format to use for batch files.",
+                        ),
                     ),
-                    Property(
-                        "compression",
-                        StringType,
-                        allowed_values=["gzip", "none"],
-                        description="Compression format to use for batch files.",
+                    csv=ObjectType(
+                        Property(
+                            "compression",
+                            StringType,
+                            allowed_values=["gzip", "none"],
+                            description="Compression format to use for batch files.",
+                        ),
+                        Property(
+                            "delimiter",
+                            StringType,
+                            description="Delimiter to use for batch files.",
+                            default=",",
+                        ),
+                        Property(
+                            "header",
+                            BooleanType,
+                            description=(
+                                "Whether to include a header row in batch files."
+                            ),
+                            default=True,
+                        ),
                     ),
                 ),
             ),

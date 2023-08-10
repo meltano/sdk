@@ -1,20 +1,22 @@
 from __future__ import annotations
 
 import typing as t
+import uuid
 from textwrap import dedent
 
 import sqlalchemy as sa
 
 from singer_sdk import SQLConnector, SQLTap
 from singer_sdk import typing as th
+from singer_sdk.exceptions import (
+    UnsupportedBatchCompressionError,
+    UnsupportedBatchFormatError,
+)
+from singer_sdk.helpers._batch import BatchFileFormat, CSVEncoding, JSONLinesEncoding
 from singer_sdk.streams import SQLStream
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._batch import BatchConfig
-
-
-class DuckDBBatchError(Exception):
-    """DuckDB batch error."""
 
 
 class DuckDBConnector(SQLConnector):
@@ -26,29 +28,54 @@ class DuckDBConnector(SQLConnector):
 class DuckDBStream(SQLStream):
     connector_class = DuckDBConnector
 
-    def get_batches(self, batch_config: BatchConfig, context=None):
-        filepath = "out/out.ndjson"
-        table_name = self.fully_qualified_name
-        files = []
-
-        file_format = batch_config.encoding.format
-        compression = batch_config.encoding.compression
-
-        options = []
-        if file_format == "jsonl":
-            options.append("FORMAT JSON")
-        else:
-            msg = f"Unsupported file format: {file_format}"
-            raise DuckDBBatchError(msg)
-
-        if compression is None or compression == "none":
-            pass
-        elif compression == "gzip":
+    def get_jsonl_copy_options(self, encoding: JSONLinesEncoding, filename: str):
+        options = ["FORMAT JSON"]
+        if encoding.compression is None or encoding.compression == "none":
+            filename = f"{filename}.jsonl"
+        elif encoding.compression == "gzip":
             options.append("COMPRESSION GZIP")
+            filename = f"{filename}.jsonl.gz"
         else:
-            msg = f"Unsupported compression: {compression}"
-            raise DuckDBBatchError(msg)
+            raise UnsupportedBatchCompressionError(encoding.compression)
 
+        return options, filename
+
+    def get_csv_copy_options(self, encoding: CSVEncoding, filename: str):
+        options = ["FORMAT CSV", f"DELIMITER '{encoding.delimiter}'"]
+        if encoding.header:
+            options.append("HEADER")
+
+        if encoding.compression is None or encoding.compression == "none":
+            filename = f"{filename}.csv"
+        elif encoding.compression == "gzip":
+            options.append("COMPRESSION GZIP")
+            filename = f"{filename}.csv.gz"
+        else:
+            raise UnsupportedBatchCompressionError(encoding.compression)
+
+        return options, filename
+
+    def get_batches(self, batch_config: BatchConfig, context=None):  # noqa: ARG002
+        prefix = batch_config.storage.prefix or ""
+        sync_id = f"{self.tap_name}--{self.name}-{uuid.uuid4()}"
+        filename = f"{prefix}{sync_id}"
+        file_format = batch_config.encoding.format
+
+        if file_format == BatchFileFormat.JSONL:
+            options, filename = self.get_jsonl_copy_options(
+                batch_config.encoding,
+                filename,
+            )
+        elif file_format == BatchFileFormat.CSV:
+            options, filename = self.get_csv_copy_options(
+                batch_config.encoding,
+                filename,
+            )
+        else:
+            raise UnsupportedBatchFormatError(file_format)
+
+        table_name = self.fully_qualified_name
+        filepath = f"{batch_config.storage.root}/{filename}"
         copy_options = ",".join(options)
         query = sa.text(
             dedent(
@@ -61,8 +88,7 @@ class DuckDBStream(SQLStream):
         with self.connector._connect() as conn:
             conn.execute(query)
 
-        files.append(filepath)
-
+        files = [filepath]
         yield (batch_config.encoding, files)
 
 

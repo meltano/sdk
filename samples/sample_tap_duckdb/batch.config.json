@@ -3,8 +3,8 @@
     "batch_config": {
         "batch_size": 10000,
         "encoding": {
-            "format": "jsonl",
-            "compression": "gzip"
+            "format": "csv",
+            "compression": "none"
         },
         "storage": {
             "root": "/Users/edgarramirez/Code/meltano/sdk/samples/sample_tap_duckdb/out"

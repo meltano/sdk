@@ -119,3 +119,27 @@ class ConformedNameClashException(Exception):
 
 class MissingKeyPropertiesError(Exception):
     """Raised when a recieved (and/or transformed) record is missing key properties."""
+
+
+class UnsupportedBatchFormatError(Exception):
+    """Raised when an unsupported batch format is requested."""
+
+    def __init__(self, batch_format: str) -> None:
+        """Initialize the exception.
+
+        Args:
+            batch_format: The unsupported batch format.
+        """
+        super().__init__(f"Unsupported batch format: {batch_format}")
+
+
+class UnsupportedBatchCompressionError(Exception):
+    """Raised when an unsupported batch compression is requested."""
+
+    def __init__(self, compression: str) -> None:
+        """Initialize the exception.
+
+        Args:
+            compression: The unsupported batch compression.
+        """
+        super().__init__(f"Unsupported batch format: {compression}")
