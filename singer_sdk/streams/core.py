@@ -1354,7 +1354,7 @@ class Stream(metaclass=abc.ABCMeta):
         if batch_config.encoding.format != BatchFileFormat.JSONL:
             raise UnsupportedBatchFormatError(batch_config.encoding.format)
 
-        if batch_config.encoding.compression != BatchFileCompression.NONE:
+        if batch_config.encoding.compression != BatchFileCompression.GZIP:
             raise UnsupportedBatchCompressionError(batch_config.encoding.compression)
 
         batcher = JSONLinesBatcher(
