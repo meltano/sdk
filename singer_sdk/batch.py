@@ -125,7 +125,7 @@ class CSVBatcher(BaseBatcher):
         self,
         tap_name: str,
         stream_name: str,
-        batch_config: BatchConfig,
+        batch_config: BatchConfig[CSVEncoding],
     ) -> None:
         """Initialize the batcher.
 
@@ -135,7 +135,7 @@ class CSVBatcher(BaseBatcher):
             batch_config: The batch configuration.
         """
         super().__init__(tap_name, stream_name, batch_config)
-        self.encoding: CSVEncoding = self.batch_config.encoding
+        self.encoding = self.batch_config.encoding
 
     def get_batches(
         self,
@@ -170,7 +170,9 @@ class CSVBatcher(BaseBatcher):
                     filename = f"{prefix}{sync_id}-{i}.csv"
                     self._write_plain(fs, filename, chunk)
                 else:
-                    raise UnsupportedBatchCompressionError(self.encoding.compression)
+                    raise UnsupportedBatchCompressionError(
+                        self.encoding.compression or "none",
+                    )
                 file_url = fs.geturl(filename)
             yield [file_url]
 

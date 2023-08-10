@@ -86,6 +86,7 @@ class JSONLinesEncoding(BaseBatchFileEncoding):
     __encoding_format__ = "jsonl"
 
 
+@dataclass
 class CSVEncoding(BaseBatchFileEncoding):
     """JSON Lines encoding for batch files."""
 
@@ -230,11 +231,14 @@ class StorageTarget:
             filesystem.close()
 
 
+T = t.TypeVar("T", bound=BaseBatchFileEncoding)
+
+
 @dataclass
-class BatchConfig:
+class BatchConfig(t.Generic[T]):
     """Batch configuration."""
 
-    encoding: BaseBatchFileEncoding
+    encoding: T
     """The encoding of the batch file."""
 
     storage: StorageTarget
