@@ -15,7 +15,6 @@ from sqlalchemy.sql.expression import bindparam
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.exceptions import ConformedNameClashException
 from singer_sdk.helpers._conformers import replace_leading_digit
-from singer_sdk.helpers._perftimer import BatchPerfTimer
 from singer_sdk.sinks.batch import BatchSink
 
 if t.TYPE_CHECKING:
@@ -50,22 +49,15 @@ class SQLSink(BatchSink):
         """
         self._connector: SQLConnector
         self._connector = connector or self.connector_class(dict(target.config))
-        self._batch_size_rows: int = target.config.get(
-            "batch_size_rows",
-            super().MAX_SIZE_DEFAULT,
-        )
-        self._batch_wait_limit_seconds: int | None = target.config.get(
-            "batch_wait_limit_seconds",
-        )
+        # self._batch_size_rows: int = target.config.get(
+        #     "batch_size_rows",
+        # self._batch_wait_limit_seconds: int | None = target.config.get(
+        #     "batch_wait_limit_seconds",
 
-        self._sink_timer: BatchPerfTimer | None = None
-
-        if self._batch_wait_limit_seconds is not None:
-            self._batch_size_rows = 100
-            self._sink_timer = BatchPerfTimer(
-                self._batch_size_rows,
-                self._batch_wait_limit_seconds,
-            )
+        # if self._batch_wait_limit_seconds is not None:
+        #     self._sink_timer = BatchPerfTimer(
+        #         self._batch_size_rows,
+        #         self._batch_wait_limit_seconds,
 
         super().__init__(target, stream_name, schema, key_properties)
 
@@ -87,50 +79,45 @@ class SQLSink(BatchSink):
         """
         return self.connector.connection
 
-    @property
-    def batch_size_rows(self) -> int:
-        """Get batch_size_rows object.
+    # @property
+    # def batch_size_rows(self) -> int:
+    #     """Get batch_size_rows object.
 
-        Returns:
-            A batch_size_rows object.
-        """
-        return self._batch_size_rows
+    #     Returns:
+    #         A batch_size_rows object.
+    #     """
 
-    @batch_size_rows.setter
-    def batch_size_rows(self, new_value: int) -> None:
-        """Set batch_size_rows object to the given value.
+    # @batch_size_rows.setter
+    # def batch_size_rows(self, new_value: int) -> None:
+    #     """Set batch_size_rows object to the given value.
 
-        Args:
-            new_value: The value you want to set batch_size_rows too.
-        """
-        self._batch_size_rows = new_value
+    #     Args:
+    #         new_value: The value you want to set batch_size_rows too.
+    #     """
 
-    @property
-    def batch_wait_limit_seconds(self) -> int | None:
-        """Get batch_wait_limit_seconds object.
+    # @property
+    # def batch_wait_limit_seconds(self) -> int | None:
+    #     """Get batch_wait_limit_seconds object.
 
-        Returns:
-            A batch_wait_limit_seconds object.
-        """
-        return self._batch_wait_limit_seconds
+    #     Returns:
+    #         A batch_wait_limit_seconds object.
+    #     """
 
-    @property
-    def sink_timer(self) -> BatchPerfTimer | None:
-        """Get sink_timer object.
+    # @property
+    # def sink_timer(self) -> BatchPerfTimer | None:
+    #     """Get sink_timer object.
 
-        Returns:
-            A sink_timer object.
-        """
-        return self._sink_timer
+    #     Returns:
+    #         A sink_timer object.
+    #     """
 
-    @property
-    def max_size(self) -> int:
-        """Get max batch size.
+    # @property
+    # def max_size(self) -> int:
+    #     """Get max batch size.
 
-        Returns:
-            Max number of records to batch before `is_full=True`
-        """
-        return self.batch_size_rows
+    #     Returns:
+    #         Max number of records to batch before `is_full=True`
+    #     """
 
     @property
     def table_name(self) -> str:
@@ -399,14 +386,11 @@ class SQLSink(BatchSink):
         with self.connector._connect() as conn, conn.begin():
             result = conn.execute(insert_sql, new_records)
 
-        # Finish Line for max_size perf counter
-        if self.sink_timer is not None:
-            if self.sink_timer.start_time is not None:
-                self.sink_timer.stop()
-                self.batch_size_rows = self.sink_timer.counter_based_max_size()
+        # # Finish Line for max_size perf counter
+        # if self.sink_timer is not None:
+        #     if self.sink_timer.start_time is not None:
 
-            # Starting Line for max_size perf counter
-            self.sink_timer.start()
+        #     # Starting Line for max_size perf counter
         return result.rowcount
 
     def merge_upsert_from_table(
