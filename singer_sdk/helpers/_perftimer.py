@@ -79,8 +79,8 @@ class BatchPerfTimer(PerfTimer):
 
     @property
     def perf_diff_allowed_max(self) -> float:
-        """The maximum positive variance allowed, # 3/4 better than wanted."""
-        return self.max_perf_counter * 0.75
+        """The maximum positive variance allowed, 1/4 better than wanted."""
+        return self.max_perf_counter * 0.25
 
     @property
     def perf_diff(self) -> float:
