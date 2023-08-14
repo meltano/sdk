@@ -23,6 +23,7 @@ from singer_sdk.helpers._batch import (
     StorageTarget,
 )
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._perftimer import BatchPerfTimer
 from singer_sdk.helpers._typing import (
     DatetimeErrorTreatmentEnum,
     get_datelike_property_type,
@@ -90,6 +91,23 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
+        # Batch Performace Timer
+        self._batch_size_rows: int = target.config.get(
+            "batch_size_rows",
+            self.MAX_SIZE_DEFAULT,
+        )
+        self._batch_wait_limit_seconds: int | None = target.config.get(
+            "batch_wait_limit_seconds",
+        )
+
+        self._sink_timer: BatchPerfTimer | None = None
+
+        if self._batch_wait_limit_seconds is not None:
+            self._batch_size_rows = 100
+            self._sink_timer = BatchPerfTimer(
+                self._batch_size_rows,
+                self._batch_wait_limit_seconds,
+            )
         self._validator = Draft7Validator(schema, format_checker=FormatChecker())
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
@@ -106,16 +124,6 @@ class Sink(metaclass=abc.ABCMeta):
         return {}
 
     # Size properties
-
-    @property
-    def max_size(self) -> int:
-        """Get max batch size.
-
-        Returns:
-            Max number of records to batch before `is_full=True`
-        """
-        return self.MAX_SIZE_DEFAULT
-
     @property
     def current_size(self) -> int:
         """Get current batch size.
@@ -133,6 +141,51 @@ class Sink(metaclass=abc.ABCMeta):
             True if the sink needs to be drained.
         """
         return self.current_size >= self.max_size
+
+    @property
+    def batch_size_rows(self) -> int:
+        """Get batch_size_rows object.
+
+        Returns:
+            A batch_size_rows object.
+        """
+        return self._batch_size_rows
+
+    @batch_size_rows.setter
+    def batch_size_rows(self, new_value: int) -> None:
+        """Set batch_size_rows object to the given value.
+
+        Args:
+            new_value: The value you want to set batch_size_rows too.
+        """
+        self._batch_size_rows = new_value
+
+    @property
+    def batch_wait_limit_seconds(self) -> int | None:
+        """Get batch_wait_limit_seconds object.
+
+        Returns:
+            A batch_wait_limit_seconds object.
+        """
+        return self._batch_wait_limit_seconds
+
+    @property
+    def sink_timer(self) -> BatchPerfTimer | None:
+        """Get sink_timer object.
+
+        Returns:
+            A sink_timer object.
+        """
+        return self._sink_timer
+
+    @property
+    def max_size(self) -> int:
+        """Get max batch size.
+
+        Returns:
+            Max number of records to batch before `is_full=True`
+        """
+        return self.batch_size_rows
 
     # Tally methods
 
