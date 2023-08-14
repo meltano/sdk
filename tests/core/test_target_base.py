@@ -141,3 +141,44 @@ def test_add_sqlsink_and_get_sink():
         target.get_sink(
             "bar",
         )
+
+
+def test_batch_size_rows_and_max_size():
+    input_schema_1 = {
+        "properties": {
+            "id": {
+                "type": ["string", "null"],
+            },
+            "col_ts": {
+                "format": "date-time",
+                "type": ["string", "null"],
+            },
+        },
+    }
+    key_properties = []
+    target_default = TargetMock()
+    sink_default = BatchSinkMock(
+        target=target_default,
+        stream_name="foo",
+        schema=input_schema_1,
+        key_properties=key_properties,
+    )
+    target_set = TargetMock(config={"batch_size_rows": 100000})
+    sink_set = BatchSinkMock(
+        target=target_set,
+        stream_name="bar",
+        schema=input_schema_1,
+        key_properties=key_properties,
+    )
+    assert sink_default.stream_name == "foo"
+    assert sink_default._batch_size_rows == 10000
+    assert sink_default.batch_size_rows == 10000
+    assert sink_default.max_size == 10000
+    assert sink_set.stream_name == "bar"
+    assert sink_set._batch_size_rows == 100000
+    assert sink_set.batch_size_rows == 100000
+    assert sink_set.max_size == 100000
+    sink_set.batch_size_rows = 99999
+    assert sink_set._batch_size_rows == 99999
+    assert sink_set.batch_size_rows == 99999
+    assert sink_set.max_size == 99999
