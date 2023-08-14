@@ -61,7 +61,7 @@ def test_batchperftimer_properties():
     assert batchtimer._max_perf_counter is batchtimer.max_perf_counter
     assert batchtimer.sink_max_size == 100
     assert batchtimer.max_perf_counter == 1
-    assert batchtimer.perf_diff_allowed_max == 0.75
+    assert batchtimer.perf_diff_allowed_max == 0.25
     assert batchtimer.perf_diff_allowed_min == -0.33
     assert batchtimer.perf_diff == 0.90
 
