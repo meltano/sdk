@@ -113,6 +113,13 @@ BATCH_SIZE_ROWS_CONFIG = PropertiesList(
         description="Maximum number of rows in each batch.",
     ),
 ).to_dict()
+BATCH_WAIT_LIMIT_SECONDS_CONFIG = PropertiesList(
+    Property(
+        "batch_wait_limit_seconds",
+        IntegerType,
+        description="Maximum time to elapse for a batch to fill, drain, and load.",
+    ),
+).to_dict()
 
 
 class DeprecatedEnum(Enum):

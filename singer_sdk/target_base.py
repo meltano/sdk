@@ -20,6 +20,7 @@ from singer_sdk.helpers.capabilities import (
     ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
     BATCH_SIZE_ROWS_CONFIG,
+    BATCH_WAIT_LIMIT_SECONDS_CONFIG,
     TARGET_SCHEMA_CONFIG,
     CapabilitiesEnum,
     PluginCapabilities,
@@ -600,6 +601,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         _merge_missing(ADD_RECORD_METADATA_CONFIG, config_jsonschema)
         _merge_missing(BATCH_SIZE_ROWS_CONFIG, config_jsonschema)
+        _merge_missing(BATCH_WAIT_LIMIT_SECONDS_CONFIG, config_jsonschema)
 
         capabilities = cls.capabilities
 
