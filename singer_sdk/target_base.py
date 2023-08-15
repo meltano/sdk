@@ -19,6 +19,7 @@ from singer_sdk.helpers._compat import final
 from singer_sdk.helpers.capabilities import (
     ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
+    BATCH_SIZE_ROWS_CONFIG,
     TARGET_SCHEMA_CONFIG,
     CapabilitiesEnum,
     PluginCapabilities,
@@ -598,6 +599,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                     target_jsonschema["properties"][k] = v
 
         _merge_missing(ADD_RECORD_METADATA_CONFIG, config_jsonschema)
+        _merge_missing(BATCH_SIZE_ROWS_CONFIG, config_jsonschema)
 
         capabilities = cls.capabilities
 

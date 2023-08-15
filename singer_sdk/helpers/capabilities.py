@@ -106,6 +106,13 @@ ADD_RECORD_METADATA_CONFIG = PropertiesList(
         description="Add metadata to records.",
     ),
 ).to_dict()
+BATCH_SIZE_ROWS_CONFIG = PropertiesList(
+    Property(
+        "batch_size_rows",
+        IntegerType,
+        description="Maximum number of rows in each batch.",
+    ),
+).to_dict()
 
 
 class DeprecatedEnum(Enum):
