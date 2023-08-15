@@ -496,20 +496,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         draining_status = sink.start_drain()
         sink.process_batch(draining_status)
-        # Finish Line for max_size perf counter
         if sink.sink_timer is not None:
-            timer_msg: str = (
-                f"batch_size_rows: {sink.batch_size_rows}, "
-                f"min: {sink.sink_timer.perf_diff_allowed_min}, "
-                f"now: {sink.sink_timer.perf_diff:.4f}, "
-                f"max {sink.sink_timer.perf_diff_allowed_max}, "
-            )
-            self.logger.info(timer_msg)
-            if sink.sink_timer.start_time is not None:
-                sink.sink_timer.stop()
-                sink.batch_size_rows = sink.sink_timer.counter_based_max_size()
-            # Starting Line for max_size perf counter
-            sink.sink_timer.start()
+            sink._lap_manager()
         sink.mark_drained()
 
     def _drain_all(self, sink_list: list[Sink], parallelism: int) -> None:
