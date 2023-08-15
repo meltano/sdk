@@ -216,6 +216,7 @@ def test_batch_wait_limit_seconds():
     assert sink_default.batch_size_rows == 10000
     assert sink_default.max_size == 10000
     assert sink_set.stream_name == "bar"
+    assert sink_set.batch_wait_limit_seconds == 1
     assert sink_set.sink_timer is not None
     assert sink_set.batch_size_rows == 100
     assert sink_set.max_size == 100
