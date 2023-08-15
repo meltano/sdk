@@ -282,16 +282,17 @@ class Sink(metaclass=abc.ABCMeta):
     def _lap_manager(self) -> None:
         """Start and Stop the Perf Time during drain.
 
-        This Method is called during a target drane_one action.
+        This method is called when the target triggers a drain on this sink.
         """
         if self.sink_timer is not None:
-            timer_msg: str = (
-                f"batch_size_rows: {self.batch_size_rows}, "
-                f"min: {self.sink_timer.perf_diff_allowed_min}, "
-                f"now: {self.sink_timer.perf_diff:.4f}, "
-                f"max {self.sink_timer.perf_diff_allowed_max}, "
+            timer_msg: str = "batch_size_rows: %f, min: %f, now: %.4f, max: %f"
+            self.logger.info(
+                timer_msg,
+                self.batch_size_rows,
+                self.sink_timer.perf_diff_allowed_min,
+                self.sink_timer.perf_diff,
+                self.sink_timer.perf_diff_allowed_max,
             )
-            self.logger.info(timer_msg)
             if self.sink_timer.start_time is not None:
                 self.sink_timer.stop()
                 self.batch_size_rows = self.sink_timer.counter_based_max_size()
