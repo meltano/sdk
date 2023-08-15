@@ -149,6 +149,7 @@ version_files = [
     "pyproject.toml:^version =",
     "cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml:singer-sdk",
     "cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:singer-sdk",
+    "cookiecutter/mapper-template/{{cookiecutter.mapper_id}}/pyproject.toml:singer-sdk",
     ".github/ISSUE_TEMPLATE/bug.yml:^      placeholder:",
 ]
 
