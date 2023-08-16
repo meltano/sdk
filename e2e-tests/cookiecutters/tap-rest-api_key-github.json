@@ -2,6 +2,7 @@
     "cookiecutter": {
       "source_name": "AutomaticTestTap",
       "admin_name": "Automatic Tester",
+      "admin_email": "auto.tester@example.com",
       "tap_id": "tap-rest-api_key-github",
       "library_name": "tap_rest_api_key_github",
       "variant": "None (Skip)",
