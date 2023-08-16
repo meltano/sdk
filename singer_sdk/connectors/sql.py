@@ -496,6 +496,7 @@ class SQLConnector:
         result: list[dict] = []
         engine = self._engine
         inspected = sqlalchemy.inspect(engine)
+        # get_schema_names returns all databases in the DB, not just schemas
         for schema_name in self.get_schema_names(engine, inspected):
             # Iterate through each table and view
             for table_name, is_view in self.get_object_names(
