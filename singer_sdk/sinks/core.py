@@ -285,16 +285,18 @@ class Sink(metaclass=abc.ABCMeta):
         This method is called when the target triggers a drain on this sink.
         """
         if self.sink_timer is not None:
-            timer_msg: str = "batch_size_rows: %f, min: %f, now: %.4f, max: %f"
-            self.logger.info(
-                timer_msg,
-                self.batch_size_rows,
-                self.sink_timer.perf_diff_allowed_min,
-                self.sink_timer.perf_diff,
-                self.sink_timer.perf_diff_allowed_max,
+            timer_msg: str = (
+                "batch_size_rows: %.0f, min_diff: %.2f, lap_diff: %.4f, max_diff: %.2f"
             )
             if self.sink_timer.start_time is not None:
                 self.sink_timer.stop()
+                self.logger.info(
+                    timer_msg,
+                    self.batch_size_rows,
+                    self.sink_timer.perf_diff_allowed_min,
+                    self.sink_timer.perf_diff,
+                    self.sink_timer.perf_diff_allowed_max,
+                )
                 self.batch_size_rows = self.sink_timer.counter_based_max_size()
             self.sink_timer.start()
 
