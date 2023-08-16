@@ -21,8 +21,13 @@ if t.TYPE_CHECKING:
 class BaseTestClass:
     """Base test class."""
 
-    params: t.ClassVar[dict] = {}
-    param_ids: t.ClassVar[dict] = {}
+    params: dict[str, t.Any]
+    param_ids: dict[str, list[str]]
+
+    def __init_subclass__(cls) -> None:
+        """Initialize a subclass."""
+        cls.params = {}
+        cls.param_ids = {}
 
 
 class TapTestClassFactory:
@@ -183,7 +188,7 @@ class TapTestClassFactory:
                         test = test_class()
                         test_name = f"test_{suite.kind}_{test.name}"
                         test_params = []
-                        test_ids = []
+                        test_ids: list[str] = []
                         for stream in streams:
                             test_params.extend(
                                 [
