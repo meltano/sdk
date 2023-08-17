@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import time
 
 import pytest
 
@@ -220,15 +221,18 @@ def test_batch_wait_limit_seconds():
     assert sink_set.stream_name == "bar"
     assert sink_set.batch_wait_limit_seconds == 1
     assert sink_set.sink_timer is not None
-    assert sink_set.batch_size_rows == 100
-    assert sink_set.max_size == 100
-    sink_set._lap_manager()
-    assert sink_set.sink_timer.start_time > 0.0
+    assert sink_set.sink_timer.start_time is not None
+    assert sink_set.batch_size_rows == 10000
+    assert sink_set.max_size == 10000
+    assert sink_set.is_too_old is False
+    time.sleep(1.1)
+    assert sink_set.is_too_old is True
+    assert sink_set.sink_timer.start_time > 1.1
     assert sink_set.sink_timer.stop_time is None
     assert sink_set.sink_timer.lap_time is None
     assert sink_set.sink_timer.perf_diff == 0.0
     sink_set._lap_manager()
     assert sink_set.sink_timer.start_time > 0.0
     assert sink_set.sink_timer.stop_time is None
-    assert sink_set.sink_timer.lap_time > 0.0
-    assert sink_set.sink_timer.perf_diff > 0.0
+    assert sink_set.sink_timer.lap_time > 1.0
+    assert sink_set.sink_timer.perf_diff < 0.0
