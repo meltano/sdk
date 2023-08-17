@@ -103,11 +103,12 @@ class Sink(metaclass=abc.ABCMeta):
         self._sink_timer: BatchPerfTimer | None = None
 
         if self._batch_wait_limit_seconds is not None:
-            self._batch_size_rows = 100
             self._sink_timer = BatchPerfTimer(
                 self._batch_size_rows,
                 self._batch_wait_limit_seconds,
             )
+            self._sink_timer.start()
+
         self._validator = Draft7Validator(schema, format_checker=FormatChecker())
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
@@ -141,6 +142,15 @@ class Sink(metaclass=abc.ABCMeta):
             True if the sink needs to be drained.
         """
         return self.current_size >= self.max_size
+
+    @property
+    def is_too_old(self) -> bool:
+        """Check against limit in seconds.
+
+        Returns:
+            True if the sink needs to be drained.
+        """
+        return self.sink_timer.is_too_old if self.sink_timer is not None else False
 
     @property
     def batch_size_rows(self) -> int:
