@@ -96,6 +96,14 @@ class BatchPerfTimer(PerfTimer):
         diff = self.max_perf_counter - self.lap_time if self._lap_time else 0
         return float(diff)
 
+    @property
+    def is_too_old(self) -> bool:
+        return (
+            self.on_the_clock() > self.max_perf_counter
+            if self.start_time is not None
+            else False
+        )
+
     def counter_based_max_size(self) -> int:  # noqa: C901
         """Calculate performance based batch size."""
         correction = 0
