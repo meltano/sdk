@@ -23,7 +23,7 @@ def get_state_if_exists(
     tap_stream_id: str,
     state_partition_context: dict | None = None,
     key: str | None = None,
-) -> t.Any | None:
+) -> t.Any | None:  # noqa: ANN401
     """Return the stream or partition state, creating a new one if it does not exist.
 
     Args:
@@ -181,7 +181,9 @@ def write_starting_replication_value(
     stream_or_partition_state[STARTING_MARKER] = to_json_compatible(initial_value)
 
 
-def get_starting_replication_value(stream_or_partition_state: dict) -> t.Any | None:
+def get_starting_replication_value(
+    stream_or_partition_state: dict,
+) -> t.Any | None:  # noqa: ANN401
     """Retrieve initial replication marker value from state."""
     if not stream_or_partition_state:
         return None
