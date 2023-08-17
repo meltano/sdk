@@ -24,10 +24,17 @@ class BaseTestClass:
     params: dict[str, t.Any]
     param_ids: dict[str, list[str]]
 
-    def __init_subclass__(cls) -> None:
-        """Initialize a subclass."""
-        cls.params = {}
-        cls.param_ids = {}
+    def __init_subclass__(cls, **kwargs: t.Any) -> None:
+        """Initialize a subclass.
+
+        Args:
+            **kwargs: Keyword arguments.
+        """
+        # Add empty params and param_ids attributes to a direct subclass but not to
+        # subclasses of subclasses
+        if cls.__base__ == BaseTestClass:
+            cls.params = {}
+            cls.param_ids = {}
 
 
 class TapTestClassFactory:
