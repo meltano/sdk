@@ -29,6 +29,7 @@ def test_perftimer_actions():
     assert timer.stop_time is None
     assert timer.lap_time is None
     time.sleep(1.1)
+    assert timer.on_the_clock() >= 1
     timer.stop()
     assert timer.lap_time >= 1
     assert timer.lap_time < 1.5
@@ -43,6 +44,11 @@ def test_perftimer_errors():
         match=r"Timer is not running. Use .start\(\) to start it",
     ):
         timer.stop()
+    with pytest.raises(
+        PerfTimerError,
+        match=r"Timer is not running. Use .start\(\) to start it",
+    ):
+        timer.on_the_clock()
     # starting a timer to test start() error
     timer.start()
     with pytest.raises(
