@@ -7,7 +7,7 @@ name = "{{cookiecutter.target_id}}"
 version = "0.0.1"
 description = "`{{cookiecutter.target_id}}` is a Singer target for {{cookiecutter.destination_name}}, built with the Meltano Singer SDK."
 readme = "README.md"
-authors = ["{{ cookiecutter.admin_name }}"]
+authors = ["{{ cookiecutter.admin_name }} <{{ cookiecutter.admin_email }}>"]
 keywords = [
     "ELT",
     "{{cookiecutter.destination_name}}",
