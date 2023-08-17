@@ -72,6 +72,15 @@ def test_batchperftimer_properties():
     assert batchtimer.perf_diff == 0.90
 
 
+def test_batchperftimer_is_too_old():
+    batchtimer: BatchPerfTimer = BatchPerfTimer(100, 1)
+    assert batchtimer.is_too_old is False
+    batchtimer.start()
+    time.sleep(1.1)
+    assert batchtimer.is_too_old is True
+    batchtimer.stop()
+
+
 def test_batchperftimer_counter_based_max_size_additive():
     batchtimer: BatchPerfTimer = BatchPerfTimer(10, 1)
     batchtimer._lap_time = 0.24
