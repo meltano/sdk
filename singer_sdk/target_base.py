@@ -358,6 +358,14 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 )
                 self.drain_one(sink)
 
+            if sink.is_too_old:
+                self.logger.info(
+                    "Target sink for '%s' is to old. Current size is '%s'. Draining...",
+                    sink.stream_name,
+                    sink.current_size,
+                )
+                self.drain_one(sink)
+
         self._handle_max_record_age()
 
     def _process_schema_message(self, message_dict: dict) -> None:
