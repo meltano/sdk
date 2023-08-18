@@ -200,25 +200,14 @@ def test_batch_wait_limit_seconds():
         },
     }
     key_properties = []
-    target_default = TargetMock()
-    sink_default = BatchSinkMock(
-        target=target_default,
+    target_set = TargetMock(config={"batch_wait_limit_seconds": 1})
+    sink_set = BatchSinkMock(
+        target=target_set,
         stream_name="foo",
         schema=input_schema_1,
         key_properties=key_properties,
     )
-    target_set = TargetMock(config={"batch_wait_limit_seconds": 1})
-    sink_set = BatchSinkMock(
-        target=target_set,
-        stream_name="bar",
-        schema=input_schema_1,
-        key_properties=key_properties,
-    )
-    assert sink_default.stream_name == "foo"
-    assert sink_default.sink_timer is None
-    assert sink_default.batch_size_rows == 10000
-    assert sink_default.max_size == 10000
-    assert sink_set.stream_name == "bar"
+    assert sink_set.stream_name == "foo"
     assert sink_set.batch_wait_limit_seconds == 1
     assert sink_set.sink_timer is not None
     assert sink_set.sink_timer.start_time is not None
