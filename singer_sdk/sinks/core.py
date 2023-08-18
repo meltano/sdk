@@ -144,7 +144,11 @@ class Sink(metaclass=abc.ABCMeta):
         Returns:
             True if the sink needs to be drained.
         """
-        return self.current_size >= self.max_size
+        return (
+            self.current_size >= self.sink_timer.sink_max_size
+            if self.batch_dynamic_management
+            else self.current_size >= self.max_size
+        )
 
     @property
     def is_too_old(self) -> bool:
