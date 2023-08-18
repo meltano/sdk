@@ -225,3 +225,54 @@ def test_batch_wait_limit_seconds():
     assert sink_set.sink_timer.stop_time is None
     assert sink_set.sink_timer.lap_time > 1.0
     assert sink_set.sink_timer.perf_diff < 0.0
+
+
+def test_batch_dynamic_management():
+    input_schema_1 = {
+        "properties": {
+            "id": {
+                "type": ["string", "null"],
+            },
+            "col_ts": {
+                "format": "date-time",
+                "type": ["string", "null"],
+            },
+        },
+    }
+    key_properties = []
+    target_set = TargetMock(
+        config={
+            "batch_size_rows": 100000,
+            "batch_wait_limit_seconds": 2,
+            "batch_dynamic_management": True,
+        },
+    )
+    sink_set = BatchSinkMock(
+        target=target_set,
+        stream_name="foo",
+        schema=input_schema_1,
+        key_properties=key_properties,
+    )
+    assert sink_set.stream_name == "foo"
+    assert sink_set.batch_dynamic_management is True
+    assert sink_set.batch_wait_limit_seconds == 2
+    assert sink_set.sink_timer is not None
+    assert sink_set.sink_timer.start_time is not None
+    assert sink_set.batch_size_rows == 100000
+    assert sink_set.max_size == 100000
+    assert sink_set.sink_timer.sink_max_size == 100
+    time.sleep(1.1)
+    sink_set._lap_manager()
+    assert sink_set.sink_timer.start_time > 0.0
+    assert sink_set.sink_timer.stop_time is None
+    assert sink_set.sink_timer.lap_time > 1.0
+    assert sink_set.sink_timer.lap_time < 2.0
+    assert sink_set.sink_timer.perf_diff > 0.0
+    assert sink_set.sink_timer.sink_max_size == 200
+    time.sleep(2.1)
+    sink_set._lap_manager()
+    assert sink_set.sink_timer.start_time > 0.0
+    assert sink_set.sink_timer.stop_time is None
+    assert sink_set.sink_timer.lap_time > 1.0
+    assert sink_set.sink_timer.perf_diff < 0.0
+    assert sink_set.sink_timer.sink_max_size == 190

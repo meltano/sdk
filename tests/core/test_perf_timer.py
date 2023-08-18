@@ -61,44 +61,57 @@ def test_perftimer_errors():
 
 
 def test_batchperftimer_properties():
-    batchtimer: BatchPerfTimer = BatchPerfTimer(100, 1)
-    batchtimer._lap_time = 0.10
+    batchtimer: BatchPerfTimer = BatchPerfTimer(100000, 30)
+    batchtimer._lap_time = 20
     assert batchtimer._sink_max_size is batchtimer.sink_max_size
     assert batchtimer._max_perf_counter is batchtimer.max_perf_counter
+    assert batchtimer.SINK_MAX_SIZE_CEILING == 100000
     assert batchtimer.sink_max_size == 100
-    assert batchtimer.max_perf_counter == 1
-    assert batchtimer.perf_diff_allowed_max == 0.25
-    assert batchtimer.perf_diff_allowed_min == -0.33
-    assert batchtimer.perf_diff == 0.90
+    assert batchtimer.max_perf_counter == 30
+    assert batchtimer.perf_diff_allowed_max == 7.5
+    assert batchtimer.perf_diff_allowed_min == -9.9
+    assert batchtimer.perf_diff == 10
 
 
 def test_batchperftimer_counter_based_max_size_additive():
-    batchtimer: BatchPerfTimer = BatchPerfTimer(10, 1)
+    batchtimer: BatchPerfTimer = BatchPerfTimer(100000, 1)
     batchtimer._lap_time = 0.24
     assert batchtimer.perf_diff > batchtimer.perf_diff_allowed_max
-    assert batchtimer.counter_based_max_size() == 20
+    batchtimer._sink_max_size = 10
+    batchtimer.counter_based_max_size()
+    assert batchtimer.sink_max_size == 20
     batchtimer._sink_max_size = 100
-    assert batchtimer.counter_based_max_size() == 200
+    batchtimer.counter_based_max_size()
+    assert batchtimer.sink_max_size == 200
     batchtimer._sink_max_size = 1000
-    assert batchtimer.counter_based_max_size() == 2000
+    batchtimer.counter_based_max_size()
+    assert batchtimer.sink_max_size == 2000
     batchtimer._sink_max_size = 10000
-    assert batchtimer.counter_based_max_size() == 20000
+    batchtimer.counter_based_max_size()
+    assert batchtimer.sink_max_size == 20000
     batchtimer._sink_max_size = 100000
     assert batchtimer.sink_max_size == batchtimer.SINK_MAX_SIZE_CEILING
-    assert batchtimer.counter_based_max_size() == 100000
+    batchtimer.counter_based_max_size()
+    assert batchtimer.sink_max_size == 100000
 
 
 def test_batchperftimer_counter_based_max_size_reductive():
     batchtimer: BatchPerfTimer = BatchPerfTimer(100000, 1)
     batchtimer._lap_time = 1.5
+    batchtimer._sink_max_size = 100000
     assert batchtimer.perf_diff < batchtimer.perf_diff_allowed_min
     assert batchtimer.sink_max_size == batchtimer.SINK_MAX_SIZE_CEILING
-    assert batchtimer.counter_based_max_size() == 95000
+    batchtimer.counter_based_max_size()
+    assert batchtimer.sink_max_size == 95000
     batchtimer._sink_max_size = 10000
-    assert batchtimer.counter_based_max_size() == 9000
+    batchtimer.counter_based_max_size()
+    assert batchtimer.sink_max_size == 9000
     batchtimer._sink_max_size = 1000
-    assert batchtimer.counter_based_max_size() == 900
+    batchtimer.counter_based_max_size()
+    assert batchtimer.sink_max_size == 900
     batchtimer._sink_max_size = 100
-    assert batchtimer.counter_based_max_size() == 90
+    batchtimer.counter_based_max_size()
+    assert batchtimer.sink_max_size == 90
     batchtimer._sink_max_size = 10
-    assert batchtimer.counter_based_max_size() == 10
+    batchtimer.counter_based_max_size()
+    assert batchtimer.sink_max_size == 10
