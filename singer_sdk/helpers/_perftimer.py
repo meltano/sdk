@@ -64,11 +64,14 @@ class BatchPerfTimer(PerfTimer):
         max_size: int,
         max_perf_counter: float,
     ) -> None:
-        self._sink_max_size: int = max_size
+        self.SINK_MAX_SIZE_CEILING: int = max_size
         self._max_perf_counter: float = max_perf_counter
 
-    SINK_MAX_SIZE_CEILING: int = 100000
+    SINK_MAX_SIZE_CEILING: int
     """The max size a bulk insert can be"""
+
+    _sink_max_size: int = 100
+    """Hold the calculated batch size"""
 
     @property
     def sink_max_size(self) -> int:
@@ -96,7 +99,7 @@ class BatchPerfTimer(PerfTimer):
         diff = self.max_perf_counter - self.lap_time if self._lap_time else 0
         return float(diff)
 
-    def counter_based_max_size(self) -> int:  # noqa: C901
+    def counter_based_max_size(self) -> None:  # noqa: C901
         """Calculate performance based batch size."""
         correction = 0
         if self.perf_diff < self.perf_diff_allowed_min:
@@ -121,4 +124,3 @@ class BatchPerfTimer(PerfTimer):
             elif self.sink_max_size >= 10:  # noqa: PLR2004
                 correction = 10
         self._sink_max_size += correction
-        return self.sink_max_size
