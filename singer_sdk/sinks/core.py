@@ -317,6 +317,18 @@ class Sink(metaclass=abc.ABCMeta):
         if self.sink_timer is not None:
             if self.sink_timer.start_time is not None:
                 self.sink_timer.stop()
+                timer_msg: str = (
+                    "max_size: %.0f, min_diff: %.2f, lap_diff: %.4f, max_diff: %.2f"
+                )
+                if self.batch_dynamic_management:
+                    self.logger.info(
+                        timer_msg,
+                        self.sink_timer.sink_max_size,
+                        self.sink_timer.perf_diff_allowed_min,
+                        self.sink_timer.perf_diff,
+                        self.sink_timer.perf_diff_allowed_max,
+                    )
+                    self.sink_timer.counter_based_max_size()
             self.sink_timer.start()
 
     # Record processing
