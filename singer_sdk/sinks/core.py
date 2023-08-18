@@ -99,6 +99,9 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_wait_limit_seconds: int | None = target.config.get(
             "batch_wait_limit_seconds",
         )
+        self._batch_dynamic_management: bool | None = target.config.get(
+            "batch_dynamic_management",
+        )
 
         self._sink_timer: BatchPerfTimer | None = None
 
@@ -186,6 +189,15 @@ class Sink(metaclass=abc.ABCMeta):
             A batch_wait_limit_seconds object.
         """
         return self._batch_wait_limit_seconds
+
+    @property
+    def batch_dynamic_management(self) -> bool:
+        """Get batch_dynamic_management object.
+
+        Returns:
+            A batch_dynamic_management object.
+        """
+        return self._batch_dynamic_management
 
     @property
     def sink_timer(self) -> BatchPerfTimer | None:
