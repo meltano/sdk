@@ -150,7 +150,11 @@ class Sink(metaclass=abc.ABCMeta):
         Returns:
             True if the sink needs to be drained.
         """
-        return self.sink_timer.is_too_old if self.sink_timer is not None else False
+        return (
+            self.sink_timer.on_the_clock() > self.batch_wait_limit_seconds
+            if self.sink_timer.start_time is not None
+            else False
+        )
 
     @property
     def batch_size_rows(self) -> int:
