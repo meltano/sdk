@@ -99,8 +99,9 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_wait_limit_seconds: int | None = target.config.get(
             "batch_wait_limit_seconds",
         )
-        self._batch_dynamic_management: bool | None = target.config.get(
+        self._batch_dynamic_management: bool = target.config.get(
             "batch_dynamic_management",
+            False,
         )
 
         self._sink_timer: BatchPerfTimer | None = None
@@ -146,7 +147,7 @@ class Sink(metaclass=abc.ABCMeta):
         """
         return (
             self.current_size >= self.sink_timer.sink_max_size
-            if self.batch_dynamic_management
+            if self.batch_dynamic_management and self.sink_timer is not None
             else self.current_size >= self.max_size
         )
 
@@ -161,6 +162,7 @@ class Sink(metaclass=abc.ABCMeta):
             (
                 self.sink_timer.on_the_clock() > self.batch_wait_limit_seconds
                 if self.sink_timer.start_time is not None
+                and self.batch_wait_limit_seconds is not None
                 else False
             )
             if self.sink_timer is not None

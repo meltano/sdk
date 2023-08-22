@@ -42,7 +42,11 @@ class PerfTimer:
             msg = "Timer is not running. Use .start() to start it"
             raise PerfTimerError(msg)
 
-        return time.perf_counter() - self._start_time
+        return (
+            time.perf_counter() - self._start_time
+            if self._start_time is not None
+            else 0.0
+        )
 
     def stop(self) -> None:
         """Stop the timer, Stores the elapsed time, and reset."""
