@@ -46,6 +46,7 @@ class Sink(metaclass=abc.ABCMeta):
     logger: Logger
 
     MAX_SIZE_DEFAULT = 10000
+    WAIT_LIMIT_SECONDS_DEFAULT = 30
 
     def __init__(
         self,
@@ -106,10 +107,12 @@ class Sink(metaclass=abc.ABCMeta):
 
         self._sink_timer: BatchPerfTimer | None = None
 
-        if self._batch_wait_limit_seconds is not None:
+        if self._batch_wait_limit_seconds is not None or self._batch_dynamic_management:
             self._sink_timer = BatchPerfTimer(
                 self._batch_size_rows,
-                self._batch_wait_limit_seconds,
+                self.WAIT_LIMIT_SECONDS_DEFAULT
+                if self._batch_wait_limit_seconds is None
+                else self._batch_wait_limit_seconds,
             )
             self._sink_timer.start()
 
