@@ -264,6 +264,7 @@ Then simply run your package's CLI as normal, preceded by the `viztracer` comman
 
 ```console
 $ poetry run viztracer my-tap
+$ poetry run viztracer -- my-target --config=config.json --input=messages.json
 ```
 
 That command will produce a `result.json` file which you can explore with the `vizviewer` tool.
