@@ -8,7 +8,6 @@ import shutil
 import typing as t
 
 import pytest
-from sqlalchemy import __version__ as sqlalchemy_version
 
 from singer_sdk import SQLConnector
 from singer_sdk import typing as th
@@ -44,11 +43,6 @@ def pytest_runtest_setup(item):
     system = platform.system().lower()
     if supported_systems and system not in supported_systems:
         pytest.skip(f"cannot run on platform {system}")
-
-
-def pytest_report_header() -> list[str]:
-    """Return a list of strings to be displayed in the header of the report."""
-    return [f"sqlalchemy: {sqlalchemy_version}"]
 
 
 @pytest.fixture(scope="class")
