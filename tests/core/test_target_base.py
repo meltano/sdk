@@ -79,6 +79,7 @@ def test_target_about_info():
     assert "add_record_metadata" in about.settings["properties"]
     assert "batch_size_rows" in about.settings["properties"]
     assert "batch_wait_limit_seconds" in about.settings["properties"]
+    assert "batch_dynamic_management" in about.settings["properties"]
 
 
 def test_sql_get_sink():
