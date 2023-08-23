@@ -56,4 +56,4 @@ jobs:
         file_glob: true
 
     - name: Publish
-      uses: pypa/gh-action-pypi-publish@v1.8.8
+      uses: pypa/gh-action-pypi-publish@v1.8.10

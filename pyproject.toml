@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.30.0"
+version = "0.31.1"
 description = "A framework for building Singer taps"
-authors = ["Meltano Team and Contributors"]
-maintainers = ["Meltano Team and Contributors"]
+authors = ["Meltano Team and Contributors <hello@meltano.com>"]
+maintainers = ["Meltano Team and Contributors <hello@meltano.com>"]
 readme = "README.md"
 homepage = "https://sdk.meltano.com/en/latest/"
 repository = "https://github.com/meltano/sdk"
@@ -101,7 +101,7 @@ testing = [
 commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
 xdoctest = "^1.1.1"
 mypy = "^1.0"
-cookiecutter = ">=2.1.1,<2.2.3"
+cookiecutter = ">=2.1.1,<2.3.1"
 PyYAML = "^6.0"
 freezegun = "^1.2.2"
 numpy = [
@@ -141,13 +141,14 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.30.0"
+version = "0.31.1"
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
-    "docs/conf.py",
+    "docs/conf.py:^release =",
     "pyproject.toml:^version =",
     "cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml:singer-sdk",
     "cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:singer-sdk",
+    "cookiecutter/mapper-template/{{cookiecutter.mapper_id}}/pyproject.toml:singer-sdk",
     ".github/ISSUE_TEMPLATE/bug.yml:^      placeholder:",
 ]
 
