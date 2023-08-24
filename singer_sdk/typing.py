@@ -58,7 +58,10 @@ import json
 import typing as t
 
 import sqlalchemy
-from jsonschema import ValidationError, Validator, validators
+from jsonschema import ValidationError, validators
+
+if t.TYPE_CHECKING:
+    from jsonschema.protocols import Validator
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,

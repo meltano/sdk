@@ -185,12 +185,12 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
         Raises:
             AssertionError: if value cannot be parsed as a datetime.
         """
-        for v in self.non_null_attribute_values:
-            try:
+        try:
+            for v in self.non_null_attribute_values:
                 error_message = f"Unable to parse value ('{v}') with datetime parser."
                 assert parser.parse(v), error_message
-            except parser.ParserError as e:
-                raise AssertionError(error_message) from e
+        except parser.ParserError as e:
+            raise AssertionError(error_message) from e
 
     @classmethod
     def evaluate(
