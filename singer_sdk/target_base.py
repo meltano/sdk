@@ -354,14 +354,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             if sink.is_full:
                 self.logger.info(
-                    "Target sink for '%s' is full. Draining...",
-                    sink.stream_name,
-                )
-                self.drain_one(sink)
-
-            if sink.is_too_old:
-                self.logger.info(
-                    "Target sink for '%s' is to old. Current size is '%s'. Draining...",
+                    "Target sink for '%s' is full. Current size is '%s'. Draining...",
                     sink.stream_name,
                     sink.current_size,
                 )
