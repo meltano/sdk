@@ -49,7 +49,7 @@ class Sink(metaclass=abc.ABCMeta):
     MAX_SIZE_DEFAULT = 10000
     WAIT_LIMIT_SECONDS_DEFAULT = 30
 
-    _drain_function: t.Callable | None = None
+    _drain_function: t.Callable[[], bool] | None = None
 
     def __init__(
         self,
@@ -111,7 +111,9 @@ class Sink(metaclass=abc.ABCMeta):
 
         if self._batch_wait_limit_seconds is not None or self._batch_dynamic_management:
             self._sink_timer = BatchPerfTimer(
-                self._batch_size_rows,
+                self._batch_size_rows
+                if self._batch_size_rows is not None
+                else self.MAX_SIZE_DEFAULT,
                 self.WAIT_LIMIT_SECONDS_DEFAULT
                 if self._batch_wait_limit_seconds is None
                 else self._batch_wait_limit_seconds,
@@ -153,7 +155,7 @@ class Sink(metaclass=abc.ABCMeta):
         if self._drain_function is None:
             self.set_drain_function()
 
-        return self._drain_function()
+        return self._drain_function() if self._drain_function is not None else True
 
     def is_full_rows(self) -> bool:
         """Check against limit in rows.
@@ -194,7 +196,11 @@ class Sink(metaclass=abc.ABCMeta):
         Returns:
             True if the sink needs to be drained.
         """
-        return self.current_size >= self.sink_timer.sink_max_size
+        return (
+            self.current_size >= self.sink_timer.sink_max_size
+            if self.sink_timer is not None
+            else False
+        )
 
     def set_drain_function(self) -> None:
         """Return the function to use in is_full."""
