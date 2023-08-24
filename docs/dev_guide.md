@@ -257,7 +257,7 @@ We've had success using [`viztracer`](https://github.com/gaogaotiantian/viztrace
 You can start doing the same in your package. Start by installing `viztracer`.
 
 ```console
-$ poetry add --dev viztracer
+$ poetry add --group dev viztracer
 ```
 
 Then simply run your package's CLI as normal, preceded by the `viztracer` command
