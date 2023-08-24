@@ -8,6 +8,7 @@ import datetime
 import json
 import time
 import typing as t
+from functools import cached_property
 from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
@@ -47,6 +48,8 @@ class Sink(metaclass=abc.ABCMeta):
 
     MAX_SIZE_DEFAULT = 10000
     WAIT_LIMIT_SECONDS_DEFAULT = 30
+
+    _drain_function: t.Callable | None = None
 
     def __init__(
         self,
@@ -93,9 +96,8 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_dupe_records_merged: int = 0
 
         # Batch Performace Timer
-        self._batch_size_rows: int = target.config.get(
+        self._batch_size_rows: int | None = target.config.get(
             "batch_size_rows",
-            self.MAX_SIZE_DEFAULT,
         )
         self._batch_wait_limit_seconds: int | None = target.config.get(
             "batch_wait_limit_seconds",
@@ -143,18 +145,24 @@ class Sink(metaclass=abc.ABCMeta):
 
     @property
     def is_full(self) -> bool:
-        """Check against size limit.
+        """Calls the size limit check funtion.
 
         Returns:
             True if the sink needs to be drained.
         """
-        return (
-            self.current_size >= self.sink_timer.sink_max_size
-            if self.batch_dynamic_management and self.sink_timer is not None
-            else self.current_size >= self.max_size
-        )
+        if self._drain_function is None:
+            self.set_drain_function()
 
-    @property
+        return self._drain_function()
+
+    def is_full_rows(self) -> bool:
+        """Check against limit in rows.
+
+        Returns:
+            True if the sink needs to be drained.
+        """
+        return self.current_size >= self.max_size
+
     def is_too_old(self) -> bool:
         """Check against limit in seconds.
 
@@ -172,23 +180,42 @@ class Sink(metaclass=abc.ABCMeta):
             else False
         )
 
+    def is_full_rows_and_too_old(self) -> bool:
+        """Check against limit in rows and seconds.
+
+        Returns:
+            True if the sink needs to be drained.
+        """
+        return True in (self.is_full_rows(), self.is_too_old())
+
+    def is_full_dynamic(self) -> bool:
+        """Check against limit in caclulated limit in rows.
+
+        Returns:
+            True if the sink needs to be drained.
+        """
+        return self.current_size >= self.sink_timer.sink_max_size
+
+    def set_drain_function(self) -> None:
+        """Return the function to use in is_full."""
+        if self.batch_dynamic_management:
+            self._drain_function = self.is_full_dynamic
+        elif self.batch_wait_limit_seconds is not None:
+            if self.batch_size_rows is not None:
+                self._drain_function = self.is_full_rows_and_too_old
+            else:
+                self._drain_function = self.is_too_old
+        else:
+            self._drain_function = self.is_full_rows
+
     @property
-    def batch_size_rows(self) -> int:
+    def batch_size_rows(self) -> int | None:
         """Get batch_size_rows object.
 
         Returns:
             A batch_size_rows object.
         """
         return self._batch_size_rows
-
-    @batch_size_rows.setter
-    def batch_size_rows(self, new_value: int) -> None:
-        """Set batch_size_rows object to the given value.
-
-        Args:
-            new_value: The value you want to set batch_size_rows too.
-        """
-        self._batch_size_rows = new_value
 
     @property
     def batch_wait_limit_seconds(self) -> int | None:
@@ -217,14 +244,18 @@ class Sink(metaclass=abc.ABCMeta):
         """
         return self._sink_timer
 
-    @property
+    @cached_property
     def max_size(self) -> int:
         """Get max batch size.
 
         Returns:
             Max number of records to batch before `is_full=True`
         """
-        return self.batch_size_rows
+        return (
+            self.batch_size_rows
+            if self.batch_size_rows is not None
+            else self.MAX_SIZE_DEFAULT
+        )
 
     # Tally methods
 
