@@ -215,7 +215,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         Raises:
             InvalidReplicationKeyException: If the schema does not contain the
-            replication key.
+                replication key.
         """
         if not self.replication_key:
             return False
