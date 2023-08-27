@@ -19,9 +19,9 @@ from singer_sdk.batch import JSONLinesBatcher
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
+    InvalidReplicationKeyException,
     InvalidStreamSortException,
     MaxRecordsLimitException,
-    InvalidReplicationKeyException,
 )
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
