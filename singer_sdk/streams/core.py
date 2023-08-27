@@ -214,7 +214,8 @@ class Stream(metaclass=abc.ABCMeta):
             True if the stream uses a timestamp-based replication key.
 
         Raises:
-            InvalidReplicationKeyException: If the schema does not contain the replication key.
+            InvalidReplicationKeyException: If the schema does not contain the 
+            replication key.
         """
         if not self.replication_key:
             return False
