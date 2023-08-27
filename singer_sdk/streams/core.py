@@ -21,6 +21,7 @@ from singer_sdk.exceptions import (
     AbortedSyncPausedException,
     InvalidStreamSortException,
     MaxRecordsLimitException,
+    InvalidReplicationKeyException,
 )
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
@@ -215,6 +216,11 @@ class Stream(metaclass=abc.ABCMeta):
         if not self.replication_key:
             return False
         type_dict = self.schema.get("properties", {}).get(self.replication_key)
+        if type_dict is None:
+            msg = (
+                f"{self.replication_key} is not in schema for stream name: {self.name}"
+            )
+            raise InvalidReplicationKeyException(msg)
         return is_datetime_type(type_dict)
 
     def get_starting_replication_key_value(
