@@ -289,7 +289,7 @@ def test_stream_invalid_replication_key(tap: SimpleTestTap):
     with pytest.raises(
         InvalidReplicationKeyException,
         match=(
-            f"{stream.replication_key} is not in schema for stream name: {stream.name}"
+            f"Field '{stream.replication_key}' is not in schema for stream '{stream.name}'"
         ),
     ):
         _check = stream.is_timestamp_replication_key
