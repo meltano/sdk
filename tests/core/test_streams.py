@@ -275,6 +275,20 @@ def test_stream_starting_timestamp(
     assert get_starting_value(None) == expected_starting_value
 
 
+def test_stream_invalid_replication_key(tap: SimpleTestTap):
+    """Validate an exception is raised if replication_key not in schema."""
+    class InvalidReplicationKeyStream(SimpleTestStream):
+        replication_key = "INVALID"
+
+    stream = InvalidReplicationKeyStream(tap)
+
+    with pytest.raises( 
+                        InvalidReplicationKeyException, 
+                        match=f"{stream.replication_key} is not in schema for stream name: {stream.name}"
+                       ):
+        stream.is_timestamp_replication_key
+
+
 @pytest.mark.parametrize(
     "path,content,result",
     [
