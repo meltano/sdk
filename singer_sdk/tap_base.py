@@ -408,7 +408,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def _reset_state_progress_markers(self) -> None:
         """Clear prior jobs' progress markers at beginning of sync."""
-        for _, state in self.state.get("bookmarks", {}).items():
+        for state in self.state.get("bookmarks", {}).values():
             _state.reset_state_progress_markers(state)
             for partition_state in state.get("partitions", []):
                 _state.reset_state_progress_markers(partition_state)
@@ -667,14 +667,11 @@ class SQLTap(Tap):
         Returns:
             List of discovered Stream objects.
         """
-        result: list[Stream] = []
-        for catalog_entry in self.catalog_dict["streams"]:
-            result.append(
-                self.default_stream_class(
-                    tap=self,
-                    catalog_entry=catalog_entry,
-                    connector=self.tap_connector,
-                ),
+        return [
+            self.default_stream_class(
+                tap=self,
+                catalog_entry=catalog_entry,
+                connector=self.tap_connector,
             )
-
-        return result
+            for catalog_entry in self.catalog_dict["streams"]
+        ]
