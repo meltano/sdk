@@ -292,7 +292,7 @@ def test_stream_invalid_replication_key(tap: SimpleTestTap):
             f"{stream.replication_key} is not in schema for stream name: {stream.name}"
         ),
     ):
-        pass
+        _check = stream.is_timestamp_replication_key
 
 
 @pytest.mark.parametrize(
