@@ -221,9 +221,7 @@ class Stream(metaclass=abc.ABCMeta):
             return False
         type_dict = self.schema.get("properties", {}).get(self.replication_key)
         if type_dict is None:
-            msg = (
-                f"Field '{self.replication_key}' is not in schema for stream '{self.name}'"
-            )
+            msg = f"Field '{self.replication_key}' is not in schema for stream '{self.name}'"
             raise InvalidReplicationKeyException(msg)
         return is_datetime_type(type_dict)
 
