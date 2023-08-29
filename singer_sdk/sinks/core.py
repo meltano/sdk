@@ -8,7 +8,6 @@ import datetime
 import json
 import time
 import typing as t
-from functools import cached_property
 from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
@@ -250,7 +249,7 @@ class Sink(metaclass=abc.ABCMeta):
         """
         return self._sink_timer
 
-    @cached_property
+    @property
     def max_size(self) -> int:
         """Get max batch size.
 
