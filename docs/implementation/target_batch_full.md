@@ -18,16 +18,20 @@ You need to know three things to determine if somthing is full
 2. The level at which an object is determined full
 3. The current mesurment of the object
 
-The units of measure used with `Sink._pending_batch` are **rows** and **time** in **seconds**.  The full level marks come from the Meltano Target configuration options of `batch_size_rows`, `batch_wait_limit_seconds`.  If the configuration options are not present, the defined constants of `MAX_SIZE_DEFAULT` and `WAIT_LIMIT_SECONDS_DEFAULT` are used.  How do we measure `Sink._pending_batch`?  To measure the **rows** the count of records read from the Tap is used.  This is held in the internal variable `Sink._batch_records_read` that is available via the property `Sink.current_size`. To measure **seconds** a batch timer is utilized.
+The units of measure used with `Sink._pending_batch` are **rows** and **time** in **seconds**.  The full level marks come from the Meltano Target configuration options of `batch_size_rows`, `batch_wait_limit_seconds`.  If the configuration options are not present, the defined constants of `MAX_SIZE_DEFAULT` and `WAIT_LIMIT_SECONDS_DEFAULT` are used.  How is `Sink._pending_batch` measured?  To measure **rows** the count of records read from the Tap is used.  The current row count is available via the property `Sink.current_size`. To measure **seconds** a batch timer is utilized.
 
 There are four “is full” scenarios and each one has a function that looks at the batch and returns `True` if it is full or `False` if the batch can take more records.
 
-1. Rows limit has been reached. `Sink.is_full_rows`
+1. Row limit has been reached. `Sink.is_full_rows`
 2. Wait limit is seconds has been reached. `Sink.is_too_old`
-3. Rows limit or Wait limit is seconds has been reached. `Sink.is_full_rows_and_too_old`
-4. Rows limit managed by `Sink.sink_timer.counter_based_max_size` has been reached. `Sink.is_full_dynamic`
+3. Row limit or Wait limit is seconds has been reached. `Sink.is_full_rows_and_too_old`
+4. Row limit managed by the batch timer has been reached. `Sink.is_full_dynamic`
 
-Based on the Meltano Target configuration options given the function `set_drain_function` places the appropriate function into the internal variable`_batch_drain_fucntion`.  This variable is what is run when the attribute `Sink.is_full` is called at the end of each Target method `_process_record_message` cycle. When `Sink.is_full` is checked and returns `True` the message "Target sink for 'stream_name' is full. Draining..." is logged to the console and `Target.drain_one(Sink)` is called.
+Based on the Meltano Target configuration option(s) given the function `set_drain_function` places the appropriate function into the internal variable`_batch_drain_fucntion`.  This variable is what is run when the attribute `Sink.is_full` is called at the end of each Target method `_process_record_message` cycle. When `Sink.is_full` is checked and returns `True` the message:
+```
+"Target sink for [Stream Name] is full. Current size is [Current Size]. Draining...",
+```
+is logged to the console and `Target.drain_one(Sink)` is called.
 
 ## Explanation of the Four "is full" Scenarios
 
@@ -35,13 +39,13 @@ Based on the Meltano Target configuration options given the function `set_drain_
 
 To know if something is full you need to know how much it currently holds and at what point to consider it full.  Sinks have the property `current_size` which gives you the number of records read and placed into the pending batch. The `current_size` gives us how much the current batch is holding.  Now that we know the `current_size` we need to determine if the current size is considered full.  The Sink property of `max_size` gives us the integer that defines the full mark. The property `max_size` returns the Sink’s internal variable `_batch_size_rows` if not `None` or the `DEFAULT_MAX_SIZE` constant which is `10000`.
 
-Both the `Sink.current_size` and `Sink.max_size` are used to calculate the `bool` value returned by the property `Sink.is_full`.  When `Sink.is_full` is checked at the end of `Target._process_record_message` and returns `True` the message "Target sink for 'stream_name' is full.  Current size is 'current_size'Draining..." is logged to the console and `Target.drain_one(Sink)` is called.
+Both the `Sink.current_size` and `Sink.max_size` are used to calculate the `bool` value returned by the property `Sink.is_full`.  If `Sink.current_size` is greater than or equal to `Sink.max_size` the batch is full and `Sink.is_full` would return `True`.  When `Sink.is_full` is checked at the end of `Target._process_record_message` and returns `True` the message "Target sink for 'stream_name' is full.  Current size is 'current_size'Draining..." is logged to the console and `Target.drain_one(Sink)` is called.
 
 ### Wait limit in seconds has been reached. `Sink.is_too_old`
 
 To know if something is too old you need to know how much time has passed and how much time needs to pass to be considered old.  When the Meltano Target configuration option of `batch_wait_limit_seconds` is present and set the internal variable `_sink_timer` is initialized with an instance of a `BatchPerfTimer`.  The `BatchPerfTimer` Class is a batch specific stop watch.  The timer is accessible via the property `Sink.sink_timer`.  Right after the timer is initialized the stop watch is started `Sink.sink_timer.start()`.  We can see how much time has passed by running `Sink.sink_timer.on_the_clock()`.  The property `Sink.batch_wait_limit_seconds` hold how much time needs to pass to be considered old.
 
-Both the `Sink.sink_timer.on_the_clock()` and `Sink.batch_wait_limit_seconds` are used to calculate the `bool` value returned by the function`Sink.is_too_old`.  When `Sink.is_full` is checked at the end of `Target._process_record_message` and returns `True` the message ""Target sink for 'stream_name' is to full. Current size is 'current_size'. Draining..."" is logged to the console and `Target.drain_one(Sink)` is called.  The `Target.drain_one(Sink)` method calls `Sink._lap_manager` which stops the timer, calculates the lap time, and starts the timer again.
+Both the `Sink.sink_timer.on_the_clock()` and `Sink.batch_wait_limit_seconds` are used to calculate the `bool` value returned by the function`Sink.is_too_old`.   If `Sink.sink_timer.on_the_clock()` is greater than or equal to `Sink.batch_wait_limit_seconds`  the batch is full and `Sink.is_full` would return `True`. When `Sink.is_full` is checked at the end of `Target._process_record_message` and returns `True` the message ""Target sink for 'stream_name' is to full. Current size is 'current_size'. Draining..."" is logged to the console and `Target.drain_one(Sink)` is called.  The `Target.drain_one(Sink)` method calls `Sink._lap_manager` which stops the timer, calculates the lap time, and starts the timer again.
 
 ### Rows or Wait limit has been reached. `Sink.is_full_rows_and_too_old`
 
