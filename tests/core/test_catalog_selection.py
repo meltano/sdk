@@ -1,11 +1,13 @@
 """Test catalog selection features."""
 
+from __future__ import annotations
+
 import logging
 from copy import deepcopy
 
 import pytest
 
-import singer_sdk.helpers._singer as singer
+import singer_sdk._singerlib as singer
 from singer_sdk.helpers._catalog import (
     get_selected_schema,
     pop_deselected_record_properties,
@@ -201,7 +203,6 @@ def test_schema_selection(
         mask,
         logging.getLogger(),
     )
-    # selected_schema["properties"]["required"] = []
     assert (
         selected_schema["properties"]
         == PropertiesList(
@@ -220,7 +221,9 @@ def test_schema_selection(
 
 
 def test_record_selection(
-    catalog_entry_obj: singer.CatalogEntry, selection_test_cases, caplog
+    catalog_entry_obj: singer.CatalogEntry,
+    selection_test_cases,
+    caplog,
 ):
     """Test that record selection rules are correctly applied to SCHEMA messages."""
     caplog.set_level(logging.DEBUG)

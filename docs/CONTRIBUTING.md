@@ -1,4 +1,4 @@
-# Contributing to the SDK
+# Contributing Guide
 
 _**Note:** The SDK currently works with Python versions 3.7 through 3.10.x. Python 3.6 is no longer supported._
 
@@ -65,7 +65,11 @@ For example:
 
     - Run pre-commit hooks: `pre-commit run --all`.
 
-      We use `black`, `flake8`, `isort`, `mypy` and `pyupgrade`. The project-wide max line length is `88`.
+      We use [Ruff](https://github.com/charliermarsh/ruff),
+      [black](https://black.readthedocs.io/en/stable/index.html),
+      [flake8](https://flake8.pycqa.org/en/latest/) and
+      [mypy](https://mypy.readthedocs.io/en/stable/).
+      The project-wide max line length is `88`.
 
     - Build documentation: `nox -rs docs`
 
@@ -97,6 +101,63 @@ To view the code coverage report in HTML format:
 nox -rs coverage -- html && open ./htmlcov/index.html
 ```
 
+### Platform-specific Testing
+
+To mark a test as platform-specific, use the `@pytest.mark.<platform>` decorator:
+
+```python
+import pytest
+
+@pytest.mark.windows
+def test_windows_only():
+    pass
+```
+
+Supported platform markers are `windows`, `darwin`, and `linux`.
+
+### Snapshot Testing
+
+We use [pytest-snapshot](https://pypi.org/project/pytest-snapshot/) for snapshot testing.
+
+#### Adding a new snapshot
+
+To add a new snapshot, use the `snapshot` fixture and mark the test with the
+`@pytest.mark.snapshot` decorator. The fixture will create a new snapshot file
+if one does not already exist. If a snapshot file already exists, the fixture
+will compare the snapshot to the actual value and fail the test if they do not
+match.
+
+The `tests/snapshots` directory is where snapshot files should be stored and
+it's available as the `snapshot_dir` fixture.
+
+```python
+@pytest.mark.snapshot
+def test_snapshot(snapshot, snapshot_dir):
+    # Configure the snapshot directory
+    snapshot.snapshot_dir = snapshot_dir.joinpath("test_snapshot_subdir")
+
+    snapshot_name = "test_snapshot"
+    expected_content = "Hello, World!"
+    snapshot.assert_match(expected_content, snapshot_name)
+```
+
+#### Generating or updating snapshots
+
+To update or generate snapshots, run the nox `update_snapshots` session
+
+```bash
+nox -rs update_snapshots
+```
+
+or use the `--snapshot-update` flag
+
+```bash
+poetry run pytest --snapshot-update -m 'snapshot'
+```
+
+This will run all tests with the `snapshot` marker and update any snapshots that have changed.
+Commit the updated snapshots to your branch if they are expected to change.
+
 ## Testing Updates to Docs
 
 Documentation runs on Sphinx, using ReadtheDocs style template, and hosting from
@@ -118,7 +179,7 @@ This repo uses the [semantic-prs](https://github.com/Ezard/semantic-prs) GitHub 
 
 Pull requests should be named according to the conventional commit syntax to streamline changelog and release notes management. We encourage (but do not require) the use of conventional commits in commit messages as well.
 
-In general, PR titles should follow the format "<type>: <desc>", where type is any one of these:
+In general, PR titles should follow the format `<type>: <desc>`, where type is any one of these:
 
 - `ci`
 - `chore`
@@ -157,8 +218,7 @@ Type hints allow us to spend less time reading documentation. Public modules are
 
 All public modules in the SDK are checked for the presence of docstrings in classes and functions. We follow the [Google Style convention](https://www.sphinx-doc.org/en/master/usage/extensions/example_google.html) for Python docstrings so functions are required to have a description of every argument and the return value, if applicable.
 
-
 ### What is Poetry and why do we need it?
 
 For more info on `Poetry` and `Pipx`, please see the topic in our
-[python tips](python_tips.md) guide.
+[python tips](./python_tips.md) guide.

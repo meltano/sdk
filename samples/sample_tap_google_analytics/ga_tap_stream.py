@@ -1,7 +1,9 @@
 """Sample tap stream test for tap-google-analytics."""
 
+from __future__ import annotations
+
+import typing as t
 from pathlib import Path
-from typing import Any, Iterable, List, Optional, cast
 
 import pendulum
 
@@ -19,7 +21,7 @@ class GoogleJWTAuthenticator(OAuthJWTAuthenticator):
     @property
     def client_id(self) -> str:
         """Override since Google auth uses email, not numeric client ID."""
-        return cast(str, self.config["client_email"])
+        return t.cast(str, self.config["client_email"])
 
 
 class SampleGoogleAnalyticsStream(RESTStream):
@@ -30,8 +32,8 @@ class SampleGoogleAnalyticsStream(RESTStream):
     rest_method = "POST"
 
     # Child class overrides:
-    dimensions: List[str] = []
-    metrics: List[str] = []
+    dimensions: tuple[str] = ()
+    metrics: tuple[str] = ()
 
     @property
     def authenticator(self) -> GoogleJWTAuthenticator:
@@ -43,37 +45,36 @@ class SampleGoogleAnalyticsStream(RESTStream):
         )
 
     def prepare_request_payload(
-        self, context: Optional[dict], next_page_token: Optional[Any]
-    ) -> Optional[dict]:
+        self,
+        context: dict | None,  # noqa: ARG002
+        next_page_token: t.Any | None,  # noqa: ARG002
+    ) -> dict | None:
         """Prepare the data payload for the REST API request."""
-        # params = self.get_url_params(context, next_page_token)
         request_def = {
             "viewId": self.config["view_id"],
             "metrics": [{"expression": m} for m in self.metrics],
             "dimensions": [{"name": d} for d in self.dimensions],
-            # "orderBys": [
-            #     {"fieldName": "ga:sessions", "sortOrder": "DESCENDING"},
-            #     {"fieldName": "ga:pageviews", "sortOrder": "DESCENDING"},
-            # ],
         }
         if self.config.get("start_date"):
             request_def["dateRanges"] = [
                 {
                     "startDate": self.config.get("start_date"),
                     "endDate": pendulum.now(tz="UTC"),
-                }
+                },
             ]
         return {"reportRequests": [request_def]}
 
-    def parse_response(self, response) -> Iterable[dict]:
+    def parse_response(self, response) -> t.Iterable[dict]:
         """Parse Google Analytics API response into individual records."""
         self.logger.info(
-            f"Received raw Google Analytics query response: {response.json()}"
+            "Received raw Google Analytics query response: %s",
+            response.json(),
         )
         report_data = response.json().get("reports", [{}])[0].get("data")
         if not report_data:
             self.logger.info(
-                f"Received empty Google Analytics query response: {response.json()}"
+                "Received empty Google Analytics query response: %s",
+                response.json(),
             )
         for total in report_data["totals"]:
             yield {"totals": total["values"]}
@@ -85,5 +86,5 @@ class GASimpleSampleStream(SampleGoogleAnalyticsStream):
     name = "simple_sample"
     schema_filepath = SCHEMAS_DIR / "simple-sample.json"
 
-    dimensions = ["ga:date"]
-    metrics = ["ga:users", "ga:sessions"]
+    dimensions = ("ga:date",)
+    metrics = ("ga:users", "ga:sessions")

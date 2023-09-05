@@ -1,0 +1,7 @@
+{"type": "SCHEMA", "stream": "test_duplicate_records", "key_properties": ["id"], "schema": {"required": ["id", "metric"], "type": "object", "properties": {"id": {"type": "integer"}, "metric": {"type": "integer"}}}}
+{"type": "RECORD", "stream": "test_duplicate_records", "record": {"id": 1, "metric": 1}}
+{"type": "RECORD", "stream": "test_duplicate_records", "record": {"id": 2, "metric": 2}}
+{"type": "RECORD", "stream": "test_duplicate_records", "record": {"id": 1, "metric": 10}}
+{"type": "RECORD", "stream": "test_duplicate_records", "record": {"id": 2, "metric": 20}}
+{"type": "RECORD", "stream": "test_duplicate_records", "record": {"id": 1, "metric": 100}}
+{"type": "STATE", "value": {"test_duplicate_records": 2}}

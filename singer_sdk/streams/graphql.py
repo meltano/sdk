@@ -1,13 +1,17 @@
 """Abstract base class for API-type streams."""
 
+from __future__ import annotations
+
 import abc
-from typing import Any, Optional
+import typing as t
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.streams.rest import RESTStream
 
+_TToken = t.TypeVar("_TToken")
 
-class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
+
+class GraphQLStream(RESTStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
     """Abstract base class for API-type streams.
 
     GraphQL streams inherit from the class `GraphQLStream`, which in turn inherits from
@@ -20,7 +24,7 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
     rest_method = "POST"
 
     @classproperty
-    def records_jsonpath(cls) -> str:  # type: ignore  # OK: str vs @classproperty
+    def records_jsonpath(cls) -> str:  # type: ignore[override] # noqa: N805
         """Get the JSONPath expression to extract records from an API response.
 
         Returns:
@@ -35,11 +39,14 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: If the derived class doesn't define this property.
         """
-        raise NotImplementedError("GraphQLStream `query` is not defined.")
+        msg = "GraphQLStream `query` is not defined."
+        raise NotImplementedError(msg)
 
     def prepare_request_payload(
-        self, context: Optional[dict], next_page_token: Optional[Any]
-    ) -> Optional[dict]:
+        self,
+        context: dict | None,
+        next_page_token: _TToken | None,
+    ) -> dict | None:
         """Prepare the data payload for the GraphQL API request.
 
         Developers generally should generally not need to override this method.
@@ -58,17 +65,20 @@ class GraphQLStream(RESTStream, metaclass=abc.ABCMeta):
             ValueError: If the `query` property is not set in the request body.
         """
         params = self.get_url_params(context, next_page_token)
-        if self.query is None:
-            raise ValueError("Graphql `query` property not set.")
-        else:
-            query = self.query
+        query = self.query
+
+        if query is None:
+            msg = "Graphql `query` property not set."
+            raise ValueError(msg)
+
         if not query.lstrip().startswith("query"):
             # Wrap text in "query { }" if not already wrapped
             query = "query { " + query + " }"
+
         query = query.lstrip()
         request_data = {
             "query": (" ".join([line.strip() for line in query.splitlines()])),
             "variables": params,
         }
-        self.logger.debug(f"Attempting query:\n{query}")
+        self.logger.debug("Attempting query:\n%s", query)
         return request_data

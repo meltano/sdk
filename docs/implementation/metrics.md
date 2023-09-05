@@ -1,18 +1,22 @@
-# [SDK Implementation Details](./index.md) - Tap Metrics
+# Tap Metrics
 
 Metrics logging is specified in the
 [Singer Spec](https://hub.meltano.com/singer/spec#metrics). The SDK will automatically
-emit two types of metrics `record_count` and `http_request_duration`.
+emit metrics for `record_count`, `http_request_duration` and `sync_duration`.
 
-Customization options:
+## Customization options
 
-Developers may optionally add a `metrics_log_level` config option to their taps,
-which will automatically allow this metrics logging to be customized at runtime.
+### `metrics_log_level`
 
-When `metrics_log_level` is supported, users can then
-set one of these values (case insensitive), `INFO`, `DEBUG`, `NONE`, to override the
-default logging level for metrics. This can be helpful for REST-type sources which use
-make a large number of REST calls can therefor have very noisy metrics.
+Metrics are logged at the `INFO` level. Developers may optionally add a
+`metrics_log_level` config option to their taps, `WARNING` or `ERROR` to disable
+metrics logging.
+
+### `SINGER_SDK_LOG_CONFIG`
+
+Metrics are written by the `singer_sdk.metrics` logger, so the end user can set
+`SINGER_SDK_LOG_CONFIG` to a logging config file that defines the format and output
+for metrics. See the [logging docs](./logging.md) for an example file.
 
 ## Additional Singer Metrics References
 

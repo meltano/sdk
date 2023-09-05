@@ -1,24 +1,30 @@
 {
-    "source_name": "MySourceName",
-    "admin_name": "FirstName LastName",
-    "tap_id": "tap-{{ cookiecutter.source_name.lower() }}",
-    "library_name": "{{ cookiecutter.tap_id.replace('-', '_') }}",
-    "stream_type": [
-        "REST",
-        "GraphQL",
-        "SQL",
-        "Other"
-    ],
-    "auth_method": [
-        "API Key",
-        "Bearer Token",
-        "Basic Auth",
-        "OAuth2",
-        "JWT",
-        "Custom or N/A"
-    ],
-    "include_cicd_sample_template": [
-        "GitHub",
-        "None (Skip)"
-    ]
+  "source_name": "MySourceName",
+  "admin_name": "FirstName LastName",
+  "admin_email": "firstname.lastname@example.com",
+  "tap_id": "tap-{{ cookiecutter.source_name.lower() }}",
+  "library_name": "{{ cookiecutter.tap_id.replace('-', '_') }}",
+  "variant": "None (Skip)",
+  "stream_type": ["REST", "GraphQL", "SQL", "Other"],
+  "auth_method": [
+    "API Key",
+    "Bearer Token",
+    "Basic Auth",
+    "OAuth2",
+    "JWT",
+    "Custom or N/A"
+  ],
+  "include_ci_files": ["GitHub", "None (Skip)"],
+  "license": ["Apache-2.0"],
+  "__prompts__": {
+    "source_name": "The name of the source, in CamelCase",
+    "admin_name": "Provide your [bold yellow]full name[/]",
+    "admin_email": "Provide your [bold yellow]email[/]",
+    "tap_id": "The ID of the tap, in kebab-case",
+    "library_name": "The name of the library, in snake_case. This is how the library will be imported in Python.",
+    "stream_type": "The type of stream the source provides",
+    "auth_method": "The [bold red]authentication[/] method used by the source, for REST and GraphQL sources",
+    "include_ci_files": "Whether to include CI files for a common CI services",
+    "license": "The license for the project"
+  }
 }

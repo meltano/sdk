@@ -1,5 +1,7 @@
 """Typing tests."""
 
+from __future__ import annotations
+
 import pytest
 import sqlalchemy
 
@@ -65,7 +67,8 @@ def test_convert_jsonschema_type_to_sql_type(
     ],
 )
 def test_convert_sql_type_to_jsonschema_type(
-    sql_type: sqlalchemy.types.TypeEngine, is_of_jsonschema_type: dict
+    sql_type: sqlalchemy.types.TypeEngine,
+    is_of_jsonschema_type: dict,
 ):
     result = th.to_jsonschema_type(sql_type)
     assert result == is_of_jsonschema_type

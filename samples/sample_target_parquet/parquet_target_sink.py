@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Union
+import typing as t
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -10,7 +10,7 @@ import pyarrow.parquet as pq
 from singer_sdk.sinks import BatchSink
 
 
-def json_schema_to_arrow(schema: dict[str, Any]) -> pa.Schema:
+def json_schema_to_arrow(schema: dict[str, t.Any]) -> pa.Schema:
     """Convert a JSON Schema to an Arrow schema.
 
     Args:
@@ -23,7 +23,7 @@ def json_schema_to_arrow(schema: dict[str, Any]) -> pa.Schema:
     return pa.schema(fields)
 
 
-def _json_schema_to_arrow_fields(schema: dict[str, Any]) -> pa.StructType:
+def _json_schema_to_arrow_fields(schema: dict[str, t.Any]) -> pa.StructType:
     """Convert a JSON Schema to an Arrow struct.
 
     Args:
@@ -36,10 +36,13 @@ def _json_schema_to_arrow_fields(schema: dict[str, Any]) -> pa.StructType:
     for name, property_schema in schema.get("properties", {}).items():
         field = pa.field(name, _json_type_to_arrow_field(property_schema))
         fields.append(field)
-    return fields
+
+    return fields if fields else [pa.field("dummy", pa.string())]
 
 
-def _json_type_to_arrow_field(schema_type: dict[str, Any]) -> pa.DataType:
+def _json_type_to_arrow_field(  # noqa: PLR0911
+    schema_type: dict[str, t.Any],
+) -> pa.DataType:
     """Convert a JSON Schema to an Arrow struct.
 
     Args:
@@ -62,22 +65,22 @@ def _json_type_to_arrow_field(schema_type: dict[str, Any]) -> pa.DataType:
         items = schema_type.get("items", {})
         return pa.list_(_json_type_to_arrow_field(items))
 
-    elif main_type == "object":
+    if main_type == "object":
         return pa.struct(_json_schema_to_arrow_fields(schema_type))
 
-    elif main_type == "string":
+    if main_type == "string":
         return pa.string()
 
-    elif main_type == "integer":
+    if main_type == "integer":
         return pa.int64()
 
-    elif main_type == "number":
+    if main_type == "number":
         return pa.float64()
 
-    elif main_type == "boolean":
+    if main_type == "boolean":
         return pa.bool_()
 
-    elif main_type == "null":
+    if main_type == "null":
         return pa.null()
 
     return pa.null()
@@ -97,22 +100,3 @@ class SampleParquetTargetSink(BatchSink):
         table = pa.Table.from_pylist(records_to_drain, schema=schema)
         writer.write_table(table)
         writer.close()
-
-    @staticmethod
-    def translate_data_type(singer_type: str | dict) -> Any:
-        """Translate from singer_type to a native type."""
-        if singer_type in ["decimal", "float", "double"]:
-            return pa.decimal128
-        if singer_type in ["date-time"]:
-            return pa.datetime
-        if singer_type in ["date"]:
-            return pa.date64
-        return pa.string
-
-    def _get_parquet_schema(self) -> List[Tuple[str, Any]]:
-        col_list: List[Tuple[str, Any]] = []
-        for property in self.schema["properties"]:
-            col_list.append(
-                (property["name"], self.translate_data_type(property["type"]))
-            )
-        return col_list

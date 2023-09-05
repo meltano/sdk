@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import os
 from unittest import mock
 
-from singer_sdk.plugin_base import PluginBase
+import pytest
+
+from singer_sdk.plugin_base import MapperNotInitialized, PluginBase
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 
 
@@ -27,10 +31,25 @@ def test_get_env_var_config():
         env_config = PluginTest._env_var_config
         assert env_config["prop1"] == "hello"
         assert "PROP1" not in env_config
-        assert "prop2" not in env_config and "PROP2" not in env_config
-        assert "prop3" not in env_config and "PROP3" not in env_config
+        assert "prop2" not in env_config
+        assert "PROP2" not in env_config
+        assert "prop3" not in env_config
+        assert "PROP3" not in env_config
 
     no_env_config = PluginTest._env_var_config
-    assert "prop1" not in no_env_config and "PROP1" not in env_config
-    assert "prop2" not in no_env_config and "PROP2" not in env_config
-    assert "prop3" not in no_env_config and "PROP3" not in env_config
+    assert "prop1" not in no_env_config
+    assert "PROP1" not in env_config
+    assert "prop2" not in no_env_config
+    assert "PROP2" not in env_config
+    assert "prop3" not in no_env_config
+    assert "PROP3" not in env_config
+
+
+def test_mapper_not_initialized():
+    """Test that the mapper is not initialized before the plugin is started."""
+    plugin = PluginTest(
+        parse_env_config=False,
+        validate_config=False,
+    )
+    with pytest.raises(MapperNotInitialized):
+        _ = plugin.mapper

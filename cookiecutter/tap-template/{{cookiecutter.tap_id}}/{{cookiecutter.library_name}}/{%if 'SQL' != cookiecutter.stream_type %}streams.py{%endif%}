@@ -1,7 +1,9 @@
 """Stream type classes for {{ cookiecutter.tap_id }}."""
 
+from __future__ import annotations
+
+import typing as t
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, List, Iterable
 
 from singer_sdk import typing as th  # JSON Schema typing helpers
 
@@ -18,25 +20,26 @@ SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 class UsersStream({{ cookiecutter.source_name }}Stream):
     """Define custom stream."""
+
     name = "users"
     # Optionally, you may also use `schema_filepath` in place of `schema`:
-    # schema_filepath = SCHEMAS_DIR / "users.json"
+    # schema_filepath = SCHEMAS_DIR / "users.json"  # noqa: ERA001
     schema = th.PropertiesList(
         th.Property("name", th.StringType),
         th.Property(
             "id",
             th.StringType,
-            description="The user's system ID"
+            description="The user's system ID",
         ),
         th.Property(
             "age",
             th.IntegerType,
-            description="The user's age in years"
+            description="The user's age in years",
         ),
         th.Property(
             "email",
             th.StringType,
-            description="The user's email address"
+            description="The user's email address",
         ),
         th.Property(
             "address",
@@ -46,13 +49,13 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
                 th.Property(
                     "state",
                     th.StringType,
-                    description="State name in ISO 3166-2 format"
+                    description="State name in ISO 3166-2 format",
                 ),
                 th.Property("zip", th.StringType),
-            )
+            ),
         ),
     ).to_dict()
-    primary_keys = ["id"]
+    primary_keys: t.ClassVar[list[str]] = ["id"]
     replication_key = None
     graphql_query = """
         users {
@@ -72,13 +75,14 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
 
 class GroupsStream({{ cookiecutter.source_name }}Stream):
     """Define custom stream."""
+
     name = "groups"
     schema = th.PropertiesList(
         th.Property("name", th.StringType),
         th.Property("id", th.StringType),
         th.Property("modified", th.DateTimeType),
     ).to_dict()
-    primary_keys = ["id"]
+    primary_keys: t.ClassVar[list[str]] = ["id"]
     replication_key = "modified"
     graphql_query = """
         groups {
@@ -96,37 +100,38 @@ class GroupsStream({{ cookiecutter.source_name }}Stream):
 
 class UsersStream({{ cookiecutter.source_name }}Stream):
     """Define custom stream."""
+
     name = "users"
 {%- if cookiecutter.stream_type == "REST" %}
     path = "/users"
 {%- endif %}
-    primary_keys = ["id"]
+    primary_keys: t.ClassVar[list[str]] = ["id"]
     replication_key = None
     # Optionally, you may also use `schema_filepath` in place of `schema`:
-    # schema_filepath = SCHEMAS_DIR / "users.json"
+    # schema_filepath = SCHEMAS_DIR / "users.json"  # noqa: ERA001
     schema = th.PropertiesList(
         th.Property("name", th.StringType),
         th.Property(
             "id",
             th.StringType,
-            description="The user's system ID"
+            description="The user's system ID",
         ),
         th.Property(
             "age",
             th.IntegerType,
-            description="The user's age in years"
+            description="The user's age in years",
         ),
         th.Property(
             "email",
             th.StringType,
-            description="The user's email address"
+            description="The user's email address",
         ),
         th.Property("street", th.StringType),
         th.Property("city", th.StringType),
         th.Property(
             "state",
             th.StringType,
-            description="State name in ISO 3166-2 format"
+            description="State name in ISO 3166-2 format",
         ),
         th.Property("zip", th.StringType),
     ).to_dict()
@@ -134,11 +139,12 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
 
 class GroupsStream({{ cookiecutter.source_name }}Stream):
     """Define custom stream."""
+
     name = "groups"
 {%- if cookiecutter.stream_type == "REST" %}
     path = "/groups"
 {%- endif %}
-    primary_keys = ["id"]
+    primary_keys: t.ClassVar[list[str]] = ["id"]
     replication_key = "modified"
     schema = th.PropertiesList(
         th.Property("name", th.StringType),

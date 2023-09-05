@@ -1,26 +1,38 @@
 """Target abstract class."""
 
+from __future__ import annotations
+
 import abc
 import copy
 import json
 import sys
 import time
-from io import FileIO
-from pathlib import Path, PurePath
-from typing import IO, Callable, Counter, Dict, List, Optional, Tuple, Type, Union
+import typing as t
 
 import click
 from joblib import Parallel, delayed, parallel_backend
 
-from singer_sdk.cli import common_options
-from singer_sdk.exceptions import RecordsWitoutSchemaException
+from singer_sdk.exceptions import RecordsWithoutSchemaException
+from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
-from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
+from singer_sdk.helpers.capabilities import (
+    ADD_RECORD_METADATA_CONFIG,
+    BATCH_CONFIG,
+    TARGET_SCHEMA_CONFIG,
+    CapabilitiesEnum,
+    PluginCapabilities,
+    TargetCapabilities,
+)
 from singer_sdk.io_base import SingerMessageType, SingerReader
-from singer_sdk.mapper import PluginMapper
 from singer_sdk.plugin_base import PluginBase
-from singer_sdk.sinks import Sink
+
+if t.TYPE_CHECKING:
+    from pathlib import PurePath
+
+    from singer_sdk.connectors import SQLConnector
+    from singer_sdk.mapper import PluginMapper
+    from singer_sdk.sinks import Sink, SQLSink
 
 _MAX_PARALLELISM = 8
 
@@ -35,17 +47,19 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     object for that record.
     """
 
-    _MAX_RECORD_AGE_IN_MINUTES: float = 30.0
+    _MAX_RECORD_AGE_IN_MINUTES: float = 5.0
 
     # Default class to use for creating new sink objects.
     # Required if `Target.get_sink_class()` is not defined.
-    default_sink_class: Optional[Type[Sink]] = None
+    default_sink_class: type[Sink]
 
     def __init__(
         self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        *,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
+        setup_mapper: bool = True,
     ) -> None:
         """Initialize the target.
 
@@ -56,6 +70,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             parse_env_config: Whether to look for configuration values in environment
                 variables.
             validate_config: True to require validation of config settings.
+            setup_mapper: True to setup the mapper. Set to False if you want to
         """
         super().__init__(
             config=config,
@@ -63,24 +78,22 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             validate_config=validate_config,
         )
 
-        self._latest_state: Dict[str, dict] = {}
-        self._drained_state: Dict[str, dict] = {}
-        self._sinks_active: Dict[str, Sink] = {}
-        self._sinks_to_clear: List[Sink] = []
-        self._max_parallelism: Optional[int] = _MAX_PARALLELISM
+        self._latest_state: dict[str, dict] = {}
+        self._drained_state: dict[str, dict] = {}
+        self._sinks_active: dict[str, Sink] = {}
+        self._sinks_to_clear: list[Sink] = []
+        self._max_parallelism: int | None = _MAX_PARALLELISM
 
         # Approximated for max record age enforcement
         self._last_full_drain_at: float = time.time()
 
-        # Initialize mapper
-        self.mapper: PluginMapper
-        self.mapper = PluginMapper(
-            plugin_config=dict(self.config),
-            logger=self.logger,
-        )
+        self._mapper: PluginMapper | None = None
+
+        if setup_mapper:
+            self.setup_mapper()
 
     @classproperty
-    def capabilities(self) -> List[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:
         """Get target capabilities.
 
         Returns:
@@ -121,9 +134,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self,
         stream_name: str,
         *,
-        record: Optional[dict] = None,
-        schema: Optional[dict] = None,
-        key_properties: Optional[List[str]] = None,
+        record: dict | None = None,
+        schema: dict | None = None,
+        key_properties: list[str] | None = None,
     ) -> Sink:
         """Return a sink for the given stream name.
 
@@ -135,7 +148,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         sink depending on the values within the `record` object. Otherwise, please see
         `default_sink_class` property and/or the `get_sink_class()` method.
 
-        Raises :class:`singer_sdk.exceptions.RecordsWitoutSchemaException` if sink does
+        Raises :class:`singer_sdk.exceptions.RecordsWithoutSchemaException` if sink does
         not exist and schema is not sent.
 
         Args:
@@ -149,7 +162,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         """
         _ = record  # Custom implementations may use record in sink selection.
         if schema is None:
-            self._assert_sink_exists(stream_name)
             return self._sinks_active[stream_name]
 
         existing_sink = self._sinks_active.get(stream_name, None)
@@ -157,19 +169,21 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             return self.add_sink(stream_name, schema, key_properties)
 
         if (
-            existing_sink.schema != schema
+            existing_sink.original_schema != schema
             or existing_sink.key_properties != key_properties
         ):
             self.logger.info(
-                f"Schema or key properties for '{stream_name}' stream have changed. "
-                f"Initializing a new '{stream_name}' sink..."
+                "Schema or key properties for '%s' stream have changed. "
+                "Initializing a new '%s' sink...",
+                stream_name,
+                stream_name,
             )
             self._sinks_to_clear.append(self._sinks_active.pop(stream_name))
             return self.add_sink(stream_name, schema, key_properties)
 
         return existing_sink
 
-    def get_sink_class(self, stream_name: str) -> Type[Sink]:
+    def get_sink_class(self, stream_name: str) -> type[Sink]:
         """Get sink for a stream.
 
         Developers can override this method to return a custom Sink type depending
@@ -187,10 +201,11 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         if self.default_sink_class:
             return self.default_sink_class
 
-        raise ValueError(
-            f"No sink class defined for '{stream_name}' "
-            "and no default sink class available."
+        msg = (
+            f"No sink class defined for '{stream_name}' and no default sink class "
+            "available."
         )
+        raise ValueError(msg)
 
     def sink_exists(self, stream_name: str) -> bool:
         """Check sink for a stream.
@@ -207,7 +222,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     @final
     def add_sink(
-        self, stream_name: str, schema: dict, key_properties: Optional[List[str]] = None
+        self,
+        stream_name: str,
+        schema: dict,
+        key_properties: list[str] | None = None,
     ) -> Sink:
         """Create a sink and register it.
 
@@ -221,35 +239,49 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         Returns:
             A new sink for the stream.
         """
-        self.logger.info(f"Initializing '{self.name}' target sink...")
+        self.logger.info("Initializing '%s' target sink...", self.name)
         sink_class = self.get_sink_class(stream_name=stream_name)
-        result = sink_class(
+        sink = sink_class(
             target=self,
             stream_name=stream_name,
             schema=schema,
             key_properties=key_properties,
         )
-        self._sinks_active[stream_name] = result
-        return result
+        sink.setup()
+        self._sinks_active[stream_name] = sink
+        return sink
 
     def _assert_sink_exists(self, stream_name: str) -> None:
-        """Raise a RecordsWitoutSchemaException exception if stream doesn't exist.
+        """Raise a RecordsWithoutSchemaException exception if stream doesn't exist.
 
         Args:
             stream_name: TODO
 
         Raises:
-            RecordsWitoutSchemaException: If sink does not exist and schema is not sent.
+            RecordsWithoutSchemaException: If sink does not exist and schema
+                is not sent.
         """
         if not self.sink_exists(stream_name):
-            raise RecordsWitoutSchemaException(
+            msg = (
                 f"A record for stream '{stream_name}' was encountered before a "
-                "corresponding schema."
+                "corresponding schema. Check that the Tap correctly implements "
+                "the Singer spec."
             )
+            raise RecordsWithoutSchemaException(msg)
 
     # Message handling
 
-    def _process_lines(self, file_input: IO[str]) -> Counter[str]:
+    def _handle_max_record_age(self) -> None:
+        """Check if _MAX_RECORD_AGE_IN_MINUTES reached, and if so trigger drain."""
+        if self._max_record_age_in_minutes > self._MAX_RECORD_AGE_IN_MINUTES:
+            self.logger.info(
+                "One or more records have exceeded the max age of %d minutes. "
+                "Draining all sinks.",
+                self._MAX_RECORD_AGE_IN_MINUTES,
+            )
+            self.drain_all()
+
+    def _process_lines(self, file_input: t.IO[str]) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:
@@ -258,15 +290,20 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         Returns:
             A counter object for the processed lines.
         """
-        self.logger.info(f"Target '{self.name}' is listening for input from tap.")
+        self.logger.info("Target '%s' is listening for input from tap.", self.name)
         counter = super()._process_lines(file_input)
 
         line_count = sum(counter.values())
 
         self.logger.info(
-            f"Target '{self.name}' completed reading {line_count} lines of input "
-            f"({counter[SingerMessageType.RECORD]} records, "
-            f"{counter[SingerMessageType.STATE]} state messages)."
+            "Target '%s' completed reading %d lines of input "
+            "(%d schemas, %d records, %d batch manifests, %d state messages).",
+            self.name,
+            line_count,
+            counter[SingerMessageType.SCHEMA],
+            counter[SingerMessageType.RECORD],
+            counter[SingerMessageType.BATCH],
+            counter[SingerMessageType.STATE],
         )
 
         return counter
@@ -284,8 +321,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._assert_line_requires(message_dict, requires={"stream", "record"})
 
         stream_name = message_dict["stream"]
+        self._assert_sink_exists(stream_name)
+
         for stream_map in self.mapper.stream_maps[stream_name]:
-            # new_schema = helpers._float_to_decimal(new_schema)
             raw_record = copy.copy(message_dict["record"])
             transformed_record = stream_map.transform(raw_record)
             if transformed_record is None:
@@ -296,23 +334,29 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             context = sink._get_context(transformed_record)
             if sink.include_sdc_metadata_properties:
                 sink._add_sdc_metadata_to_record(
-                    transformed_record, message_dict, context
+                    transformed_record,
+                    message_dict,
+                    context,
                 )
             else:
                 sink._remove_sdc_metadata_from_record(transformed_record)
 
             sink._validate_and_parse(transformed_record)
+            transformed_record = sink.preprocess_record(transformed_record, context)
+            sink._singer_validate_message(transformed_record)
 
             sink.tally_record_read()
-            transformed_record = sink.preprocess_record(transformed_record, context)
             sink.process_record(transformed_record, context)
             sink._after_process_record(context)
 
             if sink.is_full:
                 self.logger.info(
-                    f"Target sink for '{sink.stream_name}' is full. Draining..."
+                    "Target sink for '%s' is full. Draining...",
+                    sink.stream_name,
                 )
                 self.drain_one(sink)
+
+        self._handle_max_record_age()
 
     def _process_schema_message(self, message_dict: dict) -> None:
         """Process a SCHEMA messages.
@@ -321,6 +365,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             message_dict: The newly received schema message.
         """
         self._assert_line_requires(message_dict, requires={"stream", "schema"})
+        self._assert_line_requires(message_dict["schema"], requires={"properties"})
 
         stream_name = message_dict["stream"]
         schema = message_dict["schema"]
@@ -330,23 +375,25 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             do_registration = True
         elif self.mapper.stream_maps[stream_name][0].raw_schema != schema:
             self.logger.info(
-                f"Schema has changed for stream '{stream_name}'. "
-                "Mapping definitions will be reset."
+                "Schema has changed for stream '%s'. "
+                "Mapping definitions will be reset.",
+                stream_name,
             )
             do_registration = True
         elif (
             self.mapper.stream_maps[stream_name][0].raw_key_properties != key_properties
         ):
             self.logger.info(
-                f"Key properties have changed for stream '{stream_name}'. "
-                "Mapping definitions will be reset."
+                "Key properties have changed for stream '%s'. "
+                "Mapping definitions will be reset.",
+                stream_name,
             )
             do_registration = True
 
         if not do_registration:
             self.logger.debug(
-                f"No changes detected in SCHEMA message for stream '{stream_name}'. "
-                "Ignoring."
+                "No changes detected in SCHEMA message for stream '%s'. Ignoring.",
+                stream_name,
             )
             return
 
@@ -356,7 +403,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             key_properties,
         )
         for stream_map in self.mapper.stream_maps[stream_name]:
-            # new_schema = helpers._float_to_decimal(new_schema)
             _ = self.get_sink(
                 stream_map.stream_alias,
                 schema=stream_map.transformed_schema,
@@ -383,12 +429,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         if self._latest_state == state:
             return
         self._latest_state = state
-        if self._max_record_age_in_minutes > self._MAX_RECORD_AGE_IN_MINUTES:
-            self.logger.info(
-                "One or more records have exceeded the max age of "
-                f"{self._MAX_RECORD_AGE_IN_MINUTES} minutes. Draining all sinks."
-            )
-            self.drain_all()
 
     def _process_activate_version_message(self, message_dict: dict) -> None:
         """Handle the optional ACTIVATE_VERSION message extension.
@@ -400,10 +440,25 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         sink = self.get_sink(stream_name)
         sink.activate_version(message_dict["version"])
 
+    def _process_batch_message(self, message_dict: dict) -> None:
+        """Handle the optional BATCH message extension.
+
+        Args:
+            message_dict: TODO
+        """
+        sink = self.get_sink(message_dict["stream"])
+
+        encoding = BaseBatchFileEncoding.from_dict(message_dict["encoding"])
+        sink.process_batch_files(
+            encoding,
+            message_dict["manifest"],
+        )
+        self._handle_max_record_age()
+
     # Sink drain methods
 
     @final
-    def drain_all(self, is_endofpipe: bool = False) -> None:
+    def drain_all(self, *, is_endofpipe: bool = False) -> None:
         """Drains all sinks, starting with those cleared due to changed schema.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -443,7 +498,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         sink.process_batch(draining_status)
         sink.mark_drained()
 
-    def _drain_all(self, sink_list: List[Sink], parallelism: int) -> None:
+    def _drain_all(self, sink_list: list[Sink], parallelism: int) -> None:
         if parallelism == 1:
             for sink in sink_list:
                 self.drain_one(sink)
@@ -462,93 +517,268 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             state: TODO
         """
         state_json = json.dumps(state)
-        self.logger.info(f"Emitting completed target state {state_json}")
+        self.logger.info("Emitting completed target state %s", state_json)
         sys.stdout.write(f"{state_json}\n")
         sys.stdout.flush()
 
     # CLI handler
 
-    @classproperty
-    def cli(cls) -> Callable:
+    @classmethod
+    def invoke(  # type: ignore[override]
+        cls: type[Target],
+        *,
+        about: bool = False,
+        about_format: str | None = None,
+        config: tuple[str, ...] = (),
+        file_input: t.IO[str] | None = None,
+    ) -> None:
+        """Invoke the target.
+
+        Args:
+            about: Display package metadata and settings.
+            about_format: Specify output style for `--about`.
+            config: Configuration file location or 'ENV' to use environment
+                variables. Accepts multiple inputs as a tuple.
+            file_input: Optional file to read input from.
+        """
+        super().invoke(about=about, about_format=about_format)
+        cls.print_version(print_fn=cls.logger.info)
+        config_files, parse_env_config = cls.config_from_cli_args(*config)
+
+        target = cls(
+            config=config_files,  # type: ignore[arg-type]
+            validate_config=True,
+            parse_env_config=parse_env_config,
+        )
+        target.listen(file_input)
+
+    @classmethod
+    def get_singer_command(cls: type[Target]) -> click.Command:
         """Execute standard CLI handler for taps.
 
         Returns:
-            A callable CLI object.
+            A click.Command object.
+        """
+        command = super().get_singer_command()
+        command.help = "Execute the Singer target."
+        command.params.extend(
+            [
+                click.Option(
+                    ["--input", "file_input"],
+                    help="A path to read messages from instead of from standard in.",
+                    type=click.File("r"),
+                ),
+            ],
+        )
+
+        return command
+
+    @classmethod
+    def append_builtin_config(cls: type[Target], config_jsonschema: dict) -> None:
+        """Appends built-in config to `config_jsonschema` if not already set.
+
+        To customize or disable this behavior, developers may either override this class
+        method or override the `capabilities` property to disabled any unwanted
+        built-in capabilities.
+
+        For all except very advanced use cases, we recommend leaving these
+        implementations "as-is", since this provides the most choice to users and is
+        the most "future proof" in terms of taking advantage of built-in capabilities
+        which may be added in the future.
+
+        Args:
+            config_jsonschema: [description]
         """
 
-        @common_options.PLUGIN_VERSION
-        @common_options.PLUGIN_ABOUT
-        @common_options.PLUGIN_ABOUT_FORMAT
-        @common_options.PLUGIN_CONFIG
-        @common_options.PLUGIN_FILE_INPUT
-        @click.command(
-            help="Execute the Singer target.",
-            context_settings={"help_option_names": ["--help"]},
-        )
-        def cli(
-            version: bool = False,
-            about: bool = False,
-            config: Tuple[str, ...] = (),
-            format: str = None,
-            file_input: FileIO = None,
-        ) -> None:
-            """Handle command line execution.
+        def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
+            # Append any missing properties in the target with those from source.
+            for k, v in source_jsonschema["properties"].items():
+                if k not in target_jsonschema["properties"]:
+                    target_jsonschema["properties"][k] = v
 
-            Args:
-                version: Display the package version.
-                about: Display package metadata and settings.
-                format: Specify output style for `--about`.
-                config: Configuration file location or 'ENV' to use environment
-                    variables. Accepts multiple inputs as a tuple.
-                file_input: Specify a path to an input file to read messages from.
-                    Defaults to standard in if unspecified.
+        _merge_missing(ADD_RECORD_METADATA_CONFIG, config_jsonschema)
 
-            Raises:
-                FileNotFoundError: If the config file does not exist.
-            """
-            if version:
-                cls.print_version()
-                return
+        capabilities = cls.capabilities
 
-            if not about:
-                cls.print_version(print_fn=cls.logger.info)
-            else:
-                cls.print_about(format=format)
-                return
+        if PluginCapabilities.BATCH in capabilities:
+            _merge_missing(BATCH_CONFIG, config_jsonschema)
 
-            validate_config: bool = True
+        super().append_builtin_config(config_jsonschema)
 
-            cls.print_version(print_fn=cls.logger.info)
-
-            parse_env_config = False
-            config_files: List[PurePath] = []
-            for config_path in config:
-                if config_path == "ENV":
-                    # Allow parse from env vars:
-                    parse_env_config = True
-                    continue
-
-                # Validate config file paths before adding to list
-                if not Path(config_path).is_file():
-                    raise FileNotFoundError(
-                        f"Could not locate config file at '{config_path}'."
-                        "Please check that the file exists."
-                    )
-
-                config_files.append(Path(config_path))
-
-            target = cls(  # type: ignore  # Ignore 'type not callable'
-                config=config_files or None,
-                parse_env_config=parse_env_config,
-                validate_config=validate_config,
-            )
-
-            target.listen(file_input)
-
-        return cli
+    pass
 
 
 class SQLTarget(Target):
     """Target implementation for SQL destinations."""
 
+    _target_connector: SQLConnector | None = None
+
+    default_sink_class: type[SQLSink]
+
+    @property
+    def target_connector(self) -> SQLConnector:
+        """The connector object.
+
+        Returns:
+            The connector object.
+        """
+        if self._target_connector is None:
+            self._target_connector = self.default_sink_class.connector_class(
+                dict(self.config),
+            )
+        return self._target_connector
+
+    @classproperty
+    def capabilities(self) -> list[CapabilitiesEnum]:
+        """Get target capabilities.
+
+        Returns:
+            A list of capabilities supported by this target.
+        """
+        sql_target_capabilities: list[CapabilitiesEnum] = super().capabilities
+        sql_target_capabilities.extend([TargetCapabilities.TARGET_SCHEMA])
+
+        return sql_target_capabilities
+
+    @classmethod
+    def append_builtin_config(cls: type[SQLTarget], config_jsonschema: dict) -> None:
+        """Appends built-in config to `config_jsonschema` if not already set.
+
+        To customize or disable this behavior, developers may either override this class
+        method or override the `capabilities` property to disabled any unwanted
+        built-in capabilities.
+
+        For all except very advanced use cases, we recommend leaving these
+        implementations "as-is", since this provides the most choice to users and is
+        the most "future proof" in terms of taking advantage of built-in capabilities
+        which may be added in the future.
+
+        Args:
+            config_jsonschema: [description]
+        """
+
+        def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
+            # Append any missing properties in the target with those from source.
+            for k, v in source_jsonschema["properties"].items():
+                if k not in target_jsonschema["properties"]:
+                    target_jsonschema["properties"][k] = v
+
+        capabilities = cls.capabilities
+
+        if TargetCapabilities.TARGET_SCHEMA in capabilities:
+            _merge_missing(TARGET_SCHEMA_CONFIG, config_jsonschema)
+
+        super().append_builtin_config(config_jsonschema)
+
     pass
+
+    @final
+    def add_sqlsink(
+        self,
+        stream_name: str,
+        schema: dict,
+        key_properties: list[str] | None = None,
+    ) -> Sink:
+        """Create a sink and register it.
+
+        This method is internal to the SDK and should not need to be overridden.
+
+        Args:
+            stream_name: Name of the stream.
+            schema: Schema of the stream.
+            key_properties: Primary key of the stream.
+
+        Returns:
+            A new sink for the stream.
+        """
+        self.logger.info("Initializing '%s' target sink...", self.name)
+        sink_class = self.get_sink_class(stream_name=stream_name)
+        sink = sink_class(
+            target=self,
+            stream_name=stream_name,
+            schema=schema,
+            key_properties=key_properties,
+            connector=self.target_connector,
+        )
+        sink.setup()
+        self._sinks_active[stream_name] = sink
+
+        return sink
+
+    def get_sink_class(self, stream_name: str) -> type[SQLSink]:
+        """Get sink for a stream.
+
+        Developers can override this method to return a custom Sink type depending
+        on the value of `stream_name`. Optional when `default_sink_class` is set.
+
+        Args:
+            stream_name: Name of the stream.
+
+        Raises:
+            ValueError: If no :class:`singer_sdk.sinks.Sink` class is defined.
+
+        Returns:
+            The sink class to be used with the stream.
+        """
+        if self.default_sink_class:
+            return self.default_sink_class
+
+        msg = (
+            f"No sink class defined for '{stream_name}' and no default sink class "
+            "available."
+        )
+        raise ValueError(msg)
+
+    def get_sink(
+        self,
+        stream_name: str,
+        *,
+        record: dict | None = None,
+        schema: dict | None = None,
+        key_properties: list[str] | None = None,
+    ) -> Sink:
+        """Return a sink for the given stream name.
+
+        A new sink will be created if `schema` is provided and if either `schema` or
+        `key_properties` has changed. If so, the old sink becomes archived and held
+        until the next drain_all() operation.
+
+        Developers only need to override this method if they want to provide a different
+        sink depending on the values within the `record` object. Otherwise, please see
+        `default_sink_class` property and/or the `get_sink_class()` method.
+
+        Raises :class:`singer_sdk.exceptions.RecordsWithoutSchemaException` if sink does
+        not exist and schema is not sent.
+
+        Args:
+            stream_name: Name of the stream.
+            record: Record being processed.
+            schema: Stream schema.
+            key_properties: Primary key of the stream.
+
+        Returns:
+            The sink used for this target.
+        """
+        _ = record  # Custom implementations may use record in sink selection.
+        if schema is None:
+            self._assert_sink_exists(stream_name)
+            return self._sinks_active[stream_name]
+
+        existing_sink = self._sinks_active.get(stream_name, None)
+        if not existing_sink:
+            return self.add_sqlsink(stream_name, schema, key_properties)
+
+        if (
+            existing_sink.schema != schema
+            or existing_sink.key_properties != key_properties
+        ):
+            self.logger.info(
+                "Schema or key properties for '%s' stream have changed. "
+                "Initializing a new '%s' sink...",
+                stream_name,
+                stream_name,
+            )
+            self._sinks_to_clear.append(self._sinks_active.pop(stream_name))
+            return self.add_sqlsink(stream_name, schema, key_properties)
+
+        return existing_sink

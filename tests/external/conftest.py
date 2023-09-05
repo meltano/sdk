@@ -1,31 +1,42 @@
 """External tests fixtures."""
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
-from typing import Optional
 
 import pytest
 
 
-@pytest.fixture
-def gitlab_config() -> Optional[dict]:
+def gitlab_config() -> dict | None:
     """Create a tap-gitlab config object."""
-    config: Optional[dict] = None
+
     path = Path("singer_sdk/tests/external/.secrets/gitlab-config.json")
+    if not path.exists():
+        # local testing relative path
+        path = Path("tests/external/.secrets/gitlab-config.json")
 
     if path.exists():
-        config = json.loads(path.read_text())
+        return json.loads(path.read_text())
 
-    return config
+    return None
 
 
-@pytest.fixture
-def ga_config() -> Optional[dict]:
+@pytest.fixture(name="gitlab_config")
+def gitlab_config_fixture() -> dict | None:
+    return gitlab_config()
+
+
+def ga_config() -> dict | None:
     """Create a tap-google-analytics config object."""
-    config: Optional[dict] = None
     path = Path("singer_sdk/tests/external/.secrets/google-analytics-config.json")
 
     if path.exists():
-        config = json.loads(path.read_text())
+        return json.loads(path.read_text())
 
-    return config
+    return None
+
+
+@pytest.fixture(name="ga_config")
+def ga_config_fixture() -> dict | None:
+    return ga_config()

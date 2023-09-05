@@ -1,29 +1,26 @@
 """Shared parent class for Tap, Target (future), and Transform (future)."""
 
+from __future__ import annotations
+
 import abc
-import json
 import logging
 import os
-from collections import OrderedDict
-from pathlib import PurePath
+import sys
+import time
+import typing as t
+from pathlib import Path, PurePath
 from types import MappingProxyType
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
 
 import click
-from jsonschema import Draft4Validator, SchemaError, ValidationError
+from jsonschema import Draft7Validator
+from packaging.specifiers import SpecifierSet
 
-from singer_sdk.configuration._dict_config import parse_environment_config
+from singer_sdk import about, metrics
+from singer_sdk.cli import plugin_cli
+from singer_sdk.configuration._dict_config import (
+    merge_missing_config_jsonschema,
+    parse_environment_config,
+)
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import metadata
@@ -39,47 +36,82 @@ from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import extend_validator_with_defaults
 
 SDK_PACKAGE_NAME = "singer_sdk"
+CHECK_SUPPORTED_PYTHON_VERSIONS = (
+    # unsupported versions
+    "2.7",
+    "3.0",
+    "3.1",
+    "3.2",
+    "3.3",
+    "3.4",
+    "3.5",
+    "3.6",
+    "3.7",
+    # current supported versions
+    "3.8",
+    "3.9",
+    "3.10",
+    "3.11",
+    # future supported versions
+    "3.12",
+    "3.13",
+    "3.14",
+    "3.15",
+    "3.16",
+)
 
 
-JSONSchemaValidator = extend_validator_with_defaults(Draft4Validator)
+JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
+
+
+class MapperNotInitialized(Exception):
+    """Raised when the mapper is not initialized."""
+
+    def __init__(self) -> None:
+        """Initialize the exception."""
+        super().__init__("Mapper not initialized. Please call setup_mapper() first.")
 
 
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
-    name: str  # The executable name of the tap or target plugin.
+    #: The executable name of the tap or target plugin. e.g. tap-foo
+    name: str
 
-    config_jsonschema: dict = {}
+    #: The package name of the plugin. e.g meltanolabs-tap-foo
+    package_name: str | None = None
+
+    config_jsonschema: t.ClassVar[dict] = {}
     # A JSON Schema object defining the config options that this tap will accept.
 
     _config: dict
 
     @classproperty
-    def logger(cls) -> logging.Logger:
+    def logger(cls) -> logging.Logger:  # noqa: N805
         """Get logger.
 
         Returns:
             Plugin logger.
         """
         # Get the level from <PLUGIN_NAME>_LOGLEVEL or LOGLEVEL environment variables
-        LOGLEVEL = (
-            os.environ.get(f"{cls.name.upper()}_LOGLEVEL")
-            or os.environ.get("LOGLEVEL")
-            or "INFO"
-        ).upper()
+        plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
+        log_level = os.environ.get(f"{plugin_env_prefix}LOGLEVEL") or os.environ.get(
+            "LOGLEVEL",
+        )
 
-        assert (
-            LOGLEVEL in logging._levelToName.values()
-        ), f"Invalid LOGLEVEL configuration: {LOGLEVEL}"
         logger = logging.getLogger(cls.name)
-        logger.setLevel(LOGLEVEL)
+
+        if log_level is not None and log_level.upper() in logging._levelToName.values():
+            logger.setLevel(log_level.upper())
+
         return logger
 
     # Constructor
 
     def __init__(
         self,
-        config: Optional[Union[dict, PurePath, str, List[Union[PurePath, str]]]] = None,
+        *,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
@@ -96,7 +128,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         if not config:
             config_dict = {}
-        elif isinstance(config, str) or isinstance(config, PurePath):
+        elif isinstance(config, (str, PurePath)):
             config_dict = read_json_file(config)
         elif isinstance(config, list):
             config_dict = {}
@@ -107,7 +139,8 @@ class PluginBase(metaclass=abc.ABCMeta):
         elif isinstance(config, dict):
             config_dict = config
         else:
-            raise ValueError(f"Error parsing config of type '{type(config).__name__}'.")
+            msg = f"Error parsing config of type '{type(config).__name__}'."
+            raise ValueError(msg)
         if parse_env_config:
             self.logger.info("Parsing env var for settings config...")
             config_dict.update(self._env_var_config)
@@ -118,10 +151,55 @@ class PluginBase(metaclass=abc.ABCMeta):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
         self._validate_config(raise_errors=validate_config)
-        self.mapper: PluginMapper
+        self._mapper: PluginMapper | None = None
+
+        metrics._setup_logging(self.config)
+        self.metrics_logger = metrics.get_metrics_logger()
+
+        # Initialization timestamp
+        self.__initialized_at = int(time.time() * 1000)
+
+    def setup_mapper(self) -> None:
+        """Initialize the plugin mapper for this tap."""
+        self._mapper = PluginMapper(
+            plugin_config=dict(self.config),
+            logger=self.logger,
+        )
+
+    @property
+    def mapper(self) -> PluginMapper:
+        """Plugin mapper for this tap.
+
+        Returns:
+            A PluginMapper object.
+
+        Raises:
+            MapperNotInitialized: If the mapper has not been initialized.
+        """
+        if self._mapper is None:
+            raise MapperNotInitialized
+        return self._mapper
+
+    @mapper.setter
+    def mapper(self, mapper: PluginMapper) -> None:
+        """Set the plugin mapper for this plugin.
+
+        Args:
+            mapper: A PluginMapper object.
+        """
+        self._mapper = mapper
+
+    @property
+    def initialized_at(self) -> int:
+        """Start time of the plugin.
+
+        Returns:
+            The start time of the plugin.
+        """
+        return self.__initialized_at
 
     @classproperty
-    def capabilities(self) -> List[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:
         """Get capabilities.
 
         Developers may override this property in oder to add or remove
@@ -133,10 +211,11 @@ class PluginBase(metaclass=abc.ABCMeta):
         return [
             PluginCapabilities.STREAM_MAPS,
             PluginCapabilities.FLATTENING,
+            PluginCapabilities.BATCH,
         ]
 
     @classproperty
-    def _env_var_config(cls) -> Dict[str, Any]:
+    def _env_var_config(cls) -> dict[str, t.Any]:  # noqa: N805
         """Return any config specified in environment variables.
 
         Variables must match the convention "<PLUGIN_NAME>_<SETTING_NAME>",
@@ -153,31 +232,88 @@ class PluginBase(metaclass=abc.ABCMeta):
 
     # Core plugin metadata:
 
-    @classproperty
-    def plugin_version(cls) -> str:
-        """Get version.
+    @staticmethod
+    def _get_package_version(package: str) -> str:
+        """Return the package version number.
+
+        Args:
+            package: The package name.
 
         Returns:
             The package version number.
         """
         try:
-            version = metadata.version(cls.name)
+            version = metadata.version(package)
         except metadata.PackageNotFoundError:
             version = "[could not be detected]"
         return version
 
-    @classproperty
-    def sdk_version(cls) -> str:
+    @staticmethod
+    def _get_supported_python_versions(package: str) -> list[str] | None:
+        """Return the supported Python versions.
+
+        Args:
+            package: The package name.
+
+        Returns:
+            A list of supported Python versions.
+        """
+        try:
+            package_metadata = metadata.metadata(package)
+        except metadata.PackageNotFoundError:
+            return None
+
+        reported_python_versions = SpecifierSet(package_metadata["Requires-Python"])
+        return [
+            version
+            for version in CHECK_SUPPORTED_PYTHON_VERSIONS
+            if version in reported_python_versions
+        ]
+
+    @classmethod
+    def get_plugin_version(cls) -> str:
         """Return the package version number.
 
         Returns:
-            Meltano SDK version number.
+            The package version number.
         """
-        try:
-            version = metadata.version(SDK_PACKAGE_NAME)
-        except metadata.PackageNotFoundError:
-            version = "[could not be detected]"
-        return version
+        return cls._get_package_version(cls.package_name or cls.name)
+
+    @classmethod
+    def get_sdk_version(cls) -> str:
+        """Return the package version number.
+
+        Returns:
+            The package version number.
+        """
+        return cls._get_package_version(SDK_PACKAGE_NAME)
+
+    @classmethod
+    def get_supported_python_versions(cls) -> list[str] | None:
+        """Return the supported Python versions.
+
+        Returns:
+            A list of supported Python versions.
+        """
+        return cls._get_supported_python_versions(cls.package_name or cls.name)
+
+    @classproperty
+    def plugin_version(cls) -> str:  # noqa: N805
+        """Get version.
+
+        Returns:
+            The package version number.
+        """
+        return cls.get_plugin_version()
+
+    @classproperty
+    def sdk_version(cls) -> str:  # noqa: N805
+        """Return the package version number.
+
+        Returns:
+            Meltano Singer SDK version number.
+        """
+        return cls.get_sdk_version()
 
     # Abstract methods:
 
@@ -188,18 +324,18 @@ class PluginBase(metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: If the derived plugin doesn't override this method.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     # Core plugin config:
 
     @property
-    def config(self) -> Mapping[str, Any]:
+    def config(self) -> t.Mapping[str, t.Any]:
         """Get config.
 
         Returns:
             A frozen (read-only) config dictionary map.
         """
-        return cast(Dict, MappingProxyType(self._config))
+        return t.cast(dict, MappingProxyType(self._config))
 
     @staticmethod
     def _is_secret_config(config_key: str) -> bool:
@@ -216,8 +352,11 @@ class PluginBase(metaclass=abc.ABCMeta):
         return is_common_secret_key(config_key)
 
     def _validate_config(
-        self, raise_errors: bool = True, warnings_as_errors: bool = False
-    ) -> Tuple[List[str], List[str]]:
+        self,
+        *,
+        raise_errors: bool = True,
+        warnings_as_errors: bool = False,
+    ) -> tuple[list[str], list[str]]:
         """Validate configuration input against the plugin configuration JSON schema.
 
         Args:
@@ -230,23 +369,23 @@ class PluginBase(metaclass=abc.ABCMeta):
         Raises:
             ConfigValidationError: If raise_errors is True and validation fails.
         """
-        warnings: List[str] = []
-        errors: List[str] = []
+        warnings: list[str] = []
+        errors: list[str] = []
         log_fn = self.logger.info
         config_jsonschema = self.config_jsonschema
+
         if config_jsonschema:
             self.append_builtin_config(config_jsonschema)
-            try:
-                self.logger.debug(
-                    f"Validating config using jsonschema: {config_jsonschema}"
-                )
-                validator = JSONSchemaValidator(config_jsonschema)
-                validator.validate(self._config)
-            except (ValidationError, SchemaError) as ex:
-                errors.append(str(ex.message))
+            self.logger.debug(
+                "Validating config using jsonschema: %s",
+                config_jsonschema,
+            )
+            validator = JSONSchemaValidator(config_jsonschema)
+            errors = [e.message for e in validator.iter_errors(self._config)]
+
         if errors:
             summary = (
-                f"Config validation failed: {f'; '.join(errors)}\n"
+                f"Config validation failed: {'; '.join(errors)}\n"
                 f"JSONSchema was: {config_jsonschema}"
             )
             if raise_errors:
@@ -257,47 +396,50 @@ class PluginBase(metaclass=abc.ABCMeta):
             summary = f"Config validation passed with {len(warnings)} warnings."
             for warning in warnings:
                 summary += f"\n{warning}"
+
         if warnings_as_errors and raise_errors and warnings:
-            raise ConfigValidationError(
-                f"One or more warnings ocurred during validation: {warnings}"
-            )
+            msg = f"One or more warnings ocurred during validation: {warnings}"
+            raise ConfigValidationError(msg)
         log_fn(summary)
         return warnings, errors
 
     @classmethod
     def print_version(
-        cls: Type["PluginBase"],
-        print_fn: Callable[[Any], None] = print,
+        cls: type[PluginBase],
+        print_fn: t.Callable[[t.Any], None] = print,
     ) -> None:
         """Print help text for the tap.
 
         Args:
             print_fn: A function to use to display the plugin version.
-                Defaults to :function:`print`.
+                Defaults to `print`_.
+
+        .. _print: https://docs.python.org/3/library/functions.html#print
         """
         print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version}")
 
     @classmethod
-    def _get_about_info(cls: Type["PluginBase"]) -> Dict[str, Any]:
+    def _get_about_info(cls: type[PluginBase]) -> about.AboutInfo:
         """Returns capabilities and other tap metadata.
 
         Returns:
             A dictionary containing the relevant 'about' information.
         """
-        info: Dict[str, Any] = OrderedDict({})
-        info["name"] = cls.name
-        info["description"] = cls.__doc__
-        info["version"] = cls.plugin_version
-        info["sdk_version"] = cls.sdk_version
-        info["capabilities"] = cls.capabilities
-
         config_jsonschema = cls.config_jsonschema
         cls.append_builtin_config(config_jsonschema)
-        info["settings"] = config_jsonschema
-        return info
+
+        return about.AboutInfo(
+            name=cls.name,
+            description=cls.__doc__,
+            version=cls.get_plugin_version(),
+            sdk_version=cls.get_sdk_version(),
+            supported_python_versions=cls.get_supported_python_versions(),
+            capabilities=cls.capabilities,
+            settings=config_jsonschema,
+        )
 
     @classmethod
-    def append_builtin_config(cls: Type["PluginBase"], config_jsonschema: dict) -> None:
+    def append_builtin_config(cls: type[PluginBase], config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
         To customize or disable this behavior, developers may either override this class
@@ -312,101 +454,155 @@ class PluginBase(metaclass=abc.ABCMeta):
         Args:
             config_jsonschema: [description]
         """
-
-        def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
-            # Append any missing properties in the target with those from source.
-            for k, v in source_jsonschema["properties"].items():
-                if k not in target_jsonschema["properties"]:
-                    target_jsonschema["properties"][k] = v
-
         capabilities = cls.capabilities
         if PluginCapabilities.STREAM_MAPS in capabilities:
-            _merge_missing(STREAM_MAPS_CONFIG, config_jsonschema)
+            merge_missing_config_jsonschema(STREAM_MAPS_CONFIG, config_jsonschema)
 
         if PluginCapabilities.FLATTENING in capabilities:
-            _merge_missing(FLATTENING_CONFIG, config_jsonschema)
+            merge_missing_config_jsonschema(FLATTENING_CONFIG, config_jsonschema)
 
     @classmethod
-    def print_about(cls: Type["PluginBase"], format: Optional[str] = None) -> None:
+    def print_about(
+        cls: type[PluginBase],
+        output_format: str | None = None,
+    ) -> None:
         """Print capabilities and other tap metadata.
 
         Args:
-            format: Render option for the plugin information.
+            output_format: Render option for the plugin information.
         """
         info = cls._get_about_info()
+        formatter = about.AboutFormatter.get_formatter(output_format or "text")
+        print(formatter.format_about(info))  # noqa: T201
 
-        if format == "json":
-            print(json.dumps(info, indent=2, default=str))
+    @staticmethod
+    def config_from_cli_args(*args: str) -> tuple[list[Path], bool]:
+        """Parse CLI arguments into a config dictionary.
 
-        elif format == "markdown":
-            max_setting_len = cast(
-                int, max(len(k) for k in info["settings"]["properties"].keys())
-            )
+        Args:
+            args: CLI arguments.
 
-            # Set table base for markdown
-            table_base = (
-                f"| {'Setting':{max_setting_len}}| Required | Default | Description |\n"
-                f"|:{'-' * max_setting_len}|:--------:|:-------:|:------------|\n"
-            )
+        Raises:
+            FileNotFoundError: If the config file does not exist.
 
-            # Empty list for string parts
-            md_list = []
-            # Get required settings for table
-            required_settings = info["settings"].get("required", [])
+        Returns:
+            A tuple containing the config dictionary and a boolean indicating whether
+            the config file was found.
+        """
+        config_files = []
+        parse_env_config = False
 
-            # Iterate over Dict to set md
-            md_list.append(
-                f"# `{info['name']}`\n\n"
-                f"{info['description']}\n\n"
-                f"Built with the [Meltano SDK](https://sdk.meltano.com) for "
-                "Singer Taps and Targets.\n\n"
-            )
-            for key, value in info.items():
+        for config_path in args:
+            if config_path == "ENV":
+                # Allow parse from env vars:
+                parse_env_config = True
+                continue
 
-                if key == "capabilities":
-                    capabilities = f"## {key.title()}\n\n"
-                    capabilities += "\n".join([f"* `{v}`" for v in value])
-                    capabilities += "\n\n"
-                    md_list.append(capabilities)
+            # Validate config file paths before adding to list
+            if not Path(config_path).is_file():
+                msg = (
+                    f"Could not locate config file at '{config_path}'.Please check "
+                    "that the file exists."
+                )
+                raise FileNotFoundError(msg)
 
-                if key == "settings":
-                    setting = f"## {key.title()}\n\n"
-                    for k, v in info["settings"].get("properties", {}).items():
-                        md_description = v.get("description", "").replace("\n", "<BR/>")
-                        table_base += (
-                            f"| {k}{' ' * (max_setting_len - len(k))}"
-                            f"| {'True' if k in required_settings else 'False':8} | "
-                            f"{v.get('default', 'None'):7} | "
-                            f"{md_description:11} |\n"
-                        )
-                    setting += table_base
-                    setting += (
-                        "\n"
-                        + "\n".join(
-                            [
-                                "A full list of supported settings and capabilities "
-                                f"is available by running: `{info['name']} --about`"
-                            ]
-                        )
-                        + "\n"
-                    )
-                    md_list.append(setting)
+            config_files.append(Path(config_path))
 
-            print("".join(md_list))
-        else:
-            formatted = "\n".join([f"{k.title()}: {v}" for k, v in info.items()])
-            print(formatted)
+        return config_files, parse_env_config
 
-    @classproperty
-    def cli(cls) -> Callable:
+    @classmethod
+    def invoke(
+        cls,
+        *,
+        about: bool = False,
+        about_format: str | None = None,
+        **kwargs: t.Any,  # noqa: ARG003
+    ) -> None:
+        """Invoke the plugin.
+
+        Args:
+            about: Display package metadata and settings.
+            about_format: Specify output style for `--about`.
+            kwargs: Plugin keyword arguments.
+        """
+        if about:
+            cls.print_about(about_format)
+            sys.exit(0)
+
+    @classmethod
+    def cb_version(
+        cls: type[PluginBase],
+        ctx: click.Context,
+        param: click.Option,  # noqa: ARG003
+        value: bool,  # noqa: FBT001
+    ) -> None:
+        """CLI callback to print the plugin version and exit.
+
+        Args:
+            ctx: Click context.
+            param: Click parameter.
+            value: Boolean indicating whether to print the version.
+        """
+        if not value:
+            return
+        cls.print_version(print_fn=click.echo)
+        ctx.exit()
+
+    @classmethod
+    def get_singer_command(cls: type[PluginBase]) -> click.Command:
         """Handle command line execution.
 
         Returns:
             A callable CLI object.
         """
+        return click.Command(
+            name=cls.name,
+            callback=cls.invoke,
+            context_settings={"help_option_names": ["--help"]},
+            params=[
+                click.Option(
+                    ["--version"],
+                    is_flag=True,
+                    help="Display the package version.",
+                    is_eager=True,
+                    expose_value=False,
+                    callback=cls.cb_version,
+                ),
+                click.Option(
+                    ["--about"],
+                    help="Display package metadata and settings.",
+                    is_flag=True,
+                    is_eager=False,
+                    expose_value=True,
+                ),
+                click.Option(
+                    ["--format", "about_format"],
+                    help="Specify output style for --about",
+                    type=click.Choice(
+                        ["json", "markdown"],
+                        case_sensitive=False,
+                    ),
+                    default=None,
+                ),
+                click.Option(
+                    ["--config"],
+                    multiple=True,
+                    help=(
+                        "Configuration file location or 'ENV' to use environment "
+                        "variables."
+                    ),
+                    type=click.STRING,
+                    default=(),
+                    is_eager=True,
+                ),
+            ],
+        )
 
-        @click.command()
-        def cli() -> None:
-            pass
+    @plugin_cli
+    def cli(cls) -> click.Command:
+        """Handle command line execution.
 
-        return cli
+        Returns:
+            A callable CLI object.
+        """
+        return cls.get_singer_command()

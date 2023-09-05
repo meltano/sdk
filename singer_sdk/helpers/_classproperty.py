@@ -2,7 +2,7 @@
 
 """Defines the `classproperty` decorator."""
 
-# noqa
+from __future__ import annotations
 
 
 class classproperty(property):

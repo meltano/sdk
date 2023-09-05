@@ -1,5 +1,5 @@
-SDK Reference
-=============
+Classes Reference
+=================
 
 .. currentmodule:: singer_sdk
 
@@ -8,7 +8,7 @@ Plugin Classes
 
 .. autosummary::
     :toctree: classes
-    :template: class.rst
+    :template: plugin_class.rst
 
     Tap
     Target
@@ -56,6 +56,7 @@ Authenticator Classes
     :toctree: classes
     :template: class.rst
 
+    authenticators.APIAuthenticatorBase
     authenticators.APIKeyAuthenticator
     authenticators.BasicAuthenticator
     authenticators.BearerTokenAuthenticator
@@ -75,7 +76,7 @@ Exception Types
     exceptions.InvalidStreamSortException
     exceptions.MapExpressionError
     exceptions.MaxRecordsLimitException
-    exceptions.RecordsWitoutSchemaException
+    exceptions.RecordsWithoutSchemaException
     exceptions.RetriableAPIError
     exceptions.StreamMapConfigError
     exceptions.TapStreamConnectionFailure
@@ -85,6 +86,60 @@ JSON Schema builder classes
 ---------------------------
 
 .. autosummary::
-    :template: module.rst
+    :toctree: classes/typing
+    :template: class.rst
 
-    typing
+    typing.PropertiesList
+    typing.ArrayType
+    typing.BooleanType
+    typing.Constant
+    typing.CustomType
+    typing.DateTimeType
+    typing.DateType
+    typing.DiscriminatedUnion
+    typing.DurationType
+    typing.EmailType
+    typing.HostnameType
+    typing.IntegerType
+    typing.IPv4Type
+    typing.IPv6Type
+    typing.JSONPointerType
+    typing.NumberType
+    typing.ObjectType
+    typing.OneOf
+    typing.Property
+    typing.RegexType
+    typing.RelativeJSONPointerType
+    typing.StringType
+    typing.TimeType
+    typing.URITemplateType
+    typing.URIType
+    typing.UUIDType
+
+Pagination
+----------
+
+.. autosummary::
+    :toctree: classes
+    :template: class.rst
+
+    pagination.BaseAPIPaginator
+    pagination.SinglePagePaginator
+    pagination.BaseHATEOASPaginator
+    pagination.HeaderLinkPaginator
+    pagination.JSONPathPaginator
+    pagination.SimpleHeaderPaginator
+    pagination.BasePageNumberPaginator
+    pagination.BaseOffsetPaginator
+    pagination.LegacyPaginatedStreamProtocol
+    pagination.LegacyStreamPaginator
+
+Batch
+-----
+
+.. autosummary::
+    :toctree: classes
+    :template: class.rst
+
+    batch.BaseBatcher
+    batch.JSONLinesBatcher

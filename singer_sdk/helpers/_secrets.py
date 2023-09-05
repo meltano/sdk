@@ -1,5 +1,7 @@
 """Helpers function for secrets management."""
 
+from __future__ import annotations
+
 COMMON_SECRET_KEYS = [
     "db_password",
     "password",
@@ -18,10 +20,8 @@ def is_common_secret_key(key_name: str) -> bool:
     if key_name in COMMON_SECRET_KEYS:
         return True
     return any(
-        [
-            key_name.lower().endswith(key_suffix)
-            for key_suffix in COMMON_SECRET_KEY_SUFFIXES
-        ]
+        key_name.lower().endswith(key_suffix)
+        for key_suffix in COMMON_SECRET_KEY_SUFFIXES
     )
 
 

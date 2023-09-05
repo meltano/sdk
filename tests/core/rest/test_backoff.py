@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import json
+import typing as t
 
 try:
     from contextlib import nullcontext
@@ -19,7 +22,7 @@ class CustomResponseValidationStream(RESTStream):
 
     url_base = "https://badapi.test"
     name = "imabadapi"
-    schema = {"type": "object", "properties": {}}
+    schema: t.ClassVar[dict] = {"type": "object", "properties": {}}
     path = "/dummy"
 
     class StatusMessage(str, Enum):
@@ -33,9 +36,11 @@ class CustomResponseValidationStream(RESTStream):
         super().validate_response(response)
         data = response.json()
         if data["status"] == self.StatusMessage.ERROR:
-            raise FatalAPIError("Error message found :(")
+            msg = "Error message found :("
+            raise FatalAPIError(msg)
         if data["status"] == self.StatusMessage.UNAVAILABLE:
-            raise RetriableAPIError("API is unavailable")
+            msg = "API is unavailable"
+            raise RetriableAPIError(msg)
 
 
 @pytest.fixture
@@ -144,7 +149,10 @@ def test_status_message_api(custom_validation_stream, message, expectation):
     ],
 )
 def test_rate_limiting_status_override(
-    basic_rest_stream, rate_limit_codes, response_status, expectation
+    basic_rest_stream,
+    rate_limit_codes,
+    response_status,
+    expectation,
 ):
     fake_response = requests.Response()
     fake_response.status_code = response_status

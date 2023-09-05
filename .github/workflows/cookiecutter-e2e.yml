@@ -1,0 +1,83 @@
+name: E2E Cookiecutters
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths: ["cookiecutter/**", "e2e-tests/cookiecutters/**"]
+  push:
+    branches: [main]
+    paths: ["cookiecutter/**", "e2e-tests/cookiecutters/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: "1"
+
+jobs:
+  lint:
+    name: Cookiecutter E2E ${{ matrix.python-version }} ${{ matrix.python-version }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - { python-version: "3.10",  os: "ubuntu-latest" }
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v4.0.0
+
+    - name: Upgrade pip
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
+      run: |
+        pip install pip
+        pip --version
+
+    - name: Install Poetry
+      run: |
+        pipx install poetry
+        poetry --version
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4.7.0
+      with:
+        python-version: ${{ matrix.python-version }}
+        architecture: x64
+        cache: 'pip'
+        cache-dependency-path: 'poetry.lock'
+
+    - name: Install pre-commit
+      run: |
+        pipx install pre-commit
+        pre-commit --version
+
+    - name: Install Nox
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
+      run: |
+        pipx install --pip-args=--constraint=.github/workflows/constraints.txt nox
+        pipx inject --pip-args=--constraint=.github/workflows/constraints.txt nox nox-poetry
+        nox --version
+
+    - name: Run Nox
+      run: |
+        nox --python=${{ matrix.python-version }} --session=test_cookiecutter
+
+    - name: Upload build artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        path: |
+          /tmp/tap-*
+          /tmp/target-*
+          /tmp/mapper-*
+          !/tmp/tap-*/.mypy_cache/
+          !/tmp/target-*/.mypy_cache/
+          !/tmp/mapper-*/.mypy_cache/
+          !/tmp/tap-*/.tox/
+          !/tmp/target-*/.tox/
+          !/tmp/mapper-*/.tox/

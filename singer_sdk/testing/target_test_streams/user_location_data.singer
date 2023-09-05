@@ -1,0 +1,15 @@
+{"type": "SCHEMA", "stream": "test_users", "key_properties": ["id"], "schema": {"required": ["id", "name"], "type": "object", "properties": {"id": {"type": "integer"}, "name": {"type": "string"}}}}
+{"type": "RECORD", "stream": "test_users", "record": {"id": 1, "name": "Yannis"}}
+{"type": "RECORD", "stream": "test_users", "record": {"id": 2, "name": "Micael"}}
+{"type": "RECORD", "stream": "test_users", "record": {"id": 3, "name": "Jacob"}}
+{"type": "RECORD", "stream": "test_users", "record": {"id": 4, "name": "Josh"}}
+{"type": "RECORD", "stream": "test_users", "record": {"id": 5, "name": "Thomas"}}
+{"type": "SCHEMA", "stream": "test_locations", "key_properties": ["id"], "schema": {"required": ["id", "name"], "type": "object", "properties": {"id": {"type": "integer"}, "name": {"type": "string"}}}}
+{"type": "RECORD", "stream": "test_locations", "record": {"id": 1, "name": "Philadelphia"}}
+{"type": "RECORD", "stream": "test_locations", "record": {"id": 2, "name": "NY"}}
+{"type": "RECORD", "stream": "test_locations", "record": {"id": 3, "name": "SF"}}
+{"type": "SCHEMA", "stream": "test_user_in_location", "key_properties": ["id"], "schema": {"required": ["id", "user_id", "location_id"], "type": "object", "properties": {"id": {"type": "integer"}, "user_id": {"type": "integer"}, "location_id": {"type": "integer"}, "info": {"type": "object", "properties": {"weather": {"type": "string"}, "mood": {"type": "string"}}}}}}
+{"type": "RECORD", "stream": "test_user_in_location", "record": {"id": 1, "user_id": 1, "location_id": 1, "info": {"weather": "rainy", "mood": "sad"}}}
+{"type": "RECORD", "stream": "test_user_in_location", "record": {"id": 2, "user_id": 1, "location_id": 2, "info": {"weather": "sunny", "mood": "satisfied"}}}
+{"type": "RECORD", "stream": "test_user_in_location", "record": {"id": 3, "user_id": 1, "location_id": 3, "info": {"weather": "sunny", "mood": "happy"}}}
+{"type": "STATE", "value": {"test_users": 5, "test_locations": 3, "test_user_in_location": 3}}

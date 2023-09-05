@@ -1,6 +1,6 @@
 name: Bug Report
 description: File a bug report
-title: "[Bug]: <title>"
+title: "bug: <title>"
 labels: ["kind/Bug", "valuestream/SDK"]
 assignees:
   - meltano/engineering
@@ -15,9 +15,16 @@ body:
     attributes:
       label: Singer SDK Version
       description: Version of the library you are using
-      placeholder: "0.8.0"
+      placeholder: "0.31.1"
     validations:
       required: true
+  - type: checkboxes
+    id: regression
+    attributes:
+      label: Is this a regression?
+      description: Meaning this is something that previously worked correctly
+      options:
+        - label: "Yes"
   - type: dropdown
     id: python_version
     attributes:
@@ -38,10 +45,12 @@ body:
       label: Bug scope
       description: Functionality this bug affects
       options:
-        - Taps (catalog, state, stream maps, etc.)
+        - Taps (catalog, state, etc.)
+        - Mapping (stream maps, flattening, etc.)
         - Targets (data type handling, batching, SQL object generation, etc.)
         - Configuration (settings parsing, validation, etc.)
         - CLI (options, error messages, logging, etc.)
+        - Cookiecutter templates
         - Other
     validations:
       required: true

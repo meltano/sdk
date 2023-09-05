@@ -1,26 +1,269 @@
 {
-    "type": "object",
-    "properties": {
-        "group_id": {
-            "type": "integer"
+  "properties": {
+    "_links": {
+      "properties": {
+        "award_emoji": {
+          "type": "string"
         },
-        "epic_iid": {
-            "type": "integer"
+        "notes": {
+          "type": "string"
         },
-        "epic_issue_id": {
-            "type": "integer"
+        "project": {
+          "type": "string"
         },
-        "issue_id": {
-            "type": "integer"
+        "self": {
+          "type": "string"
+        }
+      },
+      "required": ["award_emoji", "notes", "project", "self"],
+      "type": "object"
+    },
+    "assignee": {
+      "properties": {
+        "avatar_url": {
+          "type": "string"
         },
-        "issue_iid": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "web_url": {
+          "type": "string"
+        }
+      },
+      "required": ["avatar_url", "id", "name", "state", "username", "web_url"],
+      "type": ["object", "null"]
+    },
+    "assignees": {
+      "items": {
+        "properties": {
+          "avatar_url": {
+            "type": "string"
+          },
+          "id": {
             "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "web_url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "avatar_url",
+          "id",
+          "name",
+          "state",
+          "username",
+          "web_url"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "author": {
+      "properties": {
+        "avatar_url": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "web_url": {
+          "type": "string"
+        }
+      },
+      "required": ["avatar_url", "id", "name", "state", "username", "web_url"],
+      "type": "object"
+    },
+    "closed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "confidential": {
+      "type": "boolean"
+    },
+    "created_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "discussion_locked": {
+      "type": "null"
+    },
+    "downvotes": {
+      "type": "integer"
+    },
+    "due_date": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "epic_issue_id": {
+      "type": "integer"
+    },
+    "id": {
+      "type": "integer"
+    },
+    "iid": {
+      "type": "integer"
+    },
+    "labels": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "milestone": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "due_date": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "iid": {
+          "type": "integer"
         },
         "project_id": {
-            "type": ["null", "integer"]
+          "type": "integer"
         },
-        "relative_position": {
-            "type": ["null", "integer"]
+        "start_date": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "state": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
         }
+      },
+      "required": [
+        "created_at",
+        "description",
+        "due_date",
+        "id",
+        "iid",
+        "start_date",
+        "state",
+        "title",
+        "updated_at"
+      ],
+      "type": ["object", "null"]
+    },
+    "project_id": {
+      "type": "integer"
+    },
+    "state": {
+      "type": "string"
+    },
+    "time_stats": {
+      "properties": {
+        "human_time_estimate": {
+          "type": ["string", "null"]
+        },
+        "human_total_time_spent": {
+          "type": ["string", "null"]
+        },
+        "time_estimate": {
+          "type": "integer"
+        },
+        "total_time_spent": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "human_time_estimate",
+        "human_total_time_spent",
+        "time_estimate",
+        "total_time_spent"
+      ],
+      "type": "object"
+    },
+    "title": {
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "upvotes": {
+      "type": "integer"
+    },
+    "user_notes_count": {
+      "type": "integer"
+    },
+    "web_url": {
+      "type": "string"
+    },
+    "weight": {
+      "type": ["integer", "null"]
     }
+  },
+  "required": [
+    "_links",
+    "assignee",
+    "assignees",
+    "author",
+    "closed_at",
+    "confidential",
+    "created_at",
+    "description",
+    "discussion_locked",
+    "downvotes",
+    "due_date",
+    "epic_issue_id",
+    "id",
+    "iid",
+    "labels",
+    "milestone",
+    "project_id",
+    "state",
+    "time_stats",
+    "title",
+    "updated_at",
+    "upvotes",
+    "user_notes_count",
+    "web_url",
+    "weight"
+  ],
+  "type": "object"
 }

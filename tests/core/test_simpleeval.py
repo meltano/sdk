@@ -6,6 +6,8 @@ For more information:
 - https://gitlab.com/meltano/sdk/-/issues/213
 
 """
+from __future__ import annotations
+
 import ast
 import operator
 import os

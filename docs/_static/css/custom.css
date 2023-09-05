@@ -1,134 +1,25 @@
-body {
-  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans",
-    "Helvetica Neue", sans-serif;
-  color: #2c3e50;
-  -moz-osx-font-smoothing: grayscale;
+@font-face {
+  font-family: 'Hanken Grotesk';
+  src: url('../fonts/HankenGrotesk-Regular.woff2') format('woff2'),
+      url('../fonts/HankenGrotesk-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
-a,
-a:visited {
-  color: #3438bf;
-}
-a:hover {
-  color: #3438bf;
-  text-decoration: underline;
-}
-
-.wy-nav-top {
-  background-color: #3438bf;
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    src: url('../fonts/PlusJakartaSans-Regular.woff2') format('woff2'),
+        url('../fonts/PlusJakartaSans-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
 }
 
-.wy-nav-top a {
-  color: white;
-  text-decoration: none !important;
+h1 {
+  color: var(--color-brand-content);
 }
 
-.wy-nav-side {
-  background-color: #3438bf;
-}
-
-.wy-side-nav-search {
-  background-color: #3438bf;
-}
-
-.wy-side-nav-search > a {
-  color: #fcfcfc;
-  text-decoration: none !important;
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.wy-side-nav-search > a img.logo {
-  display: inline-block;
-  height: 2.3rem;
-  padding: 0;
-  vertical-align: text-bottom;
-  position: relative;
-  top: 1px;
-}
-
-.wy-side-nav-search > a::after {
-  display: inline-block;
-  content: "SDK";
-  letter-spacing: -1px;
-}
-
-.wy-side-nav-search > div.version {
-  color: hsla(0, 0%, 100%, 0.7);
-}
-
-.wy-side-nav-search input[type="text"] {
-  border-color: #3438bf;
-}
-
-.wy-menu-vertical a:hover {
-  background-color: #3438bf;
-}
-
-.wy-menu-vertical a,
-.wy-menu-vertical a:hover,
-.wy-menu-vertical a:visited {
-  color: white;
-}
-
-.wy-menu-vertical li.current > a,
-.wy-menu-vertical li.on a {
-  background-color: white;
-}
-
-.wy-nav-content-wrap,
-.wy-nav-content {
-  background-color: white;
-}
-
-.rst-versions,
-.rst-versions .rst-current-version {
-  background-color: #3438bf;
-}
-
-.rst-versions .rst-current-version {
-  color: #fbbf52;
-}
-
-.rst-versions .rst-other-versions {
-  color: white;
-}
-
-.rst-versions a {
-  color: white;
-  text-decoration: underline;
-}
-
-.rst-versions .rst-other-versions dl {
-  margin: 5px 0;
-}
-
-.rst-versions .rst-other-versions dt {
-  margin-bottom: 3px;
-}
-
-.rst-versions .rst-other-versions dd a {
-  border: 1px solid white;
-  border-radius: 5px;
-  padding: 3px 6px;
-  text-decoration: none;
-}
-
-.rst-versions .rst-other-versions dd a:hover {
-  color: #3438bf;
-  background-color: white;
-}
-
-.rst-content code.literal {
-  color: #62626e;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: inherit;
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Plus Jakarta Sans";
 }
