@@ -564,6 +564,13 @@ def _clear_schema_cache() -> None:
         pytest.param(
             {},
             True,
+            0,
+            "flatten_depth_0.jsonl",
+            id="flatten_depth_0",
+        ),
+        pytest.param(
+            {},
+            True,
             1,
             "flatten_depth_1.jsonl",
             id="flatten_depth_1",
