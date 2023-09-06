@@ -50,7 +50,7 @@ Both the `Sink.sink_timer.on_the_clock()` method and the `Sink.batch_wait_limit_
 
 ### Rows or Wait limit has been reached (`Sink.is_full_rows_and_too_old`)
 
-The previously described `is_full_rows` and `is_too_old` functions are run and their results are held in a tuple.  If `True` is present in the tuple the function returns `True` so `is_full` will return `True`.  When `Sink.is_full` is checked at the end of `Target._process_record_message` and returns `True` Then the message "Target sink for 'stream_name' is full.  Current size is 'current_size' Draining..." is logged to the console and `Target.drain_one()` is called.  The `Target.drain_one(Sink)` method calls `Sink._lap_manager` which stops the timer, calculates the lap time, and starts the timer again.
+The previously described `is_full_rows` and `is_too_old` methods are run and their results are held in a tuple.  If `True` is present in the tuple the function returns `True` so `is_full` will return `True`.  When `Sink.is_full` is checked at the end of `Target._process_record_message` and returns `True` a log messages is emitted to stderr and [`Target.drain_one(Sink)`](singer_sdk.Target.drain_one) is called. The [`Target.drain_one(Sink)`](singer_sdk.Target.drain_one) method calls `Sink._lap_manager` which stops the timer, calculates the lap time, and restarts the timer.
 
 ### Rows limit managed by `Sink.sink_timer.counter_based_max_size` has been reached. `Sink.is_full_dynamic`
 
