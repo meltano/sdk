@@ -155,17 +155,7 @@ def flatten_schema(
           "type": "string"
         },
         "foo__bar": {
-          "type": "object",
-          "properties": {
-            "baz": {
-              "type": "object",
-              "properties": {
-                "qux": {
-                  "type": "string"
-                }
-              }
-            }
-          }
+          "type": "string"
         }
       }
     }
@@ -178,12 +168,7 @@ def flatten_schema(
           "type": "string"
         },
         "foo__bar__baz": {
-          "type": "object",
-          "properties": {
-            "qux": {
-              "type": "string"
-            }
-          }
+          "type": "string"
         }
       }
     }
@@ -249,7 +234,7 @@ def _flatten_schema(  # noqa: C901, PLR0912
                         max_level=max_level,
                     ).items(),
                 )
-            elif "array" in v["type"] or "object" in v["type"]:
+            elif "array" in v["type"] or "object" in v["type"] and max_level > 0:
                 items.append((new_key, {"type": "string"}))
             else:
                 items.append((new_key, v))
