@@ -210,7 +210,7 @@ def flatten_schema(
     return new_schema
 
 
-def _flatten_schema(  # noqa: C901
+def _flatten_schema(  # noqa: C901, PLR0912
     schema_node: dict,
     parent_keys: list[str] | None = None,
     separator: str = "__",
@@ -249,6 +249,8 @@ def _flatten_schema(  # noqa: C901
                         max_level=max_level,
                     ).items(),
                 )
+            elif "array" in v["type"] or "object" in v["type"]:
+                items.append((new_key, {"type": "string"}))
             else:
                 items.append((new_key, v))
         elif len(v.values()) > 0:
