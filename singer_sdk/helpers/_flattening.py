@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import collections
 import itertools
-import json
 import re
 import typing as t
 from copy import deepcopy
 
 import inflection
+import simplejson as json
 
 DEFAULT_FLATTENING_SEPARATOR = "__"
 
@@ -347,7 +347,7 @@ def _flatten_record(
             items.append(
                 (
                     new_key,
-                    json.dumps(v)
+                    json.dumps(v, use_decimal=True)
                     if _should_jsondump_value(k, v, flattened_schema)
                     else v,
                 ),
