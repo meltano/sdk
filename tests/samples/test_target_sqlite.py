@@ -541,6 +541,7 @@ def test_overwrite_load_method(
     records = [res[0] for res in cursor.fetchall()]
     assert records == ["123"]
 
+    # Assert overwrite works
     tap_output_b = "\n".join(
         json.dumps(msg)
         for msg in [
@@ -553,3 +554,22 @@ def test_overwrite_load_method(
     cursor.execute(f"SELECT col_a FROM {test_tbl} ;")  # noqa: S608
     records = [res[0] for res in cursor.fetchall()]
     assert records == ["456"]
+
+    # Assert overwrite rollback works on error
+    tap_output_c = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg,
+            # Type mismatch to cause an Exception
+            {"type": "RECORD", "stream": test_tbl, "record": {"col_a": 789}},
+        ]
+    )
+    target2 = SQLiteTarget(config=sqlite_target_test_config)
+    try:
+        target_sync_test(target2, input=StringIO(tap_output_c), finalize=True)
+    except Exception:
+        cursor.execute(f"SELECT col_a FROM {test_tbl} ;")  # noqa: S608
+        records = [res[0] for res in cursor.fetchall()]
+        assert records == ["456"]
+    else:
+        assert False, "Should have raised an exception"

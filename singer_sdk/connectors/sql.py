@@ -742,6 +742,47 @@ class SQLConnector:
         if not schema_exists:
             self.create_schema(schema_name)
 
+    @staticmethod
+    def get_alter_table_name_ddl(
+        existing_table_name: str,
+        new_table_name: str,
+    ) -> tuple[TextClause, dict]:
+        """Get the alter table name SQL statement.
+
+        Override this if your database uses a different syntax for alter table names.
+
+        Args:
+            existing_table_name: Fully qualified table name of column to alter.
+            new_table_name: The new fully qualified table name.
+
+        Returns:
+            A tuple of the SQL statement and a dictionary of bind parameters.
+        """
+        return (
+            text(f"ALTER TABLE {existing_table_name} RENAME TO {new_table_name}"),
+            {},
+        )
+
+    def alter_table_name(self, existing_table_name: str, new_full_table_name: str) -> None:
+        """Alter target table name.
+
+        Args:
+            full_table_name: Fully qualified table name of column to alter.
+
+        Raises:
+            NotImplementedError: if truncating tables is not supported.
+        """
+        if not self.allow_overwrite:
+            msg = "Altering table names for overwrite load method is not supported."
+            raise NotImplementedError(msg)
+
+        alter_table_name_ddl, kwargs = self.get_alter_table_name_ddl(
+            existing_table_name,
+            new_full_table_name,
+        )
+        with self._connect() as conn, conn.begin():
+            conn.execute(alter_table_name_ddl, **kwargs)
+
     def prepare_table(
         self,
         full_table_name: str,
@@ -749,6 +790,7 @@ class SQLConnector:
         primary_keys: list[str],
         partition_keys: list[str] | None = None,
         as_temp_table: bool = False,  # noqa: FBT002, FBT001
+        sync_started_at: int | None = None,
     ) -> None:
         """Adapt target table to provided schema if possible.
 
@@ -769,7 +811,8 @@ class SQLConnector:
             )
             return
         if self.config["load_method"] == TargetLoadMethods.OVERWRITE:
-            self.get_table(full_table_name=full_table_name).drop(self._engine)
+            self.alter_table_name(full_table_name, f"{full_table_name}_{sync_started_at}")
+
             self.create_empty_table(
                 full_table_name=full_table_name,
                 schema=schema,
@@ -785,6 +828,10 @@ class SQLConnector:
                 property_name,
                 self.to_sql_type(property_def),
             )
+
+    def drop_backup_table(self, full_table_name: str) -> None:
+        table = self.get_table(full_table_name=full_table_name)
+        table.drop(self._engine)
 
     def prepare_column(
         self,
