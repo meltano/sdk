@@ -682,6 +682,10 @@ class PluginMapper:
             catalog: TODO
         """
         for catalog_entry in catalog.streams:
+            mask = catalog_entry.metadata.resolve_selection()
+            if not mask[()]:
+                # Skip unselected streams
+                continue
             self.register_raw_stream_schema(
                 catalog_entry.stream or catalog_entry.tap_stream_id,
                 get_selected_schema(
