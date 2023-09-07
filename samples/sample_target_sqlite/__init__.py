@@ -27,15 +27,6 @@ class SQLiteConnector(SQLConnector):
         """Generates a SQLAlchemy URL for SQLite."""
         return f"sqlite:///{config[DB_PATH_CONFIG]}"
 
-    @staticmethod
-    def get_truncate_table_ddl(
-        table_name: str,
-    ) -> tuple[text, dict]:
-        return (
-            text(f"DELETE FROM {table_name}"),  # noqa: S608
-            {},
-        )
-
 
 class SQLiteSink(SQLSink):
     """The Sink class for SQLite.

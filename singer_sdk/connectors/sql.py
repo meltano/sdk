@@ -744,44 +744,6 @@ class SQLConnector:
         if not schema_exists:
             self.create_schema(schema_name)
 
-    @staticmethod
-    def get_truncate_table_ddl(
-        table_name: str,
-    ) -> tuple[TextClause, dict]:
-        """Get the truncate table SQL statement.
-
-        Override this if your database uses a different syntax for truncating tables.
-
-        Args:
-            table_name: Fully qualified table name of column to alter.
-
-        Returns:
-            A tuple of the SQL statement and a dictionary of bind parameters.
-        """
-        return (
-            text(f"TRUNCATE TABLE {table_name}"),
-            {},
-        )
-
-    def truncate_table(self, full_table_name: str) -> None:
-        """Truncate target table.
-
-        Args:
-            full_table_name: Fully qualified table name of column to alter.
-
-        Raises:
-            NotImplementedError: if truncating tables is not supported.
-        """
-        if not self.allow_overwrite:
-            msg = "Truncating tables is not supported."
-            raise NotImplementedError(msg)
-
-        truncate_table_ddl, kwargs = self.get_truncate_table_ddl(
-            table_name=full_table_name,
-        )
-        with self._connect() as conn, conn.begin():
-            conn.execute(truncate_table_ddl, **kwargs)
-
     def prepare_table(
         self,
         full_table_name: str,
@@ -809,7 +771,15 @@ class SQLConnector:
             )
             return
         if self.config["load_method"] == TargetLoadMethods.OVERWRITE:
-            self.truncate_table(full_table_name=full_table_name)
+            self.get_table(full_table_name=full_table_name).drop(self._engine)
+            self.create_empty_table(
+                full_table_name=full_table_name,
+                schema=schema,
+                primary_keys=primary_keys,
+                partition_keys=partition_keys,
+                as_temp_table=as_temp_table,
+            )
+            return
 
         for property_name, property_def in schema["properties"].items():
             self.prepare_column(
