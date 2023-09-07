@@ -572,4 +572,5 @@ def test_overwrite_load_method(
         records = [res[0] for res in cursor.fetchall()]
         assert records == ["456"]
     else:
-        assert False, "Should have raised an exception"
+        msg = "Should have raised an exception"
+        raise AssertionError(msg)

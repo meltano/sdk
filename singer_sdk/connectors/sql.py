@@ -763,7 +763,9 @@ class SQLConnector:
             {},
         )
 
-    def alter_table_name(self, existing_table_name: str, new_full_table_name: str) -> None:
+    def alter_table_name(
+        self, existing_table_name: str, new_full_table_name: str
+    ) -> None:
         """Alter target table name.
 
         Args:
@@ -811,7 +813,9 @@ class SQLConnector:
             )
             return
         if self.config["load_method"] == TargetLoadMethods.OVERWRITE:
-            self.alter_table_name(full_table_name, f"{full_table_name}_{sync_started_at}")
+            self.alter_table_name(
+                full_table_name, f"{full_table_name}_{sync_started_at}"
+            )
 
             self.create_empty_table(
                 full_table_name=full_table_name,

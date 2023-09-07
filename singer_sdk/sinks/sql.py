@@ -15,8 +15,8 @@ from sqlalchemy.sql.expression import bindparam
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.exceptions import ConformedNameClashException
 from singer_sdk.helpers._conformers import replace_leading_digit
-from singer_sdk.sinks.batch import BatchSink
 from singer_sdk.helpers.capabilities import TargetLoadMethods
+from singer_sdk.sinks.batch import BatchSink
 
 if t.TYPE_CHECKING:
     from sqlalchemy.sql import Executable
@@ -243,7 +243,7 @@ class SQLSink(BatchSink):
             schema=self.conform_schema(self.schema),
             primary_keys=self.key_properties,
             as_temp_table=False,
-            sync_started_at=self.sync_started_at
+            sync_started_at=self.sync_started_at,
         )
 
     @property
@@ -422,14 +422,16 @@ class SQLSink(BatchSink):
 
     def clean_up(self) -> None:
         """Clean up any resources held by the sink."""
-        if (
-            self.config["load_method"] == TargetLoadMethods.OVERWRITE
-            and self.connector.table_exists(full_table_name=f"{self.full_table_name}_{self.sync_started_at}")
+        if self.config[
+            "load_method"
+        ] == TargetLoadMethods.OVERWRITE and self.connector.table_exists(
+            full_table_name=f"{self.full_table_name}_{self.sync_started_at}"
         ):
             # if success then drop the backup table, if fail revert to old table
             backup_table = f"{self.full_table_name}_{self.sync_started_at}"
             self.logger.info(f"Dropping backup table {backup_table}")
             self.connector.drop_backup_table(backup_table)
         super().clean_up()
+
 
 __all__ = ["SQLSink", "SQLConnector"]
