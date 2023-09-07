@@ -2,6 +2,7 @@
     "cookiecutter": {
       "source_name": "AutomaticTestTap",
       "admin_name": "Automatic Tester",
+      "admin_email": "auto.tester@example.com",
       "tap_id": "tap-rest-bearer_token",
       "library_name": "tap_rest_bearer_token",
       "variant": "None (Skip)",
