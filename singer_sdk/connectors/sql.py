@@ -14,7 +14,6 @@ from functools import lru_cache
 import simplejson
 import sqlalchemy
 from sqlalchemy.engine import Engine
-from sqlalchemy.sql import text
 
 from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
@@ -23,7 +22,6 @@ from singer_sdk.helpers.capabilities import TargetLoadMethods
 
 if t.TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
-    from sqlalchemy.sql.elements import TextClause
 
 
 class SQLConnector:

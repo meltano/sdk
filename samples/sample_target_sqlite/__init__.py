@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import typing as t
 
-from sqlalchemy.sql import text
-
 from singer_sdk import SQLConnector, SQLSink, SQLTarget
 from singer_sdk import typing as th
 
