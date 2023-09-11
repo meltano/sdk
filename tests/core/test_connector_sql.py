@@ -1,14 +1,18 @@
 from __future__ import annotations
 
+import typing as t
 from decimal import Decimal
 from unittest import mock
 
 import pytest
 import sqlalchemy
-from sqlalchemy.dialects import sqlite
+from sqlalchemy.dialects import registry, sqlite
 
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.exceptions import ConfigValidationError
+
+if t.TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
 
 
 def stringify(in_dict):
@@ -283,3 +287,18 @@ class TestConnectorSQL:
                 (1, {"x": Decimal("1.0")}),
                 (2, {"x": Decimal("2.0"), "y": [1, 2, 3]}),
             ]
+
+
+def test_adapter_without_json_serde():
+    registry.register(
+        "myrdbms",
+        "samples.sample_custom_sql_adapter.connector",
+        "CustomSQLDialect",
+    )
+
+    class CustomConnector(SQLConnector):
+        def create_engine(self) -> Engine:
+            return super().create_engine()
+
+    connector = CustomConnector(config={"sqlalchemy_url": "myrdbms:///"})
+    connector.create_engine()
