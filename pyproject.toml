@@ -202,8 +202,8 @@ module = [
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry.scripts]
-pytest11 = { reference = "singer_sdk:testing.pytest_plugin", extras = ["testing"], type = "console" }
+[tool.poetry.plugins."pytest11"]
+singer_testing = "singer_sdk.testing.pytest_plugin"
 
 [tool.ruff]
 line-length = 88
