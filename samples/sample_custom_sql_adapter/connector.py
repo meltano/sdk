@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+import typing as t
+
 from sqlalchemy.engine.default import DefaultDialect
+
+if t.TYPE_CHECKING:
+    from types import ModuleType
 
 
 class CustomSQLDialect(DefaultDialect):
@@ -17,3 +22,11 @@ class CustomSQLDialect(DefaultDialect):
         import sqlite3
 
         return sqlite3
+
+    @classmethod
+    def dbapi(cls) -> ModuleType:  # type: ignore[override]
+        """Return the DBAPI module.
+
+        NOTE: This is a legacy method that will stop being used by SQLAlchemy at some point.
+        """  # noqa: E501
+        return cls.import_dbapi()
