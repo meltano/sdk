@@ -15,13 +15,6 @@ The Meltano SDK test framework consists of 4 main components:
 ## Example Usage
 
 If you created your Tap/Target using the provided cookiecutter templates, you will find the following snippets in `tests/test_core.py`.
-You will also find a `conftest.py` file containing configuration of the SDK as a `pytest` plugin.
-This is required for tests to collect correctly:
-
-```python
-# register the singer_sdk pytest plugin
-pytest_plugins = ("singer_sdk.testing.pytest_plugin",)
-```
 
 ### Testing Taps
 
