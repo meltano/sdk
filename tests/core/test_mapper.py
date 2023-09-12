@@ -8,6 +8,7 @@ import json
 import logging
 import typing as t
 from contextlib import redirect_stdout
+from decimal import Decimal
 
 import pytest
 from freezegun import freeze_time
@@ -19,7 +20,9 @@ from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
+    ArrayType,
     IntegerType,
+    NumberType,
     ObjectType,
     PropertiesList,
     Property,
@@ -415,6 +418,7 @@ class MappedStream(Stream):
             ObjectType(
                 Property("id", IntegerType()),
                 Property("sub", ObjectType(Property("num", IntegerType()))),
+                Property("some_numbers", ArrayType(NumberType())),
             ),
         ),
     ).to_dict()
@@ -423,17 +427,29 @@ class MappedStream(Stream):
         yield {
             "email": "alice@example.com",
             "count": 21,
-            "user": {"id": 1, "sub": {"num": 1}},
+            "user": {
+                "id": 1,
+                "sub": {"num": 1},
+                "some_numbers": [Decimal("3.14"), Decimal("2.718")],
+            },
         }
         yield {
             "email": "bob@example.com",
             "count": 13,
-            "user": {"id": 2, "sub": {"num": 2}},
+            "user": {
+                "id": 2,
+                "sub": {"num": 2},
+                "some_numbers": [Decimal("10.32"), Decimal("1.618")],
+            },
         }
         yield {
             "email": "charlie@example.com",
             "count": 19,
-            "user": {"id": 3, "sub": {"num": 3}},
+            "user": {
+                "id": 3,
+                "sub": {"num": 3},
+                "some_numbers": [Decimal("1.414"), Decimal("1.732")],
+            },
         }
 
 
@@ -544,6 +560,13 @@ def _clear_schema_cache() -> None:
             0,
             "aliased_stream.jsonl",
             id="aliased_stream",
+        ),
+        pytest.param(
+            {},
+            True,
+            0,
+            "flatten_depth_0.jsonl",
+            id="flatten_depth_0",
         ),
         pytest.param(
             {},

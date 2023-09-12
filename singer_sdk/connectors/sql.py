@@ -321,12 +321,21 @@ class SQLConnector:
         Returns:
             A new SQLAlchemy Engine.
         """
-        return sqlalchemy.create_engine(
-            self.sqlalchemy_url,
-            echo=False,
-            json_serializer=self.serialize_json,
-            json_deserializer=self.deserialize_json,
-        )
+        try:
+            return sqlalchemy.create_engine(
+                self.sqlalchemy_url,
+                echo=False,
+                json_serializer=self.serialize_json,
+                json_deserializer=self.deserialize_json,
+            )
+        except TypeError:
+            self.logger.exception(
+                "Retrying engine creation with fewer arguments due to TypeError.",
+            )
+            return sqlalchemy.create_engine(
+                self.sqlalchemy_url,
+                echo=False,
+            )
 
     def quote(self, name: str) -> str:
         """Quote a name if it needs quoting, using '.' as a name-part delimiter.
