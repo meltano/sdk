@@ -77,6 +77,7 @@ jobs:
       uses: peter-evans/create-pull-request@v5
       id: create-pull-request
       with:
+        token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}
         commit-message: "chore: Bump package version"
         title: "chore: Release v${{ steps.cz-bump.outputs.version }}"
         body: |
