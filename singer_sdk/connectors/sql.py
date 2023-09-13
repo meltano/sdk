@@ -325,6 +325,7 @@ class SQLConnector:
             return sqlalchemy.create_engine(
                 self.sqlalchemy_url,
                 echo=False,
+                future=True,
                 json_serializer=self.serialize_json,
                 json_deserializer=self.deserialize_json,
             )
@@ -335,6 +336,7 @@ class SQLConnector:
             return sqlalchemy.create_engine(
                 self.sqlalchemy_url,
                 echo=False,
+                future=True,
             )
 
     def quote(self, name: str) -> str:
