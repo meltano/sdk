@@ -66,8 +66,7 @@ jobs:
         body_path: _changelog_fragment.md
         tag_name: v${{ steps.cz-bump.outputs.version }}
         prerelease: ${{ github.event.inputs.prerelease != 'none' }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}
 
     - name: Set repo file permissions
       run: |
@@ -77,6 +76,7 @@ jobs:
       uses: peter-evans/create-pull-request@v5
       id: create-pull-request
       with:
+        token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}
         commit-message: "chore: Bump package version"
         title: "chore: Release v${{ steps.cz-bump.outputs.version }}"
         body: |
