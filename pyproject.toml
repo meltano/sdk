@@ -101,7 +101,7 @@ testing = [
 commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
 cookiecutter = ">=2.1.1,<2.3.1"
 coverage = {extras = ["toml"], version = "^7.2"}
-duckdb = "^0.8.1"
+duckdb = ">=0.8.2.dev4376"
 duckdb-engine = "^0.9.2"
 freezegun = "^1.2.2"
 mypy = "^1.0"
