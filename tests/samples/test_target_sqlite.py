@@ -508,3 +508,48 @@ def test_hostile_to_sqlite(
         "hname_starts_with_number",
         "name_with_emoji_",
     }
+
+
+def test_overwrite_load_method(
+    sqlite_target_test_config: dict,
+):
+    sqlite_target_test_config["load_method"] = "overwrite"
+    target = SQLiteTarget(config=sqlite_target_test_config)
+    test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
+    schema_msg = {
+        "type": "SCHEMA",
+        "stream": test_tbl,
+        "schema": {
+            "type": "object",
+            "properties": {"col_a": th.StringType().to_dict()},
+        },
+    }
+
+    tap_output_a = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg,
+            {"type": "RECORD", "stream": test_tbl, "record": {"col_a": "123"}},
+        ]
+    )
+    # Assert
+    db = sqlite3.connect(sqlite_target_test_config["path_to_db"])
+    cursor = db.cursor()
+
+    target_sync_test(target, input=StringIO(tap_output_a), finalize=True)
+    cursor.execute(f"SELECT col_a FROM {test_tbl} ;")  # noqa: S608
+    records = [res[0] for res in cursor.fetchall()]
+    assert records == ["123"]
+
+    tap_output_b = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg,
+            {"type": "RECORD", "stream": test_tbl, "record": {"col_a": "456"}},
+        ]
+    )
+    target = SQLiteTarget(config=sqlite_target_test_config)
+    target_sync_test(target, input=StringIO(tap_output_b), finalize=True)
+    cursor.execute(f"SELECT col_a FROM {test_tbl} ;")  # noqa: S608
+    records = [res[0] for res in cursor.fetchall()]
+    assert records == ["456"]
