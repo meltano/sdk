@@ -289,6 +289,77 @@ class TestConnectorSQL:
             ]
 
 
+class DuckDBConnector(SQLConnector):
+    allow_column_alter = True
+
+    @staticmethod
+    def get_column_alter_ddl(
+        table_name: str,
+        column_name: str,
+        column_type: sqlalchemy.types.TypeEngine,
+    ) -> sqlalchemy.DDL:
+        return sqlalchemy.DDL(
+            "ALTER TABLE %(table_name)s ALTER COLUMN %(column_name)s TYPE %(column_type)s",  # noqa: E501
+            {
+                "table_name": table_name,
+                "column_name": column_name,
+                "column_type": column_type,
+            },
+        )
+
+
+class TestDuckDBConnector:
+    @pytest.fixture
+    def connector(self):
+        return DuckDBConnector(config={"sqlalchemy_url": "duckdb:///"})
+
+    def test_create_schema(self, connector: DuckDBConnector):
+        engine = connector._engine
+        connector.create_schema("test_schema")
+        inspector = sqlalchemy.inspect(engine)
+        assert "test_schema" in inspector.get_schema_names()
+
+    def test_column_rename(self, connector: DuckDBConnector):
+        engine = connector._engine
+        meta = sqlalchemy.MetaData()
+        _ = sqlalchemy.Table(
+            "test_table",
+            meta,
+            sqlalchemy.Column("id", sqlalchemy.Integer),
+            sqlalchemy.Column("old_name", sqlalchemy.String),
+        )
+        meta.create_all(engine)
+
+        connector.rename_column("test_table", "old_name", "new_name")
+
+        with engine.connect() as conn:
+            result = conn.execute(
+                sqlalchemy.text("SELECT * FROM test_table"),
+            )
+            assert result.keys() == ["id", "new_name"]
+
+    def test_adapt_column_type(self, connector: DuckDBConnector):
+        connector.allow_column_alter = True
+        engine = connector._engine
+        meta = sqlalchemy.MetaData()
+        _ = sqlalchemy.Table(
+            "test_table",
+            meta,
+            sqlalchemy.Column("id", sqlalchemy.Integer),
+            sqlalchemy.Column("name", sqlalchemy.Integer),
+        )
+        meta.create_all(engine)
+
+        connector._adapt_column_type("test_table", "name", sqlalchemy.types.String())
+
+        with engine.connect() as conn:
+            result = conn.execute(
+                sqlalchemy.text("SELECT * FROM test_table"),
+            )
+            assert result.keys() == ["id", "name"]
+            assert result.cursor.description[1][1] == "STRING"
+
+
 def test_adapter_without_json_serde():
     registry.register(
         "myrdbms",
