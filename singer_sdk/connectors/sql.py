@@ -659,7 +659,7 @@ class SQLConnector:
         Args:
             schema_name: The target schema to create.
         """
-        with self._connect() as conn:
+        with self._connect() as conn, conn.begin():
             conn.execute(sqlalchemy.schema.CreateSchema(schema_name))
 
     def create_empty_table(
@@ -830,7 +830,7 @@ class SQLConnector:
             column_name=old_name,
             new_column_name=new_name,
         )
-        with self._connect() as conn:
+        with self._connect() as conn, conn.begin():
             conn.execute(column_rename_ddl)
 
     def merge_sql_types(
@@ -1139,7 +1139,7 @@ class SQLConnector:
             column_name=column_name,
             column_type=compatible_sql_type,
         )
-        with self._connect() as conn:
+        with self._connect() as conn, conn.begin():
             conn.execute(alter_column_ddl)
 
     def serialize_json(self, obj: object) -> str:
