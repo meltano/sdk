@@ -34,12 +34,7 @@ def _sqlite_sample_db(sqlite_connector):
 
 
 @pytest.fixture
-def sqlite_sample_tap(
-    _sqlite_sample_db,
-    sqlite_sample_db_config,
-    sqlite_sample_db_state,
-) -> SQLiteTap:
-    _ = _sqlite_sample_db
+def sqlite_sample_db_catalog(sqlite_sample_db_config) -> Catalog:
     catalog_obj = Catalog.from_dict(
         _get_tap_catalog(SQLiteTap, config=sqlite_sample_db_config, select_all=True),
     )
@@ -55,9 +50,20 @@ def sqlite_sample_tap(
     t2.key_properties = ["c1"]
     t2.replication_key = "c1"
     t2.replication_method = "INCREMENTAL"
+    return catalog_obj
+
+
+@pytest.fixture
+def sqlite_sample_tap(
+    _sqlite_sample_db,
+    sqlite_sample_db_config,
+    sqlite_sample_db_state,
+    sqlite_sample_db_catalog,
+) -> SQLiteTap:
+    _ = _sqlite_sample_db
     return SQLiteTap(
         config=sqlite_sample_db_config,
-        catalog=catalog_obj.to_dict(),
+        catalog=sqlite_sample_db_catalog.to_dict(),
         state=sqlite_sample_db_state,
     )
 

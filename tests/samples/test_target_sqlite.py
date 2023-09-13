@@ -19,13 +19,13 @@ from samples.sample_tap_sqlite import SQLiteTap
 from samples.sample_target_sqlite import SQLiteSink, SQLiteTarget
 from singer_sdk import typing as th
 from singer_sdk.testing import (
-    _get_tap_catalog,
     tap_sync_test,
     tap_to_target_sync_test,
     target_sync_test,
 )
 
 if t.TYPE_CHECKING:
+    from singer_sdk._singerlib import Catalog
     from singer_sdk.tap_base import SQLTap
     from singer_sdk.target_base import SQLTarget
 
@@ -67,6 +67,7 @@ def sqlite_sample_target_batch(sqlite_target_test_config):
 def test_sync_sqlite_to_sqlite(
     sqlite_sample_tap: SQLTap,
     sqlite_sample_target: SQLTarget,
+    sqlite_sample_db_catalog: Catalog,
 ):
     """End-to-end-to-end test for SQLite tap and target.
 
@@ -84,8 +85,10 @@ def test_sync_sqlite_to_sqlite(
     )
     orig_stdout.seek(0)
     tapped_config = dict(sqlite_sample_target.config)
-    catalog = _get_tap_catalog(SQLiteTap, config=tapped_config, select_all=True)
-    tapped_target = SQLiteTap(config=tapped_config, catalog=catalog)
+    tapped_target = SQLiteTap(
+        config=tapped_config,
+        catalog=sqlite_sample_db_catalog.to_dict(),
+    )
     new_stdout, _ = tap_sync_test(tapped_target)
 
     orig_stdout.seek(0)
