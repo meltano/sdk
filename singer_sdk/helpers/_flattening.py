@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import collections
 import itertools
-import json
 import re
 import typing as t
 from copy import deepcopy
 
 import inflection
+import simplejson as json
 
 DEFAULT_FLATTENING_SEPARATOR = "__"
 
@@ -155,17 +155,7 @@ def flatten_schema(
           "type": "string"
         },
         "foo__bar": {
-          "type": "object",
-          "properties": {
-            "baz": {
-              "type": "object",
-              "properties": {
-                "qux": {
-                  "type": "string"
-                }
-              }
-            }
-          }
+          "type": "string"
         }
       }
     }
@@ -178,12 +168,7 @@ def flatten_schema(
           "type": "string"
         },
         "foo__bar__baz": {
-          "type": "object",
-          "properties": {
-            "qux": {
-              "type": "string"
-            }
-          }
+          "type": "string"
         }
       }
     }
@@ -210,7 +195,7 @@ def flatten_schema(
     return new_schema
 
 
-def _flatten_schema(  # noqa: C901
+def _flatten_schema(  # noqa: C901, PLR0912
     schema_node: dict,
     parent_keys: list[str] | None = None,
     separator: str = "__",
@@ -249,18 +234,20 @@ def _flatten_schema(  # noqa: C901
                         max_level=max_level,
                     ).items(),
                 )
+            elif "array" in v["type"] or "object" in v["type"] and max_level > 0:
+                items.append((new_key, {"type": "string"}))
             else:
                 items.append((new_key, v))
         elif len(v.values()) > 0:
-            if list(v.values())[0][0]["type"] == "string":
-                list(v.values())[0][0]["type"] = ["null", "string"]
-                items.append((new_key, list(v.values())[0][0]))
-            elif list(v.values())[0][0]["type"] == "array":
-                list(v.values())[0][0]["type"] = ["null", "array"]
-                items.append((new_key, list(v.values())[0][0]))
-            elif list(v.values())[0][0]["type"] == "object":
-                list(v.values())[0][0]["type"] = ["null", "object"]
-                items.append((new_key, list(v.values())[0][0]))
+            if next(iter(v.values()))[0]["type"] == "string":
+                next(iter(v.values()))[0]["type"] = ["null", "string"]
+                items.append((new_key, next(iter(v.values()))[0]))
+            elif next(iter(v.values()))[0]["type"] == "array":
+                next(iter(v.values()))[0]["type"] = ["null", "array"]
+                items.append((new_key, next(iter(v.values()))[0]))
+            elif next(iter(v.values()))[0]["type"] == "object":
+                next(iter(v.values()))[0]["type"] = ["null", "object"]
+                items.append((new_key, next(iter(v.values()))[0]))
 
     # Sort and check for duplicates
     def _key_func(item):
@@ -347,7 +334,7 @@ def _flatten_record(
             items.append(
                 (
                     new_key,
-                    json.dumps(v)
+                    json.dumps(v, use_decimal=True)
                     if _should_jsondump_value(k, v, flattened_schema)
                     else v,
                 ),

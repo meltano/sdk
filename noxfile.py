@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import glob
 import os
 import shutil
 import sys
@@ -23,8 +22,10 @@ except ImportError:
 
 RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
-extend-ignore = ["TD002", "TD003"]
+extend-ignore = ["TD002", "TD003", "FIX002"]
 """
+
+COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))
 
 package = "singer_sdk"
 python_versions = ["3.11", "3.10", "3.9", "3.8", "3.7"]
@@ -38,6 +39,8 @@ nox.options.sessions = (
 )
 test_dependencies = [
     "coverage[toml]",
+    "duckdb",
+    "duckdb-engine",
     "pytest",
     "pytest-snapshot",
     "pytest-durations",
@@ -85,6 +88,14 @@ def tests(session: Session) -> None:
     session.install(".[s3]")
     session.install(*test_dependencies)
 
+    sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
+    if sqlalchemy_version:
+        # Bypass nox-poetry use of --constraint so we can install a version of
+        # SQLAlchemy that doesn't match what's in poetry.lock.
+        session.poetry.session.install(  # type: ignore[attr-defined]
+            f"sqlalchemy=={sqlalchemy_version}",
+        )
+
     try:
         session.run(
             "coverage",
@@ -95,9 +106,6 @@ def tests(session: Session) -> None:
             "-v",
             "--durations=10",
             *session.posargs,
-            env={
-                "SQLALCHEMY_WARN_20": "1",
-            },
         )
     finally:
         if session.interactive:
@@ -180,7 +188,7 @@ def docs_serve(session: Session) -> None:
     session.run("sphinx-autobuild", *args)
 
 
-@nox.parametrize("replay_file_path", glob.glob("./e2e-tests/cookiecutters/*.json"))
+@nox.parametrize("replay_file_path", COOKIECUTTER_REPLAY_FILES)
 @session(python=main_python_version)
 def test_cookiecutter(session: Session, replay_file_path) -> None:
     """Uses the tap template to build an empty cookiecutter.
@@ -190,21 +198,22 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
     cc_build_path = tempfile.gettempdir()
     folder_base_path = "./cookiecutter"
 
-    target_folder = (
-        "tap-template"
-        if Path(replay_file_path).name.startswith("tap")
-        else "target-template"
-    )
-    tap_template = Path(folder_base_path + "/" + target_folder).resolve()
+    if Path(replay_file_path).name.startswith("tap"):
+        folder = "tap-template"
+    elif Path(replay_file_path).name.startswith("target"):
+        folder = "target-template"
+    else:
+        folder = "mapper-template"
+    template = Path(folder_base_path + "/" + folder).resolve()
     replay_file = Path(replay_file_path).resolve()
 
-    if not Path(tap_template).exists():
+    if not Path(template).exists():
         return
 
     if not Path(replay_file).is_file():
         return
 
-    sdk_dir = Path(Path(tap_template).parent).parent
+    sdk_dir = Path(Path(template).parent).parent
     cc_output_dir = Path(replay_file_path).name.replace(".json", "")
     cc_test_output = cc_build_path + "/" + cc_output_dir
 
@@ -218,7 +227,7 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
         "cookiecutter",
         "--replay-file",
         str(replay_file),
-        str(tap_template),
+        str(template),
         "-o",
         cc_build_path,
     )

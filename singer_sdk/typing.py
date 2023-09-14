@@ -58,7 +58,10 @@ import json
 import typing as t
 
 import sqlalchemy
-from jsonschema import ValidationError, Validator, validators
+from jsonschema import ValidationError, validators
+
+if t.TYPE_CHECKING:
+    from jsonschema.protocols import Validator
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -965,9 +968,8 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
             for schema_type in jsonschema_type["type"]:
                 if schema_type in type_check:
                     return True
-        else:
-            if jsonschema_type.get("type") in type_check:  # noqa: PLR5501
-                return True
+        elif jsonschema_type.get("type") in type_check:
+            return True
 
     if any(
         _jsonschema_type_check(t, type_check) for t in jsonschema_type.get("anyOf", ())

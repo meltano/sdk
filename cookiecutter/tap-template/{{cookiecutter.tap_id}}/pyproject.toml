@@ -7,7 +7,7 @@ name = "{{cookiecutter.tap_id}}"
 version = "0.0.1"
 description = "`{{cookiecutter.tap_id}}` is a Singer tap for {{cookiecutter.source_name}}, built with the Meltano Singer SDK."
 readme = "README.md"
-authors = ["{{ cookiecutter.admin_name }}"]
+authors = ["{{ cookiecutter.admin_name }} <{{ cookiecutter.admin_email }}>"]
 keywords = [
     "ELT",
     "{{cookiecutter.source_name}}",
@@ -21,7 +21,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "<3.12,>=3.7.1"
-singer-sdk = { version="^0.30.0" }
+singer-sdk = { version="^0.32.0b1" }
 fs-s3fs = { version = "^1.1.1", optional = true }
 {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
 requests = "^2.31.0"
@@ -31,8 +31,8 @@ cached-property = "^1" # Remove after Python 3.7 support is dropped
 {%- endif %}
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.2.1"
-singer-sdk = { version="^0.30.0", extras = ["testing"] }
+pytest = "^7.4.0"
+singer-sdk = { version="^0.32.0b1", extras = ["testing"] }
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]

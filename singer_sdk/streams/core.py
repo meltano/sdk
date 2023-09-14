@@ -19,6 +19,7 @@ from singer_sdk.batch import JSONLinesBatcher
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
+    InvalidReplicationKeyException,
     InvalidStreamSortException,
     MaxRecordsLimitException,
 )
@@ -211,13 +212,23 @@ class Stream(metaclass=abc.ABCMeta):
 
         Returns:
             True if the stream uses a timestamp-based replication key.
+
+        Raises:
+            InvalidReplicationKeyException: If the schema does not contain the
+                replication key.
         """
         if not self.replication_key:
             return False
         type_dict = self.schema.get("properties", {}).get(self.replication_key)
+        if type_dict is None:
+            msg = f"Field '{self.replication_key}' is not in schema for stream '{self.name}'"  # noqa: E501
+            raise InvalidReplicationKeyException(msg)
         return is_datetime_type(type_dict)
 
-    def get_starting_replication_key_value(self, context: dict | None) -> t.Any | None:
+    def get_starting_replication_key_value(
+        self,
+        context: dict | None,
+    ) -> t.Any | None:  # noqa: ANN401
         """Get starting replication key.
 
         Will return the value of the stream's replication key when `--state` is passed.
@@ -385,7 +396,7 @@ class Stream(metaclass=abc.ABCMeta):
     def get_replication_key_signpost(
         self,
         context: dict | None,  # noqa: ARG002
-    ) -> datetime.datetime | t.Any | None:
+    ) -> datetime.datetime | t.Any | None:  # noqa: ANN401
         """Get the replication signpost.
 
         For timestamp-based replication keys, this defaults to `utc_now()`. For
@@ -1255,7 +1266,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         Raises:
             NotImplementedError: If the stream has children but this method is not
-                overriden.
+                overridden.
         """
         if context is None:
             for child_stream in self.child_streams:

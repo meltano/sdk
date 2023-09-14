@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import decimal
+import json
 import logging
 import typing as t
 import warnings
@@ -9,12 +11,14 @@ from contextlib import contextmanager
 from datetime import datetime
 from functools import lru_cache
 
+import simplejson
 import sqlalchemy
 from sqlalchemy.engine import Engine
 
 from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.helpers.capabilities import TargetLoadMethods
 
 if t.TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
@@ -37,6 +41,7 @@ class SQLConnector:
     allow_column_rename: bool = True  # Whether RENAME COLUMN is supported.
     allow_column_alter: bool = False  # Whether altering column types is supported.
     allow_merge_upsert: bool = False  # Whether MERGE UPSERT is supported.
+    allow_overwrite: bool = False  # Whether overwrite load method is supported.
     allow_temp_tables: bool = True  # Whether temp tables are supported.
     _cached_engine: Engine | None = None
 
@@ -181,7 +186,7 @@ class SQLConnector:
     @staticmethod
     def to_jsonschema_type(
         sql_type: (
-            str
+            str  # noqa: ANN401
             | sqlalchemy.types.TypeEngine
             | type[sqlalchemy.types.TypeEngine]
             | t.Any
@@ -318,7 +323,23 @@ class SQLConnector:
         Returns:
             A new SQLAlchemy Engine.
         """
-        return sqlalchemy.create_engine(self.sqlalchemy_url, echo=False)
+        try:
+            return sqlalchemy.create_engine(
+                self.sqlalchemy_url,
+                echo=False,
+                future=True,
+                json_serializer=self.serialize_json,
+                json_deserializer=self.deserialize_json,
+            )
+        except TypeError:
+            self.logger.exception(
+                "Retrying engine creation with fewer arguments due to TypeError.",
+            )
+            return sqlalchemy.create_engine(
+                self.sqlalchemy_url,
+                echo=False,
+                future=True,
+            )
 
     def quote(self, name: str) -> str:
         """Quote a name if it needs quoting, using '.' as a name-part delimiter.
@@ -650,7 +671,7 @@ class SQLConnector:
         Args:
             schema_name: The target schema to create.
         """
-        with self._connect() as conn:
+        with self._connect() as conn, conn.begin():
             conn.execute(sqlalchemy.schema.CreateSchema(schema_name))
 
     def create_empty_table(
@@ -766,6 +787,16 @@ class SQLConnector:
                 as_temp_table=as_temp_table,
             )
             return
+        if self.config["load_method"] == TargetLoadMethods.OVERWRITE:
+            self.get_table(full_table_name=full_table_name).drop(self._engine)
+            self.create_empty_table(
+                full_table_name=full_table_name,
+                schema=schema,
+                primary_keys=primary_keys,
+                partition_keys=partition_keys,
+                as_temp_table=as_temp_table,
+            )
+            return
 
         for property_name, property_def in schema["properties"].items():
             self.prepare_column(
@@ -821,7 +852,7 @@ class SQLConnector:
             column_name=old_name,
             new_column_name=new_name,
         )
-        with self._connect() as conn:
+        with self._connect() as conn, conn.begin():
             conn.execute(column_rename_ddl)
 
     def merge_sql_types(
@@ -1130,5 +1161,37 @@ class SQLConnector:
             column_name=column_name,
             column_type=compatible_sql_type,
         )
-        with self._connect() as conn:
+        with self._connect() as conn, conn.begin():
             conn.execute(alter_column_ddl)
+
+    def serialize_json(self, obj: object) -> str:
+        """Serialize an object to a JSON string.
+
+        Target connectors may override this method to provide custom serialization logic
+        for JSON types.
+
+        Args:
+            obj: The object to serialize.
+
+        Returns:
+            The JSON string.
+
+        .. versionadded:: 0.31.0
+        """
+        return simplejson.dumps(obj, use_decimal=True)
+
+    def deserialize_json(self, json_str: str) -> object:
+        """Deserialize a JSON string to an object.
+
+        Tap connectors may override this method to provide custom deserialization
+        logic for JSON types.
+
+        Args:
+            json_str: The JSON string to deserialize.
+
+        Returns:
+            The deserialized object.
+
+        .. versionadded:: 0.31.0
+        """
+        return json.loads(json_str, parse_float=decimal.Decimal)

@@ -99,6 +99,47 @@ TARGET_SCHEMA_CONFIG = PropertiesList(
         description="The default target database schema name to use for all streams.",
     ),
 ).to_dict()
+ADD_RECORD_METADATA_CONFIG = PropertiesList(
+    Property(
+        "add_record_metadata",
+        BooleanType(),
+        description="Add metadata to records.",
+    ),
+).to_dict()
+
+
+class TargetLoadMethods(str, Enum):
+    """Target-specific capabilities."""
+
+    # always write all input records whether that records already exists or not
+    APPEND_ONLY = "append-only"
+
+    # update existing records and insert new records
+    UPSERT = "upsert"
+
+    # delete all existing records and insert all input records
+    OVERWRITE = "overwrite"
+
+
+TARGET_LOAD_METHOD_CONFIG = PropertiesList(
+    Property(
+        "load_method",
+        StringType(),
+        description=(
+            "The method to use when loading data into the destination. "
+            "`append-only` will always write all input records whether that records "
+            "already exists or not. `upsert` will update existing records and insert "
+            "new records. `overwrite` will delete all existing records and insert all "
+            "input records."
+        ),
+        allowed_values=[
+            TargetLoadMethods.APPEND_ONLY,
+            TargetLoadMethods.UPSERT,
+            TargetLoadMethods.OVERWRITE,
+        ],
+        default=TargetLoadMethods.APPEND_ONLY,
+    ),
+).to_dict()
 
 
 class DeprecatedEnum(Enum):

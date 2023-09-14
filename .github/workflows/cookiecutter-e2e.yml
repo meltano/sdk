@@ -28,7 +28,7 @@ jobs:
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.3
+      uses: actions/checkout@v4.0.0
 
     - name: Upgrade pip
       env:
@@ -74,7 +74,10 @@ jobs:
         path: |
           /tmp/tap-*
           /tmp/target-*
+          /tmp/mapper-*
           !/tmp/tap-*/.mypy_cache/
           !/tmp/target-*/.mypy_cache/
+          !/tmp/mapper-*/.mypy_cache/
           !/tmp/tap-*/.tox/
           !/tmp/target-*/.tox/
+          !/tmp/mapper-*/.tox/

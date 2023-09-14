@@ -37,7 +37,7 @@ env:
 
 jobs:
   tests:
-    name: Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }}
+    name: "Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }} / SQLAlchemy: ${{ matrix.sqlalchemy }}"
     runs-on: ${{ matrix.os }}
     env:
       NOXSESSION: ${{ matrix.session }}
@@ -47,13 +47,15 @@ jobs:
         session: [tests]
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        sqlalchemy: ["2.*"]
         include:
-        - { session: doctest, python-version: "3.10", os: "ubuntu-latest" }
-        - { session: mypy,    python-version: "3.8",  os: "ubuntu-latest" }
+        - { session: tests,   python-version: "3.11", os: "ubuntu-latest", sqlalchemy: "1.*" }
+        - { session: doctest, python-version: "3.10", os: "ubuntu-latest", sqlalchemy: "2.*" }
+        - { session: mypy,    python-version: "3.8",  os: "ubuntu-latest", sqlalchemy: "2.*" }
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.3
+      uses: actions/checkout@v4.0.0
 
     - name: Install Poetry
       env:
@@ -86,6 +88,8 @@ jobs:
         nox --version
 
     - name: Run Nox
+      env:
+        SQLALCHEMY_VERSION: ${{ matrix.sqlalchemy }}
       run: |
         nox --python=${{ matrix.python-version }}
 
@@ -111,7 +115,7 @@ jobs:
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.3
+      uses: actions/checkout@v4.0.0
 
     - name: Install Poetry
       env:
@@ -153,7 +157,7 @@ jobs:
     needs: tests
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.3
+      uses: actions/checkout@v4.0.0
 
     - name: Install Poetry
       run: |

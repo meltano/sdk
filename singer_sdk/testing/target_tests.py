@@ -139,3 +139,9 @@ class TargetSpecialCharsInAttributes(TargetFileTestTemplate):
     """Test Target handles special chars in attributes."""
 
     name = "special_chars_in_attributes"
+
+
+class TargetRecordMissingOptionalFields(TargetFileTestTemplate):
+    """Test Target handles record missing optional fields."""
+
+    name = "record_missing_fields"
