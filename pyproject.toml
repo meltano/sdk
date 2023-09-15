@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.32.0b1"
+version = "0.32.0b2"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors <hello@meltano.com>"]
 maintainers = ["Meltano Team and Contributors <hello@meltano.com>"]
@@ -143,7 +143,7 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.32.0b1"
+version = "0.32.0b2"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
