@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import typing as t
+from logging import WARNING
 from textwrap import dedent
 
 import pytest
@@ -128,6 +129,26 @@ def test_to_json():
             "additionalProperties": false
         }""",
     )
+
+
+def test_any_type(caplog: pytest.LogCaptureFixture):
+    schema = PropertiesList(
+        Property("any_type", CustomType({}), description="Can be anything"),
+    )
+    with caplog.at_level(WARNING):
+        assert schema.to_dict() == {
+            "type": "object",
+            "properties": {
+                "any_type": {
+                    "description": "Can be anything",
+                },
+            },
+        }
+        assert caplog.records[0].levelname == "WARNING"
+        assert caplog.records[0].message == (
+            "Could not append type because the JSON schema for the dictionary `{}` "
+            "appears to be invalid."
+        )
 
 
 def test_nested_complex_objects():
