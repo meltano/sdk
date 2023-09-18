@@ -27,6 +27,7 @@ from singer_sdk.helpers._typing import (
 )
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
+    AnyType,
     ArrayType,
     BooleanType,
     CustomType,
@@ -133,7 +134,7 @@ def test_to_json():
 
 def test_any_type(caplog: pytest.LogCaptureFixture):
     schema = PropertiesList(
-        Property("any_type", CustomType({}), description="Can be anything"),
+        Property("any_type", AnyType, description="Can be anything"),
     )
     with caplog.at_level(WARNING):
         assert schema.to_dict() == {
