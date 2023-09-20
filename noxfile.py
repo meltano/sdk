@@ -57,6 +57,7 @@ test_dependencies = [
     "flake8-annotations",
     "flake8-docstrings",
     "mypy",
+    "moto",
 ]
 
 
