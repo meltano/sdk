@@ -363,7 +363,7 @@ class CustomStreamMap(StreamMap):
 
         # If a field is set to "record", then it should be an "object" in the schema
         if expr == "record":
-            return th.ObjectType()
+            return self.raw_schema
 
         if expr.startswith("float("):
             return th.NumberType()
