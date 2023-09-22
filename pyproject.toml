@@ -267,6 +267,9 @@ select = [
 ]
 src = ["samples", "singer_sdk", "tests"]
 target-version = "py37"
+unfixable = [
+    "ERA",  # Don't remove commented out code
+]
 
 [tool.ruff.per-file-ignores]
 "docs/conf.py" = [
