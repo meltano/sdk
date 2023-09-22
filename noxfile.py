@@ -39,7 +39,7 @@ nox.options.sessions = (
 )
 test_dependencies = [
     "coverage[toml]",
-    "duckdb",
+    "duckdb==0.8.2.dev5002",
     "duckdb-engine",
     "pytest",
     "pytest-snapshot",
@@ -86,7 +86,7 @@ def mypy(session: Session) -> None:
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
     session.install(".[s3]")
-    session.install(*test_dependencies, "--pre")
+    session.install(*test_dependencies)
 
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
     if sqlalchemy_version:
@@ -118,7 +118,7 @@ def update_snapshots(session: Session) -> None:
     args = session.posargs or ["-m", "snapshot"]
 
     session.install(".")
-    session.install(*test_dependencies, "--pre")
+    session.install(*test_dependencies)
     session.run("pytest", "--snapshot-update", *args)
 
 
