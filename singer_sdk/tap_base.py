@@ -30,6 +30,7 @@ from singer_sdk.plugin_base import PluginBase
 if t.TYPE_CHECKING:
     from pathlib import PurePath
 
+    from singer_sdk.connectors import SQLConnector
     from singer_sdk.mapper import PluginMapper
     from singer_sdk.streams import SQLStream, Stream
 
@@ -407,7 +408,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def _reset_state_progress_markers(self) -> None:
         """Clear prior jobs' progress markers at beginning of sync."""
-        for _, state in self.state.get("bookmarks", {}).items():
+        for state in self.state.get("bookmarks", {}).values():
             _state.reset_state_progress_markers(state)
             for partition_state in state.get("partitions", []):
                 _state.reset_state_progress_markers(partition_state)
@@ -612,6 +613,8 @@ class SQLTap(Tap):
     # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: type[SQLStream]
 
+    _tap_connector: SQLConnector | None = None
+
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Initialize the SQL tap.
 
@@ -623,6 +626,19 @@ class SQLTap(Tap):
         """
         self._catalog_dict: dict | None = None
         super().__init__(*args, **kwargs)
+
+    @property
+    def tap_connector(self) -> SQLConnector:
+        """The connector object.
+
+        Returns:
+            The connector object.
+        """
+        if self._tap_connector is None:
+            self._tap_connector = self.default_stream_class.connector_class(
+                dict(self.config),
+            )
+        return self._tap_connector
 
     @property
     def catalog_dict(self) -> dict:
@@ -637,7 +653,7 @@ class SQLTap(Tap):
         if self.input_catalog:
             return self.input_catalog.to_dict()
 
-        connector = self.default_stream_class.connector_class(dict(self.config))
+        connector = self.tap_connector
 
         result: dict[str, list[dict]] = {"streams": []}
         result["streams"].extend(connector.discover_catalog_entries())
@@ -651,8 +667,11 @@ class SQLTap(Tap):
         Returns:
             List of discovered Stream objects.
         """
-        result: list[Stream] = []
-        for catalog_entry in self.catalog_dict["streams"]:
-            result.append(self.default_stream_class(self, catalog_entry))
-
-        return result
+        return [
+            self.default_stream_class(
+                tap=self,
+                catalog_entry=catalog_entry,
+                connector=self.tap_connector,
+            )
+            for catalog_entry in self.catalog_dict["streams"]
+        ]
