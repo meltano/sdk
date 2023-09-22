@@ -39,13 +39,12 @@ nox.options.sessions = (
 )
 test_dependencies = [
     "coverage[toml]",
-    "duckdb==0.8.2.dev5002",
+    "duckdb",
     "duckdb-engine",
     "pytest",
     "pytest-snapshot",
     "pytest-durations",
     "freezegun",
-    "pandas",
     "pyarrow",
     "requests-mock",
     # Cookiecutter tests
