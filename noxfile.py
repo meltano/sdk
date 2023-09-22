@@ -45,7 +45,6 @@ test_dependencies = [
     "pytest-snapshot",
     "pytest-durations",
     "freezegun",
-    "pandas",
     "pyarrow",
     "requests-mock",
     # Cookiecutter tests
