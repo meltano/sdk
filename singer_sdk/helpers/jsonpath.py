@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import typing as t
+from functools import lru_cache
 
-import memoization
 from jsonpath_ng.ext import parse
 
 if t.TYPE_CHECKING:
@@ -31,7 +31,7 @@ def extract_jsonpath(
         yield match.value
 
 
-@memoization.cached
+@lru_cache
 def _compile_jsonpath(expression: str) -> jsonpath_ng.JSONPath:
     """Parse a JSONPath expression and cache the result.
 
