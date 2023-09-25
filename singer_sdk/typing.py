@@ -58,7 +58,10 @@ import json
 import typing as t
 
 import sqlalchemy
-from jsonschema import ValidationError, Validator, validators
+from jsonschema import ValidationError, validators
+
+if t.TYPE_CHECKING:
+    from jsonschema.protocols import Validator
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -488,6 +491,26 @@ class ArrayType(JSONTypeHelper[list], t.Generic[W]):
             A dictionary describing the type.
         """
         return {"type": "array", "items": self.wrapped_type.type_dict, **self.extras}
+
+
+class AnyType(JSONTypeHelper):
+    """Any type."""
+
+    def __init__(
+        self,
+        *args: t.Any,
+        **kwargs: t.Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+
+    @DefaultInstanceProperty
+    def type_dict(self) -> dict:
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        return {**self.extras}
 
 
 class Property(JSONTypeHelper[T], t.Generic[T]):
