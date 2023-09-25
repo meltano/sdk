@@ -1,8 +1,9 @@
 name: Release
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - v*
 
 permissions:
   contents: write  # Needed to upload artifacts to the release
@@ -16,7 +17,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4.0.0
+      uses: actions/checkout@v4.1.0
 
     - name: Set up Python
       uses: actions/setup-python@v4.7.0
