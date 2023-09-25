@@ -84,7 +84,7 @@ class StreamMap(metaclass=abc.ABCMeta):
             flattening_options: Flattening options, or None to skip flattening.
         """
         self.stream_alias = stream_alias
-        self.raw_schema = raw_schema
+        self.raw_schema = copy.deepcopy(raw_schema)
         self.raw_key_properties = key_properties
         self.transformed_schema = raw_schema
         self.transformed_key_properties = key_properties
