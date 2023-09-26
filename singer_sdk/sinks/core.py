@@ -366,11 +366,10 @@ class Sink(metaclass=abc.ABCMeta):
             treatment: TODO
         """
         for key, value in record.items():
-            try:
-                datelike_type = get_datelike_property_type(schema["properties"][key])
-            except KeyError:
+            if key not in schema["properties"]:
                 self.logger.debug("No schema for record field '%s'", key)
                 continue
+            datelike_type = get_datelike_property_type(schema["properties"][key])
             if datelike_type:
                 date_val = value
                 try:
