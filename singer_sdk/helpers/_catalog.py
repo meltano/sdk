@@ -5,17 +5,17 @@ from __future__ import annotations
 import typing as t
 from copy import deepcopy
 
-from memoization import cached
-
 from singer_sdk.helpers._typing import is_object_type
 
 if t.TYPE_CHECKING:
     from singer_sdk._singerlib import Catalog, SelectionMask
 
-_MAX_LRU_CACHE = 500
 
-
-@cached(max_size=_MAX_LRU_CACHE)
+# TODO: this was previously cached using the `memoization` library. However, the
+# `functools.lru_cache` decorator does not support non-hashable arguments.
+# It is possible that this function is not a bottleneck, but if it is, we should
+# consider implementing a custom LRU cache decorator that supports non-hashable
+# arguments.
 def get_selected_schema(
     stream_name: str,
     schema: dict,
