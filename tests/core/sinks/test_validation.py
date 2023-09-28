@@ -21,20 +21,14 @@ def test_validate_record():
         ["id"],
     )
 
-    record_message = {
-        "type": "RECORD",
-        "stream": "users",
-        "record": {
-            "id": 1,
-            "created_at": "2021-01-01T00:00:00+00:00",
-            "missing_datetime": "2021-01-01T00:00:00+00:00",
-            "invalid_datetime": "not a datetime",
-        },
-        "time_extracted": "2021-01-01T00:00:00+00:00",
-        "version": 100,
+    record = {
+        "id": 1,
+        "created_at": "2021-01-01T00:00:00+00:00",
+        "missing_datetime": "2021-01-01T00:00:00+00:00",
+        "invalid_datetime": "not a datetime",
     }
-    record = record_message["record"]
     updated_record = sink._validate_and_parse(record)
+
     assert updated_record["created_at"] == datetime.datetime(
         2021,
         1,
