@@ -485,7 +485,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             return False
         if not self.expires_in:
             return True
-        return self.expires_in > (utc_now() - self.last_refreshed).total_seconds()  # type: ignore[no-any-return]
+        return self.expires_in > (utc_now() - self.last_refreshed).total_seconds()
 
     # Authentication and refresh
     def update_access_token(self) -> None:
