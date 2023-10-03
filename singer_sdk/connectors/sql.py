@@ -587,7 +587,9 @@ class SQLConnector:
             True if the database schema exists, False if not.
         """
         if schema_name not in self._schema_cache:
-            self._schema_cache = set(sqlalchemy.inspect(self._engine).get_schema_names())
+            self._schema_cache = set(
+                sqlalchemy.inspect(self._engine).get_schema_names()
+            )
 
         return schema_name in self._schema_cache
 
