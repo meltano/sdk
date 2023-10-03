@@ -59,7 +59,7 @@ class SQLConnector:
         self._config: dict[str, t.Any] = config or {}
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
         self._table_cols_cache: dict[str, dict[str, sqlalchemy.Column]] = {}
-        self._schema_cache: list = []
+        self._schema_cache: set = {}
 
     @property
     def config(self) -> dict:
@@ -587,7 +587,7 @@ class SQLConnector:
             True if the database schema exists, False if not.
         """
         if schema_name not in self._schema_cache:
-            self._schema_cache = sqlalchemy.inspect(self._engine).get_schema_names()
+            self._schema_cache = set(sqlalchemy.inspect(self._engine).get_schema_names())
 
         return schema_name in self._schema_cache
 
