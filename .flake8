@@ -1,6 +1,7 @@
 [flake8]
 max-line-length = 88
 exclude = cookiecutter
+ignore = E
 per-file-ignores =
     # Don't require docstrings conventions in private modules
     singer_sdk/helpers/_*.py:DAR
