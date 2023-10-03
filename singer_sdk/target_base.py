@@ -607,8 +607,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         super().append_builtin_config(config_jsonschema)
 
-    pass
-
 
 class SQLTarget(Target):
     """Target implementation for SQL destinations."""
@@ -671,8 +669,6 @@ class SQLTarget(Target):
             _merge_missing(TARGET_SCHEMA_CONFIG, config_jsonschema)
 
         super().append_builtin_config(config_jsonschema)
-
-    pass
 
     @final
     def add_sqlsink(
