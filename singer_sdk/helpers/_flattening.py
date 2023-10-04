@@ -185,6 +185,101 @@ def flatten_schema(
         }
       }
     }
+
+    >>> nullable_leaves_schema = {
+    ...     "type": "object",
+    ...     "properties": {
+    ...         "id": {
+    ...             "type": "string"
+    ...         },
+    ...         "foo": {
+    ...             "type": ["object", "null"],
+    ...             "properties": {
+    ...                 "bar": {
+    ...                     "type": ["object", "null"],
+    ...                     "properties": {
+    ...                         "baz": {
+    ...                             "type": ["object", "null"],
+    ...                             "properties": {
+    ...                                 "qux": {
+    ...                                     "type": "string"
+    ...                                 }
+    ...                             }
+    ...                         }
+    ...                     }
+    ...                 }
+    ...             }
+    ...         }
+    ...     }
+    ... }
+    >>> print(json.dumps(flatten_schema(nullable_leaves_schema, 0), indent=2))
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "foo": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "bar": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "properties": {
+                "baz": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "qux": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    >>> print(json.dumps(flatten_schema(nullable_leaves_schema, 1), indent=2))
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "foo__bar": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+
+    >>> print(json.dumps(flatten_schema(nullable_leaves_schema, 2), indent=2))
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "foo__bar__baz": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
     """
     new_schema = deepcopy(schema)
     new_schema["properties"] = _flatten_schema(
