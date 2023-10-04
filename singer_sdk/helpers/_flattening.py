@@ -344,6 +344,8 @@ def _flatten_schema(  # noqa: C901, PLR0912
                 items.append((new_key, {"type": types}))
             else:
                 items.append((new_key, field_schema))
+        # TODO: Figure out what this really does, try breaking it.
+        # If it's not needed, remove it.
         elif len(field_schema.values()) > 0:
             if next(iter(field_schema.values()))[0]["type"] == "string":
                 next(iter(field_schema.values()))[0]["type"] = ["null", "string"]
