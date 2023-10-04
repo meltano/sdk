@@ -316,42 +316,53 @@ def _flatten_schema(  # noqa: C901, PLR0912
     if "properties" not in schema_node:
         return {}
 
-    for k, v in schema_node["properties"].items():
-        new_key = flatten_key(k, parent_keys, separator)
-        if "type" in v:
-            if "object" in v["type"] and "properties" in v and level < max_level:
+    for field_name, field_schema in schema_node["properties"].items():
+        new_key = flatten_key(field_name, parent_keys, separator)
+        if "type" in field_schema:
+            if (
+                "object" in field_schema["type"]
+                and "properties" in field_schema
+                and level < max_level
+            ):
                 items.extend(
                     _flatten_schema(
-                        v,
-                        [*parent_keys, k],
+                        field_schema,
+                        [*parent_keys, field_name],
                         separator=separator,
                         level=level + 1,
                         max_level=max_level,
                     ).items(),
                 )
-            elif "array" in v["type"] or "object" in v["type"] and max_level > 0:
-                items.append((new_key, {"type": "string"}))
+            elif (
+                "array" in field_schema["type"]
+                or "object" in field_schema["type"]
+                and max_level > 0
+            ):
+                types = (
+                    ["string", "null"] if "null" in field_schema["type"] else "string"
+                )
+                items.append((new_key, {"type": types}))
             else:
-                items.append((new_key, v))
-        elif len(v.values()) > 0:
-            if next(iter(v.values()))[0]["type"] == "string":
-                next(iter(v.values()))[0]["type"] = ["null", "string"]
-                items.append((new_key, next(iter(v.values()))[0]))
-            elif next(iter(v.values()))[0]["type"] == "array":
-                next(iter(v.values()))[0]["type"] = ["null", "array"]
-                items.append((new_key, next(iter(v.values()))[0]))
-            elif next(iter(v.values()))[0]["type"] == "object":
-                next(iter(v.values()))[0]["type"] = ["null", "object"]
-                items.append((new_key, next(iter(v.values()))[0]))
+                items.append((new_key, field_schema))
+        elif len(field_schema.values()) > 0:
+            if next(iter(field_schema.values()))[0]["type"] == "string":
+                next(iter(field_schema.values()))[0]["type"] = ["null", "string"]
+                items.append((new_key, next(iter(field_schema.values()))[0]))
+            elif next(iter(field_schema.values()))[0]["type"] == "array":
+                next(iter(field_schema.values()))[0]["type"] = ["null", "array"]
+                items.append((new_key, next(iter(field_schema.values()))[0]))
+            elif next(iter(field_schema.values()))[0]["type"] == "object":
+                next(iter(field_schema.values()))[0]["type"] = ["null", "object"]
+                items.append((new_key, next(iter(field_schema.values()))[0]))
 
     # Sort and check for duplicates
     def _key_func(item):
         return item[0]  # first item is tuple is the key name.
 
     sorted_items = sorted(items, key=_key_func)
-    for k, g in itertools.groupby(sorted_items, key=_key_func):
+    for field_name, g in itertools.groupby(sorted_items, key=_key_func):
         if len(list(g)) > 1:
-            msg = f"Duplicate column name produced in schema: {k}"
+            msg = f"Duplicate column name produced in schema: {field_name}"
             raise ValueError(msg)
 
     # Return the (unsorted) result as a dict.
