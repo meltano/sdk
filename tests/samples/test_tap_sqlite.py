@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import datetime
 import json
 import typing as t
 
 import pytest
+import time_machine
 from click.testing import CliRunner
-from freezegun import freeze_time
 
 from samples.sample_tap_sqlite import SQLiteTap
 from samples.sample_target_csv.csv_target import SampleTargetCSV
@@ -122,7 +123,10 @@ def test_sync_sqlite_to_csv(sqlite_sample_tap: SQLTap, tmp_path: Path):
 
 
 @pytest.fixture
-@freeze_time("2022-01-01T00:00:00Z")
+@time_machine.travel(
+    datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc),
+    tick=False,
+)
 def sqlite_sample_tap_state_messages(sqlite_sample_tap: SQLTap) -> list[dict]:
     stdout, _ = tap_sync_test(sqlite_sample_tap)
     state_messages = []
