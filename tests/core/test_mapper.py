@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import datetime
 import io
 import json
 import logging
@@ -11,7 +12,7 @@ from contextlib import redirect_stdout
 from decimal import Decimal
 
 import pytest
-from freezegun import freeze_time
+import time_machine
 
 from singer_sdk._singerlib import Catalog
 from singer_sdk.exceptions import MapExpressionError
@@ -470,7 +471,10 @@ def _clear_schema_cache() -> None:
     get_selected_schema.cache_clear()
 
 
-@freeze_time("2022-01-01T00:00:00Z")
+@time_machine.travel(
+    datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc),
+    tick=False,
+)
 @pytest.mark.snapshot()
 @pytest.mark.usefixtures("_clear_schema_cache")
 @pytest.mark.parametrize(
