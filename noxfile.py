@@ -44,9 +44,9 @@ test_dependencies = [
     "pytest",
     "pytest-snapshot",
     "pytest-durations",
-    "freezegun",
     "pyarrow",
     "requests-mock",
+    "time-machine",
     # Cookiecutter tests
     "black",
     "cookiecutter",
