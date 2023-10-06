@@ -22,6 +22,7 @@ from singer_sdk.helpers.capabilities import (
     BATCH_DYNAMIC_MANAGEMENT_CONFIG,
     BATCH_SIZE_ROWS_CONFIG,
     BATCH_WAIT_LIMIT_SECONDS_CONFIG,
+    TARGET_LOAD_METHOD_CONFIG,
     TARGET_SCHEMA_CONFIG,
     CapabilitiesEnum,
     PluginCapabilities,
@@ -605,6 +606,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         _merge_missing(BATCH_SIZE_ROWS_CONFIG, config_jsonschema)
         _merge_missing(BATCH_WAIT_LIMIT_SECONDS_CONFIG, config_jsonschema)
         _merge_missing(BATCH_DYNAMIC_MANAGEMENT_CONFIG, config_jsonschema)
+        _merge_missing(TARGET_LOAD_METHOD_CONFIG, config_jsonschema)
 
         capabilities = cls.capabilities
 
@@ -612,8 +614,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             _merge_missing(BATCH_CONFIG, config_jsonschema)
 
         super().append_builtin_config(config_jsonschema)
-
-    pass
 
 
 class SQLTarget(Target):
@@ -677,8 +677,6 @@ class SQLTarget(Target):
             _merge_missing(TARGET_SCHEMA_CONFIG, config_jsonschema)
 
         super().append_builtin_config(config_jsonschema)
-
-    pass
 
     @final
     def add_sqlsink(

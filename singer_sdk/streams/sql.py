@@ -210,5 +210,17 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                     continue
                 yield transformed_record
 
+    @property
+    def is_sorted(self) -> bool:
+        """Expect stream to be sorted.
+
+        When `True`, incremental streams will attempt to resume if unexpectedly
+        interrupted.
+
+        Returns:
+            `True` if stream is sorted. Defaults to `False`.
+        """
+        return self.replication_key is not None
+
 
 __all__ = ["SQLStream", "SQLConnector"]

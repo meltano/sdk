@@ -1,14 +1,18 @@
 from __future__ import annotations
 
+import typing as t
 from decimal import Decimal
 from unittest import mock
 
 import pytest
 import sqlalchemy
-from sqlalchemy.dialects import sqlite
+from sqlalchemy.dialects import registry, sqlite
 
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.exceptions import ConfigValidationError
+
+if t.TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
 
 
 def stringify(in_dict):
@@ -283,3 +287,89 @@ class TestConnectorSQL:
                 (1, {"x": Decimal("1.0")}),
                 (2, {"x": Decimal("2.0"), "y": [1, 2, 3]}),
             ]
+
+
+class DuckDBConnector(SQLConnector):
+    allow_column_alter = True
+
+    @staticmethod
+    def get_column_alter_ddl(
+        table_name: str,
+        column_name: str,
+        column_type: sqlalchemy.types.TypeEngine,
+    ) -> sqlalchemy.DDL:
+        return sqlalchemy.DDL(
+            "ALTER TABLE %(table_name)s ALTER COLUMN %(column_name)s TYPE %(column_type)s",  # noqa: E501
+            {
+                "table_name": table_name,
+                "column_name": column_name,
+                "column_type": column_type,
+            },
+        )
+
+
+class TestDuckDBConnector:
+    @pytest.fixture
+    def connector(self):
+        return DuckDBConnector(config={"sqlalchemy_url": "duckdb:///"})
+
+    def test_create_schema(self, connector: DuckDBConnector):
+        engine = connector._engine
+        connector.create_schema("test_schema")
+        inspector = sqlalchemy.inspect(engine)
+        assert "test_schema" in inspector.get_schema_names()
+
+    def test_column_rename(self, connector: DuckDBConnector):
+        engine = connector._engine
+        meta = sqlalchemy.MetaData()
+        _ = sqlalchemy.Table(
+            "test_table",
+            meta,
+            sqlalchemy.Column("id", sqlalchemy.Integer),
+            sqlalchemy.Column("old_name", sqlalchemy.String),
+        )
+        meta.create_all(engine)
+
+        connector.rename_column("test_table", "old_name", "new_name")
+
+        with engine.connect() as conn:
+            result = conn.execute(
+                sqlalchemy.text("SELECT * FROM test_table"),
+            )
+            assert result.keys() == ["id", "new_name"]
+
+    def test_adapt_column_type(self, connector: DuckDBConnector):
+        connector.allow_column_alter = True
+        engine = connector._engine
+        meta = sqlalchemy.MetaData()
+        _ = sqlalchemy.Table(
+            "test_table",
+            meta,
+            sqlalchemy.Column("id", sqlalchemy.Integer),
+            sqlalchemy.Column("name", sqlalchemy.Integer),
+        )
+        meta.create_all(engine)
+
+        connector._adapt_column_type("test_table", "name", sqlalchemy.types.String())
+
+        with engine.connect() as conn:
+            result = conn.execute(
+                sqlalchemy.text("SELECT * FROM test_table"),
+            )
+            assert result.keys() == ["id", "name"]
+            assert result.cursor.description[1][1] == "STRING"
+
+
+def test_adapter_without_json_serde():
+    registry.register(
+        "myrdbms",
+        "samples.sample_custom_sql_adapter.connector",
+        "CustomSQLDialect",
+    )
+
+    class CustomConnector(SQLConnector):
+        def create_engine(self) -> Engine:
+            return super().create_engine()
+
+    connector = CustomConnector(config={"sqlalchemy_url": "myrdbms:///"})
+    connector.create_engine()

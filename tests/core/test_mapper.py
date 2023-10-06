@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 import copy
+import datetime
 import io
 import json
 import logging
 import typing as t
 from contextlib import redirect_stdout
+from decimal import Decimal
 
 import pytest
-from freezegun import freeze_time
+import time_machine
 
 from singer_sdk._singerlib import Catalog
 from singer_sdk.exceptions import MapExpressionError
@@ -19,7 +21,9 @@ from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
+    ArrayType,
     IntegerType,
+    NumberType,
     ObjectType,
     PropertiesList,
     Property,
@@ -415,6 +419,7 @@ class MappedStream(Stream):
             ObjectType(
                 Property("id", IntegerType()),
                 Property("sub", ObjectType(Property("num", IntegerType()))),
+                Property("some_numbers", ArrayType(NumberType())),
             ),
         ),
     ).to_dict()
@@ -423,17 +428,29 @@ class MappedStream(Stream):
         yield {
             "email": "alice@example.com",
             "count": 21,
-            "user": {"id": 1, "sub": {"num": 1}},
+            "user": {
+                "id": 1,
+                "sub": {"num": 1},
+                "some_numbers": [Decimal("3.14"), Decimal("2.718")],
+            },
         }
         yield {
             "email": "bob@example.com",
             "count": 13,
-            "user": {"id": 2, "sub": {"num": 2}},
+            "user": {
+                "id": 2,
+                "sub": {"num": 2},
+                "some_numbers": [Decimal("10.32"), Decimal("1.618")],
+            },
         }
         yield {
             "email": "charlie@example.com",
             "count": 19,
-            "user": {"id": 3, "sub": {"num": 3}},
+            "user": {
+                "id": 3,
+                "sub": {"num": 3},
+                "some_numbers": [Decimal("1.414"), Decimal("1.732")],
+            },
         }
 
 
@@ -454,7 +471,10 @@ def _clear_schema_cache() -> None:
     get_selected_schema.cache_clear()
 
 
-@freeze_time("2022-01-01T00:00:00Z")
+@time_machine.travel(
+    datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc),
+    tick=False,
+)
 @pytest.mark.snapshot()
 @pytest.mark.usefixtures("_clear_schema_cache")
 @pytest.mark.parametrize(
@@ -548,6 +568,13 @@ def _clear_schema_cache() -> None:
         pytest.param(
             {},
             True,
+            0,
+            "flatten_depth_0.jsonl",
+            id="flatten_depth_0",
+        ),
+        pytest.param(
+            {},
+            True,
             1,
             "flatten_depth_1.jsonl",
             id="flatten_depth_1",
@@ -600,6 +627,18 @@ def _clear_schema_cache() -> None:
             0,
             "non_pk_passthrough.jsonl",
             id="non_pk_passthrough",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "_data": "record",
+                    "__else__": None,
+                },
+            },
+            False,
+            0,
+            "record_to_column.jsonl",
+            id="record_to_column",
         ),
     ],
 )
