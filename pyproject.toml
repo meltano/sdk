@@ -79,7 +79,7 @@ fs-s3fs = {version = ">=1.1.1", optional = true}
 # Testing dependencies installed as optional 'testing' extras
 pytest = {version=">=7.2.1", optional = true}
 pytest-durations = {version = ">=1.2.0", optional = true}
-msgspec = "^0.17.0"
+msgspec = "^0.18.4"
 
 [tool.poetry.extras]
 docs = [
