@@ -2,6 +2,7 @@
     "cookiecutter": {
       "name": "MyMapperName",
       "admin_name": "Automatic Tester",
+      "admin_email": "auto.tester@example.com",
       "mapper_id": "mapper-base",
       "library_name": "mapper_base",
       "variant": "None (Skip)",

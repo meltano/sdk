@@ -7,7 +7,7 @@ name = "{{cookiecutter.mapper_id}}"
 version = "0.0.1"
 description = "`{{cookiecutter.mapper_id}}` is a Singer mapper {{cookiecutter.name}}, built with the Meltano Singer SDK."
 readme = "README.md"
-authors = ["{{ cookiecutter.admin_name }}"]
+authors = ["{{ cookiecutter.admin_name }} <{{ cookiecutter.admin_email }}>"]
 keywords = [
     "ELT",
     "Mapper",
@@ -21,13 +21,13 @@ packages = [
 {%- endif %}
 
 [tool.poetry.dependencies]
-python = "<3.12,>=3.7.1"
-singer-sdk = { version="^0.31.0" }
-fs-s3fs = { version = "^1.1.1", optional = true }
+python = ">=3.7.1,<4"
+singer-sdk = { version="~=0.32.0" }
+fs-s3fs = { version = "~=1.1.1", optional = true }
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.0"
-singer-sdk = { version="^0.30.0", extras = ["testing"] }
+pytest = ">=7.4.0"
+singer-sdk = { version="~=0.32.0", extras = ["testing"] }
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]

@@ -12,6 +12,7 @@ import hashlib
 import logging
 import typing as t
 
+import singer_sdk.typing as th
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
 from singer_sdk.helpers import _simpleeval as simpleeval
 from singer_sdk.helpers._catalog import get_selected_schema
@@ -20,15 +21,6 @@ from singer_sdk.helpers._flattening import (
     flatten_record,
     flatten_schema,
     get_flattening_options,
-)
-from singer_sdk.typing import (
-    CustomType,
-    IntegerType,
-    JSONTypeHelper,
-    NumberType,
-    PropertiesList,
-    Property,
-    StringType,
 )
 
 if t.TYPE_CHECKING:
@@ -84,7 +76,7 @@ class StreamMap(metaclass=abc.ABCMeta):
             flattening_options: Flattening options, or None to skip flattening.
         """
         self.stream_alias = stream_alias
-        self.raw_schema = raw_schema
+        self.raw_schema = copy.deepcopy(raw_schema)
         self.raw_key_properties = key_properties
         self.transformed_schema = raw_schema
         self.transformed_key_properties = key_properties
@@ -349,8 +341,8 @@ class CustomStreamMap(StreamMap):
     def _eval_type(
         self,
         expr: str,
-        default: JSONTypeHelper | None = None,
-    ) -> JSONTypeHelper:
+        default: th.JSONTypeHelper | None = None,
+    ) -> th.JSONTypeHelper:
         """Evaluate an expression's type.
 
         Args:
@@ -367,21 +359,22 @@ class CustomStreamMap(StreamMap):
             msg = "Expression should be str, not None"
             raise ValueError(msg)
 
-        default = default or StringType()
+        default = default or th.StringType()
+
+        # If a field is set to "record", then it should be an "object" in the schema
+        if expr == "record":
+            return th.CustomType(self.raw_schema)
 
         if expr.startswith("float("):
-            return NumberType()
+            return th.NumberType()
 
         if expr.startswith("int("):
-            return IntegerType()
+            return th.IntegerType()
 
         if expr.startswith("str("):
-            return StringType()
+            return th.StringType()
 
-        if expr[0] == "'" and expr[-1] == "'":
-            return StringType()
-
-        return default
+        return th.StringType() if expr[0] == "'" and expr[-1] == "'" else default
 
     def _init_functions_and_schema(  # noqa: PLR0912, PLR0915, C901
         self,
@@ -442,7 +435,7 @@ class CustomStreamMap(StreamMap):
         transformed_schema = copy.copy(self.raw_schema)
         if not include_by_default:
             # Start with only the defined (or transformed) key properties
-            transformed_schema = PropertiesList().to_dict()
+            transformed_schema = th.PropertiesList().to_dict()
 
         if "properties" not in transformed_schema:
             transformed_schema["properties"] = {}
@@ -460,7 +453,7 @@ class CustomStreamMap(StreamMap):
                     raise StreamMapConfigError(msg)
                 transformed_schema["properties"].pop(prop_key, None)
             elif isinstance(prop_def, str):
-                default_type: JSONTypeHelper = StringType()  # Fallback to string
+                default_type: th.JSONTypeHelper = th.StringType()  # Fallback to string
                 existing_schema: dict = (
                     # Use transformed schema if available
                     transformed_schema["properties"].get(prop_key, {})
@@ -469,10 +462,10 @@ class CustomStreamMap(StreamMap):
                 )
                 if existing_schema:
                     # Set default type if property exists already in JSON Schema
-                    default_type = CustomType(existing_schema)
+                    default_type = th.CustomType(existing_schema)
 
                 transformed_schema["properties"].update(
-                    Property(
+                    th.Property(
                         prop_key,
                         self._eval_type(prop_def, default=default_type),
                     ).to_dict(),

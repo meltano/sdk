@@ -365,12 +365,15 @@ class Sink(metaclass=abc.ABCMeta):
             schema: TODO
             treatment: TODO
         """
-        for key in record:
+        for key, value in record.items():
+            if key not in schema["properties"]:
+                self.logger.warning("No schema for record field '%s'", key)
+                continue
             datelike_type = get_datelike_property_type(schema["properties"][key])
             if datelike_type:
-                date_val = record[key]
+                date_val = value
                 try:
-                    if record[key] is not None:
+                    if value is not None:
                         date_val = parser.parse(date_val)
                 except parser.ParserError as ex:
                     date_val = handle_invalid_timestamp_in_record(
