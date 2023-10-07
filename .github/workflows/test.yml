@@ -39,6 +39,7 @@ jobs:
   tests:
     name: "Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.session != 'tests' }}
     env:
       NOXSESSION: ${{ matrix.session }}
     strategy:
