@@ -54,6 +54,27 @@ def md5(string: str) -> str:
     return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
 
 
+def compound_eval(
+        expr: str, 
+        operators: t.Dict[str, t.Callable[[dict], dict | None]] = None, 
+        functions: t.Dict[str, t.Callable[[dict], dict | None]] = None, 
+        names=t.Dict[str, t.Any]
+        ) -> t.Union[str, int, float, t.List, t.Set, t.Dict]:
+    """Evaluate inline maps using the `EvalWithCompoundTypes` class
+    
+    Args:
+        expr: expression to evaluate
+        operators: dictionary of operators and the functions they map to in the evaluation context
+        functions: dictionary of function names and definitions available in the evaluation context
+        names: dictionary of variable names available in the evaluation context
+    
+    Returns:
+        result of the evaluated expression
+    """
+    s = simpleeval.EvalWithCompoundTypes(operators=operators, functions=functions, names=names)
+    return s.eval(expr)
+
+
 StreamMapsDict: TypeAlias = t.Dict[str, t.Union[str, dict, None]]
 
 
@@ -296,6 +317,7 @@ class CustomStreamMap(StreamMap):
         funcs: dict[str, t.Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
         funcs["md5"] = md5
         funcs["datetime"] = datetime
+        funcs["bool"] = bool
         return funcs
 
     def _eval(
@@ -325,7 +347,7 @@ class CustomStreamMap(StreamMap):
             # Allow access to original property value if applicable
             names["self"] = record[property_name]
         try:
-            result: str | int | float = simpleeval.simple_eval(
+            result: str | int | float = compound_eval(
                 expr,
                 functions=self.functions,
                 names=names,
@@ -374,6 +396,9 @@ class CustomStreamMap(StreamMap):
         if expr.startswith("str("):
             return th.StringType()
 
+        if expr.startswith("bool("):
+            return th.BooleanType()
+        
         return th.StringType() if expr[0] == "'" and expr[-1] == "'" else default
 
     def _init_functions_and_schema(  # noqa: PLR0912, PLR0915, C901

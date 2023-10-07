@@ -28,6 +28,8 @@ from singer_sdk.typing import (
     PropertiesList,
     Property,
     StringType,
+    BooleanType,
+    OneOf,
 )
 
 if t.TYPE_CHECKING:
@@ -56,6 +58,14 @@ def sample_catalog_dict() -> dict:
         Property("the", StringType),
         Property("brown", StringType),
     ).to_dict()
+    nested_jellybean_schema = PropertiesList(
+        Property("id", IntegerType),
+        Property("custom_fields", 
+                 ArrayType(ObjectType(
+                     Property("id", IntegerType), 
+                     Property("value", OneOf(StringType, IntegerType, BooleanType))))
+        )
+    ).to_dict()
     return {
         "streams": [
             {
@@ -68,6 +78,11 @@ def sample_catalog_dict() -> dict:
                 "tap_stream_id": "foobars",
                 "schema": foobars_schema,
             },
+            {
+                "stream": "nested_jellybean",
+                "tap_stream_id": "nested_jellybean",
+                "schema": nested_jellybean_schema
+            }
         ],
     }
 
@@ -110,6 +125,10 @@ def sample_stream():
             {"the": "quick"},
             {"brown": "fox"},
         ],
+        "nested_jellybean": [
+            {"id": 123, "custom_fields": [{"id": 1, "value": "abc"}, {"id": 2, "value": 1212}, {"id": 3, "value": None}]},
+            {"id": 124, "custom_fields": [{"id": 1, "value": "foo"}, {"id": 2, "value": 9009}, {"id": 3, "value": True}]}
+        ],
     }
 
 
@@ -129,6 +148,12 @@ def transform_stream_maps():
             "int_test": "int('0')",
             "__else__": None,
         },
+        "nested_jellybean": {
+            "custom_fields": "__NULL__",
+            "custom_field_1": 'dict([(x["id"], x["value"]) for x in custom_fields]).get(1)',
+            "custom_field_2": 'int(dict([(x["id"], x["value"]) for x in custom_fields]).get(2)) if dict([(x["id"], x["value"]) for x in custom_fields]).get(2) else None',
+            "custom_field_3": 'bool(dict([(x["id"], x["value"]) for x in custom_fields]).get(3)) if dict([(x["id"], x["value"]) for x in custom_fields]).get(3) else None',
+        }
     }
 
 
@@ -185,6 +210,10 @@ def transformed_result(stream_map_config):
             {"the": "quick"},
             {"brown": "fox"},
         ],
+        "nested_jellybean": [
+        {"id": 123, "custom_field_1": "abc", "custom_field_2": 1212, "custom_field_3": None},
+        {"id": 124, "custom_field_1": "foo", "custom_field_2": 9009, "custom_field_3": True}
+        ],
     }
 
 
@@ -204,6 +233,12 @@ def transformed_schemas():
             Property("the", StringType),
             Property("brown", StringType),
         ).to_dict(),
+        "nested_jellybean": PropertiesList(
+            Property("id", IntegerType),
+            Property("custom_field_1", StringType),
+            Property("custom_field_2", IntegerType),
+            Property("custom_field_3", BooleanType)
+        ).to_dict()
     }
 
 
