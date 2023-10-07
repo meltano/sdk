@@ -48,7 +48,7 @@ joblib = ">=1.0.1"
 jsonpath-ng = ">=1.5.3"
 jsonschema = ">=4.16.0"
 packaging = ">=23.1"
-pendulum = ">=2.1.0"
+pendulum = {version=">=2.1.0", allow-prereleases=true}
 PyJWT = "~=2.4"
 python-dotenv = ">=0.20,<0.22"
 pytz = ">=2022.2.1,<2024.0.0"
