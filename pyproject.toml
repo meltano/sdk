@@ -98,7 +98,6 @@ testing = [
 
 [tool.poetry.group.dev.dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
-commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
 cookiecutter = ">=2.1.1"
 coverage = {extras = ["toml"], version = ">=7.2"}
 duckdb = ">=0.8.0"
