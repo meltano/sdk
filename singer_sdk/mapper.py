@@ -6,15 +6,17 @@ Mappers allow inline stream transformation, filtering, aliasing, and duplication
 from __future__ import annotations
 
 import abc
+import ast
 import copy
 import datetime
 import hashlib
 import logging
 import typing as t
 
+import simpleeval
+
 import singer_sdk.typing as th
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
-from singer_sdk.helpers import _simpleeval as simpleeval
 from singer_sdk.helpers._catalog import get_selected_schema
 from singer_sdk.helpers._flattening import (
     FlatteningOptions,
@@ -52,27 +54,6 @@ def md5(string: str) -> str:
         A string digested into MD5.
     """
     return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
-
-
-def compound_eval(
-        expr: str, 
-        operators: t.Dict[str, t.Callable[[dict], dict | None]] = None, 
-        functions: t.Dict[str, t.Callable[[dict], dict | None]] = None, 
-        names=t.Dict[str, t.Any]
-        ) -> t.Union[str, int, float, t.List, t.Set, t.Dict]:
-    """Evaluate inline maps using the `EvalWithCompoundTypes` class
-    
-    Args:
-        expr: expression to evaluate
-        operators: dictionary of operators and the functions they map to in the evaluation context
-        functions: dictionary of function names and definitions available in the evaluation context
-        names: dictionary of variable names available in the evaluation context
-    
-    Returns:
-        result of the evaluated expression
-    """
-    s = simpleeval.EvalWithCompoundTypes(operators=operators, functions=functions, names=names)
-    return s.eval(expr)
 
 
 StreamMapsDict: TypeAlias = t.Dict[str, t.Union[str, dict, None]]
@@ -280,6 +261,7 @@ class CustomStreamMap(StreamMap):
             self._transform_fn,
             self.transformed_schema,
         ) = self._init_functions_and_schema(stream_map=map_transform)
+        self.expr_evaluator = simpleeval.EvalWithCompoundTypes(functions=self.functions)
 
     def transform(self, record: dict) -> dict | None:
         """Return a transformed record.
@@ -323,13 +305,15 @@ class CustomStreamMap(StreamMap):
     def _eval(
         self,
         expr: str,
+        expr_parsed: ast.Expr,
         record: dict,
         property_name: str | None,
     ) -> str | int | float:
         """Solve an expression.
 
         Args:
-            expr: String expression to evaluate.
+            expr: String expression to evaluate (used to raise human readable errors).
+            expr_parsed: Parsed expression abstract syntax tree.
             record: Individual stream record.
             property_name: Name of property to transform in the record.
 
@@ -347,10 +331,10 @@ class CustomStreamMap(StreamMap):
             # Allow access to original property value if applicable
             names["self"] = record[property_name]
         try:
-            result: str | int | float = compound_eval(
+            self.expr_evaluator.names = names
+            result: str | int | float = self.expr_evaluator.eval(
                 expr,
-                functions=self.functions,
-                names=names,
+                previously_parsed=expr_parsed,
             )
         except (simpleeval.InvalidExpression, SyntaxError) as ex:
             msg = f"Failed to evaluate simpleeval expressions {expr}."
@@ -398,7 +382,7 @@ class CustomStreamMap(StreamMap):
 
         if expr.startswith("bool("):
             return th.BooleanType()
-        
+
         return th.StringType() if expr[0] == "'" and expr[-1] == "'" else default
 
     def _init_functions_and_schema(  # noqa: PLR0912, PLR0915, C901
@@ -416,6 +400,7 @@ class CustomStreamMap(StreamMap):
         Raises:
             NotImplementedError: TODO
             StreamMapConfigError: TODO
+            MapExpressionError: TODO
         """
         stream_map = copy.copy(stream_map)
 
@@ -423,6 +408,12 @@ class CustomStreamMap(StreamMap):
         include_by_default = True
         if stream_map and MAPPER_FILTER_OPTION in stream_map:
             filter_rule = stream_map.pop(MAPPER_FILTER_OPTION)
+            try:
+                filter_rule_parsed: ast.Expr = ast.parse(filter_rule).body[0]
+            except (SyntaxError, IndexError) as ex:
+                msg = f"Failed to parse expression {filter_rule}."
+                raise MapExpressionError(msg) from ex
+
             logging.info(
                 "Found '%s' filter rule: %s",
                 self.stream_alias,
@@ -465,6 +456,7 @@ class CustomStreamMap(StreamMap):
         if "properties" not in transformed_schema:
             transformed_schema["properties"] = {}
 
+        stream_map_parsed: list[tuple[str, str | None, ast.Expr | None]] = []
         for prop_key, prop_def in list(stream_map.items()):
             if prop_def in {None, NULL_STRING}:
                 if prop_key in (self.transformed_key_properties or []):
@@ -477,6 +469,7 @@ class CustomStreamMap(StreamMap):
                     )
                     raise StreamMapConfigError(msg)
                 transformed_schema["properties"].pop(prop_key, None)
+                stream_map_parsed.append((prop_key, prop_def, None))
             elif isinstance(prop_def, str):
                 default_type: th.JSONTypeHelper = th.StringType()  # Fallback to string
                 existing_schema: dict = (
@@ -495,6 +488,13 @@ class CustomStreamMap(StreamMap):
                         self._eval_type(prop_def, default=default_type),
                     ).to_dict(),
                 )
+                try:
+                    parsed_def: ast.Expr = ast.parse(prop_def).body[0]
+                    stream_map_parsed.append((prop_key, prop_def, parsed_def))
+                except (SyntaxError, IndexError) as ex:
+                    msg = f"Failed to parse expression {prop_def}."
+                    raise MapExpressionError(msg) from ex
+
             else:
                 msg = (
                     f"Unexpected type '{type(prop_def).__name__}' in stream map for "
@@ -516,10 +516,14 @@ class CustomStreamMap(StreamMap):
 
         # Declare function variables
 
-        def eval_filter(filter_rule: str) -> t.Callable[[dict], bool]:
+        def eval_filter(
+            filter_rule: str,
+            filter_rule_parsed: ast.Expr,
+        ) -> t.Callable[[dict], bool]:
             def _inner(record: dict) -> bool:
                 filter_result = self._eval(
                     expr=filter_rule,
+                    expr_parsed=filter_rule_parsed,
                     record=record,
                     property_name=None,
                 )
@@ -541,7 +545,7 @@ class CustomStreamMap(StreamMap):
             return True
 
         if isinstance(filter_rule, str):
-            filter_fn = eval_filter(filter_rule)
+            filter_fn = eval_filter(filter_rule, filter_rule_parsed)
         elif filter_rule is None:
             filter_fn = always_true
         else:
@@ -566,16 +570,17 @@ class CustomStreamMap(StreamMap):
                     if key_property in record:
                         result[key_property] = record[key_property]
 
-            for prop_key, prop_def in list(stream_map.items()):
+            for prop_key, prop_def, prop_def_parsed in stream_map_parsed:
                 if prop_def in {None, NULL_STRING}:
                     # Remove property from result
                     result.pop(prop_key, None)
                     continue
 
-                if isinstance(prop_def, str):
+                if isinstance(prop_def_parsed, ast.Expr):
                     # Apply property transform
                     result[prop_key] = self._eval(
                         expr=prop_def,
+                        expr_parsed=prop_def_parsed,
                         record=record,
                         property_name=prop_key,
                     )

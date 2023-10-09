@@ -18,8 +18,8 @@ import sys
 import unittest
 import warnings
 
-from singer_sdk.helpers import _simpleeval as simpleeval
-from singer_sdk.helpers._simpleeval import (
+import simpleeval
+from simpleeval import (
     AttributeDoesNotExist,
     EvalWithCompoundTypes,
     FeatureNotAvailable,
