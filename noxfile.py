@@ -249,3 +249,20 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
     session.run("git", "init", external=True)
     session.run("git", "add", ".", external=True)
     session.run("pre-commit", "run", "--all-files", external=True)
+
+
+@session(name="version-bump")
+def version_bump(session: Session) -> None:
+    """Run commitizen."""
+    session.install(
+        "commitizen",
+        "commitizen-version-bump @ git+https://github.com/meltano/commitizen-version-bump.git@main",
+    )
+    session.run(
+        "cz",
+        "bump",
+        "--changelog",
+        "--files-only",
+        "--check-consistency",
+        "--changelog-to-stdout",
+    )
