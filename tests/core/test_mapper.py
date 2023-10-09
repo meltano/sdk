@@ -66,7 +66,7 @@ def sample_catalog_dict() -> dict:
                 ObjectType(
                     Property("id", IntegerType),
                     Property("value", OneOf(StringType, IntegerType, BooleanType)),
-                )
+                ),
             ),
         ),
     ).to_dict()
@@ -155,6 +155,19 @@ def sample_stream():
 
 @pytest.fixture
 def transform_stream_maps():
+    nested_jellybean_custom_field_1 = (
+        'dict([(x["id"], x["value"]) for x in custom_fields]).get(1)'
+    )
+    nested_jellybean_custom_field_2 = (
+        'int(dict([(x["id"], x["value"]) for x in custom_fields]).get(2)) '
+        'if dict([(x["id"], x["value"]) for x in custom_fields]).get(2) '
+        "else None"
+    )
+    nested_jellybean_custom_field_3 = (
+        'bool(dict([(x["id"], x["value"]) for x in custom_fields]).get(3)) '
+        'if dict([(x["id"], x["value"]) for x in custom_fields]).get(3) '
+        "else None"
+    )
     return {
         "repositories": {
             "repo_name": "_['name']",
@@ -168,9 +181,9 @@ def transform_stream_maps():
         },
         "nested_jellybean": {
             "custom_fields": "__NULL__",
-            "custom_field_1": 'dict([(x["id"], x["value"]) for x in custom_fields]).get(1)',
-            "custom_field_2": 'int(dict([(x["id"], x["value"]) for x in custom_fields]).get(2)) if dict([(x["id"], x["value"]) for x in custom_fields]).get(2) else None',
-            "custom_field_3": 'bool(dict([(x["id"], x["value"]) for x in custom_fields]).get(3)) if dict([(x["id"], x["value"]) for x in custom_fields]).get(3) else None',
+            "custom_field_1": nested_jellybean_custom_field_1,
+            "custom_field_2": nested_jellybean_custom_field_2,
+            "custom_field_3": nested_jellybean_custom_field_3,
         },
     }
 
