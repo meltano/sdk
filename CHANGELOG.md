@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.33.0b1 (2023-10-09)
+
+### ✨ New
+
+- [#1999](https://github.com/meltano/sdk/issues/1999) Log JSONPath match count at the INFO level
+- [#1779](https://github.com/meltano/sdk/issues/1779) Cache SQL columns and schemas
+
+### 🐛 Fixes
+
+- [#2006](https://github.com/meltano/sdk/issues/2006) Parse record `time_extracted` into `datetime.datetime` instance
+- [#1996](https://github.com/meltano/sdk/issues/1996) Respect nullability of leaf properties when flattening schema
+- [#1844](https://github.com/meltano/sdk/issues/1844) Safely skip parsing record field as date-time if it is missing in schema
+- [#1885](https://github.com/meltano/sdk/issues/1885) Map `record` field to a JSON `object` type
+
 ## v0.32.0 (2023-09-22)
 
 ## v0.32.0b3 (2023-09-22)
