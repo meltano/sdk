@@ -93,16 +93,20 @@ class StreamReturnsRecordTest(StreamTestTemplate):
 class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
     """Test all attributes in the catalog schema are present in the record schema."""
 
-    name = "catalog_schema_matches_record"
+    name = "transformed_catalog_schema_matches_record"
 
     def test(self) -> None:
         """Run test."""
-        stream_catalog_keys = set(self.stream.schema["properties"].keys())
+        stream_transformed_keys = set(
+            self.stream.stream_maps[-1].transformed_schema["properties"].keys(),
+        )
         stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
-        diff = stream_catalog_keys - stream_record_keys
+        diff = stream_transformed_keys - stream_record_keys
         if diff:
             warnings.warn(
-                UserWarning(f"Fields in catalog but not in records: ({diff})"),
+                UserWarning(
+                    f"Fields in transformed catalog but not in records: ({diff})",
+                ),
                 stacklevel=2,
             )
 
@@ -110,14 +114,16 @@ class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
 class StreamRecordSchemaMatchesCatalogTest(StreamTestTemplate):
     """Test all attributes in the record schema are present in the catalog schema."""
 
-    name = "record_schema_matches_catalog"
+    name = "record_schema_matches_transformed_catalog"
 
     def test(self) -> None:
         """Run test."""
-        stream_catalog_keys = set(self.stream.schema["properties"].keys())
+        stream_transformed_keys = set(
+            self.stream.stream_maps[-1].transformed_schema["properties"].keys(),
+        )
         stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
-        diff = stream_record_keys - stream_catalog_keys
-        assert not diff, f"Fields in records but not in catalog: ({diff})"
+        diff = stream_record_keys - stream_transformed_keys
+        assert not diff, f"Fields in records but not in transformed catalog: ({diff})"
 
 
 class StreamRecordMatchesStreamSchema(StreamTestTemplate):

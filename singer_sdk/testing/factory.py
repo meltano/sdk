@@ -197,32 +197,31 @@ class TapTestClassFactory:
                         test_params = []
                         test_ids: list[str] = []
                         for stream in streams:
+                            final_schema = stream.stream_maps[-1].transformed_schema[
+                                "properties"
+                            ]
                             test_params.extend(
                                 [
                                     {
                                         "stream": stream,
-                                        "attribute_name": property_name,
+                                        "attribute_name": prop_name,
                                     }
-                                    for property_name, property_schema in stream.schema[
-                                        "properties"
-                                    ].items()
+                                    for prop_name, prop_schema in final_schema.items()
                                     if test_class.evaluate(
                                         stream=stream,
-                                        property_name=property_name,
-                                        property_schema=property_schema,
+                                        property_name=prop_name,
+                                        property_schema=prop_schema,
                                     )
                                 ],
                             )
                             test_ids.extend(
                                 [
-                                    f"{stream.name}.{property_name}"
-                                    for property_name, property_schema in stream.schema[
-                                        "properties"
-                                    ].items()
+                                    f"{stream.name}.{prop_name}"
+                                    for prop_name, prop_schema in final_schema.items()
                                     if test_class.evaluate(
                                         stream=stream,
-                                        property_name=property_name,
-                                        property_schema=property_schema,
+                                        property_name=prop_name,
+                                        property_schema=prop_schema,
                                     )
                                 ],
                             )
