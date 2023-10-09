@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ New
 
-- [#1999](https://github.com/meltano/sdk/issues/1999) Log JSONPatch match count at the INFO level
+- [#1999](https://github.com/meltano/sdk/issues/1999) Log JSONPath match count at the INFO level
 - [#1779](https://github.com/meltano/sdk/issues/1779) Cache SQL columns and schemas
 
 ### 🐛 Fixes
