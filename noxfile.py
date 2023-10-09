@@ -258,11 +258,16 @@ def version_bump(session: Session) -> None:
         "commitizen",
         "commitizen-version-bump @ git+https://github.com/meltano/commitizen-version-bump.git@main",
     )
-    session.run(
-        "cz",
-        "bump",
+    default_args = [
         "--changelog",
         "--files-only",
         "--check-consistency",
         "--changelog-to-stdout",
+    ]
+    args = session.posargs or default_args
+
+    session.run(
+        "cz",
+        "bump",
+        *args,
     )
