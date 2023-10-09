@@ -60,8 +60,6 @@ jsonschema = ">=4.16.0"
 packaging = ">=23.1"
 pytz = ">=2022.2.1,<2024.0.0"
 PyYAML = ">=6.0"
-# urllib3 2.0 is not compatible with botocore
-urllib3 = ">=1.26,<2"
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
@@ -98,7 +96,6 @@ testing = [
 
 [tool.poetry.group.dev.dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
-commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
 cookiecutter = ">=2.1.1"
 coverage = {extras = ["toml"], version = ">=7.2"}
 duckdb = ">=0.8.0"
