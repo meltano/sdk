@@ -6,9 +6,10 @@ import enum
 import sys
 import typing as t
 from dataclasses import asdict, dataclass, field
+from datetime import timezone
 
-import pytz
 import simplejson as json
+from dateutil.parser import parse
 
 if t.TYPE_CHECKING:
     from datetime import datetime
@@ -84,6 +85,27 @@ class RecordMessage(Message):
     time_extracted: datetime | None = None
     """The time the record was extracted."""
 
+    @classmethod
+    def from_dict(cls: type[RecordMessage], data: dict[str, t.Any]) -> RecordMessage:
+        """Create a record message from a dictionary.
+
+        This overrides the default conversion logic, since it uses unnecessary
+        deep copying and is very slow.
+
+        Args:
+            data: The dictionary to create the message from.
+
+        Returns:
+            The created message.
+        """
+        time_extracted = data.get("time_extracted")
+        return cls(
+            stream=data["stream"],
+            record=data["record"],
+            version=data.get("version"),
+            time_extracted=parse(time_extracted) if time_extracted else None,
+        )
+
     def to_dict(self) -> dict[str, t.Any]:
         """Return a dictionary representation of the message.
 
@@ -119,7 +141,7 @@ class RecordMessage(Message):
             raise ValueError(msg)
 
         if self.time_extracted:
-            self.time_extracted = self.time_extracted.astimezone(pytz.utc)
+            self.time_extracted = self.time_extracted.astimezone(timezone.utc)
 
 
 @dataclass
