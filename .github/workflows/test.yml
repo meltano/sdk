@@ -101,13 +101,6 @@ jobs:
         name: coverage-data
         path: ".coverage.*"
 
-    - name: Comment with Pytest-Benchmark Result
-      if: always() && (matrix.session == 'benches')
-      uses: nils-braun/pytest-benchmark-commenter@v2.0.2
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        benchmark-file: output.json
-
     - name: Upload Benchmark Result
       if: always() && (matrix.session == 'benches')
       uses: actions/upload-artifact@v3.1.2
