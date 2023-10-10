@@ -118,6 +118,7 @@ types-requests = ">=2.28.11"
 types-simplejson = ">=3.18.0"
 types-PyYAML = ">=6.0.12"
 xdoctest = ">=1.1.1"
+pytest-benchmark = "^4.0.0"
 
 [tool.black]
 exclude = ".*simpleeval.*"
