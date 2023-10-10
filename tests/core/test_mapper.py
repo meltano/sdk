@@ -358,17 +358,15 @@ def test_filter_transforms_w_error(
         )
 
 
-def _test_transform(
-    test_name: str,
+def _run_transform(
     *,
     stream_maps,
     stream_map_config,
-    expected_result,
-    expected_schemas,
     sample_stream,
     sample_catalog_obj,
 ):
     output: dict[str, list[dict]] = {}
+    output_schemas = {}
     mapper = PluginMapper(
         plugin_config={
             "stream_maps": stream_maps,
@@ -383,15 +381,7 @@ def _test_transform(
             if isinstance(stream_map, RemoveRecordTransform):
                 logging.info("Skipping ignored stream '%s'", stream_name)
                 continue
-
-            assert (
-                expected_schemas[stream_map.stream_alias]
-                == stream_map.transformed_schema
-            ), (
-                f"Failed '{test_name}' schema test. Generated schema was "
-                f"{json.dumps(stream_map.transformed_schema, indent=2)}"
-            )
-
+            output_schemas[stream_map.stream_alias] = stream_map.transformed_schema
             output[stream_map.stream_alias] = []
             for record in stream:
                 result = stream_map.transform(record)
@@ -400,6 +390,39 @@ def _test_transform(
                     continue
 
                 output[stream_map.stream_alias].append(result)
+    return output, output_schemas
+
+
+def _test_transform(
+    test_name: str,
+    *,
+    stream_maps,
+    stream_map_config,
+    expected_result,
+    expected_schemas,
+    sample_stream,
+    sample_catalog_obj,
+):
+    output, output_schemas = _run_transform(
+        stream_maps=stream_maps,
+        stream_map_config=stream_map_config,
+        sample_stream=sample_stream,
+        sample_catalog_obj=sample_catalog_obj,
+    )
+
+    assert set(expected_schemas.keys()) == set(output_schemas.keys()), (
+        f"Failed `{test_name}` schema test. "
+        f"'{set(expected_schemas.keys()) - set(output_schemas.keys())}' "
+        "schemas not found. "
+        f"'{set(output_schemas.keys()) - set(expected_schemas.keys())}' "
+        "schemas not expected. "
+    )
+    for expected_schema_name, expected_schema in expected_schemas.items():
+        output_schema = output_schemas[expected_schema_name]
+        assert expected_schema == output_schema, (
+            f"Failed '{test_name}' schema test. Generated schema was "
+            f"{json.dumps(output_schema, indent=2)}"
+        )
 
     assert expected_result == output, (
         f"Failed '{test_name}' record result test. "
@@ -665,3 +688,37 @@ def test_mapped_stream(
 
     buf.seek(0)
     snapshot.assert_match(buf.read(), snapshot_name)
+
+
+def test_bench_simple_map_transforms(
+    benchmark,
+    sample_stream,
+    sample_catalog_dict,
+    transform_stream_maps,
+    stream_map_config,
+):
+    """Run benchmark tests using the "repositories" stream."""
+    stream_size_scale = 1000
+
+    repositories_catalog = {
+        "streams": [
+            x
+            for x in sample_catalog_dict["streams"]
+            if x["tap_stream_id"] == "repositories"
+        ],
+    }
+
+    repositories_sample_stream = {
+        "repositories": sample_stream["repositories"] * stream_size_scale,
+    }
+    repositories_transform_stream_maps = {
+        "repositories": transform_stream_maps["repositories"],
+    }
+    repositories_sample_catalog_obj = Catalog.from_dict(repositories_catalog)
+    benchmark(
+        _run_transform,
+        stream_maps=repositories_transform_stream_maps,
+        stream_map_config=stream_map_config,
+        sample_stream=repositories_sample_stream,
+        sample_catalog_obj=repositories_sample_catalog_obj,
+    )

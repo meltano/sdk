@@ -34,6 +34,7 @@ locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = (
     "mypy",
     "tests",
+    "benches",
     "doctest",
     "test_cookiecutter",
 )
@@ -44,6 +45,7 @@ test_dependencies = [
     "pytest",
     "pytest-snapshot",
     "pytest-durations",
+    "pytest-benchmark",
     "pyarrow",
     "requests-mock",
     "time-machine",
@@ -104,11 +106,32 @@ def tests(session: Session) -> None:
             "pytest",
             "-v",
             "--durations=10",
+            "--benchmark-skip",
             *session.posargs,
         )
     finally:
         if session.interactive:
             session.notify("coverage", posargs=[])
+
+
+@session(python=main_python_version)
+def benches(session: Session) -> None:
+    """Run benchmarks."""
+    session.install(".[s3]")
+    session.install(*test_dependencies)
+    sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
+    if sqlalchemy_version:
+        # Bypass nox-poetry use of --constraint so we can install a version of
+        # SQLAlchemy that doesn't match what's in poetry.lock.
+        session.poetry.session.install(  # type: ignore[attr-defined]
+            f"sqlalchemy=={sqlalchemy_version}",
+        )
+    session.run(
+        "pytest",
+        "--benchmark-only",
+        "--benchmark-json=output.json",
+        *session.posargs,
+    )
 
 
 @session(python=main_python_version)
