@@ -89,10 +89,18 @@ jobs:
         nox --version
 
     - name: Run Nox
+      if: always() && (matrix.session != 'benches')
       env:
         SQLALCHEMY_VERSION: ${{ matrix.sqlalchemy }}
       run: |
         nox --python=${{ matrix.python-version }}
+
+    - name: Run Nox
+      uses: CodSpeedHQ/action@v1
+      if: always() && (matrix.session == 'benches')
+      with:
+        token: ${{ secrets.CODSPEED_TOKEN }}
+        run: nox --python=${{ matrix.python-version }}
 
     - name: Upload coverage data
       if: always() && (matrix.session == 'tests')
@@ -100,13 +108,6 @@ jobs:
       with:
         name: coverage-data
         path: ".coverage.*"
-
-    - name: Upload Benchmark Result
-      if: always() && (matrix.session == 'benches')
-      uses: actions/upload-artifact@v3.1.2
-      with:
-        name: benchmark_results
-        path: output.json
 
   tests-external:
     name: External Tests

@@ -109,6 +109,8 @@ numpy = [
     { version = ">=1.22", python = ">=3.8" },
 ]
 pyarrow = ">=11,<13"
+pytest-benchmark = "^4.0.0"
+pytest-codspeed = "^2.2.0"
 pytest-snapshot = ">=0.9.0"
 requests-mock = ">=1.10.0"
 time-machine = ">=2.10.0"
@@ -119,7 +121,6 @@ types-requests = ">=2.28.11"
 types-simplejson = ">=3.18.0"
 types-PyYAML = ">=6.0.12"
 xdoctest = ">=1.1.1"
-pytest-benchmark = "^4.0.0"
 
 [tool.black]
 exclude = ".*simpleeval.*"
