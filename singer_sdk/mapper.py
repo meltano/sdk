@@ -13,7 +13,7 @@ import hashlib
 import logging
 import typing as t
 
-import simpleeval
+import simpleeval  # type: ignore[import]
 
 import singer_sdk.typing as th
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
@@ -409,7 +409,7 @@ class CustomStreamMap(StreamMap):
         if stream_map and MAPPER_FILTER_OPTION in stream_map:
             filter_rule = stream_map.pop(MAPPER_FILTER_OPTION)
             try:
-                filter_rule_parsed: ast.Expr = ast.parse(filter_rule).body[0]
+                filter_rule_parsed: ast.Expr = ast.parse(filter_rule).body[0]  # type: ignore[arg-type,assignment]
             except (SyntaxError, IndexError) as ex:
                 msg = f"Failed to parse expression {filter_rule}."
                 raise MapExpressionError(msg) from ex
@@ -489,7 +489,7 @@ class CustomStreamMap(StreamMap):
                     ).to_dict(),
                 )
                 try:
-                    parsed_def: ast.Expr = ast.parse(prop_def).body[0]
+                    parsed_def: ast.Expr = ast.parse(prop_def).body[0]  # type: ignore[assignment]
                     stream_map_parsed.append((prop_key, prop_def, parsed_def))
                 except (SyntaxError, IndexError) as ex:
                     msg = f"Failed to parse expression {prop_def}."
@@ -579,7 +579,7 @@ class CustomStreamMap(StreamMap):
                 if isinstance(prop_def_parsed, ast.Expr):
                     # Apply property transform
                     result[prop_key] = self._eval(
-                        expr=prop_def,
+                        expr=prop_def,  # type: ignore[arg-type]
                         expr_parsed=prop_def_parsed,
                         record=record,
                         property_name=prop_key,
