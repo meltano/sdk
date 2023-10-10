@@ -101,11 +101,19 @@ jobs:
         name: coverage-data
         path: ".coverage.*"
 
-    - name: Upload benchmark result
-      uses: benchmark-action/github-action-benchmark@v1
-      if: always() && (matrix.session == "benches")
+    - name: Comment with Pytest-Benchmark Result
+      if: always() && (matrix.session == 'benches')
+      uses: nils-braun/pytest-benchmark-commenter@v2.0.2
       with:
-        output-file-path: "bench.json"
+        token: ${{ secrets.GITHUB_TOKEN }}
+        benchmark-file: output.json
+
+    - name: Upload Benchmark Result
+      if: always() && (matrix.session == 'benches')
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: benchmark_results
+        path: output.json
 
   tests-external:
     name: External Tests

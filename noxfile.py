@@ -129,7 +129,7 @@ def benches(session: Session) -> None:
     session.run(
         "pytest",
         "--benchmark-only",
-        "--benchmark-json=bench.json",
+        "--benchmark-json=output.json",
         *session.posargs,
     )
 
