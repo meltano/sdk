@@ -20,7 +20,6 @@ except ImportError:
     {sys.executable} -m pip install nox-poetry"""
     raise SystemExit(dedent(message)) from None
 
-GH_ACTIONS_ENV_VAR = "GITHUB_ACTIONS"
 RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
 extend-ignore = ["TD002", "TD003", "FIX002"]
@@ -45,7 +44,6 @@ test_dependencies = [
     "duckdb-engine",
     "pytest",
     "pytest-benchmark",
-    "pytest-codspeed",
     "pytest-durations",
     "pytest-snapshot",
     "pyarrow",
@@ -121,15 +119,19 @@ def benches(session: Session) -> None:
     """Run benchmarks."""
     session.install(".[s3]")
     session.install(*test_dependencies)
-
-    if session.posargs:
-        args = [*session.posargs]
-    elif GH_ACTIONS_ENV_VAR in os.environ:
-        args = ["--codspeed"]
-    else:
-        args = ["--benchmark-only", "--benchmark-json=output.json"]
-
-    session.run("pytest", *args)
+    sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
+    if sqlalchemy_version:
+        # Bypass nox-poetry use of --constraint so we can install a version of
+        # SQLAlchemy that doesn't match what's in poetry.lock.
+        session.poetry.session.install(  # type: ignore[attr-defined]
+            f"sqlalchemy=={sqlalchemy_version}",
+        )
+    session.run(
+        "pytest",
+        "--benchmark-only",
+        "--benchmark-json=output.json",
+        *session.posargs,
+    )
 
 
 @session(python=main_python_version)
