@@ -23,16 +23,16 @@ jobs:
     #     pipx install poetry
     #     poetry --version
 
-    - name: Install poetry
-      run: |
-        curl -fsS https://install.python-poetry.org | python - -y
-
     - name: Setup Python 3.11
       uses: actions/setup-python@v4.7.1
       with:
         python-version: 3.11
         architecture: x64
         # cache: 'poetry'
+
+    - name: Install poetry
+      run: |
+        curl -fsS https://install.python-poetry.org | python - -y
 
     - name: Configure poetry
       run: poetry config virtualenvs.create false
