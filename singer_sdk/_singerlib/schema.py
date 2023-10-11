@@ -48,6 +48,7 @@ class Schema:
     """
 
     type: str | list[str] | None = None  # noqa: A003
+    default: t.Any | None = None
     properties: dict | None = None
     items: t.Any | None = None
     description: str | None = None
