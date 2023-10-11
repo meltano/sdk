@@ -44,6 +44,10 @@ jobs:
         --only dev
         --only benchmark
 
+    - name: Install project
+      run: |
+        poetry install -vvv --without dev --all-extras
+
     - name: Run benchmarks
       uses: CodSpeedHQ/action@v1
       with:
