@@ -89,18 +89,10 @@ jobs:
         nox --version
 
     - name: Run Nox
-      if: always() && (matrix.session != 'benches')
       env:
         SQLALCHEMY_VERSION: ${{ matrix.sqlalchemy }}
       run: |
         nox --python=${{ matrix.python-version }}
-
-    - name: Run Nox
-      uses: CodSpeedHQ/action@v1
-      if: always() && (matrix.session == 'benches')
-      with:
-        token: ${{ secrets.CODSPEED_TOKEN }}
-        run: nox --no-venv -v --python=${{ matrix.python-version }}
 
     - name: Upload coverage data
       if: always() && (matrix.session == 'tests')
