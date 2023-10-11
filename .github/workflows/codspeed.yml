@@ -16,37 +16,30 @@ jobs:
     - name: Check out the repository
       uses: actions/checkout@v4.1.0
 
-    # - name: Install Poetry
-    #   env:
-    #     PIP_CONSTRAINT: .github/workflows/constraints.txt
-    #   run: |
-    #     pipx install poetry
-    #     poetry --version
+    - name: Install Poetry
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
+      run: |
+        pipx install poetry
+        poetry --version
 
     - name: Setup Python 3.11
       uses: actions/setup-python@v4.7.1
       with:
         python-version: 3.11
         architecture: x64
-        # cache: 'poetry'
-
-    - name: Install poetry
-      run: |
-        curl -fsS https://install.python-poetry.org | python - -y
+        cache: 'poetry'
 
     - name: Configure poetry
       run: poetry config virtualenvs.create false
 
-    - name: Install requirements
+    - name: Install project
       run: >
         poetry install
         -vvv
-        --only dev
-        --only benchmark
-
-    - name: Install project
-      run: |
-        poetry install -vvv --without dev --all-extras
+        --with dev
+        --with benchmark
+        --all-extras
 
     - name: Run benchmarks
       uses: CodSpeedHQ/action@v1
