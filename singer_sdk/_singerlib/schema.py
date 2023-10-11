@@ -21,6 +21,7 @@ STANDARD_KEYS = [
     "minLength",
     "format",
     "type",
+    "default",
     "required",
     "enum",
     "pattern",
