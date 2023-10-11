@@ -5,9 +5,9 @@ import pytest
 from singer_sdk._singerlib import Schema, resolve_schema_references
 
 STRING_SCHEMA = Schema(type="string", maxLength=32, default="")
-STRING_DICT = {"type": "string", "maxLength": 32 , "default":""}
+STRING_DICT = {"type": "string", "maxLength": 32, "default": ""}
 INTEGER_SCHEMA = Schema(type="integer", maximum=1000000, default=0)
-INTEGER_DICT = {"type": "integer", "maximum": 1000000, "default":0}
+INTEGER_DICT = {"type": "integer", "maximum": 1000000, "default": 0}
 ARRAY_SCHEMA = Schema(type="array", items=INTEGER_SCHEMA)
 ARRAY_DICT = {"type": "array", "items": INTEGER_DICT}
 OBJECT_SCHEMA = Schema(
