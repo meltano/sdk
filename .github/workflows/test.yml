@@ -100,7 +100,7 @@ jobs:
       if: always() && (matrix.session == 'benches')
       with:
         token: ${{ secrets.CODSPEED_TOKEN }}
-        run: nox -v --python=${{ matrix.python-version }}
+        run: nox --no-venv -v --python=${{ matrix.python-version }}
 
     - name: Upload coverage data
       if: always() && (matrix.session == 'tests')
