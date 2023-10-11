@@ -181,8 +181,6 @@ stream_maps:
 ```
 ````
 
-2007-docs-document-using-comprehensions-in-stream-maps-expressions
-
 ### Accessing Stream Properties within Mapping Expressions
 
 By default, all stream properties are made available via the property's given name. For
