@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.33.0b2 (2023-10-11)
+
+### ✨ New
+
+- [#2003](https://github.com/meltano/sdk/issues/2003) Add ability to do list comprehensions in stream map expressions -- _**Thanks @haleemur!**_
+
+### 🐛 Fixes
+
+- [#2015](https://github.com/meltano/sdk/issues/2015) Ensure `default` property is passed to SCHEMA messages -- _**Thanks @prakharcode!**_
+
 ## v0.33.0b1 (2023-10-09)
 
 ### ✨ New
