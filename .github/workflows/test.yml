@@ -52,6 +52,7 @@ jobs:
         - { session: tests,   python-version: "3.11", os: "ubuntu-latest", sqlalchemy: "1.*" }
         - { session: doctest, python-version: "3.10", os: "ubuntu-latest", sqlalchemy: "2.*" }
         - { session: mypy,    python-version: "3.8",  os: "ubuntu-latest", sqlalchemy: "2.*" }
+        - { session: benches, python-version: "3.10", os: "ubuntu-latest", sqlalchemy: "2.*" }
 
     steps:
     - name: Check out the repository

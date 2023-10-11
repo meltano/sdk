@@ -37,11 +37,8 @@ jobs:
       run: >
         poetry install
         -vvv
-        --format requirements.txt
-        --without-hashes
         --only dev
         --only benchmark
-        -o requirements.txt
 
     - name: Run benchmarks
       uses: CodSpeedHQ/action@v1
