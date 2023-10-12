@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.33.0 (2023-10-12)
+
+### ✨ New
+
+- [#2018](https://github.com/meltano/sdk/issues/2018) Drop Python 3.7 support in cookiecutter templates -- _**Thanks @visch!**_
+
+### 📚 Documentation Improvements
+
+- [#2017](https://github.com/meltano/sdk/issues/2017) Document support for comprehenions in stream maps
+
 ## v0.33.0b2 (2023-10-11)
 
 ### ✨ New
