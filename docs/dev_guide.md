@@ -257,13 +257,14 @@ We've had success using [`viztracer`](https://github.com/gaogaotiantian/viztrace
 You can start doing the same in your package. Start by installing `viztracer`.
 
 ```console
-$ poetry add --dev viztracer
+$ poetry add --group dev viztracer
 ```
 
 Then simply run your package's CLI as normal, preceded by the `viztracer` command
 
 ```console
 $ poetry run viztracer my-tap
+$ poetry run viztracer -- my-target --config=config.json --input=messages.json
 ```
 
 That command will produce a `result.json` file which you can explore with the `vizviewer` tool.

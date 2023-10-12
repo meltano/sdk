@@ -34,18 +34,21 @@ locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = (
     "mypy",
     "tests",
+    "benches",
     "doctest",
     "test_cookiecutter",
 )
 test_dependencies = [
     "coverage[toml]",
+    "duckdb",
+    "duckdb-engine",
     "pytest",
     "pytest-snapshot",
     "pytest-durations",
-    "freezegun",
-    "pandas",
+    "pytest-benchmark",
     "pyarrow",
     "requests-mock",
+    "time-machine",
     # Cookiecutter tests
     "black",
     "cookiecutter",
@@ -103,11 +106,32 @@ def tests(session: Session) -> None:
             "pytest",
             "-v",
             "--durations=10",
+            "--benchmark-skip",
             *session.posargs,
         )
     finally:
         if session.interactive:
             session.notify("coverage", posargs=[])
+
+
+@session(python=main_python_version)
+def benches(session: Session) -> None:
+    """Run benchmarks."""
+    session.install(".[s3]")
+    session.install(*test_dependencies)
+    sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
+    if sqlalchemy_version:
+        # Bypass nox-poetry use of --constraint so we can install a version of
+        # SQLAlchemy that doesn't match what's in poetry.lock.
+        session.poetry.session.install(  # type: ignore[attr-defined]
+            f"sqlalchemy=={sqlalchemy_version}",
+        )
+    session.run(
+        "pytest",
+        "--benchmark-only",
+        "--benchmark-json=output.json",
+        *session.posargs,
+    )
 
 
 @session(python=main_python_version)
@@ -248,3 +272,25 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
     session.run("git", "init", external=True)
     session.run("git", "add", ".", external=True)
     session.run("pre-commit", "run", "--all-files", external=True)
+
+
+@session(name="version-bump")
+def version_bump(session: Session) -> None:
+    """Run commitizen."""
+    session.install(
+        "commitizen",
+        "commitizen-version-bump @ git+https://github.com/meltano/commitizen-version-bump.git@main",
+    )
+    default_args = [
+        "--changelog",
+        "--files-only",
+        "--check-consistency",
+        "--changelog-to-stdout",
+    ]
+    args = session.posargs or default_args
+
+    session.run(
+        "cz",
+        "bump",
+        *args,
+    )

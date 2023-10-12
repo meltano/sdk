@@ -21,8 +21,20 @@ if t.TYPE_CHECKING:
 class BaseTestClass:
     """Base test class."""
 
-    params: t.ClassVar[dict] = {}
-    param_ids: t.ClassVar[dict] = {}
+    params: dict[str, t.Any]
+    param_ids: dict[str, list[str]]
+
+    def __init_subclass__(cls, **kwargs: t.Any) -> None:
+        """Initialize a subclass.
+
+        Args:
+            **kwargs: Keyword arguments.
+        """
+        # Add empty params and param_ids attributes to a direct subclass but not to
+        # subclasses of subclasses
+        if cls.__base__ == BaseTestClass:
+            cls.params = {}
+            cls.param_ids = {}
 
 
 class TapTestClassFactory:
@@ -183,34 +195,33 @@ class TapTestClassFactory:
                         test = test_class()
                         test_name = f"test_{suite.kind}_{test.name}"
                         test_params = []
-                        test_ids = []
+                        test_ids: list[str] = []
                         for stream in streams:
+                            final_schema = stream.stream_maps[-1].transformed_schema[
+                                "properties"
+                            ]
                             test_params.extend(
                                 [
                                     {
                                         "stream": stream,
-                                        "attribute_name": property_name,
+                                        "attribute_name": prop_name,
                                     }
-                                    for property_name, property_schema in stream.schema[
-                                        "properties"
-                                    ].items()
+                                    for prop_name, prop_schema in final_schema.items()
                                     if test_class.evaluate(
                                         stream=stream,
-                                        property_name=property_name,
-                                        property_schema=property_schema,
+                                        property_name=prop_name,
+                                        property_schema=prop_schema,
                                     )
                                 ],
                             )
                             test_ids.extend(
                                 [
-                                    f"{stream.name}.{property_name}"
-                                    for property_name, property_schema in stream.schema[
-                                        "properties"
-                                    ].items()
+                                    f"{stream.name}.{prop_name}"
+                                    for prop_name, prop_schema in final_schema.items()
                                     if test_class.evaluate(
                                         stream=stream,
-                                        property_name=property_name,
-                                        property_schema=property_schema,
+                                        property_name=prop_name,
+                                        property_schema=prop_schema,
                                     )
                                 ],
                             )

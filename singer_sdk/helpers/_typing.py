@@ -4,20 +4,20 @@ from __future__ import annotations
 
 import copy
 import datetime
+import logging
 import typing as t
 from enum import Enum
 from functools import lru_cache
 
 import pendulum
 
-if t.TYPE_CHECKING:
-    import logging
-
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"
 JSONSCHEMA_ANNOTATION_SECRET = "secret"  # noqa: S105
 JSONSCHEMA_ANNOTATION_WRITEONLY = "writeOnly"
 UTC = datetime.timezone.utc
+
+logger = logging.getLogger(__name__)
 
 
 class DatetimeErrorTreatmentEnum(Enum):
@@ -74,11 +74,12 @@ def append_type(type_dict: dict, new_type: str) -> dict:
             result["type"] = [*type_array, new_type]
         return result
 
-    msg = (
+    logger.warning(
         "Could not append type because the JSON schema for the dictionary "
-        f"`{type_dict}` appears to be invalid."
+        "`%s` appears to be invalid.",
+        type_dict,
     )
-    raise ValueError(msg)
+    return result
 
 
 def is_secret_type(type_dict: dict) -> bool:

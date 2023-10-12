@@ -52,10 +52,11 @@ jobs:
         - { session: tests,   python-version: "3.11", os: "ubuntu-latest", sqlalchemy: "1.*" }
         - { session: doctest, python-version: "3.10", os: "ubuntu-latest", sqlalchemy: "2.*" }
         - { session: mypy,    python-version: "3.8",  os: "ubuntu-latest", sqlalchemy: "2.*" }
+        - { session: benches, python-version: "3.10", os: "ubuntu-latest", sqlalchemy: "2.*" }
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.3
+      uses: actions/checkout@v4.1.0
 
     - name: Install Poetry
       env:
@@ -65,7 +66,7 @@ jobs:
         poetry --version
 
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4.7.0
+      uses: actions/setup-python@v4.7.1
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
@@ -100,6 +101,13 @@ jobs:
         name: coverage-data
         path: ".coverage.*"
 
+    - name: Upload Benchmark Result
+      if: always() && (matrix.session == 'benches')
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: benchmark_results
+        path: output.json
+
   tests-external:
     name: External Tests
     runs-on: ubuntu-latest
@@ -115,7 +123,7 @@ jobs:
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.3
+      uses: actions/checkout@v4.1.0
 
     - name: Install Poetry
       env:
@@ -125,7 +133,7 @@ jobs:
         poetry --version
 
     - name: Setup Python 3.10
-      uses: actions/setup-python@v4.7.0
+      uses: actions/setup-python@v4.7.1
       with:
         python-version: '3.10'
         architecture: x64
@@ -157,7 +165,7 @@ jobs:
     needs: tests
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v3.5.3
+      uses: actions/checkout@v4.1.0
 
     - name: Install Poetry
       run: |
@@ -165,7 +173,7 @@ jobs:
         poetry --version
 
     - name: Set up Python
-      uses: actions/setup-python@v4.7.0
+      uses: actions/setup-python@v4.7.1
       with:
         python-version: '3.10'
         cache: 'pip'
