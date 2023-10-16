@@ -155,6 +155,32 @@ Expressions are defined and parsed using the
 accepts most native python expressions and is extended by custom functions which have been declared
 within the SDK.
 
+#### Compound Expressions
+
+Starting in version 0.33.0, the SDK supports the use of simple comprehensions, e.g. `[x + 1 for x in [1,2,3]]`. This is a powerful feature which allows you to perform complex transformations on lists of values. For example, you can use comprehensions to filter out values in an array:
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  users:
+    id: id
+    fields: "[f for f in fields if f['key'] != 'age']"
+```
+````
+
+````{tab} JSON
+```json
+{
+  "stream_maps": {
+    "users": {
+      "id": "id",
+      "fields": "[f for f in fields if f['key'] != 'age']"
+    }
+  }
+}
+```
+````
+
 ### Accessing Stream Properties within Mapping Expressions
 
 By default, all stream properties are made available via the property's given name. For

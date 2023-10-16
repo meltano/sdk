@@ -21,13 +21,13 @@ packages = [
 {%- endif %}
 
 [tool.poetry.dependencies]
-python = ">=3.7.1,<4"
-singer-sdk = { version="~=0.32.0" }
+python = ">=3.8,<4"
+singer-sdk = { version="~=0.33.0" }
 fs-s3fs = { version = "~=1.1.1", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.4.0"
-singer-sdk = { version="~=0.32.0", extras = ["testing"] }
+singer-sdk = { version="~=0.33.0", extras = ["testing"] }
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
