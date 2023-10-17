@@ -5,22 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v0.32.0 (2023-09-22)
+## v0.33.0 (2023-10-12)
 
-## v0.32.0b3 (2023-09-22)
+### ✨ New
+
+- [#1999](https://github.com/meltano/sdk/issues/1999) Log JSONPath match count at the INFO level
+- [#1779](https://github.com/meltano/sdk/issues/1779) Cache SQL columns and schemas
+- [#2003](https://github.com/meltano/sdk/issues/2003) Add ability to do list comprehensions in stream map expressions -- _**Thanks @haleemur!**_
+- [#2018](https://github.com/meltano/sdk/issues/2018) Drop Python 3.7 support in cookiecutter templates -- _**Thanks @visch!**_
 
 ### 🐛 Fixes
 
-- [#1977](https://github.com/meltano/sdk/issues/1977) Fix hanging downstream tests in tap-postgres
-- [#1970](https://github.com/meltano/sdk/issues/1970) Warn instead of crashing when schema helpers cannot append `null` to types
+- [#2006](https://github.com/meltano/sdk/issues/2006) Parse record `time_extracted` into `datetime.datetime` instance
+- [#1996](https://github.com/meltano/sdk/issues/1996) Respect nullability of leaf properties when flattening schema
+- [#1844](https://github.com/meltano/sdk/issues/1844) Safely skip parsing record field as date-time if it is missing in schema
+- [#1885](https://github.com/meltano/sdk/issues/1885) Map `record` field to a JSON `object` type
+- [#2015](https://github.com/meltano/sdk/issues/2015) Ensure `default` property is passed to SCHEMA messages -- _**Thanks @prakharcode!**_
 
-## v0.32.0b2 (2023-09-15)
+### 📚 Documentation Improvements
 
-### ⚡ Performance Improvements
+- [#2017](https://github.com/meltano/sdk/issues/2017) Document support for comprehensions in stream maps
 
-- [#1962](https://github.com/meltano/sdk/issues/1962) Ensure `raw_schema` in stream mapper is immutable
-
-## v0.32.0b1 (2023-09-13)
+## v0.32.0 (2023-09-22)
 
 ### ✨ New
 
@@ -34,10 +40,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#1949](https://github.com/meltano/sdk/issues/1949) Retry SQLAlchemy engine creation for adapters without JSON SerDe support
 - [#1939](https://github.com/meltano/sdk/issues/1939) Handle `decimal.Decimal` instances in flattening
 - [#1927](https://github.com/meltano/sdk/issues/1927) Handle replication key not found in stream schema -- _**Thanks @mjsqu!**_
+- [#1977](https://github.com/meltano/sdk/issues/1977) Fix hanging downstream tests in tap-postgres
+- [#1970](https://github.com/meltano/sdk/issues/1970) Warn instead of crashing when schema helpers cannot append `null` to types
 
-### 📚 Documentation Improvements
+### ⚡ Performance Improvements
 
 - [#1925](https://github.com/meltano/sdk/issues/1925) Add viztracer command for testing targets -- _**Thanks @mjsqu!**_
+
+- [#1962](https://github.com/meltano/sdk/issues/1962) Ensure `raw_schema` in stream mapper is immutable
 
 ## v0.31.1 (2023-08-17)
 
