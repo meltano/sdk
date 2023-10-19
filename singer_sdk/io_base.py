@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import decimal
 import logging
+import re
 import sys
 import typing as t
 from collections import Counter, defaultdict
@@ -15,6 +16,7 @@ import msgspec
 from singer_sdk._singerlib import SingerMessageType
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._conformers import replace_leading_digit
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +97,33 @@ class SingerReader(metaclass=abc.ABCMeta):
             logger.error("Unable to parse:\n%s", line, exc_info=exc)
             raise
 
+    def conform_name(
+        self,
+        name: str,
+    ) -> str:
+        """Conform a stream property name to one suitable for the target system.
+
+        Transforms names to snake case by default, applicable to most common DBMSs'.
+        Developers may override this method to apply custom transformations
+        to database/schema/table/column names.
+
+        Args:
+            name: Property name.
+
+
+        Returns:
+            The name transformed to snake case.
+        """
+        # strip non-alphanumeric characters
+        name = re.sub(r"[^a-zA-Z0-9_\-\.\s]", "", name)
+        # strip leading/trailing whitespace,
+        # transform to lowercase and replace - . and spaces to _
+        name = (
+            name.lstrip().rstrip().replace(".", "_").replace("-", "_").replace(" ", "_")
+        )
+        # replace leading digit
+        return replace_leading_digit(name)
+
     def deserialize_record(self, line: str) -> dict:
         """Deserialize a line of json.
 
@@ -128,7 +157,7 @@ class SingerReader(metaclass=abc.ABCMeta):
             raise (RecordsWithoutSchemaException)
 
         clean_record = {
-            key: val
+            self.conform_name(key): val
             for key, val in msgspec.structs.asdict(record).items()
             if val != msgspec.UNSET
         }
@@ -148,6 +177,7 @@ class SingerReader(metaclass=abc.ABCMeta):
         required_fields: list = schema_msg.get("schema", {}).get("required", [])
         fields: list = []
         for field_name, definition in properties.items():
+            conformed_field_name: str = self.conform_name(field_name)
             field_json_type: list = definition.get("type", [])
             is_not_required: bool = field_name not in required_fields
             is_not_primarykey: bool = field_name not in key_properties
@@ -159,11 +189,13 @@ class SingerReader(metaclass=abc.ABCMeta):
                 field_type = int
 
             if field_type is None:
-                fields.append(field_name)
+                fields.append(conformed_field_name)
             elif is_not_primarykey or is_not_required or can_be_null:
-                fields.append((field_name, t.Optional[field_type], msgspec.UNSET))
+                fields.append(
+                    (conformed_field_name, t.Optional[field_type], msgspec.UNSET),
+                )
             else:
-                fields.append((field_name, field_type))
+                fields.append((conformed_field_name, field_type))
 
         self.stream_structs[stream] = msgspec.defstruct(
             stream,
