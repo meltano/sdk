@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import decimal
 import logging
 import sys
 import typing as t
@@ -34,7 +35,7 @@ class Record(msgspec.Struct):
     time_extracted: t.Optional[datetime] = None  # noqa: UP007
 
 
-decoder = msgspec.json.Decoder(dec_hook=str)
+decoder = msgspec.json.Decoder(dec_hook=str, float_hook=decimal.Decimal)
 type_decoder = msgspec.json.Decoder(type=MessageType)
 
 
