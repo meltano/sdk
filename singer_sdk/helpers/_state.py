@@ -18,12 +18,12 @@ SIGNPOST_MARKER = "replication_key_signpost"
 STARTING_MARKER = "starting_replication_value"
 
 
-def get_state_if_exists(  # noqa: PLR0911
+def get_state_if_exists(
     tap_state: dict,
     tap_stream_id: str,
     state_partition_context: dict | None = None,
     key: str | None = None,
-) -> t.Any | None:
+) -> t.Any | None:  # noqa: ANN401
     """Return the stream or partition state, creating a new one if it does not exist.
 
     Args:
@@ -47,9 +47,7 @@ def get_state_if_exists(  # noqa: PLR0911
 
     stream_state = tap_state["bookmarks"][tap_stream_id]
     if not state_partition_context:
-        if key:
-            return stream_state.get(key, None)
-        return stream_state
+        return stream_state.get(key, None) if key else stream_state
     if "partitions" not in stream_state:
         return None  # No partitions defined
 
@@ -59,9 +57,7 @@ def get_state_if_exists(  # noqa: PLR0911
     )
     if matched_partition is None:
         return None  # Partition definition not present
-    if key:
-        return matched_partition.get(key, None)
-    return matched_partition
+    return matched_partition.get(key, None) if key else matched_partition
 
 
 def get_state_partitions_list(tap_state: dict, tap_stream_id: str) -> list[dict] | None:
@@ -84,10 +80,7 @@ def _find_in_partitions_list(
             f"{{state_partition_context}}.\nMatching state values were: {found!s}"
         )
         raise ValueError(msg)
-    if found:
-        return t.cast(dict, found[0])
-
-    return None
+    return t.cast(dict, found[0]) if found else None
 
 
 def _create_in_partitions_list(
@@ -134,18 +127,20 @@ def get_writeable_state_dict(
     if "partitions" not in stream_state:
         stream_state["partitions"] = []
     stream_state_partitions: list[dict] = stream_state["partitions"]
-    found = _find_in_partitions_list(stream_state_partitions, state_partition_context)
-    if found:
+    if found := _find_in_partitions_list(
+        stream_state_partitions,
+        state_partition_context,
+    ):
         return found
 
     return _create_in_partitions_list(stream_state_partitions, state_partition_context)
 
 
 def write_stream_state(
-    tap_state,
+    tap_state: dict,
     tap_stream_id: str,
-    key,
-    val,
+    key: str,
+    val: t.Any,  # noqa: ANN401
     *,
     state_partition_context: dict | None = None,
 ) -> None:
@@ -172,7 +167,7 @@ def reset_state_progress_markers(stream_or_partition_state: dict) -> dict | None
 
 def write_replication_key_signpost(
     stream_or_partition_state: dict,
-    new_signpost_value: t.Any,
+    new_signpost_value: t.Any,  # noqa: ANN401,
 ) -> None:
     """Write signpost value."""
     stream_or_partition_state[SIGNPOST_MARKER] = to_json_compatible(new_signpost_value)
@@ -180,13 +175,15 @@ def write_replication_key_signpost(
 
 def write_starting_replication_value(
     stream_or_partition_state: dict,
-    initial_value: t.Any,
+    initial_value: t.Any,  # noqa: ANN401
 ) -> None:
     """Write initial replication value to state."""
     stream_or_partition_state[STARTING_MARKER] = to_json_compatible(initial_value)
 
 
-def get_starting_replication_value(stream_or_partition_state: dict):
+def get_starting_replication_value(
+    stream_or_partition_state: dict,
+) -> t.Any | None:  # noqa: ANN401
     """Retrieve initial replication marker value from state."""
     if not stream_or_partition_state:
         return None

@@ -771,7 +771,7 @@ files = [
 name = "importlib-metadata"
 version = "6.8.0"
 description = "Read metadata from Python packages"
-optional = false
+optional = true
 python-versions = ">=3.8"
 files = [
     {file = "importlib_metadata-6.8.0-py3-none-any.whl", hash = "sha256:3ebb78df84a805d7698245025b975d9d67053cd94c79245ba4b3eb694abe68bb"},
@@ -2538,5 +2538,5 @@ testing = ["pytest", "pytest-durations"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.8,<4"
-content-hash = "8f9c1238bd8810ffa2abbd147fb099ca5b51af433eda954865a38f0567cc010f"
+python-versions = "<4,>=3.8"
+content-hash = "5c7e77fab78c4b3eca751c17f5f70039c36a3ebfba628ca9611bd3d572f3691b"

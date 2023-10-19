@@ -39,7 +39,7 @@ class EmptySchemaTypeError(Exception):
         super().__init__(msg, *args)
 
 
-def to_json_compatible(val: t.Any) -> t.Any:
+def to_json_compatible(val: t.Any) -> t.Any:  # noqa: ANN401
     """Return as string if datetime. JSON does not support proper datetime types.
 
     If given a naive datetime object, pendulum automatically makes it utc
@@ -185,7 +185,7 @@ def get_datelike_property_type(property_schema: dict) -> str | None:
     return None
 
 
-def _is_string_with_format(type_dict):
+def _is_string_with_format(type_dict: dict[str, t.Any]) -> bool | None:
     if "string" in type_dict.get("type", []) and type_dict.get("format") in {
         "date-time",
         "time",
@@ -196,14 +196,14 @@ def _is_string_with_format(type_dict):
 
 
 def handle_invalid_timestamp_in_record(
-    record,  # noqa: ARG001
+    record: dict[str, t.Any],  # noqa: ARG001
     key_breadcrumb: list[str],
     invalid_value: str,
     datelike_typename: str,
     ex: Exception,
     treatment: DatetimeErrorTreatmentEnum | None,
     logger: logging.Logger,
-) -> t.Any:
+) -> t.Any:  # noqa: ANN401
     """Apply treatment or raise an error for invalid time values."""
     treatment = treatment or DatetimeErrorTreatmentEnum.ERROR
     msg = (
@@ -331,7 +331,7 @@ def _warn_unmapped_properties(
     stream_name: str,
     property_names: tuple[str],
     logger: logging.Logger,
-):
+) -> None:
     logger.warning(
         "Properties %s were present in the '%s' stream but "
         "not found in catalog schema. Ignoring.",
@@ -469,9 +469,9 @@ def _conform_record_data_types(  # noqa: PLR0912
 
 
 def _conform_primitive_property(  # noqa: PLR0911
-    elem: t.Any,
+    elem: t.Any,  # noqa: ANN401
     property_schema: dict,
-) -> t.Any:
+) -> t.Any:  # noqa: ANN401
     """Converts a primitive (i.e. not object or array) to a json compatible type."""
     if isinstance(elem, (datetime.datetime, pendulum.DateTime)):
         return to_json_compatible(elem)
