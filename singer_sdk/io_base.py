@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import abc
-import decimal
 import logging
 import sys
 import typing as t
@@ -13,6 +12,7 @@ from datetime import datetime  # noqa: TCH003
 import msgspec
 
 from singer_sdk._singerlib import SingerMessageType
+from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._compat import final
 
 logger = logging.getLogger(__name__)
@@ -105,6 +105,7 @@ class SingerReader(metaclass=abc.ABCMeta):
 
         Raises:
             msgspec.DecodeError: raised if any lines are not valid json
+            RecordsWithoutSchemaException: stream missing a schema message
         """
         try:
             line_struct = msgspec.json.decode(line, type=Record)
@@ -113,17 +114,24 @@ class SingerReader(metaclass=abc.ABCMeta):
             raise
 
         line_dict = msgspec.structs.asdict(line_struct)
+        if line_struct.stream in self.stream_structs:
+            try:
+                record = msgspec.json.decode(
+                    line_struct.record,
+                    type=self.stream_structs[line_struct.stream],
+                )
+            except msgspec.DecodeError as exc:
+                logger.error("Unable to parse:\n%s", line, exc_info=exc)
+                raise
+        else:
+            raise (RecordsWithoutSchemaException)
 
-        try:
-            record = msgspec.json.decode(
-                line_struct.record,
-                type=self.stream_structs[line_struct.stream],
-            )
-        except msgspec.DecodeError as exc:
-            logger.error("Unable to parse:\n%s", line, exc_info=exc)
-            raise
-
-        line_dict.update({"record": msgspec.structs.asdict(record)})
+        clean_record = {
+            key: val
+            for key, val in msgspec.structs.asdict(record).items()
+            if val != msgspec.UNSET
+        }
+        line_dict.update({"record": clean_record})
 
         return line_dict
 
@@ -134,32 +142,33 @@ class SingerReader(metaclass=abc.ABCMeta):
             schema_msg: A single line of json containing a SCHMEA message.
         """
         stream: str = schema_msg.get("stream")
+        key_properties: list = schema_msg.get("key_properties", [])
         properties: dict = schema_msg.get("schema", {}).get("properties")
+        required_fields: list = schema_msg.get("schema", {}).get("required", [])
         fields: list = []
         for field_name, definition in properties.items():
-            field_json_type = definition.get("type", [])[0]
-            is_nullable: bool = "null" in definition.get("type", [])
+            field_json_type: list = definition.get("type", [])
+            is_not_required: bool = field_name not in required_fields
+            is_not_primarykey: bool = field_name not in key_properties
+            can_be_null: bool = "null" in definition.get("type", [])
             field_type = None
-            if field_json_type == "string":
+            if "string" in field_json_type:
                 field_type = str
-            elif field_json_type == "integer":
+            elif "integer" in field_json_type:
                 field_type = int
-            elif field_json_type == "number":
-                field_type = decimal.Decimal
 
-            if field_type is not None and is_nullable:
-                field_type = t.Optional[field_type]
-            elif field_type is None and is_nullable:
-                field_type = t.Optional[str]
-
-            if field_type is not None and is_nullable:
-                fields.append((field_name, field_type, None))
-            elif field_type is not None:
-                fields.append((field_name, field_type))
-            elif field_type is None:
+            if field_type is None:
                 fields.append(field_name)
+            elif is_not_primarykey or is_not_required or can_be_null:
+                fields.append((field_name, t.Optional[field_type], msgspec.UNSET))
+            else:
+                fields.append((field_name, field_type))
 
-        self.stream_structs[stream] = msgspec.defstruct(stream, fields=fields)
+        self.stream_structs[stream] = msgspec.defstruct(
+            stream,
+            fields=fields,
+            kw_only=True,
+        )
 
     def _process_lines(self, file_input: t.IO[str]) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
