@@ -111,7 +111,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         about: bool = False,
         about_format: str | None = None,
         config: tuple[str, ...] = (),
-        file_input: t.IO[str] | None = None,
+        file_input: t.BinaryIO | None = None,
     ) -> None:
         """Invoke the mapper.
 

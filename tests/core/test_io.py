@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import decimal
-import typing as t
 from contextlib import nullcontext
 
 import msgspec
@@ -13,10 +12,6 @@ from singer_sdk.io_base import SingerReader
 
 
 class DummyReader(SingerReader):
-    stream_structs: t.ClassVar[dict[str, msgspec.Struct]] = {
-        "users": msgspec.defstruct("users", [("id", int), ("value", decimal.Decimal)]),
-    }
-
     def _process_activate_version_message(self, message_dict: dict) -> None:
         pass
 
@@ -43,13 +38,11 @@ class DummyReader(SingerReader):
             id="unparsable",
         ),
         pytest.param(
-            b'{"type": "RECORD", "stream": "users", "record": {"id": 1, "value": 1.23}}',  # noqa: E501
+            b'{"type":"RECORD","stream":"users","record":{"id":1,"value":1.23}}',
             {
                 "type": "RECORD",
                 "stream": "users",
                 "record": {"id": 1, "value": decimal.Decimal("1.23")},
-                "version": None,
-                "time_extracted": None,
             },
             nullcontext(),
             id="record",
@@ -59,4 +52,4 @@ class DummyReader(SingerReader):
 def test_deserialize(line, expected, exception):
     reader = DummyReader()
     with exception:
-        assert reader.deserialize_record(line) == expected
+        assert reader.deserialize_json(line) == expected
