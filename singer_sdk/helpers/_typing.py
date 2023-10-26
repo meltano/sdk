@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import copy
 import datetime
+import importlib.util
 import logging
 import typing as t
 from enum import Enum
 from functools import lru_cache
 
 import pendulum
-import pyarrow as pa
 
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"
@@ -493,75 +493,78 @@ def _conform_primitive_property(  # noqa: PLR0911
         return None if elem is None else elem != 0
     return elem
 
-    
-def json_schema_to_arrow(schema: Dict[str, Any]) -> pa.Schema:
-    """Convert a JSON Schema to an Arrow schema.
 
-    Args:
-        schema: The JSON Schema definition.
+spec = importlib.util.find_spec("pyarrow")
+if spec:
+    import pyarrow as pa
+    def json_schema_to_arrow(schema: dict[str, t.Any]) -> pa.Schema:
+        """Convert a JSON Schema to an Arrow schema.
 
-    Returns:
-        An Arrow schema.
-    """
-    fields = _json_schema_to_arrow_fields(schema)
-    return pa.schema(fields)
+        Args:
+            schema: The JSON Schema definition.
 
-
-def _json_schema_to_arrow_fields(schema: Dict[str, Any]) -> pa.StructType:
-    """Convert a JSON Schema to an Arrow struct.
-
-    Args:
-        schema: The JSON Schema definition.
-
-    Returns:
-        An Arrow struct.
-    """
-    fields = []
-    for name, property_schema in schema.get("properties", {}).items():
-        field = pa.field(name, _json_type_to_arrow_field(property_schema))
-        fields.append(field)
-    return fields
+        Returns:
+            An Arrow schema.
+        """
+        fields = _json_schema_to_arrow_fields(schema)
+        return pa.schema(fields)
 
 
-def _json_type_to_arrow_field(schema_type: Dict[str, Any]) -> pa.DataType:
-    """Convert a JSON Schema to an Arrow struct.
+    def _json_schema_to_arrow_fields(schema: dict[str, t.Any]) -> pa.StructType:
+        """Convert a JSON Schema to an Arrow struct.
 
-    Args:
-        schema: The JSON Schema definition.
+        Args:
+            schema: The JSON Schema definition.
 
-    Returns:
-        An Arrow struct.
-    """
-    property_type = schema_type.get("type")
+        Returns:
+            An Arrow struct.
+        """
+        fields = []
+        for name, property_schema in schema.get("properties", {}).items():
+            field = pa.field(name, _json_type_to_arrow_field(property_schema))
+            fields.append(field)
+        return fields
 
-    if isinstance(property_type, list):
-        try:
-            main_type = property_type[0]
-        except IndexError:
-            main_type = "null"
-    else:
-        main_type = property_type
 
-    if main_type == "array":
-        items = schema_type.get("items", {})
-        return pa.list_(_json_type_to_arrow_field(items))
+    def _json_type_to_arrow_field(schema_type: dict[str, t.Any]) -> pa.DataType:
+        """Convert a JSON Schema to an Arrow struct.
 
-    elif main_type == "object":
-        return pa.struct(_json_schema_to_arrow_fields(schema_type))
+        Args:
+            schema: The JSON Schema definition.
 
-    elif main_type == "string":
-        return pa.string()
+        Returns:
+            An Arrow struct.
+        """
+        property_type = schema_type.get("type")
 
-    elif main_type == "integer":
-        return pa.int64()
+        if isinstance(property_type, list):
+            try:
+                main_type = property_type[0]
+            except IndexError:
+                main_type = "null"
+        else:
+            main_type = property_type
 
-    elif main_type == "number":
-        return pa.float64()
+        if main_type == "array":
+            items = schema_type.get("items", {})
+            return pa.list_(_json_type_to_arrow_field(items))
 
-    elif main_type == "boolean":
-        return pa.bool_()
+        elif main_type == "object":
+            return pa.struct(_json_schema_to_arrow_fields(schema_type))
 
-    elif main_type == "null":
+        elif main_type == "string":
+            return pa.string()
+
+        elif main_type == "integer":
+            return pa.int64()
+
+        elif main_type == "number":
+            return pa.float64()
+
+        elif main_type == "boolean":
+            return pa.bool_()
+
+        elif main_type == "null":
+            return pa.null()
+
         return pa.null()
-
-    return pa.null()

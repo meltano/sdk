@@ -56,7 +56,6 @@ numpy = [
 ]
 packaging = ">=23.1"
 pendulum = ">=2.1.0"
-pyarrow = ">=11,<13"
 PyJWT = "~=2.4"
 python-dotenv = ">=0.20,<0.22"
 pytz = ">=2022.2.1,<2024.0.0"
@@ -82,6 +81,9 @@ sphinx-inline-tabs = {version = ">=2023.4.21", optional = true, markers = "pytho
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = ">=1.1.1", optional = true}
 
+# Parquet file dependencies installed as optional 'parquet' extras
+pyarrow = {version = ">=11,<13", optional = true}
+
 # Testing dependencies installed as optional 'testing' extras
 pytest = {version=">=7.2.1", optional = true}
 pytest-durations = {version = ">=1.2.0", optional = true}
@@ -101,6 +103,7 @@ testing = [
     "pytest",
     "pytest-durations"
 ]
+parquet = [pyarrow]
 
 [tool.poetry.group.dev.dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!

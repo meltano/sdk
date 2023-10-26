@@ -2,15 +2,13 @@
 from __future__ import annotations
 
 import gzip
+import importlib.util
 import itertools
 import json
 import typing as t
 from abc import ABC, abstractmethod
 from uuid import uuid4
 
-import pyarrow as pa
-import pyarrow.parquet as pq
-from singer_sdk.helpers._typing import json_schema_to_arrow
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._batch import BatchConfig, BatchFileFormat
@@ -115,53 +113,58 @@ class JSONLinesBatcher(BaseBatcher):
             yield [file_url]
 
 
-class ParquetBatcher(BaseBatcher):
-    """Parquet Record Batcher."""
+spec = importlib.util.find_spec("pyarrow")
+if spec:
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    from singer_sdk.helpers._typing import json_schema_to_arrow
+    class ParquetBatcher(BaseBatcher):
+        """Parquet Record Batcher."""
 
-    def get_batches(
-        self,
-        records: t.Iterator[dict],
-    ) -> t.Iterator[list[str]]:
-        """Yield manifest of batches
+        def get_batches(
+            self,
+            records: t.Iterator[dict],
+        ) -> t.Iterator[list[str]]:
+            """Yield manifest of batches
 
-        Args:
-            records: The records to batch.
+            Args:
+                records: The records to batch.
 
-        Yields:
-            A list of file pathes (called a manifest).
-        """
-        sync_id = f"{self.tap_name}--{self.name}-{uuid4()}"
-        prefix = self.batch_config.storage.prefix or ""
+            Yields:
+                A list of file pathes (called a manifest).
+            """
+            sync_id = f"{self.tap_name}--{self.name}-{uuid4()}"
+            prefix = self.batch_config.storage.prefix or ""
 
-        for i, chunk in enumerate(
-            lazy_chunked_generator(
-                records,
-                self.batch_config.batch_size,
-            ),
-            start=1,
-        ):
-            filename = f"{prefix}{sync_id}={i}.parquet"
-            if self.batch_config.encoding.compression == "gzip":
-                filename = f"{filename}.gz"
-            with self.batch_config.storage.fs() as fs:
-                with fs.open(filename, "wb") as f:
-                    pylist = list(chunk)
-                    schema = json_schema_to_arrow(self.schema)
-                    table = pa.Table.from_pylist(pylist, schema=schema)
-                    if self.batch_config.encoding.compression == "gzip":
-                        pq.write_table(table, f, compression="GZIP")
-                    else:
-                        pq.write_table(table, f)
-                    
-                file_url = fs.geturl(filename)
-            yield [file_url]
+            for i, chunk in enumerate(
+                lazy_chunked_generator(
+                    records,
+                    self.batch_config.batch_size,
+                ),
+                start=1,
+            ):
+                filename = f"{prefix}{sync_id}={i}.parquet"
+                if self.batch_config.encoding.compression == "gzip":
+                    filename = f"{filename}.gz"
+                with self.batch_config.storage.fs() as fs:
+                    with fs.open(filename, "wb") as f:
+                        pylist = list(chunk)
+                        schema = json_schema_to_arrow(self.schema)
+                        table = pa.Table.from_pylist(pylist, schema=schema)
+                        if self.batch_config.encoding.compression == "gzip":
+                            pq.write_table(table, f, compression="GZIP")
+                        else:
+                            pq.write_table(table, f)
+                        
+                    file_url = fs.geturl(filename)
+                yield [file_url]
 
 
 class Batcher(BaseBatcher):
     def get_batches(self, records):
         if self.format == BatchFileFormat.JSONL:
             return self._batch_to_jsonl(records)
-        elif self.format == BatchFileFormat.PARQUET:
+        elif spec and self.format == BatchFileFormat.PARQUET:
             return self._batch_to_parquet(records)
         else:
             raise ValueError(self.format)

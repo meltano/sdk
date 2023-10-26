@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import copy
 import datetime
+import importlib.util
 import json
 import time
 import typing as t
@@ -12,7 +13,6 @@ from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
 
-import pyarrow.parquet as pq
 from dateutil import parser
 from jsonschema import Draft7Validator, FormatChecker
 
@@ -513,6 +513,9 @@ class Sink(metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: If the batch file encoding is not supported.
         """
+        spec = importlib.util.find_spec("pyarrow")
+        if spec:
+            import pyarrow.parquet as pq
         file: GzipFile | t.IO
         storage: StorageTarget | None = None
 
@@ -531,7 +534,7 @@ class Sink(metaclass=abc.ABCMeta):
                             file = gzip_open(file)
                         context = {"records": [json.loads(line) for line in file]}
                         self.process_batch(context)
-            elif encoding.format == BatchFileFormat.PARQUET:
+            elif spec and encoding.format == BatchFileFormat.PARQUET:
                 with storage.fs(create=False) as batch_fs:
                     with batch_fs.open(tail, mode="rb") as file:
                         table = pq.read_table(file)
