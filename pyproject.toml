@@ -56,7 +56,7 @@ numpy = [
 ]
 packaging = ">=23.1"
 pendulum = ">=2.1.0"
-pyarrow = "^10.0.1"
+pyarrow = ">=11,<13"
 PyJWT = "~=2.4"
 python-dotenv = ">=0.20,<0.22"
 pytz = ">=2022.2.1,<2024.0.0"
