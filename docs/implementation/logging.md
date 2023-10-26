@@ -1,4 +1,4 @@
-# [SDK Implementation Details](./index.md) - Logging
+# Logging
 
 ## Logging levels
 
@@ -51,7 +51,7 @@ version: 1
 disable_existing_loggers: false
 formatters:
   metrics:
-    format: "{asctime} {message}"
+    format: "{asctime} {levelname} {message}"
     style: "{"
 handlers:
   metrics:

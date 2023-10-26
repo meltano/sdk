@@ -5,4 +5,4 @@
 
 .. autoclass:: BasicAuthenticator
     :members:
-    :special-members: __init__
+    :special-members: __init__, __call__

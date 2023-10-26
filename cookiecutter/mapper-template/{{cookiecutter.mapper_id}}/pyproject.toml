@@ -1,0 +1,64 @@
+[tool.poetry]
+{%- if cookiecutter.variant != "None (Skip)" %}
+name = "{{cookiecutter.variant}}-{{cookiecutter.mapper_id}}"
+{%- else %}
+name = "{{cookiecutter.mapper_id}}"
+{%- endif %}
+version = "0.0.1"
+description = "`{{cookiecutter.mapper_id}}` is a Singer mapper {{cookiecutter.name}}, built with the Meltano Singer SDK."
+readme = "README.md"
+authors = ["{{ cookiecutter.admin_name }} <{{ cookiecutter.admin_email }}>"]
+keywords = [
+    "ELT",
+    "Mapper",
+    "{{cookiecutter.name}}",
+]
+license = "Apache-2.0"
+{%- if cookiecutter.variant != "None (Skip)" %}
+packages = [
+    { include = "{{cookiecutter.library_name}}" },
+]
+{%- endif %}
+
+[tool.poetry.dependencies]
+python = ">=3.8,<4"
+singer-sdk = { version="~=0.33.0" }
+fs-s3fs = { version = "~=1.1.1", optional = true }
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.4.0"
+singer-sdk = { version="~=0.33.0", extras = ["testing"] }
+
+[tool.poetry.extras]
+s3 = ["fs-s3fs"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_unused_configs = true
+
+[tool.ruff]
+ignore = [
+    "ANN101",  # missing-type-self
+    "ANN102",  # missing-type-cls
+]
+select = ["ALL"]
+src = ["{{cookiecutter.library_name}}"]
+target-version = "py37"
+
+
+[tool.ruff.flake8-annotations]
+allow-star-arg-any = true
+
+[tool.ruff.isort]
+known-first-party = ["{{cookiecutter.library_name}}"]
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[build-system]
+requires = ["poetry-core>=1.0.8"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+# CLI declaration
+{{cookiecutter.mapper_id}} = '{{cookiecutter.library_name}}.mapper:{{cookiecutter.name}}Mapper.cli'

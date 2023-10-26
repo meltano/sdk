@@ -1,7 +1,8 @@
 """
 Testing that Schema can convert schemas lossless from and to dicts.
 
-Schemas are taken from these examples; https://json-schema.org/learn/miscellaneous-examples.html
+Schemas are taken from these examples;
+https://json-schema.org/learn/miscellaneous-examples.html
 
 NOTE: The following properties are not currently supported;
 pattern
@@ -25,9 +26,12 @@ oneOf
 not
 
 Some of these could be trivially added (if they are SIMPLE_PROPERTIES.
-Some might need more thinking if they can contain schemas (though, note that we also treat 'additionalProperties',
-'anyOf' and' patternProperties' as SIMPLE even though they can contain schemas.
+Some might need more thinking if they can contain schemas (though, note that we also
+treat 'additionalProperties', 'anyOf' and' patternProperties' as SIMPLE even though they
+can contain schemas.
 """
+
+from __future__ import annotations
 
 from singer_sdk._singerlib import Schema
 

@@ -1,15 +1,24 @@
 """JSONPath helpers."""
 
-from typing import Any, Generator, Union
+from __future__ import annotations
 
-import jsonpath_ng
+import logging
+import typing as t
+
 import memoization
 from jsonpath_ng.ext import parse
 
+if t.TYPE_CHECKING:
+    import jsonpath_ng
+
+
+logger = logging.getLogger(__name__)
+
 
 def extract_jsonpath(
-    expression: str, input: Union[dict, list]
-) -> Generator[Any, None, None]:
+    expression: str,
+    input: dict | list,  # noqa: A002
+) -> t.Generator[t.Any, None, None]:
     """Extract records from an input based on a JSONPath expression.
 
     Args:
@@ -22,7 +31,11 @@ def extract_jsonpath(
     compiled_jsonpath = _compile_jsonpath(expression)
 
     match: jsonpath_ng.DatumInContext
-    for match in compiled_jsonpath.find(input):
+    matches = compiled_jsonpath.find(input)
+
+    logger.info("JSONPath matches: %d", len(matches))
+
+    for match in matches:
         yield match.value
 
 

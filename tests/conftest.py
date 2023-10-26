@@ -2,15 +2,30 @@
 
 from __future__ import annotations
 
-import os
 import pathlib
 import platform
 import shutil
+import typing as t
 
 import pytest
-from _pytest.config import Config
+from sqlalchemy import __version__ as sqlalchemy_version
+
+from singer_sdk import SQLConnector
+from singer_sdk import typing as th
+from singer_sdk.helpers._typing import DatetimeErrorTreatmentEnum
+from singer_sdk.helpers.capabilities import PluginCapabilities
+from singer_sdk.sinks import BatchSink, SQLSink
+from singer_sdk.target_base import SQLTarget, Target
+
+if t.TYPE_CHECKING:
+    from _pytest.config import Config
+
+    from singer_sdk.helpers.capabilities import CapabilitiesEnum
+
 
 SYSTEMS = {"linux", "darwin", "windows"}
+
+pytest_plugins = ("singer_sdk.testing.pytest_plugin",)
 
 
 def pytest_collection_modifyitems(config: Config, items: list[pytest.Item]):
@@ -31,16 +46,21 @@ def pytest_runtest_setup(item):
         pytest.skip(f"cannot run on platform {system}")
 
 
+def pytest_report_header() -> list[str]:
+    """Return a list of strings to be displayed in the header of the report."""
+    return [f"sqlalchemy: {sqlalchemy_version}"]
+
+
 @pytest.fixture(scope="class")
-def outdir() -> str:
+def outdir() -> t.Generator[str, None, None]:
     """Create a temporary directory for cookiecutters and target output."""
     name = ".output/"
     try:
-        os.mkdir(name)
+        pathlib.Path(name).mkdir(parents=True)
     except FileExistsError:
         # Directory already exists
         shutil.rmtree(name)
-        os.mkdir(name)
+        pathlib.Path(name).mkdir(parents=True)
 
     yield name
     shutil.rmtree(name)
@@ -50,3 +70,120 @@ def outdir() -> str:
 def snapshot_dir() -> pathlib.Path:
     """Return the path to the snapshot directory."""
     return pathlib.Path("tests/snapshots/")
+
+
+class BatchSinkMock(BatchSink):
+    """A mock Sink class."""
+
+    name = "batch-sink-mock"
+    datetime_error_treatment = DatetimeErrorTreatmentEnum.MAX
+
+    def __init__(
+        self,
+        target: TargetMock,
+        stream_name: str,
+        schema: dict,
+        key_properties: list[str] | None,
+    ):
+        """Create the Mock batch-based sink."""
+        super().__init__(target, stream_name, schema, key_properties)
+        self.target = target
+
+    def process_record(self, record: dict, context: dict) -> None:
+        """Tracks the count of processed records."""
+        self.target.num_records_processed += 1
+        super().process_record(record, context)
+
+    def process_batch(self, context: dict) -> None:
+        """Write to mock trackers."""
+        self.target.records_written.extend(context["records"])
+        self.target.num_batches_processed += 1
+
+    @property
+    def key_properties(self) -> list[str]:
+        return [key.upper() for key in super().key_properties]
+
+
+class TargetMock(Target):
+    """A mock Target class."""
+
+    name = "target-mock"
+    config_jsonschema = th.PropertiesList().to_dict()
+    default_sink_class = BatchSinkMock
+    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+        *Target.capabilities,
+        PluginCapabilities.BATCH,
+    ]
+
+    def __init__(self, *args, **kwargs):
+        """Create the Mock target sync."""
+        super().__init__(*args, **kwargs)
+        self.state_messages_written: list[dict] = []
+        self.records_written: list[dict] = []
+        self.num_records_processed: int = 0
+        self.num_batches_processed: int = 0
+
+    def _write_state_message(self, state: dict):
+        """Emit the stream's latest state."""
+        super()._write_state_message(state)
+        self.state_messages_written.append(state)
+
+
+class SQLConnectorMock(SQLConnector):
+    """A Mock SQLConnector class."""
+
+
+class SQLSinkMock(SQLSink):
+    """A mock Sink class."""
+
+    name = "sql-sink-mock"
+    connector_class = SQLConnectorMock
+
+    def __init__(
+        self,
+        target: SQLTargetMock,
+        stream_name: str,
+        schema: dict,
+        key_properties: list[str] | None,
+        connector: SQLConnector | None = None,
+    ):
+        """Create the Mock batch-based sink."""
+        self._connector: SQLConnector
+        self._connector = connector or self.connector_class(dict(target.config))
+        super().__init__(target, stream_name, schema, key_properties, connector)
+        self.target = target
+
+    def process_record(self, record: dict, context: dict) -> None:
+        """Tracks the count of processed records."""
+        self.target.num_records_processed += 1
+        super().process_record(record, context)
+
+    def process_batch(self, context: dict) -> None:
+        """Write to mock trackers."""
+        self.target.records_written.extend(context["records"])
+        self.target.num_batches_processed += 1
+
+    @property
+    def key_properties(self) -> list[str]:
+        return [key.upper() for key in super().key_properties]
+
+
+class SQLTargetMock(SQLTarget):
+    """A mock Target class."""
+
+    name = "sql-target-mock"
+    config_jsonschema = th.PropertiesList().to_dict()
+    default_sink_class = SQLSinkMock
+
+    def __init__(self, *args, **kwargs):
+        """Create the Mock target sync."""
+        super().__init__(*args, **kwargs)
+        self.state_messages_written: list[dict] = []
+        self.records_written: list[dict] = []
+        self.num_records_processed: int = 0
+        self.num_batches_processed: int = 0
+
+    def _write_state_message(self, state: dict):
+        """Emit the stream's latest state."""
+        super()._write_state_message(state)
+        self.state_messages_written.append(state)

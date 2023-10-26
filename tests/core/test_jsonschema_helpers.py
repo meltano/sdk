@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
+import typing as t
+from logging import WARNING
 from textwrap import dedent
-from typing import Callable
 
 import pytest
-from pytest_snapshot.plugin import Snapshot
+from jsonschema import Draft6Validator
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -18,19 +18,22 @@ from singer_sdk.helpers._typing import (
     is_date_or_datetime_type,
     is_datetime_type,
     is_integer_type,
+    is_null_type,
+    is_number_type,
     is_object_type,
     is_secret_type,
     is_string_array_type,
     is_string_type,
 )
-from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
+    AnyType,
     ArrayType,
     BooleanType,
     CustomType,
     DateTimeType,
     DateType,
+    DiscriminatedUnion,
     DurationType,
     EmailType,
     HostnameType,
@@ -53,7 +56,14 @@ from singer_sdk.typing import (
     UUIDType,
 )
 
-TYPE_FN_CHECKS: set[Callable] = {
+if t.TYPE_CHECKING:
+    from pathlib import Path
+
+    from pytest_snapshot.plugin import Snapshot
+
+    from singer_sdk.streams.core import Stream
+
+TYPE_FN_CHECKS: set[t.Callable] = {
     is_array_type,
     is_boolean_type,
     is_date_or_datetime_type,
@@ -118,8 +128,28 @@ def test_to_json():
                 "test_property"
             ],
             "additionalProperties": false
-        }"""
+        }""",
     )
+
+
+def test_any_type(caplog: pytest.LogCaptureFixture):
+    schema = PropertiesList(
+        Property("any_type", AnyType, description="Can be anything"),
+    )
+    with caplog.at_level(WARNING):
+        assert schema.to_dict() == {
+            "type": "object",
+            "properties": {
+                "any_type": {
+                    "description": "Can be anything",
+                },
+            },
+        }
+        assert caplog.records[0].levelname == "WARNING"
+        assert caplog.records[0].message == (
+            "Could not append type because the JSON schema for the dictionary `{}` "
+            "appears to be invalid."
+        )
 
 
 def test_nested_complex_objects():
@@ -134,22 +164,24 @@ def test_nested_complex_objects():
             ObjectType(
                 Property("DatasetId", StringType),
                 Property("DatasetName", StringType),
-            )
+            ),
         ),
     )
     test2b = test2a.to_dict()
-    assert test1a and test1b and test2a and test2b
+    assert test1a
+    assert test1b
+    assert test2a
+    assert test2b
 
 
 def test_default_value():
     prop = Property("test_property", StringType, default="test_property_value")
     assert prop.to_dict() == {
-        "test_property": {"type": ["string", "null"], "default": "test_property_value"}
+        "test_property": {"type": ["string", "null"], "default": "test_property_value"},
     }
 
 
 def test_tap_config_default_injection():
-
     config_dict = {"host": "gitlab.com", "username": "foo", "password": "bar"}
 
     tap = ConfigTestTap(config=config_dict, parse_env_config=False, catalog={})
@@ -182,7 +214,7 @@ def test_property_description():
         "test_property": {
             "type": ["string", "null"],
             "description": text,
-        }
+        },
     }
 
 
@@ -344,7 +376,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                     "type": ["string", "null"],
                     JSONSCHEMA_ANNOTATION_SECRET: True,
                     JSONSCHEMA_ANNOTATION_WRITEONLY: True,
-                }
+                },
             },
             {is_secret_type, is_string_type},
         ),
@@ -354,7 +386,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                 "my_prop4": {
                     "description": "This is a property.",
                     "type": ["string", "null"],
-                }
+                },
             },
             {is_string_type},
         ),
@@ -364,7 +396,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                 "my_prop5": {
                     "default": "some_val",
                     "type": ["string", "null"],
-                }
+                },
             },
             {is_string_type},
         ),
@@ -374,7 +406,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                 "my_prop6": {
                     "type": ["array", "null"],
                     "items": {"type": ["string"]},
-                }
+                },
             },
             {is_array_type, is_string_array_type},
         ),
@@ -397,7 +429,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                             "writeOnly": True,
                         },
                     },
-                }
+                },
             },
             {is_object_type, is_secret_type},
         ),
@@ -406,7 +438,7 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
             {
                 "my_prop8": {
                     "type": ["integer", "null"],
-                }
+                },
             },
             {is_integer_type},
         ),
@@ -422,30 +454,74 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                     "type": ["integer", "null"],
                     "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9],
                     "examples": [1, 2, 3],
-                }
+                },
             },
             {is_integer_type},
+        ),
+        (
+            Property(
+                "my_prop10",
+                ArrayType(
+                    StringType(
+                        allowed_values=["create", "delete", "insert", "update"],
+                        examples=["insert", "update"],
+                    ),
+                ),
+            ),
+            {
+                "my_prop10": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": ["string"],
+                        "enum": ["create", "delete", "insert", "update"],
+                        "examples": ["insert", "update"],
+                    },
+                },
+            },
+            {is_array_type, is_string_array_type},
+        ),
+        (
+            Property(
+                "my_prop11",
+                ArrayType(
+                    StringType,
+                    allowed_values=[
+                        ["create", "delete"],
+                        ["insert", "update"],
+                    ],
+                ),
+            ),
+            {
+                "my_prop11": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": ["string"],
+                    },
+                    "enum": [["create", "delete"], ["insert", "update"]],
+                },
+            },
+            {is_array_type, is_string_array_type},
         ),
     ],
 )
 def test_property_creation(
     property_obj: Property,
     expected_jsonschema: dict,
-    type_fn_checks_true: set[Callable],
+    type_fn_checks_true: set[t.Callable],
 ) -> None:
     property_dict = property_obj.to_dict()
     assert property_dict == expected_jsonschema
     for check_fn in TYPE_FN_CHECKS:
-        property_name = list(property_dict.keys())[0]
+        property_name = next(iter(property_dict.keys()))
         property_node = property_dict[property_name]
         if check_fn in type_fn_checks_true:
             assert (
                 check_fn(property_node) is True
-            ), f"{check_fn.__name__} was not True for {repr(property_dict)}"
+            ), f"{check_fn.__name__} was not True for {property_dict!r}"
         else:
             assert (
                 check_fn(property_node) is False
-            ), f"{check_fn.__name__} was not False for {repr(property_dict)}"
+            ), f"{check_fn.__name__} was not False for {property_dict!r}"
 
 
 def test_wrapped_type_dict():
@@ -453,7 +529,7 @@ def test_wrapped_type_dict():
         ValueError,
         match=re.escape(
             "Type dict for <class 'singer_sdk.typing.ArrayType'> is not defined. "
-            + "Try instantiating it with a nested type such as ArrayType(StringType)."
+            "Try instantiating it with a nested type such as ArrayType(StringType).",
         ),
     ):
         Property("bad_array_prop", ArrayType).to_dict()
@@ -462,7 +538,7 @@ def test_wrapped_type_dict():
         ValueError,
         match=re.escape(
             "Type dict for <class 'singer_sdk.typing.ObjectType'> is not defined. "
-            + "Try instantiating it with a nested type such as ObjectType(StringType)."
+            "Try instantiating it with a nested type such as ObjectType(StringType).",
         ),
     ):
         Property("bad_object_prop", ObjectType).to_dict()
@@ -471,7 +547,7 @@ def test_wrapped_type_dict():
         "good_array_prop": {
             "type": ["array", "null"],
             "items": {"type": ["string"]},
-        }
+        },
     }
 
 
@@ -485,7 +561,7 @@ def test_array_type():
     assert ArrayType(wrapped_type).type_dict == expected_json_schema
 
 
-@pytest.mark.snapshot
+@pytest.mark.snapshot()
 @pytest.mark.parametrize(
     "schema_obj,snapshot_name",
     [
@@ -613,9 +689,9 @@ def test_array_type():
         pytest.param(
             ObjectType(
                 Property("id", StringType),
-                Property("email", StringType, True),
-                Property("email", StringType, True),
-                Property("username", StringType, True),
+                Property("email", StringType, required=True),
+                Property("email", StringType, required=True),
+                Property("username", StringType, required=True),
                 Property("phone_number", StringType),
                 additional_properties=False,
             ),
@@ -654,3 +730,155 @@ def test_custom_type():
     }
 
     assert CustomType(json_schema).type_dict == json_schema
+
+
+@pytest.mark.parametrize(
+    "property_schemas,type_check_functions,results",
+    [
+        (
+            [
+                {
+                    "anyOf": [
+                        {"type": "array"},
+                        {"type": "null"},
+                    ],
+                },
+                {"type": "array"},
+                {"type": ["array", "null"]},
+            ],
+            [is_array_type],
+            [True],
+        ),
+        (
+            [
+                {
+                    "anyOf": [
+                        {"type": "boolean"},
+                        {"type": "null"},
+                    ],
+                },
+                {"type": "boolean"},
+                {"type": ["boolean", "null"]},
+            ],
+            [is_boolean_type],
+            [True],
+        ),
+        (
+            [
+                {
+                    "anyOf": [
+                        {"type": "integer"},
+                        {"type": "null"},
+                    ],
+                },
+                {"type": "integer"},
+                {"type": ["integer", "null"]},
+            ],
+            [is_integer_type],
+            [True],
+        ),
+        (
+            [
+                {
+                    "anyOf": [
+                        {"type": "string", "format": "date-time"},
+                        {"type": "null"},
+                    ],
+                },
+                {"type": "string"},
+                {"type": ["string", "null"]},
+            ],
+            [is_string_type],
+            [True],
+        ),
+        (
+            [
+                {
+                    "anyOf": [
+                        {"type": "string", "format": "date-time"},
+                        {"type": "null"},
+                    ],
+                },
+                {"type": "null"},
+                {"type": ["string", "null"]},
+            ],
+            [is_null_type],
+            [True],
+        ),
+        (
+            [
+                {
+                    "anyOf": [
+                        {"type": "string", "format": "date-time"},
+                        {"type": "number"},
+                    ],
+                },
+                {"type": "number"},
+                {"type": ["number", "null"]},
+            ],
+            [is_number_type],
+            [True],
+        ),
+        (
+            [
+                {
+                    "anyOf": [
+                        {"enum": ["developer", "team", "enterprise"]},
+                        {"type": "string"},
+                    ],
+                },
+            ],
+            [is_string_type],
+            [True],
+        ),
+    ],
+)
+def test_type_check_variations(property_schemas, type_check_functions, results):
+    for property_schema in property_schemas:
+        for type_check_function, result in zip(type_check_functions, results):
+            assert type_check_function(property_schema) == result
+
+
+def test_discriminated_union():
+    th = DiscriminatedUnion(
+        "flow",
+        oauth=ObjectType(
+            Property("client_id", StringType, required=True, secret=True),
+            Property("client_secret", StringType, required=True, secret=True),
+            additional_properties=False,
+        ),
+        password=ObjectType(
+            Property("username", StringType, required=True),
+            Property("password", StringType, required=True, secret=True),
+            additional_properties=False,
+        ),
+    )
+
+    validator = Draft6Validator(th.to_dict())
+
+    assert validator.is_valid(
+        {
+            "flow": "oauth",
+            "client_id": "123",
+            "client_secret": "456",
+        },
+    )
+    assert validator.is_valid(
+        {
+            "flow": "password",
+            "password": "123",
+            "username": "456",
+        },
+    )
+    assert not validator.is_valid(
+        {
+            "flow": "oauth",
+            "client_id": "123",
+        },
+    )
+    assert not validator.is_valid(
+        {
+            "flow": "password",
+            "client_id": "123",
+        },
+    )

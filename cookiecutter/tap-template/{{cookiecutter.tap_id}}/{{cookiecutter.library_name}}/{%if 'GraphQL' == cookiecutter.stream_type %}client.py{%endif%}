@@ -1,11 +1,14 @@
 """GraphQL client handling, including {{ cookiecutter.source_name }}Stream base class."""
 
-import requests
-from pathlib import Path
-from typing import Any, Dict, Optional, Union, List, Iterable
+from __future__ import annotations
 
+from typing import Iterable
+
+import requests  # noqa: TCH002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
+
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
 {%- endif %}
 
@@ -13,26 +16,32 @@ from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}A
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
-    # TODO: Set the API's base URL here:
     @property
     def url_base(self) -> str:
         """Return the API URL root, configurable via tap settings."""
-        return self.config["api_url"]
-
-    # Alternatively, use a static string for url_base:
-    # url_base = "https://api.mysample.com"
+        # TODO: hardcode a value here, or retrieve it from self.config
+        return "https://api.mysample.com"
 
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
+
     @property
     def authenticator(self) -> {{ cookiecutter.source_name }}Authenticator:
-        """Return a new authenticator object."""
+        """Return a new authenticator object.
+
+        Returns:
+            An authenticator instance.
+        """
         return {{ cookiecutter.source_name }}Authenticator.create_for_stream(self)
 
 {%- endif %}
 
     @property
     def http_headers(self) -> dict:
-        """Return the http headers needed."""
+        """Return the http headers needed.
+
+        Returns:
+            A dictionary of HTTP headers.
+        """
         headers = {}
         if "user_agent" in self.config:
             headers["User-Agent"] = self.config.get("user_agent")
@@ -43,13 +52,31 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         return headers
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
-        """Parse the response and return an iterator of result records."""
+        """Parse the response and return an iterator of result records.
+
+        Args:
+            response: The HTTP ``requests.Response`` object.
+
+        Yields:
+            Each record from the source.
+        """
         # TODO: Parse response body and return a set of records.
         resp_json = response.json()
-        for record in resp_json.get("<TODO>"):
-            yield record
+        yield from resp_json.get("<TODO>")
 
-    def post_process(self, row: dict, context: Optional[dict] = None) -> dict:
-        """As needed, append or transform raw data to match expected structure."""
+    def post_process(
+        self,
+        row: dict,
+        context: dict | None = None,  # noqa: ARG002
+    ) -> dict | None:
+        """As needed, append or transform raw data to match expected structure.
+
+        Args:
+            row: An individual record from the stream.
+            context: The stream context.
+
+        Returns:
+            The updated record dictionary, or ``None`` to skip the record.
+        """
         # TODO: Delete this method if not needed.
         return row

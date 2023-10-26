@@ -1,4 +1,4 @@
-# [SDK Implementation Details](./index.md) - Stream State
+# Stream State
 
 The SDK automatically handles state management and bookmarks.
 

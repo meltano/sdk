@@ -1,5 +1,7 @@
 """SDK for building Singer taps."""
 
+from __future__ import annotations
+
 from singer_sdk import streams
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.mapper_base import InlineMapper

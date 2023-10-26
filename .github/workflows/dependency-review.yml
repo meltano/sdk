@@ -16,12 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v4.1.1
 
       - name: GitHub dependency vulnerability check
         if: ${{ github.event_name == 'pull_request_target' }}
-        # Use this fork until https://github.com/actions/dependency-review-action/pull/165 is merged
-        uses: WillDaSilva/dependency-review-action@main
+        uses: actions/dependency-review-action@v3.1.0
+        with:
+          fail-on-severity: high
 
       - name: FOSSA dependency license check
         run: |

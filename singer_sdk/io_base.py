@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import abc
+import decimal
 import json
 import logging
 import sys
+import typing as t
 from collections import Counter, defaultdict
-from typing import IO
-from typing import Counter as CounterType
 
 from singer_sdk._singerlib import SingerMessageType
 from singer_sdk.helpers._compat import final
@@ -20,7 +20,7 @@ class SingerReader(metaclass=abc.ABCMeta):
     """Interface for all plugins reading Singer messages from stdin."""
 
     @final
-    def listen(self, file_input: IO[str] | None = None) -> None:
+    def listen(self, file_input: t.IO[str] | None = None) -> None:
         """Read from input until all messages are processed.
 
         Args:
@@ -47,11 +47,31 @@ class SingerReader(metaclass=abc.ABCMeta):
         """
         if not requires.issubset(line_dict):
             missing = requires - set(line_dict)
-            raise Exception(
-                f"Line is missing required {', '.join(missing)} key(s): {line_dict}"
-            )
+            msg = f"Line is missing required {', '.join(missing)} key(s): {line_dict}"
+            raise Exception(msg)
 
-    def _process_lines(self, file_input: IO[str]) -> CounterType[str]:
+    def deserialize_json(self, line: str) -> dict:
+        """Deserialize a line of json.
+
+        Args:
+            line: A single line of json.
+
+        Returns:
+            A dictionary of the deserialized json.
+
+        Raises:
+            json.decoder.JSONDecodeError: raised if any lines are not valid json
+        """
+        try:
+            return json.loads(  # type: ignore[no-any-return]
+                line,
+                parse_float=decimal.Decimal,
+            )
+        except json.decoder.JSONDecodeError as exc:
+            logger.error("Unable to parse:\n%s", line, exc_info=exc)
+            raise
+
+    def _process_lines(self, file_input: t.IO[str]) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:
@@ -59,18 +79,10 @@ class SingerReader(metaclass=abc.ABCMeta):
 
         Returns:
             A counter object for the processed lines.
-
-        Raises:
-            json.decoder.JSONDecodeError: raised if any lines are not valid json
         """
         stats: dict[str, int] = defaultdict(int)
         for line in file_input:
-            try:
-                line_dict = json.loads(line)
-            except json.decoder.JSONDecodeError as exc:
-                logger.error("Unable to parse:\n%s", line, exc_info=exc)
-                raise
-
+            line_dict = self.deserialize_json(line)
             self._assert_line_requires(line_dict, requires={"type"})
 
             record_type: SingerMessageType = line_dict["type"]
@@ -126,7 +138,8 @@ class SingerReader(metaclass=abc.ABCMeta):
             ValueError: raised if a message type is not recognized
         """
         record_type = message_dict["type"]
-        raise ValueError(f"Unknown message type '{record_type}' in message.")
+        msg = f"Unknown message type '{record_type}' in message."
+        raise ValueError(msg)
 
     def _process_endofpipe(self) -> None:
-        pass
+        logger.debug("End of pipe reached")

@@ -6,10 +6,13 @@ import enum
 import sys
 import typing as t
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
+from datetime import timezone
 
-import pytz
 import simplejson as json
+from dateutil.parser import parse
+
+if t.TYPE_CHECKING:
+    from datetime import datetime
 
 
 class SingerMessageType(str, enum.Enum):
@@ -38,7 +41,7 @@ def exclude_null_dict(pairs: list[tuple[str, t.Any]]) -> dict[str, t.Any]:
 class Message:
     """Singer base message."""
 
-    type: SingerMessageType = field(init=False)
+    type: SingerMessageType = field(init=False)  # noqa: A003
     """The message type."""
 
     def to_dict(self) -> dict[str, t.Any]:
@@ -50,7 +53,10 @@ class Message:
         return asdict(self, dict_factory=exclude_null_dict)
 
     @classmethod
-    def from_dict(cls: t.Type[Message], data: dict[str, t.Any]) -> Message:
+    def from_dict(
+        cls: t.Type[Message],  # noqa: UP006
+        data: dict[str, t.Any],
+    ) -> Message:
         """Create an encoding from a dictionary.
 
         Args:
@@ -78,6 +84,27 @@ class RecordMessage(Message):
 
     time_extracted: datetime | None = None
     """The time the record was extracted."""
+
+    @classmethod
+    def from_dict(cls: type[RecordMessage], data: dict[str, t.Any]) -> RecordMessage:
+        """Create a record message from a dictionary.
+
+        This overrides the default conversion logic, since it uses unnecessary
+        deep copying and is very slow.
+
+        Args:
+            data: The dictionary to create the message from.
+
+        Returns:
+            The created message.
+        """
+        time_extracted = data.get("time_extracted")
+        return cls(
+            stream=data["stream"],
+            record=data["record"],
+            version=data.get("version"),
+            time_extracted=parse(time_extracted) if time_extracted else None,
+        )
 
     def to_dict(self) -> dict[str, t.Any]:
         """Return a dictionary representation of the message.
@@ -107,13 +134,14 @@ class RecordMessage(Message):
         """
         self.type = SingerMessageType.RECORD
         if self.time_extracted and not self.time_extracted.tzinfo:
-            raise ValueError(
-                "'time_extracted' must be either None "
-                + "or an aware datetime (with a time zone)"
+            msg = (
+                "'time_extracted' must be either None or an aware datetime (with a "
+                "time zone)"
             )
+            raise ValueError(msg)
 
         if self.time_extracted:
-            self.time_extracted = self.time_extracted.astimezone(pytz.utc)
+            self.time_extracted = self.time_extracted.astimezone(timezone.utc)
 
 
 @dataclass
@@ -143,7 +171,8 @@ class SchemaMessage(Message):
         if isinstance(self.bookmark_properties, (str, bytes)):
             self.bookmark_properties = [self.bookmark_properties]
         if self.bookmark_properties and not isinstance(self.bookmark_properties, list):
-            raise ValueError("bookmark_properties must be a string or list of strings")
+            msg = "bookmark_properties must be a string or list of strings"
+            raise ValueError(msg)
 
 
 @dataclass

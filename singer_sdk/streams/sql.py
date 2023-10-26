@@ -3,25 +3,26 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Iterable, cast
-
-import sqlalchemy
+import typing as t
 
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
-from singer_sdk.plugin_base import PluginBase as TapBaseClass
 from singer_sdk.streams.core import Stream
+
+if t.TYPE_CHECKING:
+    from singer_sdk.tap_base import Tap
 
 
 class SQLStream(Stream, metaclass=abc.ABCMeta):
     """Base class for SQLAlchemy-based streams."""
 
     connector_class = SQLConnector
+    _cached_schema: dict | None = None
 
     def __init__(
         self,
-        tap: TapBaseClass,
+        tap: Tap,
         catalog_entry: dict,
         connector: SQLConnector | None = None,
     ) -> None:
@@ -50,7 +51,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             A CatalogEntry object.
         """
-        return cast(CatalogEntry, CatalogEntry.from_dict(self.catalog_entry))
+        return t.cast(CatalogEntry, CatalogEntry.from_dict(self.catalog_entry))
 
     @property
     def connector(self) -> SQLConnector:
@@ -72,7 +73,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         return self._singer_catalog_entry.metadata
 
-    @property
+    @property  # TODO: Investigate @cached_property after py > 3.7
     def schema(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
@@ -81,7 +82,13 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             The schema object.
         """
-        return cast(dict, self._singer_catalog_entry.schema.to_dict())
+        if not self._cached_schema:
+            self._cached_schema = t.cast(
+                dict,
+                self._singer_catalog_entry.schema.to_dict(),
+            )
+
+        return self._cached_schema
 
     @property
     def tap_stream_id(self) -> str:
@@ -127,9 +134,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         catalog_entry = self._singer_catalog_entry
         if not catalog_entry.table:
-            raise ValueError(
-                f"Missing table name in catalog entry: {catalog_entry.to_dict()}"
-            )
+            msg = f"Missing table name in catalog entry: {catalog_entry.to_dict()}"
+            raise ValueError(msg)
 
         return self.connector.get_fully_qualified_name(
             table_name=catalog_entry.table,
@@ -152,7 +158,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         )
 
     # Get records from stream
-    def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
+    def get_records(self, context: dict | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
 
         If the stream has a replication_key value defined, records will be sorted by the
@@ -171,9 +177,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                 not support partitioning.
         """
         if context:
-            raise NotImplementedError(
-                f"Stream '{self.name}' does not support partitioning."
-            )
+            msg = f"Stream '{self.name}' does not support partitioning."
+            raise NotImplementedError(msg)
 
         selected_column_names = self.get_selected_schema()["properties"].keys()
         table = self.connector.get_table(
@@ -188,17 +193,34 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
             start_val = self.get_starting_replication_key_value(context)
             if start_val:
-                query = query.where(
-                    sqlalchemy.text(":replication_key >= :start_val").bindparams(
-                        replication_key=replication_key_col, start_val=start_val
-                    )
-                )
+                query = query.where(replication_key_col >= start_val)
 
-        if self._MAX_RECORDS_LIMIT is not None:
-            query = query.limit(self._MAX_RECORDS_LIMIT)
+        if self.ABORT_AT_RECORD_COUNT is not None:
+            # Limit record count to one greater than the abort threshold. This ensures
+            # `MaxRecordsLimitException` exception is properly raised by caller
+            # `Stream._sync_records()` if more records are available than can be
+            # processed.
+            query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
 
-        for record in self.connector.connection.execute(query):
-            yield dict(record)
+        with self.connector._connect() as conn:
+            for record in conn.execute(query):
+                transformed_record = self.post_process(dict(record._mapping))
+                if transformed_record is None:
+                    # Record filtered out during post_process()
+                    continue
+                yield transformed_record
+
+    @property
+    def is_sorted(self) -> bool:
+        """Expect stream to be sorted.
+
+        When `True`, incremental streams will attempt to resume if unexpectedly
+        interrupted.
+
+        Returns:
+            `True` if stream is sorted. Defaults to `False`.
+        """
+        return self.replication_key is not None
 
 
 __all__ = ["SQLStream", "SQLConnector"]

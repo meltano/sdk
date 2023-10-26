@@ -1,15 +1,19 @@
 """Compatibility helpers."""
 
-try:
-    from typing import final
-except ImportError:
-    # Final not available until Python3.8
-    final = lambda f: f  # noqa: E731
+from __future__ import annotations
 
-try:
+import sys
+
+if sys.version_info < (3, 8):
+    import importlib_metadata as metadata
+    from typing_extensions import final
+else:
     from importlib import metadata
-except ImportError:
-    # Running on pre-3.8 Python; use importlib-metadata package
-    import importlib_metadata as metadata  # type: ignore
+    from typing import final  # noqa: ICN003
 
-__all__ = ["metadata", "final"]
+if sys.version_info < (3, 9):
+    import importlib_resources as resources
+else:
+    from importlib import resources
+
+__all__ = ["metadata", "final", "resources"]

@@ -4,6 +4,8 @@
 #  - https://gitlab.com/-/graphql-explorer
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 from singer_sdk.streams import GraphQLStream
@@ -32,7 +34,7 @@ class GraphQLCurrentUserStream(GitlabGraphQLStream):
     """Gitlab Current User stream."""
 
     name = "currentuser"
-    primary_keys = ["id"]
+    primary_keys = ("id",)
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "currentuser.json"
     query = """
@@ -46,11 +48,11 @@ class GraphQLProjectsStream(GitlabGraphQLStream):
     """Gitlab Projects stream."""
 
     name = "projects"
-    primary_keys = ["id"]
+    primary_keys = ("id",)
     replication_key = None
     schema_filepath = SCHEMAS_DIR / "projects-graphql.json"
 
     @property
     def query(self) -> str:
         """Return dynamic GraphQL query."""
-        return f"project(fullPath: {self.config['project_id']}" " { name }"
+        return f"project(fullPath: {self.config['project_id']} {{ name }}"

@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Iterable, cast
+import typing as t
 
 import pendulum
 import pytest
 import requests
 
 from singer_sdk._singerlib import Catalog, MetadataMapping
+from singer_sdk.exceptions import (
+    InvalidReplicationKeyException,
+)
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.jsonpath import _compile_jsonpath, extract_jsonpath
 from singer_sdk.pagination import first
@@ -47,7 +50,10 @@ class SimpleTestStream(Stream):
         """Create a new stream."""
         super().__init__(tap, schema=self.schema, name=self.name)
 
-    def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
+    def get_records(
+        self,
+        context: dict | None,  # noqa: ARG002
+    ) -> t.Iterable[dict[str, t.Any]]:
         """Generate records."""
         yield {"id": 1, "value": "Egypt"}
         yield {"id": 2, "value": "Germany"}
@@ -89,7 +95,7 @@ class RestTestStream(RESTStream):
     def get_next_page_token(
         self,
         response: requests.Response,
-        previous_token: str | None,
+        previous_token: str | None,  # noqa: ARG002
     ) -> str | None:
         if self.next_page_token_jsonpath:
             all_matches = extract_jsonpath(
@@ -145,16 +151,16 @@ def tap() -> SimpleTestTap:
 @pytest.fixture
 def stream(tap: SimpleTestTap) -> SimpleTestStream:
     """Create a new stream instance."""
-    return cast(SimpleTestStream, tap.load_streams()[0])
+    return t.cast(SimpleTestStream, tap.load_streams()[0])
 
 
 @pytest.fixture
 def unix_timestamp_stream(tap: SimpleTestTap) -> UnixTimestampIncrementalStream:
     """Create a new stream instance."""
-    return cast(UnixTimestampIncrementalStream, tap.load_streams()[1])
+    return t.cast(UnixTimestampIncrementalStream, tap.load_streams()[1])
 
 
-def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
+def test_stream_apply_catalog(stream: SimpleTestStream):
     """Applying a catalog to a stream should overwrite fields."""
     assert stream.primary_keys == []
     assert stream.replication_key == "updatedAt"
@@ -173,10 +179,10 @@ def test_stream_apply_catalog(tap: SimpleTestTap, stream: SimpleTestStream):
                         "schema": stream.schema,
                         "replication_method": REPLICATION_FULL_TABLE,
                         "replication_key": None,
-                    }
-                ]
-            }
-        )
+                    },
+                ],
+            },
+        ),
     )
 
     assert stream.primary_keys == ["id"]
@@ -248,7 +254,7 @@ def test_stream_starting_timestamp(
     tap: SimpleTestTap,
     stream_name: str,
     bookmark_value: str,
-    expected_starting_value: Any,
+    expected_starting_value: t.Any,
 ):
     """Test the starting timestamp for a stream."""
     stream = tap.streams[stream_name]
@@ -264,12 +270,30 @@ def test_stream_starting_timestamp(
                 stream_name: {
                     "replication_key": stream.replication_key,
                     "replication_key_value": bookmark_value,
-                }
-            }
-        }
+                },
+            },
+        },
     )
     stream._write_starting_replication_value(None)
     assert get_starting_value(None) == expected_starting_value
+
+
+def test_stream_invalid_replication_key(tap: SimpleTestTap):
+    """Validate an exception is raised if replication_key not in schema."""
+
+    class InvalidReplicationKeyStream(SimpleTestStream):
+        replication_key = "INVALID"
+
+    stream = InvalidReplicationKeyStream(tap)
+
+    with pytest.raises(
+        InvalidReplicationKeyException,
+        match=(
+            f"Field '{stream.replication_key}' is not in schema for stream "
+            f"'{stream.name}'"
+        ),
+    ):
+        _check = stream.is_timestamp_replication_key
 
 
 @pytest.mark.parametrize(
@@ -330,7 +354,10 @@ def test_stream_starting_timestamp(
     ],
 )
 def test_jsonpath_rest_stream(
-    tap: SimpleTestTap, path: str, content: str, result: list[dict]
+    tap: SimpleTestTap,
+    path: str,
+    content: str,
+    result: list[dict],
 ):
     """Validate records are extracted correctly from the API response."""
     fake_response = requests.Response()
@@ -377,7 +404,7 @@ def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
 
     class GraphQLJSONPathOverride(GraphqlTestStream):
         @classproperty
-        def records_jsonpath(cls):
+        def records_jsonpath(cls):  # noqa: N805
             return "$[*]"
 
     stream = GraphQLJSONPathOverride(tap)
@@ -451,7 +478,11 @@ def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
     ],
 )
 def test_next_page_token_jsonpath(
-    tap: SimpleTestTap, path: str, content: str, headers: dict, result: str
+    tap: SimpleTestTap,
+    path: str,
+    content: str,
+    headers: dict,
+    result: str,
 ):
     """Validate pagination token is extracted correctly from API response."""
     fake_response = requests.Response()
@@ -487,9 +518,9 @@ def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
     stream = RestTestStream(tap)
 
     def calculate_test_cost(
-        request: requests.PreparedRequest,
-        response: requests.Response,
-        context: dict | None,
+        request: requests.PreparedRequest,  # noqa: ARG001
+        response: requests.Response,  # noqa: ARG001
+        context: dict | None,  # noqa: ARG001
     ):
         return {"dim1": 1, "dim2": 2}
 
@@ -506,3 +537,81 @@ def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
     for record in caplog.records:
         assert record.levelname == "INFO"
         assert f"Total Sync costs for stream {stream.name}" in record.message
+
+
+@pytest.mark.parametrize(
+    "input_catalog,selection",
+    [
+        pytest.param(
+            None,
+            {
+                "selected_stream": True,
+                "unselected_stream": False,
+            },
+            id="no_catalog",
+        ),
+        pytest.param(
+            {
+                "streams": [],
+            },
+            {
+                "selected_stream": False,
+                "unselected_stream": False,
+            },
+            id="empty_catalog",
+        ),
+        pytest.param(
+            {
+                "streams": [
+                    {
+                        "tap_stream_id": "selected_stream",
+                        "metadata": [
+                            {
+                                "breadcrumb": [],
+                                "metadata": {
+                                    "selected": True,
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        "tap_stream_id": "unselected_stream",
+                        "metadata": [
+                            {
+                                "breadcrumb": [],
+                                "metadata": {
+                                    "selected": True,
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                "selected_stream": True,
+                "unselected_stream": True,
+            },
+            id="catalog_with_selection",
+        ),
+    ],
+)
+def test_stream_class_selection(input_catalog, selection):
+    """Test stream class selection."""
+
+    class SelectedStream(RESTStream):
+        name = "selected_stream"
+        url_base = "https://example.com"
+        schema = {"type": "object", "properties": {}}  # noqa: RUF012
+
+    class UnselectedStream(SelectedStream):
+        name = "unselected_stream"
+        selected_by_default = False
+
+    class MyTap(SimpleTestTap):
+        def discover_streams(self):
+            return [SelectedStream(self), UnselectedStream(self)]
+
+    # Check that the selected stream is selected
+    tap = MyTap(config=None, catalog=input_catalog)
+    for stream in selection:
+        assert tap.streams[stream].selected is selection[stream]

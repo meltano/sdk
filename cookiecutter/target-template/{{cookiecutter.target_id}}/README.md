@@ -83,7 +83,7 @@ poetry install
 
 ### Create and Run Tests
 
-Create tests within the `{{ cookiecutter.library_name }}/tests` subfolder and
+Create tests within the `tests` subfolder and
   then run:
 
 ```bash
@@ -123,7 +123,7 @@ Now you can test and orchestrate using Meltano:
 # Test invocation:
 meltano invoke {{ cookiecutter.target_id }} --version
 # OR run a test `elt` pipeline with the Carbon Intensity sample tap:
-meltano elt tap-carbon-intensity {{ cookiecutter.target_id }}
+meltano run tap-carbon-intensity {{ cookiecutter.target_id }}
 ```
 
 ### SDK Dev Guide

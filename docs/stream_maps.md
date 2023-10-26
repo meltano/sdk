@@ -107,23 +107,41 @@ The `stream_maps` config expects a mapping of stream names to a structured trans
 Here is a sample `stream_maps` transformation which removes all references to `email` and
 adds `email_domain` and `email_hash` as new properties:
 
-`config.json`:
+`meltano.yml` or `config.json`:
 
-```js
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  # Apply these transforms to the stream called 'customers'
+  customers:
+    # drop the PII field from RECORD and SCHEMA messages
+    email: __NULL__
+    # capture just the email domain
+    email_domain: owner_email.split('@')[-1]
+    # for uniqueness checks
+    email_hash: md5(config['hash_seed'] + owner_email)
+stream_map_config:
+  # hash outputs are not able to be replicated without the original seed:
+  hash_seed: 01AWZh7A6DzGm6iJZZ2T
+```
+````
+
+````{tab} JSON
+```json
 {
     "stream_maps": {
-        "customers": { // Apply these transforms to the stream called 'customers'
-            "email": null, // drop the PII field from RECORD and SCHEMA messages
-            "email_domain": "owner_email.split('@')[-1]", // capture just the email domain
-            "email_hash": "md5(config['hash_seed'] + owner_email)", // for uniqueness checks
+        "customers": {
+            "email": null,
+            "email_domain": "owner_email.split('@')[-1]",
+            "email_hash": "md5(config['hash_seed'] + owner_email)"
         }
     },
     "stream_map_config": {
-        // hash outputs are not able to be replicated without the original seed:
         "hash_seed": "01AWZh7A6DzGm6iJZZ2T"
     }
 }
 ```
+````
 
 If map expressions should have access to special config, such as in the
 one-way hash algorithm above, define those config arguments within the optional
@@ -136,6 +154,32 @@ Expressions are defined and parsed using the
 [`simpleval`](https://github.com/danthedeckie/simpleeval) expression library. This library
 accepts most native python expressions and is extended by custom functions which have been declared
 within the SDK.
+
+#### Compound Expressions
+
+Starting in version 0.33.0, the SDK supports the use of simple comprehensions, e.g. `[x + 1 for x in [1,2,3]]`. This is a powerful feature which allows you to perform complex transformations on lists of values. For example, you can use comprehensions to filter out values in an array:
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  users:
+    id: id
+    fields: "[f for f in fields if f['key'] != 'age']"
+```
+````
+
+````{tab} JSON
+```json
+{
+  "stream_maps": {
+    "users": {
+      "id": "id",
+      "fields": "[f for f in fields if f['key'] != 'age']"
+    }
+  }
+}
+```
+````
 
 ### Accessing Stream Properties within Mapping Expressions
 
@@ -197,26 +241,47 @@ The following logic is applied in determining the SCHEMA of the transformed stre
 To remove a stream, declare the stream within `stream_maps` config and assign it the value
 `null`. For example:
 
-```js
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  # don't sync the stream called 'addresses'
+  addresses: __NULL__
+```
+````
+
+````{tab} JSON
+```json
 {
     "stream_maps": {
-        "addresses": null  // don't sync the stream called 'addresses'
-    },
+        "addresses": null
+    }
 }
 ```
+````
 
 To remove a property, declare the property within the designated stream's map entry and
 assign it the value `null`. For example:
 
-```js
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  customers:
+    # don't sync the 'email' stream property
+    email: __NULL__
+```
+````
+
+````{tab} JSON
+```json
 {
     "stream_maps": {
         "customers": {
-            "email": null, // don't sync the 'email' stream property
+            "email": null
         }
-    },
+    }
 }
 ```
+````
 
 ### Remove all undeclared streams or properties
 
@@ -230,48 +295,110 @@ below.
 
 To remove all streams except the `customers` stream:
 
-```js
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  customers: {}
+  __else__: __NULL__
+```
+````
+
+````{tab} JSON
+```json
 {
     "stream_maps": {
         "customers": {},
         "__else__": null
-    },
+    }
 }
 ```
+````
 
 To remove all fields from the `customers` stream except `customer_id`:
 
-```js
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  customers:
+    customer_id: customer_id
+    __else__: __NULL__
+```
+````
+
+````{tab} JSON
+```json
 {
     "stream_maps": {
         "customers": {
             "customer_id": "customer_id",
             "__else__": null
-        },
-    },
+        }
+    }
 }
 ```
+````
 
 ### Unset or modify the stream's primary key behavior
 
 To override the stream's default primary key properties, add the `__key_properties__` operation within the stream map definition.
 
-```js
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  customers:
+    # Remove the original Customer ID column
+    customer_id: __NULL__
+    # Add a new (and still unique) ID column
+    customer_id_hashed: md5(customer_id)
+    # Updated key to reflect the new name
+    __key_properties__:
+    - customer_id_hashed
+```
+````
+
+````{tab} JSON
+```json
 {
     "stream_maps": {
         "customers": {
-            "customer_id": null,                          // Remove the original Customer ID column
-            "customer_id_hashed": "md5(customer_id)",     // Add a new (and still unique) ID column
-            "__key_properties__": ["customer_id_hashed"]  // Updated key to reflect the new name
-        },
-    },
+            "customer_id": null,
+            "customer_id_hashed": "md5(customer_id)",
+            "__key_properties__": ["customer_id_hashed"]
+        }
+    }
 }
 ```
+````
 
 Notes:
 
 - To sync the stream as if it did not contain a primary key, simply set `__key_properties__` to `null`.
 - Key properties _must_ be present in the transformed stream result. Otherwise, an error will be raised.
+
+### Add a property with a string literal value
+
+Some applications, such as multi-tenant, may benefit from adding a property with a hardcoded string literal value.
+These values need to be wrapped in double quotes to differentiate them from property names:
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  customers:
+    a_new_field: '\"client-123\"'
+```
+````
+
+````{tab} JSON
+```json
+{
+    "stream_maps": {
+        "customers": {
+            "a_new_field": "\"client-123\""
+        }
+    }
+}
+```
+````
 
 #### Q: What is the difference between `primary_keys` and `key_properties`?
 
@@ -293,15 +420,25 @@ To alias a stream, simply add the operation `"__alias__": "new_name"` to the str
 definition. For example, to alias the `customers` stream as `customer_v2`, use the
 following:
 
-```js
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  customers:
+    __alias__: customers_v2
+```
+````
+
+````{tab} JSON
+```json
 {
     "stream_maps": {
         "customers": {
             "__alias__": "customers_v2"
-        },
-    },
+        }
+    }
 }
 ```
+````
 
 ## Duplicating or splitting a stream using `__source__`
 
@@ -309,26 +446,43 @@ To create a new stream as a copy of the original, specify the operation
 `"__source__": "stream_name"`. For example, you can create a copy of the `customers` stream
 which only contains PII properties using the following:
 
-```js
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  customers:
+    # Exclude these since we're capturing them in the pii stream
+    email: __NULL__
+    full_name: __NULL__
+  customers_pii:
+    __source__: customers
+    # include just the PII and the customer_id
+    customer_id: customer_id
+    email: email
+    full_name: full_name
+    # exclude anything not declared
+    __else__: __NULL__
+```
+````
+
+````{tab} JSON
+```json
 {
     "stream_maps": {
         "customers": {
-            // exclude these since we're capturing them in the pii stream
             "email": null,
             "full_name": null
         },
         "customers_pii": {
             "__source__": "customers",
-            // include just the PII and the customer_id
             "customer_id": "customer_id",
             "email": "email",
             "full_name": "full_name",
-            // exclude anything not declared
-            "__else__": null,
-        },
-    },
+            "__else__": null
+        }
+    }
 }
 ```
+````
 
 ## Filtering out records from a stream using `__filter__` operation
 
@@ -337,15 +491,25 @@ The `__filter__` operation accept a string expression which must evaluate to `tr
 
 For example, to only include customers with emails from the `example.com` company domain:
 
-```js
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  customers:
+    __filter__: email.endswith('@example.com')
+```
+````
+
+````{tab} JSON
+```json
 {
     "stream_maps": {
         "customers": {
             "__filter__": "email.endswith('@example.com')"
         }
-    },
+    }
 }
 ```
+````
 
 ### Understanding Filters' Affects on Parent-Child Streams
 

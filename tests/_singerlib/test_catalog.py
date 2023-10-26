@@ -207,6 +207,7 @@ def test_catalog_parsing():
                 "properties": {
                     "first_name": {"type": "string"},
                     "last_name": {"type": "string"},
+                    "updated_at": {"type": "string", "format": "date-time"},
                 },
                 "type": "object",
             },
@@ -240,7 +241,7 @@ def test_catalog_parsing():
 )
 def test_standard_metadata(
     schema: dict,
-    key_properties: list[str] | None,
+    key_properties: list[str],
     replication_method: str | None,
     valid_replication_keys: list[str] | None,
     schema_name: str | None,
@@ -255,6 +256,7 @@ def test_standard_metadata(
     )
 
     stream_metadata = metadata[()]
+    assert isinstance(stream_metadata, StreamMetadata)
     assert stream_metadata.table_key_properties == key_properties
     assert stream_metadata.forced_replication_method == replication_method
     assert stream_metadata.valid_replication_keys == valid_replication_keys
@@ -265,3 +267,8 @@ def test_standard_metadata(
         pk_metadata = metadata[("properties", pk)]
         assert pk_metadata.inclusion == Metadata.InclusionType.AUTOMATIC
         assert pk_metadata.selected is None
+
+    for rk in valid_replication_keys or []:
+        rk_metadata = metadata[("properties", rk)]
+        assert rk_metadata.inclusion == Metadata.InclusionType.AUTOMATIC
+        assert rk_metadata.selected is None

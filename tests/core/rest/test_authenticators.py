@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import typing as t
+
 import jwt
 import pytest
-import requests_mock
 from cryptography.hazmat.primitives.asymmetric.rsa import (
     RSAPrivateKey,
     RSAPublicKey,
@@ -16,10 +17,15 @@ from cryptography.hazmat.primitives.serialization import (
     PrivateFormat,
     PublicFormat,
 )
+from requests.auth import HTTPProxyAuth, _basic_auth_str
 
 from singer_sdk.authenticators import OAuthAuthenticator, OAuthJWTAuthenticator
-from singer_sdk.streams import RESTStream
-from singer_sdk.tap_base import Tap
+
+if t.TYPE_CHECKING:
+    import requests_mock
+
+    from singer_sdk.streams import RESTStream
+    from singer_sdk.tap_base import Tap
 
 
 @pytest.mark.parametrize(
@@ -66,7 +72,10 @@ from singer_sdk.tap_base import Tap
     ],
 )
 def test_authenticator_is_reused(
-    rest_tap: Tap, stream_name: str, other_stream_name: str, auth_reused: bool
+    rest_tap: Tap,
+    stream_name: str,
+    other_stream_name: str,
+    auth_reused: bool,
 ):
     """Validate that the stream's authenticator is a singleton."""
     stream: RESTStream = rest_tap.streams[stream_name]
@@ -173,7 +182,7 @@ def test_oauth_jwt_authenticator_payload(
 ):
     class _FakeOAuthJWTAuthenticator(OAuthJWTAuthenticator):
         private_key = private_key_string
-        oauth_request_body = {"some": "payload"}
+        oauth_request_body = {"some": "payload"}  # noqa: RUF012
 
     authenticator = _FakeOAuthJWTAuthenticator(stream=rest_tap.streams["some_stream"])
 
@@ -182,3 +191,12 @@ def test_oauth_jwt_authenticator_payload(
     token = payload["assertion"]
 
     assert jwt.decode(token, public_key_string, algorithms=["RS256"]) == body
+
+
+def test_requests_library_auth(rest_tap: Tap):
+    """Validate that a requests.auth object can be used as an authenticator."""
+    stream: RESTStream = rest_tap.streams["proxy_auth_stream"]
+    r = stream.prepare_request(None, None)
+
+    assert isinstance(stream.authenticator, HTTPProxyAuth)
+    assert r.headers["Proxy-Authorization"] == _basic_auth_str("username", "password")

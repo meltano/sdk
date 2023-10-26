@@ -41,7 +41,7 @@ class TapCountries(Tap):
     config options and does not require authentication.
     """
     name = "tap-countries"
-    config_jsonschema = PropertiesList([]).to_dict()
+    config_jsonschema = th.PropertiesList([]).to_dict()
 
     def discover_streams(self) -> List[Stream]:
         """Return a list containing the two stream types."""
@@ -127,11 +127,11 @@ class ParquetStream(Stream):
         """Dynamically detect the json schema for the stream.
         This is evaluated prior to any records being retrieved.
         """
-        properties: List[Property] = []
-        for header in FAKECSV.split("\n")[0].split(",")
+        properties: List[th.Property] = []
+        for header in FAKECSV.split("\n")[0].split(","):
             # Assume string type for all fields
-            properties.add(header, StringType())
-        return PropertiesList(*properties).to_dict()
+            properties.append(th.Property(header, th.StringType()))
+        return th.PropertiesList(*properties).to_dict()
 ```
 
 Here is another example from the Parquet tap. This sample uses a
@@ -148,7 +148,7 @@ class ParquetStream(Stream):
         """Dynamically detect the json schema for the stream.
         This is evaluated prior to any records being retrieved.
         """
-        properties: List[Property] = []
+        properties: List[th.Property] = []
         # Get a schema object using the parquet and pyarrow libraries
         parquet_schema = pq.ParquetFile(self.filepath).schema_arrow
 
@@ -160,10 +160,10 @@ class ParquetStream(Stream):
             dtype = get_jsonschema_type(str(parquet_schema.types[i]))
 
             # Add the new property to our list
-            properties.append(Property(name, dtype))
+            properties.append(th.Property(name, dtype))
 
         # Return the list as a JSON Schema dictionary object
-        return PropertiesList(*properties).to_dict()
+        return th.PropertiesList(*properties).to_dict()
 ```
 
 ### Initialize a collection of tap streams with differing types
@@ -255,6 +255,34 @@ class CachedAuthStream(RESTStream):
         return APIAuthenticatorBase(stream=self)
 ```
 
+### Use one of `requests`'s built-in authenticators
+
+```python
+from requests.auth import HTTPDigestAuth
+from singer_sdk.streams import RESTStream
+
+class DigestAuthStream(RESTStream):
+    """A stream with digest authentication."""
+
+    @property
+    def authenticator(self) -> HTTPDigestAuth:
+        """Stream authenticator."""
+        return HTTPDigestAuth(
+            username=self.config["username"],
+            password=self.config["password"],
+        )
+```
+
+[`HTTPBasicAuth`](https://requests.readthedocs.io/en/latest/api/#requests.auth.HTTPBasicAuth) and
+[`HTTPProxyAuth`](https://requests.readthedocs.io/en/latest/api/#requests.auth.HTTPProxyAuth)
+are also available in `requests.auth`. In addition to `requests.auth` classes, the community
+has published a few packages with custom authenticator classes, which are compatible with the SDK.
+For example:
+
+- [`requests-aws4auth`](https://github.com/tedder/requests-aws4auth): AWS v4 authentication
+- [`requests_auth`](https://github.com/Colin-b/requests_auth): A collection of authenticators
+  for various services and protocols including Azure, Okta and NTLM.
+
 ### Custom response validation
 
 Some APIs deviate from HTTP status codes to report failures. For those cases,
@@ -302,6 +330,7 @@ Custom backoff and retry behaviour can be added by overriding the methods:
 - [`backoff_wait_generator`](singer_sdk.RESTStream.backoff_wait_generator)
 - [`backoff_max_tries`](singer_sdk.RESTStream.backoff_max_tries)
 - [`backoff_handler`](singer_sdk.RESTStream.backoff_handler)
+- [`backoff_jitter`](singer_sdk.RESTStream.backoff_jitter)
 
 For example, to use a constant retry:
 ```
@@ -310,6 +339,11 @@ def backoff_wait_generator() -> Callable[..., Generator[int, Any, None]]:
 ```
 
 To utilise a response header as a wait value you can use [`backoff_runtime`](singer_sdk.RESTStream.backoff_runtime), and pass a method that returns a wait value:
+
+**Note**: By default jitter makes this function wait a bit longer than the value provided.
+To disable jitter override [`backoff_jitter`](singer_sdk.RESTStream.backoff_jitter).
+In sdk versions <=0.21.0 the default jitter function will make the function below not work as you would expect without disabling jitter,
+([here](https://github.com/meltano/sdk/issues/1477) for more information) to disable jitter override the `request_decorator` and pass `jitter=None` to the `backoff.on_exception` function.
 
 ```
 def backoff_wait_generator() -> Callable[..., Generator[int, Any, None]]:

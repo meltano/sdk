@@ -1,0 +1,3 @@
+{"type": "RECORD", "stream": "test_record_before_schema", "record": {"id": 1, "metric": 6719}}
+{"type": "SCHEMA", "stream": "test_record_before_schema", "key_properties": ["id"], "schema": {"type": "object", "properties": {"id": {"type": "integer"}, "metric": {"type": "integer"}}}}
+{"type": "RECORD", "stream": "test_record_before_schema", "record": {"id": 2, "metric": 3728}}

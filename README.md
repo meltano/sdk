@@ -1,16 +1,44 @@
-# Meltano Singer SDK
+<h1 align="center">Meltano Singer SDK</h1>
 
-[![Python Versions](https://img.shields.io/pypi/pyversions/singer-sdk)](https://pypi.org/project/singer-sdk)
-[![Downloads](https://img.shields.io/pypi/dw/singer-sdk?color=blue)](https://pypi.org/project/singer-sdk)
-[![PyPI Version](https://img.shields.io/pypi/v/singer-sdk?color=blue)](https://pypi.org/project/singer-sdk)
-[![Documentation Status](https://readthedocs.org/projects/meltano-sdk/badge/?version=latest)](https://sdk.meltano.com/en/latest/?badge=latest)
-[![codecov](https://codecov.io/gh/meltano/sdk/branch/main/graph/badge.svg?token=kS1zkemAgo)](https://codecov.io/gh/meltano/sdk)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/meltano/sdk/main.svg)](https://results.pre-commit.ci/latest/github/meltano/sdk/main)
-
+<h3 align="center">
 The Tap and Target SDKs are the fastest way to build custom data extractors and loaders!
 Taps and targets built on the SDK are automatically compliant with the
-[Singer Spec](https://hub.meltano.com/singer/spec), the
+<a href="https://hub.meltano.com/singer/spec">Singer Spec</a>, the
 de-facto open source standard for extract and load pipelines.
+</h3>
+
+---
+
+</br>
+
+<div align="center">
+  <img alt="Meltano Singer SDK Logo" src="https://user-images.githubusercontent.com/11428666/231584532-ffa694e6-60f9-4fd6-b2ee-5ff3e39d3ad6.svg" width="600"/>
+</div>
+
+</br>
+
+<div align="center">
+  <a href="https://pypi.org/project/singer-sdk">
+   <img alt="Python Versions" src="https://img.shields.io/pypi/pyversions/singer-sdk"/>
+  </a>
+  <a href="https://pypi.org/project/singer-sdk">
+   <img alt="Downloads" src="https://img.shields.io/pypi/dw/singer-sdk?color=blue"/>
+  </a>
+  <a href="https://pypi.org/project/singer-sdk">
+   <img alt="PyPI Version" src="https://img.shields.io/pypi/v/singer-sdk?color=blue"/>
+  </a>
+  <a href="https://sdk.meltano.com/en/latest/?badge=latest">
+   <img alt="Documentation Status" src="https://readthedocs.org/projects/meltano-sdk/badge/?version=latest"/>
+  </a>
+  <a href="https://codecov.io/gh/meltano/sdk">
+   <img alt="codecov" src="https://codecov.io/gh/meltano/sdk/branch/main/graph/badge.svg?token=kS1zkemAgo"/>
+  </a>
+  <a href="https://results.pre-commit.ci/latest/github/meltano/sdk/main">
+   <img alt="pre-commit.ci status" src="https://results.pre-commit.ci/badge/github/meltano/sdk/main.svg"/>
+  </a>
+</div>
+
+---
 
 ## Future-proof extractors and loaders, with less code
 

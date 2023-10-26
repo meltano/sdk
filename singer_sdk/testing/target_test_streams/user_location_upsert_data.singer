@@ -1,0 +1,18 @@
+{"type": "SCHEMA", "stream": "test_users", "key_properties": ["id"], "schema": {"required": ["id", "name"], "type": "object", "properties": {"id": {"type": "integer"}, "name": {"type": "string"}}}}
+{"type": "RECORD", "stream": "test_users", "record": {"id": 1, "name": "Johny"}}
+{"type": "RECORD", "stream": "test_users", "record": {"id": 2, "name": "George"}}
+{"type": "RECORD", "stream": "test_users", "record": {"id": 5, "name": "Jim"}}
+{"type": "RECORD", "stream": "test_users", "record": {"id": 8, "name": "Thomas"}}
+{"type": "RECORD", "stream": "test_users", "record": {"id": 12, "name": "Paul"}}
+{"type": "RECORD", "stream": "test_users", "record": {"id": 13, "name": "Mary"}}
+{"type": "SCHEMA", "stream": "test_locations", "key_properties": ["id"], "schema": {"required": ["id", "name"], "type": "object", "properties": {"id": {"type": "integer"}, "name": {"type": "string"}}}}
+{"type": "RECORD", "stream": "test_locations", "record": {"id": 1, "name": "Philly"}}
+{"type": "RECORD", "stream": "test_locations", "record": {"id": 3, "name": "San Francisco"}}
+{"type": "RECORD", "stream": "test_locations", "record": {"id": 6, "name": "Colorado"}}
+{"type": "RECORD", "stream": "test_locations", "record": {"id": 8, "name": "Boston"}}
+{"type": "SCHEMA", "stream": "test_user_in_location", "key_properties": ["id"], "schema": {"required": ["id", "user_id", "location_id"], "type": "object", "properties": {"id": {"type": "integer"}, "user_id": {"type": "integer"}, "location_id": {"type": "integer"}, "info": {"type": "object", "properties": {"weather": {"type": "string"}, "mood": {"type": "string"}}}}}}
+{"type": "RECORD", "stream": "test_user_in_location", "record": {"id": 1, "user_id": 1, "location_id": 4, "info": {"weather": "rainy", "mood": "sad"}}}
+{"type": "RECORD", "stream": "test_user_in_location", "record": {"id": 2, "user_id": 2, "location_id": 3, "info": {"weather": "sunny", "mood": "satisfied"}}}
+{"type": "RECORD", "stream": "test_user_in_location", "record": {"id": 6, "user_id": 3, "location_id": 2, "info": {"weather": "sunny", "mood": "happy"}}}
+{"type": "RECORD", "stream": "test_user_in_location", "record": {"id": 14, "user_id": 4, "location_id": 1, "info": {"weather": "cloudy", "mood": "ok"}}}
+{"type": "STATE", "value": {"test_users": 13, "test_locations": 8, "test_user_in_location": 14}}

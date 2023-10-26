@@ -4,17 +4,17 @@ from __future__ import annotations
 
 import collections
 import itertools
-import json
 import re
+import typing as t
 from copy import deepcopy
-from typing import Any, Mapping, MutableMapping, NamedTuple
 
 import inflection
+import simplejson as json
 
 DEFAULT_FLATTENING_SEPARATOR = "__"
 
 
-class FlatteningOptions(NamedTuple):
+class FlatteningOptions(t.NamedTuple):
     """A stream map which performs the flattening role."""
 
     max_level: int
@@ -23,7 +23,7 @@ class FlatteningOptions(NamedTuple):
 
 
 def get_flattening_options(
-    plugin_config: Mapping,
+    plugin_config: t.Mapping,
 ) -> FlatteningOptions | None:
     """Get flattening options, if flattening is enabled.
 
@@ -56,14 +56,18 @@ def flatten_key(key_name: str, parent_keys: list[str], separator: str = "__") ->
     >>> flatten_key("foo", ["bar", "baz"], separator=".")
     'bar.baz.foo'
     """
-    full_key = parent_keys + [key_name]
+    full_key = [*parent_keys, key_name]
     inflected_key = full_key.copy()
     reducer_index = 0
-    while len(separator.join(inflected_key)) >= 255 and reducer_index < len(
-        inflected_key
+    while len(
+        separator.join(inflected_key),
+    ) >= 255 and reducer_index < len(  # noqa: PLR2004
+        inflected_key,
     ):
         reduced_key = re.sub(
-            r"[a-z]", "", inflection.camelize(inflected_key[reducer_index])
+            r"[a-z]",
+            "",
+            inflection.camelize(inflected_key[reducer_index]),
         )
         inflected_key[reducer_index] = (
             reduced_key if len(reduced_key) > 1 else inflected_key[reducer_index][0:3]
@@ -151,17 +155,7 @@ def flatten_schema(
           "type": "string"
         },
         "foo__bar": {
-          "type": "object",
-          "properties": {
-            "baz": {
-              "type": "object",
-              "properties": {
-                "qux": {
-                  "type": "string"
-                }
-              }
-            }
-          }
+          "type": "string"
         }
       }
     }
@@ -174,12 +168,7 @@ def flatten_schema(
           "type": "string"
         },
         "foo__bar__baz": {
-          "type": "object",
-          "properties": {
-            "qux": {
-              "type": "string"
-            }
-          }
+          "type": "string"
         }
       }
     }
@@ -196,6 +185,101 @@ def flatten_schema(
         }
       }
     }
+
+    >>> nullable_leaves_schema = {
+    ...     "type": "object",
+    ...     "properties": {
+    ...         "id": {
+    ...             "type": "string"
+    ...         },
+    ...         "foo": {
+    ...             "type": ["object", "null"],
+    ...             "properties": {
+    ...                 "bar": {
+    ...                     "type": ["object", "null"],
+    ...                     "properties": {
+    ...                         "baz": {
+    ...                             "type": ["object", "null"],
+    ...                             "properties": {
+    ...                                 "qux": {
+    ...                                     "type": "string"
+    ...                                 }
+    ...                             }
+    ...                         }
+    ...                     }
+    ...                 }
+    ...             }
+    ...         }
+    ...     }
+    ... }
+    >>> print(json.dumps(flatten_schema(nullable_leaves_schema, 0), indent=2))
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "foo": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "bar": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "properties": {
+                "baz": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "qux": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    >>> print(json.dumps(flatten_schema(nullable_leaves_schema, 1), indent=2))
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "foo__bar": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+
+    >>> print(json.dumps(flatten_schema(nullable_leaves_schema, 2), indent=2))
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "foo__bar__baz": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
     """
     new_schema = deepcopy(schema)
     new_schema["properties"] = _flatten_schema(
@@ -206,7 +290,7 @@ def flatten_schema(
     return new_schema
 
 
-def _flatten_schema(
+def _flatten_schema(  # noqa: C901, PLR0912
     schema_node: dict,
     parent_keys: list[str] | None = None,
     separator: str = "__",
@@ -217,7 +301,7 @@ def _flatten_schema(
 
     Args:
         schema_node: The schema node to flatten.
-        parent_key: The parent's key, provided as a list of node names.
+        parent_keys: The parent's key, provided as a list of node names.
         separator: The string to use when concatenating key names.
         level: The current recursion level (zero-based).
         max_level: The max recursion level (zero-based, exclusive).
@@ -232,41 +316,56 @@ def _flatten_schema(
     if "properties" not in schema_node:
         return {}
 
-    for k, v in schema_node["properties"].items():
-        new_key = flatten_key(k, parent_keys, separator)
-        if "type" in v.keys():
-            if "object" in v["type"] and "properties" in v and level < max_level:
+    for field_name, field_schema in schema_node["properties"].items():
+        new_key = flatten_key(field_name, parent_keys, separator)
+        if "type" in field_schema:
+            if (
+                "object" in field_schema["type"]
+                and "properties" in field_schema
+                and level < max_level
+            ):
                 items.extend(
                     _flatten_schema(
-                        v,
-                        parent_keys + [k],
+                        field_schema,
+                        [*parent_keys, field_name],
                         separator=separator,
                         level=level + 1,
                         max_level=max_level,
-                    ).items()
+                    ).items(),
                 )
+            elif (
+                "array" in field_schema["type"]
+                or "object" in field_schema["type"]
+                and max_level > 0
+            ):
+                types = (
+                    ["string", "null"] if "null" in field_schema["type"] else "string"
+                )
+                items.append((new_key, {"type": types}))
             else:
-                items.append((new_key, v))
-        else:
-            if len(v.values()) > 0:
-                if list(v.values())[0][0]["type"] == "string":
-                    list(v.values())[0][0]["type"] = ["null", "string"]
-                    items.append((new_key, list(v.values())[0][0]))
-                elif list(v.values())[0][0]["type"] == "array":
-                    list(v.values())[0][0]["type"] = ["null", "array"]
-                    items.append((new_key, list(v.values())[0][0]))
-                elif list(v.values())[0][0]["type"] == "object":
-                    list(v.values())[0][0]["type"] = ["null", "object"]
-                    items.append((new_key, list(v.values())[0][0]))
+                items.append((new_key, field_schema))
+        # TODO: Figure out what this really does, try breaking it.
+        # If it's not needed, remove it.
+        elif len(field_schema.values()) > 0:
+            if next(iter(field_schema.values()))[0]["type"] == "string":
+                next(iter(field_schema.values()))[0]["type"] = ["null", "string"]
+                items.append((new_key, next(iter(field_schema.values()))[0]))
+            elif next(iter(field_schema.values()))[0]["type"] == "array":
+                next(iter(field_schema.values()))[0]["type"] = ["null", "array"]
+                items.append((new_key, next(iter(field_schema.values()))[0]))
+            elif next(iter(field_schema.values()))[0]["type"] == "object":
+                next(iter(field_schema.values()))[0]["type"] = ["null", "object"]
+                items.append((new_key, next(iter(field_schema.values()))[0]))
 
     # Sort and check for duplicates
     def _key_func(item):
         return item[0]  # first item is tuple is the key name.
 
     sorted_items = sorted(items, key=_key_func)
-    for k, g in itertools.groupby(sorted_items, key=_key_func):
+    for field_name, g in itertools.groupby(sorted_items, key=_key_func):
         if len(list(g)) > 1:
-            raise ValueError(f"Duplicate column name produced in schema: {k}")
+            msg = f"Duplicate column name produced in schema: {field_name}"
+            raise ValueError(msg)
 
     # Return the (unsorted) result as a dict.
     return dict(items)
@@ -298,7 +397,8 @@ def flatten_record(
 
 
 def _flatten_record(
-    record_node: MutableMapping[Any, Any],
+    record_node: t.MutableMapping[t.Any, t.Any],
+    *,
     flattened_schema: dict | None = None,
     parent_key: list[str] | None = None,
     separator: str = "__",
@@ -324,40 +424,40 @@ def _flatten_record(
     if parent_key is None:
         parent_key = []
 
-    items: list[tuple[str, Any]] = []
+    items: list[tuple[str, t.Any]] = []
     for k, v in record_node.items():
         new_key = flatten_key(k, parent_key, separator)
         if isinstance(v, collections.abc.MutableMapping) and level < max_level:
             items.extend(
                 _flatten_record(
                     v,
-                    flattened_schema,
-                    parent_key + [k],
+                    flattened_schema=flattened_schema,
+                    parent_key=[*parent_key, k],
                     separator=separator,
                     level=level + 1,
                     max_level=max_level,
-                ).items()
+                ).items(),
             )
         else:
             items.append(
                 (
                     new_key,
-                    json.dumps(v)
+                    json.dumps(v, use_decimal=True)
                     if _should_jsondump_value(k, v, flattened_schema)
                     else v,
-                )
+                ),
             )
 
     return dict(items)
 
 
-def _should_jsondump_value(key: str, value: Any, flattened_schema=None) -> bool:
+def _should_jsondump_value(key: str, value: t.Any, flattened_schema=None) -> bool:
     """Return True if json.dump() should be used to serialize the value.
 
     Args:
         key: [description]
         value: [description]
-        schema: [description]. Defaults to None.
+        flattened_schema: [description]. Defaults to None.
 
     Returns:
         [description]

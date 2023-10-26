@@ -31,7 +31,33 @@
         "assignees": {
             "type": "array",
             "items": {
-                "type": "integer"
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "state": {
+                        "type": "string"
+                    },
+                    "avatar_url": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "web_url": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    }
+                }
             }
         },
         "closed_by_id": {

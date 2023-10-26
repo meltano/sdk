@@ -1,37 +1,67 @@
 [tool.poetry]
+{%- if cookiecutter.variant != "None (Skip)" %}
+name = "{{cookiecutter.variant}}-{{cookiecutter.tap_id}}"
+{%- else %}
 name = "{{cookiecutter.tap_id}}"
+{%- endif %}
 version = "0.0.1"
 description = "`{{cookiecutter.tap_id}}` is a Singer tap for {{cookiecutter.source_name}}, built with the Meltano Singer SDK."
-authors = ["{{ cookiecutter.admin_name }}"]
+readme = "README.md"
+authors = ["{{ cookiecutter.admin_name }} <{{ cookiecutter.admin_email }}>"]
 keywords = [
     "ELT",
     "{{cookiecutter.source_name}}",
 ]
-license = "Apache 2.0"
+license = "Apache-2.0"
+{%- if cookiecutter.variant != "None (Skip)" %}
+packages = [
+    { include = "{{cookiecutter.library_name}}" },
+]
+{%- endif %}
 
 [tool.poetry.dependencies]
-python = "<3.11,>=3.7.1"
-requests = "^2.25.1"
-singer-sdk = { version="^0.15.0"}
-fs-s3fs = { version = "^1.1.1", optional = true}
+python = ">=3.8,<4"
+singer-sdk = { version="~=0.33.0" }
+fs-s3fs = { version = "~=1.1.1", optional = true }
+{%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
+requests = "~=2.31.0"
+{%- endif %}
+{%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
+cached-property = "~=1" # Remove after Python 3.7 support is dropped
+{%- endif %}
 
-[tool.poetry.dev-dependencies]
-pytest = "^6.2.5"
-tox = "^3.24.4"
-flake8 = "^3.9.2"
-black = "^21.9b0"
-pydocstyle = "^6.1.1"
-mypy = "^0.910"
-types-requests = "^2.26.1"
-isort = "^5.10.1"
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.4.0"
+singer-sdk = { version="~=0.33.0", extras = ["testing"] }
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3 # Vertical Hanging Indent
-src_paths = "{{cookiecutter.library_name}}"
+[tool.mypy]
+python_version = "3.9"
+warn_unused_configs = true
+{%- if cookiecutter.stream_type == 'SQL' %}
+plugins = "sqlmypy"
+{%- endif %}
+
+[tool.ruff]
+ignore = [
+    "ANN101",  # missing-type-self
+    "ANN102",  # missing-type-cls
+]
+select = ["ALL"]
+src = ["{{cookiecutter.library_name}}"]
+target-version = "py37"
+
+
+[tool.ruff.flake8-annotations]
+allow-star-arg-any = true
+
+[tool.ruff.isort]
+known-first-party = ["{{cookiecutter.library_name}}"]
+
+[tool.ruff.pydocstyle]
+convention = "google"
 
 [build-system]
 requires = ["poetry-core>=1.0.8"]

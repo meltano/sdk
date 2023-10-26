@@ -1,18 +1,10 @@
 [flake8]
-ignore = W503, C901, ANN101
 max-line-length = 88
 exclude = cookiecutter
+ignore = E, W
 per-file-ignores =
-    # Don't require docstrings or type annotations in tests
-    # tests/*:D100,D102,D103,DAR,ANN
-    # Don't require docstrings conventions or type annotations in SDK samples
-    # samples/*:ANN,DAR
-    # Don't require docstrings conventions or type annotations in private modules
-    singer_sdk/helpers/_*.py:ANN,DAR,D105
-    # Don't require docstrings conventions in "meta" code
-    # singer_sdk/helpers/_classproperty.py:D105
-    # Ignore unused imports in __init__.py files
-    singer_sdk/_singerlib/__init__.py:F401
-max-complexity = 10
+    # Don't require docstrings conventions in private modules
+    singer_sdk/helpers/_*.py:DAR
+    # Disabled some checks in samples code
+    samples/*:DAR
 docstring-convention = google
-allow-star-arg-any = true

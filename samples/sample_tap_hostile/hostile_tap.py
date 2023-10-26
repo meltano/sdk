@@ -1,6 +1,6 @@
 """A sample tap for testing SQL target property name transformations."""
 
-from typing import List
+from __future__ import annotations
 
 from samples.sample_tap_hostile.hostile_streams import HostilePropertyNamesStream
 from singer_sdk import Stream, Tap
@@ -13,7 +13,7 @@ class SampleTapHostile(Tap):
     name: str = "sample-tap-hostile"
     config_jsonschema = PropertiesList().to_dict()
 
-    def discover_streams(self) -> List[Stream]:
+    def discover_streams(self) -> list[Stream]:
         """Return a list of discovered streams."""
         return [
             HostilePropertyNamesStream(tap=self),

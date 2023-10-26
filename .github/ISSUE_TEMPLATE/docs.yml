@@ -1,6 +1,6 @@
 name: Documentation change
 description: Request a documentation change
-title: "[Docs]: <title>"
+title: "docs: <title>"
 labels: ["Documentation", "valuestream/SDK"]
 
 body:

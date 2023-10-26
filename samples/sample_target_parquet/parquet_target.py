@@ -1,5 +1,7 @@
 """Sample target test for target-parquet."""
 
+from __future__ import annotations
+
 from samples.sample_target_parquet.parquet_target_sink import SampleParquetTargetSink
 from singer_sdk import typing as th
 from singer_sdk.target_base import Target

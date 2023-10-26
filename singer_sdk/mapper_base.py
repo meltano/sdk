@@ -3,14 +3,11 @@
 from __future__ import annotations
 
 import abc
-from io import FileIO
-from typing import Callable, Iterable
+import typing as t
 
 import click
 
 import singer_sdk._singerlib as singer
-from singer_sdk.cli import common_options
-from singer_sdk.configuration._dict_config import merge_config_sources
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerReader
@@ -19,10 +16,6 @@ from singer_sdk.plugin_base import PluginBase
 
 class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     """Abstract base class for inline mappers."""
-
-    @classproperty
-    def _env_prefix(cls) -> str:
-        return f"{cls.name.upper().replace('-', '_')}_"
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
@@ -36,7 +29,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ]
 
     @staticmethod
-    def _write_messages(messages: Iterable[singer.Message]) -> None:
+    def _write_messages(messages: t.Iterable[singer.Message]) -> None:
         for message in messages:
             singer.write_message(message)
 
@@ -56,7 +49,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._write_messages(self.map_batch_message(message_dict))
 
     @abc.abstractmethod
-    def map_schema_message(self, message_dict: dict) -> Iterable[singer.Message]:
+    def map_schema_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
         """Map a schema message to zero or more new messages.
 
         Args:
@@ -65,7 +58,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def map_record_message(self, message_dict: dict) -> Iterable[singer.Message]:
+    def map_record_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
         """Map a record message to zero or more new messages.
 
         Args:
@@ -74,7 +67,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def map_state_message(self, message_dict: dict) -> Iterable[singer.Message]:
+    def map_state_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
         """Map a state message to zero or more new messages.
 
         Args:
@@ -86,7 +79,7 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     def map_activate_version_message(
         self,
         message_dict: dict,
-    ) -> Iterable[singer.Message]:
+    ) -> t.Iterable[singer.Message]:
         """Map a version message to zero or more new messages.
 
         Args:
@@ -96,8 +89,8 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     def map_batch_message(
         self,
-        message_dict: dict,
-    ) -> Iterable[singer.Message]:
+        message_dict: dict,  # noqa: ARG002
+    ) -> t.Iterable[singer.Message]:
         """Map a batch message to zero or more new messages.
 
         Args:
@@ -106,70 +99,57 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: if not implemented by subclass.
         """
-        raise NotImplementedError("BATCH messages are not supported by mappers.")
+        msg = "BATCH messages are not supported by mappers."
+        raise NotImplementedError(msg)
 
-    @classproperty
-    def cli(cls) -> Callable:
+    # CLI handler
+
+    @classmethod
+    def invoke(  # type: ignore[override]
+        cls: type[InlineMapper],
+        *,
+        about: bool = False,
+        about_format: str | None = None,
+        config: tuple[str, ...] = (),
+        file_input: t.IO[str] | None = None,
+    ) -> None:
+        """Invoke the mapper.
+
+        Args:
+            about: Display package metadata and settings.
+            about_format: Specify output style for `--about`.
+            config: Configuration file location or 'ENV' to use environment
+                variables. Accepts multiple inputs as a tuple.
+            file_input: Optional file to read input from.
+        """
+        super().invoke(about=about, about_format=about_format)
+        cls.print_version(print_fn=cls.logger.info)
+        config_files, parse_env_config = cls.config_from_cli_args(*config)
+
+        mapper = cls(
+            config=config_files,  # type: ignore[arg-type]
+            validate_config=True,
+            parse_env_config=parse_env_config,
+        )
+        mapper.listen(file_input)
+
+    @classmethod
+    def get_singer_command(cls: type[InlineMapper]) -> click.Command:
         """Execute standard CLI handler for inline mappers.
 
         Returns:
-            A callable CLI object.
+            A click.Command object.
         """
-
-        @common_options.PLUGIN_VERSION
-        @common_options.PLUGIN_ABOUT
-        @common_options.PLUGIN_ABOUT_FORMAT
-        @common_options.PLUGIN_CONFIG
-        @common_options.PLUGIN_FILE_INPUT
-        @click.command(
-            help="Execute the Singer mapper.",
-            context_settings={"help_option_names": ["--help"]},
+        command = super().get_singer_command()
+        command.help = "Execute the Singer mapper."
+        command.params.extend(
+            [
+                click.Option(
+                    ["--input", "file_input"],
+                    help="A path to read messages from instead of from standard in.",
+                    type=click.File("r"),
+                ),
+            ],
         )
-        def cli(
-            version: bool = False,
-            about: bool = False,
-            config: tuple[str, ...] = (),
-            format: str | None = None,
-            file_input: FileIO | None = None,
-        ) -> None:
-            """Handle command line execution.
 
-            Args:
-                version: Display the package version.
-                about: Display package metadata and settings.
-                format: Specify output style for `--about`.
-                config: Configuration file location or 'ENV' to use environment
-                    variables. Accepts multiple inputs as a tuple.
-                file_input: Specify a path to an input file to read messages from.
-                    Defaults to standard in if unspecified.
-            """
-            if version:
-                cls.print_version()
-                return
-
-            if not about:
-                cls.print_version(print_fn=cls.logger.info)
-
-            validate_config: bool = True
-            if about:
-                validate_config = False
-
-            cls.print_version(print_fn=cls.logger.info)
-
-            config_dict = merge_config_sources(
-                config,
-                cls.config_jsonschema,
-                cls._env_prefix,
-            )
-
-            mapper = cls(  # type: ignore  # Ignore 'type not callable'
-                config=config_dict,
-                validate_config=validate_config,
-            )
-
-            if about:
-                mapper.print_about(format)
-            else:
-                mapper.listen(file_input)
-
-        return cli
+        return command
