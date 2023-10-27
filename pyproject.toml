@@ -103,7 +103,7 @@ testing = [
     "pytest",
     "pytest-durations"
 ]
-parquet = [pyarrow]
+parquet = ["pyarrow"]
 
 [tool.poetry.group.dev.dependencies]
 # snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
