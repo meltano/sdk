@@ -211,6 +211,11 @@ build-backend = "poetry.core.masonry.api"
 pytest11 = { reference = "singer_sdk:testing.pytest_plugin", extras = ["testing"], type = "console" }
 
 [tool.ruff]
+line-length = 88
+src = ["samples", "singer_sdk", "tests"]
+target-version = "py37"
+
+[tool.ruff.lint]
 exclude = [
     "cookiecutter/*",
     "singer_sdk/helpers/_simpleeval.py",
@@ -220,8 +225,9 @@ ignore = [
     "ANN101",  # Missing type annotation for `self` in method
     "ANN102",  # Missing type annotation for `cls` in class method
     "N818",    # Exception name should be named with an Error suffix
+    "COM812",  # missing-trailing-comma
+    "ISC001",  # single-line-implicit-string-concatenation
 ]
-line-length = 88
 select = [
     "F",    # Pyflakes
     "E",    # pycodestyle (error)
@@ -269,13 +275,11 @@ select = [
     "PERF", # perflint
     "RUF",  # ruff
 ]
-src = ["samples", "singer_sdk", "tests"]
-target-version = "py37"
 unfixable = [
     "ERA",  # Don't remove commented out code
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "docs/conf.py" = [
     "D",      # pydocstyle/flake8-docstrings
     "I002",   # isort: missing-required-import
@@ -291,32 +295,32 @@ unfixable = [
 "singer_sdk/testing/*.py" = ["S101"]
 "singer_sdk/testing/templates.py" = ["ANN401"]
 
-[tool.ruff.flake8-annotations]
+[tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
 mypy-init-return = true
 suppress-dummy-args = true
 
-[tool.ruff.flake8-import-conventions]
+[tool.ruff.lint.flake8-import-conventions]
 banned-from = ["typing"]
 
-[tool.ruff.flake8-import-conventions.extend-aliases]
+[tool.ruff.lint.flake8-import-conventions.extend-aliases]
 typing = "t"
 
-[tool.ruff.flake8-pytest-style]
+[tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 parametrize-names-type = "csv"
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["singer_sdk", "samples", "tests"]
 required-imports = ["from __future__ import annotations"]
 
-[tool.ruff.pep8-naming]
+[tool.ruff.lint.pep8-naming]
 classmethod-decorators = [
     "singer_sdk.cli.plugin_cli",
 ]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ruff.pylint]
+[tool.ruff.lint.pylint]
 max-args = 9
