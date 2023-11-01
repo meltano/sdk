@@ -114,8 +114,8 @@ class JSONLinesBatcher(BaseBatcher):
             yield [file_url]
 
 
-spec = importlib.util.find_spec("pyarrow")
-if spec:
+spec_imported = importlib.util.find_spec("pyarrow")
+if spec_imported:
     import pyarrow as pa
     import pyarrow.parquet as pq
 
@@ -164,33 +164,36 @@ class Batcher(BaseBatcher):
     """Determines batch type and then serializes batches to that format."""
 
     def get_batches(self, records: t.Iterator[dict]) -> t.Iterator[list[str]]:
-        """Yield manifest of batches.
+        """Manifest of batches.
 
         Args:
             records: The records to batch.
 
-        Yields:
+        Returns:
             A list of file paths (called a manifest).
 
         Raises:
             ValueError: If unsupported format given.
         """
-        if self.format == BatchFileFormat.JSONL:
-            yield self._batch_to_jsonl(records)
-        elif spec and self.format == BatchFileFormat.PARQUET:
-            yield self._batch_to_parquet(records)
+        if spec_imported and (
+            self.batch_config.encoding.format == BatchFileFormat.PARQUET
+        ):
+            batches = self._batch_to_parquet(records)
+        elif self.batch_config.encoding.format == BatchFileFormat.JSONL:
+            batches = self._batch_to_jsonl(records)
         else:
-            raise ValueError(self.format)
+            raise ValueError(self.batch_config.encoding.format)
+        return batches
 
     def _batch_to_jsonl(self, records: t.Iterator[dict]) -> t.Iterator[list[str]]:
-        yield JSONLinesBatcher(
+        return JSONLinesBatcher(
             tap_name=self.tap_name,
             stream_name=self.stream_name,
             batch_config=self.batch_config,
         ).get_batches(records)
 
     def _batch_to_parquet(self, records: t.Iterator[dict]) -> t.Iterator[list[str]]:
-        yield ParquetBatcher(
+        return ParquetBatcher(
             tap_name=self.tap_name,
             stream_name=self.stream_name,
             batch_config=self.batch_config,
