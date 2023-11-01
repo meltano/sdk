@@ -6,7 +6,7 @@ from dataclasses import asdict
 
 import pytest
 
-from singer_sdk.batch import Batcher, JSONLinesBatcher, ParquetBatcher
+from singer_sdk.batch import JSONLinesBatcher, ParquetBatcher
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,

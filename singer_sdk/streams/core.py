@@ -1359,9 +1359,9 @@ class Stream(metaclass=abc.ABCMeta):
             yield batch_config.encoding, manifest
 
     def post_process(
-            self, 
-            row: dict, 
-            context: dict | None = None, #noqa: ARG002
+        self,
+        row: dict,
+        context: dict | None = None,  # noqa: ARG002
     ) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
 

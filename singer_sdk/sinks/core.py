@@ -528,18 +528,24 @@ class Sink(metaclass=abc.ABCMeta):
                 storage = StorageTarget.from_url(head)
 
             if encoding.format == BatchFileFormat.JSONL:
-                with storage.fs(create=False) as batch_fs:
-                    with batch_fs.open(tail, mode="rb") as file:
-                        if encoding.compression == "gzip":
-                            file = gzip_open(file)
-                        context = {"records": [json.loads(line) for line in file]}
-                        self.process_batch(context)
+                with storage.fs(create=False) as batch_fs, batch_fs.open(
+                    tail,
+                    mode="rb",
+                ) as file:
+                    context_file = file
+                    if encoding.compression == "gzip":
+                        context_file = gzip_open(context_file)
+                    context = {"records": [json.loads(line) for line in context_file]}
+                    self.process_batch(context)
             elif spec and encoding.format == BatchFileFormat.PARQUET:
-                with storage.fs(create=False) as batch_fs:
-                    with batch_fs.open(tail, mode="rb") as file:
-                        table = pq.read_table(file)
-                        context = {"records": table.to_pylist()}
-                        self.process_batch(context)
+                with storage.fs(create=False) as batch_fs, batch_fs.open(
+                    tail,
+                    mode="rb",
+                ) as file:
+                    context_file = file
+                    table = pq.read_table(context_file)
+                    context = {"records": table.to_pylist()}
+                    self.process_batch(context)
             else:
                 msg = f"Unsupported batch encoding format: {encoding.format}"
                 raise NotImplementedError(msg)

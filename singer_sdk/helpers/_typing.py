@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import copy
 import datetime
-import importlib.util
 import logging
 import typing as t
 from enum import Enum
@@ -492,79 +491,3 @@ def _conform_primitive_property(  # noqa: PLR0911
     if is_boolean_type(property_schema):
         return None if elem is None else elem != 0
     return elem
-
-
-spec = importlib.util.find_spec("pyarrow")
-if spec:
-    import pyarrow as pa
-    def json_schema_to_arrow(schema: dict[str, t.Any]) -> pa.Schema:
-        """Convert a JSON Schema to an Arrow schema.
-
-        Args:
-            schema: The JSON Schema definition.
-
-        Returns:
-            An Arrow schema.
-        """
-        fields = _json_schema_to_arrow_fields(schema)
-        return pa.schema(fields)
-
-
-    def _json_schema_to_arrow_fields(schema: dict[str, t.Any]) -> pa.StructType:
-        """Convert a JSON Schema to an Arrow struct.
-
-        Args:
-            schema: The JSON Schema definition.
-
-        Returns:
-            An Arrow struct.
-        """
-        fields = []
-        for name, property_schema in schema.get("properties", {}).items():
-            field = pa.field(name, _json_type_to_arrow_field(property_schema))
-            fields.append(field)
-        return fields
-
-
-    def _json_type_to_arrow_field(schema_type: dict[str, t.Any]) -> pa.DataType:
-        """Convert a JSON Schema to an Arrow struct.
-
-        Args:
-            schema: The JSON Schema definition.
-
-        Returns:
-            An Arrow struct.
-        """
-        property_type = schema_type.get("type")
-
-        if isinstance(property_type, list):
-            try:
-                main_type = property_type[0]
-            except IndexError:
-                main_type = "null"
-        else:
-            main_type = property_type
-
-        if main_type == "array":
-            items = schema_type.get("items", {})
-            return pa.list_(_json_type_to_arrow_field(items))
-
-        elif main_type == "object":
-            return pa.struct(_json_schema_to_arrow_fields(schema_type))
-
-        elif main_type == "string":
-            return pa.string()
-
-        elif main_type == "integer":
-            return pa.int64()
-
-        elif main_type == "number":
-            return pa.float64()
-
-        elif main_type == "boolean":
-            return pa.bool_()
-
-        elif main_type == "null":
-            return pa.null()
-
-        return pa.null()
