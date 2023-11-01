@@ -117,7 +117,6 @@ spec = importlib.util.find_spec("pyarrow")
 if spec:
     import pyarrow as pa
     import pyarrow.parquet as pq
-    from singer_sdk.helpers._typing import json_schema_to_arrow
     class ParquetBatcher(BaseBatcher):
         """Parquet Record Batcher."""
 
@@ -131,9 +130,9 @@ if spec:
                 records: The records to batch.
 
             Yields:
-                A list of file pathes (called a manifest).
+                A list of file paths (called a manifest).
             """
-            sync_id = f"{self.tap_name}--{self.name}-{uuid4()}"
+            sync_id = f"{self.tap_name}--{self.stream_name}-{uuid4()}"
             prefix = self.batch_config.storage.prefix or ""
 
             for i, chunk in enumerate(
@@ -149,8 +148,7 @@ if spec:
                 with self.batch_config.storage.fs() as fs:
                     with fs.open(filename, "wb") as f:
                         pylist = list(chunk)
-                        schema = json_schema_to_arrow(self.schema)
-                        table = pa.Table.from_pylist(pylist, schema=schema)
+                        table = pa.Table.from_pylist(pylist)
                         if self.batch_config.encoding.compression == "gzip":
                             pq.write_table(table, f, compression="GZIP")
                         else:
