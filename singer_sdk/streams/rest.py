@@ -179,8 +179,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         """
         if (
             response.status_code in self.extra_retry_statuses
-            or HTTPStatus.INTERNAL_SERVER_ERROR
-            <= response.status_code
+            or response.status_code >= HTTPStatus.INTERNAL_SERVER_ERROR
         ):
             msg = self.response_error_message(response)
             raise RetriableAPIError(msg, response)
