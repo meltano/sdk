@@ -149,7 +149,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
     def validate_response(self, response: requests.Response) -> None:
         """Validate HTTP response.
 
-        Checks for error status codes and wether they are fatal or retriable.
+        Checks for error status codes and whether they are fatal or retriable.
 
         In case an error is deemed transient and can be safely retried, then this
         method should raise an :class:`singer_sdk.exceptions.RetriableAPIError`.
@@ -179,9 +179,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         """
         if (
             response.status_code in self.extra_retry_statuses
-            or HTTPStatus.INTERNAL_SERVER_ERROR
-            <= response.status_code
-            <= max(HTTPStatus)
+            or response.status_code >= HTTPStatus.INTERNAL_SERVER_ERROR
         ):
             msg = self.response_error_message(response)
             raise RetriableAPIError(msg, response)
