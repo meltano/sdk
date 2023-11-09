@@ -108,7 +108,10 @@ numpy = [
     { version = "<1.22", python = "<3.8" },
     { version = ">=1.22", python = ">=3.8" },
 ]
-pyarrow = ">=11,<13"
+pyarrow = [
+    { version = ">=11", python = "<3.8" },
+    { version = ">=13", python = ">=3.8" }
+]
 pytest-benchmark = "^4.0.0"
 pytest-snapshot = ">=0.9.0"
 requests-mock = ">=1.10.0"
