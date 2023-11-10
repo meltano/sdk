@@ -43,6 +43,7 @@ extensions = [
     "myst_parser",
     "sphinx_reredirects",
     "sphinx_inline_tabs",
+    "notfound.extension",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
