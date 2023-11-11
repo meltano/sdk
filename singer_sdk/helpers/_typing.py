@@ -6,6 +6,7 @@ import copy
 import datetime
 import logging
 import typing as t
+from decimal import Decimal
 from enum import Enum
 from functools import lru_cache
 
@@ -491,3 +492,15 @@ def _conform_primitive_property(  # noqa: PLR0911
     if is_boolean_type(property_schema):
         return None if elem is None else elem != 0
     return elem
+
+def float_to_decimal(value):
+    """
+    Walk the given data structure and turn all instances of float into double.
+    """
+    if isinstance(value, float):
+        return Decimal(str(value))
+    if isinstance(value, list):
+        return [float_to_decimal(child) for child in value]
+    if isinstance(value, dict):
+        return {k: float_to_decimal(v) for k, v in value.items()}
+    return value

@@ -27,6 +27,7 @@ from singer_sdk.helpers._typing import (
     DatetimeErrorTreatmentEnum,
     get_datelike_property_type,
     handle_invalid_timestamp_in_record,
+    float_to_decimal,
 )
 
 if t.TYPE_CHECKING:
@@ -321,7 +322,7 @@ class Sink(metaclass=abc.ABCMeta):
         Returns:
             TODO
         """
-        self._validator.validate(record)
+        self._validator.validate(float_to_decimal(record))
         self._parse_timestamps_in_record(
             record=record,
             schema=self.schema,
