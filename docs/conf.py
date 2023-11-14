@@ -26,7 +26,7 @@ copyright = "2021, Meltano Core Team and Contributors"  # noqa: A001
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.32.0"
+release = "0.33.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -43,6 +43,7 @@ extensions = [
     "myst_parser",
     "sphinx_reredirects",
     "sphinx_inline_tabs",
+    "notfound.extension",
 ]
 
 # Add any paths that contain templates here, relative to this directory.

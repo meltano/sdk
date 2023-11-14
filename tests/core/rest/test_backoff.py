@@ -75,6 +75,14 @@ def custom_validation_stream(rest_tap):
             ),
         ),
         (
+            521,  # Cloudflare custom status code higher than max(HTTPStatus)
+            "Web Server Is Down",
+            pytest.raises(
+                RetriableAPIError,
+                match=r"521 Server Error: Web Server Is Down for path: /dummy",
+            ),
+        ),
+        (
             429,
             "Too Many Requests",
             pytest.raises(
@@ -84,7 +92,7 @@ def custom_validation_stream(rest_tap):
         ),
         (200, "OK", nullcontext()),
     ],
-    ids=["client-error", "server-error", "rate-limited", "ok"],
+    ids=["client-error", "server-error", "server-error", "rate-limited", "ok"],
 )
 def test_status_code_api(basic_rest_stream, status_code, reason, expectation):
     fake_response = requests.Response()
