@@ -62,7 +62,7 @@ class Sink(metaclass=abc.ABCMeta):
             schema: Schema of the stream to sink.
             key_properties: Primary key of the stream to sink.
         """
-        self.logger = target.logger
+        self.logger = target.logger.getChild(stream_name)
         self.sync_started_at = target.initialized_at
         self._config = dict(target.config)
         self._pending_batch: dict | None = None
