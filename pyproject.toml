@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.33.0"
+version = "0.33.1"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors <hello@meltano.com>"]
 maintainers = ["Meltano Team and Contributors <hello@meltano.com>"]
@@ -75,14 +75,18 @@ furo = {version = ">=2022.12.7", optional = true}
 sphinx-copybutton = {version = ">=0.3.1", optional = true}
 myst-parser = {version = ">=1", optional = true}
 sphinx-autobuild = {version = ">=2021.3.14", optional = true}
-sphinx-reredirects = {version = ">=0.1.1", optional = true}
 sphinx-inline-tabs = {version = ">=2023.4.21", optional = true, markers = "python_version >= \"3.8\""}
+sphinx-notfound-page = {version = "^1.0.0", optional = true, python = ">=3.8"}
+sphinx-reredirects = {version = ">=0.1.1", optional = true}
 
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = ">=1.1.1", optional = true}
 
 # Parquet file dependencies installed as optional 'parquet' extras
-pyarrow = {version = ">=11,<13", optional = true}
+pyarrow = [
+    { version = ">=11", python = "<3.8", optional = true },
+    { version = ">=13", python = ">=3.8", optional = true }
+]
 
 # Testing dependencies installed as optional 'testing' extras
 pytest = {version=">=7.2.1", optional = true}
@@ -95,8 +99,9 @@ docs = [
     "sphinx-copybutton",
     "myst-parser",
     "sphinx-autobuild",
-    "sphinx-reredirects",
     "sphinx-inline-tabs",
+    "sphinx-notfound-page",
+    "sphinx-reredirects",
 ]
 s3 = ["fs-s3fs"]
 testing = [
@@ -116,7 +121,10 @@ numpy = [
     { version = "<1.22", python = "<3.8" },
     { version = ">=1.22", python = ">=3.8" },
 ]
-pyarrow = ">=11,<13"
+pyarrow = [
+    { version = ">=11", python = "<3.8" },
+    { version = ">=13", python = ">=3.8" }
+]
 pytest-benchmark = "^4.0.0"
 pytest-snapshot = ">=0.9.0"
 requests-mock = ">=1.10.0"
@@ -147,7 +155,7 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.33.0"
+version = "0.33.1"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
