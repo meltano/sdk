@@ -153,35 +153,34 @@ class ParquetBatcher(BaseBatcher):
         Yields:
             A list of file paths (called a manifest).
         """
-        if self.is_pyarrow_available:
-            pa = importlib.import_module("pyarrow")
-            pq = importlib.import_module("pyarrow.parquet")
-            sync_id = f"{self.tap_name}--{self.stream_name}-{uuid4()}"
-            prefix = self.batch_config.storage.prefix or ""
+        if not self.is_pyarrow_available:
+            return
+        pa = importlib.import_module("pyarrow")
+        pq = importlib.import_module("pyarrow.parquet")
+        sync_id = f"{self.tap_name}--{self.stream_name}-{uuid4()}"
+        prefix = self.batch_config.storage.prefix or ""
 
-            for i, chunk in enumerate(
-                lazy_chunked_generator(
-                    records,
-                    self.batch_config.batch_size,
-                ),
-                start=1,
-            ):
-                filename = f"{prefix}{sync_id}={i}.parquet"
-                if self.batch_config.encoding.compression == "gzip":
-                    filename = f"{filename}.gz"
-                with self.batch_config.storage.fs() as fs:
-                    with fs.open(filename, "wb") as f:
-                        pylist = list(chunk)
-                        table = pa.Table.from_pylist(pylist)
-                        if self.batch_config.encoding.compression == "gzip":
-                            pq.write_table(table, f, compression="GZIP")
-                        else:
-                            pq.write_table(table, f)
+        for i, chunk in enumerate(
+            lazy_chunked_generator(
+                records,
+                self.batch_config.batch_size,
+            ),
+            start=1,
+        ):
+            filename = f"{prefix}{sync_id}={i}.parquet"
+            if self.batch_config.encoding.compression == "gzip":
+                filename = f"{filename}.gz"
+            with self.batch_config.storage.fs() as fs:
+                with fs.open(filename, "wb") as f:
+                    pylist = list(chunk)
+                    table = pa.Table.from_pylist(pylist)
+                    if self.batch_config.encoding.compression == "gzip":
+                        pq.write_table(table, f, compression="GZIP")
+                    else:
+                        pq.write_table(table, f)
 
-                    file_url = fs.geturl(filename)
-                yield [file_url]
-        else:
-            pass
+                file_url = fs.geturl(filename)
+            yield [file_url]
 
 
 class Batcher(BaseBatcher):
