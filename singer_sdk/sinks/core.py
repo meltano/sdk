@@ -12,8 +12,8 @@ from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
 
+import fastjsonschema
 from dateutil import parser
-from jsonschema import Draft7Validator, FormatChecker
 
 from singer_sdk.exceptions import MissingKeyPropertiesError
 from singer_sdk.helpers._batch import (
@@ -33,8 +33,6 @@ if t.TYPE_CHECKING:
     from logging import Logger
 
     from singer_sdk.target_base import Target
-
-JSONSchemaValidator = Draft7Validator
 
 
 class Sink(metaclass=abc.ABCMeta):
@@ -90,7 +88,7 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
-        self._validator = Draft7Validator(schema, format_checker=FormatChecker())
+        self._validator = fastjsonschema.compile(schema)
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return an empty dictionary by default.
@@ -321,7 +319,10 @@ class Sink(metaclass=abc.ABCMeta):
         Returns:
             TODO
         """
-        self._validator.validate(record)
+        try:
+            self._validator(record)
+        except fastjsonschema.JsonSchemaValueException as e:
+            self.logger.debug("Record Message Validation Error: %s", e.message)
         self._parse_timestamps_in_record(
             record=record,
             schema=self.schema,
