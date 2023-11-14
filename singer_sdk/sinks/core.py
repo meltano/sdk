@@ -532,9 +532,9 @@ class Sink(metaclass=abc.ABCMeta):
                     tail,
                     mode="rb",
                 ) as file:
-                    context_file = file
-                    if encoding.compression == "gzip":
-                        context_file = gzip_open(context_file)
+                    context_file = (
+                        gzip_open(file) if encoding.compression == "gzip" else file
+                    )
                     context = {"records": [json.loads(line) for line in context_file]}
                     self.process_batch(context)
             elif spec and encoding.format == BatchFileFormat.PARQUET:
