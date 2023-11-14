@@ -114,26 +114,48 @@ class JSONLinesBatcher(BaseBatcher):
             yield [file_url]
 
 
-spec_imported = importlib.util.find_spec("pyarrow")
-if spec_imported:
-    import pyarrow as pa
-    import pyarrow.parquet as pq
+def _is_pyarrow_available() -> bool:
+    return importlib.util.find_spec("pyarrow") is not None
 
-    class ParquetBatcher(BaseBatcher):
-        """Parquet Record Batcher."""
 
-        def get_batches(
-            self,
-            records: t.Iterator[dict],
-        ) -> t.Iterator[list[str]]:
-            """Yield manifest of batches.
+class ParquetBatcher(BaseBatcher):
+    """Parquet Record Batcher."""
 
-            Args:
-                records: The records to batch.
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
+        """Creates a ParquetBatcher instance if pyarrow is available.
 
-            Yields:
-                A list of file paths (called a manifest).
-            """
+        Args:
+            args: Class constructor positional arguments.
+            kwargs: Class constructor keyword arguments.
+
+        Raises:
+            ImportError: If pyarrow is missing.
+        """
+        self.is_pyarrow_available = _is_pyarrow_available()
+        if self.is_pyarrow_available:
+            super().__init__(*args, **kwargs)
+        else:
+            err = """The 'pyarrow' package is required to use the 'ParquetBatcher'
+                class. Please install it by running 'poetry install -E pyarrow'."""
+            raise ImportError(
+                err,
+            )
+
+    def get_batches(
+        self,
+        records: t.Iterator[dict],
+    ) -> t.Iterator[list[str]]:
+        """Yield manifest of batches.
+
+        Args:
+            records: The records to batch.
+
+        Yields:
+            A list of file paths (called a manifest).
+        """
+        if self.is_pyarrow_available:
+            pa = importlib.import_module("pyarrow")
+            pq = importlib.import_module("pyarrow.parquet")
             sync_id = f"{self.tap_name}--{self.stream_name}-{uuid4()}"
             prefix = self.batch_config.storage.prefix or ""
 
@@ -158,6 +180,8 @@ if spec_imported:
 
                     file_url = fs.geturl(filename)
                 yield [file_url]
+        else:
+            pass
 
 
 class Batcher(BaseBatcher):
@@ -175,9 +199,7 @@ class Batcher(BaseBatcher):
         Raises:
             ValueError: If unsupported format given.
         """
-        if spec_imported and (
-            self.batch_config.encoding.format == BatchFileFormat.PARQUET
-        ):
+        if self.batch_config.encoding.format == BatchFileFormat.PARQUET:
             batches = self._batch_to_parquet(records)
         elif self.batch_config.encoding.format == BatchFileFormat.JSONL:
             batches = self._batch_to_jsonl(records)
