@@ -12,8 +12,8 @@ from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
 
-from dateutil import parser
 from jsonschema import Draft7Validator, FormatChecker
+from pendulum import parser
 
 from singer_sdk.exceptions import MissingKeyPropertiesError
 from singer_sdk.helpers._batch import (
@@ -374,8 +374,8 @@ class Sink(metaclass=abc.ABCMeta):
                 date_val = value
                 try:
                     if value is not None:
-                        date_val = parser.parse(date_val)
-                except parser.ParserError as ex:
+                        date_val = parser.parse(date_val, strict=False)
+                except ValueError as ex:
                     date_val = handle_invalid_timestamp_in_record(
                         record,
                         [key],
