@@ -294,3 +294,12 @@ def version_bump(session: Session) -> None:
         "bump",
         *args,
     )
+
+
+@session(python=main_python_version)
+def codspeed(session: Session) -> None:
+    """Run codspeed benchmarks."""
+    session.install(".[s3]")
+    session.install(*test_dependencies)
+    session.install("pytest-codspeed")
+    session.run("pytest", "--codspeed")
