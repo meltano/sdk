@@ -11,12 +11,14 @@ from collections import Counter, defaultdict
 
 import msgspec
 
-from singer_sdk._singerlib import SingerMessageType
+from singer_sdk._singerlib import Message, SingerMessageType
 from singer_sdk.helpers._compat import final
 
 logger = logging.getLogger(__name__)
 
 decoder = msgspec.json.Decoder(dec_hook=str, float_hook=decimal.Decimal)
+encoder = msgspec.json.Encoder(enc_hook=str, decimal_format="number")
+msg_buffer = bytearray(64)
 
 
 class SingerReader(metaclass=abc.ABCMeta):
@@ -147,3 +149,29 @@ class SingerReader(metaclass=abc.ABCMeta):
 
     def _process_endofpipe(self) -> None:
         logger.debug("End of pipe reached")
+
+
+class SingerWriter:
+    """Interface for all plugins writting Singer messages to stdout."""
+
+    def format_message(self, message: Message) -> bytes:
+        """Format a message as a JSON string.
+
+        Args:
+            message: The message to format.
+
+        Returns:
+            The formatted message.
+        """
+        encoder.encode_into(message.to_dict(), msg_buffer)
+        msg_buffer.extend(b"\n")
+        return msg_buffer
+
+    def write_message(self, message: Message) -> None:
+        """Write a message to stdout.
+
+        Args:
+            message: The message to write.
+        """
+        sys.stdout.buffer.write(self.format_message(message))
+        sys.stdout.flush()
