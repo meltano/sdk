@@ -11,7 +11,7 @@ from enum import Enum
 
 import click
 
-from singer_sdk._singerlib import Catalog, StateMessage, write_message
+from singer_sdk._singerlib import Catalog, StateMessage
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.exceptions import AbortedSyncFailedException, AbortedSyncPausedException
 from singer_sdk.helpers import _state
@@ -25,6 +25,7 @@ from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
     TapCapabilities,
 )
+from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:
@@ -45,7 +46,7 @@ class CliTestOptionValue(Enum):
     Disabled = "disabled"
 
 
-class Tap(PluginBase, metaclass=abc.ABCMeta):
+class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
     """Abstract base class for taps.
 
     The Tap class governs configuration, validation, and stream discovery for tap
@@ -439,7 +440,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Sync all streams."""
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
-        write_message(StateMessage(value=self.state))
+        self.write_message(StateMessage(value=self.state))
 
         stream: Stream
         for stream in self.streams.values():
