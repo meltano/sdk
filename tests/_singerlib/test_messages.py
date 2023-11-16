@@ -8,7 +8,7 @@ import pytest
 from pytz import timezone
 
 import singer_sdk._singerlib as singer
-from singer_sdk._singerlib.messages import format_message
+from singer_sdk.io_base import SingerWriter
 
 UTC = datetime.timezone.utc
 
@@ -19,16 +19,18 @@ def test_exclude_null_dict():
 
 
 def test_format_message():
+    singerwriter = SingerWriter()
     message = singer.RecordMessage(
         stream="test",
         record={"id": 1, "name": "test"},
     )
-    assert format_message(message) == (
+    assert singerwriter.format_message(message) == (
         b'{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}\n'
     )
 
 
 def test_write_message():
+    singerwriter = SingerWriter()
     message = singer.RecordMessage(
         stream="test",
         record={"id": 1, "name": "test"},
@@ -36,7 +38,7 @@ def test_write_message():
     stdout_buf = io.StringIO()
     stdout_buf.buffer = io.BufferedRandom(raw=io.BytesIO())
     with redirect_stdout(stdout_buf) as out:
-        singer.write_message(message)
+        singerwriter.write_message(message)
     out.buffer.seek(0)
     assert out.buffer.read() == (
         b'{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}\n'
