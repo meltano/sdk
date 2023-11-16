@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.33.0"
+version = "0.33.1"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors <hello@meltano.com>"]
 maintainers = ["Meltano Team and Contributors <hello@meltano.com>"]
@@ -69,8 +69,9 @@ furo = {version = ">=2022.12.7", optional = true}
 sphinx-copybutton = {version = ">=0.3.1", optional = true}
 myst-parser = {version = ">=1", optional = true}
 sphinx-autobuild = {version = ">=2021.3.14", optional = true}
+sphinx-inline-tabs = {version = ">=2023.4.21", optional = true, markers = "python_version >= \"3.8\""}
+sphinx-notfound-page = {version = "^1.0.0", optional = true, python = ">=3.8"}
 sphinx-reredirects = {version = ">=0.1.1", optional = true}
-sphinx-inline-tabs = {version = ">=2023.4.21", optional = true}
 
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = ">=1.1.1", optional = true}
@@ -87,8 +88,9 @@ docs = [
     "sphinx-copybutton",
     "myst-parser",
     "sphinx-autobuild",
-    "sphinx-reredirects",
     "sphinx-inline-tabs",
+    "sphinx-notfound-page",
+    "sphinx-reredirects",
 ]
 s3 = ["fs-s3fs"]
 testing = [
@@ -103,8 +105,14 @@ coverage = {extras = ["toml"], version = ">=7.2"}
 duckdb = ">=0.8.0"
 duckdb-engine = ">=0.9.2"
 mypy = ">=1.0"
-numpy = ">=1.22"
-pyarrow = ">=11,<13"
+numpy = [
+    { version = "<1.22", python = "<3.8" },
+    { version = ">=1.22", python = ">=3.8" },
+]
+pyarrow = [
+    { version = ">=11", python = "<3.8" },
+    { version = ">=13", python = ">=3.8" }
+]
 pytest-benchmark = "^4.0.0"
 pytest-snapshot = ">=0.9.0"
 requests-mock = ">=1.10.0"
@@ -135,7 +143,7 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.33.0"
+version = "0.33.1"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -207,6 +215,11 @@ build-backend = "poetry.core.masonry.api"
 pytest11 = { reference = "singer_sdk:testing.pytest_plugin", extras = ["testing"], type = "console" }
 
 [tool.ruff]
+line-length = 88
+src = ["samples", "singer_sdk", "tests"]
+target-version = "py37"
+
+[tool.ruff.lint]
 exclude = [
     "cookiecutter/*",
     "singer_sdk/helpers/_simpleeval.py",
@@ -216,8 +229,9 @@ ignore = [
     "ANN101",  # Missing type annotation for `self` in method
     "ANN102",  # Missing type annotation for `cls` in class method
     "N818",    # Exception name should be named with an Error suffix
+    "COM812",  # missing-trailing-comma
+    "ISC001",  # single-line-implicit-string-concatenation
 ]
-line-length = 88
 select = [
     "F",    # Pyflakes
     "E",    # pycodestyle (error)
@@ -271,7 +285,7 @@ unfixable = [
     "ERA",  # Don't remove commented out code
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "docs/conf.py" = [
     "D",      # pydocstyle/flake8-docstrings
     "I002",   # isort: missing-required-import
@@ -285,32 +299,32 @@ unfixable = [
 "singer_sdk/testing/*.py" = ["S101"]
 "singer_sdk/testing/templates.py" = ["ANN401"]
 
-[tool.ruff.flake8-annotations]
+[tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
 mypy-init-return = true
 suppress-dummy-args = true
 
-[tool.ruff.flake8-import-conventions]
+[tool.ruff.lint.flake8-import-conventions]
 banned-from = ["typing"]
 
-[tool.ruff.flake8-import-conventions.extend-aliases]
+[tool.ruff.lint.flake8-import-conventions.extend-aliases]
 typing = "t"
 
-[tool.ruff.flake8-pytest-style]
+[tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 parametrize-names-type = "csv"
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["singer_sdk", "samples", "tests"]
 required-imports = ["from __future__ import annotations"]
 
-[tool.ruff.pep8-naming]
+[tool.ruff.lint.pep8-naming]
 classmethod-decorators = [
     "singer_sdk.cli.plugin_cli",
 ]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ruff.pylint]
+[tool.ruff.lint.pylint]
 max-args = 9

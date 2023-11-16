@@ -47,6 +47,24 @@ three distinct fields:
 - `user__last_name`
 - `user__id`
 
+#### Flattening Example
+
+````{tab} meltano.yml
+```yaml
+flattening_enabled: true
+flattening_max_depth: 1   # flatten only top-level properties
+```
+````
+
+````{tab} JSON
+```json
+{
+  "flattening_enabled": true,
+  "flattening_max_depth": 1
+}
+```
+````
+
 ## Out-of-scope capabilities
 
 These capabilities are all out of scope _by design_:

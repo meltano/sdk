@@ -124,7 +124,7 @@ class Stream(metaclass=abc.ABCMeta):
             msg = "Missing argument or class variable 'name'."
             raise ValueError(msg)
 
-        self.logger: logging.Logger = tap.logger
+        self.logger: logging.Logger = tap.logger.getChild(self.name)
         self.metrics_logger = tap.metrics_logger
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
