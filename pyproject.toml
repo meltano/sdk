@@ -217,7 +217,7 @@ pytest11 = { reference = "singer_sdk:testing.pytest_plugin", extras = ["testing"
 [tool.ruff]
 line-length = 88
 src = ["samples", "singer_sdk", "tests"]
-target-version = "py37"
+target-version = "py38"
 
 [tool.ruff.lint]
 exclude = [
@@ -279,8 +279,6 @@ select = [
     "PERF", # perflint
     "RUF",  # ruff
 ]
-src = ["samples", "singer_sdk", "tests"]
-target-version = "py38"
 unfixable = [
     "ERA",  # Don't remove commented out code
 ]
