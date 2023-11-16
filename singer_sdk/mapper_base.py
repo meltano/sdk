@@ -7,14 +7,16 @@ import typing as t
 
 import click
 
-import singer_sdk._singerlib as singer
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
-from singer_sdk.io_base import SingerReader
+from singer_sdk.io_base import SingerReader, SingerWriter
 from singer_sdk.plugin_base import PluginBase
 
+if t.TYPE_CHECKING:
+    import singer_sdk._singerlib as singer
 
-class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
+
+class InlineMapper(PluginBase, SingerReader, SingerWriter, metaclass=abc.ABCMeta):
     """Abstract base class for inline mappers."""
 
     @classproperty
@@ -28,10 +30,9 @@ class InlineMapper(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             PluginCapabilities.STREAM_MAPS,
         ]
 
-    @staticmethod
-    def _write_messages(messages: t.Iterable[singer.Message]) -> None:
+    def _write_messages(self, messages: t.Iterable[singer.Message]) -> None:
         for message in messages:
-            singer.write_message(message)
+            self.write_message(message)
 
     def _process_schema_message(self, message_dict: dict) -> None:
         self._write_messages(self.map_schema_message(message_dict))
