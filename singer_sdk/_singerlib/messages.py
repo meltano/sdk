@@ -3,19 +3,14 @@
 from __future__ import annotations
 
 import enum
-import sys
 import typing as t
 from dataclasses import asdict, dataclass, field
 from datetime import timezone
 
 from dateutil.parser import parse
-from msgspec import json
 
 if t.TYPE_CHECKING:
     from datetime import datetime
-
-decimal_encoder = json.Encoder(enc_hook=str, decimal_format="number")
-msg_buffer = bytearray(64)
 
 
 class SingerMessageType(str, enum.Enum):
@@ -203,27 +198,3 @@ class ActivateVersionMessage(Message):
     def __post_init__(self) -> None:
         """Post-init processing."""
         self.type = SingerMessageType.ACTIVATE_VERSION
-
-
-def format_message(message: Message) -> bytes:
-    """Format a message as a JSON string.
-
-    Args:
-        message: The message to format.
-
-    Returns:
-        The formatted message.
-    """
-    decimal_encoder.encode_into(message.to_dict(), msg_buffer)
-    msg_buffer.extend(b"\n")
-    return msg_buffer
-
-
-def write_message(message: Message) -> None:
-    """Write a message to stdout.
-
-    Args:
-        message: The message to write.
-    """
-    sys.stdout.buffer.write(format_message(message))
-    sys.stdout.flush()
