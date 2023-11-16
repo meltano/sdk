@@ -110,7 +110,7 @@ numpy = [
     { version = ">=1.22", python = ">=3.8" },
 ]
 pyarrow = [
-    { version = ">=11", python = "<3.8" },
+    { version = "<=12", python = "<3.8" },
     { version = ">=13", python = ">=3.8" }
 ]
 pytest-benchmark = "^4.0.0"
