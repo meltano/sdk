@@ -155,8 +155,9 @@ class ParquetBatcher(BaseBatcher):
         """
         if not self.is_pyarrow_available:
             return
-        pa = importlib.import_module("pyarrow")
-        pq = importlib.import_module("pyarrow.parquet")
+        import pyarrow as pa
+        import pyarrow.parquet as pq
+
         sync_id = f"{self.tap_name}--{self.stream_name}-{uuid4()}"
         prefix = self.batch_config.storage.prefix or ""
 
