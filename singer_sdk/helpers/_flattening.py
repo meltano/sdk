@@ -465,12 +465,9 @@ def _should_jsondump_value(key: str, value: t.Any, flattened_schema=None) -> boo
     if isinstance(value, (dict, list)):
         return True
 
-    if (
+    return bool(
         flattened_schema
         and key in flattened_schema
         and "type" in flattened_schema[key]
         and set(flattened_schema[key]["type"]) == {"null", "object", "array"}
-    ):
-        return True
-
-    return False
+    )

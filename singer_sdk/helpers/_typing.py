@@ -79,7 +79,7 @@ def is_secret_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition appears to be a secret.
 
     Will return true if either `writeOnly` or `secret` are true on this type
-    or any of the type's subproperties.
+    or any of the type's sub-properties.
 
     Args:
         type_dict: The JSON Schema type to check.
@@ -96,7 +96,7 @@ def is_secret_type(type_dict: dict) -> bool:
         return True
 
     if "properties" in type_dict:
-        # Recursively check subproperties and return True if any child is secret.
+        # Recursively check sub-properties and return True if any child is secret.
         return any(
             is_secret_type(child_type_dict)
             for child_type_dict in type_dict["properties"].values()
@@ -388,6 +388,7 @@ def conform_record_data_types(
     return rec
 
 
+# TODO: This is in dire need of refactoring. It's a mess.
 def _conform_record_data_types(  # noqa: PLR0912
     input_object: dict[str, t.Any],
     schema: dict,
@@ -405,7 +406,7 @@ def _conform_record_data_types(  # noqa: PLR0912
         input_object: A single record
         schema: JSON schema the given input_object is expected to meet
         level:  Specifies how recursive the conformance process should be
-        parent: '.' seperated path to this element from the object root (for logging)
+        parent: '.' separated path to this element from the object root (for logging)
     """
     output_object: dict[str, t.Any] = {}
     unmapped_properties: list[str] = []
