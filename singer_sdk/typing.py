@@ -965,12 +965,14 @@ def to_jsonschema_type(
         msg = "Expected `str` or a SQLAlchemy `TypeEngine` object or type."
         raise ValueError(msg)
 
-    # Look for the type name within the known SQL type names:
-    for sqltype, jsonschema_type in sqltype_lookup.items():
-        if sqltype.lower() in type_name.lower():
-            return jsonschema_type
-
-    return sqltype_lookup["string"]  # safe failover to str
+    return next(
+        (
+            jsonschema_type
+            for sqltype, jsonschema_type in sqltype_lookup.items()
+            if sqltype.lower() in type_name.lower()
+        ),
+        sqltype_lookup["string"],  # safe failover to str
+    )
 
 
 def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> bool:
@@ -981,7 +983,7 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
         type_check: A tuple of type strings to look for.
 
     Returns:
-        True if the schema suports the type.
+        True if the schema supports the type.
     """
     if "type" in jsonschema_type:
         if isinstance(jsonschema_type["type"], (list, tuple)):
@@ -991,12 +993,9 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
         elif jsonschema_type.get("type") in type_check:
             return True
 
-    if any(
+    return any(
         _jsonschema_type_check(t, type_check) for t in jsonschema_type.get("anyOf", ())
-    ):
-        return True
-
-    return False
+    )
 
 
 def to_sql_type(  # noqa: PLR0911, C901

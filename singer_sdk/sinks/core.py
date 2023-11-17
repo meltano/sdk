@@ -247,7 +247,7 @@ class Sink(metaclass=abc.ABCMeta):
             tz=datetime.timezone.utc,
         ).isoformat()
         record["_sdc_batched_at"] = (
-            context.get("batch_start_time", None)
+            context.get("batch_start_time")
             or datetime.datetime.now(tz=datetime.timezone.utc)
         ).isoformat()
         record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
