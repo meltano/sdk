@@ -910,6 +910,8 @@ class SQLConnector:
                         or (cur_len and (opt_len >= cur_len))
                     ):
                         return opt
+                # If best conversion class is equal to current type
+                # return the best conversion class
                 elif str(opt) == str(current_type):
                     return opt
 
