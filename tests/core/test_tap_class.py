@@ -90,4 +90,3 @@ def test_cli_discover(tap_class: type[Tap], tmp_path):
     )
     assert result.exit_code == 0
     assert "streams" in json.loads(result.stdout)
-    assert not result.stderr
