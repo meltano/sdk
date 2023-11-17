@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import decimal
+import json
 import logging
 import typing as t
 import warnings
@@ -9,12 +11,14 @@ from contextlib import contextmanager
 from datetime import datetime
 from functools import lru_cache
 
+import simplejson
 import sqlalchemy
 from sqlalchemy.engine import Engine
 
 from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.helpers.capabilities import TargetLoadMethods
 
 if t.TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
@@ -37,6 +41,7 @@ class SQLConnector:
     allow_column_rename: bool = True  # Whether RENAME COLUMN is supported.
     allow_column_alter: bool = False  # Whether altering column types is supported.
     allow_merge_upsert: bool = False  # Whether MERGE UPSERT is supported.
+    allow_overwrite: bool = False  # Whether overwrite load method is supported.
     allow_temp_tables: bool = True  # Whether temp tables are supported.
     _cached_engine: Engine | None = None
 
@@ -53,6 +58,8 @@ class SQLConnector:
         """
         self._config: dict[str, t.Any] = config or {}
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
+        self._table_cols_cache: dict[str, dict[str, sqlalchemy.Column]] = {}
+        self._schema_cache: set[str] = set()
 
     @property
     def config(self) -> dict:
@@ -179,7 +186,7 @@ class SQLConnector:
     @staticmethod
     def to_jsonschema_type(
         sql_type: (
-            str
+            str  # noqa: ANN401
             | sqlalchemy.types.TypeEngine
             | type[sqlalchemy.types.TypeEngine]
             | t.Any
@@ -316,7 +323,21 @@ class SQLConnector:
         Returns:
             A new SQLAlchemy Engine.
         """
-        return sqlalchemy.create_engine(self.sqlalchemy_url, echo=False)
+        try:
+            return sqlalchemy.create_engine(
+                self.sqlalchemy_url,
+                echo=False,
+                json_serializer=self.serialize_json,
+                json_deserializer=self.deserialize_json,
+            )
+        except TypeError:
+            self.logger.exception(
+                "Retrying engine creation with fewer arguments due to TypeError.",
+            )
+            return sqlalchemy.create_engine(
+                self.sqlalchemy_url,
+                echo=False,
+            )
 
     def quote(self, name: str) -> str:
         """Quote a name if it needs quoting, using '.' as a name-part delimiter.
@@ -565,8 +586,12 @@ class SQLConnector:
         Returns:
             True if the database schema exists, False if not.
         """
-        schema_names = sqlalchemy.inspect(self._engine).get_schema_names()
-        return schema_name in schema_names
+        if schema_name not in self._schema_cache:
+            self._schema_cache = set(
+                sqlalchemy.inspect(self._engine).get_schema_names(),
+            )
+
+        return schema_name in self._schema_cache
 
     def get_table_columns(
         self,
@@ -582,20 +607,24 @@ class SQLConnector:
         Returns:
             An ordered list of column objects.
         """
-        _, schema_name, table_name = self.parse_full_table_name(full_table_name)
-        inspector = sqlalchemy.inspect(self._engine)
-        columns = inspector.get_columns(table_name, schema_name)
+        if full_table_name not in self._table_cols_cache:
+            _, schema_name, table_name = self.parse_full_table_name(full_table_name)
+            inspector = sqlalchemy.inspect(self._engine)
+            columns = inspector.get_columns(table_name, schema_name)
 
-        return {
-            col_meta["name"]: sqlalchemy.Column(
-                col_meta["name"],
-                col_meta["type"],
-                nullable=col_meta.get("nullable", False),
-            )
-            for col_meta in columns
-            if not column_names
-            or col_meta["name"].casefold() in {col.casefold() for col in column_names}
-        }
+            self._table_cols_cache[full_table_name] = {
+                col_meta["name"]: sqlalchemy.Column(
+                    col_meta["name"],
+                    col_meta["type"],
+                    nullable=col_meta.get("nullable", False),
+                )
+                for col_meta in columns
+                if not column_names
+                or col_meta["name"].casefold()
+                in {col.casefold() for col in column_names}
+            }
+
+        return self._table_cols_cache[full_table_name]
 
     def get_table(
         self,
@@ -642,7 +671,7 @@ class SQLConnector:
         Args:
             schema_name: The target schema to create.
         """
-        with self._connect() as conn:
+        with self._connect() as conn, conn.begin():
             conn.execute(sqlalchemy.schema.CreateSchema(schema_name))
 
     def create_empty_table(
@@ -758,6 +787,16 @@ class SQLConnector:
                 as_temp_table=as_temp_table,
             )
             return
+        if self.config["load_method"] == TargetLoadMethods.OVERWRITE:
+            self.get_table(full_table_name=full_table_name).drop(self._engine)
+            self.create_empty_table(
+                full_table_name=full_table_name,
+                schema=schema,
+                primary_keys=primary_keys,
+                partition_keys=partition_keys,
+                as_temp_table=as_temp_table,
+            )
+            return
 
         for property_name, property_def in schema["properties"].items():
             self.prepare_column(
@@ -813,7 +852,7 @@ class SQLConnector:
             column_name=old_name,
             new_column_name=new_name,
         )
-        with self._connect() as conn:
+        with self._connect() as conn, conn.begin():
             conn.execute(column_rename_ddl)
 
     def merge_sql_types(
@@ -861,9 +900,6 @@ class SQLConnector:
 
             if isinstance(generic_type, type):
                 if issubclass(
-                    generic_type,
-                    (sqlalchemy.types.String, sqlalchemy.types.Unicode),
-                ) or issubclass(
                     generic_type,
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
                 ):
@@ -1122,5 +1158,37 @@ class SQLConnector:
             column_name=column_name,
             column_type=compatible_sql_type,
         )
-        with self._connect() as conn:
+        with self._connect() as conn, conn.begin():
             conn.execute(alter_column_ddl)
+
+    def serialize_json(self, obj: object) -> str:
+        """Serialize an object to a JSON string.
+
+        Target connectors may override this method to provide custom serialization logic
+        for JSON types.
+
+        Args:
+            obj: The object to serialize.
+
+        Returns:
+            The JSON string.
+
+        .. versionadded:: 0.31.0
+        """
+        return simplejson.dumps(obj, use_decimal=True)
+
+    def deserialize_json(self, json_str: str) -> object:
+        """Deserialize a JSON string to an object.
+
+        Tap connectors may override this method to provide custom deserialization
+        logic for JSON types.
+
+        Args:
+            json_str: The JSON string to deserialize.
+
+        Returns:
+            The deserialized object.
+
+        .. versionadded:: 0.31.0
+        """
+        return json.loads(json_str, parse_float=decimal.Decimal)

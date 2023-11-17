@@ -263,10 +263,9 @@ class Timer(Meter):
             exc_tb: The exception traceback.
         """
         if Tag.STATUS not in self.tags:
-            if exc_type is None:
-                self.tags[Tag.STATUS] = Status.SUCCEEDED
-            else:
-                self.tags[Tag.STATUS] = Status.FAILED
+            self.tags[Tag.STATUS] = (
+                Status.SUCCEEDED if exc_type is None else Status.FAILED
+            )
         log(self.logger, Point("timer", self.metric, self.elapsed(), self.tags))
 
     def elapsed(self) -> float:

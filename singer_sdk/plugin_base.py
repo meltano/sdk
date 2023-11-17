@@ -6,6 +6,7 @@ import abc
 import logging
 import os
 import sys
+import time
 import typing as t
 from pathlib import Path, PurePath
 from types import MappingProxyType
@@ -176,6 +177,9 @@ class PluginBase(metaclass=abc.ABCMeta):
         metrics._setup_logging(self.config)
         self.metrics_logger = metrics.get_metrics_logger()
 
+        # Initialization timestamp
+        self.__initialized_at = int(time.time() * 1000)
+
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
         self._mapper = PluginMapper(
@@ -205,6 +209,15 @@ class PluginBase(metaclass=abc.ABCMeta):
             mapper: A PluginMapper object.
         """
         self._mapper = mapper
+
+    @property
+    def initialized_at(self) -> int:
+        """Start time of the plugin.
+
+        Returns:
+            The start time of the plugin.
+        """
+        return self.__initialized_at
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:

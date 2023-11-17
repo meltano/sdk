@@ -58,7 +58,10 @@ import json
 import typing as t
 
 import sqlalchemy
-from jsonschema import ValidationError, Validator, validators
+from jsonschema import ValidationError, validators
+
+if t.TYPE_CHECKING:
+    from jsonschema.protocols import Validator
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -488,6 +491,26 @@ class ArrayType(JSONTypeHelper[list], t.Generic[W]):
             A dictionary describing the type.
         """
         return {"type": "array", "items": self.wrapped_type.type_dict, **self.extras}
+
+
+class AnyType(JSONTypeHelper):
+    """Any type."""
+
+    def __init__(
+        self,
+        *args: t.Any,
+        **kwargs: t.Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+
+    @DefaultInstanceProperty
+    def type_dict(self) -> dict:
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        return {**self.extras}
 
 
 class Property(JSONTypeHelper[T], t.Generic[T]):
@@ -942,12 +965,14 @@ def to_jsonschema_type(
         msg = "Expected `str` or a SQLAlchemy `TypeEngine` object or type."
         raise ValueError(msg)
 
-    # Look for the type name within the known SQL type names:
-    for sqltype, jsonschema_type in sqltype_lookup.items():
-        if sqltype.lower() in type_name.lower():
-            return jsonschema_type
-
-    return sqltype_lookup["string"]  # safe failover to str
+    return next(
+        (
+            jsonschema_type
+            for sqltype, jsonschema_type in sqltype_lookup.items()
+            if sqltype.lower() in type_name.lower()
+        ),
+        sqltype_lookup["string"],  # safe failover to str
+    )
 
 
 def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> bool:
@@ -958,23 +983,19 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
         type_check: A tuple of type strings to look for.
 
     Returns:
-        True if the schema suports the type.
+        True if the schema supports the type.
     """
     if "type" in jsonschema_type:
         if isinstance(jsonschema_type["type"], (list, tuple)):
             for schema_type in jsonschema_type["type"]:
                 if schema_type in type_check:
                     return True
-        else:
-            if jsonschema_type.get("type") in type_check:  # noqa: PLR5501
-                return True
+        elif jsonschema_type.get("type") in type_check:
+            return True
 
-    if any(
+    return any(
         _jsonschema_type_check(t, type_check) for t in jsonschema_type.get("anyOf", ())
-    ):
-        return True
-
-    return False
+    )
 
 
 def to_sql_type(  # noqa: PLR0911, C901

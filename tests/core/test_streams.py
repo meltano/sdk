@@ -10,6 +10,9 @@ import pytest
 import requests
 
 from singer_sdk._singerlib import Catalog, MetadataMapping
+from singer_sdk.exceptions import (
+    InvalidReplicationKeyException,
+)
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.jsonpath import _compile_jsonpath, extract_jsonpath
 from singer_sdk.pagination import first
@@ -190,6 +193,24 @@ def test_stream_starting_timestamp(
     )
     stream._write_starting_replication_value(None)
     assert get_starting_value(None) == expected_starting_value
+
+
+def test_stream_invalid_replication_key(tap: SimpleTestTap):
+    """Validate an exception is raised if replication_key not in schema."""
+
+    class InvalidReplicationKeyStream(SimpleTestStream):
+        replication_key = "INVALID"
+
+    stream = InvalidReplicationKeyStream(tap)
+
+    with pytest.raises(
+        InvalidReplicationKeyException,
+        match=(
+            f"Field '{stream.replication_key}' is not in schema for stream "
+            f"'{stream.name}'"
+        ),
+    ):
+        _check = stream.is_timestamp_replication_key
 
 
 @pytest.mark.parametrize(

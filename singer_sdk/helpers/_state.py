@@ -18,7 +18,7 @@ SIGNPOST_MARKER = "replication_key_signpost"
 STARTING_MARKER = "starting_replication_value"
 
 
-def get_state_if_exists(  # noqa: PLR0911
+def get_state_if_exists(
     tap_state: dict,
     tap_stream_id: str,
     state_partition_context: dict | None = None,
@@ -47,9 +47,7 @@ def get_state_if_exists(  # noqa: PLR0911
 
     stream_state = tap_state["bookmarks"][tap_stream_id]
     if not state_partition_context:
-        if key:
-            return stream_state.get(key, None)
-        return stream_state
+        return stream_state.get(key, None) if key else stream_state
     if "partitions" not in stream_state:
         return None  # No partitions defined
 
@@ -59,9 +57,7 @@ def get_state_if_exists(  # noqa: PLR0911
     )
     if matched_partition is None:
         return None  # Partition definition not present
-    if key:
-        return matched_partition.get(key, None)
-    return matched_partition
+    return matched_partition.get(key, None) if key else matched_partition
 
 
 def get_state_partitions_list(tap_state: dict, tap_stream_id: str) -> list[dict] | None:
@@ -84,10 +80,7 @@ def _find_in_partitions_list(
             f"{{state_partition_context}}.\nMatching state values were: {found!s}"
         )
         raise ValueError(msg)
-    if found:
-        return t.cast(dict, found[0])
-
-    return None
+    return t.cast(dict, found[0]) if found else None
 
 
 def _create_in_partitions_list(

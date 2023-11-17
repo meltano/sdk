@@ -76,6 +76,24 @@ generated `README.md` file to complete your new tap or target. You can also refe
 [Meltano Tutorial](https://docs.meltano.com/tutorials/custom-extractor) for a more
 detailed guide.
 
+````{admonition} Avoid repeating yourself
+  If you find yourself repeating the same inputs to the cookiecutter, you can create a
+  `cookiecutterrc` file in your home directory to set default values for the prompts.
+
+  For example, if you want to set the default value for your name and email, and the
+  default stream type and authentication method, you can add the following to your
+  `~/.cookiecutterrc` file:
+
+  ```yaml
+  # ~/.cookiecutterrc
+  default_context:
+    admin_name: Johnny B. Goode
+    admin_email: jbg@example.com
+    stream_type: REST
+    auth_method: Bearer Token
+  ```
+````
+
 ### Using an existing library
 
 In some cases, there may already be a library that connects to the API and all you need the SDK for
@@ -239,13 +257,14 @@ We've had success using [`viztracer`](https://github.com/gaogaotiantian/viztrace
 You can start doing the same in your package. Start by installing `viztracer`.
 
 ```console
-$ poetry add --dev viztracer
+$ poetry add --group dev viztracer
 ```
 
 Then simply run your package's CLI as normal, preceded by the `viztracer` command
 
 ```console
 $ poetry run viztracer my-tap
+$ poetry run viztracer -- my-target --config=config.json --input=messages.json
 ```
 
 That command will produce a `result.json` file which you can explore with the `vizviewer` tool.

@@ -4,20 +4,20 @@ from __future__ import annotations
 
 import copy
 import datetime
+import logging
 import typing as t
 from enum import Enum
 from functools import lru_cache
 
 import pendulum
 
-if t.TYPE_CHECKING:
-    import logging
-
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"
 JSONSCHEMA_ANNOTATION_SECRET = "secret"  # noqa: S105
 JSONSCHEMA_ANNOTATION_WRITEONLY = "writeOnly"
 UTC = datetime.timezone.utc
+
+logger = logging.getLogger(__name__)
 
 
 class DatetimeErrorTreatmentEnum(Enum):
@@ -67,18 +67,19 @@ def append_type(type_dict: dict, new_type: str) -> dict:
             result["type"] = [*type_array, new_type]
         return result
 
-    msg = (
+    logger.warning(
         "Could not append type because the JSON schema for the dictionary "
-        f"`{type_dict}` appears to be invalid."
+        "`%s` appears to be invalid.",
+        type_dict,
     )
-    raise ValueError(msg)
+    return result
 
 
 def is_secret_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition appears to be a secret.
 
     Will return true if either `writeOnly` or `secret` are true on this type
-    or any of the type's subproperties.
+    or any of the type's sub-properties.
 
     Args:
         type_dict: The JSON Schema type to check.
@@ -95,7 +96,7 @@ def is_secret_type(type_dict: dict) -> bool:
         return True
 
     if "properties" in type_dict:
-        # Recursively check subproperties and return True if any child is secret.
+        # Recursively check sub-properties and return True if any child is secret.
         return any(
             is_secret_type(child_type_dict)
             for child_type_dict in type_dict["properties"].values()
@@ -387,6 +388,7 @@ def conform_record_data_types(
     return rec
 
 
+# TODO: This is in dire need of refactoring. It's a mess.
 def _conform_record_data_types(  # noqa: PLR0912
     input_object: dict[str, t.Any],
     schema: dict,
@@ -404,7 +406,7 @@ def _conform_record_data_types(  # noqa: PLR0912
         input_object: A single record
         schema: JSON schema the given input_object is expected to meet
         level:  Specifies how recursive the conformance process should be
-        parent: '.' seperated path to this element from the object root (for logging)
+        parent: '.' separated path to this element from the object root (for logging)
     """
     output_object: dict[str, t.Any] = {}
     unmapped_properties: list[str] = []

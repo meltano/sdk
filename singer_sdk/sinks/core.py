@@ -32,7 +32,7 @@ from singer_sdk.helpers._typing import (
 if t.TYPE_CHECKING:
     from logging import Logger
 
-    from singer_sdk.plugin_base import PluginBase
+    from singer_sdk.target_base import Target
 
 JSONSchemaValidator = Draft7Validator
 
@@ -48,7 +48,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        target: PluginBase,
+        target: Target,
         stream_name: str,
         schema: dict,
         key_properties: list[str] | None,
@@ -61,7 +61,8 @@ class Sink(metaclass=abc.ABCMeta):
             schema: Schema of the stream to sink.
             key_properties: Primary key of the stream to sink.
         """
-        self.logger = target.logger
+        self.logger = target.logger.getChild(stream_name)
+        self.sync_started_at = target.initialized_at
         self._config = dict(target.config)
         self._pending_batch: dict | None = None
         self.stream_name = stream_name
@@ -238,7 +239,7 @@ class Sink(metaclass=abc.ABCMeta):
 
         Args:
             record: Individual record in the stream.
-            message: TODO
+            message: The record message.
             context: Stream partition or context dictionary.
         """
         record["_sdc_extracted_at"] = message.get("time_extracted")
@@ -246,12 +247,13 @@ class Sink(metaclass=abc.ABCMeta):
             tz=datetime.timezone.utc,
         ).isoformat()
         record["_sdc_batched_at"] = (
-            context.get("batch_start_time", None)
+            context.get("batch_start_time")
             or datetime.datetime.now(tz=datetime.timezone.utc)
         ).isoformat()
         record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
         record["_sdc_sequence"] = int(round(time.time() * 1000))
         record["_sdc_table_version"] = message.get("version")
+        record["_sdc_sync_started_at"] = self.sync_started_at
 
     def _add_sdc_metadata_to_schema(self) -> None:
         """Add _sdc metadata columns.
@@ -270,7 +272,7 @@ class Sink(metaclass=abc.ABCMeta):
                 "type": ["null", "string"],
                 "format": "date-time",
             }
-        for col in ("_sdc_sequence", "_sdc_table_version"):
+        for col in ("_sdc_sequence", "_sdc_table_version", "_sdc_sync_started_at"):
             properties_dict[col] = {"type": ["null", "integer"]}
 
     def _remove_sdc_metadata_from_schema(self) -> None:
@@ -287,6 +289,7 @@ class Sink(metaclass=abc.ABCMeta):
             "_sdc_deleted_at",
             "_sdc_sequence",
             "_sdc_table_version",
+            "_sdc_sync_started_at",
         ):
             properties_dict.pop(col, None)
 
@@ -305,6 +308,7 @@ class Sink(metaclass=abc.ABCMeta):
         record.pop("_sdc_deleted_at", None)
         record.pop("_sdc_sequence", None)
         record.pop("_sdc_table_version", None)
+        record.pop("_sdc_sync_started_at", None)
 
     # Record validation
 
@@ -361,12 +365,15 @@ class Sink(metaclass=abc.ABCMeta):
             schema: TODO
             treatment: TODO
         """
-        for key in record:
+        for key, value in record.items():
+            if key not in schema["properties"]:
+                self.logger.warning("No schema for record field '%s'", key)
+                continue
             datelike_type = get_datelike_property_type(schema["properties"][key])
             if datelike_type:
-                date_val = record[key]
+                date_val = value
                 try:
-                    if record[key] is not None:
+                    if value is not None:
                         date_val = parser.parse(date_val)
                 except parser.ParserError as ex:
                     date_val = handle_invalid_timestamp_in_record(

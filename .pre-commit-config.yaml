@@ -5,7 +5,7 @@ ci:
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v4.5.0
   hooks:
   - id: check-json
   - id: check-toml
@@ -36,14 +36,14 @@ repos:
         )$
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.23.3
+  rev: 0.27.1
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
   - id: check-readthedocs
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.0.278
+  rev: v0.1.5
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]
@@ -51,20 +51,14 @@ repos:
       (?x)^(
         cookiecutter/.*
       )$
-
-- repo: https://github.com/psf/black
-  rev: 23.7.0
-  hooks:
-  - id: black
+  - id: ruff-format
     exclude: |
-        (?x)^(
-            cookiecutter/.*|
-            singer_sdk/helpers/_simpleeval.py|
-            tests/core/test_simpleeval.py
-        )$
+      (?x)^(
+        cookiecutter/.*
+      )$
 
 - repo: https://github.com/pycqa/flake8
-  rev: 6.0.0
+  rev: 6.1.0
   hooks:
   - id: flake8
     additional_dependencies:
@@ -76,6 +70,6 @@ repos:
         )$
 
 - repo: https://github.com/python-poetry/poetry
-  rev: 1.5.0
+  rev: 1.7.0
   hooks:
   - id: poetry-check

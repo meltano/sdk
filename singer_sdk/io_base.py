@@ -48,7 +48,7 @@ class SingerReader(metaclass=abc.ABCMeta):
         if not requires.issubset(line_dict):
             missing = requires - set(line_dict)
             msg = f"Line is missing required {', '.join(missing)} key(s): {line_dict}"
-            raise Exception(msg)
+            raise Exception(msg)  # TODO: Raise a more specific exception
 
     def deserialize_json(self, line: str) -> dict:
         """Deserialize a line of json.
