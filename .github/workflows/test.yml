@@ -62,7 +62,9 @@ jobs:
         PIP_CONSTRAINT: .github/workflows/constraints.txt
       run: |
         pipx install poetry
+        pipx inject poetry poetry-plugin-export
         poetry --version
+        poetry self show plugins
 
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4.7.1
@@ -83,8 +85,8 @@ jobs:
       env:
         PIP_CONSTRAINT: .github/workflows/constraints.txt
       run: |
-        pipx install --pip-args=--constraint=.github/workflows/constraints.txt nox
-        pipx inject --pip-args=--constraint=.github/workflows/constraints.txt nox nox-poetry
+        pipx install nox
+        pipx inject nox nox-poetry
         nox --version
 
     - name: Run Nox
@@ -122,7 +124,9 @@ jobs:
         PIP_CONSTRAINT: .github/workflows/constraints.txt
       run: |
         pipx install poetry
+        pipx inject poetry poetry-plugin-export
         poetry --version
+        poetry self show plugins
 
     - name: Setup Python 3.10
       uses: actions/setup-python@v4.7.1
@@ -143,8 +147,8 @@ jobs:
       env:
         PIP_CONSTRAINT: .github/workflows/constraints.txt
       run: |
-        pipx install --pip-args=--constraint=.github/workflows/constraints.txt nox
-        pipx inject --pip-args=--constraint=.github/workflows/constraints.txt nox nox-poetry
+        pipx install nox
+        pipx inject nox nox-poetry
         nox --version
 
     - name: Run Nox
@@ -160,9 +164,13 @@ jobs:
       uses: actions/checkout@v4.1.1
 
     - name: Install Poetry
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
       run: |
-        pipx install --pip-args=--constraint=.github/workflows/constraints.txt poetry
+        pipx install poetry
+        pipx inject poetry poetry-plugin-export
         poetry --version
+        poetry self show plugins
 
     - name: Set up Python
       uses: actions/setup-python@v4.7.1
@@ -185,8 +193,8 @@ jobs:
       env:
         PIP_CONSTRAINT: .github/workflows/constraints.txt
       run: |
-        pipx install --pip-args=--constraint=.github/workflows/constraints.txt nox
-        pipx inject --pip-args=--constraint=.github/workflows/constraints.txt nox nox-poetry
+        pipx install nox
+        pipx inject nox nox-poetry
         nox --version
 
     - name: Combine coverage data and display human readable report
