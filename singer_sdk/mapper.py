@@ -273,10 +273,7 @@ class CustomStreamMap(StreamMap):
             The transformed record.
         """
         transformed_record = self._transform_fn(record)
-        if not transformed_record:
-            return None
-
-        return super().transform(transformed_record)
+        return super().transform(transformed_record) if transformed_record else None
 
     def get_filter_result(self, record: dict) -> bool:
         """Return True to include or False to exclude.
@@ -291,7 +288,7 @@ class CustomStreamMap(StreamMap):
 
     @property
     def functions(self) -> dict[str, t.Callable]:
-        """Get availabale transformation functions.
+        """Get available transformation functions.
 
         Returns:
             Functions which should be available for expression evaluation.

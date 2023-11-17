@@ -16,11 +16,13 @@ def snakecase(string: str) -> str:
     """
     string = re.sub(r"[\-\.\s]", "_", string)
     string = (
-        string[0].lower()
-        + re.sub(
-            r"[A-Z]",
-            lambda matched: "_" + str(matched.group(0).lower()),
-            string[1:],
+        (
+            string[0].lower()
+            + re.sub(
+                r"[A-Z]",
+                lambda matched: f"_{matched.group(0).lower()!s}",
+                string[1:],
+            )
         )
         if string
         else string
