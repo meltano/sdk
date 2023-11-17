@@ -5,7 +5,7 @@ from __future__ import annotations
 import base64
 import math
 import typing as t
-from datetime import datetime, timedelta
+from datetime import timedelta
 from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
@@ -18,6 +18,8 @@ from singer_sdk.helpers._util import utc_now
 
 if t.TYPE_CHECKING:
     import logging
+
+    from pendulum import DateTime
 
     from singer_sdk.streams.rest import RESTStream
 
@@ -378,7 +380,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         # Initialize internal tracking attributes
         self.access_token: str | None = None
         self.refresh_token: str | None = None
-        self.last_refreshed: datetime | None = None
+        self.last_refreshed: DateTime | None = None
         self.expires_in: int | None = None
 
     @property
@@ -483,7 +485,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             return False
         if not self.expires_in:
             return True
-        return self.expires_in > (utc_now() - self.last_refreshed).total_seconds()
+        return self.expires_in > (utc_now() - self.last_refreshed).total_seconds()  # type: ignore[no-any-return]
 
     # Authentication and refresh
     def update_access_token(self) -> None:
