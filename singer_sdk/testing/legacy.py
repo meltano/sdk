@@ -150,10 +150,7 @@ def _get_tap_catalog(
     # Test discovery
     tap.run_discovery()
     catalog_dict = tap.catalog_dict
-    if select_all:
-        return _select_all(catalog_dict)
-
-    return catalog_dict
+    return _select_all(catalog_dict) if select_all else catalog_dict
 
 
 def _select_all(catalog_dict: dict) -> dict:
