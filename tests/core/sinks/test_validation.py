@@ -62,22 +62,17 @@ def bench_sink() -> BatchSinkMock:
     )
 
 
-@pytest.fixture
-def bench_record():
-    return {
+def test_bench_parse_timestamps_in_record(benchmark, bench_sink):
+    """Run benchmark for Sink method _parse_timestamps_in_record."""
+    number_of_runs = 10000
+
+    sink: BatchSinkMock = bench_sink
+    record: dict = {
         "id": 1,
         "created_at": "2021-01-01T00:08:00-07:00",
         "updated_at": "2022-01-02T00:09:00-07:00",
         "deleted_at": "2023-01-03T00:10:00.0000",
     }
-
-
-def test_bench_parse_timestamps_in_record(benchmark, bench_sink, bench_record):
-    """Run benchmark for Sink method _parse_timestamps_in_record."""
-    number_of_runs = 10000
-
-    sink: BatchSinkMock = bench_sink
-    record: dict = bench_record
 
     def run_parse_timestamps_in_record():
         for _ in range(number_of_runs):
@@ -88,12 +83,17 @@ def test_bench_parse_timestamps_in_record(benchmark, bench_sink, bench_record):
     benchmark(run_parse_timestamps_in_record)
 
 
-def test_bench_validate_and_parse(benchmark, bench_sink, bench_record):
+def test_bench_validate_and_parse(benchmark, bench_sink):
     """Run benchmark for Sink method _validate_and_parse."""
     number_of_runs = 10000
 
     sink: BatchSinkMock = bench_sink
-    record: dict = bench_record
+    record: dict = {
+        "id": 1,
+        "created_at": "2021-01-01T00:08:00-07:00",
+        "updated_at": "2022-01-02T00:09:00-07:00",
+        "deleted_at": "2023-01-03T00:10:00.0000",
+    }
 
     def run_validate_and_parse():
         for _ in range(number_of_runs):
