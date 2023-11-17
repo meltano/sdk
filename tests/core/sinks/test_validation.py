@@ -73,14 +73,14 @@ def bench_record():
 
 
 def test_bench_validate_record_with_schema(benchmark, bench_sink, bench_record):
-    """Run benchmark tests using the "repositories" stream."""
-    stream_size_scale = 1000
+    """Run benchmark for Sink._validator method validate."""
+    number_of_runs = 1000
 
     sink: BatchSinkMock = bench_sink
     record: dict = bench_record
 
     def run_validate_record_with_schema():
-        for _ in range(stream_size_scale):
+        for _ in range(number_of_runs):
             sink._validator.validate(record)
 
     benchmark(run_validate_record_with_schema)
