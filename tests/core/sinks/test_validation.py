@@ -73,14 +73,14 @@ def bench_record():
 
 
 def test_bench_parse_timestamps_in_record(benchmark, bench_sink, bench_record):
-    """Run benchmark tests using the "repositories" stream."""
-    record_size_scale = 10000
+    """Run benchmark for Sink method _parse_timestamps_in_record."""
+    number_of_runs = 10000
 
     sink: BatchSinkMock = bench_sink
     record: dict = bench_record
 
     def run_parse_timestamps_in_record():
-        for _ in range(record_size_scale):
+        for _ in range(number_of_runs):
             _ = sink._parse_timestamps_in_record(
                 record, sink.schema, sink.datetime_error_treatment
             )
@@ -89,14 +89,14 @@ def test_bench_parse_timestamps_in_record(benchmark, bench_sink, bench_record):
 
 
 def test_bench_validate_and_parse(benchmark, bench_sink, bench_record):
-    """Run benchmark tests using the "repositories" stream."""
-    record_size_scale = 10000
+    """Run benchmark for Sink method _validate_and_parse."""
+    number_of_runs = 10000
 
     sink: BatchSinkMock = bench_sink
     record: dict = bench_record
 
     def run_validate_and_parse():
-        for _ in range(record_size_scale):
+        for _ in range(number_of_runs):
             _ = sink._validate_and_parse(record)
 
     benchmark(run_validate_and_parse)
