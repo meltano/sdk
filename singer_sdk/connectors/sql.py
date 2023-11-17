@@ -902,9 +902,6 @@ class SQLConnector:
                 if issubclass(
                     generic_type,
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
-                ) or issubclass(
-                    generic_type,
-                    (sqlalchemy.types.String, sqlalchemy.types.Unicode),
                 ):
                     # If length None or 0 then is varchar max ?
                     if (
@@ -913,8 +910,6 @@ class SQLConnector:
                         or (cur_len and (opt_len >= cur_len))
                     ):
                         return opt
-                # If best conversion class is equal to current type
-                # return the best conversion class
                 elif str(opt) == str(current_type):
                     return opt
 

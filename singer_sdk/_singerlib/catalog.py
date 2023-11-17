@@ -31,11 +31,7 @@ class SelectionMask(t.Dict[Breadcrumb, bool]):
         Returns:
             True if the breadcrumb is selected, False otherwise.
         """
-        if len(breadcrumb) >= 2:  # noqa: PLR2004
-            parent = breadcrumb[:-2]
-            return self[parent]
-
-        return True
+        return self[breadcrumb[:-2]] if len(breadcrumb) >= 2 else True  # noqa: PLR2004
 
 
 @dataclass
@@ -71,7 +67,7 @@ class Metadata:
         )
 
     def to_dict(self) -> dict[str, t.Any]:
-        """Convert metadata to a JSON-encodeable dictionary.
+        """Convert metadata to a JSON-encodable dictionary.
 
         Returns:
             Metadata object.
