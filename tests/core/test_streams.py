@@ -20,11 +20,13 @@ from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMEN
 from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
+from tests.core.conftest import SimpleTestStream
 
 CONFIG_START_DATE = "2021-01-01"
 
 if t.TYPE_CHECKING:
     from singer_sdk import Stream, Tap
+    from tests.core.conftest import SimpleTestTap
 
 
 class RestTestStream(RESTStream):
