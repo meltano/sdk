@@ -10,7 +10,9 @@ import sys
 import typing as t
 from collections import Counter, defaultdict
 
-from singer_sdk._singerlib import SingerMessageType
+import simplejson
+
+from singer_sdk._singerlib import Message, SingerMessageType
 from singer_sdk.helpers._compat import final
 
 logger = logging.getLogger(__name__)
@@ -143,3 +145,27 @@ class SingerReader(metaclass=abc.ABCMeta):
 
     def _process_endofpipe(self) -> None:
         logger.debug("End of pipe reached")
+
+
+class SingerWriter:
+    """Interface for all plugins writting Singer messages to stdout."""
+
+    def format_message(self, message: Message) -> str:
+        """Format a message as a JSON string.
+
+        Args:
+            message: The message to format.
+
+        Returns:
+            The formatted message.
+        """
+        return simplejson.dumps(message.to_dict(), use_decimal=True, default=str)
+
+    def write_message(self, message: Message) -> None:
+        """Write a message to stdout.
+
+        Args:
+            message: The message to write.
+        """
+        sys.stdout.write(self.format_message(message) + "\n")
+        sys.stdout.flush()
