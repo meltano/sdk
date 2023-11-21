@@ -17,7 +17,9 @@ repos:
     exclude: |
         (?x)^(
             cookiecutter/.*/meltano.yml|
-            cookiecutter/.*/.pre-commit-config.yaml
+            cookiecutter/.*/.pre-commit-config.yaml|
+            cookiecutter/.*/dependabot.yml|
+            cookiecutter/.*/test.yml
         )$
   - id: end-of-file-fixer
     exclude: |
