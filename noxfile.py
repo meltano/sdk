@@ -212,35 +212,35 @@ def docs_serve(session: Session) -> None:
 
 @nox.parametrize("replay_file_path", COOKIECUTTER_REPLAY_FILES)
 @session(python=main_python_version)
-def test_cookiecutter(session: Session, replay_file_path) -> None:
+def test_cookiecutter(session: Session, replay_file_path: str) -> None:
     """Uses the tap template to build an empty cookiecutter.
 
     Runs the lint task on the created test project.
     """
-    cc_build_path = tempfile.gettempdir()
-    folder_base_path = "./cookiecutter"
+    cc_build_path = Path(tempfile.gettempdir())
+    folder_base_path = Path("./cookiecutter")
+    replay_file = Path(replay_file_path).resolve()
 
-    if Path(replay_file_path).name.startswith("tap"):
+    if replay_file.name.startswith("tap"):
         folder = "tap-template"
-    elif Path(replay_file_path).name.startswith("target"):
+    elif replay_file.name.startswith("target"):
         folder = "target-template"
     else:
         folder = "mapper-template"
-    template = Path(folder_base_path + "/" + folder).resolve()
-    replay_file = Path(replay_file_path).resolve()
+    template = folder_base_path.joinpath(folder).resolve()
 
-    if not Path(template).exists():
+    if not template.exists():
         return
 
-    if not Path(replay_file).is_file():
+    if not replay_file.is_file():
         return
 
-    sdk_dir = Path(Path(template).parent).parent
-    cc_output_dir = Path(replay_file_path).name.replace(".json", "")
-    cc_test_output = cc_build_path + "/" + cc_output_dir
+    sdk_dir = template.parent.parent
+    cc_output_dir = replay_file.name.replace(".json", "")
+    cc_test_output = cc_build_path.joinpath(cc_output_dir)
 
-    if Path(cc_test_output).exists():
-        session.run("rm", "-fr", cc_test_output, external=True)
+    if cc_test_output.exists():
+        session.run("rm", "-fr", str(cc_test_output), external=True)
 
     session.install(".")
     session.install("cookiecutter", "pythonsed")
@@ -251,7 +251,7 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
         str(replay_file),
         str(template),
         "-o",
-        cc_build_path,
+        str(cc_build_path),
     )
     session.chdir(cc_test_output)
 
