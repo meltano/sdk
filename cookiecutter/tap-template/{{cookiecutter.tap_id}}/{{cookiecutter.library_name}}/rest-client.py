@@ -3,24 +3,43 @@
 from __future__ import annotations
 
 {% if cookiecutter.auth_method in ("OAuth2", "JWT") -%}
-import sys{% endif -%}
+import sys
+{% endif -%}
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
 import requests
 {% if cookiecutter.auth_method  == "API Key" -%}
 from singer_sdk.authenticators import APIKeyAuthenticator
-{% elif cookiecutter.auth_method  == "Bearer Token" -%}
-from singer_sdk.authenticators import BearerTokenAuthenticator
-{% elif cookiecutter.auth_method == "Basic Auth" -%}
-from singer_sdk.authenticators import BasicAuthenticator
-{% endif -%}
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
-from singer_sdk.streams import RESTStream
+from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+
+{% elif cookiecutter.auth_method  == "Bearer Token" -%}
+from singer_sdk.authenticators import BearerTokenAuthenticator
+from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
+from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+
+{% elif cookiecutter.auth_method == "Basic Auth" -%}
+from singer_sdk.authenticators import BasicAuthenticator
+from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
+from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+
+{% elif cookiecutter.auth_method == "Custom or N/A" -%}
+from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
+from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+
+{% elif cookiecutter.auth_method in ("OAuth2", "JWT") -%}
+from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
+from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
 
+{% endif -%}
 
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 if sys.version_info >= (3, 8):
@@ -34,7 +53,7 @@ _Auth = Callable[[requests.PreparedRequest], requests.PreparedRequest]
 SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 
-class {{ cookiecutter.source_name }}Stream(RESTStream):
+class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
     @property
