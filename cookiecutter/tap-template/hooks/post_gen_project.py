@@ -1,17 +1,9 @@
 #!/usr/bin/env python
 from pathlib import Path
+import shutil
 
 
 BASE_PATH = Path('{{cookiecutter.library_name}}')
-
-
-def delete_folder(pth: Path):
-    for sub in pth.iterdir():
-        if sub.is_dir():
-            delete_folder(sub)
-        else:
-            sub.unlink()
-    pth.rmdir()
 
 
 if __name__ == '__main__':
@@ -31,5 +23,5 @@ if __name__ == '__main__':
         Path('LICENSE').unlink()
 
     if '{{ cookiecutter.include_ci_files }}' != 'GitHub':
-        delete_folder(Path('.github'))
+        shutil.rmtree(Path('.github'))
 
