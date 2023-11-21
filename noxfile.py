@@ -240,7 +240,7 @@ def test_cookiecutter(session: Session, replay_file_path: str) -> None:
     cc_test_output = cc_build_path.joinpath(cc_output_dir)
 
     if cc_test_output.exists():
-        session.run("rm", "-fr", cc_test_output, external=True)
+        session.run("rm", "-fr", str(cc_test_output), external=True)
 
     session.install(".")
     session.install("cookiecutter", "pythonsed")
@@ -251,7 +251,7 @@ def test_cookiecutter(session: Session, replay_file_path: str) -> None:
         str(replay_file),
         str(template),
         "-o",
-        cc_build_path,
+        str(cc_build_path),
     )
     session.chdir(cc_test_output)
 
