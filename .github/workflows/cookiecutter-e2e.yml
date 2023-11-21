@@ -3,10 +3,16 @@ name: E2E Cookiecutters
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths: ["cookiecutter/**", "e2e-tests/cookiecutters/**"]
+    paths:
+    - "cookiecutter/**"
+    - "e2e-tests/cookiecutters/**"
+    - ".github/workflows/cookiecutter-e2e.yml"
   push:
     branches: [main]
-    paths: ["cookiecutter/**", "e2e-tests/cookiecutters/**"]
+    paths:
+    - "cookiecutter/**"
+    - "e2e-tests/cookiecutters/**"
+    - ".github/workflows/cookiecutter-e2e.yml"
   workflow_dispatch:
 
 concurrency:
@@ -18,13 +24,13 @@ env:
 
 jobs:
   lint:
-    name: Cookiecutter E2E ${{ matrix.python-version }} ${{ matrix.python-version }} / ${{ matrix.os }}
+    name: Cookiecutter E2E Python ${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
       matrix:
         include:
-          - { python-version: "3.10",  os: "ubuntu-latest" }
+          - { python-version: "3.11",  os: "ubuntu-latest" }
 
     steps:
     - name: Check out the repository
