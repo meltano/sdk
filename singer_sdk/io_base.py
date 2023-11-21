@@ -10,9 +10,9 @@ import sys
 import typing as t
 from collections import Counter, defaultdict
 
-import simplejson
-
-from singer_sdk._singerlib import Message, SingerMessageType
+from singer_sdk._singerlib.messages import Message, SingerMessageType
+from singer_sdk._singerlib.messages import format_message as singer_format_message
+from singer_sdk._singerlib.messages import write_message as singer_write_message
 from singer_sdk.helpers._compat import final
 
 logger = logging.getLogger(__name__)
@@ -159,7 +159,7 @@ class SingerWriter:
         Returns:
             The formatted message.
         """
-        return simplejson.dumps(message.to_dict(), use_decimal=True, default=str)
+        return singer_format_message(message)
 
     def write_message(self, message: Message) -> None:
         """Write a message to stdout.
@@ -167,5 +167,4 @@ class SingerWriter:
         Args:
             message: The message to write.
         """
-        sys.stdout.write(self.format_message(message) + "\n")
-        sys.stdout.flush()
+        singer_write_message(message)
