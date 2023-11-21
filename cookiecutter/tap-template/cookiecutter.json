@@ -14,8 +14,8 @@
     "JWT",
     "Custom or N/A"
   ],
-  "include_ci_files": ["GitHub", "None (Skip)"],
-  "license": ["Apache-2.0"],
+  "include_ci_files": ["GitHub", "None"],
+  "license": ["Apache-2.0", "None"],
   "__prompts__": {
     "source_name": "The name of the source, in CamelCase",
     "admin_name": "Provide your [bold yellow]full name[/]",

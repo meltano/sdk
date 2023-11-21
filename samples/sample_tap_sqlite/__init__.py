@@ -48,6 +48,7 @@ class SQLiteTap(SQLTap):
             DB_PATH_CONFIG,
             th.StringType,
             description="The path to your SQLite database file(s).",
+            required=True,
             examples=["./path/to/my.db", "/absolute/path/to/my.db"],
         ),
     ).to_dict()

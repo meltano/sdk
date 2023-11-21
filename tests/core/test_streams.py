@@ -16,68 +16,17 @@ from singer_sdk.exceptions import (
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.jsonpath import _compile_jsonpath, extract_jsonpath
 from singer_sdk.pagination import first
-from singer_sdk.streams.core import (
-    REPLICATION_FULL_TABLE,
-    REPLICATION_INCREMENTAL,
-    Stream,
-)
+from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMENTAL
 from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
-from singer_sdk.tap_base import Tap
-from singer_sdk.typing import (
-    DateTimeType,
-    IntegerType,
-    PropertiesList,
-    Property,
-    StringType,
-)
+from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
+from tests.core.conftest import SimpleTestStream
 
 CONFIG_START_DATE = "2021-01-01"
 
-
-class SimpleTestStream(Stream):
-    """Test stream class."""
-
-    name = "test"
-    schema = PropertiesList(
-        Property("id", IntegerType, required=True),
-        Property("value", StringType, required=True),
-        Property("updatedAt", DateTimeType, required=True),
-    ).to_dict()
-    replication_key = "updatedAt"
-
-    def __init__(self, tap: Tap):
-        """Create a new stream."""
-        super().__init__(tap, schema=self.schema, name=self.name)
-
-    def get_records(
-        self,
-        context: dict | None,  # noqa: ARG002
-    ) -> t.Iterable[dict[str, t.Any]]:
-        """Generate records."""
-        yield {"id": 1, "value": "Egypt"}
-        yield {"id": 2, "value": "Germany"}
-        yield {"id": 3, "value": "India"}
-
-
-class UnixTimestampIncrementalStream(SimpleTestStream):
-    name = "unix_ts"
-    schema = PropertiesList(
-        Property("id", IntegerType, required=True),
-        Property("value", StringType, required=True),
-        Property("updatedAt", IntegerType, required=True),
-    ).to_dict()
-    replication_key = "updatedAt"
-
-
-class UnixTimestampIncrementalStream2(UnixTimestampIncrementalStream):
-    name = "unix_ts_override"
-
-    def compare_start_date(self, value: str, start_date_value: str) -> str:
-        """Compare a value to a start date value."""
-
-        start_timestamp = pendulum.parse(start_date_value).format("X")
-        return max(value, start_timestamp, key=float)
+if t.TYPE_CHECKING:
+    from singer_sdk import Stream, Tap
+    from tests.core.conftest import SimpleTestTap
 
 
 class RestTestStream(RESTStream):
@@ -124,43 +73,13 @@ class GraphqlTestStream(GraphQLStream):
     replication_key = "updatedAt"
 
 
-class SimpleTestTap(Tap):
-    """Test tap class."""
-
-    name = "test-tap"
-    settings_jsonschema = PropertiesList(Property("start_date", DateTimeType)).to_dict()
-
-    def discover_streams(self) -> list[Stream]:
-        """List all streams."""
-        return [
-            SimpleTestStream(self),
-            UnixTimestampIncrementalStream(self),
-            UnixTimestampIncrementalStream2(self),
-        ]
-
-
 @pytest.fixture
-def tap() -> SimpleTestTap:
-    """Tap instance."""
-    return SimpleTestTap(
-        config={"start_date": CONFIG_START_DATE},
-        parse_env_config=False,
-    )
-
-
-@pytest.fixture
-def stream(tap: SimpleTestTap) -> SimpleTestStream:
+def stream(tap):
     """Create a new stream instance."""
-    return t.cast(SimpleTestStream, tap.load_streams()[0])
+    return tap.load_streams()[0]
 
 
-@pytest.fixture
-def unix_timestamp_stream(tap: SimpleTestTap) -> UnixTimestampIncrementalStream:
-    """Create a new stream instance."""
-    return t.cast(UnixTimestampIncrementalStream, tap.load_streams()[1])
-
-
-def test_stream_apply_catalog(stream: SimpleTestStream):
+def test_stream_apply_catalog(stream: Stream):
     """Applying a catalog to a stream should overwrite fields."""
     assert stream.primary_keys == []
     assert stream.replication_key == "updatedAt"
@@ -251,7 +170,7 @@ def test_stream_apply_catalog(stream: SimpleTestStream):
     ],
 )
 def test_stream_starting_timestamp(
-    tap: SimpleTestTap,
+    tap: Tap,
     stream_name: str,
     bookmark_value: str,
     expected_starting_value: t.Any,
@@ -353,12 +272,7 @@ def test_stream_invalid_replication_key(tap: SimpleTestTap):
         "nested_values",
     ],
 )
-def test_jsonpath_rest_stream(
-    tap: SimpleTestTap,
-    path: str,
-    content: str,
-    result: list[dict],
-):
+def test_jsonpath_rest_stream(tap: Tap, path: str, content: str, result: list[dict]):
     """Validate records are extracted correctly from the API response."""
     fake_response = requests.Response()
     fake_response._content = str.encode(content)
@@ -371,7 +285,7 @@ def test_jsonpath_rest_stream(
     assert list(records) == result
 
 
-def test_jsonpath_graphql_stream_default(tap: SimpleTestTap):
+def test_jsonpath_graphql_stream_default(tap: Tap):
     """Validate graphql JSONPath, defaults to the stream name."""
     content = """{
                 "data": {
@@ -391,7 +305,7 @@ def test_jsonpath_graphql_stream_default(tap: SimpleTestTap):
     assert list(records) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
 
 
-def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
+def test_jsonpath_graphql_stream_override(tap: Tap):
     """Validate graphql jsonpath can be updated."""
     content = """[
                         {"id": 1, "value": "abc"},
@@ -478,7 +392,7 @@ def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
     ],
 )
 def test_next_page_token_jsonpath(
-    tap: SimpleTestTap,
+    tap: Tap,
     path: str,
     content: str,
     headers: dict,
@@ -510,7 +424,7 @@ def test_cached_jsonpath():
     assert recompiled is compiled
 
 
-def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
+def test_sync_costs_calculation(tap: Tap, caplog):
     """Test sync costs are added up correctly."""
     fake_request = requests.PreparedRequest()
     fake_response = requests.Response()
@@ -595,7 +509,7 @@ def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
         ),
     ],
 )
-def test_stream_class_selection(input_catalog, selection):
+def test_stream_class_selection(tap_class, input_catalog, selection):
     """Test stream class selection."""
 
     class SelectedStream(RESTStream):
@@ -607,11 +521,12 @@ def test_stream_class_selection(input_catalog, selection):
         name = "unselected_stream"
         selected_by_default = False
 
-    class MyTap(SimpleTestTap):
+    class MyTap(tap_class):
         def discover_streams(self):
             return [SelectedStream(self), UnselectedStream(self)]
 
     # Check that the selected stream is selected
-    tap = MyTap(config=None, catalog=input_catalog)
-    for stream in selection:
-        assert tap.streams[stream].selected is selection[stream]
+    tap = MyTap(config=None, catalog=input_catalog, validate_config=False)
+    assert all(
+        tap.streams[stream].selected is selection[stream] for stream in selection
+    )
