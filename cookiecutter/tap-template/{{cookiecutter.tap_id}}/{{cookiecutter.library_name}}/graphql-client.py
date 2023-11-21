@@ -5,15 +5,14 @@ from __future__ import annotations
 from typing import Iterable
 
 import requests  # noqa: TCH002
-from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
+from singer_sdk.streams import GraphQLStream
 
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
-
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
 {%- endif %}
 
 
-class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
+class {{ cookiecutter.source_name }}Stream(GraphQLStream):
     """{{ cookiecutter.source_name }} stream class."""
 
     @property
