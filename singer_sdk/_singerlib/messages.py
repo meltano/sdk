@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import enum
+import sys
 import typing as t
 from dataclasses import asdict, dataclass, field
 from datetime import timezone
 
+import simplejson as json
 from dateutil.parser import parse
 
 if t.TYPE_CHECKING:
@@ -198,3 +200,25 @@ class ActivateVersionMessage(Message):
     def __post_init__(self) -> None:
         """Post-init processing."""
         self.type = SingerMessageType.ACTIVATE_VERSION
+
+
+def format_message(message: Message) -> str:
+    """Format a message as a JSON string.
+
+    Args:
+        message: The message to format.
+
+    Returns:
+        The formatted message.
+    """
+    return json.dumps(message.to_dict(), use_decimal=True, default=str)
+
+
+def write_message(message: Message) -> None:
+    """Write a message to stdout.
+
+    Args:
+        message: The message to write.
+    """
+    sys.stdout.write(format_message(message) + "\n")
+    sys.stdout.flush()
