@@ -98,13 +98,7 @@ class SQLSink(BatchSink):
         if default_target_schema:
             return default_target_schema
 
-        if len(parts) in {2, 3}:
-            # Stream name is a two-part or three-part identifier.
-            # Use the second-to-last part as the schema name.
-            return self.conform_name(parts[-2], "schema")
-
-        # Schema name not detected.
-        return None
+        return self.conform_name(parts[-2], "schema") if len(parts) in {2, 3} else None
 
     @property
     def database_name(self) -> str | None:

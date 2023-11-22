@@ -144,6 +144,7 @@ class TapTestClassFactory:
 
         return TapTestClass
 
+    # TODO: Refactor this. It's too long and nested.
     def _annotate_test_class(  # noqa: C901
         self,
         empty_test_class: type[BaseTestClass],

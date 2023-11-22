@@ -10,7 +10,9 @@ import sys
 import typing as t
 from collections import Counter, defaultdict
 
-from singer_sdk._singerlib import SingerMessageType
+from singer_sdk._singerlib.messages import Message, SingerMessageType
+from singer_sdk._singerlib.messages import format_message as singer_format_message
+from singer_sdk._singerlib.messages import write_message as singer_write_message
 from singer_sdk.helpers._compat import final
 
 logger = logging.getLogger(__name__)
@@ -48,7 +50,7 @@ class SingerReader(metaclass=abc.ABCMeta):
         if not requires.issubset(line_dict):
             missing = requires - set(line_dict)
             msg = f"Line is missing required {', '.join(missing)} key(s): {line_dict}"
-            raise Exception(msg)
+            raise Exception(msg)  # TODO: Raise a more specific exception
 
     def deserialize_json(self, line: str) -> dict:
         """Deserialize a line of json.
@@ -143,3 +145,26 @@ class SingerReader(metaclass=abc.ABCMeta):
 
     def _process_endofpipe(self) -> None:
         logger.debug("End of pipe reached")
+
+
+class SingerWriter:
+    """Interface for all plugins writting Singer messages to stdout."""
+
+    def format_message(self, message: Message) -> str:
+        """Format a message as a JSON string.
+
+        Args:
+            message: The message to format.
+
+        Returns:
+            The formatted message.
+        """
+        return singer_format_message(message)
+
+    def write_message(self, message: Message) -> None:
+        """Write a message to stdout.
+
+        Args:
+            message: The message to write.
+        """
+        singer_write_message(message)
