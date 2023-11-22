@@ -75,7 +75,7 @@ def bench_record():
 
 def test_bench_parse_timestamps_in_record(benchmark, bench_sink, bench_record):
     """Run benchmark for Sink method _parse_timestamps_in_record."""
-    number_of_runs = 10000
+    number_of_runs = 1000
 
     sink: BatchSinkMock = bench_sink
 
@@ -90,7 +90,7 @@ def test_bench_parse_timestamps_in_record(benchmark, bench_sink, bench_record):
 
 def test_bench_validate_and_parse(benchmark, bench_sink, bench_record):
     """Run benchmark for Sink method _validate_and_parse."""
-    number_of_runs = 10000
+    number_of_runs = 1000
 
     sink: BatchSinkMock = bench_sink
 
@@ -99,3 +99,16 @@ def test_bench_validate_and_parse(benchmark, bench_sink, bench_record):
             _ = sink._validate_and_parse(record.copy())
 
     benchmark(run_validate_and_parse)
+
+
+def test_bench_validate_record_with_schema(benchmark, bench_sink, bench_record):
+    """Run benchmark for Sink._validator method validate."""
+    number_of_runs = 1000
+
+    sink: BatchSinkMock = bench_sink
+
+    def run_validate_record_with_schema():
+        for record in itertools.repeat(bench_record, number_of_runs):
+            sink._validator.validate(record)
+
+    benchmark(run_validate_record_with_schema)
