@@ -322,7 +322,7 @@ class Sink(metaclass=abc.ABCMeta):
         try:
             self._validator(record)
         except fastjsonschema.JsonSchemaValueException as e:
-            self.logger.debug("Record Message Validation Error: %s", e.message)
+            self.logger.info("Record Message Validation Error: %s", e.message)
         self._parse_timestamps_in_record(
             record=record,
             schema=self.schema,
