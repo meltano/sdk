@@ -12,7 +12,7 @@ from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
 
-from dateutil import parser
+from backports.datetime_fromisoformat import MonkeyPatch
 from jsonschema import Draft7Validator, FormatChecker
 
 from singer_sdk.exceptions import MissingKeyPropertiesError
@@ -91,6 +91,7 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_dupe_records_merged: int = 0
 
         self._validator = Draft7Validator(schema, format_checker=FormatChecker())
+        MonkeyPatch.patch_fromisoformat()
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return an empty dictionary by default.
@@ -374,8 +375,8 @@ class Sink(metaclass=abc.ABCMeta):
                 date_val = value
                 try:
                     if value is not None:
-                        date_val = parser.parse(date_val)
-                except parser.ParserError as ex:
+                        date_val = datetime.datetime.fromisoformat(date_val)
+                except ValueError as ex:
                     date_val = handle_invalid_timestamp_in_record(
                         record,
                         [key],
