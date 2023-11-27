@@ -2590,4 +2590,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.7.1,<4"
-content-hash = "02a40567252eaf857c8280c55fdd420c816ec2f4589f331ed7a8168f1b708055"
+content-hash = "34ce3dd7949cb103c5402241e56df1316fc215c9f31da078f61be964c100f43a"
