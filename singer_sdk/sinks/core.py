@@ -6,13 +6,13 @@ import abc
 import copy
 import datetime
 import json
+import sys
 import time
 import typing as t
 from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
 
-from backports.datetime_fromisoformat import MonkeyPatch
 from jsonschema import Draft7Validator
 
 from singer_sdk.exceptions import MissingKeyPropertiesError
@@ -33,6 +33,9 @@ if t.TYPE_CHECKING:
     from logging import Logger
 
     from singer_sdk.target_base import Target
+
+if sys.version_info < (3, 11):
+    from backports.datetime_fromisoformat import MonkeyPatch
 
 JSONSchemaValidator = Draft7Validator
 
@@ -93,7 +96,8 @@ class Sink(metaclass=abc.ABCMeta):
         self._validator = Draft7Validator(
             schema, format_checker=Draft7Validator.FORMAT_CHECKER
         )
-        MonkeyPatch.patch_fromisoformat()
+        if "MonkeyPatch" in sys.modules:
+            MonkeyPatch.patch_fromisoformat()
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return an empty dictionary by default.
