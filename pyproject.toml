@@ -201,6 +201,7 @@ warn_return_any = true
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
 module = [
+    "backports.datetime_fromisoformat.*",
     "bcrypt.*",
     "joblib.*",
     "pyarrow.*",
