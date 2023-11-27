@@ -96,7 +96,8 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_dupe_records_merged: int = 0
 
         self._validator = Draft7Validator(
-            schema, format_checker=Draft7Validator.FORMAT_CHECKER
+            schema,
+            format_checker=Draft7Validator.FORMAT_CHECKER,
         )
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
