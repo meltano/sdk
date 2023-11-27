@@ -81,6 +81,7 @@ fs-s3fs = {version = ">=1.1.1", optional = true}
 # Testing dependencies installed as optional 'testing' extras
 pytest = {version=">=7.2.1", optional = true}
 pytest-durations = {version = ">=1.2.0", optional = true}
+backports-datetime-fromisoformat = { version = ">=2.0.1", python = "<3.11" }
 
 [tool.poetry.extras]
 docs = [
@@ -200,12 +201,9 @@ warn_return_any = true
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
 module = [
-    "bcrypt.*",
-    "joblib.*",
-    "pyarrow.*",
+    "backports.datetime_fromisoformat.*",
+    "joblib.*",  # TODO: Remove when https://github.com/joblib/joblib/issues/1516 is shipped
     "jsonpath_ng.*",
-    "samples.*",
-    "sqlalchemy.*",
 ]
 
 [build-system]
