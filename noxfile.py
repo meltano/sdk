@@ -67,6 +67,7 @@ def mypy(session: Session) -> None:
     args = session.posargs or ["singer_sdk"]
     session.install(".")
     session.install(
+        "backports-datetime-fromisoformat",
         "mypy",
         "pytest",
         "importlib-resources",
