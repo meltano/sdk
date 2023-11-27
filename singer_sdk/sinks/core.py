@@ -375,7 +375,12 @@ class Sink(metaclass=abc.ABCMeta):
                 date_val = value
                 try:
                     if value is not None:
-                        date_val = datetime.datetime.fromisoformat(date_val)
+                        if datelike_type == "time":
+                            date_val = datetime.time.fromisoformat(date_val)
+                        elif datelike_type == "date":
+                            date_val = datetime.date.fromisoformat(date_val)
+                        else:
+                            date_val = datetime.datetime.fromisoformat(date_val)
                 except ValueError as ex:
                     date_val = handle_invalid_timestamp_in_record(
                         record,
