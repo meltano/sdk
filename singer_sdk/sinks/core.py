@@ -37,6 +37,8 @@ if t.TYPE_CHECKING:
 if sys.version_info < (3, 11):
     from backports.datetime_fromisoformat import MonkeyPatch
 
+    MonkeyPatch.patch_fromisoformat()
+
 JSONSchemaValidator = Draft7Validator
 
 
@@ -96,8 +98,6 @@ class Sink(metaclass=abc.ABCMeta):
         self._validator = Draft7Validator(
             schema, format_checker=Draft7Validator.FORMAT_CHECKER
         )
-        if "MonkeyPatch" in sys.modules:
-            MonkeyPatch.patch_fromisoformat()
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return an empty dictionary by default.
