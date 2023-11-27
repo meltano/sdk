@@ -13,7 +13,7 @@ from gzip import open as gzip_open
 from types import MappingProxyType
 
 from backports.datetime_fromisoformat import MonkeyPatch
-from jsonschema import Draft7Validator, FormatChecker
+from jsonschema import Draft7Validator
 
 from singer_sdk.exceptions import MissingKeyPropertiesError
 from singer_sdk.helpers._batch import (
@@ -90,7 +90,9 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
-        self._validator = Draft7Validator(schema, format_checker=FormatChecker())
+        self._validator = Draft7Validator(
+            schema, format_checker=Draft7Validator.FORMAT_CHECKER
+        )
         MonkeyPatch.patch_fromisoformat()
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
