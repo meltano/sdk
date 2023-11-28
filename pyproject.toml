@@ -44,7 +44,7 @@ backports-datetime-fromisoformat = { version = ">=2.0.1", python = "<3.11" }
 click = "~=8.0"
 cryptography = ">=3.4.6,<42.0.0"
 fs = ">=2.4.16"
-importlib-metadata = {version = "<7.0.0", markers = "python_version < \"3.8\""}
+importlib-metadata = {version = "<7.0.0", python = "<3.12"}
 importlib-resources = {version = ">=5.12.0", markers = "python_version < \"3.9\""}
 inflection = ">=0.5.1"
 joblib = ">=1.0.1"
@@ -82,6 +82,16 @@ sphinx-reredirects = {version = ">=0.1.1", optional = true}
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = ">=1.1.1", optional = true}
 
+# Parquet file dependencies installed as optional 'parquet' extras
+numpy = [
+    { version = "<1.22", python = "<3.8", optional = true },
+    { version = ">=1.22", python = ">=3.8", optional = true },
+]
+pyarrow = [
+    { version = ">=11", python = "<3.8", optional = true },
+    { version = ">=13", python = ">=3.8", optional = true }
+]
+
 # Testing dependencies installed as optional 'testing' extras
 pytest = {version=">=7.2.1", optional = true}
 pytest-durations = {version = ">=1.2.0", optional = true}
@@ -102,6 +112,7 @@ testing = [
     "pytest",
     "pytest-durations"
 ]
+parquet = ["numpy", "pyarrow"]
 
 [tool.poetry.group.dev.dependencies]
 coverage = [
@@ -113,10 +124,6 @@ duckdb-engine = ">=0.9.2"
 mypy = [
     { version = ">=1.0,<1.5", python = "<3.8" },
     { version = ">=1.0", python = ">=3.8" },
-]
-numpy = [
-    { version = "<1.22", python = "<3.8" },
-    { version = ">=1.22", python = ">=3.8" },
 ]
 pyarrow = [
     { version = ">=11,<13", python = "<3.8" },
@@ -217,6 +224,7 @@ module = [
     "backports.datetime_fromisoformat.*",
     "joblib.*",  # TODO: Remove when https://github.com/joblib/joblib/issues/1516 is shipped
     "jsonpath_ng.*",
+    "pyarrow.*", # TODO: Remove when https://github.com/apache/arrow/issues/32609 if implemented and released
 ]
 
 [build-system]
@@ -225,6 +233,10 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 pytest11 = { reference = "singer_sdk:testing.pytest_plugin", extras = ["testing"], type = "console" }
+
+[tool.poetry.plugins."singer_sdk.batch_encoders"]
+jsonl = "singer_sdk.contrib.batch_encoder_jsonl:JSONLinesBatcher"
+parquet = "singer_sdk.contrib.batch_encoder_parquet:ParquetBatcher"
 
 [tool.ruff]
 line-length = 88

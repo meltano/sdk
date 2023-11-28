@@ -15,7 +15,7 @@ import pendulum
 
 import singer_sdk._singerlib as singer
 from singer_sdk import metrics
-from singer_sdk.batch import JSONLinesBatcher
+from singer_sdk.batch import Batcher
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
@@ -1349,7 +1349,7 @@ class Stream(metaclass=abc.ABCMeta):
         Yields:
             A tuple of (encoding, manifest) for each batch.
         """
-        batcher = JSONLinesBatcher(
+        batcher = Batcher(
             tap_name=self.tap_name,
             stream_name=self.name,
             batch_config=batch_config,
