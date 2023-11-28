@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "sample-tap-duckdb"
+version = "0.0.0"
+description = ""
+authors = ["Edgar Ramírez Mondragón <edgar@meltano.com>"]
+license = "Apache-2.0"
+packages = [{include = "tap_duckdb"}]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.12"
+duckdb-engine = "^0.9.2"
+singer-sdk = {path = "../..", develop = true}
+
+[tool.poetry.group.dev.dependencies]
+singer-sdk = {path = "../..", develop = true, extras = ["testing"]}
+ipython = "^8.14.0"
+
+[tool.poetry.scripts]
+sample-tap-duckdb = "tap_duckdb.tap:TapDuckDB.cli"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

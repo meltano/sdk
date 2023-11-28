@@ -6,13 +6,58 @@ from dataclasses import asdict
 
 import pytest
 
-from singer_sdk.batch import JSONLinesBatcher
+from singer_sdk.batch import CSVBatcher, JSONLinesBatcher
+from singer_sdk.exceptions import (
+    UnsupportedBatchCompressionError,
+    UnsupportedBatchFormatError,
+)
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
+    BatchFileFormat,
+    CSVEncoding,
     JSONLinesEncoding,
     StorageTarget,
 )
+from singer_sdk.streams.core import Stream
+from singer_sdk.tap_base import Tap
+
+
+class DefaultBatchesStream(Stream):
+    name = "default_batches"
+    schema = {  # noqa: RUF012
+        "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "amount": {"type": "number"},
+        },
+    }
+
+    def get_records(self, _):
+        yield {"id": 1, "name": "foo", "amount": decimal.Decimal("1.23")}
+        yield {"id": 2, "name": "bar", "amount": decimal.Decimal("4.56")}
+        yield {"id": 3, "name": "baz", "amount": decimal.Decimal("7.89")}
+
+
+class CustomBatchesStream(DefaultBatchesStream):
+    name = "custom_batches"
+
+    def get_batches(self, batch_config, context=None):
+        if batch_config.encoding.format == BatchFileFormat.CSV:
+            csv_batcher = CSVBatcher(self.tap_name, self.name, batch_config)
+            records = self._sync_records(context, write_messages=False)
+            for manifest in csv_batcher.get_batches(records=records):
+                yield batch_config.encoding, manifest
+        else:
+            yield from super().get_batches(batch_config, context)
+
+
+class BatchedTap(Tap):
+    name = "tap-batched"
+    config_jsonschema = {"properties": {}}  # noqa: RUF012
+
+    def discover_streams(self):
+        return [DefaultBatchesStream(self), CustomBatchesStream(self)]
 
 
 @pytest.mark.parametrize(
@@ -125,3 +170,46 @@ def test_json_lines_batcher():
         for batch in batches
         for filepath in batch
     )
+
+
+@pytest.mark.parametrize(
+    "compression",
+    [
+        pytest.param("gzip", id="gzip"),
+        pytest.param("none", id="none"),
+    ],
+)
+def test_csv_batches(compression: str):
+    batch_config = BatchConfig(
+        encoding=CSVEncoding(compression=compression),
+        storage=StorageTarget("file:///tmp/sdk-batches"),
+        batch_size=2,
+    )
+    tap = BatchedTap()
+    streams = tap.streams
+    batches = list(streams["custom_batches"].get_batches(batch_config=batch_config))
+    assert len(batches) == 2
+
+
+def test_csv_batches_unsupported_format():
+    batch_config = BatchConfig(
+        encoding=CSVEncoding(compression="unknown"),
+        storage=StorageTarget("file:///tmp/sdk-batches"),
+        batch_size=2,
+    )
+    tap = BatchedTap()
+    streams = tap.streams
+    with pytest.raises(UnsupportedBatchCompressionError):
+        list(streams["custom_batches"].get_batches(batch_config=batch_config))
+
+
+def test_jsonl_batches_unsupported_format():
+    batch_config = BatchConfig(
+        encoding=CSVEncoding(compression="none"),
+        storage=StorageTarget("file:///tmp/sdk-batches"),
+        batch_size=2,
+    )
+    tap = BatchedTap()
+    streams = tap.streams
+    with pytest.raises(UnsupportedBatchFormatError):
+        list(streams["default_batches"].get_batches(batch_config=batch_config))
