@@ -40,6 +40,7 @@ license = "Apache-2.0"
 [tool.poetry.dependencies]
 python = ">=3.7.1,<4"
 backoff = ">=2.0.0"
+backports-datetime-fromisoformat = { version = ">=2.0.1", python = "<3.11" }
 click = "~=8.0"
 cryptography = ">=3.4.6,<42.0.0"
 fs = ">=2.4.16"
@@ -48,7 +49,10 @@ importlib-resources = {version = ">=5.12.0", markers = "python_version < \"3.9\"
 inflection = ">=0.5.1"
 joblib = ">=1.0.1"
 jsonpath-ng = ">=1.5.3"
-jsonschema = ">=4.16.0"
+jsonschema = [
+    { version = ">=4.16.0,<4.18", python = "<3.8" },
+    { version = ">=4.16.0", python = ">=3.8" },
+]
 memoization = ">=0.3.2,<0.5.0"
 packaging = ">=23.1"
 pendulum = ">=2.1.0"
@@ -81,7 +85,6 @@ fs-s3fs = {version = ">=1.1.1", optional = true}
 # Testing dependencies installed as optional 'testing' extras
 pytest = {version=">=7.2.1", optional = true}
 pytest-durations = {version = ">=1.2.0", optional = true}
-backports-datetime-fromisoformat = { version = ">=2.0.1", python = "<3.11" }
 
 [tool.poetry.extras]
 docs = [
@@ -101,25 +104,35 @@ testing = [
 ]
 
 [tool.poetry.group.dev.dependencies]
-# snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
-cookiecutter = ">=2.1.1"
-coverage = {extras = ["toml"], version = ">=7.2"}
+coverage = [
+    {extras = ["toml"], version = ">=7.2,<7.3", python = "<3.8"},
+    {extras = ["toml"], version = ">=7.2", python = ">=3.8"},
+]
 duckdb = ">=0.8.0"
 duckdb-engine = ">=0.9.2"
-mypy = ">=1.0"
+mypy = [
+    { version = ">=1.0,<1.5", python = "<3.8" },
+    { version = ">=1.0", python = ">=3.8" },
+]
 numpy = [
     { version = "<1.22", python = "<3.8" },
     { version = ">=1.22", python = ">=3.8" },
 ]
 pyarrow = [
-    { version = ">=11", python = "<3.8" },
-    { version = ">=13", python = ">=3.8" }
+    { version = ">=11,<13", python = "<3.8" },
+    { version = ">=11", python = ">=3.8" }
 ]
 pytest-benchmark = ">=4.0.0"
 pytest-snapshot = ">=0.9.0"
 requests-mock = ">=1.10.0"
-time-machine = ">=2.10.0"
-types-jsonschema = ">=4.17.0.6"
+time-machine = [
+    { version = ">=2.10.0,<2.11", python = "<3.8" },
+    { version = ">=2.10.0", python = ">=3.8" },
+]
+types-jsonschema = [
+    { version = ">=4.17.0.6,<4.18", python = "<3.8" },
+    { version = ">=4.17.0.6", python = ">=3.8" },
+]
 types-python-dateutil = ">=2.8.19"
 types-pytz = ">=2022.7.1.2"
 types-requests = ">=2.28.11"
@@ -134,7 +147,7 @@ pytest-codspeed = ">=2.2.0"
 exclude = ".*simpleeval.*"
 
 [tool.pytest.ini_options]
-addopts = '-vvv --ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
+addopts = '--ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
 markers = [
     "external: Tests relying on external resources",
     "windows: Tests that only run on Windows",

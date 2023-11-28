@@ -49,19 +49,10 @@ test_dependencies = [
     "pyarrow",
     "requests-mock",
     "time-machine",
-    # Cookiecutter tests
-    "black",
-    "cookiecutter",
-    "PyYAML",
-    "darglint",
-    "flake8",
-    "flake8-annotations",
-    "flake8-docstrings",
-    "mypy",
 ]
 
 
-@session(python=python_versions)
+@session(python=main_python_version)
 def mypy(session: Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
@@ -104,7 +95,6 @@ def tests(session: Session) -> None:
             "--parallel",
             "-m",
             "pytest",
-            "-v",
             "--durations=10",
             "--benchmark-skip",
             *session.posargs,
