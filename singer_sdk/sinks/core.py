@@ -526,9 +526,6 @@ class Sink(metaclass=abc.ABCMeta):
         Raises:
             NotImplementedError: If the batch file encoding is not supported.
         """
-        spec = importlib.util.find_spec("pyarrow")
-        if spec:
-            import pyarrow.parquet as pq
         file: GzipFile | t.IO
         storage: StorageTarget | None = None
 
@@ -550,7 +547,12 @@ class Sink(metaclass=abc.ABCMeta):
                     )
                     context = {"records": [json.loads(line) for line in context_file]}  # type: ignore[attr-defined]
                     self.process_batch(context)
-            elif spec and encoding.format == BatchFileFormat.PARQUET:
+            elif (
+                importlib.util.find_spec("pyarrow")
+                and encoding.format == BatchFileFormat.PARQUET
+            ):
+                import pyarrow.parquet as pq
+
                 with storage.fs(create=False) as batch_fs, batch_fs.open(
                     tail,
                     mode="rb",

@@ -109,6 +109,11 @@ def test_storage_from_url(file_url: str, root: str):
     assert target.root == root
 
 
+def test_get_unsupported_batcher():
+    with pytest.raises(ValueError, match="Unsupported batcher"):
+        Batcher.get_batcher("unsupported")
+
+
 @pytest.mark.parametrize(
     "file_url,expected",
     [

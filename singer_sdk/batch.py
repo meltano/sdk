@@ -12,9 +12,10 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers._batch import BatchConfig
 
 _T = t.TypeVar("_T")
+_B = t.TypeVar("_B", bound="BaseBatcher")
 
 
-def __getattr__(name: str) -> t.Any:  # noqa: ANN401
+def __getattr__(name: str) -> t.Any:  # noqa: ANN401 # pragma: no cover
     if name == "JSONLinesBatcher":
         warnings.warn(
             "The class JSONLinesBatcher was moved to singer_sdk.contrib.batch_encoder_jsonl.",  # noqa: E501
@@ -98,23 +99,35 @@ class Batcher(BaseBatcher):
 
         Returns:
             A list of file paths (called a manifest).
-
-        Raises:
-            ValueError: If unsupported format given.
         """
         encoding_format = self.batch_config.encoding.format
-        plugins = entry_points(group="singer_sdk.batch_encoders")
-
-        try:
-            plugin = next(filter(lambda x: x.name == encoding_format, plugins))
-        except StopIteration:
-            message = f"Unsupported batch format: {encoding_format}"
-            raise ValueError(message) from None
-
-        batcher_type: type[Batcher] = plugin.load()
+        batcher_type: type[BaseBatcher] = self.get_batcher(encoding_format)
         batcher = batcher_type(
             self.tap_name,
             self.stream_name,
             self.batch_config,
         )
         return batcher.get_batches(records)
+
+    @classmethod
+    def get_batcher(cls, name: str) -> type[_B]:
+        """Get a batcher by name.
+
+        Args:
+            name: The name of the batcher.
+
+        Returns:
+            The batcher class.
+
+        Raises:
+            ValueError: If the batcher is not found.
+        """
+        plugins = entry_points(group="singer_sdk.batch_encoders")
+
+        try:
+            plugin = next(filter(lambda x: x.name == name, plugins))
+        except StopIteration:
+            message = f"Unsupported batcher: {name}"
+            raise ValueError(message) from None
+
+        return plugin.load()
