@@ -64,7 +64,7 @@ REPLICATION_LOG_BASED = "LOG_BASED"
 FactoryType = t.TypeVar("FactoryType", bound="Stream")
 
 
-class Stream(metaclass=abc.ABCMeta):
+class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for tap streams."""
 
     STATE_MSG_FREQUENCY = 10000

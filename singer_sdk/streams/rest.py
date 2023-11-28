@@ -46,7 +46,7 @@ _TToken = t.TypeVar("_TToken")
 _Auth: TypeAlias = t.Callable[[requests.PreparedRequest], requests.PreparedRequest]
 
 
-class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
+class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for REST API streams."""
 
     _page_size: int = DEFAULT_PAGE_SIZE
@@ -99,7 +99,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         self._next_page_token_compiled_jsonpath = None
 
     @staticmethod
-    def _url_encode(val: str | datetime | bool | int | list[str]) -> str:
+    def _url_encode(val: str | datetime | bool | int | list[str]) -> str:  # noqa: FBT001
         """Encode the val argument as url-compatible string.
 
         Args:

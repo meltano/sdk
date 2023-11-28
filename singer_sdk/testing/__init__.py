@@ -27,7 +27,7 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
             stacklevel=2,
         )
 
-        from .legacy import get_standard_tap_tests
+        from .legacy import get_standard_tap_tests  # noqa: PLC0415
 
         return get_standard_tap_tests
 
@@ -40,7 +40,7 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401
             stacklevel=2,
         )
 
-        from .legacy import get_standard_target_tests
+        from .legacy import get_standard_target_tests  # noqa: PLC0415
 
         return get_standard_target_tests
 

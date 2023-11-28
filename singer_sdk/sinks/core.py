@@ -42,7 +42,7 @@ if t.TYPE_CHECKING:
 JSONSchemaValidator = Draft7Validator
 
 
-class Sink(metaclass=abc.ABCMeta):
+class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for target sinks."""
 
     # max timestamp/datetime supported, used to reset invalid dates
@@ -550,7 +550,7 @@ class Sink(metaclass=abc.ABCMeta):
                 importlib.util.find_spec("pyarrow")
                 and encoding.format == BatchFileFormat.PARQUET
             ):
-                import pyarrow.parquet as pq
+                import pyarrow.parquet as pq  # noqa: PLC0415
 
                 with storage.fs(create=False) as batch_fs, batch_fs.open(
                     tail,

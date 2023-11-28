@@ -1,4 +1,5 @@
 """Batching utilities for Singer SDK."""
+
 from __future__ import annotations
 
 import itertools
@@ -22,7 +23,9 @@ def __getattr__(name: str) -> t.Any:  # noqa: ANN401 # pragma: no cover
             stacklevel=2,
         )
 
-        from singer_sdk.contrib.batch_encoder_jsonl import JSONLinesBatcher
+        from singer_sdk.contrib.batch_encoder_jsonl import (  # noqa: PLC0415
+            JSONLinesBatcher,
+        )
 
         return JSONLinesBatcher
 

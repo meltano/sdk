@@ -223,7 +223,7 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
         super().__init__(stream=stream)
         auth_credentials = {key: value}
 
-        if location not in ["header", "params"]:
+        if location not in {"header", "params"}:
             msg = "`type` must be one of 'header' or 'params'."
             raise ValueError(msg)
 

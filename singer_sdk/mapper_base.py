@@ -56,7 +56,6 @@ class InlineMapper(PluginBase, SingerReader, SingerWriter, metaclass=abc.ABCMeta
         Args:
             message_dict: A SCHEMA message JSON dictionary.
         """
-        ...
 
     @abc.abstractmethod
     def map_record_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
@@ -65,7 +64,6 @@ class InlineMapper(PluginBase, SingerReader, SingerWriter, metaclass=abc.ABCMeta
         Args:
             message_dict: A RECORD message JSON dictionary.
         """
-        ...
 
     @abc.abstractmethod
     def map_state_message(self, message_dict: dict) -> t.Iterable[singer.Message]:
@@ -74,7 +72,6 @@ class InlineMapper(PluginBase, SingerReader, SingerWriter, metaclass=abc.ABCMeta
         Args:
             message_dict: A STATE message JSON dictionary.
         """
-        ...
 
     @abc.abstractmethod
     def map_activate_version_message(
@@ -86,7 +83,6 @@ class InlineMapper(PluginBase, SingerReader, SingerWriter, metaclass=abc.ABCMeta
         Args:
             message_dict: An ACTIVATE_VERSION message JSON dictionary.
         """
-        ...
 
     def map_batch_message(
         self,

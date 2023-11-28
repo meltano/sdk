@@ -68,7 +68,6 @@ class AboutFormatter(abc.ABC):
         Args:
             about_info: About information.
         """
-        ...
 
 
 class TextFormatter(AboutFormatter, format_name="text"):

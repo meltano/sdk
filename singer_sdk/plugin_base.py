@@ -109,7 +109,7 @@ class SingerCommand(click.Command):
             sys.exit(1)
 
 
-class PluginBase(metaclass=abc.ABCMeta):
+class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for taps."""
 
     #: The executable name of the tap or target plugin. e.g. tap-foo

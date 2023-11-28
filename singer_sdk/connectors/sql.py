@@ -24,7 +24,7 @@ if t.TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
 
 
-class SQLConnector:
+class SQLConnector:  # noqa: PLR0904
     """Base class for SQLAlchemy-based connectors.
 
     The connector class serves as a wrapper around the SQL connection.

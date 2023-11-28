@@ -524,7 +524,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         required: bool = False,  # noqa: FBT001, FBT002
         default: T | None = None,
         description: str | None = None,
-        secret: bool | None = False,  # noqa: FBT002
+        secret: bool | None = False,  # noqa: FBT002, FBT001
         allowed_values: list[T] | None = None,
         examples: list[T] | None = None,
     ) -> None:

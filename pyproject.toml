@@ -234,6 +234,7 @@ parquet = "singer_sdk.contrib.batch_encoder_parquet:ParquetBatcher"
 
 [tool.ruff]
 line-length = 88
+preview = true
 src = ["samples", "singer_sdk", "tests"]
 target-version = "py37"
 
@@ -243,11 +244,12 @@ exclude = [
     "*simpleeval*",
 ]
 ignore = [
-    "ANN101",  # Missing type annotation for `self` in method
-    "ANN102",  # Missing type annotation for `cls` in class method
-    "N818",    # Exception name should be named with an Error suffix
-    "COM812",  # missing-trailing-comma
-    "ISC001",  # single-line-implicit-string-concatenation
+    "ANN101",   # Missing type annotation for `self` in method
+    "ANN102",   # Missing type annotation for `cls` in class method
+    "N818",     # Exception name should be named with an Error suffix
+    "COM812",   # missing-trailing-comma
+    "ISC001",   # single-line-implicit-string-concatenation
+    "PLR6301",  # Method {method_name} could be a function, class method, or static method
 ]
 select = [
     "F",    # Pyflakes
@@ -294,6 +296,8 @@ select = [
     "PLR",  # pylint (refactor)
     "PLW",  # pylint (warning)
     "PERF", # perflint
+    "FURB", # refurb
+    "LOG",  # flake8-logging
     "RUF",  # ruff
 ]
 unfixable = [

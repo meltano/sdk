@@ -138,7 +138,6 @@ class Meter(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __enter__(self) -> Meter:
         """Enter the meter context."""
-        ...
 
     @abc.abstractmethod
     def __exit__(
@@ -154,7 +153,6 @@ class Meter(metaclass=abc.ABCMeta):
             exc_val: The exception value.
             exc_tb: The exception traceback.
         """
-        ...
 
 
 class Counter(Meter):

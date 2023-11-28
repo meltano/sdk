@@ -146,7 +146,6 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
             The next page token or index. Return `None` from this method to indicate
                 the end of pagination.
         """
-        ...
 
 
 class SinglePagePaginator(BaseAPIPaginator[None]):
@@ -234,7 +233,6 @@ class BaseHATEOASPaginator(
         Args:
             response: API response object.
         """
-        ...
 
     def get_next(self, response: Response) -> ParseResult | None:
         """Get the next pagination token or index from the API response.
@@ -347,7 +345,6 @@ class BasePageNumberPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
             Boolean flag used to indicate if the endpoint has more pages.
 
         """
-        ...
 
     def get_next(self, response: Response) -> int | None:  # noqa: ARG002
         """Get the next page number.
@@ -392,7 +389,6 @@ class BaseOffsetPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         Returns:
             Boolean flag used to indicate if the endpoint has more pages.
         """
-        ...
 
     def get_next(self, response: Response) -> int | None:  # noqa: ARG002
         """Get the next page offset.
@@ -420,7 +416,6 @@ class LegacyPaginatedStreamProtocol(Protocol[TPageToken]):
             response: API response object.
             previous_token: Previous page token.
         """
-        ...  # pragma: no cover
 
 
 class LegacyStreamPaginator(

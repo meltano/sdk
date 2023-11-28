@@ -149,7 +149,7 @@ class TapTestRunner(SingerTestRunner):
         Args:
             kwargs: Unused keyword arguments.
         """
-        stdout, stderr = self._execute_sync()
+        stdout, _stderr = self._execute_sync()
         messages = self._clean_sync_output(stdout)
         self._parse_records(messages)
 

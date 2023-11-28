@@ -25,8 +25,8 @@ class ParquetBatcher(BaseBatcher):
         Yields:
             A list of file paths (called a manifest).
         """
-        import pyarrow as pa
-        import pyarrow.parquet as pq
+        import pyarrow as pa  # noqa: PLC0415
+        import pyarrow.parquet as pq  # noqa: PLC0415
 
         sync_id = f"{self.tap_name}--{self.stream_name}-{uuid4()}"
         prefix = self.batch_config.storage.prefix or ""
