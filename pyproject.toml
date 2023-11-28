@@ -48,10 +48,7 @@ importlib-resources = {version = ">=5.12.0", markers = "python_version < \"3.9\"
 inflection = ">=0.5.1"
 joblib = ">=1.0.1"
 jsonpath-ng = ">=1.5.3"
-jsonschema = [
-    { version = ">=4.16.0,<4.18", python = "<3.8" },
-    { version = ">=4.16.0", python = ">=3.8" },
-]
+jsonschema = { version = ">=4.16.0", python = ">=3.8" }
 memoization = ">=0.3.2,<0.5.0"
 msgspec = "^0.18.4"
 packaging = ">=23.1"
@@ -83,14 +80,8 @@ sphinx-reredirects = {version = ">=0.1.1", optional = true}
 fs-s3fs = {version = ">=1.1.1", optional = true}
 
 # Parquet file dependencies installed as optional 'parquet' extras
-numpy = [
-    { version = "<1.22", python = "<3.8", optional = true },
-    { version = ">=1.22", python = ">=3.8", optional = true },
-]
-pyarrow = [
-    { version = ">=11", python = "<3.8", optional = true },
-    { version = ">=13", python = ">=3.8", optional = true }
-]
+numpy = { version = ">=1.22", python = ">=3.8", optional = true }
+pyarrow = { version = ">=13", python = ">=3.8", optional = true }
 
 # Testing dependencies installed as optional 'testing' extras
 pytest = {version=">=7.2.1", optional = true}
@@ -132,14 +123,8 @@ pyarrow = [
 pytest-benchmark = ">=4.0.0"
 pytest-snapshot = ">=0.9.0"
 requests-mock = ">=1.10.0"
-time-machine = [
-    { version = ">=2.10.0,<2.11", python = "<3.8" },
-    { version = ">=2.10.0", python = ">=3.8" },
-]
-types-jsonschema = [
-    { version = ">=4.17.0.6,<4.18", python = "<3.8" },
-    { version = ">=4.17.0.6", python = ">=3.8" },
-]
+time-machine = { version = ">=2.10.0", python = ">=3.8" }
+types-jsonschema ={ version = ">=4.17.0.6", python = ">=3.8" }
 types-python-dateutil = ">=2.8.19"
 types-pytz = ">=2022.7.1.2"
 types-requests = ">=2.28.11"

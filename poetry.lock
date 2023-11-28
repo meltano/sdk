@@ -2485,11 +2485,11 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 
 [extras]
 docs = ["furo", "myst-parser", "sphinx", "sphinx-autobuild", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-notfound-page", "sphinx-reredirects"]
-parquet = ["numpy", "numpy", "pyarrow", "pyarrow"]
+parquet = ["numpy", "pyarrow"]
 s3 = ["fs-s3fs"]
 testing = ["pytest", "pytest-durations"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "<4,>=3.8"
-content-hash = "49f64ad0319fca91d3b045b325e58ed581aea3811886a5ec95cc377307c2e5f9"
+content-hash = "9e9f34f7184571564a1ec39e8337d6fcb9965f222d45d06a72ae07dab2bca1fc"
