@@ -56,7 +56,7 @@ test_dependencies = [
 def mypy(session: Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
-    session.install(".")
+    session.install(".[s3,testing,parquet]")
     session.install(
         "mypy",
         "pytest",
