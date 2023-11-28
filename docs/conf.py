@@ -26,7 +26,7 @@ copyright = "2021, Meltano Core Team and Contributors"  # noqa: A001
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.33.1"
+release = "0.34.0b1"
 
 
 # -- General configuration ---------------------------------------------------
