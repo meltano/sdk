@@ -1,0 +1,1 @@
+"""Singer SDK contrib modules."""

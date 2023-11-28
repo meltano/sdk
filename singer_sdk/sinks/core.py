@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import copy
 import datetime
+import importlib.util
 import json
 import sys
 import time
@@ -539,15 +540,24 @@ class Sink(metaclass=abc.ABCMeta):
                     tail,
                     mode="rb",
                 ) as file:
-                    open_file = (
+                    context_file = (
                         gzip_open(file) if encoding.compression == "gzip" else file
                     )
-                    context = {
-                        "records": [
-                            json.loads(line)
-                            for line in open_file  # type: ignore[attr-defined]
-                        ],
-                    }
+                    context = {"records": [json.loads(line) for line in context_file]}  # type: ignore[attr-defined]
+                    self.process_batch(context)
+            elif (
+                importlib.util.find_spec("pyarrow")
+                and encoding.format == BatchFileFormat.PARQUET
+            ):
+                import pyarrow.parquet as pq
+
+                with storage.fs(create=False) as batch_fs, batch_fs.open(
+                    tail,
+                    mode="rb",
+                ) as file:
+                    context_file = file
+                    table = pq.read_table(context_file)
+                    context = {"records": table.to_pylist()}
                     self.process_batch(context)
             else:
                 msg = f"Unsupported batch encoding format: {encoding.format}"
