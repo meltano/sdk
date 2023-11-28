@@ -36,7 +36,7 @@ def path_to_target_db(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def sqlite_target_test_config(path_to_target_db: str) -> dict:
+def sqlite_target_test_config(path_to_target_db: Path) -> dict:
     """Get configuration dictionary for target-csv."""
     return {"path_to_db": str(path_to_target_db)}
 

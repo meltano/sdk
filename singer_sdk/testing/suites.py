@@ -42,17 +42,17 @@ from .target_tests import (
     TargetSchemaUpdates,
     TargetSpecialCharsInAttributes,
 )
+from .templates import TestTemplate
 
-if t.TYPE_CHECKING:
-    from .templates import TapTestTemplate, TargetTestTemplate, TestTemplate
+T = t.TypeVar("T", bound=TestTemplate)
 
 
 @dataclass
-class TestSuite:
+class TestSuite(t.Generic[T]):
     """Test Suite container class."""
 
     kind: str
-    tests: list[type[TestTemplate] | type[TapTestTemplate] | type[TargetTestTemplate]]
+    tests: list[type[T]]
 
 
 # Tap Test Suites

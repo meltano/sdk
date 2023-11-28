@@ -55,7 +55,7 @@ python-dotenv = ">=0.20,<0.22"
 pytz = ">=2022.2.1,<2024.0.0"
 PyYAML = ">=6.0"
 requests = ">=2.25.1"
-simpleeval = "^0.9.13"
+simpleeval = ">=0.9.13"
 simplejson = ">=3.17.6"
 sqlalchemy = ">=1.4,<3.0"
 typing-extensions = ">=4.2.0"
@@ -70,7 +70,7 @@ sphinx-copybutton = {version = ">=0.3.1", optional = true}
 myst-parser = {version = ">=1", optional = true}
 sphinx-autobuild = {version = ">=2021.3.14", optional = true}
 sphinx-inline-tabs = {version = ">=2023.4.21", optional = true, markers = "python_version >= \"3.8\""}
-sphinx-notfound-page = {version = "^1.0.0", optional = true, python = ">=3.8"}
+sphinx-notfound-page = {version = ">=1.0.0", optional = true, python = ">=3.8"}
 sphinx-reredirects = {version = ">=0.1.1", optional = true}
 
 # File storage dependencies installed as optional 'filesystem' extras
@@ -79,6 +79,7 @@ fs-s3fs = {version = ">=1.1.1", optional = true}
 # Testing dependencies installed as optional 'testing' extras
 pytest = {version=">=7.2.1", optional = true}
 pytest-durations = {version = ">=1.2.0", optional = true}
+backports-datetime-fromisoformat = { version = ">=2.0.1", python = "<3.11" }
 msgspec = "^0.18.4"
 
 [tool.poetry.extras]
@@ -113,7 +114,7 @@ pyarrow = [
     { version = "<=12", python = "<3.8" },
     { version = ">=13", python = ">=3.8" }
 ]
-pytest-benchmark = "^4.0.0"
+pytest-benchmark = ">=4.0.0"
 pytest-snapshot = ">=0.9.0"
 requests-mock = ">=1.10.0"
 time-machine = ">=2.10.0"
@@ -126,7 +127,7 @@ types-PyYAML = ">=6.0.12"
 xdoctest = ">=1.1.1"
 
 [tool.poetry.group.benchmark.dependencies]
-pytest-codspeed = "^2.2.0"
+pytest-codspeed = ">=2.2.0"
 
 [tool.black]
 exclude = ".*simpleeval.*"
@@ -199,12 +200,9 @@ warn_return_any = true
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
 module = [
-    "bcrypt.*",
-    "joblib.*",
-    "pyarrow.*",
+    "backports.datetime_fromisoformat.*",
+    "joblib.*",  # TODO: Remove when https://github.com/joblib/joblib/issues/1516 is shipped
     "jsonpath_ng.*",
-    "samples.*",
-    "sqlalchemy.*",
 ]
 
 [build-system]

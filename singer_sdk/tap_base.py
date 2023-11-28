@@ -122,10 +122,10 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         Returns:
             A mapping of names to streams, using discovery or a provided catalog.
         """
-        input_catalog = self.input_catalog
-
         if self._streams is None:
             self._streams = {}
+            input_catalog = self.input_catalog
+
             for stream in self.load_streams():
                 if input_catalog is not None:
                     stream.apply_catalog(input_catalog)
