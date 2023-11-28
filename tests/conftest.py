@@ -53,7 +53,7 @@ def pytest_report_header() -> list[str]:
 
 @pytest.fixture(scope="class")
 def outdir() -> t.Generator[str, None, None]:
-    """Create a temporary directory for cookiecutters and target output."""
+    """Create a temporary directory for target output."""
     name = ".output/"
     try:
         pathlib.Path(name).mkdir(parents=True)
