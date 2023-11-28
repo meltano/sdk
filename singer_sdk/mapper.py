@@ -13,7 +13,7 @@ import hashlib
 import logging
 import typing as t
 
-import simpleeval  # type: ignore[import]
+import simpleeval  # type: ignore[import-untyped]
 
 import singer_sdk.typing as th
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError

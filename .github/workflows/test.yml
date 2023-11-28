@@ -40,6 +40,7 @@ jobs:
     name: "Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }} / SQLAlchemy: ${{ matrix.sqlalchemy }}"
     runs-on: ${{ matrix.os }}
     env:
+      NOXPYTHON: ${{ matrix.python-version }}
       NOXSESSION: ${{ matrix.session }}
     strategy:
       fail-fast: false
@@ -93,7 +94,7 @@ jobs:
       env:
         SQLALCHEMY_VERSION: ${{ matrix.sqlalchemy }}
       run: |
-        nox --python=${{ matrix.python-version }}
+        nox --verbose
 
     - name: Upload coverage data
       if: always() && (matrix.session == 'tests')
