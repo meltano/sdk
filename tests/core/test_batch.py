@@ -4,11 +4,12 @@ import decimal
 import importlib.util
 import re
 from dataclasses import asdict
-from unittest.mock import patch
 
 import pytest
 
-from singer_sdk.batch import Batcher, JSONLinesBatcher, ParquetBatcher
+from singer_sdk.batch import Batcher
+from singer_sdk.contrib.batch_encoder_jsonl import JSONLinesBatcher
+from singer_sdk.contrib.batch_encoder_parquet import ParquetBatcher
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
@@ -244,44 +245,3 @@ def test_batcher_with_parquet_encoding():
         for batch in batches
         for filepath in batch
     )
-
-
-@patch("singer_sdk.batch._is_pyarrow_available", return_value=False)
-def test_batcher_with_parquet_encoding_raises_import_error_when_no_pyarrow(
-    mock_is_pyarrow_available,
-):
-    del mock_is_pyarrow_available
-    records = [
-        {"id": 1, "numeric": decimal.Decimal("1.0")},
-        {"id": 2, "numeric": decimal.Decimal("2.0")},
-        {"id": 3, "numeric": decimal.Decimal("3.0")},
-    ]
-    with pytest.raises(ImportError) as exc_info:
-        Batcher(
-            "tap-test",
-            "stream-test",
-            batch_config=BatchConfig(
-                encoding=ParquetEncoding("gzip"),
-                storage=StorageTarget("file:///tmp/sdk-batches"),
-                batch_size=2,
-            ),
-        ).get_batches(records)
-
-    assert "The 'pyarrow' package is required" in str(exc_info.value)
-
-
-@patch("singer_sdk.batch._is_pyarrow_available", return_value=False)
-def test_parquet_batcher_import_error(mock_is_pyarrow_available):
-    del mock_is_pyarrow_available
-    with pytest.raises(ImportError) as exc_info:
-        ParquetBatcher(
-            "tap-test",
-            "stream-test",
-            batch_config=BatchConfig(
-                encoding=ParquetEncoding("gzip"),
-                storage=StorageTarget("file:///tmp/sdk-batches"),
-                batch_size=2,
-            ),
-        )
-
-    assert "The 'pyarrow' package is required" in str(exc_info.value)

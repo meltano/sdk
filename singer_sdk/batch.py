@@ -1,20 +1,33 @@
 """Batching utilities for Singer SDK."""
 from __future__ import annotations
 
-import gzip
-import importlib.util
 import itertools
-import json
 import typing as t
+import warnings
 from abc import ABC, abstractmethod
-from uuid import uuid4
 
-from singer_sdk.helpers._batch import BatchFileFormat
+from singer_sdk.helpers._compat import entry_points
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._batch import BatchConfig
 
 _T = t.TypeVar("_T")
+
+
+def __getattr__(name: str) -> t.Any:  # noqa: ANN401
+    if name == "JSONLinesBatcher":
+        warnings.warn(
+            "The class JSONLinesBatcher was moved to singer_sdk.contrib.batch_encoder_jsonl.",  # noqa: E501
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+        from singer_sdk.contrib.batch_encoder_jsonl import JSONLinesBatcher
+
+        return JSONLinesBatcher
+
+    msg = f"module {__name__} has no attribute {name}"
+    raise AttributeError(msg)
 
 
 def lazy_chunked_generator(
@@ -74,116 +87,6 @@ class BaseBatcher(ABC):
         raise NotImplementedError
 
 
-class JSONLinesBatcher(BaseBatcher):
-    """JSON Lines Record Batcher."""
-
-    def get_batches(
-        self,
-        records: t.Iterator[dict],
-    ) -> t.Iterator[list[str]]:
-        """Yield manifest of batches.
-
-        Args:
-            records: The records to batch.
-
-        Yields:
-            A list of file paths (called a manifest).
-        """
-        sync_id = f"{self.tap_name}--{self.stream_name}-{uuid4()}"
-        prefix = self.batch_config.storage.prefix or ""
-
-        for i, chunk in enumerate(
-            lazy_chunked_generator(
-                records,
-                self.batch_config.batch_size,
-            ),
-            start=1,
-        ):
-            filename = f"{prefix}{sync_id}-{i}.json.gz"
-            with self.batch_config.storage.fs(create=True) as fs:
-                # TODO: Determine compression from config.
-                with fs.open(filename, "wb") as f, gzip.GzipFile(
-                    fileobj=f,
-                    mode="wb",
-                ) as gz:
-                    gz.writelines(
-                        (json.dumps(record, default=str) + "\n").encode()
-                        for record in chunk
-                    )
-                file_url = fs.geturl(filename)
-            yield [file_url]
-
-
-def _is_pyarrow_available() -> bool:
-    return importlib.util.find_spec("pyarrow") is not None
-
-
-class ParquetBatcher(BaseBatcher):
-    """Parquet Record Batcher."""
-
-    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
-        """Creates a ParquetBatcher instance if pyarrow is available.
-
-        Args:
-            args: Class constructor positional arguments.
-            kwargs: Class constructor keyword arguments.
-
-        Raises:
-            ImportError: If pyarrow is missing.
-        """
-        self.is_pyarrow_available = _is_pyarrow_available()
-        if self.is_pyarrow_available:
-            super().__init__(*args, **kwargs)
-        else:
-            err = """The 'pyarrow' package is required to use the 'ParquetBatcher'
-                class. Please install it by running 'poetry install -E pyarrow'."""
-            raise ImportError(
-                err,
-            )
-
-    def get_batches(
-        self,
-        records: t.Iterator[dict],
-    ) -> t.Iterator[list[str]]:
-        """Yield manifest of batches.
-
-        Args:
-            records: The records to batch.
-
-        Yields:
-            A list of file paths (called a manifest).
-        """
-        if not self.is_pyarrow_available:
-            return
-        import pyarrow as pa
-        import pyarrow.parquet as pq
-
-        sync_id = f"{self.tap_name}--{self.stream_name}-{uuid4()}"
-        prefix = self.batch_config.storage.prefix or ""
-
-        for i, chunk in enumerate(
-            lazy_chunked_generator(
-                records,
-                self.batch_config.batch_size,
-            ),
-            start=1,
-        ):
-            filename = f"{prefix}{sync_id}={i}.parquet"
-            if self.batch_config.encoding.compression == "gzip":
-                filename = f"{filename}.gz"
-            with self.batch_config.storage.fs() as fs:
-                with fs.open(filename, "wb") as f:
-                    pylist = list(chunk)
-                    table = pa.Table.from_pylist(pylist)
-                    if self.batch_config.encoding.compression == "gzip":
-                        pq.write_table(table, f, compression="GZIP")
-                    else:
-                        pq.write_table(table, f)
-
-                file_url = fs.geturl(filename)
-            yield [file_url]
-
-
 class Batcher(BaseBatcher):
     """Determines batch type and then serializes batches to that format."""
 
@@ -199,24 +102,19 @@ class Batcher(BaseBatcher):
         Raises:
             ValueError: If unsupported format given.
         """
-        if self.batch_config.encoding.format == BatchFileFormat.PARQUET:
-            batches = self._batch_to_parquet(records)
-        elif self.batch_config.encoding.format == BatchFileFormat.JSONL:
-            batches = self._batch_to_jsonl(records)
-        else:
-            raise ValueError(self.batch_config.encoding.format)
-        return batches
+        encoding_format = self.batch_config.encoding.format
+        plugins = entry_points(group="singer_sdk.batch_encoders")
 
-    def _batch_to_jsonl(self, records: t.Iterator[dict]) -> t.Iterator[list[str]]:
-        return JSONLinesBatcher(
-            tap_name=self.tap_name,
-            stream_name=self.stream_name,
-            batch_config=self.batch_config,
-        ).get_batches(records)
+        try:
+            plugin = next(filter(lambda x: x.name == encoding_format, plugins))
+        except StopIteration:
+            message = f"Unsupported batch format: {encoding_format}"
+            raise ValueError(message) from None
 
-    def _batch_to_parquet(self, records: t.Iterator[dict]) -> t.Iterator[list[str]]:
-        return ParquetBatcher(
-            tap_name=self.tap_name,
-            stream_name=self.stream_name,
-            batch_config=self.batch_config,
-        ).get_batches(records)
+        batcher_type: type[Batcher] = plugin.load()
+        batcher = batcher_type(
+            self.tap_name,
+            self.stream_name,
+            self.batch_config,
+        )
+        return batcher.get_batches(records)
