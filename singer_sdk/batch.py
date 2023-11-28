@@ -12,7 +12,6 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers._batch import BatchConfig
 
 _T = t.TypeVar("_T")
-_B = t.TypeVar("_B", bound="BaseBatcher")
 
 
 def __getattr__(name: str) -> t.Any:  # noqa: ANN401 # pragma: no cover
@@ -101,7 +100,7 @@ class Batcher(BaseBatcher):
             A list of file paths (called a manifest).
         """
         encoding_format = self.batch_config.encoding.format
-        batcher_type: type[BaseBatcher] = self.get_batcher(encoding_format)
+        batcher_type = self.get_batcher(encoding_format)
         batcher = batcher_type(
             self.tap_name,
             self.stream_name,
@@ -110,7 +109,7 @@ class Batcher(BaseBatcher):
         return batcher.get_batches(records)
 
     @classmethod
-    def get_batcher(cls, name: str) -> type[_B]:
+    def get_batcher(cls, name: str) -> type[BaseBatcher]:
         """Get a batcher by name.
 
         Args:
@@ -130,4 +129,4 @@ class Batcher(BaseBatcher):
             message = f"Unsupported batcher: {name}"
             raise ValueError(message) from None
 
-        return plugin.load()
+        return plugin.load()  # type: ignore[no-any-return]
