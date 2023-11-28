@@ -18,6 +18,8 @@ def test_validate_record():
             "properties": {
                 "id": {"type": "integer"},
                 "created_at": {"type": "string", "format": "date-time"},
+                "created_at_date": {"type": "string", "format": "date"},
+                "created_at_time": {"type": "string", "format": "time"},
                 "invalid_datetime": {"type": "string", "format": "date-time"},
             },
         },
@@ -27,6 +29,8 @@ def test_validate_record():
     record = {
         "id": 1,
         "created_at": "2021-01-01T00:00:00+00:00",
+        "created_at_date": "2021-01-01",
+        "created_at_time": "00:01:00+00:00",
         "missing_datetime": "2021-01-01T00:00:00+00:00",
         "invalid_datetime": "not a datetime",
     }
@@ -38,6 +42,16 @@ def test_validate_record():
         1,
         0,
         0,
+        tzinfo=datetime.timezone.utc,
+    )
+    assert updated_record["created_at_date"] == datetime.date(
+        2021,
+        1,
+        1,
+    )
+    assert updated_record["created_at_time"] == datetime.time(
+        0,
+        1,
         tzinfo=datetime.timezone.utc,
     )
     assert updated_record["missing_datetime"] == "2021-01-01T00:00:00+00:00"
