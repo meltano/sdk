@@ -51,7 +51,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             A CatalogEntry object.
         """
-        return t.cast(CatalogEntry, CatalogEntry.from_dict(self.catalog_entry))
+        return CatalogEntry.from_dict(self.catalog_entry)
 
     @property
     def connector(self) -> SQLConnector:
