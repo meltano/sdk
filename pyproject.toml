@@ -225,6 +225,7 @@ warn_unused_ignores = true
 ignore_missing_imports = true
 module = [
     "backports.datetime_fromisoformat.*",
+    "fastjsonschema.*",
     "joblib.*",  # TODO: Remove when https://github.com/joblib/joblib/issues/1516 is shipped
     "jsonpath_ng.*",
     "pyarrow.*", # TODO: Remove when https://github.com/apache/arrow/issues/32609 if implemented and released
