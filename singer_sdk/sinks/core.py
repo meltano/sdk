@@ -49,6 +49,8 @@ class Sink(metaclass=abc.ABCMeta):
     logger: Logger
 
     MAX_SIZE_DEFAULT = 10000
+    CHECK_RECORD_FORMATS = False
+    record_validator = fastjsonschema
 
     def __init__(
         self,
@@ -94,7 +96,31 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
-        self._validator = fastjsonschema.compile(schema)
+        self._validator = self.record_validator.compile(
+            schema,
+            formats=self.get_validator_formats(),
+            use_formats=self.CHECK_RECORD_FORMATS,
+        )
+
+    def get_validator_formats(self) -> dict:
+        """Get formats for JSON schema validator.
+
+        Override this method to add custom string format checkers to the JSON schema
+        validator.
+        This is useful when, for example, the target requires a specific format for a
+        date or datetime field.
+
+        Example:
+            .. validate = fastjsonschema.compile(definition, formats={
+                    'foo': r'foo|bar',
+                    'bar': lambda value: value in ('foo', 'bar'),
+                })
+
+        Returns:
+            A dictionary containing regex strings and callables
+                https://horejsek.github.io/python-fastjsonschema/
+        """
+        return {}
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return an empty dictionary by default.
