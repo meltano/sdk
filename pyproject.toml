@@ -214,9 +214,10 @@ fail_under = 82
 exclude = "tests"
 files = "singer_sdk"
 python_version = "3.8"
+warn_redundant_casts = true
+warn_return_any = true
 warn_unused_configs = true
 warn_unused_ignores = true
-warn_return_any = true
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
