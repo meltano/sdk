@@ -38,8 +38,8 @@ license = "Apache-2.0"
 "Youtube" = "https://www.youtube.com/meltano"
 
 [tool.poetry.dependencies]
-python = ">=3.7.1,<4"
-backoff = ">=2.0.0"
+python = ">=3.7.1"
+backoff = { version = ">=2.0.0", python = "<4" }
 backports-datetime-fromisoformat = { version = ">=2.0.1", python = "<3.11" }
 click = "~=8.0"
 cryptography = ">=3.4.6,<42.0.0"
@@ -54,10 +54,11 @@ jsonschema = [
     { version = ">=4.16.0,<4.18", python = "<3.8" },
     { version = ">=4.16.0", python = ">=3.8" },
 ]
-memoization = ">=0.3.2,<0.5.0"
+memoization = { version = ">=0.3.2,<0.5.0", python = "<4" }
 packaging = ">=23.1"
 pendulum = ">=2.1.0"
 PyJWT = "~=2.4"
+python-dateutil = ">=2.8.2"
 python-dotenv = ">=0.20,<0.22"
 pytz = ">=2022.2.1,<2024.0.0"
 PyYAML = ">=6.0"
@@ -215,9 +216,10 @@ fail_under = 82
 exclude = "tests"
 files = "singer_sdk"
 python_version = "3.8"
+warn_redundant_casts = true
+warn_return_any = true
 warn_unused_configs = true
 warn_unused_ignores = true
-warn_return_any = true
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true

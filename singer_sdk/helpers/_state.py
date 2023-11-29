@@ -80,7 +80,7 @@ def _find_in_partitions_list(
             f"{{state_partition_context}}.\nMatching state values were: {found!s}"
         )
         raise ValueError(msg)
-    return t.cast(dict, found[0]) if found else None
+    return found[0] if found else None
 
 
 def _create_in_partitions_list(
