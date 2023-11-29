@@ -30,4 +30,4 @@ scopes:
   - mappers    # mappers only
   - templates  # cookiecutters
   - deps       # production dependencies
-  - deps-dev   # development depencencies (testing, linting, etc.)
+  - deps-dev   # development dependencies (testing, linting, etc.)
