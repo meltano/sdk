@@ -54,6 +54,7 @@ msgspec = "^0.18.4"
 packaging = ">=23.1"
 pendulum = ">=2.1.0"
 PyJWT = "~=2.4"
+python-dateutil = "^2.8.2"
 python-dotenv = ">=0.20,<0.22"
 pytz = ">=2022.2.1,<2024.0.0"
 PyYAML = ">=6.0"
@@ -199,9 +200,10 @@ fail_under = 82
 exclude = "tests"
 files = "singer_sdk"
 python_version = "3.8"
+warn_redundant_casts = true
+warn_return_any = true
 warn_unused_configs = true
 warn_unused_ignores = true
-warn_return_any = true
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
