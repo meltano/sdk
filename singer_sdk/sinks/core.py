@@ -102,7 +102,7 @@ class Sink(metaclass=abc.ABCMeta):
             use_formats=self.CHECK_RECORD_FORMATS,
         )
 
-    def get_validator_formats(self) -> dict:
+    def get_validator_formats(self) -> dict[str, str | t.Callable[[], bool]]:
         """Get formats for JSON schema validator.
 
         Override this method to add custom string format checkers to the JSON schema
@@ -117,8 +117,8 @@ class Sink(metaclass=abc.ABCMeta):
                 })
 
         Returns:
-            A dictionary containing regex strings and callables
-                https://horejsek.github.io/python-fastjsonschema/
+            A dictionary containing regex strings and callables.
+            See: https://horejsek.github.io/python-fastjsonschema/.
         """
         return {}
 
