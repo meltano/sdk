@@ -49,8 +49,9 @@ class Sink(metaclass=abc.ABCMeta):
     logger: Logger
 
     MAX_SIZE_DEFAULT = 10000
-    CHECK_RECORD_FORMATS = False
+
     record_validator = fastjsonschema
+    validate_field_string_format = False
 
     def __init__(
         self,
