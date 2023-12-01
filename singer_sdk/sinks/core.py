@@ -51,6 +51,8 @@ class Sink(metaclass=abc.ABCMeta):
     MAX_SIZE_DEFAULT = 10000
 
     record_validator = fastjsonschema
+    """Default JSONSschema validation library, Developers can override."""
+
     validate_field_string_format = False
     """Enable format validation, for example for `date-time` string fields."""
 
