@@ -199,8 +199,7 @@ omit = [
 ]
 
 [tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
+exclude_also = [
     "def __repr__",
     "raise AssertionError",
     "raise NotImplementedError",
