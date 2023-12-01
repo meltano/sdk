@@ -27,7 +27,7 @@ class SingerReader(metaclass=abc.ABCMeta):
     stream_structs: dict[str, msgspec.Struct] = {}  # noqa: RUF012
 
     @final
-    def listen(self, file_input: t.BinaryIO | None = None) -> None:
+    def listen(self, file_input: t.IO | None = None) -> None:
         """Read from input until all messages are processed.
 
         Args:
@@ -77,7 +77,7 @@ class SingerReader(metaclass=abc.ABCMeta):
             logger.error("Unable to parse:\n%s", line, exc_info=exc)
             raise
 
-    def _process_lines(self, file_input: t.BinaryIO) -> t.Counter[str]:
+    def _process_lines(self, file_input: t.IO) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:

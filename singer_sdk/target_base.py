@@ -282,7 +282,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             )
             self.drain_all()
 
-    def _process_lines(self, file_input: t.BinaryIO) -> t.Counter[str]:
+    def _process_lines(self, file_input: t.IO) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:

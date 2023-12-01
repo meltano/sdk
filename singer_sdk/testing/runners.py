@@ -14,6 +14,12 @@ from singer_sdk import Tap, Target
 from singer_sdk.testing.config import SuiteConfig
 
 
+class RunnerStandardOutErr(io.StringIO):
+    """Class to memic standard out with binary buffer."""
+
+    buffer = io.BytesIO()
+
+
 class SingerTestRunner(metaclass=abc.ABCMeta):
     """Base Singer Test Runner."""
 
@@ -180,9 +186,8 @@ class TapTestRunner(SingerTestRunner):
         Returns:
             A 2-item tuple with StringIO buffers from the Tap's output: (stdout, stderr)
         """
-        stdout_buf = io.StringIO()
-        stdout_buf.buffer = io.BufferedRandom(raw=io.BytesIO())
-        stderr_buf = io.StringIO()
+        stdout_buf = RunnerStandardOutErr()
+        stderr_buf = RunnerStandardOutErr()
         with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
             self.run_sync_dry_run()
 
@@ -238,7 +243,7 @@ class TargetTestRunner(SingerTestRunner):
         return t.cast(Target, self.create())
 
     @property
-    def target_input(self) -> t.IO[str]:
+    def target_input(self) -> t.IO:
         """Input messages to pass to Target.
 
         Returns:
@@ -282,7 +287,7 @@ class TargetTestRunner(SingerTestRunner):
     def _execute_sync(
         self,
         target: Target,
-        target_input: t.IO[str],
+        target_input: t.IO,
         *,
         finalize: bool = True,
     ) -> tuple[io.StringIO, io.StringIO]:
@@ -298,8 +303,8 @@ class TargetTestRunner(SingerTestRunner):
             A 2-item tuple with StringIO buffers from the Target's output:
                 (stdout, stderr)
         """
-        stdout_buf = io.StringIO()
-        stderr_buf = io.StringIO()
+        stdout_buf = RunnerStandardOutErr()
+        stderr_buf = RunnerStandardOutErr()
 
         with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
             if target_input is not None:

@@ -121,7 +121,7 @@ def tap_sync_test(tap: Tap) -> tuple[io.StringIO, io.StringIO]:
         A 2-item tuple with StringIO buffers from the Tap's output: (stdout, stderr)
     """
     stdout_buf = io.StringIO()
-    stdout_buf.buffer = io.BufferedRandom(raw=io.BytesIO())
+    stdout_buf.buffer = io.BytesIO()
     stderr_buf = io.StringIO()
 
     with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
@@ -244,7 +244,7 @@ def sync_end_to_end(tap: Tap, target: Target, *mappers: InlineMapper) -> None:
             order.
     """
     stdout_buf = io.StringIO()
-    stdout_buf.buffer = io.BufferedRandom(raw=io.BytesIO())
+    stdout_buf.buffer = io.BytesIO()
     with redirect_stdout(stdout_buf):
         tap.sync_all()
 
@@ -257,7 +257,7 @@ def sync_end_to_end(tap: Tap, target: Target, *mappers: InlineMapper) -> None:
 
     for mapper in mappers:
         buf = io.StringIO()
-        buf.buffer = io.BufferedRandom(raw=io.BytesIO())
+        buf.buffer = io.BytesIO()
         with redirect_stdout(buf):
             mapper.listen(mapper_output)
 
