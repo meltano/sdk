@@ -65,7 +65,7 @@ def draft7_sink():
     class CustomSink(BatchSinkMock):
         """Custom sink class."""
 
-        CHECK_RECORD_FORMATS = True
+        validate_field_string_format = True
 
     return CustomSink(
         TargetMock(),

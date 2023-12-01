@@ -54,7 +54,7 @@ def draft7_sink(target, test_schema):
     class CustomSink(Sink):
         """Custom sink class."""
 
-        CHECK_RECORD_FORMATS = True
+        validate_field_string_format = True
 
         def process_batch(self, context: dict) -> None:
             pass
@@ -72,7 +72,7 @@ def custom_sink(target, test_schema):
     class CustomSink(Sink):
         """Custom sink class."""
 
-        CHECK_RECORD_FORMATS = True
+        validate_field_string_format = True
 
         def get_validator_formats(self) -> dict:
             """Get formats for JSON schema validator.

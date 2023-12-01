@@ -100,7 +100,7 @@ class Sink(metaclass=abc.ABCMeta):
         self._validator = self.record_validator.compile(
             schema,
             formats=self.get_validator_formats(),
-            use_formats=self.CHECK_RECORD_FORMATS,
+            use_formats=self.validate_field_string_format,
         )
 
     def get_validator_formats(self) -> dict[str, str | t.Callable[[], bool]]:
