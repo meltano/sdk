@@ -52,6 +52,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     record_validator = fastjsonschema
     validate_field_string_format = False
+    """Enable format validation, for example for `date-time` string fields."""
 
     def __init__(
         self,
