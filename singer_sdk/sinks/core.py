@@ -41,6 +41,40 @@ if sys.version_info < (3, 11):
     MonkeyPatch.patch_fromisoformat()
 
 
+class RecordValidator:
+    """Abstract base class for JSONSchema validator."""
+
+    def __init__(
+        self,
+        schema: dict,
+        *,
+        validate_formts: bool = False,
+        validator_formats: dict,
+    ):
+        """Initlize the validator.
+
+        Args:
+            schema: Schema of the stream to sink.
+            validate_formts: Ture or False validate formats.
+            validator_formats: User defined validator formats.
+        """
+        self.validator = fastjsonschema.compile(
+            schema,
+            use_formats=validate_formts,
+            formats=validator_formats,
+        )
+
+    def validate(self, record: dict):  # noqa: ANN201
+        """Validate a record message.
+
+        Args:
+            record: Record message to validate.
+
+        Returns: Record validation results.
+        """
+        self.validator(record)
+
+
 class Sink(metaclass=abc.ABCMeta):
     """Abstract base class for target sinks."""
 
@@ -50,7 +84,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     MAX_SIZE_DEFAULT = 10000
 
-    record_validator = fastjsonschema
+    record_validator = RecordValidator
     validate_field_string_format = False
     """Enable format validation, for example for `date-time` string fields."""
 
@@ -98,10 +132,10 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
-        self._validator = self.record_validator.compile(
+        self._validator: RecordValidator = self.record_validator(
             schema,
-            formats=self.get_validator_formats(),
-            use_formats=self.validate_field_string_format,
+            validate_formts=self.validate_field_string_format,
+            validator_formats=self.get_validator_formats(),
         )
 
     def get_validator_formats(self) -> dict[str, str | t.Callable[[], bool]]:
@@ -354,7 +388,7 @@ class Sink(metaclass=abc.ABCMeta):
             TODO
         """
         try:
-            self._validator(record)
+            self._validator.validate(record)
         except fastjsonschema.JsonSchemaValueException as e:
             error_message: str = f"Record Message Validation Error: {e.message}"
             self.logger.info(error_message)

@@ -189,6 +189,6 @@ def test_bench_validate_record_with_schema(benchmark, bench_sink, bench_record):
 
     def run_validate_record_with_schema():
         for record in itertools.repeat(bench_record, number_of_runs):
-            sink._validator(record)
+            sink._validator.validate(record)
 
     benchmark(run_validate_record_with_schema)

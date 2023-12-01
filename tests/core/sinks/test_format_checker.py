@@ -142,7 +142,7 @@ def custom_checker(custom_sink: Sink):
 )
 def test_default_date_time_check(default_checker, col: str, value: str):
     """Test the custom format checker with a date-time checker."""
-    default_checker({col: value})
+    default_checker.validate({col: value})
 
 
 @pytest.mark.parametrize(
@@ -184,7 +184,7 @@ def test_default_date_time_check(default_checker, col: str, value: str):
 )
 def test_draft7_date_time_check(draft7_checker, col: str, value: str):
     """Test the custom format checker with a date-time checker."""
-    draft7_checker({col: value})
+    draft7_checker.validate({col: value})
 
 
 @pytest.mark.parametrize(
@@ -220,4 +220,4 @@ def test_draft7_date_time_check(draft7_checker, col: str, value: str):
 )
 def test_custom_date_time_check(custom_checker, col: str, value: str):
     """Test the custom format checker with a date-time checker."""
-    custom_checker({col: value})
+    custom_checker.validate({col: value})
