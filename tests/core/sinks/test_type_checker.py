@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from typing_extensions import override
 
 from singer_sdk.sinks.core import BaseJSONSchemaValidator, InvalidJSONSchema, Sink
 from singer_sdk.target_base import Target
@@ -36,9 +37,11 @@ def test_default_schema_type_checks(target, test_schema_invalid):
     class CustomSink(Sink):
         """Custom sink class."""
 
+        @override
         def process_batch(self, context: dict) -> None:
             pass
 
+        @override
         def process_record(self, record: dict, context: dict) -> None:
             pass
 
@@ -55,6 +58,7 @@ def test_disable_schema_type_checks_returning_none(target, test_schema_invalid):
     class CustomSink(Sink):
         """Custom sink class."""
 
+        @override
         def get_validator(self) -> BaseJSONSchemaValidator | None:
             """Get a record validator for this sink.
 
@@ -66,9 +70,11 @@ def test_disable_schema_type_checks_returning_none(target, test_schema_invalid):
             """
             return None
 
+        @override
         def process_batch(self, context: dict) -> None:
             pass
 
+        @override
         def process_record(self, record: dict, context: dict) -> None:
             pass
 
@@ -83,9 +89,11 @@ def test_disable_schema_type_checks_setting_false(target, test_schema_invalid):
 
         validate_schema = False
 
+        @override
         def process_batch(self, context: dict) -> None:
             pass
 
+        @override
         def process_record(self, record: dict, context: dict) -> None:
             pass
 

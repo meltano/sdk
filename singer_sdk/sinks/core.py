@@ -14,6 +14,7 @@ from gzip import open as gzip_open
 from types import MappingProxyType
 
 import fastjsonschema
+from typing_extensions import override
 
 from singer_sdk.exceptions import (
     InvalidJSONSchema,
@@ -98,6 +99,7 @@ class FastJSONSchemaValidator(BaseJSONSchemaValidator):
             error_message = f"Schema Validation Error: {e}"
             raise InvalidJSONSchema(error_message) from e
 
+    @override
     def validate(self, record: dict):  # noqa: ANN201
         """Validate a record message.
 

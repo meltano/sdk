@@ -43,9 +43,11 @@ def default_sink(target, test_schema):
     class CustomSink(Sink):
         """Custom sink class."""
 
+        @override
         def process_batch(self, context: dict) -> None:
             pass
 
+        @override
         def process_record(self, record: dict, context: dict) -> None:
             pass
 
@@ -61,9 +63,11 @@ def draft7_sink(target, test_schema):
 
         validate_field_string_format = True
 
+        @override
         def process_batch(self, context: dict) -> None:
             pass
 
+        @override
         def process_record(self, record: dict, context: dict) -> None:
             pass
 
@@ -93,9 +97,11 @@ def custom_sink(target, test_schema):
                 },
             )
 
+        @override
         def process_batch(self, context: dict) -> None:
             pass
 
+        @override
         def process_record(self, record: dict, context: dict) -> None:
             pass
 
