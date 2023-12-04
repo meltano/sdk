@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-import fastjsonschema
+import typing as t
+
 import pytest
 
-from singer_sdk.sinks.core import Sink
+from singer_sdk.sinks.core import InvalidRecord, Sink
 from singer_sdk.target_base import Target
+
+if t.TYPE_CHECKING:
+    from singer_sdk.sinks.core import BaseJSONSchemaValidator
 
 
 @pytest.fixture
@@ -140,7 +144,9 @@ def custom_checker(custom_sink: Sink):
         ),
     ],
 )
-def test_default_date_time_check(default_checker, col: str, value: str):
+def test_default_date_time_check(
+    default_checker: BaseJSONSchemaValidator, col: str, value: str
+):
     """Test the custom format checker with a date-time checker."""
     default_checker.validate({col: value})
 
@@ -165,7 +171,7 @@ def test_default_date_time_check(default_checker, col: str, value: str):
             "2020-01-01T20:25:00.0",
             marks=[
                 pytest.mark.xfail(
-                    raises=fastjsonschema.JsonSchemaValueException,
+                    raises=InvalidRecord,
                     reason="Missing offset",
                 )
             ],
@@ -175,14 +181,16 @@ def test_default_date_time_check(default_checker, col: str, value: str):
             "no way to fail",
             marks=[
                 pytest.mark.xfail(
-                    raises=fastjsonschema.JsonSchemaValueException,
+                    raises=InvalidRecord,
                     reason="String of text",
                 )
             ],
         ),
     ],
 )
-def test_draft7_date_time_check(draft7_checker, col: str, value: str):
+def test_draft7_date_time_check(
+    draft7_checker: BaseJSONSchemaValidator, col: str, value: str
+):
     """Test the custom format checker with a date-time checker."""
     draft7_checker.validate({col: value})
 
@@ -211,13 +219,15 @@ def test_draft7_date_time_check(draft7_checker, col: str, value: str):
             "no way to fail",
             marks=[
                 pytest.mark.xfail(
-                    raises=fastjsonschema.JsonSchemaValueException,
+                    raises=InvalidRecord,
                     reason="String of text",
                 )
             ],
         ),
     ],
 )
-def test_custom_date_time_check(custom_checker, col: str, value: str):
+def test_custom_date_time_check(
+    custom_checker: BaseJSONSchemaValidator, col: str, value: str
+):
     """Test the custom format checker with a date-time checker."""
     custom_checker.validate({col: value})

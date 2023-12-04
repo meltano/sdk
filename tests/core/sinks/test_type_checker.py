@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import fastjsonschema
 import pytest
 
-from singer_sdk.sinks.core import Sink
+from singer_sdk.sinks.core import BaseJSONSchemaValidator, InvalidJSONSchema, Sink
 from singer_sdk.target_base import Target
 
 
@@ -44,7 +43,60 @@ def test_default_schema_type_checks(target, test_schema_invalid):
             pass
 
     with pytest.raises(
-        fastjsonschema.exceptions.JsonSchemaDefinitionException,
-        match=r"Unknown type: 'ssttrriinngg'",
+        InvalidJSONSchema,
+        match=r"Schema Validation Error: Unknown type: 'ssttrriinngg'",
     ):
         CustomSink(target, "test_stream", test_schema_invalid, None)
+
+
+def test_disable_schema_type_checks_returning_none(target, test_schema_invalid):
+    """Test type checks on _validator initialization."""
+
+    class CustomSink(Sink):
+        """Custom sink class."""
+
+        def get_validator(self) -> BaseJSONSchemaValidator | None:
+            """Get a record validator for this sink.
+
+            Override this method to use a custom format validator
+            or disable jsonschema validator, by returning `None`.
+
+            Returns:
+                An instance of a subclass of ``BaseJSONSchemaValidator``.
+            """
+            return None
+
+        def process_batch(self, context: dict) -> None:
+            pass
+
+        def process_record(self, record: dict, context: dict) -> None:
+            pass
+
+    try:
+        CustomSink(target, "test_stream", test_schema_invalid, None)
+    except InvalidJSONSchema:
+        pytest.fail("InvalidJSONSchema should not have been raised")
+    else:
+        pass
+
+
+def test_disable_schema_type_checks_setting_false(target, test_schema_invalid):
+    """Test type checks on _validator initialization."""
+
+    class CustomSink(Sink):
+        """Custom sink class."""
+
+        validate_schema = False
+
+        def process_batch(self, context: dict) -> None:
+            pass
+
+        def process_record(self, record: dict, context: dict) -> None:
+            pass
+
+    try:
+        CustomSink(target, "test_stream", test_schema_invalid, None)
+    except InvalidJSONSchema:
+        pytest.fail("InvalidJSONSchema should not have been raised")
+    else:
+        pass
