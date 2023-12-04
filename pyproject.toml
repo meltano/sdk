@@ -151,9 +151,6 @@ xdoctest = ">=1.1.1"
 [tool.poetry.group.benchmark.dependencies]
 pytest-codspeed = ">=2.2.0"
 
-[tool.black]
-exclude = ".*simpleeval.*"
-
 [tool.pytest.ini_options]
 addopts = '--ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
 markers = [
@@ -247,8 +244,7 @@ target-version = "py37"
 [tool.ruff.lint]
 exclude = [
     "cookiecutter/*",
-    "singer_sdk/helpers/_simpleeval.py",
-    "tests/core/test_simpleeval.py",
+    "*simpleeval*",
 ]
 ignore = [
     "ANN101",  # Missing type annotation for `self` in method
@@ -318,8 +314,6 @@ unfixable = [
 "tests/*" = ["ANN", "D1", "D2", "FBT001", "FBT003", "PLR2004", "S101"]
 # Disabled some checks in samples code
 "samples/*" = ["ANN", "D"]
-# Don't require docstrings conventions or type annotations in private modules
-"singer_sdk/helpers/_*.py" = ["ANN", "D105"]
 # Templates support a generic resource of type Any.
 "singer_sdk/testing/*.py" = ["S101"]
 "singer_sdk/testing/templates.py" = ["ANN401"]

@@ -92,7 +92,7 @@ class SDKBatchMessage(Message):
     manifest: list[str] = field(default_factory=list)
     """The manifest of files in the batch."""
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if isinstance(self.encoding, dict):
             self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
 
@@ -112,7 +112,7 @@ class StorageTarget:
     params: dict = field(default_factory=dict)
     """"The storage parameters."""
 
-    def asdict(self):
+    def asdict(self) -> dict[str, t.Any]:
         """Return a dictionary representation of the message.
 
         Returns:
@@ -144,7 +144,7 @@ class StorageTarget:
         """
         if platform.system() == "Windows" and "\\" in url:
             # Original code from pyFileSystem split
-            # Augemnted slitly to properly Windows paths
+            # Augmented slightly to properly handle Windows paths
             split = url.rsplit("\\", 1)
             return (split[0] or "\\", split[1])
 
@@ -224,7 +224,7 @@ class BatchConfig:
     batch_size: int = DEFAULT_BATCH_SIZE
     """The max number of records in a batch."""
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if isinstance(self.encoding, dict):
             self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
 
@@ -234,7 +234,7 @@ class BatchConfig:
         if self.batch_size is None:
             self.batch_size = DEFAULT_BATCH_SIZE
 
-    def asdict(self):
+    def asdict(self) -> dict[str, t.Any]:
         """Return a dictionary representation of the message.
 
         Returns:
