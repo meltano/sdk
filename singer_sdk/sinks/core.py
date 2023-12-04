@@ -7,7 +7,6 @@ import copy
 import datetime
 import importlib.util
 import json
-import sys
 import time
 import typing as t
 from gzip import GzipFile
@@ -23,7 +22,12 @@ from singer_sdk.helpers._batch import (
     BatchFileFormat,
     StorageTarget,
 )
-from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._compat import (
+    date_fromisoformat,
+    datetime_fromisoformat,
+    final,
+    time_fromisoformat,
+)
 from singer_sdk.helpers._typing import (
     DatetimeErrorTreatmentEnum,
     get_datelike_property_type,
@@ -34,11 +38,6 @@ if t.TYPE_CHECKING:
     from logging import Logger
 
     from singer_sdk.target_base import Target
-
-if sys.version_info < (3, 11):
-    from backports.datetime_fromisoformat import MonkeyPatch
-
-    MonkeyPatch.patch_fromisoformat()
 
 
 class RecordValidator:
@@ -445,11 +444,11 @@ class Sink(metaclass=abc.ABCMeta):
                 try:
                     if value is not None:
                         if datelike_type == "time":
-                            date_val = datetime.time.fromisoformat(date_val)
+                            date_val = time_fromisoformat(date_val)
                         elif datelike_type == "date":
-                            date_val = datetime.date.fromisoformat(date_val)
+                            date_val = date_fromisoformat(date_val)
                         else:
-                            date_val = datetime.datetime.fromisoformat(date_val)
+                            date_val = datetime_fromisoformat(date_val)
                 except ValueError as ex:
                     date_val = handle_invalid_timestamp_in_record(
                         record,
