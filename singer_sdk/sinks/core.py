@@ -54,7 +54,7 @@ class BaseRecordValidator(abc.ABC):
     @abc.abstractmethod
     def validate(record: dict[str, t.Any]) -> None:
         ...
-        
+
 
 class FastJSONSchemaValidator(BaseRecordValidator):
     def __init__(
