@@ -437,7 +437,7 @@ class Sink(metaclass=abc.ABCMeta):
         Returns:
             TODO
         """
-        if self._validator and self.validate_field_string_format:
+        if self._validator:
             try:
                 self._validator.validate(record)
             except InvalidRecord:
