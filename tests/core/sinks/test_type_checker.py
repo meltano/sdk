@@ -72,12 +72,7 @@ def test_disable_schema_type_checks_returning_none(target, test_schema_invalid):
         def process_record(self, record: dict, context: dict) -> None:
             pass
 
-    try:
-        CustomSink(target, "test_stream", test_schema_invalid, None)
-    except InvalidJSONSchema:
-        pytest.fail("InvalidJSONSchema should not have been raised")
-    else:
-        pass
+    CustomSink(target, "test_stream", test_schema_invalid, None)
 
 
 def test_disable_schema_type_checks_setting_false(target, test_schema_invalid):
