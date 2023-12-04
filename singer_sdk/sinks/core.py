@@ -150,30 +150,21 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_dupe_records_merged: int = 0
 
         self._validator: BaseRecordValidator | None = self.get_record_validator()
-            schema,
-            validate_formts=self.validate_field_string_format,
-            validator_formats=self.get_validator_formats(),
         )
 
-    def get_validator_formats(self) -> dict[str, str | t.Callable[[], bool]]:
-        """Get formats for JSON schema validator.
+    def get_record_validator(self) -> BaseRecordValidator | None:
+        """Get a record validator for this sink.
 
-        Override this method to add custom string format checkers to the JSON schema
-        validator.
-        This is useful when, for example, the target requires a specific format for a
-        date or datetime field.
-
-        Example:
-            .. validate = fastjsonschema.compile(definition, formats={
-                    'foo': r'foo|bar',
-                    'bar': lambda value: value in ('foo', 'bar'),
-                })
+        Override this method to use a custom format validator or disable record validator, by returning `None`.
 
         Returns:
-            A dictionary containing regex strings and callables.
-            See: https://horejsek.github.io/python-fastjsonschema/.
+            An instance of a subclass of ``BaseRecordValidator``.
         """
-        return {}
+        return FastJSONSchemaValidator(
+            schema,
+validate_formats=self.validate_field_string_format,
+            format_validators={},
+        )
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return an empty dictionary by default.
