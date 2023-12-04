@@ -15,7 +15,11 @@ from types import MappingProxyType
 
 import fastjsonschema
 
-from singer_sdk.exceptions import MissingKeyPropertiesError
+from singer_sdk.exceptions import (
+    InvalidJSONSchema,
+    InvalidRecord,
+    MissingKeyPropertiesError,
+)
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
@@ -40,19 +44,11 @@ if t.TYPE_CHECKING:
     from singer_sdk.target_base import Target
 
 
-class InvalidJSONSchema(Exception):
-    """JSONSchema validation exception."""
-
-
-class InvalidRecord(Exception):
-    """JSONSchema invalid record data exception."""
-
-
 class BaseJSONSchemaValidator(abc.ABC):
     """Abstract base class for JSONSchema validator."""
 
     def __init__(self, schema: dict[str, t.Any]) -> None:
-        """Initialize the validator.
+        """Initialize the record validator.
 
         Args:
             schema: Schema of the stream to sink.
@@ -63,44 +59,42 @@ class BaseJSONSchemaValidator(abc.ABC):
     def validate(self, record: dict[str, t.Any]) -> None:
         """Validate a record message.
 
+        This method MUST raise an ``InvalidRecord`` exception if the record is invalid.
+
         Args:
             record: Record message to validate.
-
-        Returns: Record validation results.
         """
-        ...
 
 
 class FastJSONSchemaValidator(BaseJSONSchemaValidator):
-    """Class to Interface with fastjsonschema validator."""
+    """Validate records using the ``fastjsonschema`` library."""
 
     def __init__(
         self,
         schema: dict,
         *,
         validate_formats: bool = False,
-        format_validators: dict[str, t.Callable],
+        format_validators: dict[str, t.Callable] | None = None,
     ):
         """Initialize the validator.
 
         Args:
             schema: Schema of the stream to sink.
-            validate_formats: Whether JSON string formats
-                (e.g. ``date-time``) should be validated.
-            format_validators: User defined format validators.
+            validate_formats: Whether JSON string formats (e.g. ``date-time``) should
+                be validated.
+            format_validators: User-defined format validators.
 
         Raises:
             InvalidJSONSchema: If the schema provided from tap or mapper is invalid.
-
         """
         super().__init__(schema)
         try:
             self.validator = fastjsonschema.compile(
                 self.schema,
                 use_formats=validate_formats,
-                formats=format_validators,
+                formats=format_validators or {},
             )
-        except fastjsonschema.exceptions.JsonSchemaDefinitionException as e:
+        except fastjsonschema.JsonSchemaDefinitionException as e:
             error_message = f"Schema Validation Error: {e}"
             raise InvalidJSONSchema(error_message) from e
 
@@ -110,10 +104,8 @@ class FastJSONSchemaValidator(BaseJSONSchemaValidator):
         Args:
             record: Record message to validate.
 
-        Returns: Record validation results.
-
         Raises:
-            InvalidRecord: If the data in an element is formatted improperly.
+            InvalidRecord: If the record is invalid.
         """
         try:
             self.validator(record)
@@ -131,11 +123,11 @@ class Sink(metaclass=abc.ABCMeta):
 
     MAX_SIZE_DEFAULT = 10000
 
-    record_validator = FastJSONSchemaValidator
     validate_schema = True
-    """Enable jsonschema validation, for example {"type": "integer"}."""
+    """Enable JSON schema record validation."""
+
     validate_field_string_format = False
-    """Enable jsonschema format validation, for example `date-time` string fields."""
+    """Enable JSON schema format validation, for example `date-time` string fields."""
 
     def __init__(
         self,
@@ -181,32 +173,24 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
-        self._validator: BaseJSONSchemaValidator | None = (
-            self.get_validator() if self.validate_schema else None
-        )
+        self._validator: BaseJSONSchemaValidator | None = self.get_validator()
 
     def get_validator(self) -> BaseJSONSchemaValidator | None:
         """Get a record validator for this sink.
 
-        Override this method to use a custom format validator
-        or disable jsonschema validator, by returning `None`.
+        Override this method to use a custom format validator, or disable record
+        validation by returning `None`.
 
         Returns:
             An instance of a subclass of ``BaseJSONSchemaValidator``.
         """
-        return FastJSONSchemaValidator(
-            self.schema,
-            validate_formats=self.validate_field_string_format,
-            format_validators=self.get_validator_formats(),
-        )
-
-    def get_validator_formats(self) -> dict:
-        """Get formats for JSON schema validator.
-
-        Returns:
-            A dictionary containing regex strings and callables
-        """
-        return {}
+        if self.validate_schema:
+            return FastJSONSchemaValidator(
+                self.schema,
+                validate_formats=self.validate_field_string_format,
+                format_validators={},
+            )
+        return None
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return an empty dictionary by default.
@@ -437,12 +421,14 @@ class Sink(metaclass=abc.ABCMeta):
         Returns:
             TODO
         """
-        if self._validator:
+        if self._validator is not None:
+            # TODO: Check the performance impact of this try/except block. It runs
+            # on every record, so it's probably bad and should be moved up the stack.
             try:
                 self._validator.validate(record)
-            except InvalidRecord:
-                message = "Record message validation failed"
-                self.logger.exception(message)
+            except InvalidRecord as e:
+                self.logger.exception("Record validation failed %s", e)
+
         self._parse_timestamps_in_record(
             record=record,
             schema=self.schema,

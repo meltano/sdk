@@ -5,8 +5,9 @@ from __future__ import annotations
 import typing as t
 
 import pytest
+from typing_extensions import override
 
-from singer_sdk.sinks.core import InvalidRecord, Sink
+from singer_sdk.sinks.core import FastJSONSchemaValidator, InvalidRecord, Sink
 from singer_sdk.target_base import Target
 
 if t.TYPE_CHECKING:
@@ -78,19 +79,19 @@ def custom_sink(target, test_schema):
 
         validate_field_string_format = True
 
-        def get_validator_formats(self) -> dict:
-            """Get formats for JSON schema validator.
-
-            Returns:
-                A dictionary containing regex strings and callables
-            """
-            return {
-                "date-time": (
-                    r"^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])"
-                    r"T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?"
-                    r"(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$"
-                ),
-            }
+        @override
+        def get_validator(self) -> BaseJSONSchemaValidator | None:
+            return FastJSONSchemaValidator(
+                self.schema,
+                validate_formats=self.validate_field_string_format,
+                format_validators={
+                    "date-time": (
+                        r"^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])"
+                        r"T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?"
+                        r"(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$"
+                    ),
+                },
+            )
 
         def process_batch(self, context: dict) -> None:
             pass

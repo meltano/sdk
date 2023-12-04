@@ -25,10 +25,10 @@ class SingerReader(metaclass=abc.ABCMeta):
     def listen(self, file_input: t.IO[str] | None = None) -> None:
         """Read from input until all messages are processed.
 
+        This method is internal to the SDK and should not need to be overridden.
+
         Args:
             file_input: Readable stream of messages. Defaults to standard in.
-
-        This method is internal to the SDK and should not need to be overridden.
         """
         if not file_input:
             file_input = sys.stdin

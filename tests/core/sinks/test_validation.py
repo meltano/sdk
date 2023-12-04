@@ -118,10 +118,7 @@ def test_validate_record_jsonschema_format_checking_enabled(capsys, draft7_sink)
     )
     assert updated_record["missing_datetime"] == "2021-01-01T00:00:00+00:00"
     assert updated_record["invalid_datetime"] == "9999-12-31 23:59:59.999999"
-    assert (
-        "Record Message Validation Error: data.invalid_datetime must be date-time"
-        in captured.err
-    )
+    assert "data.invalid_datetime must be date-time" in captured.err
 
 
 @pytest.fixture
