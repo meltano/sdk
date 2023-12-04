@@ -43,24 +43,39 @@ if t.TYPE_CHECKING:
 class RecordValidator:
     """Abstract base class for JSONSchema validator."""
 
+class InvalidRecord(Exception):
+    pass
+
+
+class BaseRecordValidator(abc.ABC):
+    def __init__(schema: dict[str, t.Any]) -> None:
+        self.schema = schema
+
+    @abc.abstractmethod
+    def validate(record: dict[str, t.Any]) -> None:
+        ...
+        
+
+class FastJSONSchemaValidator(BaseRecordValidator):
     def __init__(
         self,
         schema: dict,
         *,
-        validate_formts: bool = False,
-        validator_formats: dict,
+        validate_formats: bool = False,
+        format_validators: dict[str, t.Callable],
     ):
-        """Initlize the validator.
+        """Initialize the validator.
 
         Args:
             schema: Schema of the stream to sink.
-            validate_formts: Ture or False validate formats.
-            validator_formats: User defined validator formats.
+            validate_formats: Whether JSON string formats (e.g. ``date-time``) should be validated.
+            format_validators: User defined format validators.
         """
+        super().__init__(schema)
         self.validator = fastjsonschema.compile(
-            schema,
-            use_formats=validate_formts,
-            formats=validator_formats,
+            self.schema,
+            use_formats=validate_formats,
+            formats=format_validators,
         )
 
     def validate(self, record: dict):  # noqa: ANN201
@@ -71,7 +86,10 @@ class RecordValidator:
 
         Returns: Record validation results.
         """
-        self.validator(record)
+        try:
+            self.validator(record)
+        except fastjsonschema.JsonSchemaValueException as e:
+            raise InvalidRecord(e.message) from e
 
 
 class Sink(metaclass=abc.ABCMeta):
@@ -131,7 +149,7 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
-        self._validator: RecordValidator = self.record_validator(
+        self._validator: BaseRecordValidator | None = self.get_record_validator()
             schema,
             validate_formts=self.validate_field_string_format,
             validator_formats=self.get_validator_formats(),
@@ -388,9 +406,9 @@ class Sink(metaclass=abc.ABCMeta):
         """
         try:
             self._validator.validate(record)
-        except fastjsonschema.JsonSchemaValueException as e:
-            error_message: str = f"Record Message Validation Error: {e.message}"
-            self.logger.info(error_message)
+        except InvalidRecord:
+            message = "Record message validation failed"
+            self.logger.exception(message)
         self._parse_timestamps_in_record(
             record=record,
             schema=self.schema,
