@@ -93,7 +93,7 @@ def draft7_sink_continue():
         """Custom sink class."""
 
         validate_field_string_format = True
-        stop_on_field_validation_exception = False
+        fail_on_record_validation_exception = False
 
     return CustomSink(
         TargetMock(),
@@ -113,7 +113,7 @@ def draft7_sink_continue():
 
 
 def test_validate_record_jsonschema_format_checking_enabled_stop_on_error(
-    draft7_sink_stop
+    draft7_sink_stop,
 ):
     sink: BatchSinkMock = draft7_sink_stop
 
@@ -133,7 +133,8 @@ def test_validate_record_jsonschema_format_checking_enabled_stop_on_error(
 
 
 def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
-    capsys, draft7_sink_continue
+    capsys: pytest.CaptureFixture,
+    draft7_sink_continue,
 ):
     sink: BatchSinkMock = draft7_sink_continue
 
