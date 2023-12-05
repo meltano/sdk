@@ -1,4 +1,4 @@
-"""Internal helper library for record flatteting functions."""
+"""Internal helper library for record flattening functions."""
 
 from __future__ import annotations
 

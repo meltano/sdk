@@ -144,7 +144,7 @@ class StorageTarget:
         """
         if platform.system() == "Windows" and "\\" in url:
             # Original code from pyFileSystem split
-            # Augmented slightly to properly handle Windows path
+            # Augmented slightly to properly handle Windows paths
             split = url.rsplit("\\", 1)
             return (split[0] or "\\", split[1])
 

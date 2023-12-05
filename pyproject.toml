@@ -136,9 +136,6 @@ xdoctest = ">=1.1.1"
 [tool.poetry.group.benchmark.dependencies]
 pytest-codspeed = ">=2.2.0"
 
-[tool.black]
-exclude = ".*simpleeval.*"
-
 [tool.pytest.ini_options]
 addopts = '--ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
 markers = [
@@ -232,8 +229,7 @@ target-version = "py38"
 [tool.ruff.lint]
 exclude = [
     "cookiecutter/*",
-    "singer_sdk/helpers/_simpleeval.py",
-    "tests/core/test_simpleeval.py",
+    "*simpleeval*",
 ]
 ignore = [
     "ANN101",  # Missing type annotation for `self` in method

@@ -167,7 +167,7 @@ def reset_state_progress_markers(stream_or_partition_state: dict) -> dict | None
 
 def write_replication_key_signpost(
     stream_or_partition_state: dict,
-    new_signpost_value: t.Any,  # noqa: ANN401,
+    new_signpost_value: t.Any,  # noqa: ANN401
 ) -> None:
     """Write signpost value."""
     stream_or_partition_state[SIGNPOST_MARKER] = to_json_compatible(new_signpost_value)
@@ -181,9 +181,7 @@ def write_starting_replication_value(
     stream_or_partition_state[STARTING_MARKER] = to_json_compatible(initial_value)
 
 
-def get_starting_replication_value(
-    stream_or_partition_state: dict,
-) -> t.Any | None:  # noqa: ANN401
+def get_starting_replication_value(stream_or_partition_state: dict) -> t.Any | None:  # noqa: ANN401
     """Retrieve initial replication marker value from state."""
     if not stream_or_partition_state:
         return None
