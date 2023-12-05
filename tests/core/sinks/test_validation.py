@@ -5,6 +5,7 @@ import itertools
 
 import pytest
 
+from singer_sdk.exceptions import InvalidRecord
 from tests.conftest import BatchSinkMock, TargetMock
 
 
@@ -59,7 +60,7 @@ def test_validate_record():
 
 
 @pytest.fixture
-def draft7_sink():
+def draft7_sink_stop():
     """Return a sink object with Draft7 checks enabled."""
 
     class CustomSink(BatchSinkMock):
@@ -84,8 +85,37 @@ def draft7_sink():
     )
 
 
-def test_validate_record_jsonschema_format_checking_enabled(capsys, draft7_sink):
-    sink: BatchSinkMock = draft7_sink
+@pytest.fixture
+def draft7_sink_continue():
+    """Return a sink object with Draft7 checks enabled."""
+
+    class CustomSink(BatchSinkMock):
+        """Custom sink class."""
+
+        validate_field_string_format = True
+        stop_on_field_validation_exception = False
+
+    return CustomSink(
+        TargetMock(),
+        "users",
+        {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "created_at": {"type": "string", "format": "date-time"},
+                "created_at_date": {"type": "string", "format": "date"},
+                "created_at_time": {"type": "string", "format": "time"},
+                "invalid_datetime": {"type": "string", "format": "date-time"},
+            },
+        },
+        ["id"],
+    )
+
+
+def test_validate_record_jsonschema_format_checking_enabled_stop_on_error(
+    draft7_sink_stop
+):
+    sink: BatchSinkMock = draft7_sink_stop
 
     record = {
         "id": 1,
@@ -95,6 +125,27 @@ def test_validate_record_jsonschema_format_checking_enabled(capsys, draft7_sink)
         "missing_datetime": "2021-01-01T00:00:00+00:00",
         "invalid_datetime": "not a datetime",
     }
+    with pytest.raises(
+        InvalidRecord,
+        match=r"data.invalid_datetime must be date-time",
+    ):
+        sink._validate_and_parse(record)
+
+
+def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
+    capsys, draft7_sink_continue
+):
+    sink: BatchSinkMock = draft7_sink_continue
+
+    record = {
+        "id": 1,
+        "created_at": "2021-01-01T00:00:00+00:00",
+        "created_at_date": "2021-01-01",
+        "created_at_time": "00:01:00+00:00",
+        "missing_datetime": "2021-01-01T00:00:00+00:00",
+        "invalid_datetime": "not a datetime",
+    }
+
     updated_record = sink._validate_and_parse(record)
     captured = capsys.readouterr()
 

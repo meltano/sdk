@@ -131,6 +131,9 @@ class Sink(metaclass=abc.ABCMeta):
     validate_field_string_format = False
     """Enable JSON schema format validation, for example `date-time` string fields."""
 
+    stop_on_field_validation_exception: bool = True
+    """Enable Target to stop when a JSONSchmea field validation exception is raised."""
+
     def __init__(
         self,
         target: Target,
@@ -422,6 +425,9 @@ class Sink(metaclass=abc.ABCMeta):
 
         Returns:
             TODO
+
+        Raises:
+            InvalidRecord: If the record is invalid.
         """
         if self._validator is not None:
             # TODO: Check the performance impact of this try/except block. It runs
@@ -429,6 +435,8 @@ class Sink(metaclass=abc.ABCMeta):
             try:
                 self._validator.validate(record)
             except InvalidRecord as e:
+                if self.stop_on_field_validation_exception:
+                    raise InvalidRecord(e) from e
                 self.logger.exception("Record validation failed %s", e)
 
         self._parse_timestamps_in_record(
