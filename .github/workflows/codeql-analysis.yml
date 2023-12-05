@@ -9,7 +9,13 @@ name: "CodeQL"
 on:
   push:
     branches: [ "main" ]
-  pull_request: {}
+    paths:
+      - .github/workflows/codeql-analysis.yml
+      - '**.py'  # Any Python file
+  pull_request:
+    paths:
+      - .github/workflows/codeql-analysis.yml
+      - '**.py'  # Any Python file
   schedule:
     - cron: '37 10 * * 5'
 

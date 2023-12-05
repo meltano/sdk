@@ -15,7 +15,7 @@ import pendulum
 
 import singer_sdk._singerlib as singer
 from singer_sdk import metrics
-from singer_sdk.batch import JSONLinesBatcher
+from singer_sdk.batch import Batcher
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
@@ -124,7 +124,7 @@ class Stream(metaclass=abc.ABCMeta):
             msg = "Missing argument or class variable 'name'."
             raise ValueError(msg)
 
-        self.logger: logging.Logger = tap.logger
+        self.logger: logging.Logger = tap.logger.getChild(self.name)
         self.metrics_logger = tap.metrics_logger
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
@@ -769,7 +769,7 @@ class Stream(metaclass=abc.ABCMeta):
         if (not self._is_state_flushed) and (
             self.tap_state != self._last_emitted_state
         ):
-            singer.write_message(singer.StateMessage(value=self.tap_state))
+            self._tap.write_message(singer.StateMessage(value=self.tap_state))
             self._last_emitted_state = copy.deepcopy(self.tap_state)
             self._is_state_flushed = True
 
@@ -797,7 +797,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _write_schema_message(self) -> None:
         """Write out a SCHEMA message with the stream schema."""
         for schema_message in self._generate_schema_messages():
-            singer.write_message(schema_message)
+            self._tap.write_message(schema_message)
 
     @property
     def mask(self) -> singer.SelectionMask:
@@ -849,7 +849,7 @@ class Stream(metaclass=abc.ABCMeta):
             record: A single stream record.
         """
         for record_message in self._generate_record_messages(record):
-            singer.write_message(record_message)
+            self._tap.write_message(record_message)
 
         self._is_state_flushed = False
 
@@ -864,7 +864,7 @@ class Stream(metaclass=abc.ABCMeta):
             encoding: The encoding to use for the batch.
             manifest: A list of filenames for the batch.
         """
-        singer.write_message(
+        self._tap.write_message(
             SDKBatchMessage(
                 stream=self.name,
                 encoding=encoding,
@@ -1349,7 +1349,7 @@ class Stream(metaclass=abc.ABCMeta):
         Yields:
             A tuple of (encoding, manifest) for each batch.
         """
-        batcher = JSONLinesBatcher(
+        batcher = Batcher(
             tap_name=self.tap_name,
             stream_name=self.name,
             batch_config=batch_config,

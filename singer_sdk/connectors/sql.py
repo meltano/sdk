@@ -13,7 +13,6 @@ from functools import lru_cache
 
 import simplejson
 import sqlalchemy
-from sqlalchemy.engine import Engine
 
 from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
@@ -21,6 +20,7 @@ from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers.capabilities import TargetLoadMethods
 
 if t.TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
     from sqlalchemy.engine.reflection import Inspector
 
 
@@ -293,7 +293,7 @@ class SQLConnector:
         Returns:
             The dialect object.
         """
-        return t.cast(sqlalchemy.engine.Dialect, self._engine.dialect)
+        return self._engine.dialect
 
     @property
     def _engine(self) -> Engine:
@@ -307,7 +307,7 @@ class SQLConnector:
         """
         if not self._cached_engine:
             self._cached_engine = self.create_engine()
-        return t.cast(Engine, self._cached_engine)
+        return self._cached_engine
 
     def create_engine(self) -> Engine:
         """Creates and returns a new engine. Do not call outside of _engine.
@@ -572,10 +572,7 @@ class SQLConnector:
         """
         _, schema_name, table_name = self.parse_full_table_name(full_table_name)
 
-        return t.cast(
-            bool,
-            sqlalchemy.inspect(self._engine).has_table(table_name, schema_name),
-        )
+        return sqlalchemy.inspect(self._engine).has_table(table_name, schema_name)
 
     def schema_exists(self, schema_name: str) -> bool:
         """Determine if the target database schema already exists.
@@ -900,9 +897,6 @@ class SQLConnector:
 
             if isinstance(generic_type, type):
                 if issubclass(
-                    generic_type,
-                    (sqlalchemy.types.String, sqlalchemy.types.Unicode),
-                ) or issubclass(
                     generic_type,
                     (sqlalchemy.types.String, sqlalchemy.types.Unicode),
                 ):

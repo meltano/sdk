@@ -36,7 +36,7 @@ def path_to_target_db(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def sqlite_target_test_config(path_to_target_db: str) -> dict:
+def sqlite_target_test_config(path_to_target_db: Path) -> dict:
     """Get configuration dictionary for target-csv."""
     return {"path_to_db": str(path_to_target_db)}
 
@@ -351,6 +351,52 @@ def test_sqlite_process_batch_message(
     cursor = db.cursor()
     cursor.execute("SELECT COUNT(*) as count FROM users")
     assert cursor.fetchone()[0] == 4
+
+
+def test_sqlite_process_batch_parquet(
+    sqlite_target_test_config: dict,
+    sqlite_sample_target_batch: SQLiteTarget,
+):
+    """Test handling a Parquet batch message for the SQLite target."""
+    config = {
+        **sqlite_target_test_config,
+        "batch_config": {
+            "encoding": {"format": "parquet", "compression": "gzip"},
+            "batch_size": 100,
+        },
+    }
+    schema_message = {
+        "type": "SCHEMA",
+        "stream": "continents",
+        "key_properties": ["id"],
+        "schema": {
+            "required": ["id"],
+            "type": "object",
+            "properties": {
+                "code": {"type": "string"},
+                "name": {"type": "string"},
+            },
+        },
+    }
+    batch_message = {
+        "type": "BATCH",
+        "stream": "continents",
+        "encoding": {"format": "parquet", "compression": "gzip"},
+        "manifest": [
+            "file://tests/core/resources/continents.parquet.gz",
+        ],
+    }
+    tap_output = "\n".join([json.dumps(schema_message), json.dumps(batch_message)])
+
+    target_sync_test(
+        sqlite_sample_target_batch,
+        input=StringIO(tap_output),
+        finalize=True,
+    )
+    db = sqlite3.connect(config["path_to_db"])
+    cursor = db.cursor()
+    cursor.execute("SELECT COUNT(*) as count FROM continents")
+    assert cursor.fetchone()[0] == 7
 
 
 def test_sqlite_column_no_morph(sqlite_sample_target: SQLTarget):

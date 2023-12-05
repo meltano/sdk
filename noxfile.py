@@ -29,7 +29,7 @@ COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"
 
 package = "singer_sdk"
 python_versions = ["3.11", "3.10", "3.9", "3.8", "3.7"]
-main_python_version = "3.10"
+main_python_version = "3.11"
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = (
     "mypy",
@@ -49,23 +49,14 @@ test_dependencies = [
     "pyarrow",
     "requests-mock",
     "time-machine",
-    # Cookiecutter tests
-    "black",
-    "cookiecutter",
-    "PyYAML",
-    "darglint",
-    "flake8",
-    "flake8-annotations",
-    "flake8-docstrings",
-    "mypy",
 ]
 
 
-@session(python=python_versions)
+@session(python=main_python_version)
 def mypy(session: Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
-    session.install(".")
+    session.install(".[s3,testing,parquet]")
     session.install(
         "mypy",
         "pytest",
@@ -86,7 +77,7 @@ def mypy(session: Session) -> None:
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
-    session.install(".[s3]")
+    session.install(".[s3,parquet]")
     session.install(*test_dependencies)
 
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
@@ -104,7 +95,6 @@ def tests(session: Session) -> None:
             "--parallel",
             "-m",
             "pytest",
-            "-v",
             "--durations=10",
             "--benchmark-skip",
             *session.posargs,
@@ -212,35 +202,35 @@ def docs_serve(session: Session) -> None:
 
 @nox.parametrize("replay_file_path", COOKIECUTTER_REPLAY_FILES)
 @session(python=main_python_version)
-def test_cookiecutter(session: Session, replay_file_path) -> None:
+def test_cookiecutter(session: Session, replay_file_path: str) -> None:
     """Uses the tap template to build an empty cookiecutter.
 
     Runs the lint task on the created test project.
     """
-    cc_build_path = tempfile.gettempdir()
-    folder_base_path = "./cookiecutter"
+    cc_build_path = Path(tempfile.gettempdir())
+    folder_base_path = Path("./cookiecutter")
+    replay_file = Path(replay_file_path).resolve()
 
-    if Path(replay_file_path).name.startswith("tap"):
+    if replay_file.name.startswith("tap"):
         folder = "tap-template"
-    elif Path(replay_file_path).name.startswith("target"):
+    elif replay_file.name.startswith("target"):
         folder = "target-template"
     else:
         folder = "mapper-template"
-    template = Path(folder_base_path + "/" + folder).resolve()
-    replay_file = Path(replay_file_path).resolve()
+    template = folder_base_path.joinpath(folder).resolve()
 
-    if not Path(template).exists():
+    if not template.exists():
         return
 
-    if not Path(replay_file).is_file():
+    if not replay_file.is_file():
         return
 
-    sdk_dir = Path(Path(template).parent).parent
-    cc_output_dir = Path(replay_file_path).name.replace(".json", "")
-    cc_test_output = cc_build_path + "/" + cc_output_dir
+    sdk_dir = template.parent.parent
+    cc_output_dir = replay_file.name.replace(".json", "")
+    cc_test_output = cc_build_path.joinpath(cc_output_dir)
 
-    if Path(cc_test_output).exists():
-        session.run("rm", "-fr", cc_test_output, external=True)
+    if cc_test_output.exists():
+        session.run("rm", "-fr", str(cc_test_output), external=True)
 
     session.install(".")
     session.install("cookiecutter", "pythonsed")
@@ -251,7 +241,7 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
         str(replay_file),
         str(template),
         "-o",
-        cc_build_path,
+        str(cc_build_path),
     )
     session.chdir(cc_test_output)
 

@@ -21,7 +21,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4"
-singer-sdk = { version="~=0.33.0" }
+singer-sdk = { version="~=0.34.0b1" }
 fs-s3fs = { version = "~=1.1.1", optional = true }
 {%- if cookiecutter.serialization_method != "SQL" %}
 requests = "~=2.31.0"
@@ -29,27 +29,31 @@ requests = "~=2.31.0"
 
 [tool.poetry.dev-dependencies]
 pytest = ">=7.4.0"
-singer-sdk = { version="~=0.33.0", extras = ["testing"] }
+singer-sdk = { version="~=0.34.0b1", extras = ["testing"] }
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
 
 [tool.ruff]
-ignore = [
-    "ANN101",  # missing-type-self
-    "ANN102",  # missing-type-cls
-]
-select = ["ALL"]
 src = ["{{cookiecutter.library_name}}"]
 target-version = "py37"
 
-[tool.ruff.flake8-annotations]
+[tool.ruff.lint]
+ignore = [
+    "ANN101",  # missing-type-self
+    "ANN102",  # missing-type-cls
+    "COM812",  # missing-trailing-comma
+    "ISC001",  # single-line-implicit-string-concatenation
+]
+select = ["ALL"]
+
+[tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["{{cookiecutter.library_name}}"]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [build-system]

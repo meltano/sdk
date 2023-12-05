@@ -62,7 +62,7 @@ BATCH_CONFIG = PropertiesList(
                     Property(
                         "format",
                         StringType,
-                        allowed_values=["jsonl"],
+                        allowed_values=["jsonl", "parquet"],
                         description="Format to use for batch files.",
                     ),
                     Property(

@@ -17,7 +17,9 @@ repos:
     exclude: |
         (?x)^(
             cookiecutter/.*/meltano.yml|
-            cookiecutter/.*/.pre-commit-config.yaml
+            cookiecutter/.*/.pre-commit-config.yaml|
+            cookiecutter/.*/dependabot.yml|
+            cookiecutter/.*/test.yml
         )$
   - id: end-of-file-fixer
     exclude: |
@@ -36,14 +38,14 @@ repos:
         )$
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.27.0
+  rev: 0.27.2
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
   - id: check-readthedocs
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.1.1
+  rev: v0.1.6
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]
@@ -51,17 +53,11 @@ repos:
       (?x)^(
         cookiecutter/.*
       )$
-
-- repo: https://github.com/psf/black
-  rev: 23.10.1
-  hooks:
-  - id: black
+  - id: ruff-format
     exclude: |
-        (?x)^(
-            cookiecutter/.*|
-            singer_sdk/helpers/_simpleeval.py|
-            tests/core/test_simpleeval.py
-        )$
+      (?x)^(
+        cookiecutter/.*
+      )$
 
 - repo: https://github.com/pycqa/flake8
   rev: 6.1.0
@@ -76,6 +72,6 @@ repos:
         )$
 
 - repo: https://github.com/python-poetry/poetry
-  rev: 1.6.0
+  rev: 1.7.0
   hooks:
   - id: poetry-check
