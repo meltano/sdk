@@ -16,6 +16,7 @@ from singer_sdk.typing import (
 )
 
 _EnumMemberT = t.TypeVar("_EnumMemberT")
+_SettingT = t.TypeVar("_SettingT")
 
 # Default JSON Schema to support config for built-in capabilities:
 
@@ -325,3 +326,37 @@ class TargetCapabilities(CapabilitiesEnum):
 
     #: Allow setting the target schema.
     TARGET_SCHEMA = "target-schema"
+
+
+class ConfigProtocol(t.Protocol):
+    """Protocol for config dictionary."""
+
+    @property
+    def config(self) -> t.Mapping[str, t.Any]:
+        """Get plugin configuration."""
+        ...
+
+
+class ConfigProperty(t.Generic[_SettingT]):
+    """Descriptor that gets attributes from the config dict."""
+
+    def __init__(self, default: _SettingT, *, setting_name: str | None = None) -> None:
+        """Initialize the ConfigProperty."""
+        self.default = default
+        self.setting_name = setting_name
+
+    def __set_name__(self, owner: type[ConfigProtocol], name: str) -> None:
+        """Set the name of the config property."""
+        if self.setting_name is None:
+            self.setting_name = name
+
+    def __get__(
+        self,
+        instance: ConfigProtocol,
+        owner: type[ConfigProtocol],
+    ) -> _SettingT:
+        """Get the config property from the instance."""
+        if self.setting_name is None:
+            return self.default
+
+        return instance.config.get(self.setting_name, self.default)
