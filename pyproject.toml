@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.34.0b1"
+version = "0.34.0"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors <hello@meltano.com>"]
 maintainers = ["Meltano Team and Contributors <hello@meltano.com>"]
@@ -42,7 +42,7 @@ python = ">=3.7.1"
 backoff = { version = ">=2.0.0", python = "<4" }
 backports-datetime-fromisoformat = { version = ">=2.0.1", python = "<3.11" }
 click = "~=8.0"
-cryptography = ">=3.4.6,<42.0.0"
+cryptography = ">=3.4.6"
 fs = ">=2.4.16"
 importlib-metadata = {version = "<7.0.0", python = "<3.12"}
 importlib-resources = {version = ">=5.12.0", markers = "python_version < \"3.9\""}
@@ -57,9 +57,9 @@ memoization = { version = ">=0.3.2,<0.5.0", python = "<4" }
 packaging = ">=23.1"
 pendulum = ">=2.1.0"
 PyJWT = "~=2.4"
-python-dateutil = "^2.8.2"
-python-dotenv = ">=0.20,<0.22"
-pytz = ">=2022.2.1,<2024.0.0"
+python-dateutil = ">=2.8.2"
+python-dotenv = ">=0.20"
+pytz = ">=2022.2.1"
 PyYAML = ">=6.0"
 requests = ">=2.25.1"
 simpleeval = ">=0.9.13"
@@ -89,7 +89,7 @@ numpy = [
     { version = ">=1.22", python = ">=3.8", optional = true },
 ]
 pyarrow = [
-    { version = ">=11", python = "<3.8", optional = true },
+    { version = ">=11,<13", python = "<3.8", optional = true },
     { version = ">=13", python = ">=3.8", optional = true }
 ]
 
@@ -126,10 +126,6 @@ mypy = [
     { version = ">=1.0,<1.5", python = "<3.8" },
     { version = ">=1.0", python = ">=3.8" },
 ]
-pyarrow = [
-    { version = ">=11,<13", python = "<3.8" },
-    { version = ">=11", python = ">=3.8" }
-]
 pytest-benchmark = ">=4.0.0"
 pytest-snapshot = ">=0.9.0"
 requests-mock = ">=1.10.0"
@@ -163,7 +159,7 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.34.0b1"
+version = "0.34.0"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
