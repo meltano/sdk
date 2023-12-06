@@ -33,6 +33,7 @@ jobs:
     permissions:
       contents: write       # to create a github release
       pull-requests: write  # to create and update PRs
+      discussions: write    # to create a discussion
 
     steps:
     - uses: actions/checkout@v4.1.1
@@ -67,6 +68,7 @@ jobs:
         tag_name: v${{ steps.cz-bump.outputs.version }}
         prerelease: ${{ github.event.inputs.prerelease != 'none' }}
         token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}
+        discussion_category_name: ${{ github.event.inputs.prerelease && 'announcements' || '' }}
 
     - name: Set repo file permissions
       run: |
