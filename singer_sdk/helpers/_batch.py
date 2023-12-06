@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import enum
+import os.path
 import platform
 import typing as t
 from contextlib import contextmanager
@@ -10,11 +11,9 @@ from dataclasses import asdict, dataclass, field
 from urllib.parse import ParseResult, urlencode, urlparse
 
 import fs
+import fsspec
 
 from singer_sdk._singerlib.messages import Message, SingerMessageType
-
-if t.TYPE_CHECKING:
-    from fs.base import FS
 
 DEFAULT_BATCH_SIZE = 10000
 
@@ -174,7 +173,11 @@ class StorageTarget:
         return urlparse(self.root)._replace(query=urlencode(self.params))
 
     @contextmanager
-    def fs(self, **kwargs: t.Any) -> t.Generator[FS, None, None]:
+    def fs(
+        self,
+        *,
+        create: bool = False,
+    ) -> t.Generator[fsspec.AbstractFileSystem, None, None]:
         """Get a filesystem object for the storage target.
 
         Args:
@@ -183,9 +186,26 @@ class StorageTarget:
         Returns:
             The filesystem object.
         """
-        filesystem = fs.open_fs(self.fs_url.geturl(), **kwargs)
-        yield filesystem
-        filesystem.close()
+        fs, url = fsspec.core.url_to_fs(
+            self.root,
+            **self.params,
+        )
+        if create:
+            fs.mkdirs(url, exist_ok=True)
+        yield fs
+
+    def file_url(self, filename: str) -> str:
+        """Get the URL of a file in the storage target.
+
+        Args:
+            filename: The filename to get the URL for.
+
+        Returns:
+            The URL of the file.
+        """
+        return self.fs_url._replace(
+            path=os.path.join(self.fs_url.path, filename)
+        ).geturl()
 
     @contextmanager
     def open(

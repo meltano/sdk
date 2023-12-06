@@ -38,9 +38,10 @@ class JSONLinesBatcher(BaseBatcher):
             start=1,
         ):
             filename = f"{prefix}{sync_id}-{i}.json.gz"
-            with self.batch_config.storage.fs(create=True) as fs:
+            with self.batch_config.storage.fs() as fs:
                 # TODO: Determine compression from config.
-                with fs.open(filename, "wb") as f, gzip.GzipFile(
+                file_url = self.batch_config.storage.file_url(filename)
+                with fs.open(file_url, mode="wb") as f, gzip.GzipFile(
                     fileobj=f,
                     mode="wb",
                 ) as gz:
@@ -48,5 +49,4 @@ class JSONLinesBatcher(BaseBatcher):
                         (json.dumps(record, default=str) + "\n").encode()
                         for record in chunk
                     )
-                file_url = fs.geturl(filename)
             yield [file_url]
