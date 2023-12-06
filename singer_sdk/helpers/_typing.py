@@ -45,7 +45,7 @@ def to_json_compatible(val: t.Any) -> t.Any:  # noqa: ANN401
     If given a naive datetime object, pendulum automatically makes it utc
     """
     if isinstance(val, (datetime.datetime, pendulum.DateTime)):
-        return pendulum.instance(val).isoformat()
+        return pendulum.instance(val).isoformat("T")
     return val
 
 
