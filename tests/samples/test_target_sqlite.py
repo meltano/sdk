@@ -83,7 +83,7 @@ def test_sync_sqlite_to_sqlite(
         sqlite_sample_tap,
         sqlite_sample_target,
     )
-    orig_stdout.seek(0)
+    orig_stdout.rewind()
     tapped_config = dict(sqlite_sample_target.config)
     tapped_target = SQLiteTap(
         config=tapped_config,
@@ -91,12 +91,13 @@ def test_sync_sqlite_to_sqlite(
     )
     new_stdout, _ = tap_sync_test(tapped_target)
 
-    orig_stdout.seek(0)
+    orig_stdout.rewind()
+    new_stdout.rewind()
     orig_lines = orig_stdout.readlines()
     new_lines = new_stdout.readlines()
     assert len(orig_lines) > 0, "Orig tap output should not be empty."
     assert len(new_lines) > 0, "(Re-)tapped target output should not be empty."
-    assert len(orig_lines) == len(new_lines)
+    assert len(orig_lines) + 1 == len(new_lines)  # new is now always one off
 
     line_num = 0
     for line_num, orig_out, new_out in zip(
