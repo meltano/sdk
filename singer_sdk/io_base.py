@@ -8,6 +8,7 @@ import logging
 import sys
 import typing as t
 from collections import Counter, defaultdict
+from datetime import datetime
 
 import msgspec
 
@@ -15,10 +16,38 @@ from singer_sdk._singerlib.messages import Message, SingerMessageType
 from singer_sdk.helpers._compat import final
 
 logger = logging.getLogger(__name__)
-
-decoder = msgspec.json.Decoder(dec_hook=str, float_hook=decimal.Decimal)
-encoder = msgspec.json.Encoder(enc_hook=str, decimal_format="number")
 msg_buffer = bytearray(64)
+
+
+def enc_hook(obj: t.Any) -> t.Any:  # noqa: ANN401
+    """Enocding type helper for non native types.
+
+    Args:
+        obj: the item to be encoded
+
+    Returns:
+        The object converted to the appropriate type, default is str
+    """
+    return obj.isoformat(sep="T") if isinstance(obj, datetime) else str(obj)
+
+
+encoder = msgspec.json.Encoder(enc_hook=enc_hook, decimal_format="number")
+
+
+def dec_hook(type: type, obj: t.Any) -> t.Any:  # noqa: ARG001, A002, ANN401
+    """Decoding type helper for non native types.
+
+    Args:
+        type: the type given
+        obj: the item to be decoded
+
+    Returns:
+        The object converted to the appropriate type, default is str.
+    """
+    return str(obj)
+
+
+decoder = msgspec.json.Decoder(dec_hook=dec_hook, float_hook=decimal.Decimal)
 
 
 class SingerReader(metaclass=abc.ABCMeta):
