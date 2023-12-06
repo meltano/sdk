@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import enum
+import sys
 import typing as t
 from dataclasses import asdict, dataclass, field
-from datetime import timezone
+from datetime import datetime, timezone
 
+import simplejson as json
 from dateutil.parser import parse
-
-if t.TYPE_CHECKING:
-    from datetime import datetime
 
 
 class SingerMessageType(str, enum.Enum):
@@ -21,6 +20,18 @@ class SingerMessageType(str, enum.Enum):
     STATE = "STATE"
     ACTIVATE_VERSION = "ACTIVATE_VERSION"
     BATCH = "BATCH"
+
+
+def _default_encoding(obj: t.Any) -> str:  # noqa: ANN401
+    """Default JSON encoder.
+
+    Args:
+        obj: The object to encode.
+
+    Returns:
+        The encoded object.
+    """
+    return obj.isoformat(sep="T") if isinstance(obj, datetime) else str(obj)
 
 
 def exclude_null_dict(pairs: list[tuple[str, t.Any]]) -> dict[str, t.Any]:
@@ -198,3 +209,25 @@ class ActivateVersionMessage(Message):
     def __post_init__(self) -> None:
         """Post-init processing."""
         self.type = SingerMessageType.ACTIVATE_VERSION
+
+
+def format_message(message: Message) -> str:
+    """Format a message as a JSON string.
+
+    Args:
+        message: The message to format.
+
+    Returns:
+        The formatted message.
+    """
+    return json.dumps(message.to_dict(), use_decimal=True, default=_default_encoding)
+
+
+def write_message(message: Message) -> None:
+    """Write a message to stdout.
+
+    Args:
+        message: The message to write.
+    """
+    sys.stdout.write(format_message(message) + "\n")
+    sys.stdout.flush()
