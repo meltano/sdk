@@ -28,22 +28,38 @@ class DummyReader(SingerReader):
         pass
 
 
-def test_dec_hook():
-    test_type = int
-    test_obj = 1
-    expected_value = "1"
-    expceted_type = str
-    returned = dec_hook(type=test_type, obj=test_obj)
+@pytest.mark.parametrize(
+    "test_type,test_value,expected_value,expected_type",
+    [
+        pytest.param(
+            int,
+            1,
+            "1",
+            str,
+            id="int-to-str",
+        ),
+    ],
+)
+def test_dec_hook(test_type, test_value, expected_value, expected_type):
+    returned = dec_hook(type=test_type, obj=test_value)
     returned_type = type(returned)
 
     assert returned == expected_value
-    assert returned_type == expceted_type
+    assert returned_type == expected_type
 
 
-def test_enc_hook():
-    test_obj = 1
-    expected_value = "1"
-    returned = enc_hook(obj=test_obj)
+@pytest.mark.parametrize(
+    "test_value,expected_value",
+    [
+        pytest.param(
+            1,
+            "1",
+            id="int-to-str",
+        ),
+    ],
+)
+def test_enc_hook(test_value, expected_value):
+    returned = enc_hook(obj=test_value)
 
     assert returned == expected_value
 
