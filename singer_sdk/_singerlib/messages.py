@@ -9,7 +9,11 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
 import simplejson as json
-from dateutil.parser import parse
+
+if sys.version_info < (3, 11):
+    from backports.datetime_fromisoformat import MonkeyPatch
+
+    MonkeyPatch.patch_fromisoformat()
 
 
 class SingerMessageType(str, enum.Enum):
@@ -112,7 +116,9 @@ class RecordMessage(Message):
             stream=data["stream"],
             record=data["record"],
             version=data.get("version"),
-            time_extracted=parse(time_extracted) if time_extracted else None,
+            time_extracted=datetime.fromisoformat(time_extracted)
+            if time_extracted
+            else None,
         )
 
     def to_dict(self) -> dict[str, t.Any]:
