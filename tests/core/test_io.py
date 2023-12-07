@@ -38,7 +38,7 @@ class DummyReader(SingerReader):
             id="unparsable",
         ),
         pytest.param(
-            '{"type": "RECORD", "stream": "users", "record": {"id": 1, "value": 1.23}}',  # noqa: E501
+            '{"type": "RECORD", "stream": "users", "record": {"id": 1, "value": 1.23}}',
             {
                 "type": "RECORD",
                 "stream": "users",

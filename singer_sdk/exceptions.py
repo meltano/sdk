@@ -12,9 +12,28 @@ if t.TYPE_CHECKING:
 class ConfigValidationError(Exception):
     """Raised when a user's config settings fail validation."""
 
+    def __init__(
+        self,
+        message: str,
+        *,
+        errors: list[str] | None = None,
+    ) -> None:
+        """Initialize a ConfigValidationError.
+
+        Args:
+            message: A message describing the error.
+            errors: A list of errors which caused the validation error.
+        """
+        super().__init__(message)
+        self.errors = errors or []
+
 
 class FatalAPIError(Exception):
     """Exception raised when a failed request should not be considered retriable."""
+
+
+class InvalidReplicationKeyException(Exception):
+    """Exception to raise if the replication key is not in the stream properties."""
 
 
 class InvalidStreamSortException(Exception):

@@ -1,12 +1,17 @@
 from __future__ import annotations
 
-from freezegun import freeze_time
+import datetime
+
+import time_machine
 
 from tests.conftest import BatchSinkMock, TargetMock
 
 
 def test_sdc_metadata():
-    with freeze_time("2023-01-01T00:00:00+00:00"):
+    with time_machine.travel(
+        datetime.datetime(2023, 1, 1, tzinfo=datetime.timezone.utc),
+        tick=False,
+    ):
         target = TargetMock()
 
     sink = BatchSinkMock(
@@ -25,7 +30,10 @@ def test_sdc_metadata():
     }
     record = record_message["record"]
 
-    with freeze_time("2023-01-01T00:05:00+00:00"):
+    with time_machine.travel(
+        datetime.datetime(2023, 1, 1, 0, 5, tzinfo=datetime.timezone.utc),
+        tick=False,
+    ):
         sink._add_sdc_metadata_to_record(record, record_message, {})
 
     assert record == {

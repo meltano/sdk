@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import sys
 from datetime import datetime, timedelta
 
-import dateutil.parser
 import pytz
+
+if sys.version_info < (3, 11):
+    from backports.datetime_fromisoformat import MonkeyPatch
+
+    MonkeyPatch.patch_fromisoformat()
 
 DATETIME_FMT = "%04Y-%m-%dT%H:%M:%S.%fZ"
 DATETIME_FMT_SAFE = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -26,7 +31,7 @@ def strptime_to_utc(dtimestr: str) -> datetime:
     Returns:
         A UTC datetime.datetime object
     """
-    d_object: datetime = dateutil.parser.parse(dtimestr)
+    d_object: datetime = datetime.fromisoformat(dtimestr)
     if d_object.tzinfo is None:
         return d_object.replace(tzinfo=pytz.UTC)
 

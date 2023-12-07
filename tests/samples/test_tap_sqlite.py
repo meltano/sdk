@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import datetime
 import json
 import typing as t
 
+import pytest
+import time_machine
 from click.testing import CliRunner
 
 from samples.sample_tap_sqlite import SQLiteTap
@@ -11,6 +14,7 @@ from singer_sdk import SQLStream
 from singer_sdk._singerlib import MetadataMapping, StreamMetadata
 from singer_sdk.testing import (
     get_standard_tap_tests,
+    tap_sync_test,
     tap_to_target_sync_test,
 )
 
@@ -115,4 +119,28 @@ def test_sync_sqlite_to_csv(sqlite_sample_tap: SQLTap, tmp_path: Path):
     orig_stdout, _, _, _ = tap_to_target_sync_test(
         sqlite_sample_tap,
         SampleTargetCSV(config={"target_folder": f"{tmp_path}/"}),
+    )
+
+
+@pytest.fixture
+@time_machine.travel(
+    datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc),
+    tick=False,
+)
+def sqlite_sample_tap_state_messages(sqlite_sample_tap: SQLTap) -> list[dict]:
+    stdout, _ = tap_sync_test(sqlite_sample_tap)
+    state_messages = []
+    for line in stdout.readlines():
+        message = json.loads(line)
+        if message["type"] == "STATE":
+            state_messages.append(message)
+
+    return state_messages
+
+
+def test_sqlite_state(sqlite_sample_tap_state_messages):
+    assert all(
+        "progress_markers" not in bookmark
+        for message in sqlite_sample_tap_state_messages
+        for bookmark in message["value"]["bookmarks"].values()
     )

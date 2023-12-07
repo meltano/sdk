@@ -5,7 +5,7 @@ from __future__ import annotations
 import base64
 import math
 import typing as t
-from datetime import datetime, timedelta
+from datetime import timedelta
 from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
@@ -19,6 +19,8 @@ from singer_sdk.helpers._util import utc_now
 
 if t.TYPE_CHECKING:
     import logging
+
+    from pendulum import DateTime
 
     from singer_sdk.streams.rest import RESTStream
 
@@ -379,7 +381,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         # Initialize internal tracking attributes
         self.access_token: str | None = None
         self.refresh_token: str | None = None
-        self.last_refreshed: datetime | None = None
+        self.last_refreshed: DateTime | None = None
         self.expires_in: int | None = None
 
     @property
@@ -463,9 +465,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         Returns:
             Optional client secret from stream config if it has been set.
         """
-        if self.config:
-            return self.config.get("client_id")
-        return None
+        return self.config.get("client_id") if self.config else None
 
     @property
     def client_secret(self) -> str | None:
@@ -474,9 +474,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         Returns:
             Optional client secret from stream config if it has been set.
         """
-        if self.config:
-            return self.config.get("client_secret")
-        return None
+        return self.config.get("client_secret") if self.config else None
 
     def is_token_valid(self) -> bool:
         """Check if token is valid.
@@ -488,9 +486,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             return False
         if not self.expires_in:
             return True
-        if self.expires_in > (utc_now() - self.last_refreshed).total_seconds():
-            return True
-        return False
+        return self.expires_in > (utc_now() - self.last_refreshed).total_seconds()  # type: ignore[no-any-return]
 
     # Authentication and refresh
     def update_access_token(self) -> None:
@@ -521,7 +517,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         self.expires_in = int(expiration) if expiration else None
         if self.expires_in is None:
             self.logger.debug(
-                "No expires_in receied in OAuth response and no "
+                "No expires_in received in OAuth response and no "
                 "default_expiration set. Token will be treated as if it never "
                 "expires.",
             )
@@ -567,7 +563,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
 
     @property
     def oauth_request_payload(self) -> dict:
-        """Return request paytload for OAuth request.
+        """Return request payload for OAuth request.
 
         Returns:
             Payload object for OAuth.

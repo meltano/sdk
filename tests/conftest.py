@@ -12,6 +12,7 @@ from sqlalchemy import __version__ as sqlalchemy_version
 
 from singer_sdk import SQLConnector
 from singer_sdk import typing as th
+from singer_sdk.helpers._typing import DatetimeErrorTreatmentEnum
 from singer_sdk.helpers.capabilities import PluginCapabilities
 from singer_sdk.sinks import BatchSink, SQLSink
 from singer_sdk.target_base import SQLTarget, Target
@@ -52,7 +53,7 @@ def pytest_report_header() -> list[str]:
 
 @pytest.fixture(scope="class")
 def outdir() -> t.Generator[str, None, None]:
-    """Create a temporary directory for cookiecutters and target output."""
+    """Create a temporary directory for target output."""
     name = ".output/"
     try:
         pathlib.Path(name).mkdir(parents=True)
@@ -75,6 +76,7 @@ class BatchSinkMock(BatchSink):
     """A mock Sink class."""
 
     name = "batch-sink-mock"
+    datetime_error_treatment = DatetimeErrorTreatmentEnum.MAX
 
     def __init__(
         self,

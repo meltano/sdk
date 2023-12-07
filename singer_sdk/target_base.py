@@ -19,6 +19,7 @@ from singer_sdk.helpers._compat import final
 from singer_sdk.helpers.capabilities import (
     ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
+    TARGET_LOAD_METHOD_CONFIG,
     TARGET_SCHEMA_CONFIG,
     CapabilitiesEnum,
     PluginCapabilities,
@@ -369,7 +370,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         stream_name = message_dict["stream"]
         schema = message_dict["schema"]
-        key_properties = message_dict.get("key_properties", None)
+        key_properties = message_dict.get("key_properties")
         do_registration = False
         if stream_name not in self.mapper.stream_maps:
             do_registration = True
@@ -597,6 +598,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                     target_jsonschema["properties"][k] = v
 
         _merge_missing(ADD_RECORD_METADATA_CONFIG, config_jsonschema)
+        _merge_missing(TARGET_LOAD_METHOD_CONFIG, config_jsonschema)
 
         capabilities = cls.capabilities
 
@@ -604,8 +606,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             _merge_missing(BATCH_CONFIG, config_jsonschema)
 
         super().append_builtin_config(config_jsonschema)
-
-    pass
 
 
 class SQLTarget(Target):
@@ -669,8 +669,6 @@ class SQLTarget(Target):
             _merge_missing(TARGET_SCHEMA_CONFIG, config_jsonschema)
 
         super().append_builtin_config(config_jsonschema)
-
-    pass
 
     @final
     def add_sqlsink(

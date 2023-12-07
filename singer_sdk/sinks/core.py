@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import copy
 import datetime
+import importlib.util
 import json
 import time
 import typing as t
@@ -12,8 +13,7 @@ from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
 
-from dateutil import parser
-from jsonschema import Draft7Validator, FormatChecker
+from jsonschema import Draft7Validator
 
 from singer_sdk.exceptions import MissingKeyPropertiesError
 from singer_sdk.helpers._batch import (
@@ -22,7 +22,12 @@ from singer_sdk.helpers._batch import (
     BatchFileFormat,
     StorageTarget,
 )
-from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._compat import (
+    date_fromisoformat,
+    datetime_fromisoformat,
+    final,
+    time_fromisoformat,
+)
 from singer_sdk.helpers._typing import (
     DatetimeErrorTreatmentEnum,
     get_datelike_property_type,
@@ -61,7 +66,7 @@ class Sink(metaclass=abc.ABCMeta):
             schema: Schema of the stream to sink.
             key_properties: Primary key of the stream to sink.
         """
-        self.logger = target.logger
+        self.logger = target.logger.getChild(stream_name)
         self.sync_started_at = target.initialized_at
         self._config = dict(target.config)
         self._pending_batch: dict | None = None
@@ -90,7 +95,10 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
-        self._validator = Draft7Validator(schema, format_checker=FormatChecker())
+        self._validator = Draft7Validator(
+            schema,
+            format_checker=Draft7Validator.FORMAT_CHECKER,
+        )
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return an empty dictionary by default.
@@ -247,7 +255,7 @@ class Sink(metaclass=abc.ABCMeta):
             tz=datetime.timezone.utc,
         ).isoformat()
         record["_sdc_batched_at"] = (
-            context.get("batch_start_time", None)
+            context.get("batch_start_time")
             or datetime.datetime.now(tz=datetime.timezone.utc)
         ).isoformat()
         record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
@@ -365,14 +373,22 @@ class Sink(metaclass=abc.ABCMeta):
             schema: TODO
             treatment: TODO
         """
-        for key in record:
+        for key, value in record.items():
+            if key not in schema["properties"]:
+                self.logger.warning("No schema for record field '%s'", key)
+                continue
             datelike_type = get_datelike_property_type(schema["properties"][key])
             if datelike_type:
-                date_val = record[key]
+                date_val = value
                 try:
-                    if record[key] is not None:
-                        date_val = parser.parse(date_val)
-                except parser.ParserError as ex:
+                    if value is not None:
+                        if datelike_type == "time":
+                            date_val = time_fromisoformat(date_val)
+                        elif datelike_type == "date":
+                            date_val = date_fromisoformat(date_val)
+                        else:
+                            date_val = datetime_fromisoformat(date_val)
+                except ValueError as ex:
                     date_val = handle_invalid_timestamp_in_record(
                         record,
                         [key],
@@ -525,15 +541,24 @@ class Sink(metaclass=abc.ABCMeta):
                     tail,
                     mode="rb",
                 ) as file:
-                    open_file = (
+                    context_file = (
                         gzip_open(file) if encoding.compression == "gzip" else file
                     )
-                    context = {
-                        "records": [
-                            json.loads(line)
-                            for line in open_file  # type: ignore[attr-defined]
-                        ],
-                    }
+                    context = {"records": [json.loads(line) for line in context_file]}  # type: ignore[attr-defined]
+                    self.process_batch(context)
+            elif (
+                importlib.util.find_spec("pyarrow")
+                and encoding.format == BatchFileFormat.PARQUET
+            ):
+                import pyarrow.parquet as pq
+
+                with storage.fs(create=False) as batch_fs, batch_fs.open(
+                    tail,
+                    mode="rb",
+                ) as file:
+                    context_file = file
+                    table = pq.read_table(context_file)
+                    context = {"records": table.to_pylist()}
                     self.process_batch(context)
             else:
                 msg = f"Unsupported batch encoding format: {encoding.format}"

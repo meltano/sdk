@@ -11,7 +11,7 @@ from enum import Enum
 
 import click
 
-from singer_sdk._singerlib import Catalog, StateMessage, write_message
+from singer_sdk._singerlib import Catalog, StateMessage
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.exceptions import AbortedSyncFailedException, AbortedSyncPausedException
 from singer_sdk.helpers import _state
@@ -25,11 +25,13 @@ from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
     TapCapabilities,
 )
+from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
 
+    from singer_sdk.connectors import SQLConnector
     from singer_sdk.mapper import PluginMapper
     from singer_sdk.streams import SQLStream, Stream
 
@@ -44,7 +46,7 @@ class CliTestOptionValue(Enum):
     Disabled = "disabled"
 
 
-class Tap(PluginBase, metaclass=abc.ABCMeta):
+class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
     """Abstract base class for taps.
 
     The Tap class governs configuration, validation, and stream discovery for tap
@@ -120,10 +122,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         Returns:
             A mapping of names to streams, using discovery or a provided catalog.
         """
-        input_catalog = self.input_catalog
-
         if self._streams is None:
             self._streams = {}
+            input_catalog = self.input_catalog
+
             for stream in self.load_streams():
                 if input_catalog is not None:
                     stream.apply_catalog(input_catalog)
@@ -407,7 +409,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def _reset_state_progress_markers(self) -> None:
         """Clear prior jobs' progress markers at beginning of sync."""
-        for _, state in self.state.get("bookmarks", {}).items():
+        for state in self.state.get("bookmarks", {}).values():
             _state.reset_state_progress_markers(state)
             for partition_state in state.get("partitions", []):
                 _state.reset_state_progress_markers(partition_state)
@@ -438,7 +440,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Sync all streams."""
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
-        write_message(StateMessage(value=self.state))
+        self.write_message(StateMessage(value=self.state))
 
         stream: Stream
         for stream in self.streams.values():
@@ -612,6 +614,8 @@ class SQLTap(Tap):
     # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: type[SQLStream]
 
+    _tap_connector: SQLConnector | None = None
+
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Initialize the SQL tap.
 
@@ -623,6 +627,19 @@ class SQLTap(Tap):
         """
         self._catalog_dict: dict | None = None
         super().__init__(*args, **kwargs)
+
+    @property
+    def tap_connector(self) -> SQLConnector:
+        """The connector object.
+
+        Returns:
+            The connector object.
+        """
+        if self._tap_connector is None:
+            self._tap_connector = self.default_stream_class.connector_class(
+                dict(self.config),
+            )
+        return self._tap_connector
 
     @property
     def catalog_dict(self) -> dict:
@@ -637,7 +654,7 @@ class SQLTap(Tap):
         if self.input_catalog:
             return self.input_catalog.to_dict()
 
-        connector = self.default_stream_class.connector_class(dict(self.config))
+        connector = self.tap_connector
 
         result: dict[str, list[dict]] = {"streams": []}
         result["streams"].extend(connector.discover_catalog_entries())
@@ -651,8 +668,11 @@ class SQLTap(Tap):
         Returns:
             List of discovered Stream objects.
         """
-        result: list[Stream] = []
-        for catalog_entry in self.catalog_dict["streams"]:
-            result.append(self.default_stream_class(self, catalog_entry))
-
-        return result
+        return [
+            self.default_stream_class(
+                tap=self,
+                catalog_entry=catalog_entry,
+                connector=self.tap_connector,
+            )
+            for catalog_entry in self.catalog_dict["streams"]
+        ]

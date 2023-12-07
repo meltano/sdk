@@ -2,6 +2,7 @@
     "cookiecutter": {
       "destination_name": "MyDestinationName",
       "admin_name": "FirstName LastName",
+      "admin_email": "firstname.lastname@example.com",
       "target_id": "target-sql",
       "library_name": "target_sql",
       "variant": "None (Skip)",

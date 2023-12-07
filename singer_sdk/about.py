@@ -138,10 +138,7 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
         Returns:
             A formatted string.
         """
-        max_setting_len = t.cast(
-            int,
-            max(len(k) for k in about_info.settings["properties"]),
-        )
+        max_setting_len = max(len(k) for k in about_info.settings["properties"])
 
         # Set table base for markdown
         table_base = (

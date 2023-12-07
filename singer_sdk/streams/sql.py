@@ -51,7 +51,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             A CatalogEntry object.
         """
-        return t.cast(CatalogEntry, CatalogEntry.from_dict(self.catalog_entry))
+        return CatalogEntry.from_dict(self.catalog_entry)
 
     @property
     def connector(self) -> SQLConnector:
@@ -209,6 +209,18 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
                     # Record filtered out during post_process()
                     continue
                 yield transformed_record
+
+    @property
+    def is_sorted(self) -> bool:
+        """Expect stream to be sorted.
+
+        When `True`, incremental streams will attempt to resume if unexpectedly
+        interrupted.
+
+        Returns:
+            `True` if stream is sorted. Defaults to `False`.
+        """
+        return self.replication_key is not None
 
 
 __all__ = ["SQLStream", "SQLConnector"]
