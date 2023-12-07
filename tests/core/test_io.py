@@ -87,7 +87,7 @@ def bench_encoded_record(bench_record):
     return json.dumps(bench_record)
 
 
-def test_bench_format(benchmark, bench_record_message):
+def test_bench_format_message(benchmark, bench_record_message):
     """Run benchmark for Sink._validator method validate."""
     number_of_runs = 1000
 
