@@ -53,8 +53,6 @@ decoder = msgspec.json.Decoder(dec_hook=dec_hook, float_hook=decimal.Decimal)
 class SingerReader(metaclass=abc.ABCMeta):
     """Interface for all plugins reading Singer messages from stdin."""
 
-    stream_structs: dict[str, msgspec.Struct] = {}  # noqa: RUF012
-
     @final
     def listen(self, file_input: t.IO | None = None) -> None:
         """Read from input until all messages are processed.
