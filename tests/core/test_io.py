@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import decimal
+import sys
+import typing as t
 from contextlib import nullcontext
 
 import msgspec
@@ -12,6 +14,11 @@ from singer_sdk.io_base import SingerReader, dec_hook, enc_hook
 
 
 class DummyReader(SingerReader):
+    returned_file_input: t.IO = None
+
+    def _process_lines(self, file_input: t.IO) -> t.Counter[str]:
+        self.returned_file_input = file_input
+
     def _process_activate_version_message(self, message_dict: dict) -> None:
         pass
 
@@ -62,6 +69,24 @@ def test_enc_hook(test_value, expected_value):
     returned = enc_hook(obj=test_value)
 
     assert returned == expected_value
+
+
+@pytest.mark.parametrize(
+    "test_value,expected_value",
+    [
+        pytest.param(
+            None,
+            sys.stdin.buffer,
+            id="file_input_is_none",
+        ),
+    ],
+)
+def test_listen_file_input(test_value, expected_value):
+    reader = DummyReader()
+
+    reader.listen(test_value)
+
+    assert reader.returned_file_input is expected_value
 
 
 @pytest.mark.parametrize(
