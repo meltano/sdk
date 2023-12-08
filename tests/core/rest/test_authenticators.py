@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import datetime
 import typing as t
 
 import jwt
 import pytest
+import time_machine
 from cryptography.hazmat.primitives.asymmetric.rsa import (
     RSAPrivateKey,
     RSAPublicKey,
@@ -125,7 +127,7 @@ def test_oauth_authenticator_token_expiry_handling(
     requests_mock: requests_mock.Mocker,
     oauth_response_expires_in: int,
     default_expiration: int,
-    result: bool,
+    result: int | None,
 ):
     """Validate various combinations of expires_in and default_expiration."""
     response = {"access_token": "an-access-token"}
@@ -143,9 +145,25 @@ def test_oauth_authenticator_token_expiry_handling(
         auth_endpoint="https://example.com/oauth",
         default_expiration=default_expiration,
     )
-    authenticator.update_access_token()
+    with time_machine.travel(
+        datetime.datetime(2023, 1, 1, tzinfo=datetime.timezone.utc),
+        tick=False,
+    ):
+        authenticator.update_access_token()
 
     assert authenticator.expires_in == result
+
+    with time_machine.travel(
+        datetime.datetime(2023, 1, 1, 0, 1, tzinfo=datetime.timezone.utc),
+        tick=False,
+    ):
+        assert authenticator.is_token_valid()
+
+    with time_machine.travel(
+        datetime.datetime(2023, 1, 1, 0, 5, tzinfo=datetime.timezone.utc),
+        tick=False,
+    ):
+        assert not authenticator.expires_in or not authenticator.is_token_valid()
 
 
 @pytest.fixture
