@@ -57,6 +57,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # Show typehints in the description, along with parameter descriptions
 autodoc_typehints = "signature"
 autodoc_class_signature = "separated"
+autodoc_member_order = "groupwise"
 
 # -- Options for HTML output -------------------------------------------------
 

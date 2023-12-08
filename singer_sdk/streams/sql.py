@@ -5,6 +5,8 @@ from __future__ import annotations
 import abc
 import typing as t
 
+from sqlalchemy import nulls_first
+
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
@@ -19,6 +21,9 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
     connector_class = SQLConnector
     _cached_schema: dict | None = None
+
+    supports_nulls_first: bool = False
+    """Whether the database supports the NULLS FIRST/LAST syntax."""
 
     def __init__(
         self,
@@ -189,7 +194,12 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         if self.replication_key:
             replication_key_col = table.columns[self.replication_key]
-            query = query.order_by(replication_key_col)
+            order_by = (
+                nulls_first(replication_key_col.asc())
+                if self.supports_nulls_first
+                else replication_key_col.asc()
+            )
+            query = query.order_by(order_by)
 
             start_val = self.get_starting_replication_key_value(context)
             if start_val:
