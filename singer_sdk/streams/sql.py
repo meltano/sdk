@@ -213,7 +213,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
 
         with self.connector._connect() as conn:
-            for record in conn.execute(query).mappings().all():
+            for record in conn.execute(query).mappings():
                 # TODO: Standardize record mapping type
                 # https://github.com/meltano/sdk/issues/2096
                 transformed_record = self.post_process(dict(record))
