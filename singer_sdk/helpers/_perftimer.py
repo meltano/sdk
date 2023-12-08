@@ -100,7 +100,7 @@ class BatchPerfTimer(PerfTimer):
     @property
     def perf_diff(self) -> float:
         """Difference between wanted elapsed time and actual elapsed time."""
-        diff = self.max_perf_counter - self.lap_time if self._lap_time else 0
+        diff = self.max_perf_counter - self.lap_time if self.lap_time else 0
         return float(diff)
 
     def counter_based_max_size(self) -> None:  # noqa: C901
