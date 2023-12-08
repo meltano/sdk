@@ -276,7 +276,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         """Write a SCHEMA message for all known streams to STDOUT."""
         for stream in self.streams.values():
             stream.selected = True
-            stream._write_schema_message()
+            stream._write_schema_message()  # noqa: SLF001
 
     # Stream detection:
 
@@ -316,7 +316,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
             :class:`singer_sdk._singerlib.Catalog`.
         """
         return Catalog(
-            (stream.tap_stream_id, stream._singer_catalog_entry)
+            (stream.tap_stream_id, stream._singer_catalog_entry)  # noqa: SLF001
             for stream in self.streams.values()
         )
 

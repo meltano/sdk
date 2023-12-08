@@ -138,7 +138,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         logger = logging.getLogger(cls.name)
 
-        if log_level is not None and log_level.upper() in logging._levelToName.values():
+        if log_level is not None and log_level.upper() in logging._levelToName.values():  # noqa: SLF001
             logger.setLevel(log_level.upper())
 
         return logger
@@ -187,7 +187,7 @@ class PluginBase(metaclass=abc.ABCMeta):
             if self._is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
-        metrics._setup_logging(self.config)
+        metrics._setup_logging(self.config)  # noqa: SLF001
         self.metrics_logger = metrics.get_metrics_logger()
 
         self._validate_config(raise_errors=validate_config)
