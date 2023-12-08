@@ -215,7 +215,8 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         with self.connector._connect() as conn:
             for record in conn.execute(query).mappings().all():
                 # TODO: Standardize record mapping type
-                transformed_record = self.post_process(record)  # type: ignore[arg-type]
+                # https://github.com/meltano/sdk/issues/2096
+                transformed_record = self.post_process(dict(record))
                 if transformed_record is None:
                     # Record filtered out during post_process()
                     continue
