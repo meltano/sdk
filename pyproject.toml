@@ -281,7 +281,7 @@ select = [
     "Q",    # flake8-quotes
     "RSE",  # flake8-raise
     "RET",  # flake8-return
-    # "SLF",  # flake8-self
+    "SLF",  # flake8-self
     "SIM",  # flake8-simplify
     "TID",  # flake8-tidy-imports
     "TCH",  # flake8-type-checking
@@ -307,7 +307,7 @@ unfixable = [
     "INP001", # flake8-no-pep420: implicit-namespace-package
 ]
 "noxfile.py" = ["ANN"]
-"tests/*" = ["ANN", "D1", "D2", "FBT001", "FBT003", "PLR2004", "S101"]
+"tests/*" = ["ANN", "D1", "D2", "FBT001", "FBT003", "PLR2004", "S101", "SLF001"]
 # Disabled some checks in samples code
 "samples/*" = ["ANN", "D"]
 # Templates support a generic resource of type Any.

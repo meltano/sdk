@@ -212,7 +212,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             # processed.
             query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
 
-        with self.connector._connect() as conn:
+        with self.connector._connect() as conn:  # noqa: SLF001
             for record in conn.execute(query).mappings():
                 # TODO: Standardize record mapping type
                 # https://github.com/meltano/sdk/issues/2096
