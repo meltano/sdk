@@ -213,8 +213,9 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
 
         with self.connector._connect() as conn:
-            for record in conn.execute(query):
-                transformed_record = self.post_process(dict(record._mapping))
+            for record in conn.execute(query).mappings().all():
+                # TODO: Standardize record mapping type
+                transformed_record = self.post_process(record)  # type: ignore[arg-type]
                 if transformed_record is None:
                     # Record filtered out during post_process()
                     continue
