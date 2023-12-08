@@ -17,15 +17,15 @@ class PerfTimer:
     _lap_time: float | None = None
 
     @property
-    def start_time(self):
+    def start_time(self) -> float | None:
         return self._start_time
 
     @property
-    def stop_time(self):
+    def stop_time(self) -> float | None:
         return self._stop_time
 
     @property
-    def lap_time(self):
+    def lap_time(self) -> float | None:
         return self._lap_time
 
     def start(self) -> None:
