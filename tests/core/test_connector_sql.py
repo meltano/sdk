@@ -317,7 +317,7 @@ class TestDuckDBConnector:
         engine = connector._engine
         connector.create_schema("test_schema")
         inspector = sqlalchemy.inspect(engine)
-        assert "test_schema" in inspector.get_schema_names()
+        assert "memory.test_schema" in inspector.get_schema_names()
 
     def test_column_rename(self, connector: DuckDBConnector):
         engine = connector._engine
