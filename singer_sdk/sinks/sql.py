@@ -327,7 +327,7 @@ class SQLSink(BatchSink):
 
         self.logger.info("Inserting with SQL: %s", insert_sql)
 
-        with self.connector._connect() as conn, conn.begin():
+        with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
             result = conn.execute(insert_sql, new_records)
 
         return result.rowcount
@@ -379,7 +379,7 @@ class SQLSink(BatchSink):
             )
 
         if self.config.get("hard_delete", True):
-            with self.connector._connect() as conn, conn.begin():
+            with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
                 conn.execute(
                     sqlalchemy.text(
                         f"DELETE FROM {self.full_table_name} "  # noqa: S608
@@ -408,7 +408,7 @@ class SQLSink(BatchSink):
             bindparam("deletedate", value=deleted_at, type_=sqlalchemy.types.DateTime),
             bindparam("version", value=new_version, type_=sqlalchemy.types.Integer),
         )
-        with self.connector._connect() as conn, conn.begin():
+        with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
             conn.execute(query)
 
 

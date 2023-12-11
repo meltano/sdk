@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
+import datetime
 import typing as t
 from pathlib import Path
-
-import pendulum
 
 from singer_sdk.authenticators import OAuthJWTAuthenticator
 from singer_sdk.streams import RESTStream
@@ -59,7 +58,7 @@ class SampleGoogleAnalyticsStream(RESTStream):
             request_def["dateRanges"] = [
                 {
                     "startDate": self.config.get("start_date"),
-                    "endDate": pendulum.now(tz="UTC"),
+                    "endDate": datetime.datetime.now(datetime.timezone.utc),
                 },
             ]
         return {"reportRequests": [request_def]}

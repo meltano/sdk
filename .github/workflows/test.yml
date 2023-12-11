@@ -47,7 +47,7 @@ jobs:
       matrix:
         session: [tests]
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
         sqlalchemy: ["2.*"]
         include:
         - { session: tests,   python-version: "3.11", os: "ubuntu-latest", sqlalchemy: "1.*" }
@@ -68,7 +68,7 @@ jobs:
         poetry self show plugins
 
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4.7.1
+      uses: actions/setup-python@v5.0.0
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
@@ -132,7 +132,7 @@ jobs:
         poetry self show plugins
 
     - name: Setup Python
-      uses: actions/setup-python@v4.7.1
+      uses: actions/setup-python@v5.0.0
       with:
         python-version: ${{ env.NOXPYTHON }}
         architecture: x64
@@ -176,7 +176,7 @@ jobs:
         poetry self show plugins
 
     - name: Set up Python
-      uses: actions/setup-python@v4.7.1
+      uses: actions/setup-python@v5.0.0
       with:
         python-version: '3.11'
         cache: 'pip'

@@ -5,11 +5,11 @@ from __future__ import annotations
 import typing as t
 import warnings
 
-from dateutil import parser
 from jsonschema import Draft7Validator
 
 import singer_sdk.helpers._typing as th
 from singer_sdk import Tap
+from singer_sdk.helpers._compat import datetime_fromisoformat
 
 from .templates import AttributeTestTemplate, StreamTestTemplate, TapTestTemplate
 
@@ -194,8 +194,8 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
         try:
             for v in self.non_null_attribute_values:
                 error_message = f"Unable to parse value ('{v}') with datetime parser."
-                assert parser.parse(v), error_message
-        except parser.ParserError as e:
+                assert datetime_fromisoformat(v), error_message
+        except ValueError as e:
             raise AssertionError(error_message) from e
 
     @classmethod
