@@ -317,9 +317,9 @@ class TargetTestRunner(SingerTestRunner):
 
         with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
             if target_input is not None:
-                target._process_lines(target_input)
+                target._process_lines(target_input)  # noqa: SLF001
             if finalize:
-                target._process_endofpipe()
+                target._process_endofpipe()  # noqa: SLF001
 
         stdout_buf.seek(0)
         stderr_buf.seek(0)
