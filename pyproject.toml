@@ -24,6 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
@@ -55,7 +56,10 @@ jsonschema = [
 ]
 memoization = { version = ">=0.3.2,<0.5.0", python = "<4" }
 packaging = ">=23.1"
-pendulum = ">=2.1.0"
+pendulum = [
+    {version = ">=2.1.0,<3", python = "<3.8"},
+    {version = ">=2.1.0,<4", python = ">=3.8", allow-prereleases = true},
+]
 PyJWT = "~=2.4"
 python-dateutil = ">=2.8.2"
 python-dotenv = ">=0.20"
@@ -86,7 +90,8 @@ fs-s3fs = {version = ">=1.1.1", optional = true}
 # Parquet file dependencies installed as optional 'parquet' extras
 numpy = [
     { version = "<1.22", python = "<3.8", optional = true },
-    { version = ">=1.22", python = ">=3.8", optional = true },
+    { version = ">=1.22,<1.25", python = ">=3.8,<3.9", optional = true },
+    { version = ">=1.22", python = ">=3.9", optional = true },
 ]
 pyarrow = [
     { version = ">=11,<13", python = "<3.8", optional = true },
@@ -120,8 +125,11 @@ coverage = [
     {extras = ["toml"], version = ">=7.2,<7.3", python = "<3.8"},
     {extras = ["toml"], version = ">=7.2", python = ">=3.8"},
 ]
-duckdb = ">=0.8.0"
-duckdb-engine = ">=0.9.4"
+
+# TODO: Remove the Python 3.12 marker when DuckDB supports it
+duckdb = { version = ">=0.8.0", python = "<3.12" }
+duckdb-engine = { version = ">=0.9.4", python = "<3.12" }
+
 mypy = [
     { version = ">=1.0,<1.5", python = "<3.8" },
     { version = ">=1.0", python = ">=3.8" },
