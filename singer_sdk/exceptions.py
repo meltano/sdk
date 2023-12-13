@@ -138,3 +138,11 @@ class ConformedNameClashException(Exception):
 
 class MissingKeyPropertiesError(Exception):
     """Raised when a recieved (and/or transformed) record is missing key properties."""
+
+
+class InvalidJSONSchema(Exception):
+    """Raised when a JSON schema is invalid."""
+
+
+class InvalidRecord(Exception):
+    """Raised when a stream record is invalid according to its declared schema."""
