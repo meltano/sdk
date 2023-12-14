@@ -1013,26 +1013,26 @@ def to_sql_type(  # noqa: PLR0911, C901
         datelike_type = get_datelike_property_type(jsonschema_type)
         if datelike_type:
             if datelike_type == "date-time":
-                return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATETIME())
+                return sqlalchemy.types.DATETIME()
             if datelike_type in "time":
-                return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.TIME())
+                return sqlalchemy.types.TIME()
             if datelike_type == "date":
-                return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATE())
+                return sqlalchemy.types.DATE()
 
         maxlength = jsonschema_type.get("maxLength")
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR(maxlength))
+        return sqlalchemy.types.VARCHAR(maxlength)
 
     if _jsonschema_type_check(jsonschema_type, ("integer",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.INTEGER())
+        return sqlalchemy.types.INTEGER()
     if _jsonschema_type_check(jsonschema_type, ("number",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DECIMAL())
+        return sqlalchemy.types.DECIMAL()
     if _jsonschema_type_check(jsonschema_type, ("boolean",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.BOOLEAN())
+        return sqlalchemy.types.BOOLEAN()
 
     if _jsonschema_type_check(jsonschema_type, ("object",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR())
+        return sqlalchemy.types.VARCHAR()
 
     if _jsonschema_type_check(jsonschema_type, ("array",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR())
+        return sqlalchemy.types.VARCHAR()
 
-    return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR())
+    return sqlalchemy.types.VARCHAR()

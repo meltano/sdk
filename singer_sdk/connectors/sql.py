@@ -444,8 +444,10 @@ class SQLConnector:
         if pk_def and "constrained_columns" in pk_def:
             possible_primary_keys.append(pk_def["constrained_columns"])
 
+        # An element of the columns list is ``None`` if it's an expression and is
+        # returned in the ``expressions`` list of the reflected index.
         possible_primary_keys.extend(
-            index_def["column_names"]
+            index_def["column_names"]  # type: ignore[misc]
             for index_def in inspected.get_indexes(table_name, schema=schema_name)
             if index_def.get("unique", False)
         )
@@ -457,9 +459,7 @@ class SQLConnector:
         for column_def in inspected.get_columns(table_name, schema=schema_name):
             column_name = column_def["name"]
             is_nullable = column_def.get("nullable", False)
-            jsonschema_type: dict = self.to_jsonschema_type(
-                t.cast(sqlalchemy.types.TypeEngine, column_def["type"]),
-            )
+            jsonschema_type: dict = self.to_jsonschema_type(column_def["type"])
             table_schema.append(
                 th.Property(
                     name=column_name,
@@ -979,7 +979,7 @@ class SQLConnector:
             msg = f"Column `{column_name}` does not exist in table `{full_table_name}`."
             raise KeyError(msg) from ex
 
-        return t.cast(sqlalchemy.types.TypeEngine, column.type)
+        return column.type
 
     @staticmethod
     def get_column_add_ddl(

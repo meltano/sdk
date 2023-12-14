@@ -245,6 +245,9 @@ line-length = 88
 src = ["samples", "singer_sdk", "tests"]
 target-version = "py37"
 
+[tool.ruff.format]
+docstring-code-format = true
+
 [tool.ruff.lint]
 exclude = [
     "cookiecutter/*",

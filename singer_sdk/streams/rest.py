@@ -292,6 +292,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
 
            from urllib.parse import urlencode
 
+
            class MyStream(RESTStream):
                def get_url_params(self, context, next_page_token):
                    params = {"key": "(a,b,c)"}
