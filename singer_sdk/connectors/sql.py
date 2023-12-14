@@ -1189,3 +1189,28 @@ class SQLConnector:
         .. versionadded:: 0.31.0
         """
         return json.loads(json_str, parse_float=decimal.Decimal)
+
+    def delete_old_versions(
+        self,
+        *,
+        full_table_name: str,
+        version_column_name: str,
+        current_version: int,
+    ) -> None:
+        """Hard-deletes any old version rows from the table.
+
+        This is used to clean up old versions when an ACTIVATE_VERSION message is
+        received.
+
+        Args:
+            full_table_name: The fully qualified table name.
+            version_column_name: The name of the version column.
+            current_version: The current ACTIVATE version of the table.
+        """
+        with self._connect() as conn, conn.begin():
+            conn.execute(
+                sqlalchemy.text(
+                    f"DELETE FROM {full_table_name} "  # noqa: S608
+                    f"WHERE {version_column_name} <= {current_version}",
+                ),
+            )
