@@ -246,7 +246,11 @@ class Stream(metaclass=abc.ABCMeta):
         """
         state = self.get_context_state(context)
 
-        return get_starting_replication_value(state)
+        return (
+            get_starting_replication_value(state)
+            if self.replication_method != REPLICATION_FULL_TABLE
+            else None
+        )
 
     def get_starting_timestamp(self, context: dict | None) -> datetime.datetime | None:
         """Get starting replication timestamp.
