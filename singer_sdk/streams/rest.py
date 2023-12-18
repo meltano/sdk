@@ -140,7 +140,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             The `requests.Session`_ object for HTTP requests.
 
         .. _requests.Session:
-            https://requests.readthedocs.io/en/latest/api/#request-sessions
+            https://requests.readthedocs.io/en/latest/api.html#requests.Session
         """
         if not self._requests_session:
             self._requests_session = requests.Session()
@@ -175,7 +175,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             RetriableAPIError: If the request is retriable.
 
         .. _requests.Response:
-            https://requests.readthedocs.io/en/latest/api/#requests.Response
+            https://requests.readthedocs.io/en/latest/api.html#requests.Response
         """
         if (
             response.status_code in self.extra_retry_statuses
@@ -329,9 +329,9 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             A `requests.PreparedRequest`_ object.
 
         .. _requests.PreparedRequest:
-            https://requests.readthedocs.io/en/latest/api/#requests.PreparedRequest
+            https://requests.readthedocs.io/en/latest/api.html#requests.PreparedRequest
         .. _requests.Request:
-            https://requests.readthedocs.io/en/latest/api/#requests.Request
+            https://requests.readthedocs.io/en/latest/api.html#requests.Request
         """
         request = requests.Request(*args, **kwargs)
         self.requests_session.auth = self.authenticator
@@ -589,7 +589,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             One item for every item found in the response.
 
         .. _requests.Response:
-            https://requests.readthedocs.io/en/latest/api/#requests.Response
+            https://requests.readthedocs.io/en/latest/api.html#requests.Response
         """
         yield from extract_jsonpath(self.records_jsonpath, input=response.json())
 
