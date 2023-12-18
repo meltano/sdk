@@ -140,7 +140,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             The `requests.Session`_ object for HTTP requests.
 
         .. _requests.Session:
-            https://requests.readthedocs.io/en/latest/api.html?#requests.Session
+            https://requests.readthedocs.io/en/latest/api.html#requests.Session
         """
         if not self._requests_session:
             self._requests_session = requests.Session()
