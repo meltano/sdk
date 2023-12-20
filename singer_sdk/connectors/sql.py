@@ -854,7 +854,7 @@ class SQLConnector:
 
     def merge_sql_types(
         self,
-        sql_types: list[sqlalchemy.types.TypeEngine],
+        sql_types: t.Sequence[sqlalchemy.types.TypeEngine],
     ) -> sqlalchemy.types.TypeEngine:
         """Return a compatible SQL type for the selected type list.
 
@@ -886,7 +886,7 @@ class SQLConnector:
         # If greater than two evaluate the first pair then on down the line
         if len(sql_types) > 2:  # noqa: PLR2004
             return self.merge_sql_types(
-                [self.merge_sql_types([sql_types[0], sql_types[1]])] + sql_types[2:],
+                [self.merge_sql_types([sql_types[0], sql_types[1]]), *sql_types[2:]],
             )
 
         # Get the generic type class
@@ -918,7 +918,7 @@ class SQLConnector:
     def _sort_types(
         self,
         sql_types: t.Iterable[sqlalchemy.types.TypeEngine],
-    ) -> list[sqlalchemy.types.TypeEngine]:
+    ) -> t.Sequence[sqlalchemy.types.TypeEngine]:
         """Return the input types sorted from most to least compatible.
 
         For example, [Smallint, Integer, Datetime, String, Double] would become

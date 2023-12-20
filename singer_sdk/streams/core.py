@@ -323,7 +323,7 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             A list of all children, recursively.
         """
-        result: list[Stream] = list(self.child_streams) or []
+        result: list[Stream] = [*self.child_streams]
         for child in self.child_streams:
             result += child.descendent_streams or []
         return result

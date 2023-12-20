@@ -385,7 +385,7 @@ class Catalog(t.Dict[str, CatalogEntry]):
         return {"streams": [stream.to_dict() for stream in self.streams]}
 
     @property
-    def streams(self) -> list[CatalogEntry]:
+    def streams(self) -> t.Sequence[CatalogEntry]:
         """Get catalog entries.
 
         Returns:
