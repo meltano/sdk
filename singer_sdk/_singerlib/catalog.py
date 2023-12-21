@@ -86,7 +86,7 @@ class Metadata:
 class StreamMetadata(Metadata):
     """Stream metadata."""
 
-    table_key_properties: list[str] | None = None
+    table_key_properties: t.Sequence[str] | None = None
     forced_replication_method: str | None = None
     valid_replication_keys: list[str] | None = None
     schema_name: str | None = None
@@ -159,7 +159,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
         *,
         schema: dict[str, t.Any] | None = None,
         schema_name: str | None = None,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
         valid_replication_keys: list[str] | None = None,
         replication_method: str | None = None,
         selected_by_default: bool | None = None,
@@ -285,7 +285,7 @@ class CatalogEntry:
     metadata: MetadataMapping
     schema: Schema
     stream: str | None = None
-    key_properties: list[str] | None = None
+    key_properties: t.Sequence[str] | None = None
     replication_key: str | None = None
     is_view: bool | None = None
     database: str | None = None

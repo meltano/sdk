@@ -134,7 +134,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._stream_maps: list[StreamMap] | None = None
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
-        self._primary_keys: list[str] | None = None
+        self._primary_keys: t.Sequence[str] | None = None
         self._state_partitioning_keys: list[str] | None = None
         self._schema_filepath: Path | None = None
         self._metadata: singer.MetadataMapping | None = None
@@ -439,7 +439,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._schema
 
     @property
-    def primary_keys(self) -> list[str] | None:
+    def primary_keys(self) -> t.Sequence[str] | None:
         """Get primary keys.
 
         Returns:
@@ -448,7 +448,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._primary_keys or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: list[str] | None) -> None:
+    def primary_keys(self, new_value: t.Sequence[str] | None) -> None:
         """Set primary key(s) for the stream.
 
         Args:

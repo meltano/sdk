@@ -675,7 +675,7 @@ class SQLConnector:
         self,
         full_table_name: str,
         schema: dict,
-        primary_keys: list[str] | None = None,
+        primary_keys: t.Sequence[str] | None = None,
         partition_keys: list[str] | None = None,
         as_temp_table: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
@@ -762,7 +762,7 @@ class SQLConnector:
         self,
         full_table_name: str,
         schema: dict,
-        primary_keys: list[str],
+        primary_keys: t.Sequence[str],
         partition_keys: list[str] | None = None,
         as_temp_table: bool = False,  # noqa: FBT002, FBT001
     ) -> None:
