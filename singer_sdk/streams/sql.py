@@ -5,7 +5,7 @@ from __future__ import annotations
 import abc
 import typing as t
 
-from sqlalchemy import nulls_first
+import sqlalchemy as sa
 
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping
@@ -195,7 +195,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         if self.replication_key:
             replication_key_col = table.columns[self.replication_key]
             order_by = (
-                nulls_first(replication_key_col.asc())
+                sa.nulls_first(replication_key_col.asc())
                 if self.supports_nulls_first
                 else replication_key_col.asc()
             )

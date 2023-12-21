@@ -331,9 +331,10 @@ mypy-init-return = true
 suppress-dummy-args = true
 
 [tool.ruff.lint.flake8-import-conventions]
-banned-from = ["typing"]
+banned-from = ["sqlalchemy", "typing"]
 
 [tool.ruff.lint.flake8-import-conventions.extend-aliases]
+sqlalchemy = "sa"
 typing = "t"
 
 [tool.ruff.lint.flake8-pytest-style]
