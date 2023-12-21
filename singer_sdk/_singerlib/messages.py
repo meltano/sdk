@@ -169,7 +169,7 @@ class SchemaMessage(Message):
     schema: dict[str, t.Any]
     """The schema definition."""
 
-    key_properties: list[str] | None = None
+    key_properties: t.Sequence[str] | None = None
     """The key properties."""
 
     bookmark_properties: list[str] | None = None

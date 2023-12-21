@@ -138,7 +138,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         *,
         record: dict | None = None,
         schema: dict | None = None,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
     ) -> Sink:
         """Return a sink for the given stream name.
 
@@ -227,7 +227,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self,
         stream_name: str,
         schema: dict,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
     ) -> Sink:
         """Create a sink and register it.
 
@@ -684,7 +684,7 @@ class SQLTarget(Target):
         self,
         stream_name: str,
         schema: dict,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
     ) -> Sink:
         """Create a sink and register it.
 
@@ -742,7 +742,7 @@ class SQLTarget(Target):
         *,
         record: dict | None = None,
         schema: dict | None = None,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
     ) -> Sink:
         """Return a sink for the given stream name.
 
