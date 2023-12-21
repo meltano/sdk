@@ -662,11 +662,11 @@ class SQLTap(Tap):
         self._catalog_dict = result
         return self._catalog_dict
 
-    def discover_streams(self) -> list[Stream]:
-        """Initialize all available streams and return them as a list.
+    def discover_streams(self) -> t.Sequence[Stream]:
+        """Initialize all available streams and return them as a sequence.
 
         Returns:
-            List of discovered Stream objects.
+            A sequence of discovered Stream objects.
         """
         return [
             self.default_stream_class(

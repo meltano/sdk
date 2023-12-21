@@ -35,7 +35,7 @@ class SQLSink(BatchSink):
         target: Target,
         stream_name: str,
         schema: dict,
-        key_properties: list[str] | None,
+        key_properties: t.Sequence[str] | None,
         connector: SQLConnector | None = None,
     ) -> None:
         """Initialize SQL Sink.
@@ -239,7 +239,7 @@ class SQLSink(BatchSink):
         )
 
     @property
-    def key_properties(self) -> list[str]:
+    def key_properties(self) -> t.Sequence[str]:
         """Return key properties, conformed to target system naming requirements.
 
         Returns:
