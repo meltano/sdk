@@ -12,15 +12,22 @@ else:
     from importlib import metadata
     from typing import final  # noqa: ICN003
 
+if sys.version_info < (3, 9):
+    import importlib_resources
+else:
+    from importlib import resources as importlib_resources
+
+if sys.version_info < (3, 9):
+    from importlib_resources.abc import Traversable
+elif sys.version_info < (3, 12):
+    from importlib.abc import Traversable
+else:
+    from importlib.resources.abc import Traversable
+
 if sys.version_info < (3, 12):
     from importlib_metadata import entry_points
 else:
     from importlib.metadata import entry_points
-
-if sys.version_info < (3, 9):
-    import importlib_resources as resources
-else:
-    from importlib import resources
 
 if sys.version_info < (3, 11):
     from backports.datetime_fromisoformat import MonkeyPatch
@@ -34,9 +41,10 @@ time_fromisoformat = datetime.time.fromisoformat
 __all__ = [
     "metadata",
     "final",
-    "resources",
     "entry_points",
     "datetime_fromisoformat",
     "date_fromisoformat",
     "time_fromisoformat",
+    "importlib_resources",
+    "Traversable",
 ]

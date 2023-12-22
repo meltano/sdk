@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-{% if cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 import sys
-{% endif -%}
-from pathlib import Path
 from typing import Any, Callable, Iterable
 
 import requests
@@ -49,8 +46,15 @@ else:
 
 {% endif -%}
 
+if sys.version_info >= (3, 9):
+    import importlib.resources as importlib_resources
+else:
+    import importlib_resources
+
 _Auth = Callable[[requests.PreparedRequest], requests.PreparedRequest]
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+
+# TODO: Delete this is if not using json files for schema definition
+SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
 
 
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):

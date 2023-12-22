@@ -9,12 +9,12 @@ See the online explorer and query builder here:
 from __future__ import annotations
 
 import abc
-from pathlib import Path
 
 from singer_sdk import typing as th
+from singer_sdk.helpers._compat import importlib_resources
 from singer_sdk.streams.graphql import GraphQLStream
 
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
 
 
 class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
