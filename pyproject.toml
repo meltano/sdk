@@ -321,6 +321,9 @@ typing = "t"
 fixture-parentheses = false
 parametrize-names-type = "csv"
 
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"pendulum".msg = "BAN002: pendulum is banned"
+
 [tool.ruff.lint.isort]
 known-first-party = ["singer_sdk", "samples", "tests"]
 required-imports = ["from __future__ import annotations"]
