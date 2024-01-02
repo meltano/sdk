@@ -96,6 +96,8 @@ def tests(session: Session) -> None:
             f"sqlalchemy=={sqlalchemy_version}",
         )
 
+    env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
+
     try:
         session.run(
             "coverage",
@@ -106,6 +108,7 @@ def tests(session: Session) -> None:
             "--durations=10",
             "--benchmark-skip",
             *session.posargs,
+            env=env,
         )
     finally:
         if session.interactive:
