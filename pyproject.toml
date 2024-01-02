@@ -123,7 +123,8 @@ parquet = ["numpy", "pyarrow"]
 [tool.poetry.group.dev.dependencies]
 coverage = [
     {extras = ["toml"], version = ">=7.2,<7.3", python = "<3.8"},
-    {extras = ["toml"], version = ">=7.2", python = ">=3.8"},
+    {extras = ["toml"], version = ">=7.2", python = ">=3.8,<3.12"},
+    {extras = ["toml"], version = ">=7.4", python = ">=3.12"},
 ]
 
 # TODO: Remove the Python 3.12 marker when DuckDB supports it
