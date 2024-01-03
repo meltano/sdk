@@ -65,10 +65,10 @@ def mypy(session: Session) -> None:
     args = session.posargs or ["singer_sdk"]
     session.install(".[s3,testing,parquet]")
     session.install(
+        "exceptiongroup",
         "mypy",
         "pytest",
         "importlib-resources",
-        "sqlalchemy2-stubs",
         "types-jsonschema",
         "types-python-dateutil",
         "types-pytz",
@@ -93,8 +93,10 @@ def tests(session: Session) -> None:
         # Bypass nox-poetry use of --constraint so we can install a version of
         # SQLAlchemy that doesn't match what's in poetry.lock.
         session.poetry.session.install(  # type: ignore[attr-defined]
-            f"sqlalchemy=={sqlalchemy_version}",
+            f"sqlalchemy=={sqlalchemy_version}.*",
         )
+
+    env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
 
     try:
         session.run(
@@ -106,6 +108,7 @@ def tests(session: Session) -> None:
             "--durations=10",
             "--benchmark-skip",
             *session.posargs,
+            env=env,
         )
     finally:
         if session.interactive:

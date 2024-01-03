@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from sqlalchemy import text
+import sqlalchemy as sa
 
 from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
 from singer_sdk._singerlib import Catalog
@@ -23,13 +23,13 @@ def _sqlite_sample_db(sqlite_connector):
     """Return a path to a newly constructed sample DB."""
     with sqlite_connector._connect() as conn, conn.begin():
         for t in range(3):
-            conn.execute(text(f"DROP TABLE IF EXISTS t{t}"))
+            conn.execute(sa.text(f"DROP TABLE IF EXISTS t{t}"))
             conn.execute(
-                text(f"CREATE TABLE t{t} (c1 int PRIMARY KEY, c2 varchar(10))"),
+                sa.text(f"CREATE TABLE t{t} (c1 int PRIMARY KEY, c2 varchar(10))"),
             )
             for x in range(100):
                 conn.execute(
-                    text(f"INSERT INTO t{t} VALUES ({x}, 'x={x}')"),  # noqa: S608
+                    sa.text(f"INSERT INTO t{t} VALUES ({x}, 'x={x}')"),  # noqa: S608
                 )
 
 
