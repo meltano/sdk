@@ -8,7 +8,7 @@ import shutil
 import typing as t
 
 import pytest
-from sqlalchemy import __version__ as sqlalchemy_version
+import sqlalchemy as sa
 
 from singer_sdk import SQLConnector
 from singer_sdk import typing as th
@@ -48,7 +48,7 @@ def pytest_runtest_setup(item):
 
 def pytest_report_header() -> list[str]:
     """Return a list of strings to be displayed in the header of the report."""
-    return [f"sqlalchemy: {sqlalchemy_version}"]
+    return [f"sqlalchemy: {sa.__version__}"]
 
 
 @pytest.fixture(scope="class")

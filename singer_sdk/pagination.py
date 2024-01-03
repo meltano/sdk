@@ -30,7 +30,7 @@ def first(iterable: t.Iterable[T]) -> T:
     Returns:
         The first element of the iterable.
 
-    >>> first('ABC')
+    >>> first("ABC")
     'A'
     """
     return next(iter(iterable))
@@ -204,6 +204,7 @@ class BaseHATEOASPaginator(
        class MyHATEOASPaginator(BaseHATEOASPaginator):
            def get_next_url(self, response):
                return response.json().get("next")
+
 
        class MyStream(Stream):
            def get_new_paginator(self):

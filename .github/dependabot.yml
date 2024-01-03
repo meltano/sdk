@@ -20,3 +20,7 @@ updates:
       interval: weekly
     reviewers: [meltano/engineering]
     labels: [deps]
+    groups:
+      actions:
+        patterns:
+          - "*"

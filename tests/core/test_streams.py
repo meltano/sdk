@@ -46,18 +46,17 @@ class RestTestStream(RESTStream):
         response: requests.Response,
         previous_token: str | None,  # noqa: ARG002
     ) -> str | None:
-        if self.next_page_token_jsonpath:
-            all_matches = extract_jsonpath(
-                self.next_page_token_jsonpath,
-                response.json(),
-            )
-            try:
-                return first(all_matches)
-            except StopIteration:
-                return None
-
-        else:
+        if not self.next_page_token_jsonpath:
             return response.headers.get("X-Next-Page", None)
+
+        all_matches = extract_jsonpath(
+            self.next_page_token_jsonpath,
+            response.json(),
+        )
+        try:
+            return first(all_matches)
+        except StopIteration:
+            return None
 
 
 class GraphqlTestStream(GraphQLStream):
@@ -111,22 +110,32 @@ def test_stream_apply_catalog(stream: Stream):
 
 
 @pytest.mark.parametrize(
-    "stream_name,bookmark_value,expected_starting_value",
+    "stream_name,forced_replication_method,bookmark_value,expected_starting_value",
     [
         pytest.param(
             "test",
+            None,
             None,
             pendulum.parse(CONFIG_START_DATE),
             id="datetime-repl-key-no-state",
         ),
         pytest.param(
             "test",
+            None,
             "2021-02-01",
             pendulum.datetime(2021, 2, 1),
             id="datetime-repl-key-recent-bookmark",
         ),
         pytest.param(
             "test",
+            REPLICATION_FULL_TABLE,
+            "2021-02-01",
+            None,
+            id="datetime-forced-full-table",
+        ),
+        pytest.param(
+            "test",
+            None,
             "2020-01-01",
             pendulum.parse(CONFIG_START_DATE),
             id="datetime-repl-key-old-bookmark",
@@ -134,17 +143,20 @@ def test_stream_apply_catalog(stream: Stream):
         pytest.param(
             "unix_ts",
             None,
+            None,
             CONFIG_START_DATE,
             id="naive-unix-ts-repl-key-no-state",
         ),
         pytest.param(
             "unix_ts",
+            None,
             "1612137600",
             "1612137600",
             id="naive-unix-ts-repl-key-recent-bookmark",
         ),
         pytest.param(
             "unix_ts",
+            None,
             "1577858400",
             "1577858400",
             id="naive-unix-ts-repl-key-old-bookmark",
@@ -152,17 +164,20 @@ def test_stream_apply_catalog(stream: Stream):
         pytest.param(
             "unix_ts_override",
             None,
+            None,
             CONFIG_START_DATE,
             id="unix-ts-repl-key-no-state",
         ),
         pytest.param(
             "unix_ts_override",
+            None,
             "1612137600",
             "1612137600",
             id="unix-ts-repl-key-recent-bookmark",
         ),
         pytest.param(
             "unix_ts_override",
+            None,
             "1577858400",
             pendulum.parse(CONFIG_START_DATE).format("X"),
             id="unix-ts-repl-key-old-bookmark",
@@ -172,6 +187,7 @@ def test_stream_apply_catalog(stream: Stream):
 def test_stream_starting_timestamp(
     tap: Tap,
     stream_name: str,
+    forced_replication_method: str | None,
     bookmark_value: str,
     expected_starting_value: t.Any,
 ):
@@ -194,7 +210,9 @@ def test_stream_starting_timestamp(
         },
     )
     stream._write_starting_replication_value(None)
-    assert get_starting_value(None) == expected_starting_value
+
+    with stream.with_replication_method(forced_replication_method):
+        assert get_starting_value(None) == expected_starting_value
 
 
 def test_stream_invalid_replication_key(tap: SimpleTestTap):

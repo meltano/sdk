@@ -443,12 +443,12 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             @property
             def oauth_request_body(self) -> dict:
                 return {
-                    'grant_type': 'password',
-                    'scope': 'https://api.powerbi.com',
-                    'resource': 'https://analysis.windows.net/powerbi/api',
-                    'client_id': self.config["client_id"],
-                    'username': self.config.get("username", self.config["client_id"]),
-                    'password': self.config["password"],
+                    "grant_type": "password",
+                    "scope": "https://api.powerbi.com",
+                    "resource": "https://analysis.windows.net/powerbi/api",
+                    "client_id": self.config["client_id"],
+                    "username": self.config.get("username", self.config["client_id"]),
+                    "password": self.config["password"],
                 }
 
         Raises:

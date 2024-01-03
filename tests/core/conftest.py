@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import typing as t
+from contextlib import contextmanager
 
 import pendulum
 import pytest
+from typing_extensions import override
 
 from singer_sdk import Stream, Tap
 from singer_sdk.typing import (
@@ -32,14 +34,23 @@ class SimpleTestStream(Stream):
         """Create a new stream."""
         super().__init__(tap, schema=self.schema, name=self.name)
 
+    @override
     def get_records(
         self,
-        context: dict | None,  # noqa: ARG002
+        context: dict | None,
     ) -> t.Iterable[dict[str, t.Any]]:
         """Generate records."""
         yield {"id": 1, "value": "Egypt"}
         yield {"id": 2, "value": "Germany"}
         yield {"id": 3, "value": "India"}
+
+    @contextmanager
+    def with_replication_method(self, method: str | None) -> t.Iterator[None]:
+        """Context manager to temporarily override the replication method."""
+        original_method = self.forced_replication_method
+        self.forced_replication_method = method
+        yield
+        self.forced_replication_method = original_method
 
 
 class UnixTimestampIncrementalStream(SimpleTestStream):
@@ -55,6 +66,7 @@ class UnixTimestampIncrementalStream(SimpleTestStream):
 class UnixTimestampIncrementalStream2(UnixTimestampIncrementalStream):
     name = "unix_ts_override"
 
+    @override
     def compare_start_date(self, value: str, start_date_value: str) -> str:
         """Compare a value to a start date value."""
 
@@ -73,6 +85,7 @@ class SimpleTestTap(Tap):
         additional_properties=False,
     ).to_dict()
 
+    @override
     def discover_streams(self) -> list[Stream]:
         """List all streams."""
         return [

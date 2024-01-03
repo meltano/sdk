@@ -13,11 +13,8 @@ jobs:
   benchmarks:
     runs-on: ubuntu-latest
     steps:
-    - name: Check out the repository
-      uses: actions/checkout@v4.1.1
-
-    - name: Setup Python
-      uses: actions/setup-python@v5.0.0
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: 3.11
         architecture: x64
@@ -37,8 +34,7 @@ jobs:
         --with benchmark
         --all-extras
 
-    - name: Run benchmarks
-      uses: CodSpeedHQ/action@v2
+    - uses: CodSpeedHQ/action@v2
       with:
         token: ${{ secrets.CODSPEED_TOKEN }}
         run: pytest tests/ --codspeed

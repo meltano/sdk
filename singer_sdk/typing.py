@@ -57,7 +57,7 @@ from __future__ import annotations
 import json
 import typing as t
 
-import sqlalchemy
+import sqlalchemy as sa
 from jsonschema import ValidationError, validators
 
 if t.TYPE_CHECKING:
@@ -920,7 +920,7 @@ class PropertiesList(ObjectType):
 
 
 def to_jsonschema_type(
-    from_type: str | sqlalchemy.types.TypeEngine | type[sqlalchemy.types.TypeEngine],
+    from_type: str | sa.types.TypeEngine | type[sa.types.TypeEngine],
 ) -> dict:
     """Return the JSON Schema dict that describes the sql type.
 
@@ -954,11 +954,11 @@ def to_jsonschema_type(
     }
     if isinstance(from_type, str):
         type_name = from_type
-    elif isinstance(from_type, sqlalchemy.types.TypeEngine):
+    elif isinstance(from_type, sa.types.TypeEngine):
         type_name = type(from_type).__name__
     elif isinstance(from_type, type) and issubclass(
         from_type,
-        sqlalchemy.types.TypeEngine,
+        sa.types.TypeEngine,
     ):
         type_name = from_type.__name__
     else:
@@ -1000,7 +1000,7 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
 
 def to_sql_type(  # noqa: PLR0911, C901
     jsonschema_type: dict,
-) -> sqlalchemy.types.TypeEngine:
+) -> sa.types.TypeEngine:
     """Convert JSON Schema type to a SQL type.
 
     Args:
@@ -1013,26 +1013,26 @@ def to_sql_type(  # noqa: PLR0911, C901
         datelike_type = get_datelike_property_type(jsonschema_type)
         if datelike_type:
             if datelike_type == "date-time":
-                return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATETIME())
+                return sa.types.DATETIME()
             if datelike_type in "time":
-                return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.TIME())
+                return sa.types.TIME()
             if datelike_type == "date":
-                return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATE())
+                return sa.types.DATE()
 
         maxlength = jsonschema_type.get("maxLength")
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR(maxlength))
+        return sa.types.VARCHAR(maxlength)
 
     if _jsonschema_type_check(jsonschema_type, ("integer",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.INTEGER())
+        return sa.types.INTEGER()
     if _jsonschema_type_check(jsonschema_type, ("number",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DECIMAL())
+        return sa.types.DECIMAL()
     if _jsonschema_type_check(jsonschema_type, ("boolean",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.BOOLEAN())
+        return sa.types.BOOLEAN()
 
     if _jsonschema_type_check(jsonschema_type, ("object",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR())
+        return sa.types.VARCHAR()
 
     if _jsonschema_type_check(jsonschema_type, ("array",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR())
+        return sa.types.VARCHAR()
 
-    return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR())
+    return sa.types.VARCHAR()

@@ -66,7 +66,7 @@ class StreamMap(metaclass=abc.ABCMeta):
         self,
         stream_alias: str,
         raw_schema: dict,
-        key_properties: list[str] | None,
+        key_properties: t.Sequence[str] | None,
         flattening_options: FlatteningOptions | None,
     ) -> None:
         """Initialize mapper.
@@ -232,7 +232,7 @@ class CustomStreamMap(StreamMap):
         stream_alias: str,
         map_config: dict,
         raw_schema: dict,
-        key_properties: list[str] | None,
+        key_properties: t.Sequence[str] | None,
         map_transform: dict,
         flattening_options: FlatteningOptions | None,
     ) -> None:
@@ -666,7 +666,7 @@ class PluginMapper:
         self,
         stream_name: str,
         schema: dict,
-        key_properties: list[str] | None,
+        key_properties: t.Sequence[str] | None,
     ) -> None:
         """Register a new stream as described by its name and schema.
 
