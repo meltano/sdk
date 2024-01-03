@@ -48,15 +48,14 @@ jobs:
         session: [tests]
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
-        sqlalchemy: ["2.*"]
+        sqlalchemy: ["2"]
         include:
-        - { session: tests,   python-version: "3.11", os: "ubuntu-latest", sqlalchemy: "1.*" }
-        - { session: doctest, python-version: "3.11", os: "ubuntu-latest", sqlalchemy: "2.*" }
-        - { session: mypy,    python-version: "3.11",  os: "ubuntu-latest", sqlalchemy: "2.*" }
+        - { session: tests,   python-version: "3.11", os: "ubuntu-latest", sqlalchemy: "1" }
+        - { session: doctest, python-version: "3.11", os: "ubuntu-latest", sqlalchemy: "2" }
+        - { session: mypy,    python-version: "3.11",  os: "ubuntu-latest", sqlalchemy: "2" }
 
     steps:
-    - name: Check out the repository
-      uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v4
 
     - name: Install Poetry
       env:
@@ -67,8 +66,7 @@ jobs:
         poetry --version
         poetry self show plugins
 
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5.0.0
+    - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
@@ -96,11 +94,10 @@ jobs:
       run: |
         nox --verbose
 
-    - name: Upload coverage data
+    - uses: actions/upload-artifact@v4
       if: always() && (matrix.session == 'tests')
-      uses: actions/upload-artifact@v3.1.2
       with:
-        name: coverage-data
+        name: coverage-data-nox_${{ matrix.session }}-${{ matrix.os }}-py${{ matrix.python-version }}_sqlalchemy_${{ matrix.sqlalchemy }}
         path: ".coverage.*"
 
   tests-external:
@@ -119,8 +116,7 @@ jobs:
       SAMPLE_TAP_GOOGLE_ANALYTICS_VIEW_ID: ${{ secrets.SAMPLE_TAP_GOOGLE_ANALYTICS_VIEW_ID }}
 
     steps:
-    - name: Check out the repository
-      uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v4
 
     - name: Install Poetry
       env:
@@ -131,8 +127,7 @@ jobs:
         poetry --version
         poetry self show plugins
 
-    - name: Setup Python
-      uses: actions/setup-python@v5.0.0
+    - uses: actions/setup-python@v5
       with:
         python-version: ${{ env.NOXPYTHON }}
         architecture: x64
@@ -163,8 +158,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: tests
     steps:
-    - name: Check out the repository
-      uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v4
 
     - name: Install Poetry
       env:
@@ -175,8 +169,7 @@ jobs:
         poetry --version
         poetry self show plugins
 
-    - name: Set up Python
-      uses: actions/setup-python@v5.0.0
+    - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         cache: 'pip'
@@ -187,10 +180,10 @@ jobs:
         pip install --constraint=.github/workflows/constraints.txt pip
         pip --version
 
-    - name: Download coverage data
-      uses: actions/download-artifact@v3.0.2
+    - uses: actions/download-artifact@v4
       with:
-        name: coverage-data
+        pattern: coverage-data-*
+        merge-multiple: true
 
     - name: Install Nox
       env:
@@ -208,8 +201,7 @@ jobs:
       run: |
         nox --session=coverage -- xml
 
-    - name: Upload coverage report
-      uses: codecov/codecov-action@v3.1.4
+    - uses: codecov/codecov-action@v3
       with:
         fail_ci_if_error: true
         token: ${{ secrets.CODECOV_TOKEN }}
