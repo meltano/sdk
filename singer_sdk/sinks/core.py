@@ -75,7 +75,7 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
         schema: dict,
         *,
         validate_formats: bool = False,
-        format_validators: dict[str, t.Callable] | list[str] | None = None,
+        format_checker: jsonschema.FormatChecker | None = None,
     ):
         """Initialize the validator.
 
@@ -83,28 +83,29 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
             schema: Schema of the stream to sink.
             validate_formats: Whether JSON string formats (e.g. ``date-time``) should
                 be validated.
-            format_validators: User-defined format validators.
+            format_checker: User-defined format checker.
 
         Raises:
             InvalidJSONSchema: If the schema provided from tap or mapper is invalid.
         """
         jsonschema_validator = jsonschema.Draft7Validator
-        format_checker = jsonschema.FormatChecker(formats=())
 
         super().__init__(schema)
         if validate_formats:
-            if format_validators is None:
-                format_checker = jsonschema_validator.FORMAT_CHECKER
-            else:
-                format_checker = format_validators
+            format_checker = format_checker or jsonschema_validator.FORMAT_CHECKER
+        else:
+            format_checker = jsonschema.FormatChecker(formats=())
+
         try:
             jsonschema_validator.check_schema(schema)
-            self.validator = jsonschema_validator(
-                schema=schema, format_checker=format_checker
-            )
         except jsonschema.SchemaError as e:
             error_message = f"Schema Validation Error: {e}"
             raise InvalidJSONSchema(error_message) from e
+
+        self.validator = jsonschema_validator(
+            schema=schema,
+            format_checker=format_checker,
+        )
 
     @override
     def validate(self, record: dict):  # noqa: ANN201
@@ -119,8 +120,7 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
         try:
             self.validator.validate(record)
         except jsonschema.ValidationError as e:
-            error_message = f"Record Message Validation Error: {e.message}"
-            raise InvalidRecord(error_message) from e
+            raise InvalidRecord(e.message, record) from e
 
 
 class Sink(metaclass=abc.ABCMeta):
@@ -443,7 +443,7 @@ class Sink(metaclass=abc.ABCMeta):
                 self._validator.validate(record)
             except InvalidRecord as e:
                 if self.fail_on_record_validation_exception:
-                    raise InvalidRecord(e) from e
+                    raise
                 self.logger.exception("Record validation failed %s", e)
 
         self._parse_timestamps_in_record(

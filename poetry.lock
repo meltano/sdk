@@ -2045,6 +2045,20 @@ fixture = ["fixtures"]
 test = ["fixtures", "mock", "purl", "pytest", "requests-futures", "sphinx", "testtools"]
 
 [[package]]
+name = "rfc3339-validator"
+version = "0.1.4"
+description = "A pure python RFC3339 validator"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+files = [
+    {file = "rfc3339_validator-0.1.4-py2.py3-none-any.whl", hash = "sha256:24f6ec1eda14ef823da9e36ec7113124b39c04d50a4d3d3a3c2859577e7791fa"},
+    {file = "rfc3339_validator-0.1.4.tar.gz", hash = "sha256:138a2abdf93304ad60530167e51d2dfb9549521a836871b88d7f4695d0022f6b"},
+]
+
+[package.dependencies]
+six = "*"
+
+[[package]]
 name = "rpds-py"
 version = "0.16.2"
 description = "Python bindings to Rust's persistent data structures (rpds)"
@@ -3046,4 +3060,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.7.1"
-content-hash = "bd5ad4eb7d109f3d184dcfb99e6808e6209776dfc741b86e3ba3ac3369d64449"
+content-hash = "a32d001b727dbe29568054008036015df7c95eec9e83d56f7cc8fc788fbd6e2d"
