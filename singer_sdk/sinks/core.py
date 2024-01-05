@@ -136,7 +136,6 @@ class Sink(metaclass=abc.ABCMeta):
     """Enable JSON schema record validation."""
 
     validate_field_string_format = False
-
     """Enable JSON schema format validation, for example `date-time` string fields."""
 
     fail_on_record_validation_exception: bool = True
