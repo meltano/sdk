@@ -3,11 +3,16 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+import sys
 
 from singer_sdk import Stream, Tap
 
-PROJECT_DIR = Path(__file__).parent
+if sys.version_info < (3, 9):
+    import importlib_resources
+else:
+    import importlib.resources as importlib_resources
+
+PROJECT_DIR = importlib_resources.files("samples.aapl")
 
 
 class AAPL(Stream):

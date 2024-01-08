@@ -54,6 +54,7 @@ from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, Stream
 if t.TYPE_CHECKING:
     import logging
 
+    from singer_sdk.helpers._compat import Traversable
     from singer_sdk.tap_base import Tap
 
 # Replication methods
@@ -136,7 +137,7 @@ class Stream(metaclass=abc.ABCMeta):
         self._replication_key: str | None = None
         self._primary_keys: t.Sequence[str] | None = None
         self._state_partitioning_keys: list[str] | None = None
-        self._schema_filepath: Path | None = None
+        self._schema_filepath: Path | Traversable | None = None
         self._metadata: singer.MetadataMapping | None = None
         self._mask: singer.SelectionMask | None = None
         self._schema: dict
@@ -160,7 +161,7 @@ class Stream(metaclass=abc.ABCMeta):
                 raise ValueError(msg)
 
         if self.schema_filepath:
-            self._schema = json.loads(Path(self.schema_filepath).read_text())
+            self._schema = json.loads(self.schema_filepath.read_text())
 
         if not self.schema:
             msg = (
@@ -421,7 +422,7 @@ class Stream(metaclass=abc.ABCMeta):
         return utc_now() if self.is_timestamp_replication_key else None
 
     @property
-    def schema_filepath(self) -> Path | None:
+    def schema_filepath(self) -> Path | Traversable | None:
         """Get path to schema file.
 
         Returns:
