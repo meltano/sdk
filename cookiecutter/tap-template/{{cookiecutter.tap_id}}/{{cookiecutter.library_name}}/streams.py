@@ -2,15 +2,21 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
-from pathlib import Path
 
 from singer_sdk import typing as th  # JSON Schema typing helpers
 
 from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }}Stream
 
+if sys.version_info >= (3, 9):
+    import importlib.resources as importlib_resources
+else:
+    import importlib_resources
+
+
 # TODO: Delete this is if not using json files for schema definition
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
 
 
 {%- if cookiecutter.stream_type == "GraphQL" %}
