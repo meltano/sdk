@@ -337,19 +337,6 @@ class SimpleHeaderPaginator(BaseAPIPaginator[t.Optional[str]]):
 class BasePageNumberPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
     """Paginator class for APIs that use page number."""
 
-    @abstractmethod
-    def has_more(self, response: Response) -> bool:
-        """Override this method to check if the endpoint has any pages left.
-
-        Args:
-            response: API response object.
-
-        Returns:
-            Boolean flag used to indicate if the endpoint has more pages.
-
-        """
-        ...
-
     def get_next(self, response: Response) -> int | None:  # noqa: ARG002
         """Get the next page number.
 
@@ -382,18 +369,6 @@ class BaseOffsetPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         """
         super().__init__(start_value, *args, **kwargs)
         self._page_size = page_size
-
-    @abstractmethod
-    def has_more(self, response: Response) -> bool:
-        """Override this method to check if the endpoint has any pages left.
-
-        Args:
-            response: API response object.
-
-        Returns:
-            Boolean flag used to indicate if the endpoint has more pages.
-        """
-        ...
 
     def get_next(self, response: Response) -> int | None:  # noqa: ARG002
         """Get the next page offset.
