@@ -2,6 +2,7 @@
     "cookiecutter": {
       "source_name": "GraphQLJWTTemplateTest",
       "admin_name": "Automatic Tester",
+      "admin_email": "auto.tester@example.com",
       "tap_id": "tap-graphql-jwt",
       "library_name": "tap_graphql_jwt",
       "variant": "None (Skip)",

@@ -11,9 +11,13 @@ from enum import Enum
 
 import click
 
-from singer_sdk._singerlib import Catalog, StateMessage, write_message
+from singer_sdk._singerlib import Catalog, StateMessage
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
-from singer_sdk.exceptions import AbortedSyncFailedException, AbortedSyncPausedException
+from singer_sdk.exceptions import (
+    AbortedSyncFailedException,
+    AbortedSyncPausedException,
+    ConfigValidationError,
+)
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
@@ -25,11 +29,13 @@ from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
     TapCapabilities,
 )
+from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
 
+    from singer_sdk.connectors import SQLConnector
     from singer_sdk.mapper import PluginMapper
     from singer_sdk.streams import SQLStream, Stream
 
@@ -44,7 +50,7 @@ class CliTestOptionValue(Enum):
     Disabled = "disabled"
 
 
-class Tap(PluginBase, metaclass=abc.ABCMeta):
+class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
     """Abstract base class for taps.
 
     The Tap class governs configuration, validation, and stream discovery for tap
@@ -124,10 +130,10 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         Returns:
             A mapping of names to streams, using discovery or a provided catalog.
         """
-        input_catalog = self.input_catalog
-
         if self._streams is None:
             self._streams = {}
+            input_catalog = self.input_catalog
+
             for stream in self.load_streams():
                 if input_catalog is not None:
                     stream.apply_catalog(input_catalog)
@@ -278,7 +284,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Write a SCHEMA message for all known streams to STDOUT."""
         for stream in self.streams.values():
             stream.selected = True
-            stream._write_schema_message()
+            stream._write_schema_message()  # noqa: SLF001
 
     # Stream detection:
 
@@ -318,7 +324,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
             :class:`singer_sdk._singerlib.Catalog`.
         """
         return Catalog(
-            (stream.tap_stream_id, stream._singer_catalog_entry)
+            (stream.tap_stream_id, stream._singer_catalog_entry)  # noqa: SLF001
             for stream in self.streams.values()
         )
 
@@ -411,7 +417,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
     def _reset_state_progress_markers(self) -> None:
         """Clear prior jobs' progress markers at beginning of sync."""
-        for _, state in self.state.get("bookmarks", {}).items():
+        for state in self.state.get("bookmarks", {}).values():
             _state.reset_state_progress_markers(state)
             for partition_state in state.get("partitions", []):
                 _state.reset_state_progress_markers(partition_state)
@@ -442,7 +448,7 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
         """Sync all streams."""
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
-        write_message(StateMessage(value=self.state))
+        self.write_message(StateMessage(value=self.state))
 
         stream: Stream
         for stream in self.streams.values():
@@ -522,12 +528,17 @@ class Tap(PluginBase, metaclass=abc.ABCMeta):
 
         config_args = ctx.params.get("config", ())
         config_files, parse_env_config = cls.config_from_cli_args(*config_args)
-        tap = cls(
-            config=config_files,  # type: ignore[arg-type]
-            parse_env_config=parse_env_config,
-            validate_config=cls.dynamic_catalog,
-            setup_mapper=False,
-        )
+        try:
+            tap = cls(
+                config=config_files,  # type: ignore[arg-type]
+                parse_env_config=parse_env_config,
+                validate_config=cls.dynamic_catalog,
+                setup_mapper=False,
+            )
+        except ConfigValidationError as exc:
+            for error in exc.errors:
+                cls.logger.error("Config validation error: %s", error)
+            ctx.exit(1)
         tap.run_discovery()
         ctx.exit()
 
@@ -617,37 +628,32 @@ class SQLTap(Tap):
     default_stream_class: type[SQLStream]
     dynamic_catalog: bool = True
 
-    def __init__(
-        self,
-        *,
-        config: dict | PurePath | str | list[PurePath | str] | None = None,
-        catalog: PurePath | str | dict | None = None,
-        state: PurePath | str | dict | None = None,
-        parse_env_config: bool = False,
-        validate_config: bool = True,
-    ) -> None:
+    _tap_connector: SQLConnector | None = None
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Initialize the SQL tap.
 
         The SQLTap initializer additionally creates a cache variable for _catalog_dict.
 
         Args:
-            config: Tap configuration. Can be a dictionary, a single path to a
-                configuration file, or a list of paths to multiple configuration
-                files.
-            catalog: Tap catalog. Can be a dictionary or a path to the catalog file.
-            state: Tap state. Can be dictionary or a path to the state file.
-            parse_env_config: Whether to look for configuration values in environment
-                variables.
-            validate_config: True to require validation of config settings.
+            *args: Positional arguments for the Tap initializer.
+            **kwargs: Keyword arguments for the Tap initializer.
         """
         self._catalog_dict: dict | None = None
-        super().__init__(
-            config=config,
-            catalog=catalog,
-            state=state,
-            parse_env_config=parse_env_config,
-            validate_config=validate_config,
-        )
+        super().__init__(*args, **kwargs)
+
+    @property
+    def tap_connector(self) -> SQLConnector:
+        """The connector object.
+
+        Returns:
+            The connector object.
+        """
+        if self._tap_connector is None:
+            self._tap_connector = self.default_stream_class.connector_class(
+                dict(self.config),
+            )
+        return self._tap_connector
 
     @property
     def catalog_dict(self) -> dict:
@@ -662,7 +668,7 @@ class SQLTap(Tap):
         if self.input_catalog:
             return self.input_catalog.to_dict()
 
-        connector = self.default_stream_class.connector_class(dict(self.config))
+        connector = self.tap_connector
 
         result: dict[str, list[dict]] = {"streams": []}
         result["streams"].extend(connector.discover_catalog_entries())
@@ -670,14 +676,17 @@ class SQLTap(Tap):
         self._catalog_dict = result
         return self._catalog_dict
 
-    def discover_streams(self) -> list[Stream]:
-        """Initialize all available streams and return them as a list.
+    def discover_streams(self) -> t.Sequence[Stream]:
+        """Initialize all available streams and return them as a sequence.
 
         Returns:
-            List of discovered Stream objects.
+            A sequence of discovered Stream objects.
         """
-        result: list[Stream] = []
-        for catalog_entry in self.catalog_dict["streams"]:
-            result.append(self.default_stream_class(self, catalog_entry))
-
-        return result
+        return [
+            self.default_stream_class(
+                tap=self,
+                catalog_entry=catalog_entry,
+                connector=self.tap_connector,
+            )
+            for catalog_entry in self.catalog_dict["streams"]
+        ]

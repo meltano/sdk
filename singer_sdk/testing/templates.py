@@ -5,9 +5,12 @@ from __future__ import annotations
 import contextlib
 import typing as t
 import warnings
-from pathlib import Path
+
+from singer_sdk.helpers._compat import importlib_resources
+from singer_sdk.testing import target_test_streams
 
 if t.TYPE_CHECKING:
+    from singer_sdk.helpers._compat import Traversable
     from singer_sdk.streams import Stream
 
     from .config import SuiteConfig
@@ -319,14 +322,14 @@ class TargetFileTestTemplate(TargetTestTemplate):
         """
         # get input from file
         if getattr(self, "singer_filepath", None):
-            assert Path(
-                self.singer_filepath,
-            ).exists(), f"Singer file {self.singer_filepath} does not exist."
+            assert (
+                self.singer_filepath.is_file()
+            ), f"Singer file {self.singer_filepath} does not exist."
             runner.input_filepath = self.singer_filepath
         super().run(config, resource, runner)
 
     @property
-    def singer_filepath(self) -> Path:
+    def singer_filepath(self) -> Traversable:
         """Get path to singer JSONL formatted messages file.
 
         Files will be sourced from `./target_test_streams/<test name>.singer`.
@@ -334,5 +337,4 @@ class TargetFileTestTemplate(TargetTestTemplate):
         Returns:
             The expected Path to this tests singer file.
         """
-        current_dir = Path(__file__).resolve().parent
-        return current_dir / "target_test_streams" / f"{self.name}.singer"
+        return importlib_resources.files(target_test_streams) / f"{self.name}.singer"  # type: ignore[no-any-return]

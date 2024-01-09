@@ -3,10 +3,16 @@ name: E2E Cookiecutters
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths: ["cookiecutter/**", "e2e-tests/cookiecutters/**"]
+    paths:
+    - "cookiecutter/**"
+    - "e2e-tests/cookiecutters/**"
+    - ".github/workflows/cookiecutter-e2e.yml"
   push:
     branches: [main]
-    paths: ["cookiecutter/**", "e2e-tests/cookiecutters/**"]
+    paths:
+    - "cookiecutter/**"
+    - "e2e-tests/cookiecutters/**"
+    - ".github/workflows/cookiecutter-e2e.yml"
   workflow_dispatch:
 
 concurrency:
@@ -18,18 +24,16 @@ env:
 
 jobs:
   lint:
-    name: Cookiecutter E2E ${{ matrix.python-version }} ${{ matrix.python-version }} / ${{ matrix.os }}
+    name: Cookiecutter E2E Python ${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
       matrix:
         include:
-          - { python-version: "3.10",  os: "ubuntu-latest" }
+          - { python-version: "3.11",  os: "ubuntu-latest" }
 
     steps:
-    - name: Check out the repository
-      uses: actions/checkout@v3.5.3
-
+    - uses: actions/checkout@v4
     - name: Upgrade pip
       env:
         PIP_CONSTRAINT: .github/workflows/constraints.txt
@@ -38,12 +42,15 @@ jobs:
         pip --version
 
     - name: Install Poetry
+      env:
+        PIP_CONSTRAINT: .github/workflows/constraints.txt
       run: |
         pipx install poetry
+        pipx inject poetry poetry-plugin-export
         poetry --version
+        poetry self show plugins
 
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4.7.0
+    - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
@@ -59,22 +66,25 @@ jobs:
       env:
         PIP_CONSTRAINT: .github/workflows/constraints.txt
       run: |
-        pipx install --pip-args=--constraint=.github/workflows/constraints.txt nox
-        pipx inject --pip-args=--constraint=.github/workflows/constraints.txt nox nox-poetry
+        pipx install nox
+        pipx inject nox nox-poetry
         nox --version
 
     - name: Run Nox
       run: |
         nox --python=${{ matrix.python-version }} --session=test_cookiecutter
 
-    - name: Upload build artifacts
+    - uses: actions/upload-artifact@v4
       if: always()
-      uses: actions/upload-artifact@v3
       with:
+        name: cookiecutter-${{ matrix.os }}-py${{ matrix.python-version }}
         path: |
           /tmp/tap-*
           /tmp/target-*
+          /tmp/mapper-*
           !/tmp/tap-*/.mypy_cache/
           !/tmp/target-*/.mypy_cache/
+          !/tmp/mapper-*/.mypy_cache/
           !/tmp/tap-*/.tox/
           !/tmp/target-*/.tox/
+          !/tmp/mapper-*/.tox/

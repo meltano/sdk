@@ -8,7 +8,7 @@ from collections import defaultdict
 from copy import copy
 from textwrap import dedent
 
-import sqlalchemy
+import sqlalchemy as sa
 from pendulum import now
 from sqlalchemy.sql.expression import bindparam
 
@@ -20,7 +20,7 @@ from singer_sdk.sinks.batch import BatchSink
 if t.TYPE_CHECKING:
     from sqlalchemy.sql import Executable
 
-    from singer_sdk.plugin_base import PluginBase
+    from singer_sdk.target_base import Target
 
 
 class SQLSink(BatchSink):
@@ -32,10 +32,10 @@ class SQLSink(BatchSink):
 
     def __init__(
         self,
-        target: PluginBase,
+        target: Target,
         stream_name: str,
         schema: dict,
-        key_properties: list[str] | None,
+        key_properties: t.Sequence[str] | None,
         connector: SQLConnector | None = None,
     ) -> None:
         """Initialize SQL Sink.
@@ -61,7 +61,7 @@ class SQLSink(BatchSink):
         return self._connector
 
     @property
-    def connection(self) -> sqlalchemy.engine.Connection:
+    def connection(self) -> sa.engine.Connection:
         """Get or set the SQLAlchemy connection for this sink.
 
         Returns:
@@ -98,13 +98,7 @@ class SQLSink(BatchSink):
         if default_target_schema:
             return default_target_schema
 
-        if len(parts) in {2, 3}:
-            # Stream name is a two-part or three-part identifier.
-            # Use the second-to-last part as the schema name.
-            return self.conform_name(parts[-2], "schema")
-
-        # Schema name not detected.
-        return None
+        return self.conform_name(parts[-2], "schema") if len(parts) in {2, 3} else None
 
     @property
     def database_name(self) -> str | None:
@@ -245,7 +239,7 @@ class SQLSink(BatchSink):
         )
 
     @property
-    def key_properties(self) -> list[str]:
+    def key_properties(self) -> t.Sequence[str]:
         """Return key properties, conformed to target system naming requirements.
 
         Returns:
@@ -320,17 +314,23 @@ class SQLSink(BatchSink):
             schema,
         )
         if isinstance(insert_sql, str):
-            insert_sql = sqlalchemy.text(insert_sql)
+            insert_sql = sa.text(insert_sql)
 
-        conformed_records = (
-            [self.conform_record(record) for record in records]
-            if isinstance(records, list)
-            else (self.conform_record(record) for record in records)
-        )
+        conformed_records = [self.conform_record(record) for record in records]
+        property_names = list(self.conform_schema(schema)["properties"].keys())
+
+        # Create new record dicts with missing properties filled in with None
+        new_records = [
+            {name: record.get(name) for name in property_names}
+            for record in conformed_records
+        ]
+
         self.logger.info("Inserting with SQL: %s", insert_sql)
-        with self.connector._connect() as conn, conn.begin():
-            conn.execute(insert_sql, conformed_records)
-        return len(conformed_records) if isinstance(conformed_records, list) else None
+
+        with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
+            result = conn.execute(insert_sql, new_records)
+
+        return result.rowcount
 
     def merge_upsert_from_table(
         self,
@@ -375,13 +375,13 @@ class SQLSink(BatchSink):
             self.connector.prepare_column(
                 self.full_table_name,
                 self.version_column_name,
-                sql_type=sqlalchemy.types.Integer(),
+                sql_type=sa.types.Integer(),
             )
 
         if self.config.get("hard_delete", True):
-            with self.connector._connect() as conn, conn.begin():
+            with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
                 conn.execute(
-                    sqlalchemy.text(
+                    sa.text(
                         f"DELETE FROM {self.full_table_name} "  # noqa: S608
                         f"WHERE {self.version_column_name} <= {new_version}",
                     ),
@@ -395,20 +395,20 @@ class SQLSink(BatchSink):
             self.connector.prepare_column(
                 self.full_table_name,
                 self.soft_delete_column_name,
-                sql_type=sqlalchemy.types.DateTime(),
+                sql_type=sa.types.DateTime(),
             )
 
-        query = sqlalchemy.text(
+        query = sa.text(
             f"UPDATE {self.full_table_name}\n"
             f"SET {self.soft_delete_column_name} = :deletedate \n"
             f"WHERE {self.version_column_name} < :version \n"
             f"  AND {self.soft_delete_column_name} IS NULL\n",
         )
         query = query.bindparams(
-            bindparam("deletedate", value=deleted_at, type_=sqlalchemy.types.DateTime),
-            bindparam("version", value=new_version, type_=sqlalchemy.types.Integer),
+            bindparam("deletedate", value=deleted_at, type_=sa.types.DateTime),
+            bindparam("version", value=new_version, type_=sa.types.Integer),
         )
-        with self.connector._connect() as conn, conn.begin():
+        with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
             conn.execute(query)
 
 

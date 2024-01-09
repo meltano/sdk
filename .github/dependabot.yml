@@ -5,7 +5,6 @@ updates:
     schedule:
       interval: daily
       time: "12:00"
-      timezone: "UTC"
     reviewers: [meltano/engineering]
     labels: [deps]
   - package-ecosystem: pip
@@ -13,7 +12,6 @@ updates:
     schedule:
       interval: daily
       time: "12:00"
-      timezone: "UTC"
     reviewers: [meltano/engineering]
     labels: [deps]
   - package-ecosystem: github-actions
@@ -22,3 +20,7 @@ updates:
       interval: weekly
     reviewers: [meltano/engineering]
     labels: [deps]
+    groups:
+      actions:
+        patterns:
+          - "*"

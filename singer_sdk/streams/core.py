@@ -15,10 +15,11 @@ import pendulum
 
 import singer_sdk._singerlib as singer
 from singer_sdk import metrics
-from singer_sdk.batch import JSONLinesBatcher
+from singer_sdk.batch import Batcher
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
+    InvalidReplicationKeyException,
     InvalidStreamSortException,
     MaxRecordsLimitException,
 )
@@ -53,6 +54,7 @@ from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, Stream
 if t.TYPE_CHECKING:
     import logging
 
+    from singer_sdk.helpers._compat import Traversable
     from singer_sdk.tap_base import Tap
 
 # Replication methods
@@ -123,7 +125,7 @@ class Stream(metaclass=abc.ABCMeta):
             msg = "Missing argument or class variable 'name'."
             raise ValueError(msg)
 
-        self.logger: logging.Logger = tap.logger
+        self.logger: logging.Logger = tap.logger.getChild(self.name)
         self.metrics_logger = tap.metrics_logger
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
@@ -133,9 +135,9 @@ class Stream(metaclass=abc.ABCMeta):
         self._stream_maps: list[StreamMap] | None = None
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
-        self._primary_keys: list[str] | None = None
+        self._primary_keys: t.Sequence[str] | None = None
         self._state_partitioning_keys: list[str] | None = None
-        self._schema_filepath: Path | None = None
+        self._schema_filepath: Path | Traversable | None = None
         self._metadata: singer.MetadataMapping | None = None
         self._mask: singer.SelectionMask | None = None
         self._schema: dict
@@ -159,7 +161,7 @@ class Stream(metaclass=abc.ABCMeta):
                 raise ValueError(msg)
 
         if self.schema_filepath:
-            self._schema = json.loads(Path(self.schema_filepath).read_text())
+            self._schema = json.loads(self.schema_filepath.read_text())
 
         if not self.schema:
             msg = (
@@ -211,13 +213,23 @@ class Stream(metaclass=abc.ABCMeta):
 
         Returns:
             True if the stream uses a timestamp-based replication key.
+
+        Raises:
+            InvalidReplicationKeyException: If the schema does not contain the
+                replication key.
         """
         if not self.replication_key:
             return False
         type_dict = self.schema.get("properties", {}).get(self.replication_key)
+        if type_dict is None:
+            msg = f"Field '{self.replication_key}' is not in schema for stream '{self.name}'"  # noqa: E501
+            raise InvalidReplicationKeyException(msg)
         return is_datetime_type(type_dict)
 
-    def get_starting_replication_key_value(self, context: dict | None) -> t.Any | None:
+    def get_starting_replication_key_value(
+        self,
+        context: dict | None,
+    ) -> t.Any | None:  # noqa: ANN401
         """Get starting replication key.
 
         Will return the value of the stream's replication key when `--state` is passed.
@@ -235,7 +247,11 @@ class Stream(metaclass=abc.ABCMeta):
         """
         state = self.get_context_state(context)
 
-        return get_starting_replication_value(state)
+        return (
+            get_starting_replication_value(state)
+            if self.replication_method != REPLICATION_FULL_TABLE
+            else None
+        )
 
     def get_starting_timestamp(self, context: dict | None) -> datetime.datetime | None:
         """Get starting replication timestamp.
@@ -308,7 +324,7 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             A list of all children, recursively.
         """
-        result: list[Stream] = list(self.child_streams) or []
+        result: list[Stream] = [*self.child_streams]
         for child in self.child_streams:
             result += child.descendent_streams or []
         return result
@@ -385,7 +401,7 @@ class Stream(metaclass=abc.ABCMeta):
     def get_replication_key_signpost(
         self,
         context: dict | None,  # noqa: ARG002
-    ) -> datetime.datetime | t.Any | None:
+    ) -> datetime.datetime | t.Any | None:  # noqa: ANN401
         """Get the replication signpost.
 
         For timestamp-based replication keys, this defaults to `utc_now()`. For
@@ -406,7 +422,7 @@ class Stream(metaclass=abc.ABCMeta):
         return utc_now() if self.is_timestamp_replication_key else None
 
     @property
-    def schema_filepath(self) -> Path | None:
+    def schema_filepath(self) -> Path | Traversable | None:
         """Get path to schema file.
 
         Returns:
@@ -424,7 +440,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._schema
 
     @property
-    def primary_keys(self) -> list[str] | None:
+    def primary_keys(self) -> t.Sequence[str] | None:
         """Get primary keys.
 
         Returns:
@@ -433,7 +449,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._primary_keys or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: list[str] | None) -> None:
+    def primary_keys(self, new_value: t.Sequence[str] | None) -> None:
         """Set primary key(s) for the stream.
 
         Args:
@@ -758,7 +774,7 @@ class Stream(metaclass=abc.ABCMeta):
         if (not self._is_state_flushed) and (
             self.tap_state != self._last_emitted_state
         ):
-            singer.write_message(singer.StateMessage(value=self.tap_state))
+            self._tap.write_message(singer.StateMessage(value=self.tap_state))
             self._last_emitted_state = copy.deepcopy(self.tap_state)
             self._is_state_flushed = True
 
@@ -786,7 +802,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _write_schema_message(self) -> None:
         """Write out a SCHEMA message with the stream schema."""
         for schema_message in self._generate_schema_messages():
-            singer.write_message(schema_message)
+            self._tap.write_message(schema_message)
 
     @property
     def mask(self) -> singer.SelectionMask:
@@ -838,7 +854,7 @@ class Stream(metaclass=abc.ABCMeta):
             record: A single stream record.
         """
         for record_message in self._generate_record_messages(record):
-            singer.write_message(record_message)
+            self._tap.write_message(record_message)
 
         self._is_state_flushed = False
 
@@ -853,7 +869,7 @@ class Stream(metaclass=abc.ABCMeta):
             encoding: The encoding to use for the batch.
             manifest: A list of filenames for the batch.
         """
-        singer.write_message(
+        self._tap.write_message(
             SDKBatchMessage(
                 stream=self.name,
                 encoding=encoding,
@@ -1255,7 +1271,7 @@ class Stream(metaclass=abc.ABCMeta):
 
         Raises:
             NotImplementedError: If the stream has children but this method is not
-                overriden.
+                overridden.
         """
         if context is None:
             for child_stream in self.child_streams:
@@ -1338,7 +1354,7 @@ class Stream(metaclass=abc.ABCMeta):
         Yields:
             A tuple of (encoding, manifest) for each batch.
         """
-        batcher = JSONLinesBatcher(
+        batcher = Batcher(
             tap_name=self.tap_name,
             stream_name=self.name,
             batch_config=batch_config,

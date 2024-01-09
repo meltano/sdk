@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import typing as t
+from logging import WARNING
 from textwrap import dedent
 
 import pytest
@@ -26,6 +27,7 @@ from singer_sdk.helpers._typing import (
 )
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
+    AnyType,
     ArrayType,
     BooleanType,
     CustomType,
@@ -128,6 +130,26 @@ def test_to_json():
             "additionalProperties": false
         }""",
     )
+
+
+def test_any_type(caplog: pytest.LogCaptureFixture):
+    schema = PropertiesList(
+        Property("any_type", AnyType, description="Can be anything"),
+    )
+    with caplog.at_level(WARNING):
+        assert schema.to_dict() == {
+            "type": "object",
+            "properties": {
+                "any_type": {
+                    "description": "Can be anything",
+                },
+            },
+        }
+        assert caplog.records[0].levelname == "WARNING"
+        assert caplog.records[0].message == (
+            "Could not append type because the JSON schema for the dictionary `{}` "
+            "appears to be invalid."
+        )
 
 
 def test_nested_complex_objects():
@@ -490,7 +512,7 @@ def test_property_creation(
     property_dict = property_obj.to_dict()
     assert property_dict == expected_jsonschema
     for check_fn in TYPE_FN_CHECKS:
-        property_name = list(property_dict.keys())[0]
+        property_name = next(iter(property_dict.keys()))
         property_node = property_dict[property_name]
         if check_fn in type_fn_checks_true:
             assert (

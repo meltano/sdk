@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.30.0"
+version = "0.34.1"
 description = "A framework for building Singer taps"
-authors = ["Meltano Team and Contributors"]
-maintainers = ["Meltano Team and Contributors"]
+authors = ["Meltano Team and Contributors <hello@meltano.com>"]
+maintainers = ["Meltano Team and Contributors <hello@meltano.com>"]
 readme = "README.md"
 homepage = "https://sdk.meltano.com/en/latest/"
 repository = "https://github.com/meltano/sdk"
@@ -24,6 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
@@ -38,47 +39,68 @@ license = "Apache-2.0"
 "Youtube" = "https://www.youtube.com/meltano"
 
 [tool.poetry.dependencies]
-python = "<3.12,>=3.7.1"
-backoff = ">=2.0.0,<3.0"
-pendulum = "^2.1.0"
+python = ">=3.7.1"
+backoff = { version = ">=2.0.0", python = "<4" }
+backports-datetime-fromisoformat = { version = ">=2.0.1", python = "<3.11" }
 click = "~=8.0"
-fs = "^2.4.16"
-PyJWT = "~=2.4"
-requests = "^2.25.1"
-cryptography = ">=3.4.6,<42.0.0"
-importlib-metadata = {version = "<5.0.0", markers = "python_version < \"3.8\""}
-importlib-resources = {version = "5.12.0", markers = "python_version < \"3.9\""}
-memoization = ">=0.3.2,<0.5.0"
-jsonpath-ng = "^1.5.3"
-joblib = "^1.0.1"
-inflection = "^0.5.1"
-sqlalchemy = "^1.4"
-python-dotenv = ">=0.20,<0.22"
-typing-extensions = "^4.2.0"
-simplejson = "^3.17.6"
-jsonschema = "^4.16.0"
+cryptography = ">=3.4.6"
+fs = ">=2.4.16"
+importlib-metadata = {version = "<7.0.0", python = "<3.12"}
+importlib-resources = {version = ">=5.12.0", python = "<3.9"}
+inflection = ">=0.5.1"
+joblib = ">=1.0.1"
+jsonpath-ng = ">=1.5.3"
+jsonschema = [
+    { version = ">=4.16.0,<4.18", python = "<3.8" },
+    { version = ">=4.16.0", python = ">=3.8" },
+]
+memoization = { version = ">=0.3.2,<0.5.0", python = "<4" }
 packaging = ">=23.1"
-pytz = ">=2022.2.1,<2024.0.0"
-PyYAML = "^6.0"
+pendulum = [
+    { version = ">=2.1.0,<3", python = "<3.8" },
+    { version = ">=2.1.0,<4", python = ">=3.8" },
+]
+PyJWT = "~=2.4"
+python-dateutil = ">=2.8.2"
+python-dotenv = ">=0.20"
+pytz = ">=2022.2.1"
+PyYAML = ">=6.0"
+requests = ">=2.25.1"
+simpleeval = ">=0.9.13"
+simplejson = ">=3.17.6"
+sqlalchemy = ">=1.4,<3.0"
+typing-extensions = ">=4.5.0"
 # urllib3 2.0 is not compatible with botocore
 urllib3 = ">=1.26,<2"
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
-sphinx = {version = ">=4.5,<6.0", optional = true}
-furo = {version = ">=2022.12.7,<2024.0.0", optional = true}
-sphinx-copybutton = {version = ">=0.3.1,<0.6.0", optional = true}
-myst-parser = {version = ">=0.17.2,<1.1.0", optional = true}
-sphinx-autobuild = {version = "^2021.3.14", optional = true}
-sphinx-reredirects = {version = "^0.1.1", optional = true}
+sphinx = {version = ">=4.5", optional = true}
+furo = {version = ">=2022.12.7", optional = true}
+sphinx-copybutton = {version = ">=0.3.1", optional = true}
+myst-parser = {version = ">=1", optional = true}
+sphinx-autobuild = {version = ">=2021.3.14", optional = true}
 sphinx-inline-tabs = {version = ">=2023.4.21", optional = true, markers = "python_version >= \"3.8\""}
+sphinx-notfound-page = {version = ">=1.0.0", optional = true, python = ">=3.8"}
+sphinx-reredirects = {version = ">=0.1.1", optional = true}
 
 # File storage dependencies installed as optional 'filesystem' extras
-fs-s3fs = {version = "^1.1.1", optional = true}
+fs-s3fs = {version = ">=1.1.1", optional = true}
+
+# Parquet file dependencies installed as optional 'parquet' extras
+numpy = [
+    { version = "<1.22", python = "<3.8", optional = true },
+    { version = ">=1.22,<1.25", python = ">=3.8,<3.9", optional = true },
+    { version = ">=1.22", python = ">=3.9", optional = true },
+]
+pyarrow = [
+    { version = ">=11,<13", python = "<3.8", optional = true },
+    { version = ">=13", python = ">=3.8", optional = true }
+]
 
 # Testing dependencies installed as optional 'testing' extras
-pytest = {version="^7.2.1", optional = true}
-pytest-durations = {version = "^1.2.0", optional = true}
+pytest = {version=">=7.2.1", optional = true}
+pytest-durations = {version = ">=1.2.0", optional = true}
 
 [tool.poetry.extras]
 docs = [
@@ -87,54 +109,55 @@ docs = [
     "sphinx-copybutton",
     "myst-parser",
     "sphinx-autobuild",
-    "sphinx-reredirects",
     "sphinx-inline-tabs",
+    "sphinx-notfound-page",
+    "sphinx-reredirects",
 ]
 s3 = ["fs-s3fs"]
 testing = [
     "pytest",
     "pytest-durations"
 ]
+parquet = ["numpy", "pyarrow"]
 
 [tool.poetry.group.dev.dependencies]
-# snowflake-connector-python = "2.0.4" # Removed: Too many version conflicts!
-commitizen-version-bump = { git = "https://github.com/meltano/commitizen-version-bump.git", branch = "main" }
-xdoctest = "^1.1.1"
-mypy = "^1.0"
-cookiecutter = ">=2.1.1,<2.2.3"
-PyYAML = "^6.0"
-freezegun = "^1.2.2"
-numpy = [
-    { version = "<1.22", python = "<3.8" },
-    { version = ">=1.22", python = ">=3.8" },
+coverage = [
+    {extras = ["toml"], version = ">=7.2,<7.3", python = "<3.8"},
+    {extras = ["toml"], version = ">=7.2", python = ">=3.8,<3.12"},
+    {extras = ["toml"], version = ">=7.4", python = ">=3.12"},
 ]
-requests-mock = "^1.10.0"
-sqlalchemy2-stubs = {version = "^0.0.2a32", allow-prereleases = true}
-types-jsonschema = "^4.17.0.6"
-types-python-dateutil = "^2.8.19"
-types-pytz = ">=2022.7.1.2,<2024.0.0.0"
-types-requests = "^2.28.11"
-types-simplejson = "^3.18.0"
-types-PyYAML = "^6.0.12"
-coverage = {extras = ["toml"], version = "^7.2"}
-pyarrow = ">=11,<13"
-pytest-snapshot = "^0.9.0"
 
-# Cookiecutter tests
-black = "^23.1"
-darglint = "^1.8.0"
-flake8 = "^3.9.0"
-flake8-annotations = "^2.9.1"
-flake8-docstrings = "^1.7.0"
+# TODO: Remove the Python 3.12 marker when DuckDB supports it
+duckdb = { version = ">=0.8.0", python = "<3.12" }
+duckdb-engine = { version = ">=0.9.4", python = "<3.12" }
 
-[tool.black]
-exclude = ".*simpleeval.*"
+mypy = [
+    { version = ">=1.0,<1.5", python = "<3.8" },
+    { version = ">=1.0", python = ">=3.8" },
+]
+pytest-benchmark = ">=4.0.0"
+pytest-snapshot = ">=0.9.0"
+requests-mock = ">=1.10.0"
+time-machine = [
+    { version = ">=2.10.0,<2.11", python = "<3.8" },
+    { version = ">=2.10.0", python = ">=3.8" },
+]
+types-jsonschema = [
+    { version = ">=4.17.0.6,<4.18", python = "<3.8" },
+    { version = ">=4.17.0.6", python = ">=3.8" },
+]
+types-python-dateutil = ">=2.8.19"
+types-pytz = ">=2022.7.1.2"
+types-requests = ">=2.28.11"
+types-simplejson = ">=3.18.0"
+types-PyYAML = ">=6.0.12"
+xdoctest = ">=1.1.1"
+
+[tool.poetry.group.benchmark.dependencies]
+pytest-codspeed = ">=2.2.0"
 
 [tool.pytest.ini_options]
-addopts = '-vvv --ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
-filterwarnings = [
-    "error::sqlalchemy.exc.RemovedIn20Warning",
-]
+addopts = '--ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
 markers = [
     "external: Tests relying on external resources",
     "windows: Tests that only run on Windows",
@@ -145,13 +168,16 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.30.0"
+version = "0.34.1"
+changelog_merge_prerelease = true
+prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
-    "docs/conf.py",
+    "docs/conf.py:^release =",
     "pyproject.toml:^version =",
     "cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml:singer-sdk",
     "cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:singer-sdk",
+    "cookiecutter/mapper-template/{{cookiecutter.mapper_id}}/pyproject.toml:singer-sdk",
     ".github/ISSUE_TEMPLATE/bug.yml:^      placeholder:",
 ]
 
@@ -175,8 +201,7 @@ omit = [
 ]
 
 [tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
+exclude_also = [
     "def __repr__",
     "raise AssertionError",
     "raise NotImplementedError",
@@ -190,24 +215,19 @@ fail_under = 82
 [tool.mypy]
 exclude = "tests"
 files = "singer_sdk"
-plugins = [
-    "sqlalchemy.ext.mypy.plugin",
-]
 python_version = "3.8"
+warn_redundant_casts = true
+warn_return_any = true
 warn_unused_configs = true
 warn_unused_ignores = true
-warn_return_any = true
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
 module = [
-    "bcrypt.*",
-    "joblib.*",
-    "pyarrow.*",
-    "pandas.*",
+    "backports.datetime_fromisoformat.*",
+    "joblib.*",  # TODO: Remove when https://github.com/joblib/joblib/issues/1516 is shipped
     "jsonpath_ng.*",
-    "samples.*",
-    "sqlalchemy.*",
+    "pyarrow.*", # TODO: Remove when https://github.com/apache/arrow/issues/32609 if implemented and released
 ]
 
 [build-system]
@@ -215,20 +235,32 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-pytest11 = { callable = "singer_sdk:testing.pytest_plugin", extras = ["testing"] }
+pytest11 = { reference = "singer_sdk:testing.pytest_plugin", extras = ["testing"], type = "console" }
+
+[tool.poetry.plugins."singer_sdk.batch_encoders"]
+jsonl = "singer_sdk.contrib.batch_encoder_jsonl:JSONLinesBatcher"
+parquet = "singer_sdk.contrib.batch_encoder_parquet:ParquetBatcher"
 
 [tool.ruff]
+line-length = 88
+src = ["samples", "singer_sdk", "tests"]
+target-version = "py37"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
 exclude = [
     "cookiecutter/*",
-    "singer_sdk/helpers/_simpleeval.py",
-    "tests/core/test_simpleeval.py",
+    "*simpleeval*",
 ]
 ignore = [
     "ANN101",  # Missing type annotation for `self` in method
     "ANN102",  # Missing type annotation for `cls` in class method
     "N818",    # Exception name should be named with an Error suffix
+    "COM812",  # missing-trailing-comma
+    "ISC001",  # single-line-implicit-string-concatenation
 ]
-line-length = 88
 select = [
     "F",    # Pyflakes
     "E",    # pycodestyle (error)
@@ -249,7 +281,8 @@ select = [
     "C4",   # flake8-comprehensions
     "DTZ",  # flake8-datetimezs
     "T10",  # flake8-debugger
-    "EM",   # flake8-error-message
+    "EM",   # flake8-errmsg
+    "FA",   # flake8-future-annotations
     "ISC",  # flake8-implicit-str-concat
     "ICN",  # flake8-import-conventions
     "G",    # flake8-logging-format
@@ -260,6 +293,7 @@ select = [
     "Q",    # flake8-quotes
     "RSE",  # flake8-raise
     "RET",  # flake8-return
+    "SLF",  # flake8-self
     "SIM",  # flake8-simplify
     "TID",  # flake8-tidy-imports
     "TCH",  # flake8-type-checking
@@ -271,53 +305,54 @@ select = [
     "PLE",  # pylint (error)
     "PLR",  # pylint (refactor)
     "PLW",  # pylint (warning)
+    "PERF", # perflint
     "RUF",  # ruff
 ]
-src = ["samples", "singer_sdk", "tests"]
-target-version = "py37"
+unfixable = [
+    "ERA",  # Don't remove commented out code
+]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "docs/conf.py" = [
     "D",      # pydocstyle/flake8-docstrings
     "I002",   # isort: missing-required-import
     "INP001", # flake8-no-pep420: implicit-namespace-package
 ]
 "noxfile.py" = ["ANN"]
-"tests/*" = ["ANN", "D1", "D2", "FBT001", "FBT003", "PLR2004", "S101"]
+"tests/*" = ["ANN", "D1", "D2", "FBT001", "FBT003", "PLR2004", "S101", "SLF001"]
 # Disabled some checks in samples code
 "samples/*" = ["ANN", "D"]
-# Don't require docstrings conventions or type annotations in private modules
-"singer_sdk/helpers/_*.py" = ["ANN", "D105"]
 # Templates support a generic resource of type Any.
 "singer_sdk/testing/*.py" = ["S101"]
 "singer_sdk/testing/templates.py" = ["ANN401"]
 
-[tool.ruff.flake8-annotations]
+[tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
 mypy-init-return = true
 suppress-dummy-args = true
 
-[tool.ruff.flake8-import-conventions]
-banned-from = ["typing"]
+[tool.ruff.lint.flake8-import-conventions]
+banned-from = ["sqlalchemy", "typing"]
 
-[tool.ruff.flake8-import-conventions.extend-aliases]
+[tool.ruff.lint.flake8-import-conventions.extend-aliases]
+sqlalchemy = "sa"
 typing = "t"
 
-[tool.ruff.flake8-pytest-style]
+[tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 parametrize-names-type = "csv"
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["singer_sdk", "samples", "tests"]
 required-imports = ["from __future__ import annotations"]
 
-[tool.ruff.pep8-naming]
+[tool.ruff.lint.pep8-naming]
 classmethod-decorators = [
     "singer_sdk.cli.plugin_cli",
 ]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ruff.pylint]
+[tool.ruff.lint.pylint]
 max-args = 9

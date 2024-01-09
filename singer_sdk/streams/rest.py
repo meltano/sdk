@@ -140,7 +140,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             The `requests.Session`_ object for HTTP requests.
 
         .. _requests.Session:
-            https://requests.readthedocs.io/en/latest/api/#request-sessions
+            https://requests.readthedocs.io/en/latest/api.html#requests.Session
         """
         if not self._requests_session:
             self._requests_session = requests.Session()
@@ -149,7 +149,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
     def validate_response(self, response: requests.Response) -> None:
         """Validate HTTP response.
 
-        Checks for error status codes and wether they are fatal or retriable.
+        Checks for error status codes and whether they are fatal or retriable.
 
         In case an error is deemed transient and can be safely retried, then this
         method should raise an :class:`singer_sdk.exceptions.RetriableAPIError`.
@@ -175,13 +175,11 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             RetriableAPIError: If the request is retriable.
 
         .. _requests.Response:
-            https://requests.readthedocs.io/en/latest/api/#requests.Response
+            https://requests.readthedocs.io/en/latest/api.html#requests.Response
         """
         if (
             response.status_code in self.extra_retry_statuses
-            or HTTPStatus.INTERNAL_SERVER_ERROR
-            <= response.status_code
-            <= max(HTTPStatus)
+            or response.status_code >= HTTPStatus.INTERNAL_SERVER_ERROR
         ):
             msg = self.response_error_message(response)
             raise RetriableAPIError(msg, response)
@@ -294,6 +292,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
 
            from urllib.parse import urlencode
 
+
            class MyStream(RESTStream):
                def get_url_params(self, context, next_page_token):
                    params = {"key": "(a,b,c)"}
@@ -330,9 +329,9 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             A `requests.PreparedRequest`_ object.
 
         .. _requests.PreparedRequest:
-            https://requests.readthedocs.io/en/latest/api/#requests.PreparedRequest
+            https://requests.readthedocs.io/en/latest/api.html#requests.PreparedRequest
         .. _requests.Request:
-            https://requests.readthedocs.io/en/latest/api/#requests.Request
+            https://requests.readthedocs.io/en/latest/api.html#requests.Request
         """
         request = requests.Request(*args, **kwargs)
         self.requests_session.auth = self.authenticator
@@ -590,7 +589,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             One item for every item found in the response.
 
         .. _requests.Response:
-            https://requests.readthedocs.io/en/latest/api/#requests.Response
+            https://requests.readthedocs.io/en/latest/api.html#requests.Response
         """
         yield from extract_jsonpath(self.records_jsonpath, input=response.json())
 

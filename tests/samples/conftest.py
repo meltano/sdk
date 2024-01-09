@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from sqlalchemy import text
+import sqlalchemy as sa
 
 from samples.sample_tap_sqlite import SQLiteConnector, SQLiteTap
 from singer_sdk._singerlib import Catalog
@@ -23,23 +23,18 @@ def _sqlite_sample_db(sqlite_connector):
     """Return a path to a newly constructed sample DB."""
     with sqlite_connector._connect() as conn, conn.begin():
         for t in range(3):
-            conn.execute(text(f"DROP TABLE IF EXISTS t{t}"))
+            conn.execute(sa.text(f"DROP TABLE IF EXISTS t{t}"))
             conn.execute(
-                text(f"CREATE TABLE t{t} (c1 int PRIMARY KEY, c2 varchar(10))"),
+                sa.text(f"CREATE TABLE t{t} (c1 int PRIMARY KEY, c2 varchar(10))"),
             )
             for x in range(100):
                 conn.execute(
-                    text(f"INSERT INTO t{t} VALUES ({x}, 'x={x}')"),  # noqa: S608
+                    sa.text(f"INSERT INTO t{t} VALUES ({x}, 'x={x}')"),  # noqa: S608
                 )
 
 
 @pytest.fixture
-def sqlite_sample_tap(
-    _sqlite_sample_db,
-    sqlite_sample_db_config,
-    sqlite_sample_db_state,
-) -> SQLiteTap:
-    _ = _sqlite_sample_db
+def sqlite_sample_db_catalog(sqlite_sample_db_config) -> Catalog:
     catalog_obj = Catalog.from_dict(
         _get_tap_catalog(SQLiteTap, config=sqlite_sample_db_config, select_all=True),
     )
@@ -55,9 +50,20 @@ def sqlite_sample_tap(
     t2.key_properties = ["c1"]
     t2.replication_key = "c1"
     t2.replication_method = "INCREMENTAL"
+    return catalog_obj
+
+
+@pytest.fixture
+def sqlite_sample_tap(
+    _sqlite_sample_db,
+    sqlite_sample_db_config,
+    sqlite_sample_db_state,
+    sqlite_sample_db_catalog,
+) -> SQLiteTap:
+    _ = _sqlite_sample_db
     return SQLiteTap(
         config=sqlite_sample_db_config,
-        catalog=catalog_obj.to_dict(),
+        catalog=sqlite_sample_db_catalog.to_dict(),
         state=sqlite_sample_db_state,
     )
 
@@ -73,7 +79,7 @@ def path_to_sample_data_db(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def sqlite_sample_db_config(path_to_sample_data_db: str) -> dict:
+def sqlite_sample_db_config(path_to_sample_data_db: Path) -> dict:
     """Get configuration dictionary for target-csv."""
     return {"path_to_db": str(path_to_sample_data_db)}
 

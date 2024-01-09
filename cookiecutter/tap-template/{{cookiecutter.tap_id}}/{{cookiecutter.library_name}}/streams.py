@@ -2,14 +2,21 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+import sys
+import typing as t
 
 from singer_sdk import typing as th  # JSON Schema typing helpers
 
 from {{ cookiecutter.library_name }}.client import {{ cookiecutter.source_name }}Stream
 
+if sys.version_info >= (3, 9):
+    import importlib.resources as importlib_resources
+else:
+    import importlib_resources
+
+
 # TODO: Delete this is if not using json files for schema definition
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
 
 
 {%- if cookiecutter.stream_type == "GraphQL" %}
@@ -54,7 +61,7 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
             ),
         ),
     ).to_dict()
-    primary_keys = ["id"]
+    primary_keys: t.ClassVar[list[str]] = ["id"]
     replication_key = None
     graphql_query = """
         users {
@@ -81,7 +88,7 @@ class GroupsStream({{ cookiecutter.source_name }}Stream):
         th.Property("id", th.StringType),
         th.Property("modified", th.DateTimeType),
     ).to_dict()
-    primary_keys = ["id"]
+    primary_keys: t.ClassVar[list[str]] = ["id"]
     replication_key = "modified"
     graphql_query = """
         groups {
@@ -104,7 +111,7 @@ class UsersStream({{ cookiecutter.source_name }}Stream):
 {%- if cookiecutter.stream_type == "REST" %}
     path = "/users"
 {%- endif %}
-    primary_keys = ["id"]
+    primary_keys: t.ClassVar[list[str]] = ["id"]
     replication_key = None
     # Optionally, you may also use `schema_filepath` in place of `schema`:
     # schema_filepath = SCHEMAS_DIR / "users.json"  # noqa: ERA001
@@ -143,7 +150,7 @@ class GroupsStream({{ cookiecutter.source_name }}Stream):
 {%- if cookiecutter.stream_type == "REST" %}
     path = "/groups"
 {%- endif %}
-    primary_keys = ["id"]
+    primary_keys: t.ClassVar[list[str]] = ["id"]
     replication_key = "modified"
     schema = th.PropertiesList(
         th.Property("name", th.StringType),

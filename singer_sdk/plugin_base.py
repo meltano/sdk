@@ -6,6 +6,7 @@ import abc
 import logging
 import os
 import sys
+import time
 import typing as t
 from pathlib import Path, PurePath
 from types import MappingProxyType
@@ -71,6 +72,43 @@ class MapperNotInitialized(Exception):
         super().__init__("Mapper not initialized. Please call setup_mapper() first.")
 
 
+class SingerCommand(click.Command):
+    """Custom click command class for Singer packages."""
+
+    def __init__(
+        self,
+        *args: t.Any,
+        logger: logging.Logger,
+        **kwargs: t.Any,
+    ) -> None:
+        """Initialize the command.
+
+        Args:
+            *args: Positional `click.Command` arguments.
+            logger: A logger instance.
+            **kwargs: Keyword `click.Command` arguments.
+        """
+        super().__init__(*args, **kwargs)
+        self.logger = logger
+
+    def invoke(self, ctx: click.Context) -> t.Any:  # noqa: ANN401
+        """Invoke the command, capturing warnings and logging them.
+
+        Args:
+            ctx: The `click` context.
+
+        Returns:
+            The result of the command invocation.
+        """
+        logging.captureWarnings(capture=True)
+        try:
+            return super().invoke(ctx)
+        except ConfigValidationError as exc:
+            for error in exc.errors:
+                self.logger.error("Config validation error: %s", error)
+            sys.exit(1)
+
+
 class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
@@ -100,7 +138,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         logger = logging.getLogger(cls.name)
 
-        if log_level is not None and log_level.upper() in logging._levelToName.values():
+        if log_level is not None and log_level.upper() in logging._levelToName.values():  # noqa: SLF001
             logger.setLevel(log_level.upper())
 
         return logger
@@ -149,11 +187,14 @@ class PluginBase(metaclass=abc.ABCMeta):
             if self._is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
+        metrics._setup_logging(self.config)  # noqa: SLF001
+        self.metrics_logger = metrics.get_metrics_logger()
+
         self._validate_config(raise_errors=validate_config)
         self._mapper: PluginMapper | None = None
 
-        metrics._setup_logging(self.config)
-        self.metrics_logger = metrics.get_metrics_logger()
+        # Initialization timestamp
+        self.__initialized_at = int(time.time() * 1000)
 
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
@@ -184,6 +225,15 @@ class PluginBase(metaclass=abc.ABCMeta):
             mapper: A PluginMapper object.
         """
         self._mapper = mapper
+
+    @property
+    def initialized_at(self) -> int:
+        """Start time of the plugin.
+
+        Returns:
+            The start time of the plugin.
+        """
+        return self.__initialized_at
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
@@ -338,27 +388,19 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         return is_common_secret_key(config_key)
 
-    def _validate_config(
-        self,
-        *,
-        raise_errors: bool = True,
-        warnings_as_errors: bool = False,
-    ) -> tuple[list[str], list[str]]:
+    def _validate_config(self, *, raise_errors: bool = True) -> list[str]:
         """Validate configuration input against the plugin configuration JSON schema.
 
         Args:
             raise_errors: Flag to throw an exception if any validation errors are found.
-            warnings_as_errors: Flag to throw an exception if any warnings were emitted.
 
         Returns:
-            A tuple of configuration validation warnings and errors.
+            A list of validation errors.
 
         Raises:
             ConfigValidationError: If raise_errors is True and validation fails.
         """
-        warnings: list[str] = []
         errors: list[str] = []
-        log_fn = self.logger.info
         config_jsonschema = self.config_jsonschema
 
         if config_jsonschema:
@@ -376,19 +418,11 @@ class PluginBase(metaclass=abc.ABCMeta):
                 f"JSONSchema was: {config_jsonschema}"
             )
             if raise_errors:
-                raise ConfigValidationError(summary)
+                raise ConfigValidationError(summary, errors=errors)
 
-            log_fn = self.logger.warning
-        else:
-            summary = f"Config validation passed with {len(warnings)} warnings."
-            for warning in warnings:
-                summary += f"\n{warning}"
+            self.logger.warning(summary)
 
-        if warnings_as_errors and raise_errors and warnings:
-            msg = f"One or more warnings ocurred during validation: {warnings}"
-            raise ConfigValidationError(msg)
-        log_fn(summary)
-        return warnings, errors
+        return errors
 
     @classmethod
     def print_version(
@@ -542,7 +576,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         Returns:
             A callable CLI object.
         """
-        return click.Command(
+        return SingerCommand(
             name=cls.name,
             callback=cls.invoke,
             context_settings={"help_option_names": ["--help"]},
@@ -583,6 +617,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                     is_eager=True,
                 ),
             ],
+            logger=cls.logger,
         )
 
     @plugin_cli

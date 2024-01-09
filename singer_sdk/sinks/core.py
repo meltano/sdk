@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import copy
 import datetime
+import importlib.util
 import json
 import time
 import typing as t
@@ -12,8 +13,7 @@ from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
 
-from dateutil import parser
-from jsonschema import Draft7Validator, FormatChecker
+from jsonschema import Draft7Validator
 
 from singer_sdk.exceptions import MissingKeyPropertiesError
 from singer_sdk.helpers._batch import (
@@ -22,7 +22,12 @@ from singer_sdk.helpers._batch import (
     BatchFileFormat,
     StorageTarget,
 )
-from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._compat import (
+    date_fromisoformat,
+    datetime_fromisoformat,
+    final,
+    time_fromisoformat,
+)
 from singer_sdk.helpers._typing import (
     DatetimeErrorTreatmentEnum,
     get_datelike_property_type,
@@ -32,7 +37,7 @@ from singer_sdk.helpers._typing import (
 if t.TYPE_CHECKING:
     from logging import Logger
 
-    from singer_sdk.plugin_base import PluginBase
+    from singer_sdk.target_base import Target
 
 JSONSchemaValidator = Draft7Validator
 
@@ -48,10 +53,10 @@ class Sink(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        target: PluginBase,
+        target: Target,
         stream_name: str,
         schema: dict,
-        key_properties: list[str] | None,
+        key_properties: t.Sequence[str] | None,
     ) -> None:
         """Initialize target sink.
 
@@ -61,7 +66,8 @@ class Sink(metaclass=abc.ABCMeta):
             schema: Schema of the stream to sink.
             key_properties: Primary key of the stream to sink.
         """
-        self.logger = target.logger
+        self.logger = target.logger.getChild(stream_name)
+        self.sync_started_at = target.initialized_at
         self._config = dict(target.config)
         self._pending_batch: dict | None = None
         self.stream_name = stream_name
@@ -89,7 +95,10 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
-        self._validator = Draft7Validator(schema, format_checker=FormatChecker())
+        self._validator = Draft7Validator(
+            schema,
+            format_checker=Draft7Validator.FORMAT_CHECKER,
+        )
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return an empty dictionary by default.
@@ -212,8 +221,11 @@ class Sink(metaclass=abc.ABCMeta):
         return DatetimeErrorTreatmentEnum.ERROR
 
     @property
-    def key_properties(self) -> list[str]:
+    def key_properties(self) -> t.Sequence[str]:
         """Return key properties.
+
+        Override this method to return a list of key properties in a format that is
+        compatible with the target.
 
         Returns:
             A list of stream key properties.
@@ -235,7 +247,7 @@ class Sink(metaclass=abc.ABCMeta):
 
         Args:
             record: Individual record in the stream.
-            message: TODO
+            message: The record message.
             context: Stream partition or context dictionary.
         """
         record["_sdc_extracted_at"] = message.get("time_extracted")
@@ -243,12 +255,13 @@ class Sink(metaclass=abc.ABCMeta):
             tz=datetime.timezone.utc,
         ).isoformat()
         record["_sdc_batched_at"] = (
-            context.get("batch_start_time", None)
+            context.get("batch_start_time")
             or datetime.datetime.now(tz=datetime.timezone.utc)
         ).isoformat()
         record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
         record["_sdc_sequence"] = int(round(time.time() * 1000))
         record["_sdc_table_version"] = message.get("version")
+        record["_sdc_sync_started_at"] = self.sync_started_at
 
     def _add_sdc_metadata_to_schema(self) -> None:
         """Add _sdc metadata columns.
@@ -267,7 +280,7 @@ class Sink(metaclass=abc.ABCMeta):
                 "type": ["null", "string"],
                 "format": "date-time",
             }
-        for col in ("_sdc_sequence", "_sdc_table_version"):
+        for col in ("_sdc_sequence", "_sdc_table_version", "_sdc_sync_started_at"):
             properties_dict[col] = {"type": ["null", "integer"]}
 
     def _remove_sdc_metadata_from_schema(self) -> None:
@@ -284,6 +297,7 @@ class Sink(metaclass=abc.ABCMeta):
             "_sdc_deleted_at",
             "_sdc_sequence",
             "_sdc_table_version",
+            "_sdc_sync_started_at",
         ):
             properties_dict.pop(col, None)
 
@@ -302,6 +316,7 @@ class Sink(metaclass=abc.ABCMeta):
         record.pop("_sdc_deleted_at", None)
         record.pop("_sdc_sequence", None)
         record.pop("_sdc_table_version", None)
+        record.pop("_sdc_sync_started_at", None)
 
     # Record validation
 
@@ -331,10 +346,10 @@ class Sink(metaclass=abc.ABCMeta):
         Raises:
             MissingKeyPropertiesError: If record is missing one or more key properties.
         """
-        if not all(key_property in record for key_property in self.key_properties):
+        if any(key_property not in record for key_property in self._key_properties):
             msg = (
                 f"Record is missing one or more key_properties. \n"
-                f"Key Properties: {self.key_properties}, "
+                f"Key Properties: {self._key_properties}, "
                 f"Record Keys: {list(record.keys())}"
             )
             raise MissingKeyPropertiesError(
@@ -358,14 +373,22 @@ class Sink(metaclass=abc.ABCMeta):
             schema: TODO
             treatment: TODO
         """
-        for key in record:
+        for key, value in record.items():
+            if key not in schema["properties"]:
+                self.logger.warning("No schema for record field '%s'", key)
+                continue
             datelike_type = get_datelike_property_type(schema["properties"][key])
             if datelike_type:
-                date_val = record[key]
+                date_val = value
                 try:
-                    if record[key] is not None:
-                        date_val = parser.parse(date_val)
-                except parser.ParserError as ex:
+                    if value is not None:
+                        if datelike_type == "time":
+                            date_val = time_fromisoformat(date_val)
+                        elif datelike_type == "date":
+                            date_val = date_fromisoformat(date_val)
+                        else:
+                            date_val = datetime_fromisoformat(date_val)
+                except ValueError as ex:
                     date_val = handle_invalid_timestamp_in_record(
                         record,
                         [key],
@@ -518,15 +541,24 @@ class Sink(metaclass=abc.ABCMeta):
                     tail,
                     mode="rb",
                 ) as file:
-                    open_file = (
+                    context_file = (
                         gzip_open(file) if encoding.compression == "gzip" else file
                     )
-                    context = {
-                        "records": [
-                            json.loads(line)
-                            for line in open_file  # type: ignore[attr-defined]
-                        ],
-                    }
+                    context = {"records": [json.loads(line) for line in context_file]}  # type: ignore[attr-defined]
+                    self.process_batch(context)
+            elif (
+                importlib.util.find_spec("pyarrow")
+                and encoding.format == BatchFileFormat.PARQUET
+            ):
+                import pyarrow.parquet as pq
+
+                with storage.fs(create=False) as batch_fs, batch_fs.open(
+                    tail,
+                    mode="rb",
+                ) as file:
+                    context_file = file
+                    table = pq.read_table(context_file)
+                    context = {"records": table.to_pylist()}
                     self.process_batch(context)
             else:
                 msg = f"Unsupported batch encoding format: {encoding.format}"

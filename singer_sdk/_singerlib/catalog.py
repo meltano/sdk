@@ -31,11 +31,7 @@ class SelectionMask(t.Dict[Breadcrumb, bool]):
         Returns:
             True if the breadcrumb is selected, False otherwise.
         """
-        if len(breadcrumb) >= 2:  # noqa: PLR2004
-            parent = breadcrumb[:-2]
-            return self[parent]
-
-        return True
+        return self[breadcrumb[:-2]] if len(breadcrumb) >= 2 else True  # noqa: PLR2004
 
 
 @dataclass
@@ -71,7 +67,7 @@ class Metadata:
         )
 
     def to_dict(self) -> dict[str, t.Any]:
-        """Convert metadata to a JSON-encodeable dictionary.
+        """Convert metadata to a JSON-encodable dictionary.
 
         Returns:
             Metadata object.
@@ -90,7 +86,7 @@ class Metadata:
 class StreamMetadata(Metadata):
     """Stream metadata."""
 
-    table_key_properties: list[str] | None = None
+    table_key_properties: t.Sequence[str] | None = None
     forced_replication_method: str | None = None
     valid_replication_keys: list[str] | None = None
     schema_name: str | None = None
@@ -163,7 +159,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
         *,
         schema: dict[str, t.Any] | None = None,
         schema_name: str | None = None,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
         valid_replication_keys: list[str] | None = None,
         replication_method: str | None = None,
         selected_by_default: bool | None = None,
@@ -289,7 +285,7 @@ class CatalogEntry:
     metadata: MetadataMapping
     schema: Schema
     stream: str | None = None
-    key_properties: list[str] | None = None
+    key_properties: t.Sequence[str] | None = None
     replication_key: str | None = None
     is_view: bool | None = None
     database: str | None = None
@@ -389,7 +385,7 @@ class Catalog(t.Dict[str, CatalogEntry]):
         return {"streams": [stream.to_dict() for stream in self.streams]}
 
     @property
-    def streams(self) -> list[CatalogEntry]:
+    def streams(self) -> t.Sequence[CatalogEntry]:
         """Get catalog entries.
 
         Returns:

@@ -33,6 +33,10 @@ class SQLiteStream(SQLStream):
     """
 
     connector_class = SQLiteConnector
+    supports_nulls_first = True
+
+    # Use a smaller state message frequency to check intermediate state.
+    STATE_MSG_FREQUENCY = 10
 
 
 class SQLiteTap(SQLTap):
