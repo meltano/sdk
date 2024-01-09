@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import sys
 import typing as t
 from decimal import Decimal
 from unittest import mock
 
 import pytest
-import sqlalchemy
+import sqlalchemy as sa
 from sqlalchemy.dialects import registry, sqlite
+from sqlalchemy.exc import NoSuchModuleError
 
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.exceptions import ConfigValidationError
@@ -34,14 +36,14 @@ class TestConnectorSQL:
                 {
                     "table_name": "full.table.name",
                     "column_name": "column_name",
-                    "column_type": sqlalchemy.types.Text(),
+                    "column_type": sa.types.Text(),
                 },
                 {
                     "table_name": "full.table.name",
-                    "create_column_clause": sqlalchemy.schema.CreateColumn(
-                        sqlalchemy.Column(
+                    "create_column_clause": sa.schema.CreateColumn(
+                        sa.Column(
                             "column_name",
-                            sqlalchemy.types.Text(),
+                            sa.types.Text(),
                         ),
                     ),
                 },
@@ -68,12 +70,12 @@ class TestConnectorSQL:
                 {
                     "table_name": "full.table.name",
                     "column_name": "column_name",
-                    "column_type": sqlalchemy.types.String(),
+                    "column_type": sa.types.String(),
                 },
                 {
                     "table_name": "full.table.name",
                     "column_name": "column_name",
-                    "column_type": sqlalchemy.types.String(),
+                    "column_type": sa.types.String(),
                 },
                 "ALTER TABLE %(table_name)s ALTER COLUMN %(column_name)s (%(column_type)s)",  # noqa: E501
                 "ALTER TABLE full.table.name ALTER COLUMN column_name (VARCHAR)",
@@ -106,7 +108,7 @@ class TestConnectorSQL:
     def test_remove_collation_text_type(self):
         remove_collation = SQLConnector.remove_collation
         test_collation = "SQL_Latin1_General_CP1_CI_AS"
-        current_type = sqlalchemy.types.Text(collation=test_collation)
+        current_type = sa.types.Text(collation=test_collation)
         current_type_collation = remove_collation(current_type)
         # Check collation was set to None by the function
         assert current_type.collation is None
@@ -115,7 +117,7 @@ class TestConnectorSQL:
 
     def test_remove_collation_non_text_type(self):
         remove_collation = SQLConnector.remove_collation
-        current_type = sqlalchemy.types.Integer()
+        current_type = sa.types.Integer()
         current_type_collation = remove_collation(current_type)
         # Check there is not a collation attribute
         assert not hasattr(current_type, "collation")
@@ -127,7 +129,7 @@ class TestConnectorSQL:
     def test_update_collation_text_type(self):
         update_collation = SQLConnector.update_collation
         test_collation = "SQL_Latin1_General_CP1_CI_AS"
-        compatible_type = sqlalchemy.types.Text(collation=None)
+        compatible_type = sa.types.Text(collation=None)
         update_collation(compatible_type, test_collation)
         # Check collation was set to the value we put in
         assert compatible_type.collation == test_collation
@@ -135,7 +137,7 @@ class TestConnectorSQL:
     def test_update_collation_non_text_type(self):
         update_collation = SQLConnector.update_collation
         test_collation = "SQL_Latin1_General_CP1_CI_AS"
-        compatible_type = sqlalchemy.types.Integer()
+        compatible_type = sa.types.Integer()
         update_collation(compatible_type, test_collation)
         # Check there is not a collation attribute
         assert not hasattr(compatible_type, "collation")
@@ -178,9 +180,9 @@ class TestConnectorSQL:
 
     def test_connect_raises_on_operational_failure(self, connector):
         with pytest.raises(
-            sqlalchemy.exc.OperationalError,
+            sa.exc.OperationalError,
         ) as _, connector._connect() as conn:
-            conn.execute(sqlalchemy.text("SELECT * FROM fake_table"))
+            conn.execute(sa.text("SELECT * FROM fake_table"))
 
     def test_rename_column_uses_connect_correctly(self, connector):
         attached_engine = connector._engine
@@ -203,30 +205,30 @@ class TestConnectorSQL:
             res = connector._dialect
             assert res == attached_engine.dialect
 
-    def test_merge_sql_types_text_current_max(self, connector):
-        current_type = sqlalchemy.types.VARCHAR(length=None)
-        sql_type = sqlalchemy.types.VARCHAR(length=255)
+    def test_merge_sql_types_text_current_max(self, connector: SQLConnector):
+        current_type = sa.types.VARCHAR(length=None)
+        sql_type = sa.types.VARCHAR(length=255)
         compatible_sql_type = connector.merge_sql_types([current_type, sql_type])
         # Check that the current VARCHAR(MAX) type is kept
         assert compatible_sql_type is current_type
 
-    def test_merge_sql_types_text_current_greater_than(self, connector):
-        current_type = sqlalchemy.types.VARCHAR(length=255)
-        sql_type = sqlalchemy.types.VARCHAR(length=64)
+    def test_merge_sql_types_text_current_greater_than(self, connector: SQLConnector):
+        current_type = sa.types.VARCHAR(length=255)
+        sql_type = sa.types.VARCHAR(length=64)
         compatible_sql_type = connector.merge_sql_types([current_type, sql_type])
         # Check the current greater VARCHAR(255) is kept
         assert compatible_sql_type is current_type
 
     def test_merge_sql_types_text_proposed_max(self, connector):
-        current_type = sqlalchemy.types.VARCHAR(length=64)
-        sql_type = sqlalchemy.types.VARCHAR(length=None)
+        current_type = sa.types.VARCHAR(length=64)
+        sql_type = sa.types.VARCHAR(length=None)
         compatible_sql_type = connector.merge_sql_types([current_type, sql_type])
         # Check the current VARCHAR(64) is chosen over default VARCHAR(max)
         assert compatible_sql_type is current_type
 
     def test_merge_sql_types_text_current_less_than(self, connector):
-        current_type = sqlalchemy.types.VARCHAR(length=64)
-        sql_type = sqlalchemy.types.VARCHAR(length=255)
+        current_type = sa.types.VARCHAR(length=64)
+        sql_type = sa.types.VARCHAR(length=255)
         compatible_sql_type = connector.merge_sql_types([current_type, sql_type])
         # Check that VARCHAR(255) is chosen over the lesser current VARCHAR(64)
         assert compatible_sql_type is sql_type
@@ -235,22 +237,22 @@ class TestConnectorSQL:
         "types,expected_type",
         [
             pytest.param(
-                [sqlalchemy.types.Integer(), sqlalchemy.types.Numeric()],
-                sqlalchemy.types.Integer,
+                [sa.types.Integer(), sa.types.Numeric()],
+                sa.types.Integer,
                 id="integer-numeric",
             ),
             pytest.param(
-                [sqlalchemy.types.Numeric(), sqlalchemy.types.Integer()],
-                sqlalchemy.types.Numeric,
+                [sa.types.Numeric(), sa.types.Integer()],
+                sa.types.Numeric,
                 id="numeric-integer",
             ),
             pytest.param(
                 [
-                    sqlalchemy.types.Integer(),
-                    sqlalchemy.types.String(),
-                    sqlalchemy.types.Numeric(),
+                    sa.types.Integer(),
+                    sa.types.String(),
+                    sa.types.Numeric(),
                 ],
-                sqlalchemy.types.String,
+                sa.types.String,
                 id="integer-string-numeric",
             ),
         ],
@@ -258,20 +260,20 @@ class TestConnectorSQL:
     def test_merge_generic_sql_types(
         self,
         connector: SQLConnector,
-        types: list[sqlalchemy.types.TypeEngine],
-        expected_type: type[sqlalchemy.types.TypeEngine],
+        types: list[sa.types.TypeEngine],
+        expected_type: type[sa.types.TypeEngine],
     ):
         merged_type = connector.merge_sql_types(types)
         assert isinstance(merged_type, expected_type)
 
     def test_engine_json_serialization(self, connector: SQLConnector):
         engine = connector._engine
-        meta = sqlalchemy.MetaData()
-        table = sqlalchemy.Table(
+        meta = sa.MetaData()
+        table = sa.Table(
             "test_table",
             meta,
-            sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-            sqlalchemy.Column("attrs", sqlalchemy.JSON),
+            sa.Column("id", sa.Integer, primary_key=True),
+            sa.Column("attrs", sa.JSON),
         )
         meta.create_all(engine)
         with engine.connect() as conn:
@@ -296,9 +298,9 @@ class DuckDBConnector(SQLConnector):
     def get_column_alter_ddl(
         table_name: str,
         column_name: str,
-        column_type: sqlalchemy.types.TypeEngine,
-    ) -> sqlalchemy.DDL:
-        return sqlalchemy.DDL(
+        column_type: sa.types.TypeEngine,
+    ) -> sa.DDL:
+        return sa.DDL(
             "ALTER TABLE %(table_name)s ALTER COLUMN %(column_name)s TYPE %(column_type)s",  # noqa: E501
             {
                 "table_name": table_name,
@@ -308,6 +310,11 @@ class DuckDBConnector(SQLConnector):
         )
 
 
+@pytest.mark.xfail(
+    reason="DuckDB does not build on Python 3.12 yet",
+    condition=sys.version_info >= (3, 12),
+    raises=NoSuchModuleError,
+)
 class TestDuckDBConnector:
     @pytest.fixture
     def connector(self):
@@ -316,17 +323,17 @@ class TestDuckDBConnector:
     def test_create_schema(self, connector: DuckDBConnector):
         engine = connector._engine
         connector.create_schema("test_schema")
-        inspector = sqlalchemy.inspect(engine)
-        assert "test_schema" in inspector.get_schema_names()
+        inspector = sa.inspect(engine)
+        assert "memory.test_schema" in inspector.get_schema_names()
 
     def test_column_rename(self, connector: DuckDBConnector):
         engine = connector._engine
-        meta = sqlalchemy.MetaData()
-        _ = sqlalchemy.Table(
+        meta = sa.MetaData()
+        _ = sa.Table(
             "test_table",
             meta,
-            sqlalchemy.Column("id", sqlalchemy.Integer),
-            sqlalchemy.Column("old_name", sqlalchemy.String),
+            sa.Column("id", sa.Integer),
+            sa.Column("old_name", sa.String),
         )
         meta.create_all(engine)
 
@@ -334,27 +341,27 @@ class TestDuckDBConnector:
 
         with engine.connect() as conn:
             result = conn.execute(
-                sqlalchemy.text("SELECT * FROM test_table"),
+                sa.text("SELECT * FROM test_table"),
             )
             assert result.keys() == ["id", "new_name"]
 
     def test_adapt_column_type(self, connector: DuckDBConnector):
         connector.allow_column_alter = True
         engine = connector._engine
-        meta = sqlalchemy.MetaData()
-        _ = sqlalchemy.Table(
+        meta = sa.MetaData()
+        _ = sa.Table(
             "test_table",
             meta,
-            sqlalchemy.Column("id", sqlalchemy.Integer),
-            sqlalchemy.Column("name", sqlalchemy.Integer),
+            sa.Column("id", sa.Integer),
+            sa.Column("name", sa.Integer),
         )
         meta.create_all(engine)
 
-        connector._adapt_column_type("test_table", "name", sqlalchemy.types.String())
+        connector._adapt_column_type("test_table", "name", sa.types.String())
 
         with engine.connect() as conn:
             result = conn.execute(
-                sqlalchemy.text("SELECT * FROM test_table"),
+                sa.text("SELECT * FROM test_table"),
             )
             assert result.keys() == ["id", "name"]
             assert result.cursor.description[1][1] == "STRING"

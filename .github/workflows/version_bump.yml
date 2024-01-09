@@ -36,12 +36,11 @@ jobs:
       discussions: write    # to create a discussion
 
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    - name: Set up Python
-      uses: actions/setup-python@v4.7.1
+    - uses: actions/setup-python@v5
       with:
         python-version: "3.11"
         architecture: x64

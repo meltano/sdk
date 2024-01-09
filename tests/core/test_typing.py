@@ -6,7 +6,7 @@ import datetime
 import logging
 
 import pytest
-import sqlalchemy
+import sqlalchemy as sa
 
 from singer_sdk.helpers._typing import (
     TypeConformanceLevel,
@@ -297,23 +297,23 @@ def test_conform_primitives():
 @pytest.mark.parametrize(
     "jsonschema_type,expected",
     [
-        ({"type": ["string", "null"]}, sqlalchemy.types.VARCHAR),
-        ({"type": ["integer", "null"]}, sqlalchemy.types.INTEGER),
-        ({"type": ["number", "null"]}, sqlalchemy.types.DECIMAL),
-        ({"type": ["boolean", "null"]}, sqlalchemy.types.BOOLEAN),
-        ({"type": "object", "properties": {}}, sqlalchemy.types.VARCHAR),
-        ({"type": "array"}, sqlalchemy.types.VARCHAR),
-        ({"format": "date", "type": ["string", "null"]}, sqlalchemy.types.DATE),
-        ({"format": "time", "type": ["string", "null"]}, sqlalchemy.types.TIME),
+        ({"type": ["string", "null"]}, sa.types.VARCHAR),
+        ({"type": ["integer", "null"]}, sa.types.INTEGER),
+        ({"type": ["number", "null"]}, sa.types.DECIMAL),
+        ({"type": ["boolean", "null"]}, sa.types.BOOLEAN),
+        ({"type": "object", "properties": {}}, sa.types.VARCHAR),
+        ({"type": "array"}, sa.types.VARCHAR),
+        ({"format": "date", "type": ["string", "null"]}, sa.types.DATE),
+        ({"format": "time", "type": ["string", "null"]}, sa.types.TIME),
         (
             {"format": "date-time", "type": ["string", "null"]},
-            sqlalchemy.types.DATETIME,
+            sa.types.DATETIME,
         ),
         (
             {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
-            sqlalchemy.types.DATETIME,
+            sa.types.DATETIME,
         ),
-        ({"anyOf": [{"type": "integer"}, {"type": "null"}]}, sqlalchemy.types.INTEGER),
+        ({"anyOf": [{"type": "integer"}, {"type": "null"}]}, sa.types.INTEGER),
     ],
 )
 def test_to_sql_type(jsonschema_type, expected):

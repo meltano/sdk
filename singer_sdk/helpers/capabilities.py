@@ -185,7 +185,7 @@ class DeprecatedEnum(Enum):
         """
         member: DeprecatedEnum = object.__new__(cls)
         member._value_ = value
-        member._deprecation = deprecation
+        member.deprecation = deprecation
         return member
 
     @property
@@ -195,8 +195,8 @@ class DeprecatedEnum(Enum):
         Returns:
             Deprecation message.
         """
-        self._deprecation: str | None
-        return self._deprecation
+        self.deprecation: str | None
+        return self.deprecation
 
     def emit_warning(self) -> None:
         """Emit deprecation warning."""

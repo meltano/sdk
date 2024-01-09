@@ -443,12 +443,12 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             @property
             def oauth_request_body(self) -> dict:
                 return {
-                    'grant_type': 'password',
-                    'scope': 'https://api.powerbi.com',
-                    'resource': 'https://analysis.windows.net/powerbi/api',
-                    'client_id': self.config["client_id"],
-                    'username': self.config.get("username", self.config["client_id"]),
-                    'password': self.config["password"],
+                    "grant_type": "password",
+                    "scope": "https://api.powerbi.com",
+                    "resource": "https://analysis.windows.net/powerbi/api",
+                    "client_id": self.config["client_id"],
+                    "username": self.config.get("username", self.config["client_id"]),
+                    "password": self.config["password"],
                 }
 
         Raises:
@@ -485,7 +485,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             return False
         if not self.expires_in:
             return True
-        return self.expires_in > (utc_now() - self.last_refreshed).total_seconds()  # type: ignore[no-any-return]
+        return self.expires_in > (utc_now() - self.last_refreshed).total_seconds()
 
     # Authentication and refresh
     def update_access_token(self) -> None:

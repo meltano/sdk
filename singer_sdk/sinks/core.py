@@ -60,7 +60,7 @@ class Sink(metaclass=abc.ABCMeta):
         target: Target,
         stream_name: str,
         schema: dict,
-        key_properties: list[str] | None,
+        key_properties: t.Sequence[str] | None,
     ) -> None:
         """Initialize target sink.
 
@@ -349,7 +349,7 @@ class Sink(metaclass=abc.ABCMeta):
         return DatetimeErrorTreatmentEnum.ERROR
 
     @property
-    def key_properties(self) -> list[str]:
+    def key_properties(self) -> t.Sequence[str]:
         """Return key properties.
 
         Override this method to return a list of key properties in a format that is

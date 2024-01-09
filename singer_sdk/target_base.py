@@ -140,7 +140,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         *,
         record: dict | None = None,
         schema: dict | None = None,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
     ) -> Sink:
         """Return a sink for the given stream name.
 
@@ -229,7 +229,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self,
         stream_name: str,
         schema: dict,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
     ) -> Sink:
         """Create a sink and register it.
 
@@ -335,23 +335,23 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 continue
 
             sink = self.get_sink(stream_map.stream_alias, record=transformed_record)
-            context = sink._get_context(transformed_record)
+            context = sink._get_context(transformed_record)  # noqa: SLF001
             if sink.include_sdc_metadata_properties:
-                sink._add_sdc_metadata_to_record(
+                sink._add_sdc_metadata_to_record(  # noqa: SLF001
                     transformed_record,
                     message_dict,
                     context,
                 )
             else:
-                sink._remove_sdc_metadata_from_record(transformed_record)
+                sink._remove_sdc_metadata_from_record(transformed_record)  # noqa: SLF001
 
-            sink._validate_and_parse(transformed_record)
+            sink._validate_and_parse(transformed_record)  # noqa: SLF001
             transformed_record = sink.preprocess_record(transformed_record, context)
-            sink._singer_validate_message(transformed_record)
+            sink._singer_validate_message(transformed_record)  # noqa: SLF001
 
             sink.tally_record_read()
             sink.process_record(transformed_record, context)
-            sink._after_process_record(context)
+            sink._after_process_record(context)  # noqa: SLF001
 
             if sink.is_full:
                 self.logger.info(
@@ -683,7 +683,7 @@ class SQLTarget(Target):
         self,
         stream_name: str,
         schema: dict,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
     ) -> Sink:
         """Create a sink and register it.
 
@@ -741,7 +741,7 @@ class SQLTarget(Target):
         *,
         record: dict | None = None,
         schema: dict | None = None,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
     ) -> Sink:
         """Return a sink for the given stream name.
 

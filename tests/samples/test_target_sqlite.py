@@ -12,7 +12,7 @@ from textwrap import dedent
 from uuid import uuid4
 
 import pytest
-import sqlalchemy
+import sqlalchemy as sa
 
 from samples.sample_tap_hostile import SampleTapHostile
 from samples.sample_tap_sqlite import SQLiteTap
@@ -160,7 +160,7 @@ def test_sqlite_schema_addition(sqlite_sample_target: SQLTarget):
         ]
     )
     # sqlite doesn't support schema creation
-    with pytest.raises(sqlalchemy.exc.OperationalError) as excinfo:
+    with pytest.raises(sa.exc.OperationalError) as excinfo:
         target_sync_test(
             sqlite_sample_target,
             input=StringIO(tap_output),

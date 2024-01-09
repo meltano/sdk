@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.34.1 (2023-12-19)
+
+### 🐛 Fixes
+
+- [#2118](https://github.com/meltano/sdk/issues/2118) Output JSONPath expression with match count message -- _**Thanks @mjsqu!**_
+- [#2107](https://github.com/meltano/sdk/issues/2107) Respect forced replication method when retrieving state
+- [#2094](https://github.com/meltano/sdk/issues/2094) Use `nulls_first` when available to order `NULL` results in incremental SQL streams
+
+### ⚙️ Under the Hood
+
+- [#1733](https://github.com/meltano/sdk/issues/1733) Test with Python 3.12 🐍
+- [#2095](https://github.com/meltano/sdk/issues/2095) Use `CursorResult.mappings()` in SQL streams
+- [#2092](https://github.com/meltano/sdk/issues/2092) Use `datetime.fromisoformat` in other places
+- [#2090](https://github.com/meltano/sdk/issues/2090) Explicitly use `T` iso date separator
+
+### 📚 Documentation Improvements
+
+- [#2111](https://github.com/meltano/sdk/issues/2111) Fix broken requests documentation links -- _**Thanks @mjsqu!**_
+
 ## v0.34.0 (2023-12-05)
 
 ## v0.34.0rc1 (2023-12-05)
