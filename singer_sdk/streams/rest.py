@@ -384,6 +384,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         """
         paginator = self.get_new_paginator()
         decorated_request = self.request_decorator(self._request)
+        pages = 0
 
         with metrics.http_request_counter(self.name, self.path) as request_counter:
             request_counter.context = context
@@ -396,7 +397,19 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
                 resp = decorated_request(prepared_request, context)
                 request_counter.increment()
                 self.update_sync_costs(prepared_request, resp, context)
-                yield from self.parse_response(resp)
+                records = iter(self.parse_response(resp))
+                try:
+                    first_record = next(records)
+                except StopIteration:
+                    self.logger.info(
+                        "Pagination stopped after %d pages because no records were "
+                        "found in the last response",
+                        pages,
+                    )
+                    break
+                yield first_record
+                yield from records
+                pages += 1
 
                 paginator.advance(resp)
 
