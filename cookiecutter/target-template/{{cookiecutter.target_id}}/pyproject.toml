@@ -12,6 +12,15 @@ keywords = [
     "ELT",
     "{{cookiecutter.destination_name}}",
 ]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
 license = "Apache-2.0"
 {%- if cookiecutter.variant != "None (Skip)" %}
 packages = [
@@ -20,7 +29,7 @@ packages = [
 {%- endif %}
 
 [tool.poetry.dependencies]
-python = ">=3.8,<4"
+python = ">=3.8"
 singer-sdk = { version="~=0.34.1" }
 fs-s3fs = { version = "~=1.1.1", optional = true }
 {%- if cookiecutter.serialization_method != "SQL" %}
@@ -36,7 +45,7 @@ s3 = ["fs-s3fs"]
 
 [tool.ruff]
 src = ["{{cookiecutter.library_name}}"]
-target-version = "py37"
+target-version = "py38"
 
 [tool.ruff.lint]
 ignore = [
@@ -57,7 +66,7 @@ known-first-party = ["{{cookiecutter.library_name}}"]
 convention = "google"
 
 [build-system]
-requires = ["poetry-core>=1.0.8"]
+requires = ["poetry-core==1.8.1"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]

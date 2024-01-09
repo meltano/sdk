@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import sys
+{%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
+from functools import cached_property
+{%- endif %}
 from typing import Any, Callable, Iterable
 
 import requests
@@ -35,14 +38,6 @@ from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
-
-{% endif -%}
-
-{%- if cookiecutter.auth_method in ("OAuth2", "JWT") -%}
-if sys.version_info >= (3, 8):
-    from functools import cached_property
-else:
-    from cached_property import cached_property
 
 {% endif -%}
 
