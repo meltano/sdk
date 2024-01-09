@@ -362,7 +362,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     # Timer Management
 
-    def _lap_manager(self) -> None:
+    def lap_manager(self) -> None:
         """Start and Stop the Perf Time during drain.
 
         This method is called when the target triggers a drain on this sink.

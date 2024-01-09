@@ -217,7 +217,7 @@ def test_batch_wait_limit_seconds():
     assert sink_set.sink_timer.stop_time is None
     assert sink_set.sink_timer.lap_time is None
     assert sink_set.sink_timer.perf_diff == 0.0
-    sink_set._lap_manager()
+    sink_set.lap_manager()
     assert sink_set.sink_timer.start_time > 0.0
     assert sink_set.sink_timer.stop_time is None
     assert sink_set.sink_timer.lap_time > 1.0
@@ -259,7 +259,7 @@ def test_batch_dynamic_management():
     assert sink_set.max_size == 100000
     assert sink_set.sink_timer.sink_max_size == 100
     time.sleep(1.1)
-    sink_set._lap_manager()
+    sink_set.lap_manager()
     assert sink_set.sink_timer.start_time > 0.0
     assert sink_set.sink_timer.stop_time is None
     assert sink_set.sink_timer.lap_time > 1.0
@@ -267,7 +267,7 @@ def test_batch_dynamic_management():
     assert sink_set.sink_timer.perf_diff > sink_set.sink_timer.perf_diff_allowed_max
     assert sink_set.sink_timer.sink_max_size == 200
     time.sleep(3.1)
-    sink_set._lap_manager()
+    sink_set.lap_manager()
     assert sink_set.sink_timer.start_time > 0.0
     assert sink_set.sink_timer.stop_time is None
     assert sink_set.sink_timer.lap_time > 1.0
