@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.34.1"
+version = "0.0.0"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors <hello@meltano.com>"]
 maintainers = ["Meltano Team and Contributors <hello@meltano.com>"]
@@ -174,7 +174,6 @@ prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
     "docs/conf.py:^release =",
-    "pyproject.toml:^version =",
     "cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml:singer-sdk",
     "cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:singer-sdk",
     "cookiecutter/mapper-template/{{cookiecutter.mapper_id}}/pyproject.toml:singer-sdk",
@@ -230,9 +229,13 @@ module = [
     "pyarrow.*", # TODO: Remove when https://github.com/apache/arrow/issues/32609 if implemented and released
 ]
 
+[tool.poetry-dynamic-versioning]
+enable = true
+style = "pep440"
+
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core==1.8.1", "poetry-dynamic-versioning==1.2.0"]
+build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry.scripts]
 pytest11 = { reference = "singer_sdk:testing.pytest_plugin", extras = ["testing"], type = "console" }
