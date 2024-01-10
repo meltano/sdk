@@ -170,7 +170,7 @@ def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
     )
     assert updated_record["missing_datetime"] == "2021-01-01T00:00:00+00:00"
     assert updated_record["invalid_datetime"] == "9999-12-31 23:59:59.999999"
-    assert "data.invalid_datetime must be date-time" in captured.err
+    assert "Invalid isoformat string: 'not a datetime'" in captured.err
 
 
 @pytest.fixture
