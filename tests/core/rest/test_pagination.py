@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import json
 import typing as t
+from urllib.parse import parse_qs, urlparse
 
 import pytest
-from requests import Response
+from requests import PreparedRequest, Response
 
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import (
@@ -20,6 +21,10 @@ from singer_sdk.pagination import (
     SinglePagePaginator,
     first,
 )
+from singer_sdk.streams.rest import RESTStream
+
+if t.TYPE_CHECKING:
+    from singer_sdk.tap_base import Tap
 
 
 def test_paginator_base_missing_implementation():
@@ -45,26 +50,6 @@ def test_single_page_paginator():
     assert paginator.finished
     assert paginator.current_value is None
     assert paginator.count == 1
-
-
-def test_paginator_page_number_missing_implementation():
-    """Validate that `BasePageNumberPaginator` implementation requires `has_more`."""
-
-    with pytest.raises(
-        TypeError,
-        match="Can't instantiate abstract class .* '?has_more'?",
-    ):
-        BasePageNumberPaginator(1)
-
-
-def test_paginator_offset_missing_implementation():
-    """Validate that `BaseOffsetPaginator` implementation requires `has_more`."""
-
-    with pytest.raises(
-        TypeError,
-        match="Can't instantiate abstract class .* '?has_more'?",
-    ):
-        BaseOffsetPaginator(0, 100)
 
 
 def test_paginator_hateoas_missing_implementation():
@@ -352,3 +337,63 @@ def test_paginator_custom_hateoas():
     paginator.advance(response)
     assert paginator.finished
     assert paginator.count == 3
+
+
+def test_break_pagination(tap: Tap, caplog: pytest.LogCaptureFixture):
+    class MyAPIStream(RESTStream[int]):
+        """My API stream."""
+
+        name = "my-api-stream"
+        url_base = "https://my.api.test"
+        path = "/path/to/resource"
+        schema = {"type": "object", "properties": {"id": {"type": "integer"}}}  # noqa: RUF012
+
+        def parse_response(self, response: Response) -> t.Iterable[dict]:
+            return response.json()
+
+        def get_new_paginator(self) -> BasePageNumberPaginator:
+            return BasePageNumberPaginator(1)
+
+        def get_url_params(
+            self,
+            context: dict | None,  # noqa: ARG002
+            next_page_token: int | None,
+        ) -> dict[str, t.Any] | str:
+            params = {}
+            if next_page_token:
+                params["page"] = next_page_token
+            return params
+
+        def _request(
+            self,
+            prepared_request: PreparedRequest,
+            context: dict | None,  # noqa: ARG002
+        ) -> Response:
+            r = Response()
+            r.status_code = 200
+
+            parsed = urlparse(prepared_request.url)
+            query = parse_qs(parsed.query)
+
+            if query.get("page", ["1"]) == ["1"]:
+                r._content = json.dumps(
+                    [
+                        {"id": 1},
+                        {"id": 2},
+                    ]
+                ).encode()
+            else:
+                r._content = json.dumps([]).encode()
+
+            return r
+
+    stream = MyAPIStream(tap=tap)
+
+    records_iter = stream.request_records(context=None)
+
+    next(records_iter)
+    next(records_iter)
+    with pytest.raises(StopIteration):
+        next(records_iter)
+
+    assert "Pagination stopped after 1 pages" in caplog.text
