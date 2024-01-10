@@ -13,7 +13,7 @@ from uuid import uuid4
 
 import msgspec
 import pytest
-import sqlalchemy
+import sqlalchemy as sa
 
 from samples.sample_tap_hostile import SampleTapHostile
 from samples.sample_tap_sqlite import SQLiteTap
@@ -49,9 +49,9 @@ def sqlite_sample_target(sqlite_target_test_config):
 
 
 @pytest.fixture
-def sqlite_sample_target_soft_delete(sqlite_target_test_config):
+def sqlite_sample_target_hard_delete(sqlite_target_test_config):
     """Get a sample target object with hard_delete disabled."""
-    return SQLiteTarget(config={**sqlite_target_test_config, "hard_delete": False})
+    return SQLiteTarget(config={**sqlite_target_test_config, "hard_delete": True})
 
 
 @pytest.fixture
@@ -166,7 +166,7 @@ def test_sqlite_schema_addition(sqlite_sample_target: SQLTarget):
         ]
     )
     # sqlite doesn't support schema creation
-    with pytest.raises(sqlalchemy.exc.OperationalError) as excinfo:
+    with pytest.raises(sa.exc.OperationalError) as excinfo:
         target_sync_test(
             sqlite_sample_target,
             input=StringIO(tap_output),
@@ -223,7 +223,7 @@ def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
 
 def test_sqlite_activate_version(
     sqlite_sample_target: SQLTarget,
-    sqlite_sample_target_soft_delete: SQLTarget,
+    sqlite_sample_target_hard_delete: SQLTarget,
 ):
     """Test handling the activate_version message for the SQLite target.
 
@@ -255,7 +255,7 @@ def test_sqlite_activate_version(
 
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output), finalize=True)
     target_sync_test(
-        sqlite_sample_target_soft_delete,
+        sqlite_sample_target_hard_delete,
         input=StringIO(tap_output),
         finalize=True,
     )

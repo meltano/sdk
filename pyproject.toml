@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "singer-sdk"
-version = "0.34.0"
+version = "0.0.0"
 description = "A framework for building Singer taps"
 authors = ["Meltano Team and Contributors <hello@meltano.com>"]
 maintainers = ["Meltano Team and Contributors <hello@meltano.com>"]
@@ -45,7 +45,7 @@ click = "~=8.0"
 cryptography = ">=3.4.6"
 fs = ">=2.4.16"
 importlib-metadata = {version = "<7.0.0", python = "<3.12"}
-importlib-resources = {version = ">=5.12.0", markers = "python_version < \"3.9\""}
+importlib-resources = {version = ">=5.12.0", python = "<3.9"}
 inflection = ">=0.5.1"
 joblib = ">=1.0.1"
 jsonpath-ng = ">=1.5.3"
@@ -54,8 +54,8 @@ memoization = ">=0.3.2,<0.5.0"
 msgspec = "^0.18.4"
 packaging = ">=23.1"
 pendulum = [
-    {version = ">=2.1.0,<3", python = "<3.8"},
-    {version = ">=2.1.0,<4", python = ">=3.8", allow-prereleases = true},
+    { version = ">=2.1.0,<3", python = "<3.8" },
+    { version = ">=2.1.0,<4", python = ">=3.8" },
 ]
 PyJWT = "~=2.4"
 python-dateutil = ">=2.8.2"
@@ -66,7 +66,7 @@ requests = ">=2.25.1"
 simpleeval = ">=0.9.13"
 simplejson = ">=3.17.6"
 sqlalchemy = ">=1.4,<3.0"
-typing-extensions = ">=4.2.0"
+typing-extensions = ">=4.5.0"
 # urllib3 2.0 is not compatible with botocore
 urllib3 = ">=1.26,<2"
 
@@ -118,7 +118,8 @@ parquet = ["numpy", "pyarrow"]
 [tool.poetry.group.dev.dependencies]
 coverage = [
     {extras = ["toml"], version = ">=7.2,<7.3", python = "<3.8"},
-    {extras = ["toml"], version = ">=7.2", python = ">=3.8"},
+    {extras = ["toml"], version = ">=7.2", python = ">=3.8,<3.12"},
+    {extras = ["toml"], version = ">=7.4", python = ">=3.12"},
 ]
 
 # TODO: Remove the Python 3.12 marker when DuckDB supports it
@@ -156,13 +157,12 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.34.0"
+version = "0.34.1"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
     "docs/conf.py:^release =",
-    "pyproject.toml:^version =",
     "cookiecutter/tap-template/{{cookiecutter.tap_id}}/pyproject.toml:singer-sdk",
     "cookiecutter/target-template/{{cookiecutter.target_id}}/pyproject.toml:singer-sdk",
     "cookiecutter/mapper-template/{{cookiecutter.mapper_id}}/pyproject.toml:singer-sdk",
@@ -218,9 +218,13 @@ module = [
     "pyarrow.*", # TODO: Remove when https://github.com/apache/arrow/issues/32609 if implemented and released
 ]
 
+[tool.poetry-dynamic-versioning]
+enable = true
+style = "pep440"
+
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core==1.8.1", "poetry-dynamic-versioning==1.2.0"]
+build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry.scripts]
 pytest11 = { reference = "singer_sdk:testing.pytest_plugin", extras = ["testing"], type = "console" }
@@ -233,6 +237,9 @@ parquet = "singer_sdk.contrib.batch_encoder_parquet:ParquetBatcher"
 line-length = 88
 src = ["samples", "singer_sdk", "tests"]
 target-version = "py38"
+
+[tool.ruff.format]
+docstring-code-format = true
 
 [tool.ruff.lint]
 exclude = [
@@ -317,9 +324,10 @@ mypy-init-return = true
 suppress-dummy-args = true
 
 [tool.ruff.lint.flake8-import-conventions]
-banned-from = ["typing"]
+banned-from = ["sqlalchemy", "typing"]
 
 [tool.ruff.lint.flake8-import-conventions.extend-aliases]
+sqlalchemy = "sa"
 typing = "t"
 
 [tool.ruff.lint.flake8-pytest-style]

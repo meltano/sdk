@@ -96,9 +96,7 @@ def flatten_schema(
     >>> schema = {
     ...     "type": "object",
     ...     "properties": {
-    ...         "id": {
-    ...             "type": "string"
-    ...         },
+    ...         "id": {"type": "string"},
     ...         "foo": {
     ...             "type": "object",
     ...             "properties": {
@@ -107,17 +105,13 @@ def flatten_schema(
     ...                     "properties": {
     ...                         "baz": {
     ...                             "type": "object",
-    ...                             "properties": {
-    ...                                 "qux": {
-    ...                                     "type": "string"
-    ...                                 }
-    ...                             }
+    ...                             "properties": {"qux": {"type": "string"}},
     ...                         }
-    ...                     }
+    ...                     },
     ...                 }
-    ...             }
-    ...         }
-    ...     }
+    ...             },
+    ...         },
+    ...     },
     ... }
     >>> print(json.dumps(flatten_schema(schema, 0), indent=2))
     {
@@ -189,9 +183,7 @@ def flatten_schema(
     >>> nullable_leaves_schema = {
     ...     "type": "object",
     ...     "properties": {
-    ...         "id": {
-    ...             "type": "string"
-    ...         },
+    ...         "id": {"type": "string"},
     ...         "foo": {
     ...             "type": ["object", "null"],
     ...             "properties": {
@@ -200,17 +192,13 @@ def flatten_schema(
     ...                     "properties": {
     ...                         "baz": {
     ...                             "type": ["object", "null"],
-    ...                             "properties": {
-    ...                                 "qux": {
-    ...                                     "type": "string"
-    ...                                 }
-    ...                             }
+    ...                             "properties": {"qux": {"type": "string"}},
     ...                         }
-    ...                     }
+    ...                     },
     ...                 }
-    ...             }
-    ...         }
-    ...     }
+    ...             },
+    ...         },
+    ...     },
     ... }
     >>> print(json.dumps(flatten_schema(nullable_leaves_schema, 0), indent=2))
     {

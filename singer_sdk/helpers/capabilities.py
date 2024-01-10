@@ -106,6 +106,14 @@ ADD_RECORD_METADATA_CONFIG = PropertiesList(
         description="Add metadata to records.",
     ),
 ).to_dict()
+TARGET_HARD_DELETE_CONFIG = PropertiesList(
+    Property(
+        "hard_delete",
+        BooleanType(),
+        description="Hard delete records.",
+        default=False,
+    ),
+).to_dict()
 
 
 class TargetLoadMethods(str, Enum):

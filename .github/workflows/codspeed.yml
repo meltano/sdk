@@ -4,7 +4,21 @@ on:
   push:
     branches:
       - "main"
+    paths:
+      - "singer_sdk/**"
+      - "tests/**"
+      - "noxfile.py"
+      - "poetry.lock"
+      - "pyproject.toml"
+      - ".github/workflows/codspeed.yml"
   pull_request:
+    paths:
+      - "singer_sdk/**"
+      - "tests/**"
+      - "noxfile.py"
+      - "poetry.lock"
+      - "pyproject.toml"
+      - ".github/workflows/codspeed.yml"
   # `workflow_dispatch` allows CodSpeed to trigger backtest
   # performance analysis in order to generate initial data.
   workflow_dispatch:
@@ -13,13 +27,10 @@ jobs:
   benchmarks:
     runs-on: ubuntu-latest
     steps:
-    - name: Check out the repository
-      uses: actions/checkout@v4.1.1
-
-    - name: Setup Python
-      uses: actions/setup-python@v5.0.0
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
-        python-version: 3.11
+        python-version: 3.12
         architecture: x64
 
     - name: Install poetry
@@ -37,8 +48,7 @@ jobs:
         --with benchmark
         --all-extras
 
-    - name: Run benchmarks
-      uses: CodSpeedHQ/action@v2
+    - uses: CodSpeedHQ/action@v2
       with:
         token: ${{ secrets.CODSPEED_TOKEN }}
         run: pytest tests/ --codspeed

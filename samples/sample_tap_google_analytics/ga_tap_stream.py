@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import datetime
 import typing as t
-from pathlib import Path
 
 from singer_sdk.authenticators import OAuthJWTAuthenticator
+from singer_sdk.helpers._compat import importlib_resources
 from singer_sdk.streams import RESTStream
 
 GOOGLE_OAUTH_ENDPOINT = "https://oauth2.googleapis.com/token"
 GA_OAUTH_SCOPES = "https://www.googleapis.com/auth/analytics.readonly"
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
 
 
 class GoogleJWTAuthenticator(OAuthJWTAuthenticator):

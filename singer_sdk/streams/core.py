@@ -54,6 +54,7 @@ from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, Stream
 if t.TYPE_CHECKING:
     import logging
 
+    from singer_sdk.helpers._compat import Traversable
     from singer_sdk.tap_base import Tap
 
 # Replication methods
@@ -134,9 +135,9 @@ class Stream(metaclass=abc.ABCMeta):
         self._stream_maps: list[StreamMap] | None = None
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
-        self._primary_keys: list[str] | None = None
+        self._primary_keys: t.Sequence[str] | None = None
         self._state_partitioning_keys: list[str] | None = None
-        self._schema_filepath: Path | None = None
+        self._schema_filepath: Path | Traversable | None = None
         self._metadata: singer.MetadataMapping | None = None
         self._mask: singer.SelectionMask | None = None
         self._schema: dict
@@ -160,7 +161,7 @@ class Stream(metaclass=abc.ABCMeta):
                 raise ValueError(msg)
 
         if self.schema_filepath:
-            self._schema = json.loads(Path(self.schema_filepath).read_text())
+            self._schema = json.loads(self.schema_filepath.read_text())
 
         if not self.schema:
             msg = (
@@ -246,7 +247,11 @@ class Stream(metaclass=abc.ABCMeta):
         """
         state = self.get_context_state(context)
 
-        return get_starting_replication_value(state)
+        return (
+            get_starting_replication_value(state)
+            if self.replication_method != REPLICATION_FULL_TABLE
+            else None
+        )
 
     def get_starting_timestamp(self, context: dict | None) -> datetime.datetime | None:
         """Get starting replication timestamp.
@@ -319,7 +324,7 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             A list of all children, recursively.
         """
-        result: list[Stream] = list(self.child_streams) or []
+        result: list[Stream] = [*self.child_streams]
         for child in self.child_streams:
             result += child.descendent_streams or []
         return result
@@ -417,7 +422,7 @@ class Stream(metaclass=abc.ABCMeta):
         return utc_now() if self.is_timestamp_replication_key else None
 
     @property
-    def schema_filepath(self) -> Path | None:
+    def schema_filepath(self) -> Path | Traversable | None:
         """Get path to schema file.
 
         Returns:
@@ -435,7 +440,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._schema
 
     @property
-    def primary_keys(self) -> list[str] | None:
+    def primary_keys(self) -> t.Sequence[str] | None:
         """Get primary keys.
 
         Returns:
@@ -444,7 +449,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._primary_keys or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: list[str] | None) -> None:
+    def primary_keys(self, new_value: t.Sequence[str] | None) -> None:
         """Set primary key(s) for the stream.
 
         Args:
