@@ -276,7 +276,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         """Write a SCHEMA message for all known streams to STDOUT."""
         for stream in self.streams.values():
             stream.selected = True
-            stream._write_schema_message()
+            stream._write_schema_message()  # noqa: SLF001
 
     # Stream detection:
 
@@ -316,7 +316,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
             :class:`singer_sdk._singerlib.Catalog`.
         """
         return Catalog(
-            (stream.tap_stream_id, stream._singer_catalog_entry)
+            (stream.tap_stream_id, stream._singer_catalog_entry)  # noqa: SLF001
             for stream in self.streams.values()
         )
 
@@ -662,11 +662,11 @@ class SQLTap(Tap):
         self._catalog_dict = result
         return self._catalog_dict
 
-    def discover_streams(self) -> list[Stream]:
-        """Initialize all available streams and return them as a list.
+    def discover_streams(self) -> t.Sequence[Stream]:
+        """Initialize all available streams and return them as a sequence.
 
         Returns:
-            List of discovered Stream objects.
+            A sequence of discovered Stream objects.
         """
         return [
             self.default_stream_class(

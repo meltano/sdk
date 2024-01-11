@@ -28,7 +28,7 @@ extend-ignore = ["TD002", "TD003", "FIX002"]
 COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))
 
 package = "singer_sdk"
-python_versions = ["3.11", "3.10", "3.9", "3.8", "3.7"]
+python_versions = ["3.12", "3.11", "3.10", "3.9", "3.8", "3.7"]
 main_python_version = "3.11"
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = (
@@ -53,16 +53,23 @@ test_dependencies = [
 ]
 
 
+def _clean_py312_deps(session: Session, dependencies: list[str]) -> None:
+    """Clean dependencies for Python 3.12."""
+    if session.python == "3.12":
+        dependencies.remove("duckdb")
+        dependencies.remove("duckdb-engine")
+
+
 @session(python=main_python_version)
 def mypy(session: Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
     session.install(".[s3,testing,parquet]")
     session.install(
+        "exceptiongroup",
         "mypy",
         "pytest",
         "importlib-resources",
-        "sqlalchemy2-stubs",
         "types-jsonschema",
         "types-python-dateutil",
         "types-pytz",
@@ -78,6 +85,7 @@ def mypy(session: Session) -> None:
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
+    _clean_py312_deps(session, test_dependencies)
     session.install(".[s3,parquet]")
     session.install(*test_dependencies)
 
@@ -86,8 +94,10 @@ def tests(session: Session) -> None:
         # Bypass nox-poetry use of --constraint so we can install a version of
         # SQLAlchemy that doesn't match what's in poetry.lock.
         session.poetry.session.install(  # type: ignore[attr-defined]
-            f"sqlalchemy=={sqlalchemy_version}",
+            f"sqlalchemy=={sqlalchemy_version}.*",
         )
+
+    env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
 
     try:
         session.run(
@@ -99,6 +109,7 @@ def tests(session: Session) -> None:
             "--durations=10",
             "--benchmark-skip",
             *session.posargs,
+            env=env,
         )
     finally:
         if session.interactive:
@@ -108,6 +119,7 @@ def tests(session: Session) -> None:
 @session(python=main_python_version)
 def benches(session: Session) -> None:
     """Run benchmarks."""
+    _clean_py312_deps(session, test_dependencies)
     session.install(".[s3]")
     session.install(*test_dependencies)
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
@@ -130,6 +142,7 @@ def update_snapshots(session: Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
 
+    _clean_py312_deps(session, test_dependencies)
     session.install(".")
     session.install(*test_dependencies)
     session.run("pytest", "--snapshot-update", *args)

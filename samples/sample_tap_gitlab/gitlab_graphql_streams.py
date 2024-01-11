@@ -6,13 +6,12 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
+from singer_sdk.helpers._compat import importlib_resources
 from singer_sdk.streams import GraphQLStream
 
 SITE_URL = "https://gitlab.com/graphql"
 
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
 
 
 class GitlabGraphQLStream(GraphQLStream):
