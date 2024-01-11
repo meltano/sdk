@@ -1026,17 +1026,18 @@ class Stream(metaclass=abc.ABCMeta):
             partition_context: The partition context.
         """
         partition_context = partition_context or {}
-        child_context = copy.copy(
-            self.get_child_context(record=record, context=child_context),
-        )
         for key, val in partition_context.items():
             # Add state context to records if not already present
             if key not in record:
                 record[key] = val
 
-        # Sync children, except when primary mapper filters out the record
-        if self.stream_maps[0].get_filter_result(record):
-            self._sync_children(child_context)
+        for context in self.generate_child_contexts(
+            record=record,
+            context=child_context,
+        ):
+            # Sync children, except when primary mapper filters out the record
+            if self.stream_maps[0].get_filter_result(record):
+                self._sync_children(copy.copy(context))
 
     def _sync_records(  # noqa: C901
         self,
@@ -1288,6 +1289,22 @@ class Stream(metaclass=abc.ABCMeta):
                     raise NotImplementedError(msg)
 
         return context or record
+
+    def generate_child_contexts(
+        self,
+        record: dict,
+        context: dict | None,
+    ) -> t.Iterable[dict | None]:
+        """Generate child contexts.
+
+        Args:
+            record: Individual record in the stream.
+            context: Stream partition or context dictionary.
+
+        Yields:
+            A child context for each child stream.
+        """
+        yield self.get_child_context(record=record, context=context)
 
     # Abstract Methods
 

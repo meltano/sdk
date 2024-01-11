@@ -13,9 +13,14 @@ from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
 
-from jsonschema import Draft7Validator
+import jsonschema
+from typing_extensions import override
 
-from singer_sdk.exceptions import MissingKeyPropertiesError
+from singer_sdk.exceptions import (
+    InvalidJSONSchema,
+    InvalidRecord,
+    MissingKeyPropertiesError,
+)
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
@@ -40,7 +45,83 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.target_base import Target
 
-JSONSchemaValidator = Draft7Validator
+
+class BaseJSONSchemaValidator(abc.ABC):
+    """Abstract base class for JSONSchema validator."""
+
+    def __init__(self, schema: dict[str, t.Any]) -> None:
+        """Initialize the record validator.
+
+        Args:
+            schema: Schema of the stream to sink.
+        """
+        self.schema = schema
+
+    @abc.abstractmethod
+    def validate(self, record: dict[str, t.Any]) -> None:
+        """Validate a record message.
+
+        This method MUST raise an ``InvalidRecord`` exception if the record is invalid.
+
+        Args:
+            record: Record message to validate.
+        """
+
+
+class JSONSchemaValidator(BaseJSONSchemaValidator):
+    """Validate records using the ``fastjsonschema`` library."""
+
+    def __init__(
+        self,
+        schema: dict,
+        *,
+        validate_formats: bool = False,
+        format_checker: jsonschema.FormatChecker | None = None,
+    ):
+        """Initialize the validator.
+
+        Args:
+            schema: Schema of the stream to sink.
+            validate_formats: Whether JSON string formats (e.g. ``date-time``) should
+                be validated.
+            format_checker: User-defined format checker.
+
+        Raises:
+            InvalidJSONSchema: If the schema provided from tap or mapper is invalid.
+        """
+        jsonschema_validator = jsonschema.Draft7Validator
+
+        super().__init__(schema)
+        if validate_formats:
+            format_checker = format_checker or jsonschema_validator.FORMAT_CHECKER
+        else:
+            format_checker = jsonschema.FormatChecker(formats=())
+
+        try:
+            jsonschema_validator.check_schema(schema)
+        except jsonschema.SchemaError as e:
+            error_message = f"Schema Validation Error: {e}"
+            raise InvalidJSONSchema(error_message) from e
+
+        self.validator = jsonschema_validator(
+            schema=schema,
+            format_checker=format_checker,
+        )
+
+    @override
+    def validate(self, record: dict):  # noqa: ANN201
+        """Validate a record message.
+
+        Args:
+            record: Record message to validate.
+
+        Raises:
+            InvalidRecord: If the record is invalid.
+        """
+        try:
+            self.validator.validate(record)
+        except jsonschema.ValidationError as e:
+            raise InvalidRecord(e.message, record) from e
 
 
 class Sink(metaclass=abc.ABCMeta):
@@ -52,6 +133,15 @@ class Sink(metaclass=abc.ABCMeta):
 
     MAX_SIZE_DEFAULT = 10000
     WAIT_LIMIT_SECONDS_DEFAULT = 30
+
+    validate_schema = True
+    """Enable JSON schema record validation."""
+
+    validate_field_string_format = False
+    """Enable JSON schema format validation, for example `date-time` string fields."""
+
+    fail_on_record_validation_exception: bool = True
+    """Interrupt the target execution when a record fails schema validation."""
 
     _drain_function: t.Callable[[], bool] | None = None
 
@@ -124,10 +214,23 @@ class Sink(metaclass=abc.ABCMeta):
             )
             self._sink_timer.start()
 
-        self._validator = Draft7Validator(
-            schema,
-            format_checker=Draft7Validator.FORMAT_CHECKER,
-        )
+        self._validator: BaseJSONSchemaValidator | None = self.get_validator()
+
+    def get_validator(self) -> BaseJSONSchemaValidator | None:
+        """Get a record validator for this sink.
+
+        Override this method to use a custom format validator, or disable record
+        validation by returning `None`.
+
+        Returns:
+            An instance of a subclass of ``BaseJSONSchemaValidator``.
+        """
+        if self.validate_schema:
+            return JSONSchemaValidator(
+                self.schema,
+                validate_formats=self.validate_field_string_format,
+            )
+        return None
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return an empty dictionary by default.
@@ -480,8 +583,20 @@ class Sink(metaclass=abc.ABCMeta):
 
         Returns:
             TODO
+
+        Raises:
+            InvalidRecord: If the record is invalid.
         """
-        self._validator.validate(record)
+        if self._validator is not None:
+            # TODO: Check the performance impact of this try/except block. It runs
+            # on every record, so it's probably bad and should be moved up the stack.
+            try:
+                self._validator.validate(record)
+            except InvalidRecord as e:
+                if self.fail_on_record_validation_exception:
+                    raise
+                self.logger.exception("Record validation failed %s", e)
+
         self._parse_timestamps_in_record(
             record=record,
             schema=self.schema,
