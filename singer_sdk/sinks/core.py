@@ -75,7 +75,7 @@ class FastJSONSchemaValidator(BaseJSONSchemaValidator):
         schema: dict,
         *,
         validate_formats: bool = False,
-        format_validators: dict[str, t.Callable] | None = None,
+        format_checker: dict[str, t.Callable] | None = None,
     ):
         """Initialize the validator.
 
@@ -83,7 +83,7 @@ class FastJSONSchemaValidator(BaseJSONSchemaValidator):
             schema: Schema of the stream to sink.
             validate_formats: Whether JSON string formats (e.g. ``date-time``) should
                 be validated.
-            format_validators: User-defined format validators.
+            format_checker: User-defined format validators.
 
         Raises:
             InvalidJSONSchema: If the schema provided from tap or mapper is invalid.
@@ -91,9 +91,7 @@ class FastJSONSchemaValidator(BaseJSONSchemaValidator):
         super().__init__(schema)
         try:
             self.validator = fastjsonschema.compile(
-                self.schema,
-                use_formats=validate_formats,
-                formats=format_validators or {},
+                self.schema, use_formats=validate_formats, formats=format_checker or {}
             )
         except fastjsonschema.JsonSchemaDefinitionException as e:
             error_message = f"Schema Validation Error: {e}"
@@ -113,7 +111,7 @@ class FastJSONSchemaValidator(BaseJSONSchemaValidator):
             self.validator(record)
         except fastjsonschema.JsonSchemaValueException as e:
             error_message = f"Record Message Validation Error: {e.message}"
-            raise InvalidRecord(error_message) from e
+            raise InvalidRecord(error_message, record) from e
 
 
 class Sink(metaclass=abc.ABCMeta):
@@ -193,7 +191,6 @@ class Sink(metaclass=abc.ABCMeta):
             return FastJSONSchemaValidator(
                 self.schema,
                 validate_formats=self.validate_field_string_format,
-                format_validators={},
             )
         return None
 
