@@ -19,6 +19,7 @@ from singer_sdk.helpers._compat import final
 from singer_sdk.helpers.capabilities import (
     ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
+    TARGET_HARD_DELETE_CONFIG,
     TARGET_LOAD_METHOD_CONFIG,
     TARGET_SCHEMA_CONFIG,
     CapabilitiesEnum,
@@ -636,7 +637,12 @@ class SQLTarget(Target):
             A list of capabilities supported by this target.
         """
         sql_target_capabilities: list[CapabilitiesEnum] = super().capabilities
-        sql_target_capabilities.extend([TargetCapabilities.TARGET_SCHEMA])
+        sql_target_capabilities.extend(
+            [
+                TargetCapabilities.TARGET_SCHEMA,
+                TargetCapabilities.HARD_DELETE,
+            ]
+        )
 
         return sql_target_capabilities
 
@@ -667,6 +673,9 @@ class SQLTarget(Target):
 
         if TargetCapabilities.TARGET_SCHEMA in capabilities:
             _merge_missing(TARGET_SCHEMA_CONFIG, config_jsonschema)
+
+        if TargetCapabilities.HARD_DELETE in capabilities:
+            _merge_missing(TARGET_HARD_DELETE_CONFIG, config_jsonschema)
 
         super().append_builtin_config(config_jsonschema)
 

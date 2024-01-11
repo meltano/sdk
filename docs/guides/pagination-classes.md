@@ -83,11 +83,6 @@ class can be used to handle this pattern.
 
 from singer_sdk.pagination import BaseOffsetPaginator
 
-class MyPaginator(BaseOffsetPaginator):
-    def has_more(self, response):
-        data = response.json()
-        return data.get("has_more", False)
-
 
 class MyStream(RESTStream):
     def get_new_paginator(self):

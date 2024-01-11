@@ -137,7 +137,7 @@ class ConformedNameClashException(Exception):
 
 
 class MissingKeyPropertiesError(Exception):
-    """Raised when a received (and/or transformed) record is missing key properties."""
+    """Raised when a recieved (and/or transformed) record is missing key properties."""
 
 
 class InvalidJSONSchema(Exception):
@@ -146,3 +146,14 @@ class InvalidJSONSchema(Exception):
 
 class InvalidRecord(Exception):
     """Raised when a stream record is invalid according to its declared schema."""
+
+    def __init__(self, error_message: str, record: dict) -> None:
+        """Initialize an InvalidRecord exception.
+
+        Args:
+            error_message: A message describing the error.
+            record: The invalid record.
+        """
+        super().__init__(f"Record Message Validation Error: {error_message}")
+        self.error_message = error_message
+        self.record = record

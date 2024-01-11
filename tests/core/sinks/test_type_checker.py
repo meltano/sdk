@@ -47,7 +47,7 @@ def test_default_schema_type_checks(target, test_schema_invalid):
 
     with pytest.raises(
         InvalidJSONSchema,
-        match=r"Schema Validation Error: Unknown type: 'ssttrriinngg'",
+        match=r"Schema Validation Error: 'ssttrriinngg' is not valid under any",
     ):
         CustomSink(target, "test_stream", test_schema_invalid, None)
 
