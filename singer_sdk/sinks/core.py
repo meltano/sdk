@@ -94,7 +94,7 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
                 self.schema, use_formats=validate_formats, formats=format_checker or {}
             )
         except fastjsonschema.JsonSchemaDefinitionException as e:
-            error_message = f"Schema Validation Error: {e}"
+            error_message = "Schema Validation Error"
             raise InvalidJSONSchema(error_message) from e
 
     @override
