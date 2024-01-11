@@ -127,9 +127,8 @@ coverage = [
     {extras = ["toml"], version = ">=7.4", python = ">=3.12"},
 ]
 
-# TODO: Remove the Python 3.12 marker when DuckDB supports it
-duckdb = { version = ">=0.8.0", python = "<3.12" }
-duckdb-engine = { version = ">=0.9.4", python = "<3.12" }
+duckdb = { version = ">=0.9.3.dev2490", allow-prereleases = true }
+duckdb-engine = { version = ">=0.9.4" }
 
 mypy = [
     { version = ">=1.0,<1.5", python = "<3.8" },
