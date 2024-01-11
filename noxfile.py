@@ -48,6 +48,7 @@ test_dependencies = [
     "pytest-snapshot",
     "pyarrow",
     "requests-mock",
+    "rfc3339-validator",
     "time-machine",
 ]
 
