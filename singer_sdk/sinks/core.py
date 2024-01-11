@@ -67,7 +67,7 @@ class BaseJSONSchemaValidator(abc.ABC):
         """
 
 
-class FastJSONSchemaValidator(BaseJSONSchemaValidator):
+class JSONSchemaValidator(BaseJSONSchemaValidator):
     """Validate records using the ``fastjsonschema`` library."""
 
     def __init__(
@@ -188,7 +188,7 @@ class Sink(metaclass=abc.ABCMeta):
             An instance of a subclass of ``BaseJSONSchemaValidator``.
         """
         if self.validate_schema:
-            return FastJSONSchemaValidator(
+            return JSONSchemaValidator(
                 self.schema,
                 validate_formats=self.validate_field_string_format,
             )
