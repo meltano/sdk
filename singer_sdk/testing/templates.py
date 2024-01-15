@@ -38,7 +38,7 @@ class TestTemplate:
     plugin_type: str | None = None
 
     @property
-    def id(self) -> str:  # noqa: A003
+    def id(self) -> str:
         """Test ID.
 
         Raises:
@@ -130,7 +130,7 @@ class TapTestTemplate(TestTemplate):
     plugin_type = "tap"
 
     @property
-    def id(self) -> str:  # noqa: A003
+    def id(self) -> str:
         """Test ID.
 
         Returns:
@@ -162,7 +162,7 @@ class StreamTestTemplate(TestTemplate):
     required_kwargs: t.ClassVar[list[str]] = ["stream"]
 
     @property
-    def id(self) -> str:  # noqa: A003
+    def id(self) -> str:
         """Test ID.
 
         Returns:
@@ -196,7 +196,7 @@ class AttributeTestTemplate(TestTemplate):
     plugin_type = "attribute"
 
     @property
-    def id(self) -> str:  # noqa: A003
+    def id(self) -> str:
         """Test ID.
 
         Returns:
@@ -292,7 +292,7 @@ class TargetTestTemplate(TestTemplate):
         super().run(config, resource, runner)
 
     @property
-    def id(self) -> str:  # noqa: A003
+    def id(self) -> str:
         """Test ID.
 
         Returns:
