@@ -37,7 +37,7 @@ class BaseBatchFileEncoding:
     __encoding_format__: t.ClassVar[str] = "OVERRIDE_ME"
 
     # Base encoding fields
-    format: str = field(init=False)  # noqa: A003
+    format: str = field(init=False)
     """The format of the batch file."""
 
     compression: str | None = None
@@ -188,7 +188,7 @@ class StorageTarget:
         filesystem.close()
 
     @contextmanager
-    def open(  # noqa: A003
+    def open(
         self,
         filename: str,
         mode: str = "rb",
