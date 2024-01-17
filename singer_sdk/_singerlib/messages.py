@@ -54,7 +54,7 @@ def exclude_null_dict(pairs: list[tuple[str, t.Any]]) -> dict[str, t.Any]:
 class Message:
     """Singer base message."""
 
-    type: SingerMessageType = field(init=False)  # noqa: A003
+    type: SingerMessageType = field(init=False)
     """The message type."""
 
     def to_dict(self) -> dict[str, t.Any]:
