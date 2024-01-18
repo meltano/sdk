@@ -337,4 +337,4 @@ class TargetFileTestTemplate(TargetTestTemplate):
         Returns:
             The expected Path to this tests singer file.
         """
-        return importlib_resources.files(target_test_streams) / f"{self.name}.singer"  # type: ignore[no-any-return]
+        return importlib_resources.files(target_test_streams) / f"{self.name}.singer"
