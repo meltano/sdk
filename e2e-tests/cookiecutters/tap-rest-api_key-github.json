@@ -10,6 +10,7 @@
       "auth_method": "API Key",
       "include_ci_files": "GitHub",
       "license": "Apache-2.0",
+      "ide": "VSCode",
       "_template": "../tap-template/",
       "_output_dir": "."
     }

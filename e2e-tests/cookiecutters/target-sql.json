@@ -9,6 +9,7 @@
       "serialization_method": "SQL",
       "include_ci_files": "None (Skip)",
       "license": "Apache-2.0",
+      "ide": "VSCode",
       "_template": "./sdk/cookiecutter/target-template",
       "_output_dir": "."
     }
