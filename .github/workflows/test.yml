@@ -163,6 +163,8 @@ jobs:
     name: Coverage
     runs-on: ubuntu-latest
     needs: tests
+    env:
+      NOXSESSION: coverage
     steps:
     - uses: actions/checkout@v4
 
@@ -199,13 +201,16 @@ jobs:
         pipx inject nox nox-poetry
         nox --version
 
+    - run: nox --install-only
+
     - name: Combine coverage data and display human readable report
       run: |
-        nox --session=coverage
+        nox -r --no-install -- combine --debug=pathmap
+        nox -r --no-install -- report --show-missing --ignore-errors
 
     - name: Create coverage report
       run: |
-        nox --session=coverage -- xml
+        nox -r --no-install -- xml
 
     - uses: codecov/codecov-action@v3
       with:

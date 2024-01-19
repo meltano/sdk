@@ -193,6 +193,7 @@ tests = [
 [tool.coverage.run]
 branch = true
 source = ["singer_sdk", "tests"]
+relative_files = true  # This allows coverage to be measured in Windows
 omit = [
     "tests/*",
     "samples/*",
