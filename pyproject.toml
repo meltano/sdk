@@ -236,8 +236,8 @@ style = "pep440"
 requires = ["poetry-core==1.8.1", "poetry-dynamic-versioning==1.2.0"]
 build-backend = "poetry_dynamic_versioning.backend"
 
-[tool.poetry.scripts]
-pytest11 = { reference = "singer_sdk:testing.pytest_plugin", extras = ["testing"], type = "console" }
+[tool.poetry.plugins."pytest11"]
+singer_testing = "singer_sdk.testing.pytest_plugin"
 
 [tool.poetry.plugins."singer_sdk.batch_encoders"]
 jsonl = "singer_sdk.contrib.batch_encoder_jsonl:JSONLinesBatcher"
