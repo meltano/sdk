@@ -13,7 +13,11 @@ import click
 
 from singer_sdk._singerlib import Catalog, StateMessage
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
-from singer_sdk.exceptions import AbortedSyncFailedException, AbortedSyncPausedException
+from singer_sdk.exceptions import (
+    AbortedSyncFailedException,
+    AbortedSyncPausedException,
+    ConfigValidationError,
+)
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import final
@@ -52,6 +56,10 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
     The Tap class governs configuration, validation, and stream discovery for tap
     plugins.
     """
+
+    dynamic_catalog: bool = False
+    """Whether the tap's catalog is dynamic. Set to True if the catalog is
+    generated dynamically (e.g. by querying a database's system tables)."""
 
     # Constructor
 
@@ -520,12 +528,17 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
 
         config_args = ctx.params.get("config", ())
         config_files, parse_env_config = cls.config_from_cli_args(*config_args)
-        tap = cls(
-            config=config_files,  # type: ignore[arg-type]
-            parse_env_config=parse_env_config,
-            validate_config=False,
-            setup_mapper=False,
-        )
+        try:
+            tap = cls(
+                config=config_files,  # type: ignore[arg-type]
+                parse_env_config=parse_env_config,
+                validate_config=cls.dynamic_catalog,
+                setup_mapper=False,
+            )
+        except ConfigValidationError as exc:  # pragma: no cover
+            for error in exc.errors:
+                cls.logger.error("Config validation error: %s", error)
+            ctx.exit(1)
         tap.run_discovery()
         ctx.exit()
 
@@ -611,8 +624,18 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
 class SQLTap(Tap):
     """A specialized Tap for extracting from SQL streams."""
 
-    # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: type[SQLStream]
+    """
+    The default stream class used to initialize new SQL streams from their catalog
+    entries.
+    """
+
+    dynamic_catalog: bool = True
+    """
+    Whether the tap's catalog is dynamic, enabling configuration validation in
+    discovery mode. Set to True if the catalog is generated dynamically (e.g. by
+    querying a database's system tables).
+    """
 
     _tap_connector: SQLConnector | None = None
 
