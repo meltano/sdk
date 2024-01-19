@@ -42,21 +42,16 @@ test_dependencies = [
     "coverage[toml]",
     "duckdb",
     "duckdb-engine",
+    "pyarrow",
     "pytest",
     "pytest-benchmark",
     "pytest-durations",
     "pytest-snapshot",
-    "pyarrow",
+    "pytz",
     "requests-mock",
+    "rfc3339-validator",
     "time-machine",
 ]
-
-
-def _clean_py312_deps(session: Session, dependencies: list[str]) -> None:
-    """Clean dependencies for Python 3.12."""
-    if session.python == "3.12":
-        dependencies.remove("duckdb")
-        dependencies.remove("duckdb-engine")
 
 
 @session(python=main_python_version)
@@ -84,7 +79,6 @@ def mypy(session: Session) -> None:
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
-    _clean_py312_deps(session, test_dependencies)
     session.install(".[s3,parquet]")
     session.install(*test_dependencies)
 
@@ -118,7 +112,6 @@ def tests(session: Session) -> None:
 @session(python=main_python_version)
 def benches(session: Session) -> None:
     """Run benchmarks."""
-    _clean_py312_deps(session, test_dependencies)
     session.install(".[s3]")
     session.install(*test_dependencies)
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
@@ -141,7 +134,6 @@ def update_snapshots(session: Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
 
-    _clean_py312_deps(session, test_dependencies)
     session.install(".")
     session.install(*test_dependencies)
     session.run("pytest", "--snapshot-update", *args)

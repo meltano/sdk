@@ -167,3 +167,100 @@ def test_child_deselected_parent(tap_with_deselected_parent: MyTap):
     assert all(msg["type"] == SingerMessageType.RECORD for msg in child_record_messages)
     assert all(msg["stream"] == child_stream.name for msg in child_record_messages)
     assert all("pid" in msg["record"] for msg in child_record_messages)
+
+
+def test_one_parent_many_children(tap: MyTap):
+    """Test tap output with parent stream deselected."""
+
+    class ParentMany(Stream):
+        """A parent stream."""
+
+        name = "parent_many"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "children": {"type": "array", "items": {"type": "integer"}},
+            },
+        }
+
+        def get_records(
+            self,
+            context: dict | None,  # noqa: ARG002
+        ) -> t.Iterable[dict | tuple[dict, dict | None]]:
+            yield {"id": "1", "children": [1, 2, 3]}
+
+        def generate_child_contexts(
+            self,
+            record: dict,
+            context: dict | None,  # noqa: ARG002
+        ) -> t.Iterable[dict | None]:
+            for child_id in record["children"]:
+                yield {"child_id": child_id, "pid": record["id"]}
+
+    class ChildMany(Stream):
+        """A child stream."""
+
+        name = "child_many"
+        schema: t.ClassVar[dict] = {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "pid": {"type": "integer"},
+            },
+        }
+        parent_stream_type = ParentMany
+
+        def get_records(self, context: dict | None):
+            """Get dummy records."""
+            yield {
+                "id": context["child_id"],
+                "composite_id": f"{context['pid']}-{context['child_id']}",
+            }
+
+    class MyTapMany(Tap):
+        """A tap with streams having a parent-child relationship."""
+
+        name = "my-tap-many"
+
+        def discover_streams(self):
+            """Discover streams."""
+            return [
+                ParentMany(self),
+                ChildMany(self),
+            ]
+
+    tap = MyTapMany()
+    parent_stream = tap.streams["parent_many"]
+    child_stream = tap.streams["child_many"]
+
+    messages = _get_messages(tap)
+
+    # Parent schema is emitted
+    assert messages[1]
+    assert messages[1]["type"] == SingerMessageType.SCHEMA
+    assert messages[1]["stream"] == parent_stream.name
+    assert messages[1]["schema"] == parent_stream.schema
+
+    # Child schemas are emitted
+    schema_messages = messages[2:9:3]
+    assert schema_messages
+    assert all(msg["type"] == SingerMessageType.SCHEMA for msg in schema_messages)
+    assert all(msg["stream"] == child_stream.name for msg in schema_messages)
+    assert all(msg["schema"] == child_stream.schema for msg in schema_messages)
+
+    # Child records are emitted
+    child_record_messages = messages[3:10:3]
+    assert child_record_messages
+    assert all(msg["type"] == SingerMessageType.RECORD for msg in child_record_messages)
+    assert all(msg["stream"] == child_stream.name for msg in child_record_messages)
+    assert all("pid" in msg["record"] for msg in child_record_messages)
+
+    # State messages are emitted
+    state_messages = messages[4:11:3]
+    assert state_messages
+    assert all(msg["type"] == SingerMessageType.STATE for msg in state_messages)
+
+    # Parent record is emitted
+    assert messages[11]
+    assert messages[11]["type"] == SingerMessageType.RECORD

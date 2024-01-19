@@ -378,14 +378,12 @@ class SQLSink(BatchSink):
                 sql_type=sa.types.Integer(),
             )
 
-        if self.config.get("hard_delete", True):
-            with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
-                conn.execute(
-                    sa.text(
-                        f"DELETE FROM {self.full_table_name} "  # noqa: S608
-                        f"WHERE {self.version_column_name} <= {new_version}",
-                    ),
-                )
+        if self.config.get("hard_delete", False):
+            self.connector.delete_old_versions(
+                full_table_name=self.full_table_name,
+                version_column_name=self.version_column_name,
+                current_version=new_version,
+            )
             return
 
         if not self.connector.column_exists(

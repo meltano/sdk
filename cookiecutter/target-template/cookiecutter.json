@@ -8,6 +8,7 @@
   "serialization_method": ["Per record", "Per batch", "SQL"],
   "include_ci_files": ["GitHub", "None (Skip)"],
   "license": ["Apache-2.0"],
+  "ide": ["VSCode", "None"],
   "__prompts__": {
     "name": "The name of the mapper, in CamelCase",
     "admin_name": "Provide your [bold yellow]full name[/]",
@@ -16,6 +17,7 @@
     "library_name": "The name of the library, in snake_case. This is how the library will be imported in Python.",
     "serialization_method": "The serialization method to use for loading data",
     "include_ci_files": "Whether to include CI files for a common CI services",
-    "license": "The license for the project"
+    "license": "The license for the project",
+    "ide": "Add configuration files for your preferred IDE"
   }
 }

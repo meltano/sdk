@@ -8,6 +8,7 @@
       "variant": "None (Skip)",
       "include_ci_files": "None (Skip)",
       "license": "Apache-2.0",
+      "ide": "VSCode",
       "_template": "../mapper-template/",
       "_output_dir": "."
     }
