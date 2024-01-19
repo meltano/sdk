@@ -535,7 +535,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
                 validate_config=cls.dynamic_catalog,
                 setup_mapper=False,
             )
-        except ConfigValidationError as exc:
+        except ConfigValidationError as exc:  # pragma: no cover
             for error in exc.errors:
                 cls.logger.error("Config validation error: %s", error)
             ctx.exit(1)
