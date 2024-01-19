@@ -624,9 +624,18 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
 class SQLTap(Tap):
     """A specialized Tap for extracting from SQL streams."""
 
-    # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: type[SQLStream]
+    """
+    The default stream class used to initialize new SQL streams from their catalog
+    entries.
+    """
+
     dynamic_catalog: bool = True
+    """
+    Whether the tap's catalog is dynamic, enabling configuration validation in
+    discovery mode. Set to True if the catalog is generated dynamically (e.g. by
+    querying a database's system tables).
+    """
 
     _tap_connector: SQLConnector | None = None
 
