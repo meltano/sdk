@@ -63,7 +63,6 @@ pendulum = [
 PyJWT = "~=2.4"
 python-dateutil = ">=2.8.2"
 python-dotenv = ">=0.20"
-pytz = ">=2022.2.1"
 PyYAML = ">=6.0"
 requests = ">=2.25.1"
 simpleeval = ">=0.9.13"
@@ -127,9 +126,8 @@ coverage = [
     {extras = ["toml"], version = ">=7.4", python = ">=3.12"},
 ]
 
-# TODO: Remove the Python 3.12 marker when DuckDB supports it
-duckdb = { version = ">=0.8.0", python = "<3.12" }
-duckdb-engine = { version = ">=0.9.4", python = "<3.12" }
+duckdb = { version = ">=0.9.3.dev2490", allow-prereleases = true }
+duckdb-engine = { version = ">=0.9.4" }
 
 mypy = [
     { version = ">=1.0,<1.5", python = "<3.8" },
@@ -138,7 +136,9 @@ mypy = [
 pytest-benchmark = ">=4.0.0"
 pytest-httpserver = { version = ">=1.0.6", python = "<4" }
 pytest-snapshot = ">=0.9.0"
+pytz = ">=2022.2.1"
 requests-mock = ">=1.10.0"
+rfc3339-validator = ">=0.1.4"
 time-machine = [
     { version = ">=2.10.0,<2.11", python = "<3.8" },
     { version = ">=2.10.0", python = ">=3.8" },
@@ -215,7 +215,6 @@ fail_under = 82
 [tool.mypy]
 exclude = "tests"
 files = "singer_sdk"
-python_version = "3.8"
 warn_redundant_casts = true
 warn_return_any = true
 warn_unused_configs = true
