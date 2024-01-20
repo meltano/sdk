@@ -44,38 +44,43 @@ Users of a tap can configure the SDK logging by setting the `SINGER_SDK_LOG_CONF
 environment variable. The value of this variable should be a path to a YAML file in the
 [Python logging dict format](https://docs.python.org/3/library/logging.config.html#dictionary-schema-details).
 
-For example, to send [metrics](./metrics.md) (with logger name `singer_sdk.metrics`) to a file, you could use the following config:
+### Metrics logging
+
+The Singer SDK provides a logger named `singer_sdk.metrics` for logging [Singer metrics](./metrics.md). Metric log records contain an extra field `point` which is a dictionary containing the metric data. The `point` field is formatted as JSON by default.
+
+To send metrics to a file in JSON format, you could use the following config:
 
 ```yaml
 version: 1
 disable_existing_loggers: false
 formatters:
   metrics:
-    format: "{asctime} {levelname} {message}"
+    (): pythonjsonlogger.jsonlogger.JsonFormatter
+    format: "{created} {message} {point}"
     style: "{"
 handlers:
   metrics:
     class: logging.FileHandler
     formatter: metrics
-    filename: metrics.log
+    filename: metrics.jsonl
 loggers:
   singer_sdk.metrics:
     level: INFO
     handlers: [ metrics ]
-    propagate: yes
+    propagate: no
 ```
 
-This will send metrics to a `metrics.log`:
+This will send metrics to a `metrics.jsonl`:
 
-```
-2022-09-29 00:48:52,746 INFO METRIC: {"metric_type": "timer", "metric": "http_request_duration", "value": 0.501743, "tags": {"stream": "continents", "endpoint": "", "http_status_code": 200, "status": "succeeded"}}
-2022-09-29 00:48:52,775 INFO METRIC: {"metric_type": "counter", "metric": "http_request_count", "value": 1, "tags": {"stream": "continents", "endpoint": ""}}
-2022-09-29 00:48:52,776 INFO METRIC: {"metric_type": "timer", "metric": "sync_duration", "value": 0.7397160530090332, "tags": {"stream": "continents", "context": {}, "status": "succeeded"}}
-2022-09-29 00:48:52,776 INFO METRIC: {"metric_type": "counter", "metric": "record_count", "value": 7, "tags": {"stream": "continents", "context": {}}}
-2022-09-29 00:48:53,225 INFO METRIC: {"metric_type": "timer", "metric": "http_request_duration", "value": 0.392148, "tags": {"stream": "countries", "endpoint": "", "http_status_code": 200, "status": "succeeded"}}
-2022-09-29 00:48:53,302 INFO METRIC: {"metric_type": "counter", "metric": "http_request_count", "value": 1, "tags": {"stream": "countries", "endpoint": ""}}
-2022-09-29 00:48:53,302 INFO METRIC: {"metric_type": "timer", "metric": "sync_duration", "value": 0.5258760452270508, "tags": {"stream": "countries", "context": {}, "status": "succeeded"}}
-2022-09-29 00:48:53,303 INFO METRIC: {"metric_type": "counter", "metric": "record_count", "value": 250, "tags": {"stream": "countries", "context": {}}}
+```json
+{"created": 1705709074.883021, "message": "METRIC", "point": {"type": "timer", "metric": "http_request_duration", "value": 0.501743, "tags": {"stream": "continents", "endpoint": "", "http_status_code": 200, "status": "succeeded"}}}
+{"created": 1705709074.897184, "message": "METRIC", "point": {"type": "counter", "metric": "http_request_count", "value": 1, "tags": {"stream": "continents", "endpoint": ""}}}
+{"created": 1705709074.897256, "message": "METRIC", "point": {"type": "timer", "metric": "sync_duration", "value": 0.7397160530090332, "tags": {"stream": "continents", "context": {}, "status": "succeeded"}}}
+{"created": 1705709074.897292, "message": "METRIC", "point": {"type": "counter", "metric": "record_count", "value": 7, "tags": {"stream": "continents", "context": {}}}}
+{"created": 1705709075.397254, "message": "METRIC", "point": {"type": "timer", "metric": "http_request_duration", "value": 0.392148, "tags": {"stream": "countries", "endpoint": "", "http_status_code": 200, "status": "succeeded"}}}
+{"created": 1705709075.421888, "message": "METRIC", "point": {"type": "counter", "metric": "http_request_count", "value": 1, "tags": {"stream": "countries", "endpoint": ""}}}
+{"created": 1705709075.422001, "message": "METRIC", "point": {"type": "timer", "metric": "sync_duration", "value": 0.5258760452270508, "tags": {"stream": "countries", "context": {}, "status": "succeeded"}}}
+{"created": 1705709075.422047, "message": "METRIC", "point": {"type": "counter", "metric": "record_count", "value": 250, "tags": {"stream": "countries", "context": {}}}}
 ```
 
 ## For package developers
