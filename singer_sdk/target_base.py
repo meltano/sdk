@@ -15,7 +15,6 @@ from joblib import Parallel, delayed, parallel_backend
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._compat import final
 from singer_sdk.helpers.capabilities import (
     ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
@@ -222,7 +221,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         """
         return stream_name in self._sinks_active
 
-    @final
+    @t.final
     def add_sink(
         self,
         stream_name: str,
@@ -468,7 +467,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
     # Sink drain methods
 
-    @final
+    @t.final
     def drain_all(self, *, is_endofpipe: bool = False) -> None:
         """Drains all sinks, starting with those cleared due to changed schema.
 
@@ -493,7 +492,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._write_state_message(state)
         self._reset_max_record_age()
 
-    @final
+    @t.final
     def drain_one(self, sink: Sink) -> None:
         """Drain a specific sink.
 
@@ -688,7 +687,7 @@ class SQLTarget(Target):
 
         super().append_builtin_config(config_jsonschema)
 
-    @final
+    @t.final
     def add_sqlsink(
         self,
         stream_name: str,

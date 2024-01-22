@@ -8,6 +8,7 @@ import os
 import sys
 import time
 import typing as t
+from importlib import metadata
 from pathlib import Path, PurePath
 from types import MappingProxyType
 
@@ -23,7 +24,6 @@ from singer_sdk.configuration._dict_config import (
 )
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._compat import metadata
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -52,8 +52,8 @@ CHECK_SUPPORTED_PYTHON_VERSIONS = (
     "3.9",
     "3.10",
     "3.11",
-    # future supported versions
     "3.12",
+    # future supported versions
     "3.13",
     "3.14",
     "3.15",

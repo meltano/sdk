@@ -127,8 +127,10 @@ def get_writeable_state_dict(
     if "partitions" not in stream_state:
         stream_state["partitions"] = []
     stream_state_partitions: list[dict] = stream_state["partitions"]
-    found = _find_in_partitions_list(stream_state_partitions, state_partition_context)
-    if found:
+    if found := _find_in_partitions_list(
+        stream_state_partitions,
+        state_partition_context,
+    ):
         return found
 
     return _create_in_partitions_list(stream_state_partitions, state_partition_context)
