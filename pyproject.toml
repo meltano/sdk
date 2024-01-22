@@ -74,14 +74,14 @@ urllib3 = ">=1.26,<2"
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
-sphinx = {version = ">=4.5", optional = true}
-furo = {version = ">=2022.12.7", optional = true}
-sphinx-copybutton = {version = ">=0.3.1", optional = true}
-myst-parser = {version = ">=1", optional = true}
-sphinx-autobuild = {version = ">=2021.3.14", optional = true}
-sphinx-inline-tabs = {version = ">=2023.4.21", optional = true, markers = "python_version >= \"3.8\""}
+sphinx = {version = ">=4.5", optional = true, python = ">=3.8"}
+furo = {version = ">=2022.12.7", optional = true, python = ">=3.8"}
+sphinx-copybutton = {version = ">=0.3.1", optional = true, python = ">=3.8"}
+myst-parser = {version = ">=1", optional = true, python = ">=3.8"}
+sphinx-autobuild = {version = ">=2021.3.14", optional = true, python = ">=3.8"}
+sphinx-inline-tabs = {version = ">=2023.4.21", optional = true, python = ">=3.8"}
 sphinx-notfound-page = {version = ">=1.0.0", optional = true, python = ">=3.8"}
-sphinx-reredirects = {version = ">=0.1.1", optional = true}
+sphinx-reredirects = {version = ">=0.1.1", optional = true, python = ">=3.8"}
 
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = ">=1.1.1", optional = true}
