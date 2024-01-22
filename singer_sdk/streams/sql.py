@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import abc
 import typing as t
+from functools import cached_property
 
 import sqlalchemy as sa
 
@@ -78,7 +79,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         return self._singer_catalog_entry.metadata
 
-    @property  # TODO: Investigate @cached_property after py > 3.7
+    @cached_property
     def schema(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
@@ -87,13 +88,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             The schema object.
         """
-        if not self._cached_schema:
-            self._cached_schema = t.cast(
-                dict,
-                self._singer_catalog_entry.schema.to_dict(),
-            )
-
-        return self._cached_schema
+        return self._singer_catalog_entry.schema.to_dict()
 
     @property
     def tap_stream_id(self) -> str:

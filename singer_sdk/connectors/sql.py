@@ -377,7 +377,7 @@ class SQLConnector(BaseConnector[sa.engine.Connection]):
             ],
         )
 
-    @lru_cache()  # noqa: B019
+    @lru_cache  # noqa: B019
     def _warn_no_view_detection(self) -> None:
         """Print a warning, but only the first time."""
         self.logger.warning(

@@ -5,13 +5,6 @@ from __future__ import annotations
 import datetime
 import sys
 
-if sys.version_info < (3, 8):
-    import importlib_metadata as metadata
-    from typing_extensions import Protocol, final
-else:
-    from importlib import metadata
-    from typing import Protocol, final  # noqa: ICN003
-
 if sys.version_info < (3, 9):
     import importlib_resources
 else:
@@ -39,13 +32,10 @@ date_fromisoformat = datetime.date.fromisoformat
 time_fromisoformat = datetime.time.fromisoformat
 
 __all__ = [
-    "metadata",
-    "final",
     "entry_points",
     "datetime_fromisoformat",
     "date_fromisoformat",
     "time_fromisoformat",
     "importlib_resources",
     "Traversable",
-    "Protocol",
 ]
