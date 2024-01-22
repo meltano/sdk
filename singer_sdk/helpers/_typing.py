@@ -326,7 +326,7 @@ def is_number_type(property_schema: dict) -> bool | None:
     return False
 
 
-@lru_cache()
+@lru_cache
 def _warn_unmapped_properties(
     stream_name: str,
     property_names: tuple[str],

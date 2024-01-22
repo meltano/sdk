@@ -30,7 +30,6 @@ from singer_sdk.helpers._batch import (
 from singer_sdk.helpers._compat import (
     date_fromisoformat,
     datetime_fromisoformat,
-    final,
     time_fromisoformat,
 )
 from singer_sdk.helpers._perftimer import BatchPerfTimer
@@ -375,7 +374,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     # Tally methods
 
-    @final
+    @t.final
     def tally_record_read(self, count: int = 1) -> None:
         """Increment the records read tally.
 
@@ -387,7 +386,7 @@ class Sink(metaclass=abc.ABCMeta):
         self._total_records_read += count
         self._batch_records_read += count
 
-    @final
+    @t.final
     def tally_record_written(self, count: int = 1) -> None:
         """Increment the records written tally.
 
@@ -400,7 +399,7 @@ class Sink(metaclass=abc.ABCMeta):
         """
         self._total_records_written += count
 
-    @final
+    @t.final
     def tally_duplicate_merged(self, count: int = 1) -> None:
         """Increment the records merged tally.
 
