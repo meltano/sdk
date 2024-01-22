@@ -2,8 +2,6 @@ name: Bug Report
 description: File a bug report
 title: "bug: <title>"
 labels: ["kind/Bug", "valuestream/SDK"]
-assignees:
-  - meltano/engineering
 
 body:
   - type: markdown
@@ -31,11 +29,13 @@ body:
       label: Python Version
       description: Version of Python you are using
       options:
-        - "3.6 (deprecated)"
+        - "3.6 (EOL)"
+        - "3.7 (EOL)"
         - "3.8"
         - "3.9"
         - "3.10"
         - "3.11"
+        - "3.12"
         - "NA"
     validations:
       required: true

@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import sys
-from datetime import datetime, timedelta
-
-import pytz
+from datetime import datetime, timedelta, timezone
 
 if sys.version_info < (3, 11):
     from backports.datetime_fromisoformat import MonkeyPatch
@@ -33,9 +31,9 @@ def strptime_to_utc(dtimestr: str) -> datetime:
     """
     d_object: datetime = datetime.fromisoformat(dtimestr)
     if d_object.tzinfo is None:
-        return d_object.replace(tzinfo=pytz.UTC)
+        return d_object.replace(tzinfo=timezone.utc)
 
-    return d_object.astimezone(tz=pytz.UTC)
+    return d_object.astimezone(tz=timezone.utc)
 
 
 def strftime(dtime: datetime, format_str: str = DATETIME_FMT) -> str:

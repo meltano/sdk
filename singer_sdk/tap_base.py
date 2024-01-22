@@ -13,10 +13,13 @@ import click
 
 from singer_sdk._singerlib import Catalog, StateMessage
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
-from singer_sdk.exceptions import AbortedSyncFailedException, AbortedSyncPausedException
+from singer_sdk.exceptions import (
+    AbortedSyncFailedException,
+    AbortedSyncPausedException,
+    ConfigValidationError,
+)
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -52,6 +55,10 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
     The Tap class governs configuration, validation, and stream discovery for tap
     plugins.
     """
+
+    dynamic_catalog: bool = False
+    """Whether the tap's catalog is dynamic. Set to True if the catalog is
+    generated dynamically (e.g. by querying a database's system tables)."""
 
     # Constructor
 
@@ -214,7 +221,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
 
     # Connection and sync tests:
 
-    @final
+    @t.final
     def run_connection_test(self) -> bool:
         """Run connection test, aborting each stream after 1 record.
 
@@ -226,7 +233,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
             streams=self.streams.values(),
         )
 
-    @final
+    @t.final
     def run_sync_dry_run(
         self,
         dry_run_record_limit: int | None = 1,
@@ -271,7 +278,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
                 stream.sync()
         return True
 
-    @final
+    @t.final
     def write_schemas(self) -> None:
         """Write a SCHEMA message for all known streams to STDOUT."""
         for stream in self.streams.values():
@@ -336,7 +343,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         )
         raise NotImplementedError(msg)
 
-    @final
+    @t.final
     def load_streams(self) -> list[Stream]:
         """Load streams from discovery and initialize DAG.
 
@@ -435,7 +442,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
 
     # Sync methods
 
-    @final
+    @t.final
     def sync_all(self) -> None:
         """Sync all streams."""
         self._reset_state_progress_markers()
@@ -520,12 +527,17 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
 
         config_args = ctx.params.get("config", ())
         config_files, parse_env_config = cls.config_from_cli_args(*config_args)
-        tap = cls(
-            config=config_files,  # type: ignore[arg-type]
-            parse_env_config=parse_env_config,
-            validate_config=False,
-            setup_mapper=False,
-        )
+        try:
+            tap = cls(
+                config=config_files,  # type: ignore[arg-type]
+                parse_env_config=parse_env_config,
+                validate_config=cls.dynamic_catalog,
+                setup_mapper=False,
+            )
+        except ConfigValidationError as exc:  # pragma: no cover
+            for error in exc.errors:
+                cls.logger.error("Config validation error: %s", error)
+            ctx.exit(1)
         tap.run_discovery()
         ctx.exit()
 
@@ -611,8 +623,18 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
 class SQLTap(Tap):
     """A specialized Tap for extracting from SQL streams."""
 
-    # Stream class used to initialize new SQL streams from their catalog declarations.
     default_stream_class: type[SQLStream]
+    """
+    The default stream class used to initialize new SQL streams from their catalog
+    entries.
+    """
+
+    dynamic_catalog: bool = True
+    """
+    Whether the tap's catalog is dynamic, enabling configuration validation in
+    discovery mode. Set to True if the catalog is generated dynamically (e.g. by
+    querying a database's system tables).
+    """
 
     _tap_connector: SQLConnector | None = None
 

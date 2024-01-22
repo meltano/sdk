@@ -19,6 +19,7 @@ jobs:
   publish:
     name: Publish to PyPI
     runs-on: ubuntu-latest
+    needs: [build]
     environment:
       name: publishing
       url: https://pypi.org/p/singer-sdk

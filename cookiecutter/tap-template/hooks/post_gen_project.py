@@ -26,3 +26,6 @@ if __name__ == "__main__":
 
     if "{{ cookiecutter.include_ci_files }}" != "GitHub":
         shutil.rmtree(".github")
+
+    if "{{ cookiecutter.ide }}" != "VSCode":
+        shutil.rmtree(".vscode")
