@@ -18,7 +18,7 @@ PROGRESS_MARKER_NOTE = "Note"
 SIGNPOST_MARKER = "replication_key_signpost"
 STARTING_MARKER = "starting_replication_value"
 
-logger = logging.getLogger(__package__)
+logger = logging.getLogger("singer_sdk")
 
 
 def get_state_if_exists(
