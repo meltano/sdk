@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import typing as t
 
 from singer_sdk.exceptions import InvalidStreamSortException
@@ -16,6 +17,8 @@ PROGRESS_MARKERS = "progress_markers"
 PROGRESS_MARKER_NOTE = "Note"
 SIGNPOST_MARKER = "replication_key_signpost"
 STARTING_MARKER = "starting_replication_value"
+
+logger = logging.getLogger(__package__)
 
 
 def get_state_if_exists(
@@ -207,6 +210,11 @@ def increment_state(
             stream_or_partition_state[PROGRESS_MARKERS] = {
                 PROGRESS_MARKER_NOTE: "Progress is not resumable if interrupted.",
             }
+            logger.warning(
+                "Stream is assumed to be unsorted, progress is not resumable if "
+                "interrupted",
+                extra={"replication_key": replication_key},
+            )
         progress_dict = stream_or_partition_state[PROGRESS_MARKERS]
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
     new_rk_value = to_json_compatible(latest_record[replication_key])
