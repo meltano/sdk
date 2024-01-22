@@ -214,7 +214,7 @@ def increment_state(
                 "Stream is assumed to be unsorted, progress is not resumable if "
                 "interrupted",
                 extra={"replication_key": replication_key},
-            )  # pragma: no cover
+            )
         progress_dict = stream_or_partition_state[PROGRESS_MARKERS]
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
     new_rk_value = to_json_compatible(latest_record[replication_key])
