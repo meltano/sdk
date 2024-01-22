@@ -243,6 +243,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         Returns:
             A new sink for the stream.
+
+        Raises:
+            Exception: If sink setup fails.
         """
         self.logger.info("Initializing '%s' target sink...", self.name)
         sink_class = self.get_sink_class(stream_name=stream_name)
@@ -252,7 +255,13 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             schema=schema,
             key_properties=key_properties,
         )
-        sink.setup()
+
+        try:
+            sink.setup()
+        except Exception:  # pragma: no cover
+            self.logger.error("Error initializing '%s' target sink", self.name)
+            raise
+
         self._sinks_active[stream_name] = sink
         return sink
 

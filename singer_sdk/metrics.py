@@ -15,10 +15,12 @@ from time import time
 
 import yaml
 
-from singer_sdk.helpers._resources import Traversable, get_package_files
+from singer_sdk.helpers._resources import get_package_files
 
 if t.TYPE_CHECKING:
     from types import TracebackType
+
+    from singer_sdk.helpers._compat import Traversable
 
 DEFAULT_LOG_INTERVAL = 60.0
 METRICS_LOGGER_NAME = __name__

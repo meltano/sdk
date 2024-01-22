@@ -47,7 +47,7 @@ class Schema:
     This is because we wanted to expand it with extra STANDARD_KEYS.
     """
 
-    type: str | list[str] | None = None  # noqa: A003
+    type: str | list[str] | None = None
     default: t.Any | None = None
     properties: dict | None = None
     items: t.Any | None = None
@@ -60,7 +60,7 @@ class Schema:
     maxLength: int | None = None  # noqa: N815
     minLength: int | None = None  # noqa: N815
     anyOf: t.Any | None = None  # noqa: N815
-    format: str | None = None  # noqa: A003
+    format: str | None = None
     additionalProperties: t.Any | None = None  # noqa: N815
     patternProperties: t.Any | None = None  # noqa: N815
     required: list[str] | None = None
