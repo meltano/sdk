@@ -29,7 +29,6 @@ from singer_sdk.helpers._batch import (
     SDKBatchMessage,
 )
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
-from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._flattening import get_flattening_options
 from singer_sdk.helpers._state import (
     finalize_state_progress_markers,
@@ -303,7 +302,7 @@ class Stream(metaclass=abc.ABCMeta):
         self.metadata.root.selected = value
         self._mask = self.metadata.resolve_selection()
 
-    @final
+    @t.final
     @property
     def has_selected_descendents(self) -> bool:
         """Check descendents.
@@ -316,7 +315,7 @@ class Stream(metaclass=abc.ABCMeta):
             for child in self.child_streams or []
         )
 
-    @final
+    @t.final
     @property
     def descendent_streams(self) -> list[Stream]:
         """Get child streams.
@@ -1158,7 +1157,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Public methods ("final", not recommended to be overridden)
 
-    @final
+    @t.final
     def sync(self, context: dict | None = None) -> None:
         """Sync this stream.
 

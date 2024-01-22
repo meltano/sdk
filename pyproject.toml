@@ -19,7 +19,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -39,7 +38,7 @@ license = "Apache-2.0"
 "Youtube" = "https://www.youtube.com/meltano"
 
 [tool.poetry.dependencies]
-python = ">=3.7.1"
+python = ">=3.8"
 backoff = { version = ">=2.0.0", python = "<4" }
 backports-datetime-fromisoformat = { version = ">=2.0.1", python = "<3.11" }
 click = "~=8.0"
@@ -50,16 +49,10 @@ importlib-resources = {version = ">=5.12.0", python = "<3.9"}
 inflection = ">=0.5.1"
 joblib = ">=1.0.1"
 jsonpath-ng = ">=1.5.3"
-jsonschema = [
-    { version = ">=4.16.0,<4.18", python = "<3.8" },
-    { version = ">=4.16.0", python = ">=3.8" },
-]
+jsonschema = ">=4.16.0"
 memoization = { version = ">=0.3.2,<0.5.0", python = "<4" }
 packaging = ">=23.1"
-pendulum = [
-    { version = ">=2.1.0,<3", python = "<3.8" },
-    { version = ">=2.1.0,<4", python = ">=3.8" },
-]
+pendulum = ">=2.1.0,<4"
 PyJWT = "~=2.4"
 python-dateutil = ">=2.8.2"
 python-dotenv = ">=0.20"
@@ -74,28 +67,24 @@ urllib3 = ">=1.26,<2"
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
-sphinx = {version = ">=4.5", optional = true, python = ">=3.8"}
-furo = {version = ">=2022.12.7", optional = true, python = ">=3.8"}
-sphinx-copybutton = {version = ">=0.3.1", optional = true, python = ">=3.8"}
-myst-parser = {version = ">=1", optional = true, python = ">=3.8"}
-sphinx-autobuild = {version = ">=2021.3.14", optional = true, python = ">=3.8"}
-sphinx-inline-tabs = {version = ">=2023.4.21", optional = true, python = ">=3.8"}
-sphinx-notfound-page = {version = ">=1.0.0", optional = true, python = ">=3.8"}
-sphinx-reredirects = {version = ">=0.1.1", optional = true, python = ">=3.8"}
+sphinx = {version = ">=4.5", optional = true}
+furo = {version = ">=2022.12.7", optional = true}
+sphinx-copybutton = {version = ">=0.3.1", optional = true}
+myst-parser = {version = ">=1", optional = true}
+sphinx-autobuild = {version = ">=2021.3.14", optional = true}
+sphinx-inline-tabs = {version = ">=2023.4.21", optional = true}
+sphinx-notfound-page = {version = ">=1.0.0", optional = true}
+sphinx-reredirects = {version = ">=0.1.1", optional = true}
 
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = ">=1.1.1", optional = true}
 
 # Parquet file dependencies installed as optional 'parquet' extras
 numpy = [
-    { version = "<1.22", python = "<3.8", optional = true },
     { version = ">=1.22,<1.25", python = ">=3.8,<3.9", optional = true },
     { version = ">=1.22", python = ">=3.9", optional = true },
 ]
-pyarrow = [
-    { version = ">=11,<13", python = "<3.8", optional = true },
-    { version = ">=13", python = ">=3.8", optional = true }
-]
+pyarrow = { version = ">=13", optional = true }
 
 # Testing dependencies installed as optional 'testing' extras
 pytest = {version=">=7.2.1", optional = true}
@@ -120,32 +109,19 @@ testing = [
 parquet = ["numpy", "pyarrow"]
 
 [tool.poetry.group.dev.dependencies]
-coverage = [
-    {extras = ["toml"], version = ">=7.2,<7.3", python = "<3.8"},
-    {extras = ["toml"], version = ">=7.2", python = ">=3.8,<3.12"},
-    {extras = ["toml"], version = ">=7.4", python = ">=3.12"},
-]
+coverage = {extras = ["toml"], version = ">=7.4"}
 
 duckdb = { version = ">=0.9.3.dev2490", allow-prereleases = true }
 duckdb-engine = { version = ">=0.9.4" }
 
-mypy = [
-    { version = ">=1.0,<1.5", python = "<3.8" },
-    { version = ">=1.0", python = ">=3.8" },
-]
+mypy = ">=1.0"
 pytest-benchmark = ">=4.0.0"
 pytest-snapshot = ">=0.9.0"
 pytz = ">=2022.2.1"
 requests-mock = ">=1.10.0"
 rfc3339-validator = ">=0.1.4"
-time-machine = [
-    { version = ">=2.10.0,<2.11", python = "<3.8" },
-    { version = ">=2.10.0", python = ">=3.8" },
-]
-types-jsonschema = [
-    { version = ">=4.17.0.6,<4.18", python = "<3.8" },
-    { version = ">=4.17.0.6", python = ">=3.8" },
-]
+time-machine = ">=2.10.0"
+types-jsonschema = ">=4.17.0.6"
 types-python-dateutil = ">=2.8.19"
 types-pytz = ">=2022.7.1.2"
 types-requests = ">=2.28.11"
@@ -247,7 +223,7 @@ parquet = "singer_sdk.contrib.batch_encoder_parquet:ParquetBatcher"
 [tool.ruff]
 line-length = 88
 src = ["samples", "singer_sdk", "tests"]
-target-version = "py37"
+target-version = "py38"
 
 [tool.ruff.format]
 docstring-code-format = true

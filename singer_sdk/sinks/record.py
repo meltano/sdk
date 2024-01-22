@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import abc
+import typing as t
 
-from singer_sdk.helpers._compat import final
 from singer_sdk.sinks.core import Sink
 
 
@@ -23,7 +23,7 @@ class RecordSink(Sink):
         """
         self.tally_record_written()
 
-    @final
+    @t.final
     def process_batch(self, context: dict) -> None:
         """Do nothing and return immediately.
 
@@ -35,7 +35,7 @@ class RecordSink(Sink):
             context: Stream partition or context dictionary.
         """
 
-    @final
+    @t.final
     def start_batch(self, context: dict) -> None:
         """Do nothing and return immediately.
 
