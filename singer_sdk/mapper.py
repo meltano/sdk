@@ -14,6 +14,7 @@ import logging
 import typing as t
 
 import simpleeval  # type: ignore[import-untyped]
+from faker import Faker
 
 import singer_sdk.typing as th
 from singer_sdk.exceptions import MapExpressionError, StreamMapConfigError
@@ -263,6 +264,15 @@ class CustomStreamMap(StreamMap):
         ) = self._init_functions_and_schema(stream_map=map_transform)
         self.expr_evaluator = simpleeval.EvalWithCompoundTypes(functions=self.functions)
 
+        faker_config = self.map_config.get("faker")
+        faker_seed = faker_config and faker_config.get("seed")
+        faker_locale = faker_config and faker_config.get("locale")
+
+        if faker_seed is not None:
+            Faker.seed(faker_seed)
+
+        self.fake = Faker(faker_locale) if faker_locale else Faker()
+
     def transform(self, record: dict) -> dict | None:
         """Return a transformed record.
 
@@ -324,6 +334,8 @@ class CustomStreamMap(StreamMap):
         names["_"] = record  # Add a shorthand alias in case of reserved words in names
         names["record"] = record  # ...and a longhand alias
         names["config"] = self.map_config  # Allow map config access within transform
+        names["fake"] = self.fake
+
         if property_name and property_name in record:
             # Allow access to original property value if applicable
             names["self"] = record[property_name]
