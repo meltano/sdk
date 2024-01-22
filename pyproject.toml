@@ -64,7 +64,7 @@ sqlalchemy = ">=1.4,<3.0"
 typing-extensions = ">=4.5.0"
 # urllib3 2.0 is not compatible with botocore
 urllib3 = ">=1.26,<2"
-faker = "~=18.13"
+faker = "~=22.5"
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
