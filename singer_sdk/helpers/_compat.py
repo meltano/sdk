@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import datetime
 import sys
-from importlib import metadata
-from typing import final  # noqa: ICN003
 
 if sys.version_info < (3, 9):
     import importlib_resources
@@ -34,8 +32,6 @@ date_fromisoformat = datetime.date.fromisoformat
 time_fromisoformat = datetime.time.fromisoformat
 
 __all__ = [
-    "metadata",
-    "final",
     "entry_points",
     "datetime_fromisoformat",
     "date_fromisoformat",
