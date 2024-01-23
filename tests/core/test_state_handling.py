@@ -103,3 +103,27 @@ def test_state_finalize(dirty_state, finalized_state):
         for partition_state in stream_state.get("partitions", []):
             _state.finalize_state_progress_markers(partition_state)
     assert state == finalized_state
+
+
+def test_irresumable_state():
+    stream_state = {}
+    latest_record = {"updated_at": "2021-05-17T20:41:16Z"}
+    replication_key = "updated_at"
+    is_sorted = False
+    check_sorted = False
+
+    _state.increment_state(
+        stream_state,
+        latest_record=latest_record,
+        replication_key=replication_key,
+        is_sorted=is_sorted,
+        check_sorted=check_sorted,
+    )
+
+    assert stream_state == {
+        "progress_markers": {
+            "Note": "Progress is not resumable if interrupted.",
+            "replication_key": "updated_at",
+            "replication_key_value": "2021-05-17T20:41:16Z",
+        },
+    }
