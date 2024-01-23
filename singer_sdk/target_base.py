@@ -540,7 +540,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         about: bool = False,
         about_format: str | None = None,
         config: tuple[str, ...] = (),
-        file_input: t.BinaryIO | None = None,
+        file_input: t.IO[bytes] | None = None,
     ) -> None:
         """Invoke the target.
 
