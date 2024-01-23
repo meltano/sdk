@@ -13,7 +13,6 @@ from datetime import datetime
 import msgspec
 
 from singer_sdk._singerlib.messages import Message, SingerMessageType
-from singer_sdk.helpers._compat import final
 
 logger = logging.getLogger(__name__)
 msg_buffer = bytearray(64)
@@ -53,7 +52,7 @@ decoder = msgspec.json.Decoder(dec_hook=dec_hook, float_hook=decimal.Decimal)
 class SingerReader(metaclass=abc.ABCMeta):
     """Interface for all plugins reading Singer messages from stdin."""
 
-    @final
+    @t.final
     def listen(self, file_input: t.IO | None = None) -> None:
         """Read from input until all messages are processed.
 
