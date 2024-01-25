@@ -188,6 +188,7 @@ exclude_also = [
     '''if (t\.)?TYPE_CHECKING:''',
 ]
 fail_under = 82
+show_missing = true
 
 [tool.mypy]
 exclude = "tests"
