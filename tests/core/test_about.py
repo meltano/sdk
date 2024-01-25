@@ -12,8 +12,6 @@ from singer_sdk.about import (
     _PY_MIN_VERSION,
     AboutFormatter,
     AboutInfo,
-    _get_max_version,
-    _get_min_version,
     get_supported_pythons,
 )
 from singer_sdk.helpers.capabilities import TapCapabilities
