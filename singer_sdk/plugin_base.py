@@ -14,7 +14,6 @@ from types import MappingProxyType
 
 import click
 from jsonschema import Draft7Validator
-from packaging.specifiers import SpecifierSet
 
 from singer_sdk import about, metrics
 from singer_sdk.cli import plugin_cli
@@ -36,30 +35,6 @@ from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import extend_validator_with_defaults
 
 SDK_PACKAGE_NAME = "singer_sdk"
-CHECK_SUPPORTED_PYTHON_VERSIONS = (
-    # unsupported versions
-    "2.7",
-    "3.0",
-    "3.1",
-    "3.2",
-    "3.3",
-    "3.4",
-    "3.5",
-    "3.6",
-    "3.7",
-    # current supported versions
-    "3.8",
-    "3.9",
-    "3.10",
-    "3.11",
-    "3.12",
-    # future supported versions
-    "3.13",
-    "3.14",
-    "3.15",
-    "3.16",
-)
-
 
 JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
 
@@ -300,12 +275,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         except metadata.PackageNotFoundError:
             return None
 
-        reported_python_versions = SpecifierSet(package_metadata["Requires-Python"])
-        return [
-            version
-            for version in CHECK_SUPPORTED_PYTHON_VERSIONS
-            if version in reported_python_versions
-        ]
+        return list(about.get_supported_pythons(package_metadata["Requires-Python"]))
 
     @classmethod
     def get_plugin_version(cls) -> str:

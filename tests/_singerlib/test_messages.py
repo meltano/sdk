@@ -25,7 +25,7 @@ def test_format_message():
         record={"id": 1, "name": "test"},
     )
     assert singerwriter.format_message(message) == (
-        '{"type": "RECORD", "stream": "test", "record": {"id": 1, "name": "test"}}'
+        '{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}'
     )
 
 
@@ -39,7 +39,7 @@ def test_write_message():
         singerwriter.write_message(message)
 
     assert out.getvalue() == (
-        '{"type": "RECORD", "stream": "test", "record": {"id": 1, "name": "test"}}\n'
+        '{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}\n'
     )
 
 
