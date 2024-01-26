@@ -28,4 +28,4 @@ if __name__ == "__main__":
         shutil.rmtree(".github")
 
     if "{{ cookiecutter.ide }}" != "VSCode":
-        shutil.rmtree(".vscode")
+        shutil.rmtree(".vscode", ignore_errors=True)
