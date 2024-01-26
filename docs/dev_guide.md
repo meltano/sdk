@@ -55,6 +55,10 @@ pipx install poetry
 pipx install tox
 ```
 
+:::{tip}
+The minimum recommended version of cookiecutter is `2.2.0` (released 2023-07-06).
+:::
+
 Now you can initialize your new project with the Cookiecutter template for taps:
 
 ```bash
