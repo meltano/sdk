@@ -152,7 +152,7 @@ def resolve_schema_references(
         A schema dict with all $refs replaced with the appropriate dict.
     """
     refs = refs or {}
-    registry = Registry()
+    registry: Registry = Registry()
     schema_resource = DRAFT202012.create_resource(schema)
     registry = registry.with_resource("", schema_resource)
     registry = registry.with_resources(
