@@ -226,7 +226,12 @@ def format_message(message: Message) -> str:
     Returns:
         The formatted message.
     """
-    return json.dumps(message.to_dict(), use_decimal=True, default=_default_encoding)
+    return json.dumps(
+        message.to_dict(),
+        use_decimal=True,
+        default=_default_encoding,
+        separators=(",", ":"),
+    )
 
 
 def write_message(message: Message) -> None:
