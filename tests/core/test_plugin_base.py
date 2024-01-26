@@ -5,7 +5,7 @@ from unittest import mock
 
 import pytest
 
-from singer_sdk.plugin_base import MapperNotInitialized, PluginBase
+from singer_sdk.plugin_base import SDK_PACKAGE_NAME, MapperNotInitialized, PluginBase
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 
 
@@ -53,3 +53,8 @@ def test_mapper_not_initialized():
     )
     with pytest.raises(MapperNotInitialized):
         _ = plugin.mapper
+
+
+def test_supported_python_versions():
+    """Test that supported python versions are correctly parsed."""
+    assert PluginBase._get_supported_python_versions(SDK_PACKAGE_NAME)
