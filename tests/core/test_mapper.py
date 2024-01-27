@@ -16,7 +16,6 @@ import time_machine
 
 from singer_sdk._singerlib import Catalog
 from singer_sdk.exceptions import MapExpressionError
-from singer_sdk.helpers._catalog import get_selected_schema
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
@@ -563,19 +562,11 @@ class MappedTap(Tap):
         return [MappedStream(self)]
 
 
-@pytest.fixture
-def _clear_schema_cache() -> None:
-    """Schemas are cached, so the cache needs to be cleared between test invocations."""
-    yield
-    get_selected_schema.cache_clear()
-
-
 @time_machine.travel(
     datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc),
     tick=False,
 )
 @pytest.mark.snapshot()
-@pytest.mark.usefixtures("_clear_schema_cache")
 @pytest.mark.parametrize(
     "stream_maps,flatten,flatten_max_depth,snapshot_name",
     [
