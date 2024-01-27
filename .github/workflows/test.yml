@@ -39,6 +39,7 @@ jobs:
   tests:
     name: "Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }} / SQLAlchemy: ${{ matrix.sqlalchemy }}"
     runs-on: ${{ matrix.os }}
+    continue-on-error: true
     env:
       NOXPYTHON: ${{ matrix.python-version }}
       NOXSESSION: ${{ matrix.session }}

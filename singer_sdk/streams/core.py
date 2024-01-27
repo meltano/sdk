@@ -827,7 +827,7 @@ class Stream(metaclass=abc.ABCMeta):
         Yields:
             Record message objects.
         """
-        pop_deselected_record_properties(record, self.schema, self.mask, self.logger)
+        pop_deselected_record_properties(record, self.schema, self.mask)
         record = conform_record_data_types(
             stream_name=self.name,
             record=record,

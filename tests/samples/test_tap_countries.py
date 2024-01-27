@@ -5,7 +5,6 @@ from __future__ import annotations
 import copy
 import io
 import json
-import logging
 import typing as t
 from contextlib import redirect_stdout
 
@@ -89,7 +88,6 @@ def test_with_catalog_entry():
         record=copied_record,
         schema=stream.schema,
         mask=stream.mask,
-        logger=logging.getLogger(),
     )
     assert copied_record == record
 
@@ -97,7 +95,6 @@ def test_with_catalog_entry():
         stream_name=stream.name,
         schema=stream.schema,
         mask=stream.metadata.resolve_selection(),
-        logger=logging.getLogger(),
     )
     assert new_schema == stream.schema
 
