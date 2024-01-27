@@ -110,18 +110,37 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return val.replace("/", "%2F") if isinstance(val, str) else str(val)
 
-    def get_url(self, context: dict | None) -> str:
+    def get_url(
+        self,
+        context: dict | None,
+        *,
+        next_page_token: _TToken | None = None,  # noqa: ARG002
+    ) -> str:
         """Get stream entity URL.
 
         Developers override this method to perform dynamic URL generation.
 
         Args:
             context: Stream partition or context dictionary.
+            next_page_token: Token, page number or any request argument to request the
+                next page of data.
 
         Returns:
             A URL, optionally targeted to a specific partition or context.
+
+        Example:
+            .. code-block:: python
+
+                class Users(RESTStream):
+                    name = "users"
+                    path = "/users"
+                    url_base = "https://api.mysite.com/v3"
+
+                    def get_url(self, context, next_page_token=None):
+                        url = super().get_url(context, next_page_token=next_page_token)
+                        return f"{url}/page/{next_page_token or 1}"
         """
-        url = "".join([self.url_base, self.path or ""])
+        url = f"{self.url_base}{self.path or ''}"
         vals = copy.copy(dict(self.config))
         vals.update(context or {})
         for k, v in vals.items():
@@ -344,7 +363,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             HTTP headers and authenticator.
         """
         http_method = self.rest_method
-        url: str = self.get_url(context)
+        url: str = self.get_url(context, next_page_token=next_page_token)
         params: dict | str = self.get_url_params(context, next_page_token)
         request_data = self.prepare_request_payload(context, next_page_token)
         headers = self.http_headers
