@@ -1060,16 +1060,6 @@ files = [
 ]
 
 [[package]]
-name = "memoization"
-version = "0.4.0"
-description = "A powerful caching library for Python, with TTL support and multiple algorithm options. (https://github.com/lonelyenvoy/python-memoization)"
-optional = false
-python-versions = ">=3, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <4"
-files = [
-    {file = "memoization-0.4.0.tar.gz", hash = "sha256:fde5e7cd060ef45b135e0310cfec17b2029dc472ccb5bbbbb42a503d4538a135"},
-]
-
-[[package]]
 name = "mypy"
 version = "1.8.0"
 description = "Optional static typing for Python"
@@ -2620,4 +2610,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "3308a0e70f8f097b0a678989aa8d25133ff05e8d9ea37232d739a9664b05f361"
+content-hash = "d4e6a793a168c7440918376ba46cf015de7cd633d0f957dfc244db89f81b85d8"

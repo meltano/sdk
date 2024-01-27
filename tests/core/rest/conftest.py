@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import typing as t
+from functools import cached_property
 
 import pytest
-from memoization.memoization import cached
 from requests.auth import HTTPProxyAuth
 
 from singer_sdk.authenticators import APIAuthenticatorBase, SingletonMeta
@@ -49,8 +49,7 @@ class NaiveAuthenticator(APIAuthenticatorBase):
 class CachedAuthStream(SimpleRESTStream):
     """A stream with Naive authentication."""
 
-    @property
-    @cached
+    @cached_property
     def authenticator(self) -> NaiveAuthenticator:
         """Stream authenticator."""
         return NaiveAuthenticator(stream=self)
