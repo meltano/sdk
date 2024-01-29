@@ -9,6 +9,9 @@ import typing as t
 from collections import OrderedDict
 from textwrap import dedent
 
+from packaging.specifiers import SpecifierSet
+from packaging.version import Version
+
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.capabilities import CapabilitiesEnum
 
@@ -18,6 +21,38 @@ __all__ = [
     "JSONFormatter",
     "MarkdownFormatter",
 ]
+
+# Keep these in sync with the supported Python versions in pyproject.toml
+_PY_MIN_VERSION = 8
+_PY_MAX_VERSION = 12
+
+
+def _get_min_version(specifiers: SpecifierSet) -> int:
+    min_version: list[int] = []
+    for specifier in specifiers:
+        if specifier.operator == ">=":
+            min_version.append(Version(specifier.version).minor)
+        if specifier.operator == ">":
+            min_version.append(Version(specifier.version).minor + 1)
+    return min(min_version, default=_PY_MIN_VERSION)
+
+
+def _get_max_version(specifiers: SpecifierSet) -> int:
+    max_version: list[int] = []
+    for specifier in specifiers:
+        if specifier.operator == "<=":
+            max_version.append(Version(specifier.version).minor)
+        if specifier.operator == "<":
+            max_version.append(Version(specifier.version).minor - 1)
+    return max(max_version, default=_PY_MAX_VERSION)
+
+
+def get_supported_pythons(requires_python: str) -> t.Generator[str, None, None]:
+    specifiers = SpecifierSet(requires_python)
+    min_version = _get_min_version(specifiers)
+    max_version = _get_max_version(specifiers)
+
+    yield from specifiers.filter(f"3.{v}" for v in range(min_version, max_version + 1))
 
 
 @dataclasses.dataclass

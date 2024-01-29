@@ -5,28 +5,25 @@ from __future__ import annotations
 import typing as t
 from copy import deepcopy
 
-from memoization import cached
-
 from singer_sdk.helpers._typing import is_object_type
 
 if t.TYPE_CHECKING:
-    from logging import Logger
-
     from singer_sdk._singerlib import Catalog, SelectionMask
 
-_MAX_LRU_CACHE = 500
 
-
-@cached(max_size=_MAX_LRU_CACHE)
+# TODO: this was previously cached using the `memoization` library. However, the
+# `functools.lru_cache` decorator does not support non-hashable arguments.
+# It is possible that this function is not a bottleneck, but if it is, we should
+# consider implementing a custom LRU cache decorator that supports non-hashable
+# arguments.
 def get_selected_schema(
     stream_name: str,
     schema: dict,
     mask: SelectionMask,
-    logger: Logger,
 ) -> dict:
     """Return a copy of the provided JSON schema, dropping any fields not selected."""
     new_schema = deepcopy(schema)
-    _pop_deselected_schema(new_schema, mask, stream_name, (), logger)
+    _pop_deselected_schema(new_schema, mask, stream_name, ())
     return new_schema
 
 
@@ -35,7 +32,6 @@ def _pop_deselected_schema(
     mask: SelectionMask,
     stream_name: str,
     breadcrumb: tuple[str, ...],
-    logger: Logger,
 ) -> None:
     """Remove anything from schema that is not selected.
 
@@ -75,7 +71,6 @@ def _pop_deselected_schema(
                 mask,
                 stream_name,
                 property_breadcrumb,
-                logger,
             )
 
 
@@ -83,7 +78,6 @@ def pop_deselected_record_properties(
     record: dict[str, t.Any],
     schema: dict,
     mask: SelectionMask,
-    logger: Logger,
     breadcrumb: tuple[str, ...] = (),
 ) -> None:
     """Remove anything from record properties that is not selected.
@@ -104,7 +98,6 @@ def pop_deselected_record_properties(
                 val,
                 schema,
                 mask,
-                logger,
                 property_breadcrumb,
             )
 
