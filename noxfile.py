@@ -58,7 +58,7 @@ test_dependencies = [
 def mypy(session: Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
-    session.install(".[s3,testing,parquet]")
+    session.install(".[s3,testing,parquet,faker]")
     session.install(
         "exceptiongroup",
         "mypy",
