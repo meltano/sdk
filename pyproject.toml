@@ -44,19 +44,19 @@ backports-datetime-fromisoformat = { version = ">=2.0.1", python = "<3.11" }
 click = "~=8.0"
 cryptography = ">=3.4.6"
 fs = ">=2.4.16"
-importlib-metadata = {version = "<7.0.0", python = "<3.12"}
+importlib-metadata = {version = "<8.0.0", python = "<3.12"}
 importlib-resources = {version = ">=5.12.0", python = "<3.9"}
 inflection = ">=0.5.1"
 joblib = ">=1.0.1"
 jsonpath-ng = ">=1.5.3"
 jsonschema = ">=4.16.0"
-memoization = { version = ">=0.3.2,<0.5.0", python = "<4" }
 packaging = ">=23.1"
 pendulum = ">=2.1.0,<4"
 PyJWT = "~=2.4"
 python-dateutil = ">=2.8.2"
 python-dotenv = ">=0.20"
 PyYAML = ">=6.0"
+referencing = ">=0.30.0"
 requests = ">=2.25.1"
 simpleeval = ">=0.9.13"
 simplejson = ">=3.17.6"
@@ -187,6 +187,7 @@ exclude_also = [
     '''if (t\.)?TYPE_CHECKING:''',
 ]
 fail_under = 82
+show_missing = true
 
 [tool.mypy]
 exclude = "tests"
