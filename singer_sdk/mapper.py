@@ -687,7 +687,6 @@ class PluginMapper:
                     catalog_entry.stream or catalog_entry.tap_stream_id,
                     catalog_entry.schema.to_dict(),
                     catalog_entry.metadata.resolve_selection(),
-                    self.logger,
                 ),
                 catalog_entry.key_properties,
             )
