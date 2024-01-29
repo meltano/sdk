@@ -91,7 +91,6 @@ pytest = {version=">=7.2.1", optional = true}
 pytest-durations = {version = ">=1.2.0", optional = true}
 
 # installed as optional 'faker' extra
-faker = {version = "~=22.5", optional = true}
 
 [tool.poetry.extras]
 docs = [
@@ -110,7 +109,6 @@ testing = [
     "pytest-durations"
 ]
 parquet = ["numpy", "pyarrow"]
-faker = ["faker"]
 
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = ">=7.4"}
