@@ -283,7 +283,7 @@ class SQLSink(BatchSink):
         statement = dedent(
             f"""\
             INSERT INTO {full_table_name}
-            ({", ".join(quoted_name(name) for name in property_names)})
+            ({", ".join(quoted_name(name, True) for name in property_names)})
             VALUES ({", ".join([f":{name}" for name in property_names])})
             """,  # noqa: S608
         )
