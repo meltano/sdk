@@ -122,8 +122,7 @@ by the SDK automatically:
 
 The `stream_maps` config expects a mapping of stream names to a structured transform object.
 
-Here is a sample `stream_maps` transformation which removes all references to `email` and
-adds `email_domain` and `email_hash` as new properties:
+Here is a sample `stream_maps` transformation which obfuscates `phone_number` with a fake value, removes all references to `email` and adds `email_domain` and `email_hash` as new properties:
 
 `meltano.yml` or `config.json`:
 
@@ -132,6 +131,8 @@ adds `email_domain` and `email_hash` as new properties:
 stream_maps:
   # Apply these transforms to the stream called 'customers'
   customers:
+    # generate a fake phone number
+    phone_number: fake.phone_number()
     # drop the PII field from RECORD and SCHEMA messages
     email: __NULL__
     # capture just the email domain
@@ -141,6 +142,13 @@ stream_maps:
 stream_map_config:
   # hash outputs are not able to be replicated without the original seed:
   hash_seed: 01AWZh7A6DzGm6iJZZ2T
+faker_config:
+  # set specific seed
+  seed: 0
+  # set specific locales
+  locale:
+  - en_US
+  - en_GB
 ```
 ````
 
@@ -156,6 +164,13 @@ stream_map_config:
     },
     "stream_map_config": {
         "hash_seed": "01AWZh7A6DzGm6iJZZ2T"
+    },
+    "faker_config": {
+        "seed": 0,
+        "locale": [
+            "en_US",
+            "en_GB"
+        ]
     }
 }
 ```
@@ -236,6 +251,7 @@ can be referenced directly by mapping expressions.
 - `record` - an alias for the record values dictionary in the current stream.
 - `_` - same as `record` but shorter to type
 - `self` - the existing property value if the property already exists
+- `fake` - a [`Faker`](https://faker.readthedocs.io/en/master/) instance, configurable via `faker_config` (see previous example) - the built-in [standard providers](https://faker.readthedocs.io/en/master/providers.html) provide the available methods
 
 #### Automatic Schema Detection
 
