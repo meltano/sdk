@@ -117,7 +117,12 @@ html_css_files = [
     "css/custom.css",
 ]
 
+# -- Options for MyST --------------------------------------------------------
+# https://myst-parser.readthedocs.io/en/latest/configuration.html
 myst_heading_anchors = 3
+myst_enable_extensions = {
+    "colon_fence",
+}
 
 redirects = {
     "porting.html": "guides/porting.html",

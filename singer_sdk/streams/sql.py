@@ -154,7 +154,6 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             stream_name=self.name,
             schema=self.schema,
             mask=self.mask,
-            logger=self.logger,
         )
 
     # Get records from stream
