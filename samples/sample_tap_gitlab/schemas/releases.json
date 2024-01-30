@@ -4,20 +4,102 @@
     "tag_name": {
       "type": "string"
     },
-    "author_id": {
-      "type": ["null", "integer"]
+    "author": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "avatar_url": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "web_url": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
     },
-    "commit_id": {
-      "type": ["string", "null"]
+    "commit": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "short_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "parent_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "message": {
+          "type": "string"
+        },
+        "author_name": {
+          "type": "string"
+        },
+        "author_email": {
+          "type": "string"
+        },
+        "authored_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "committer_name": {
+          "type": "string"
+        },
+        "committer_email": {
+          "type": "string"
+        },
+        "committed_date": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
     },
     "project_id": {
       "type": "string"
     },
     "description": {
-      "type": ["null", "string"]
+      "type": [
+        "null",
+        "string"
+      ]
     },
     "name": {
-      "type": ["null", "string"]
+      "type": [
+        "null",
+        "string"
+      ]
     },
     "created_at": {
       "anyOf": [

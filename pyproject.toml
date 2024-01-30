@@ -138,6 +138,26 @@ pytest-codspeed = ">=2.2.0"
 
 [tool.pytest.ini_options]
 addopts = '--ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
+filterwarnings = [
+    "error",
+    "ignore:Could not configure external gitlab tests:UserWarning",
+    "ignore:No records were available to test:UserWarning",
+    # https://github.com/meltano/sdk/issues/1354
+    "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
+    # https://docs.python.org/3.12/whatsnew/3.12.html#deprecated
+    # https://github.com/danthedeckie/simpleeval/blob/master/simpleeval.py
+    "ignore:ast.NameConstant is deprecated:DeprecationWarning:simpleeval",
+    # https://docs.python.org/3.12/whatsnew/3.12.html#deprecated
+    # https://github.com/danthedeckie/simpleeval/blob/master/simpleeval.py
+    "ignore:ast.Num is deprecated:DeprecationWarning:simpleeval",
+    # https://github.com/joblib/joblib/pull/1518
+    "ignore:ast.Num is deprecated:DeprecationWarning:joblib._utils",
+    # https://docs.python.org/3.12/whatsnew/3.12.html#deprecated
+    # https://github.com/danthedeckie/simpleeval/blob/master/simpleeval.py
+    "ignore:ast.Str is deprecated:DeprecationWarning:simpleeval",
+    # https://github.com/joblib/joblib/pull/1518
+    "ignore:Attribute n is deprecated:DeprecationWarning:joblib._utils",
+]
 markers = [
     "external: Tests relying on external resources",
     "windows: Tests that only run on Windows",
