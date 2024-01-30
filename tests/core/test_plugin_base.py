@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-import os
-from unittest import mock
-
 import pytest
 
 from singer_sdk.plugin_base import SDK_PACKAGE_NAME, MapperNotInitialized, PluginBase
@@ -19,15 +16,17 @@ class PluginTest(PluginBase):
     ).to_dict()
 
 
-def test_get_env_var_config():
+def test_get_env_var_config(monkeypatch: pytest.MonkeyPatch):
     """Test settings parsing from environment variables."""
-    with mock.patch.dict(
-        os.environ,
-        {
-            "PLUGIN_TEST_PROP1": "hello",
-            "PLUGIN_TEST_PROP3": "not-a-tap-setting",
-        },
-    ):
+    monkeypatch.delenv("PLUGIN_TEST_PROP1", raising=False)
+    monkeypatch.delenv("PLUGIN_TEST_PROP2", raising=False)
+    monkeypatch.delenv("PLUGIN_TEST_PROP3", raising=False)
+    monkeypatch.delenv("PLUGIN_TEST_PROP4", raising=False)
+
+    with monkeypatch.context() as m:
+        m.setenv("PLUGIN_TEST_PROP1", "hello")
+        m.setenv("PLUGIN_TEST_PROP3", "not-a-tap-setting")
+        m.setenv("PLUGIN_TEST_PROP4", "not-a-tap-setting")
         env_config = PluginTest._env_var_config
         assert env_config["prop1"] == "hello"
         assert "PROP1" not in env_config
