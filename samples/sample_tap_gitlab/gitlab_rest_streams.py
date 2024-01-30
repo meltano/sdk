@@ -13,6 +13,7 @@ from singer_sdk.typing import (
     DateTimeType,
     DateType,
     IntegerType,
+    ObjectType,
     PropertiesList,
     Property,
     StringType,
@@ -103,6 +104,13 @@ class ProjectsStream(ProjectBasedStream):
     is_sorted = True
     schema_filepath = SCHEMAS_DIR / "projects.json"
 
+    def get_url_params(
+        self, context: dict | None, next_page_token: str | None
+    ) -> dict[str, t.Any]:
+        params = super().get_url_params(context, next_page_token)
+        params["statistics"] = True
+        return params
+
 
 class ReleasesStream(ProjectBasedStream):
     """Gitlab Releases stream."""
@@ -158,7 +166,6 @@ class EpicsStream(ProjectBasedStream):
         Property("title", StringType),
         Property("description", StringType),
         Property("state", StringType),
-        Property("author_id", IntegerType),
         Property("start_date", DateType),
         Property("end_date", DateType),
         Property("due_date", DateType),
@@ -167,6 +174,17 @@ class EpicsStream(ProjectBasedStream):
         Property("labels", ArrayType(StringType)),
         Property("upvotes", IntegerType),
         Property("downvotes", IntegerType),
+        Property(
+            "author",
+            ObjectType(
+                Property("id", IntegerType),
+                Property("name", StringType),
+                Property("username", StringType),
+                Property("state", StringType),
+                Property("avatar_url", StringType),
+                Property("web_url", StringType),
+            ),
+        ),
     ).to_dict()
 
     def get_child_context(

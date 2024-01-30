@@ -137,6 +137,7 @@ addopts = '--ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
 filterwarnings = [
     "error",
     "ignore:Could not configure external gitlab tests:UserWarning",
+    "ignore:No records were available to test:UserWarning:singer_sdk.testing.templates",
     # https://github.com/meltano/sdk/issues/1354
     "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
     # https://docs.python.org/3.12/whatsnew/3.12.html#deprecated
