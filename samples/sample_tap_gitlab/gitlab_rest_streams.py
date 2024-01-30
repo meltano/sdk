@@ -13,6 +13,7 @@ from singer_sdk.typing import (
     DateTimeType,
     DateType,
     IntegerType,
+    ObjectType,
     PropertiesList,
     Property,
     StringType,
@@ -158,7 +159,6 @@ class EpicsStream(ProjectBasedStream):
         Property("title", StringType),
         Property("description", StringType),
         Property("state", StringType),
-        Property("author_id", IntegerType),
         Property("start_date", DateType),
         Property("end_date", DateType),
         Property("due_date", DateType),
@@ -167,6 +167,17 @@ class EpicsStream(ProjectBasedStream):
         Property("labels", ArrayType(StringType)),
         Property("upvotes", IntegerType),
         Property("downvotes", IntegerType),
+        Property(
+            "author",
+            ObjectType(
+                Property("id", IntegerType),
+                Property("name", StringType),
+                Property("username", StringType),
+                Property("state", StringType),
+                Property("avatar_url", StringType),
+                Property("web_url", StringType),
+            ),
+        ),
     ).to_dict()
 
     def get_child_context(

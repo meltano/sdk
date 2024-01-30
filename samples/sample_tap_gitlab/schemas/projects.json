@@ -10,8 +10,9 @@
     "avatar_url": {
       "type": ["null", "string"]
     },
-    "builds_enabled": {
-      "type": ["null", "boolean"]
+    "builds_access_level": {
+      "type": ["null", "string"],
+      "enum": ["disabled", "private", "enabled"]
     },
     "container_registry_enabled": {
       "type": ["null", "boolean"]
@@ -86,13 +87,10 @@
     "only_allow_merge_if_all_discussions_are_resolved": {
       "type": ["null", "boolean"]
     },
-    "only_allow_merge_if_build_succeeds": {
+    "only_allow_merge_if_pipeline_succeeds": {
       "type": ["null", "boolean"]
     },
     "open_issues_count": {
-      "type": ["null", "integer"]
-    },
-    "owner_id": {
       "type": ["null", "integer"]
     },
     "path": {
@@ -128,10 +126,7 @@
         }
       }
     },
-    "public": {
-      "type": ["null", "boolean"]
-    },
-    "public_builds": {
+    "public_jobs": {
       "type": ["null", "boolean"]
     },
     "request_access_enabled": {
@@ -166,37 +161,15 @@
     "star_count": {
       "type": ["null", "integer"]
     },
-    "statistics": {
-      "type": ["object", "null"],
-      "properties": {
-        "commit_count": {
-          "type": ["null", "integer"]
-        },
-        "storage_size": {
-          "type": ["null", "integer"]
-        },
-        "repository_size": {
-          "type": ["null", "integer"]
-        },
-        "lfs_objects_size": {
-          "type": ["null", "integer"]
-        },
-        "job_artifacts_size": {
-          "type": ["null", "integer"]
-        }
-      }
-    },
     "tag_list": {
       "type": ["array", "null"],
       "items": {
         "type": "string"
       }
     },
-    "visibility_level": {
-      "type": ["null", "integer"]
-    },
     "visibility": {
-      "type": ["null", "string"]
+      "type": ["null", "string"],
+      "enum": ["private", "internal", "public"]
     },
     "web_url": {
       "type": ["null", "string"]
