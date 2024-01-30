@@ -280,10 +280,14 @@ class SQLSink(BatchSink):
             An insert statement.
         """
         property_names = list(self.conform_schema(schema)["properties"].keys())
+        column_identifiers = [
+            self.connector.quote(quoted_name(name, quote=True))
+            for name in property_names
+        ]
         statement = dedent(
             f"""\
             INSERT INTO {full_table_name}
-            ({", ".join(quoted_name(name, True) for name in property_names)})
+            ({", ".join(column_identifiers)})
             VALUES ({", ".join([f":{name}" for name in property_names])})
             """,  # noqa: S608
         )
