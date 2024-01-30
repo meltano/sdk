@@ -7,10 +7,10 @@ from __future__ import annotations
 
 import abc
 import ast
-import contextlib
 import copy
 import datetime
 import hashlib
+import importlib.util
 import logging
 import typing as t
 
@@ -28,6 +28,8 @@ from singer_sdk.helpers._flattening import (
 
 if t.TYPE_CHECKING:
     import sys
+
+    from faker import Faker
 
     if sys.version_info >= (3, 10):
         from typing import TypeAlias  # noqa: ICN003
@@ -267,9 +269,7 @@ class CustomStreamMap(StreamMap):
             self.transformed_schema,
         ) = self._init_functions_and_schema(stream_map=map_transform)
         self.expr_evaluator = simpleeval.EvalWithCompoundTypes(functions=self.functions)
-
-        with contextlib.suppress(ImportError):
-            self._init_faker_instance()
+        self.fake = self._init_faker_instance()
 
     def transform(self, record: dict) -> dict | None:
         """Return a transformed record.
@@ -333,7 +333,7 @@ class CustomStreamMap(StreamMap):
         names["record"] = record  # ...and a longhand alias
         names["config"] = self.map_config  # Allow map config access within transform
 
-        with contextlib.suppress(AttributeError):
+        if self.fake:
             names["fake"] = self.fake
 
         if property_name and property_name in record:
@@ -605,22 +605,23 @@ class CustomStreamMap(StreamMap):
 
         return filter_fn, transform_fn, transformed_schema
 
-    def _init_faker_instance(self) -> None:
+    def _init_faker_instance(self) -> Faker | None:
+        if not importlib.util.find_spec("faker"):
+            return None
+
         from faker import Faker
 
-        self.fake = Faker()
+        if self.faker_config:
+            faker_seed = self.faker_config.get("seed")
+            faker_locale = self.faker_config.get("locale")
 
-        if not self.faker_config:
-            return
+            if faker_seed is not None:
+                Faker.seed(faker_seed)
 
-        faker_seed = self.faker_config.get("seed")
-        faker_locale = self.faker_config.get("locale")
+            if faker_locale is not None:
+                return Faker(faker_locale)
 
-        if faker_seed is not None:
-            Faker.seed(faker_seed)
-
-        if faker_locale is not None:
-            self.fake = Faker(faker_locale)
+        return Faker()
 
 
 class PluginMapper:
