@@ -15,6 +15,9 @@ if __name__ == "__main__":
     for client_py in PACKAGE_PATH.rglob("*-client.py"):
         client_py.unlink()
 
+    if "{{ cookiecutter.stream_type }}" != "REST":
+        shutil.rmtree(PACKAGE_PATH.joinpath("schemas"), ignore_errors=True)
+
     if "{{ cookiecutter.auth_method }}" not in ("OAuth2", "JWT"):
         PACKAGE_PATH.joinpath("auth.py").unlink()
 
