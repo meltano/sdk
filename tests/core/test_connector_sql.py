@@ -274,7 +274,7 @@ class TestConnectorSQL:
             sa.Column("attrs", sa.JSON),
         )
         meta.create_all(engine)
-        with engine.connect() as conn:
+        with engine.connect() as conn, conn.begin():
             conn.execute(
                 table.insert(),
                 [
