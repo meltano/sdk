@@ -29,7 +29,7 @@ COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"
 
 package = "singer_sdk"
 python_versions = ["3.12", "3.11", "3.10", "3.9", "3.8"]
-main_python_version = "3.11"
+main_python_version = "3.12"
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = (
     "mypy",
