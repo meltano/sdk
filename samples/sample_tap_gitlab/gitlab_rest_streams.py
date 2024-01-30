@@ -104,13 +104,6 @@ class ProjectsStream(ProjectBasedStream):
     is_sorted = True
     schema_filepath = SCHEMAS_DIR / "projects.json"
 
-    def get_url_params(
-        self, context: dict | None, next_page_token: str | None
-    ) -> dict[str, t.Any]:
-        params = super().get_url_params(context, next_page_token)
-        params["statistics"] = True
-        return params
-
 
 class ReleasesStream(ProjectBasedStream):
     """Gitlab Releases stream."""

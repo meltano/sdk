@@ -93,21 +93,6 @@
     "open_issues_count": {
       "type": ["null", "integer"]
     },
-    "owner": {
-      "type": ["null", "object"],
-      "properties": {
-        "id": {
-          "type": ["null", "integer"]
-        },
-        "name": {
-          "type": ["null", "string"]
-        },
-        "created_at": {
-          "type": ["null", "string"],
-          "format": "date-time"
-        }
-      }
-    },
     "path": {
       "type": ["null", "string"]
     },
@@ -175,26 +160,6 @@
     },
     "star_count": {
       "type": ["null", "integer"]
-    },
-    "statistics": {
-      "type": ["object", "null"],
-      "properties": {
-        "commit_count": {
-          "type": ["null", "integer"]
-        },
-        "storage_size": {
-          "type": ["null", "integer"]
-        },
-        "repository_size": {
-          "type": ["null", "integer"]
-        },
-        "lfs_objects_size": {
-          "type": ["null", "integer"]
-        },
-        "job_artifacts_size": {
-          "type": ["null", "integer"]
-        }
-      }
     },
     "tag_list": {
       "type": ["array", "null"],

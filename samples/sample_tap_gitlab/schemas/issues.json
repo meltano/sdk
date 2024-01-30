@@ -36,7 +36,7 @@
             "null",
             "string"
           ],
-          "format": "date-time"
+          "format": "date"
         },
         "iid": {
           "type": "integer"
@@ -173,11 +173,37 @@
         }
       }
     },
-    "closed_by_id": {
+    "closed_by": {
       "type": [
         "null",
-        "integer"
-      ]
+        "object"
+      ],
+      "properties": {
+        "state": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "web_url": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "avatar_url": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "username": {
+          "type": "string"
+        }
+      }
     },
     "title": {
       "type": [
@@ -236,12 +262,6 @@
         }
       ]
     },
-    "subscribed": {
-      "type": [
-        "null",
-        "boolean"
-      ]
-    },
     "upvotes": {
       "type": [
         "null",
@@ -270,7 +290,8 @@
       "type": [
         "null",
         "string"
-      ]
+      ],
+      "format": "date"
     },
     "weight": {
       "type": [
