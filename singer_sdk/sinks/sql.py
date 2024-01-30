@@ -10,6 +10,7 @@ from textwrap import dedent
 
 import sqlalchemy as sa
 from pendulum import now
+from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.expression import bindparam
 
 from singer_sdk.connectors import SQLConnector
@@ -282,7 +283,7 @@ class SQLSink(BatchSink):
         statement = dedent(
             f"""\
             INSERT INTO {full_table_name}
-            ({", ".join([f'"{name}"' for name in property_names])})
+            ({", ".join(quoted_name(name) for name in property_names)})
             VALUES ({", ".join([f":{name}" for name in property_names])})
             """,  # noqa: S608
         )

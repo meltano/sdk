@@ -490,7 +490,7 @@ def test_record_with_missing_properties(
             dedent(
                 """\
                 INSERT INTO test_stream
-                (id, name)
+                ("id", "name")
                 VALUES (:id, :name)""",
             ),
         ),
