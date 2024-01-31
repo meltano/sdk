@@ -22,6 +22,7 @@ from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
     ArrayType,
     BooleanType,
+    CustomType,
     IntegerType,
     NumberType,
     ObjectType,
@@ -393,6 +394,7 @@ def wildcard_result(sample_stream):
             {**record, "db_name": "database"} for record in sample_stream["foobars"]
         ],
         "singular": sample_stream["singular"],
+        "nested_jellybean": sample_stream["nested_jellybean"],
     }
 
 
@@ -412,6 +414,18 @@ def wildcard_schemas():
             Property("db_name", StringType),  # added
         ).to_dict(),
         "singular": PropertiesList(Property("foo", StringType)).to_dict(),  # unchanged
+        "nested_jellybean": PropertiesList(  # unchanged
+            Property("id", IntegerType),
+            Property(
+                "custom_fields",
+                ArrayType(
+                    ObjectType(
+                        Property("id", IntegerType),
+                        Property("value", CustomType({})),
+                    ),
+                ),
+            ),
+        ).to_dict(),
     }
 
 
