@@ -7,7 +7,7 @@ import typing as t
 import singer_sdk._singerlib as singer
 import singer_sdk.typing as th
 from singer_sdk.helpers._util import utc_now
-from singer_sdk.mapper import PluginMapper
+from singer_sdk.mapper import PluginMapper, RemoveRecordTransform
 from singer_sdk.mapper_base import InlineMapper
 
 if t.TYPE_CHECKING:
@@ -90,13 +90,15 @@ class StreamTransform(InlineMapper):
             message_dict.get("key_properties", []),
         )
         for stream_map in self.mapper.stream_maps[stream_id]:
-            schema_message = singer.SchemaMessage(
+            if isinstance(stream_map, RemoveRecordTransform):
+                # Don't emit schema if the stream's records are all ignored.
+                continue
+            yield singer.SchemaMessage(
                 stream_map.stream_alias,
                 stream_map.transformed_schema,
                 stream_map.transformed_key_properties,
                 message_dict.get("bookmark_keys", []),
             )
-            yield schema_message
 
     def map_record_message(
         self,
