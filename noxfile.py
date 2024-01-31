@@ -144,7 +144,7 @@ def update_snapshots(session: Session) -> None:
     args = session.posargs or ["-m", "snapshot"]
 
     _clean_py312_deps(session, test_dependencies)
-    session.install(".")
+    session.install(".[faker]")
     session.install(*test_dependencies)
     session.run("pytest", "--snapshot-update", *args)
 
