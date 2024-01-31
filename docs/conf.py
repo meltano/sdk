@@ -26,7 +26,7 @@ copyright = "2021, Meltano Core Team and Contributors"  # noqa: A001
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.30.0"
+release = "0.34.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -39,10 +39,12 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
     "sphinx_copybutton",
     "myst_parser",
     "sphinx_reredirects",
     "sphinx_inline_tabs",
+    "notfound.extension",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -56,6 +58,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # Show typehints in the description, along with parameter descriptions
 autodoc_typehints = "signature"
 autodoc_class_signature = "separated"
+autodoc_member_order = "groupwise"
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -70,7 +73,6 @@ html_theme_options = {
     "source_branch": "main",
     "source_directory": "docs/",
     "sidebar_hide_name": True,
-    "announcement": '<a href="https://meltano.com/cloud/?utm_campaign=top_banner_sdk">Sign up for Public Beta today</a>! Get a 20% discount on purchases before 27th of July!',  # noqa: E501
     # branding
     "light_css_variables": {
         "font-stack": "Hanken Grotesk,-apple-system,Helvetica,sans-serif",
@@ -116,8 +118,20 @@ html_css_files = [
     "css/custom.css",
 ]
 
+# -- Options for MyST --------------------------------------------------------
+# https://myst-parser.readthedocs.io/en/latest/configuration.html
 myst_heading_anchors = 3
+myst_enable_extensions = {
+    "colon_fence",
+}
 
 redirects = {
     "porting.html": "guides/porting.html",
+}
+
+# -- Options for intersphinx -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#configuration
+intersphinx_mapping = {
+    "requests": ("https://requests.readthedocs.io/en/latest/", None),
+    "python": ("https://docs.python.org/3/", None),
 }

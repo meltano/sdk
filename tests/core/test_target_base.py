@@ -8,7 +8,7 @@ from singer_sdk.exceptions import (
     MissingKeyPropertiesError,
     RecordsWithoutSchemaException,
 )
-from singer_sdk.helpers.capabilities import PluginCapabilities
+from singer_sdk.helpers.capabilities import PluginCapabilities, TargetCapabilities
 from tests.conftest import BatchSinkMock, SQLSinkMock, SQLTargetMock, TargetMock
 
 
@@ -67,6 +67,7 @@ def test_target_about_info():
         PluginCapabilities.ABOUT,
         PluginCapabilities.STREAM_MAPS,
         PluginCapabilities.FLATTENING,
+        TargetCapabilities.VALIDATE_RECORDS,
         PluginCapabilities.BATCH,
     ]
 

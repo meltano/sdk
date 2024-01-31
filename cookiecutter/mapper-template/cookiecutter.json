@@ -1,0 +1,23 @@
+{
+  "name": "MyMapperName",
+  "admin_name": "FirstName LastName",
+  "admin_email": "firstname.lastname@example.com",
+  "mapper_id": "mapper-{{ cookiecutter.name.lower() }}",
+  "library_name": "{{ cookiecutter.mapper_id.replace('-', '_') }}",
+  "variant": "None (Skip)",
+  "faker_extra": false,
+  "include_ci_files": ["GitHub", "None (Skip)"],
+  "license": ["Apache-2.0"],
+  "ide": ["VSCode", "None"],
+  "__prompts__": {
+    "name": "The name of the mapper, in CamelCase",
+    "admin_name": "Provide your [bold yellow]full name[/]",
+    "admin_email": "Provide your [bold yellow]email[/]",
+    "mapper_id": "The ID of the tap, in kebab-case",
+    "library_name": "The name of the library, in snake_case. This is how the library will be imported in Python.",
+    "faker_extra": "Add [bold orange1][link=https://faker.readthedocs.io/en/master/]Faker[/link][/] as an extra dependency to support generating fake data in stream maps?",
+    "include_ci_files": "Whether to include CI files for a common CI services",
+    "license": "The license for the project",
+    "ide": "Add configuration files for your preferred IDE"
+  }
+}

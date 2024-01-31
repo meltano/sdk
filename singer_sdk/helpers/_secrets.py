@@ -28,7 +28,7 @@ def is_common_secret_key(key_name: str) -> bool:
 class SecretString(str):
     """For now, this class wraps a sensitive string to be identified as such later."""
 
-    def __init__(self, contents):
+    def __init__(self, contents: str) -> None:
         """Initialize secret string."""
         self.contents = contents
 

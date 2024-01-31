@@ -197,12 +197,7 @@ def test_schema_selection(
     stream_name: str,
 ):
     """Test that schema selection rules are correctly applied to SCHEMA messages."""
-    selected_schema = get_selected_schema(
-        stream_name,
-        schema,
-        mask,
-        logging.getLogger(),
-    )
+    selected_schema = get_selected_schema(stream_name, schema, mask)
     assert (
         selected_schema["properties"]
         == PropertiesList(
@@ -247,7 +242,6 @@ def test_record_property_pop(
         record=record_pop,
         schema=schema,
         mask=mask,
-        logger=logging.getLogger(),
         breadcrumb=(),
     )
 

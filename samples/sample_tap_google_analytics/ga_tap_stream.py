@@ -2,17 +2,16 @@
 
 from __future__ import annotations
 
+import datetime
 import typing as t
-from pathlib import Path
-
-import pendulum
 
 from singer_sdk.authenticators import OAuthJWTAuthenticator
+from singer_sdk.helpers._compat import importlib_resources
 from singer_sdk.streams import RESTStream
 
 GOOGLE_OAUTH_ENDPOINT = "https://oauth2.googleapis.com/token"
 GA_OAUTH_SCOPES = "https://www.googleapis.com/auth/analytics.readonly"
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
 
 
 class GoogleJWTAuthenticator(OAuthJWTAuthenticator):
@@ -59,7 +58,7 @@ class SampleGoogleAnalyticsStream(RESTStream):
             request_def["dateRanges"] = [
                 {
                     "startDate": self.config.get("start_date"),
-                    "endDate": pendulum.now(tz="UTC"),
+                    "endDate": datetime.datetime.now(datetime.timezone.utc),
                 },
             ]
         return {"reportRequests": [request_def]}

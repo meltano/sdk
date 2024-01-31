@@ -2,12 +2,15 @@
     "cookiecutter": {
       "destination_name": "MyDestinationName",
       "admin_name": "FirstName LastName",
+      "admin_email": "firstname.lastname@example.com",
       "target_id": "target-sql",
       "library_name": "target_sql",
       "variant": "None (Skip)",
       "serialization_method": "SQL",
       "include_ci_files": "None (Skip)",
+      "faker_extra": false,
       "license": "Apache-2.0",
+      "ide": "VSCode",
       "_template": "./sdk/cookiecutter/target-template",
       "_output_dir": "."
     }

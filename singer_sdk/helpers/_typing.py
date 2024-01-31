@@ -4,20 +4,20 @@ from __future__ import annotations
 
 import copy
 import datetime
+import logging
 import typing as t
 from enum import Enum
 from functools import lru_cache
 
 import pendulum
 
-if t.TYPE_CHECKING:
-    import logging
-
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"
 JSONSCHEMA_ANNOTATION_SECRET = "secret"  # noqa: S105
 JSONSCHEMA_ANNOTATION_WRITEONLY = "writeOnly"
 UTC = datetime.timezone.utc
+
+logger = logging.getLogger(__name__)
 
 
 class DatetimeErrorTreatmentEnum(Enum):
@@ -39,13 +39,13 @@ class EmptySchemaTypeError(Exception):
         super().__init__(msg, *args)
 
 
-def to_json_compatible(val: t.Any) -> t.Any:
+def to_json_compatible(val: t.Any) -> t.Any:  # noqa: ANN401
     """Return as string if datetime. JSON does not support proper datetime types.
 
     If given a naive datetime object, pendulum automatically makes it utc
     """
     if isinstance(val, (datetime.datetime, pendulum.DateTime)):
-        return pendulum.instance(val).isoformat()
+        return pendulum.instance(val).isoformat("T")
     return val
 
 
@@ -67,18 +67,19 @@ def append_type(type_dict: dict, new_type: str) -> dict:
             result["type"] = [*type_array, new_type]
         return result
 
-    msg = (
+    logger.warning(
         "Could not append type because the JSON schema for the dictionary "
-        f"`{type_dict}` appears to be invalid."
+        "`%s` appears to be invalid.",
+        type_dict,
     )
-    raise ValueError(msg)
+    return result
 
 
 def is_secret_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition appears to be a secret.
 
     Will return true if either `writeOnly` or `secret` are true on this type
-    or any of the type's subproperties.
+    or any of the type's sub-properties.
 
     Args:
         type_dict: The JSON Schema type to check.
@@ -95,7 +96,7 @@ def is_secret_type(type_dict: dict) -> bool:
         return True
 
     if "properties" in type_dict:
-        # Recursively check subproperties and return True if any child is secret.
+        # Recursively check sub-properties and return True if any child is secret.
         return any(
             is_secret_type(child_type_dict)
             for child_type_dict in type_dict["properties"].values()
@@ -184,7 +185,7 @@ def get_datelike_property_type(property_schema: dict) -> str | None:
     return None
 
 
-def _is_string_with_format(type_dict):
+def _is_string_with_format(type_dict: dict[str, t.Any]) -> bool | None:
     if "string" in type_dict.get("type", []) and type_dict.get("format") in {
         "date-time",
         "time",
@@ -195,14 +196,14 @@ def _is_string_with_format(type_dict):
 
 
 def handle_invalid_timestamp_in_record(
-    record,  # noqa: ARG001
+    record: dict[str, t.Any],  # noqa: ARG001
     key_breadcrumb: list[str],
     invalid_value: str,
     datelike_typename: str,
     ex: Exception,
     treatment: DatetimeErrorTreatmentEnum | None,
     logger: logging.Logger,
-) -> t.Any:
+) -> t.Any:  # noqa: ANN401
     """Apply treatment or raise an error for invalid time values."""
     treatment = treatment or DatetimeErrorTreatmentEnum.ERROR
     msg = (
@@ -325,12 +326,12 @@ def is_number_type(property_schema: dict) -> bool | None:
     return False
 
 
-@lru_cache()
+@lru_cache
 def _warn_unmapped_properties(
     stream_name: str,
     property_names: tuple[str],
     logger: logging.Logger,
-):
+) -> None:
     logger.warning(
         "Properties %s were present in the '%s' stream but "
         "not found in catalog schema. Ignoring.",
@@ -387,6 +388,7 @@ def conform_record_data_types(
     return rec
 
 
+# TODO: This is in dire need of refactoring. It's a mess.
 def _conform_record_data_types(  # noqa: PLR0912
     input_object: dict[str, t.Any],
     schema: dict,
@@ -404,7 +406,7 @@ def _conform_record_data_types(  # noqa: PLR0912
         input_object: A single record
         schema: JSON schema the given input_object is expected to meet
         level:  Specifies how recursive the conformance process should be
-        parent: '.' seperated path to this element from the object root (for logging)
+        parent: '.' separated path to this element from the object root (for logging)
     """
     output_object: dict[str, t.Any] = {}
     unmapped_properties: list[str] = []
@@ -468,9 +470,9 @@ def _conform_record_data_types(  # noqa: PLR0912
 
 
 def _conform_primitive_property(  # noqa: PLR0911
-    elem: t.Any,
+    elem: t.Any,  # noqa: ANN401
     property_schema: dict,
-) -> t.Any:
+) -> t.Any:  # noqa: ANN401
     """Converts a primitive (i.e. not object or array) to a json compatible type."""
     if isinstance(elem, (datetime.datetime, pendulum.DateTime)):
         return to_json_compatible(elem)

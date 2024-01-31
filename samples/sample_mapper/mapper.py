@@ -93,14 +93,12 @@ class StreamTransform(InlineMapper):
             if isinstance(stream_map, RemoveRecordTransform):
                 # Don't emit schema if the stream's records are all ignored.
                 continue
-
-            schema_message = singer.SchemaMessage(
+            yield singer.SchemaMessage(
                 stream_map.stream_alias,
                 stream_map.transformed_schema,
                 stream_map.transformed_key_properties,
                 message_dict.get("bookmark_keys", []),
             )
-            yield schema_message
 
     def map_record_message(
         self,

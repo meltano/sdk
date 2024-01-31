@@ -1,17 +1,32 @@
 from __future__ import annotations
 
 import decimal
+import importlib.util
 import re
 from dataclasses import asdict
 
 import pytest
 
-from singer_sdk.batch import JSONLinesBatcher
+from singer_sdk.batch import Batcher
+from singer_sdk.contrib.batch_encoder_jsonl import JSONLinesBatcher
+from singer_sdk.contrib.batch_encoder_parquet import ParquetBatcher
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
     JSONLinesEncoding,
+    ParquetEncoding,
     StorageTarget,
+)
+
+
+def is_pyarrow_installed():
+    module_spec = importlib.util.find_spec("pyarrow")
+    return module_spec is not None
+
+
+skip_if_no_pyarrow = pytest.mark.skipif(
+    not is_pyarrow_installed(),
+    reason="requires pyarrow",
 )
 
 
@@ -20,21 +35,46 @@ from singer_sdk.helpers._batch import (
     [
         (JSONLinesEncoding("gzip"), {"compression": "gzip", "format": "jsonl"}),
         (JSONLinesEncoding(), {"compression": None, "format": "jsonl"}),
+        (ParquetEncoding("gzip"), {"compression": "gzip", "format": "parquet"}),
+        (ParquetEncoding(), {"compression": None, "format": "parquet"}),
     ],
-    ids=["jsonl-compression-gzip", "jsonl-compression-none"],
+    ids=[
+        "jsonl-compression-gzip",
+        "jsonl-compression-none",
+        "parquet-compression-gzip",
+        "parquet-compression-none",
+    ],
 )
 def test_encoding_as_dict(encoding: BaseBatchFileEncoding, expected: dict) -> None:
     """Test encoding as dict."""
     assert asdict(encoding) == expected
 
 
-def test_storage_get_url():
-    storage = StorageTarget("file://root_dir")
+@pytest.mark.parametrize(
+    "file_scheme,root,prefix,expected",
+    [
+        (
+            "file://",
+            "root_dir",
+            "prefix--file.jsonl.gz",
+            "root_dir/prefix--file.jsonl.gz",
+        ),
+        (
+            "file://",
+            "root_dir",
+            "prefix--file.parquet.gz",
+            "root_dir/prefix--file.parquet.gz",
+        ),
+    ],
+    ids=["jsonl-url", "parquet-url"],
+)
+def test_storage_get_url(file_scheme, root, prefix, expected):
+    storage = StorageTarget(file_scheme + root)
 
     with storage.fs(create=True) as fs:
-        url = fs.geturl("prefix--file.jsonl.gz")
-        assert url.startswith("file://")
-        assert url.replace("\\", "/").endswith("root_dir/prefix--file.jsonl.gz")
+        url = fs.geturl(prefix)
+        assert url.startswith(file_scheme)
+        assert url.replace("\\", "/").endswith(expected)
 
 
 def test_storage_get_s3_url():
@@ -67,6 +107,11 @@ def test_storage_from_url(file_url: str, root: str):
     head, _ = StorageTarget.split_url(file_url)
     target = StorageTarget.from_url(head)
     assert target.root == root
+
+
+def test_get_unsupported_batcher():
+    with pytest.raises(ValueError, match="Unsupported batcher"):
+        Batcher.get_batcher("unsupported")
 
 
 @pytest.mark.parametrize(
@@ -122,6 +167,86 @@ def test_json_lines_batcher():
     assert all(len(batch) == 1 for batch in batches)
     assert all(
         re.match(r".*tap-test--stream-test-.*\.json.gz", filepath)
+        for batch in batches
+        for filepath in batch
+    )
+
+
+def test_batcher_with_jsonl_encoding():
+    batcher = Batcher(
+        "tap-test",
+        "stream-test",
+        batch_config=BatchConfig(
+            encoding=JSONLinesEncoding("gzip"),
+            storage=StorageTarget("file:///tmp/sdk-batches"),
+            batch_size=2,
+        ),
+    )
+    records = [
+        {"id": 1, "numeric": decimal.Decimal("1.0")},
+        {"id": 2, "numeric": decimal.Decimal("2.0")},
+        {"id": 3, "numeric": decimal.Decimal("3.0")},
+    ]
+
+    batches = list(batcher.get_batches(records))
+    assert len(batches) == 2
+    assert all(len(batch) == 1 for batch in batches)
+    assert all(
+        re.match(r".*tap-test--stream-test-.*\.json.gz", filepath)
+        for batch in batches
+        for filepath in batch
+    )
+
+
+@skip_if_no_pyarrow
+def test_parquet_batcher():
+    batcher = ParquetBatcher(
+        "tap-test",
+        "stream-test",
+        batch_config=BatchConfig(
+            encoding=ParquetEncoding("gzip"),
+            storage=StorageTarget("file:///tmp/sdk-batches"),
+            batch_size=2,
+        ),
+    )
+    records = [
+        {"id": 1, "numeric": decimal.Decimal("1.0")},
+        {"id": 2, "numeric": decimal.Decimal("2.0")},
+        {"id": 3, "numeric": decimal.Decimal("3.0")},
+    ]
+
+    batches = list(batcher.get_batches(records))
+    assert len(batches) == 2
+    assert all(len(batch) == 1 for batch in batches)
+    assert all(
+        re.match(r".*tap-test--stream-test-.*\.parquet.gz", filepath)
+        for batch in batches
+        for filepath in batch
+    )
+
+
+@skip_if_no_pyarrow
+def test_batcher_with_parquet_encoding():
+    batcher = Batcher(
+        "tap-test",
+        "stream-test",
+        batch_config=BatchConfig(
+            encoding=ParquetEncoding("gzip"),
+            storage=StorageTarget("file:///tmp/sdk-batches"),
+            batch_size=2,
+        ),
+    )
+    records = [
+        {"id": 1, "numeric": decimal.Decimal("1.0")},
+        {"id": 2, "numeric": decimal.Decimal("2.0")},
+        {"id": 3, "numeric": decimal.Decimal("3.0")},
+    ]
+
+    batches = list(batcher.get_batches(records))
+    assert len(batches) == 2
+    assert all(len(batch) == 1 for batch in batches)
+    assert all(
+        re.match(r".*tap-test--stream-test-.*\.parquet.gz", filepath)
         for batch in batches
         for filepath in batch
     )

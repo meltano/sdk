@@ -5,24 +5,34 @@ from __future__ import annotations
 import abc
 import copy
 import datetime
+import importlib.util
 import json
 import time
 import typing as t
+from functools import cached_property
 from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
 
-from dateutil import parser
-from jsonschema import Draft7Validator, FormatChecker
+import jsonschema
+from typing_extensions import override
 
-from singer_sdk.exceptions import MissingKeyPropertiesError
+from singer_sdk.exceptions import (
+    InvalidJSONSchema,
+    InvalidRecord,
+    MissingKeyPropertiesError,
+)
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
     BatchFileFormat,
     StorageTarget,
 )
-from singer_sdk.helpers._compat import final
+from singer_sdk.helpers._compat import (
+    date_fromisoformat,
+    datetime_fromisoformat,
+    time_fromisoformat,
+)
 from singer_sdk.helpers._typing import (
     DatetimeErrorTreatmentEnum,
     get_datelike_property_type,
@@ -34,7 +44,83 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.target_base import Target
 
-JSONSchemaValidator = Draft7Validator
+
+class BaseJSONSchemaValidator(abc.ABC):
+    """Abstract base class for JSONSchema validator."""
+
+    def __init__(self, schema: dict[str, t.Any]) -> None:
+        """Initialize the record validator.
+
+        Args:
+            schema: Schema of the stream to sink.
+        """
+        self.schema = schema
+
+    @abc.abstractmethod
+    def validate(self, record: dict[str, t.Any]) -> None:
+        """Validate a record message.
+
+        This method MUST raise an ``InvalidRecord`` exception if the record is invalid.
+
+        Args:
+            record: Record message to validate.
+        """
+
+
+class JSONSchemaValidator(BaseJSONSchemaValidator):
+    """Validate records using the ``fastjsonschema`` library."""
+
+    def __init__(
+        self,
+        schema: dict,
+        *,
+        validate_formats: bool = False,
+        format_checker: jsonschema.FormatChecker | None = None,
+    ):
+        """Initialize the validator.
+
+        Args:
+            schema: Schema of the stream to sink.
+            validate_formats: Whether JSON string formats (e.g. ``date-time``) should
+                be validated.
+            format_checker: User-defined format checker.
+
+        Raises:
+            InvalidJSONSchema: If the schema provided from tap or mapper is invalid.
+        """
+        jsonschema_validator = jsonschema.Draft7Validator
+
+        super().__init__(schema)
+        if validate_formats:
+            format_checker = format_checker or jsonschema_validator.FORMAT_CHECKER
+        else:
+            format_checker = jsonschema.FormatChecker(formats=())
+
+        try:
+            jsonschema_validator.check_schema(schema)
+        except jsonschema.SchemaError as e:
+            error_message = f"Schema Validation Error: {e}"
+            raise InvalidJSONSchema(error_message) from e
+
+        self.validator = jsonschema_validator(
+            schema=schema,
+            format_checker=format_checker,
+        )
+
+    @override
+    def validate(self, record: dict):  # noqa: ANN201
+        """Validate a record message.
+
+        Args:
+            record: Record message to validate.
+
+        Raises:
+            InvalidRecord: If the record is invalid.
+        """
+        try:
+            self.validator.validate(record)
+        except jsonschema.ValidationError as e:
+            raise InvalidRecord(e.message, record) from e
 
 
 class Sink(metaclass=abc.ABCMeta):
@@ -46,12 +132,18 @@ class Sink(metaclass=abc.ABCMeta):
 
     MAX_SIZE_DEFAULT = 10000
 
+    validate_field_string_format = False
+    """Enable JSON schema format validation, for example `date-time` string fields."""
+
+    fail_on_record_validation_exception: bool = True
+    """Interrupt the target execution when a record fails schema validation."""
+
     def __init__(
         self,
         target: Target,
         stream_name: str,
         schema: dict,
-        key_properties: list[str] | None,
+        key_properties: t.Sequence[str] | None,
     ) -> None:
         """Initialize target sink.
 
@@ -61,7 +153,7 @@ class Sink(metaclass=abc.ABCMeta):
             schema: Schema of the stream to sink.
             key_properties: Primary key of the stream to sink.
         """
-        self.logger = target.logger
+        self.logger = target.logger.getChild(stream_name)
         self.sync_started_at = target.initialized_at
         self._config = dict(target.config)
         self._pending_batch: dict | None = None
@@ -90,7 +182,32 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
-        self._validator = Draft7Validator(schema, format_checker=FormatChecker())
+        self._validator: BaseJSONSchemaValidator | None = self.get_validator()
+
+    @cached_property
+    def validate_schema(self) -> bool:
+        """Enable JSON schema record validation.
+
+        Returns:
+            True if JSON schema validation is enabled.
+        """
+        return self.config.get("validate_records", True)
+
+    def get_validator(self) -> BaseJSONSchemaValidator | None:
+        """Get a record validator for this sink.
+
+        Override this method to use a custom format validator, or disable record
+        validation by returning `None`.
+
+        Returns:
+            An instance of a subclass of ``BaseJSONSchemaValidator``.
+        """
+        if self.validate_schema:
+            return JSONSchemaValidator(
+                self.schema,
+                validate_formats=self.validate_field_string_format,
+            )
+        return None
 
     def _get_context(self, record: dict) -> dict:  # noqa: ARG002
         """Return an empty dictionary by default.
@@ -136,7 +253,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     # Tally methods
 
-    @final
+    @t.final
     def tally_record_read(self, count: int = 1) -> None:
         """Increment the records read tally.
 
@@ -148,7 +265,7 @@ class Sink(metaclass=abc.ABCMeta):
         self._total_records_read += count
         self._batch_records_read += count
 
-    @final
+    @t.final
     def tally_record_written(self, count: int = 1) -> None:
         """Increment the records written tally.
 
@@ -161,7 +278,7 @@ class Sink(metaclass=abc.ABCMeta):
         """
         self._total_records_written += count
 
-    @final
+    @t.final
     def tally_duplicate_merged(self, count: int = 1) -> None:
         """Increment the records merged tally.
 
@@ -213,7 +330,7 @@ class Sink(metaclass=abc.ABCMeta):
         return DatetimeErrorTreatmentEnum.ERROR
 
     @property
-    def key_properties(self) -> list[str]:
+    def key_properties(self) -> t.Sequence[str]:
         """Return key properties.
 
         Override this method to return a list of key properties in a format that is
@@ -247,7 +364,7 @@ class Sink(metaclass=abc.ABCMeta):
             tz=datetime.timezone.utc,
         ).isoformat()
         record["_sdc_batched_at"] = (
-            context.get("batch_start_time", None)
+            context.get("batch_start_time")
             or datetime.datetime.now(tz=datetime.timezone.utc)
         ).isoformat()
         record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
@@ -320,8 +437,20 @@ class Sink(metaclass=abc.ABCMeta):
 
         Returns:
             TODO
+
+        Raises:
+            InvalidRecord: If the record is invalid.
         """
-        self._validator.validate(record)
+        if self._validator is not None:
+            # TODO: Check the performance impact of this try/except block. It runs
+            # on every record, so it's probably bad and should be moved up the stack.
+            try:
+                self._validator.validate(record)
+            except InvalidRecord as e:
+                if self.fail_on_record_validation_exception:
+                    raise
+                self.logger.exception("Record validation failed %s", e)
+
         self._parse_timestamps_in_record(
             record=record,
             schema=self.schema,
@@ -365,14 +494,22 @@ class Sink(metaclass=abc.ABCMeta):
             schema: TODO
             treatment: TODO
         """
-        for key in record:
+        for key, value in record.items():
+            if key not in schema["properties"]:
+                self.logger.warning("No schema for record field '%s'", key)
+                continue
             datelike_type = get_datelike_property_type(schema["properties"][key])
             if datelike_type:
-                date_val = record[key]
+                date_val = value
                 try:
-                    if record[key] is not None:
-                        date_val = parser.parse(date_val)
-                except parser.ParserError as ex:
+                    if value is not None:
+                        if datelike_type == "time":
+                            date_val = time_fromisoformat(date_val)
+                        elif datelike_type == "date":
+                            date_val = date_fromisoformat(date_val)
+                        else:
+                            date_val = datetime_fromisoformat(date_val)
+                except ValueError as ex:
                     date_val = handle_invalid_timestamp_in_record(
                         record,
                         [key],
@@ -525,15 +662,24 @@ class Sink(metaclass=abc.ABCMeta):
                     tail,
                     mode="rb",
                 ) as file:
-                    open_file = (
+                    context_file = (
                         gzip_open(file) if encoding.compression == "gzip" else file
                     )
-                    context = {
-                        "records": [
-                            json.loads(line)
-                            for line in open_file  # type: ignore[attr-defined]
-                        ],
-                    }
+                    context = {"records": [json.loads(line) for line in context_file]}  # type: ignore[attr-defined]
+                    self.process_batch(context)
+            elif (
+                importlib.util.find_spec("pyarrow")
+                and encoding.format == BatchFileFormat.PARQUET
+            ):
+                import pyarrow.parquet as pq
+
+                with storage.fs(create=False) as batch_fs, batch_fs.open(
+                    tail,
+                    mode="rb",
+                ) as file:
+                    context_file = file
+                    table = pq.read_table(context_file)
+                    context = {"records": table.to_pylist()}
                     self.process_batch(context)
             else:
                 msg = f"Unsupported batch encoding format: {encoding.format}"

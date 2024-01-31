@@ -26,3 +26,12 @@ class MyStream(Stream):
         super().__init__(tap)
         self.conn...
 ```
+
+## I'm seeing `Note: Progress is not resumable if interrupted.` in my state files
+
+If the stream attribute [`is_sorted`](singer_sdk.Stream.is_sorted) (default: `False`) is not set to `True`, the records are assumed not to be monotonically increasing, i.e. there's no guarantee that newer records always come later and the tap has to run to completion so the state can safely reflect the largest replication value seen. If you know that the records are monotonically increasing, you can set `is_sorted` to `True` and the sync will be resumable if it's interrupted at any point and the state file will reflect this.
+
+```python
+class MyStream(Stream):
+    is_sorted = True
+```

@@ -1,0 +1,16 @@
+{
+    "cookiecutter": {
+      "name": "MyMapperName",
+      "admin_name": "Automatic Tester",
+      "admin_email": "auto.tester@example.com",
+      "mapper_id": "mapper-base",
+      "library_name": "mapper_base",
+      "variant": "None (Skip)",
+      "faker_extra": false,
+      "include_ci_files": "None (Skip)",
+      "license": "Apache-2.0",
+      "ide": "VSCode",
+      "_template": "../mapper-template/",
+      "_output_dir": "."
+    }
+}

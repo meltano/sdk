@@ -5,7 +5,11 @@ from __future__ import annotations
 import typing as t
 from dataclasses import dataclass
 
-from jsonschema import RefResolver
+from referencing import Registry
+from referencing.jsonschema import DRAFT202012
+
+if t.TYPE_CHECKING:
+    from referencing._core import Resolver
 
 # These are keys defined in the JSON Schema spec that do not themselves contain
 # schemas (or lists of schemas)
@@ -21,6 +25,7 @@ STANDARD_KEYS = [
     "minLength",
     "format",
     "type",
+    "default",
     "required",
     "enum",
     "pattern",
@@ -46,7 +51,8 @@ class Schema:
     This is because we wanted to expand it with extra STANDARD_KEYS.
     """
 
-    type: str | list[str] | None = None  # noqa: A003
+    type: str | list[str] | None = None
+    default: t.Any | None = None
     properties: dict | None = None
     items: t.Any | None = None
     description: str | None = None
@@ -58,7 +64,7 @@ class Schema:
     maxLength: int | None = None  # noqa: N815
     minLength: int | None = None  # noqa: N815
     anyOf: t.Any | None = None  # noqa: N815
-    format: str | None = None  # noqa: A003
+    format: str | None = None
     additionalProperties: t.Any | None = None  # noqa: N815
     patternProperties: t.Any | None = None  # noqa: N815
     required: list[str] | None = None
@@ -146,17 +152,25 @@ def resolve_schema_references(
         A schema dict with all $refs replaced with the appropriate dict.
     """
     refs = refs or {}
-    return _resolve_schema_references(schema, RefResolver("", schema, store=refs))
+    registry: Registry = Registry()
+    schema_resource = DRAFT202012.create_resource(schema)
+    registry = registry.with_resource("", schema_resource)
+    registry = registry.with_resources(
+        [(k, DRAFT202012.create_resource(v)) for k, v in refs.items()]
+    )
+
+    resolver = registry.resolver()
+    return _resolve_schema_references(schema, resolver)
 
 
 def _resolve_schema_references(
     schema: dict[str, t.Any],
-    resolver: RefResolver,
+    resolver: Resolver,
 ) -> dict[str, t.Any]:
     if _SchemaKey.ref in schema:
         reference_path = schema.pop(_SchemaKey.ref, None)
-        resolved = resolver.resolve(reference_path)[1]
-        schema.update(resolved)
+        resolved = resolver.lookup(reference_path)
+        schema.update(resolved.contents)
         return _resolve_schema_references(schema, resolver)
 
     if _SchemaKey.properties in schema:

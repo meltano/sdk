@@ -15,10 +15,11 @@ import pendulum
 
 import singer_sdk._singerlib as singer
 from singer_sdk import metrics
-from singer_sdk.batch import JSONLinesBatcher
+from singer_sdk.batch import Batcher
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
     AbortedSyncPausedException,
+    InvalidReplicationKeyException,
     InvalidStreamSortException,
     MaxRecordsLimitException,
 )
@@ -28,7 +29,6 @@ from singer_sdk.helpers._batch import (
     SDKBatchMessage,
 )
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
-from singer_sdk.helpers._compat import final
 from singer_sdk.helpers._flattening import get_flattening_options
 from singer_sdk.helpers._state import (
     finalize_state_progress_markers,
@@ -53,6 +53,7 @@ from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, Stream
 if t.TYPE_CHECKING:
     import logging
 
+    from singer_sdk.helpers._compat import Traversable
     from singer_sdk.tap_base import Tap
 
 # Replication methods
@@ -123,7 +124,7 @@ class Stream(metaclass=abc.ABCMeta):
             msg = "Missing argument or class variable 'name'."
             raise ValueError(msg)
 
-        self.logger: logging.Logger = tap.logger
+        self.logger: logging.Logger = tap.logger.getChild(self.name)
         self.metrics_logger = tap.metrics_logger
         self.tap_name: str = tap.name
         self._config: dict = dict(tap.config)
@@ -133,9 +134,9 @@ class Stream(metaclass=abc.ABCMeta):
         self._stream_maps: list[StreamMap] | None = None
         self.forced_replication_method: str | None = None
         self._replication_key: str | None = None
-        self._primary_keys: list[str] | None = None
+        self._primary_keys: t.Sequence[str] | None = None
         self._state_partitioning_keys: list[str] | None = None
-        self._schema_filepath: Path | None = None
+        self._schema_filepath: Path | Traversable | None = None
         self._metadata: singer.MetadataMapping | None = None
         self._mask: singer.SelectionMask | None = None
         self._schema: dict
@@ -159,7 +160,7 @@ class Stream(metaclass=abc.ABCMeta):
                 raise ValueError(msg)
 
         if self.schema_filepath:
-            self._schema = json.loads(Path(self.schema_filepath).read_text())
+            self._schema = json.loads(self.schema_filepath.read_text())
 
         if not self.schema:
             msg = (
@@ -211,10 +212,17 @@ class Stream(metaclass=abc.ABCMeta):
 
         Returns:
             True if the stream uses a timestamp-based replication key.
+
+        Raises:
+            InvalidReplicationKeyException: If the schema does not contain the
+                replication key.
         """
         if not self.replication_key:
             return False
         type_dict = self.schema.get("properties", {}).get(self.replication_key)
+        if type_dict is None:
+            msg = f"Field '{self.replication_key}' is not in schema for stream '{self.name}'"  # noqa: E501
+            raise InvalidReplicationKeyException(msg)
         return is_datetime_type(type_dict)
 
     def get_starting_replication_key_value(
@@ -238,7 +246,11 @@ class Stream(metaclass=abc.ABCMeta):
         """
         state = self.get_context_state(context)
 
-        return get_starting_replication_value(state)
+        return (
+            get_starting_replication_value(state)
+            if self.replication_method != REPLICATION_FULL_TABLE
+            else None
+        )
 
     def get_starting_timestamp(self, context: dict | None) -> datetime.datetime | None:
         """Get starting replication timestamp.
@@ -290,7 +302,7 @@ class Stream(metaclass=abc.ABCMeta):
         self.metadata.root.selected = value
         self._mask = self.metadata.resolve_selection()
 
-    @final
+    @t.final
     @property
     def has_selected_descendents(self) -> bool:
         """Check descendents.
@@ -303,7 +315,7 @@ class Stream(metaclass=abc.ABCMeta):
             for child in self.child_streams or []
         )
 
-    @final
+    @t.final
     @property
     def descendent_streams(self) -> list[Stream]:
         """Get child streams.
@@ -311,7 +323,7 @@ class Stream(metaclass=abc.ABCMeta):
         Returns:
             A list of all children, recursively.
         """
-        result: list[Stream] = list(self.child_streams) or []
+        result: list[Stream] = [*self.child_streams]
         for child in self.child_streams:
             result += child.descendent_streams or []
         return result
@@ -409,7 +421,7 @@ class Stream(metaclass=abc.ABCMeta):
         return utc_now() if self.is_timestamp_replication_key else None
 
     @property
-    def schema_filepath(self) -> Path | None:
+    def schema_filepath(self) -> Path | Traversable | None:
         """Get path to schema file.
 
         Returns:
@@ -427,7 +439,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._schema
 
     @property
-    def primary_keys(self) -> list[str] | None:
+    def primary_keys(self) -> t.Sequence[str] | None:
         """Get primary keys.
 
         Returns:
@@ -436,7 +448,7 @@ class Stream(metaclass=abc.ABCMeta):
         return self._primary_keys or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: list[str] | None) -> None:
+    def primary_keys(self, new_value: t.Sequence[str] | None) -> None:
         """Set primary key(s) for the stream.
 
         Args:
@@ -761,7 +773,7 @@ class Stream(metaclass=abc.ABCMeta):
         if (not self._is_state_flushed) and (
             self.tap_state != self._last_emitted_state
         ):
-            singer.write_message(singer.StateMessage(value=self.tap_state))
+            self._tap.write_message(singer.StateMessage(value=self.tap_state))
             self._last_emitted_state = copy.deepcopy(self.tap_state)
             self._is_state_flushed = True
 
@@ -789,7 +801,7 @@ class Stream(metaclass=abc.ABCMeta):
     def _write_schema_message(self) -> None:
         """Write out a SCHEMA message with the stream schema."""
         for schema_message in self._generate_schema_messages():
-            singer.write_message(schema_message)
+            self._tap.write_message(schema_message)
 
     @property
     def mask(self) -> singer.SelectionMask:
@@ -815,7 +827,7 @@ class Stream(metaclass=abc.ABCMeta):
         Yields:
             Record message objects.
         """
-        pop_deselected_record_properties(record, self.schema, self.mask, self.logger)
+        pop_deselected_record_properties(record, self.schema, self.mask)
         record = conform_record_data_types(
             stream_name=self.name,
             record=record,
@@ -841,7 +853,7 @@ class Stream(metaclass=abc.ABCMeta):
             record: A single stream record.
         """
         for record_message in self._generate_record_messages(record):
-            singer.write_message(record_message)
+            self._tap.write_message(record_message)
 
         self._is_state_flushed = False
 
@@ -856,7 +868,7 @@ class Stream(metaclass=abc.ABCMeta):
             encoding: The encoding to use for the batch.
             manifest: A list of filenames for the batch.
         """
-        singer.write_message(
+        self._tap.write_message(
             SDKBatchMessage(
                 stream=self.name,
                 encoding=encoding,
@@ -1013,17 +1025,18 @@ class Stream(metaclass=abc.ABCMeta):
             partition_context: The partition context.
         """
         partition_context = partition_context or {}
-        child_context = copy.copy(
-            self.get_child_context(record=record, context=child_context),
-        )
         for key, val in partition_context.items():
             # Add state context to records if not already present
             if key not in record:
                 record[key] = val
 
-        # Sync children, except when primary mapper filters out the record
-        if self.stream_maps[0].get_filter_result(record):
-            self._sync_children(child_context)
+        for context in self.generate_child_contexts(
+            record=record,
+            context=child_context,
+        ):
+            # Sync children, except when primary mapper filters out the record
+            if self.stream_maps[0].get_filter_result(record):
+                self._sync_children(copy.copy(context))
 
     def _sync_records(  # noqa: C901
         self,
@@ -1144,7 +1157,7 @@ class Stream(metaclass=abc.ABCMeta):
 
     # Public methods ("final", not recommended to be overridden)
 
-    @final
+    @t.final
     def sync(self, context: dict | None = None) -> None:
         """Sync this stream.
 
@@ -1276,6 +1289,22 @@ class Stream(metaclass=abc.ABCMeta):
 
         return context or record
 
+    def generate_child_contexts(
+        self,
+        record: dict,
+        context: dict | None,
+    ) -> t.Iterable[dict | None]:
+        """Generate child contexts.
+
+        Args:
+            record: Individual record in the stream.
+            context: Stream partition or context dictionary.
+
+        Yields:
+            A child context for each child stream.
+        """
+        yield self.get_child_context(record=record, context=context)
+
     # Abstract Methods
 
     @abc.abstractmethod
@@ -1341,7 +1370,7 @@ class Stream(metaclass=abc.ABCMeta):
         Yields:
             A tuple of (encoding, manifest) for each batch.
         """
-        batcher = JSONLinesBatcher(
+        batcher = Batcher(
             tap_name=self.tap_name,
             stream_name=self.name,
             batch_config=batch_config,

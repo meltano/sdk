@@ -1,14 +1,16 @@
 from __future__ import annotations
 
+import datetime
 import io
 from contextlib import redirect_stdout
-from datetime import datetime
 
 import pytest
-from pytz import UTC, timezone
+from pytz import timezone
 
 import singer_sdk._singerlib as singer
-from singer_sdk._singerlib.messages import format_message
+from singer_sdk.io_base import SingerWriter
+
+UTC = datetime.timezone.utc
 
 
 def test_exclude_null_dict():
@@ -17,25 +19,27 @@ def test_exclude_null_dict():
 
 
 def test_format_message():
+    singerwriter = SingerWriter()
     message = singer.RecordMessage(
         stream="test",
         record={"id": 1, "name": "test"},
     )
-    assert format_message(message) == (
-        '{"type": "RECORD", "stream": "test", "record": {"id": 1, "name": "test"}}'
+    assert singerwriter.format_message(message) == (
+        '{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}'
     )
 
 
 def test_write_message():
+    singerwriter = SingerWriter()
     message = singer.RecordMessage(
         stream="test",
         record={"id": 1, "name": "test"},
     )
     with redirect_stdout(io.StringIO()) as out:
-        singer.write_message(message)
+        singerwriter.write_message(message)
 
     assert out.getvalue() == (
-        '{"type": "RECORD", "stream": "test", "record": {"id": 1, "name": "test"}}\n'
+        '{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}\n'
     )
 
 
@@ -55,19 +59,33 @@ def test_record_message():
     assert singer.RecordMessage.from_dict(record.to_dict()) == record
 
 
+def test_record_message_parse_time_extracted():
+    message_dic = {
+        "type": "RECORD",
+        "stream": "test",
+        "record": {"id": 1, "name": "test"},
+        "time_extracted": "2021-01-01T00:00:00Z",
+    }
+    record = singer.RecordMessage.from_dict(message_dic)
+    assert record.type == "RECORD"
+    assert record.stream == "test"
+    assert record.record == {"id": 1, "name": "test"}
+    assert record.time_extracted == datetime.datetime(2021, 1, 1, 0, 0, 0, tzinfo=UTC)
+
+
 def test_record_message_naive_time_extracted():
     """Check that record message' time_extracted must be timezone-aware."""
     with pytest.raises(ValueError, match="must be either None or an aware datetime"):
         singer.RecordMessage(
             stream="test",
             record={"id": 1, "name": "test"},
-            time_extracted=datetime(2021, 1, 1),  # noqa: DTZ001
+            time_extracted=datetime.datetime(2021, 1, 1),  # noqa: DTZ001
         )
 
 
 def test_record_message_time_extracted_to_utc():
     """Check that record message's time_extracted is converted to UTC."""
-    naive = datetime(2021, 1, 1, 12)  # noqa: DTZ001
+    naive = datetime.datetime(2021, 1, 1, 12)  # noqa: DTZ001
     nairobi = timezone("Africa/Nairobi")
 
     record = singer.RecordMessage(
@@ -75,7 +93,7 @@ def test_record_message_time_extracted_to_utc():
         record={"id": 1, "name": "test"},
         time_extracted=nairobi.localize(naive),
     )
-    assert record.time_extracted == datetime(2021, 1, 1, 9, tzinfo=UTC)
+    assert record.time_extracted == datetime.datetime(2021, 1, 1, 9, tzinfo=UTC)
 
 
 def test_schema_message():

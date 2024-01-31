@@ -8,12 +8,12 @@ import os
 import sys
 import time
 import typing as t
+from importlib import metadata
 from pathlib import Path, PurePath
 from types import MappingProxyType
 
 import click
 from jsonschema import Draft7Validator
-from packaging.specifiers import SpecifierSet
 
 from singer_sdk import about, metrics
 from singer_sdk.cli import plugin_cli
@@ -23,7 +23,6 @@ from singer_sdk.configuration._dict_config import (
 )
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._compat import metadata
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -36,30 +35,6 @@ from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import extend_validator_with_defaults
 
 SDK_PACKAGE_NAME = "singer_sdk"
-CHECK_SUPPORTED_PYTHON_VERSIONS = (
-    # unsupported versions
-    "2.7",
-    "3.0",
-    "3.1",
-    "3.2",
-    "3.3",
-    "3.4",
-    "3.5",
-    "3.6",
-    "3.7",
-    # current supported versions
-    "3.8",
-    "3.9",
-    "3.10",
-    "3.11",
-    # future supported versions
-    "3.12",
-    "3.13",
-    "3.14",
-    "3.15",
-    "3.16",
-)
-
 
 JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
 
@@ -70,6 +45,43 @@ class MapperNotInitialized(Exception):
     def __init__(self) -> None:
         """Initialize the exception."""
         super().__init__("Mapper not initialized. Please call setup_mapper() first.")
+
+
+class SingerCommand(click.Command):
+    """Custom click command class for Singer packages."""
+
+    def __init__(
+        self,
+        *args: t.Any,
+        logger: logging.Logger,
+        **kwargs: t.Any,
+    ) -> None:
+        """Initialize the command.
+
+        Args:
+            *args: Positional `click.Command` arguments.
+            logger: A logger instance.
+            **kwargs: Keyword `click.Command` arguments.
+        """
+        super().__init__(*args, **kwargs)
+        self.logger = logger
+
+    def invoke(self, ctx: click.Context) -> t.Any:  # noqa: ANN401
+        """Invoke the command, capturing warnings and logging them.
+
+        Args:
+            ctx: The `click` context.
+
+        Returns:
+            The result of the command invocation.
+        """
+        logging.captureWarnings(capture=True)
+        try:
+            return super().invoke(ctx)
+        except ConfigValidationError as exc:
+            for error in exc.errors:
+                self.logger.error("Config validation error: %s", error)
+            sys.exit(1)
 
 
 class PluginBase(metaclass=abc.ABCMeta):
@@ -101,7 +113,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         logger = logging.getLogger(cls.name)
 
-        if log_level is not None and log_level.upper() in logging._levelToName.values():
+        if log_level is not None and log_level.upper() in logging._levelToName.values():  # noqa: SLF001
             logger.setLevel(log_level.upper())
 
         return logger
@@ -150,11 +162,11 @@ class PluginBase(metaclass=abc.ABCMeta):
             if self._is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
+        metrics._setup_logging(self.config)  # noqa: SLF001
+        self.metrics_logger = metrics.get_metrics_logger()
+
         self._validate_config(raise_errors=validate_config)
         self._mapper: PluginMapper | None = None
-
-        metrics._setup_logging(self.config)
-        self.metrics_logger = metrics.get_metrics_logger()
 
         # Initialization timestamp
         self.__initialized_at = int(time.time() * 1000)
@@ -263,12 +275,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         except metadata.PackageNotFoundError:
             return None
 
-        reported_python_versions = SpecifierSet(package_metadata["Requires-Python"])
-        return [
-            version
-            for version in CHECK_SUPPORTED_PYTHON_VERSIONS
-            if version in reported_python_versions
-        ]
+        return list(about.get_supported_pythons(package_metadata["Requires-Python"]))
 
     @classmethod
     def get_plugin_version(cls) -> str:
@@ -351,27 +358,19 @@ class PluginBase(metaclass=abc.ABCMeta):
         """
         return is_common_secret_key(config_key)
 
-    def _validate_config(
-        self,
-        *,
-        raise_errors: bool = True,
-        warnings_as_errors: bool = False,
-    ) -> tuple[list[str], list[str]]:
+    def _validate_config(self, *, raise_errors: bool = True) -> list[str]:
         """Validate configuration input against the plugin configuration JSON schema.
 
         Args:
             raise_errors: Flag to throw an exception if any validation errors are found.
-            warnings_as_errors: Flag to throw an exception if any warnings were emitted.
 
         Returns:
-            A tuple of configuration validation warnings and errors.
+            A list of validation errors.
 
         Raises:
             ConfigValidationError: If raise_errors is True and validation fails.
         """
-        warnings: list[str] = []
         errors: list[str] = []
-        log_fn = self.logger.info
         config_jsonschema = self.config_jsonschema
 
         if config_jsonschema:
@@ -389,19 +388,11 @@ class PluginBase(metaclass=abc.ABCMeta):
                 f"JSONSchema was: {config_jsonschema}"
             )
             if raise_errors:
-                raise ConfigValidationError(summary)
+                raise ConfigValidationError(summary, errors=errors)
 
-            log_fn = self.logger.warning
-        else:
-            summary = f"Config validation passed with {len(warnings)} warnings."
-            for warning in warnings:
-                summary += f"\n{warning}"
+            self.logger.warning(summary)
 
-        if warnings_as_errors and raise_errors and warnings:
-            msg = f"One or more warnings ocurred during validation: {warnings}"
-            raise ConfigValidationError(msg)
-        log_fn(summary)
-        return warnings, errors
+        return errors
 
     @classmethod
     def print_version(
@@ -412,9 +403,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         Args:
             print_fn: A function to use to display the plugin version.
-                Defaults to `print`_.
-
-        .. _print: https://docs.python.org/3/library/functions.html#print
+                Defaults to :py:func:`print`.
         """
         print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version}")
 
@@ -555,7 +544,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         Returns:
             A callable CLI object.
         """
-        return click.Command(
+        return SingerCommand(
             name=cls.name,
             callback=cls.invoke,
             context_settings={"help_option_names": ["--help"]},
@@ -596,6 +585,7 @@ class PluginBase(metaclass=abc.ABCMeta):
                     is_eager=True,
                 ),
             ],
+            logger=cls.logger,
         )
 
     @plugin_cli

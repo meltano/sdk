@@ -2,8 +2,6 @@ name: Bug Report
 description: File a bug report
 title: "bug: <title>"
 labels: ["kind/Bug", "valuestream/SDK"]
-assignees:
-  - meltano/engineering
 
 body:
   - type: markdown
@@ -15,7 +13,7 @@ body:
     attributes:
       label: Singer SDK Version
       description: Version of the library you are using
-      placeholder: "0.30.0"
+      placeholder: "0.34.1"
     validations:
       required: true
   - type: checkboxes
@@ -31,11 +29,13 @@ body:
       label: Python Version
       description: Version of Python you are using
       options:
-        - "3.6 (deprecated)"
-        - "3.7"
+        - "3.6 (EOL)"
+        - "3.7 (EOL)"
         - "3.8"
         - "3.9"
         - "3.10"
+        - "3.11"
+        - "3.12"
         - "NA"
     validations:
       required: true
@@ -75,6 +75,6 @@ body:
     attributes:
       label: Code
       description: Paste the failing code and/or traceback, if applicable
-      render: python
+      render: Python
     validations:
       required: false

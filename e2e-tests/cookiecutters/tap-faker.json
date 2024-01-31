@@ -1,0 +1,18 @@
+{
+    "cookiecutter": {
+      "source_name": "AutomaticTestTap",
+      "admin_name": "Automatic Tester",
+      "admin_email": "auto.tester@example.com",
+      "tap_id": "tap-faker",
+      "library_name": "tap_faker",
+      "variant": "None (Skip)",
+      "stream_type": "REST",
+      "auth_method": "Bearer Token",
+      "include_ci_files": "None (Skip)",
+      "faker_extra": true,
+      "license": "Apache-2.0",
+      "ide": "VSCode",
+      "_template": "../tap-template/",
+      "_output_dir": "."
+    }
+}
