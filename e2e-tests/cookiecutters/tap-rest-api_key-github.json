@@ -9,6 +9,7 @@
       "stream_type": "REST",
       "auth_method": "API Key",
       "include_ci_files": "GitHub",
+      "faker_extra": true,
       "license": "Apache-2.0",
       "ide": "VSCode",
       "_template": "../tap-template/",
