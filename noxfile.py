@@ -65,7 +65,7 @@ def _clean_py312_deps(session: Session, dependencies: list[str]) -> None:
 def mypy(session: Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
-    session.install(".[s3,testing,parquet]")
+    session.install(".[faker,parquet,s3,testing]")
     session.install(
         "exceptiongroup",
         "mypy",
@@ -87,7 +87,7 @@ def mypy(session: Session) -> None:
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
     _clean_py312_deps(session, test_dependencies)
-    session.install(".[s3,parquet]")
+    session.install(".[faker,parquet,s3]")
     session.install(*test_dependencies)
 
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
@@ -144,7 +144,7 @@ def update_snapshots(session: Session) -> None:
     args = session.posargs or ["-m", "snapshot"]
 
     _clean_py312_deps(session, test_dependencies)
-    session.install(".")
+    session.install(".[faker]")
     session.install(*test_dependencies)
     session.run("pytest", "--snapshot-update", *args)
 

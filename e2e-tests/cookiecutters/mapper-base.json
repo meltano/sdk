@@ -6,6 +6,7 @@
       "mapper_id": "mapper-base",
       "library_name": "mapper_base",
       "variant": "None (Skip)",
+      "faker_extra": false,
       "include_ci_files": "None (Skip)",
       "license": "Apache-2.0",
       "ide": "VSCode",

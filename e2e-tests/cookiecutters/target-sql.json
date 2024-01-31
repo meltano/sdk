@@ -8,6 +8,7 @@
       "variant": "None (Skip)",
       "serialization_method": "SQL",
       "include_ci_files": "None (Skip)",
+      "faker_extra": false,
       "license": "Apache-2.0",
       "ide": "VSCode",
       "_template": "./sdk/cookiecutter/target-template",

@@ -130,13 +130,10 @@ class APIAuthenticatorBase:
         """Authenticate a request.
 
         Args:
-            request: A `request object`_.
+            request: A :class:`requests.PreparedRequest` object.
 
         Returns:
             The authenticated request object.
-
-        .. _request object:
-            https://requests.readthedocs.io/en/latest/api/#requests.PreparedRequest
         """
         request.headers.update(self.auth_headers)
 
@@ -153,13 +150,10 @@ class APIAuthenticatorBase:
         and returns the result.
 
         Args:
-            r: A `request object`_.
+            r: A :class:`requests.PreparedRequest` object.
 
         Returns:
             The authenticated request object.
-
-        .. _request object:
-            https://requests.readthedocs.io/en/latest/api/#requests.PreparedRequest
         """
         return self.authenticate_request(r)
 
