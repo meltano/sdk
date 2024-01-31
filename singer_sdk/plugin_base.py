@@ -403,9 +403,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         Args:
             print_fn: A function to use to display the plugin version.
-                Defaults to `print`_.
-
-        .. _print: https://docs.python.org/3/library/functions.html#print
+                Defaults to :py:func:`print`.
         """
         print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version}")
 
