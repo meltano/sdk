@@ -121,14 +121,14 @@ Here is a sample `stream_maps` transformation which obfuscates `phone_number` wi
 stream_maps:
   # Apply these transforms to the stream called 'customers'
   customers:
-    # generate a fake phone number
-    phone_number: fake.phone_number()
     # drop the PII field from RECORD and SCHEMA messages
     email: __NULL__
     # capture just the email domain
     email_domain: owner_email.split('@')[-1]
     # for uniqueness checks
     email_hash: md5(config['hash_seed'] + owner_email)
+    # generate a fake phone number
+    phone_number: fake.phone_number()
 stream_map_config:
   # hash outputs are not able to be replicated without the original seed:
   hash_seed: 01AWZh7A6DzGm6iJZZ2T
@@ -149,7 +149,8 @@ faker_config:
         "customers": {
             "email": null,
             "email_domain": "owner_email.split('@')[-1]",
-            "email_hash": "md5(config['hash_seed'] + owner_email)"
+            "email_hash": "md5(config['hash_seed'] + owner_email)",
+            "phone_number": "fake.phone_number()"
         }
     },
     "stream_map_config": {
