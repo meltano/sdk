@@ -144,6 +144,14 @@ TARGET_HARD_DELETE_CONFIG = PropertiesList(
         default=False,
     ),
 ).to_dict()
+TARGET_VALIDATE_RECORDS_CONFIG = PropertiesList(
+    Property(
+        "validate_records",
+        BooleanType(),
+        description="Whether to validate the schema of the incoming streams.",
+        default=True,
+    ),
+).to_dict()
 
 
 class TargetLoadMethods(str, Enum):
@@ -355,3 +363,6 @@ class TargetCapabilities(CapabilitiesEnum):
 
     #: Allow setting the target schema.
     TARGET_SCHEMA = "target-schema"
+
+    #: Validate the schema of the incoming records.
+    VALIDATE_RECORDS = "validate-records"
