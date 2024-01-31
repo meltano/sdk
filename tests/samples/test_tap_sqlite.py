@@ -13,7 +13,7 @@ from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk import SQLStream
 from singer_sdk._singerlib import MetadataMapping, StreamMetadata
 from singer_sdk.testing import (
-    get_standard_tap_tests,
+    get_tap_test_class,
     tap_sync_test,
     tap_to_target_sync_test,
 )
@@ -104,16 +104,6 @@ def test_sqlite_input_catalog(sqlite_sample_tap: SQLTap):
     assert stream.fully_qualified_name == "main.t1"
 
 
-def test_sqlite_tap_standard_tests(sqlite_sample_tap: SQLTap):
-    """Run standard tap tests against Countries tap."""
-    tests = get_standard_tap_tests(
-        type(sqlite_sample_tap),
-        dict(sqlite_sample_tap.config),
-    )
-    for test in tests:
-        test()
-
-
 def test_sync_sqlite_to_csv(sqlite_sample_tap: SQLTap, tmp_path: Path):
     _discover_and_select_all(sqlite_sample_tap)
     orig_stdout, _, _, _ = tap_to_target_sync_test(
@@ -144,3 +134,46 @@ def test_sqlite_state(sqlite_sample_tap_state_messages):
         for message in sqlite_sample_tap_state_messages
         for bookmark in message["value"]["bookmarks"].values()
     )
+
+
+TestSQLiteTap = get_tap_test_class(
+    SQLiteTap,
+    config={
+        "path_to_db": "tests/fixtures/tap.sqlite",
+    },
+    catalog={
+        "streams": [
+            {
+                "tap_stream_id": "main-test",
+                "stream": "main-test",
+                "table_name": "test",
+                "schema": {
+                    "properties": {
+                        "id": {"type": ["integer", "null"]},
+                        "name": {"type": ["string", "null"]},
+                    },
+                },
+                "metadata": [
+                    {
+                        "breadcrumb": [],
+                        "metadata": {
+                            "selected": True,
+                        },
+                    },
+                    {
+                        "breadcrumb": ["properties", "id"],
+                        "metadata": {
+                            "selected": True,
+                        },
+                    },
+                    {
+                        "breadcrumb": ["properties", "name"],
+                        "metadata": {
+                            "selected": True,
+                        },
+                    },
+                ],
+            },
+        ],
+    },
+)
