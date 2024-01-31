@@ -241,7 +241,9 @@ can be referenced directly by mapping expressions.
 - `record` - an alias for the record values dictionary in the current stream.
 - `_` - same as `record` but shorter to type
 - `self` - the existing property value if the property already exists
-- `fake` - a [`Faker`](https://faker.readthedocs.io/en/master/) instance, configurable via `faker_config` (see previous example) - see the built-in [standard providers](https://faker.readthedocs.io/en/master/providers.html) for available methods 
+- `fake` - a [`Faker`](https://faker.readthedocs.io/en/master/) instance, configurable via `faker_config` (see previous example) - see the built-in [standard providers](https://faker.readthedocs.io/en/master/providers.html) for available methods
+
+  **Note:** only available if the plugin specifies `faker` as an addtional dependency (through the `singer-sdk` `faker` extra or directly) 
 
 #### Automatic Schema Detection
 
