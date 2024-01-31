@@ -505,6 +505,14 @@ def _test_transform(
     )
 
 
+class CustomObj:
+    def __init__(self, value: str):
+        self.value = value
+
+    def __str__(self) -> str:
+        return f"obj-{self.value}"
+
+
 class MappedStream(Stream):
     """A stream to be mapped."""
 
@@ -516,7 +524,13 @@ class MappedStream(Stream):
             "user",
             ObjectType(
                 Property("id", IntegerType()),
-                Property("sub", ObjectType(Property("num", IntegerType()))),
+                Property(
+                    "sub",
+                    ObjectType(
+                        Property("num", IntegerType()),
+                        Property("custom_obj", StringType),
+                    ),
+                ),
                 Property("some_numbers", ArrayType(NumberType())),
             ),
         ),
@@ -528,7 +542,7 @@ class MappedStream(Stream):
             "count": 21,
             "user": {
                 "id": 1,
-                "sub": {"num": 1},
+                "sub": {"num": 1, "custom_obj": CustomObj("hello")},
                 "some_numbers": [Decimal("3.14"), Decimal("2.718")],
             },
         }
@@ -537,7 +551,7 @@ class MappedStream(Stream):
             "count": 13,
             "user": {
                 "id": 2,
-                "sub": {"num": 2},
+                "sub": {"num": 2, "custom_obj": CustomObj("world")},
                 "some_numbers": [Decimal("10.32"), Decimal("1.618")],
             },
         }
@@ -546,7 +560,7 @@ class MappedStream(Stream):
             "count": 19,
             "user": {
                 "id": 3,
-                "sub": {"num": 3},
+                "sub": {"num": 3, "custom_obj": CustomObj("hello")},
                 "some_numbers": [Decimal("1.414"), Decimal("1.732")],
             },
         }
