@@ -1,223 +1,365 @@
 {
-    "type": "object",
-    "properties": {
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "integer"
+    },
+    "id": {
+      "type": "integer"
+    },
+    "iid": {
+      "type": "integer"
+    },
+    "milestone": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
         "project_id": {
-            "type": "integer"
-        },
-        "id": {
-            "type": "integer"
-        },
-        "iid": {
-            "type": "integer"
-        },
-        "milestone_id": {
-            "type": [
-                "null",
-                "integer"
-            ]
-        },
-        "author_id": {
-            "type": [
-                "null",
-                "integer"
-            ]
-        },
-        "assignee_id": {
-            "type": [
-                "null",
-                "integer"
-            ]
-        },
-        "assignees": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "username": {
-                        "type": "string"
-                    },
-                    "state": {
-                        "type": "string"
-                    },
-                    "avatar_url": {
-                        "type": [
-                            "null",
-                            "string"
-                        ]
-                    },
-                    "web_url": {
-                        "type": [
-                            "null",
-                            "string"
-                        ]
-                    }
-                }
-            }
-        },
-        "closed_by_id": {
-            "type": [
-                "null",
-                "integer"
-            ]
-        },
-        "title": {
-            "type": [
-                "null",
-                "string"
-            ]
+          "type": "integer"
         },
         "description": {
-            "type": [
-                "null",
-                "string"
-            ]
+          "type": [
+            "null",
+            "string"
+          ]
         },
         "state": {
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        "labels": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
-        },
-        "created_at": {
-            "anyOf": [
-                {
-                    "type": "string",
-                    "format": "date-time"
-                },
-                {
-                    "type": "null"
-                }
-            ]
-        },
-        "updated_at": {
-            "anyOf": [
-                {
-                    "type": "string",
-                    "format": "date-time"
-                },
-                {
-                    "type": "null"
-                }
-            ]
-        },
-        "closed_at": {
-            "anyOf": [
-                {
-                    "type": "string",
-                    "format": "date-time"
-                },
-                {
-                    "type": "null"
-                }
-            ]
-        },
-        "subscribed": {
-            "type": [
-                "null",
-                "boolean"
-            ]
-        },
-        "upvotes": {
-            "type": [
-                "null",
-                "integer"
-            ]
-        },
-        "downvotes": {
-            "type": [
-                "null",
-                "integer"
-            ]
-        },
-        "merge_requests_count": {
-            "type": [
-                "null",
-                "integer"
-            ]
-        },
-        "user_notes_count": {
-            "type": [
-                "null",
-                "integer"
-            ]
+          "type": [
+            "null",
+            "string"
+          ]
         },
         "due_date": {
-            "type": [
-                "null",
-                "string"
-            ]
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "date"
         },
-        "weight": {
-            "type": [
-                "null",
-                "integer"
-            ]
+        "iid": {
+          "type": "integer"
+        },
+        "created_at": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "date-time"
+        },
+        "title": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "id": {
+          "type": "integer"
+        },
+        "updated_at": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "date-time"
+        }
+      },
+      "example": {
+        "project_id" : 1,
+        "description" : "Ducimus nam enim ex consequatur cumque ratione.",
+        "state" : "closed",
+        "due_date" : null,
+        "iid" : 2,
+        "created_at" : "2016-01-04T15:31:39.996Z",
+        "title" : "v4.0",
+        "id" : 17,
+        "updated_at" : "2016-01-04T15:31:39.996Z"
+      }
+    },
+    "author": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "avatar_url": {
+          "type": [
+            "null",
+            "string"
+          ]
         },
         "web_url": {
-            "type": [
-                "null",
-                "string"
-            ]
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "assignee": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "state": {
+          "type": "string"
         },
-        "confidential": {
-            "type": [
-                "null",
-                "boolean"
-            ]
+        "id": {
+          "type": "integer"
         },
-        "discussion_locked": {
-            "type": [
-                "null",
-                "boolean"
-            ]
+        "name": {
+          "type": "string"
         },
-        "has_tasks": {
-            "type": [
-                "null",
-                "boolean"
-            ]
+        "web_url": {
+          "type": [
+            "null",
+            "string"
+          ]
         },
-        "task_status": {
-            "type": [
-                "null",
-                "string"
-            ]
+        "avatar_url": {
+          "type": [
+            "null",
+            "string"
+          ]
         },
+        "username": {
+          "type": "string"
+        }
+      }
+    },
+    "assignees": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "avatar_url": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "web_url": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
+    },
+    "closed_by": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "state": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "web_url": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "avatar_url": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "username": {
+          "type": "string"
+        }
+      }
+    },
+    "title": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "description": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "state": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "labels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "closed_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "upvotes": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "downvotes": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "merge_requests_count": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "user_notes_count": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "due_date": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date"
+    },
+    "weight": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "web_url": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "confidential": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "discussion_locked": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "has_tasks": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "task_status": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "time_stats": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
         "time_estimate": {
-            "type": [
-                "null",
-                "integer"
-            ]
+          "type": [
+            "null",
+            "integer"
+          ]
         },
         "total_time_spent": {
-            "type": [
-                "null",
-                "integer"
-            ]
+          "type": [
+            "null",
+            "integer"
+          ]
         },
         "human_time_estimate": {
-            "type": [
-                "null",
-                "string"
-            ]
+          "type": [
+            "null",
+            "string"
+          ]
         },
         "human_total_time_spent": {
-            "type": [
-                "null",
-                "string"
-            ]
+          "type": [
+            "null",
+            "string"
+          ]
         }
+      }
     }
+  }
 }

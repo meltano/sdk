@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
-from unittest import mock
 
 import pytest
 
@@ -38,16 +36,12 @@ def config_file2(tmpdir) -> str:
     return filepath
 
 
-def test_get_env_var_config():
+def test_get_env_var_config(monkeypatch: pytest.MonkeyPatch):
     """Test settings parsing from environment variables."""
-    with mock.patch.dict(
-        os.environ,
-        {
-            "PLUGIN_TEST_PROP1": "hello",
-            "PLUGIN_TEST_PROP3": "val1,val2",
-            "PLUGIN_TEST_PROP4": "not-a-tap-setting",
-        },
-    ):
+    with monkeypatch.context() as m:
+        m.setenv("PLUGIN_TEST_PROP1", "hello")
+        m.setenv("PLUGIN_TEST_PROP3", "val1,val2")
+        m.setenv("PLUGIN_TEST_PROP4", "not-a-tap-setting")
         env_config = parse_environment_config(CONFIG_JSONSCHEMA, "PLUGIN_TEST_")
         assert env_config["prop1"] == "hello"
         assert env_config["prop3"] == ["val1", "val2"]
@@ -68,9 +62,8 @@ def test_get_env_var_config():
     assert "PROP4" not in env_config
 
 
-def test_get_dotenv_config(tmpdir, monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.chdir(tmpdir)
-    dotenv = Path(tmpdir) / ".env"
+def test_get_dotenv_config(tmp_path: Path):
+    dotenv = tmp_path / ".env"
     dotenv.write_text("PLUGIN_TEST_PROP1=hello\n")
     dotenv_config = parse_environment_config(
         CONFIG_JSONSCHEMA,
@@ -81,27 +74,24 @@ def test_get_dotenv_config(tmpdir, monkeypatch: pytest.MonkeyPatch):
     assert dotenv_config["prop1"] == "hello"
 
 
-def test_get_env_var_config_not_parsable():
+def test_get_env_var_config_not_parsable(monkeypatch: pytest.MonkeyPatch):
     """Test settings parsing from environment variables with a non-parsable value."""
-    with mock.patch.dict(
-        os.environ,
-        {
-            "PLUGIN_TEST_PROP1": "hello",
-            "PLUGIN_TEST_PROP3": '["repeated"]',
-        },
-    ), pytest.raises(ValueError, match="A bracketed list was detected"):
-        parse_environment_config(CONFIG_JSONSCHEMA, "PLUGIN_TEST_")
+    with monkeypatch.context() as m:
+        m.setenv("PLUGIN_TEST_PROP1", "hello")
+        m.setenv("PLUGIN_TEST_PROP3", '["repeated"]')
+        with pytest.raises(ValueError, match="A bracketed list was detected"):
+            parse_environment_config(CONFIG_JSONSCHEMA, "PLUGIN_TEST_")
 
 
-def test_merge_config_sources(config_file1, config_file2):
+def test_merge_config_sources(
+    config_file1,
+    config_file2,
+    monkeypatch: pytest.MonkeyPatch,
+):
     """Test merging multiple configuration sources."""
-    with mock.patch.dict(
-        os.environ,
-        {
-            "PLUGIN_TEST_PROP1": "from-env",
-            "PLUGIN_TEST_PROP4": "not-a-tap-setting",
-        },
-    ):
+    with monkeypatch.context() as m:
+        m.setenv("PLUGIN_TEST_PROP1", "from-env")
+        m.setenv("PLUGIN_TEST_PROP4", "not-a-tap-setting")
         config = merge_config_sources(
             [config_file1, config_file2, "ENV"],
             CONFIG_JSONSCHEMA,

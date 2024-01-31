@@ -111,8 +111,9 @@ parquet = ["numpy", "pyarrow"]
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = ">=7.4"}
 
-duckdb = { version = ">=0.9.3.dev2490", allow-prereleases = true }
-duckdb-engine = { version = ">=0.9.4" }
+# TODO: Remove the Python 3.12 marker when DuckDB supports it
+duckdb = { version = ">=0.8.0", python = "<3.12" }
+duckdb-engine = { version = ">=0.9.4", python = "<3.12" }
 
 mypy = ">=1.0"
 pytest-benchmark = ">=4.0.0"
@@ -134,6 +135,26 @@ pytest-codspeed = ">=2.2.0"
 
 [tool.pytest.ini_options]
 addopts = '--ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
+filterwarnings = [
+    "error",
+    "ignore:Could not configure external gitlab tests:UserWarning",
+    "ignore:No records were available to test:UserWarning",
+    # https://github.com/meltano/sdk/issues/1354
+    "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
+    # https://docs.python.org/3.12/whatsnew/3.12.html#deprecated
+    # https://github.com/danthedeckie/simpleeval/blob/master/simpleeval.py
+    "ignore:ast.NameConstant is deprecated:DeprecationWarning:simpleeval",
+    # https://docs.python.org/3.12/whatsnew/3.12.html#deprecated
+    # https://github.com/danthedeckie/simpleeval/blob/master/simpleeval.py
+    "ignore:ast.Num is deprecated:DeprecationWarning:simpleeval",
+    # https://github.com/joblib/joblib/pull/1518
+    "ignore:ast.Num is deprecated:DeprecationWarning:joblib._utils",
+    # https://docs.python.org/3.12/whatsnew/3.12.html#deprecated
+    # https://github.com/danthedeckie/simpleeval/blob/master/simpleeval.py
+    "ignore:ast.Str is deprecated:DeprecationWarning:simpleeval",
+    # https://github.com/joblib/joblib/pull/1518
+    "ignore:Attribute n is deprecated:DeprecationWarning:joblib._utils",
+]
 markers = [
     "external: Tests relying on external resources",
     "windows: Tests that only run on Windows",
