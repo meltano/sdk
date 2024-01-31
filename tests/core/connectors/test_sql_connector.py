@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 import typing as t
 from decimal import Decimal
 from unittest import mock
@@ -7,6 +8,7 @@ from unittest import mock
 import pytest
 import sqlalchemy as sa
 from sqlalchemy.dialects import registry, sqlite
+from sqlalchemy.exc import NoSuchModuleError
 
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.exceptions import ConfigValidationError
@@ -276,7 +278,7 @@ class TestConnectorSQL:
             sa.Column("attrs", sa.JSON),
         )
         meta.create_all(engine)
-        with engine.connect() as conn:
+        with engine.connect() as conn, conn.begin():
             conn.execute(
                 table.insert(),
                 [
@@ -310,6 +312,11 @@ class DuckDBConnector(SQLConnector):
         )
 
 
+@pytest.mark.xfail(
+    reason="DuckDB does not build on Python 3.12 yet",
+    condition=sys.version_info >= (3, 12),
+    raises=NoSuchModuleError,
+)
 class TestDuckDBConnector:
     @pytest.fixture
     def connector(self):
