@@ -39,6 +39,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
     "sphinx_copybutton",
     "myst_parser",
     "sphinx_reredirects",
@@ -126,4 +127,11 @@ myst_enable_extensions = {
 
 redirects = {
     "porting.html": "guides/porting.html",
+}
+
+# -- Options for intersphinx -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#configuration
+intersphinx_mapping = {
+    "requests": ("https://requests.readthedocs.io/en/latest/", None),
+    "python": ("https://docs.python.org/3/", None),
 }
