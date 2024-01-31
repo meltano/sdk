@@ -80,23 +80,13 @@ These capabilities are all out of scope _by design_:
     a transformation tool like [dbt](https://www.getdbt.com), or (b) create a custom mapper
     plugin with inline lookup logic.
 
-### A feature for all Singer users, enabled by the SDK
+## A feature for all Singer users, enabled by the SDK
 
-The mapping features described here are create for the **_users_** of SDK-based taps and targets.
+The mapping features described here are created for the **_users_** of SDK-based taps and targets, which support inline transformations with `stream_maps` and `stream_map_config` out-of-box.
 
-Developers simply enable the feature using the instructions below, and then users can benefit from having inline transformation capabilities out-of-box on their favorite taps and targets.
+**Note:** to support non-SDK taps and targets, the standalone inline mapper plugin [`meltano-map-transformer`](https://hub.meltano.com/mappers/meltano-map-transformer/) follows all specifications defined here and can apply mapping transformations between _any_ Singer tap and target, even if they are not built using the SDK.
 
-**Note:** to support non-SDK taps and targets, we are also creating a standalone inline mapper plugin (`meltano-map-transform`), which follows all specifications defined here and can apply mapping transformations between _any_ Singer tap and target, even if they are not built using the SDK.
-
-## Enabling Stream Maps in SDK-Based Plugins
-
-To support inline mapping functions, the developer only needs to declare two plugin settings,
-called `stream_maps` and `stream_map_config`, and declare both settings as `object` type. (For example:
-`Property("stream_maps, ObjectType())` if using the python helper classes or
-`"stream_maps": {"type": "object"}` if using native JSON Schema declarations.)
-
-If the `stream_maps` setting is detected, the following behaviors will be implemented
-by the SDK automatically:
+The following behaviors are implemented by the SDK automatically:
 
 1. For taps, the SCHEMA and RECORD messages will automatically be transformed,
    duplicated, filtered, or aliased, as per the `stream_maps` config settings _after_
@@ -108,7 +98,7 @@ by the SDK automatically:
    setting _prior_ to any Sink processing functions.
    - This means that the target developer can assume that all streams and records are
      transformed, aliased, filtered, etc. _before_ any custom target code is executed.
-3. The upcoming standalone mapper plugin (`meltano-map-transform`) is a hybrid tap/target which
+3. The standalone mapper plugin [`meltano-map-transformer`](https://hub.meltano.com/mappers/meltano-map-transformer/) is a hybrid tap/target which
    simply receives input from a tap, transforms all stream and schema messages via the
    `stream_maps` config option, and then emits the resulting stream(s) to a downstream
    target.
