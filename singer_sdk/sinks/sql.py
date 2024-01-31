@@ -331,8 +331,7 @@ class SQLSink(BatchSink):
         ]
 
         self.logger.info("Inserting with SQL: %s", insert_sql)
-
-        with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
+        with self.connector.connect() as conn, conn.begin():
             result = conn.execute(insert_sql, new_records)
 
         return result.rowcount
@@ -411,7 +410,7 @@ class SQLSink(BatchSink):
             bindparam("deletedate", value=deleted_at, type_=sa.types.DateTime),
             bindparam("version", value=new_version, type_=sa.types.Integer),
         )
-        with self.connector._connect() as conn, conn.begin():  # noqa: SLF001
+        with self.connector.connect() as conn, conn.begin():
             conn.execute(query)
 
 

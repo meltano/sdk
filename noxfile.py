@@ -46,6 +46,7 @@ test_dependencies = [
     "pytest",
     "pytest-benchmark",
     "pytest-durations",
+    "pytest-httpserver",
     "pytest-snapshot",
     "pytz",
     "requests-mock",

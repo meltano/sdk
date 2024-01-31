@@ -19,9 +19,9 @@ def csv_config(outdir: str) -> dict:
 
 
 @pytest.fixture
-def _sqlite_sample_db(sqlite_connector):
+def _sqlite_sample_db(sqlite_connector: SQLiteConnector):
     """Return a path to a newly constructed sample DB."""
-    with sqlite_connector._connect() as conn, conn.begin():
+    with sqlite_connector.connect() as conn, conn.begin():
         for t in range(3):
             conn.execute(sa.text(f"DROP TABLE IF EXISTS t{t}"))
             conn.execute(
