@@ -94,6 +94,10 @@ pytest-durations = {version = ">=1.2.0", optional = true}
 faker = {version = ">=22.5,<25.0", optional = true}
 
 [tool.poetry.extras]
+jwt = [
+    "cryptography",
+    "PyJWT",
+]
 docs = [
     "furo",
     "myst-parser",

@@ -10,10 +10,7 @@ from datetime import timedelta
 from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
-import jwt
 import requests
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
 
 from singer_sdk.helpers._util import utc_now
 
@@ -575,6 +572,10 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         Raises:
             ValueError: If the private key is not set.
         """
+        import jwt
+        from cryptography.hazmat.backends import default_backend
+        from cryptography.hazmat.primitives import serialization
+
         if not self.private_key:
             msg = "Missing 'private_key' property for OAuth payload."
             raise ValueError(msg)
