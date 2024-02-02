@@ -297,7 +297,10 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
 class BasicAuthenticator(APIAuthenticatorBase):
     """Implements basic authentication for REST Streams.
 
-    This Authenticator implements basic authentication by concatinating a
+    .. deprecated:: 0.36.0
+       Use :class:`requests.auth.HTTPBasicAuth` instead.
+
+    This Authenticator implements basic authentication by concatenating a
     username and password then base64 encoding the string. The resulting
     token will be merged with any HTTP headers specified on the stream.
     """
