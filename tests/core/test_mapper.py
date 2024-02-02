@@ -505,6 +505,14 @@ def _test_transform(
     )
 
 
+class CustomObj:
+    def __init__(self, value: str):
+        self.value = value
+
+    def __str__(self) -> str:
+        return f"obj-{self.value}"
+
+
 class MappedStream(Stream):
     """A stream to be mapped."""
 
@@ -516,7 +524,13 @@ class MappedStream(Stream):
             "user",
             ObjectType(
                 Property("id", IntegerType()),
-                Property("sub", ObjectType(Property("num", IntegerType()))),
+                Property(
+                    "sub",
+                    ObjectType(
+                        Property("num", IntegerType()),
+                        Property("custom_obj", StringType),
+                    ),
+                ),
                 Property("some_numbers", ArrayType(NumberType())),
             ),
         ),
@@ -528,7 +542,7 @@ class MappedStream(Stream):
             "count": 21,
             "user": {
                 "id": 1,
-                "sub": {"num": 1},
+                "sub": {"num": 1, "custom_obj": CustomObj("hello")},
                 "some_numbers": [Decimal("3.14"), Decimal("2.718")],
             },
         }
@@ -537,7 +551,7 @@ class MappedStream(Stream):
             "count": 13,
             "user": {
                 "id": 2,
-                "sub": {"num": 2},
+                "sub": {"num": 2, "custom_obj": CustomObj("world")},
                 "some_numbers": [Decimal("10.32"), Decimal("1.618")],
             },
         }
@@ -546,7 +560,7 @@ class MappedStream(Stream):
             "count": 19,
             "user": {
                 "id": 3,
-                "sub": {"num": 3},
+                "sub": {"num": 3, "custom_obj": CustomObj("hello")},
                 "some_numbers": [Decimal("1.414"), Decimal("1.732")],
             },
         }
@@ -568,12 +582,11 @@ class MappedTap(Tap):
 )
 @pytest.mark.snapshot()
 @pytest.mark.parametrize(
-    "stream_maps,flatten,flatten_max_depth,snapshot_name",
+    "stream_maps,config,snapshot_name",
     [
         pytest.param(
             {},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "no_map.jsonl",
             id="no_map",
         ),
@@ -583,8 +596,7 @@ class MappedTap(Tap):
                     "email_hash": "md5(email)",
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "keep_all_fields.jsonl",
             id="keep_all_fields",
         ),
@@ -596,8 +608,7 @@ class MappedTap(Tap):
                     "__else__": None,
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "only_mapped_fields.jsonl",
             id="only_mapped_fields",
         ),
@@ -609,8 +620,7 @@ class MappedTap(Tap):
                     "__else__": "__NULL__",
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "only_mapped_fields_null_string.jsonl",
             id="only_mapped_fields_null_string",
         ),
@@ -622,57 +632,49 @@ class MappedTap(Tap):
                     "__else__": None,
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "changed_key_properties.jsonl",
             id="changed_key_properties",
         ),
         pytest.param(
             {"mystream": None, "sourced_stream_1": {"__source__": "mystream"}},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "sourced_stream_1.jsonl",
             id="sourced_stream_1",
         ),
         pytest.param(
             {"mystream": "__NULL__", "sourced_stream_1": {"__source__": "mystream"}},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "sourced_stream_1_null_string.jsonl",
             id="sourced_stream_1_null_string",
         ),
         pytest.param(
             {"sourced_stream_2": {"__source__": "mystream"}, "__else__": None},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "sourced_stream_2.jsonl",
             id="sourced_stream_2",
         ),
         pytest.param(
             {"mystream": {"__alias__": "aliased_stream"}},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "aliased_stream.jsonl",
             id="aliased_stream",
         ),
         pytest.param(
             {},
-            True,
-            0,
+            {"flattening_enabled": True, "flattening_max_depth": 0},
             "flatten_depth_0.jsonl",
             id="flatten_depth_0",
         ),
         pytest.param(
             {},
-            True,
-            1,
+            {"flattening_enabled": True, "flattening_max_depth": 1},
             "flatten_depth_1.jsonl",
             id="flatten_depth_1",
         ),
         pytest.param(
             {},
-            True,
-            10,
+            {"flattening_enabled": True, "flattening_max_depth": 2},
             "flatten_all.jsonl",
             id="flatten_all",
         ),
@@ -683,8 +685,7 @@ class MappedTap(Tap):
                     "__key_properties__": ["email_hash"],
                 },
             },
-            True,
-            10,
+            {"flattening_enabled": True, "flattening_max_depth": 10},
             "map_and_flatten.jsonl",
             id="map_and_flatten",
         ),
@@ -694,15 +695,13 @@ class MappedTap(Tap):
                     "email": None,
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "drop_property.jsonl",
             id="drop_property",
         ),
         pytest.param(
             {"mystream": {"email": "__NULL__"}},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "drop_property_null_string.jsonl",
             id="drop_property_null_string",
         ),
@@ -713,8 +712,7 @@ class MappedTap(Tap):
                     "__else__": None,
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "non_pk_passthrough.jsonl",
             id="non_pk_passthrough",
         ),
@@ -725,10 +723,27 @@ class MappedTap(Tap):
                     "__else__": None,
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "record_to_column.jsonl",
             id="record_to_column",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "cc": "fake.credit_card_number()",
+                    "__else__": None,
+                },
+            },
+            {
+                "flattening_enabled": False,
+                "flattening_max_depth": 0,
+                "faker_config": {
+                    "locale": "en_US",
+                    "seed": 123456,
+                },
+            },
+            "fake_credit_card_number.jsonl",
+            id="fake_credit_card_number",
         ),
     ],
 )
@@ -736,18 +751,13 @@ def test_mapped_stream(
     snapshot: Snapshot,
     snapshot_dir: Path,
     stream_maps: dict,
-    flatten: bool,
-    flatten_max_depth: int | None,
+    config: dict,
     snapshot_name: str,
 ):
     snapshot.snapshot_dir = snapshot_dir.joinpath("mapped_stream")
 
     tap = MappedTap(
-        config={
-            "stream_maps": stream_maps,
-            "flattening_enabled": flatten,
-            "flattening_max_depth": flatten_max_depth,
-        },
+        config={"stream_maps": stream_maps, **config},
     )
     buf = io.StringIO()
     with redirect_stdout(buf):

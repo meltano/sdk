@@ -9,6 +9,7 @@
       "stream_type": "REST",
       "auth_method": "OAuth2",
       "include_ci_files": "None (Skip)",
+      "faker_extra": false,
       "license": "Apache-2.0",
       "ide": "VSCode",
       "_template": "../tap-template/",

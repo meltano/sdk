@@ -430,7 +430,7 @@ def _flatten_record(
             items.append(
                 (
                     new_key,
-                    json.dumps(v, use_decimal=True)
+                    json.dumps(v, use_decimal=True, default=str)
                     if _should_jsondump_value(k, v, flattened_schema)
                     else v,
                 ),

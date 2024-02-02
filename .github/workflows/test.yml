@@ -51,9 +51,9 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         sqlalchemy: ["2"]
         include:
-        - { session: tests,   python-version: "3.11", os: "ubuntu-latest", sqlalchemy: "1" }
-        - { session: doctest, python-version: "3.11", os: "ubuntu-latest", sqlalchemy: "2" }
-        - { session: mypy,    python-version: "3.11",  os: "ubuntu-latest", sqlalchemy: "2" }
+        - { session: tests,   python-version: "3.12", os: "ubuntu-latest", sqlalchemy: "1" }
+        - { session: doctest, python-version: "3.12", os: "ubuntu-latest", sqlalchemy: "2" }
+        - { session: mypy,    python-version: "3.12",  os: "ubuntu-latest", sqlalchemy: "2" }
 
     steps:
     - uses: actions/checkout@v4
@@ -109,7 +109,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.head.repo.fork }}
     env:
-      NOXPYTHON: "3.11"
+      NOXPYTHON: "3.12"
       NOXSESSION: tests
       SAMPLE_TAP_GITLAB_AUTH_TOKEN: ${{ secrets.SAMPLE_TAP_GITLAB_AUTH_TOKEN }}
       SAMPLE_TAP_GITLAB_GROUP_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_GROUP_IDS }}
@@ -180,7 +180,7 @@ jobs:
 
     - uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.12'
         cache: 'pip'
         cache-dependency-path: 'poetry.lock'
 

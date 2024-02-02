@@ -9,6 +9,7 @@ import importlib.util
 import json
 import time
 import typing as t
+from functools import cached_property
 from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
@@ -133,9 +134,6 @@ class Sink(metaclass=abc.ABCMeta):
     MAX_SIZE_DEFAULT = 10000
     WAIT_LIMIT_SECONDS_DEFAULT = 30
 
-    validate_schema = True
-    """Enable JSON schema record validation."""
-
     validate_field_string_format = False
     """Enable JSON schema format validation, for example `date-time` string fields."""
 
@@ -214,6 +212,15 @@ class Sink(metaclass=abc.ABCMeta):
             self._sink_timer.start()
 
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
+
+    @cached_property
+    def validate_schema(self) -> bool:
+        """Enable JSON schema record validation.
+
+        Returns:
+            True if JSON schema validation is enabled.
+        """
+        return self.config.get("validate_records", True)
 
     def get_validator(self) -> BaseJSONSchemaValidator | None:
         """Get a record validator for this sink.

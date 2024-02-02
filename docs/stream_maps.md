@@ -80,23 +80,13 @@ These capabilities are all out of scope _by design_:
     a transformation tool like [dbt](https://www.getdbt.com), or (b) create a custom mapper
     plugin with inline lookup logic.
 
-### A feature for all Singer users, enabled by the SDK
+## A feature for all Singer users, enabled by the SDK
 
-The mapping features described here are create for the **_users_** of SDK-based taps and targets.
+The mapping features described here are created for the **_users_** of SDK-based taps and targets, which support inline transformations with `stream_maps` and `stream_map_config` out-of-box.
 
-Developers simply enable the feature using the instructions below, and then users can benefit from having inline transformation capabilities out-of-box on their favorite taps and targets.
+**Note:** to support non-SDK taps and targets, the standalone inline mapper plugin [`meltano-map-transformer`](https://hub.meltano.com/mappers/meltano-map-transformer/) follows all specifications defined here and can apply mapping transformations between _any_ Singer tap and target, even if they are not built using the SDK.
 
-**Note:** to support non-SDK taps and targets, we are also creating a standalone inline mapper plugin (`meltano-map-transform`), which follows all specifications defined here and can apply mapping transformations between _any_ Singer tap and target, even if they are not built using the SDK.
-
-## Enabling Stream Maps in SDK-Based Plugins
-
-To support inline mapping functions, the developer only needs to declare two plugin settings,
-called `stream_maps` and `stream_map_config`, and declare both settings as `object` type. (For example:
-`Property("stream_maps, ObjectType())` if using the python helper classes or
-`"stream_maps": {"type": "object"}` if using native JSON Schema declarations.)
-
-If the `stream_maps` setting is detected, the following behaviors will be implemented
-by the SDK automatically:
+The following behaviors are implemented by the SDK automatically:
 
 1. For taps, the SCHEMA and RECORD messages will automatically be transformed,
    duplicated, filtered, or aliased, as per the `stream_maps` config settings _after_
@@ -108,7 +98,7 @@ by the SDK automatically:
    setting _prior_ to any Sink processing functions.
    - This means that the target developer can assume that all streams and records are
      transformed, aliased, filtered, etc. _before_ any custom target code is executed.
-3. The upcoming standalone mapper plugin (`meltano-map-transform`) is a hybrid tap/target which
+3. The standalone mapper plugin [`meltano-map-transformer`](https://hub.meltano.com/mappers/meltano-map-transformer/) is a hybrid tap/target which
    simply receives input from a tap, transforms all stream and schema messages via the
    `stream_maps` config option, and then emits the resulting stream(s) to a downstream
    target.
@@ -122,8 +112,7 @@ by the SDK automatically:
 
 The `stream_maps` config expects a mapping of stream names to a structured transform object.
 
-Here is a sample `stream_maps` transformation which removes all references to `email` and
-adds `email_domain` and `email_hash` as new properties:
+Here is a sample `stream_maps` transformation which obfuscates `phone_number` with a fake value, removes all references to `email` and adds `email_domain` and `email_hash` as new properties:
 
 `meltano.yml` or `config.json`:
 
@@ -138,9 +127,18 @@ stream_maps:
     email_domain: owner_email.split('@')[-1]
     # for uniqueness checks
     email_hash: md5(config['hash_seed'] + owner_email)
+    # generate a fake phone number
+    phone_number: fake.phone_number()
 stream_map_config:
   # hash outputs are not able to be replicated without the original seed:
   hash_seed: 01AWZh7A6DzGm6iJZZ2T
+faker_config:
+  # set specific seed
+  seed: 0
+  # set specific locales
+  locale:
+  - en_US
+  - en_GB
 ```
 ````
 
@@ -151,11 +149,19 @@ stream_map_config:
         "customers": {
             "email": null,
             "email_domain": "owner_email.split('@')[-1]",
-            "email_hash": "md5(config['hash_seed'] + owner_email)"
+            "email_hash": "md5(config['hash_seed'] + owner_email)",
+            "phone_number": "fake.phone_number()"
         }
     },
     "stream_map_config": {
         "hash_seed": "01AWZh7A6DzGm6iJZZ2T"
+    },
+    "faker_config": {
+        "seed": 0,
+        "locale": [
+            "en_US",
+            "en_GB"
+        ]
     }
 }
 ```
@@ -236,6 +242,11 @@ can be referenced directly by mapping expressions.
 - `record` - an alias for the record values dictionary in the current stream.
 - `_` - same as `record` but shorter to type
 - `self` - the existing property value if the property already exists
+- `fake` - a [`Faker`](https://faker.readthedocs.io/en/master/) instance, configurable via `faker_config` (see previous example) - see the built-in [standard providers](https://faker.readthedocs.io/en/master/providers.html) for available methods
+
+  ```{tip}
+  The `fake` object is only available if the plugin specifies `faker` as an addtional dependency (through the `singer-sdk` `faker` extra, or directly).
+  ```
 
 #### Automatic Schema Detection
 
