@@ -95,10 +95,11 @@ faker = {version = "~=22.5", optional = true}
 
 [tool.poetry.extras]
 docs = [
-    "sphinx",
     "furo",
-    "sphinx-copybutton",
     "myst-parser",
+    "pytest",
+    "sphinx",
+    "sphinx-copybutton",
     "sphinx-autobuild",
     "sphinx-inline-tabs",
     "sphinx-notfound-page",
