@@ -81,6 +81,7 @@ def flatten_schema(
     schema: dict,
     max_level: int,
     separator: str = "__",
+    nan_strategy: t.Literal["fail", "allow"] = "fail",
 ) -> dict:
     """Flatten the provided schema up to a depth of max_level.
 
@@ -88,6 +89,7 @@ def flatten_schema(
         schema: The schema definition to flatten.
         separator: The string to use when concatenating key names.
         max_level: The max recursion level (zero-based, exclusive).
+        nan_strategy: Strategy for handling NaNs in json.
 
     Returns:
         A flattened version of the provided schema definition.
@@ -274,6 +276,7 @@ def flatten_schema(
         schema_node=new_schema,
         max_level=max_level,
         separator=separator,
+        nan_strategy=nan_strategy,
     )
     return new_schema
 
@@ -284,6 +287,7 @@ def _flatten_schema(  # noqa: C901, PLR0912
     separator: str = "__",
     level: int = 0,
     max_level: int = 0,
+    nan_strategy: t.Literal["fail", "allow"] = "fail",
 ) -> dict:
     """Flatten the provided schema node, recursively up to depth of `max_level`.
 
@@ -293,6 +297,7 @@ def _flatten_schema(  # noqa: C901, PLR0912
         separator: The string to use when concatenating key names.
         level: The current recursion level (zero-based).
         max_level: The max recursion level (zero-based, exclusive).
+        nan_strategy: Strategy for handling NaNs in json.
 
     Returns:
         A flattened version of the provided node.
@@ -319,6 +324,7 @@ def _flatten_schema(  # noqa: C901, PLR0912
                         separator=separator,
                         level=level + 1,
                         max_level=max_level,
+                        nan_strategy=nan_strategy,
                     ).items(),
                 )
             elif (
@@ -364,6 +370,7 @@ def flatten_record(
     flattened_schema: dict,
     max_level: int,
     separator: str = "__",
+    nan_strategy: t.Literal["fail", "allow"] = "fail",
 ) -> dict:
     """Flatten a record up to max_level.
 
@@ -381,6 +388,7 @@ def flatten_record(
         flattened_schema=flattened_schema,
         separator=separator,
         max_level=max_level,
+        nan_strategy=nan_strategy,
     )
 
 
@@ -392,6 +400,7 @@ def _flatten_record(
     separator: str = "__",
     level: int = 0,
     max_level: int = 0,
+    nan_strategy: t.Literal["fail", "allow"] = "fail",
 ) -> dict:
     """This recursive function flattens the record node.
 
@@ -424,13 +433,18 @@ def _flatten_record(
                     separator=separator,
                     level=level + 1,
                     max_level=max_level,
+                    nan_strategy=nan_strategy,
                 ).items(),
             )
         else:
+            nan_strategies = {
+                "fail": False,
+                "allow": True,
+            }
             items.append(
                 (
                     new_key,
-                    json.dumps(v, use_decimal=True, default=str)
+                    json.dumps(v, use_decimal=True, default=str, allow_nan=nan_strategies[nan_strategy])
                     if _should_jsondump_value(k, v, flattened_schema)
                     else v,
                 ),
