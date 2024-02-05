@@ -20,6 +20,7 @@ class FlatteningOptions(t.NamedTuple):
     max_level: int
     flattening_enabled: bool = True
     separator: str = DEFAULT_FLATTENING_SEPARATOR
+    nan_strategy: t.Literal["fail", "allow"] = "fail"
 
 
 def get_flattening_options(
