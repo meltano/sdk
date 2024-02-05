@@ -1072,7 +1072,6 @@ class Stream(metaclass=abc.ABCMeta):
                 record_counter.context = context_element
                 timer.context = context_element
 
-                partition_record_index = 0
                 current_context = context_element or None
                 state = self.get_context_state(current_context)
                 state_partition_context = self._get_state_partition_context(
@@ -1083,7 +1082,7 @@ class Stream(metaclass=abc.ABCMeta):
                     None if current_context is None else copy.copy(current_context)
                 )
 
-                for record_result in self.get_records(current_context):
+                for idx, record_result in enumerate(self.get_records(current_context)):
                     self._check_max_record_limit(current_record_index=record_index)
 
                     if isinstance(record_result, tuple):
@@ -1102,7 +1101,7 @@ class Stream(metaclass=abc.ABCMeta):
                             log_fn=self.logger.error,
                             ex=ex,
                             record_count=record_index + 1,
-                            partition_record_count=partition_record_index + 1,
+                            partition_record_count=idx + 1,
                             current_context=current_context,
                             state_partition_context=state_partition_context,
                             stream_name=self.name,
@@ -1123,7 +1122,6 @@ class Stream(metaclass=abc.ABCMeta):
                         yield record
 
                     record_index += 1
-                    partition_record_index += 1
 
                 if current_context == state_partition_context:
                     # Finalize per-partition state only if 1:1 with context
