@@ -444,7 +444,12 @@ def _flatten_record(
             items.append(
                 (
                     new_key,
-                    json.dumps(v, use_decimal=True, default=str, allow_nan=nan_strategies[nan_strategy])
+                    json.dumps(
+                        v,
+                        use_decimal=True,
+                        default=str,
+                        allow_nan=nan_strategies[nan_strategy],
+                    )
                     if _should_jsondump_value(k, v, flattened_schema)
                     else v,
                 ),
