@@ -502,6 +502,50 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
             },
             {is_array_type, is_string_array_type},
         ),
+        (
+            Property(
+                "my_prop12",
+                StringType(min_length=5, max_length=10, pattern="^a.*b$"),
+            ),
+            {
+                "my_prop12": {
+                    "type": ["string", "null"],
+                    "minLength": 5,
+                    "maxLength": 10,
+                    "pattern": "^a.*b$",
+                },
+            },
+            {is_string_type},
+        ),
+        (
+            Property(
+                "my_prop13",
+                IntegerType(minimum=5, maximum=10),
+            ),
+            {
+                "my_prop13": {
+                    "type": ["integer", "null"],
+                    "minimum": 5,
+                    "maximum": 10,
+                },
+            },
+            {is_integer_type},
+        ),
+        (
+            Property(
+                "my_prop14",
+                IntegerType(exclusive_minimum=5, exclusive_maximum=10, multiple_of=2),
+            ),
+            {
+                "my_prop14": {
+                    "type": ["integer", "null"],
+                    "exclusiveMinimum": 5,
+                    "exclusiveMaximum": 10,
+                    "multipleOf": 2,
+                },
+            },
+            {is_integer_type},
+        ),
     ],
 )
 def test_property_creation(
