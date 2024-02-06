@@ -380,6 +380,7 @@ def flatten_record(
         flattened_schema: The already flattened schema.
         separator: The string used to separate concatenated key names. Defaults to "__".
         max_level: The maximum depth of keys to flatten recursively.
+        nan_strategy: Strategy for handling NaNs in json.
 
     Returns:
         A flattened version of the record.
@@ -415,6 +416,7 @@ def _flatten_record(
         separator: The string to use when concatenating key names.
         level: The current recursion level (zero-based).
         max_level: The max recursion level (zero-based, exclusive).
+        nan_strategy: Strategy for handling NaNs in json.
 
     Returns:
         A flattened version of the provided node.
