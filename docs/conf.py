@@ -26,7 +26,7 @@ copyright = "2021, Meltano Core Team and Contributors"  # noqa: A001
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.34.1"
+release = "0.35.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -56,7 +56,7 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Show typehints in the description, along with parameter descriptions
-autodoc_typehints = "signature"
+autodoc_typehints = "description"
 autodoc_class_signature = "separated"
 autodoc_member_order = "groupwise"
 

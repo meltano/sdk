@@ -592,13 +592,13 @@ files = [
 
 [[package]]
 name = "duckdb-engine"
-version = "0.10.0"
+version = "0.11.0"
 description = "SQLAlchemy driver for duckdb"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "duckdb_engine-0.10.0-py3-none-any.whl", hash = "sha256:c408d002e83630b6bbb05fc3b26a43406085b1c22dd43e8cab00bf0b9c011ea8"},
-    {file = "duckdb_engine-0.10.0.tar.gz", hash = "sha256:5e3dad3b3513f055a4f5ec5430842249cfe03015743a7597ed1dcc0447dca565"},
+    {file = "duckdb_engine-0.11.0-py3-none-any.whl", hash = "sha256:b19c408f601d0a3af25f2d27cf78e2b9d981243443c5de5c258a3ccc586990f1"},
+    {file = "duckdb_engine-0.11.0.tar.gz", hash = "sha256:4c808bc71873beef0b336b782d2e6809a152c1c5b2f7589db15893f75ec8ec9b"},
 ]
 
 [package.dependencies]
@@ -621,13 +621,13 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "faker"
-version = "22.5.0"
+version = "22.6.0"
 description = "Faker is a Python package that generates fake data for you."
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "Faker-22.5.0-py3-none-any.whl", hash = "sha256:9a510a31090cc47a7ef7d95c1da8126a891a9d076c7e26b01ad02e1bcf915c3e"},
-    {file = "Faker-22.5.0.tar.gz", hash = "sha256:a4e689e2f4e62474245364bbd82cec045dcbbf85a539ee742a515fb4e93a6dd5"},
+    {file = "Faker-22.6.0-py3-none-any.whl", hash = "sha256:2b57f0256da6b45b7851dca87836ef5e2ae2fbb64d63d8697f1e47830d7b505d"},
+    {file = "Faker-22.6.0.tar.gz", hash = "sha256:fa6d969728ef3da6229da91267a1bd4e6b902044c4822012d4fc46c71bb92b26"},
 ]
 
 [package.dependencies]
@@ -1622,13 +1622,13 @@ cli = ["click (>=5.0)"]
 
 [[package]]
 name = "pytz"
-version = "2023.4"
+version = "2024.1"
 description = "World timezone definitions, modern and historical"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pytz-2023.4-py2.py3-none-any.whl", hash = "sha256:f90ef520d95e7c46951105338d918664ebfd6f1d995bd7d153127ce90efafa6a"},
-    {file = "pytz-2023.4.tar.gz", hash = "sha256:31d4583c4ed539cd037956140d695e42c033a19e984bfce9964a3f7d59bc2b40"},
+    {file = "pytz-2024.1-py2.py3-none-any.whl", hash = "sha256:328171f4e3623139da4983451950b28e95ac706e13f3f2630a879749e7a8b319"},
+    {file = "pytz-2024.1.tar.gz", hash = "sha256:2a29735ea9c18baf14b448846bde5a48030ed267578472d8955cd0e7443a9812"},
 ]
 
 [[package]]
@@ -2493,13 +2493,13 @@ files = [
 
 [[package]]
 name = "types-pytz"
-version = "2023.4.0.20240130"
+version = "2024.1.0.20240203"
 description = "Typing stubs for pytz"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "types-pytz-2023.4.0.20240130.tar.gz", hash = "sha256:33676a90bf04b19f92c33eec8581136bea2f35ddd12759e579a624a006fd387a"},
-    {file = "types_pytz-2023.4.0.20240130-py3-none-any.whl", hash = "sha256:6ce76a9f8fd22bd39b01a59c35bfa2db39b60d11a2f77145e97b730de7e64fe0"},
+    {file = "types-pytz-2024.1.0.20240203.tar.gz", hash = "sha256:c93751ee20dfc6e054a0148f8f5227b9a00b79c90a4d3c9f464711a73179c89e"},
+    {file = "types_pytz-2024.1.0.20240203-py3-none-any.whl", hash = "sha256:9679eef0365db3af91ef7722c199dbb75ee5c1b67e3c4dd7bfbeb1b8a71c21a3"},
 ]
 
 [[package]]
@@ -2626,7 +2626,7 @@ docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.link
 testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-ignore-flaky", "pytest-mypy (>=0.9.1)", "pytest-ruff"]
 
 [extras]
-docs = ["furo", "myst-parser", "sphinx", "sphinx-autobuild", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-notfound-page", "sphinx-reredirects"]
+docs = ["furo", "myst-parser", "pytest", "sphinx", "sphinx-autobuild", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-notfound-page", "sphinx-reredirects"]
 faker = ["faker"]
 parquet = ["numpy", "numpy", "pyarrow"]
 s3 = ["fs-s3fs"]
@@ -2635,4 +2635,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "cf326e02c7b02fbe1d12a80b3d16a4485357799c06585b3a36b025ad02bde08f"
+content-hash = "56214b1bc1880ddec382a731f9d34a4ba8e2e72c81677d7c51defe3ea5de435f"
