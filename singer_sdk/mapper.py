@@ -766,6 +766,8 @@ class PluginMapper:
             else:
                 continue
 
+            mapper: CustomStreamMap | RemoveRecordTransform
+
             if isinstance(stream_def, dict):
                 mapper = CustomStreamMap(
                     stream_alias=stream_alias,
