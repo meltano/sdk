@@ -592,13 +592,13 @@ files = [
 
 [[package]]
 name = "duckdb-engine"
-version = "0.11.0"
+version = "0.11.1"
 description = "SQLAlchemy driver for duckdb"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "duckdb_engine-0.11.0-py3-none-any.whl", hash = "sha256:b19c408f601d0a3af25f2d27cf78e2b9d981243443c5de5c258a3ccc586990f1"},
-    {file = "duckdb_engine-0.11.0.tar.gz", hash = "sha256:4c808bc71873beef0b336b782d2e6809a152c1c5b2f7589db15893f75ec8ec9b"},
+    {file = "duckdb_engine-0.11.1-py3-none-any.whl", hash = "sha256:ab69a00472fb34b0c57329461f1765e6fc528a0b42edbd2d566dad9b760a0d61"},
+    {file = "duckdb_engine-0.11.1.tar.gz", hash = "sha256:ea7004c689e1f17b2e2d1734c522aa8a7d56366bfbeeddbe8a02dc6a6c36dc15"},
 ]
 
 [package.dependencies]
@@ -621,13 +621,13 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "faker"
-version = "22.6.0"
+version = "23.1.0"
 description = "Faker is a Python package that generates fake data for you."
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "Faker-22.6.0-py3-none-any.whl", hash = "sha256:2b57f0256da6b45b7851dca87836ef5e2ae2fbb64d63d8697f1e47830d7b505d"},
-    {file = "Faker-22.6.0.tar.gz", hash = "sha256:fa6d969728ef3da6229da91267a1bd4e6b902044c4822012d4fc46c71bb92b26"},
+    {file = "Faker-23.1.0-py3-none-any.whl", hash = "sha256:60e89e5c0b584e285a7db05eceba35011a241954afdab2853cb246c8a56700a2"},
+    {file = "Faker-23.1.0.tar.gz", hash = "sha256:b7f76bb1b2ac4cdc54442d955e36e477c387000f31ce46887fb9722a041be60b"},
 ]
 
 [package.dependencies]
@@ -2626,7 +2626,7 @@ docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.link
 testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-ignore-flaky", "pytest-mypy (>=0.9.1)", "pytest-ruff"]
 
 [extras]
-docs = ["furo", "myst-parser", "sphinx", "sphinx-autobuild", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-notfound-page", "sphinx-reredirects"]
+docs = ["furo", "myst-parser", "pytest", "sphinx", "sphinx-autobuild", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-notfound-page", "sphinx-reredirects"]
 faker = ["faker"]
 parquet = ["numpy", "numpy", "pyarrow"]
 s3 = ["fs-s3fs"]
@@ -2635,4 +2635,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "cf326e02c7b02fbe1d12a80b3d16a4485357799c06585b3a36b025ad02bde08f"
+content-hash = "e9747e01321a2fd07fb58447bced9656dca2b3602f9b124a9fbd68792c47c30b"

@@ -25,7 +25,14 @@ def _sqlite_sample_db(sqlite_connector):
         for t in range(3):
             conn.execute(sa.text(f"DROP TABLE IF EXISTS t{t}"))
             conn.execute(
-                sa.text(f"CREATE TABLE t{t} (c1 int PRIMARY KEY, c2 varchar(10))"),
+                sa.text(
+                    f"""
+                    CREATE TABLE t{t} (
+                        c1 int PRIMARY KEY NOT NULL,
+                        c2 varchar(10) NOT NULL
+                    )
+                    """
+                ),
             )
             for x in range(100):
                 conn.execute(
