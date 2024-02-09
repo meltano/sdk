@@ -42,6 +42,7 @@ test_dependencies = [
     "coverage[toml]",
     "duckdb",
     "duckdb-engine",
+    "fastjsonschema",
     "pyarrow",
     "pytest",
     "pytest-benchmark",
