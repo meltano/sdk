@@ -201,6 +201,31 @@ class Sink(metaclass=abc.ABCMeta):
 
         Returns:
             An instance of a subclass of ``BaseJSONSchemaValidator``.
+
+        Example implementation using the `fastjsonschema`_ library:
+
+        .. code-block:: python
+
+           import fastjsonschema
+
+
+           class FastJSONSchemaValidator(BaseJSONSchemaValidator):
+               def __init__(self, schema: dict[str, t.Any]) -> None:
+                   super().__init__(schema)
+                   try:
+                       self.validator = fastjsonschema.compile(self.schema)
+                   except fastjsonschema.JsonSchemaDefinitionException as e:
+                       error_message = "Schema Validation Error"
+                       raise InvalidJSONSchema(error_message) from e
+
+               def validate(self, record: dict):
+                   try:
+                       self.validator(record)
+                   except fastjsonschema.JsonSchemaValueException as e:
+                       error_message = f"Record Message Validation Error: {e.message}"
+                       raise InvalidRecord(error_message, record) from e
+
+        .. _fastjsonschema: https://pypi.org/project/fastjsonschema/
         """
         if self.validate_schema:
             return JSONSchemaValidator(

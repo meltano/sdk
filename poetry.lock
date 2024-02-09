@@ -592,13 +592,13 @@ files = [
 
 [[package]]
 name = "duckdb-engine"
-version = "0.11.0"
+version = "0.11.1"
 description = "SQLAlchemy driver for duckdb"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "duckdb_engine-0.11.0-py3-none-any.whl", hash = "sha256:b19c408f601d0a3af25f2d27cf78e2b9d981243443c5de5c258a3ccc586990f1"},
-    {file = "duckdb_engine-0.11.0.tar.gz", hash = "sha256:4c808bc71873beef0b336b782d2e6809a152c1c5b2f7589db15893f75ec8ec9b"},
+    {file = "duckdb_engine-0.11.1-py3-none-any.whl", hash = "sha256:ab69a00472fb34b0c57329461f1765e6fc528a0b42edbd2d566dad9b760a0d61"},
+    {file = "duckdb_engine-0.11.1.tar.gz", hash = "sha256:ea7004c689e1f17b2e2d1734c522aa8a7d56366bfbeeddbe8a02dc6a6c36dc15"},
 ]
 
 [package.dependencies]
@@ -621,18 +621,32 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "faker"
-version = "22.6.0"
+version = "23.1.0"
 description = "Faker is a Python package that generates fake data for you."
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "Faker-22.6.0-py3-none-any.whl", hash = "sha256:2b57f0256da6b45b7851dca87836ef5e2ae2fbb64d63d8697f1e47830d7b505d"},
-    {file = "Faker-22.6.0.tar.gz", hash = "sha256:fa6d969728ef3da6229da91267a1bd4e6b902044c4822012d4fc46c71bb92b26"},
+    {file = "Faker-23.1.0-py3-none-any.whl", hash = "sha256:60e89e5c0b584e285a7db05eceba35011a241954afdab2853cb246c8a56700a2"},
+    {file = "Faker-23.1.0.tar.gz", hash = "sha256:b7f76bb1b2ac4cdc54442d955e36e477c387000f31ce46887fb9722a041be60b"},
 ]
 
 [package.dependencies]
 python-dateutil = ">=2.4"
 typing-extensions = {version = ">=3.10.0.1", markers = "python_version <= \"3.8\""}
+
+[[package]]
+name = "fastjsonschema"
+version = "2.19.1"
+description = "Fastest Python implementation of JSON schema"
+optional = false
+python-versions = "*"
+files = [
+    {file = "fastjsonschema-2.19.1-py3-none-any.whl", hash = "sha256:3672b47bc94178c9f23dbb654bf47440155d4db9df5f7bc47643315f9c405cd0"},
+    {file = "fastjsonschema-2.19.1.tar.gz", hash = "sha256:e3126a94bdc4623d3de4485f8d468a12f02a67921315ddc87836d6e456dc789d"},
+]
+
+[package.extras]
+devel = ["colorama", "json-spec", "jsonschema", "pylint", "pytest", "pytest-benchmark", "pytest-cache", "validictory"]
 
 [[package]]
 name = "filelock"
@@ -2635,4 +2649,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "56214b1bc1880ddec382a731f9d34a4ba8e2e72c81677d7c51defe3ea5de435f"
+content-hash = "37a0fb5f11f53814739deaf7ba08ded83d345087110b1dae7c5b7956f27a3a51"
