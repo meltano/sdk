@@ -26,7 +26,7 @@ copyright = "2021, Meltano Core Team and Contributors"  # noqa: A001
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.34.1"
+release = "0.35.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -39,6 +39,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
     "sphinx_copybutton",
     "myst_parser",
     "sphinx_reredirects",
@@ -55,7 +56,7 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Show typehints in the description, along with parameter descriptions
-autodoc_typehints = "signature"
+autodoc_typehints = "description"
 autodoc_class_signature = "separated"
 autodoc_member_order = "groupwise"
 
@@ -126,4 +127,11 @@ myst_enable_extensions = {
 
 redirects = {
     "porting.html": "guides/porting.html",
+}
+
+# -- Options for intersphinx -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#configuration
+intersphinx_mapping = {
+    "requests": ("https://requests.readthedocs.io/en/latest/", None),
+    "python": ("https://docs.python.org/3/", None),
 }

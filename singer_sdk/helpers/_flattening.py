@@ -33,7 +33,7 @@ def get_flattening_options(
     Returns:
         A new FlatteningOptions object or None if flattening is disabled.
     """
-    if "flattening_enabled" in plugin_config and plugin_config["flattening_enabled"]:
+    if plugin_config.get("flattening_enabled"):
         return FlatteningOptions(max_level=int(plugin_config["flattening_max_depth"]))
 
     return None
@@ -430,7 +430,7 @@ def _flatten_record(
             items.append(
                 (
                     new_key,
-                    json.dumps(v, use_decimal=True)
+                    json.dumps(v, use_decimal=True, default=str)
                     if _should_jsondump_value(k, v, flattened_schema)
                     else v,
                 ),

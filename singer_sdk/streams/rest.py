@@ -137,10 +137,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         """Get requests session.
 
         Returns:
-            The `requests.Session`_ object for HTTP requests.
-
-        .. _requests.Session:
-            https://requests.readthedocs.io/en/latest/api.html#requests.Session
+            The :class:`requests.Session` object for HTTP requests.
         """
         if not self._requests_session:
             self._requests_session = requests.Session()
@@ -168,14 +165,11 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         .. image:: ../images/200.png
 
         Args:
-            response: A `requests.Response`_ object.
+            response: A :class:`requests.Response` object.
 
         Raises:
             FatalAPIError: If the request is not retriable.
             RetriableAPIError: If the request is retriable.
-
-        .. _requests.Response:
-            https://requests.readthedocs.io/en/latest/api.html#requests.Response
         """
         if (
             response.status_code in self.extra_retry_statuses
@@ -198,7 +192,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         WARNING - Override this method when the URL path may contain secrets or PII
 
         Args:
-            response: A `requests.Response`_ object.
+            response: A :class:`requests.Response` object.
 
         Returns:
             str: The error message
@@ -286,7 +280,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
 
         If your source needs special handling and, for example, parentheses should not
         be encoded, you can return a string constructed with
-        `urllib.parse.urlencode`_:
+        :py:func:`urllib.parse.urlencode`:
 
         .. code-block:: python
 
@@ -306,9 +300,6 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         Returns:
             Dictionary or encoded string with URL query parameters to use in the
                 request.
-
-        .. _urllib.parse.urlencode:
-           https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlencode
         """
         return {}
 
@@ -322,16 +313,11 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         Uses the authenticator instance to mutate the request with authentication.
 
         Args:
-            *args: Arguments to pass to `requests.Request`_.
-            **kwargs: Keyword arguments to pass to `requests.Request`_.
+            *args: Arguments to pass to :class:`requests.Request`.
+            **kwargs: Keyword arguments to pass to :class:`requests.Request`.
 
         Returns:
-            A `requests.PreparedRequest`_ object.
-
-        .. _requests.PreparedRequest:
-            https://requests.readthedocs.io/en/latest/api.html#requests.PreparedRequest
-        .. _requests.Request:
-            https://requests.readthedocs.io/en/latest/api.html#requests.Request
+            A :class:`requests.PreparedRequest` object.
         """
         request = requests.Request(*args, **kwargs)
         self.requests_session.auth = self.authenticator
@@ -460,7 +446,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
 
         Args:
             request: the Request object that was just called.
-            response: the `requests.Response` object
+            response: the :class:`requests.Response` object
             context: the context passed to the call
 
         Returns:
@@ -498,7 +484,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
 
         Args:
             request: the API Request object that was just called.
-            response: the `requests.Response` object
+            response: the :class:`requests.Response` object
             context: the context passed to the call
 
         Returns:
@@ -596,13 +582,10 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         """Parse the response and return an iterator of result records.
 
         Args:
-            response: A raw `requests.Response`_ object.
+            response: A raw :class:`requests.Response`
 
         Yields:
             One item for every item found in the response.
-
-        .. _requests.Response:
-            https://requests.readthedocs.io/en/latest/api.html#requests.Response
         """
         yield from extract_jsonpath(self.records_jsonpath, input=response.json())
 

@@ -7,9 +7,12 @@ from enum import Enum, EnumMeta
 from warnings import warn
 
 from singer_sdk.typing import (
+    ArrayType,
     BooleanType,
     IntegerType,
+    NumberType,
     ObjectType,
+    OneOf,
     PropertiesList,
     Property,
     StringType,
@@ -33,6 +36,33 @@ STREAM_MAPS_CONFIG = PropertiesList(
         "stream_map_config",
         ObjectType(),
         description="User-defined config values to be used within map expressions.",
+    ),
+    Property(
+        "faker_config",
+        ObjectType(
+            Property(
+                "seed",
+                OneOf(NumberType, StringType, BooleanType),
+                description=(
+                    "Value to seed the Faker generator for deterministic output: "
+                    "https://faker.readthedocs.io/en/master/#seeding-the-generator"
+                ),
+            ),
+            Property(
+                "locale",
+                OneOf(StringType, ArrayType(StringType)),
+                description=(
+                    "One or more LCID locale strings to produce localized output for: "
+                    "https://faker.readthedocs.io/en/master/#localization"
+                ),
+            ),
+        ),
+        description=(
+            "Config for the [`Faker`](https://faker.readthedocs.io/en/master/) "
+            "instance variable `fake` used within map expressions. Only applicable if "
+            "the plugin specifies `faker` as an addtional dependency (through the "
+            "`singer-sdk` `faker` extra or directly)."
+        ),
     ),
 ).to_dict()
 FLATTENING_CONFIG = PropertiesList(
@@ -112,6 +142,14 @@ TARGET_HARD_DELETE_CONFIG = PropertiesList(
         BooleanType(),
         description="Hard delete records.",
         default=False,
+    ),
+).to_dict()
+TARGET_VALIDATE_RECORDS_CONFIG = PropertiesList(
+    Property(
+        "validate_records",
+        BooleanType(),
+        description="Whether to validate the schema of the incoming streams.",
+        default=True,
     ),
 ).to_dict()
 
@@ -325,3 +363,6 @@ class TargetCapabilities(CapabilitiesEnum):
 
     #: Allow setting the target schema.
     TARGET_SCHEMA = "target-schema"
+
+    #: Validate the schema of the incoming records.
+    VALIDATE_RECORDS = "validate-records"
