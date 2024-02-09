@@ -517,7 +517,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
     """Generic Property. Should be nested within a `PropertiesList`."""
 
     # TODO: Make some of these arguments keyword-only. This is a breaking change.
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         wrapped: JSONTypeHelper[T] | type[JSONTypeHelper[T]],
@@ -527,6 +527,8 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         secret: bool | None = False,  # noqa: FBT002
         allowed_values: list[T] | None = None,
         examples: list[T] | None = None,
+        *,
+        nullable: bool | None = None,
     ) -> None:
         """Initialize Property object.
 
@@ -547,6 +549,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
                 are permitted. This will define the type as an 'enum'.
             examples: Optional. A list of one or more sample values. These may be
                 displayed to the user as hints of the expected format of inputs.
+            nullable: If True, the property may be null.
         """
         self.name = name
         self.wrapped = wrapped
@@ -556,6 +559,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         self.secret = secret
         self.allowed_values = allowed_values or None
         self.examples = examples or None
+        self.nullable = nullable
 
     @property
     def type_dict(self) -> dict:  # type: ignore[override]
@@ -585,7 +589,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
             A JSON Schema dictionary describing the object.
         """
         type_dict = self.type_dict
-        if self.optional:
+        if self.nullable or self.optional:
             type_dict = append_type(type_dict, "null")
         if self.default is not None:
             type_dict.update({"default": self.default})
