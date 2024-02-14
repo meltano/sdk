@@ -2,11 +2,36 @@ from __future__ import annotations
 
 import datetime
 import itertools
+import typing as t
 
+import fastjsonschema
 import pytest
 
 from singer_sdk.exceptions import InvalidRecord
+from singer_sdk.sinks.core import BaseJSONSchemaValidator, InvalidJSONSchema
 from tests.conftest import BatchSinkMock, TargetMock
+
+
+class FastJSONSchemaValidator(BaseJSONSchemaValidator):
+    def __init__(self, schema: dict[str, t.Any]) -> None:
+        super().__init__(schema)
+        try:
+            self.validator = fastjsonschema.compile(self.schema)
+        except fastjsonschema.JsonSchemaDefinitionException as e:
+            error_message = "Schema Validation Error"
+            raise InvalidJSONSchema(error_message) from e
+
+    def validate(self, record: dict):
+        try:
+            self.validator(record)
+        except fastjsonschema.JsonSchemaValueException as e:
+            error_message = f"Record Message Validation Error: {e.message}"
+            raise InvalidRecord(error_message, record) from e
+
+
+class FastJSONSchemaSink(BatchSinkMock):
+    def get_validator(self) -> BaseJSONSchemaValidator | None:
+        return FastJSONSchemaValidator(self.schema)
 
 
 def test_validate_record():
@@ -57,6 +82,42 @@ def test_validate_record():
     )
     assert updated_record["missing_datetime"] == "2021-01-01T00:00:00+00:00"
     assert updated_record["invalid_datetime"] == "9999-12-31 23:59:59.999999"
+
+
+def test_validate_fastjsonschema():
+    target = TargetMock()
+    sink = FastJSONSchemaSink(
+        target,
+        "users",
+        {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "created_at": {"type": "string", "format": "date-time"},
+                "created_at_date": {"type": "string", "format": "date"},
+                "created_at_time": {"type": "string", "format": "time"},
+                "invalid_datetime": {"type": "string", "format": "date-time"},
+            },
+        },
+        ["id"],
+    )
+
+    record = {
+        "id": 1,
+        "created_at": "2021-01-01T00:00:00+00:00",
+        "created_at_date": "2021-01-01",
+        "created_at_time": "00:01:00+00:00",
+        "missing_datetime": "2021-01-01T00:00:00+00:00",
+        "invalid_datetime": "not a datetime",
+    }
+
+    with pytest.raises(
+        InvalidRecord,
+        match=r"Record Message Validation Error",
+    ) as exc_info:
+        sink._validator.validate(record)
+
+    assert isinstance(exc_info.value.__cause__, fastjsonschema.JsonSchemaValueException)
 
 
 @pytest.fixture
