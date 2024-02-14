@@ -1212,6 +1212,6 @@ class SQLConnector:
             conn.execute(
                 sa.text(
                     f"DELETE FROM {full_table_name} "  # noqa: S608
-                    f"WHERE {version_column_name} <= {current_version}",
+                    f"WHERE {version_column_name} < {current_version}",
                 ),
             )
