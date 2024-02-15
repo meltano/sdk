@@ -11,7 +11,7 @@ from copy import deepcopy
 import inflection
 import simplejson as json
 
-from exceptions import InvalidFlatteningRecordsParameter
+from singer_sdk.exceptions import InvalidFlatteningRecordsParameter
 
 DEFAULT_FLATTENING_SEPARATOR = "__"
 

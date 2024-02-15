@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from exceptions import InvalidFlatteningRecordsParameter
+from singer_sdk.exceptions import InvalidFlatteningRecordsParameter
 from singer_sdk.helpers._flattening import flatten_record
 
 
