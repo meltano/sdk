@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from exceptions import InvalidFlatteningRecordsParameter
 from singer_sdk.helpers._flattening import flatten_record
 
 
@@ -38,7 +39,7 @@ from singer_sdk.helpers._flattening import flatten_record
             id="flattened schema not provided",
         ),
         pytest.param(
-            None, None, None, AssertionError, id="no schema or max level provided"
+            None, None, None, InvalidFlatteningRecordsParameter, id="no schema or max level provided"
         ),
     ],
 )
@@ -57,5 +58,4 @@ def test_flatten_record(flattened_schema, max_level, expected, expected_exceptio
         result = flatten_record(
             record, max_level=max_level, flattened_schema=flattened_schema
         )
-        print(result)
         assert expected == result

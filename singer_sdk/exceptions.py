@@ -157,3 +157,7 @@ class InvalidRecord(Exception):
         super().__init__(f"Record Message Validation Error: {error_message}")
         self.error_message = error_message
         self.record = record
+
+
+class InvalidFlatteningRecordsParameter(Exception):
+    """Raised when the flattening_records parameter is invalid."""

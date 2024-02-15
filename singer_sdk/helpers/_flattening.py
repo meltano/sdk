@@ -11,6 +11,8 @@ from copy import deepcopy
 import inflection
 import simplejson as json
 
+from exceptions import InvalidFlatteningRecordsParameter
+
 DEFAULT_FLATTENING_SEPARATOR = "__"
 
 
@@ -376,9 +378,8 @@ def flatten_record(
     Returns:
         A flattened version of the record.
     """
-    assert (flattened_schema is not None) or (
-        max_level is not None
-    ), "flattened_schema or max_level must be provided"
+    if (flattened_schema is not None) or (max_level is not None):
+        raise InvalidFlatteningRecordsParameter("flattened_schema or max_level must be provided")
     max_level = max_level or 0
 
     return _flatten_record(
