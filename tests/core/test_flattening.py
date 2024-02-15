@@ -57,7 +57,8 @@ from singer_sdk.helpers._flattening import flatten_record
                 "key_2__key_3": "value",
                 "key_2__key_4": '{"key_5": 1, "key_6": ["a", "b"]}',
             },
-            id="max level limiting flattened schema")
+            id="max level limiting flattened schema",
+        ),
     ],
 )
 def test_flatten_record(flattened_schema, max_level, expected):
