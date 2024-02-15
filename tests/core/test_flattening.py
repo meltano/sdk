@@ -39,7 +39,11 @@ from singer_sdk.helpers._flattening import flatten_record
             id="flattened schema not provided",
         ),
         pytest.param(
-            None, None, None, InvalidFlatteningRecordsParameter, id="no schema or max level provided"
+            None,
+            None,
+            None,
+            InvalidFlatteningRecordsParameter,
+            id="no schema or max level provided",
         ),
     ],
 )
