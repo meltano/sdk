@@ -416,7 +416,7 @@ def _flatten_record(
     for k, v in record_node.items():
         new_key = flatten_key(k, parent_key, separator)
         if isinstance(v, collections.abc.MutableMapping) and (
-            (new_key not in flattened_schema.get("properties", {}))
+            (flattened_schema and new_key not in flattened_schema.get("properties", {}))
             and (level < max_level)
         ):
             items.extend(
