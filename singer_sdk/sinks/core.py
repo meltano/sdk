@@ -9,6 +9,7 @@ import importlib.util
 import json
 import time
 import typing as t
+from functools import cached_property
 from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
@@ -131,9 +132,6 @@ class Sink(metaclass=abc.ABCMeta):
 
     MAX_SIZE_DEFAULT = 10000
 
-    validate_schema = True
-    """Enable JSON schema record validation."""
-
     validate_field_string_format = False
     """Enable JSON schema format validation, for example `date-time` string fields."""
 
@@ -186,6 +184,15 @@ class Sink(metaclass=abc.ABCMeta):
 
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
 
+    @cached_property
+    def validate_schema(self) -> bool:
+        """Enable JSON schema record validation.
+
+        Returns:
+            True if JSON schema validation is enabled.
+        """
+        return self.config.get("validate_records", True)
+
     def get_validator(self) -> BaseJSONSchemaValidator | None:
         """Get a record validator for this sink.
 
@@ -194,6 +201,31 @@ class Sink(metaclass=abc.ABCMeta):
 
         Returns:
             An instance of a subclass of ``BaseJSONSchemaValidator``.
+
+        Example implementation using the `fastjsonschema`_ library:
+
+        .. code-block:: python
+
+           import fastjsonschema
+
+
+           class FastJSONSchemaValidator(BaseJSONSchemaValidator):
+               def __init__(self, schema: dict[str, t.Any]) -> None:
+                   super().__init__(schema)
+                   try:
+                       self.validator = fastjsonschema.compile(self.schema)
+                   except fastjsonschema.JsonSchemaDefinitionException as e:
+                       error_message = "Schema Validation Error"
+                       raise InvalidJSONSchema(error_message) from e
+
+               def validate(self, record: dict):
+                   try:
+                       self.validator(record)
+                   except fastjsonschema.JsonSchemaValueException as e:
+                       error_message = f"Record Message Validation Error: {e.message}"
+                       raise InvalidRecord(error_message, record) from e
+
+        .. _fastjsonschema: https://pypi.org/project/fastjsonschema/
         """
         if self.validate_schema:
             return JSONSchemaValidator(

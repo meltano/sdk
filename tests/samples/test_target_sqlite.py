@@ -490,14 +490,15 @@ def test_record_with_missing_properties(
                 "properties": {
                     "id": {"type": "integer"},
                     "name": {"type": "string"},
+                    "table": {"type": "string"},
                 },
             },
             [],
             dedent(
                 """\
                 INSERT INTO test_stream
-                (id, name)
-                VALUES (:id, :name)""",
+                (id, name, "table")
+                VALUES (:id, :name, :table)""",
             ),
         ),
     ],

@@ -464,7 +464,8 @@ class SQLConnector:
                 th.Property(
                     name=column_name,
                     wrapped=th.CustomType(jsonschema_type),
-                    required=not is_nullable,
+                    nullable=is_nullable,
+                    required=column_name in key_properties if key_properties else False,
                 ),
             )
         schema = table_schema.to_dict()
@@ -1211,6 +1212,6 @@ class SQLConnector:
             conn.execute(
                 sa.text(
                     f"DELETE FROM {full_table_name} "  # noqa: S608
-                    f"WHERE {version_column_name} <= {current_version}",
+                    f"WHERE {version_column_name} < {current_version}",
                 ),
             )

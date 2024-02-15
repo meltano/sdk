@@ -181,7 +181,7 @@ class BaseHATEOASPaginator(
     like "https://api.com/link/to/next-item".
 
     The :attr:`~singer_sdk.pagination.BaseAPIPaginator.current_value` attribute of
-    this paginator is a `urllib.parse.ParseResult`_ object. This object
+    this paginator is a :class:`urllib.parse.ParseResult` object. This object
     contains the following attributes:
 
     - scheme
@@ -208,9 +208,6 @@ class BaseHATEOASPaginator(
                if next_page_token:
                    return dict(parse_qsl(next_page_token.query))
                return {}
-
-    .. _`urllib.parse.ParseResult`:
-         https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlparse
     """
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
@@ -390,7 +387,6 @@ class LegacyPaginatedStreamProtocol(t.Protocol[TPageToken]):
             response: API response object.
             previous_token: Previous page token.
         """
-        ...  # pragma: no cover
 
 
 class LegacyStreamPaginator(

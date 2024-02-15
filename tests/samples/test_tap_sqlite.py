@@ -80,6 +80,8 @@ def test_sqlite_discovery(sqlite_sample_tap: SQLTap):
 
     assert stream.metadata.root.table_key_properties == ["c1"]
     assert stream.primary_keys == ["c1"]
+    assert stream.schema["properties"]["c1"] == {"type": ["integer"]}
+    assert stream.schema["required"] == ["c1"]
 
 
 def test_sqlite_input_catalog(sqlite_sample_tap: SQLTap):
@@ -90,7 +92,7 @@ def test_sqlite_input_catalog(sqlite_sample_tap: SQLTap):
 
     for schema in [stream.schema, stream.stream_maps[0].transformed_schema]:
         assert len(schema["properties"]) == 2
-        assert schema["properties"]["c1"] == {"type": ["integer", "null"]}
+        assert schema["properties"]["c1"] == {"type": ["integer"]}
         assert schema["properties"]["c2"] == {"type": ["string", "null"]}
         assert stream.name == stream.tap_stream_id == "main-t1"
 

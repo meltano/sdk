@@ -10,6 +10,7 @@ import ast
 import copy
 import datetime
 import hashlib
+import importlib.util
 import logging
 import typing as t
 
@@ -27,6 +28,8 @@ from singer_sdk.helpers._flattening import (
 
 if t.TYPE_CHECKING:
     import sys
+
+    from faker import Faker
 
     if sys.version_info >= (3, 10):
         from typing import TypeAlias  # noqa: ICN003
@@ -231,6 +234,7 @@ class CustomStreamMap(StreamMap):
         self,
         stream_alias: str,
         map_config: dict,
+        faker_config: dict,
         raw_schema: dict,
         key_properties: t.Sequence[str] | None,
         map_transform: dict,
@@ -241,6 +245,7 @@ class CustomStreamMap(StreamMap):
         Args:
             stream_alias: Stream name.
             map_config: Stream map configuration.
+            faker_config: Faker configuration.
             raw_schema: Original stream's JSON schema.
             key_properties: Primary key of the source stream.
             map_transform: Dictionary of transformations to apply to the stream.
@@ -254,6 +259,8 @@ class CustomStreamMap(StreamMap):
         )
 
         self.map_config = map_config
+        self.faker_config = faker_config
+
         self._transform_fn: t.Callable[[dict], dict | None]
         self._filter_fn: t.Callable[[dict], bool]
         (
@@ -262,6 +269,7 @@ class CustomStreamMap(StreamMap):
             self.transformed_schema,
         ) = self._init_functions_and_schema(stream_map=map_transform)
         self.expr_evaluator = simpleeval.EvalWithCompoundTypes(functions=self.functions)
+        self.fake = self._init_faker_instance()
 
     def transform(self, record: dict) -> dict | None:
         """Return a transformed record.
@@ -324,6 +332,10 @@ class CustomStreamMap(StreamMap):
         names["_"] = record  # Add a shorthand alias in case of reserved words in names
         names["record"] = record  # ...and a longhand alias
         names["config"] = self.map_config  # Allow map config access within transform
+
+        if self.fake:
+            names["fake"] = self.fake
+
         if property_name and property_name in record:
             # Allow access to original property value if applicable
             names["self"] = record[property_name]
@@ -593,6 +605,24 @@ class CustomStreamMap(StreamMap):
 
         return filter_fn, transform_fn, transformed_schema
 
+    def _init_faker_instance(self) -> Faker | None:
+        if not importlib.util.find_spec("faker"):
+            return None
+
+        from faker import Faker
+
+        if self.faker_config:
+            faker_seed = self.faker_config.get("seed")
+            faker_locale = self.faker_config.get("locale")
+
+            if faker_seed is not None:
+                Faker.seed(faker_seed)
+
+            if faker_locale is not None:
+                return Faker(faker_locale)
+
+        return Faker()
+
 
 class PluginMapper:
     """Inline map tranformer."""
@@ -613,6 +643,7 @@ class PluginMapper:
         """
         self.stream_maps: dict[str, list[StreamMap]] = {}
         self.map_config = plugin_config.get("stream_map_config", {})
+        self.faker_config = plugin_config.get("faker_config", {})
         self.flattening_options = get_flattening_options(plugin_config)
         self.default_mapper_type: type[DefaultStreamMap] = SameRecordTransform
         self.logger = logger
@@ -751,6 +782,7 @@ class PluginMapper:
                 stream_alias=stream_alias,
                 map_transform=stream_def,
                 map_config=self.map_config,
+                faker_config=self.faker_config,
                 raw_schema=schema,
                 key_properties=key_properties,
                 flattening_options=self.flattening_options,

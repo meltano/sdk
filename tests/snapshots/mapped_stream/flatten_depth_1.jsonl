@@ -1,6 +1,6 @@
 {"type":"STATE","value":{}}
 {"type":"SCHEMA","stream":"mystream","schema":{"properties":{"email":{"type":["string","null"]},"count":{"type":["integer","null"]},"user__id":{"type":["integer","null"]},"user__sub":{"type":["string","null"]},"user__some_numbers":{"type":["string","null"]}},"type":"object"},"key_properties":[]}
-{"type":"RECORD","stream":"mystream","record":{"email":"alice@example.com","count":21,"user__id":1,"user__sub":"{\"num\":1}","user__some_numbers":"[\"3.14\",\"2.718\"]"},"time_extracted":"2022-01-01T00:00:00+00:00"}
-{"type":"RECORD","stream":"mystream","record":{"email":"bob@example.com","count":13,"user__id":2,"user__sub":"{\"num\":2}","user__some_numbers":"[\"10.32\",\"1.618\"]"},"time_extracted":"2022-01-01T00:00:00+00:00"}
-{"type":"RECORD","stream":"mystream","record":{"email":"charlie@example.com","count":19,"user__id":3,"user__sub":"{\"num\":3}","user__some_numbers":"[\"1.414\",\"1.732\"]"},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"mystream","record":{"email":"alice@example.com","count":21,"user__id":1,"user__sub":"{\"num\": 1, \"custom_obj\": \"obj-hello\"}","user__some_numbers":"[3.14, 2.718]"},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"mystream","record":{"email":"bob@example.com","count":13,"user__id":2,"user__sub":"{\"num\": 2, \"custom_obj\": \"obj-world\"}","user__some_numbers":"[10.32, 1.618]"},"time_extracted":"2022-01-01T00:00:00+00:00"}
+{"type":"RECORD","stream":"mystream","record":{"email":"charlie@example.com","count":19,"user__id":3,"user__sub":"{\"num\": 3, \"custom_obj\": \"obj-hello\"}","user__some_numbers":"[1.414, 1.732]"},"time_extracted":"2022-01-01T00:00:00+00:00"}
 {"type":"STATE","value":{"bookmarks":{"mystream":{}}}}

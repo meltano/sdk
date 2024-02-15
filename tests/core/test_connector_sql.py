@@ -274,7 +274,7 @@ class TestConnectorSQL:
             sa.Column("attrs", sa.JSON),
         )
         meta.create_all(engine)
-        with engine.connect() as conn:
+        with engine.connect() as conn, conn.begin():
             conn.execute(
                 table.insert(),
                 [
@@ -317,7 +317,7 @@ class TestDuckDBConnector:
         engine = connector._engine
         connector.create_schema("test_schema")
         inspector = sa.inspect(engine)
-        assert "memory.test_schema" in inspector.get_schema_names()
+        assert "test_schema" in inspector.get_schema_names()
 
     def test_column_rename(self, connector: DuckDBConnector):
         engine = connector._engine

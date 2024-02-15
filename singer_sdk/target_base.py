@@ -21,6 +21,7 @@ from singer_sdk.helpers.capabilities import (
     TARGET_HARD_DELETE_CONFIG,
     TARGET_LOAD_METHOD_CONFIG,
     TARGET_SCHEMA_CONFIG,
+    TARGET_VALIDATE_RECORDS_CONFIG,
     CapabilitiesEnum,
     PluginCapabilities,
     TargetCapabilities,
@@ -104,6 +105,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             PluginCapabilities.ABOUT,
             PluginCapabilities.STREAM_MAPS,
             PluginCapabilities.FLATTENING,
+            TargetCapabilities.VALIDATE_RECORDS,
         ]
 
     @property
@@ -613,6 +615,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         if PluginCapabilities.BATCH in capabilities:
             _merge_missing(BATCH_CONFIG, config_jsonschema)
+
+        if TargetCapabilities.VALIDATE_RECORDS in capabilities:
+            _merge_missing(TARGET_VALIDATE_RECORDS_CONFIG, config_jsonschema)
 
         super().append_builtin_config(config_jsonschema)
 
