@@ -40,6 +40,16 @@ from singer_sdk.helpers._flattening import flatten_record
         ),
         pytest.param(
             None,
+            1,
+            {
+                'key_1': 1,
+                'key_2__key_3': 'value',
+                'key_2__key_4': '{"key_5": 1, "key_6": ["a", "b"]}'
+            },
+            None,
+            id='limited by max_level 2'),
+        pytest.param(
+            None,
             None,
             None,
             InvalidFlatteningRecordsParameter,
