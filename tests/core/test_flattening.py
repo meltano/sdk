@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from singer_sdk._flattening import flatten_record
+import pytest
+
+from singer_sdk.helpers._flattening import flatten_record
 
 
 @pytest.mark.parametrize(
