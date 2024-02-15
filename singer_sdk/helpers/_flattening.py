@@ -379,7 +379,8 @@ def flatten_record(
         A flattened version of the record.
     """
     if (flattened_schema is not None) or (max_level is not None):
-        raise InvalidFlatteningRecordsParameter("flattened_schema or max_level must be provided")
+        msg = "flattened_schema or max_level must be provided"
+        raise InvalidFlatteningRecordsParameter(msg)
     max_level = max_level or 0
 
     return _flatten_record(
