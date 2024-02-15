@@ -415,7 +415,14 @@ def _flatten_record(
     items: list[tuple[str, t.Any]] = []
     for k, v in record_node.items():
         new_key = flatten_key(k, parent_key, separator)
-        if isinstance(v, collections.abc.MutableMapping) and level < max_level:
+        # If the value is a dictionary, and the key is not in the schema, and the
+        # level is less than the max level, then we should continue to flatten.
+        if (
+            isinstance(v, collections.abc.MutableMapping)
+            and flattened_schema
+            and new_key not in flattened_schema.get("properties", {})
+            and (level < max_level)
+        ):
             items.extend(
                 _flatten_record(
                     v,
