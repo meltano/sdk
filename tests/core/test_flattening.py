@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import pytest
 
-from singer_sdk.exceptions import InvalidFlatteningRecordsParameter
 from singer_sdk.helpers._flattening import flatten_record
 
 
 @pytest.mark.parametrize(
-    "flattened_schema, max_level, expected, expected_exception",
+    "flattened_schema, max_level, expected",
     [
         pytest.param(
             {
@@ -17,17 +16,23 @@ from singer_sdk.helpers._flattening import flatten_record
                     "key_2__key_4": {"type": ["null", "object"]},
                 }
             },
-            None,
+            99,
             {
                 "key_1": 1,
                 "key_2__key_3": "value",
                 "key_2__key_4": '{"key_5": 1, "key_6": ["a", "b"]}',
             },
-            None,
-            id="flattened schema provided",
+            id="flattened schema limiting the max level",
         ),
         pytest.param(
-            None,
+            {
+                "properties": {
+                    "key_1": {"type": ["null", "integer"]},
+                    "key_2__key_3": {"type": ["null", "string"]},
+                    "key_2__key_4__key_5": {"type": ["null", "integer"]},
+                    "key_2__key_4__key_6": {"type": ["null", "array"]},
+                }
+            },
             99,
             {
                 "key_1": 1,
@@ -35,41 +40,34 @@ from singer_sdk.helpers._flattening import flatten_record
                 "key_2__key_4__key_5": 1,
                 "key_2__key_4__key_6": '["a", "b"]',
             },
-            None,
-            id="flattened schema not provided",
+            id="flattened schema not limiting the max level",
         ),
         pytest.param(
-            None,
+            {
+                "properties": {
+                    "key_1": {"type": ["null", "integer"]},
+                    "key_2__key_3": {"type": ["null", "string"]},
+                    "key_2__key_4__key_5": {"type": ["null", "integer"]},
+                    "key_2__key_4__key_6": {"type": ["null", "array"]},
+                }
+            },
             1,
             {
-                'key_1': 1,
-                'key_2__key_3': 'value',
-                'key_2__key_4': '{"key_5": 1, "key_6": ["a", "b"]}'
+                "key_1": 1,
+                "key_2__key_3": "value",
+                "key_2__key_4": '{"key_5": 1, "key_6": ["a", "b"]}',
             },
-            None,
-            id='limited by max_level 2'),
-        pytest.param(
-            None,
-            None,
-            None,
-            InvalidFlatteningRecordsParameter,
-            id="no schema or max level provided",
-        ),
+            id="max level limiting flattened schema")
     ],
 )
-def test_flatten_record(flattened_schema, max_level, expected, expected_exception):
+def test_flatten_record(flattened_schema, max_level, expected):
     """Test flatten_record to obey the max_level and flattened_schema parameters."""
     record = {
         "key_1": 1,
         "key_2": {"key_3": "value", "key_4": {"key_5": 1, "key_6": ["a", "b"]}},
     }
-    if expected_exception:
-        with pytest.raises(expected_exception):
-            flatten_record(
-                record, max_level=max_level, flattened_schema=flattened_schema
-            )
-    else:
-        result = flatten_record(
-            record, max_level=max_level, flattened_schema=flattened_schema
-        )
-        assert expected == result
+
+    result = flatten_record(
+        record, max_level=max_level, flattened_schema=flattened_schema
+    )
+    assert expected == result

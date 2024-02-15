@@ -11,8 +11,6 @@ from copy import deepcopy
 import inflection
 import simplejson as json
 
-from singer_sdk.exceptions import InvalidFlatteningRecordsParameter
-
 DEFAULT_FLATTENING_SEPARATOR = "__"
 
 
@@ -363,8 +361,8 @@ def _flatten_schema(  # noqa: C901, PLR0912
 
 def flatten_record(
     record: dict,
-    flattened_schema: dict | None = None,
-    max_level: int | None = None,
+    flattened_schema: dict,
+    max_level: int,
     separator: str = "__",
 ) -> dict:
     """Flatten a record up to max_level.
@@ -378,11 +376,6 @@ def flatten_record(
     Returns:
         A flattened version of the record.
     """
-    if flattened_schema is None and max_level is None:
-        msg = "flattened_schema or max_level must be provided"
-        raise InvalidFlatteningRecordsParameter(msg)
-    max_level = max_level or 0
-
     return _flatten_record(
         record_node=record,
         flattened_schema=flattened_schema,
@@ -394,7 +387,7 @@ def flatten_record(
 def _flatten_record(
     record_node: t.MutableMapping[t.Any, t.Any],
     *,
-    flattened_schema: dict | None = None,
+    flattened_schema: dict,
     parent_key: list[str] | None = None,
     separator: str = "__",
     level: int = 0,
@@ -423,8 +416,8 @@ def _flatten_record(
     for k, v in record_node.items():
         new_key = flatten_key(k, parent_key, separator)
         if isinstance(v, collections.abc.MutableMapping) and (
-            (flattened_schema and new_key not in flattened_schema.get("properties", {}))
-            or (not flattened_schema and level < max_level)
+            (new_key not in flattened_schema.get("properties", {}))
+            and (level < max_level)
         ):
             items.extend(
                 _flatten_record(
