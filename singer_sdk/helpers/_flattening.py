@@ -361,8 +361,8 @@ def _flatten_schema(  # noqa: C901, PLR0912
 
 def flatten_record(
     record: dict,
-    flattened_schema: dict,
-    max_level: int,
+    flattened_schema: dict | None = None,
+    max_level: int | None = None,
     separator: str = "__",
 ) -> dict:
     """Flatten a record up to max_level.
@@ -376,6 +376,9 @@ def flatten_record(
     Returns:
         A flattened version of the record.
     """
+    assert (flattened_schema is not None) or (max_level is not None), "flattened_schema or max_level must be provided"
+    max_level = max_level or 0
+
     return _flatten_record(
         record_node=record,
         flattened_schema=flattened_schema,
@@ -415,7 +418,9 @@ def _flatten_record(
     items: list[tuple[str, t.Any]] = []
     for k, v in record_node.items():
         new_key = flatten_key(k, parent_key, separator)
-        if isinstance(v, collections.abc.MutableMapping) and level < max_level:
+        if (isinstance(v, MutableMapping) and
+                ((flattened_schema and new_key not in flattened_schema.get('properties', {})) or
+                 (not flattened_schema and level < max_level))):
             items.extend(
                 _flatten_record(
                     v,
