@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import collections
 import itertools
 import re
 import typing as t
@@ -376,7 +375,9 @@ def flatten_record(
     Returns:
         A flattened version of the record.
     """
-    assert (flattened_schema is not None) or (max_level is not None), "flattened_schema or max_level must be provided"
+    assert (flattened_schema is not None) or (
+        max_level is not None
+    ), "flattened_schema or max_level must be provided"
     max_level = max_level or 0
 
     return _flatten_record(
@@ -418,9 +419,10 @@ def _flatten_record(
     items: list[tuple[str, t.Any]] = []
     for k, v in record_node.items():
         new_key = flatten_key(k, parent_key, separator)
-        if (isinstance(v, MutableMapping) and
-                ((flattened_schema and new_key not in flattened_schema.get('properties', {})) or
-                 (not flattened_schema and level < max_level))):
+        if isinstance(v, MutableMapping) and (
+            (flattened_schema and new_key not in flattened_schema.get("properties", {}))
+            or (not flattened_schema and level < max_level)
+        ):
             items.extend(
                 _flatten_record(
                     v,
