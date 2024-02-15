@@ -419,7 +419,7 @@ def _flatten_record(
     items: list[tuple[str, t.Any]] = []
     for k, v in record_node.items():
         new_key = flatten_key(k, parent_key, separator)
-        if isinstance(v, MutableMapping) and (
+        if isinstance(v, t.MutableMapping) and (
             (flattened_schema and new_key not in flattened_schema.get("properties", {}))
             or (not flattened_schema and level < max_level)
         ):
