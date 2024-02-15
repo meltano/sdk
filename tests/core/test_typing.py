@@ -19,6 +19,7 @@ from singer_sdk.typing import (
     PropertiesList,
     Property,
     StringType,
+    append_type,
     to_sql_type,
 )
 
@@ -318,3 +319,33 @@ def test_conform_primitives():
 )
 def test_to_sql_type(jsonschema_type, expected):
     assert isinstance(to_sql_type(jsonschema_type), expected)
+
+
+@pytest.mark.parametrize(
+    "type_dict,expected",
+    [
+        pytest.param({"type": "string"}, {"type": ["string", "null"]}, id="string"),
+        pytest.param({"type": "integer"}, {"type": ["integer", "null"]}, id="integer"),
+        pytest.param({"type": "number"}, {"type": ["number", "null"]}, id="number"),
+        pytest.param({"type": "boolean"}, {"type": ["boolean", "null"]}, id="boolean"),
+        pytest.param(
+            {"type": "object", "properties": {}},
+            {"type": ["object", "null"], "properties": {}},
+            id="object",
+        ),
+        pytest.param({"type": "array"}, {"type": ["array", "null"]}, id="array"),
+        pytest.param(
+            {"anyOf": [{"type": "integer"}, {"type": "number"}]},
+            {"anyOf": [{"type": "integer"}, {"type": "number"}, "null"]},
+            id="anyOf",
+        ),
+        pytest.param(
+            {"oneOf": [{"type": "integer"}, {"type": "number"}]},
+            {"oneOf": [{"type": "integer"}, {"type": "number"}, "null"]},
+            id="oneOf",
+        ),
+    ],
+)
+def test_append_null(type_dict: dict, expected: dict):
+    result = append_type(type_dict, "null")
+    assert result == expected
