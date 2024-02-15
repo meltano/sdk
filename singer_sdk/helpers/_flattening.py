@@ -387,7 +387,7 @@ def flatten_record(
 def _flatten_record(
     record_node: t.MutableMapping[t.Any, t.Any],
     *,
-    flattened_schema: dict,
+    flattened_schema: dict | None = None,
     parent_key: list[str] | None = None,
     separator: str = "__",
     level: int = 0,
