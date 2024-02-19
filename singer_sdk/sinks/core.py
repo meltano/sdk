@@ -274,10 +274,10 @@ class Sink(metaclass=abc.ABCMeta):
 
     @property
     def batch_size_rows(self) -> int | None:
-        """Get batch_size_rows object.
+        """The maximum number of rows a batch can accumulate before being processed.
 
         Returns:
-            A batch_size_rows object.
+            The max number of rows or None if not set.
         """
         return self._batch_size_rows
 
@@ -290,7 +290,7 @@ class Sink(metaclass=abc.ABCMeta):
 
         .. versionchanged:: 0.36.0
            This property now takes into account the
-           :meth:`~singer_sdk.Sink.batch_size_rows` attribute and the corresponding
+           :attr:`~singer_sdk.Sink.batch_size_rows` attribute and the corresponding
            ``batch_size_rows`` target setting.
         """
         return (
