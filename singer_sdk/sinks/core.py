@@ -265,7 +265,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     @property
     def is_full(self) -> bool:
-        """Calls the size limit check funtion.
+        """Check against the batch size limit.
 
         Returns:
             True if the sink needs to be drained.
