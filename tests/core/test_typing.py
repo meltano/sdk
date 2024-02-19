@@ -341,7 +341,7 @@ def test_to_sql_type(jsonschema_type, expected):
         ),
         pytest.param(
             {"oneOf": [{"type": "integer"}, {"type": "number"}]},
-            {"oneOf": [{"type": "integer"}, {"type": "number"}, "null"]},
+            {"oneOf": [{"type": "integer"}, {"type": "number"}, {"type": "null"}]},
             id="oneOf",
         ),
     ],
