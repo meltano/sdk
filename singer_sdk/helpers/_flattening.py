@@ -7,11 +7,27 @@ import itertools
 import re
 import typing as t
 from copy import deepcopy
+from datetime import datetime
 
 import inflection
-from msgspec import json
+import msgspec
 
 DEFAULT_FLATTENING_SEPARATOR = "__"
+
+
+def enc_hook(obj: t.Any) -> t.Any:  # noqa: ANN401
+    """Enocding type helper for non native types.
+
+    Args:
+        obj: the item to be encoded
+
+    Returns:
+        The object converted to the appropriate type, default is str
+    """
+    return obj.isoformat(sep="T") if isinstance(obj, datetime) else str(obj)
+
+
+encoder = msgspec.json.Encoder(enc_hook=enc_hook, decimal_format="number")
 
 
 class FlatteningOptions(t.NamedTuple):
@@ -437,7 +453,7 @@ def _flatten_record(
             items.append(
                 (
                     new_key,
-                    json.encode(v).decode()
+                    encoder.encode(v).decode()
                     if _should_jsondump_value(k, v, flattened_schema)
                     else v,
                 ),
