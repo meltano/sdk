@@ -288,7 +288,7 @@ class Sink(metaclass=abc.ABCMeta):
         Returns:
             Max number of records to batch before `is_full=True`
 
-        .. versionremoved:: 0.36.0
+        .. versionchanged:: 0.36.0
         This property now takes into account the ``batch_size_rows`` target setting.
         """
         return (
