@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import math
 import typing as t
+import warnings
 from datetime import timedelta
 from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
@@ -319,6 +320,13 @@ class BasicAuthenticator(APIAuthenticatorBase):
             password: API password.
         """
         super().__init__(stream=stream)
+        warnings.warn(
+            "BasicAuthenticator is deprecated. Use "
+            "requests.auth.HTTPBasicAuth instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         credentials = f"{username}:{password}".encode()
         auth_token = base64.b64encode(credentials).decode("ascii")
         auth_credentials = {"Authorization": f"Basic {auth_token}"}
