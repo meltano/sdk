@@ -2,11 +2,75 @@
 
 from __future__ import annotations
 
+import decimal
 import json
+import logging
+import sys
 import typing as t
+from datetime import datetime
 from pathlib import Path, PurePath
 
 import pendulum
+import simplejson as simjson
+
+if sys.version_info < (3, 11):
+    from backports.datetime_fromisoformat import MonkeyPatch
+
+    MonkeyPatch.patch_fromisoformat()
+
+
+logger = logging.getLogger(__name__)
+
+
+def _default_encoding(obj: t.Any) -> str:  # noqa: ANN401
+    """Default JSON encoder.
+
+    Args:
+        obj: The object to encode.
+
+    Returns:
+        The encoded object.
+    """
+    return obj.isoformat(sep="T") if isinstance(obj, datetime) else str(obj)
+
+
+def deserialize_json(line: str) -> dict:
+    """Deserialize a line of json.
+
+    Args:
+        line: A single line of json.
+
+    Returns:
+        A dictionary of the deserialized json.
+
+    Raises:
+        json.decoder.JSONDecodeError: raised if any lines are not valid json
+    """
+    try:
+        return json.loads(  # type: ignore[no-any-return]
+            line,
+            parse_float=decimal.Decimal,
+        )
+    except json.decoder.JSONDecodeError as exc:
+        logger.error("Unable to parse:\n%s", line, exc_info=exc)
+        raise
+
+
+def serialize_json(line_dict: dict) -> str:
+    """Serialize a dictionary into a line of json.
+
+    Args:
+        line_dict: A Python dict.
+
+    Returns:
+        A string of serialized json.
+    """
+    return simjson.dumps(
+        line_dict,
+        use_decimal=True,
+        default=_default_encoding,
+        separators=(",", ":"),
+    )
 
 
 def read_json_file(path: PurePath | str) -> dict[str, t.Any]:
