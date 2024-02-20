@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.35.2 (2024-02-19)
+
+### 🐛 Fixes
+
+- [#2252](https://github.com/meltano/sdk/issues/2252) Null type is now correctly appended as `{"type": "null"}` to `oneOf` types
+
+## v0.35.1 (2024-02-15)
+
+### 🐛 Fixes
+
+- [#2243](https://github.com/meltano/sdk/issues/2243) Flattening level of record is now forced to match the provided flattened schema -- _**Thanks @joaopamaral!**_
+- [#2245](https://github.com/meltano/sdk/issues/2245) Instances of `oneOf` are now handled by null-appending logic
+- [#2242](https://github.com/meltano/sdk/issues/2242) Hard and soft deletes for handling `ACTIVATE_VERSION` messages now use the same `WHERE` clause -- _**Thanks @vitoravancini!**_
+- [#2232](https://github.com/meltano/sdk/issues/2232) Test workflow job now fails for unsupported Python versions in cookiecutter templates -- _**Thanks @ReubenFrankel!**_
+- [#2225](https://github.com/meltano/sdk/issues/2225) SQL columns that are non-nullable but not required (i.e. not part of a primary key) are now not included in the `"required": [...]` array of the discovered JSON schema
+
+### 📚 Documentation Improvements
+
+- [#2239](https://github.com/meltano/sdk/issues/2239) Linked reference docs to source code
+- [#2231](https://github.com/meltano/sdk/issues/2231) Added an example implemetation of JSON schema validation that uses `fastjsonschema`
+- [#2219](https://github.com/meltano/sdk/issues/2219) Added reference docs for tap & target testing helpers
+
 ## v0.35.0 (2024-02-02)
 
 ### ✨ New
