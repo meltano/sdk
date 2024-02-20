@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import abc
 import contextlib
-import json
 import typing as t
 from enum import Enum
 
@@ -21,7 +20,7 @@ from singer_sdk.exceptions import (
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._state import write_stream_state
-from singer_sdk.helpers._util import read_json_file
+from singer_sdk.helpers._util import read_json_file, serialize_json
 from singer_sdk.helpers.capabilities import (
     BATCH_CONFIG,
     CapabilitiesEnum,
@@ -313,7 +312,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         Returns:
             The tap's catalog as formatted JSON text.
         """
-        return json.dumps(self.catalog_dict, indent=2)
+        return serialize_json(self.catalog_dict, indent=2)
 
     @property
     def _singer_catalog(self) -> Catalog:
