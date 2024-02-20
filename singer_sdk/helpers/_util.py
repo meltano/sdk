@@ -11,7 +11,7 @@ from datetime import datetime
 from pathlib import Path, PurePath
 
 import pendulum
-import simplejson as simjson
+import simplejson
 
 if sys.version_info < (3, 11):
     from backports.datetime_fromisoformat import MonkeyPatch
@@ -34,11 +34,12 @@ def _default_encoding(obj: t.Any) -> str:  # noqa: ANN401
     return obj.isoformat(sep="T") if isinstance(obj, datetime) else str(obj)
 
 
-def deserialize_json(line: str) -> dict:
+def deserialize_json(line: str, **kwargs: t.Any) -> dict:
     """Deserialize a line of json.
 
     Args:
         line: A single line of json.
+        **kwargs: Optional key word arguments.
 
     Returns:
         A dictionary of the deserialized json.
@@ -50,26 +51,29 @@ def deserialize_json(line: str) -> dict:
         return json.loads(  # type: ignore[no-any-return]
             line,
             parse_float=decimal.Decimal,
+            **kwargs,
         )
     except json.decoder.JSONDecodeError as exc:
         logger.error("Unable to parse:\n%s", line, exc_info=exc)
         raise
 
 
-def serialize_json(line_dict: dict) -> str:
+def serialize_json(line_dict: dict, **kwargs: t.Any) -> str:
     """Serialize a dictionary into a line of json.
 
     Args:
         line_dict: A Python dict.
+        **kwargs: Optional key word arguments.
 
     Returns:
         A string of serialized json.
     """
-    return simjson.dumps(
+    return simplejson.dumps(
         line_dict,
         use_decimal=True,
         default=_default_encoding,
         separators=(",", ":"),
+        **kwargs,
     )
 
 
@@ -86,7 +90,7 @@ def read_json_file(path: PurePath | str) -> dict[str, t.Any]:
                 msg += f"\nFor more info, please see the sample template at: {template}"
         raise FileExistsError(msg)
 
-    return t.cast(dict, json.loads(Path(path).read_text()))
+    return t.cast(dict, deserialize_json(Path(path).read_text()))
 
 
 def utc_now() -> pendulum.DateTime:
