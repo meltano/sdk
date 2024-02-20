@@ -6,7 +6,6 @@ import abc
 import copy
 import datetime
 import importlib.util
-import json
 import time
 import typing as t
 from functools import cached_property
@@ -38,6 +37,7 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
     handle_invalid_timestamp_in_record,
 )
+from singer_sdk.helpers._util import deserialize_json
 
 if t.TYPE_CHECKING:
     from logging import Logger
@@ -690,7 +690,9 @@ class Sink(metaclass=abc.ABCMeta):
                     context_file = (
                         gzip_open(file) if encoding.compression == "gzip" else file
                     )
-                    context = {"records": [json.loads(line) for line in context_file]}  # type: ignore[attr-defined]
+                    context = {
+                        "records": [deserialize_json(line) for line in context_file]
+                    }  # type: ignore[attr-defined]
                     self.process_batch(context)
             elif (
                 importlib.util.find_spec("pyarrow")
