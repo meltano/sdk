@@ -60,7 +60,7 @@ def append_type(type_dict: dict, new_type: str) -> dict:
         return result
 
     if "oneOf" in result:
-        result["oneOf"].append(new_type)
+        result["oneOf"].append({"type": new_type})
         return result
 
     if "type" in result:
