@@ -691,8 +691,8 @@ class Sink(metaclass=abc.ABCMeta):
                         gzip_open(file) if encoding.compression == "gzip" else file
                     )
                     context = {
-                        "records": [deserialize_json(line) for line in context_file]
-                    }  # type: ignore[attr-defined]
+                        "records": [deserialize_json(line) for line in context_file]  # type: ignore[attr-defined]
+                    }
                     self.process_batch(context)
             elif (
                 importlib.util.find_spec("pyarrow")
