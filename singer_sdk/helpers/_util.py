@@ -34,11 +34,11 @@ def _default_encoding(obj: t.Any) -> str:  # noqa: ANN401
     return obj.isoformat(sep="T") if isinstance(obj, datetime) else str(obj)
 
 
-def deserialize_json(line: str, **kwargs: t.Any) -> dict:
+def deserialize_json(json_str: str, **kwargs: t.Any) -> dict:
     """Deserialize a line of json.
 
     Args:
-        line: A single line of json.
+        json_str: A single line of json.
         **kwargs: Optional key word arguments.
 
     Returns:
@@ -49,27 +49,27 @@ def deserialize_json(line: str, **kwargs: t.Any) -> dict:
     """
     try:
         return json.loads(  # type: ignore[no-any-return]
-            line,
+            json_str,
             parse_float=decimal.Decimal,
             **kwargs,
         )
     except json.decoder.JSONDecodeError as exc:
-        logger.error("Unable to parse:\n%s", line, exc_info=exc)
+        logger.error("Unable to parse:\n%s", json_str, exc_info=exc)
         raise
 
 
-def serialize_json(line_dict: dict, **kwargs: t.Any) -> str:
+def serialize_json(obj: object, **kwargs: t.Any) -> str:
     """Serialize a dictionary into a line of json.
 
     Args:
-        line_dict: A Python dict.
+        obj: A Python object usually a dict.
         **kwargs: Optional key word arguments.
 
     Returns:
         A string of serialized json.
     """
     return simplejson.dumps(
-        line_dict,
+        obj,
         use_decimal=True,
         default=_default_encoding,
         separators=(",", ":"),
@@ -90,7 +90,7 @@ def read_json_file(path: PurePath | str) -> dict[str, t.Any]:
                 msg += f"\nFor more info, please see the sample template at: {template}"
         raise FileExistsError(msg)
 
-    return t.cast(dict, deserialize_json(Path(path).read_text()))
+    return deserialize_json(Path(path).read_text())
 
 
 def utc_now() -> pendulum.DateTime:
