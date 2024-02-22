@@ -33,6 +33,7 @@ from singer_sdk.helpers._compat import (
     datetime_fromisoformat,
     time_fromisoformat,
 )
+from singer_sdk.helpers._perftimer import BatchPerfTimer
 from singer_sdk.helpers._typing import (
     DatetimeErrorTreatmentEnum,
     get_datelike_property_type,
@@ -131,12 +132,15 @@ class Sink(metaclass=abc.ABCMeta):
     logger: Logger
 
     MAX_SIZE_DEFAULT = 10000
+    WAIT_LIMIT_SECONDS_DEFAULT = 30
 
     validate_field_string_format = False
     """Enable JSON schema format validation, for example `date-time` string fields."""
 
     fail_on_record_validation_exception: bool = True
     """Interrupt the target execution when a record fails schema validation."""
+
+    _drain_function: t.Callable[[], bool] | None = None
 
     def __init__(
         self,
@@ -181,6 +185,31 @@ class Sink(metaclass=abc.ABCMeta):
         self._total_records_read: int = 0
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
+
+        # Batch Performace Timer
+        self._batch_size_rows: int | None = target.config.get(
+            "batch_size_rows",
+        )
+        self._batch_wait_limit_seconds: int | None = target.config.get(
+            "batch_wait_limit_seconds",
+        )
+        self._batch_dynamic_management: bool = target.config.get(
+            "batch_dynamic_management",
+            False,
+        )
+
+        self._sink_timer: BatchPerfTimer | None = None
+
+        if self._batch_wait_limit_seconds is not None or self._batch_dynamic_management:
+            self._sink_timer = BatchPerfTimer(
+                self._batch_size_rows
+                if self._batch_size_rows is not None
+                else self.MAX_SIZE_DEFAULT,
+                self.WAIT_LIMIT_SECONDS_DEFAULT
+                if self._batch_wait_limit_seconds is None
+                else self._batch_wait_limit_seconds,
+            )
+            self._sink_timer.start()
 
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
 
@@ -248,16 +277,6 @@ class Sink(metaclass=abc.ABCMeta):
         return {}
 
     # Size properties
-
-    @property
-    def max_size(self) -> int:
-        """Get max batch size.
-
-        Returns:
-            Max number of records to batch before `is_full=True`
-        """
-        return self.MAX_SIZE_DEFAULT
-
     @property
     def current_size(self) -> int:
         """Get current batch size.
@@ -269,12 +288,121 @@ class Sink(metaclass=abc.ABCMeta):
 
     @property
     def is_full(self) -> bool:
-        """Check against size limit.
+        """Calls the size limit check funtion.
+
+        Returns:
+            True if the sink needs to be drained.
+        """
+        if self._drain_function is None:
+            self.set_drain_function()
+
+        return self._drain_function() if self._drain_function is not None else True
+
+    def is_full_rows(self) -> bool:
+        """Check against limit in rows.
 
         Returns:
             True if the sink needs to be drained.
         """
         return self.current_size >= self.max_size
+
+    def is_too_old(self) -> bool:
+        """Check against limit in seconds.
+
+        Returns:
+            True if the sink needs to be drained.
+        """
+        return (
+            (
+                self.sink_timer.on_the_clock() > self.batch_wait_limit_seconds
+                if self.sink_timer.start_time is not None
+                and self.batch_wait_limit_seconds is not None
+                else False
+            )
+            if self.sink_timer is not None
+            else False
+        )
+
+    def is_full_rows_and_too_old(self) -> bool:
+        """Check against limit in rows and seconds.
+
+        Returns:
+            True if the sink needs to be drained.
+        """
+        return True in (self.is_full_rows(), self.is_too_old())
+
+    def is_full_dynamic(self) -> bool:
+        """Check against limit in caclulated limit in rows.
+
+        Returns:
+            True if the sink needs to be drained.
+        """
+        return (
+            self.current_size >= self.sink_timer.sink_max_size
+            if self.sink_timer is not None
+            else False
+        )
+
+    def set_drain_function(self) -> None:
+        """Return the function to use in is_full."""
+        if self.batch_dynamic_management:
+            self._drain_function = self.is_full_dynamic
+        elif self.batch_wait_limit_seconds is not None:
+            if self.batch_size_rows is not None:
+                self._drain_function = self.is_full_rows_and_too_old
+            else:
+                self._drain_function = self.is_too_old
+        else:
+            self._drain_function = self.is_full_rows
+
+    @property
+    def batch_size_rows(self) -> int | None:
+        """Get batch_size_rows object.
+
+        Returns:
+            A batch_size_rows object.
+        """
+        return self._batch_size_rows
+
+    @property
+    def batch_wait_limit_seconds(self) -> int | None:
+        """Get batch_wait_limit_seconds object.
+
+        Returns:
+            A batch_wait_limit_seconds object.
+        """
+        return self._batch_wait_limit_seconds
+
+    @property
+    def batch_dynamic_management(self) -> bool:
+        """Get batch_dynamic_management object.
+
+        Returns:
+            A batch_dynamic_management object.
+        """
+        return self._batch_dynamic_management
+
+    @property
+    def sink_timer(self) -> BatchPerfTimer | None:
+        """Get sink_timer object.
+
+        Returns:
+            A sink_timer object.
+        """
+        return self._sink_timer
+
+    @property
+    def max_size(self) -> int:
+        """Get max batch size.
+
+        Returns:
+            Max number of records to batch before `is_full=True`
+        """
+        return (
+            self.batch_size_rows
+            if self.batch_size_rows is not None
+            else self.MAX_SIZE_DEFAULT
+        )
 
     # Tally methods
 
@@ -365,6 +493,30 @@ class Sink(metaclass=abc.ABCMeta):
             A list of stream key properties.
         """
         return self._key_properties
+
+    # Timer Management
+
+    def lap_manager(self) -> None:
+        """Start and Stop the Perf Time during drain.
+
+        This method is called when the target triggers a drain on this sink.
+        """
+        if self.sink_timer is not None:
+            if self.sink_timer.start_time is not None:
+                self.sink_timer.stop()
+                timer_msg: str = (
+                    "max_size: %.0f, min_diff: %.2f, lap_diff: %.4f, max_diff: %.2f"
+                )
+                if self.batch_dynamic_management:
+                    self.logger.info(
+                        timer_msg,
+                        self.sink_timer.sink_max_size,
+                        self.sink_timer.perf_diff_allowed_min,
+                        self.sink_timer.perf_diff,
+                        self.sink_timer.perf_diff_allowed_max,
+                    )
+                    self.sink_timer.counter_based_max_size()
+            self.sink_timer.start()
 
     # Record processing
 

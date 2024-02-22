@@ -13,6 +13,7 @@ metrics
 logging
 state
 at_least_once
+target_batch_full
 ```
 
 ## How to use the implementation reference material

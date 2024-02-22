@@ -18,6 +18,9 @@ from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import (
     ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
+    BATCH_DYNAMIC_MANAGEMENT_CONFIG,
+    BATCH_SIZE_ROWS_CONFIG,
+    BATCH_WAIT_LIMIT_SECONDS_CONFIG,
     TARGET_HARD_DELETE_CONFIG,
     TARGET_LOAD_METHOD_CONFIG,
     TARGET_SCHEMA_CONFIG,
@@ -363,8 +366,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             if sink.is_full:
                 self.logger.info(
-                    "Target sink for '%s' is full. Draining...",
+                    "Target sink for '%s' is full. Current size is '%s'. Draining...",
                     sink.stream_name,
+                    sink.current_size,
                 )
                 self.drain_one(sink)
 
@@ -508,6 +512,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         draining_status = sink.start_drain()
         sink.process_batch(draining_status)
+        sink.lap_manager()
         sink.mark_drained()
 
     def _drain_all(self, sink_list: list[Sink], parallelism: int) -> None:
@@ -609,6 +614,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                     target_jsonschema["properties"][k] = v
 
         _merge_missing(ADD_RECORD_METADATA_CONFIG, config_jsonschema)
+        _merge_missing(BATCH_SIZE_ROWS_CONFIG, config_jsonschema)
+        _merge_missing(BATCH_WAIT_LIMIT_SECONDS_CONFIG, config_jsonschema)
+        _merge_missing(BATCH_DYNAMIC_MANAGEMENT_CONFIG, config_jsonschema)
         _merge_missing(TARGET_LOAD_METHOD_CONFIG, config_jsonschema)
 
         capabilities = cls.capabilities
