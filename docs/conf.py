@@ -40,6 +40,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
+    "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "sphinx.ext.linkcode",
     "sphinx_copybutton",
@@ -136,6 +137,16 @@ myst_enable_extensions = {
 
 redirects = {
     "porting.html": "guides/porting.html",
+}
+
+# -- Options for extlinks -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/extlinks.html
+
+extlinks = {
+    "jsonschema": (
+        "https://json-schema.org/understanding-json-schema/reference/%s",
+        "%s",
+    ),
 }
 
 # -- Options for intersphinx -----------------------------------------------------------
