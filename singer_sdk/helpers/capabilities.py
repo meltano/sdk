@@ -152,6 +152,13 @@ TARGET_VALIDATE_RECORDS_CONFIG = PropertiesList(
         default=True,
     ),
 ).to_dict()
+TARGET_BATCH_SIZE_ROWS_CONFIG = PropertiesList(
+    Property(
+        "batch_size_rows",
+        IntegerType,
+        description="Maximum number of rows in each batch.",
+    ),
+).to_dict()
 
 
 class TargetLoadMethods(str, Enum):
