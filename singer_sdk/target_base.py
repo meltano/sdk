@@ -18,6 +18,7 @@ from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import (
     ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
+    TARGET_BATCH_SIZE_ROWS_CONFIG,
     TARGET_HARD_DELETE_CONFIG,
     TARGET_LOAD_METHOD_CONFIG,
     TARGET_SCHEMA_CONFIG,
@@ -363,8 +364,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             if sink.is_full:
                 self.logger.info(
-                    "Target sink for '%s' is full. Draining...",
+                    "Target sink for '%s' is full. Current size is '%s'. Draining...",
                     sink.stream_name,
+                    sink.current_size,
                 )
                 self.drain_one(sink)
 
@@ -610,6 +612,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         _merge_missing(ADD_RECORD_METADATA_CONFIG, config_jsonschema)
         _merge_missing(TARGET_LOAD_METHOD_CONFIG, config_jsonschema)
+        _merge_missing(TARGET_BATCH_SIZE_ROWS_CONFIG, config_jsonschema)
 
         capabilities = cls.capabilities
 

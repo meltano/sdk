@@ -164,6 +164,60 @@ class JSONFormatter(AboutFormatter, format_name="json"):
 class MarkdownFormatter(AboutFormatter, format_name="markdown"):
     """About formatter for Markdown output."""
 
+    def _generate_property_row(
+        self,
+        name: str,
+        schema: dict[str, t.Any],
+        *,
+        required: bool,
+        parent_name: str | None = None,
+    ) -> t.Generator[str, None, None]:
+        """Generate a row for this property and for nested properties, if any.
+
+        Args:
+            name: The property name.
+            schema: The property schema.
+            required: Whether the property is required to be present.
+            parent_name: The parent property name, if any.
+
+        Yields:
+            One markdown table row for the setting, and one for each sub-property.
+        """
+        setting_name = f"{parent_name}.{name}" if parent_name else name
+        md_description = schema.get("description", "").replace("\n", "<BR/>")
+        yield (
+            f"| {setting_name} "
+            f"| {'True' if required else 'False':8} "
+            f"| {schema.get('default', 'None'):7} "
+            f"| {md_description:11} |"
+        )
+        if "properties" in schema:
+            yield from self._generate_property_rows(schema, parent_name=setting_name)
+
+    def _generate_property_rows(
+        self,
+        schema: dict[str, t.Any],
+        *,
+        parent_name: str = "",
+    ) -> t.Generator[str, None, None]:
+        """Generate a row for each property in the schema.
+
+        Args:
+            schema: A JSON object schema.
+            parent_name: The parent property name, if any.
+
+        Yields:
+            One markdown table row for each property.
+        """
+        required_settings = schema.get("required", [])
+        for name, sub_schema in schema.get("properties", {}).items():
+            yield from self._generate_property_row(
+                name,
+                sub_schema,
+                required=name in required_settings,
+                parent_name=parent_name,
+            )
+
     def format_about(self, about_info: AboutInfo) -> str:
         """Render about information.
 
@@ -173,18 +227,8 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
         Returns:
             A formatted string.
         """
-        max_setting_len = max(len(k) for k in about_info.settings["properties"])
-
-        # Set table base for markdown
-        table_base = (
-            f"| {'Setting':{max_setting_len}}| Required | Default | Description |\n"
-            f"|:{'-' * max_setting_len}|:--------:|:-------:|:------------|\n"
-        )
-
         # Empty list for string parts
         md_list = []
-        # Get required settings for table
-        required_settings = about_info.settings.get("required", [])
 
         # Iterate over Dict to set md
         md_list.append(
@@ -201,19 +245,14 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
         md_list.append(capabilities)
 
         setting = "## Settings\n\n"
-
-        for k, v in about_info.settings.get("properties", {}).items():
-            md_description = v.get("description", "").replace("\n", "<BR/>")
-            table_base += (
-                f"| {k}{' ' * (max_setting_len - len(k))}"
-                f"| {'True' if k in required_settings else 'False':8} | "
-                f"{v.get('default', 'None'):7} | "
-                f"{md_description:11} |\n"
-            )
-
-        setting += table_base
+        settings_table = (
+            "| Setting | Required | Default | Description |\n"
+            "|:--------|:--------:|:-------:|:------------|\n"
+        )
+        settings_table += "\n".join(self._generate_property_rows(about_info.settings))
+        setting += settings_table
         setting += (
-            "\n"
+            "\n\n"
             + "\n".join(
                 [
                     "A full list of supported settings and capabilities "
