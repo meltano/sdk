@@ -673,7 +673,8 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
                 f"Type dict for {wrapped} is not defined. Try instantiating it with a "
                 f"nested type such as {wrapped.__name__}(StringType)."
             )
-            raise ValueError(msg)
+            # TODO: this should be a TypeError, but it's a breaking change.
+            raise ValueError(msg)  # noqa: TRY004
 
         return t.cast(dict, wrapped.type_dict)
 
@@ -1070,7 +1071,8 @@ def to_jsonschema_type(
         type_name = from_type.__name__
     else:
         msg = "Expected `str` or a SQLAlchemy `TypeEngine` object or type."
-        raise ValueError(msg)
+        # TODO: this should be a TypeError, but it's a breaking change.
+        raise ValueError(msg)  # noqa: TRY004
 
     return next(
         (
