@@ -182,6 +182,11 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
+        # Batch full markers
+        self._batch_size_rows: int | None = target.config.get(
+            "batch_size_rows",
+        )
+
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
 
     @cached_property
@@ -250,15 +255,6 @@ class Sink(metaclass=abc.ABCMeta):
     # Size properties
 
     @property
-    def max_size(self) -> int:
-        """Get max batch size.
-
-        Returns:
-            Max number of records to batch before `is_full=True`
-        """
-        return self.MAX_SIZE_DEFAULT
-
-    @property
     def current_size(self) -> int:
         """Get current batch size.
 
@@ -269,12 +265,39 @@ class Sink(metaclass=abc.ABCMeta):
 
     @property
     def is_full(self) -> bool:
-        """Check against size limit.
+        """Check against the batch size limit.
 
         Returns:
             True if the sink needs to be drained.
         """
         return self.current_size >= self.max_size
+
+    @property
+    def batch_size_rows(self) -> int | None:
+        """The maximum number of rows a batch can accumulate before being processed.
+
+        Returns:
+            The max number of rows or None if not set.
+        """
+        return self._batch_size_rows
+
+    @property
+    def max_size(self) -> int:
+        """Get max batch size.
+
+        Returns:
+            Max number of records to batch before `is_full=True`
+
+        .. versionchanged:: 0.36.0
+           This property now takes into account the
+           :attr:`~singer_sdk.Sink.batch_size_rows` attribute and the corresponding
+           ``batch_size_rows`` target setting.
+        """
+        return (
+            self.batch_size_rows
+            if self.batch_size_rows is not None
+            else self.MAX_SIZE_DEFAULT
+        )
 
     # Tally methods
 
