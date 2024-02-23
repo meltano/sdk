@@ -6,3 +6,4 @@
 .. autoclass:: NumberType
     :members:
     :special-members: __init__, __call__
+    :inherited-members: JSONTypeHelper
