@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import logging
-import time
 
 import pytest
+import time_machine
 
 from singer_sdk import metrics
 
@@ -79,13 +79,16 @@ def test_record_counter(caplog: pytest.LogCaptureFixture):
 
 def test_sync_timer(caplog: pytest.LogCaptureFixture):
     caplog.set_level(logging.INFO, logger=metrics.METRICS_LOGGER_NAME)
-    with metrics.sync_timer("test_stream", custom_tag="pytest") as timer:
-        start_time = timer.start_time
-        for _ in range(1000):
-            time.sleep(0.001)
-        end_time = time.time()
+    traveler = time_machine.travel(0, tick=False)
+    traveler.start()
 
-    assert len(caplog.records) == 1
+    with metrics.sync_timer("test_stream", custom_tag="pytest"):
+        traveler.stop()
+
+        traveler = time_machine.travel(10, tick=False)
+        traveler.start()
+
+    traveler.stop()
 
     record = caplog.records[0]
     assert record.levelname == "INFO"
@@ -100,4 +103,4 @@ def test_sync_timer(caplog: pytest.LogCaptureFixture):
         "custom_tag": "pytest",
     }
 
-    assert pytest.approx(point.value, rel=0.001) == end_time - start_time
+    assert pytest.approx(point.value, rel=0.001) == 10.0
