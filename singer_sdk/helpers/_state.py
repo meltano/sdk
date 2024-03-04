@@ -80,7 +80,7 @@ def _find_in_partitions_list(
     if len(found) > 1:
         msg = (
             "State file contains duplicate entries for partition: "
-            f"{{state_partition_context}}.\nMatching state values were: {found!s}"
+            f"{state_partition_context}.\nMatching state values were: {found!s}"
         )
         raise ValueError(msg)
     return found[0] if found else None
