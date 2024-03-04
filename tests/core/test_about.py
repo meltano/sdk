@@ -53,6 +53,16 @@ def about_info() -> AboutInfo:
                     "type": "string",
                     "description": "API key for the tap to use.",
                 },
+                "complex_setting": {
+                    "type": "object",
+                    "description": "A complex setting, with sub-settings.",
+                    "properties": {
+                        "sub_setting": {
+                            "type": "string",
+                            "description": "A sub-setting.",
+                        }
+                    },
+                },
             },
             "required": ["api_key"],
         },

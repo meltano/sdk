@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.36.0 (2024-02-26)
+
+### ✨ New
+
+- [#2241](https://github.com/meltano/sdk/issues/2241) JSON schema keywords such as `maxLength` are now supported in `StringType`, `IntegerType` and `NumberType` JSON schema helpers
+- [#2263](https://github.com/meltano/sdk/issues/2263) Nested settings are now documented in the output of `--about --format=markdown`
+- [#2248](https://github.com/meltano/sdk/issues/2248) Targets now accept a `batch_size_rows` setting to configure how many rows are loaded in each record batch -- _**Thanks @BuzzCutNorman!**_
+
+### 🐛 Fixes
+
+- [#2258](https://github.com/meltano/sdk/issues/2258) Database disconnects are now handled via SQLAlchemy `pool_pre_ping` parameter
+
+### ⚙️ Under the Hood
+
+- [#2220](https://github.com/meltano/sdk/issues/2220) Deprecated `singer_sdk.authenticators.BasicAuthenticator` in favor of `requests.auth.HTTPBasicAuth`
+
 ## v0.35.2 (2024-02-19)
 
 ### 🐛 Fixes

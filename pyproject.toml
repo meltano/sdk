@@ -171,7 +171,7 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.35.2"
+version = "0.36.0"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -249,6 +249,10 @@ jsonl = "singer_sdk.contrib.batch_encoder_jsonl:JSONLinesBatcher"
 parquet = "singer_sdk.contrib.batch_encoder_parquet:ParquetBatcher"
 
 [tool.ruff]
+extend-exclude = [
+    "cookiecutter/*",
+    "*simpleeval*",
+]
 line-length = 88
 src = ["samples", "singer_sdk", "tests"]
 target-version = "py38"
@@ -257,10 +261,6 @@ target-version = "py38"
 docstring-code-format = true
 
 [tool.ruff.lint]
-exclude = [
-    "cookiecutter/*",
-    "*simpleeval*",
-]
 ignore = [
     "ANN101",  # Missing type annotation for `self` in method
     "ANN102",  # Missing type annotation for `cls` in class method
