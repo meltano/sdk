@@ -445,7 +445,8 @@ def _flatten_record(
                 "allow": True,
                 "convert_null": None,
             }
-            ignore_nan = True if nan_strategy == "convert_null" else False
+
+            ignore_nan = nan_strategy == "convert_null"
             items.append(
                 (
                     new_key,
