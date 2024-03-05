@@ -600,13 +600,13 @@ files = [
 
 [[package]]
 name = "duckdb-engine"
-version = "0.11.1"
+version = "0.11.2"
 description = "SQLAlchemy driver for duckdb"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "duckdb_engine-0.11.1-py3-none-any.whl", hash = "sha256:ab69a00472fb34b0c57329461f1765e6fc528a0b42edbd2d566dad9b760a0d61"},
-    {file = "duckdb_engine-0.11.1.tar.gz", hash = "sha256:ea7004c689e1f17b2e2d1734c522aa8a7d56366bfbeeddbe8a02dc6a6c36dc15"},
+    {file = "duckdb_engine-0.11.2-py3-none-any.whl", hash = "sha256:786a9a14b56297d8b98ec6213dce79f0bdb44129bf5faa5792e0fa24f290e7a0"},
+    {file = "duckdb_engine-0.11.2.tar.gz", hash = "sha256:40644334a0af02bdb50bbd8c57e4bd29441e7bf9bd21b565848645bae318e533"},
 ]
 
 [package.dependencies]
