@@ -20,7 +20,7 @@ class FlatteningOptions(t.NamedTuple):
     max_level: int
     flattening_enabled: bool = True
     separator: str = DEFAULT_FLATTENING_SEPARATOR
-    nan_strategy: t.Literal["fail", "allow"] = "fail"
+    nan_strategy: t.Literal["fail", "allow", "convert_null"] = "fail"
 
 
 def get_flattening_options(
@@ -82,7 +82,7 @@ def flatten_schema(
     schema: dict,
     max_level: int,
     separator: str = "__",
-    nan_strategy: t.Literal["fail", "allow"] = "fail",
+    nan_strategy: t.Literal["fail", "allow", "convert_null"] = "fail",
 ) -> dict:
     """Flatten the provided schema up to a depth of max_level.
 
@@ -288,7 +288,7 @@ def _flatten_schema(  # noqa: C901, PLR0912
     separator: str = "__",
     level: int = 0,
     max_level: int = 0,
-    nan_strategy: t.Literal["fail", "allow"] = "fail",
+    nan_strategy: t.Literal["fail", "allow", "convert_null"] = "fail",
 ) -> dict:
     """Flatten the provided schema node, recursively up to depth of `max_level`.
 
@@ -371,7 +371,7 @@ def flatten_record(
     flattened_schema: dict,
     max_level: int,
     separator: str = "__",
-    nan_strategy: t.Literal["fail", "allow"] = "fail",
+    nan_strategy: t.Literal["fail", "allow", "convert_null"] = "fail",
 ) -> dict:
     """Flatten a record up to max_level.
 
@@ -402,7 +402,7 @@ def _flatten_record(
     separator: str = "__",
     level: int = 0,
     max_level: int = 0,
-    nan_strategy: t.Literal["fail", "allow"] = "fail",
+    nan_strategy: t.Literal["fail", "allow", "convert_null"] = "fail",
 ) -> dict:
     """This recursive function flattens the record node.
 
@@ -443,7 +443,9 @@ def _flatten_record(
             nan_strategies = {
                 "fail": False,
                 "allow": True,
+                "convert_null": None,
             }
+            ignore_nan = True if nan_strategy == "convert_null" else False
             items.append(
                 (
                     new_key,
@@ -452,6 +454,7 @@ def _flatten_record(
                         use_decimal=True,
                         default=str,
                         allow_nan=nan_strategies[nan_strategy],
+                        ignore_nan=ignore_nan,
                     )
                     if _should_jsondump_value(k, v, flattened_schema)
                     else v,
