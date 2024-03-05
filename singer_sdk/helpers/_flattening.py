@@ -443,7 +443,7 @@ def _flatten_record(
             nan_strategies = {
                 "fail": False,
                 "allow": True,
-                "convert_null": None,
+                "convert_null": False,
             }
 
             ignore_nan = nan_strategy == "convert_null"
