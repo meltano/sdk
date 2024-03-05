@@ -759,12 +759,17 @@ def test_mapped_stream(
     tap = MappedTap(
         config={"stream_maps": stream_maps, **config},
     )
-    buf = io.StringIO()
-    with redirect_stdout(buf):
+    stdout_buf = io.StringIO()
+    stdout_buf.buffer = io.BufferedRandom(raw=io.BytesIO())
+    with redirect_stdout(stdout_buf):
         tap.sync_all()
 
-    buf.seek(0)
-    snapshot.assert_match(buf.read(), snapshot_name)
+    # take the BytesIO buffer and decode to match stdin
+    stdout_buf.buffer.seek(0)
+    stdout_buf.write(stdout_buf.buffer.read().decode())
+    # match the decoded json to the files provided via snapshot
+    stdout_buf.seek(0)
+    snapshot.assert_match(stdout_buf.read(), snapshot_name)
 
 
 def test_bench_simple_map_transforms(

@@ -16,7 +16,6 @@ from singer_sdk._singerlib.messages import (
     SingerMessageType,
     StateMessage,
     exclude_null_dict,
-    write_message,
 )
 from singer_sdk._singerlib.schema import Schema, resolve_schema_references
 from singer_sdk._singerlib.utils import strftime, strptime_to_utc
