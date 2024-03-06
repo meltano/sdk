@@ -327,6 +327,7 @@ class SQLConnector:
             return sa.create_engine(
                 self.sqlalchemy_url,
                 echo=False,
+                pool_pre_ping=True,
                 json_serializer=self.serialize_json,
                 json_deserializer=self.deserialize_json,
             )
@@ -337,6 +338,7 @@ class SQLConnector:
             return sa.create_engine(
                 self.sqlalchemy_url,
                 echo=False,
+                pool_pre_ping=True,
             )
 
     def quote(self, name: str) -> str:
@@ -1212,6 +1214,6 @@ class SQLConnector:
             conn.execute(
                 sa.text(
                     f"DELETE FROM {full_table_name} "  # noqa: S608
-                    f"WHERE {version_column_name} <= {current_version}",
+                    f"WHERE {version_column_name} < {current_version}",
                 ),
             )

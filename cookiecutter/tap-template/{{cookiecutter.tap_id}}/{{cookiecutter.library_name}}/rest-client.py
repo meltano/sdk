@@ -22,7 +22,7 @@ from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {% elif cookiecutter.auth_method == "Basic Auth" -%}
-from singer_sdk.authenticators import BasicAuthenticator
+from requests.auth import HTTPBasicAuth
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
@@ -110,14 +110,13 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 {%- elif cookiecutter.auth_method == "Basic Auth" %}
 
     @property
-    def authenticator(self) -> BasicAuthenticator:
+    def authenticator(self) -> HTTPBasicAuth:
         """Return a new authenticator object.
 
         Returns:
             An authenticator instance.
         """
-        return BasicAuthenticator.create_for_stream(
-            self,
+        return HTTPBasicAuth(
             username=self.config.get("username", ""),
             password=self.config.get("password", ""),
         )
