@@ -6,8 +6,12 @@ from __future__ import annotations
 import abc
 import contextlib
 import json
+import logging
+import sys
 import typing as t
 from enum import Enum
+from logging.handlers import QueueHandler, QueueListener
+from multiprocessing import Manager, Queue
 
 import click
 from joblib import Parallel, delayed, parallel_config
@@ -466,12 +470,26 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
     def sync_one(
         self,
         stream: Stream,
+        log_level: logging.Logger | None = None,
+        log_queue: Queue | None = None,
     ) -> None:
         """Sync a single stream.
 
         Args:
             stream: The stream that your would like to sync.
+            log_level: The logging level used by Tap.logger.
+            log_queue: Multiprocess Queue used by the listener.
+
+        This is a link to a logging example for joblib.
+        https://github.com/joblib/joblib/issues/1017
         """
+        if self.max_parallelism is not None and not self.logger.hasHandlers():
+            queue_handler = QueueHandler(log_queue)
+            self.logger.addHandler(queue_handler)
+            self.logger.setLevel(log_level)
+            self.metrics_logger.addHandler(queue_handler)
+            self.metrics_logger.setLevel(log_level)
+
         if not stream.selected and not stream.has_selected_descendents:
             self.logger.info("Skipping deselected stream '%s'.", stream.name)
             return
@@ -501,12 +519,32 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
             for stream in self.streams.values():
                 self.sync_one(stream=stream)
         else:
-            with parallel_config(
-                backend="loky", prefer="processes", n_jobs=self.max_parallelism
-            ), Parallel() as parallel:
-                parallel(
-                    delayed(self.sync_one)(stream) for stream in self.streams.values()
+            with Manager() as manager:
+                # Prepare logger for parallel processes
+                console_handler = logging.StreamHandler(sys.stderr)
+                console_formatter = logging.Formatter(
+                    fmt="{asctime:23s} | {levelname:8s} | {name:20s} | {message}",
+                    style="{",
                 )
+                console_handler.setFormatter(console_formatter)
+                self.logger.addHandler(console_handler)
+                log_queue = manager.Queue()
+                listener = QueueListener(log_queue, *self.logger.handlers)
+                listener.start()
+                with parallel_config(
+                    backend="loky",
+                    prefer="processes",
+                    n_jobs=self.max_parallelism,
+                ), Parallel() as parallel:
+                    parallel(
+                        delayed(self.sync_one)(
+                            stream,
+                            log_queue=log_queue,
+                            log_level=self.logger.getEffectiveLevel(),
+                        )
+                        for stream in self.streams.values()
+                    )
+                listener.stop()
 
         # this second loop is needed for all streams to print out their costs
         # including child streams which are otherwise skipped in the loop above
