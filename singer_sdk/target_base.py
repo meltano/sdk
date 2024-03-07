@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import asyncio
 import copy
 import json
 import sys
@@ -368,7 +369,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                     sink.stream_name,
                     sink.current_size,
                 )
-                self.drain_one(sink)
+                asyncio.run(self.drain_one(sink))
 
         self._handle_max_record_age()
 
@@ -497,7 +498,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._reset_max_record_age()
 
     @t.final
-    def drain_one(self, sink: Sink) -> None:
+    async def drain_one(self, sink: Sink) -> None:
         """Drain a specific sink.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -519,7 +520,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             return
 
         def _drain_sink(sink: Sink) -> None:
-            self.drain_one(sink)
+            asyncio.run(self.drain_one(sink))
 
         with parallel_backend("threading", n_jobs=parallelism):
             Parallel()(delayed(_drain_sink)(sink=sink) for sink in sink_list)
