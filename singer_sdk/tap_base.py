@@ -97,6 +97,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         self._input_catalog: Catalog | None = None
         self._state: dict[str, Stream] = {}
         self._catalog: Catalog | None = None  # Tap's working catalog
+        self._max_parallelism: int | None = self.config.get("max_parallelism")
 
         # Process input catalog
         if isinstance(catalog, Catalog):
@@ -180,6 +181,20 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         """Initialize the plugin mapper for this tap."""
         super().setup_mapper()
         self.mapper.register_raw_streams_from_catalog(self.catalog)
+
+    @property
+    def max_parallelism(self) -> int:
+        """Get max parallel sinks.
+
+        The default is None if not overridden.
+
+        Returns:
+            Max number of streams that can be synced in parallel.
+        """
+        if self._max_parallelism in (0, 1):
+            self._max_parallelism = None
+
+        return self._max_parallelism
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:
