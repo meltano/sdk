@@ -159,6 +159,13 @@ TARGET_BATCH_SIZE_ROWS_CONFIG = PropertiesList(
         description="Maximum number of rows in each batch.",
     ),
 ).to_dict()
+TAP_MAX_PARALLELISM_CONFIG = PropertiesList(
+    Property(
+        "max_parallelism",
+        IntegerType,
+        description="Max number of streams that can sync in parallel.",
+    ),
+).to_dict()
 
 
 class TargetLoadMethods(str, Enum):
