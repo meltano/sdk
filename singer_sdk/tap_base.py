@@ -24,6 +24,7 @@ from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
     BATCH_CONFIG,
+    TAP_MAX_PARALLELISM_CONFIG,
     CapabilitiesEnum,
     PluginCapabilities,
     TapCapabilities,
@@ -218,6 +219,9 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         capabilities = cls.capabilities
         if PluginCapabilities.BATCH in capabilities:
             merge_missing_config_jsonschema(BATCH_CONFIG, config_jsonschema)
+            merge_missing_config_jsonschema(
+                TAP_MAX_PARALLELISM_CONFIG, config_jsonschema
+            )
 
     # Connection and sync tests:
 
