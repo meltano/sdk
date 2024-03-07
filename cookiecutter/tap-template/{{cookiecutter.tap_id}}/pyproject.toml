@@ -45,8 +45,10 @@ singer-sdk = { version="~=0.36.0", extras = ["testing"] }
 s3 = ["fs-s3fs"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 warn_unused_configs = true
+{#- TODO: Remove this after support for SQLAlchemy 1 is dropped in v1 -#}
+{#- https://github.com/meltano/sdk/pull/1931 -#}
 {%- if cookiecutter.stream_type == 'SQL' %}
 plugins = "sqlmypy"
 {%- endif %}
@@ -74,7 +76,7 @@ known-first-party = ["{{cookiecutter.library_name}}"]
 convention = "google"
 
 [build-system]
-requires = ["poetry-core==1.8.1"]
+requires = ["poetry-core==1.9.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
