@@ -462,6 +462,33 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
     # Sync methods
 
     @t.final
+    def sync_one(
+        self,
+        stream: Stream,
+    ) -> None:
+        """Sync a single stream.
+
+        Args:
+            stream: The stream that your would like to sync.
+        """
+        if not stream.selected and not stream.has_selected_descendents:
+            self.logger.info("Skipping deselected stream '%s'.", stream.name)
+            return
+
+        if stream.parent_stream_type:
+            self.logger.debug(
+                "Child stream '%s' is expected to be called "
+                "by parent stream '%s'. "
+                "Skipping direct invocation.",
+                type(stream).__name__,
+                stream.parent_stream_type.__name__,
+            )
+            return
+
+        stream.sync()
+        stream.finalize_state_progress_markers()
+
+    @t.final
     def sync_all(self) -> None:
         """Sync all streams."""
         self._reset_state_progress_markers()
@@ -470,22 +497,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
 
         stream: Stream
         for stream in self.streams.values():
-            if not stream.selected and not stream.has_selected_descendents:
-                self.logger.info("Skipping deselected stream '%s'.", stream.name)
-                continue
-
-            if stream.parent_stream_type:
-                self.logger.debug(
-                    "Child stream '%s' is expected to be called "
-                    "by parent stream '%s'. "
-                    "Skipping direct invocation.",
-                    type(stream).__name__,
-                    stream.parent_stream_type.__name__,
-                )
-                continue
-
-            stream.sync()
-            stream.finalize_state_progress_markers()
+            self.sync_one(stream=stream)
 
         # this second loop is needed for all streams to print out their costs
         # including child streams which are otherwise skipped in the loop above
