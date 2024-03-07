@@ -10,6 +10,7 @@ import typing as t
 from enum import Enum
 
 import click
+from joblib import Parallel, delayed, parallel_config
 
 from singer_sdk._singerlib import Catalog, StateMessage
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
@@ -495,9 +496,17 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         self._set_compatible_replication_methods()
         self.write_message(StateMessage(value=self.state))
 
-        stream: Stream
-        for stream in self.streams.values():
-            self.sync_one(stream=stream)
+        if self.max_parallelism is None:
+            stream: Stream
+            for stream in self.streams.values():
+                self.sync_one(stream=stream)
+        else:
+            with parallel_config(
+                backend="loky", prefer="processes", n_jobs=self.max_parallelism
+            ), Parallel() as parallel:
+                parallel(
+                    delayed(self.sync_one)(stream) for stream in self.streams.values()
+                )
 
         # this second loop is needed for all streams to print out their costs
         # including child streams which are otherwise skipped in the loop above
