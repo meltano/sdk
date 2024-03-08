@@ -421,6 +421,8 @@ def _conform_record_data_types(  # noqa: PLR0912
     for property_name, elem in input_object.items():
         property_path = property_name if parent is None else f"{parent}.{property_name}"
         if property_name not in schema["properties"]:
+            if schema.get("additionalProperties"):
+                output_object[property_name] = elem
             unmapped_properties.append(property_path)
             continue
 
