@@ -47,7 +47,7 @@ jobs:
 
     - name: Bump version
       id: cz-bump
-      uses: commitizen-tools/commitizen-action@0.20.0
+      uses: commitizen-tools/commitizen-action@0.21.0
       with:
         increment: ${{ github.event.inputs.bump != 'auto' && github.event.inputs.bump || '' }}
         prerelease: ${{ github.event.inputs.prerelease != 'none' && github.event.inputs.prerelease || '' }}
@@ -60,7 +60,7 @@ jobs:
 
     - name: Draft Release
       id: draft-release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         draft: true
         body_path: _changelog_fragment.md
