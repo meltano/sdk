@@ -1,4 +1,5 @@
 """Batching utilities for Singer SDK."""
+
 from __future__ import annotations
 
 import itertools
