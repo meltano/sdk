@@ -1,6 +1,5 @@
 """Module test for target-parquet functionality."""
 
-
 from __future__ import annotations
 
 # Reuse the tap connection rather than create a new target connection:
