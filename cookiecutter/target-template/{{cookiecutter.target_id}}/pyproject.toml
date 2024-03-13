@@ -30,7 +30,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.8"
-singer-sdk = { version="~=0.36.0"{{ ', extras = ["faker"]' if cookiecutter.faker_extra }} }
+singer-sdk = { version="~=0.36.1"{{ ', extras = ["faker"]' if cookiecutter.faker_extra }} }
 fs-s3fs = { version = "~=1.1.1", optional = true }
 {%- if cookiecutter.serialization_method != "SQL" %}
 requests = "~=2.31.0"
@@ -38,7 +38,7 @@ requests = "~=2.31.0"
 
 [tool.poetry.dev-dependencies]
 pytest = ">=7.4.0"
-singer-sdk = { version="~=0.36.0", extras = ["testing"] }
+singer-sdk = { version="~=0.36.1", extras = ["testing"] }
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
