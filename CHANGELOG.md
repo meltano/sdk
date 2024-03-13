@@ -1,9 +1,11 @@
-# Changelog
+## v0.36.1 (2024-03-13)
 
-All notable changes to this project will be documented in this file.
+### 🐛 Fixes
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+- [#2310](https://github.com/meltano/sdk/issues/2310) Limited `importlib-resources` to < 6.2 due to breaking changes
+- [#2288](https://github.com/meltano/sdk/issues/2288) Bumped min joblib dependency to `>=1.3.0` and replaced deprecated `parallel_backend` with `parallel_config` -- _**Thanks @BuzzCutNorman!**_
+- [#2281](https://github.com/meltano/sdk/issues/2281) The `state_partition_context` dictionary is now correctly interpolated in the error message when duplicate partitions/contexts are detected in the input state
+- [#2274](https://github.com/meltano/sdk/issues/2274) Test workflow now fails for any Python matrix job failure in cookiecutter template -- _**Thanks @ReubenFrankel!**_
 
 ## v0.36.0 (2024-02-26)
 
@@ -31,19 +33,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixes
 
-- [#2243](https://github.com/meltano/sdk/issues/2243) Flattening level of record is now forced to match the provided flattened schema -- _**Thanks @joaopamaral!**_
+- [#2243](https://github.com/meltano/sdk/issues/2243) Force flattened record according to provided flattened schema -- _**Thanks @joaopamaral!**_
 - [#2245](https://github.com/meltano/sdk/issues/2245) Instances of `oneOf` are now handled by null-appending logic
 - [#2242](https://github.com/meltano/sdk/issues/2242) Hard and soft deletes for handling `ACTIVATE_VERSION` messages now use the same `WHERE` clause -- _**Thanks @vitoravancini!**_
 - [#2232](https://github.com/meltano/sdk/issues/2232) Test workflow job now fails for unsupported Python versions in cookiecutter templates -- _**Thanks @ReubenFrankel!**_
-- [#2225](https://github.com/meltano/sdk/issues/2225) SQL columns that are non-nullable but not required (i.e. not part of a primary key) are now not included in the `"required": [...]` array of the discovered JSON schema
+- [#2225](https://github.com/meltano/sdk/issues/2225) Support non-nullable but not required SQL columns
 
 ### 📚 Documentation Improvements
 
 - [#2239](https://github.com/meltano/sdk/issues/2239) Linked reference docs to source code
 - [#2231](https://github.com/meltano/sdk/issues/2231) Added an example implemetation of JSON schema validation that uses `fastjsonschema`
-- [#2219](https://github.com/meltano/sdk/issues/2219) Added reference docs for tap & target testing helpers
+- [#2219](https://github.com/meltano/sdk/issues/2219) Add reference docs for tap & target testing helpers
 
-## v0.35.0 (2024-02-02)
+## v0.35.0 (2024-02-05)
 
 ### ✨ New
 
@@ -63,7 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#2183](https://github.com/meltano/sdk/issues/2183) Ensure `.vscode` directory is included when requested in cookiecutters and avoid failing if it does not exist
 - [#2180](https://github.com/meltano/sdk/issues/2180) Limit supported Python versions in `--about` output to existing ones
 - [#2108](https://github.com/meltano/sdk/issues/2108) Log sink name when an unhandled error occurs during setup
-- [#2158](https://github.com/meltano/sdk/issues/2158) Fix pytest plugin declaration so it can be used without requiring defining `pytest_plugins` in `conftest.py`
+- [#2158](https://github.com/meltano/sdk/issues/2158) Fix pytest plugin declaration so it can be used without requiring declaration of `pytest_plugins`
 - [#2105](https://github.com/meltano/sdk/issues/2105) Default handling of `ACTIVATE_VERSION` messages to soft deletes and add new `SQLConnector.delete_old_versions` method
 
 ### ⚙️ Under the Hood
@@ -84,6 +86,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.34.1 (2023-12-19)
 
+### ✨ New
+
+- [#1733](https://github.com/meltano/sdk/issues/1733) Test with Python 3.12 🐍
+
 ### 🐛 Fixes
 
 - [#2118](https://github.com/meltano/sdk/issues/2118) Output JSONPath expression with match count message -- _**Thanks @mjsqu!**_
@@ -92,7 +98,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ⚙️ Under the Hood
 
-- [#1733](https://github.com/meltano/sdk/issues/1733) Test with Python 3.12 🐍
 - [#2095](https://github.com/meltano/sdk/issues/2095) Use `CursorResult.mappings()` in SQL streams
 - [#2092](https://github.com/meltano/sdk/issues/2092) Use `datetime.fromisoformat` in other places
 - [#2090](https://github.com/meltano/sdk/issues/2090) Explicitly use `T` iso date separator
@@ -103,19 +108,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.34.0 (2023-12-05)
 
-## v0.34.0rc1 (2023-12-05)
-
-### 🐛 Fixes
-
-- [#2076](https://github.com/meltano/sdk/issues/2076) Make a explicit dependency on `python-dateutil`
-
-## v0.34.0b1 (2023-11-28)
-
 ### ✨ New
 
 - [#2044](https://github.com/meltano/sdk/issues/2044) Add Parquet as a batch encoding option -- _**Thanks @jamielxcarter!**_
 - [#768](https://github.com/meltano/sdk/issues/768) Better error messages when config validation fails
 - [#1854](https://github.com/meltano/sdk/issues/1854) Make stream logger a child of the tap logger
+
+### 🐛 Fixes
+
+- [#2076](https://github.com/meltano/sdk/issues/2076) Make a explicit dependency on `python-dateutil`
 
 ### ⚙️ Under the Hood
 
@@ -136,26 +137,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#2035](https://github.com/meltano/sdk/issues/2035) Retry all 5xx status codes -- _**Thanks @asamasoma!**_
 
-## v0.33.0 (2023-10-12)
+## v0.33.0 (2023-10-16)
 
 ### ✨ New
 
-- [#1999](https://github.com/meltano/sdk/issues/1999) Log JSONPath match count at the INFO level
-- [#1779](https://github.com/meltano/sdk/issues/1779) Cache SQL columns and schemas
-- [#2003](https://github.com/meltano/sdk/issues/2003) Add ability to do list comprehensions in stream map expressions -- _**Thanks @haleemur!**_
 - [#2018](https://github.com/meltano/sdk/issues/2018) Drop Python 3.7 support in cookiecutter templates -- _**Thanks @visch!**_
+- [#2003](https://github.com/meltano/sdk/issues/2003) Add ability to do list comprehensions in stream map expressions -- _**Thanks @haleemur!**_
+- [#1999](https://github.com/meltano/sdk/issues/1999) Log JSONPatch match count at the INFO level
+- [#1779](https://github.com/meltano/sdk/issues/1779) Cache SQL columns and schemas
 
 ### 🐛 Fixes
 
+- [#2015](https://github.com/meltano/sdk/issues/2015) Ensure `default` property is passed to SCHEMA messages -- _**Thanks @prakharcode!**_
 - [#2006](https://github.com/meltano/sdk/issues/2006) Parse record `time_extracted` into `datetime.datetime` instance
 - [#1996](https://github.com/meltano/sdk/issues/1996) Respect nullability of leaf properties when flattening schema
 - [#1844](https://github.com/meltano/sdk/issues/1844) Safely skip parsing record field as date-time if it is missing in schema
 - [#1885](https://github.com/meltano/sdk/issues/1885) Map `record` field to a JSON `object` type
-- [#2015](https://github.com/meltano/sdk/issues/2015) Ensure `default` property is passed to SCHEMA messages -- _**Thanks @prakharcode!**_
 
 ### 📚 Documentation Improvements
 
-- [#2017](https://github.com/meltano/sdk/issues/2017) Document support for comprehensions in stream maps
+- [#2017](https://github.com/meltano/sdk/issues/2017) Document support for comprehenions in stream maps
 
 ## v0.32.0 (2023-09-22)
 
@@ -166,19 +167,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixes
 
+- [#1977](https://github.com/meltano/sdk/issues/1977) Fix hanging downstream tests in tap-postgres
+- [#1970](https://github.com/meltano/sdk/issues/1970) Warn instead of crashing when schema helpers cannot append `null` to types
 - [#1954](https://github.com/meltano/sdk/issues/1954) Missing begin()s related to SQLAlchemy 2.0 -- _**Thanks @andyoneal!**_
 - [#1951](https://github.com/meltano/sdk/issues/1951) Ensure SQL streams are sorted when a replication key is set
 - [#1949](https://github.com/meltano/sdk/issues/1949) Retry SQLAlchemy engine creation for adapters without JSON SerDe support
 - [#1939](https://github.com/meltano/sdk/issues/1939) Handle `decimal.Decimal` instances in flattening
 - [#1927](https://github.com/meltano/sdk/issues/1927) Handle replication key not found in stream schema -- _**Thanks @mjsqu!**_
-- [#1977](https://github.com/meltano/sdk/issues/1977) Fix hanging downstream tests in tap-postgres
-- [#1970](https://github.com/meltano/sdk/issues/1970) Warn instead of crashing when schema helpers cannot append `null` to types
 
 ### ⚡ Performance Improvements
 
-- [#1925](https://github.com/meltano/sdk/issues/1925) Add viztracer command for testing targets -- _**Thanks @mjsqu!**_
-
 - [#1962](https://github.com/meltano/sdk/issues/1962) Ensure `raw_schema` in stream mapper is immutable
+
+### 📚 Documentation Improvements
+
+- [#1925](https://github.com/meltano/sdk/issues/1925) Add viztracer command for testing targets -- _**Thanks @mjsqu!**_
 
 ## v0.31.1 (2023-08-17)
 
@@ -197,7 +200,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#1892](https://github.com/meltano/sdk/issues/1892) Add a mapper cookiecutter template
 - [#1864](https://github.com/meltano/sdk/issues/1864) SQLTarget connector instance shared with sinks -- _**Thanks @BuzzCutNorman!**_
 - [#1878](https://github.com/meltano/sdk/issues/1878) Add `_sdc_sync_started_at` metadata column to indicate the start of the target process
-- [#1484](https://github.com/meltano/sdk/issues/1484) Bump latest supported sqlalchemy from `1.*` to `2.*`
+- [#1484](https://github.com/meltano/sdk/issues/1484) Bump latest supported sqlalchemy from `1.*` to `2.*` -- _**Thanks @dependabot[bot]!**_
 
 ### 🐛 Fixes
 
@@ -306,7 +309,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ⚙️ Under the Hood
 
-- [#1668](https://github.com/meltano/sdk/issues/1668) Break out default batch file writer into a separate class
+- [#1668](https://github.com/meltano/sdk/issues/1668) Break out default batch file writer into separate class
 
 ### 📚 Documentation Improvements
 
@@ -353,9 +356,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🐛 Fixes
 
 - [#1574](https://github.com/meltano/sdk/issues/1574) Conform metric field `type` to Singer spec
-- [#1436](https://github.com/meltano/sdk/issues/1436) Handle sync abort, reduce duplicate `STATE` messages, rename `_MAX_RECORD_LIMIT` as `ABORT_AT_RECORD_COUNT`
+- [#1436](https://github.com/meltano/sdk/issues/1436) Handle sync abort, reduce duplicate `STATE` messages, rename `_MAX_RECORD_LIMIT` as `ABORT_AT_RECORD_COUNT` -- _**Thanks @aaronsteers!**_
 
-## v0.22.1 (2023-03-28)
+## v0.22.1 (2023-03-29)
 
 ### 🐛 Fixes
 
@@ -366,7 +369,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 📚 Documentation Improvements
 
 - [#1553](https://github.com/meltano/sdk/issues/1553) Change link color from pink to blue
+- Add sidebar hover styling
 - [#1544](https://github.com/meltano/sdk/issues/1544) Update branding colors in docs site
+- Add logo to readme
 - [#1518](https://github.com/meltano/sdk/issues/1518) Fix HATEOAS pagination example
 
 ## v0.22.0 (2023-03-14)
@@ -392,19 +397,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.21.0 (2023-02-21)
 
+### ✨ New
+
+- [#1410](https://github.com/meltano/sdk/issues/1410) Build empty cookiecutters and run lint task during CI -- _**Thanks @flexponsive!**_
+
 ### 🐛 Fixes
 
-- [#1410](https://github.com/meltano/sdk/issues/1410) Tap template: fix style, types and imports; and also catch more errors by building from replay files in CI -- _**Thanks @flexponsive!**_
-- [#1428](https://github.com/meltano/sdk/issues/1428) Tap template: cover all REST authentication cases, and one GraphQL case -- _**Thanks @flexponsive!**_
+- [#1428](https://github.com/meltano/sdk/issues/1428) E2E Cookiecutter - Cover all REST authentication cases + one GraphQL case -- _**Thanks @flexponsive!**_
 
 ## v0.20.0 (2023-02-13)
 
 ### ✨ New
 
-- [#1365](https://github.com/meltano/sdk/issues/1365) Add `strptime_to_utc` and `strftime` functions to `_singerlib.utils` -- _**Thanks @menzenski!**_
-- [#1394](https://github.com/meltano/sdk/issues/1394) Refactor SQLConnector connection handling -- _**Thanks @qbatten!**_
+- [#1394](https://github.com/meltano/sdk/issues/1394) Refactor `SQLConnector` connection handling -- _**Thanks @qbatten!**_
 - [#1241](https://github.com/meltano/sdk/issues/1241) Support declaring variant for use in package name
 - [#1109](https://github.com/meltano/sdk/issues/1109) Support `requests.auth` authenticators
+- [#1365](https://github.com/meltano/sdk/issues/1365) Add `strptime_to_utc` and `strftime` functions to `_singerlib.utils` -- _**Thanks @menzenski!**_
 
 ### 🐛 Fixes
 
@@ -416,7 +424,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📚 Documentation Improvements
 
+- [#1407](https://github.com/meltano/sdk/issues/1407) Docs nav structure reorg follow-up -- _**Thanks @aaronsteers!**_
 - [#1390](https://github.com/meltano/sdk/issues/1390) Add incremental replication example -- _**Thanks @flexponsive!**_
+- [#1353](https://github.com/meltano/sdk/issues/1353) Reorganize docs and add deprecation timeline
 
 ## v0.19.0 (2023-01-30)
 
@@ -446,13 +456,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixes
 
+- [#1305](https://github.com/meltano/sdk/issues/1305) Install dependencies in CI and bump dev dependencies
 - [#1308](https://github.com/meltano/sdk/issues/1308) Replace hyphens with underscores when generating expected env var name `<PLUGIN_NAME>_LOGLEVEL` -- _**Thanks @adherr!**_
 - [#887](https://github.com/meltano/sdk/issues/887) Make `conform_record_data_types` work on nested objects and arrays -- _**Thanks @Jack-Burnett!**_
 - [#1287](https://github.com/meltano/sdk/issues/1287) Targets to fail gracefully when schema message is missing the `properties` key -- _**Thanks @visch!**_
 
 ### 📚 Documentation Improvements
 
-- [#1293](https://github.com/meltano/sdk/issues/1293) Add link to the [EDK](https://edk.meltano.com)
+- [#1306](https://github.com/meltano/sdk/issues/1306) Update code samples docs
+- [#1293](https://github.com/meltano/sdk/issues/1293) Add link to EDK
 
 ## v0.16.0 (2022-12-19)
 
@@ -493,7 +505,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#1243](https://github.com/meltano/sdk/issues/1243) Document inherited `PluginBase` attributes and methods
 - [#1209](https://github.com/meltano/sdk/issues/1209) Fix argument descriptions for `OAuthAuthenticator`
 
-## v0.14.0 (2022-11-16)
+## v0.14.0 (2022-11-15)
 
 ### ✨ New
 
@@ -509,12 +521,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#1114](https://github.com/meltano/sdk/issues/1114) Make DDL overridable for column `ADD`, `ALTER`, and `RENAME` operations
 
-## v0.13.1 (2022-11-08)
+## v0.13.1 (2022-11-07)
 
 ### 🐛 Fixes
 
-- [#1126](https://github.com/meltano/sdk/issues/1126) Resolve failure in `_increment_stream_state()` for cases when `replication_method` is `LOG_BASED`
-- [#1111](https://github.com/meltano/sdk/issues/1111) Push `_MAX_RECORDS_LIMIT` down into SQL
+- [#1126](https://github.com/meltano/sdk/issues/1126) Resolve failure in `_increment_stream_state()` for cases when `replication_method` is `LOG_BASED` -- _**Thanks @aaronsteers!**_
+- [#1111](https://github.com/meltano/sdk/issues/1111) Push _MAX_RECORDS_LIMIT down into SQL
 
 ### ⚙️ Under the Hood
 
@@ -523,14 +535,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 📚 Documentation Improvements
 
 - [#1133](https://github.com/meltano/sdk/issues/1133) Fix duplicate `Known Limitations` header
-- [#1118](https://github.com/meltano/sdk/issues/1118) Document `BATCH` limitations
+- [#1118](https://github.com/meltano/sdk/issues/1118) Document `BATCH` limitations -- _**Thanks @aaronsteers!**_
 
 ## v0.13.0 (2022-10-24)
 
 ### ✨ New
 
-- [#1098](https://github.com/meltano/sdk/issues/1098) Add JSON Schema `Property` helpers for `allowed_values` (`enum`) and `examples`
-- [#1096](https://github.com/meltano/sdk/issues/1096) Add secrets support for tap and target config, via `Property(..., secret=True)`
+- [#1098](https://github.com/meltano/sdk/issues/1098) Add JSON Schema `Property` helpers for `allowed_values` (`enum`) and `examples` -- _**Thanks @aaronsteers!**_
+- [#1096](https://github.com/meltano/sdk/issues/1096) Add secrets support for tap and target config, via `Property(..., secret=True)` -- _**Thanks @aaronsteers!**_
 - [#1039](https://github.com/meltano/sdk/issues/1039) Support conforming singer property names to target identifier constraints in SQL sinks
 
 ### 🐛 Fixes
@@ -579,44 +591,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#972](https://github.com/meltano/sdk/issues/972) Resolve issue where TypeError is thrown by SQLConnector cookiecutter implementation due to super() references
 
+### ⚙️ Under the Hood
+
+- [#979](https://github.com/meltano/sdk/issues/979) Remove dependency on `pipelinewise-singer-python` and move singer library code into `singer_sdk._singerlib`
+
 ### 📚 Documentation Improvements
 
 - [#988](https://github.com/meltano/sdk/issues/988) Add pipe before SDK logo in header
-- [#970](https://github.com/meltano/sdk/issues/970) Move cookiecutter TODOs into markdown comments
+- [#970](https://github.com/meltano/sdk/issues/970) Move cookiecutter TODOs into markdown comments -- _**Thanks @aaronsteers!**_
 
 ## v0.10.0 (2022-09-12)
 
 ### ✨ New
 
 - [#829](https://github.com/meltano/sdk/issues/829) Add checks for primary keys, replication keys and state partitioning keys to standard tap tests -- _**Thanks @laurentS!**_
-- [#732](https://github.com/meltano/sdk/issues/732) Implement reference paginators.
+- [#732](https://github.com/meltano/sdk/issues/732) Implement reference paginators
 
 ### 🐛 Fixes
 
 - [#898](https://github.com/meltano/sdk/issues/898) Fix SQL type merging for pre-existing target tables -- _**Thanks @BuzzCutNorman!**_
-- [#856](https://github.com/meltano/sdk/issues/856) Fix typo RecordsWitoutSchemaException -> RecordsWithoutSchemaException.
+- [#856](https://github.com/meltano/sdk/issues/856) Fix typo RecordsWitoutSchemaException -> RecordsWithoutSchemaException
 
 ### ⚙️ Under the Hood
 
-- Use `__future__.annotations` on `singer_sdk.helpers._singer`
+- Use __future__.annotations on singer_sdk.helpers._singer
 
 ### 📚 Documentation Improvements
 
-- [#950](https://github.com/meltano/sdk/issues/950) Document missing initializers for authentication and pagination helpers.
-- [#947](https://github.com/meltano/sdk/issues/947) Remove stale autodoc page for RecordsWitoutSchemaException.
-- [#942](https://github.com/meltano/sdk/issues/942) Add docs preview links to PR description.
+- [#950](https://github.com/meltano/sdk/issues/950) Document missing initializers for authentication and pagination helpers
+- [#947](https://github.com/meltano/sdk/issues/947) Remove stale autodoc page for RecordsWitoutSchemaException
+- [#942](https://github.com/meltano/sdk/issues/942) Add docs preview links to PR description
 
 ## v0.9.0 (2022-08-24)
 
 ### ✨ New
 
 - [#842](https://github.com/meltano/sdk/issues/842) Allow authenticating more generic requests
-- [#919](https://github.com/meltano/sdk/issues/919) add `ConnectionError` to list of backoff exceptions for auto-retry
+- [#919](https://github.com/meltano/sdk/issues/919) Add `ConnectionError` to list of backoff exceptions for auto-retry -- _**Thanks @jlloyd-widen!**_
 
 ### 🐛 Fixes
 
-- [#917](https://github.com/meltano/sdk/issues/917) Allow Singer schemas to include the `required` and `enum` fields
-- [#759](https://github.com/meltano/sdk/issues/759) Use recent start_date as starting_replication_value
+- [#917](https://github.com/meltano/sdk/issues/917) Allow Singer schemas to include the `required` and `enum` fields -- _**Thanks @Jack-Burnett!**_
+- [#759](https://github.com/meltano/sdk/issues/759) Use recent start_date as starting_replication_value -- _**Thanks @ericboucher!**_
 
 ### ⚙️ Under the Hood
 
@@ -631,8 +647,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixes
 
-- [#784](https://github.com/meltano/sdk/issues/784) Update return type for `backoff_max_tries` to reflect it accepts a callable that returns an integer
-- [#874](https://github.com/meltano/sdk/issues/874) Singer metrics are now properly emitted in JSON format --_Thanks, **@Jack-Burnett!**_
+- [#868](https://github.com/meltano/sdk/issues/868) Update return type for `backoff_max_tries` to reflect it accepts a callable that returns an integer -- _**Thanks @rawwar!**_
+- [#878](https://github.com/meltano/sdk/issues/878) Change to use json dumps for outputting metrics -- _**Thanks @Jack-Burnett!**_
 
 ### 📚 Documentation Improvements
 
@@ -642,557 +658,79 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ New
 
-- [#785](https://github.com/meltano/sdk/issues/785) Output full URL path in error messages
+- [#785](https://github.com/meltano/sdk/issues/785) Output full URL path in error messages -- _**Thanks @ericboucher!**_
 
 ### 🐛 Fixes
 
-- [#815](https://github.com/meltano/sdk/issues/815) Generate correct SQL target project from cookiecutter
-- [#782](https://github.com/meltano/sdk/issues/782) Allow lists and dictionaries as types for default JSON values
+- [#816](https://github.com/meltano/sdk/issues/816) Generate correct SQL target project from cookiecutter
+- [#781](https://github.com/meltano/sdk/issues/781) Allow lists and dictionaries as types for default JSON values
 
 ### 📚 Documentation Improvements
 
-- [#823](https://github.com/meltano/sdk/issues/823) Add link to the sdk for README generation regarding Stream Maps
-- [#813](https://github.com/meltano/sdk/issues/813) Fix PyPI trove classifiers
+- [#823](https://github.com/meltano/sdk/issues/823) Add link to the sdk for README generation regarding Stream Maps -- _**Thanks @visch!**_
+- [#814](https://github.com/meltano/sdk/issues/814) Fix PyPI trove classifiers
 - [#783](https://github.com/meltano/sdk/issues/783) Document using pipx inject for nox-poetry
 
-## v0.6.1 (2022-07-01)
+## v0.6.1 (2022-06-30)
 
-### Fix
+### 🐛 Fixes
 
-- Fix missing typing-extensions for Python<3.10 (#776)
+- [#776](https://github.com/meltano/sdk/issues/776) Fix missing typing-extensions for Python<3.10
 
-## 0.6.0 - (2022-06-30)
+## v0.6.0 (2022-06-30)
 
----
+### ✨ New
 
-### New
+- [#750](https://github.com/meltano/sdk/issues/750) Add end of pipe clean up hook to Sinks -- _**Thanks @z3z1ma!**_
+- [#704](https://github.com/meltano/sdk/issues/704) Add api costs hook -- _**Thanks @laurentS!**_
+- [#730](https://github.com/meltano/sdk/issues/730) Allow sort checking to be disabled -- _**Thanks @ilkkapeltola!**_
 
-- Tap and Target SDK: Adds the ability to override the [logging level](https://sdk.meltano.com/en/latest/implementation/logging.html) via `LOGLEVEL` environment variables. ([!300](https://gitlab.com/meltano/sdk/-/merge_requests/300)) - Thanks, _**[Eric Boucher](https://gitlab.com/ericboucher)**_!
-- Tap SDK: Allow sort checking to be disabled for taps with un-sortable replication keys. ([#729](https://github.com/meltano/sdk/issues/729), [#730](https://github.com/meltano/sdk/pull/730)) - Thanks, _**[Ilkka](https://github.com/ilkkapeltola)**_!
-- Tap SDK: Add `Stream.calculate_sync_cost` hook to gather "cost" (in terms of number of requests, etc.) for each stream. ([#348](https://github.com/meltano/sdk/issues/348), [#704](https://github.com/meltano/sdk/pull/704)) - Thanks, _**[Laurent Savaëte](https://github.com/laurentS)**_!
-- Target SDK: Add end-of-pipe clean up hooks for `Sink` implementations ([#750](https://github.com/meltano/sdk/pull/750)) - Thanks, _**[Alexander Butler](https://github.com/z3z1ma)**_!
+### 🐛 Fixes
 
-### Changes
+- [#767](https://github.com/meltano/sdk/issues/767) Remove trailing parenthesis from logged version
+- [#752](https://github.com/meltano/sdk/issues/752) Ensure all streams log sync costs -- _**Thanks @laurentS!**_
+- [#737](https://github.com/meltano/sdk/issues/737) Check if RK is sortable before comparing
+- Use str in Generic counter type
+- Do not write SQLAlchemy logs to stdout
+- Do not write SQLAlchemy logs to stdout -- _**Thanks @elephantum!**_
 
-- Tap SDK: Bump minimum version of `PyJWT` to `2.4` ([#396](https://gitlab.com/meltano/sdk/-/issues/396), [!302](https://gitlab.com/meltano/sdk/-/merge_requests/302)).
-- Tap SDK: Compare replication key values when incrementing state, only if the `check_sorted` flag is set to True ([#736](https://github.com/meltano/sdk/issues/736), [#737](https://github.com/meltano/sdk/pull/737)).
+### 📚 Documentation Improvements
 
-### Fixes
+- [#745](https://github.com/meltano/sdk/issues/745) Update contributing docs
+- [#689](https://github.com/meltano/sdk/issues/689) Update gitlab refs to github ones -- _**Thanks @aaronsteers!**_
 
-- Tap and Target SDK: Resolves an issue where SQLAlchemy logs would be printed to `STDOUT`. ([!303](https://gitlab.com/meltano/sdk/-/merge_requests/303)) - Thanks, _**[Andrey Tatarinov](https://gitlab.com/elephantum)**_!
-- Tap SDK: Reduces number of log lines printed when unmapped properties are ignored from the source API ([!300](https://gitlab.com/meltano/sdk/-/merge_requests/300)) - Thanks, _**[Eric Boucher](https://gitlab.com/ericboucher)**_!
-- Tap and Target SDK: Remove trailing parenthesis from logged version ([#766](https://github.com/meltano/sdk/issues/766), [#767](https://github.com/meltano/sdk/pull/767)).
+## v0.4.3 (2022-02-18)
 
-## 0.5.0 - (2022-05-19)
+## v0.3.16 (2021-12-09)
 
----
+## v0.3.10 (2021-09-30)
 
-### New
+## v0.3.8 (2021-09-16)
 
-- Tap and Target SDK: The `--config=ENV` option now also considers environment variables from a
-  dotenv (`.env`) file if present ([#384](https://gitlab.com/meltano/sdk/-/issues/384), [!293](https://gitlab.com/meltano/sdk/-/merge_requests/293)).
+## v0.3.6 (2021-08-26)
 
-### Changes
+## v0.3.5 (2021-08-17)
 
-- Target SDK: Use generic SQLALchemy markers for parameterized queries in SQL targets ([#376](https://gitlab.com/meltano/sdk/-/issues/376), [!287](https://gitlab.com/meltano/sdk/-/merge_requests/287)) - _Thanks, **[Thomas Briggs](https://gitlab.com/tbriggs2)**_!
+## v0.3.4 (2021-08-13)
 
-- Target SDK: Explicitly specify column names when inserting rows in SQL targets ([#385](https://gitlab.com/meltano/sdk/-/issues/385), [!294](https://gitlab.com/meltano/sdk/-/merge_requests/294)) - _Thanks, **[Thomas Briggs](https://gitlab.com/tbriggs2)**_!
+## v0.3.3 (2021-07-09)
 
-### Fixes
+## v0.3.2 (2021-07-02)
 
-- Target SDK: Fixes bug where an `activate_version` message caused an error when destination table does not exist ([#372](https://gitlab.com/meltano/sdk/-/issues/372), [!285](https://gitlab.com/meltano/sdk/-/merge_requests/285)) - _Thanks, **[Thomas Briggs](https://gitlab.com/tbriggs2)**_!
+## v0.3.1 (2021-06-28)
 
-- Tap and Target SDK: Do not fail `--about` option if tap or target is not configured ([#379](https://gitlab.com/meltano/sdk/-/issues/379), [!291](https://gitlab.com/meltano/sdk/-/merge_requests/291)).
+## v0.3.0 (2021-06-24)
 
-## 0.4.9 - (2022-05-12)
+## v0.2.0 (2021-05-20)
 
----
+## v0.1.6 (2021-05-14)
 
-### New
+## v0.1.5 (2021-05-04)
 
-- Tap SDK: Improved helpers for handling rate limits, backoff and retries ([#137](https://gitlab.com/meltano/sdk/-/issues/137), [#140](https://gitlab.com/meltano/sdk/-/issues/140), [!277](https://gitlab.com/meltano/sdk/-/merge_requests/277)) - _Thanks, **[Fred O'Loughlin](https://gitlab.com/fred-oloughlin-fl)**_!
+## v0.1.4 (2021-05-03)
 
-### Changes
+## v0.1.3 (2021-04-23)
 
-- Remove "errors" from non-error log line to improve log searchability ([!279](https://gitlab.com/meltano/sdk/-/merge_requests/279/diffs)) - _Thanks, **[Laurent Savaëte](https://gitlab.com/LaurentS)**_!
+## v0.1.2 (2021-04-12)
 
-### Fixes
-
-- Tap and Target SDK: Fixed a bug where setting stream map property to `null` did not remove it from SCHEMA message ([#370](https://gitlab.com/meltano/sdk/-/issues/370), [!286](https://gitlab.com/meltano/sdk/-/merge_requests/286)) - _Thanks, **[Ryan Whitten](https://gitlab.com/rwhitten577)**_!
-- Tap and Target SDK: Fixed a bug where flattening resulted in an invalid SCHEMA message ([!286](https://gitlab.com/meltano/sdk/-/merge_requests/286)) - _Thanks, **[Ryan Whitten](https://gitlab.com/rwhitten577)**_!
-
-## 0.4.8 - (2022-05-05)
-
----
-
-### Fixes
-
-- Target SDK: Use `maxLength` in SQL targets for string fields if the schema provides it ([#371](https://gitlab.com/meltano/sdk/-/issues/371), [!284](https://gitlab.com/meltano/sdk/-/merge_requests/284)) - _Thanks, **[Thomas Briggs](https://gitlab.com/tbriggs2)**_!
-
-## 0.4.7 - (2022-04-28)
-
----
-
-### Fixes
-
-- Tap Cookiecutter: Fixed a bug where the wrong key was used to select the appropriate `Tap` class for SQL taps ([#353](https://gitlab.com/meltano/sdk/-/issues/353), [!275](https://gitlab.com/meltano/sdk/-/merge_requests/275)) - _Thanks, **[Dan Norman](https://gitlab.com/BuzzCutNorman)**_!
-- Tap Cookiecutter: Fixed a bug where `client.py` for SQL taps was overwritten during initialization ([#354](https://gitlab.com/meltano/sdk/-/issues/354), [!276](https://gitlab.com/meltano/sdk/-/merge_requests/276)) - _Thanks, **[Dan Norman](https://gitlab.com/BuzzCutNorman)**_!
-- Tap SDK: Fixed a bug where a parent stream emitted schema messages when it's not selected, but at least one of its child streams is ([#366](https://gitlab.com/meltano/sdk/-/issues/366), [!280](https://gitlab.com/meltano/sdk/-/merge_requests/280))
-- Tap SDK: Bump `pyjwt` dependency to `~=2.3` ([!281](https://gitlab.com/meltano/sdk/-/merge_requests/281)) - _Thanks, **[Eric Boucher](https://gitlab.com/ericboucher)**_!
-
-## 0.4.6 - (2022-04-21)
-
----
-
-### Fixes
-
-- Raise more descriptive exceptions when wrapped JSON typing classes needs to be instantiated ([#55](https://gitlab.com/meltano/sdk/-/issues/55), [#360](https://gitlab.com/meltano/sdk/-/issues/360), [!270](https://gitlab.com/meltano/sdk/-/merge_requests/270)).
-- Support JSONPath extensions in `records_jsonpath` and `next_page_token_jsonpath` ([#361](https://gitlab.com/meltano/sdk/-/issues/361), [!271](https://gitlab.com/meltano/sdk/-/merge_requests/271)).
-
-## 0.4.5 - (2022-04-08)
-
----
-
-### Fixes
-
-- Fixed a bug where setting a stream map property to null did not remove the property ([#352](https://gitlab.com/meltano/sdk/-/issues/352), [!263](https://gitlab.com/meltano/sdk/-/merge_requests/263)).
-- Avoid SQLAlchemy deprecation warning caused by using `Engine.has_table()` ([#341](https://gitlab.com/meltano/sdk/-/issues/341), [!264](https://gitlab.com/meltano/sdk/-/merge_requests/264))
-- Resolve issue where "falsey" defaults like '0', '', and 'False' would not be properly applied to tap settings config. ([#357](https://gitlab.com/meltano/sdk/-/issues/357), [!265](https://gitlab.com/meltano/sdk/-/merge_requests/265))
-- Return to stable `poetry-core` version in cookiecutter templates ([#338](https://gitlab.com/meltano/sdk/-/issues/338), [!260](https://gitlab.com/meltano/sdk/-/merge_requests/260))
-
-## 0.4.4 - (2022-03-03)
-
----
-
-### New
-
-- Define all built-in JSON Schema string formats as separate types ([#336](https://gitlab.com/meltano/sdk/-/issues/336), [!250](https://gitlab.com/meltano/sdk/-/merge_requests/250)) - _Thanks, **[Reuben Frankel](https://gitlab.com/ReubenFrankel)**_!
-
-## 0.4.3 - (2022-02-18)
-
----
-
-### New
-
-- Enable JSONPath for GraphQL record extraction ([#327](https://gitlab.com/meltano/sdk/-/issues/327), [!247](https://gitlab.com/meltano/sdk/-/merge_requests/247)) - _Thanks, **[Fred O'Loughlin](https://gitlab.com/fred-oloughlin-fl)**_!
-
-### Changes
-
-- Deprecate Python 3.6 ([#316](https://gitlab.com/meltano/sdk/-/issues/316), [!246](https://gitlab.com/meltano/sdk/-/merge_requests/246))
-
-## 0.4.2 - (2022-02-04)
-
----
-
-### New
-
-- Add record and schema flattening in Stream Maps ([!236](https://gitlab.com/meltano/sdk/-/merge_requests/236)),
-
-### Fixes
-
-- Resolve issues when aliasing stream maps using the keywords `__alias__`, `__source__`, or `__else__` ([#301](https://gitlab.com/meltano/sdk/-/issues/301), [#302](https://gitlab.com/meltano/sdk/-/issues/302), [!243](https://gitlab.com/meltano/sdk/-/merge_requests/243))
-
-## 0.4.1 - (2022-01-27)
-
----
-
-### Changes
-
-- Always sync one record per stream when invoking with `--test` or `--test=all` ([#311](https://gitlab.com/meltano/sdk/-/issues/311), [!241](https://gitlab.com/meltano/sdk/-/merge_requests/241))
-- Add `--test=schema` option to emit tap SCHEMA messages only ([!218](https://gitlab.com/meltano/sdk/-/merge_requests/218)) - _Thanks, **[Laurent Savaëte](https://gitlab.com/LaurentS)**_!
-
-## 0.4.0 - (2022-01-21)
-
----
-
-### New
-
-- Add support for SQL Taps ([#74](https://gitlab.com/meltano/sdk/-/issues/74), [!44](https://gitlab.com/meltano/sdk/-/merge_requests/44))
-- Add support for SQL Targets ([#263](https://gitlab.com/meltano/sdk/-/issues/263), [!44](https://gitlab.com/meltano/sdk/-/merge_requests/44), [!200](https://gitlab.com/meltano/sdk/-/merge_requests/200), [!239](https://gitlab.com/meltano/sdk/-/merge_requests/239))
-- Added Licence tracking to SDK GitLab Project ([#166](https://gitlab.com/meltano/sdk/-/issues/166), [!237](https://gitlab.com/meltano/sdk/-/merge_requests/237))
-
-## 0.3.18 - (2022-01-13)
-
----
-
-### New
-
-- Inline Mapper SDK: Support for creation of inline mapper plugins ([#257](https://gitlab.com/meltano/sdk/-/issues/257), [!234](https://gitlab.com/meltano/sdk/-/merge_requests/234))
-- Tap and Target Cookiecutter: Support editable pip installs (`pip install -e .`) with [PEP 660](https://www.python.org/dev/peps/pep-0660/) ([#238](https://gitlab.com/meltano/sdk/-/issues/238), [!231](https://gitlab.com/meltano/sdk/-/merge_requests/231))
-
-### Fixes
-
-- Tap Cookiecutter: Add output directory for `target-jsonl` ([!228](https://gitlab.com/meltano/sdk/-/merge_requests/228)) -- _Thanks, **[Niall Woodward](https://gitlab.com/NiallRees)**!_
-- Tap SDK: Make the `expires_in` property optional in OAuth response ([#297](https://gitlab.com/meltano/sdk/-/issues/297), [!232](https://gitlab.com/meltano/sdk/-/merge_requests/232)) -- _Thanks, **[Daniel Ferguson](https://gitlab.com/daniel-ferguson)**!_
-
-## 0.3.17 - (2021-12-16)
-
----
-
-### New
-
-- Tap SDK: Add configurable timeout for HTTP requests ([#287](https://gitlab.com/meltano/sdk/-/issues/287), [!217](https://gitlab.com/meltano/sdk/-/merge_requests/217), [!225](https://gitlab.com/meltano/sdk/-/merge_requests/225)) -- _Thanks, **[Josh Lloyd](https://gitlab.com/jlloyd3)**!_
-- Tap and Target SDK: Adds support for Python 3.10 ([#293](https://gitlab.com/meltano/sdk/-/issues/293), [!224](https://gitlab.com/meltano/sdk/-/merge_requests/224))
-
-### Fixes
-
-- Resolve lint errors when ArrayType is used to wrap other types ([!223](https://gitlab.com/meltano/sdk/-/merge_requests/223)) -- _Thanks, **[David Wallace](https://gitlab.com/dwallace0723)**!_
-
-## 0.3.16 - (2021-12-09)
-
----
-
-### Fixes
-
-- Tap SDK: Fix datelike type parsing bug with nested schemas ([#283](https://gitlab.com/meltano/sdk/-/issues/283), [!219](https://gitlab.com/meltano/sdk/-/merge_requests/219))
-- Tap SDK: Resolved bug in `--test` which caused child streams to not use record limiting ([#268](https://gitlab.com/meltano/sdk/-/issues/268), [!204](https://gitlab.com/meltano/sdk/-/merge_requests/204), [!220](https://gitlab.com/meltano/sdk/-/merge_requests/220)) -- _Thanks, **[Derek Visch](https://gitlab.com/vischous)**!_
-
-## 0.3.15 - (2021-12-03)
-
----
-
-### Fixes
-
-- Tap SDK: Fixed mapped `__key_properties__` not being passed to the emitted schema message ([#281](https://gitlab.com/meltano/sdk/-/issues/281), [!209](https://gitlab.com/meltano/sdk/-/merge_requests/209))
-- Tap SDK: Fixed missing schema during development causing sync to fail [#284](https://gitlab.com/meltano/sdk/-/issues/284), [!212](https://gitlab.com/meltano/sdk/-/merge_requests/212) -- _Thanks, **[Fred Reimer](https://gitlab.com/freimer)**!_
-
-## 0.3.14 - (2021-11-18)
-
----
-
-### New
-
-- Tap SDK: New method `RESTStream.validate_response` for custom validation of HTTP responses ([#207](https://gitlab.com/meltano/sdk/-/issues/207), [!195](https://gitlab.com/meltano/sdk/-/merge_requests/195))
-- Tap SDK: New method `RESTStream.request_decorator` for custom back-off and retry parameters ([#137](https://gitlab.com/meltano/sdk/-/issues/137), [!195](https://gitlab.com/meltano/sdk/-/merge_requests/195))
-
-### Changes
-
-- Target SDK: Split sink classes into separate modules ([#264](https://gitlab.com/meltano/sdk/-/issues/264), [!201](https://gitlab.com/meltano/sdk/-/merge_requests/201))
-
-### Fixes
-
-- Target SDK: Document options for the target CLI and accept multiple config files as input ([!183](https://gitlab.com/meltano/sdk/-/merge_requests/183))
-
-## 0.3.13 - (2021-10-28)
-
----
-
-### New
-
-- Target SDK: CLI flag for targets to read messages from a file instead of stdin ([#249](https://gitlab.com/meltano/sdk/-/issues/249), [!190](https://gitlab.com/meltano/sdk/-/merge_requests/190)) -- _Thanks, **[Charles Julian Knight](https://gitlab.com/rabidaudio)**!_
-- Target SDK: Add target mock classes and tap-to-target scenario tests ([#198](https://gitlab.com/meltano/sdk/-/issues/198), [!138](https://gitlab.com/meltano/sdk/-/merge_requests/138))
-- Tap and Target SDK: Create expanded list of capabilities ([#186](https://gitlab.com/meltano/sdk/-/issues/186), [!141](https://gitlab.com/meltano/sdk/-/merge_requests/141))
-
-## 0.3.12 - (2021-10-21)
-
----
-
-### Fixes
-
-- Tap and Target SDK: Fix markdown table formatting in `--about` for multi-line settings descriptions ([#240](https://gitlab.com/meltano/sdk/-/issues/240), [!185](https://gitlab.com/meltano/sdk/-/merge_requests/185))
-- Tap SDK: Clarify undocumented feature of filtering `None` from `post_process()` ([#233](https://gitlab.com/meltano/sdk/-/issues/233), [!187](https://gitlab.com/meltano/sdk/-/merge_requests/187))
-- Tap and Target SDK: Add `dataclasses` as an explicit third-party dependency for Python 3.6 ([#245](https://gitlab.com/meltano/sdk/-/issues/245), [!189](https://gitlab.com/meltano/sdk/-/merge_requests/189))
-- Tap and Target SDK: Allows `--discover` and `--about` execution without requiring settings validation ([#235](https://gitlab.com/meltano/sdk/-/issues/235), [!188](https://gitlab.com/meltano/sdk/-/merge_requests/188))
-
-## 0.3.11 - (2021-10-07)
-
----
-
-### New
-
-- Tap and Target SDK: Adds capability to print markdown docs with `--about --format=markdown` ([!172](https://gitlab.com/meltano/sdk/-/merge_requests/172), [!180](https://gitlab.com/meltano/sdk/-/merge_requests/180)) -- _Thanks, **[Nick Müller](https://gitlab.com/muellernick1994)**!_
-
-### Changes
-
-- Tap and Target SDK: Autogenerated docstrings for arguments, return types, and exceptions raised ([!166](https://gitlab.com/meltano/sdk/-/merge_requests/166)).
-- Tap and Target SDK: Support Black by default by bumping min Python version to 3.6.2. (#224, !169)
-
-### Fixes
-
-- Fixes a bug where tox invocations after initial setup failed ([!179](https://gitlab.com/meltano/sdk/-/merge_requests/179)) -- _Thanks, **[Jon Watson](https://gitlab.com/jawats)**!_.
-- Tap SDK: Fixes a bug in `Stream.get_starting_timestamp()` and `Stream.get_starting_replication_key_value()` calls where results where not cached breaking stream sorting ([!157](https://gitlab.com/meltano/sdk/-/merge_requests/157))
-
-## 0.3.10 - (2021-09-30)
-
----
-
-### Changes
-
-- Tap and Target SDK: Prevents the leaking of sensitive configuration values when JSON schema validation fails ([!173](https://gitlab.com/meltano/sdk/-/merge_requests/173)) -- _Thanks, **[Kevin Mullins](https://gitlab.com/zyzil)**!_.
-
-## 0.3.9 - (2021-09-23)
-
----
-
-### New
-
-- Add description attribute to `Property` class for JSON schemas ([#159](https://gitlab.com/meltano/sdk/-/issues/159), [!164](https://gitlab.com/meltano/sdk/-/merge_requests/164)) -- _Thanks, **[Stephen Bailey](https://gitlab.com/stkbailey)**!_
-
-### Changes
-
-- Tap SDK: Set `key_properties = []` instead of `null` per the Singer spec ([!160](https://gitlab.com/meltano/sdk/-/merge_requests/160)) -- _Thanks, **[Niall Woodward](https://gitlab.com/NiallRees)**!_
-
-### Fixes
-
-- Tap SDK: Fixes issue where stream map schema generation fails when overriding the value of an existing property. ([#196](https://gitlab.com/meltano/sdk/-/issues/196), [!165](https://gitlab.com/meltano/sdk/-/merge_requests/165))
-
-## 0.3.8 - (2021-09-16)
-
----
-
-### Fixes
-
-- Tap and Target SDK: Resolves `2to3` compatibility issues when installed with `setuptools>=58.0`.
-- Resolve issue preventing repo from being cloned on Windows.
-
-## 0.3.7 - (2021-09-09)
-
----
-
-### New
-
-- Tap and Target SDK: Added compatibility with [PEP 561](https://www.python.org/dev/peps/pep-0561/) and `mypy` type checking ([#212](https://gitlab.com/meltano/sdk/-/issues/212), [!150](https://gitlab.com/meltano/sdk/-/merge_requests/150)) -- _Thanks, **[Laurent Savaëte](https://gitlab.com/LaurentS)**!_
-
-### Changes
-
-- Tap SDK: Improved record parsing and validation performance, especially with large record objects ([#161](https://gitlab.com/meltano/sdk/-/issues/161), [!146](https://gitlab.com/meltano/sdk/-/merge_requests/146))
-- Tap SDK: Changed the signature of `Stream.apply_catalog` to reflect new catalog parsing flow ([#161](https://gitlab.com/meltano/sdk/-/issues/161), [!146](https://gitlab.com/meltano/sdk/-/merge_requests/146))
-
-## 0.3.6 - (2021-08-26)
-
----
-
-### New
-
-- Tap and Target SDK: Adds support for Python 3.9 (#66, !38)
-- Tap SDK: Added support for new authenticator classes: `BasicAuthenticator`, `BearerTokenAuthenticator`, and `APIKeyAuthenticator` (#185, !128) -- _Thanks, **[Stephen Bailey](https://gitlab.com/stkbailey)**!_
-
-### Changes
-
-- Tap and Target SDK: Bumps `click` library version to 8.0 (#178, !140).
-- Target SDK: Improves `BatchSink` performance by reducing the frequency by which batches are processed. (#172, !137)
-
-### Fixes
-
-- Tap SDK: Improves CLI `--help` output (#177, !140).
-- Tap SDK: Fixes a bug in state tracking where timezone-aware timestamps are appended again with `+0:00` (#176, !142) -- _Thanks, **[Joshua Adeyemi](https://gitlab.com/joshua.a.adeyemi)**!_
-- Tap SDK: Improve performance by reusing a single authenticator instance (#168, #173, !136)
-
-## 0.3.5 - (2021-08-17)
-
----
-
-### Fixes
-
-- Tap SDK: Fixed a bug where not using a catalog file resulted in all streams being selected but all properties being removed from the schema and records (#190, !132)
-
-## v0.3.4
-
----
-
-### New
-
-- Tap SDK: Added full support for selection metadata as specified by the [Singer Spec](https://hub.meltano.com/singer/spec#metadata), including metadata for `selected`, `selected-by-default`, and `inclusion` (!121)
-
-### Changes
-
-- Target SDK: Improved performance for Batch Sinks by skipping extra drain operations when newly recieved STATE messages are unchanged from the prior received STATE (#172, !125) -- _Thanks, **[Pat Nadolny](https://gitlab.com/pnadolny13)**!_
-
-### Fixes
-
-- Target SDK: Fixed a bug where would emit an invalid STATE payload (#188, !130) -- _Thanks, **[Pat Nadolny](https://gitlab.com/pnadolny13)**!_
-- Tap SDK: Fixed a bug where replication key signposts were not correctly applied for streams which defined them (#180, !129)
-
-## v0.3.3
-
----
-
-### New
-
-- Added JSONPath for taps to handle record extraction from API responses (!77)
-
-### Fixes
-
-- Resolve batch `context` not being reset between batches (#164, !117)
-
-### Removes
-
-- Removed unused `DEFAULT_BATCH_SIZE_ROWS` in favor of `max_size` for `BatchSink` implementations (#163, !118)
-
-## v0.3.2
-
-### Fixes
-
-- Resolve stream map duplicates not aliased correctly (#154, !114)
-
-## v0.3.1
-
-### New
-
-- Added target support for `add_record_metadata` config (#157, !111)
-
-### Fixes
-
-- Resolve target failures when dates are parsed prior to JSON Schema validation (#156, !110)
-- Resolve target failures when `default_sink_class` is not used (#153, !109)
-- Improved tap log messages when child property's selection metadata defaults to the parent's (#131, !91)
-
-## v0.3.0
-
-### New
-
-- Added Stream Map feature for inline transformation and filtering capabilities (#63, !4, !92, !103)
-- Added Target SDK, components and templates for building Singer targets (#96, !4)
-
-### Breaks
-
-- Removed methods deprecated in v0.2.0: `get_partition_state()` and `get_stream_or_partition_state()`. Affected developers should replace these with references to `get_context_state()`. (#152, !107)
-
-## v0.2.0
-
-### New
-
-- Added support for parent-child streams (#97, !79)
-- Added support for configurable metrics logging (#91, !79)
-- Added ability to use fewer state bookmarks by setting `Stream.state_partitioning_keys` to a
-  subset of available context keys (!79)
-
-### Changes
-
-- Renamed the optional `partition` dictionary arg in method signatures to the more generic `context` (!79)
-
-### Deprecates
-
-- The methods `Stream.get_partition_state()` and `Stream.get_stream_or_partition_state()`
-  have been deprecated in favor of the new and simpler `get_context_state()` (!79)
-
-### Improves
-
-- Code coverage is now tracked and available as a tool for SDK contributors to further
-  improve overall stability and help prioritize unit test development. (#39, !89)
-
-## v0.1.6
-
-Stability and bugfix release. No breaking changes.
-
-### Fixes
-
-- Resolved excessive logging during selection filtering. (#125, !83)
-- Resolved issue where deselected sub-fields were incorrectly included in stream records. (#126, !85) -- _Thanks, **[Alex Levene](https://gitlab.com/alex.levene)**!_
-
-### Improves
-
-- Added improved type hints for developers, including mypy code compliance for improved stability. (#127, !86)
-
-## v0.1.5
-
-Bugfix release. No breaking changes.
-
-### Fixes
-
-- Resolved tap failure when a sorted stream has non-unique replication keys. (#120, !82)
-
-## v0.1.4
-
-Significant release with newly added features. No breaking changes.
-
-### New
-
-- Added support for GraphQL query variables (#115, !78)
-- Added selection rules support for record and schema messages (#7, !26)
-
-### Changes
-
-- Improved cookiecutter template coverage, resolved readability issues. (#116, #119, !75)
-
-### Fixes
-
-- Resolved tap failure when a stream is missing from the input catalog. (#105, !80)
-- Resolved bug where unsorted streams did not properly advance state bookmarks for incremental streams. (#118, !74)
-
-## v0.1.3
-
-Significant release with newly added features. No breaking changes.
-
-### New
-
-- Added `is_sorted` stream property, which enables long-running incremental streams to be
-  resumed if interrupted. (!61)
-- Added signpost feature to prevent bookmarks from advancing beyond the point where all
-  records have been streamed. (!61)
-- Added `get_replication_key_signpost()` stream method which defaults to the current time
-  for timestamp-based replication keys. (!61)
-
-### Fixes
-
-- Fixed a scenario where _unsorted_ incremental streams would generate incorrect STATE bookmarks. (!61) -- _Thanks, **[Egi Gjevori](https://gitlab.com/egi-gjevori)**!_
-- Fixed a problem where CI pipelines would fail when run from a fork. (!71) -- _Thanks, **[Derek Visch](https://gitlab.com/vischous)**!_
-- Fixed fatal error when running from the cookiecutter shell script (#102, !64)
-
-## v0.1.2
-
-Fixes bug in state handling, adds improvements to documentation.
-
-### Documentation
-
-- Streamlined Dev Guide (!56)
-- Added Code Samples page, including dynamic schema discovery examples (#33, !56)
-- Added links to external sdk-based taps (#32, !56)
-- Added static/dynamic property documentation (#86, !56)
-- Added "implementation" docs for debugging and troubleshooting (#71, !41)
-
-### Fixes
-
-- Fixes bug in `Stream.get_starting_timestamp()` using incorrect state key (#94, !58)
-
-## v0.1.1
-
-Documentation and cookiecutter template improvements.
-
-## New
-
-- Added 'admin_name' field in cookiecutter, streamline poetry setup (!25)
-- Added meltano integration and testing options (#47, !52)
-- Added new cookiecutter `.sh` script to ease testing during development (!52)
-
-### Changes
-
-- Improved cookiecutter readme template with examples (#76, !53)
-
-## v0.1.0
-
-First official SDK release. Numerous changes and improvements implemented, with the goal of stabilizing the SDK
-and making it broadly available to the community.
-
-### New
-
-- Added this CHANGELOG.md file (#68, !43)
-- Added standardized tap tests (!36, #78, !46)
-- Added SDK testing matrix for python versions 3.6, 3.7, 3.8 (#61, !33)
-- Added support for multiple `--config=` inputs, combining one or more config.json files (#53, !27)
-- Added new CLI `--test` option to perform connection test on all defined streams (#14, !28)
-- Added default value support for plugin configs (!12) -- _Contributed by: **[Ken Payne](https://gitlab.com/kgpayne)**_
-
-### Changes
-
-- Promote `singer_sdk.helpers.typing` to `singer_sdk.typing` (#84)
-- Modified environment variable parsing logic for arrays (#82)
-- Renamed `http_headers` in `Authenticator` class to `auth_headers` (#75, !47)
-- Expect environment variables in all caps (`<PLUGIN>_<SETTING>`) (#59, !34)
-- Parse environment variables only if `--config=ENV` is passed (#53, !27)
-
-### Fixes
-
-- OAuth no longer applies `client_email` automatically if `client_id` is missing (#83)
-- Resolved issue on Python 3.6: `cannot import 'metadata' from 'importlib'` (#58)
-- Fixed issue reading from JSON file (!11) -- _Contributed by: **[Edgar R. Mondragón](https://gitlab.com/edgarrmondragon)**_
-- Look only for valid plugin settings in environment variables (!21) -- _Contributed by: **[Edgar R. Mondragón](https://gitlab.com/edgarrmondragon)**_
-- Fixed bug in `STATE` handling (!13) -- _Contributed by: **[Ken Payne](https://gitlab.com/kgpayne)**_
-
-### Removes
-
-- Remove parquet sample (#81,!48)
-
-## v0.0.1-devx
-
-Initial prerelease version for review and prototyping.
+## v0.1.1 (2021-04-07)
