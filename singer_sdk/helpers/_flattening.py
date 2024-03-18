@@ -9,7 +9,8 @@ import typing as t
 from copy import deepcopy
 
 import inflection
-import simplejson as json
+
+from singer_sdk.helpers._util import serialize_json
 
 DEFAULT_FLATTENING_SEPARATOR = "__"
 
@@ -437,7 +438,7 @@ def _flatten_record(
             items.append(
                 (
                     new_key,
-                    json.dumps(v, use_decimal=True, default=str)
+                    serialize_json(v)
                     if _should_jsondump_value(k, v, flattened_schema)
                     else v,
                 ),

@@ -20,7 +20,7 @@ from singer_sdk.helpers._flattening import flatten_record
             {
                 "key_1": 1,
                 "key_2__key_3": "value",
-                "key_2__key_4": '{"key_5": 1, "key_6": ["a", "b"]}',
+                "key_2__key_4": '{"key_5":1,"key_6":["a","b"]}',
             },
             id="flattened schema limiting the max level",
         ),
@@ -38,7 +38,7 @@ from singer_sdk.helpers._flattening import flatten_record
                 "key_1": 1,
                 "key_2__key_3": "value",
                 "key_2__key_4__key_5": 1,
-                "key_2__key_4__key_6": '["a", "b"]',
+                "key_2__key_4__key_6": '["a","b"]',
             },
             id="flattened schema not limiting the max level",
         ),
@@ -55,7 +55,7 @@ from singer_sdk.helpers._flattening import flatten_record
             {
                 "key_1": 1,
                 "key_2__key_3": "value",
-                "key_2__key_4": '{"key_5": 1, "key_6": ["a", "b"]}',
+                "key_2__key_4": '{"key_5":1,"key_6":["a","b"]}',
             },
             id="max level limiting flattened schema",
         ),

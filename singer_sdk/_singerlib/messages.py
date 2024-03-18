@@ -8,7 +8,7 @@ import typing as t
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
-import simplejson as json
+from singer_sdk.helpers._util import serialize_json
 
 if sys.version_info < (3, 11):
     from backports.datetime_fromisoformat import MonkeyPatch
@@ -24,18 +24,6 @@ class SingerMessageType(str, enum.Enum):
     STATE = "STATE"
     ACTIVATE_VERSION = "ACTIVATE_VERSION"
     BATCH = "BATCH"
-
-
-def _default_encoding(obj: t.Any) -> str:  # noqa: ANN401
-    """Default JSON encoder.
-
-    Args:
-        obj: The object to encode.
-
-    Returns:
-        The encoded object.
-    """
-    return obj.isoformat(sep="T") if isinstance(obj, datetime) else str(obj)
 
 
 def exclude_null_dict(pairs: list[tuple[str, t.Any]]) -> dict[str, t.Any]:
@@ -226,12 +214,7 @@ def format_message(message: Message) -> str:
     Returns:
         The formatted message.
     """
-    return json.dumps(
-        message.to_dict(),
-        use_decimal=True,
-        default=_default_encoding,
-        separators=(",", ":"),
-    )
+    return serialize_json(message.to_dict())
 
 
 def write_message(message: Message) -> None:

@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import abc
-import decimal
-import json
 import logging
 import sys
 import typing as t
@@ -13,6 +11,7 @@ from collections import Counter, defaultdict
 from singer_sdk._singerlib.messages import Message, SingerMessageType
 from singer_sdk._singerlib.messages import format_message as singer_format_message
 from singer_sdk._singerlib.messages import write_message as singer_write_message
+from singer_sdk.helpers._util import deserialize_json
 
 logger = logging.getLogger(__name__)
 
@@ -51,27 +50,6 @@ class SingerReader(metaclass=abc.ABCMeta):
             msg = f"Line is missing required {', '.join(missing)} key(s): {line_dict}"
             raise Exception(msg)  # TODO: Raise a more specific exception
 
-    def deserialize_json(self, line: str) -> dict:
-        """Deserialize a line of json.
-
-        Args:
-            line: A single line of json.
-
-        Returns:
-            A dictionary of the deserialized json.
-
-        Raises:
-            json.decoder.JSONDecodeError: raised if any lines are not valid json
-        """
-        try:
-            return json.loads(  # type: ignore[no-any-return]
-                line,
-                parse_float=decimal.Decimal,
-            )
-        except json.decoder.JSONDecodeError as exc:
-            logger.error("Unable to parse:\n%s", line, exc_info=exc)
-            raise
-
     def _process_lines(self, file_input: t.IO[str]) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
@@ -83,7 +61,7 @@ class SingerReader(metaclass=abc.ABCMeta):
         """
         stats: dict[str, int] = defaultdict(int)
         for line in file_input:
-            line_dict = self.deserialize_json(line)
+            line_dict = deserialize_json(line)
             self._assert_line_requires(line_dict, requires={"type"})
 
             record_type: SingerMessageType = line_dict["type"]
