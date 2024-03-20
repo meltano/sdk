@@ -144,7 +144,7 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
 
 
 class SinglePagePaginator(BaseAPIPaginator[None]):
-    """A paginator that does works with single-page endpoints."""
+    """A paginator that works with single-page endpoints."""
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Create a new paginator.
