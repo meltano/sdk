@@ -7,7 +7,6 @@ Usage example:
     jsonschema = PropertiesList(
         Property("username", StringType, required=True),
         Property("password", StringType, required=True, secret=True),
-
         Property("id", IntegerType, required=True),
         Property("foo_or_bar", StringType, allowed_values=["foo", "bar"]),
         Property(
@@ -23,13 +22,12 @@ Usage example:
         Property("days_active", IntegerType),
         Property("updated_on", DateTimeType),
         Property("is_deleted", BooleanType),
-
         Property(
             "author",
             ObjectType(
                 Property("id", StringType),
                 Property("name", StringType),
-            )
+            ),
         ),
         Property("tags", ArrayType(StringType)),
         Property(
@@ -39,7 +37,7 @@ Usage example:
                     Property("id", StringType),
                     Property("name", StringType),
                 )
-            )
+            ),
         ),
     ).to_dict()
 
