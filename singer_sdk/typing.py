@@ -1017,6 +1017,10 @@ class PropertiesList(ObjectType):
         """
         self.wrapped[property.name] = property
 
+    def __iter__(self) -> t.Iterator[Property]:
+        """Iterate all properties of the property list."""
+        return self.wrapped.values().__iter__()
+
 
 def to_jsonschema_type(
     from_type: str | sa.types.TypeEngine | type[sa.types.TypeEngine],
