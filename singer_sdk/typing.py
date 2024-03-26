@@ -1018,7 +1018,11 @@ class PropertiesList(ObjectType):
         self.wrapped[property.name] = property
 
     def __iter__(self) -> t.Iterator[Property]:
-        """Iterate all properties of the property list."""
+        """Iterate all properties of the property list.
+
+        Returns:
+            Iterator of properties.
+        """
         return self.wrapped.values().__iter__()
 
 
