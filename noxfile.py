@@ -59,7 +59,7 @@ test_dependencies = [
 def mypy(session: Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
-    session.install(".[faker,parquet,s3,testing]")
+    session.install(".[faker,jwt,parquet,s3,testing]")
     session.install(
         "exceptiongroup",
         "mypy",
@@ -80,7 +80,7 @@ def mypy(session: Session) -> None:
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
-    session.install(".[faker,parquet,s3]")
+    session.install(".[faker,jwt,parquet,s3]")
     session.install(*test_dependencies)
 
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
@@ -113,7 +113,7 @@ def tests(session: Session) -> None:
 @session(python=main_python_version)
 def benches(session: Session) -> None:
     """Run benchmarks."""
-    session.install(".[s3]")
+    session.install(".[jwt,s3]")
     session.install(*test_dependencies)
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
     if sqlalchemy_version:
@@ -135,7 +135,7 @@ def update_snapshots(session: Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
 
-    session.install(".[faker]")
+    session.install(".[faker,jwt]")
     session.install(*test_dependencies)
     session.run("pytest", "--snapshot-update", *args)
 

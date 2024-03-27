@@ -17,7 +17,7 @@ Create taps with the SDK requires overriding just two or three classes:
      `http_headers` property in the stream class.
    - `OAuthAuthenticator` - This class performs an OAuth 2.0 authentication flow.
    - `OAuthJWTAuthenticator` - This class performs an JWT (JSON Web Token) authentication
-     flow.
+     flow. Requires installing the `singer-sdk[jwt]` extra.
 
 ## Target Development Overview
 
@@ -182,6 +182,7 @@ Some APIs instead return the records as values inside an object where each key i
 The following [extra features](https://packaging.python.org/en/latest/specifications/dependency-specifiers/#extras) are available for the Singer SDK:
 
 - `faker` - Enables the use of [Faker](https://faker.readthedocs.io/en/master/) in [stream maps](stream_maps.md).
+- `jwt` - Enables the `OAuthJWTAuthenticator` class for JWT (JSON Web Token) authentication.
 - `s3` - Enables AWS S3 as a [BATCH storage](batch.md#the-batch-message).
 - `parquet` - Enables as [BATCH encoding](batch.md#encoding).
 - `testing` - Pytest dependencies required to use the [Tap & Target Testing Framework](testing.md).
