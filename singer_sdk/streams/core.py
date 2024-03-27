@@ -9,7 +9,6 @@ import json
 import typing as t
 from os import PathLike
 from pathlib import Path
-from types import MappingProxyType
 
 import pendulum
 
@@ -52,6 +51,7 @@ from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, Stream
 
 if t.TYPE_CHECKING:
     import logging
+    from types import MappingProxyType
 
     from singer_sdk.helpers._compat import Traversable
     from singer_sdk.tap_base import Tap
@@ -127,7 +127,6 @@ class Stream(metaclass=abc.ABCMeta):
         self.logger: logging.Logger = tap.logger.getChild(self.name)
         self.metrics_logger = tap.metrics_logger
         self.tap_name: str = tap.name
-        self._config: dict = dict(tap.config)
         self._tap = tap
         self._tap_state = tap.state
         self._tap_input_catalog: singer.Catalog | None = None
@@ -592,13 +591,13 @@ class Stream(metaclass=abc.ABCMeta):
         return singer.Catalog([(self.tap_stream_id, self._singer_catalog_entry)])
 
     @property
-    def config(self) -> t.Mapping[str, t.Any]:
+    def config(self) -> MappingProxyType[str, t.Any]:
         """Get stream configuration.
 
         Returns:
             A frozen (read-only) config dictionary map.
         """
-        return MappingProxyType(self._config)
+        return self._tap.config
 
     @property
     def tap_stream_id(self) -> str:
