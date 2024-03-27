@@ -152,6 +152,7 @@ extlinks = {
 # -- Options for intersphinx -----------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#configuration
 intersphinx_mapping = {
+    "blinker": ("https://blinker.readthedocs.io/en/stable/", None),
     "requests": ("https://requests.readthedocs.io/en/latest/", None),
     "python": ("https://docs.python.org/3/", None),
 }
