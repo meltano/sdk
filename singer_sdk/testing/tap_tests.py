@@ -328,7 +328,7 @@ class AttributeIsNumberTest(AttributeTestTemplate):
         for v in self.non_null_attribute_values:
             error_message = f"Unable to cast value ('{v}') to float type."
             if not isinstance(v, (float, int)):
-                raise AssertionError(error_message)
+                raise AssertionError(error_message)  # noqa: TRY004
 
     @classmethod
     def evaluate(

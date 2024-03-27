@@ -258,7 +258,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         try:
             sink.setup()
         except Exception:  # pragma: no cover
-            self.logger.error("Error initializing '%s' target sink", self.name)
+            self.logger.exception("Error initializing '%s' target sink", self.name)
             raise
 
         self._sinks_active[stream_name] = sink
