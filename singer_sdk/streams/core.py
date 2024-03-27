@@ -11,8 +11,6 @@ from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
 
-import pendulum
-
 import singer_sdk._singerlib as singer
 from singer_sdk import metrics
 from singer_sdk.batch import Batcher
@@ -29,6 +27,7 @@ from singer_sdk.helpers._batch import (
     SDKBatchMessage,
 )
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
+from singer_sdk.helpers._compat import datetime_fromisoformat
 from singer_sdk.helpers._flattening import get_flattening_options
 from singer_sdk.helpers._state import (
     finalize_state_progress_markers,
@@ -281,7 +280,8 @@ class Stream(metaclass=abc.ABCMeta):
             msg = f"The replication key {self.replication_key} is not of timestamp type"
             raise ValueError(msg)
 
-        return t.cast(datetime.datetime, pendulum.parse(value))
+        result = datetime_fromisoformat(value)
+        return result if result.tzinfo else result.replace(tzinfo=datetime.timezone.utc)
 
     @property
     def selected(self) -> bool:
@@ -367,7 +367,7 @@ class Stream(metaclass=abc.ABCMeta):
             The most recent value between the bookmark and start date.
         """
         if self.is_timestamp_replication_key:
-            return max(value, start_date_value, key=pendulum.parse)
+            return max(value, start_date_value, key=datetime_fromisoformat)
 
         return value
 

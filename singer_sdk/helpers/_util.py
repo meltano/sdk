@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
+import datetime
 import json
 import typing as t
 from pathlib import Path, PurePath
-
-import pendulum
 
 
 def read_json_file(path: PurePath | str) -> dict[str, t.Any]:
@@ -25,6 +24,6 @@ def read_json_file(path: PurePath | str) -> dict[str, t.Any]:
     return t.cast(dict, json.loads(Path(path).read_text()))
 
 
-def utc_now() -> pendulum.DateTime:
+def utc_now() -> datetime.datetime:
     """Return current time in UTC."""
-    return pendulum.now(tz="UTC")
+    return datetime.datetime.now(datetime.timezone.utc)
