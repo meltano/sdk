@@ -8,19 +8,23 @@ repos:
   rev: v4.5.0
   hooks:
   - id: check-json
+    exclude: |
+        (?x)^(
+            .*/launch.json
+        )$
   - id: check-toml
   - id: check-yaml
   - id: end-of-file-fixer
   - id: trailing-whitespace
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.27.3
+  rev: 0.28.0
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.1.11
+  rev: v0.3.1
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]

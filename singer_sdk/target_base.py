@@ -10,7 +10,7 @@ import time
 import typing as t
 
 import click
-from joblib import Parallel, delayed, parallel_backend
+from joblib import Parallel, delayed, parallel_config
 
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
@@ -521,7 +521,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         def _drain_sink(sink: Sink) -> None:
             self.drain_one(sink)
 
-        with parallel_backend("threading", n_jobs=parallelism):
+        with parallel_config(backend="threading", n_jobs=parallelism):
             Parallel()(delayed(_drain_sink)(sink=sink) for sink in sink_list)
 
     def _write_state_message(self, state: dict) -> None:

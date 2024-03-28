@@ -49,6 +49,13 @@ def pytest_report_header() -> list[str]:
     return [f"sqlalchemy: {sa.__version__}"]
 
 
+@pytest.fixture(autouse=True)
+def _reset_envvars(monkeypatch: pytest.MonkeyPatch):
+    """Remove envvars that might interfere with tests."""
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
+    monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+
+
 @pytest.fixture(scope="class")
 def outdir() -> t.Generator[str, None, None]:
     """Create a temporary directory for target output."""

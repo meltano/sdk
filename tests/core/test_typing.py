@@ -285,10 +285,10 @@ def test_conform_primitives():
     )
 
     assert _conform_primitive_property(b"\x00", {"type": "string"}) == "00"
-    assert _conform_primitive_property(b"\xBC", {"type": "string"}) == "bc"
+    assert _conform_primitive_property(b"\xbc", {"type": "string"}) == "bc"
 
     assert _conform_primitive_property(b"\x00", {"type": "boolean"}) is False
-    assert _conform_primitive_property(b"\xBC", {"type": "boolean"}) is True
+    assert _conform_primitive_property(b"\xbc", {"type": "boolean"}) is True
 
     assert _conform_primitive_property(None, {"type": "boolean"}) is None
     assert _conform_primitive_property(0, {"type": "boolean"}) is False
@@ -349,3 +349,15 @@ def test_to_sql_type(jsonschema_type, expected):
 def test_append_null(type_dict: dict, expected: dict):
     result = append_type(type_dict, "null")
     assert result == expected
+
+
+def test_iterate_properties_list():
+    primitive_property = Property("primitive", BooleanType)
+    object_property = Property("object", PropertiesList(Property("value", BooleanType)))
+    list_property = Property("list", ArrayType(BooleanType))
+
+    properties_list = PropertiesList(primitive_property, object_property, list_property)
+
+    assert primitive_property in properties_list
+    assert object_property in properties_list
+    assert list_property in properties_list
