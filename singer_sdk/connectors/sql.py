@@ -58,8 +58,6 @@ class SQLConnector:
         """
         self._config: dict[str, t.Any] = config or {}
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
-        self._table_cols_cache: dict[str, dict[str, sa.Column]] = {}
-        self._schema_cache: set[str] = set()
 
     @property
     def config(self) -> dict:
@@ -586,12 +584,8 @@ class SQLConnector:
         Returns:
             True if the database schema exists, False if not.
         """
-        if schema_name not in self._schema_cache:
-            self._schema_cache = set(
-                sa.inspect(self._engine).get_schema_names(),
-            )
-
-        return schema_name in self._schema_cache
+        schemas = set(sa.inspect(self._engine).get_schema_names())
+        return schema_name in schemas
 
     def get_table_columns(
         self,
@@ -607,24 +601,23 @@ class SQLConnector:
         Returns:
             An ordered list of column objects.
         """
-        if full_table_name not in self._table_cols_cache:
-            _, schema_name, table_name = self.parse_full_table_name(full_table_name)
-            inspector = sa.inspect(self._engine)
-            columns = inspector.get_columns(table_name, schema_name)
+        _, schema_name, table_name = self.parse_full_table_name(full_table_name)
+        inspector = sa.inspect(self._engine)
+        columns = inspector.get_columns(table_name, schema_name)
 
-            self._table_cols_cache[full_table_name] = {
-                col_meta["name"]: sa.Column(
-                    col_meta["name"],
-                    col_meta["type"],
-                    nullable=col_meta.get("nullable", False),
-                )
-                for col_meta in columns
-                if not column_names
-                or col_meta["name"].casefold()
-                in {col.casefold() for col in column_names}
-            }
+        columns_dict: dict[str, sa.Column] = {
+            col_meta["name"]: sa.Column(
+                col_meta["name"],
+                col_meta["type"],
+                nullable=col_meta.get("nullable", False),
+            )
+            for col_meta in columns
+            if not column_names
+            or col_meta["name"].casefold()
+            in {col.casefold() for col in column_names}
+        }
 
-        return self._table_cols_cache[full_table_name]
+        return columns_dict
 
     def get_table(
         self,
