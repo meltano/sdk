@@ -613,8 +613,7 @@ class SQLConnector:
             )
             for col_meta in columns
             if not column_names
-            or col_meta["name"].casefold()
-            in {col.casefold() for col in column_names}
+            or col_meta["name"].casefold() in {col.casefold() for col in column_names}
         }
 
         return columns_dict
