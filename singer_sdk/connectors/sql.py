@@ -797,7 +797,7 @@ class SQLConnector:
                 as_temp_table=as_temp_table,
             )
             return
-        
+
         self.prepare_table_columns(
             full_table_name=full_table_name,
             schema=schema,
@@ -810,8 +810,8 @@ class SQLConnector:
     ) -> None:
         """Adapt target table columns to provided schema if possible. The advantage of encapsulating this
         in a separate method is that we reduce the number of calls to the database by calling get_table_columns()
-        only once per table. 
-        
+        only once per table.
+
         Args:
             full_table_name: the target table name.
             schema: the JSON Schema for the table.
