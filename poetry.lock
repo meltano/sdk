@@ -2636,6 +2636,7 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [extras]
 docs = ["furo", "myst-parser", "pytest", "sphinx", "sphinx-autobuild", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-notfound-page", "sphinx-reredirects"]
 faker = ["faker"]
+jwt = ["PyJWT", "cryptography"]
 parquet = ["numpy", "numpy", "pyarrow"]
 s3 = ["fs-s3fs"]
 testing = ["pytest", "pytest-durations"]
@@ -2643,4 +2644,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "a1649e1ccefeed0391552089bf6be64ca6e8e54b6db177ac86e6ca730f677d01"
+content-hash = "fa28db8eb855ac9bb217e40ad0c1720726effa79e8a07cf08d17aa0d7ceb8bef"
