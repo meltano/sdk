@@ -370,3 +370,15 @@ def test_to_sql_type(jsonschema_type, expected):
 def test_append_null(type_dict: dict, expected: dict):
     result = append_type(type_dict, "null")
     assert result == expected
+
+
+def test_iterate_properties_list():
+    primitive_property = Property("primitive", BooleanType)
+    object_property = Property("object", PropertiesList(Property("value", BooleanType)))
+    list_property = Property("list", ArrayType(BooleanType))
+
+    properties_list = PropertiesList(primitive_property, object_property, list_property)
+
+    assert primitive_property in properties_list
+    assert object_property in properties_list
+    assert list_property in properties_list
