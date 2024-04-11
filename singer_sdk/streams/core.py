@@ -1088,7 +1088,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                             child_context=child_context,
                             partition_context=state_partition_context,
                         )
-                    except InvalidStreamSortException as ex:
+                    except InvalidStreamSortException as ex:  # pragma: no cover
                         log_sort_error(
                             log_fn=self.logger.error,
                             ex=ex,

@@ -1069,7 +1069,7 @@ def to_jsonschema_type(
         sa.types.TypeEngine,
     ):
         type_name = from_type.__name__
-    else:
+    else:  # pragma: no cover
         msg = "Expected `str` or a SQLAlchemy `TypeEngine` object or type."
         # TODO: this should be a TypeError, but it's a breaking change.
         raise ValueError(msg)  # noqa: TRY004

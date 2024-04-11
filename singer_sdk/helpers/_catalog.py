@@ -42,7 +42,7 @@ def _pop_deselected_schema(
     for crumb in breadcrumb:
         schema_at_breadcrumb = schema_at_breadcrumb.get(crumb, {})
 
-    if not isinstance(schema_at_breadcrumb, dict):
+    if not isinstance(schema_at_breadcrumb, dict):  # pragma: no cover
         msg = (
             "Expected dictionary type instead of "
             f"'{type(schema_at_breadcrumb).__name__}' '{schema_at_breadcrumb}' for "
@@ -122,7 +122,7 @@ def set_catalog_stream_selected(
     breadcrumb is the path to a property within the stream.
     """
     breadcrumb = breadcrumb or ()
-    if not isinstance(breadcrumb, tuple):
+    if not isinstance(breadcrumb, tuple):  # pragma: no cover
         msg = (
             f"Expected tuple value for breadcrumb '{breadcrumb}'. Got "
             f"{type(breadcrumb).__name__}"
