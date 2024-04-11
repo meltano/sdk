@@ -7,7 +7,6 @@ Usage example:
     jsonschema = PropertiesList(
         Property("username", StringType, required=True),
         Property("password", StringType, required=True, secret=True),
-
         Property("id", IntegerType, required=True),
         Property("foo_or_bar", StringType, allowed_values=["foo", "bar"]),
         Property(
@@ -23,13 +22,12 @@ Usage example:
         Property("days_active", IntegerType),
         Property("updated_on", DateTimeType),
         Property("is_deleted", BooleanType),
-
         Property(
             "author",
             ObjectType(
                 Property("id", StringType),
                 Property("name", StringType),
-            )
+            ),
         ),
         Property("tags", ArrayType(StringType)),
         Property(
@@ -39,7 +37,7 @@ Usage example:
                     Property("id", StringType),
                     Property("name", StringType),
                 )
-            )
+            ),
         ),
     ).to_dict()
 
@@ -1018,6 +1016,14 @@ class PropertiesList(ObjectType):
             property: Property to add
         """
         self.wrapped[property.name] = property
+
+    def __iter__(self) -> t.Iterator[Property]:
+        """Iterate all properties of the property list.
+
+        Returns:
+            Iterator of properties.
+        """
+        return self.wrapped.values().__iter__()
 
 
 def to_jsonschema_type(
