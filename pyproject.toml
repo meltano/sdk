@@ -62,6 +62,11 @@ simpleeval = ">=0.9.13"
 simplejson = ">=3.17.6"
 sqlalchemy = ">=1.4,<3.0"
 typing-extensions = ">=4.5.0"
+# urllib3 2.0 is not compatible with botocore
+urllib3 = [
+    { version = ">=1.26", python = ">=3.10" },
+    { version = ">=1.26,<2", python = "<3.10" },
+]
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
