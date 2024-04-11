@@ -80,7 +80,7 @@ class SingerCommand(click.Command):
             return super().invoke(ctx)
         except ConfigValidationError as exc:
             for error in exc.errors:
-                self.logger.exception("Config validation error: %s", error)
+                self.logger.error("Config validation error: %s", error)  # noqa: TRY400
             sys.exit(1)
 
 
