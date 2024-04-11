@@ -64,8 +64,8 @@ sqlalchemy = ">=1.4,<3.0"
 typing-extensions = ">=4.5.0"
 # urllib3 2.0 is not compatible with botocore
 urllib3 = [
-    { version = ">=1.26", python = ">=3.10" },
-    { version = ">=1.26,<2", python = "<3.10" },
+    { version = ">=1.25", python = ">=3.10" },
+    { version = ">=1.25,<1.27", python = "<3.10" },
 ]
 
 # Sphinx dependencies installed as optional 'docs' extras
