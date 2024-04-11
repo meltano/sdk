@@ -16,8 +16,8 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers.capabilities import CapabilitiesEnum
 
 __all__ = [
-    "AboutInfo",
     "AboutFormatter",
+    "AboutInfo",
     "JSONFormatter",
     "MarkdownFormatter",
 ]
@@ -109,7 +109,7 @@ class AboutFormatter(abc.ABC):
 class TextFormatter(AboutFormatter, format_name="text"):
     """About formatter for text output."""
 
-    def format_about(self, about_info: AboutInfo) -> str:
+    def format_about(self, about_info: AboutInfo) -> str:  # noqa: PLR6301
         """Render about information.
 
         Args:

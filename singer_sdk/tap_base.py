@@ -48,7 +48,7 @@ class CliTestOptionValue(Enum):
     Disabled = "disabled"
 
 
-class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
+class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for taps.
 
     The Tap class governs configuration, validation, and stream discovery for tap
@@ -180,7 +180,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         self.mapper.register_raw_streams_from_catalog(self.catalog)
 
     @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
         """Get tap capabilities.
 
         Returns:

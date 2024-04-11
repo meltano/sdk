@@ -21,7 +21,7 @@ class AAPL(Stream):
     name = "aapl"
     schema_filepath = PROJECT_DIR / "fundamentals.json"
 
-    def get_records(self, _):
+    def get_records(self, _):  # noqa: PLR6301
         """Generate a single record."""
         with PROJECT_DIR.joinpath("AAPL.json").open() as f:
             record = json.load(f)

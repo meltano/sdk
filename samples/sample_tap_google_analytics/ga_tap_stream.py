@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 import datetime
+import sys
 import typing as t
 
 from singer_sdk.authenticators import OAuthJWTAuthenticator
-from singer_sdk.helpers._compat import importlib_resources
 from singer_sdk.streams import RESTStream
+
+if sys.version_info < (3, 9):
+    import importlib_resources
+else:
+    from importlib import resources as importlib_resources
+
 
 GOOGLE_OAUTH_ENDPOINT = "https://oauth2.googleapis.com/token"
 GA_OAUTH_SCOPES = "https://www.googleapis.com/auth/analytics.readonly"

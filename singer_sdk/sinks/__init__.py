@@ -7,4 +7,4 @@ from singer_sdk.sinks.core import Sink
 from singer_sdk.sinks.record import RecordSink
 from singer_sdk.sinks.sql import SQLSink
 
-__all__ = ["BatchSink", "RecordSink", "Sink", "SQLSink"]
+__all__ = ["BatchSink", "RecordSink", "SQLSink", "Sink"]
