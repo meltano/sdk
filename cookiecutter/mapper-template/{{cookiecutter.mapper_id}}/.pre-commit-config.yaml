@@ -8,6 +8,10 @@ repos:
   rev: v4.5.0
   hooks:
   - id: check-json
+    exclude: |
+      (?x)^(
+          .*/launch.json
+      )$
   - id: check-toml
   - id: check-yaml
   - id: end-of-file-fixer
