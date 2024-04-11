@@ -32,10 +32,10 @@ date_fromisoformat = datetime.date.fromisoformat
 time_fromisoformat = datetime.time.fromisoformat
 
 __all__ = [
-    "entry_points",
-    "datetime_fromisoformat",
-    "date_fromisoformat",
-    "time_fromisoformat",
-    "importlib_resources",
     "Traversable",
+    "date_fromisoformat",
+    "datetime_fromisoformat",
+    "entry_points",
+    "importlib_resources",
+    "time_fromisoformat",
 ]

@@ -118,7 +118,7 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
         else:
             self._value = new_value
 
-    def has_more(self, response: Response) -> bool:  # noqa: ARG002
+    def has_more(self, response: Response) -> bool:  # noqa: ARG002, PLR6301
         """Override this method to check if the endpoint has any pages left.
 
         Args:
@@ -155,7 +155,7 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
         """
         super().__init__(None, *args, **kwargs)
 
-    def get_next(self, response: Response) -> None:  # noqa: ARG002
+    def get_next(self, response: Response) -> None:  # noqa: ARG002, PLR6301
         """Get the next pagination token or index from the API response.
 
         Args:
@@ -249,7 +249,7 @@ class HeaderLinkPaginator(BaseHATEOASPaginator):
         - https://datatracker.ietf.org/doc/html/rfc8288#section-3
     """
 
-    def get_next_url(self, response: Response) -> str | None:
+    def get_next_url(self, response: Response) -> str | None:  # noqa: PLR6301
         """Override this method to extract a HATEOAS link from the response.
 
         Args:
