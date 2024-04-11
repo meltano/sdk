@@ -64,7 +64,7 @@ REPLICATION_LOG_BASED = "LOG_BASED"
 FactoryType = t.TypeVar("FactoryType", bound="Stream")
 
 
-class Stream(metaclass=abc.ABCMeta):
+class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for tap streams."""
 
     STATE_MSG_FREQUENCY = 10000
@@ -1339,7 +1339,7 @@ class Stream(metaclass=abc.ABCMeta):
             context: Stream partition or context dictionary.
         """
 
-    def get_batch_config(self, config: t.Mapping) -> BatchConfig | None:
+    def get_batch_config(self, config: t.Mapping) -> BatchConfig | None:  # noqa: PLR6301
         """Return the batch config for this stream.
 
         Args:
@@ -1377,7 +1377,7 @@ class Stream(metaclass=abc.ABCMeta):
         for manifest in batcher.get_batches(records=records):
             yield batch_config.encoding, manifest
 
-    def post_process(
+    def post_process(  # noqa: PLR6301
         self,
         row: dict,
         context: dict | None = None,  # noqa: ARG002

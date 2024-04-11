@@ -51,7 +51,7 @@ class SingerReader(metaclass=abc.ABCMeta):
             msg = f"Line is missing required {', '.join(missing)} key(s): {line_dict}"
             raise Exception(msg)  # TODO: Raise a more specific exception
 
-    def deserialize_json(self, line: str) -> dict:
+    def deserialize_json(self, line: str) -> dict:  # noqa: PLR6301
         """Deserialize a line of json.
 
         Args:
@@ -124,7 +124,7 @@ class SingerReader(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def _process_batch_message(self, message_dict: dict) -> None: ...
 
-    def _process_unknown_message(self, message_dict: dict) -> None:
+    def _process_unknown_message(self, message_dict: dict) -> None:  # noqa: PLR6301
         """Internal method to process unknown message types from a Singer tap.
 
         Args:
@@ -137,14 +137,14 @@ class SingerReader(metaclass=abc.ABCMeta):
         msg = f"Unknown message type '{record_type}' in message."
         raise ValueError(msg)
 
-    def _process_endofpipe(self) -> None:
+    def _process_endofpipe(self) -> None:  # noqa: PLR6301
         logger.debug("End of pipe reached")
 
 
 class SingerWriter:
     """Interface for all plugins writting Singer messages to stdout."""
 
-    def format_message(self, message: Message) -> str:
+    def format_message(self, message: Message) -> str:  # noqa: PLR6301
         """Format a message as a JSON string.
 
         Args:
@@ -155,7 +155,7 @@ class SingerWriter:
         """
         return singer_format_message(message)
 
-    def write_message(self, message: Message) -> None:
+    def write_message(self, message: Message) -> None:  # noqa: PLR6301
         """Write a message to stdout.
 
         Args:

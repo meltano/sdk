@@ -182,7 +182,7 @@ class DefaultStreamMap(StreamMap):
 class RemoveRecordTransform(DefaultStreamMap):
     """Default mapper which simply excludes any records."""
 
-    def transform(self, record: dict) -> None:
+    def transform(self, record: dict) -> None:  # noqa: PLR6301
         """Return None (always exclude).
 
         Args:
@@ -190,7 +190,7 @@ class RemoveRecordTransform(DefaultStreamMap):
         """
         _ = record  # Drop the record
 
-    def get_filter_result(self, record: dict) -> bool:  # noqa: ARG002
+    def get_filter_result(self, record: dict) -> bool:  # noqa: ARG002, PLR6301
         """Exclude all records.
 
         Args:
@@ -216,7 +216,7 @@ class SameRecordTransform(DefaultStreamMap):
         """
         return super().transform(record)
 
-    def get_filter_result(self, record: dict) -> bool:  # noqa: ARG002
+    def get_filter_result(self, record: dict) -> bool:  # noqa: ARG002, PLR6301
         """Return True (always include).
 
         Args:
@@ -610,7 +610,7 @@ class CustomStreamMap(StreamMap):
         if not importlib.util.find_spec("faker"):
             return None
 
-        from faker import Faker
+        from faker import Faker  # noqa: PLC0415
 
         if self.faker_config:
             faker_seed = self.faker_config.get("seed")

@@ -46,7 +46,7 @@ _TToken = t.TypeVar("_TToken")
 _Auth: TypeAlias = t.Callable[[requests.PreparedRequest], requests.PreparedRequest]
 
 
-class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
+class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for REST API streams."""
 
     _page_size: int = DEFAULT_PAGE_SIZE
@@ -99,7 +99,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         self._next_page_token_compiled_jsonpath = None
 
     @staticmethod
-    def _url_encode(val: str | datetime | bool | int | list[str]) -> str:
+    def _url_encode(val: str | datetime | bool | int | list[str]) -> str:  # noqa: FBT001
         """Encode the val argument as url-compatible string.
 
         Args:
@@ -269,7 +269,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         logging.debug("Response received successfully.")
         return response
 
-    def get_url_params(
+    def get_url_params(  # noqa: PLR6301
         self,
         context: dict | None,  # noqa: ARG002
         next_page_token: _TToken | None,  # noqa: ARG002
@@ -461,7 +461,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
 
     # Overridable:
 
-    def calculate_sync_cost(
+    def calculate_sync_cost(  # noqa: PLR6301
         self,
         request: requests.PreparedRequest,  # noqa: ARG002
         response: requests.Response,  # noqa: ARG002
@@ -604,7 +604,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return SimpleAuthenticator(stream=self)
 
-    def backoff_wait_generator(self) -> t.Generator[float, None, None]:
+    def backoff_wait_generator(self) -> t.Generator[float, None, None]:  # noqa: PLR6301
         """The wait generator used by the backoff decorator on request failure.
 
         See for options:
@@ -617,7 +617,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return backoff.expo(factor=2)
 
-    def backoff_max_tries(self) -> int:
+    def backoff_max_tries(self) -> int:  # noqa: PLR6301
         """The number of attempts before giving up when retrying requests.
 
         Returns:
@@ -625,7 +625,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return 5
 
-    def backoff_jitter(self, value: float) -> float:
+    def backoff_jitter(self, value: float) -> float:  # noqa: PLR6301
         """Amount of jitter to add.
 
         For more information see
@@ -644,7 +644,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         """
         return backoff.random_jitter(value)
 
-    def backoff_handler(self, details: Details) -> None:
+    def backoff_handler(self, details: Details) -> None:  # noqa: PLR6301
         """Adds additional behaviour prior to retry.
 
         By default will log out backoff details, developers can override
@@ -665,7 +665,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             details.get("kwargs"),
         )
 
-    def backoff_runtime(
+    def backoff_runtime(  # noqa: PLR6301
         self,
         *,
         value: t.Callable[[t.Any], int],

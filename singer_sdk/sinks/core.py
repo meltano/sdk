@@ -123,7 +123,7 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
             raise InvalidRecord(e.message, record) from e
 
 
-class Sink(metaclass=abc.ABCMeta):
+class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for target sinks."""
 
     # max timestamp/datetime supported, used to reset invalid dates
@@ -239,7 +239,7 @@ class Sink(metaclass=abc.ABCMeta):
             )
         return None
 
-    def _get_context(self, record: dict) -> dict:  # noqa: ARG002
+    def _get_context(self, record: dict) -> dict:  # noqa: ARG002, PLR6301
         """Return an empty dictionary by default.
 
         NOTE: Future versions of the SDK may expand the available context attributes.
@@ -458,7 +458,7 @@ class Sink(metaclass=abc.ABCMeta):
         ):
             properties_dict.pop(col, None)
 
-    def _remove_sdc_metadata_from_record(self, record: dict) -> None:
+    def _remove_sdc_metadata_from_record(self, record: dict) -> None:  # noqa: PLR6301
         """Remove metadata _sdc columns from incoming record message.
 
         Record metadata specs documented at:
@@ -580,7 +580,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     # SDK developer overrides:
 
-    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: ARG002
+    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: ARG002, PLR6301
         """Process incoming record and return a modified result.
 
         Args:
@@ -720,7 +720,7 @@ class Sink(metaclass=abc.ABCMeta):
                 importlib.util.find_spec("pyarrow")
                 and encoding.format == BatchFileFormat.PARQUET
             ):
-                import pyarrow.parquet as pq
+                import pyarrow.parquet as pq  # noqa: PLC0415
 
                 with storage.fs(create=False) as batch_fs, batch_fs.open(
                     tail,

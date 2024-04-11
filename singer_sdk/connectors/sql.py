@@ -24,7 +24,7 @@ if t.TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
 
 
-class SQLConnector:
+class SQLConnector:  # noqa: PLR0904
     """Base class for SQLAlchemy-based connectors.
 
     The connector class serves as a wrapper around the SQL connection.
@@ -162,7 +162,7 @@ class SQLConnector:
 
         return self._sqlalchemy_url
 
-    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:
+    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:  # noqa: PLR6301
         """Return the SQLAlchemy URL string.
 
         Developers can generally override just one of the following:
@@ -369,7 +369,7 @@ class SQLConnector:
             "Streams list may be incomplete or `is_view` may be unpopulated.",
         )
 
-    def get_schema_names(
+    def get_schema_names(  # noqa: PLR6301
         self,
         engine: Engine,  # noqa: ARG002
         inspected: Inspector,
@@ -530,7 +530,7 @@ class SQLConnector:
 
         return result
 
-    def parse_full_table_name(
+    def parse_full_table_name(  # noqa: PLR6301
         self,
         full_table_name: str,
     ) -> tuple[str | None, str | None, str]:
@@ -918,7 +918,7 @@ class SQLConnector:
         msg = f"Unable to merge sql types: {', '.join([str(t) for t in sql_types])}"
         raise ValueError(msg)
 
-    def _sort_types(
+    def _sort_types(  # noqa: PLR6301
         self,
         sql_types: t.Iterable[sa.types.TypeEngine],
     ) -> t.Sequence[sa.types.TypeEngine]:
@@ -1161,7 +1161,7 @@ class SQLConnector:
         with self._connect() as conn, conn.begin():
             conn.execute(alter_column_ddl)
 
-    def serialize_json(self, obj: object) -> str:
+    def serialize_json(self, obj: object) -> str:  # noqa: PLR6301
         """Serialize an object to a JSON string.
 
         Target connectors may override this method to provide custom serialization logic
@@ -1177,7 +1177,7 @@ class SQLConnector:
         """
         return simplejson.dumps(obj, use_decimal=True)
 
-    def deserialize_json(self, json_str: str) -> object:
+    def deserialize_json(self, json_str: str) -> object:  # noqa: PLR6301
         """Deserialize a JSON string to an object.
 
         Tap connectors may override this method to provide custom deserialization

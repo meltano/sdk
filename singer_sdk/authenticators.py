@@ -215,7 +215,7 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
         super().__init__(stream=stream)
         auth_credentials = {key: value}
 
-        if location not in ["header", "params"]:
+        if location not in {"header", "params"}:
             msg = "`type` must be one of 'header' or 'params'."
             raise ValueError(msg)
 
@@ -572,9 +572,9 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         Raises:
             ValueError: If the private key is not set.
         """
-        import jwt
-        from cryptography.hazmat.backends import default_backend
-        from cryptography.hazmat.primitives import serialization
+        import jwt  # noqa: PLC0415
+        from cryptography.hazmat.backends import default_backend  # noqa: PLC0415
+        from cryptography.hazmat.primitives import serialization  # noqa: PLC0415
 
         if not self.private_key:
             msg = "Missing 'private_key' property for OAuth payload."
