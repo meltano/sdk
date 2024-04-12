@@ -588,13 +588,12 @@ files = [
 
 [[package]]
 name = "duckdb-engine"
-version = "0.11.2"
+version = "0.11.3"
 description = "SQLAlchemy driver for duckdb"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "duckdb_engine-0.11.2-py3-none-any.whl", hash = "sha256:786a9a14b56297d8b98ec6213dce79f0bdb44129bf5faa5792e0fa24f290e7a0"},
-    {file = "duckdb_engine-0.11.2.tar.gz", hash = "sha256:40644334a0af02bdb50bbd8c57e4bd29441e7bf9bd21b565848645bae318e533"},
+    {file = "duckdb_engine-0.11.3-py3-none-any.whl", hash = "sha256:604bd88d1848e1dacb4a127d132b856f89ff437a252144c680fef77ea91e0fe6"},
 ]
 
 [package.dependencies]
@@ -617,13 +616,13 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "faker"
-version = "24.4.0"
+version = "24.9.0"
 description = "Faker is a Python package that generates fake data for you."
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "Faker-24.4.0-py3-none-any.whl", hash = "sha256:998c29ee7d64429bd59204abffa9ba11f784fb26c7b9df4def78d1a70feb36a7"},
-    {file = "Faker-24.4.0.tar.gz", hash = "sha256:a5ddccbe97ab691fad6bd8036c31f5697cfaa550e62e000078d1935fa8a7ec2e"},
+    {file = "Faker-24.9.0-py3-none-any.whl", hash = "sha256:97c7874665e8eb7b517f97bf3b59f03bf3f07513fe2c159e98b6b9ea6b9f2b3d"},
+    {file = "Faker-24.9.0.tar.gz", hash = "sha256:73b1e7967b0ceeac42fc99a8c973bb49e4499cc4044d20d17ab661d5cb7eda1d"},
 ]
 
 [package.dependencies]
@@ -785,13 +784,13 @@ test = ["objgraph", "psutil"]
 
 [[package]]
 name = "idna"
-version = "3.6"
+version = "3.7"
 description = "Internationalized Domain Names in Applications (IDNA)"
 optional = false
 python-versions = ">=3.5"
 files = [
-    {file = "idna-3.6-py3-none-any.whl", hash = "sha256:c05567e9c24a6b9faaa835c4821bad0590fbb9d5779e7caa6e1cc4978e7eb24f"},
-    {file = "idna-3.6.tar.gz", hash = "sha256:9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca"},
+    {file = "idna-3.7-py3-none-any.whl", hash = "sha256:82fee1fc78add43492d3a1898bfa6d8a904cc97d8427f683ed8e798d07761aa0"},
+    {file = "idna-3.7.tar.gz", hash = "sha256:028ff3aadf0609c1fd278d8ea3089299412a7a8b9bd005dd08b9f8285bcb5cfc"},
 ]
 
 [[package]]
@@ -894,13 +893,13 @@ files = [
 
 [[package]]
 name = "joblib"
-version = "1.3.2"
+version = "1.4.0"
 description = "Lightweight pipelining with Python functions"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "joblib-1.3.2-py3-none-any.whl", hash = "sha256:ef4331c65f239985f3f2220ecc87db222f08fd22097a3dd5698f693875f8cbb9"},
-    {file = "joblib-1.3.2.tar.gz", hash = "sha256:92f865e621e17784e7955080b6d042489e3b8e294949cc44c6eac304f59772b1"},
+    {file = "joblib-1.4.0-py3-none-any.whl", hash = "sha256:42942470d4062537be4d54c83511186da1fc14ba354961a2114da91efa9a4ed7"},
+    {file = "joblib-1.4.0.tar.gz", hash = "sha256:1eb0dc091919cd384490de890cb5dfd538410a6d4b3b54eef09fb8c50b409b1c"},
 ]
 
 [[package]]
@@ -1739,22 +1738,20 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "requests-mock"
-version = "1.11.0"
+version = "1.12.1"
 description = "Mock out responses from the requests package"
 optional = false
-python-versions = "*"
+python-versions = ">=3.5"
 files = [
-    {file = "requests-mock-1.11.0.tar.gz", hash = "sha256:ef10b572b489a5f28e09b708697208c4a3b2b89ef80a9f01584340ea357ec3c4"},
-    {file = "requests_mock-1.11.0-py2.py3-none-any.whl", hash = "sha256:f7fae383f228633f6bececebdab236c478ace2284d6292c6e7e2867b9ab74d15"},
+    {file = "requests-mock-1.12.1.tar.gz", hash = "sha256:e9e12e333b525156e82a3c852f22016b9158220d2f47454de9cae8a77d371401"},
+    {file = "requests_mock-1.12.1-py2.py3-none-any.whl", hash = "sha256:b1e37054004cdd5e56c84454cc7df12b25f90f382159087f4b6915aaeef39563"},
 ]
 
 [package.dependencies]
-requests = ">=2.3,<3"
-six = "*"
+requests = ">=2.22,<3"
 
 [package.extras]
 fixture = ["fixtures"]
-test = ["fixtures", "mock", "purl", "pytest", "requests-futures", "sphinx", "testtools"]
 
 [[package]]
 name = "rfc3339-validator"
@@ -2478,13 +2475,13 @@ files = [
 
 [[package]]
 name = "types-jsonschema"
-version = "4.21.0.20240311"
+version = "4.21.0.20240331"
 description = "Typing stubs for jsonschema"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "types-jsonschema-4.21.0.20240311.tar.gz", hash = "sha256:f7165ce70abd91df490c73b089873afd2899c5e56430ee495b64f851ad01f287"},
-    {file = "types_jsonschema-4.21.0.20240311-py3-none-any.whl", hash = "sha256:e872f5661513824edf9698f73a66c9c114713d93eab58699bd0532e7e6db5750"},
+    {file = "types-jsonschema-4.21.0.20240331.tar.gz", hash = "sha256:3a5ed0a72ab7bc304ca4accbb709272c620f396abf2fb19570b80d949e357eb6"},
+    {file = "types_jsonschema-4.21.0.20240331-py3-none-any.whl", hash = "sha256:78dec1d88c5aec77e46e6bddce2a082157ce3059ec7aab19169b13b2ee553a51"},
 ]
 
 [package.dependencies]
@@ -2561,13 +2558,13 @@ files = [
 
 [[package]]
 name = "typing-extensions"
-version = "4.10.0"
+version = "4.11.0"
 description = "Backported and Experimental Type Hints for Python 3.8+"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "typing_extensions-4.10.0-py3-none-any.whl", hash = "sha256:69b1a937c3a517342112fb4c6df7e72fc39a38e7891a5730ed4985b5214b5475"},
-    {file = "typing_extensions-4.10.0.tar.gz", hash = "sha256:b0abd7c89e8fb96f98db18d86106ff1d90ab692004eb746cf6eda2682f91b3cb"},
+    {file = "typing_extensions-4.11.0-py3-none-any.whl", hash = "sha256:c1f94d72897edaf4ce775bb7558d5b79d8126906a14ea5ed1635921406c0387a"},
+    {file = "typing_extensions-4.11.0.tar.gz", hash = "sha256:83f085bd5ca59c80295fc2a82ab5dac679cbe02b9f33f7d83af68e241bea51b0"},
 ]
 
 [[package]]
@@ -2638,6 +2635,7 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [extras]
 docs = ["furo", "myst-parser", "pytest", "sphinx", "sphinx-autobuild", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-notfound-page", "sphinx-reredirects"]
 faker = ["faker"]
+jwt = []
 parquet = ["numpy", "numpy", "pyarrow"]
 s3 = ["fs-s3fs"]
 testing = ["pytest", "pytest-durations"]
@@ -2645,4 +2643,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "a1649e1ccefeed0391552089bf6be64ca6e8e54b6db177ac86e6ca730f677d01"
+content-hash = "5db1a43b1cf02498136e3599ae3be1481092b0c3be716a740562b51c71a1e9ce"

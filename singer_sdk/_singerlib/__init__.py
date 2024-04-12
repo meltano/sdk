@@ -22,22 +22,22 @@ from singer_sdk._singerlib.schema import Schema, resolve_schema_references
 from singer_sdk._singerlib.utils import strftime, strptime_to_utc
 
 __all__ = [
+    "ActivateVersionMessage",
     "Catalog",
     "CatalogEntry",
+    "Message",
     "Metadata",
     "MetadataMapping",
-    "SelectionMask",
-    "StreamMetadata",
-    "ActivateVersionMessage",
-    "Message",
     "RecordMessage",
+    "Schema",
     "SchemaMessage",
+    "SelectionMask",
     "SingerMessageType",
     "StateMessage",
+    "StreamMetadata",
     "exclude_null_dict",
-    "write_message",
-    "Schema",
     "resolve_schema_references",
     "strftime",
     "strptime_to_utc",
+    "write_message",
 ]

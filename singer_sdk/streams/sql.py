@@ -229,4 +229,4 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self.replication_key is not None
 
 
-__all__ = ["SQLStream", "SQLConnector"]
+__all__ = ["SQLConnector", "SQLStream"]

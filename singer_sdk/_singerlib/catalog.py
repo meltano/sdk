@@ -192,10 +192,8 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
                 root.schema_name = schema_name
 
             for field_name in schema.get("properties", {}):
-                if (
-                    key_properties
-                    and field_name in key_properties
-                    or (valid_replication_keys and field_name in valid_replication_keys)
+                if (key_properties and field_name in key_properties) or (
+                    valid_replication_keys and field_name in valid_replication_keys
                 ):
                     entry = Metadata(inclusion=Metadata.InclusionType.AUTOMATIC)
                 else:

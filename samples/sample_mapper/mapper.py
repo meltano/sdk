@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import typing as t
 
-import singer_sdk._singerlib as singer
+import singer_sdk._singerlib as singer  # noqa: PLC2701
 import singer_sdk.typing as th
-from singer_sdk.helpers._util import utc_now
+from singer_sdk.helpers._util import utc_now  # noqa: PLC2701
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform
 from singer_sdk.mapper_base import InlineMapper
 
@@ -127,7 +127,7 @@ class StreamTransform(InlineMapper):
                 self.logger.info(stream_map.stream_alias)
                 yield record_message
 
-    def map_state_message(self, message_dict: dict) -> list[singer.Message]:
+    def map_state_message(self, message_dict: dict) -> list[singer.Message]:  # noqa: PLR6301
         """Do nothing to the message.
 
         Args:
