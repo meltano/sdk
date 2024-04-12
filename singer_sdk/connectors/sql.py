@@ -808,9 +808,11 @@ class SQLConnector:  # noqa: PLR0904
         full_table_name: str,
         schema: dict,
     ) -> None:
-        """Adapt target table columns to provided schema if possible. The advantage of encapsulating this
-        in a separate method is that we reduce the number of calls to the database by calling get_table_columns()
-        only once per table.
+        """Adapt target table columns to provided schema if possible.
+        
+        The advantage of encapsulating this in a separate method is that we reduce
+        the number of calls to the database by calling get_table_columns() only once
+        per table.
 
         Args:
             full_table_name: the target table name.
