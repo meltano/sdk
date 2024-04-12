@@ -118,7 +118,7 @@ def test_sqlite_tap_standard_tests(sqlite_sample_tap: SQLTap):
 
 def test_sync_sqlite_to_csv(sqlite_sample_tap: SQLTap, tmp_path: Path):
     _discover_and_select_all(sqlite_sample_tap)
-    orig_stdout, _, _, _ = tap_to_target_sync_test(
+    _, _, _, _ = tap_to_target_sync_test(
         sqlite_sample_tap,
         SampleTargetCSV(config={"target_folder": f"{tmp_path}/"}),
     )
