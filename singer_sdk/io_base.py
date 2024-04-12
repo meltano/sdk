@@ -13,6 +13,7 @@ from collections import Counter, defaultdict
 from singer_sdk._singerlib.messages import Message, SingerMessageType
 from singer_sdk._singerlib.messages import format_message as singer_format_message
 from singer_sdk._singerlib.messages import write_message as singer_write_message
+from singer_sdk.exceptions import InvalidInputLine
 
 logger = logging.getLogger(__name__)
 
@@ -44,12 +45,12 @@ class SingerReader(metaclass=abc.ABCMeta):
             requires: TODO
 
         Raises:
-            Exception: TODO
+            InvalidInputLine: raised if any required keys are missing
         """
         if not requires.issubset(line_dict):
             missing = requires - set(line_dict)
             msg = f"Line is missing required {', '.join(missing)} key(s): {line_dict}"
-            raise Exception(msg)  # TODO: Raise a more specific exception
+            raise InvalidInputLine(msg)
 
     def deserialize_json(self, line: str) -> dict:  # noqa: PLR6301
         """Deserialize a line of json.
@@ -69,7 +70,7 @@ class SingerReader(metaclass=abc.ABCMeta):
                 parse_float=decimal.Decimal,
             )
         except json.decoder.JSONDecodeError as exc:
-            logger.error("Unable to parse:\n%s", line, exc_info=exc)
+            logger.exception("Unable to parse:\n%s", line, exc_info=exc)
             raise
 
     def _process_lines(self, file_input: t.IO[str]) -> t.Counter[str]:

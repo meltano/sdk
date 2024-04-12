@@ -318,6 +318,8 @@ select = [
     "PLE",  # pylint (error)
     "PLR",  # pylint (refactor)
     "PLW",  # pylint (warning)
+    "TRY",  # tryceratops
+    "FLY",  # flynt
     "PERF", # perflint
     "RUF",  # ruff
 ]
