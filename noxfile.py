@@ -20,6 +20,8 @@ except ImportError:
     {sys.executable} -m pip install nox-poetry"""
     raise SystemExit(dedent(message)) from None
 
+nox.needs_version = ">=2024.4.15"
+
 RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
 extend-ignore = ["TD002", "TD003", "FIX002"]
@@ -38,21 +40,9 @@ nox.options.sessions = (
     "doctest",
     "test_cookiecutter",
 )
-test_dependencies = [
-    "coverage[toml]",
-    "duckdb",
-    "duckdb-engine",
-    "fastjsonschema",
-    "pyarrow",
-    "pytest",
-    "pytest-benchmark",
-    "pytest-durations",
-    "pytest-snapshot",
-    "pytz",
-    "requests-mock",
-    "rfc3339-validator",
-    "time-machine",
-]
+
+poetry_config = nox.project.load_toml("pyproject.toml")["tool"]["poetry"]
+test_dependencies = poetry_config["group"]["dev"]["dependencies"].keys()
 
 
 @session(python=main_python_version)
