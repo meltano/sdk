@@ -905,25 +905,17 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         Args:
             current_record_index: The zero-based index of the current record.
-
-        Raises:
-            AbortedSyncFailedException: Raised if sync could not reach a valid state.
-            AbortedSyncPausedException: Raised if sync was able to be transitioned into
-                a valid state without data loss or corruption.
         """
         if (
             self.ABORT_AT_RECORD_COUNT is not None
             and current_record_index > self.ABORT_AT_RECORD_COUNT - 1
         ):
-            try:
-                self._abort_sync(
-                    abort_reason=MaxRecordsLimitException(
-                        "Stream prematurely aborted due to the stream's max dry run "
-                        f"record limit ({self.ABORT_AT_RECORD_COUNT}) being reached.",
-                    ),
-                )
-            except (AbortedSyncFailedException, AbortedSyncPausedException) as ex:
-                raise ex
+            self._abort_sync(
+                abort_reason=MaxRecordsLimitException(
+                    "Stream prematurely aborted due to the stream's max dry run "
+                    f"record limit ({self.ABORT_AT_RECORD_COUNT}) being reached.",
+                ),
+            )
 
     def _abort_sync(self, abort_reason: Exception) -> None:
         """Handle a sync operation being aborted.
@@ -1096,7 +1088,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                             child_context=child_context,
                             partition_context=state_partition_context,
                         )
-                    except InvalidStreamSortException as ex:
+                    except InvalidStreamSortException as ex:  # pragma: no cover
                         log_sort_error(
                             log_fn=self.logger.error,
                             ex=ex,
@@ -1106,7 +1098,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                             state_partition_context=state_partition_context,
                             stream_name=self.name,
                         )
-                        raise ex
+                        raise
 
                     if selected:
                         if write_messages:
@@ -1189,12 +1181,12 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 # Sync the records themselves:
                 for _ in self._sync_records(context=context):
                     pass
-        except Exception as ex:
+        except Exception:
             self.logger.exception(
                 "An unhandled error occurred while syncing '%s'",
                 self.name,
             )
-            raise ex
+            raise
 
     def _sync_children(self, child_context: dict | None) -> None:
         if child_context is None:

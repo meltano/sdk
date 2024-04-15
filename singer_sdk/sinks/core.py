@@ -494,10 +494,10 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             # on every record, so it's probably bad and should be moved up the stack.
             try:
                 self._validator.validate(record)
-            except InvalidRecord as e:
+            except InvalidRecord:
                 if self.fail_on_record_validation_exception:
                     raise
-                self.logger.exception("Record validation failed %s", e)
+                self.logger.exception("Record validation failed")
 
         self._parse_timestamps_in_record(
             record=record,
