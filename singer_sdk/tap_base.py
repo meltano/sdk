@@ -535,7 +535,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             )
         except ConfigValidationError as exc:  # pragma: no cover
             for error in exc.errors:
-                cls.logger.error("Config validation error: %s", error)
+                cls.logger.error("Config validation error: %s", error)  # noqa: TRY400
             ctx.exit(1)
         tap.run_discovery()
         ctx.exit()

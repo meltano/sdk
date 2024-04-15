@@ -125,7 +125,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         vals = copy.copy(dict(self.config))
         vals.update(context or {})
         for k, v in vals.items():
-            search_text = "".join(["{", k, "}"])
+            search_text = f"{{{k}}}"
             if search_text in url:
                 url = url.replace(search_text, self._url_encode(v))
         return url
