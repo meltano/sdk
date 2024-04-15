@@ -42,13 +42,14 @@ def _pop_deselected_schema(
     for crumb in breadcrumb:
         schema_at_breadcrumb = schema_at_breadcrumb.get(crumb, {})
 
-    if not isinstance(schema_at_breadcrumb, dict):
+    if not isinstance(schema_at_breadcrumb, dict):  # pragma: no cover
         msg = (
             "Expected dictionary type instead of "
             f"'{type(schema_at_breadcrumb).__name__}' '{schema_at_breadcrumb}' for "
             f"'{stream_name}' bookmark '{breadcrumb!s}' in '{schema}'"
         )
-        raise ValueError(msg)
+        # TODO: this should be a ValueError, but it's a breaking change.
+        raise ValueError(msg)  # noqa: TRY004
 
     if "properties" not in schema_at_breadcrumb:
         return
@@ -121,12 +122,13 @@ def set_catalog_stream_selected(
     breadcrumb is the path to a property within the stream.
     """
     breadcrumb = breadcrumb or ()
-    if not isinstance(breadcrumb, tuple):
+    if not isinstance(breadcrumb, tuple):  # pragma: no cover
         msg = (
             f"Expected tuple value for breadcrumb '{breadcrumb}'. Got "
             f"{type(breadcrumb).__name__}"
         )
-        raise ValueError(msg)
+        # TODO: this should be a ValueError, but it's a breaking change.
+        raise ValueError(msg)  # noqa: TRY004
 
     catalog_entry = catalog.get_stream(stream_name)
     if not catalog_entry:
