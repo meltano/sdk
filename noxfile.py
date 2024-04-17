@@ -21,6 +21,7 @@ except ImportError:
     raise SystemExit(dedent(message)) from None
 
 nox.needs_version = ">=2024.4.15"
+nox.options.default_venv_backend = "uv|virtualenv"
 
 RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
