@@ -74,8 +74,6 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
-        cache: 'pip'
-        cache-dependency-path: 'poetry.lock'
 
     - name: Upgrade pip
       env:
@@ -88,7 +86,7 @@ jobs:
       env:
         PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        pipx install nox
+        pipx install 'nox[uv]'
         pipx inject nox nox-poetry
         nox --version
 
@@ -138,8 +136,6 @@ jobs:
       with:
         python-version: ${{ env.NOXPYTHON }}
         architecture: x64
-        cache: 'pip'
-        cache-dependency-path: 'poetry.lock'
 
     - name: Upgrade pip
       env:
@@ -152,7 +148,7 @@ jobs:
       env:
         PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        pipx install nox
+        pipx install 'nox[uv]'
         pipx inject nox nox-poetry
         nox --version
 
@@ -181,8 +177,6 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-        cache: 'pip'
-        cache-dependency-path: 'poetry.lock'
 
     - name: Upgrade pip
       env:
@@ -200,7 +194,7 @@ jobs:
       env:
         PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        pipx install nox
+        pipx install 'nox[uv]'
         pipx inject nox nox-poetry
         nox --version
 
