@@ -145,6 +145,8 @@ def is_datetime_type(type_dict: dict) -> bool:
         raise EmptySchemaTypeError
     if "anyOf" in type_dict:
         return any(is_datetime_type(type_dict) for type_dict in type_dict["anyOf"])
+    if "allOf" in type_dict:
+        return all(is_datetime_type(type_dict) for type_dict in type_dict["allOf"])
     if "type" in type_dict:
         return type_dict.get("format") == "date-time"
     msg = f"Could not detect type of replication key using schema '{type_dict}'"
@@ -167,6 +169,11 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
     """
     if "anyOf" in type_dict:
         return any(is_date_or_datetime_type(option) for option in type_dict["anyOf"])
+
+    if "allOf" in type_dict:
+        return all(
+            is_date_or_datetime_type(type_dict) for type_dict in type_dict["allOf"]
+        )
 
     if "type" in type_dict:
         return type_dict.get("format") in {"date", "date-time"}
@@ -233,6 +240,9 @@ def is_string_array_type(type_dict: dict) -> bool:
     if "anyOf" in type_dict:
         return any(is_string_array_type(t) for t in type_dict["anyOf"])
 
+    if "allOf" in type_dict:
+        return all(is_string_array_type(t) for t in type_dict["allOf"])
+
     if "type" not in type_dict:
         msg = f"Could not detect type from schema '{type_dict}'"
         raise ValueError(msg)
@@ -247,6 +257,9 @@ def is_array_type(type_dict: dict) -> bool:
 
     if "anyOf" in type_dict:
         return any(is_array_type(t) for t in type_dict["anyOf"])
+
+    if "allOf" in type_dict:
+        return all(is_array_type(t) for t in type_dict["allOf"])
 
     if "type" not in type_dict:
         msg = f"Could not detect type from schema '{type_dict}'"

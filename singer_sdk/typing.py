@@ -834,7 +834,7 @@ class ObjectType(JSONTypeHelper):
         return result
 
 
-class OneOf(JSONPointerType):
+class OneOf(JSONTypeHelper):
     """OneOf type.
 
     This type allows for a value to be one of a set of types.
@@ -874,6 +874,63 @@ class OneOf(JSONPointerType):
             A dictionary describing the type.
         """
         return {"oneOf": [t.type_dict for t in self.wrapped]}
+
+
+class AllOf(JSONTypeHelper):
+    """AllOf type.
+
+    This type requires a value to match all of the given types.
+
+    Examples:
+        >>> t = AllOf(
+        ...     ObjectType(Property("first_type", StringType)),
+        ...     ObjectType(Property("second_type", IntegerType)),
+        ... )
+        >>> print(t.to_json(indent=2))
+        {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "first_type": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "second_type": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+    """
+
+    def __init__(self, *types: W | type[W]) -> None:
+        """Initialize OneOf type.
+
+        Args:
+            types: Types to choose from.
+        """
+        self.wrapped = types
+
+    @property
+    def type_dict(self) -> dict:  # type: ignore[override]
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        return {"allOf": [t.type_dict for t in self.wrapped]}
 
 
 class Constant(JSONTypeHelper):
