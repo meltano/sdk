@@ -36,6 +36,7 @@ STANDARD_KEYS = [
     "additionalProperties",
     "anyOf",
     "patternProperties",
+    "allOf",
 ]
 
 
@@ -64,6 +65,7 @@ class Schema:
     maxLength: int | None = None  # noqa: N815
     minLength: int | None = None  # noqa: N815
     anyOf: t.Any | None = None  # noqa: N815
+    allOf: t.Any | None = None  # noqa: N815
     format: str | None = None
     additionalProperties: t.Any | None = None  # noqa: N815
     patternProperties: t.Any | None = None  # noqa: N815
@@ -131,6 +133,7 @@ class _SchemaKey:
     properties = "properties"
     pattern_properties = "patternProperties"
     any_of = "anyOf"
+    all_of = "allOf"
 
 
 def resolve_schema_references(
@@ -163,7 +166,7 @@ def resolve_schema_references(
     return _resolve_schema_references(schema, resolver)
 
 
-def _resolve_schema_references(
+def _resolve_schema_references(  # noqa: C901
     schema: dict[str, t.Any],
     resolver: Resolver,
 ) -> dict[str, t.Any]:
@@ -193,5 +196,9 @@ def _resolve_schema_references(
     if _SchemaKey.any_of in schema:
         for i, element in enumerate(schema[_SchemaKey.any_of]):
             schema[_SchemaKey.any_of][i] = _resolve_schema_references(element, resolver)
+
+    if _SchemaKey.all_of in schema:
+        for i, element in enumerate(schema[_SchemaKey.all_of]):
+            schema[_SchemaKey.all_of][i] = _resolve_schema_references(element, resolver)
 
     return schema
