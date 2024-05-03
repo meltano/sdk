@@ -1,5 +1,5 @@
 pip==24.1
-poetry==1.8.3
+poetry @ git+https://github.com/radoering/poetry.git@pep621-support
 poetry-plugin-export==1.8.0
 poetry-dynamic-versioning==1.4.0
 pre-commit==3.7.1
