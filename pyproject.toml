@@ -1,13 +1,12 @@
-[tool.poetry]
+[project]
 name = "singer-sdk"
-version = "0.0.0"
+dynamic = [
+    "dependencies",
+    "version",
+]
 description = "A framework for building Singer taps"
-authors = ["Meltano Team and Contributors <hello@meltano.com>"]
-maintainers = ["Meltano Team and Contributors <hello@meltano.com>"]
-readme = "README.md"
-homepage = "https://sdk.meltano.com/en/latest/"
-repository = "https://github.com/meltano/sdk"
-documentation = "https://sdk.meltano.com/en/latest/"
+authors = [{ name = "Meltano Team and Contributors", email = "hello@meltano.com" }]
+maintainers = [{ name = "Meltano Team and Contributors", email = "hello@meltano.com" }]
 keywords = [
     "Meltano",
     "Singer",
@@ -28,14 +27,22 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
 ]
-license = "Apache-2.0"
+readme = "README.md"
+license.file = "LICENSE"
+requires-python = ">=3.9"
 
-[tool.poetry.urls]
+[project.urls]
+Homepage = "https://sdk.meltano.com/en/latest/"
+Repository = "https://github.com/meltano/sdk"
+Documentation = "https://sdk.meltano.com/en/latest/"
 "Issue Tracker" = "https://github.com/meltano/sdk/issues"
 "Twitter" = "https://twitter.com/meltanodata/"
 "Changelog" = "https://github.com/meltano/sdk/blob/main/CHANGELOG.md"
 "Slack" = "https://meltano.com/slack"
 "Youtube" = "https://www.youtube.com/meltano"
+
+[tool.poetry]
+version = "0.0.0"
 
 [tool.poetry.dependencies]
 python = ">=3.9"
@@ -300,13 +307,16 @@ enable = true
 style = "pep440"
 
 [build-system]
-requires = ["poetry-core==1.9.0", "poetry-dynamic-versioning==1.4.0"]
+requires = [
+    "poetry-core@ git+https://github.com/python-poetry/poetry-core.git@main",
+    "poetry-dynamic-versioning",
+]
 build-backend = "poetry_dynamic_versioning.backend"
 
-[tool.poetry.plugins."pytest11"]
+[project.entry-points."pytest11"]
 singer_testing = "singer_sdk.testing.pytest_plugin"
 
-[tool.poetry.plugins."singer_sdk.batch_encoders"]
+[project.entry-points."singer_sdk.batch_encoders"]
 jsonl = "singer_sdk.contrib.batch_encoder_jsonl:JSONLinesBatcher"
 parquet = "singer_sdk.contrib.batch_encoder_parquet:ParquetBatcher"
 
@@ -315,7 +325,6 @@ extend-exclude = [
     "cookiecutter/*",
 ]
 line-length = 88
-target-version = "py39"
 
 [tool.ruff.format]
 docstring-code-format = true
