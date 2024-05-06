@@ -240,7 +240,7 @@ class SingletonAuthStream(RESTStream):
 ### Make a stream reuse the same authenticator instance for all requests
 
 ```python
-from memoization import cached
+from functools import cached_property
 
 from singer_sdk.authenticators import APIAuthenticatorBase
 from singer_sdk.streams import RESTStream
@@ -248,8 +248,7 @@ from singer_sdk.streams import RESTStream
 class CachedAuthStream(RESTStream):
     """A stream with singleton authenticator."""
 
-    @property
-    @cached
+    @cached_property
     def authenticator(self) -> APIAuthenticatorBase:
         """Stream authenticator."""
         return APIAuthenticatorBase(stream=self)

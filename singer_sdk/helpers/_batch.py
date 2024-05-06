@@ -25,6 +25,9 @@ class BatchFileFormat(str, enum.Enum):
     JSONL = "jsonl"
     """JSON Lines format."""
 
+    PARQUET = "parquet"
+    """Parquet format."""
+
 
 @dataclass
 class BaseBatchFileEncoding:
@@ -34,7 +37,7 @@ class BaseBatchFileEncoding:
     __encoding_format__: t.ClassVar[str] = "OVERRIDE_ME"
 
     # Base encoding fields
-    format: str = field(init=False)  # noqa: A003
+    format: str = field(init=False)
     """The format of the batch file."""
 
     compression: str | None = None
@@ -70,6 +73,13 @@ class JSONLinesEncoding(BaseBatchFileEncoding):
 
 
 @dataclass
+class ParquetEncoding(BaseBatchFileEncoding):
+    """Parquet encoding for batch files."""
+
+    __encoding_format__ = "parquet"
+
+
+@dataclass
 class SDKBatchMessage(Message):
     """Singer batch message in the Meltano Singer SDK flavor."""
 
@@ -82,7 +92,7 @@ class SDKBatchMessage(Message):
     manifest: list[str] = field(default_factory=list)
     """The manifest of files in the batch."""
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if isinstance(self.encoding, dict):
             self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
 
@@ -102,7 +112,7 @@ class StorageTarget:
     params: dict = field(default_factory=dict)
     """"The storage parameters."""
 
-    def asdict(self):
+    def asdict(self) -> dict[str, t.Any]:
         """Return a dictionary representation of the message.
 
         Returns:
@@ -134,7 +144,7 @@ class StorageTarget:
         """
         if platform.system() == "Windows" and "\\" in url:
             # Original code from pyFileSystem split
-            # Augemnted slitly to properly Windows paths
+            # Augmented slightly to properly handle Windows paths
             split = url.rsplit("\\", 1)
             return (split[0] or "\\", split[1])
 
@@ -178,7 +188,7 @@ class StorageTarget:
         filesystem.close()
 
     @contextmanager
-    def open(  # noqa: A003
+    def open(
         self,
         filename: str,
         mode: str = "rb",
@@ -214,7 +224,7 @@ class BatchConfig:
     batch_size: int = DEFAULT_BATCH_SIZE
     """The max number of records in a batch."""
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if isinstance(self.encoding, dict):
             self.encoding = BaseBatchFileEncoding.from_dict(self.encoding)
 
@@ -224,7 +234,7 @@ class BatchConfig:
         if self.batch_size is None:
             self.batch_size = DEFAULT_BATCH_SIZE
 
-    def asdict(self):
+    def asdict(self) -> dict[str, t.Any]:
         """Return a dictionary representation of the message.
 
         Returns:

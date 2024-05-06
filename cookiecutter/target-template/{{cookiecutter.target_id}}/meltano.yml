@@ -21,5 +21,6 @@ plugins:
     - name: username
     - name: password
       kind: password
+      sensitive: true
     - name: start_date
       value: '2010-01-01T00:00:00Z'

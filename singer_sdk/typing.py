@@ -7,7 +7,6 @@ Usage example:
     jsonschema = PropertiesList(
         Property("username", StringType, required=True),
         Property("password", StringType, required=True, secret=True),
-
         Property("id", IntegerType, required=True),
         Property("foo_or_bar", StringType, allowed_values=["foo", "bar"]),
         Property(
@@ -23,13 +22,12 @@ Usage example:
         Property("days_active", IntegerType),
         Property("updated_on", DateTimeType),
         Property("is_deleted", BooleanType),
-
         Property(
             "author",
             ObjectType(
                 Property("id", StringType),
                 Property("name", StringType),
-            )
+            ),
         ),
         Property("tags", ArrayType(StringType)),
         Property(
@@ -39,7 +37,7 @@ Usage example:
                     Property("id", StringType),
                     Property("name", StringType),
                 )
-            )
+            ),
         ),
     ).to_dict()
 
@@ -57,8 +55,11 @@ from __future__ import annotations
 import json
 import typing as t
 
-import sqlalchemy
-from jsonschema import ValidationError, Validator, validators
+import sqlalchemy as sa
+from jsonschema import ValidationError, validators
+
+if t.TYPE_CHECKING:
+    from jsonschema.protocols import Validator
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -77,34 +78,34 @@ if t.TYPE_CHECKING:
 
 
 __all__ = [
-    "extend_validator_with_defaults",
-    "to_jsonschema_type",
-    "to_sql_type",
-    "JSONTypeHelper",
-    "StringType",
+    "ArrayType",
+    "BooleanType",
+    "CustomType",
     "DateTimeType",
-    "TimeType",
     "DateType",
     "DurationType",
     "EmailType",
     "HostnameType",
     "IPv4Type",
     "IPv6Type",
-    "UUIDType",
-    "URIType",
+    "IntegerType",
+    "JSONPointerType",
+    "JSONTypeHelper",
+    "NumberType",
+    "ObjectType",
+    "PropertiesList",
+    "Property",
+    "RegexType",
+    "RelativeJSONPointerType",
+    "StringType",
+    "TimeType",
     "URIReferenceType",
     "URITemplateType",
-    "JSONPointerType",
-    "RelativeJSONPointerType",
-    "RegexType",
-    "BooleanType",
-    "IntegerType",
-    "NumberType",
-    "ArrayType",
-    "Property",
-    "ObjectType",
-    "CustomType",
-    "PropertiesList",
+    "URIType",
+    "UUIDType",
+    "extend_validator_with_defaults",
+    "to_jsonschema_type",
+    "to_sql_type",
 ]
 
 _JsonValue: TypeAlias = t.Union[
@@ -263,22 +264,46 @@ class StringType(JSONTypeHelper[str]):
         {'type': ['string']}
         >>> StringType(allowed_values=["a", "b"]).type_dict
         {'type': ['string'], 'enum': ['a', 'b']}
+        >>> StringType(max_length=10).type_dict
+        {'type': ['string'], 'maxLength': 10}
     """
 
     string_format: str | None = None
     """String format.
 
-    See the `formats built into the JSON Schema specification`_.
+    See the :jsonschema:`JSON Schema reference <string#built-in-formats>` for a list of
+    all the built-in formats.
 
     Returns:
         A string describing the format.
-
-    .. _`formats built into the JSON Schema specification`:
-        https://json-schema.org/understanding-json-schema/reference/string.html#built-in-formats
     """
 
+    def __init__(
+        self,
+        *,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        pattern: str | None = None,
+        **kwargs: t.Any,
+    ) -> None:
+        """Initialize StringType.
+
+        Args:
+            min_length: Minimum length of the string. See the
+                :jsonschema:`JSON Schema reference <string#length>` for details.
+            max_length: Maximum length of the string. See the
+                :jsonschema:`JSON Schema reference <string#length>` for details.
+            pattern: A regular expression pattern that the string must match. See the
+                :jsonschema:`JSON Schema reference <string#regexp>` for details.
+            **kwargs: Additional keyword arguments to pass to the parent class.
+        """
+        super().__init__(**kwargs)
+        self.min_length = min_length
+        self.max_length = max_length
+        self.pattern = pattern
+
     @property
-    def _format(self) -> dict:
+    def _format(self) -> dict[str, t.Any]:
         return {"format": self.string_format} if self.string_format else {}
 
     @DefaultInstanceProperty
@@ -288,11 +313,22 @@ class StringType(JSONTypeHelper[str]):
         Returns:
             A dictionary describing the type.
         """
-        return {
+        result = {
             "type": ["string"],
             **self._format,
             **self.extras,
         }
+
+        if self.max_length is not None:
+            result["maxLength"] = self.max_length
+
+        if self.min_length is not None:
+            result["minLength"] = self.min_length
+
+        if self.pattern is not None:
+            result["pattern"] = self.pattern
+
+        return result
 
 
 class DateTimeType(StringType):
@@ -420,7 +456,71 @@ class BooleanType(JSONTypeHelper[bool]):
         return {"type": ["boolean"], **self.extras}
 
 
-class IntegerType(JSONTypeHelper):
+class _NumericType(JSONTypeHelper[T]):
+    """Abstract numeric type for integers and numbers."""
+
+    __type_name__: str
+
+    def __init__(
+        self,
+        *,
+        minimum: int | None = None,
+        maximum: int | None = None,
+        exclusive_minimum: int | None = None,
+        exclusive_maximum: int | None = None,
+        multiple_of: int | None = None,
+        **kwargs: t.Any,
+    ) -> None:
+        """Initialize IntegerType.
+
+        Args:
+            minimum: Minimum numeric value. See the
+                :jsonschema:`JSON Schema reference <numeric#range>` for details.
+            maximum: Maximum numeric value.
+                :jsonschema:`JSON Schema reference <numeric#range>` for details.
+            exclusive_minimum: Exclusive minimum numeric value.
+                :jsonschema:`JSON Schema reference <numeric#range>` for details.
+            exclusive_maximum: Exclusive maximum numeric value. See the
+                :jsonschema:`JSON Schema reference <numeric#range>` for details.
+            multiple_of: A number that the value must be a multiple of. See the
+                :jsonschema:`JSON Schema reference <numeric#multiples>` for details.
+            **kwargs: Additional keyword arguments to pass to the parent class.
+        """
+        super().__init__(**kwargs)
+        self.minimum = minimum
+        self.maximum = maximum
+        self.exclusive_minimum = exclusive_minimum
+        self.exclusive_maximum = exclusive_maximum
+        self.multiple_of = multiple_of
+
+    @DefaultInstanceProperty
+    def type_dict(self) -> dict:
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        result = {"type": [self.__type_name__], **self.extras}
+
+        if self.minimum is not None:
+            result["minimum"] = self.minimum
+
+        if self.maximum is not None:
+            result["maximum"] = self.maximum
+
+        if self.exclusive_minimum is not None:
+            result["exclusiveMinimum"] = self.exclusive_minimum
+
+        if self.exclusive_maximum is not None:
+            result["exclusiveMaximum"] = self.exclusive_maximum
+
+        if self.multiple_of is not None:
+            result["multipleOf"] = self.multiple_of
+
+        return result
+
+
+class IntegerType(_NumericType[int]):
     """Integer type.
 
     Examples:
@@ -430,19 +530,18 @@ class IntegerType(JSONTypeHelper):
         {'type': ['integer']}
         >>> IntegerType(allowed_values=[1, 2]).type_dict
         {'type': ['integer'], 'enum': [1, 2]}
+        >>> IntegerType(minimum=0, maximum=10).type_dict
+        {'type': ['integer'], 'minimum': 0, 'maximum': 10}
+        >>> IntegerType(exclusive_minimum=0, exclusive_maximum=10).type_dict
+        {'type': ['integer'], 'exclusiveMinimum': 0, 'exclusiveMaximum': 10}
+        >>> IntegerType(multiple_of=2).type_dict
+        {'type': ['integer'], 'multipleOf': 2}
     """
 
-    @DefaultInstanceProperty
-    def type_dict(self) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
-        return {"type": ["integer"], **self.extras}
+    __type_name__ = "integer"
 
 
-class NumberType(JSONTypeHelper[float]):
+class NumberType(_NumericType[float]):
     """Number type.
 
     Examples:
@@ -452,16 +551,15 @@ class NumberType(JSONTypeHelper[float]):
         {'type': ['number']}
         >>> NumberType(allowed_values=[1.0, 2.0]).type_dict
         {'type': ['number'], 'enum': [1.0, 2.0]}
+        >>> NumberType(minimum=0, maximum=10).type_dict
+        {'type': ['number'], 'minimum': 0, 'maximum': 10}
+        >>> NumberType(exclusive_minimum=0, exclusive_maximum=10).type_dict
+        {'type': ['number'], 'exclusiveMinimum': 0, 'exclusiveMaximum': 10}
+        >>> NumberType(multiple_of=2).type_dict
+        {'type': ['number'], 'multipleOf': 2}
     """
 
-    @DefaultInstanceProperty
-    def type_dict(self) -> dict:
-        """Get type dictionary.
-
-        Returns:
-            A dictionary describing the type.
-        """
-        return {"type": ["number"], **self.extras}
+    __type_name__ = "number"
 
 
 W = t.TypeVar("W", bound=JSONTypeHelper)
@@ -490,20 +588,42 @@ class ArrayType(JSONTypeHelper[list], t.Generic[W]):
         return {"type": "array", "items": self.wrapped_type.type_dict, **self.extras}
 
 
+class AnyType(JSONTypeHelper):
+    """Any type."""
+
+    def __init__(
+        self,
+        *args: t.Any,
+        **kwargs: t.Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+
+    @DefaultInstanceProperty
+    def type_dict(self) -> dict:
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        return {**self.extras}
+
+
 class Property(JSONTypeHelper[T], t.Generic[T]):
     """Generic Property. Should be nested within a `PropertiesList`."""
 
     # TODO: Make some of these arguments keyword-only. This is a breaking change.
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         wrapped: JSONTypeHelper[T] | type[JSONTypeHelper[T]],
         required: bool = False,  # noqa: FBT001, FBT002
         default: T | None = None,
         description: str | None = None,
-        secret: bool | None = False,  # noqa: FBT002
+        secret: bool | None = False,  # noqa: FBT002, FBT001
         allowed_values: list[T] | None = None,
         examples: list[T] | None = None,
+        *,
+        nullable: bool | None = None,
     ) -> None:
         """Initialize Property object.
 
@@ -524,6 +644,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
                 are permitted. This will define the type as an 'enum'.
             examples: Optional. A list of one or more sample values. These may be
                 displayed to the user as hints of the expected format of inputs.
+            nullable: If True, the property may be null.
         """
         self.name = name
         self.wrapped = wrapped
@@ -533,6 +654,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         self.secret = secret
         self.allowed_values = allowed_values or None
         self.examples = examples or None
+        self.nullable = nullable
 
     @property
     def type_dict(self) -> dict:  # type: ignore[override]
@@ -551,7 +673,8 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
                 f"Type dict for {wrapped} is not defined. Try instantiating it with a "
                 f"nested type such as {wrapped.__name__}(StringType)."
             )
-            raise ValueError(msg)
+            # TODO: this should be a TypeError, but it's a breaking change.
+            raise ValueError(msg)  # noqa: TRY004
 
         return t.cast(dict, wrapped.type_dict)
 
@@ -562,7 +685,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
             A JSON Schema dictionary describing the object.
         """
         type_dict = self.type_dict
-        if self.optional:
+        if self.nullable or self.optional:
             type_dict = append_type(type_dict, "null")
         if self.default is not None:
             type_dict.update({"default": self.default})
@@ -711,7 +834,7 @@ class ObjectType(JSONTypeHelper):
         return result
 
 
-class OneOf(JSONPointerType):
+class OneOf(JSONTypeHelper):
     """OneOf type.
 
     This type allows for a value to be one of a set of types.
@@ -751,6 +874,63 @@ class OneOf(JSONPointerType):
             A dictionary describing the type.
         """
         return {"oneOf": [t.type_dict for t in self.wrapped]}
+
+
+class AllOf(JSONTypeHelper):
+    """AllOf type.
+
+    This type requires a value to match all of the given types.
+
+    Examples:
+        >>> t = AllOf(
+        ...     ObjectType(Property("first_type", StringType)),
+        ...     ObjectType(Property("second_type", IntegerType)),
+        ... )
+        >>> print(t.to_json(indent=2))
+        {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "first_type": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "second_type": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+    """
+
+    def __init__(self, *types: W | type[W]) -> None:
+        """Initialize OneOf type.
+
+        Args:
+            types: Types to choose from.
+        """
+        self.wrapped = types
+
+    @property
+    def type_dict(self) -> dict:  # type: ignore[override]
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        return {"allOf": [t.type_dict for t in self.wrapped]}
 
 
 class Constant(JSONTypeHelper):
@@ -895,9 +1075,17 @@ class PropertiesList(ObjectType):
         """
         self.wrapped[property.name] = property
 
+    def __iter__(self) -> t.Iterator[Property]:
+        """Iterate all properties of the property list.
+
+        Returns:
+            Iterator of properties.
+        """
+        return self.wrapped.values().__iter__()
+
 
 def to_jsonschema_type(
-    from_type: str | sqlalchemy.types.TypeEngine | type[sqlalchemy.types.TypeEngine],
+    from_type: str | sa.types.TypeEngine | type[sa.types.TypeEngine],
 ) -> dict:
     """Return the JSON Schema dict that describes the sql type.
 
@@ -931,23 +1119,26 @@ def to_jsonschema_type(
     }
     if isinstance(from_type, str):
         type_name = from_type
-    elif isinstance(from_type, sqlalchemy.types.TypeEngine):
+    elif isinstance(from_type, sa.types.TypeEngine):
         type_name = type(from_type).__name__
     elif isinstance(from_type, type) and issubclass(
         from_type,
-        sqlalchemy.types.TypeEngine,
+        sa.types.TypeEngine,
     ):
         type_name = from_type.__name__
-    else:
+    else:  # pragma: no cover
         msg = "Expected `str` or a SQLAlchemy `TypeEngine` object or type."
-        raise ValueError(msg)
+        # TODO: this should be a TypeError, but it's a breaking change.
+        raise ValueError(msg)  # noqa: TRY004
 
-    # Look for the type name within the known SQL type names:
-    for sqltype, jsonschema_type in sqltype_lookup.items():
-        if sqltype.lower() in type_name.lower():
-            return jsonschema_type
-
-    return sqltype_lookup["string"]  # safe failover to str
+    return next(
+        (
+            jsonschema_type
+            for sqltype, jsonschema_type in sqltype_lookup.items()
+            if sqltype.lower() in type_name.lower()
+        ),
+        sqltype_lookup["string"],  # safe failover to str
+    )
 
 
 def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> bool:
@@ -958,7 +1149,7 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
         type_check: A tuple of type strings to look for.
 
     Returns:
-        True if the schema suports the type.
+        True if the schema supports the type.
     """
     if "type" in jsonschema_type:
         if isinstance(jsonschema_type["type"], (list, tuple)):
@@ -968,17 +1159,14 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
         elif jsonschema_type.get("type") in type_check:
             return True
 
-    if any(
+    return any(
         _jsonschema_type_check(t, type_check) for t in jsonschema_type.get("anyOf", ())
-    ):
-        return True
-
-    return False
+    )
 
 
 def to_sql_type(  # noqa: PLR0911, C901
     jsonschema_type: dict,
-) -> sqlalchemy.types.TypeEngine:
+) -> sa.types.TypeEngine:
     """Convert JSON Schema type to a SQL type.
 
     Args:
@@ -991,26 +1179,26 @@ def to_sql_type(  # noqa: PLR0911, C901
         datelike_type = get_datelike_property_type(jsonschema_type)
         if datelike_type:
             if datelike_type == "date-time":
-                return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATETIME())
+                return sa.types.DATETIME()
             if datelike_type in "time":
-                return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.TIME())
+                return sa.types.TIME()
             if datelike_type == "date":
-                return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DATE())
+                return sa.types.DATE()
 
         maxlength = jsonschema_type.get("maxLength")
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR(maxlength))
+        return sa.types.VARCHAR(maxlength)
 
     if _jsonschema_type_check(jsonschema_type, ("integer",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.INTEGER())
+        return sa.types.INTEGER()
     if _jsonschema_type_check(jsonschema_type, ("number",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.DECIMAL())
+        return sa.types.DECIMAL()
     if _jsonschema_type_check(jsonschema_type, ("boolean",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.BOOLEAN())
+        return sa.types.BOOLEAN()
 
     if _jsonschema_type_check(jsonschema_type, ("object",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR())
+        return sa.types.VARCHAR()
 
     if _jsonschema_type_check(jsonschema_type, ("array",)):
-        return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR())
+        return sa.types.VARCHAR()
 
-    return t.cast(sqlalchemy.types.TypeEngine, sqlalchemy.types.VARCHAR())
+    return sa.types.VARCHAR()

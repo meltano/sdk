@@ -17,7 +17,7 @@ Create taps with the SDK requires overriding just two or three classes:
      `http_headers` property in the stream class.
    - `OAuthAuthenticator` - This class performs an OAuth 2.0 authentication flow.
    - `OAuthJWTAuthenticator` - This class performs an JWT (JSON Web Token) authentication
-     flow.
+     flow. Requires installing the `singer-sdk[jwt]` extra.
 
 ## Target Development Overview
 
@@ -55,6 +55,10 @@ pipx install poetry
 pipx install tox
 ```
 
+:::{tip}
+The minimum recommended version of cookiecutter is `2.2.0` (released 2023-07-06).
+:::
+
 Now you can initialize your new project with the Cookiecutter template for taps:
 
 ```bash
@@ -75,6 +79,24 @@ Once you've answered the cookiecutter prompts, follow the instructions in the
 generated `README.md` file to complete your new tap or target. You can also reference the
 [Meltano Tutorial](https://docs.meltano.com/tutorials/custom-extractor) for a more
 detailed guide.
+
+````{admonition} Avoid repeating yourself
+  If you find yourself repeating the same inputs to the cookiecutter, you can create a
+  `cookiecutterrc` file in your home directory to set default values for the prompts.
+
+  For example, if you want to set the default value for your name and email, and the
+  default stream type and authentication method, you can add the following to your
+  `~/.cookiecutterrc` file:
+
+  ```yaml
+  # ~/.cookiecutterrc
+  default_context:
+    admin_name: Johnny B. Goode
+    admin_email: jbg@example.com
+    stream_type: REST
+    auth_method: Bearer Token
+  ```
+````
 
 ### Using an existing library
 
@@ -154,6 +176,16 @@ Some APIs instead return the records as values inside an object where each key i
     { "id": 2, "value": "def" }
   ]
   ```
+
+## Extra features
+
+The following [extra features](https://packaging.python.org/en/latest/specifications/dependency-specifiers/#extras) are available for the Singer SDK:
+
+- `faker` - Enables the use of [Faker](https://faker.readthedocs.io/en/master/) in [stream maps](stream_maps.md).
+- `jwt` - Enables the `OAuthJWTAuthenticator` class for JWT (JSON Web Token) authentication.
+- `s3` - Enables AWS S3 as a [BATCH storage](batch.md#the-batch-message).
+- `parquet` - Enables as [BATCH encoding](batch.md#encoding).
+- `testing` - Pytest dependencies required to use the [Tap & Target Testing Framework](testing.md).
 
 ## Resources
 
@@ -239,13 +271,14 @@ We've had success using [`viztracer`](https://github.com/gaogaotiantian/viztrace
 You can start doing the same in your package. Start by installing `viztracer`.
 
 ```console
-$ poetry add --dev viztracer
+$ poetry add --group dev viztracer
 ```
 
 Then simply run your package's CLI as normal, preceded by the `viztracer` command
 
 ```console
 $ poetry run viztracer my-tap
+$ poetry run viztracer -- my-target --config=config.json --input=messages.json
 ```
 
 That command will produce a `result.json` file which you can explore with the `vizviewer` tool.

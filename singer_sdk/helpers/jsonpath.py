@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import logging
 import typing as t
+from functools import lru_cache
 
-import memoization
 from jsonpath_ng.ext import parse
 
 if t.TYPE_CHECKING:
     import jsonpath_ng
+
+
+logger = logging.getLogger(__name__)
 
 
 def extract_jsonpath(
@@ -27,11 +31,15 @@ def extract_jsonpath(
     compiled_jsonpath = _compile_jsonpath(expression)
 
     match: jsonpath_ng.DatumInContext
-    for match in compiled_jsonpath.find(input):
+    matches = compiled_jsonpath.find(input)
+
+    logger.info("JSONPath %s match count: %d", expression, len(matches))
+
+    for match in matches:
         yield match.value
 
 
-@memoization.cached
+@lru_cache
 def _compile_jsonpath(expression: str) -> jsonpath_ng.JSONPath:
     """Parse a JSONPath expression and cache the result.
 

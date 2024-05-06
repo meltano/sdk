@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-{% if cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 import sys
-{% endif -%}
-from pathlib import Path
+{%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
+from functools import cached_property
+{%- endif %}
 from typing import Any, Callable, Iterable
 
 import requests
@@ -22,7 +22,7 @@ from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {% elif cookiecutter.auth_method == "Basic Auth" -%}
-from singer_sdk.authenticators import BasicAuthenticator
+from requests.auth import HTTPBasicAuth
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
@@ -41,16 +41,15 @@ from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}A
 
 {% endif -%}
 
-{%- if cookiecutter.auth_method in ("OAuth2", "JWT") -%}
-if sys.version_info >= (3, 8):
-    from functools import cached_property
+if sys.version_info >= (3, 9):
+    import importlib.resources as importlib_resources
 else:
-    from cached_property import cached_property
-
-{% endif -%}
+    import importlib_resources
 
 _Auth = Callable[[requests.PreparedRequest], requests.PreparedRequest]
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+
+# TODO: Delete this is if not using json files for schema definition
+SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
 
 
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
@@ -111,14 +110,13 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 {%- elif cookiecutter.auth_method == "Basic Auth" %}
 
     @property
-    def authenticator(self) -> BasicAuthenticator:
+    def authenticator(self) -> HTTPBasicAuth:
         """Return a new authenticator object.
 
         Returns:
             An authenticator instance.
         """
-        return BasicAuthenticator.create_for_stream(
-            self,
+        return HTTPBasicAuth(
             username=self.config.get("username", ""),
             password=self.config.get("password", ""),
         )

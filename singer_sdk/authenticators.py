@@ -5,19 +5,19 @@ from __future__ import annotations
 import base64
 import math
 import typing as t
-from datetime import datetime, timedelta
+import warnings
+from datetime import timedelta
 from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
-import jwt
 import requests
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
 
 from singer_sdk.helpers._util import utc_now
 
 if t.TYPE_CHECKING:
     import logging
+
+    from pendulum import DateTime
 
     from singer_sdk.streams.rest import RESTStream
 
@@ -129,13 +129,10 @@ class APIAuthenticatorBase:
         """Authenticate a request.
 
         Args:
-            request: A `request object`_.
+            request: A :class:`requests.PreparedRequest` object.
 
         Returns:
             The authenticated request object.
-
-        .. _request object:
-            https://requests.readthedocs.io/en/latest/api/#requests.PreparedRequest
         """
         request.headers.update(self.auth_headers)
 
@@ -152,13 +149,10 @@ class APIAuthenticatorBase:
         and returns the result.
 
         Args:
-            r: A `request object`_.
+            r: A :class:`requests.PreparedRequest` object.
 
         Returns:
             The authenticated request object.
-
-        .. _request object:
-            https://requests.readthedocs.io/en/latest/api/#requests.PreparedRequest
         """
         return self.authenticate_request(r)
 
@@ -221,7 +215,7 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
         super().__init__(stream=stream)
         auth_credentials = {key: value}
 
-        if location not in ["header", "params"]:
+        if location not in {"header", "params"}:
             msg = "`type` must be one of 'header' or 'params'."
             raise ValueError(msg)
 
@@ -301,7 +295,10 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
 class BasicAuthenticator(APIAuthenticatorBase):
     """Implements basic authentication for REST Streams.
 
-    This Authenticator implements basic authentication by concatinating a
+    .. deprecated:: 0.36.0
+       Use :class:`requests.auth.HTTPBasicAuth` instead.
+
+    This Authenticator implements basic authentication by concatenating a
     username and password then base64 encoding the string. The resulting
     token will be merged with any HTTP headers specified on the stream.
     """
@@ -320,6 +317,13 @@ class BasicAuthenticator(APIAuthenticatorBase):
             password: API password.
         """
         super().__init__(stream=stream)
+        warnings.warn(
+            "BasicAuthenticator is deprecated. Use "
+            "requests.auth.HTTPBasicAuth instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         credentials = f"{username}:{password}".encode()
         auth_token = base64.b64encode(credentials).decode("ascii")
         auth_credentials = {"Authorization": f"Basic {auth_token}"}
@@ -378,7 +382,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         # Initialize internal tracking attributes
         self.access_token: str | None = None
         self.refresh_token: str | None = None
-        self.last_refreshed: datetime | None = None
+        self.last_refreshed: DateTime | None = None
         self.expires_in: int | None = None
 
     @property
@@ -441,12 +445,12 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             @property
             def oauth_request_body(self) -> dict:
                 return {
-                    'grant_type': 'password',
-                    'scope': 'https://api.powerbi.com',
-                    'resource': 'https://analysis.windows.net/powerbi/api',
-                    'client_id': self.config["client_id"],
-                    'username': self.config.get("username", self.config["client_id"]),
-                    'password': self.config["password"],
+                    "grant_type": "password",
+                    "scope": "https://api.powerbi.com",
+                    "resource": "https://analysis.windows.net/powerbi/api",
+                    "client_id": self.config["client_id"],
+                    "username": self.config.get("username", self.config["client_id"]),
+                    "password": self.config["password"],
                 }
 
         Raises:
@@ -462,9 +466,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         Returns:
             Optional client secret from stream config if it has been set.
         """
-        if self.config:
-            return self.config.get("client_id")
-        return None
+        return self.config.get("client_id") if self.config else None
 
     @property
     def client_secret(self) -> str | None:
@@ -473,9 +475,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         Returns:
             Optional client secret from stream config if it has been set.
         """
-        if self.config:
-            return self.config.get("client_secret")
-        return None
+        return self.config.get("client_secret") if self.config else None
 
     def is_token_valid(self) -> bool:
         """Check if token is valid.
@@ -487,9 +487,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             return False
         if not self.expires_in:
             return True
-        if self.expires_in > (utc_now() - self.last_refreshed).total_seconds():
-            return True
-        return False
+        return self.expires_in > (utc_now() - self.last_refreshed).total_seconds()
 
     # Authentication and refresh
     def update_access_token(self) -> None:
@@ -520,7 +518,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         self.expires_in = int(expiration) if expiration else None
         if self.expires_in is None:
             self.logger.debug(
-                "No expires_in receied in OAuth response and no "
+                "No expires_in received in OAuth response and no "
                 "default_expiration set. Token will be treated as if it never "
                 "expires.",
             )
@@ -566,7 +564,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
 
     @property
     def oauth_request_payload(self) -> dict:
-        """Return request paytload for OAuth request.
+        """Return request payload for OAuth request.
 
         Returns:
             Payload object for OAuth.
@@ -574,6 +572,10 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         Raises:
             ValueError: If the private key is not set.
         """
+        import jwt  # noqa: PLC0415
+        from cryptography.hazmat.backends import default_backend  # noqa: PLC0415
+        from cryptography.hazmat.primitives import serialization  # noqa: PLC0415
+
         if not self.private_key:
             msg = "Missing 'private_key' property for OAuth payload."
             raise ValueError(msg)

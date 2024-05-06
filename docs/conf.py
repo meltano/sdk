@@ -12,6 +12,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+from __future__ import annotations
 
 import sys
 from pathlib import Path
@@ -26,10 +27,10 @@ copyright = "2021, Meltano Core Team and Contributors"  # noqa: A001
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.31.0"
+release = "0.37.0"
 
 
-# -- General configuration ---------------------------------------------------
+# -- General configuration -------------------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -39,10 +40,14 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
+    "sphinx.ext.extlinks",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.linkcode",
     "sphinx_copybutton",
     "myst_parser",
     "sphinx_reredirects",
     "sphinx_inline_tabs",
+    "notfound.extension",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -53,11 +58,7 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-# Show typehints in the description, along with parameter descriptions
-autodoc_typehints = "signature"
-autodoc_class_signature = "separated"
-
-# -- Options for HTML output -------------------------------------------------
+# -- Options for HTML output -----------------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
@@ -70,7 +71,6 @@ html_theme_options = {
     "source_branch": "main",
     "source_directory": "docs/",
     "sidebar_hide_name": True,
-    "announcement": '<a href="https://meltano.com/cloud/?utm_campaign=top_banner_sdk">Sign up for Public Beta today</a>! Get a 20% discount on purchases before 27th of July!',  # noqa: E501
     # branding
     "light_css_variables": {
         "font-stack": "Hanken Grotesk,-apple-system,Helvetica,sans-serif",
@@ -116,8 +116,67 @@ html_css_files = [
     "css/custom.css",
 ]
 
+# -- Options for AutoDoc ---------------------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
+
+# Show typehints in the description
+autodoc_typehints = "description"
+
+# Display the signature as a method.
+autodoc_class_signature = "separated"
+
+# Sort members by type.
+autodoc_member_order = "groupwise"
+
+# -- Options for MyST ------------------------------------------------------------------
+# https://myst-parser.readthedocs.io/en/latest/configuration.html
 myst_heading_anchors = 3
+myst_enable_extensions = {
+    "colon_fence",
+}
 
 redirects = {
     "porting.html": "guides/porting.html",
 }
+
+# -- Options for extlinks -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/extlinks.html
+
+extlinks = {
+    "jsonschema": (
+        "https://json-schema.org/understanding-json-schema/reference/%s",
+        "%s",
+    ),
+}
+
+# -- Options for intersphinx -----------------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#configuration
+intersphinx_mapping = {
+    "requests": ("https://requests.readthedocs.io/en/latest/", None),
+    "python": ("https://docs.python.org/3/", None),
+}
+
+# -- Options for linkcode --------------------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/linkcode.html#configuration
+
+
+def linkcode_resolve(domain: str, info: dict) -> str | None:
+    """Get URL to source code.
+
+    Args:
+        domain: Language domain the object is in.
+        info: A dictionary with domain-specific keys.
+
+    Returns:
+        A URL.
+    """
+    if domain != "py":
+        return None
+    if not info["module"]:
+        return None
+    filename = info["module"].replace(".", "/")
+
+    if filename == "singer_sdk":
+        filename = "singer_sdk/__init__"
+
+    return f"https://github.com/meltano/sdk/tree/main/{filename}.py"

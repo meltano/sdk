@@ -5,12 +5,12 @@ from __future__ import annotations
 import contextlib
 import typing as t
 import warnings
-from pathlib import Path
 
-from singer_sdk.helpers._compat import resources
+from singer_sdk.helpers._compat import importlib_resources
 from singer_sdk.testing import target_test_streams
 
 if t.TYPE_CHECKING:
+    from singer_sdk.helpers._compat import Traversable
     from singer_sdk.streams import Stream
 
     from .config import SuiteConfig
@@ -38,7 +38,7 @@ class TestTemplate:
     plugin_type: str | None = None
 
     @property
-    def id(self) -> str:  # noqa: A003
+    def id(self) -> str:
         """Test ID.
 
         Raises:
@@ -47,7 +47,7 @@ class TestTemplate:
         msg = "ID not implemented."
         raise NotImplementedError(msg)
 
-    def setup(self) -> None:
+    def setup(self) -> None:  # noqa: PLR6301
         """Test setup, called before `.test()`.
 
         This method is useful for preparing external resources (databases, folders etc.)
@@ -63,7 +63,7 @@ class TestTemplate:
         """Main Test body, called after `.setup()` and before `.validate()`."""
         self.runner.sync_all()
 
-    def validate(self) -> None:
+    def validate(self) -> None:  # noqa: PLR6301
         """Test validation, called after `.test()`.
 
         This method is particularly useful in Target tests, to validate that records
@@ -75,7 +75,7 @@ class TestTemplate:
         msg = "Method not implemented."
         raise NotImplementedError(msg)
 
-    def teardown(self) -> None:
+    def teardown(self) -> None:  # noqa: PLR6301
         """Test Teardown.
 
         This method is useful for cleaning up external resources
@@ -130,7 +130,7 @@ class TapTestTemplate(TestTemplate):
     plugin_type = "tap"
 
     @property
-    def id(self) -> str:  # noqa: A003
+    def id(self) -> str:
         """Test ID.
 
         Returns:
@@ -162,7 +162,7 @@ class StreamTestTemplate(TestTemplate):
     required_kwargs: t.ClassVar[list[str]] = ["stream"]
 
     @property
-    def id(self) -> str:  # noqa: A003
+    def id(self) -> str:
         """Test ID.
 
         Returns:
@@ -196,7 +196,7 @@ class AttributeTestTemplate(TestTemplate):
     plugin_type = "attribute"
 
     @property
-    def id(self) -> str:  # noqa: A003
+    def id(self) -> str:
         """Test ID.
 
         Returns:
@@ -292,7 +292,7 @@ class TargetTestTemplate(TestTemplate):
         super().run(config, resource, runner)
 
     @property
-    def id(self) -> str:  # noqa: A003
+    def id(self) -> str:
         """Test ID.
 
         Returns:
@@ -322,14 +322,14 @@ class TargetFileTestTemplate(TargetTestTemplate):
         """
         # get input from file
         if getattr(self, "singer_filepath", None):
-            assert Path(
-                self.singer_filepath,
-            ).exists(), f"Singer file {self.singer_filepath} does not exist."
+            assert (
+                self.singer_filepath.is_file()
+            ), f"Singer file {self.singer_filepath} does not exist."
             runner.input_filepath = self.singer_filepath
         super().run(config, resource, runner)
 
     @property
-    def singer_filepath(self) -> Path:
+    def singer_filepath(self) -> Traversable:
         """Get path to singer JSONL formatted messages file.
 
         Files will be sourced from `./target_test_streams/<test name>.singer`.
@@ -337,4 +337,4 @@ class TargetFileTestTemplate(TargetTestTemplate):
         Returns:
             The expected Path to this tests singer file.
         """
-        return resources.files(target_test_streams).joinpath(f"{self.name}.singer")  # type: ignore[no-any-return]  # noqa: E501
+        return importlib_resources.files(target_test_streams) / f"{self.name}.singer"

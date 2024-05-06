@@ -3,11 +3,19 @@
 from __future__ import annotations
 
 import typing as t
+from importlib import metadata
 
 import pytest
 
-from singer_sdk.about import AboutFormatter, AboutInfo
+from singer_sdk.about import (
+    _PY_MAX_VERSION,
+    _PY_MIN_VERSION,
+    AboutFormatter,
+    AboutInfo,
+    get_supported_pythons,
+)
 from singer_sdk.helpers.capabilities import TapCapabilities
+from singer_sdk.plugin_base import SDK_PACKAGE_NAME
 
 if t.TYPE_CHECKING:
     from pathlib import Path
@@ -45,6 +53,16 @@ def about_info() -> AboutInfo:
                     "type": "string",
                     "description": "API key for the tap to use.",
                 },
+                "complex_setting": {
+                    "type": "object",
+                    "description": "A complex setting, with sub-settings.",
+                    "properties": {
+                        "sub_setting": {
+                            "type": "string",
+                            "description": "A sub-setting.",
+                        }
+                    },
+                },
             },
             "required": ["api_key"],
         },
@@ -72,3 +90,26 @@ def test_about_format(
     output = formatter.format_about(about_info)
     snapshot_name = f"{about_format}.snap.{_format_to_extension[about_format]}"
     snapshot.assert_match(output, snapshot_name)
+
+
+def test_get_supported_pythons_sdk():
+    package_metadata = metadata.metadata(SDK_PACKAGE_NAME)
+    requires_python = package_metadata["Requires-Python"]
+
+    supported_pythons = list(get_supported_pythons(requires_python))
+    assert supported_pythons[0] == f"3.{_PY_MIN_VERSION}"
+    assert supported_pythons[-1] == f"3.{_PY_MAX_VERSION}"
+
+
+@pytest.mark.parametrize(
+    "specifiers,expected",
+    [
+        (">=3.7,<3.12", ["3.7", "3.8", "3.9", "3.10", "3.11"]),
+        (">=3.7", ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]),
+        (">3.7", ["3.8", "3.9", "3.10", "3.11", "3.12"]),
+        (">3.7,<=3.11", ["3.8", "3.9", "3.10", "3.11"]),
+    ],
+)
+def test_get_supported_pythons(specifiers: str, expected: list[str]):
+    supported_pythons = list(get_supported_pythons(specifiers))
+    assert supported_pythons == expected

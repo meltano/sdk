@@ -9,12 +9,18 @@ See the online explorer and query builder here:
 from __future__ import annotations
 
 import abc
-from pathlib import Path
+import sys
 
 from singer_sdk import typing as th
 from singer_sdk.streams.graphql import GraphQLStream
 
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+if sys.version_info < (3, 9):
+    import importlib_resources
+else:
+    from importlib import resources as importlib_resources
+
+
+SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
 
 
 class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):

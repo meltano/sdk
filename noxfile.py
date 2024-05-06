@@ -20,6 +20,9 @@ except ImportError:
     {sys.executable} -m pip install nox-poetry"""
     raise SystemExit(dedent(message)) from None
 
+nox.needs_version = ">=2024.4.15"
+nox.options.default_venv_backend = "uv|virtualenv"
+
 RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
 extend-ignore = ["TD002", "TD003", "FIX002"]
@@ -28,46 +31,31 @@ extend-ignore = ["TD002", "TD003", "FIX002"]
 COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))
 
 package = "singer_sdk"
-python_versions = ["3.11", "3.10", "3.9", "3.8", "3.7"]
-main_python_version = "3.10"
+python_versions = ["3.12", "3.11", "3.10", "3.9", "3.8"]
+main_python_version = "3.12"
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = (
     "mypy",
     "tests",
+    "benches",
     "doctest",
     "test_cookiecutter",
 )
-test_dependencies = [
-    "coverage[toml]",
-    "pytest",
-    "pytest-snapshot",
-    "pytest-durations",
-    "freezegun",
-    "pandas",
-    "pyarrow",
-    "requests-mock",
-    # Cookiecutter tests
-    "black",
-    "cookiecutter",
-    "PyYAML",
-    "darglint",
-    "flake8",
-    "flake8-annotations",
-    "flake8-docstrings",
-    "mypy",
-]
+
+poetry_config = nox.project.load_toml("pyproject.toml")["tool"]["poetry"]
+test_dependencies = poetry_config["group"]["dev"]["dependencies"].keys()
 
 
-@session(python=python_versions)
+@session(python=main_python_version)
 def mypy(session: Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
-    session.install(".")
+    session.install(".[faker,jwt,parquet,s3,testing]")
     session.install(
+        "exceptiongroup",
         "mypy",
         "pytest",
         "importlib-resources",
-        "sqlalchemy2-stubs",
         "types-jsonschema",
         "types-python-dateutil",
         "types-pytz",
@@ -83,7 +71,7 @@ def mypy(session: Session) -> None:
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
-    session.install(".[s3]")
+    session.install(".[faker,jwt,parquet,s3]")
     session.install(*test_dependencies)
 
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
@@ -91,8 +79,10 @@ def tests(session: Session) -> None:
         # Bypass nox-poetry use of --constraint so we can install a version of
         # SQLAlchemy that doesn't match what's in poetry.lock.
         session.poetry.session.install(  # type: ignore[attr-defined]
-            f"sqlalchemy=={sqlalchemy_version}",
+            f"sqlalchemy=={sqlalchemy_version}.*",
         )
+
+    env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
 
     try:
         session.run(
@@ -101,9 +91,10 @@ def tests(session: Session) -> None:
             "--parallel",
             "-m",
             "pytest",
-            "-v",
             "--durations=10",
+            "--benchmark-skip",
             *session.posargs,
+            env=env,
         )
     finally:
         if session.interactive:
@@ -111,11 +102,31 @@ def tests(session: Session) -> None:
 
 
 @session(python=main_python_version)
+def benches(session: Session) -> None:
+    """Run benchmarks."""
+    session.install(".[jwt,s3]")
+    session.install(*test_dependencies)
+    sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
+    if sqlalchemy_version:
+        # Bypass nox-poetry use of --constraint so we can install a version of
+        # SQLAlchemy that doesn't match what's in poetry.lock.
+        session.poetry.session.install(  # type: ignore[attr-defined]
+            f"sqlalchemy=={sqlalchemy_version}",
+        )
+    session.run(
+        "pytest",
+        "--benchmark-only",
+        "--benchmark-json=output.json",
+        *session.posargs,
+    )
+
+
+@session(python=main_python_version)
 def update_snapshots(session: Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
 
-    session.install(".")
+    session.install(".[faker,jwt]")
     session.install(*test_dependencies)
     session.run("pytest", "--snapshot-update", *args)
 
@@ -188,35 +199,35 @@ def docs_serve(session: Session) -> None:
 
 @nox.parametrize("replay_file_path", COOKIECUTTER_REPLAY_FILES)
 @session(python=main_python_version)
-def test_cookiecutter(session: Session, replay_file_path) -> None:
+def test_cookiecutter(session: Session, replay_file_path: str) -> None:
     """Uses the tap template to build an empty cookiecutter.
 
     Runs the lint task on the created test project.
     """
-    cc_build_path = tempfile.gettempdir()
-    folder_base_path = "./cookiecutter"
+    cc_build_path = Path(tempfile.gettempdir())
+    folder_base_path = Path("./cookiecutter")
+    replay_file = Path(replay_file_path).resolve()
 
-    if Path(replay_file_path).name.startswith("tap"):
+    if replay_file.name.startswith("tap"):
         folder = "tap-template"
-    elif Path(replay_file_path).name.startswith("target"):
+    elif replay_file.name.startswith("target"):
         folder = "target-template"
     else:
         folder = "mapper-template"
-    template = Path(folder_base_path + "/" + folder).resolve()
-    replay_file = Path(replay_file_path).resolve()
+    template = folder_base_path.joinpath(folder).resolve()
 
-    if not Path(template).exists():
+    if not template.exists():
         return
 
-    if not Path(replay_file).is_file():
+    if not replay_file.is_file():
         return
 
-    sdk_dir = Path(Path(template).parent).parent
-    cc_output_dir = Path(replay_file_path).name.replace(".json", "")
-    cc_test_output = cc_build_path + "/" + cc_output_dir
+    sdk_dir = template.parent.parent
+    cc_output_dir = replay_file.name.replace(".json", "")
+    cc_test_output = cc_build_path.joinpath(cc_output_dir)
 
-    if Path(cc_test_output).exists():
-        session.run("rm", "-fr", cc_test_output, external=True)
+    if cc_test_output.exists():
+        session.run("rm", "-fr", str(cc_test_output), external=True)
 
     session.install(".")
     session.install("cookiecutter", "pythonsed")
@@ -227,7 +238,7 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
         str(replay_file),
         str(template),
         "-o",
-        cc_build_path,
+        str(cc_build_path),
     )
     session.chdir(cc_test_output)
 
@@ -248,3 +259,25 @@ def test_cookiecutter(session: Session, replay_file_path) -> None:
     session.run("git", "init", external=True)
     session.run("git", "add", ".", external=True)
     session.run("pre-commit", "run", "--all-files", external=True)
+
+
+@session(name="version-bump")
+def version_bump(session: Session) -> None:
+    """Run commitizen."""
+    session.install(
+        "commitizen",
+        "commitizen-version-bump @ git+https://github.com/meltano/commitizen-version-bump.git@main",
+    )
+    default_args = [
+        "--changelog",
+        "--files-only",
+        "--check-consistency",
+        "--changelog-to-stdout",
+    ]
+    args = session.posargs or default_args
+
+    session.run(
+        "cz",
+        "bump",
+        *args,
+    )

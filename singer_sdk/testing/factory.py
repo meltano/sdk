@@ -1,4 +1,5 @@
 """Test Class Factory."""
+
 from __future__ import annotations
 
 import typing as t
@@ -8,6 +9,7 @@ import pytest
 from .config import SuiteConfig
 from .runners import TapTestRunner, TargetTestRunner
 from .suites import (
+    TestSuite,
     tap_stream_attribute_tests,
     tap_stream_tests,
     tap_tests,
@@ -15,14 +17,31 @@ from .suites import (
 )
 
 if t.TYPE_CHECKING:
-    from singer_sdk import Tap, Target
+    from singer_sdk import Stream, Tap, Target
+    from singer_sdk.testing.templates import (
+        AttributeTestTemplate,
+        StreamTestTemplate,
+        TapTestTemplate,
+    )
 
 
 class BaseTestClass:
     """Base test class."""
 
-    params: t.ClassVar[dict] = {}
-    param_ids: t.ClassVar[dict] = {}
+    params: dict[str, t.Any]
+    param_ids: dict[str, list[str]]
+
+    def __init_subclass__(cls, **kwargs: t.Any) -> None:
+        """Initialize a subclass.
+
+        Args:
+            **kwargs: Keyword arguments.
+        """
+        # Add empty params and param_ids attributes to a direct subclass but not to
+        # subclasses of subclasses
+        if cls.__base__ == BaseTestClass:
+            cls.params = {}
+            cls.param_ids = {}
 
 
 class TapTestClassFactory:
@@ -98,7 +117,7 @@ class TapTestClassFactory:
             test_runner=test_runner,
         )
 
-    def _get_empty_test_class(
+    def _get_empty_test_class(  # noqa: PLR6301
         self,
         test_runner: TapTestRunner,
         suite_config: SuiteConfig | None,
@@ -117,22 +136,22 @@ class TapTestClassFactory:
             """Tap Test Class."""
 
             @pytest.fixture
-            def config(self) -> SuiteConfig:
+            def config(self) -> SuiteConfig:  # noqa: PLR6301
                 return suite_config or SuiteConfig()
 
             @pytest.fixture
-            def resource(self) -> t.Any:  # noqa: ANN401, PT004
+            def resource(self) -> t.Any:  # noqa: ANN401, PLR6301, PT004
                 yield  # noqa: PT022
 
             @pytest.fixture(scope="class")
-            def runner(self) -> TapTestRunner | TargetTestRunner:
+            def runner(self) -> TapTestRunner | TargetTestRunner:  # noqa: PLR6301
                 # Populate runner class with cached records for use in tests
                 test_runner.sync_all()
                 return test_runner
 
         return TapTestClass
 
-    def _annotate_test_class(  # noqa: C901
+    def _annotate_test_class(
         self,
         empty_test_class: type[BaseTestClass],
         test_suites: list,
@@ -150,81 +169,101 @@ class TapTestClassFactory:
         """
         for suite in test_suites:
             if suite.kind == "tap":
-                for test_class in suite.tests:
-                    test = test_class()
-                    test_name = f"test_{suite.kind}_{test.name}"
-                    setattr(empty_test_class, test_name, test.run)
+                self._with_tap_tests(empty_test_class, suite)
 
             if suite.kind in {"tap_stream", "tap_stream_attribute"}:
                 streams = list(test_runner.new_tap().streams.values())
 
                 if suite.kind == "tap_stream":
-                    params = [
-                        {
-                            "stream": stream,
-                        }
-                        for stream in streams
-                    ]
-                    param_ids = [stream.name for stream in streams]
-
-                    for test_class in suite.tests:
-                        test = test_class()
-                        test_name = f"test_{suite.kind}_{test.name}"
-                        setattr(
-                            empty_test_class,
-                            test_name,
-                            test.run,
-                        )
-                        empty_test_class.params[test_name] = params
-                        empty_test_class.param_ids[test_name] = param_ids
+                    self._with_stream_tests(empty_test_class, suite, streams)
 
                 if suite.kind == "tap_stream_attribute":
-                    for test_class in suite.tests:
-                        test = test_class()
-                        test_name = f"test_{suite.kind}_{test.name}"
-                        test_params = []
-                        test_ids = []
-                        for stream in streams:
-                            test_params.extend(
-                                [
-                                    {
-                                        "stream": stream,
-                                        "attribute_name": property_name,
-                                    }
-                                    for property_name, property_schema in stream.schema[
-                                        "properties"
-                                    ].items()
-                                    if test_class.evaluate(
-                                        stream=stream,
-                                        property_name=property_name,
-                                        property_schema=property_schema,
-                                    )
-                                ],
-                            )
-                            test_ids.extend(
-                                [
-                                    f"{stream.name}.{property_name}"
-                                    for property_name, property_schema in stream.schema[
-                                        "properties"
-                                    ].items()
-                                    if test_class.evaluate(
-                                        stream=stream,
-                                        property_name=property_name,
-                                        property_schema=property_schema,
-                                    )
-                                ],
-                            )
-
-                        if test_params:
-                            setattr(
-                                empty_test_class,
-                                test_name,
-                                test.run,
-                            )
-                            empty_test_class.params[test_name] = test_params
-                            empty_test_class.param_ids[test_name] = test_ids
+                    self._with_stream_attribute_tests(empty_test_class, suite, streams)
 
         return empty_test_class
+
+    def _with_tap_tests(  # noqa: PLR6301
+        self,
+        empty_test_class: type[BaseTestClass],
+        suite: TestSuite[TapTestTemplate],
+    ) -> None:
+        for test_class in suite.tests:
+            test = test_class()
+            test_name = f"test_{suite.kind}_{test.name}"
+            setattr(empty_test_class, test_name, test.run)
+
+    def _with_stream_tests(  # noqa: PLR6301
+        self,
+        empty_test_class: type[BaseTestClass],
+        suite: TestSuite[StreamTestTemplate],
+        streams: list[Stream],
+    ) -> None:
+        params = [
+            {
+                "stream": stream,
+            }
+            for stream in streams
+        ]
+        param_ids = [stream.name for stream in streams]
+
+        for test_class in suite.tests:
+            test = test_class()
+            test_name = f"test_{suite.kind}_{test.name}"
+            setattr(
+                empty_test_class,
+                test_name,
+                test.run,
+            )
+            empty_test_class.params[test_name] = params
+            empty_test_class.param_ids[test_name] = param_ids
+
+    def _with_stream_attribute_tests(  # noqa: PLR6301
+        self,
+        empty_test_class: type[BaseTestClass],
+        suite: TestSuite[AttributeTestTemplate],
+        streams: list[Stream],
+    ) -> None:
+        for test_class in suite.tests:
+            test = test_class()
+            test_name = f"test_{suite.kind}_{test.name}"
+            test_params = []
+            test_ids: list[str] = []
+            for stream in streams:
+                final_schema = stream.stream_maps[-1].transformed_schema["properties"]
+                test_params.extend(
+                    [
+                        {
+                            "stream": stream,
+                            "attribute_name": prop_name,
+                        }
+                        for prop_name, prop_schema in final_schema.items()
+                        if test_class.evaluate(
+                            stream=stream,
+                            property_name=prop_name,
+                            property_schema=prop_schema,
+                        )
+                    ],
+                )
+                test_ids.extend(
+                    [
+                        f"{stream.name}.{prop_name}"
+                        for prop_name, prop_schema in final_schema.items()
+                        if test_class.evaluate(
+                            stream=stream,
+                            property_name=prop_name,
+                            property_schema=prop_schema,
+                        )
+                    ],
+                )
+
+            if test_params:
+                setattr(
+                    empty_test_class,
+                    test_name,
+                    test.run,
+                )
+                empty_test_class.params[test_name] = test_params
+                empty_test_class.param_ids[test_name] = test_ids
 
 
 class TargetTestClassFactory:
@@ -279,7 +318,7 @@ class TargetTestClassFactory:
             test_suites=suites,
         )
 
-    def _get_empty_test_class(
+    def _get_empty_test_class(  # noqa: PLR6301
         self,
         target_class: type[Target],
         suite_config: SuiteConfig | None,
@@ -302,15 +341,15 @@ class TargetTestClassFactory:
             """Target Test Class."""
 
             @pytest.fixture
-            def config(self) -> SuiteConfig:
+            def config(self) -> SuiteConfig:  # noqa: PLR6301
                 return suite_config or SuiteConfig()
 
             @pytest.fixture
-            def resource(self) -> t.Any:  # noqa: ANN401, PT004
+            def resource(self) -> t.Any:  # noqa: ANN401, PLR6301, PT004
                 yield  # noqa: PT022
 
             @pytest.fixture
-            def runner(self) -> TargetTestRunner:
+            def runner(self) -> TargetTestRunner:  # noqa: PLR6301
                 # Instantiate new runner class and populate records for use in tests
                 return TargetTestRunner(
                     target_class=target_class,
@@ -321,7 +360,7 @@ class TargetTestClassFactory:
 
         return TargetTestClass
 
-    def _annotate_test_class(
+    def _annotate_test_class(  # noqa: PLR6301
         self,
         empty_test_class: type[BaseTestClass],
         test_suites: list,

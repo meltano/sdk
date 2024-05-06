@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import abc
 import typing as t
+from functools import cached_property
+
+import sqlalchemy as sa
 
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping
@@ -19,6 +22,9 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
     connector_class = SQLConnector
     _cached_schema: dict | None = None
+
+    supports_nulls_first: bool = False
+    """Whether the database supports the NULLS FIRST/LAST syntax."""
 
     def __init__(
         self,
@@ -51,7 +57,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             A CatalogEntry object.
         """
-        return t.cast(CatalogEntry, CatalogEntry.from_dict(self.catalog_entry))
+        return CatalogEntry.from_dict(self.catalog_entry)
 
     @property
     def connector(self) -> SQLConnector:
@@ -73,7 +79,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         """
         return self._singer_catalog_entry.metadata
 
-    @property  # TODO: Investigate @cached_property after py > 3.7
+    @cached_property
     def schema(self) -> dict:
         """Return metadata object (dict) as specified in the Singer spec.
 
@@ -82,13 +88,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             The schema object.
         """
-        if not self._cached_schema:
-            self._cached_schema = t.cast(
-                dict,
-                self._singer_catalog_entry.schema.to_dict(),
-            )
-
-        return self._cached_schema
+        return self._singer_catalog_entry.schema.to_dict()
 
     @property
     def tap_stream_id(self) -> str:
@@ -105,7 +105,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self._singer_catalog_entry.tap_stream_id
 
     @property
-    def primary_keys(self) -> list[str] | None:
+    def primary_keys(self) -> t.Sequence[str] | None:
         """Get primary keys from the catalog entry definition.
 
         Returns:
@@ -114,7 +114,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self._singer_catalog_entry.metadata.root.table_key_properties or []
 
     @primary_keys.setter
-    def primary_keys(self, new_value: list[str]) -> None:
+    def primary_keys(self, new_value: t.Sequence[str]) -> None:
         """Set or reset the primary key(s) in the stream's catalog entry.
 
         Args:
@@ -154,7 +154,6 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             stream_name=self.name,
             schema=self.schema,
             mask=self.mask,
-            logger=self.logger,
         )
 
     # Get records from stream
@@ -189,7 +188,12 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
 
         if self.replication_key:
             replication_key_col = table.columns[self.replication_key]
-            query = query.order_by(replication_key_col)
+            order_by = (
+                sa.nulls_first(replication_key_col.asc())
+                if self.supports_nulls_first
+                else replication_key_col.asc()
+            )
+            query = query.order_by(order_by)
 
             start_val = self.get_starting_replication_key_value(context)
             if start_val:
@@ -202,13 +206,27 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
             # processed.
             query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
 
-        with self.connector._connect() as conn:
-            for record in conn.execute(query):
-                transformed_record = self.post_process(dict(record._mapping))
+        with self.connector._connect() as conn:  # noqa: SLF001
+            for record in conn.execute(query).mappings():
+                # TODO: Standardize record mapping type
+                # https://github.com/meltano/sdk/issues/2096
+                transformed_record = self.post_process(dict(record))
                 if transformed_record is None:
                     # Record filtered out during post_process()
                     continue
                 yield transformed_record
 
+    @property
+    def is_sorted(self) -> bool:
+        """Expect stream to be sorted.
 
-__all__ = ["SQLStream", "SQLConnector"]
+        When `True`, incremental streams will attempt to resume if unexpectedly
+        interrupted.
+
+        Returns:
+            `True` if stream is sorted. Defaults to `False`.
+        """
+        return self.replication_key is not None
+
+
+__all__ = ["SQLConnector", "SQLStream"]

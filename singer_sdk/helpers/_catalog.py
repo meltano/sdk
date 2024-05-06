@@ -5,28 +5,25 @@ from __future__ import annotations
 import typing as t
 from copy import deepcopy
 
-from memoization import cached
-
 from singer_sdk.helpers._typing import is_object_type
 
 if t.TYPE_CHECKING:
-    from logging import Logger
-
     from singer_sdk._singerlib import Catalog, SelectionMask
 
-_MAX_LRU_CACHE = 500
 
-
-@cached(max_size=_MAX_LRU_CACHE)
+# TODO: this was previously cached using the `memoization` library. However, the
+# `functools.lru_cache` decorator does not support non-hashable arguments.
+# It is possible that this function is not a bottleneck, but if it is, we should
+# consider implementing a custom LRU cache decorator that supports non-hashable
+# arguments.
 def get_selected_schema(
     stream_name: str,
     schema: dict,
     mask: SelectionMask,
-    logger: Logger,
 ) -> dict:
     """Return a copy of the provided JSON schema, dropping any fields not selected."""
     new_schema = deepcopy(schema)
-    _pop_deselected_schema(new_schema, mask, stream_name, (), logger)
+    _pop_deselected_schema(new_schema, mask, stream_name, ())
     return new_schema
 
 
@@ -35,7 +32,6 @@ def _pop_deselected_schema(
     mask: SelectionMask,
     stream_name: str,
     breadcrumb: tuple[str, ...],
-    logger: Logger,
 ) -> None:
     """Remove anything from schema that is not selected.
 
@@ -46,13 +42,14 @@ def _pop_deselected_schema(
     for crumb in breadcrumb:
         schema_at_breadcrumb = schema_at_breadcrumb.get(crumb, {})
 
-    if not isinstance(schema_at_breadcrumb, dict):
+    if not isinstance(schema_at_breadcrumb, dict):  # pragma: no cover
         msg = (
             "Expected dictionary type instead of "
             f"'{type(schema_at_breadcrumb).__name__}' '{schema_at_breadcrumb}' for "
             f"'{stream_name}' bookmark '{breadcrumb!s}' in '{schema}'"
         )
-        raise ValueError(msg)
+        # TODO: this should be a ValueError, but it's a breaking change.
+        raise ValueError(msg)  # noqa: TRY004
 
     if "properties" not in schema_at_breadcrumb:
         return
@@ -75,7 +72,6 @@ def _pop_deselected_schema(
                 mask,
                 stream_name,
                 property_breadcrumb,
-                logger,
             )
 
 
@@ -83,7 +79,6 @@ def pop_deselected_record_properties(
     record: dict[str, t.Any],
     schema: dict,
     mask: SelectionMask,
-    logger: Logger,
     breadcrumb: tuple[str, ...] = (),
 ) -> None:
     """Remove anything from record properties that is not selected.
@@ -104,7 +99,6 @@ def pop_deselected_record_properties(
                 val,
                 schema,
                 mask,
-                logger,
                 property_breadcrumb,
             )
 
@@ -128,12 +122,13 @@ def set_catalog_stream_selected(
     breadcrumb is the path to a property within the stream.
     """
     breadcrumb = breadcrumb or ()
-    if not isinstance(breadcrumb, tuple):
+    if not isinstance(breadcrumb, tuple):  # pragma: no cover
         msg = (
             f"Expected tuple value for breadcrumb '{breadcrumb}'. Got "
             f"{type(breadcrumb).__name__}"
         )
-        raise ValueError(msg)
+        # TODO: this should be a ValueError, but it's a breaking change.
+        raise ValueError(msg)  # noqa: TRY004
 
     catalog_entry = catalog.get_stream(stream_name)
     if not catalog_entry:

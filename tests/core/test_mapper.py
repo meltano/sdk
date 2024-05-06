@@ -3,24 +3,30 @@
 from __future__ import annotations
 
 import copy
+import datetime
 import io
 import json
 import logging
 import typing as t
 from contextlib import redirect_stdout
+from decimal import Decimal
 
 import pytest
-from freezegun import freeze_time
+import time_machine
 
 from singer_sdk._singerlib import Catalog
 from singer_sdk.exceptions import MapExpressionError
-from singer_sdk.helpers._catalog import get_selected_schema
 from singer_sdk.mapper import PluginMapper, RemoveRecordTransform, md5
 from singer_sdk.streams.core import Stream
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
+    ArrayType,
+    BooleanType,
+    CustomType,
     IntegerType,
+    NumberType,
     ObjectType,
+    OneOf,
     PropertiesList,
     Property,
     StringType,
@@ -46,11 +52,24 @@ def sample_catalog_dict() -> dict:
         Property("name", StringType),
         Property("owner_email", StringType),
         Property("description", StringType),
-        Property("description", StringType),
+        Property("create_date", StringType),
     ).to_dict()
     foobars_schema = PropertiesList(
         Property("the", StringType),
         Property("brown", StringType),
+    ).to_dict()
+    singular_schema = PropertiesList(Property("foo", StringType)).to_dict()
+    nested_jellybean_schema = PropertiesList(
+        Property("id", IntegerType),
+        Property(
+            "custom_fields",
+            ArrayType(
+                ObjectType(
+                    Property("id", IntegerType),
+                    Property("value", OneOf(StringType, IntegerType, BooleanType)),
+                ),
+            ),
+        ),
     ).to_dict()
     return {
         "streams": [
@@ -63,6 +82,16 @@ def sample_catalog_dict() -> dict:
                 "stream": "foobars",
                 "tap_stream_id": "foobars",
                 "schema": foobars_schema,
+            },
+            {
+                "stream": "singular",
+                "tap_stream_id": "singular",
+                "schema": singular_schema,
+            },
+            {
+                "stream": "nested_jellybean",
+                "tap_stream_id": "nested_jellybean",
+                "schema": nested_jellybean_schema,
             },
         ],
     }
@@ -106,6 +135,27 @@ def sample_stream():
             {"the": "quick"},
             {"brown": "fox"},
         ],
+        "singular": [
+            {"foo": "bar"},
+        ],
+        "nested_jellybean": [
+            {
+                "id": 123,
+                "custom_fields": [
+                    {"id": 1, "value": "abc"},
+                    {"id": 2, "value": 1212},
+                    {"id": 3, "value": None},
+                ],
+            },
+            {
+                "id": 124,
+                "custom_fields": [
+                    {"id": 1, "value": "foo"},
+                    {"id": 2, "value": 9009},
+                    {"id": 3, "value": True},
+                ],
+            },
+        ],
     }
 
 
@@ -114,6 +164,19 @@ def sample_stream():
 
 @pytest.fixture
 def transform_stream_maps():
+    nested_jellybean_custom_field_1 = (
+        'dict([(x["id"], x["value"]) for x in custom_fields]).get(1)'
+    )
+    nested_jellybean_custom_field_2 = (
+        'int(dict([(x["id"], x["value"]) for x in custom_fields]).get(2)) '
+        'if dict([(x["id"], x["value"]) for x in custom_fields]).get(2) '
+        "else None"
+    )
+    nested_jellybean_custom_field_3 = (
+        'bool(dict([(x["id"], x["value"]) for x in custom_fields]).get(3)) '
+        'if dict([(x["id"], x["value"]) for x in custom_fields]).get(3) '
+        "else None"
+    )
     return {
         "repositories": {
             "repo_name": "_['name']",
@@ -124,6 +187,12 @@ def transform_stream_maps():
             "create_year": "int(datetime.date.fromisoformat(create_date).year)",
             "int_test": "int('0')",
             "__else__": None,
+        },
+        "nested_jellybean": {
+            "custom_fields": "__NULL__",
+            "custom_field_1": nested_jellybean_custom_field_1,
+            "custom_field_2": nested_jellybean_custom_field_2,
+            "custom_field_3": nested_jellybean_custom_field_3,
         },
     }
 
@@ -181,6 +250,21 @@ def transformed_result(stream_map_config):
             {"the": "quick"},
             {"brown": "fox"},
         ],
+        "singular": [{"foo": "bar"}],  # should be unchanged
+        "nested_jellybean": [
+            {
+                "id": 123,
+                "custom_field_1": "abc",
+                "custom_field_2": 1212,
+                "custom_field_3": None,
+            },
+            {
+                "id": 124,
+                "custom_field_1": "foo",
+                "custom_field_2": 9009,
+                "custom_field_3": True,
+            },
+        ],
     }
 
 
@@ -199,6 +283,15 @@ def transformed_schemas():
         "foobars": PropertiesList(
             Property("the", StringType),
             Property("brown", StringType),
+        ).to_dict(),
+        "singular": PropertiesList(
+            Property("foo", StringType),
+        ).to_dict(),
+        "nested_jellybean": PropertiesList(
+            Property("id", IntegerType),
+            Property("custom_field_1", StringType),
+            Property("custom_field_2", IntegerType),
+            Property("custom_field_3", BooleanType),
         ).to_dict(),
     }
 
@@ -231,6 +324,7 @@ def cloned_and_aliased_schemas():
         Property("name", StringType),
         Property("owner_email", StringType),
         Property("description", StringType),
+        Property("create_date", StringType),
     ).to_dict()
     return {
         "repositories_aliased": properties,
@@ -275,6 +369,64 @@ def filtered_result():
 @pytest.fixture
 def filtered_schemas():
     return {"repositories": PropertiesList(Property("name", StringType)).to_dict()}
+
+
+# Wildcard
+
+
+@pytest.fixture
+def wildcard_stream_maps():
+    return {
+        "*s": {
+            "db_name": "'database'",
+        },
+    }
+
+
+@pytest.fixture
+def wildcard_result(sample_stream):
+    return {
+        "repositories": [
+            {**record, "db_name": "database"}
+            for record in sample_stream["repositories"]
+        ],
+        "foobars": [
+            {**record, "db_name": "database"} for record in sample_stream["foobars"]
+        ],
+        "singular": sample_stream["singular"],
+        "nested_jellybean": sample_stream["nested_jellybean"],
+    }
+
+
+@pytest.fixture
+def wildcard_schemas():
+    return {
+        "repositories": PropertiesList(
+            Property("name", StringType),
+            Property("owner_email", StringType),
+            Property("description", StringType),
+            Property("create_date", StringType),
+            Property("db_name", StringType),
+        ).to_dict(),
+        "foobars": PropertiesList(
+            Property("the", StringType),
+            Property("brown", StringType),
+            Property("db_name", StringType),  # added
+        ).to_dict(),
+        "singular": PropertiesList(Property("foo", StringType)).to_dict(),  # unchanged
+        "nested_jellybean": PropertiesList(  # unchanged
+            Property("id", IntegerType),
+            Property(
+                "custom_fields",
+                ArrayType(
+                    ObjectType(
+                        Property("id", IntegerType),
+                        Property("value", CustomType({})),
+                    ),
+                ),
+            ),
+        ).to_dict(),
+    }
 
 
 def test_map_transforms(
@@ -354,17 +506,34 @@ def test_filter_transforms_w_error(
         )
 
 
-def _test_transform(
-    test_name: str,
+def test_wildcard_transforms(
+    sample_stream,
+    sample_catalog_obj,
+    wildcard_stream_maps,
+    stream_map_config,
+    wildcard_result,
+    wildcard_schemas,
+):
+    _test_transform(
+        "wildcard",
+        stream_maps=wildcard_stream_maps,
+        stream_map_config=stream_map_config,
+        expected_result=wildcard_result,
+        expected_schemas=wildcard_schemas,
+        sample_stream=sample_stream,
+        sample_catalog_obj=sample_catalog_obj,
+    )
+
+
+def _run_transform(
     *,
     stream_maps,
     stream_map_config,
-    expected_result,
-    expected_schemas,
     sample_stream,
     sample_catalog_obj,
 ):
     output: dict[str, list[dict]] = {}
+    output_schemas = {}
     mapper = PluginMapper(
         plugin_config={
             "stream_maps": stream_maps,
@@ -379,15 +548,7 @@ def _test_transform(
             if isinstance(stream_map, RemoveRecordTransform):
                 logging.info("Skipping ignored stream '%s'", stream_name)
                 continue
-
-            assert (
-                expected_schemas[stream_map.stream_alias]
-                == stream_map.transformed_schema
-            ), (
-                f"Failed '{test_name}' schema test. Generated schema was "
-                f"{json.dumps(stream_map.transformed_schema, indent=2)}"
-            )
-
+            output_schemas[stream_map.stream_alias] = stream_map.transformed_schema
             output[stream_map.stream_alias] = []
             for record in stream:
                 result = stream_map.transform(record)
@@ -396,11 +557,52 @@ def _test_transform(
                     continue
 
                 output[stream_map.stream_alias].append(result)
+    return output, output_schemas
+
+
+def _test_transform(
+    test_name: str,
+    *,
+    stream_maps,
+    stream_map_config,
+    expected_result,
+    expected_schemas,
+    sample_stream,
+    sample_catalog_obj,
+):
+    output, output_schemas = _run_transform(
+        stream_maps=stream_maps,
+        stream_map_config=stream_map_config,
+        sample_stream=sample_stream,
+        sample_catalog_obj=sample_catalog_obj,
+    )
+
+    assert set(expected_schemas.keys()) == set(output_schemas.keys()), (
+        f"Failed `{test_name}` schema test. "
+        f"'{set(expected_schemas.keys()) - set(output_schemas.keys())}' "
+        "schemas not found. "
+        f"'{set(output_schemas.keys()) - set(expected_schemas.keys())}' "
+        "schemas not expected. "
+    )
+    for expected_schema_name, expected_schema in expected_schemas.items():
+        output_schema = output_schemas[expected_schema_name]
+        assert expected_schema == output_schema, (
+            f"Failed '{test_name}' schema test. Generated schema was "
+            f"{json.dumps(output_schema, indent=2)}"
+        )
 
     assert expected_result == output, (
         f"Failed '{test_name}' record result test. "
         f"Generated output was {json.dumps(output, indent=2)}"
     )
+
+
+class CustomObj:
+    def __init__(self, value: str):
+        self.value = value
+
+    def __str__(self) -> str:
+        return f"obj-{self.value}"
 
 
 class MappedStream(Stream):
@@ -414,7 +616,14 @@ class MappedStream(Stream):
             "user",
             ObjectType(
                 Property("id", IntegerType()),
-                Property("sub", ObjectType(Property("num", IntegerType()))),
+                Property(
+                    "sub",
+                    ObjectType(
+                        Property("num", IntegerType()),
+                        Property("custom_obj", StringType),
+                    ),
+                ),
+                Property("some_numbers", ArrayType(NumberType())),
             ),
         ),
     ).to_dict()
@@ -423,17 +632,29 @@ class MappedStream(Stream):
         yield {
             "email": "alice@example.com",
             "count": 21,
-            "user": {"id": 1, "sub": {"num": 1}},
+            "user": {
+                "id": 1,
+                "sub": {"num": 1, "custom_obj": CustomObj("hello")},
+                "some_numbers": [Decimal("3.14"), Decimal("2.718")],
+            },
         }
         yield {
             "email": "bob@example.com",
             "count": 13,
-            "user": {"id": 2, "sub": {"num": 2}},
+            "user": {
+                "id": 2,
+                "sub": {"num": 2, "custom_obj": CustomObj("world")},
+                "some_numbers": [Decimal("10.32"), Decimal("1.618")],
+            },
         }
         yield {
             "email": "charlie@example.com",
             "count": 19,
-            "user": {"id": 3, "sub": {"num": 3}},
+            "user": {
+                "id": 3,
+                "sub": {"num": 3, "custom_obj": CustomObj("hello")},
+                "some_numbers": [Decimal("1.414"), Decimal("1.732")],
+            },
         }
 
 
@@ -447,23 +668,17 @@ class MappedTap(Tap):
         return [MappedStream(self)]
 
 
-@pytest.fixture
-def _clear_schema_cache() -> None:
-    """Schemas are cached, so the cache needs to be cleared between test invocations."""
-    yield
-    get_selected_schema.cache_clear()
-
-
-@freeze_time("2022-01-01T00:00:00Z")
+@time_machine.travel(
+    datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc),
+    tick=False,
+)
 @pytest.mark.snapshot()
-@pytest.mark.usefixtures("_clear_schema_cache")
 @pytest.mark.parametrize(
-    "stream_maps,flatten,flatten_max_depth,snapshot_name",
+    "stream_maps,config,snapshot_name",
     [
         pytest.param(
             {},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "no_map.jsonl",
             id="no_map",
         ),
@@ -473,8 +688,7 @@ def _clear_schema_cache() -> None:
                     "email_hash": "md5(email)",
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "keep_all_fields.jsonl",
             id="keep_all_fields",
         ),
@@ -486,8 +700,7 @@ def _clear_schema_cache() -> None:
                     "__else__": None,
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "only_mapped_fields.jsonl",
             id="only_mapped_fields",
         ),
@@ -499,8 +712,7 @@ def _clear_schema_cache() -> None:
                     "__else__": "__NULL__",
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "only_mapped_fields_null_string.jsonl",
             id="only_mapped_fields_null_string",
         ),
@@ -512,50 +724,49 @@ def _clear_schema_cache() -> None:
                     "__else__": None,
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "changed_key_properties.jsonl",
             id="changed_key_properties",
         ),
         pytest.param(
             {"mystream": None, "sourced_stream_1": {"__source__": "mystream"}},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "sourced_stream_1.jsonl",
             id="sourced_stream_1",
         ),
         pytest.param(
             {"mystream": "__NULL__", "sourced_stream_1": {"__source__": "mystream"}},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "sourced_stream_1_null_string.jsonl",
             id="sourced_stream_1_null_string",
         ),
         pytest.param(
             {"sourced_stream_2": {"__source__": "mystream"}, "__else__": None},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "sourced_stream_2.jsonl",
             id="sourced_stream_2",
         ),
         pytest.param(
             {"mystream": {"__alias__": "aliased_stream"}},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "aliased_stream.jsonl",
             id="aliased_stream",
         ),
         pytest.param(
             {},
-            True,
-            1,
+            {"flattening_enabled": True, "flattening_max_depth": 0},
+            "flatten_depth_0.jsonl",
+            id="flatten_depth_0",
+        ),
+        pytest.param(
+            {},
+            {"flattening_enabled": True, "flattening_max_depth": 1},
             "flatten_depth_1.jsonl",
             id="flatten_depth_1",
         ),
         pytest.param(
             {},
-            True,
-            10,
+            {"flattening_enabled": True, "flattening_max_depth": 2},
             "flatten_all.jsonl",
             id="flatten_all",
         ),
@@ -566,8 +777,7 @@ def _clear_schema_cache() -> None:
                     "__key_properties__": ["email_hash"],
                 },
             },
-            True,
-            10,
+            {"flattening_enabled": True, "flattening_max_depth": 10},
             "map_and_flatten.jsonl",
             id="map_and_flatten",
         ),
@@ -577,15 +787,13 @@ def _clear_schema_cache() -> None:
                     "email": None,
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "drop_property.jsonl",
             id="drop_property",
         ),
         pytest.param(
             {"mystream": {"email": "__NULL__"}},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "drop_property_null_string.jsonl",
             id="drop_property_null_string",
         ),
@@ -596,10 +804,38 @@ def _clear_schema_cache() -> None:
                     "__else__": None,
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "non_pk_passthrough.jsonl",
             id="non_pk_passthrough",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "_data": "record",
+                    "__else__": None,
+                },
+            },
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "record_to_column.jsonl",
+            id="record_to_column",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "cc": "fake.credit_card_number()",
+                    "__else__": None,
+                },
+            },
+            {
+                "flattening_enabled": False,
+                "flattening_max_depth": 0,
+                "faker_config": {
+                    "locale": "en_US",
+                    "seed": 123456,
+                },
+            },
+            "fake_credit_card_number.jsonl",
+            id="fake_credit_card_number",
         ),
     ],
 )
@@ -607,18 +843,13 @@ def test_mapped_stream(
     snapshot: Snapshot,
     snapshot_dir: Path,
     stream_maps: dict,
-    flatten: bool,
-    flatten_max_depth: int | None,
+    config: dict,
     snapshot_name: str,
 ):
     snapshot.snapshot_dir = snapshot_dir.joinpath("mapped_stream")
 
     tap = MappedTap(
-        config={
-            "stream_maps": stream_maps,
-            "flattening_enabled": flatten,
-            "flattening_max_depth": flatten_max_depth,
-        },
+        config={"stream_maps": stream_maps, **config},
     )
     buf = io.StringIO()
     with redirect_stdout(buf):
@@ -626,3 +857,37 @@ def test_mapped_stream(
 
     buf.seek(0)
     snapshot.assert_match(buf.read(), snapshot_name)
+
+
+def test_bench_simple_map_transforms(
+    benchmark,
+    sample_stream,
+    sample_catalog_dict,
+    transform_stream_maps,
+    stream_map_config,
+):
+    """Run benchmark tests using the "repositories" stream."""
+    stream_size_scale = 1000
+
+    repositories_catalog = {
+        "streams": [
+            x
+            for x in sample_catalog_dict["streams"]
+            if x["tap_stream_id"] == "repositories"
+        ],
+    }
+
+    repositories_sample_stream = {
+        "repositories": sample_stream["repositories"] * stream_size_scale,
+    }
+    repositories_transform_stream_maps = {
+        "repositories": transform_stream_maps["repositories"],
+    }
+    repositories_sample_catalog_obj = Catalog.from_dict(repositories_catalog)
+    benchmark(
+        _run_transform,
+        stream_maps=repositories_transform_stream_maps,
+        stream_map_config=stream_map_config,
+        sample_stream=repositories_sample_stream,
+        sample_catalog_obj=repositories_sample_catalog_obj,
+    )
