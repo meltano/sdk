@@ -19,7 +19,7 @@ class CustomSQLDialect(DefaultDialect):
     @classmethod
     def import_dbapi(cls):
         """Import the sqlite3 DBAPI."""
-        import sqlite3
+        import sqlite3  # noqa: PLC0415
 
         return sqlite3
 

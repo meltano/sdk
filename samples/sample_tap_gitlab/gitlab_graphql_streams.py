@@ -6,8 +6,15 @@
 
 from __future__ import annotations
 
-from singer_sdk.helpers._compat import importlib_resources
+import sys
+
 from singer_sdk.streams import GraphQLStream
+
+if sys.version_info < (3, 9):
+    import importlib_resources
+else:
+    from importlib import resources as importlib_resources
+
 
 SITE_URL = "https://gitlab.com/graphql"
 
@@ -40,7 +47,7 @@ class GraphQLCurrentUserStream(GitlabGraphQLStream):
         currentUser {
             name
         }
-        """
+        """  # noqa: RUF027
 
 
 class GraphQLProjectsStream(GitlabGraphQLStream):

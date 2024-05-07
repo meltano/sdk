@@ -131,7 +131,7 @@ class SQLSink(BatchSink):
             db_name=self.database_name,
         )
 
-    def conform_name(
+    def conform_name(  # noqa: PLR6301
         self,
         name: str,
         object_type: str | None = None,  # noqa: ARG002
@@ -415,4 +415,4 @@ class SQLSink(BatchSink):
             conn.execute(query)
 
 
-__all__ = ["SQLSink", "SQLConnector"]
+__all__ = ["SQLConnector", "SQLSink"]

@@ -13,6 +13,7 @@ from collections import Counter, defaultdict
 from singer_sdk._singerlib.messages import Message, SingerMessageType
 from singer_sdk._singerlib.messages import format_message as singer_format_message
 from singer_sdk._singerlib.messages import write_message as singer_write_message
+from singer_sdk.exceptions import InvalidInputLine
 
 logger = logging.getLogger(__name__)
 
@@ -44,14 +45,14 @@ class SingerReader(metaclass=abc.ABCMeta):
             requires: TODO
 
         Raises:
-            Exception: TODO
+            InvalidInputLine: raised if any required keys are missing
         """
         if not requires.issubset(line_dict):
             missing = requires - set(line_dict)
             msg = f"Line is missing required {', '.join(missing)} key(s): {line_dict}"
-            raise Exception(msg)  # TODO: Raise a more specific exception
+            raise InvalidInputLine(msg)
 
-    def deserialize_json(self, line: str) -> dict:
+    def deserialize_json(self, line: str) -> dict:  # noqa: PLR6301
         """Deserialize a line of json.
 
         Args:
@@ -69,7 +70,7 @@ class SingerReader(metaclass=abc.ABCMeta):
                 parse_float=decimal.Decimal,
             )
         except json.decoder.JSONDecodeError as exc:
-            logger.error("Unable to parse:\n%s", line, exc_info=exc)
+            logger.exception("Unable to parse:\n%s", line, exc_info=exc)
             raise
 
     def _process_lines(self, file_input: t.IO[str]) -> t.Counter[str]:
@@ -124,7 +125,7 @@ class SingerReader(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def _process_batch_message(self, message_dict: dict) -> None: ...
 
-    def _process_unknown_message(self, message_dict: dict) -> None:
+    def _process_unknown_message(self, message_dict: dict) -> None:  # noqa: PLR6301
         """Internal method to process unknown message types from a Singer tap.
 
         Args:
@@ -137,14 +138,14 @@ class SingerReader(metaclass=abc.ABCMeta):
         msg = f"Unknown message type '{record_type}' in message."
         raise ValueError(msg)
 
-    def _process_endofpipe(self) -> None:
+    def _process_endofpipe(self) -> None:  # noqa: PLR6301
         logger.debug("End of pipe reached")
 
 
 class SingerWriter:
     """Interface for all plugins writting Singer messages to stdout."""
 
-    def format_message(self, message: Message) -> str:
+    def format_message(self, message: Message) -> str:  # noqa: PLR6301
         """Format a message as a JSON string.
 
         Args:
@@ -155,7 +156,7 @@ class SingerWriter:
         """
         return singer_format_message(message)
 
-    def write_message(self, message: Message) -> None:
+    def write_message(self, message: Message) -> None:  # noqa: PLR6301
         """Write a message to stdout.
 
         Args:

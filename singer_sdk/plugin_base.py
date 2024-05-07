@@ -80,11 +80,11 @@ class SingerCommand(click.Command):
             return super().invoke(ctx)
         except ConfigValidationError as exc:
             for error in exc.errors:
-                self.logger.error("Config validation error: %s", error)
+                self.logger.error("Config validation error: %s", error)  # noqa: TRY400
             sys.exit(1)
 
 
-class PluginBase(metaclass=abc.ABCMeta):
+class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for taps."""
 
     #: The executable name of the tap or target plugin. e.g. tap-foo
@@ -211,7 +211,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         return self.__initialized_at
 
     @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
         """Get capabilities.
 
         Developers may override this property in oder to add or remove

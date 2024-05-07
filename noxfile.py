@@ -20,6 +20,9 @@ except ImportError:
     {sys.executable} -m pip install nox-poetry"""
     raise SystemExit(dedent(message)) from None
 
+nox.needs_version = ">=2024.4.15"
+nox.options.default_venv_backend = "uv|virtualenv"
+
 RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
 extend-ignore = ["TD002", "TD003", "FIX002"]
@@ -38,28 +41,16 @@ nox.options.sessions = (
     "doctest",
     "test_cookiecutter",
 )
-test_dependencies = [
-    "coverage[toml]",
-    "duckdb",
-    "duckdb-engine",
-    "fastjsonschema",
-    "pyarrow",
-    "pytest",
-    "pytest-benchmark",
-    "pytest-durations",
-    "pytest-snapshot",
-    "pytz",
-    "requests-mock",
-    "rfc3339-validator",
-    "time-machine",
-]
+
+poetry_config = nox.project.load_toml("pyproject.toml")["tool"]["poetry"]
+test_dependencies = poetry_config["group"]["dev"]["dependencies"].keys()
 
 
 @session(python=main_python_version)
 def mypy(session: Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
-    session.install(".[faker,parquet,s3,testing]")
+    session.install(".[faker,jwt,parquet,s3,testing]")
     session.install(
         "exceptiongroup",
         "mypy",
@@ -80,7 +71,7 @@ def mypy(session: Session) -> None:
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
-    session.install(".[faker,parquet,s3]")
+    session.install(".[faker,jwt,parquet,s3]")
     session.install(*test_dependencies)
 
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
@@ -113,7 +104,7 @@ def tests(session: Session) -> None:
 @session(python=main_python_version)
 def benches(session: Session) -> None:
     """Run benchmarks."""
-    session.install(".[s3]")
+    session.install(".[jwt,s3]")
     session.install(*test_dependencies)
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
     if sqlalchemy_version:
@@ -135,7 +126,7 @@ def update_snapshots(session: Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
 
-    session.install(".[faker]")
+    session.install(".[faker,jwt]")
     session.install(*test_dependencies)
     session.run("pytest", "--snapshot-update", *args)
 

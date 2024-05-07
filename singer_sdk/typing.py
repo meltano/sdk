@@ -78,34 +78,34 @@ if t.TYPE_CHECKING:
 
 
 __all__ = [
-    "extend_validator_with_defaults",
-    "to_jsonschema_type",
-    "to_sql_type",
-    "JSONTypeHelper",
-    "StringType",
+    "ArrayType",
+    "BooleanType",
+    "CustomType",
     "DateTimeType",
-    "TimeType",
     "DateType",
     "DurationType",
     "EmailType",
     "HostnameType",
     "IPv4Type",
     "IPv6Type",
-    "UUIDType",
-    "URIType",
+    "IntegerType",
+    "JSONPointerType",
+    "JSONTypeHelper",
+    "NumberType",
+    "ObjectType",
+    "PropertiesList",
+    "Property",
+    "RegexType",
+    "RelativeJSONPointerType",
+    "StringType",
+    "TimeType",
     "URIReferenceType",
     "URITemplateType",
-    "JSONPointerType",
-    "RelativeJSONPointerType",
-    "RegexType",
-    "BooleanType",
-    "IntegerType",
-    "NumberType",
-    "ArrayType",
-    "Property",
-    "ObjectType",
-    "CustomType",
-    "PropertiesList",
+    "URIType",
+    "UUIDType",
+    "extend_validator_with_defaults",
+    "to_jsonschema_type",
+    "to_sql_type",
 ]
 
 _JsonValue: TypeAlias = t.Union[
@@ -619,7 +619,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         required: bool = False,  # noqa: FBT001, FBT002
         default: T | None = None,
         description: str | None = None,
-        secret: bool | None = False,  # noqa: FBT002
+        secret: bool | None = False,  # noqa: FBT002, FBT001
         allowed_values: list[T] | None = None,
         examples: list[T] | None = None,
         *,
@@ -673,7 +673,8 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
                 f"Type dict for {wrapped} is not defined. Try instantiating it with a "
                 f"nested type such as {wrapped.__name__}(StringType)."
             )
-            raise ValueError(msg)
+            # TODO: this should be a TypeError, but it's a breaking change.
+            raise ValueError(msg)  # noqa: TRY004
 
         return t.cast(dict, wrapped.type_dict)
 
@@ -833,7 +834,7 @@ class ObjectType(JSONTypeHelper):
         return result
 
 
-class OneOf(JSONPointerType):
+class OneOf(JSONTypeHelper):
     """OneOf type.
 
     This type allows for a value to be one of a set of types.
@@ -873,6 +874,63 @@ class OneOf(JSONPointerType):
             A dictionary describing the type.
         """
         return {"oneOf": [t.type_dict for t in self.wrapped]}
+
+
+class AllOf(JSONTypeHelper):
+    """AllOf type.
+
+    This type requires a value to match all of the given types.
+
+    Examples:
+        >>> t = AllOf(
+        ...     ObjectType(Property("first_type", StringType)),
+        ...     ObjectType(Property("second_type", IntegerType)),
+        ... )
+        >>> print(t.to_json(indent=2))
+        {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "first_type": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "second_type": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+    """
+
+    def __init__(self, *types: W | type[W]) -> None:
+        """Initialize OneOf type.
+
+        Args:
+            types: Types to choose from.
+        """
+        self.wrapped = types
+
+    @property
+    def type_dict(self) -> dict:  # type: ignore[override]
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        return {"allOf": [t.type_dict for t in self.wrapped]}
 
 
 class Constant(JSONTypeHelper):
@@ -1017,6 +1075,14 @@ class PropertiesList(ObjectType):
         """
         self.wrapped[property.name] = property
 
+    def __iter__(self) -> t.Iterator[Property]:
+        """Iterate all properties of the property list.
+
+        Returns:
+            Iterator of properties.
+        """
+        return self.wrapped.values().__iter__()
+
 
 def to_jsonschema_type(
     from_type: str | sa.types.TypeEngine | type[sa.types.TypeEngine],
@@ -1060,9 +1126,10 @@ def to_jsonschema_type(
         sa.types.TypeEngine,
     ):
         type_name = from_type.__name__
-    else:
+    else:  # pragma: no cover
         msg = "Expected `str` or a SQLAlchemy `TypeEngine` object or type."
-        raise ValueError(msg)
+        # TODO: this should be a TypeError, but it's a breaking change.
+        raise ValueError(msg)  # noqa: TRY004
 
     return next(
         (

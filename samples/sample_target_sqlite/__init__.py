@@ -21,7 +21,7 @@ class SQLiteConnector(SQLConnector):
     allow_merge_upsert = True
     allow_overwrite: bool = True
 
-    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:
+    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:  # noqa: PLR6301
         """Generates a SQLAlchemy URL for SQLite."""
         return f"sqlite:///{config[DB_PATH_CONFIG]}"
 
@@ -57,4 +57,4 @@ class SQLiteTarget(SQLTarget):
     ).to_dict()
 
 
-__all__ = ["SQLiteTarget", "SQLiteConnector", "SQLiteSink"]
+__all__ = ["SQLiteConnector", "SQLiteSink", "SQLiteTarget"]
