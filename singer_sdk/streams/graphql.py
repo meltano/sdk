@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import sys
 import typing as t
 
 from singer_sdk.helpers._classproperty import classproperty
@@ -10,6 +11,11 @@ from singer_sdk.streams.rest import RESTStream
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import Context
+
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override  # noqa: ICN003
 
 _TToken = t.TypeVar("_TToken")
 
@@ -26,6 +32,7 @@ class GraphQLStream(RESTStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
     path = ""
     http_method = "POST"
 
+    @override
     @classproperty
     def records_jsonpath(cls) -> str:  # type: ignore[override] # noqa: N805
         """Get the JSONPath expression to extract records from an API response.
@@ -45,6 +52,7 @@ class GraphQLStream(RESTStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         msg = "GraphQLStream `query` is not defined."
         raise NotImplementedError(msg)
 
+    @override
     def prepare_request_payload(
         self,
         context: Context | None,

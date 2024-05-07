@@ -31,6 +31,11 @@ from singer_sdk.helpers.capabilities import (
 from singer_sdk.io_base import SingerReader
 from singer_sdk.plugin_base import BaseSingerReader
 
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override  # noqa: ICN003
+
 if t.TYPE_CHECKING:
     from collections.abc import Iterable
     from pathlib import PurePath
@@ -537,6 +542,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
 
     # CLI handler
 
+    @override
     @classmethod
     def invoke(  # type: ignore[override]
         cls: type[Target],
@@ -566,6 +572,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
         )
         target.listen(file_input)
 
+    @override
     @classmethod
     def get_singer_command(cls: type[Target]) -> click.Command:
         """Execute standard CLI handler for taps.

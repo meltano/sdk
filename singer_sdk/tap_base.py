@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import contextlib
 import pathlib
+import sys
 import typing as t
 import warnings
 from enum import Enum
@@ -32,6 +33,11 @@ from singer_sdk.helpers.capabilities import (
 from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import BaseSingerWriter, PluginBase
 from singer_sdk.singerlib import Catalog, StateMessage
+
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override  # noqa: ICN003
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -498,6 +504,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     # Command Line Execution
 
+    @override
     @classmethod
     def invoke(  # type: ignore[override]
         cls: type[Tap],
@@ -596,6 +603,7 @@ class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         ctx.exit()
 
+    @override
     @classmethod
     def get_singer_command(cls: type[Tap]) -> click.Command:
         """Execute standard CLI handler for taps.
@@ -729,6 +737,7 @@ class SQLTap(Tap):
         }
         return self._catalog_dict
 
+    @override
     def discover_streams(self) -> t.Sequence[Stream]:
         """Initialize all available streams and return them as a sequence.
 

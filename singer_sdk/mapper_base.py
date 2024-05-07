@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import sys
 import typing as t
 
 import click
@@ -10,6 +11,11 @@ import click
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.plugin_base import BaseSingerReader, BaseSingerWriter
+
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override  # noqa: ICN003
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -128,6 +134,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
 
     # CLI handler
 
+    @override
     @classmethod
     def invoke(  # type: ignore[override]
         cls: type[InlineMapper],
@@ -157,6 +164,7 @@ class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
         )
         mapper.listen(file_input)
 
+    @override
     @classmethod
     def get_singer_command(cls: type[InlineMapper]) -> click.Command:
         """Execute standard CLI handler for inline mappers.
