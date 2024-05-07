@@ -6,6 +6,7 @@ import abc
 import copy
 import datetime
 import json
+import sys
 import typing as t
 from os import PathLike
 from pathlib import Path
@@ -50,6 +51,11 @@ from singer_sdk.helpers._typing import (
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, StreamMap
 
+if sys.version_info < (3, 10):
+    from typing_extensions import TypeAlias
+else:
+    from typing import TypeAlias  # noqa: ICN003
+
 if t.TYPE_CHECKING:
     import logging
 
@@ -62,6 +68,8 @@ REPLICATION_INCREMENTAL = "INCREMENTAL"
 REPLICATION_LOG_BASED = "LOG_BASED"
 
 FactoryType = t.TypeVar("FactoryType", bound="Stream")
+Record: TypeAlias = t.Dict[str, t.Any]
+Context: TypeAlias = t.Dict
 
 
 class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
@@ -227,7 +235,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def get_starting_replication_key_value(
         self,
-        context: dict | None,
+        context: Context | None,
     ) -> t.Any | None:  # noqa: ANN401
         """Get starting replication key.
 
@@ -252,7 +260,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             else None
         )
 
-    def get_starting_timestamp(self, context: dict | None) -> datetime.datetime | None:
+    def get_starting_timestamp(
+        self, context: Context | None
+    ) -> datetime.datetime | None:
         """Get starting replication timestamp.
 
         Will return the value of the stream's replication key when `--state` is passed.
@@ -330,7 +340,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def _write_replication_key_signpost(
         self,
-        context: dict | None,
+        context: Context | None,
         value: datetime.datetime | str | int | float,
     ) -> None:
         """Write the signpost value, if available.
@@ -371,7 +381,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         return value
 
-    def _write_starting_replication_value(self, context: dict | None) -> None:
+    def _write_starting_replication_value(self, context: Context | None) -> None:
         """Write the starting replication value, if available.
 
         Args:
@@ -399,7 +409,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def get_replication_key_signpost(
         self,
-        context: dict | None,  # noqa: ARG002
+        context: Context | None,  # noqa: ARG002
     ) -> datetime.datetime | t.Any | None:  # noqa: ANN401
         """Get the replication signpost.
 
@@ -646,7 +656,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         return self._tap_state
 
-    def get_context_state(self, context: dict | None) -> dict:
+    def get_context_state(self, context: Context | None) -> dict:
         """Return a writable state dict for the given context.
 
         Gives a partitioned context state if applicable; else returns stream state.
@@ -701,7 +711,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     # Partitions
 
     @property
-    def partitions(self) -> list[dict] | None:
+    def partitions(self) -> list[Context] | None:
         """Get stream partitions.
 
         Developers may override this property to provide a default partitions list.
@@ -724,9 +734,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def _increment_stream_state(
         self,
-        latest_record: dict[str, t.Any],
+        latest_record: Record,
         *,
-        context: dict | None = None,
+        context: Context | None = None,
     ) -> None:
         """Update state of stream or partition with data from the provided record.
 
@@ -817,7 +827,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def _generate_record_messages(
         self,
-        record: dict,
+        record: Record,
     ) -> t.Generator[singer.RecordMessage, None, None]:
         """Write out a RECORD message.
 
@@ -846,7 +856,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     time_extracted=utc_now(),
                 )
 
-    def _write_record_message(self, record: dict) -> None:
+    def _write_record_message(self, record: Record) -> None:
         """Write out a RECORD message.
 
         Args:
@@ -963,7 +973,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             state: State object to promote progress markers with.
         """
         if state is None or state == {}:
-            context: dict | None
+            context: Context | None
             for context in self.partitions or [{}]:
                 state = self.get_context_state(context or None)
                 reset_state_progress_markers(state)
@@ -992,7 +1002,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             for child_stream in self.child_streams or []:
                 child_stream.finalize_state_progress_markers()
 
-            context: dict | None
+            context: Context | None
             for context in self.partitions or [{}]:
                 state = self.get_context_state(context or None)
                 self._finalize_state(state)
@@ -1005,9 +1015,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def _process_record(
         self,
-        record: dict,
-        child_context: dict | None = None,
-        partition_context: dict | None = None,
+        record: Record,
+        child_context: Context | None = None,
+        partition_context: Context | None = None,
     ) -> None:
         """Process a record.
 
@@ -1032,7 +1042,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def _sync_records(  # noqa: C901
         self,
-        context: dict | None = None,
+        context: Context | None = None,
         *,
         write_messages: bool = True,
     ) -> t.Generator[dict, t.Any, t.Any]:
@@ -1054,7 +1064,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         timer = metrics.sync_timer(self.name)
 
         record_index = 0
-        context_element: dict | None
+        context_element: Context | None
         context_list: list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
@@ -1070,7 +1080,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     current_context,
                 )
                 self._write_starting_replication_value(current_context)
-                child_context: dict | None = (
+                child_context: Context | None = (
                     None if current_context is None else copy.copy(current_context)
                 )
 
@@ -1131,7 +1141,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def _sync_batches(
         self,
         batch_config: BatchConfig,
-        context: dict | None = None,
+        context: Context | None = None,
     ) -> None:
         """Sync batches, emitting BATCH messages.
 
@@ -1148,7 +1158,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     # Public methods ("final", not recommended to be overridden)
 
     @t.final
-    def sync(self, context: dict | None = None) -> None:
+    def sync(self, context: Context | None = None) -> None:
         """Sync this stream.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -1188,7 +1198,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             )
             raise
 
-    def _sync_children(self, child_context: dict | None) -> None:
+    def _sync_children(self, child_context: Context | None) -> None:
         if child_context is None:
             self.logger.warning(
                 "Context for child streams of '%s' is null, "
@@ -1223,7 +1233,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             if catalog_entry.replication_method:
                 self.forced_replication_method = catalog_entry.replication_method
 
-    def _get_state_partition_context(self, context: dict | None) -> dict | None:
+    def _get_state_partition_context(self, context: Context | None) -> dict | None:
         """Override state handling if Stream.state_partitioning_keys is specified.
 
         Args:
@@ -1240,7 +1250,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         return {k: v for k, v in context.items() if k in self.state_partitioning_keys}
 
-    def get_child_context(self, record: dict, context: dict | None) -> dict | None:
+    def get_child_context(
+        self,
+        record: Record,
+        context: Context | None,
+    ) -> dict | None:
         """Return a child context object from the record and optional provided context.
 
         By default, will return context if provided and otherwise the record dict.
@@ -1281,8 +1295,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def generate_child_contexts(
         self,
-        record: dict,
-        context: dict | None,
+        record: Record,
+        context: Context | None,
     ) -> t.Iterable[dict | None]:
         """Generate child contexts.
 
@@ -1300,7 +1314,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     @abc.abstractmethod
     def get_records(
         self,
-        context: dict | None,
+        context: Context | None,
     ) -> t.Iterable[dict | tuple[dict, dict | None]]:
         """Abstract record generator function. Must be overridden by the child class.
 
@@ -1346,7 +1360,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def get_batches(
         self,
         batch_config: BatchConfig,
-        context: dict | None = None,
+        context: Context | None = None,
     ) -> t.Iterable[tuple[BaseBatchFileEncoding, list[str]]]:
         """Batch generator function.
 
@@ -1371,8 +1385,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def post_process(  # noqa: PLR6301
         self,
-        row: dict,
-        context: dict | None = None,  # noqa: ARG002
+        row: Record,
+        context: Context | None = None,  # noqa: ARG002
     ) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
 

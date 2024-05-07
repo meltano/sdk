@@ -32,6 +32,7 @@ if t.TYPE_CHECKING:
     from backoff.types import Details
 
     from singer_sdk._singerlib import Schema
+    from singer_sdk.streams.core import Context
     from singer_sdk.tap_base import Tap
 
     if sys.version_info >= (3, 10):
@@ -110,7 +111,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         """
         return val.replace("/", "%2F") if isinstance(val, str) else str(val)
 
-    def get_url(self, context: dict | None) -> str:
+    def get_url(self, context: Context | None) -> str:
         """Get stream entity URL.
 
         Developers override this method to perform dynamic URL generation.
@@ -245,7 +246,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
     def _request(
         self,
         prepared_request: requests.PreparedRequest,
-        context: dict | None,
+        context: Context | None,
     ) -> requests.Response:
         """TODO.
 
@@ -271,7 +272,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
 
     def get_url_params(  # noqa: PLR6301
         self,
-        context: dict | None,  # noqa: ARG002
+        context: Context | None,  # noqa: ARG002
         next_page_token: _TToken | None,  # noqa: ARG002
     ) -> dict[str, t.Any] | str:
         """Return a dictionary or string of URL query parameters.
@@ -325,7 +326,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
 
     def prepare_request(
         self,
-        context: dict | None,
+        context: Context | None,
         next_page_token: _TToken | None,
     ) -> requests.PreparedRequest:
         """Prepare a request object for this stream.
@@ -357,7 +358,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
             json=request_data,
         )
 
-    def request_records(self, context: dict | None) -> t.Iterable[dict]:
+    def request_records(self, context: Context | None) -> t.Iterable[dict]:
         """Request records from REST endpoint(s), returning response records.
 
         If pagination is detected, pages will be recursed automatically.
@@ -403,7 +404,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         self,
         endpoint: str,
         response: requests.Response,
-        context: dict | None,
+        context: Context | None,
         extra_tags: dict | None,
     ) -> None:
         """TODO.
@@ -440,7 +441,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         self,
         request: requests.PreparedRequest,
         response: requests.Response,
-        context: dict | None,
+        context: Context | None,
     ) -> dict[str, int]:
         """Update internal calculation of Sync costs.
 
@@ -465,7 +466,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         self,
         request: requests.PreparedRequest,  # noqa: ARG002
         response: requests.Response,  # noqa: ARG002
-        context: dict | None,  # noqa: ARG002
+        context: Context | None,  # noqa: ARG002
     ) -> dict[str, int]:
         """Calculate the cost of the last API call made.
 
@@ -494,7 +495,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
 
     def prepare_request_payload(
         self,
-        context: dict | None,
+        context: Context | None,
         next_page_token: _TToken | None,
     ) -> dict | None:
         """Prepare the data payload for the REST API request.
@@ -560,7 +561,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
 
     # Records iterator
 
-    def get_records(self, context: dict | None) -> t.Iterable[dict[str, t.Any]]:
+    def get_records(self, context: Context | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
 
         Each record emitted should be a dictionary of property names to their values.

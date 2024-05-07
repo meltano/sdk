@@ -8,6 +8,9 @@ import typing as t
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.streams.rest import RESTStream
 
+if t.TYPE_CHECKING:
+    from singer_sdk.streams.core import Context
+
 _TToken = t.TypeVar("_TToken")
 
 
@@ -44,7 +47,7 @@ class GraphQLStream(RESTStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
 
     def prepare_request_payload(
         self,
-        context: dict | None,
+        context: Context | None,
         next_page_token: _TToken | None,
     ) -> dict | None:
         """Prepare the data payload for the GraphQL API request.
