@@ -44,6 +44,7 @@ nox.options.sessions = (
 
 poetry_config = nox.project.load_toml("pyproject.toml")["tool"]["poetry"]
 test_dependencies = poetry_config["group"]["dev"]["dependencies"].keys()
+typing_dependencies = poetry_config["group"]["typing"]["dependencies"].keys()
 
 
 @session(python=main_python_version)
@@ -51,18 +52,7 @@ def mypy(session: Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
     session.install(".[faker,jwt,parquet,s3,testing]")
-    session.install(
-        "exceptiongroup",
-        "mypy",
-        "pytest",
-        "importlib-resources",
-        "types-jsonschema",
-        "types-python-dateutil",
-        "types-pytz",
-        "types-requests",
-        "types-simplejson",
-        "types-PyYAML",
-    )
+    session.install(*typing_dependencies)
     session.run("mypy", *args)
     if not session.posargs:
         session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
