@@ -111,6 +111,14 @@ def benches(session: Session) -> None:
     )
 
 
+@session(name="deps", python=python_versions)
+def dependencies(session: Session) -> None:
+    """Check issues with dependencies."""
+    session.install(".[s3,testing]")
+    session.install("deptry")
+    session.run("deptry", "singer_sdk", *session.posargs)
+
+
 @session(python=main_python_version)
 def update_snapshots(session: Session) -> None:
     """Update pytest snapshots."""
