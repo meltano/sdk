@@ -42,7 +42,6 @@ python = ">=3.8"
 backoff = { version = ">=2.0.0", python = "<4" }
 backports-datetime-fromisoformat = { version = ">=2.0.1", python = "<3.11" }
 click = "~=8.0"
-cryptography = ">=3.4.6"
 fs = ">=2.4.16"
 importlib-metadata = {version = "<9.0.0", python = "<3.12"}
 importlib-resources = {version = ">=5.12.0,!=6.2.0,!=6.3.0,!=6.3.1", python = "<3.9"}
@@ -52,7 +51,6 @@ jsonpath-ng = ">=1.5.3"
 jsonschema = ">=4.16.0"
 packaging = ">=23.1"
 pendulum = ">=2.1.0,<4"
-PyJWT = "~=2.4"
 python-dateutil = ">=2.8.2"
 python-dotenv = ">=0.20"
 PyYAML = ">=6.0"
@@ -93,10 +91,17 @@ pytest-durations = {version = ">=1.2.0", optional = true}
 # installed as optional 'faker' extra
 faker = {version = ">=22.5,<27.0", optional = true}
 
+# Crypto extras
+cryptography = { version = ">=3.4.6", optional = true }
+PyJWT = { version = "~=2.4", optional = true }
+
 [tool.poetry.extras]
 # TODO: Add 'cryptography' and 'PyJWT' to the 'jwt' when we want to remove them
 # from the main dependencies
-jwt = []
+jwt = [
+    "cryptography",
+    "PyJWT",
+]
 docs = [
     "furo",
     "myst-parser",
