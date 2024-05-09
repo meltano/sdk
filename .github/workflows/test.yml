@@ -54,6 +54,7 @@ jobs:
         - { session: tests,   python-version: "3.12", os: "ubuntu-latest", sqlalchemy: "1" }
         - { session: doctest, python-version: "3.12", os: "ubuntu-latest", sqlalchemy: "2" }
         - { session: mypy,    python-version: "3.12",  os: "ubuntu-latest", sqlalchemy: "2" }
+        - { session: deps,    python-version: "3.12",  os: "ubuntu-latest", sqlalchemy: "2" }
 
     steps:
     - uses: actions/checkout@v4
@@ -62,7 +63,7 @@ jobs:
 
     - name: Install Poetry
       env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pipx install poetry
         pipx inject poetry poetry-plugin-export
@@ -73,22 +74,19 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-        architecture: x64
-        cache: 'pip'
-        cache-dependency-path: 'poetry.lock'
 
     - name: Upgrade pip
       env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pip install pip
         pip --version
 
     - name: Install Nox
       env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        pipx install nox
+        pipx install 'nox[uv]'
         pipx inject nox nox-poetry
         nox --version
 
@@ -126,7 +124,7 @@ jobs:
 
     - name: Install Poetry
       env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pipx install poetry
         pipx inject poetry poetry-plugin-export
@@ -137,22 +135,19 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ env.NOXPYTHON }}
-        architecture: x64
-        cache: 'pip'
-        cache-dependency-path: 'poetry.lock'
 
     - name: Upgrade pip
       env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pip install pip
         pip --version
 
     - name: Install Nox
       env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        pipx install nox
+        pipx install 'nox[uv]'
         pipx inject nox nox-poetry
         nox --version
 
@@ -171,7 +166,7 @@ jobs:
 
     - name: Install Poetry
       env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pipx install poetry
         pipx inject poetry poetry-plugin-export
@@ -181,12 +176,12 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-        cache: 'pip'
-        cache-dependency-path: 'poetry.lock'
 
     - name: Upgrade pip
+      env:
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        pip install --constraint=.github/workflows/constraints.txt pip
+        pip install pip
         pip --version
 
     - uses: actions/download-artifact@v4
@@ -196,9 +191,9 @@ jobs:
 
     - name: Install Nox
       env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        pipx install nox
+        pipx install 'nox[uv]'
         pipx inject nox nox-poetry
         nox --version
 

@@ -19,7 +19,7 @@ def stringify(in_dict):
     return {k: str(v) for k, v in in_dict.items()}
 
 
-class TestConnectorSQL:
+class TestConnectorSQL:  # noqa: PLR0904
     """Test the SQLConnector class."""
 
     @pytest.fixture

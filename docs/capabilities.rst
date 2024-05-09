@@ -12,6 +12,7 @@ Built-in base capabilities
 The following capabilities are supported by default.
 
 .. autoattribute:: PluginCapabilities.ABOUT
+.. autoattribute:: PluginCapabilities.BATCH
 .. autoattribute:: PluginCapabilities.STREAM_MAPS
 
 ========================
@@ -21,7 +22,6 @@ Custom base capabilities
 The following capabilities have to be implemented in the plugin.
 
 .. autoattribute:: PluginCapabilities.ACTIVATE_VERSION
-.. autoattribute:: PluginCapabilities.BATCH
 
 Tap Capabilities
 ----------------

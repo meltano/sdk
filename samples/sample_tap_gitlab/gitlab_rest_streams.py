@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 
 from singer_sdk.authenticators import SimpleAuthenticator
-from singer_sdk.helpers._compat import importlib_resources
 from singer_sdk.pagination import SimpleHeaderPaginator
 from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import (
@@ -18,6 +18,12 @@ from singer_sdk.typing import (
     Property,
     StringType,
 )
+
+if sys.version_info < (3, 9):
+    import importlib_resources
+else:
+    from importlib import resources as importlib_resources
+
 
 SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
 
@@ -56,7 +62,7 @@ class GitlabStream(RESTStream[str]):
             params["order_by"] = self.replication_key
         return params
 
-    def get_new_paginator(self) -> SimpleHeaderPaginator:
+    def get_new_paginator(self) -> SimpleHeaderPaginator:  # noqa: PLR6301
         """Return a new paginator for GitLab API endpoints.
 
         Returns:
@@ -180,7 +186,7 @@ class EpicsStream(ProjectBasedStream):
         ),
     ).to_dict()
 
-    def get_child_context(
+    def get_child_context(  # noqa: PLR6301
         self,
         record: dict,
         context: dict | None,  # noqa: ARG002

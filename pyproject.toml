@@ -45,7 +45,7 @@ click = "~=8.0"
 cryptography = ">=3.4.6"
 fs = ">=2.4.16"
 importlib-metadata = {version = "<8.0.0", python = "<3.12"}
-importlib-resources = {version = ">=5.12.0", python = "<3.9"}
+importlib-resources = {version = ">=5.12.0,!=6.2.0,!=6.3.0,!=6.3.1", python = "<3.9"}
 inflection = ">=0.5.1"
 joblib = ">=1.3.0"
 jsonpath-ng = ">=1.5.3"
@@ -91,9 +91,12 @@ pytest = {version=">=7.2.1", optional = true}
 pytest-durations = {version = ">=1.2.0", optional = true}
 
 # installed as optional 'faker' extra
-faker = {version = ">=22.5,<25.0", optional = true}
+faker = {version = ">=22.5,<26.0", optional = true}
 
 [tool.poetry.extras]
+# TODO: Add 'cryptography' and 'PyJWT' to the 'jwt' when we want to remove them
+# from the main dependencies
+jwt = []
 docs = [
     "furo",
     "myst-parser",
@@ -115,26 +118,29 @@ faker = ["faker"]
 
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = ">=7.4"}
+deptry = ">=0.15.0"
 
 # TODO: Remove the Python 3.12 marker when DuckDB supports it
 duckdb = { version = ">=0.8.0", python = "<3.12" }
 duckdb-engine = { version = ">=0.9.4", python = "<3.12" }
 
 fastjsonschema = ">=2.19.1"
-mypy = ">=1.0"
 pytest-benchmark = ">=4.0.0"
 pytest-snapshot = ">=0.9.0"
 pytz = ">=2022.2.1"
 requests-mock = ">=1.10.0"
 rfc3339-validator = ">=0.1.4"
 time-machine = ">=2.10.0"
+xdoctest = ">=1.1.1"
+
+[tool.poetry.group.typing.dependencies]
+mypy = ">=1.9"
 types-jsonschema = ">=4.17.0.6"
 types-python-dateutil = ">=2.8.19"
 types-pytz = ">=2022.7.1.2"
 types-requests = ">=2.28.11"
 types-simplejson = ">=3.18.0"
 types-PyYAML = ">=6.0.12"
-xdoctest = ">=1.1.1"
 
 [tool.poetry.group.benchmark.dependencies]
 pytest-codspeed = ">=2.2.0"
@@ -171,7 +177,7 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.36.0"
+version = "0.37.0"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -216,9 +222,47 @@ exclude_also = [
 fail_under = 82
 show_missing = true
 
+[tool.deptry]
+known_first_party = ["singer_sdk"]
+pep621_dev_dependency_groups = ["testing"]
+
+[tool.deptry.package_module_name_map]
+backports-datetime-fromisoformat = "backports"
+importlib-metadata = "importlib_metadata"
+importlib-resources = "importlib_resources"
+PyJWT = "jwt"
+types-jsonschema = "jsonschema"
+types-pytz = "pytz"
+types-PyYAML = "yaml"
+types-requests = "requests"
+
+[tool.deptry.per_rule_ignores]
+DEP002 = [
+    # Deprecated dependencies
+    "python-dateutil",
+    # Transitive constraints
+    "numpy",
+    "urllib3",
+    # Python version-specific dependencies
+    "backports-datetime-fromisoformat",
+    # Docs extras
+    "furo",
+    "myst-parser",
+    "sphinx",
+    "sphinx-autobuild",
+    "sphinx-copybutton",
+    "sphinx-inline-tabs",
+    "sphinx-notfound-page",
+    "sphinx-reredirects",
+    # Plugins
+    "fs-s3fs",
+    "pytest-durations",
+]
+
 [tool.mypy]
 exclude = "tests"
 files = "singer_sdk"
+local_partial_types = true
 warn_redundant_casts = true
 warn_return_any = true
 warn_unused_configs = true
@@ -238,7 +282,7 @@ enable = true
 style = "pep440"
 
 [build-system]
-requires = ["poetry-core==1.8.1", "poetry-dynamic-versioning==1.2.0"]
+requires = ["poetry-core==1.9.0", "poetry-dynamic-versioning==1.2.0"]
 build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry.plugins."pytest11"]
@@ -261,6 +305,7 @@ target-version = "py38"
 docstring-code-format = true
 
 [tool.ruff.lint]
+explicit-preview-rules = false
 ignore = [
     "ANN101",  # Missing type annotation for `self` in method
     "ANN102",  # Missing type annotation for `cls` in class method
@@ -268,6 +313,7 @@ ignore = [
     "COM812",  # missing-trailing-comma
     "ISC001",  # single-line-implicit-string-concatenation
 ]
+preview = true
 select = [
     "F",    # Pyflakes
     "E",    # pycodestyle (error)
@@ -312,6 +358,8 @@ select = [
     "PLE",  # pylint (error)
     "PLR",  # pylint (refactor)
     "PLW",  # pylint (warning)
+    "TRY",  # tryceratops
+    "FLY",  # flynt
     "PERF", # perflint
     "RUF",  # ruff
 ]
@@ -326,7 +374,18 @@ unfixable = [
     "INP001", # flake8-no-pep420: implicit-namespace-package
 ]
 "noxfile.py" = ["ANN"]
-"tests/*" = ["ANN", "D1", "D2", "FBT001", "FBT003", "PLR2004", "S101", "SLF001"]
+"tests/*" = [
+    "ANN",
+    "D1",
+    "D2",
+    "FBT001",
+    "FBT003",
+    "PLR2004",
+    "S101",
+    "SLF001",
+    "PLC2701",  # Allow usage of private members in tests
+    "PLR6301",  # Don't suggest making test methods static, etc.
+]
 # Disabled some checks in samples code
 "samples/*" = ["ANN", "D"]
 # Templates support a generic resource of type Any.
