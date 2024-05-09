@@ -48,15 +48,24 @@ def sqlite_sample_db_catalog(sqlite_sample_db_config) -> Catalog:
 
     # Set stream `t1` to use incremental replication.
     t0 = catalog_obj.get_stream("main-t0")
+    assert t0 is not None
+
     t0.replication_key = "c1"
     t0.replication_method = "INCREMENTAL"
+
     t1 = catalog_obj.get_stream("main-t1")
+    assert t1 is not None
+
     t1.key_properties = ["c1"]
     t1.replication_method = "FULL_TABLE"
+
     t2 = catalog_obj.get_stream("main-t2")
+    assert t2 is not None
+
     t2.key_properties = ["c1"]
     t2.replication_key = "c1"
     t2.replication_method = "INCREMENTAL"
+
     return catalog_obj
 
 
