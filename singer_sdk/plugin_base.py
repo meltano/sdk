@@ -15,6 +15,7 @@ from types import MappingProxyType
 import click
 from jsonschema import Draft7Validator
 
+import singer_sdk.logger as singer_logger
 from singer_sdk import about, metrics
 from singer_sdk.cli import plugin_cli
 from singer_sdk.configuration._dict_config import (
@@ -23,6 +24,7 @@ from singer_sdk.configuration._dict_config import (
 )
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._resources import get_package_files
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -162,7 +164,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             if self._is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
-        metrics._setup_logging(self.config)  # noqa: SLF001
+        singer_logger.setup_logging(self.config, self.get_default_logging_config())
         self.metrics_logger = metrics.get_metrics_logger()
 
         self._validate_config(raise_errors=validate_config)
@@ -177,6 +179,15 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             plugin_config=dict(self.config),
             logger=self.logger,
         )
+
+    def get_default_logging_config(self) -> t.Any:  # noqa: ANN401, PLR6301
+        """Get a default logging configuration for the plugin.
+
+        Returns:
+            A logging configuration.
+        """
+        log_config_path = get_package_files("singer_sdk") / "default_logging.yml"
+        return singer_logger.load_yaml_logging_config(log_config_path)
 
     @property
     def mapper(self) -> PluginMapper:
