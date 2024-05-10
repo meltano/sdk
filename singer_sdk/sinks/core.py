@@ -495,9 +495,9 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             try:
                 self._validator.validate(record)
             except InvalidRecord:
+                self.logger.exception("Record validation failed")
                 if self.fail_on_record_validation_exception:
                     raise
-                self.logger.exception("Record validation failed")
 
         self._parse_timestamps_in_record(
             record=record,
