@@ -23,6 +23,7 @@ repos:
             cookiecutter/.*/meltano.yml|
             cookiecutter/.*/.pre-commit-config.yaml|
             cookiecutter/.*/dependabot.yml|
+            cookiecutter/.*/build.yml|
             cookiecutter/.*/test.yml
         )$
   - id: end-of-file-fixer
