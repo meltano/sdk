@@ -240,7 +240,7 @@ def test_cookiecutter(session: Session, replay_file_path: str) -> None:
     )
     session.chdir(cc_test_output)
 
-    with Path("ruff.toml").open("w") as ruff_toml:
+    with Path("ruff.toml").open("w", encoding="utf-8") as ruff_toml:
         ruff_toml.write(RUFF_OVERRIDES)
 
     session.run(
