@@ -66,6 +66,9 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
     #: Example: `"$.next_page"`
     next_page_token_jsonpath: str | None = None
 
+    #: Optional flag to disable HTTP redirects. Defaults to False.
+    allow_redirects: bool = True
+
     # Private constants. May not be supported in future releases:
     _LOG_REQUEST_METRICS: bool = True
     # Disabled by default for safety:
@@ -257,7 +260,11 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         Returns:
             TODO
         """
-        response = self.requests_session.send(prepared_request, timeout=self.timeout)
+        response = self.requests_session.send(
+            prepared_request,
+            timeout=self.timeout,
+            allow_redirects=self.allow_redirects,
+        )
         self._write_request_duration_log(
             endpoint=self.path,
             response=response,
