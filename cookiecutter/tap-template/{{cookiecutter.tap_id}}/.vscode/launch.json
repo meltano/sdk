@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "{{ cookiecutter.tap_id }}",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "program": "{{ cookiecutter.library_name }}",
