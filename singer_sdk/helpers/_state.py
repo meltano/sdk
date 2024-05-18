@@ -220,7 +220,7 @@ def increment_state(
     new_rk_value = to_json_compatible(latest_record[replication_key])
 
     if new_rk_value is None:
-        logger.warning("New replication is null")
+        logger.warning("New replication value is null")
         return
 
     if old_rk_value is None or not check_sorted or new_rk_value >= old_rk_value:
