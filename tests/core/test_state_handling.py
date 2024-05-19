@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 import pytest
 
 from singer_sdk.helpers import _state
@@ -127,3 +129,29 @@ def test_irresumable_state():
             "replication_key_value": "2021-05-17T20:41:16Z",
         },
     }
+
+
+def test_null_replication_value(caplog):
+    stream_state = {
+        "replication_key": "updated_at",
+        "replication_key_value": "2021-05-17T20:41:16Z",
+    }
+    latest_record = {"updated_at": None}
+    replication_key = "updated_at"
+    is_sorted = True
+    check_sorted = False
+
+    with caplog.at_level(logging.WARNING):
+        _state.increment_state(
+            stream_state,
+            latest_record=latest_record,
+            replication_key=replication_key,
+            is_sorted=is_sorted,
+            check_sorted=check_sorted,
+        )
+
+    assert (
+        stream_state["replication_key_value"] == "2021-05-17T20:41:16Z"
+    ), "State should not be updated."
+    assert caplog.records[0].levelname == "WARNING"
+    assert "is null" in caplog.records[0].message
