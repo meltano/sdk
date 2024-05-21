@@ -2192,13 +2192,13 @@ test = ["pytest", "pytest-cov", "pytest-xdist"]
 
 [[package]]
 name = "sphinx-notfound-page"
-version = "1.0.0"
+version = "1.0.1"
 description = "Sphinx extension to build a 404 page with absolute URLs"
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "sphinx_notfound_page-1.0.0-py3-none-any.whl", hash = "sha256:40a5741a6b07245a08fe55dbbd603ad6719e191b1419ab2e5337c706ebd16554"},
-    {file = "sphinx_notfound_page-1.0.0.tar.gz", hash = "sha256:14cd388956de5cdf8710ab4ff31776ef8d85759c4f46014ee30f368e83bd3a3b"},
+    {file = "sphinx_notfound_page-1.0.1-py3-none-any.whl", hash = "sha256:682fe6339cec9a12f7194466b609e8e6b1fe2da5e7268e5600269db764bbe924"},
+    {file = "sphinx_notfound_page-1.0.1.tar.gz", hash = "sha256:7041c3efa43173f44b03b1f8242b9a19cfceb8baeef73b0c213c8469aabd7c9b"},
 ]
 
 [package.dependencies]
