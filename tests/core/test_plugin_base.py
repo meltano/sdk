@@ -57,3 +57,11 @@ def test_mapper_not_initialized():
 def test_supported_python_versions():
     """Test that supported python versions are correctly parsed."""
     assert PluginBase._get_supported_python_versions(SDK_PACKAGE_NAME)
+
+
+def test_config_updated_signal():
+    plugin = PluginTest(config={"prop1": "hello"})
+    assert plugin.config == {"prop1": "hello"}
+
+    PluginBase.config_updated.send(prop2="abc")
+    assert plugin.config == {"prop1": "hello", "prop2": "abc"}

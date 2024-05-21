@@ -7,7 +7,6 @@ import math
 import typing as t
 import warnings
 from datetime import timedelta
-from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import requests
@@ -16,6 +15,7 @@ from singer_sdk.helpers._util import utc_now
 
 if t.TYPE_CHECKING:
     import logging
+    from types import MappingProxyType
 
     from pendulum import DateTime
 
@@ -90,19 +90,19 @@ class APIAuthenticatorBase:
             stream: A stream for a RESTful endpoint.
         """
         self.tap_name: str = stream.tap_name
-        self._config: dict[str, t.Any] = dict(stream.config)
+        self._config = stream.config
         self._auth_headers: dict[str, t.Any] = {}
         self._auth_params: dict[str, t.Any] = {}
         self.logger: logging.Logger = stream.logger
 
     @property
-    def config(self) -> t.Mapping[str, t.Any]:
+    def config(self) -> MappingProxyType:
         """Get stream or tap config.
 
         Returns:
             A frozen (read-only) config dictionary map.
         """
-        return MappingProxyType(self._config)
+        return self._config
 
     @property
     def auth_headers(self) -> dict:

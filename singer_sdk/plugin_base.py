@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import json
 import logging
 import os
 import sys
@@ -13,6 +14,7 @@ from pathlib import Path, PurePath
 from types import MappingProxyType
 
 import click
+from blinker import Signal
 from jsonschema import Draft7Validator
 
 from singer_sdk import about, metrics
@@ -98,6 +100,9 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     _config: dict
 
+    # Signals
+    config_updated = Signal()
+
     @classproperty
     def logger(cls) -> logging.Logger:  # noqa: N805
         """Get logger.
@@ -134,10 +139,43 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 it can be a predetermined config dict.
             parse_env_config: True to parse settings from env vars.
             validate_config: True to require validation of config settings.
+        """
+        self._config, self._config_path = self._process_config(
+            config=config,
+            parse_env_config=parse_env_config,
+        )
+        metrics._setup_logging(self.config)  # noqa: SLF001
+        self.metrics_logger = metrics.get_metrics_logger()
+
+        self._validate_config(raise_errors=validate_config)
+        self._mapper: PluginMapper | None = None
+
+        # Initialization timestamp
+        self.__initialized_at = int(time.time() * 1000)
+
+        self.config_updated.connect(self.update_config)
+
+    def _process_config(
+        self,
+        *,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
+        parse_env_config: bool = False,
+    ) -> tuple[dict[str, t.Any], PurePath | str | None]:
+        """Process the plugin configuration.
+
+        Args:
+            config: May be one or more paths, either as str or PurePath objects, or
+                it can be a predetermined config dict.
+            parse_env_config: True to parse settings from env vars.
+
+        Returns:
+            A tuple containing the config dictionary and the config write-back path.
 
         Raises:
             ValueError: If config is not a dict or path string.
         """
+        config_path = None
+
         if not config:
             config_dict = {}
         elif isinstance(config, (str, PurePath)):
@@ -148,28 +186,29 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 # Read each config file sequentially. Settings from files later in the
                 # list will override those of earlier ones.
                 config_dict.update(read_json_file(config_path))
+
+            if len(config) == 1 and not parse_env_config:
+                config_path = config[0]
+
         elif isinstance(config, dict):
             config_dict = config
-        else:
+        else:  # pragma: no cover
             msg = f"Error parsing config of type '{type(config).__name__}'."
             raise ValueError(msg)
+
+        # Parse env var settings
         if parse_env_config:
             self.logger.info("Parsing env var for settings config...")
             config_dict.update(self._env_var_config)
         else:
             self.logger.info("Skipping parse of env var settings...")
+
+        # Handle sensitive settings
         for k, v in config_dict.items():
             if self._is_secret_config(k):
                 config_dict[k] = SecretString(v)
-        self._config = config_dict
-        metrics._setup_logging(self.config)  # noqa: SLF001
-        self.metrics_logger = metrics.get_metrics_logger()
 
-        self._validate_config(raise_errors=validate_config)
-        self._mapper: PluginMapper | None = None
-
-        # Initialization timestamp
-        self.__initialized_at = int(time.time() * 1000)
+        return config_dict, config_path
 
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
@@ -336,13 +375,28 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     # Core plugin config:
 
     @property
-    def config(self) -> t.Mapping[str, t.Any]:
+    def config(self) -> MappingProxyType:
         """Get config.
 
         Returns:
             A frozen (read-only) config dictionary map.
         """
-        return t.cast(dict, MappingProxyType(self._config))
+        return MappingProxyType(self._config)
+
+    def update_config(self, sender: t.Any, **settings: t.Any) -> None:  # noqa: ANN401, ARG002
+        """Update the config with new settings.
+
+        This is a :external+blinker:std:doc:`Blinker <index>` signal receiver.
+
+        Args:
+            sender: The sender of the signal.
+            **settings: New settings to update the config with.
+        """
+        self._config.update(**settings)
+        if self._config_path is not None:  # pragma: no cover
+            self.logger.info("Updating config file: %s", self._config_path)
+            with Path(self._config_path).open("w") as f:
+                json.dump(self._config, f)
 
     @staticmethod
     def _is_secret_config(config_key: str) -> bool:
