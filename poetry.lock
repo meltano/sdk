@@ -612,18 +612,16 @@ files = [
 
 [[package]]
 name = "duckdb-engine"
-version = "0.12.0"
+version = "0.11.3"
 description = "SQLAlchemy driver for duckdb"
 optional = false
-python-versions = "<4,>=3.8"
+python-versions = ">=3.7"
 files = [
-    {file = "duckdb_engine-0.12.0-py3-none-any.whl", hash = "sha256:8dadb6065ebfaf83378644d0289ffc9b55ae3ee6ace3b0b732abcfb8f5b03cd7"},
-    {file = "duckdb_engine-0.12.0.tar.gz", hash = "sha256:7e2fec35bbc1b794d64942f2102746482dae25dccfb459a10c70b08ccea55583"},
+    {file = "duckdb_engine-0.11.3-py3-none-any.whl", hash = "sha256:604bd88d1848e1dacb4a127d132b856f89ff437a252144c680fef77ea91e0fe6"},
 ]
 
 [package.dependencies]
-duckdb = ">=0.5.0"
-packaging = ">=21"
+duckdb = ">=0.4.0"
 sqlalchemy = ">=1.3.22"
 
 [[package]]
@@ -2191,13 +2189,13 @@ test = ["pytest", "pytest-cov", "pytest-xdist"]
 
 [[package]]
 name = "sphinx-notfound-page"
-version = "1.0.1"
+version = "1.0.2"
 description = "Sphinx extension to build a 404 page with absolute URLs"
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "sphinx_notfound_page-1.0.1-py3-none-any.whl", hash = "sha256:682fe6339cec9a12f7194466b609e8e6b1fe2da5e7268e5600269db764bbe924"},
-    {file = "sphinx_notfound_page-1.0.1.tar.gz", hash = "sha256:7041c3efa43173f44b03b1f8242b9a19cfceb8baeef73b0c213c8469aabd7c9b"},
+    {file = "sphinx_notfound_page-1.0.2-py3-none-any.whl", hash = "sha256:dbfb4fb05d8ccdaf28c19c3452231eeab73917fd475dcafebbf3babb84343800"},
+    {file = "sphinx_notfound_page-1.0.2.tar.gz", hash = "sha256:7b2759ca79cbaa44422325f540b91542b1ce411cd31217c20cd6ba1e6cffb5ec"},
 ]
 
 [package.dependencies]
@@ -2666,4 +2664,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "6ce3b4821061e0e086e451a5d652882a18f669bb5685ad8029188f54b17243fd"
+content-hash = "f91b4d6eb615bf03b54a46a864fd3d4a54ee0f06ab33a5aeee220c0443169977"

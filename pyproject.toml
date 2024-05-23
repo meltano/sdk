@@ -120,9 +120,8 @@ faker = ["faker"]
 coverage = {extras = ["toml"], version = ">=7.4"}
 deptry = ">=0.15.0"
 
-# TODO: Remove the Python 3.12 marker when DuckDB supports it
-duckdb = { version = ">=0.8.0", python = "<3.12" }
-duckdb-engine = { version = ">=0.9.4", python = "<3.12" }
+duckdb = ">=0.8.0"
+duckdb-engine = ">=0.9.4"
 
 fastjsonschema = ">=2.19.1"
 pytest-benchmark = ">=4.0.0"
