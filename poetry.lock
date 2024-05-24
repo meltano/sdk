@@ -612,16 +612,18 @@ files = [
 
 [[package]]
 name = "duckdb-engine"
-version = "0.11.3"
+version = "0.12.1"
 description = "SQLAlchemy driver for duckdb"
 optional = false
-python-versions = ">=3.7"
+python-versions = "<4,>=3.8"
 files = [
-    {file = "duckdb_engine-0.11.3-py3-none-any.whl", hash = "sha256:604bd88d1848e1dacb4a127d132b856f89ff437a252144c680fef77ea91e0fe6"},
+    {file = "duckdb_engine-0.12.1-py3-none-any.whl", hash = "sha256:2449b61db4f7cf928ebbbb6b897a839bc3df353878533c1300818aa9094ee0e8"},
+    {file = "duckdb_engine-0.12.1.tar.gz", hash = "sha256:8ee3b672f5d3abc85ea6290cde59a58a72462cdd671826db4b7d3d50d8ab49ba"},
 ]
 
 [package.dependencies]
-duckdb = ">=0.4.0"
+duckdb = ">=0.5.0"
+packaging = ">=21"
 sqlalchemy = ">=1.3.22"
 
 [[package]]
@@ -2664,4 +2666,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "f91b4d6eb615bf03b54a46a864fd3d4a54ee0f06ab33a5aeee220c0443169977"
+content-hash = "c67c6c6f6394ae7cddeb6d00b05225e0e232d460a34fc2806b4f12c89486cb78"
