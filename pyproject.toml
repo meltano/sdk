@@ -121,7 +121,7 @@ coverage = {extras = ["toml"], version = ">=7.4"}
 deptry = ">=0.15.0"
 
 duckdb = ">=0.8.0"
-duckdb-engine = ">=0.9.4"
+duckdb-engine = { version = ">=0.9.4", python = "<4" }
 
 fastjsonschema = ">=2.19.1"
 pytest-benchmark = ">=4.0.0"
