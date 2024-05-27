@@ -8,6 +8,9 @@ from pathlib import Path, PurePath
 
 import pendulum
 
+if t.TYPE_CHECKING:
+    import datetime
+
 
 def read_json_file(path: PurePath | str) -> dict[str, t.Any]:
     """Read json file, throwing an error if missing."""
@@ -25,6 +28,7 @@ def read_json_file(path: PurePath | str) -> dict[str, t.Any]:
     return t.cast(dict, json.loads(Path(path).read_text(encoding="utf-8")))
 
 
-def utc_now() -> pendulum.DateTime:
+def utc_now() -> datetime.datetime:
     """Return current time in UTC."""
+    # TODO: replace with datetime.datetime.now(tz=datetime.timezone.utc)
     return pendulum.now(tz="UTC")
