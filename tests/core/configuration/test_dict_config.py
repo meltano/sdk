@@ -21,7 +21,7 @@ CONFIG_JSONSCHEMA = th.PropertiesList(
 @pytest.fixture
 def config_file1(tmpdir) -> str:
     filepath: str = tmpdir.join("file1.json")
-    with Path(filepath).open("w") as f:
+    with Path(filepath).open("w", encoding="utf-8") as f:
         json.dump({"prop2": "from-file-1"}, f)
 
     return filepath
@@ -30,7 +30,7 @@ def config_file1(tmpdir) -> str:
 @pytest.fixture
 def config_file2(tmpdir) -> str:
     filepath: str = tmpdir.join("file2.json")
-    with Path(filepath).open("w") as f:
+    with Path(filepath).open("w", encoding="utf-8") as f:
         json.dump({"prop3": ["from-file-2"]}, f)
 
     return filepath

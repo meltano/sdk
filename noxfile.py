@@ -44,6 +44,7 @@ nox.options.sessions = (
 
 poetry_config = nox.project.load_toml("pyproject.toml")["tool"]["poetry"]
 test_dependencies = poetry_config["group"]["dev"]["dependencies"].keys()
+typing_dependencies = poetry_config["group"]["typing"]["dependencies"].keys()
 
 
 @session(python=main_python_version)
@@ -51,18 +52,7 @@ def mypy(session: Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
     session.install(".[faker,jwt,parquet,s3,testing]")
-    session.install(
-        "exceptiongroup",
-        "mypy",
-        "pytest",
-        "importlib-resources",
-        "types-jsonschema",
-        "types-python-dateutil",
-        "types-pytz",
-        "types-requests",
-        "types-simplejson",
-        "types-PyYAML",
-    )
+    session.install(*typing_dependencies)
     session.run("mypy", *args)
     if not session.posargs:
         session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
@@ -119,6 +109,14 @@ def benches(session: Session) -> None:
         "--benchmark-json=output.json",
         *session.posargs,
     )
+
+
+@session(name="deps", python=python_versions)
+def dependencies(session: Session) -> None:
+    """Check issues with dependencies."""
+    session.install(".[s3,testing]")
+    session.install("deptry")
+    session.run("deptry", "singer_sdk", *session.posargs)
 
 
 @session(python=main_python_version)
@@ -242,7 +240,7 @@ def test_cookiecutter(session: Session, replay_file_path: str) -> None:
     )
     session.chdir(cc_test_output)
 
-    with Path("ruff.toml").open("w") as ruff_toml:
+    with Path("ruff.toml").open("w", encoding="utf-8") as ruff_toml:
         ruff_toml.write(RUFF_OVERRIDES)
 
     session.run(
