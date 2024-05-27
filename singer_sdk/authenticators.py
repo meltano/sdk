@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import datetime
 import math
 import typing as t
 import warnings
@@ -16,8 +17,6 @@ from singer_sdk.helpers._util import utc_now
 
 if t.TYPE_CHECKING:
     import logging
-
-    from pendulum import DateTime
 
     from singer_sdk.streams.rest import RESTStream
 
@@ -382,7 +381,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         # Initialize internal tracking attributes
         self.access_token: str | None = None
         self.refresh_token: str | None = None
-        self.last_refreshed: DateTime | None = None
+        self.last_refreshed: datetime.datetime | None = None
         self.expires_in: int | None = None
 
     @property
