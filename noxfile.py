@@ -20,6 +20,9 @@ except ImportError:
     {sys.executable} -m pip install nox-poetry"""
     raise SystemExit(dedent(message)) from None
 
+nox.needs_version = ">=2024.4.15"
+nox.options.default_venv_backend = "uv|virtualenv"
+
 RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
 extend-ignore = ["TD002", "TD003", "FIX002"]
@@ -38,47 +41,18 @@ nox.options.sessions = (
     "doctest",
     "test_cookiecutter",
 )
-test_dependencies = [
-    "coverage[toml]",
-    "duckdb",
-    "duckdb-engine",
-    "pyarrow",
-    "pytest",
-    "pytest-benchmark",
-    "pytest-durations",
-    "pytest-httpserver",
-    "pytest-snapshot",
-    "pytz",
-    "requests-mock",
-    "rfc3339-validator",
-    "time-machine",
-]
 
-
-def _clean_py312_deps(session: Session, dependencies: list[str]) -> None:
-    """Clean dependencies for Python 3.12."""
-    if session.python == "3.12":
-        dependencies.remove("duckdb")
-        dependencies.remove("duckdb-engine")
+poetry_config = nox.project.load_toml("pyproject.toml")["tool"]["poetry"]
+test_dependencies = poetry_config["group"]["dev"]["dependencies"].keys()
+typing_dependencies = poetry_config["group"]["typing"]["dependencies"].keys()
 
 
 @session(python=main_python_version)
 def mypy(session: Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
-    session.install(".[s3,testing,parquet]")
-    session.install(
-        "exceptiongroup",
-        "mypy",
-        "pytest",
-        "importlib-resources",
-        "types-jsonschema",
-        "types-python-dateutil",
-        "types-pytz",
-        "types-requests",
-        "types-simplejson",
-        "types-PyYAML",
-    )
+    session.install(".[faker,jwt,parquet,s3,testing]")
+    session.install(*typing_dependencies)
     session.run("mypy", *args)
     if not session.posargs:
         session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
@@ -87,8 +61,7 @@ def mypy(session: Session) -> None:
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
-    _clean_py312_deps(session, test_dependencies)
-    session.install(".[s3,parquet]")
+    session.install(".[faker,jwt,parquet,s3]")
     session.install(*test_dependencies)
 
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
@@ -121,8 +94,7 @@ def tests(session: Session) -> None:
 @session(python=main_python_version)
 def benches(session: Session) -> None:
     """Run benchmarks."""
-    _clean_py312_deps(session, test_dependencies)
-    session.install(".[s3]")
+    session.install(".[jwt,s3]")
     session.install(*test_dependencies)
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
     if sqlalchemy_version:
@@ -139,13 +111,20 @@ def benches(session: Session) -> None:
     )
 
 
+@session(name="deps", python=python_versions)
+def dependencies(session: Session) -> None:
+    """Check issues with dependencies."""
+    session.install(".[s3,testing]")
+    session.install("deptry")
+    session.run("deptry", "singer_sdk", *session.posargs)
+
+
 @session(python=main_python_version)
 def update_snapshots(session: Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
 
-    _clean_py312_deps(session, test_dependencies)
-    session.install(".")
+    session.install(".[faker,jwt]")
     session.install(*test_dependencies)
     session.run("pytest", "--snapshot-update", *args)
 
@@ -261,7 +240,7 @@ def test_cookiecutter(session: Session, replay_file_path: str) -> None:
     )
     session.chdir(cc_test_output)
 
-    with Path("ruff.toml").open("w") as ruff_toml:
+    with Path("ruff.toml").open("w", encoding="utf-8") as ruff_toml:
         ruff_toml.write(RUFF_OVERRIDES)
 
     session.run(

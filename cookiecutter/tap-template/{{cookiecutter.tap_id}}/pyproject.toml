@@ -30,23 +30,32 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.8"
-importlib-resources = { version = "==6.1.*", python = "<3.9" }
-singer-sdk = { version="~=0.34.1" }
+importlib-resources = { version = "==6.4.*", python = "<3.9" }
+singer-sdk = { version="~=0.37.0", extras = [
+    {%- if cookiecutter.auth_method == "JWT" -%}"jwt", {% endif -%}
+    {%- if cookiecutter.faker_extra -%}"faker",{%- endif -%}
+] }
 fs-s3fs = { version = "~=1.1.1", optional = true }
 {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
-requests = "~=2.31.0"
+requests = "~=2.32.0"
 {%- endif %}
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.4.0"
-singer-sdk = { version="~=0.34.1", extras = ["testing"] }
+{%- if cookiecutter.auth_method == "JWT" %}
+singer-sdk = { version="~=0.37.0", extras = ["jwt", "testing"] }
+{%- else %}
+singer-sdk = { version="~=0.37.0", extras = ["testing"] }
+{%- endif %}
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 warn_unused_configs = true
+{#- TODO: Remove this after support for SQLAlchemy 1 is dropped in v1 -#}
+{#- https://github.com/meltano/sdk/pull/1931 -#}
 {%- if cookiecutter.stream_type == 'SQL' %}
 plugins = "sqlmypy"
 {%- endif %}
@@ -74,7 +83,7 @@ known-first-party = ["{{cookiecutter.library_name}}"]
 convention = "google"
 
 [build-system]
-requires = ["poetry-core==1.8.1"]
+requires = ["poetry-core==1.9.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]

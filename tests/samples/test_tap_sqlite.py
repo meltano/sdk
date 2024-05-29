@@ -58,8 +58,11 @@ def test_sql_metadata(sqlite_sample_tap: SQLTap):
     assert detected_root_md["schema-name"] == translated_metadata.schema_name
     assert detected_root_md == translated_metadata.to_dict()
     md_map = MetadataMapping.from_iterable(stream.catalog_entry["metadata"])
-    assert md_map[()].schema_name == "main"
-    assert md_map[()].table_key_properties == ["c1"]
+
+    stream_metadata = md_map[()]
+    assert isinstance(stream_metadata, StreamMetadata)
+    assert stream_metadata.schema_name == "main"
+    assert stream_metadata.table_key_properties == ["c1"]
 
 
 def test_sqlite_discovery(sqlite_sample_tap: SQLTap):
@@ -80,6 +83,8 @@ def test_sqlite_discovery(sqlite_sample_tap: SQLTap):
 
     assert stream.metadata.root.table_key_properties == ["c1"]
     assert stream.primary_keys == ["c1"]
+    assert stream.schema["properties"]["c1"] == {"type": ["integer"]}
+    assert stream.schema["required"] == ["c1"]
 
 
 def test_sqlite_input_catalog(sqlite_sample_tap: SQLTap):
@@ -90,7 +95,7 @@ def test_sqlite_input_catalog(sqlite_sample_tap: SQLTap):
 
     for schema in [stream.schema, stream.stream_maps[0].transformed_schema]:
         assert len(schema["properties"]) == 2
-        assert schema["properties"]["c1"] == {"type": ["integer", "null"]}
+        assert schema["properties"]["c1"] == {"type": ["integer"]}
         assert schema["properties"]["c2"] == {"type": ["string", "null"]}
         assert stream.name == stream.tap_stream_id == "main-t1"
 
@@ -116,7 +121,7 @@ def test_sqlite_tap_standard_tests(sqlite_sample_tap: SQLTap):
 
 def test_sync_sqlite_to_csv(sqlite_sample_tap: SQLTap, tmp_path: Path):
     _discover_and_select_all(sqlite_sample_tap)
-    orig_stdout, _, _, _ = tap_to_target_sync_test(
+    _, _, _, _ = tap_to_target_sync_test(
         sqlite_sample_tap,
         SampleTargetCSV(config={"target_folder": f"{tmp_path}/"}),
     )

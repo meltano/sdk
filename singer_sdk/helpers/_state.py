@@ -80,7 +80,7 @@ def _find_in_partitions_list(
     if len(found) > 1:
         msg = (
             "State file contains duplicate entries for partition: "
-            f"{{state_partition_context}}.\nMatching state values were: {found!s}"
+            f"{state_partition_context}.\nMatching state values were: {found!s}"
         )
         raise ValueError(msg)
     return found[0] if found else None
@@ -218,6 +218,11 @@ def increment_state(
         progress_dict = stream_or_partition_state[PROGRESS_MARKERS]
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
     new_rk_value = to_json_compatible(latest_record[replication_key])
+
+    if new_rk_value is None:
+        logger.warning("New replication value is null")
+        return
+
     if old_rk_value is None or not check_sorted or new_rk_value >= old_rk_value:
         progress_dict["replication_key"] = replication_key
         progress_dict["replication_key_value"] = new_rk_value

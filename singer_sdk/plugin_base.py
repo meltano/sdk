@@ -80,11 +80,11 @@ class SingerCommand(click.Command):
             return super().invoke(ctx)
         except ConfigValidationError as exc:
             for error in exc.errors:
-                self.logger.error("Config validation error: %s", error)
+                self.logger.error("Config validation error: %s", error)  # noqa: TRY400
             sys.exit(1)
 
 
-class PluginBase(metaclass=abc.ABCMeta):
+class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for taps."""
 
     #: The executable name of the tap or target plugin. e.g. tap-foo
@@ -211,7 +211,7 @@ class PluginBase(metaclass=abc.ABCMeta):
         return self.__initialized_at
 
     @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
         """Get capabilities.
 
         Developers may override this property in oder to add or remove
@@ -403,9 +403,7 @@ class PluginBase(metaclass=abc.ABCMeta):
 
         Args:
             print_fn: A function to use to display the plugin version.
-                Defaults to `print`_.
-
-        .. _print: https://docs.python.org/3/library/functions.html#print
+                Defaults to :py:func:`print`.
         """
         print_fn(f"{cls.name} v{cls.plugin_version}, Meltano SDK v{cls.sdk_version}")
 

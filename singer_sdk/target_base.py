@@ -10,7 +10,7 @@ import time
 import typing as t
 
 import click
-from joblib import Parallel, delayed, parallel_backend
+from joblib import Parallel, delayed, parallel_config
 
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
@@ -18,9 +18,11 @@ from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import (
     ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
+    TARGET_BATCH_SIZE_ROWS_CONFIG,
     TARGET_HARD_DELETE_CONFIG,
     TARGET_LOAD_METHOD_CONFIG,
     TARGET_SCHEMA_CONFIG,
+    TARGET_VALIDATE_RECORDS_CONFIG,
     CapabilitiesEnum,
     PluginCapabilities,
     TargetCapabilities,
@@ -94,7 +96,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             self.setup_mapper()
 
     @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
         """Get target capabilities.
 
         Returns:
@@ -104,6 +106,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             PluginCapabilities.ABOUT,
             PluginCapabilities.STREAM_MAPS,
             PluginCapabilities.FLATTENING,
+            TargetCapabilities.VALIDATE_RECORDS,
         ]
 
     @property
@@ -255,7 +258,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         try:
             sink.setup()
         except Exception:  # pragma: no cover
-            self.logger.error("Error initializing '%s' target sink", self.name)
+            self.logger.error("Error initializing '%s' target sink", self.name)  # noqa: TRY400
             raise
 
         self._sinks_active[stream_name] = sink
@@ -361,8 +364,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             if sink.is_full:
                 self.logger.info(
-                    "Target sink for '%s' is full. Draining...",
+                    "Target sink for '%s' is full. Current size is '%s'. Draining...",
                     sink.stream_name,
+                    sink.current_size,
                 )
                 self.drain_one(sink)
 
@@ -493,7 +497,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._reset_max_record_age()
 
     @t.final
-    def drain_one(self, sink: Sink) -> None:
+    def drain_one(self, sink: Sink) -> None:  # noqa: PLR6301
         """Drain a specific sink.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -517,7 +521,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         def _drain_sink(sink: Sink) -> None:
             self.drain_one(sink)
 
-        with parallel_backend("threading", n_jobs=parallelism):
+        with parallel_config(backend="threading", n_jobs=parallelism):
             Parallel()(delayed(_drain_sink)(sink=sink) for sink in sink_list)
 
     def _write_state_message(self, state: dict) -> None:
@@ -608,11 +612,15 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         _merge_missing(ADD_RECORD_METADATA_CONFIG, config_jsonschema)
         _merge_missing(TARGET_LOAD_METHOD_CONFIG, config_jsonschema)
+        _merge_missing(TARGET_BATCH_SIZE_ROWS_CONFIG, config_jsonschema)
 
         capabilities = cls.capabilities
 
         if PluginCapabilities.BATCH in capabilities:
             _merge_missing(BATCH_CONFIG, config_jsonschema)
+
+        if TargetCapabilities.VALIDATE_RECORDS in capabilities:
+            _merge_missing(TARGET_VALIDATE_RECORDS_CONFIG, config_jsonschema)
 
         super().append_builtin_config(config_jsonschema)
 

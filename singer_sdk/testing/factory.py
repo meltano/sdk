@@ -1,4 +1,5 @@
 """Test Class Factory."""
+
 from __future__ import annotations
 
 import typing as t
@@ -116,7 +117,7 @@ class TapTestClassFactory:
             test_runner=test_runner,
         )
 
-    def _get_empty_test_class(
+    def _get_empty_test_class(  # noqa: PLR6301
         self,
         test_runner: TapTestRunner,
         suite_config: SuiteConfig | None,
@@ -135,15 +136,15 @@ class TapTestClassFactory:
             """Tap Test Class."""
 
             @pytest.fixture
-            def config(self) -> SuiteConfig:
+            def config(self) -> SuiteConfig:  # noqa: PLR6301
                 return suite_config or SuiteConfig()
 
             @pytest.fixture
-            def resource(self) -> t.Any:  # noqa: ANN401, PT004
+            def resource(self) -> t.Any:  # noqa: ANN401, PLR6301, PT004
                 yield  # noqa: PT022
 
             @pytest.fixture(scope="class")
-            def runner(self) -> TapTestRunner | TargetTestRunner:
+            def runner(self) -> TapTestRunner | TargetTestRunner:  # noqa: PLR6301
                 # Populate runner class with cached records for use in tests
                 test_runner.sync_all()
                 return test_runner
@@ -181,7 +182,7 @@ class TapTestClassFactory:
 
         return empty_test_class
 
-    def _with_tap_tests(
+    def _with_tap_tests(  # noqa: PLR6301
         self,
         empty_test_class: type[BaseTestClass],
         suite: TestSuite[TapTestTemplate],
@@ -191,7 +192,7 @@ class TapTestClassFactory:
             test_name = f"test_{suite.kind}_{test.name}"
             setattr(empty_test_class, test_name, test.run)
 
-    def _with_stream_tests(
+    def _with_stream_tests(  # noqa: PLR6301
         self,
         empty_test_class: type[BaseTestClass],
         suite: TestSuite[StreamTestTemplate],
@@ -216,7 +217,7 @@ class TapTestClassFactory:
             empty_test_class.params[test_name] = params
             empty_test_class.param_ids[test_name] = param_ids
 
-    def _with_stream_attribute_tests(
+    def _with_stream_attribute_tests(  # noqa: PLR6301
         self,
         empty_test_class: type[BaseTestClass],
         suite: TestSuite[AttributeTestTemplate],
@@ -317,7 +318,7 @@ class TargetTestClassFactory:
             test_suites=suites,
         )
 
-    def _get_empty_test_class(
+    def _get_empty_test_class(  # noqa: PLR6301
         self,
         target_class: type[Target],
         suite_config: SuiteConfig | None,
@@ -340,15 +341,15 @@ class TargetTestClassFactory:
             """Target Test Class."""
 
             @pytest.fixture
-            def config(self) -> SuiteConfig:
+            def config(self) -> SuiteConfig:  # noqa: PLR6301
                 return suite_config or SuiteConfig()
 
             @pytest.fixture
-            def resource(self) -> t.Any:  # noqa: ANN401, PT004
+            def resource(self) -> t.Any:  # noqa: ANN401, PLR6301, PT004
                 yield  # noqa: PT022
 
             @pytest.fixture
-            def runner(self) -> TargetTestRunner:
+            def runner(self) -> TargetTestRunner:  # noqa: PLR6301
                 # Instantiate new runner class and populate records for use in tests
                 return TargetTestRunner(
                     target_class=target_class,
@@ -359,7 +360,7 @@ class TargetTestClassFactory:
 
         return TargetTestClass
 
-    def _annotate_test_class(
+    def _annotate_test_class(  # noqa: PLR6301
         self,
         empty_test_class: type[BaseTestClass],
         test_suites: list,

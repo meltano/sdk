@@ -15,7 +15,7 @@ from singer_sdk.typing import PropertiesList, Property, StringType
 REPORT_DEFS_FILE = (
     "samples/sample_tap_google_analytics/resources/default_report_definitions.json"
 )
-REPORT_DEFS = json.loads(Path(REPORT_DEFS_FILE).read_text())
+REPORT_DEFS = json.loads(Path(REPORT_DEFS_FILE).read_text(encoding="utf-8"))
 
 
 class SampleTapGoogleAnalytics(Tap):

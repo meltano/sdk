@@ -5,6 +5,117 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.37.0 (2024-04-29)
+
+### ✨ New
+
+- [#2389](https://github.com/meltano/sdk/issues/2389) JSON schema keyword `allOf` is now supported
+- [#1888](https://github.com/meltano/sdk/issues/1888) Added support for glob patterns in source stream names -- _**Thanks @DouweM!**_
+- [#2345](https://github.com/meltano/sdk/issues/2345) `PropertiesList` can now behave as an iterable -- _**Thanks @ReubenFrankel!**_
+
+### 🐛 Fixes
+
+- [#2352](https://github.com/meltano/sdk/issues/2352) Removed unnecessary and problematic column caching -- _**Thanks @raulbonet!**_
+- [#2375](https://github.com/meltano/sdk/issues/2375) Added `sensitive: true` to password settings in templates
+- [#2301](https://github.com/meltano/sdk/issues/2301) Unmapped sub-fields in object-type fields are now no longer dropped when the field declares `additionalProperties`
+- [#2348](https://github.com/meltano/sdk/issues/2348) Added a condition to the `No schema for record field` warning -- _**Thanks @tobiascadee!**_
+- [#2342](https://github.com/meltano/sdk/issues/2342) Avoid failing if VSCode IDE config is not requested for target and mapper cookiecutter templates -- _**Thanks @ReubenFrankel!**_
+- [#2331](https://github.com/meltano/sdk/issues/2331) Allow `importlib-resources` >=6.3.2
+
+### ⚙️ Under the Hood
+
+- [#2205](https://github.com/meltano/sdk/issues/2205) Added a `jwt` package extra, but the `cryptography` and `jwt` dependencies are still installed by default for now
+
+### 📚 Documentation Improvements
+
+- [#2326](https://github.com/meltano/sdk/issues/2326) Documented `BATCH` as a default plugin capability -- _**Thanks @ReubenFrankel!**_
+
+## v0.36.1 (2024-03-13)
+
+### 🐛 Fixes
+
+- [#2310](https://github.com/meltano/sdk/issues/2310) Limited `importlib-resources` to < 6.2 due to breaking changes
+- [#2288](https://github.com/meltano/sdk/issues/2288) Bumped min joblib dependency to `>=1.3.0` and replaced deprecated `parallel_backend` with `parallel_config` -- _**Thanks @BuzzCutNorman!**_
+- [#2281](https://github.com/meltano/sdk/issues/2281) The `state_partition_context` dictionary is now correctly interpolated in the error message when duplicate partitions/contexts are detected in the input state
+- [#2274](https://github.com/meltano/sdk/issues/2274) Test workflow now fails for any Python matrix job failure in cookiecutter template -- _**Thanks @ReubenFrankel!**_
+
+## v0.36.0 (2024-02-26)
+
+### ✨ New
+
+- [#2241](https://github.com/meltano/sdk/issues/2241) JSON schema keywords such as `maxLength` are now supported in `StringType`, `IntegerType` and `NumberType` JSON schema helpers
+- [#2263](https://github.com/meltano/sdk/issues/2263) Nested settings are now documented in the output of `--about --format=markdown`
+- [#2248](https://github.com/meltano/sdk/issues/2248) Targets now accept a `batch_size_rows` setting to configure how many rows are loaded in each record batch -- _**Thanks @BuzzCutNorman!**_
+
+### 🐛 Fixes
+
+- [#2258](https://github.com/meltano/sdk/issues/2258) Database disconnects are now handled via SQLAlchemy `pool_pre_ping` parameter
+
+### ⚙️ Under the Hood
+
+- [#2220](https://github.com/meltano/sdk/issues/2220) Deprecated `singer_sdk.authenticators.BasicAuthenticator` in favor of `requests.auth.HTTPBasicAuth`
+
+## v0.35.2 (2024-02-19)
+
+### 🐛 Fixes
+
+- [#2252](https://github.com/meltano/sdk/issues/2252) Null type is now correctly appended as `{"type": "null"}` to `oneOf` types
+
+## v0.35.1 (2024-02-15)
+
+### 🐛 Fixes
+
+- [#2243](https://github.com/meltano/sdk/issues/2243) Flattening level of record is now forced to match the provided flattened schema -- _**Thanks @joaopamaral!**_
+- [#2245](https://github.com/meltano/sdk/issues/2245) Instances of `oneOf` are now handled by null-appending logic
+- [#2242](https://github.com/meltano/sdk/issues/2242) Hard and soft deletes for handling `ACTIVATE_VERSION` messages now use the same `WHERE` clause -- _**Thanks @vitoravancini!**_
+- [#2232](https://github.com/meltano/sdk/issues/2232) Test workflow job now fails for unsupported Python versions in cookiecutter templates -- _**Thanks @ReubenFrankel!**_
+- [#2225](https://github.com/meltano/sdk/issues/2225) SQL columns that are non-nullable but not required (i.e. not part of a primary key) are now not included in the `"required": [...]` array of the discovered JSON schema
+
+### 📚 Documentation Improvements
+
+- [#2239](https://github.com/meltano/sdk/issues/2239) Linked reference docs to source code
+- [#2231](https://github.com/meltano/sdk/issues/2231) Added an example implemetation of JSON schema validation that uses `fastjsonschema`
+- [#2219](https://github.com/meltano/sdk/issues/2219) Added reference docs for tap & target testing helpers
+
+## v0.35.0 (2024-02-02)
+
+### ✨ New
+
+- [#2208](https://github.com/meltano/sdk/issues/2208) Allow users to disable schema validation in targets
+- [#2170](https://github.com/meltano/sdk/issues/2170) Generate fake data with stream maps -- _**Thanks @ReubenFrankel!**_
+- [#937](https://github.com/meltano/sdk/issues/937) Support validating configuration for any tap with a dynamic catalog
+- [#2144](https://github.com/meltano/sdk/issues/2144) Support fanning out parent record into multiple child contexts/syncs
+- [#1918](https://github.com/meltano/sdk/issues/1918) End RESTStream pagination if an empty page is received
+
+### 🐛 Fixes
+
+- [#2203](https://github.com/meltano/sdk/issues/2203) Fix serialization of arbitrary objects (e.g. `ObjectId` from mongoDB) during flattening -- _**Thanks @dgawlowsky!**_
+- [#2200](https://github.com/meltano/sdk/issues/2200) Quote column names in INSERT statement
+- [#2195](https://github.com/meltano/sdk/issues/2195) Include empty `schemas` directory in REST tap cookiecutter
+- [#2187](https://github.com/meltano/sdk/issues/2187) Replace use of deprecated `jsonschema._RefResolver` with recommended `referencing` library
+- [#2184](https://github.com/meltano/sdk/issues/2184) Reduce amount of unnecessary whitespace in Singer output
+- [#2183](https://github.com/meltano/sdk/issues/2183) Ensure `.vscode` directory is included when requested in cookiecutters and avoid failing if it does not exist
+- [#2180](https://github.com/meltano/sdk/issues/2180) Limit supported Python versions in `--about` output to existing ones
+- [#2108](https://github.com/meltano/sdk/issues/2108) Log sink name when an unhandled error occurs during setup
+- [#2158](https://github.com/meltano/sdk/issues/2158) Fix pytest plugin declaration so it can be used without requiring defining `pytest_plugins` in `conftest.py`
+- [#2105](https://github.com/meltano/sdk/issues/2105) Default handling of `ACTIVATE_VERSION` messages to soft deletes and add new `SQLConnector.delete_old_versions` method
+
+### ⚙️ Under the Hood
+
+- [#2189](https://github.com/meltano/sdk/issues/2189) Use `functools.lru_cache` instead of the stale `memoization` library (#1981)
+- [#2188](https://github.com/meltano/sdk/issues/2188) Remove unused `logger` parameter from private catalog helper functions
+- [#2143](https://github.com/meltano/sdk/issues/2143) Drop support for Python 3.7
+- [#2157](https://github.com/meltano/sdk/issues/2157) Remove `pytz` dependency and use `datetime.timezone.utc` instead of `pytz.UTC` where possible
+- [#2136](https://github.com/meltano/sdk/issues/2136) Create interface for schema validation in sinks, and implement it for `python-jsonschema` -- _**Thanks @BuzzCutNorman!**_
+- [#2130](https://github.com/meltano/sdk/issues/2130) Allow loading stream schemas from `importlib.resources.abc.Traversable` types
+
+### 📚 Documentation Improvements
+
+- [#2204](https://github.com/meltano/sdk/issues/2204) Document supported package extras
+- [#2186](https://github.com/meltano/sdk/issues/2186) Call out minimum recommended `cookiecutter` version
+- [#2168](https://github.com/meltano/sdk/issues/2168) Explain `Progress is not resumable if interrupted` in docs FAQ
+- [#2140](https://github.com/meltano/sdk/issues/2140) Update auth caching example to use `functools.cached_property`
+
 ## v0.34.1 (2023-12-19)
 
 ### 🐛 Fixes

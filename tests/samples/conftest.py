@@ -25,7 +25,14 @@ def _sqlite_sample_db(sqlite_connector: SQLiteConnector):
         for t in range(3):
             conn.execute(sa.text(f"DROP TABLE IF EXISTS t{t}"))
             conn.execute(
-                sa.text(f"CREATE TABLE t{t} (c1 int PRIMARY KEY, c2 varchar(10))"),
+                sa.text(
+                    f"""
+                    CREATE TABLE t{t} (
+                        c1 int PRIMARY KEY NOT NULL,
+                        c2 varchar(10) NOT NULL
+                    )
+                    """
+                ),
             )
             for x in range(100):
                 conn.execute(
@@ -41,15 +48,24 @@ def sqlite_sample_db_catalog(sqlite_sample_db_config) -> Catalog:
 
     # Set stream `t1` to use incremental replication.
     t0 = catalog_obj.get_stream("main-t0")
+    assert t0 is not None
+
     t0.replication_key = "c1"
     t0.replication_method = "INCREMENTAL"
+
     t1 = catalog_obj.get_stream("main-t1")
+    assert t1 is not None
+
     t1.key_properties = ["c1"]
     t1.replication_method = "FULL_TABLE"
+
     t2 = catalog_obj.get_stream("main-t2")
+    assert t2 is not None
+
     t2.key_properties = ["c1"]
     t2.replication_key = "c1"
     t2.replication_method = "INCREMENTAL"
+
     return catalog_obj
 
 

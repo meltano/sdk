@@ -46,5 +46,9 @@ def test_target_about_info(
         pass
 
     about = MyTarget._get_about_info()
-    default_settings = {"add_record_metadata", "load_method"}
+    default_settings = {
+        "add_record_metadata",
+        "load_method",
+        "batch_size_rows",
+    }
     assert set(about.settings["properties"]) == expected_settings | default_settings

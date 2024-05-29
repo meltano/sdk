@@ -9,6 +9,7 @@ import importlib.util
 import json
 import time
 import typing as t
+from functools import cached_property
 from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
@@ -122,7 +123,7 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
             raise InvalidRecord(e.message, record) from e
 
 
-class Sink(metaclass=abc.ABCMeta):
+class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for target sinks."""
 
     # max timestamp/datetime supported, used to reset invalid dates
@@ -130,9 +131,6 @@ class Sink(metaclass=abc.ABCMeta):
     logger: Logger
 
     MAX_SIZE_DEFAULT = 10000
-
-    validate_schema = True
-    """Enable JSON schema record validation."""
 
     validate_field_string_format = False
     """Enable JSON schema format validation, for example `date-time` string fields."""
@@ -184,7 +182,21 @@ class Sink(metaclass=abc.ABCMeta):
         self._batch_records_read: int = 0
         self._batch_dupe_records_merged: int = 0
 
+        # Batch full markers
+        self._batch_size_rows: int | None = target.config.get(
+            "batch_size_rows",
+        )
+
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
+
+    @cached_property
+    def validate_schema(self) -> bool:
+        """Enable JSON schema record validation.
+
+        Returns:
+            True if JSON schema validation is enabled.
+        """
+        return self.config.get("validate_records", True)
 
     def get_validator(self) -> BaseJSONSchemaValidator | None:
         """Get a record validator for this sink.
@@ -194,6 +206,31 @@ class Sink(metaclass=abc.ABCMeta):
 
         Returns:
             An instance of a subclass of ``BaseJSONSchemaValidator``.
+
+        Example implementation using the `fastjsonschema`_ library:
+
+        .. code-block:: python
+
+           import fastjsonschema
+
+
+           class FastJSONSchemaValidator(BaseJSONSchemaValidator):
+               def __init__(self, schema: dict[str, t.Any]) -> None:
+                   super().__init__(schema)
+                   try:
+                       self.validator = fastjsonschema.compile(self.schema)
+                   except fastjsonschema.JsonSchemaDefinitionException as e:
+                       error_message = "Schema Validation Error"
+                       raise InvalidJSONSchema(error_message) from e
+
+               def validate(self, record: dict):
+                   try:
+                       self.validator(record)
+                   except fastjsonschema.JsonSchemaValueException as e:
+                       error_message = f"Record Message Validation Error: {e.message}"
+                       raise InvalidRecord(error_message, record) from e
+
+        .. _fastjsonschema: https://pypi.org/project/fastjsonschema/
         """
         if self.validate_schema:
             return JSONSchemaValidator(
@@ -202,7 +239,7 @@ class Sink(metaclass=abc.ABCMeta):
             )
         return None
 
-    def _get_context(self, record: dict) -> dict:  # noqa: ARG002
+    def _get_context(self, record: dict) -> dict:  # noqa: ARG002, PLR6301
         """Return an empty dictionary by default.
 
         NOTE: Future versions of the SDK may expand the available context attributes.
@@ -218,15 +255,6 @@ class Sink(metaclass=abc.ABCMeta):
     # Size properties
 
     @property
-    def max_size(self) -> int:
-        """Get max batch size.
-
-        Returns:
-            Max number of records to batch before `is_full=True`
-        """
-        return self.MAX_SIZE_DEFAULT
-
-    @property
     def current_size(self) -> int:
         """Get current batch size.
 
@@ -237,12 +265,39 @@ class Sink(metaclass=abc.ABCMeta):
 
     @property
     def is_full(self) -> bool:
-        """Check against size limit.
+        """Check against the batch size limit.
 
         Returns:
             True if the sink needs to be drained.
         """
         return self.current_size >= self.max_size
+
+    @property
+    def batch_size_rows(self) -> int | None:
+        """The maximum number of rows a batch can accumulate before being processed.
+
+        Returns:
+            The max number of rows or None if not set.
+        """
+        return self._batch_size_rows
+
+    @property
+    def max_size(self) -> int:
+        """Get max batch size.
+
+        Returns:
+            Max number of records to batch before `is_full=True`
+
+        .. versionchanged:: 0.36.0
+           This property now takes into account the
+           :attr:`~singer_sdk.Sink.batch_size_rows` attribute and the corresponding
+           ``batch_size_rows`` target setting.
+        """
+        return (
+            self.batch_size_rows
+            if self.batch_size_rows is not None
+            else self.MAX_SIZE_DEFAULT
+        )
 
     # Tally methods
 
@@ -403,7 +458,7 @@ class Sink(metaclass=abc.ABCMeta):
         ):
             properties_dict.pop(col, None)
 
-    def _remove_sdc_metadata_from_record(self, record: dict) -> None:
+    def _remove_sdc_metadata_from_record(self, record: dict) -> None:  # noqa: PLR6301
         """Remove metadata _sdc columns from incoming record message.
 
         Record metadata specs documented at:
@@ -439,10 +494,10 @@ class Sink(metaclass=abc.ABCMeta):
             # on every record, so it's probably bad and should be moved up the stack.
             try:
                 self._validator.validate(record)
-            except InvalidRecord as e:
+            except InvalidRecord:
+                self.logger.exception("Record validation failed")
                 if self.fail_on_record_validation_exception:
                     raise
-                self.logger.exception("Record validation failed %s", e)
 
         self._parse_timestamps_in_record(
             record=record,
@@ -489,7 +544,8 @@ class Sink(metaclass=abc.ABCMeta):
         """
         for key, value in record.items():
             if key not in schema["properties"]:
-                self.logger.warning("No schema for record field '%s'", key)
+                if value is not None:
+                    self.logger.warning("No schema for record field '%s'", key)
                 continue
             datelike_type = get_datelike_property_type(schema["properties"][key])
             if datelike_type:
@@ -524,7 +580,7 @@ class Sink(metaclass=abc.ABCMeta):
 
     # SDK developer overrides:
 
-    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: ARG002
+    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: ARG002, PLR6301
         """Process incoming record and return a modified result.
 
         Args:
@@ -664,7 +720,7 @@ class Sink(metaclass=abc.ABCMeta):
                 importlib.util.find_spec("pyarrow")
                 and encoding.format == BatchFileFormat.PARQUET
             ):
-                import pyarrow.parquet as pq
+                import pyarrow.parquet as pq  # noqa: PLC0415
 
                 with storage.fs(create=False) as batch_fs, batch_fs.open(
                     tail,

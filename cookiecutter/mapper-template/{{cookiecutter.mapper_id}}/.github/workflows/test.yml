@@ -11,6 +11,7 @@ jobs:
     env:
       GITHUB_TOKEN: {{ '${{secrets.GITHUB_TOKEN}}' }}
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
@@ -24,6 +25,7 @@ jobs:
         pip install poetry
     - name: Install dependencies
       run: |
+        poetry env use {{ '${{ matrix.python-version }}' }}
         poetry install
     - name: Test with pytest
       run: |

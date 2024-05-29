@@ -36,14 +36,14 @@ jobs:
     - uses: actions/checkout@v4
     - name: Upgrade pip
       env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pip install pip
         pip --version
 
     - name: Install Poetry
       env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pipx install poetry
         pipx inject poetry poetry-plugin-export
@@ -64,7 +64,7 @@ jobs:
 
     - name: Install Nox
       env:
-        PIP_CONSTRAINT: .github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pipx install nox
         pipx inject nox nox-poetry

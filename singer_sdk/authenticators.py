@@ -3,24 +3,21 @@
 from __future__ import annotations
 
 import base64
+import datetime
 import math
 import typing as t
+import warnings
 from datetime import timedelta
 from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
-import jwt
 import requests
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
 from requests.auth import AuthBase
 
 from singer_sdk.helpers._util import utc_now
 
 if t.TYPE_CHECKING:
     import logging
-
-    from pendulum import DateTime
 
     from singer_sdk.streams.rest import RESTStream
 
@@ -132,13 +129,10 @@ class APIAuthenticatorBase:
         """Authenticate a request.
 
         Args:
-            request: A `request object`_.
+            request: A :class:`requests.PreparedRequest` object.
 
         Returns:
             The authenticated request object.
-
-        .. _request object:
-            https://requests.readthedocs.io/en/latest/api/#requests.PreparedRequest
         """
         request.headers.update(self.auth_headers)
 
@@ -155,13 +149,10 @@ class APIAuthenticatorBase:
         and returns the result.
 
         Args:
-            r: A `request object`_.
+            r: A :class:`requests.PreparedRequest` object.
 
         Returns:
             The authenticated request object.
-
-        .. _request object:
-            https://requests.readthedocs.io/en/latest/api/#requests.PreparedRequest
         """
         return self.authenticate_request(r)
 
@@ -224,7 +215,7 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
         super().__init__(stream=stream)
         auth_credentials = {key: value}
 
-        if location not in ["header", "params"]:
+        if location not in {"header", "params"}:
             msg = "`type` must be one of 'header' or 'params'."
             raise ValueError(msg)
 
@@ -304,7 +295,10 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
 class BasicAuthenticator(APIAuthenticatorBase):
     """Implements basic authentication for REST Streams.
 
-    This Authenticator implements basic authentication by concatinating a
+    .. deprecated:: 0.36.0
+       Use :class:`requests.auth.HTTPBasicAuth` instead.
+
+    This Authenticator implements basic authentication by concatenating a
     username and password then base64 encoding the string. The resulting
     token will be merged with any HTTP headers specified on the stream.
     """
@@ -323,6 +317,13 @@ class BasicAuthenticator(APIAuthenticatorBase):
             password: API password.
         """
         super().__init__(stream=stream)
+        warnings.warn(
+            "BasicAuthenticator is deprecated. Use "
+            "requests.auth.HTTPBasicAuth instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         credentials = f"{username}:{password}".encode()
         auth_token = base64.b64encode(credentials).decode("ascii")
         auth_credentials = {"Authorization": f"Basic {auth_token}"}
@@ -381,7 +382,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         # Initialize internal tracking attributes
         self.access_token: str | None = None
         self.refresh_token: str | None = None
-        self.last_refreshed: DateTime | None = None
+        self.last_refreshed: datetime.datetime | None = None
         self.expires_in: int | None = None
 
     @property
@@ -571,6 +572,10 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         Raises:
             ValueError: If the private key is not set.
         """
+        import jwt  # noqa: PLC0415
+        from cryptography.hazmat.backends import default_backend  # noqa: PLC0415
+        from cryptography.hazmat.primitives import serialization  # noqa: PLC0415
+
         if not self.private_key:
             msg = "Missing 'private_key' property for OAuth payload."
             raise ValueError(msg)

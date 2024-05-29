@@ -21,7 +21,11 @@ from cryptography.hazmat.primitives.serialization import (
 )
 from requests.auth import HTTPProxyAuth, _basic_auth_str
 
-from singer_sdk.authenticators import OAuthAuthenticator, OAuthJWTAuthenticator
+from singer_sdk.authenticators import (
+    BasicAuthenticator,
+    OAuthAuthenticator,
+    OAuthJWTAuthenticator,
+)
 
 if t.TYPE_CHECKING:
     import requests_mock
@@ -218,3 +222,13 @@ def test_requests_library_auth(rest_tap: Tap):
 
     assert isinstance(stream.authenticator, HTTPProxyAuth)
     assert r.headers["Proxy-Authorization"] == _basic_auth_str("username", "password")
+
+
+def test_basic_auth_deprecation_warning(rest_tap: Tap):
+    """Validate that a warning is emitted when using BasicAuthenticator."""
+    stream: RESTStream = rest_tap.streams["some_stream"]
+    with pytest.deprecated_call(match="BasicAuthenticator is deprecated") as recorder:
+        BasicAuthenticator(stream=stream, username="username", password="password")  # noqa: S106
+
+    assert len(recorder.list) == 1
+    assert recorder.list[0].filename.endswith("test_authenticators.py")

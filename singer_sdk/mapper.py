@@ -9,7 +9,9 @@ import abc
 import ast
 import copy
 import datetime
+import fnmatch
 import hashlib
+import importlib.util
 import logging
 import typing as t
 
@@ -27,6 +29,8 @@ from singer_sdk.helpers._flattening import (
 
 if t.TYPE_CHECKING:
     import sys
+
+    from faker import Faker
 
     if sys.version_info >= (3, 10):
         from typing import TypeAlias  # noqa: ICN003
@@ -178,7 +182,7 @@ class DefaultStreamMap(StreamMap):
 class RemoveRecordTransform(DefaultStreamMap):
     """Default mapper which simply excludes any records."""
 
-    def transform(self, record: dict) -> None:
+    def transform(self, record: dict) -> None:  # noqa: PLR6301
         """Return None (always exclude).
 
         Args:
@@ -186,7 +190,7 @@ class RemoveRecordTransform(DefaultStreamMap):
         """
         _ = record  # Drop the record
 
-    def get_filter_result(self, record: dict) -> bool:  # noqa: ARG002
+    def get_filter_result(self, record: dict) -> bool:  # noqa: ARG002, PLR6301
         """Exclude all records.
 
         Args:
@@ -212,7 +216,7 @@ class SameRecordTransform(DefaultStreamMap):
         """
         return super().transform(record)
 
-    def get_filter_result(self, record: dict) -> bool:  # noqa: ARG002
+    def get_filter_result(self, record: dict) -> bool:  # noqa: ARG002, PLR6301
         """Return True (always include).
 
         Args:
@@ -231,6 +235,7 @@ class CustomStreamMap(StreamMap):
         self,
         stream_alias: str,
         map_config: dict,
+        faker_config: dict,
         raw_schema: dict,
         key_properties: t.Sequence[str] | None,
         map_transform: dict,
@@ -241,6 +246,7 @@ class CustomStreamMap(StreamMap):
         Args:
             stream_alias: Stream name.
             map_config: Stream map configuration.
+            faker_config: Faker configuration.
             raw_schema: Original stream's JSON schema.
             key_properties: Primary key of the source stream.
             map_transform: Dictionary of transformations to apply to the stream.
@@ -254,6 +260,8 @@ class CustomStreamMap(StreamMap):
         )
 
         self.map_config = map_config
+        self.faker_config = faker_config
+
         self._transform_fn: t.Callable[[dict], dict | None]
         self._filter_fn: t.Callable[[dict], bool]
         (
@@ -262,6 +270,7 @@ class CustomStreamMap(StreamMap):
             self.transformed_schema,
         ) = self._init_functions_and_schema(stream_map=map_transform)
         self.expr_evaluator = simpleeval.EvalWithCompoundTypes(functions=self.functions)
+        self.fake = self._init_faker_instance()
 
     def transform(self, record: dict) -> dict | None:
         """Return a transformed record.
@@ -324,6 +333,10 @@ class CustomStreamMap(StreamMap):
         names["_"] = record  # Add a shorthand alias in case of reserved words in names
         names["record"] = record  # ...and a longhand alias
         names["config"] = self.map_config  # Allow map config access within transform
+
+        if self.fake:
+            names["fake"] = self.fake
+
         if property_name and property_name in record:
             # Allow access to original property value if applicable
             names["self"] = record[property_name]
@@ -593,6 +606,24 @@ class CustomStreamMap(StreamMap):
 
         return filter_fn, transform_fn, transformed_schema
 
+    def _init_faker_instance(self) -> Faker | None:
+        if not importlib.util.find_spec("faker"):
+            return None
+
+        from faker import Faker  # noqa: PLC0415
+
+        if self.faker_config:
+            faker_seed = self.faker_config.get("seed")
+            faker_locale = self.faker_config.get("locale")
+
+            if faker_seed is not None:
+                Faker.seed(faker_seed)
+
+            if faker_locale is not None:
+                return Faker(faker_locale)
+
+        return Faker()
+
 
 class PluginMapper:
     """Inline map tranformer."""
@@ -613,6 +644,7 @@ class PluginMapper:
         """
         self.stream_maps: dict[str, list[StreamMap]] = {}
         self.map_config = plugin_config.get("stream_map_config", {})
+        self.faker_config = plugin_config.get("faker_config", {})
         self.flattening_options = get_flattening_options(plugin_config)
         self.default_mapper_type: type[DefaultStreamMap] = SameRecordTransform
         self.logger = logger
@@ -683,11 +715,14 @@ class PluginMapper:
         if stream_name in self.stream_maps:
             primary_mapper = self.stream_maps[stream_name][0]
             if (
-                primary_mapper.raw_schema != schema
-                or primary_mapper.raw_key_properties != key_properties
+                isinstance(primary_mapper, self.default_mapper_type)
+                and primary_mapper.raw_schema == schema
+                and primary_mapper.raw_key_properties == key_properties
             ):
-                # Unload/reset stream maps if schema or key properties have changed.
-                self.stream_maps.pop(stream_name)
+                return
+
+            # Unload/reset stream maps if schema or key properties have changed.
+            self.stream_maps.pop(stream_name)
 
         if stream_name not in self.stream_maps:
             # The 0th mapper should be the same-named treatment.
@@ -707,59 +742,69 @@ class PluginMapper:
                 if isinstance(stream_map_val, dict)
                 else stream_map_val
             )
-            stream_alias: str = stream_map_key
             source_stream: str = stream_map_key
-            if isinstance(stream_def, str) and stream_def != NULL_STRING:
-                if stream_name == stream_map_key:
-                    # TODO: Add any expected cases for str expressions (currently none)
-                    pass
+            stream_alias: str = stream_map_key
 
-                msg = f"Option '{stream_map_key}:{stream_def}' is not expected."
-                raise StreamMapConfigError(msg)
+            is_source_stream_primary = True
+            if isinstance(stream_def, dict):
+                if MAPPER_SOURCE_OPTION in stream_def:
+                    # <alias>: __source__: <source>
+                    source_stream = stream_def.pop(MAPPER_SOURCE_OPTION)
+                    is_source_stream_primary = False
+                elif MAPPER_ALIAS_OPTION in stream_def:
+                    # <source>: __alias__: <alias>
+                    stream_alias = stream_def.pop(MAPPER_ALIAS_OPTION)
 
-            if stream_def is None or stream_def == NULL_STRING:
-                if stream_name != stream_map_key:
-                    continue
+            if stream_name == source_stream:
+                # Exact match
+                pass
+            elif fnmatch.fnmatch(stream_name, source_stream):
+                # Wildcard match
+                if stream_alias == source_stream:
+                    stream_alias = stream_name
+                source_stream = stream_name
+            else:
+                continue
 
-                self.stream_maps[stream_map_key][0] = RemoveRecordTransform(
-                    stream_alias=stream_map_key,
+            mapper: CustomStreamMap | RemoveRecordTransform
+
+            if isinstance(stream_def, dict):
+                mapper = CustomStreamMap(
+                    stream_alias=stream_alias,
+                    map_transform=stream_def,
+                    map_config=self.map_config,
+                    faker_config=self.faker_config,
+                    raw_schema=schema,
+                    key_properties=key_properties,
+                    flattening_options=self.flattening_options,
+                )
+            elif stream_def is None or (
+                isinstance(stream_def, str) and stream_def == NULL_STRING
+            ):
+                mapper = RemoveRecordTransform(
+                    stream_alias=stream_alias,
                     raw_schema=schema,
                     key_properties=None,
                     flattening_options=self.flattening_options,
                 )
-                logging.info("Set null tansform as default for '%s'", stream_name)
-                continue
+                logging.info("Set null transform as default for '%s'", stream_name)
 
-            if not isinstance(stream_def, dict):
+            elif isinstance(stream_def, str):
+                # Non-NULL string values are not currently supported
+                msg = f"Option '{stream_map_key}:{stream_def}' is not expected."
+                raise StreamMapConfigError(msg)
+
+            else:
                 msg = (
                     f"Unexpected stream definition type. Expected str, dict, or None. "
                     f"Got '{type(stream_def).__name__}'."
                 )
                 raise StreamMapConfigError(msg)
 
-            if MAPPER_SOURCE_OPTION in stream_def:
-                source_stream = stream_def.pop(MAPPER_SOURCE_OPTION)
-
-            if source_stream != stream_name:
-                # Not a match
-                continue
-
-            if MAPPER_ALIAS_OPTION in stream_def:
-                stream_alias = stream_def.pop(MAPPER_ALIAS_OPTION)
-
-            mapper = CustomStreamMap(
-                stream_alias=stream_alias,
-                map_transform=stream_def,
-                map_config=self.map_config,
-                raw_schema=schema,
-                key_properties=key_properties,
-                flattening_options=self.flattening_options,
-            )
-
-            if source_stream == stream_map_key:
+            if is_source_stream_primary:
                 # Zero-th mapper should be the same-keyed mapper.
                 # Override the default mapper with this custom map.
-                self.stream_maps[stream_name][0] = mapper
+                self.stream_maps[source_stream][0] = mapper
             else:
                 # Additional mappers for aliasing and multi-projection:
-                self.stream_maps[stream_name].append(mapper)
+                self.stream_maps[source_stream].append(mapper)

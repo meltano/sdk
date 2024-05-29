@@ -22,6 +22,7 @@ from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
     ArrayType,
     BooleanType,
+    CustomType,
     IntegerType,
     NumberType,
     ObjectType,
@@ -51,12 +52,13 @@ def sample_catalog_dict() -> dict:
         Property("name", StringType),
         Property("owner_email", StringType),
         Property("description", StringType),
-        Property("description", StringType),
+        Property("create_date", StringType),
     ).to_dict()
     foobars_schema = PropertiesList(
         Property("the", StringType),
         Property("brown", StringType),
     ).to_dict()
+    singular_schema = PropertiesList(Property("foo", StringType)).to_dict()
     nested_jellybean_schema = PropertiesList(
         Property("id", IntegerType),
         Property(
@@ -80,6 +82,11 @@ def sample_catalog_dict() -> dict:
                 "stream": "foobars",
                 "tap_stream_id": "foobars",
                 "schema": foobars_schema,
+            },
+            {
+                "stream": "singular",
+                "tap_stream_id": "singular",
+                "schema": singular_schema,
             },
             {
                 "stream": "nested_jellybean",
@@ -127,6 +134,9 @@ def sample_stream():
         "foobars": [
             {"the": "quick"},
             {"brown": "fox"},
+        ],
+        "singular": [
+            {"foo": "bar"},
         ],
         "nested_jellybean": [
             {
@@ -240,6 +250,7 @@ def transformed_result(stream_map_config):
             {"the": "quick"},
             {"brown": "fox"},
         ],
+        "singular": [{"foo": "bar"}],  # should be unchanged
         "nested_jellybean": [
             {
                 "id": 123,
@@ -272,6 +283,9 @@ def transformed_schemas():
         "foobars": PropertiesList(
             Property("the", StringType),
             Property("brown", StringType),
+        ).to_dict(),
+        "singular": PropertiesList(
+            Property("foo", StringType),
         ).to_dict(),
         "nested_jellybean": PropertiesList(
             Property("id", IntegerType),
@@ -310,6 +324,7 @@ def cloned_and_aliased_schemas():
         Property("name", StringType),
         Property("owner_email", StringType),
         Property("description", StringType),
+        Property("create_date", StringType),
     ).to_dict()
     return {
         "repositories_aliased": properties,
@@ -354,6 +369,64 @@ def filtered_result():
 @pytest.fixture
 def filtered_schemas():
     return {"repositories": PropertiesList(Property("name", StringType)).to_dict()}
+
+
+# Wildcard
+
+
+@pytest.fixture
+def wildcard_stream_maps():
+    return {
+        "*s": {
+            "db_name": "'database'",
+        },
+    }
+
+
+@pytest.fixture
+def wildcard_result(sample_stream):
+    return {
+        "repositories": [
+            {**record, "db_name": "database"}
+            for record in sample_stream["repositories"]
+        ],
+        "foobars": [
+            {**record, "db_name": "database"} for record in sample_stream["foobars"]
+        ],
+        "singular": sample_stream["singular"],
+        "nested_jellybean": sample_stream["nested_jellybean"],
+    }
+
+
+@pytest.fixture
+def wildcard_schemas():
+    return {
+        "repositories": PropertiesList(
+            Property("name", StringType),
+            Property("owner_email", StringType),
+            Property("description", StringType),
+            Property("create_date", StringType),
+            Property("db_name", StringType),
+        ).to_dict(),
+        "foobars": PropertiesList(
+            Property("the", StringType),
+            Property("brown", StringType),
+            Property("db_name", StringType),  # added
+        ).to_dict(),
+        "singular": PropertiesList(Property("foo", StringType)).to_dict(),  # unchanged
+        "nested_jellybean": PropertiesList(  # unchanged
+            Property("id", IntegerType),
+            Property(
+                "custom_fields",
+                ArrayType(
+                    ObjectType(
+                        Property("id", IntegerType),
+                        Property("value", CustomType({})),
+                    ),
+                ),
+            ),
+        ).to_dict(),
+    }
 
 
 def test_map_transforms(
@@ -431,6 +504,25 @@ def test_filter_transforms_w_error(
             sample_stream=sample_stream,
             sample_catalog_obj=sample_catalog_obj,
         )
+
+
+def test_wildcard_transforms(
+    sample_stream,
+    sample_catalog_obj,
+    wildcard_stream_maps,
+    stream_map_config,
+    wildcard_result,
+    wildcard_schemas,
+):
+    _test_transform(
+        "wildcard",
+        stream_maps=wildcard_stream_maps,
+        stream_map_config=stream_map_config,
+        expected_result=wildcard_result,
+        expected_schemas=wildcard_schemas,
+        sample_stream=sample_stream,
+        sample_catalog_obj=sample_catalog_obj,
+    )
 
 
 def _run_transform(
@@ -582,12 +674,11 @@ class MappedTap(Tap):
 )
 @pytest.mark.snapshot()
 @pytest.mark.parametrize(
-    "stream_maps,flatten,flatten_max_depth,snapshot_name",
+    "stream_maps,config,snapshot_name",
     [
         pytest.param(
             {},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "no_map.jsonl",
             id="no_map",
         ),
@@ -597,8 +688,7 @@ class MappedTap(Tap):
                     "email_hash": "md5(email)",
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "keep_all_fields.jsonl",
             id="keep_all_fields",
         ),
@@ -610,8 +700,7 @@ class MappedTap(Tap):
                     "__else__": None,
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "only_mapped_fields.jsonl",
             id="only_mapped_fields",
         ),
@@ -623,8 +712,7 @@ class MappedTap(Tap):
                     "__else__": "__NULL__",
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "only_mapped_fields_null_string.jsonl",
             id="only_mapped_fields_null_string",
         ),
@@ -636,57 +724,49 @@ class MappedTap(Tap):
                     "__else__": None,
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "changed_key_properties.jsonl",
             id="changed_key_properties",
         ),
         pytest.param(
             {"mystream": None, "sourced_stream_1": {"__source__": "mystream"}},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "sourced_stream_1.jsonl",
             id="sourced_stream_1",
         ),
         pytest.param(
             {"mystream": "__NULL__", "sourced_stream_1": {"__source__": "mystream"}},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "sourced_stream_1_null_string.jsonl",
             id="sourced_stream_1_null_string",
         ),
         pytest.param(
             {"sourced_stream_2": {"__source__": "mystream"}, "__else__": None},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "sourced_stream_2.jsonl",
             id="sourced_stream_2",
         ),
         pytest.param(
             {"mystream": {"__alias__": "aliased_stream"}},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "aliased_stream.jsonl",
             id="aliased_stream",
         ),
         pytest.param(
             {},
-            True,
-            0,
+            {"flattening_enabled": True, "flattening_max_depth": 0},
             "flatten_depth_0.jsonl",
             id="flatten_depth_0",
         ),
         pytest.param(
             {},
-            True,
-            1,
+            {"flattening_enabled": True, "flattening_max_depth": 1},
             "flatten_depth_1.jsonl",
             id="flatten_depth_1",
         ),
         pytest.param(
             {},
-            True,
-            10,
+            {"flattening_enabled": True, "flattening_max_depth": 2},
             "flatten_all.jsonl",
             id="flatten_all",
         ),
@@ -697,8 +777,7 @@ class MappedTap(Tap):
                     "__key_properties__": ["email_hash"],
                 },
             },
-            True,
-            10,
+            {"flattening_enabled": True, "flattening_max_depth": 10},
             "map_and_flatten.jsonl",
             id="map_and_flatten",
         ),
@@ -708,15 +787,13 @@ class MappedTap(Tap):
                     "email": None,
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "drop_property.jsonl",
             id="drop_property",
         ),
         pytest.param(
             {"mystream": {"email": "__NULL__"}},
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "drop_property_null_string.jsonl",
             id="drop_property_null_string",
         ),
@@ -727,8 +804,7 @@ class MappedTap(Tap):
                     "__else__": None,
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "non_pk_passthrough.jsonl",
             id="non_pk_passthrough",
         ),
@@ -739,10 +815,27 @@ class MappedTap(Tap):
                     "__else__": None,
                 },
             },
-            False,
-            0,
+            {"flattening_enabled": False, "flattening_max_depth": 0},
             "record_to_column.jsonl",
             id="record_to_column",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "cc": "fake.credit_card_number()",
+                    "__else__": None,
+                },
+            },
+            {
+                "flattening_enabled": False,
+                "flattening_max_depth": 0,
+                "faker_config": {
+                    "locale": "en_US",
+                    "seed": 123456,
+                },
+            },
+            "fake_credit_card_number.jsonl",
+            id="fake_credit_card_number",
         ),
     ],
 )
@@ -750,18 +843,13 @@ def test_mapped_stream(
     snapshot: Snapshot,
     snapshot_dir: Path,
     stream_maps: dict,
-    flatten: bool,
-    flatten_max_depth: int | None,
+    config: dict,
     snapshot_name: str,
 ):
     snapshot.snapshot_dir = snapshot_dir.joinpath("mapped_stream")
 
     tap = MappedTap(
-        config={
-            "stream_maps": stream_maps,
-            "flattening_enabled": flatten,
-            "flattening_max_depth": flatten_max_depth,
-        },
+        config={"stream_maps": stream_maps, **config},
     )
     buf = io.StringIO()
     with redirect_stdout(buf):

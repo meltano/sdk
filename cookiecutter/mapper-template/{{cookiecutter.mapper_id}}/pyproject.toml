@@ -31,18 +31,18 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.8"
-singer-sdk = { version="~=0.34.1" }
+singer-sdk = { version="~=0.37.0"{{ ', extras = ["faker"]' if cookiecutter.faker_extra }} }
 fs-s3fs = { version = "~=1.1.1", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.4.0"
-singer-sdk = { version="~=0.34.1", extras = ["testing"] }
+singer-sdk = { version="~=0.37.0", extras = ["testing"] }
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 warn_unused_configs = true
 
 [tool.ruff]
@@ -68,7 +68,7 @@ known-first-party = ["{{cookiecutter.library_name}}"]
 convention = "google"
 
 [build-system]
-requires = ["poetry-core==1.8.1"]
+requires = ["poetry-core==1.9.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]

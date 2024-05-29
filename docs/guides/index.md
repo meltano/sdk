@@ -9,4 +9,5 @@ porting
 pagination-classes
 custom-connector
 custom-clis
+config-schema
 ```

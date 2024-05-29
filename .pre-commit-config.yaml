@@ -5,7 +5,7 @@ ci:
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.5.0
+  rev: v4.6.0
   hooks:
   - id: check-json
     exclude: |
@@ -23,6 +23,7 @@ repos:
             cookiecutter/.*/meltano.yml|
             cookiecutter/.*/.pre-commit-config.yaml|
             cookiecutter/.*/dependabot.yml|
+            cookiecutter/.*/build.yml|
             cookiecutter/.*/test.yml
         )$
   - id: end-of-file-fixer
@@ -42,14 +43,14 @@ repos:
         )$
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.27.3
+  rev: 0.28.4
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
   - id: check-readthedocs
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.1.14
+  rev: v0.4.5
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]
@@ -76,6 +77,6 @@ repos:
         )$
 
 - repo: https://github.com/python-poetry/poetry
-  rev: 1.7.0
+  rev: 1.8.0
   hooks:
   - id: poetry-check

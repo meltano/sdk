@@ -118,7 +118,7 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
         else:
             self._value = new_value
 
-    def has_more(self, response: Response) -> bool:  # noqa: ARG002
+    def has_more(self, response: Response) -> bool:  # noqa: ARG002, PLR6301
         """Override this method to check if the endpoint has any pages left.
 
         Args:
@@ -144,7 +144,7 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
 
 
 class SinglePagePaginator(BaseAPIPaginator[None]):
-    """A paginator that does works with single-page endpoints."""
+    """A paginator that works with single-page endpoints."""
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Create a new paginator.
@@ -155,7 +155,7 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
         """
         super().__init__(None, *args, **kwargs)
 
-    def get_next(self, response: Response) -> None:  # noqa: ARG002
+    def get_next(self, response: Response) -> None:  # noqa: ARG002, PLR6301
         """Get the next pagination token or index from the API response.
 
         Args:
@@ -181,7 +181,7 @@ class BaseHATEOASPaginator(
     like "https://api.com/link/to/next-item".
 
     The :attr:`~singer_sdk.pagination.BaseAPIPaginator.current_value` attribute of
-    this paginator is a `urllib.parse.ParseResult`_ object. This object
+    this paginator is a :class:`urllib.parse.ParseResult` object. This object
     contains the following attributes:
 
     - scheme
@@ -208,9 +208,6 @@ class BaseHATEOASPaginator(
                if next_page_token:
                    return dict(parse_qsl(next_page_token.query))
                return {}
-
-    .. _`urllib.parse.ParseResult`:
-         https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlparse
     """
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
@@ -252,7 +249,7 @@ class HeaderLinkPaginator(BaseHATEOASPaginator):
         - https://datatracker.ietf.org/doc/html/rfc8288#section-3
     """
 
-    def get_next_url(self, response: Response) -> str | None:
+    def get_next_url(self, response: Response) -> str | None:  # noqa: PLR6301
         """Override this method to extract a HATEOAS link from the response.
 
         Args:
@@ -390,7 +387,6 @@ class LegacyPaginatedStreamProtocol(t.Protocol[TPageToken]):
             response: API response object.
             previous_token: Previous page token.
         """
-        ...  # pragma: no cover
 
 
 class LegacyStreamPaginator(
