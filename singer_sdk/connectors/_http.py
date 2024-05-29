@@ -53,7 +53,7 @@ class HTTPConnector(BaseConnector[requests.Session]):
 
         return self.__session
 
-    def get_session(self) -> requests.Session:
+    def get_session(self) -> requests.Session:  # noqa: PLR6301
         """Return a new HTTP session object.
 
         Returns:
@@ -61,7 +61,7 @@ class HTTPConnector(BaseConnector[requests.Session]):
         """
         return requests.Session()
 
-    def get_authenticator(self) -> _Auth:
+    def get_authenticator(self) -> _Auth:  # noqa: PLR6301
         """Authenticate the HTTP session.
 
         Returns:
