@@ -1,6 +1,6 @@
 pip==24.1.2
-poetry==1.8.3
-poetry-plugin-export==1.8.0
+poetry @ git+https://github.com/radoering/poetry.git@lock-markers-and-groups3a
+poetry-plugin-export @ git+https://github.com/radoering/poetry-export-plugin.git@dependency-walk-failed
 poetry-dynamic-versioning==1.4.0
 pre-commit==3.7.1
 nox==2024.4.15
