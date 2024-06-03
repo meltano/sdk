@@ -15,6 +15,7 @@ import requests
 
 from singer_sdk import metrics
 from singer_sdk.authenticators import SimpleAuthenticator
+from singer_sdk.connectors import HTTPConnector
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import (
@@ -51,7 +52,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
     """Abstract base class for REST API streams."""
 
     _page_size: int = DEFAULT_PAGE_SIZE
-    _requests_session: requests.Session | None
+    _requests_session: requests.Session
 
     #: HTTP method to use for requests. Defaults to "GET".
     rest_method = "GET"
@@ -98,7 +99,13 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         if path:
             self.path = path
         self._http_headers: dict = {}
-        self._requests_session = requests.Session()
+
+        self.connector = HTTPConnector(self.config)
+
+        # Override the connector's auth with the stream's auth
+        self.connector.auth = self.authenticator
+
+        self._requests_session = self.connector.session
         self._compiled_jsonpath = None
         self._next_page_token_compiled_jsonpath = None
 
@@ -143,8 +150,12 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         Returns:
             The :class:`requests.Session` object for HTTP requests.
         """
-        if not self._requests_session:
-            self._requests_session = requests.Session()
+        warn(
+            "The `requests_session` property is deprecated and will be removed in a "
+            "future release. Use the `connector` property instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self._requests_session
 
     def validate_response(self, response: requests.Response) -> None:
@@ -260,11 +271,13 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         Returns:
             TODO
         """
-        response = self.requests_session.send(
-            prepared_request,
-            timeout=self.timeout,
-            allow_redirects=self.allow_redirects,
-        )
+        with self.connector.connect() as session:
+            response = session.send(
+                prepared_request,
+                timeout=self.timeout,
+                allow_redirects=self.allow_redirects,
+            )
+
         self._write_request_duration_log(
             endpoint=self.path,
             response=response,
@@ -328,8 +341,8 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
             A :class:`requests.PreparedRequest` object.
         """
         request = requests.Request(*args, **kwargs)
-        self.requests_session.auth = self.authenticator
-        return self.requests_session.prepare_request(request)
+        with self.connector.connect(authenticate=True) as session:
+            return session.prepare_request(request)
 
     def prepare_request(
         self,
