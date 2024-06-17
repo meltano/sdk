@@ -881,6 +881,8 @@ class SQLConnector:  # noqa: PLR0904
         schema_name: str,
         table_name: str,
         is_view: bool,  # noqa: FBT001
+        *,
+        reflect_indices: bool = True,
     ) -> CatalogEntry:
         """Create `CatalogEntry` object for the given table or a view.
 
@@ -890,6 +892,7 @@ class SQLConnector:  # noqa: PLR0904
             schema_name: Schema name to inspect
             table_name: Name of the table or a view
             is_view: Flag whether this object is a view, returned by `get_object_names`
+            reflect_indices: Whether to reflect indices
 
         Returns:
             `CatalogEntry` object for the given table or a view
@@ -905,11 +908,12 @@ class SQLConnector:  # noqa: PLR0904
 
         # An element of the columns list is ``None`` if it's an expression and is
         # returned in the ``expressions`` list of the reflected index.
-        possible_primary_keys.extend(
-            index_def["column_names"]  # type: ignore[misc]
-            for index_def in inspected.get_indexes(table_name, schema=schema_name)
-            if index_def.get("unique", False)
-        )
+        if reflect_indices:
+            possible_primary_keys.extend(
+                index_def["column_names"]  # type: ignore[misc]
+                for index_def in inspected.get_indexes(table_name, schema=schema_name)
+                if index_def.get("unique", False)
+            )
 
         key_properties = next(iter(possible_primary_keys), None)
 
@@ -960,8 +964,18 @@ class SQLConnector:  # noqa: PLR0904
             replication_key=None,  # Must be defined by user
         )
 
-    def discover_catalog_entries(self) -> list[dict]:
+    def discover_catalog_entries(
+        self,
+        *,
+        exclude_schemas: t.Sequence[str] = (),
+        reflect_indices: bool = True,
+    ) -> list[dict]:
         """Return a list of catalog entries from discovery.
+
+        Args:
+            exclude_schemas: A list of schema names to exclude from discovery.
+            reflect_indices: Whether to reflect indices to detect potential primary
+                keys.
 
         Returns:
             The discovered catalog entries as a list.
@@ -970,6 +984,9 @@ class SQLConnector:  # noqa: PLR0904
         engine = self._engine
         inspected = sa.inspect(engine)
         for schema_name in self.get_schema_names(engine, inspected):
+            if schema_name in exclude_schemas:
+                continue
+
             # Iterate through each table and view
             for table_name, is_view in self.get_object_names(
                 engine,
@@ -982,6 +999,7 @@ class SQLConnector:  # noqa: PLR0904
                     schema_name,
                     table_name,
                     is_view,
+                    reflect_indices=reflect_indices,
                 )
                 result.append(catalog_entry.to_dict())
 
@@ -1217,8 +1235,7 @@ class SQLConnector:  # noqa: PLR0904
         Args:
             schema_name: The target schema name.
         """
-        schema_exists = self.schema_exists(schema_name)
-        if not schema_exists:
+        if not self.schema_exists(schema_name):
             self.create_schema(schema_name)
 
     def prepare_table(

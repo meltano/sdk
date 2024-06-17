@@ -657,6 +657,9 @@ class SQLTap(Tap):
     querying a database's system tables).
     """
 
+    exclude_schemas: t.Sequence[str] = []
+    """Hard-coded list of stream names to skip when discovering the catalog."""
+
     _tap_connector: SQLConnector | None = None
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
@@ -700,7 +703,9 @@ class SQLTap(Tap):
         connector = self.tap_connector
 
         result: dict[str, list[dict]] = {"streams": []}
-        result["streams"].extend(connector.discover_catalog_entries())
+        result["streams"].extend(
+            connector.discover_catalog_entries(exclude_schemas=self.exclude_schemas),
+        )
 
         self._catalog_dict = result
         return self._catalog_dict
