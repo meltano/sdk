@@ -45,6 +45,7 @@ class Tag(str, enum.Enum):
     JOB_TYPE = "job_type"
     HTTP_STATUS_CODE = "http_status_code"
     STATUS = "status"
+    PID = "pid"
 
 
 class Metric(str, enum.Enum):
@@ -56,6 +57,7 @@ class Metric(str, enum.Enum):
     HTTP_REQUEST_COUNT = "http_request_count"
     JOB_DURATION = "job_duration"
     SYNC_DURATION = "sync_duration"
+    MESSAGE_COUNT = "message_count"
 
 
 @dataclass
@@ -180,6 +182,10 @@ class Counter(Meter):
         self.log_interval = log_interval
         self.last_log_time = time()
 
+    def exit(self) -> None:
+        """Exit the counter context."""
+        self._pop()
+
     def __enter__(self) -> Counter:
         """Enter the counter context.
 
@@ -202,7 +208,7 @@ class Counter(Meter):
             exc_val: The exception value.
             exc_tb: The exception traceback.
         """
-        self._pop()
+        self.exit()
 
     def _pop(self) -> None:
         """Log and reset the counter."""

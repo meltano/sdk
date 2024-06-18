@@ -7,6 +7,7 @@ import copy
 import datetime
 import importlib.util
 import json
+import os
 import time
 import typing as t
 from functools import cached_property
@@ -17,6 +18,7 @@ from types import MappingProxyType
 import jsonschema
 from typing_extensions import override
 
+from singer_sdk import metrics
 from singer_sdk.exceptions import (
     InvalidJSONSchema,
     InvalidRecord,
@@ -188,6 +190,23 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         )
 
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
+        self._record_counter: metrics.Counter = metrics.Counter(
+            metrics.Metric.RECORD_COUNT,
+            {
+                metrics.Tag.STREAM: stream_name,
+                metrics.Tag.PID: os.getpid(),
+            },
+            log_interval=metrics.DEFAULT_LOG_INTERVAL,
+        )
+
+    @property
+    def record_counter_metric(self) -> metrics.Counter:
+        """Get the record counter metric.
+
+        Returns:
+            The record counter metric.
+        """
+        return self._record_counter
 
     @cached_property
     def validate_schema(self) -> bool:
@@ -680,6 +699,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         should not be relied on, it's recommended to use a uuid as well.
         """
         self.logger.info("Cleaning up %s", self.stream_name)
+        self.record_counter_metric.exit()
 
     def process_batch_files(
         self,
