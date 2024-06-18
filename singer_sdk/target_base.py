@@ -360,6 +360,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             sink.tally_record_read()
             sink.process_record(transformed_record, context)
+            sink.record_counter_metric.increment()
             sink._after_process_record(context)  # noqa: SLF001
 
             if sink.is_full:

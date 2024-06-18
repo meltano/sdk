@@ -6,10 +6,12 @@ import abc
 import decimal
 import json
 import logging
+import os
 import sys
 import typing as t
 from collections import Counter, defaultdict
 
+from singer_sdk import metrics
 from singer_sdk._singerlib.messages import Message, SingerMessageType
 from singer_sdk._singerlib.messages import format_message as singer_format_message
 from singer_sdk._singerlib.messages import write_message as singer_write_message
@@ -33,8 +35,14 @@ class SingerReader(metaclass=abc.ABCMeta):
         if not file_input:
             file_input = sys.stdin
 
-        self._process_lines(file_input)
-        self._process_endofpipe()
+        load_timer = metrics.Timer(
+            metrics.Metric.SYNC_DURATION,
+            {"pid": os.getpid()},
+        )
+
+        with load_timer:
+            self._process_lines(file_input)
+            self._process_endofpipe()
 
     @staticmethod
     def _assert_line_requires(line_dict: dict, requires: set[str]) -> None:
@@ -83,30 +91,37 @@ class SingerReader(metaclass=abc.ABCMeta):
             A counter object for the processed lines.
         """
         stats: dict[str, int] = defaultdict(int)
-        for line in file_input:
-            line_dict = self.deserialize_json(line)
-            self._assert_line_requires(line_dict, requires={"type"})
+        record_message_counter = metrics.Counter(
+            metrics.Metric.MESSAGE_COUNT,
+            {"pid": os.getpid()},
+            log_interval=metrics.DEFAULT_LOG_INTERVAL,
+        )
+        with record_message_counter:
+            for line in file_input:
+                line_dict = self.deserialize_json(line)
+                self._assert_line_requires(line_dict, requires={"type"})
 
-            record_type: SingerMessageType = line_dict["type"]
-            if record_type == SingerMessageType.SCHEMA:
-                self._process_schema_message(line_dict)
+                record_type: SingerMessageType = line_dict["type"]
+                if record_type == SingerMessageType.SCHEMA:
+                    self._process_schema_message(line_dict)
 
-            elif record_type == SingerMessageType.RECORD:
-                self._process_record_message(line_dict)
+                elif record_type == SingerMessageType.RECORD:
+                    record_message_counter.increment()
+                    self._process_record_message(line_dict)
 
-            elif record_type == SingerMessageType.ACTIVATE_VERSION:
-                self._process_activate_version_message(line_dict)
+                elif record_type == SingerMessageType.ACTIVATE_VERSION:
+                    self._process_activate_version_message(line_dict)
 
-            elif record_type == SingerMessageType.STATE:
-                self._process_state_message(line_dict)
+                elif record_type == SingerMessageType.STATE:
+                    self._process_state_message(line_dict)
 
-            elif record_type == SingerMessageType.BATCH:
-                self._process_batch_message(line_dict)
+                elif record_type == SingerMessageType.BATCH:
+                    self._process_batch_message(line_dict)
 
-            else:
-                self._process_unknown_message(line_dict)
+                else:
+                    self._process_unknown_message(line_dict)  # pragma: no cover
 
-            stats[record_type] += 1
+                stats[record_type] += 1
 
         return Counter(**stats)
 
