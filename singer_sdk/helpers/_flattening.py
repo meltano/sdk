@@ -8,7 +8,7 @@ import re
 import typing as t
 from copy import deepcopy
 
-import inflection
+import humps
 
 from singer_sdk._singerlib.json import serialize_json
 
@@ -68,7 +68,7 @@ def flatten_key(key_name: str, parent_keys: list[str], separator: str = "__") ->
         reduced_key = re.sub(
             r"[a-z]",
             "",
-            inflection.camelize(inflected_key[reducer_index]),
+            humps.camelize(inflected_key[reducer_index]),
         )
         inflected_key[reducer_index] = (
             reduced_key if len(reduced_key) > 1 else inflected_key[reducer_index][:3]
