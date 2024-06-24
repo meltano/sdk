@@ -245,6 +245,24 @@ def test_schema_from_dict(pydict, expected):
             {"anyOf": [{"type": "string"}, {"type": "integer"}]},
             id="resolve_schema_any_of",
         ),
+        pytest.param(
+            {
+                "allOf": [
+                    {"$ref": "references.json#/definitions/first_type"},
+                    {"$ref": "references.json#/definitions/second_type"},
+                ],
+            },
+            {
+                "references.json": {
+                    "definitions": {
+                        "first_type": {"type": "string"},
+                        "second_type": {"type": "integer"},
+                    },
+                },
+            },
+            {"allOf": [{"type": "string"}, {"type": "integer"}]},
+            id="resolve_schema_all_of",
+        ),
     ],
 )
 def test_resolve_schema_references(schema, refs, expected):

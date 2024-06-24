@@ -322,10 +322,8 @@ def _flatten_schema(  # noqa: C901, PLR0912
                         max_level=max_level,
                     ).items(),
                 )
-            elif (
-                "array" in field_schema["type"]
-                or "object" in field_schema["type"]
-                and max_level > 0
+            elif "array" in field_schema["type"] or (
+                "object" in field_schema["type"] and max_level > 0
             ):
                 types = (
                     ["string", "null"] if "null" in field_schema["type"] else "string"

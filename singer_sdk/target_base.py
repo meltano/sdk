@@ -96,7 +96,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             self.setup_mapper()
 
     @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
         """Get target capabilities.
 
         Returns:
@@ -258,7 +258,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         try:
             sink.setup()
         except Exception:  # pragma: no cover
-            self.logger.error("Error initializing '%s' target sink", self.name)
+            self.logger.error("Error initializing '%s' target sink", self.name)  # noqa: TRY400
             raise
 
         self._sinks_active[stream_name] = sink
@@ -497,7 +497,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._reset_max_record_age()
 
     @t.final
-    def drain_one(self, sink: Sink) -> None:
+    def drain_one(self, sink: Sink) -> None:  # noqa: PLR6301
         """Drain a specific sink.
 
         This method is internal to the SDK and should not need to be overridden.

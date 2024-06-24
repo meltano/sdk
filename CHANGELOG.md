@@ -5,6 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.38.0 (2024-06-17)
+
+### ✨ New
+
+- [#2433](https://github.com/meltano/sdk/issues/2433) Tap developers can now disable HTTP redirects
+- [#2426](https://github.com/meltano/sdk/issues/2426) Added an optional GitHub workflow to publish to PyPI with trusted publishers
+
+### 🐛 Fixes
+
+- [#2438](https://github.com/meltano/sdk/issues/2438) Null replication values are now handled when incrementing bookmarks
+- [#2431](https://github.com/meltano/sdk/issues/2431) Updated cookiecutter VSCode `launch.json` to use `debugpy`
+- [#2421](https://github.com/meltano/sdk/issues/2421) An error message is now logged every time schema validation fails for any record
+
+### ⚙️ Under the Hood
+
+- [#2455](https://github.com/meltano/sdk/issues/2455) Use parent `datetime.datetime` class in type conforming checks
+- [#2453](https://github.com/meltano/sdk/issues/2453) Change to return type of `utc_now` from `pendulum.DateTime` to `datetime.datetime`
+
+### 📚 Documentation Improvements
+
+- [#2449](https://github.com/meltano/sdk/issues/2449) Add a short guide on defining a configuration schema
+- [#2436](https://github.com/meltano/sdk/issues/2436) Documented how context fields are passed to a child stream
+- [#2435](https://github.com/meltano/sdk/issues/2435) Using an empty list for `__key_properties__` to disable a stream primary keys is now recommended as an alternative to `null`
+
+## v0.37.0 (2024-04-29)
+
+### ✨ New
+
+- [#2389](https://github.com/meltano/sdk/issues/2389) JSON schema keyword `allOf` is now supported
+- [#1888](https://github.com/meltano/sdk/issues/1888) Added support for glob patterns in source stream names -- _**Thanks @DouweM!**_
+- [#2345](https://github.com/meltano/sdk/issues/2345) `PropertiesList` can now behave as an iterable -- _**Thanks @ReubenFrankel!**_
+
+### 🐛 Fixes
+
+- [#2352](https://github.com/meltano/sdk/issues/2352) Removed unnecessary and problematic column caching -- _**Thanks @raulbonet!**_
+- [#2375](https://github.com/meltano/sdk/issues/2375) Added `sensitive: true` to password settings in templates
+- [#2301](https://github.com/meltano/sdk/issues/2301) Unmapped sub-fields in object-type fields are now no longer dropped when the field declares `additionalProperties`
+- [#2348](https://github.com/meltano/sdk/issues/2348) Added a condition to the `No schema for record field` warning -- _**Thanks @tobiascadee!**_
+- [#2342](https://github.com/meltano/sdk/issues/2342) Avoid failing if VSCode IDE config is not requested for target and mapper cookiecutter templates -- _**Thanks @ReubenFrankel!**_
+- [#2331](https://github.com/meltano/sdk/issues/2331) Allow `importlib-resources` >=6.3.2
+
+### ⚙️ Under the Hood
+
+- [#2205](https://github.com/meltano/sdk/issues/2205) Added a `jwt` package extra, but the `cryptography` and `jwt` dependencies are still installed by default for now
+
+### 📚 Documentation Improvements
+
+- [#2326](https://github.com/meltano/sdk/issues/2326) Documented `BATCH` as a default plugin capability -- _**Thanks @ReubenFrankel!**_
+
 ## v0.36.1 (2024-03-13)
 
 ### 🐛 Fixes

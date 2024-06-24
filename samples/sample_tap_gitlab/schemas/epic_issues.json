@@ -115,7 +115,7 @@
       "type": "string"
     },
     "discussion_locked": {
-      "type": "null"
+      "type": ["boolean", "null"]
     },
     "downvotes": {
       "type": "integer"

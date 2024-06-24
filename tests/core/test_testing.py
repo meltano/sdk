@@ -9,12 +9,12 @@ from singer_sdk.testing.factory import BaseTestClass
 
 def test_module_deprecations():
     with pytest.deprecated_call():
-        from singer_sdk.testing import get_standard_tap_tests  # noqa: F401
+        from singer_sdk.testing import get_standard_tap_tests  # noqa: F401, PLC0415
 
     with pytest.deprecated_call():
-        from singer_sdk.testing import get_standard_target_tests  # noqa: F401
+        from singer_sdk.testing import get_standard_target_tests  # noqa: F401, PLC0415
 
-    from singer_sdk import testing
+    from singer_sdk import testing  # noqa: PLC0415
 
     with pytest.raises(
         AttributeError,

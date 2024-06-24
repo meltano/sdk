@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
+import datetime
 import decimal
 import json
 import logging
 import sys
 import typing as t
-from datetime import datetime
 from pathlib import Path, PurePath
 
 import pendulum
@@ -31,7 +31,7 @@ def _default_encoding(obj: t.Any) -> str:  # noqa: ANN401
     Returns:
         The encoded object.
     """
-    return obj.isoformat(sep="T") if isinstance(obj, datetime) else str(obj)
+    return obj.isoformat(sep="T") if isinstance(obj, datetime.datetime) else str(obj)
 
 
 def deserialize_json(json_str: str, **kwargs: t.Any) -> dict:
@@ -54,7 +54,7 @@ def deserialize_json(json_str: str, **kwargs: t.Any) -> dict:
             **kwargs,
         )
     except json.decoder.JSONDecodeError as exc:
-        logger.error("Unable to parse:\n%s", json_str, exc_info=exc)
+        logger.exception("Unable to parse:\n%s", json_str, exc_info=exc)
         raise
 
 
@@ -90,9 +90,10 @@ def read_json_file(path: PurePath | str) -> dict[str, t.Any]:
                 msg += f"\nFor more info, please see the sample template at: {template}"
         raise FileExistsError(msg)
 
-    return deserialize_json(Path(path).read_text())
+    return t.cast(dict, deserialize_json(Path(path).read_text(encoding="utf-8")))
 
 
-def utc_now() -> pendulum.DateTime:
+def utc_now() -> datetime.datetime:
     """Return current time in UTC."""
+    # TODO: replace with datetime.datetime.now(tz=datetime.timezone.utc)
     return pendulum.now(tz="UTC")
