@@ -48,7 +48,7 @@ def test_countries_primary_key():
     )
     assert key_props_2 == ("code",), (
         f"Incorrect 'key_properties' in catalog: ({key_props_2})\n\n"
-        "Catalog entry was: {countries_entry}"
+        f"Catalog entry was: {countries_entry}"
     )
 
 

@@ -218,6 +218,11 @@ def increment_state(
         progress_dict = stream_or_partition_state[PROGRESS_MARKERS]
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
     new_rk_value = to_json_compatible(latest_record[replication_key])
+
+    if new_rk_value is None:
+        logger.warning("New replication value is null")
+        return
+
     if old_rk_value is None or not check_sorted or new_rk_value >= old_rk_value:
         progress_dict["replication_key"] = replication_key
         progress_dict["replication_key_value"] = new_rk_value

@@ -20,7 +20,7 @@ class InlineMapper(PluginBase, SingerReader, SingerWriter, metaclass=abc.ABCMeta
     """Abstract base class for inline mappers."""
 
     @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
         """Get capabilities.
 
         Returns:
@@ -88,7 +88,7 @@ class InlineMapper(PluginBase, SingerReader, SingerWriter, metaclass=abc.ABCMeta
         """
         ...
 
-    def map_batch_message(
+    def map_batch_message(  # noqa: PLR6301
         self,
         message_dict: dict,  # noqa: ARG002
     ) -> t.Iterable[singer.Message]:

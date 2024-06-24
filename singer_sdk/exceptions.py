@@ -140,6 +140,10 @@ class MissingKeyPropertiesError(Exception):
     """Raised when a recieved (and/or transformed) record is missing key properties."""
 
 
+class InvalidInputLine(Exception):
+    """Raised when an input line is not a valid Singer message."""
+
+
 class InvalidJSONSchema(Exception):
     """Raised when a JSON schema is invalid."""
 

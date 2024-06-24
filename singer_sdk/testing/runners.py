@@ -170,7 +170,7 @@ class TapTestRunner(SingerTestRunner):
         Args:
             kwargs: Unused keyword arguments.
         """
-        stdout, stderr = self._execute_sync()
+        stdout, _ = self._execute_sync()
         messages = self._clean_sync_output(stdout)
         self._parse_records(messages)
 
@@ -295,7 +295,7 @@ class TargetTestRunner(SingerTestRunner):
         self.stdout, self.stderr = (stdout.read(), stderr.read())
         self.state_messages.extend(self._clean_sync_output(self.stdout))
 
-    def _execute_sync(
+    def _execute_sync(  # noqa: PLR6301
         self,
         target: Target,
         target_input: t.IO,

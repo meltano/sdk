@@ -401,7 +401,7 @@ stream_maps:
 
 Notes:
 
-- To sync the stream as if it did not contain a primary key, simply set `__key_properties__` to `null`.
+- To sync the stream as if it did not contain a primary key, simply set `__key_properties__` to `null` or an empty list.
 - Key properties _must_ be present in the transformed stream result. Otherwise, an error will be raised.
 
 ### Add a property with a string literal value

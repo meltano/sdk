@@ -50,7 +50,7 @@ class BatchSink(Sink):
             context: Stream partition or context dictionary.
         """
 
-    def process_record(self, record: dict, context: dict) -> None:
+    def process_record(self, record: dict, context: dict) -> None:  # noqa: PLR6301
         """Load the latest record from the stream.
 
         Developers may either load to the `context` dict for staging (the

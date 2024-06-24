@@ -24,7 +24,7 @@ if t.TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
 
 
-class SQLConnector:
+class SQLConnector:  # noqa: PLR0904
     """Base class for SQLAlchemy-based connectors.
 
     The connector class serves as a wrapper around the SQL connection.
@@ -58,8 +58,6 @@ class SQLConnector:
         """
         self._config: dict[str, t.Any] = config or {}
         self._sqlalchemy_url: str | None = sqlalchemy_url or None
-        self._table_cols_cache: dict[str, dict[str, sa.Column]] = {}
-        self._schema_cache: set[str] = set()
 
     @property
     def config(self) -> dict:
@@ -162,7 +160,7 @@ class SQLConnector:
 
         return self._sqlalchemy_url
 
-    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:
+    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:  # noqa: PLR6301
         """Return the SQLAlchemy URL string.
 
         Developers can generally override just one of the following:
@@ -369,7 +367,7 @@ class SQLConnector:
             "Streams list may be incomplete or `is_view` may be unpopulated.",
         )
 
-    def get_schema_names(
+    def get_schema_names(  # noqa: PLR6301
         self,
         engine: Engine,  # noqa: ARG002
         inspected: Inspector,
@@ -530,7 +528,7 @@ class SQLConnector:
 
         return result
 
-    def parse_full_table_name(
+    def parse_full_table_name(  # noqa: PLR6301
         self,
         full_table_name: str,
     ) -> tuple[str | None, str | None, str]:
@@ -586,12 +584,8 @@ class SQLConnector:
         Returns:
             True if the database schema exists, False if not.
         """
-        if schema_name not in self._schema_cache:
-            self._schema_cache = set(
-                sa.inspect(self._engine).get_schema_names(),
-            )
-
-        return schema_name in self._schema_cache
+        schemas = set(sa.inspect(self._engine).get_schema_names())
+        return schema_name in schemas
 
     def get_table_columns(
         self,
@@ -607,24 +601,22 @@ class SQLConnector:
         Returns:
             An ordered list of column objects.
         """
-        if full_table_name not in self._table_cols_cache:
-            _, schema_name, table_name = self.parse_full_table_name(full_table_name)
-            inspector = sa.inspect(self._engine)
-            columns = inspector.get_columns(table_name, schema_name)
+        _, schema_name, table_name = self.parse_full_table_name(full_table_name)
+        inspector = sa.inspect(self._engine)
+        columns = inspector.get_columns(table_name, schema_name)
 
-            self._table_cols_cache[full_table_name] = {
-                col_meta["name"]: sa.Column(
-                    col_meta["name"],
-                    col_meta["type"],
-                    nullable=col_meta.get("nullable", False),
-                )
-                for col_meta in columns
-                if not column_names
-                or col_meta["name"].casefold()
-                in {col.casefold() for col in column_names}
-            }
+        columns_dict: dict[str, sa.Column] = {
+            col_meta["name"]: sa.Column(
+                col_meta["name"],
+                col_meta["type"],
+                nullable=col_meta.get("nullable", False),
+            )
+            for col_meta in columns
+            if not column_names
+            or col_meta["name"].casefold() in {col.casefold() for col in column_names}
+        }
 
-        return self._table_cols_cache[full_table_name]
+        return columns_dict
 
     def get_table(
         self,
@@ -918,7 +910,7 @@ class SQLConnector:
         msg = f"Unable to merge sql types: {', '.join([str(t) for t in sql_types])}"
         raise ValueError(msg)
 
-    def _sort_types(
+    def _sort_types(  # noqa: PLR6301
         self,
         sql_types: t.Iterable[sa.types.TypeEngine],
     ) -> t.Sequence[sa.types.TypeEngine]:
@@ -1161,7 +1153,7 @@ class SQLConnector:
         with self._connect() as conn, conn.begin():
             conn.execute(alter_column_ddl)
 
-    def serialize_json(self, obj: object) -> str:
+    def serialize_json(self, obj: object) -> str:  # noqa: PLR6301
         """Serialize an object to a JSON string.
 
         Target connectors may override this method to provide custom serialization logic
@@ -1177,7 +1169,7 @@ class SQLConnector:
         """
         return simplejson.dumps(obj, use_decimal=True)
 
-    def deserialize_json(self, json_str: str) -> object:
+    def deserialize_json(self, json_str: str) -> object:  # noqa: PLR6301
         """Deserialize a JSON string to an object.
 
         Tap connectors may override this method to provide custom deserialization

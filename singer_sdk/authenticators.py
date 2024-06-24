@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import datetime
 import math
 import typing as t
 import warnings
@@ -10,17 +11,12 @@ from datetime import timedelta
 from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
-import jwt
 import requests
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
 
 from singer_sdk.helpers._util import utc_now
 
 if t.TYPE_CHECKING:
     import logging
-
-    from pendulum import DateTime
 
     from singer_sdk.streams.rest import RESTStream
 
@@ -218,7 +214,7 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
         super().__init__(stream=stream)
         auth_credentials = {key: value}
 
-        if location not in ["header", "params"]:
+        if location not in {"header", "params"}:
             msg = "`type` must be one of 'header' or 'params'."
             raise ValueError(msg)
 
@@ -385,7 +381,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         # Initialize internal tracking attributes
         self.access_token: str | None = None
         self.refresh_token: str | None = None
-        self.last_refreshed: DateTime | None = None
+        self.last_refreshed: datetime.datetime | None = None
         self.expires_in: int | None = None
 
     @property
@@ -575,6 +571,10 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         Raises:
             ValueError: If the private key is not set.
         """
+        import jwt  # noqa: PLC0415
+        from cryptography.hazmat.backends import default_backend  # noqa: PLC0415
+        from cryptography.hazmat.primitives import serialization  # noqa: PLC0415
+
         if not self.private_key:
             msg = "Missing 'private_key' property for OAuth payload."
             raise ValueError(msg)

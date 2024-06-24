@@ -69,6 +69,10 @@ class EpicIssuesStream(GitlabStream):
     # ...
 ```
 
+```{note}
+All the keys in the `context` dictionary are added to the child's record, but they will be automatically removed if they are not present in the child's schema. If you wish to preserve these keys in the child's record, you must add them to the child's schema.
+```
+
 ## Additional Parent-Child References
 
 - [Singer State in SDK Taps](./implementation/state.md)

@@ -14,6 +14,7 @@ from singer_sdk.connectors import SQLConnector
 from singer_sdk.streams.core import Stream
 
 if t.TYPE_CHECKING:
+    from singer_sdk.streams.core import Context
     from singer_sdk.tap_base import Tap
 
 
@@ -157,7 +158,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         )
 
     # Get records from stream
-    def get_records(self, context: dict | None) -> t.Iterable[dict[str, t.Any]]:
+    def get_records(self, context: Context | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
 
         If the stream has a replication_key value defined, records will be sorted by the
@@ -229,4 +230,4 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         return self.replication_key is not None
 
 
-__all__ = ["SQLStream", "SQLConnector"]
+__all__ = ["SQLConnector", "SQLStream"]

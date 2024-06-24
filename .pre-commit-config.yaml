@@ -5,7 +5,7 @@ ci:
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.5.0
+  rev: v4.6.0
   hooks:
   - id: check-json
     exclude: |
@@ -23,6 +23,7 @@ repos:
             cookiecutter/.*/meltano.yml|
             cookiecutter/.*/.pre-commit-config.yaml|
             cookiecutter/.*/dependabot.yml|
+            cookiecutter/.*/build.yml|
             cookiecutter/.*/test.yml
         )$
   - id: end-of-file-fixer
@@ -42,14 +43,14 @@ repos:
         )$
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.28.0
+  rev: 0.28.5
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
   - id: check-readthedocs
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.3.4
+  rev: v0.4.9
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]
@@ -64,7 +65,7 @@ repos:
       )$
 
 - repo: https://github.com/pycqa/flake8
-  rev: 7.0.0
+  rev: 7.1.0
   hooks:
   - id: flake8
     additional_dependencies:
