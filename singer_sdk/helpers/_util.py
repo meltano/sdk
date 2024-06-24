@@ -90,7 +90,7 @@ def read_json_file(path: PurePath | str) -> dict[str, t.Any]:
                 msg += f"\nFor more info, please see the sample template at: {template}"
         raise FileExistsError(msg)
 
-    return t.cast(dict, deserialize_json(Path(path).read_text(encoding="utf-8")))
+    return deserialize_json(Path(path).read_text(encoding="utf-8"))
 
 
 def utc_now() -> datetime.datetime:
