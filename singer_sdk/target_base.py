@@ -13,20 +13,8 @@ import click
 from joblib import Parallel, delayed, parallel_config
 
 from singer_sdk.exceptions import RecordsWithoutSchemaException
+from singer_sdk.helpers import capabilities
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
-from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers.capabilities import (
-    ADD_RECORD_METADATA_CONFIG,
-    BATCH_CONFIG,
-    TARGET_BATCH_SIZE_ROWS_CONFIG,
-    TARGET_HARD_DELETE_CONFIG,
-    TARGET_LOAD_METHOD_CONFIG,
-    TARGET_SCHEMA_CONFIG,
-    TARGET_VALIDATE_RECORDS_CONFIG,
-    CapabilitiesEnum,
-    PluginCapabilities,
-    TargetCapabilities,
-)
 from singer_sdk.io_base import SingerMessageType, SingerReader
 from singer_sdk.plugin_base import PluginBase
 
@@ -55,6 +43,14 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
     # Default class to use for creating new sink objects.
     # Required if `Target.get_sink_class()` is not defined.
     default_sink_class: type[Sink]
+
+    #: Target capabilities.
+    capabilities: t.ClassVar[list[capabilities.CapabilitiesEnum]] = [
+        capabilities.PluginCapabilities.ABOUT,
+        capabilities.PluginCapabilities.STREAM_MAPS,
+        capabilities.PluginCapabilities.FLATTENING,
+        capabilities.TargetCapabilities.VALIDATE_RECORDS,
+    ]
 
     def __init__(
         self,
@@ -94,20 +90,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         if setup_mapper:
             self.setup_mapper()
-
-    @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
-        """Get target capabilities.
-
-        Returns:
-            A list of capabilities supported by this target.
-        """
-        return [
-            PluginCapabilities.ABOUT,
-            PluginCapabilities.STREAM_MAPS,
-            PluginCapabilities.FLATTENING,
-            TargetCapabilities.VALIDATE_RECORDS,
-        ]
 
     @property
     def max_parallelism(self) -> int:
@@ -610,17 +592,18 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 if k not in target_jsonschema["properties"]:
                     target_jsonschema["properties"][k] = v
 
-        _merge_missing(ADD_RECORD_METADATA_CONFIG, config_jsonschema)
-        _merge_missing(TARGET_LOAD_METHOD_CONFIG, config_jsonschema)
-        _merge_missing(TARGET_BATCH_SIZE_ROWS_CONFIG, config_jsonschema)
+        _merge_missing(capabilities.ADD_RECORD_METADATA.schema, config_jsonschema)
+        _merge_missing(capabilities.TARGET_LOAD_METHOD.schema, config_jsonschema)
+        _merge_missing(capabilities.TARGET_BATCH_SIZE_ROWS.schema, config_jsonschema)
 
-        capabilities = cls.capabilities
+        if capabilities.BATCH.capability in cls.capabilities:
+            _merge_missing(capabilities.BATCH.schema, config_jsonschema)
 
-        if PluginCapabilities.BATCH in capabilities:
-            _merge_missing(BATCH_CONFIG, config_jsonschema)
-
-        if TargetCapabilities.VALIDATE_RECORDS in capabilities:
-            _merge_missing(TARGET_VALIDATE_RECORDS_CONFIG, config_jsonschema)
+        if capabilities.TARGET_VALIDATE_RECORDS.capability in cls.capabilities:
+            _merge_missing(
+                capabilities.TARGET_VALIDATE_RECORDS.schema,
+                config_jsonschema,
+            )
 
         super().append_builtin_config(config_jsonschema)
 
@@ -631,6 +614,13 @@ class SQLTarget(Target):
     _target_connector: SQLConnector | None = None
 
     default_sink_class: type[SQLSink]
+
+    #: Target capabilities.
+    capabilities: t.ClassVar[list[capabilities.CapabilitiesEnum]] = [
+        *Target.capabilities,
+        capabilities.TargetCapabilities.TARGET_SCHEMA,
+        capabilities.TargetCapabilities.HARD_DELETE,
+    ]
 
     @property
     def target_connector(self) -> SQLConnector:
@@ -644,23 +634,6 @@ class SQLTarget(Target):
                 dict(self.config),
             )
         return self._target_connector
-
-    @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:
-        """Get target capabilities.
-
-        Returns:
-            A list of capabilities supported by this target.
-        """
-        sql_target_capabilities: list[CapabilitiesEnum] = super().capabilities
-        sql_target_capabilities.extend(
-            [
-                TargetCapabilities.TARGET_SCHEMA,
-                TargetCapabilities.HARD_DELETE,
-            ]
-        )
-
-        return sql_target_capabilities
 
     @classmethod
     def append_builtin_config(cls: type[SQLTarget], config_jsonschema: dict) -> None:
@@ -685,13 +658,11 @@ class SQLTarget(Target):
                 if k not in target_jsonschema["properties"]:
                     target_jsonschema["properties"][k] = v
 
-        capabilities = cls.capabilities
+        if capabilities.TARGET_SCHEMA.capability in cls.capabilities:
+            _merge_missing(capabilities.TARGET_SCHEMA.schema, config_jsonschema)
 
-        if TargetCapabilities.TARGET_SCHEMA in capabilities:
-            _merge_missing(TARGET_SCHEMA_CONFIG, config_jsonschema)
-
-        if TargetCapabilities.HARD_DELETE in capabilities:
-            _merge_missing(TARGET_HARD_DELETE_CONFIG, config_jsonschema)
+        if capabilities.TARGET_HARD_DELETE.capability in cls.capabilities:
+            _merge_missing(capabilities.TARGET_HARD_DELETE.schema, config_jsonschema)
 
         super().append_builtin_config(config_jsonschema)
 
