@@ -57,6 +57,7 @@ within the `#singer-tap-development`_ and `#singer-target-development`_ Slack ch
    implementation/index
    typing
    capabilities
+   builtin
 
 .. toctree::
    :caption: Advanced Concepts
