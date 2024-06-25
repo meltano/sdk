@@ -837,6 +837,16 @@ class MappedTap(Tap):
             "fake_credit_card_number.jsonl",
             id="fake_credit_card_number",
         ),
+        pytest.param(
+            {
+                "mystream": {
+                    "__alias__": "stream + '-user_' + str(user['id'])",
+                },
+            },
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "stream_alias_expr.jsonl",
+            id="stream_alias_expr",
+        ),
     ],
 )
 def test_mapped_stream(

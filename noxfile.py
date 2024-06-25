@@ -124,7 +124,7 @@ def update_snapshots(session: Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
 
-    session.install(".[faker,jwt]")
+    session.install(".[faker,jwt,parquet]")
     session.install(*test_dependencies)
     session.run("pytest", "--snapshot-update", *args)
 

@@ -159,6 +159,17 @@ class StreamMap(metaclass=abc.ABCMeta):
         """
         return self.flatten_record(record)
 
+    def transform_stream_alias(self, record: dict) -> str:  # noqa: ARG002
+        """Transform the stream alias.
+
+        Args:
+            record: An individual record dictionary in a stream.
+
+        Returns:
+            The transformed stream alias.
+        """
+        return self.stream_alias
+
     @abc.abstractmethod
     def get_filter_result(self, record: dict) -> bool:
         """Exclude records from a stream.
@@ -284,6 +295,23 @@ class CustomStreamMap(StreamMap):
         transformed_record = self._transform_fn(record)
         return super().transform(transformed_record) if transformed_record else None
 
+    def transform_stream_alias(self, record: dict) -> str:
+        """Return the transformed stream alias.
+
+        Args:
+            record: An individual record dictionary in a stream.
+
+        Returns:
+            The transformed stream alias.
+        """
+        parsed_alias_expr = ast.parse(self.stream_alias).body[0]
+        return self._eval(
+            expr=self.stream_alias,
+            expr_parsed=parsed_alias_expr,
+            record=record,
+            property_name=None,
+        )
+
     def get_filter_result(self, record: dict) -> bool:
         """Return True to include or False to exclude.
 
@@ -333,6 +361,10 @@ class CustomStreamMap(StreamMap):
         names["_"] = record  # Add a shorthand alias in case of reserved words in names
         names["record"] = record  # ...and a longhand alias
         names["config"] = self.map_config  # Allow map config access within transform
+        names["stream"] = self.stream_alias  # Allow stream name access within transform
+        names[self.stream_alias] = (
+            self.stream_alias
+        )  # Allow stream name access within transform
 
         if self.fake:
             names["fake"] = self.fake

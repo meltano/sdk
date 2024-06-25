@@ -847,10 +847,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         )
         for stream_map in self.stream_maps:
             mapped_record = stream_map.transform(record)
+            stream_alias = stream_map.transform_stream_alias(record)
             # Emit record if not filtered
             if mapped_record is not None:
                 yield singer.RecordMessage(
-                    stream=stream_map.stream_alias,
+                    stream=stream_alias,
                     record=mapped_record,
                     version=None,
                     time_extracted=utc_now(),
