@@ -18,6 +18,23 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers._compat import Traversable
 
 
+class RunnerStandardOutErr(io.StringIO):
+    """Class to memic standard out with binary buffer."""
+
+    buffer = io.BytesIO()
+
+    def rewind(self) -> None:
+        """Sets self and buffer back to the start."""
+        self.seek(0)
+        self.buffer.seek(0)
+
+    def load_from_buffer(self) -> None:
+        """Decodes and loads the rows from the buffer into self."""
+        self.rewind()
+        self.write(self.buffer.read().decode())
+        self.rewind()
+
+
 class SingerTestRunner(metaclass=abc.ABCMeta):
     """Base Singer Test Runner."""
 
@@ -184,12 +201,15 @@ class TapTestRunner(SingerTestRunner):
         Returns:
             A 2-item tuple with StringIO buffers from the Tap's output: (stdout, stderr)
         """
-        stdout_buf = io.StringIO()
-        stderr_buf = io.StringIO()
+        stdout_buf = RunnerStandardOutErr()
+        stderr_buf = RunnerStandardOutErr()
         with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
             self.run_sync_dry_run()
-        stdout_buf.seek(0)
-        stderr_buf.seek(0)
+
+        # Add decoded buffer items into stdout_buf
+        stdout_buf.load_from_buffer()
+
+        stderr_buf.rewind()
         return stdout_buf.read(), stderr_buf.read()
 
 
@@ -236,7 +256,7 @@ class TargetTestRunner(SingerTestRunner):
         return t.cast(Target, self.create())
 
     @property
-    def target_input(self) -> t.IO[str]:
+    def target_input(self) -> t.IO:
         """Input messages to pass to Target.
 
         Returns:
@@ -278,7 +298,7 @@ class TargetTestRunner(SingerTestRunner):
     def _execute_sync(  # noqa: PLR6301
         self,
         target: Target,
-        target_input: t.IO[str],
+        target_input: t.IO,
         *,
         finalize: bool = True,
     ) -> tuple[io.StringIO, io.StringIO]:

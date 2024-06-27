@@ -7,6 +7,7 @@ import typing as t
 from contextlib import redirect_stderr, redirect_stdout
 
 import singer_sdk._singerlib as singer
+from singer_sdk.testing.runners import RunnerStandardOutErr
 
 if t.TYPE_CHECKING:
     from singer_sdk.mapper_base import InlineMapper
@@ -111,7 +112,7 @@ def get_standard_target_tests(
     return []
 
 
-def tap_sync_test(tap: Tap) -> tuple[io.StringIO, io.StringIO]:
+def tap_sync_test(tap: Tap) -> tuple[RunnerStandardOutErr, io.StringIO]:
     """Invokes a Tap object and return STDOUT and STDERR results in StringIO buffers.
 
     Args:
@@ -120,11 +121,15 @@ def tap_sync_test(tap: Tap) -> tuple[io.StringIO, io.StringIO]:
     Returns:
         A 2-item tuple with StringIO buffers from the Tap's output: (stdout, stderr)
     """
-    stdout_buf = io.StringIO()
+    stdout_buf = RunnerStandardOutErr()
     stderr_buf = io.StringIO()
+
     with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
         tap.sync_all()
-    stdout_buf.seek(0)
+
+    # Add decoded buffer items into stdout_buf
+    stdout_buf.load_from_buffer()
+
     stderr_buf.seek(0)
     return stdout_buf, stderr_buf
 
@@ -171,7 +176,7 @@ def _select_all(catalog_dict: dict) -> dict:
 
 def target_sync_test(
     target: Target,
-    input: io.StringIO | None,  # noqa: A002
+    input: RunnerStandardOutErr | None,  # noqa: A002
     *,
     finalize: bool = True,
 ) -> tuple[io.StringIO, io.StringIO]:
@@ -203,7 +208,7 @@ def target_sync_test(
 def tap_to_target_sync_test(
     tap: Tap,
     target: Target,
-) -> tuple[io.StringIO, io.StringIO, io.StringIO, io.StringIO]:
+) -> tuple[RunnerStandardOutErr, io.StringIO, io.StringIO, io.StringIO]:
     """Test and end-to-end sink from the tap to the target.
 
     Note: This method buffers all output from the tap in memory and should not be
@@ -222,7 +227,7 @@ def tap_to_target_sync_test(
     target_stdout, target_stderr = target_sync_test(target, tap_stdout, finalize=True)
 
     # Reset the tap's stdout buffer before returning
-    tap_stdout.seek(0)
+    tap_stdout.rewind()
 
     return tap_stdout, tap_stderr, target_stdout, target_stderr
 
@@ -236,19 +241,23 @@ def sync_end_to_end(tap: Tap, target: Target, *mappers: InlineMapper) -> None:
         mappers: Zero or more inline mapper to apply in between the tap and target, in
             order.
     """
-    buf = io.StringIO()
-    with redirect_stdout(buf):
+    stdout_buf = RunnerStandardOutErr()
+    with redirect_stdout(stdout_buf):
         tap.sync_all()
 
-    buf.seek(0)
-    mapper_output = buf
+    # Add decoded buffer items into stdout_buf
+    stdout_buf.rewind()
+
+    mapper_output = stdout_buf
 
     for mapper in mappers:
-        buf = io.StringIO()
+        buf = RunnerStandardOutErr()
         with redirect_stdout(buf):
             mapper.listen(mapper_output)
 
-        buf.seek(0)
+        # Add decoded buffer items into stdout_buf
+        buf.rewind()
+
         mapper_output = buf
 
     target.listen(mapper_output)

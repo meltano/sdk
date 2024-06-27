@@ -4,25 +4,57 @@ from __future__ import annotations
 
 import abc
 import decimal
-import json
 import logging
 import sys
 import typing as t
 from collections import Counter, defaultdict
+from datetime import datetime
+
+import msgspec
 
 from singer_sdk._singerlib.messages import Message, SingerMessageType
-from singer_sdk._singerlib.messages import format_message as singer_format_message
-from singer_sdk._singerlib.messages import write_message as singer_write_message
 from singer_sdk.exceptions import InvalidInputLine
 
 logger = logging.getLogger(__name__)
+msg_buffer = bytearray(64)
+
+
+def enc_hook(obj: t.Any) -> t.Any:  # noqa: ANN401
+    """Enocding type helper for non native types.
+
+    Args:
+        obj: the item to be encoded
+
+    Returns:
+        The object converted to the appropriate type, default is str
+    """
+    return obj.isoformat(sep="T") if isinstance(obj, datetime) else str(obj)
+
+
+encoder = msgspec.json.Encoder(enc_hook=enc_hook, decimal_format="number")
+
+
+def dec_hook(type: type, obj: t.Any) -> t.Any:  # noqa: ARG001, A002, ANN401
+    """Decoding type helper for non native types.
+
+    Args:
+        type: the type given
+        obj: the item to be decoded
+
+    Returns:
+        The object converted to the appropriate type, default is str.
+    """
+    return str(obj)
+
+
+decoder = msgspec.json.Decoder(dec_hook=dec_hook, float_hook=decimal.Decimal)
 
 
 class SingerReader(metaclass=abc.ABCMeta):
     """Interface for all plugins reading Singer messages from stdin."""
 
     @t.final
-    def listen(self, file_input: t.IO[str] | None = None) -> None:
+    def listen(self, file_input: t.IO | None = None) -> None:
         """Read from input until all messages are processed.
 
         Args:
@@ -31,7 +63,7 @@ class SingerReader(metaclass=abc.ABCMeta):
         This method is internal to the SDK and should not need to be overridden.
         """
         if not file_input:
-            file_input = sys.stdin
+            file_input = sys.stdin.buffer
 
         self._process_lines(file_input)
         self._process_endofpipe()
@@ -52,7 +84,7 @@ class SingerReader(metaclass=abc.ABCMeta):
             msg = f"Line is missing required {', '.join(missing)} key(s): {line_dict}"
             raise InvalidInputLine(msg)
 
-    def deserialize_json(self, line: str) -> dict:  # noqa: PLR6301
+    def deserialize_json(self, line: bytes) -> dict:  # noqa: PLR6301
         """Deserialize a line of json.
 
         Args:
@@ -62,18 +94,17 @@ class SingerReader(metaclass=abc.ABCMeta):
             A dictionary of the deserialized json.
 
         Raises:
-            json.decoder.JSONDecodeError: raised if any lines are not valid json
+            msgspec.DecodeError: raised if any lines are not valid json
         """
         try:
-            return json.loads(  # type: ignore[no-any-return]
+            return decoder.decode(  # type: ignore[no-any-return]
                 line,
-                parse_float=decimal.Decimal,
             )
-        except json.decoder.JSONDecodeError as exc:
+        except msgspec.DecodeError as exc:
             logger.exception("Unable to parse:\n%s", line, exc_info=exc)
             raise
 
-    def _process_lines(self, file_input: t.IO[str]) -> t.Counter[str]:
+    def _process_lines(self, file_input: t.IO) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:
@@ -145,7 +176,7 @@ class SingerReader(metaclass=abc.ABCMeta):
 class SingerWriter:
     """Interface for all plugins writting Singer messages to stdout."""
 
-    def format_message(self, message: Message) -> str:  # noqa: PLR6301
+    def format_message(self, message: Message) -> bytes:  # noqa: PLR6301
         """Format a message as a JSON string.
 
         Args:
@@ -154,12 +185,15 @@ class SingerWriter:
         Returns:
             The formatted message.
         """
-        return singer_format_message(message)
+        encoder.encode_into(message.to_dict(), msg_buffer)
+        msg_buffer.extend(b"\n")
+        return msg_buffer
 
-    def write_message(self, message: Message) -> None:  # noqa: PLR6301
+    def write_message(self, message: Message) -> None:
         """Write a message to stdout.
 
         Args:
             message: The message to write.
         """
-        singer_write_message(message)
+        sys.stdout.buffer.write(self.format_message(message))
+        sys.stdout.flush()
