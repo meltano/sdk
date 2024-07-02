@@ -62,8 +62,7 @@ simpleeval = ">=0.9.13"
 simplejson = ">=3.17.6"
 sqlalchemy = ">=1.4,<3.0"
 typing-extensions = ">=4.5.0"
-# urllib3 2.0 is not compatible with botocore
-urllib3 = ">=1.26,<2"
+
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
@@ -80,10 +79,7 @@ sphinx-reredirects = {version = ">=0.1.1", optional = true}
 fs-s3fs = {version = ">=1.1.1", optional = true}
 
 # Parquet file dependencies installed as optional 'parquet' extras
-numpy = [
-    { version = ">=1.22,<1.25", python = ">=3.8,<3.9", optional = true },
-    { version = ">=1.22", python = ">=3.9", optional = true },
-]
+numpy = { version = ">=1.22", optional = true }
 pyarrow = { version = ">=13", optional = true }
 
 # Testing dependencies installed as optional 'testing' extras
@@ -124,12 +120,18 @@ duckdb = ">=0.8.0"
 duckdb-engine = { version = ">=0.9.4", python = "<4" }
 
 fastjsonschema = ">=2.19.1"
+numpy = [
+    { version = ">=1.22,<1.25", python = ">=3.8,<3.9" },
+    { version = ">=1.22", python = ">=3.9" },
+]
 pytest-benchmark = ">=4.0.0"
 pytest-snapshot = ">=0.9.0"
 pytz = ">=2022.2.1"
 requests-mock = ">=1.10.0"
 rfc3339-validator = ">=0.1.4"
 time-machine = ">=2.10.0"
+# urllib3 2.0 is not compatible with botocore
+urllib3 = ">=1.26,<2"
 xdoctest = ">=1.1.1"
 
 [tool.poetry.group.typing.dependencies]
