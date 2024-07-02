@@ -5,11 +5,11 @@ from __future__ import annotations
 import typing as t
 from contextlib import contextmanager
 
-import pendulum
 import pytest
 from typing_extensions import override
 
 from singer_sdk import Stream, Tap
+from singer_sdk.helpers._compat import datetime_fromisoformat
 from singer_sdk.typing import (
     DateTimeType,
     IntegerType,
@@ -70,7 +70,7 @@ class UnixTimestampIncrementalStream2(UnixTimestampIncrementalStream):
     def compare_start_date(self, value: str, start_date_value: str) -> str:
         """Compare a value to a start date value."""
 
-        start_timestamp = pendulum.parse(start_date_value).format("X")
+        start_timestamp = datetime_fromisoformat(start_date_value).timestamp()
         return max(value, start_timestamp, key=float)
 
 

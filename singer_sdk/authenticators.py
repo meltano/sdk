@@ -7,7 +7,6 @@ import datetime
 import math
 import typing as t
 import warnings
-from datetime import timedelta
 from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
@@ -557,7 +556,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             "iss": self.client_id,
             "scope": self.oauth_scopes,
             "aud": self.auth_endpoint,
-            "exp": math.floor((request_time + timedelta(hours=1)).timestamp()),
+            "exp": math.floor((request_time + datetime.timedelta(hours=1)).timestamp()),
             "iat": math.floor(request_time.timestamp()),
         }
 

@@ -6,7 +6,6 @@ import datetime
 import logging
 import typing as t
 
-import pendulum
 import pytest
 import requests
 
@@ -24,11 +23,11 @@ from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 from tests.core.conftest import SimpleTestStream
 
-CONFIG_START_DATE = "2021-01-01"
-
 if t.TYPE_CHECKING:
     from singer_sdk import Stream, Tap
     from tests.core.conftest import SimpleTestTap
+
+CONFIG_START_DATE = "2021-01-01"
 
 
 class RestTestStream(RESTStream):
@@ -181,7 +180,7 @@ def test_stream_apply_catalog(stream: Stream):
             "unix_ts_override",
             None,
             "1577858400",
-            pendulum.parse(CONFIG_START_DATE).format("X"),
+            parse(CONFIG_START_DATE).timestamp(),
             id="unix-ts-repl-key-old-bookmark",
         ),
     ],
