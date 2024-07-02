@@ -11,7 +11,7 @@ import sqlalchemy as sa
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
-from singer_sdk.streams.core import Stream
+from singer_sdk.streams.core import REPLICATION_INCREMENTAL, Stream
 
 if t.TYPE_CHECKING:
     from singer_sdk.streams.core import Context
@@ -227,7 +227,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             `True` if stream is sorted. Defaults to `False`.
         """
-        return self.replication_key is not None
+        return self.replication_method == REPLICATION_INCREMENTAL
 
 
 __all__ = ["SQLConnector", "SQLStream"]
