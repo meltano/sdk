@@ -60,6 +60,7 @@ if t.TYPE_CHECKING:
     import logging
 
     from singer_sdk.helpers._compat import Traversable
+    from singer_sdk.helpers._state import TapStateDict
     from singer_sdk.tap_base import Tap
 
 # Replication methods
@@ -149,7 +150,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         self._mask: singer.SelectionMask | None = None
         self._schema: dict
         self._is_state_flushed: bool = True
-        self._last_emitted_state: dict | None = None
+        self._last_emitted_state: TapStateDict | None = None
         self._sync_costs: dict[str, int] = {}
         self.child_streams: list[Stream] = []
         if schema:
@@ -638,7 +639,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     # State properties:
 
     @property
-    def tap_state(self) -> dict:
+    def tap_state(self) -> TapStateDict:
         """Return a writeable state dict for the entire tap.
 
         Note: This dictionary is shared (and writable) across all streams.
@@ -783,7 +784,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if (not self._is_state_flushed) and (
             self.tap_state != self._last_emitted_state
         ):
-            self._tap.write_message(singer.StateMessage(value=self.tap_state))
+            self._tap.write_message(singer.StateMessage(value=self.tap_state))  # type: ignore[arg-type]
             self._last_emitted_state = copy.deepcopy(self.tap_state)
             self._is_state_flushed = True
 
