@@ -6,6 +6,7 @@ import os
 import shutil
 import sys
 import tempfile
+import typing as t
 from pathlib import Path
 from textwrap import dedent
 
@@ -45,7 +46,7 @@ nox.options.sessions = (
 )
 
 poetry_config = nox.project.load_toml("pyproject.toml")["tool"]["poetry"]
-test_dependencies = poetry_config["group"]["dev"]["dependencies"].keys()
+test_dependencies: dict[str, t.Any] = poetry_config["group"]["dev"]["dependencies"]
 typing_dependencies = poetry_config["group"]["typing"]["dependencies"].keys()
 
 
@@ -63,7 +64,22 @@ def mypy(session: Session) -> None:
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
-    session.install(".[faker,jwt,parquet,s3]")
+    extras = [
+        "faker",
+        "jwt",
+        "parquet",
+        "s3",
+    ]
+
+    if session.python == "3.13":
+        # https://github.com/apache/arrow/issues/43519
+        extras.remove("parquet")
+
+        # https://github.com/duckdb/duckdb/discussions/13352
+        test_dependencies.pop("duckdb")
+        test_dependencies.pop("duckdb-engine")
+
+    session.install(f".[{','.join(extras)}]")
     session.install(*test_dependencies)
 
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
