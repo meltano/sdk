@@ -238,6 +238,7 @@ types-requests = "requests"
 [tool.deptry.per_rule_ignores]
 DEP002 = [
     # Deprecated dependencies
+    "pendulum",
     "python-dateutil",
     # Transitive constraints
     "numpy",
