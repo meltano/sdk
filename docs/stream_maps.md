@@ -515,7 +515,7 @@ stream_maps:
 
 ## Filtering out records from a stream using `__filter__` operation
 
-The `__filter__` operation accept a string expression which must evaluate to `true` or
+The `__filter__` operation accepts a string expression which must evaluate to `true` or
 `false`. Filter expressions should be wrapped in `bool()` to ensure proper type conversion.
 
 For example, to only include customers with emails from the `example.com` company domain:

@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.38.0 (2024-06-17)
+
+### ✨ New
+
+- [#2433](https://github.com/meltano/sdk/issues/2433) Tap developers can now disable HTTP redirects
+- [#2426](https://github.com/meltano/sdk/issues/2426) Added an optional GitHub workflow to publish to PyPI with trusted publishers
+
+### 🐛 Fixes
+
+- [#2438](https://github.com/meltano/sdk/issues/2438) Null replication values are now handled when incrementing bookmarks
+- [#2431](https://github.com/meltano/sdk/issues/2431) Updated cookiecutter VSCode `launch.json` to use `debugpy`
+- [#2421](https://github.com/meltano/sdk/issues/2421) An error message is now logged every time schema validation fails for any record
+
+### ⚙️ Under the Hood
+
+- [#2455](https://github.com/meltano/sdk/issues/2455) Use parent `datetime.datetime` class in type conforming checks
+- [#2453](https://github.com/meltano/sdk/issues/2453) Change to return type of `utc_now` from `pendulum.DateTime` to `datetime.datetime`
+
+### 📚 Documentation Improvements
+
+- [#2449](https://github.com/meltano/sdk/issues/2449) Add a short guide on defining a configuration schema
+- [#2436](https://github.com/meltano/sdk/issues/2436) Documented how context fields are passed to a child stream
+- [#2435](https://github.com/meltano/sdk/issues/2435) Using an empty list for `__key_properties__` to disable a stream primary keys is now recommended as an alternative to `null`
+
 ## v0.37.0 (2024-04-29)
 
 ### ✨ New
