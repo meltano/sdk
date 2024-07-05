@@ -238,6 +238,7 @@ types-requests = "requests"
 [tool.deptry.per_rule_ignores]
 DEP002 = [
     # Deprecated dependencies
+    "pendulum",
     "python-dateutil",
     # Transitive constraints
     "numpy",
@@ -406,6 +407,9 @@ typing = "t"
 [tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 parametrize-names-type = "csv"
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"pendulum".msg = "BAN002: pendulum is banned"
 
 [tool.ruff.lint.isort]
 known-first-party = ["singer_sdk", "samples", "tests"]
