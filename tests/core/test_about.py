@@ -69,7 +69,7 @@ def about_info() -> AboutInfo:
     )
 
 
-@pytest.mark.snapshot()
+@pytest.mark.snapshot
 @pytest.mark.parametrize(
     "about_format",
     [
