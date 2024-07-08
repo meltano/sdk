@@ -639,7 +639,7 @@ def test_array_type():
     assert ArrayType(wrapped_type).type_dict == expected_json_schema
 
 
-@pytest.mark.snapshot()
+@pytest.mark.snapshot
 @pytest.mark.parametrize(
     "schema_obj,snapshot_name",
     [

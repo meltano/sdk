@@ -143,7 +143,7 @@ def test_batch_mode(outdir):
     assert counter[("STATE",)] == 3
 
 
-@pytest.mark.snapshot()
+@pytest.mark.snapshot
 def test_write_schema(
     snapshot: Snapshot,
     snapshot_dir: Path,
