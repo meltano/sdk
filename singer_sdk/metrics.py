@@ -20,7 +20,9 @@ from singer_sdk.helpers._resources import get_package_files
 if t.TYPE_CHECKING:
     from types import TracebackType
 
+    from singer_sdk.helpers import types
     from singer_sdk.helpers._compat import Traversable
+
 
 DEFAULT_LOG_INTERVAL = 60.0
 METRICS_LOGGER_NAME = __name__
@@ -117,7 +119,7 @@ class Meter(metaclass=abc.ABCMeta):
         self.logger = get_metrics_logger()
 
     @property
-    def context(self) -> dict | None:
+    def context(self) -> types.Context | None:
         """Get the context for this meter.
 
         Returns:
@@ -126,7 +128,7 @@ class Meter(metaclass=abc.ABCMeta):
         return self.tags.get(Tag.CONTEXT)
 
     @context.setter
-    def context(self, value: dict | None) -> None:
+    def context(self, value: types.Context | None) -> None:
         """Set the context for this meter.
 
         Args:

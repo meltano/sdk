@@ -14,7 +14,7 @@ from singer_sdk.connectors import SQLConnector
 from singer_sdk.streams.core import Stream
 
 if t.TYPE_CHECKING:
-    from singer_sdk.streams.core import Context
+    from singer_sdk.helpers.types import Context
     from singer_sdk.tap_base import Tap
 
 

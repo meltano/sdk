@@ -32,7 +32,7 @@ if t.TYPE_CHECKING:
     from backoff.types import Details
 
     from singer_sdk._singerlib import Schema
-    from singer_sdk.streams.core import Context
+    from singer_sdk.helpers.types import Context
     from singer_sdk.tap_base import Tap
 
     if sys.version_info >= (3, 10):
