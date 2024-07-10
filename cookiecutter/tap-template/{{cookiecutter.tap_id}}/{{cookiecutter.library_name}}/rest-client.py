@@ -55,16 +55,17 @@ SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
+    # Update this value if necessary or override `parse_response`.
+    records_jsonpath = "$[*]"
+
+    # Update this value if necessary or override `get_new_paginator`.
+    next_page_token_jsonpath = "$.next_page"  # noqa: S105
+
     @property
     def url_base(self) -> str:
         """Return the API URL root, configurable via tap settings."""
         # TODO: hardcode a value here, or retrieve it from self.config
         return "https://api.mysample.com"
-
-    records_jsonpath = "$[*]"  # Or override `parse_response`.
-
-    # Set this value or override `get_new_paginator`.
-    next_page_token_jsonpath = "$.next_page"  # noqa: S105
 
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
 
