@@ -211,6 +211,7 @@ omit = [
     "tests/*",
     "samples/*",
     "singer_sdk/helpers/_compat.py",
+    "singer_sdk/helpers/types.py",
 ]
 
 [tool.coverage.report]
