@@ -568,11 +568,16 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             Payload object for OAuth.
 
         Raises:
+            RuntimeError: If the JWT dependencies are not installed.
             ValueError: If the private key is not set.
         """
-        import jwt  # noqa: PLC0415
-        from cryptography.hazmat.backends import default_backend  # noqa: PLC0415
-        from cryptography.hazmat.primitives import serialization  # noqa: PLC0415
+        try:
+            import jwt  # noqa: PLC0415
+            from cryptography.hazmat.backends import default_backend  # noqa: PLC0415
+            from cryptography.hazmat.primitives import serialization  # noqa: PLC0415
+        except ModuleNotFoundError as ex:
+            msg = "Install singer-sdk[jwt] to use OAuthJWTAuthenticator."
+            raise RuntimeError(msg) from ex
 
         if not self.private_key:
             msg = "Missing 'private_key' property for OAuth payload."

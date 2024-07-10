@@ -96,8 +96,6 @@ cryptography = { version = ">=3.4.6", optional = true }
 PyJWT = { version = "~=2.4", optional = true }
 
 [tool.poetry.extras]
-# TODO: Add 'cryptography' and 'PyJWT' to the 'jwt' when we want to remove them
-# from the main dependencies
 jwt = [
     "cryptography",
     "PyJWT",
@@ -278,9 +276,9 @@ warn_unused_ignores = true
 ignore_missing_imports = true
 module = [
     "backports.datetime_fromisoformat.*",
-    "joblib.*",  # TODO: Remove when https://github.com/joblib/joblib/issues/1516 is shipped
-    "jsonpath_ng.*",
-    "pyarrow.*", # TODO: Remove when https://github.com/apache/arrow/issues/32609 if implemented and released
+    "joblib.*",       # TODO: Remove when https://github.com/joblib/joblib/issues/1516 is shipped
+    "jsonpath_ng.*",  # TODO: Remove when https://github.com/h2non/jsonpath-ng/issues/152 is implemented and released
+    "pyarrow.*",      # TODO: Remove when https://github.com/apache/arrow/issues/32609 if implemented and released
 ]
 
 [tool.poetry-dynamic-versioning]
