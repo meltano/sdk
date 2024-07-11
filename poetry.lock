@@ -469,7 +469,7 @@ toml = ["tomli"]
 name = "cryptography"
 version = "42.0.8"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "cryptography-42.0.8-cp37-abi3-macosx_10_12_universal2.whl", hash = "sha256:81d8a521705787afe7a18d5bfb47ea9d9cc068206270aad0b96a725022e18d2e"},
@@ -1528,7 +1528,7 @@ windows-terminal = ["colorama (>=0.4.6)"]
 name = "pyjwt"
 version = "2.8.0"
 description = "JSON Web Token implementation in Python"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "PyJWT-2.8.0-py3-none-any.whl", hash = "sha256:59127c392cc44c2da5bb3192169a91f429924e17aff6534d70fdc02ab3e04320"},
@@ -2666,7 +2666,7 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [extras]
 docs = ["furo", "myst-parser", "pytest", "sphinx", "sphinx-autobuild", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-notfound-page", "sphinx-reredirects"]
 faker = ["faker"]
-jwt = []
+jwt = ["PyJWT", "cryptography"]
 parquet = ["numpy", "numpy", "pyarrow"]
 s3 = ["fs-s3fs"]
 testing = ["pytest", "pytest-durations"]
@@ -2674,4 +2674,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "1316397863d23f10b9f8ec4b5647d4b95311ef90e98618dc3833cacf9ba1ef64"
+content-hash = "82c4b9443a3fed513d597831da8a953b3b2989e4859895939a31db30959a19d9"
