@@ -6,7 +6,7 @@ import sys
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
 from functools import cached_property
 {%- endif %}
-from typing import Any, Callable, Iterable
+from typing import TYPE_CHECKING, Any, Callable, Iterable
 
 import requests
 {% if cookiecutter.auth_method  == "API Key" -%}
@@ -46,6 +46,10 @@ if sys.version_info >= (3, 9):
 else:
     import importlib_resources
 
+if TYPE_CHECKING:
+    from singer_sdk.helpers.types import Context
+
+
 _Auth = Callable[[requests.PreparedRequest], requests.PreparedRequest]
 
 # TODO: Delete this is if not using json files for schema definition
@@ -55,16 +59,17 @@ SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
     """{{ cookiecutter.source_name }} stream class."""
 
+    # Update this value if necessary or override `parse_response`.
+    records_jsonpath = "$[*]"
+
+    # Update this value if necessary or override `get_new_paginator`.
+    next_page_token_jsonpath = "$.next_page"  # noqa: S105
+
     @property
     def url_base(self) -> str:
         """Return the API URL root, configurable via tap settings."""
         # TODO: hardcode a value here, or retrieve it from self.config
         return "https://api.mysample.com"
-
-    records_jsonpath = "$[*]"  # Or override `parse_response`.
-
-    # Set this value or override `get_new_paginator`.
-    next_page_token_jsonpath = "$.next_page"  # noqa: S105
 
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
 
@@ -156,7 +161,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 
     def get_url_params(
         self,
-        context: dict | None,  # noqa: ARG002
+        context: Context | None,  # noqa: ARG002
         next_page_token: Any | None,  # noqa: ANN401
     ) -> dict[str, Any]:
         """Return a dictionary of values to be used in URL parameterization.
@@ -178,7 +183,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 
     def prepare_request_payload(
         self,
-        context: dict | None,  # noqa: ARG002
+        context: Context | None,  # noqa: ARG002
         next_page_token: Any | None,  # noqa: ARG002, ANN401
     ) -> dict | None:
         """Prepare the data payload for the REST API request.
@@ -210,7 +215,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     def post_process(
         self,
         row: dict,
-        context: dict | None = None,  # noqa: ARG002
+        context: Context | None = None,  # noqa: ARG002
     ) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
 

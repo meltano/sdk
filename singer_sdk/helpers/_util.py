@@ -10,7 +10,6 @@ import sys
 import typing as t
 from pathlib import Path, PurePath
 
-import pendulum
 import simplejson
 
 if sys.version_info < (3, 11):
@@ -95,5 +94,4 @@ def read_json_file(path: PurePath | str) -> dict[str, t.Any]:
 
 def utc_now() -> datetime.datetime:
     """Return current time in UTC."""
-    # TODO: replace with datetime.datetime.now(tz=datetime.timezone.utc)
-    return pendulum.now(tz="UTC")
+    return datetime.datetime.now(datetime.timezone.utc)

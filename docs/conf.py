@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import sys
+from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path("..").resolve()))
@@ -23,7 +24,7 @@ sys.path.insert(0, str(Path("..").resolve()))
 # -- Project information -----------------------------------------------------
 
 project = "Meltano Singer SDK"
-copyright = "2021, Meltano Core Team and Contributors"  # noqa: A001
+copyright = f"{datetime.now().year}, Arch Data, Inc and Contributors"  # noqa: A001, DTZ005
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags

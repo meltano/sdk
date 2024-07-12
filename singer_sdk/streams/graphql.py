@@ -9,7 +9,7 @@ from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.streams.rest import RESTStream
 
 if t.TYPE_CHECKING:
-    from singer_sdk.streams.core import Context
+    from singer_sdk.helpers.types import Context
 
 _TToken = t.TypeVar("_TToken")
 
