@@ -12,8 +12,9 @@ from functools import lru_cache
 import sqlalchemy as sa
 
 from singer_sdk import typing as th
-from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema, serde
+from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.helpers._util import dump_json, load_json
 from singer_sdk.helpers.capabilities import TargetLoadMethods
 
 if t.TYPE_CHECKING:
@@ -1164,7 +1165,7 @@ class SQLConnector:  # noqa: PLR0904
 
         .. versionadded:: 0.31.0
         """
-        return serde.serialize_json(obj)
+        return dump_json(obj)
 
     def deserialize_json(self, json_str: str) -> object:  # noqa: PLR6301
         """Deserialize a JSON string to an object.
@@ -1180,7 +1181,7 @@ class SQLConnector:  # noqa: PLR0904
 
         .. versionadded:: 0.31.0
         """
-        return serde.deserialize_json(json_str)
+        return load_json(json_str)
 
     def delete_old_versions(
         self,
