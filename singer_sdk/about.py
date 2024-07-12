@@ -244,6 +244,18 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
         capabilities += "\n\n"
         md_list.append(capabilities)
 
+        # Process Supported Python Versions
+
+        if about_info.supported_python_versions:
+            supported_python_versions = "## Supported Python Versions\n\n"
+            supported_python_versions += "\n".join(
+                [f"* {v}" for v in about_info.supported_python_versions],
+            )
+            supported_python_versions += "\n\n"
+            md_list.append(supported_python_versions)
+
+        # Process settings
+
         setting = "## Settings\n\n"
         settings_table = (
             "| Setting | Required | Default | Description |\n"
@@ -261,17 +273,6 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
             )
             + "\n"
         )
-        setting += "\n"
         md_list.append(setting)
-
-        # Process Supported Python Versions
-
-        if about_info.supported_python_versions:
-            supported_python_versions = "## Supported Python Versions\n\n"
-            supported_python_versions += "\n".join(
-                [f"* {v}" for v in about_info.supported_python_versions],
-            )
-            supported_python_versions += "\n"
-            md_list.append(supported_python_versions)
 
         return "".join(md_list)

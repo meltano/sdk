@@ -36,7 +36,7 @@ def about_info() -> AboutInfo:
         description="Example tap for Singer SDK",
         version="0.1.1",
         sdk_version="1.0.0",
-        supported_python_versions=["3.6", "3.7", "3.8"],
+        supported_python_versions=["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"],
         capabilities=[
             TapCapabilities.CATALOG,
             TapCapabilities.DISCOVER,
@@ -69,7 +69,7 @@ def about_info() -> AboutInfo:
     )
 
 
-@pytest.mark.snapshot()
+@pytest.mark.snapshot
 @pytest.mark.parametrize(
     "about_format",
     [
