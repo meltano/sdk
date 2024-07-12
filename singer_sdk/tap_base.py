@@ -10,6 +10,7 @@ from enum import Enum
 import click
 
 from singer_sdk._singerlib import Catalog, StateMessage
+from singer_sdk._singerlib.serde import serialize_json
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
@@ -19,7 +20,7 @@ from singer_sdk.exceptions import (
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._state import write_stream_state
-from singer_sdk.helpers._util import read_json_file, serialize_json
+from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
     BATCH_CONFIG,
     CapabilitiesEnum,

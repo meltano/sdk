@@ -10,7 +10,7 @@ from contextlib import nullcontext
 import pytest
 
 from singer_sdk._singerlib import RecordMessage
-from singer_sdk.helpers._util import deserialize_json
+from singer_sdk._singerlib.serde import deserialize_json
 from singer_sdk.io_base import SingerReader, SingerWriter
 
 

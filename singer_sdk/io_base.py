@@ -11,8 +11,8 @@ from collections import Counter, defaultdict
 from singer_sdk._singerlib.messages import Message, SingerMessageType
 from singer_sdk._singerlib.messages import format_message as singer_format_message
 from singer_sdk._singerlib.messages import write_message as singer_write_message
+from singer_sdk._singerlib.serde import deserialize_json
 from singer_sdk.exceptions import InvalidInputLine
-from singer_sdk.helpers._util import deserialize_json
 
 logger = logging.getLogger(__name__)
 

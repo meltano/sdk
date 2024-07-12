@@ -8,7 +8,7 @@ import typing as t
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
-from singer_sdk.helpers._util import serialize_json
+from singer_sdk._singerlib.serde import serialize_json
 
 if sys.version_info < (3, 11):
     from backports.datetime_fromisoformat import MonkeyPatch

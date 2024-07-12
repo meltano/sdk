@@ -6,8 +6,8 @@ import gzip
 import typing as t
 from uuid import uuid4
 
+from singer_sdk._singerlib.serde import serialize_json
 from singer_sdk.batch import BaseBatcher, lazy_chunked_generator
-from singer_sdk.helpers._util import serialize_json
 
 __all__ = ["JSONLinesBatcher"]
 

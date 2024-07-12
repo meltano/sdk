@@ -16,6 +16,7 @@ from types import MappingProxyType
 import jsonschema
 from typing_extensions import override
 
+from singer_sdk._singerlib.serde import deserialize_json
 from singer_sdk.exceptions import (
     InvalidJSONSchema,
     InvalidRecord,
@@ -37,7 +38,6 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
     handle_invalid_timestamp_in_record,
 )
-from singer_sdk.helpers._util import deserialize_json
 
 if t.TYPE_CHECKING:
     from logging import Logger
