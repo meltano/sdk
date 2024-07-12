@@ -10,7 +10,6 @@ from enum import Enum
 import click
 
 from singer_sdk._singerlib import Catalog, StateMessage
-from singer_sdk._singerlib.serde import serialize_json
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
@@ -20,7 +19,7 @@ from singer_sdk.exceptions import (
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._state import write_stream_state
-from singer_sdk.helpers._util import read_json_file
+from singer_sdk.helpers._util import dump_json, read_json_file
 from singer_sdk.helpers.capabilities import (
     BATCH_CONFIG,
     CapabilitiesEnum,
@@ -312,7 +311,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             The tap's catalog as formatted JSON text.
         """
-        return serialize_json(self.catalog_dict, indent=2)
+        return dump_json(self.catalog_dict, indent=2)
 
     @property
     def _singer_catalog(self) -> Catalog:
