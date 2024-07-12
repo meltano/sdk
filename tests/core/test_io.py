@@ -10,7 +10,6 @@ from contextlib import nullcontext
 import pytest
 
 from singer_sdk._singerlib import RecordMessage
-from singer_sdk._singerlib.serde import deserialize_json
 from singer_sdk.io_base import SingerReader, SingerWriter
 
 
@@ -53,8 +52,9 @@ class DummyReader(SingerReader):
     ],
 )
 def test_deserialize(line, expected, exception):
+    reader = DummyReader()
     with exception:
-        assert deserialize_json(line) == expected
+        assert reader.deserialize_json(line) == expected
 
 
 # Benchmark Tests
@@ -104,8 +104,10 @@ def test_bench_deserialize_json(benchmark, bench_encoded_record):
     """Run benchmark for Sink._validator method validate."""
     number_of_runs = 1000
 
+    reader = DummyReader()
+
     def run_deserialize_json():
         for record in itertools.repeat(bench_encoded_record, number_of_runs):
-            deserialize_json(record)
+            reader.deserialize_json(record)
 
     benchmark(run_deserialize_json)
