@@ -3,12 +3,9 @@ from __future__ import annotations
 import datetime
 import decimal
 import json
-import logging
 import typing as t
 
 import simplejson
-
-logger = logging.getLogger(__name__)
 
 __all__ = [
     "deserialize_json",
@@ -37,19 +34,12 @@ def deserialize_json(json_str: str | bytes, **kwargs: t.Any) -> dict:
 
     Returns:
         A dictionary of the deserialized json.
-
-    Raises:
-        json.decoder.JSONDecodeError: raised if any lines are not valid json
     """
-    try:
-        return json.loads(  # type: ignore[no-any-return]
-            json_str,
-            parse_float=decimal.Decimal,
-            **kwargs,
-        )
-    except json.decoder.JSONDecodeError as exc:
-        logger.exception("Unable to parse:\n%s", json_str, exc_info=exc)
-        raise
+    return json.loads(  # type: ignore[no-any-return]
+        json_str,
+        parse_float=decimal.Decimal,
+        **kwargs,
+    )
 
 
 def serialize_json(obj: object, **kwargs: t.Any) -> str:

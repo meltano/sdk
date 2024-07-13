@@ -1,14 +1,19 @@
 from __future__ import annotations
 
+import json
+import logging
 import sys
 import typing as t
 
+from singer_sdk._singerlib.exceptions import InvalidInputLine
 from singer_sdk._singerlib.json import deserialize_json, serialize_json
 
 from .base import GenericSingerReader, GenericSingerWriter
 
 if t.TYPE_CHECKING:
     from singer_sdk._singerlib.messages import Message
+
+logger = logging.getLogger(__name__)
 
 
 class SingerReader(GenericSingerReader[str]):
@@ -24,8 +29,16 @@ class SingerReader(GenericSingerReader[str]):
 
         Returns:
             A dictionary of the deserialized json.
+
+        Raises:
+            InvalidInputLine: If the line is not valid JSON.
         """
-        return deserialize_json(line)
+        try:
+            return deserialize_json(line)
+        except json.decoder.JSONDecodeError as exc:
+            logger.exception("Unable to parse:\n%s", line)
+            msg = f"Unable to parse line as JSON: {line}"
+            raise InvalidInputLine(msg) from exc
 
 
 class SingerWriter(GenericSingerWriter[str]):

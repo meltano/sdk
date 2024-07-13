@@ -11,6 +11,7 @@ from contextlib import nullcontext, redirect_stdout
 import pytest
 
 from singer_sdk._singerlib import RecordMessage
+from singer_sdk._singerlib.exceptions import InvalidInputLine
 from singer_sdk.io_base import SingerReader, SingerWriter
 
 
@@ -37,7 +38,7 @@ class DummyReader(SingerReader):
         pytest.param(
             "not-valid-json",
             None,
-            pytest.raises(json.decoder.JSONDecodeError),
+            pytest.raises(InvalidInputLine),
             id="unparsable",
         ),
         pytest.param(
