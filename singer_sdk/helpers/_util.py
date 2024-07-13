@@ -21,7 +21,7 @@ def dump_json(obj: t.Any, **kwargs: t.Any) -> str:  # noqa: ANN401
         A string of serialized json.
 
     .. warning:: Do not use this function to serialize Singer messages or bulk data.
-                 Use the functions in ``singer_sdk._singerlib.serde`` instead.
+                 Use the functions in ``singer_sdk._singerlib.json`` instead.
     """
     return simplejson.dumps(
         obj,
@@ -42,7 +42,7 @@ def load_json(json_str: str, **kwargs: t.Any) -> dict:
         A Python object, usually a dict.
 
     .. warning:: Do not use this function to parse Singer messages or bulk data.
-                 Use the functions in ``singer_sdk._singerlib.serde`` instead.
+                 Use the functions in ``singer_sdk._singerlib.json`` instead.
     """
     return simplejson.loads(  # type: ignore[no-any-return]
         json_str,
