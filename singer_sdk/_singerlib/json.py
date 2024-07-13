@@ -10,6 +10,11 @@ import simplejson
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "deserialize_json",
+    "serialize_json",
+]
+
 
 def _default_encoding(obj: t.Any) -> str:  # noqa: ANN401
     """Default JSON encoder.

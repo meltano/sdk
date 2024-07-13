@@ -16,7 +16,7 @@ from types import MappingProxyType
 import jsonschema
 from typing_extensions import override
 
-from singer_sdk._singerlib.serde import deserialize_json
+from singer_sdk._singerlib.json import deserialize_json
 from singer_sdk.exceptions import (
     InvalidJSONSchema,
     InvalidRecord,

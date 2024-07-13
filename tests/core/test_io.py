@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import decimal
+import io
 import itertools
 import json
-from contextlib import nullcontext
+from contextlib import nullcontext, redirect_stdout
 
 import pytest
 
@@ -55,6 +56,20 @@ def test_deserialize(line, expected, exception):
     reader = DummyReader()
     with exception:
         assert reader.deserialize_json(line) == expected
+
+
+def test_write_message():
+    writer = SingerWriter()
+    message = RecordMessage(
+        stream="test",
+        record={"id": 1, "name": "test"},
+    )
+    with redirect_stdout(io.StringIO()) as out:
+        writer.write_message(message)
+
+    assert out.getvalue() == (
+        '{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}\n'
+    )
 
 
 # Benchmark Tests
