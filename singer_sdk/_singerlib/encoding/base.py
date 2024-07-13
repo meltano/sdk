@@ -58,11 +58,11 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
             elif record_type == SingerMessageType.STATE:
                 self._process_state_message(line_dict)
 
-            elif record_type == SingerMessageType.BATCH:  # pragma: no cover
+            elif record_type == SingerMessageType.BATCH:
                 self._process_batch_message(line_dict)
 
             else:
-                self._process_unknown_message(line_dict)  # pragma: no cover
+                self._process_unknown_message(line_dict)
 
             stats[record_type] += 1
 
@@ -106,7 +106,7 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def _process_batch_message(self, message_dict: dict) -> None: ...
 
-    def _process_unknown_message(self, message_dict: dict) -> None:  # noqa: PLR6301 # pragma: no cover
+    def _process_unknown_message(self, message_dict: dict) -> None:  # noqa: PLR6301
         """Internal method to process unknown message types from a Singer tap.
 
         Args:
