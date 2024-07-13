@@ -93,6 +93,21 @@ def test_record_message_time_extracted_to_utc():
     assert record.time_extracted == datetime.datetime(2021, 1, 1, 9, tzinfo=UTC)
 
 
+def test_record_message_with_version():
+    record = singer.RecordMessage(
+        stream="test",
+        record={"id": 1, "name": "test"},
+        version=1614556800,
+    )
+    assert record.version == 1614556800
+    assert record.to_dict() == {
+        "type": "RECORD",
+        "stream": "test",
+        "record": {"id": 1, "name": "test"},
+        "version": 1614556800,
+    }
+
+
 def test_schema_message():
     schema = singer.SchemaMessage(
         stream="test",
