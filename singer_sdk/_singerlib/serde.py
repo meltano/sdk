@@ -23,7 +23,7 @@ def _default_encoding(obj: t.Any) -> str:  # noqa: ANN401
     return obj.isoformat(sep="T") if isinstance(obj, datetime.datetime) else str(obj)
 
 
-def deserialize_json(json_str: str, **kwargs: t.Any) -> dict:
+def deserialize_json(json_str: str | bytes, **kwargs: t.Any) -> dict:
     """Deserialize a line of json.
 
     Args:
