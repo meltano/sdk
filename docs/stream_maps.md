@@ -235,7 +235,7 @@ can be referenced directly by mapping expressions.
 - `datetime` - This is the datetime module object from the Python standard library. You can access
     datetime.datetime, datetime.timedelta, etc.
 - `json` - This is the json module object from the Python standard library.
-    Primarily used for calling :py:func:`json.dumps()` and :py:func:`json.loads()`.
+    Primarily used for calling [`json.dumps()`](inv:py:func:json.dumps) and [`json.loads()`](inv:py:func:json.loads).
 
 #### Built-in Variable Names
 
