@@ -234,6 +234,8 @@ can be referenced directly by mapping expressions.
     `hashlib.md5(<input>.encode("utf-8")).hexdigest()`.
 - `datetime` - This is the datetime module object from the Python standard library. You can access
     datetime.datetime, datetime.timedelta, etc.
+- `json` - This is the json module object from the Python standard library.
+    Primarily used for calling json.dumps() and json.loads().
 
 #### Built-in Variable Names
 
