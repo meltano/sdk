@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from singer_sdk._singerlib.encoding import SingerWriter
-from singer_sdk._singerlib.encoding.base import (
+from singer_sdk._singerlib._encoding import SingerWriter
+from singer_sdk._singerlib._encoding.base import (
     ActivateVersionMessage,
     Message,
     RecordMessage,

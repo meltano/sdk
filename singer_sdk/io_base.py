@@ -2,4 +2,4 @@
 
 from __future__ import annotations
 
-from singer_sdk._singerlib.encoding import *  # noqa: F403
+from singer_sdk._singerlib._encoding import *  # noqa: F403
