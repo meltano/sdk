@@ -14,6 +14,7 @@
 #
 from __future__ import annotations
 
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -60,10 +61,19 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # -- Options for HTML output -----------------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
+
+# Define the canonical URL for sdk.meltano.com
+html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL", "")
+html_context = {}
+
+# Tell Jinja2 templates the build is running on Read the Docs
+if os.environ.get("READTHEDOCS", "") == "True":
+    html_context["READTHEDOCS"] = True
+
 html_logo = "_static/img/logo.svg"
 html_theme = "furo"
 html_theme_options = {
