@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import gzip
-import json
 import typing as t
 from uuid import uuid4
 
+from singer_sdk._singerlib.json import serialize_json
 from singer_sdk.batch import BaseBatcher, lazy_chunked_generator
 
 __all__ = ["JSONLinesBatcher"]
@@ -45,8 +45,7 @@ class JSONLinesBatcher(BaseBatcher):
                     mode="wb",
                 ) as gz:
                     gz.writelines(
-                        (json.dumps(record, default=str) + "\n").encode()
-                        for record in chunk
+                        (serialize_json(record) + "\n").encode() for record in chunk
                     )
                 file_url = fs.geturl(filename)
             yield [file_url]
