@@ -123,6 +123,7 @@ class StreamMap(metaclass=abc.ABCMeta):
             flattened_schema=self.transformed_schema,
             max_level=self.flattening_options.max_level,
             separator=self.flattening_options.separator,
+            nan_strategy=self.flattening_options.nan_strategy,
         )
 
     def flatten_schema(self, raw_schema: dict) -> dict:
