@@ -155,6 +155,7 @@ extlinks = {
 intersphinx_mapping = {
     "requests": ("https://requests.readthedocs.io/en/latest/", None),
     "python": ("https://docs.python.org/3/", None),
+    "faker": ("https://faker.readthedocs.io/en/master/", None),
 }
 
 # -- Options for linkcode --------------------------------------------------------------
