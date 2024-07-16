@@ -228,12 +228,16 @@ can be referenced directly by mapping expressions.
 
 #### Built-In Functions
 
-- `md5()` - returns an inline MD5 hash of any string, outputting the string representation
-    of the hash's hex digest.
+- [`md5()`](inv:python:py:module:#hashlib) - returns an inline MD5 hash of any string, outputting
+    the string representation of the hash's hex digest.
   - This is defined by the SDK internally with native python:
-    `hashlib.md5(<input>.encode("utf-8")).hexdigest()`.
-- `datetime` - This is the datetime module object from the Python standard library. You can access
-    datetime.datetime, datetime.timedelta, etc.
+    [`hashlib.md5(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest).
+- [`datetime`](inv:python:py:module:#datetime) - This is the datetime module object from the Python
+    standard library. You can access [`datetime.datetime`](inv:python:py:class:#datetime.datetime),
+    [`datetime.timedelta`](inv:python:py:class:#datetime.timedelta), etc.
+- [`json`](inv:python:py:module:#json) - This is the json module object from the Python standard
+    library. Primarily used for calling [`json.dumps()`](inv:python:py:function:#json.dumps)
+    and [`json.loads()`](inv:python:py:function:#json.loads).
 
 #### Built-in Variable Names
 
@@ -242,10 +246,12 @@ can be referenced directly by mapping expressions.
 - `record` - an alias for the record values dictionary in the current stream.
 - `_` - same as `record` but shorter to type
 - `self` - the existing property value if the property already exists
-- `fake` - a [`Faker`](https://faker.readthedocs.io/en/master/) instance, configurable via `faker_config` (see previous example) - see the built-in [standard providers](https://faker.readthedocs.io/en/master/providers.html) for available methods
+- `fake` - a [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config`
+  (see previous example) - see the built-in [standard providers](inv:faker:std:doc#providers)
+  for available methods
 
   ```{tip}
-  The `fake` object is only available if the plugin specifies `faker` as an addtional dependency (through the `singer-sdk` `faker` extra, or directly).
+  The `fake` object is only available if the plugin specifies `faker` as an additional dependency (through the `singer-sdk` `faker` extra, or directly).
   ```
 
 #### Automatic Schema Detection

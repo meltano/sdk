@@ -12,6 +12,7 @@ import datetime
 import fnmatch
 import hashlib
 import importlib.util
+import json
 import logging
 import typing as t
 
@@ -306,6 +307,7 @@ class CustomStreamMap(StreamMap):
         funcs["md5"] = md5
         funcs["datetime"] = datetime
         funcs["bool"] = bool
+        funcs["json"] = json
         return funcs
 
     def _eval(
