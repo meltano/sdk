@@ -17,16 +17,9 @@ from singer_sdk.exceptions import (
     AbortedSyncPausedException,
     ConfigValidationError,
 )
-from singer_sdk.helpers import _state
-from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers import _state, capabilities
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import read_json_file
-from singer_sdk.helpers.capabilities import (
-    BATCH_CONFIG,
-    CapabilitiesEnum,
-    PluginCapabilities,
-    TapCapabilities,
-)
 from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import PluginBase
 
@@ -58,6 +51,17 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
     dynamic_catalog: bool = False
     """Whether the tap's catalog is dynamic. Set to True if the catalog is
     generated dynamically (e.g. by querying a database's system tables)."""
+
+    #: A list of capabilities supported by this tap.
+    capabilities: t.ClassVar[list[capabilities.CapabilitiesEnum]] = [
+        capabilities.TapCapabilities.CATALOG,
+        capabilities.TapCapabilities.STATE,
+        capabilities.TapCapabilities.DISCOVER,
+        capabilities.PluginCapabilities.ABOUT,
+        capabilities.PluginCapabilities.STREAM_MAPS,
+        capabilities.PluginCapabilities.FLATTENING,
+        capabilities.PluginCapabilities.BATCH,
+    ]
 
     # Constructor
 
@@ -179,23 +183,6 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         super().setup_mapper()
         self.mapper.register_raw_streams_from_catalog(self.catalog)
 
-    @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
-        """Get tap capabilities.
-
-        Returns:
-            A list of capabilities supported by this tap.
-        """
-        return [
-            TapCapabilities.CATALOG,
-            TapCapabilities.STATE,
-            TapCapabilities.DISCOVER,
-            PluginCapabilities.ABOUT,
-            PluginCapabilities.STREAM_MAPS,
-            PluginCapabilities.FLATTENING,
-            PluginCapabilities.BATCH,
-        ]
-
     @classmethod
     def append_builtin_config(cls: type[PluginBase], config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
@@ -214,9 +201,11 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         PluginBase.append_builtin_config(config_jsonschema)
 
-        capabilities = cls.capabilities
-        if PluginCapabilities.BATCH in capabilities:
-            merge_missing_config_jsonschema(BATCH_CONFIG, config_jsonschema)
+        if capabilities.BATCH.capability in cls.capabilities:  # pragma: no branch
+            merge_missing_config_jsonschema(
+                capabilities.BATCH.schema,
+                config_jsonschema,
+            )
 
     # Connection and sync tests:
 
