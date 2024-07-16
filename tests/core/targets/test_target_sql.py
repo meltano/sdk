@@ -48,6 +48,7 @@ def test_target_about_info(
     about = MyTarget._get_about_info()
     default_settings = {
         "add_record_metadata",
+        "allow_column_alter",
         "load_method",
         "batch_size_rows",
     }
