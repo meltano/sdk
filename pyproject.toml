@@ -65,14 +65,13 @@ urllib3 = ">=1.26,<2"
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
-sphinx = {version = ">=4.5", optional = true}
-furo = {version = ">=2022.12.7", optional = true}
-sphinx-copybutton = {version = ">=0.3.1", optional = true}
-myst-parser = {version = ">=1", optional = true}
-sphinx-autobuild = {version = ">=2021.3.14", optional = true}
-sphinx-inline-tabs = {version = ">=2023.4.21", optional = true}
-sphinx-notfound-page = {version = ">=1.0.0", optional = true}
-sphinx-reredirects = {version = ">=0.1.1", optional = true}
+sphinx = {version = ">=7", python = ">=3.9", optional = true}
+furo = {version = ">=2024.5.6", python = ">=3.9", optional = true}
+sphinx-copybutton = {version = ">=0.5.2", python = ">=3.9", optional = true}
+myst-parser = {version = ">=3", python = ">=3.9", optional = true}
+sphinx-inline-tabs = {version = ">=2023.4.21", python = ">=3.9", optional = true}
+sphinx-notfound-page = {version = ">=1.0.0", python = ">=3.9", optional = true}
+sphinx-reredirects = {version = ">=0.1.5", python = ">=3.9", optional = true}
 
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = ">=1.1.1", optional = true}
@@ -106,7 +105,6 @@ docs = [
     "pytest",
     "sphinx",
     "sphinx-copybutton",
-    "sphinx-autobuild",
     "sphinx-inline-tabs",
     "sphinx-notfound-page",
     "sphinx-reredirects",
@@ -253,7 +251,6 @@ DEP002 = [
     "furo",
     "myst-parser",
     "sphinx",
-    "sphinx-autobuild",
     "sphinx-copybutton",
     "sphinx-inline-tabs",
     "sphinx-notfound-page",

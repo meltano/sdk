@@ -8,7 +8,6 @@ import pytest
 from pytz import timezone
 
 import singer_sdk._singerlib as singer
-from singer_sdk.io_base import SingerWriter
 
 UTC = datetime.timezone.utc
 
@@ -19,24 +18,22 @@ def test_exclude_null_dict():
 
 
 def test_format_message():
-    singerwriter = SingerWriter()
     message = singer.RecordMessage(
         stream="test",
         record={"id": 1, "name": "test"},
     )
-    assert singerwriter.format_message(message) == (
+    assert singer.format_message(message) == (
         '{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}'
     )
 
 
 def test_write_message():
-    singerwriter = SingerWriter()
     message = singer.RecordMessage(
         stream="test",
         record={"id": 1, "name": "test"},
     )
     with redirect_stdout(io.StringIO()) as out:
-        singerwriter.write_message(message)
+        singer.write_message(message)
 
     assert out.getvalue() == (
         '{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}\n'
@@ -94,6 +91,21 @@ def test_record_message_time_extracted_to_utc():
         time_extracted=nairobi.localize(naive),
     )
     assert record.time_extracted == datetime.datetime(2021, 1, 1, 9, tzinfo=UTC)
+
+
+def test_record_message_with_version():
+    record = singer.RecordMessage(
+        stream="test",
+        record={"id": 1, "name": "test"},
+        version=1614556800,
+    )
+    assert record.version == 1614556800
+    assert record.to_dict() == {
+        "type": "RECORD",
+        "stream": "test",
+        "record": {"id": 1, "name": "test"},
+        "version": 1614556800,
+    }
 
 
 def test_schema_message():

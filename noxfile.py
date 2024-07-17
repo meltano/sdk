@@ -186,7 +186,7 @@ def docs_serve(session: Session) -> None:
         "build",
         "-W",
     ]
-    session.install(".[docs]")
+    session.install(".[docs]", "sphinx-autobuild")
 
     build_dir = Path("build")
     if build_dir.exists():
@@ -279,3 +279,18 @@ def version_bump(session: Session) -> None:
         "bump",
         *args,
     )
+
+
+@nox.session(name="api")
+def api_changes(session: nox.Session) -> None:
+    """Check for API changes."""
+    args = [
+        "griffe",
+        "check",
+        "singer_sdk",
+    ]
+
+    if session.posargs:
+        args.append(f"-a={session.posargs[0]}")
+
+    session.run(*args, external=True)

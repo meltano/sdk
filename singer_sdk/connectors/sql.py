@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import decimal
-import json
 import logging
 import typing as t
 import warnings
@@ -11,12 +9,12 @@ from contextlib import contextmanager
 from datetime import datetime
 from functools import lru_cache
 
-import simplejson
 import sqlalchemy as sa
 
 from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.helpers._util import dump_json, load_json
 from singer_sdk.helpers.capabilities import TargetLoadMethods
 
 if t.TYPE_CHECKING:
@@ -1167,7 +1165,7 @@ class SQLConnector:  # noqa: PLR0904
 
         .. versionadded:: 0.31.0
         """
-        return simplejson.dumps(obj, use_decimal=True)
+        return dump_json(obj)
 
     def deserialize_json(self, json_str: str) -> object:  # noqa: PLR6301
         """Deserialize a JSON string to an object.
@@ -1183,7 +1181,7 @@ class SQLConnector:  # noqa: PLR0904
 
         .. versionadded:: 0.31.0
         """
-        return json.loads(json_str, parse_float=decimal.Decimal)
+        return load_json(json_str)
 
     def delete_old_versions(
         self,
