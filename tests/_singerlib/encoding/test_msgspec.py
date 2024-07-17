@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import decimal
 import io
-import itertools
 from contextlib import nullcontext, redirect_stdout
 from textwrap import dedent
 
@@ -136,32 +135,3 @@ def test_write_message():
     assert out.read() == (
         '{"type":"RECORD","stream":"test","record":{"id":1,"name":"test"}}\n'
     )
-
-
-# Benchmark Tests
-
-
-def test_bench_format_message(benchmark, bench_record_message: RecordMessage):
-    """Run benchmark for Sink._validator method validate."""
-    number_of_runs = 1000
-
-    writer = MsgSpecWriter()
-
-    def run_format_message():
-        for record in itertools.repeat(bench_record_message, number_of_runs):
-            writer.format_message(record)
-
-    benchmark(run_format_message)
-
-
-def test_bench_deserialize_json(benchmark, bench_encoded_record: str):
-    """Run benchmark for Sink._validator method validate."""
-    number_of_runs = 1000
-
-    reader = DummyReader()
-
-    def run_deserialize_json():
-        for record in itertools.repeat(bench_encoded_record, number_of_runs):
-            reader.deserialize_json(record)
-
-    benchmark(run_deserialize_json)

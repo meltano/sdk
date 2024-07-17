@@ -82,7 +82,7 @@ class MsgSpecWriter(GenericSingerWriter[bytes, Message]):
         Returns:
             A string of serialized json.
         """
-        return encoder.encode(message)
+        return encoder.encode(message.to_dict())
 
     def write_message(self, message: Message) -> None:
         """Write a message to stdout.
