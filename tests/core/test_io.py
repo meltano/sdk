@@ -12,6 +12,7 @@ from textwrap import dedent
 import pytest
 
 from singer_sdk._singerlib import RecordMessage
+from singer_sdk._singerlib.encoding._msgspec import MsgSpecReader, MsgSpecWriter
 from singer_sdk._singerlib.exceptions import InvalidInputLine
 from singer_sdk.io_base import SingerReader, SingerWriter
 
@@ -104,6 +105,7 @@ def test_write_message():
 def bench_record():
     return {
         "stream": "users",
+        "type": "RECORD",
         "record": {
             "Id": 1,
             "created_at": "2021-01-01T00:08:00-07:00",
@@ -131,7 +133,7 @@ def test_bench_format_message(benchmark, bench_record_message):
     """Run benchmark for Sink._validator method validate."""
     number_of_runs = 1000
 
-    writer = SingerWriter()
+    writer = MsgSpecWriter()
 
     def run_format_message():
         for record in itertools.repeat(bench_record_message, number_of_runs):
@@ -143,6 +145,22 @@ def test_bench_format_message(benchmark, bench_record_message):
 def test_bench_deserialize_json(benchmark, bench_encoded_record):
     """Run benchmark for Sink._validator method validate."""
     number_of_runs = 1000
+
+    class DummyReader(MsgSpecReader):
+        def _process_activate_version_message(self, message_dict: dict) -> None:
+            pass
+
+        def _process_batch_message(self, message_dict: dict) -> None:
+            pass
+
+        def _process_record_message(self, message_dict: dict) -> None:
+            pass
+
+        def _process_schema_message(self, message_dict: dict) -> None:
+            pass
+
+        def _process_state_message(self, message_dict: dict) -> None:
+            pass
 
     reader = DummyReader()
 
