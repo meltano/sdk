@@ -45,10 +45,10 @@ encoder = msgspec.json.Encoder(enc_hook=enc_hook, decimal_format="number")
 decoder = msgspec.json.Decoder(dec_hook=dec_hook, float_hook=decimal.Decimal)
 
 
-class MsgSpecReader(GenericSingerReader[bytes]):
+class MsgSpecReader(GenericSingerReader[str]):
     """Base class for all plugins reading Singer messages as strings from stdin."""
 
-    default_input = sys.stdin.buffer
+    default_input = sys.stdin
 
     def deserialize_json(self, line: str) -> dict:  # noqa: PLR6301
         """Deserialize a line of json.
