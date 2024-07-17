@@ -1716,6 +1716,17 @@ files = [
 ]
 
 [[package]]
+name = "readthedocs-sphinx-search"
+version = "0.3.2"
+description = "Sphinx extension to enable search as you type for docs hosted on Read the Docs."
+optional = true
+python-versions = ">=3.6"
+files = [
+    {file = "readthedocs-sphinx-search-0.3.2.tar.gz", hash = "sha256:277773bfa28566a86694c08e568d5a648cd80f22826545555a764d6d20c365fb"},
+    {file = "readthedocs_sphinx_search-0.3.2-py3-none-any.whl", hash = "sha256:58716fd21f01581e6e67bf3bc02e79c77e10dc58b5f8e4c7cc1977e013eda173"},
+]
+
+[[package]]
 name = "referencing"
 version = "0.35.1"
 description = "JSON Referencing + Python"
@@ -2610,7 +2621,7 @@ doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linke
 test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-itertools", "pytest (>=6,!=8.1.*)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-ignore-flaky", "pytest-mypy", "pytest-ruff (>=0.2.1)"]
 
 [extras]
-docs = ["furo", "myst-parser", "pytest", "sphinx", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-notfound-page", "sphinx-reredirects"]
+docs = ["furo", "myst-parser", "pytest", "readthedocs-sphinx-search", "sphinx", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-notfound-page", "sphinx-reredirects"]
 faker = ["faker"]
 jwt = ["PyJWT", "cryptography"]
 parquet = ["numpy", "numpy", "pyarrow"]
@@ -2620,4 +2631,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "91c9f418561bf500a204fa69295a5bb8b66da5b01ea1b77c397d38cb3b749ac4"
+content-hash = "02b6c0d7688842e95aa841877325629ab21811b4b6dc8cd9abdb4d19055c2456"

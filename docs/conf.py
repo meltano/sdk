@@ -50,6 +50,7 @@ extensions = [
     "sphinx_reredirects",
     "sphinx_inline_tabs",
     "notfound.extension",
+    "sphinx_search.extension",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
