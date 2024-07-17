@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from singer_sdk._singerlib._encoding import SingerWriter
-from singer_sdk._singerlib._encoding.base import (
+from .encoding import SingerWriter
+from .encoding._base import SingerMessageType
+from .encoding._simple import (
     ActivateVersionMessage,
     Message,
     RecordMessage,
     SchemaMessage,
-    SingerMessageType,
     StateMessage,
     exclude_null_dict,
 )
