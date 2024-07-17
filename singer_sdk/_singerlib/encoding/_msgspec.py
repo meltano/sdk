@@ -45,7 +45,7 @@ encoder = msgspec.json.Encoder(enc_hook=enc_hook, decimal_format="number")
 decoder = msgspec.json.Decoder(dec_hook=dec_hook, float_hook=decimal.Decimal)
 
 
-class MsgSpecReader(GenericSingerReader[str]):
+class MsgSpecReader(GenericSingerReader[bytes]):
     """Base class for all plugins reading Singer messages as strings from stdin."""
 
     default_input = sys.stdin.buffer
