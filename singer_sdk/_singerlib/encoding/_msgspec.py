@@ -91,4 +91,4 @@ class MsgSpecWriter(GenericSingerWriter[bytes, Message]):
             message: The message to write.
         """
         sys.stdout.buffer.write(self.format_message(message) + b"\n")
-        sys.stdout.buffer.flush()
+        sys.stdout.flush()
