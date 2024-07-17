@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from .base import GenericSingerReader, GenericSingerWriter, SingerMessageType
-from .simple import SingerReader, SingerWriter
+from ._base import GenericSingerReader, GenericSingerWriter, SingerMessageType
+from ._simple import SingerReader, SingerWriter
 
 __all__ = [
     "GenericSingerReader",
