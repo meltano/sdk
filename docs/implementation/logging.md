@@ -80,7 +80,7 @@ This will send metrics to a `metrics.log`:
 
 ## For package developers
 
-If you're developing a tap or target package, you can put a `default_loggging.yml` file in the package root to set the default logging configuration for your package. This file will be used if the `SINGER_SDK_LOG_CONFIG` environment variable is not set:
+If you're developing a tap or target package and would like to customize its logging configuration, you can put a `default_loggging.yml` file in the package root to set the default logging configuration for your package. This file will be used if the `SINGER_SDK_LOG_CONFIG` environment variable is not set:
 
 ```
 .
