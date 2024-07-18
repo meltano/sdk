@@ -379,6 +379,7 @@ unfixable = [
     "SLF001",
     "PLC2701",  # Allow usage of private members in tests
     "PLR6301",  # Don't suggest making test methods static, etc.
+    "INP001",   # flake8-no-pep420: implicit-namespace-package
 ]
 # Disabled some checks in helper modules
 "singer_sdk/helpers/_*.py" = ["DOC"]
