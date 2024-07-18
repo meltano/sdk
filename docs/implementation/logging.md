@@ -77,3 +77,21 @@ This will send metrics to a `metrics.log`:
 2022-09-29 00:48:53,302 INFO METRIC: {"metric_type": "timer", "metric": "sync_duration", "value": 0.5258760452270508, "tags": {"stream": "countries", "context": {}, "status": "succeeded"}}
 2022-09-29 00:48:53,303 INFO METRIC: {"metric_type": "counter", "metric": "record_count", "value": 250, "tags": {"stream": "countries", "context": {}}}
 ```
+
+## For package developers
+
+If you're developing a tap or target package and would like to customize its logging configuration, you can put a `default_loggging.yml` file in the package root to set the default logging configuration for your package. This file will be used if the `SINGER_SDK_LOG_CONFIG` environment variable is not set:
+
+```
+.
+├── README.md
+├── poetry.lock
+├── pyproject.toml
+└── tap_example
+    ├── __init__.py
+    ├── __main__.py
+    ├── default_logging.yml  # <-- This file will be used if SINGER_SDK_LOG_CONFIG is not set
+    ├── client.py
+    ├── streams.py
+    └── tap.py
+```
