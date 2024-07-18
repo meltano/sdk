@@ -7,14 +7,21 @@ import enum
 import json
 import logging
 import logging.config
+import os
 import typing as t
 from dataclasses import dataclass, field
+from pathlib import Path
 from time import time
+
+import yaml
+
+from singer_sdk.helpers._resources import get_package_files
 
 if t.TYPE_CHECKING:
     from types import TracebackType
 
     from singer_sdk.helpers import types
+    from singer_sdk.helpers._compat import Traversable
 
 
 DEFAULT_LOG_INTERVAL = 60.0
@@ -372,3 +379,48 @@ def sync_timer(stream: str, **tags: t.Any) -> Timer:
     """
     tags[Tag.STREAM] = stream
     return Timer(Metric.SYNC_DURATION, tags)
+
+
+def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN401
+    """Load the logging config from the YAML file.
+
+    Args:
+        path: A path to the YAML file.
+
+    Returns:
+        The logging config.
+    """
+    with path.open() as f:
+        return yaml.safe_load(f)
+
+
+def _get_default_config() -> t.Any:  # noqa: ANN401
+    """Get a logging configuration.
+
+    Returns:
+        A logging configuration.
+    """
+    filename = "default_logging.yml"
+    path = get_package_files(__package__) / filename
+    if path.is_file():
+        return _load_yaml_logging_config(path)
+
+    path = get_package_files("singer_sdk").joinpath("default_logging.yml")
+    return _load_yaml_logging_config(path)
+
+
+def _setup_logging(config: t.Mapping[str, t.Any]) -> None:
+    """Setup logging.
+
+    Args:
+        config: A plugin configuration dictionary.
+    """
+    logging.config.dictConfig(_get_default_config())
+
+    config = config or {}
+    metrics_log_level = config.get(METRICS_LOG_LEVEL_SETTING, "INFO").upper()
+    logging.getLogger(METRICS_LOGGER_NAME).setLevel(metrics_log_level)
+
+    if "SINGER_SDK_LOG_CONFIG" in os.environ:
+        log_config_path = Path(os.environ["SINGER_SDK_LOG_CONFIG"])
+        logging.config.dictConfig(_load_yaml_logging_config(log_config_path))
