@@ -394,7 +394,7 @@ def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN40
         return yaml.safe_load(f)
 
 
-def _get_default_config() -> t.Any:  # noqa: ANN401
+def _get_default_config_path() -> Traversable:
     """Get a logging configuration.
 
     Returns:
@@ -403,10 +403,11 @@ def _get_default_config() -> t.Any:  # noqa: ANN401
     filename = "default_logging.yml"
     path = get_package_files(__package__) / filename
     if path.is_file():
-        return _load_yaml_logging_config(path)
+        return path
 
-    path = get_package_files("singer_sdk").joinpath("default_logging.yml")
-    return _load_yaml_logging_config(path)
+    return get_package_files("singer_sdk").joinpath(  # pragma: no cover
+        "default_logging.yml"
+    )
 
 
 def _setup_logging(config: t.Mapping[str, t.Any]) -> None:
@@ -415,7 +416,7 @@ def _setup_logging(config: t.Mapping[str, t.Any]) -> None:
     Args:
         config: A plugin configuration dictionary.
     """
-    logging.config.dictConfig(_get_default_config())
+    logging.config.dictConfig(_load_yaml_logging_config(_get_default_config_path()))
 
     config = config or {}
     metrics_log_level = config.get(METRICS_LOG_LEVEL_SETTING, "INFO").upper()
