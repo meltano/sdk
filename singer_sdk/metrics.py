@@ -402,12 +402,7 @@ def _get_default_config_path() -> Traversable:
     """
     filename = "default_logging.yml"
     path = get_package_files(__package__) / filename
-    if path.is_file():
-        return path
-
-    return get_package_files("singer_sdk").joinpath(  # pragma: no cover
-        "default_logging.yml"
-    )
+    return path if path.is_file() else get_package_files("singer_sdk") / filename
 
 
 def _setup_logging(config: t.Mapping[str, t.Any]) -> None:
