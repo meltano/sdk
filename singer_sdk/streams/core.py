@@ -7,7 +7,6 @@ import copy
 import datetime
 import json
 import typing as t
-from contextlib import contextmanager
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
@@ -29,7 +28,6 @@ from singer_sdk.helpers._batch import (
 )
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
 from singer_sdk.helpers._compat import datetime_fromisoformat
-from singer_sdk.helpers._deprecation import deprecate_row_param
 from singer_sdk.helpers._flattening import get_flattening_options
 from singer_sdk.helpers._state import (
     finalize_state_progress_markers,
@@ -1157,15 +1155,6 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 self._write_batch_message(encoding=encoding, manifest=manifest)
                 self._write_state_message()
 
-    @contextmanager
-    def _with_context(
-        self,
-        context: types.Context | None,
-    ) -> t.Generator[None, None, None]:
-        self.context = MappingProxyType(context) if context else None
-        yield
-        self.context = None
-
     # Public methods ("final", not recommended to be overridden)
 
     @t.final
@@ -1398,10 +1387,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         for manifest in batcher.get_batches(records=records):
             yield batch_config.encoding, manifest
 
-    @deprecate_row_param
     def post_process(  # noqa: PLR6301
         self,
-        record: types.Record,
+        row: types.Record,
         context: types.Context | None = None,  # noqa: ARG002
     ) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
@@ -1415,13 +1403,10 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         invalid or not-applicable records from the stream.
 
         Args:
-            record: Individual record in the stream.
+            row: Individual record in the stream.
             context: Stream partition or context dictionary.
 
         Returns:
             The resulting record dict, or `None` if the record should be excluded.
-
-        .. versionchanged:: 0.39.0
-           The ``row`` parameter was renamed to ``record`` with a deprecation warning.
         """
-        return record
+        return row
