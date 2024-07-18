@@ -408,11 +408,7 @@ def _get_default_config_path(package: str) -> Traversable:
     return path if path.is_file() else get_package_files("singer_sdk") / filename
 
 
-def _setup_logging(
-    config: t.Mapping[str, t.Any],
-    *,
-    package: str | None = None,
-) -> None:
+def _setup_logging(config: t.Mapping[str, t.Any], *, package: str) -> None:
     """Setup logging.
 
     Args:
