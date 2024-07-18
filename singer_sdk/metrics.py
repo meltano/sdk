@@ -394,21 +394,25 @@ def _load_yaml_logging_config(path: Traversable | Path) -> t.Any:  # noqa: ANN40
         return yaml.safe_load(f)
 
 
-def _get_default_config_path(package_name: str) -> Traversable:
+def _get_default_config_path(package: str) -> Traversable:
     """Get a logging configuration.
 
     Args:
-        package_name: The package name to get the logging configuration for.
+        package: The package name to get the logging configuration for.
 
     Returns:
         A logging configuration.
     """
     filename = "default_logging.yml"
-    path = get_package_files(package_name) / filename
+    path = get_package_files(package) / filename
     return path if path.is_file() else get_package_files("singer_sdk") / filename
 
 
-def _setup_logging(package: str, config: t.Mapping[str, t.Any]) -> None:
+def _setup_logging(
+    config: t.Mapping[str, t.Any],
+    *,
+    package: str | None = None,
+) -> None:
     """Setup logging.
 
     Args:
