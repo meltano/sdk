@@ -230,6 +230,10 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         ]
 
     @classproperty
+    def _env_var_prefix(cls) -> str:  # noqa: N805
+        return f"{cls.name.upper().replace('-', '_')}_"
+
+    @classproperty
     def _env_var_config(cls) -> dict[str, t.Any]:  # noqa: N805
         """Return any config specified in environment variables.
 
@@ -239,11 +243,10 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             Dictionary of configuration parsed from the environment.
         """
-        plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
         config_jsonschema = cls.config_jsonschema
         cls.append_builtin_config(config_jsonschema)
 
-        return parse_environment_config(config_jsonschema, plugin_env_prefix)
+        return parse_environment_config(config_jsonschema, cls._env_var_prefix)
 
     # Core plugin metadata:
 
@@ -428,6 +431,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             supported_python_versions=cls.get_supported_python_versions(),
             capabilities=cls.capabilities,
             settings=config_jsonschema,
+            env_var_prefix=cls._env_var_prefix,
         )
 
     @classmethod
