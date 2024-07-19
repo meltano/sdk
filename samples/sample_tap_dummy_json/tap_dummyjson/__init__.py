@@ -1,0 +1,1 @@
+"""Tap for DummyJSON."""

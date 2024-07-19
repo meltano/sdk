@@ -1,0 +1,10 @@
+# IMPORTANT! This folder is hidden from git - if you need to store config files or other secrets,
+# make sure those are never staged for commit into your git repo. You can store them here or another
+# secure location.
+#
+# Note: This may be redundant with the global .gitignore for, and is provided
+# for redundancy. If the `.secrets` folder is not needed, you may delete it
+# from the project.
+
+*
+!.gitignore
