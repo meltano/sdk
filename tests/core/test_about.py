@@ -66,6 +66,7 @@ def about_info() -> AboutInfo:
             },
             "required": ["api_key"],
         },
+        env_var_prefix="TAP_EXAMPLE_",
     )
 
 
