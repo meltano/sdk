@@ -4,7 +4,7 @@ The Tap SDK supports stream partitioning, meaning a set of substreams
 which each have their own state and their own distinct queryable domain.
 
 You can read more about state partitioning in the
-[State Implemetation](./implementation/state.html#partitioned-state) explanation
+[State Implemetation](./implementation/state.md#partitioned-state) explanation
 document.
 
 ## If you do not require partitioning
