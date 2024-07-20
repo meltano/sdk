@@ -250,7 +250,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             Starting replication value.
 
-        .. warning::
+        .. note::
 
            This method requires :meth:`~singer_sdk.Stream.replication_key` to be set
            to a non-null value, indicating the stream should be synced incrementally.
@@ -286,7 +286,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Raises:
             ValueError: If the replication value is not a valid timestamp.
 
-        .. warning::
+        .. note::
 
            This method requires :meth:`~singer_sdk.Stream.replication_key` to be set
            to a non-null value, indicating the stream should be synced incrementally.
