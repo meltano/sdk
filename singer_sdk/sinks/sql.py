@@ -23,11 +23,13 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.target_base import Target
 
+_C = t.TypeVar("_C", bound=SQLConnector)
 
-class SQLSink(BatchSink):
+
+class SQLSink(BatchSink, t.Generic[_C]):
     """SQL-type sink type."""
 
-    connector_class: type[SQLConnector]
+    connector_class: type[_C]
     soft_delete_column_name = "_sdc_deleted_at"
     version_column_name = "_sdc_table_version"
 
@@ -37,7 +39,7 @@ class SQLSink(BatchSink):
         stream_name: str,
         schema: dict,
         key_properties: t.Sequence[str] | None,
-        connector: SQLConnector | None = None,
+        connector: _C | None = None,
     ) -> None:
         """Initialize SQL Sink.
 
@@ -48,12 +50,12 @@ class SQLSink(BatchSink):
             key_properties: The primary key columns.
             connector: Optional connector to reuse.
         """
-        self._connector: SQLConnector
+        self._connector: _C
         self._connector = connector or self.connector_class(dict(target.config))
         super().__init__(target, stream_name, schema, key_properties)
 
     @property
-    def connector(self) -> SQLConnector:
+    def connector(self) -> _C:
         """The connector object.
 
         Returns:

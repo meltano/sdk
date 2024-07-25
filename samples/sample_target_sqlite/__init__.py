@@ -26,7 +26,7 @@ class SQLiteConnector(SQLConnector):
         return f"sqlite:///{config[DB_PATH_CONFIG]}"
 
 
-class SQLiteSink(SQLSink):
+class SQLiteSink(SQLSink[SQLiteConnector]):
     """The Sink class for SQLite.
 
     This class allows developers to optionally override `get_records()` and other
