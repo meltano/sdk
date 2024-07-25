@@ -15,6 +15,7 @@ types:
   - docs
   - feat
   - fix
+  - packaging
   - perf
   - refactor
   - revert

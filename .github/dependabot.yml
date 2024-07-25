@@ -6,7 +6,7 @@ updates:
       interval: weekly
       time: "12:00"
     reviewers: [meltano/engineering]
-    labels: [deps]
+    labels: [Dependencies]
     groups:
       development-dependencies:
         dependency-type: development
@@ -21,7 +21,7 @@ updates:
       interval: weekly
       time: "12:00"
     reviewers: [meltano/engineering]
-    labels: [deps]
+    labels: [Dependencies]
     groups:
       ci:
         patterns:
@@ -31,7 +31,7 @@ updates:
     schedule:
       interval: weekly
     reviewers: [meltano/engineering]
-    labels: [deps]
+    labels: [Dependencies]
     groups:
       actions:
         patterns:

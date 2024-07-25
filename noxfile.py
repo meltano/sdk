@@ -186,7 +186,7 @@ def docs_serve(session: Session) -> None:
         "build",
         "-W",
     ]
-    session.install(".[docs]")
+    session.install(".[docs]", "sphinx-autobuild")
 
     build_dir = Path("build")
     if build_dir.exists():

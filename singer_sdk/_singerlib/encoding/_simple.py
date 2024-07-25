@@ -194,7 +194,7 @@ class ActivateVersionMessage(Message):
         self.type = SingerMessageType.ACTIVATE_VERSION
 
 
-class SingerReader(GenericSingerReader[str]):
+class SimpleSingerReader(GenericSingerReader[str]):
     """Base class for all plugins reading Singer messages as strings from stdin."""
 
     default_input = sys.stdin
@@ -219,7 +219,7 @@ class SingerReader(GenericSingerReader[str]):
             raise InvalidInputLine(msg) from exc
 
 
-class SingerWriter(GenericSingerWriter[str, Message]):
+class SimpleSingerWriter(GenericSingerWriter[str, Message]):
     """Interface for all plugins writing Singer messages to stdout."""
 
     def serialize_message(self, message: Message) -> str:  # noqa: PLR6301

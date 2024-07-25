@@ -10,11 +10,14 @@ from textwrap import dedent
 import pytest
 
 from singer_sdk._singerlib import RecordMessage
-from singer_sdk._singerlib.encoding._simple import SingerReader, SingerWriter
+from singer_sdk._singerlib.encoding._simple import (
+    SimpleSingerReader,
+    SimpleSingerWriter,
+)
 from singer_sdk._singerlib.exceptions import InvalidInputLine
 
 
-class DummyReader(SingerReader):
+class DummyReader(SimpleSingerReader):
     def _process_activate_version_message(self, message_dict: dict) -> None:
         pass
 
@@ -82,7 +85,7 @@ def test_listen_unknown_message():
 
 
 def test_write_message():
-    writer = SingerWriter()
+    writer = SimpleSingerWriter()
     message = RecordMessage(
         stream="test",
         record={"id": 1, "name": "test"},

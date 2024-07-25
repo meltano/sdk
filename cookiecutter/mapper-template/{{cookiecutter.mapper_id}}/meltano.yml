@@ -13,18 +13,26 @@ plugins:
       streams:
       - stream_name: animals
         input_filename: https://raw.githubusercontent.com/meltano/tap-smoke-test/main/demo-data/animals-data.jsonl
+
   loaders:
   - name: target-jsonl
     variant: andyh1203
     pip_url: target-jsonl
+
   mappers:
   - name: "{{cookiecutter.mapper_id}}"
-    pip_url: -e .
     namespace: "{{cookiecutter.library_name}}"
-    # TODO: replace these with the actual settings
+    pip_url: -e .
+
+    # TODO: Declare settings and their types here:
     settings:
     - name: example_config
       kind: string
+      label: Example Config
+      description: An example configuration setting
+
+    # TODO: Declare mapping instances here:
+    # https://docs.meltano.com/guide/mappers/#example-1
     mappings:
     - name: example
       config:

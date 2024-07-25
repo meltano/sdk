@@ -249,6 +249,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         Returns:
             Starting replication value.
+
+        .. note::
+
+           This method requires :attr:`~singer_sdk.Stream.replication_key` to be set
+           to a non-null value, indicating the stream should be synced incrementally.
         """
         state = self.get_context_state(context)
 
@@ -280,6 +285,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         Raises:
             ValueError: If the replication value is not a valid timestamp.
+
+        .. note::
+
+           This method requires :attr:`~singer_sdk.Stream.replication_key` to be set
+           to a non-null value, indicating the stream should be synced incrementally.
         """
         value = self.get_starting_replication_key_value(context)
 
