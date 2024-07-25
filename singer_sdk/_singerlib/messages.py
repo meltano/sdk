@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .encoding import SingerWriter
+from .encoding import SimpleSingerWriter as SingerWriter
 from .encoding._base import SingerMessageType
 from .encoding._simple import (
     ActivateVersionMessage,
