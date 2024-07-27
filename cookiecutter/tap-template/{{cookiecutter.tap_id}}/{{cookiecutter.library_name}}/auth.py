@@ -27,27 +27,9 @@ class {{ cookiecutter.source_name }}Authenticator(OAuthAuthenticator, metaclass=
         return {
             "resource": "https://analysis.windows.net/powerbi/api",
             "scope": self.oauth_scopes,
-            "client_id": self.config["client_id"],
-            "username": self.config["username"],
-            "password": self.config["password"],
+            "client_id": self.client_id,
             "grant_type": "password",
         }
-
-    @classmethod
-    def create_for_stream(cls, stream) -> {{ cookiecutter.source_name }}Authenticator:  # noqa: ANN001
-        """Instantiate an authenticator for a specific Singer stream.
-
-        Args:
-            stream: The Singer stream instance.
-
-        Returns:
-            A new authenticator.
-        """
-        return cls(
-            stream=stream,
-            auth_endpoint="TODO: OAuth Endpoint URL",
-            oauth_scopes="TODO: OAuth Scopes",
-        )
 {%- elif cookiecutter.auth_method == "JWT" %}
 
 from singer_sdk.authenticators import OAuthJWTAuthenticator
@@ -55,23 +37,4 @@ from singer_sdk.authenticators import OAuthJWTAuthenticator
 
 class {{ cookiecutter.source_name }}Authenticator(OAuthJWTAuthenticator):
     """Authenticator class for {{ cookiecutter.source_name }}."""
-
-    @classmethod
-    def create_for_stream(
-        cls,
-        stream,  # noqa: ANN001
-    ) -> {{ cookiecutter.source_name }}Authenticator:
-        """Instantiate an authenticator for a specific Singer stream.
-
-        Args:
-            stream: The Singer stream instance.
-
-        Returns:
-            A new authenticator.
-        """
-        return cls(
-            stream=stream,
-            auth_endpoint="TODO: OAuth Endpoint URL",
-            oauth_scopes="TODO: OAuth Scopes",
-        )
 {%- endif %}

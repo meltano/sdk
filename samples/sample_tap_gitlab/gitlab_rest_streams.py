@@ -44,7 +44,6 @@ class GitlabStream(RESTStream[str]):
     def authenticator(self) -> SimpleAuthenticator:
         """Return an authenticator for REST API requests."""
         return SimpleAuthenticator(
-            stream=self,
             auth_headers={"Private-Token": self.config.get("auth_token")},
         )
 

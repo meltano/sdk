@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import datetime
+import logging
 import math
 import typing as t
 import warnings
@@ -11,13 +12,15 @@ from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import requests
+from typing_extensions import deprecated
 
+from singer_sdk.helpers._deprecate import deprecate_param
 from singer_sdk.helpers._util import utc_now
 
 if t.TYPE_CHECKING:
-    import logging
-
     from singer_sdk.streams.rest import RESTStream
+
+logger = logging.getLogger(__name__)
 
 
 def _add_parameters(initial_url: str, extra_parameters: dict) -> str:
@@ -82,30 +85,84 @@ class APIAuthenticatorBase:
     """Base class for offloading API auth.
 
     Attributes:
-        auth_headers: HTTP headers for authentication.
-        auth_params: URL query parameters for authentication.
+        auth_headers: The HTTP headers for authentication.
+        auth_params: The URL query parameters for authentication.
+        tap_name: The name of the tap.
+        config: The tap configuration.
+        logger: The logger for the tap.
+
+    .. versionchanged:: 0.39.0
+        The ``tap_name`` attribute is deprecated.
+        release.
+
+    .. versionchanged:: 0.39.0
+        The ``config`` attribute is deprecated.
+
+    .. versionchanged:: 0.39.0
+        The ``logger`` attribute is deprecated.
     """
 
-    def __init__(self, stream: RESTStream) -> None:
+    @deprecate_param(1, "stream")
+    def __init__(self, stream: RESTStream | None = None) -> None:
         """Init authenticator.
 
         Args:
             stream: A stream for a RESTful endpoint.
+
+        .. versionchanged:: 0.39.0
+            The ``stream`` parameter is deprecated.
         """
-        self.tap_name: str = stream.tap_name
-        self._config: dict[str, t.Any] = dict(stream.config)
         self.auth_headers: dict[str, t.Any] = {}
         self.auth_params: dict[str, t.Any] = {}
-        self.logger: logging.Logger = stream.logger
+
+        self.__tap_name: str | None = stream.tap_name if stream else None
+        self.__config: dict[str, t.Any] = dict(stream.config) if stream else {}
+        self.__logger: logging.Logger = stream.logger if stream else logger
 
     @property
+    @deprecated(
+        "The `tap_name` attribute is deprecated and will be removed in a future "
+        "release.",
+        category=DeprecationWarning,
+        stacklevel=2,
+    )
+    def tap_name(self) -> str | None:
+        """Get the tap name.
+
+        Returns:
+            The tap name.
+        """
+        return self.__tap_name
+
+    @property
+    @deprecated(
+        "The `logger` attribute is deprecated and will be removed in a future release.",
+        category=DeprecationWarning,
+        stacklevel=2,
+    )
+    def logger(self) -> logging.Logger:
+        """Get the logger.
+
+        Returns:
+            The logger.
+        """
+        return self.__logger
+
+    @property
+    @deprecated(
+        "The `config` property is deprecated and will be removed in a future "
+        "release. Use specific instance attributes instead and override the "
+        "constructor to pass in the necessary configuration.",
+        category=DeprecationWarning,
+        stacklevel=2,
+    )
     def config(self) -> t.Mapping[str, t.Any]:
         """Get stream or tap config.
 
         Returns:
             A frozen (read-only) config dictionary map.
         """
-        return MappingProxyType(self._config)
+        return MappingProxyType(self.__config)
 
     def authenticate_request(
         self,
@@ -149,9 +206,10 @@ class SimpleAuthenticator(APIAuthenticatorBase):
     in either the request headers or query parameters.
     """
 
+    @deprecate_param(1, "stream")
     def __init__(
         self,
-        stream: RESTStream,
+        stream: RESTStream | None = None,
         auth_headers: dict | None = None,
     ) -> None:
         """Create a new authenticator.
@@ -162,6 +220,9 @@ class SimpleAuthenticator(APIAuthenticatorBase):
         Args:
             stream: The stream instance to use with this authenticator.
             auth_headers: Authentication headers.
+
+        .. versionchanged:: 0.39.0
+            The ``stream`` parameter is deprecated.
         """
         super().__init__(stream=stream)
         if self.auth_headers is None:
@@ -179,9 +240,10 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
     any key-value pair may be used for this authenticator.
     """
 
+    @deprecate_param(1, "stream")
     def __init__(
         self,
-        stream: RESTStream,
+        stream: RESTStream | None,
         key: str,
         value: str,
         location: str = "header",
@@ -196,6 +258,9 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
 
         Raises:
             ValueError: If the location value is not 'header' or 'params'.
+
+        .. versionchanged:: 0.39.0
+            The ``stream`` parameter is deprecated.
         """
         super().__init__(stream=stream)
         auth_credentials = {key: value}
@@ -214,9 +279,15 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
             self.auth_params.update(auth_credentials)
 
     @classmethod
+    @deprecated(
+        "APIKeyAuthenticator.create_for_stream is deprecated. Please use the class "
+        "constructor instead.",
+        category=DeprecationWarning,
+        stacklevel=2,
+    )
     def create_for_stream(
         cls: type[APIKeyAuthenticator],
-        stream: RESTStream,
+        stream: RESTStream | None,
         key: str,
         value: str,
         location: str,
@@ -244,12 +315,16 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
     'Bearer '. The token will be merged with HTTP headers on the stream.
     """
 
-    def __init__(self, stream: RESTStream, token: str) -> None:
+    @deprecate_param(1, "stream")
+    def __init__(self, stream: RESTStream | None, token: str) -> None:
         """Create a new authenticator.
 
         Args:
             stream: The stream instance to use with this authenticator.
             token: Authentication token.
+
+        .. versionchanged:: 0.39.0
+            The ``stream`` parameter is deprecated.
         """
         super().__init__(stream=stream)
         auth_credentials = {"Authorization": f"Bearer {token}"}
@@ -259,6 +334,12 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
         self.auth_headers.update(auth_credentials)
 
     @classmethod
+    @deprecated(
+        "BearerTokenAuthenticator.create_for_stream is deprecated. Please use the "
+        "class constructor instead.",
+        category=DeprecationWarning,
+        stacklevel=2,
+    )
     def create_for_stream(
         cls: type[BearerTokenAuthenticator],
         stream: RESTStream,
@@ -288,9 +369,10 @@ class BasicAuthenticator(APIAuthenticatorBase):
     token will be merged with any HTTP headers specified on the stream.
     """
 
+    @deprecate_param(1, "stream")
     def __init__(
         self,
-        stream: RESTStream,
+        stream: RESTStream | None,
         username: str,
         password: str,
     ) -> None:
@@ -318,6 +400,12 @@ class BasicAuthenticator(APIAuthenticatorBase):
         self.auth_headers.update(auth_credentials)
 
     @classmethod
+    @deprecated(
+        "BasicAuthenticator.create_for_stream is deprecated. Please use the class "
+        "constructor instead.",
+        category=DeprecationWarning,
+        stacklevel=2,
+    )
     def create_for_stream(
         cls: type[BasicAuthenticator],
         stream: RESTStream,
@@ -341,13 +429,17 @@ class BasicAuthenticator(APIAuthenticatorBase):
 class OAuthAuthenticator(APIAuthenticatorBase):
     """API Authenticator for OAuth 2.0 flows."""
 
+    @deprecate_param(1, "stream")
     def __init__(
         self,
-        stream: RESTStream,
+        stream: RESTStream | None = None,
         auth_endpoint: str | None = None,
         oauth_scopes: str | None = None,
         default_expiration: int | None = None,
         oauth_headers: dict | None = None,
+        *,
+        client_id: str | None = None,
+        client_secret: str | None = None,
     ) -> None:
         """Create a new authenticator.
 
@@ -357,6 +449,8 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             oauth_scopes: A comma-separated list of OAuth scopes.
             default_expiration: Default token expiry in seconds.
             oauth_headers: An optional dict of headers required to get a token.
+            client_id: The client ID to use in authentication.
+            client_secret: The client secret to use in authentication.
         """
         super().__init__(stream=stream)
         self._auth_endpoint = auth_endpoint
@@ -369,6 +463,9 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         self.refresh_token: str | None = None
         self.last_refreshed: datetime.datetime | None = None
         self.expires_in: int | None = None
+
+        self.__client_id = client_id
+        self.__client_secret = client_secret
 
     def authenticate_request(
         self,
@@ -454,7 +551,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         Returns:
             Optional client secret from stream config if it has been set.
         """
-        return self.config.get("client_id") if self.config else None
+        return self.config.get("client_id", self.__client_id)
 
     @property
     def client_secret(self) -> str | None:
@@ -463,7 +560,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         Returns:
             Optional client secret from stream config if it has been set.
         """
-        return self.config.get("client_secret") if self.config else None
+        return self.config.get("client_secret", self.__client_secret)
 
     def is_token_valid(self) -> bool:
         """Check if token is valid.
@@ -498,14 +595,14 @@ class OAuthAuthenticator(APIAuthenticatorBase):
             msg = f"Failed OAuth login, response was '{token_response.json()}'. {ex}"
             raise RuntimeError(msg) from ex
 
-        self.logger.info("OAuth authorization attempt was successful.")
+        logger.info("OAuth authorization attempt was successful.")
 
         token_json = token_response.json()
         self.access_token = token_json["access_token"]
         expiration = token_json.get("expires_in", self._default_expiration)
         self.expires_in = int(expiration) if expiration else None
         if self.expires_in is None:
-            self.logger.debug(
+            logger.debug(
                 "No expires_in received in OAuth response and no "
                 "default_expiration set. Token will be treated as if it never "
                 "expires.",
@@ -516,6 +613,25 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 class OAuthJWTAuthenticator(OAuthAuthenticator):
     """API Authenticator for OAuth 2.0 flows which utilize a JWT refresh token."""
 
+    def __init__(
+        self,
+        *args: t.Any,
+        private_key: str | None = None,
+        private_key_passphrase: str | None = None,
+        **kwargs: t.Any,
+    ) -> None:
+        """Create a new authenticator.
+
+        Args:
+            *args: Positional arguments for the base class.
+            private_key: The private key to use in encryption.
+            private_key_passphrase: The passphrase for the private key.
+            **kwargs: Keyword arguments for the base class.
+        """
+        super().__init__(*args, **kwargs)
+        self.__private_key = private_key
+        self.__private_key_passphrase = private_key_passphrase
+
     @property
     def private_key(self) -> str | None:
         """Return the private key to use in encryption.
@@ -523,7 +639,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         Returns:
             Private key from stream config.
         """
-        return self.config.get("private_key", None)
+        return self.__private_key or self.config.get("private_key", None)
 
     @property
     def private_key_passphrase(self) -> str | None:
@@ -532,7 +648,8 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
         Returns:
             Passphrase for private key from stream config.
         """
-        return self.config.get("private_key_passphrase", None)
+        key = "private_key_passphrase"
+        return self.__private_key_passphrase or self.config.get(key, None)
 
     @property
     def oauth_request_body(self) -> dict:

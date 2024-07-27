@@ -30,7 +30,7 @@ class SimpleRESTStream(RESTStream):
     @property
     def authenticator(self) -> APIAuthenticatorBase:
         """Stream authenticator."""
-        return APIAuthenticatorBase(stream=self)
+        return APIAuthenticatorBase()
 
 
 class SingletonAuthStream(SimpleRESTStream):
@@ -39,7 +39,7 @@ class SingletonAuthStream(SimpleRESTStream):
     @property
     def authenticator(self) -> SingletonAuthenticator:
         """Stream authenticator."""
-        return SingletonAuthenticator(stream=self)
+        return SingletonAuthenticator()
 
 
 class NaiveAuthenticator(APIAuthenticatorBase):
@@ -52,7 +52,7 @@ class CachedAuthStream(SimpleRESTStream):
     @cached_property
     def authenticator(self) -> NaiveAuthenticator:
         """Stream authenticator."""
-        return NaiveAuthenticator(stream=self)
+        return NaiveAuthenticator()
 
 
 class ProxyAuthStream(SimpleRESTStream):

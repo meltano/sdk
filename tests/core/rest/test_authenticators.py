@@ -127,7 +127,6 @@ class _FakeOAuthAuthenticator(OAuthAuthenticator):
     ],
 )
 def test_oauth_authenticator_token_expiry_handling(
-    rest_tap: Tap,
     requests_mock: requests_mock.Mocker,
     oauth_response_expires_in: int,
     default_expiration: int,
@@ -145,7 +144,6 @@ def test_oauth_authenticator_token_expiry_handling(
     )
 
     authenticator = _FakeOAuthAuthenticator(
-        stream=rest_tap.streams["some_stream"],
         auth_endpoint="https://example.com/oauth",
         default_expiration=default_expiration,
     )
@@ -198,15 +196,14 @@ def public_key_string(public_key: RSAPublicKey) -> str:
 
 
 def test_oauth_jwt_authenticator_payload(
-    rest_tap: Tap,
     private_key_string: str,
     public_key_string: str,
 ):
     class _FakeOAuthJWTAuthenticator(OAuthJWTAuthenticator):
-        private_key = private_key_string
+        private_key_passphrase = None
         oauth_request_body = {"some": "payload"}  # noqa: RUF012
 
-    authenticator = _FakeOAuthJWTAuthenticator(stream=rest_tap.streams["some_stream"])
+    authenticator = _FakeOAuthJWTAuthenticator(private_key=private_key_string)
 
     body = authenticator.oauth_request_body
     payload = authenticator.oauth_request_payload
@@ -224,11 +221,9 @@ def test_requests_library_auth(rest_tap: Tap):
     assert r.headers["Proxy-Authorization"] == _basic_auth_str("username", "password")
 
 
-def test_basic_auth_deprecation_warning(rest_tap: Tap):
+def test_basic_auth_deprecation_warning():
     """Validate that a warning is emitted when using BasicAuthenticator."""
-    stream: RESTStream = rest_tap.streams["some_stream"]
     with pytest.deprecated_call(match="BasicAuthenticator is deprecated") as recorder:
-        BasicAuthenticator(stream=stream, username="username", password="password")  # noqa: S106
+        BasicAuthenticator(username="username", password="password")  # noqa: S106
 
     assert len(recorder.list) == 1
-    assert recorder.list[0].filename.endswith("test_authenticators.py")

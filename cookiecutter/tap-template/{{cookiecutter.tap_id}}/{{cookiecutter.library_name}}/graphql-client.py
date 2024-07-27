@@ -34,7 +34,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         Returns:
             An authenticator instance.
         """
-        return {{ cookiecutter.source_name }}Authenticator.create_for_stream(self)
+        return {{ cookiecutter.source_name }}Authenticator()
 
 {%- endif %}
 
