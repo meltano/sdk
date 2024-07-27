@@ -21,7 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### ⚙️ Under the Hood
 
 - [#2564](https://github.com/meltano/sdk/issues/2564) Make `SQLSink` a generic with a `SQLConnector` type parameter
-- Deprecate `row` parameter of `Stream.post_process` in favor or `record`
 - [#2540](https://github.com/meltano/sdk/issues/2540) Implement abstract `serialize_message` for Singer writers
 - [#2259](https://github.com/meltano/sdk/issues/2259) Centralize JSON SerDe into helper functions -- _**Thanks @BuzzCutNorman!**_
 - [#2525](https://github.com/meltano/sdk/issues/2525) Make `PyJWT` and `cryptography` dependencies optional
