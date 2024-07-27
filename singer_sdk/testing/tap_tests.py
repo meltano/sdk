@@ -5,7 +5,8 @@ from __future__ import annotations
 import typing as t
 import warnings
 
-from jsonschema import Draft7Validator
+from jsonschema import Draft202012Validator
+from jsonschema.exceptions import SchemaError
 
 import singer_sdk.helpers._typing as th
 from singer_sdk import Tap
@@ -71,6 +72,28 @@ class TapValidFinalStateTest(TapTestTemplate):
         assert "progress_markers" not in final_state, self.message
 
 
+class StreamSchemaIsValidTest(StreamTestTemplate):
+    """Test that a stream's schema is valid."""
+
+    name = "schema_is_valid"
+
+    def test(self) -> None:
+        """Run test.
+
+        Raises:
+            AssertionError: if schema is not valid.
+        """
+        assert self.stream.schema
+
+        validator = Draft202012Validator(self.stream.schema)
+
+        try:
+            validator.check_schema(self.stream.schema)
+        except SchemaError as e:  # pragma: no cover
+            msg = f"Schema is not valid: {e}"
+            raise AssertionError(msg) from e
+
+
 class StreamReturnsRecordTest(StreamTestTemplate):
     """Test that a stream sync returns at least 1 record."""
 
@@ -134,9 +157,9 @@ class StreamRecordMatchesStreamSchema(StreamTestTemplate):
     def test(self) -> None:
         """Run test."""
         schema = self.stream.schema
-        validator = Draft7Validator(
+        validator = Draft202012Validator(
             schema,
-            format_checker=Draft7Validator.FORMAT_CHECKER,
+            format_checker=Draft202012Validator.FORMAT_CHECKER,
         )
         for record in self.stream_records:
             errors = list(validator.iter_errors(record))

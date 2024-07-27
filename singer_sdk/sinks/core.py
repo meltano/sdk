@@ -88,7 +88,7 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
         Raises:
             InvalidJSONSchema: If the schema provided from tap or mapper is invalid.
         """
-        jsonschema_validator = jsonschema.Draft7Validator
+        jsonschema_validator = jsonschema.Draft202012Validator
 
         super().__init__(schema)
         if validate_formats:
