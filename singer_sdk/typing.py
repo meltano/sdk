@@ -58,9 +58,6 @@ import typing as t
 import sqlalchemy as sa
 from jsonschema import ValidationError, validators
 
-if t.TYPE_CHECKING:
-    from jsonschema.protocols import Validator
-
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
     JSONSCHEMA_ANNOTATION_WRITEONLY,
@@ -71,6 +68,8 @@ from singer_sdk.helpers._typing import (
 if t.TYPE_CHECKING:
     import sys
 
+    from jsonschema.protocols import Validator
+
     if sys.version_info >= (3, 10):
         from typing import TypeAlias  # noqa: ICN003
     else:
@@ -78,6 +77,7 @@ if t.TYPE_CHECKING:
 
 
 __all__ = [
+    "DEFAULT_JSONSCHEMA_VALIDATOR",
     "ArrayType",
     "BooleanType",
     "CustomType",
@@ -118,11 +118,13 @@ _JsonValue: TypeAlias = t.Union[
     None,
 ]
 
+DEFAULT_JSONSCHEMA_VALIDATOR: type[Validator] = validators.Draft7Validator  # type: ignore[assignment]
+
 T = t.TypeVar("T", bound=_JsonValue)
 P = t.TypeVar("P")
 
 
-def extend_validator_with_defaults(validator_class):  # noqa: ANN001, ANN201
+def extend_validator_with_defaults(validator_class: type[Validator]):  # noqa: ANN201
     """Fill in defaults, before validating with the provided JSON Schema Validator.
 
     See
