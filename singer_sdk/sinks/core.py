@@ -14,6 +14,7 @@ from gzip import open as gzip_open
 from types import MappingProxyType
 
 import jsonschema
+import jsonschema.validators
 from typing_extensions import override
 
 from singer_sdk._singerlib.json import deserialize_json
@@ -38,6 +39,7 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
     handle_invalid_timestamp_in_record,
 )
+from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
 
 if t.TYPE_CHECKING:
     from logging import Logger
@@ -88,7 +90,10 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
         Raises:
             InvalidJSONSchema: If the schema provided from tap or mapper is invalid.
         """
-        jsonschema_validator = jsonschema.Draft7Validator
+        jsonschema_validator = jsonschema.validators.validator_for(
+            schema,
+            DEFAULT_JSONSCHEMA_VALIDATOR,
+        )
 
         super().__init__(schema)
         if validate_formats:
