@@ -48,7 +48,7 @@ jobs:
         --with benchmark
         --all-extras
 
-    - uses: CodSpeedHQ/action@v2
+    - uses: CodSpeedHQ/action@v3
       with:
         token: ${{ secrets.CODSPEED_TOKEN }}
         run: pytest tests/ --codspeed
