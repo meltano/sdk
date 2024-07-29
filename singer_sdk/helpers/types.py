@@ -20,5 +20,5 @@ __all__ = [
     "Record",
 ]
 
-Context: TypeAlias = Mapping
+Context: TypeAlias = Mapping[str, t.Any]
 Record: TypeAlias = t.Dict[str, t.Any]
