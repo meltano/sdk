@@ -51,7 +51,7 @@ typing_dependencies = poetry_config["group"]["typing"]["dependencies"].keys()
 def mypy(session: Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
-    session.install(".[faker,jwt,parquet,s3,testing]")
+    session.install(".[faker,jwt,msgspec,parquet,s3,testing]")
     session.install(*typing_dependencies)
     session.run("mypy", *args)
     if not session.posargs:
@@ -61,7 +61,7 @@ def mypy(session: Session) -> None:
 @session(python=python_versions)
 def tests(session: Session) -> None:
     """Execute pytest tests and compute coverage."""
-    session.install(".[faker,jwt,parquet,s3]")
+    session.install(".[faker,jwt,msgspec,parquet,s3]")
     session.install(*test_dependencies)
 
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
@@ -94,7 +94,7 @@ def tests(session: Session) -> None:
 @session(python=main_python_version)
 def benches(session: Session) -> None:
     """Run benchmarks."""
-    session.install(".[jwt,s3]")
+    session.install(".[jwt,msgspec,s3]")
     session.install(*test_dependencies)
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
     if sqlalchemy_version:
@@ -114,7 +114,7 @@ def benches(session: Session) -> None:
 @session(name="deps", python=python_versions)
 def dependencies(session: Session) -> None:
     """Check issues with dependencies."""
-    session.install(".[s3,testing]")
+    session.install(".[msgspec,s3,testing]")
     session.install("deptry")
     session.run("deptry", "singer_sdk", *session.posargs)
 
@@ -124,7 +124,7 @@ def update_snapshots(session: Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
 
-    session.install(".[faker,jwt,parquet]")
+    session.install(".[faker,jwt,msgspec,parquet]")
     session.install(*test_dependencies)
     session.run("pytest", "--snapshot-update", *args)
 
