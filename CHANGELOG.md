@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.39.0 (2024-07-27)
+
+### ✨ New
+
+- [#2432](https://github.com/meltano/sdk/issues/2432) Developers can now customize the default logging configuration for their taps/targets by adding `default_logging.yml` to their package
+- [#2531](https://github.com/meltano/sdk/issues/2531) The `json` module is now avaiable to stream maps -- _**Thanks @grigi!**_
+- [#2529](https://github.com/meltano/sdk/issues/2529) Stream sync context is now available to all instances methods as a `Stream.context` attribute
+
+### 🐛 Fixes
+
+- [#2554](https://github.com/meltano/sdk/issues/2554) Use mapped stream aliases when handling `ACTIVATE_VERSION` messages in the base target class
+- [#2526](https://github.com/meltano/sdk/issues/2526) Moved up the supported Python versions in the Markdown output of `--about`
+
+### ⚙️ Under the Hood
+
+- [#2564](https://github.com/meltano/sdk/issues/2564) Make `SQLSink` a generic with a `SQLConnector` type parameter
+- [#2540](https://github.com/meltano/sdk/issues/2540) Implement abstract `serialize_message` for Singer writers
+- [#2259](https://github.com/meltano/sdk/issues/2259) Centralize JSON SerDe into helper functions -- _**Thanks @BuzzCutNorman!**_
+- [#2525](https://github.com/meltano/sdk/issues/2525) Make `PyJWT` and `cryptography` dependencies optional
+- [#2528](https://github.com/meltano/sdk/issues/2528) Moved class-level attributes to the top in REST tap template
+- [#2132](https://github.com/meltano/sdk/issues/2132) Limit internal usage of pendulum
+
+### 📚 Documentation Improvements
+
+- [#2557](https://github.com/meltano/sdk/issues/2557) Document that `get_starting_timestamp` requires setting a non-null replication_key
+- [#2556](https://github.com/meltano/sdk/issues/2556) Reference state partitioning in stream partitioning page
+- [#2536](https://github.com/meltano/sdk/issues/2536) Prepare for RTD addons migration
+- [#2535](https://github.com/meltano/sdk/issues/2535) Added more intersphinx links to Python and Faker docs
+- [#2530](https://github.com/meltano/sdk/issues/2530) Explained how the request URL is generated from `url_base`, `path` and the sync context
+- [#2527](https://github.com/meltano/sdk/issues/2527) Updated the footer
+- [#2506](https://github.com/meltano/sdk/issues/2506) Fixed a typo in the stream maps docs
+
 ## v0.38.0 (2024-06-17)
 
 ### ✨ New
