@@ -672,7 +672,7 @@ class MappedTap(Tap):
     datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc),
     tick=False,
 )
-@pytest.mark.snapshot()
+@pytest.mark.snapshot
 @pytest.mark.parametrize(
     "stream_maps,config,snapshot_name",
     [

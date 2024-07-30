@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import base64
+import datetime
 import math
 import typing as t
 import warnings
-from datetime import timedelta
 from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
@@ -16,8 +16,6 @@ from singer_sdk.helpers._util import utc_now
 
 if t.TYPE_CHECKING:
     import logging
-
-    from pendulum import DateTime
 
     from singer_sdk.streams.rest import RESTStream
 
@@ -382,7 +380,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         # Initialize internal tracking attributes
         self.access_token: str | None = None
         self.refresh_token: str | None = None
-        self.last_refreshed: DateTime | None = None
+        self.last_refreshed: datetime.datetime | None = None
         self.expires_in: int | None = None
 
     @property
@@ -558,7 +556,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             "iss": self.client_id,
             "scope": self.oauth_scopes,
             "aud": self.auth_endpoint,
-            "exp": math.floor((request_time + timedelta(hours=1)).timestamp()),
+            "exp": math.floor((request_time + datetime.timedelta(hours=1)).timestamp()),
             "iat": math.floor(request_time.timestamp()),
         }
 
@@ -570,13 +568,18 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             Payload object for OAuth.
 
         Raises:
+            RuntimeError: If the JWT dependencies are not installed.
             ValueError: If the private key is not set.
         """
-        import jwt  # noqa: PLC0415
-        from cryptography.hazmat.backends import default_backend  # noqa: PLC0415
-        from cryptography.hazmat.primitives import serialization  # noqa: PLC0415
+        try:
+            import jwt  # noqa: PLC0415
+            from cryptography.hazmat.backends import default_backend  # noqa: PLC0415
+            from cryptography.hazmat.primitives import serialization  # noqa: PLC0415
+        except ModuleNotFoundError as ex:  # pragma: no cover
+            msg = "Install singer-sdk[jwt] to use OAuthJWTAuthenticator."
+            raise RuntimeError(msg) from ex
 
-        if not self.private_key:
+        if not self.private_key:  # pragma: no cover
             msg = "Missing 'private_key' property for OAuth payload."
             raise ValueError(msg)
 

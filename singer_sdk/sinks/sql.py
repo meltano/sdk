@@ -9,13 +9,13 @@ from copy import copy
 from textwrap import dedent
 
 import sqlalchemy as sa
-from pendulum import now
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.expression import bindparam
 
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.exceptions import ConformedNameClashException
 from singer_sdk.helpers._conformers import replace_leading_digit
+from singer_sdk.helpers._util import utc_now
 from singer_sdk.sinks.batch import BatchSink
 
 if t.TYPE_CHECKING:
@@ -23,11 +23,13 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.target_base import Target
 
+_C = t.TypeVar("_C", bound=SQLConnector)
 
-class SQLSink(BatchSink):
+
+class SQLSink(BatchSink, t.Generic[_C]):
     """SQL-type sink type."""
 
-    connector_class: type[SQLConnector]
+    connector_class: type[_C]
     soft_delete_column_name = "_sdc_deleted_at"
     version_column_name = "_sdc_table_version"
 
@@ -37,7 +39,7 @@ class SQLSink(BatchSink):
         stream_name: str,
         schema: dict,
         key_properties: t.Sequence[str] | None,
-        connector: SQLConnector | None = None,
+        connector: _C | None = None,
     ) -> None:
         """Initialize SQL Sink.
 
@@ -48,12 +50,12 @@ class SQLSink(BatchSink):
             key_properties: The primary key columns.
             connector: Optional connector to reuse.
         """
-        self._connector: SQLConnector
+        self._connector: _C
         self._connector = connector or self.connector_class(dict(target.config))
         super().__init__(target, stream_name, schema, key_properties)
 
     @property
-    def connector(self) -> SQLConnector:
+    def connector(self) -> _C:
         """The connector object.
 
         Returns:
@@ -371,7 +373,7 @@ class SQLSink(BatchSink):
         if not self.connector.table_exists(self.full_table_name):
             return
 
-        deleted_at = now()
+        deleted_at = utc_now()
 
         if not self.connector.column_exists(
             full_table_name=self.full_table_name,

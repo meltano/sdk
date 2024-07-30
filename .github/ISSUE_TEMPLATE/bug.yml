@@ -13,7 +13,7 @@ body:
     attributes:
       label: Singer SDK Version
       description: Version of the library you are using
-      placeholder: "0.37.0"
+      placeholder: "0.39.0"
     validations:
       required: true
   - type: checkboxes

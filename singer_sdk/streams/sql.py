@@ -11,9 +11,10 @@ import sqlalchemy as sa
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
-from singer_sdk.streams.core import Stream
+from singer_sdk.streams.core import REPLICATION_INCREMENTAL, Stream
 
 if t.TYPE_CHECKING:
+    from singer_sdk.helpers.types import Context
     from singer_sdk.tap_base import Tap
 
 
@@ -157,7 +158,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         )
 
     # Get records from stream
-    def get_records(self, context: dict | None) -> t.Iterable[dict[str, t.Any]]:
+    def get_records(self, context: Context | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
 
         If the stream has a replication_key value defined, records will be sorted by the
@@ -226,7 +227,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             `True` if stream is sorted. Defaults to `False`.
         """
-        return self.replication_key is not None
+        return self.replication_method == REPLICATION_INCREMENTAL
 
 
 __all__ = ["SQLConnector", "SQLStream"]

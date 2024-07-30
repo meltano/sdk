@@ -5,7 +5,7 @@ name = "{{cookiecutter.variant}}-{{cookiecutter.tap_id}}"
 name = "{{cookiecutter.tap_id}}"
 {%- endif %}
 version = "0.0.1"
-description = "`{{cookiecutter.tap_id}}` is a Singer tap for {{cookiecutter.source_name}}, built with the Meltano Singer SDK."
+description = "Singer tap for {{cookiecutter.source_name}}, built with the Meltano Singer SDK."
 readme = "README.md"
 authors = ["{{ cookiecutter.admin_name }} <{{ cookiecutter.admin_email }}>"]
 keywords = [
@@ -30,22 +30,22 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.8"
-importlib-resources = { version = "==6.1.*", python = "<3.9" }
-singer-sdk = { version="~=0.37.0", extras = [
+importlib-resources = { version = "==6.4.*", python = "<3.9" }
+singer-sdk = { version="~=0.39.0", extras = [
     {%- if cookiecutter.auth_method == "JWT" -%}"jwt", {% endif -%}
     {%- if cookiecutter.faker_extra -%}"faker",{%- endif -%}
 ] }
 fs-s3fs = { version = "~=1.1.1", optional = true }
 {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
-requests = "~=2.31.0"
+requests = "~=2.32.3"
 {%- endif %}
 
 [tool.poetry.group.dev.dependencies]
-pytest = ">=7.4.0"
+pytest = ">=8"
 {%- if cookiecutter.auth_method == "JWT" %}
-singer-sdk = { version="~=0.37.0", extras = ["jwt", "testing"] }
+singer-sdk = { version="~=0.39.0", extras = ["jwt", "testing"] }
 {%- else %}
-singer-sdk = { version="~=0.37.0", extras = ["testing"] }
+singer-sdk = { version="~=0.39.0", extras = ["testing"] }
 {%- endif %}
 
 [tool.poetry.extras]

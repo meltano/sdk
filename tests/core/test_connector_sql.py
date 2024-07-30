@@ -8,6 +8,7 @@ import pytest
 import sqlalchemy as sa
 from sqlalchemy.dialects import registry, sqlite
 
+from samples.sample_duckdb import DuckDBConnector
 from singer_sdk.connectors import SQLConnector
 from singer_sdk.exceptions import ConfigValidationError
 
@@ -289,25 +290,6 @@ class TestConnectorSQL:  # noqa: PLR0904
             ]
 
 
-class DuckDBConnector(SQLConnector):
-    allow_column_alter = True
-
-    @staticmethod
-    def get_column_alter_ddl(
-        table_name: str,
-        column_name: str,
-        column_type: sa.types.TypeEngine,
-    ) -> sa.DDL:
-        return sa.DDL(
-            "ALTER TABLE %(table_name)s ALTER COLUMN %(column_name)s TYPE %(column_type)s",  # noqa: E501
-            {
-                "table_name": table_name,
-                "column_name": column_name,
-                "column_type": column_type,
-            },
-        )
-
-
 class TestDuckDBConnector:
     @pytest.fixture
     def connector(self):
@@ -317,7 +299,7 @@ class TestDuckDBConnector:
         engine = connector._engine
         connector.create_schema("test_schema")
         inspector = sa.inspect(engine)
-        assert "test_schema" in inspector.get_schema_names()
+        assert "memory.test_schema" in inspector.get_schema_names()
 
     def test_column_rename(self, connector: DuckDBConnector):
         engine = connector._engine

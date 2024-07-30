@@ -1,0 +1,43 @@
+version: 1
+send_anonymous_usage_stats: true
+project_id: "tap-dummyjson"
+default_environment: test
+environments:
+- name: test
+plugins:
+  extractors:
+  - name: "tap-dummyjson"
+    namespace: "tap_dummyjson"
+
+    pip_url: -e .
+
+    capabilities:
+    - state
+    - catalog
+    - discover
+    - about
+    - stream-maps
+
+    settings:
+    - name: username
+      label: Username
+    - name: password
+      label: Password
+      kind: password
+      sensitive: true
+    - name: api_url
+      label: API URL
+      description: The base URL for the API
+    - name: start_date
+      kind: date_iso8601
+
+    settings_group_validation:
+    - [username, password]
+
+    config:
+      start_date: '2024-01-01T00:00:00Z'
+
+  loaders:
+  - name: target-jsonl
+    variant: andyh1203
+    pip_url: target-jsonl

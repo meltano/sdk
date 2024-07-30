@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable
+from typing import TYPE_CHECKING, Iterable
 
 import requests  # noqa: TCH002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
@@ -11,6 +11,9 @@ from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
 {%- endif %}
+
+if TYPE_CHECKING:
+    from singer_sdk.helpers.types import Context
 
 
 class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream):
@@ -67,7 +70,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
     def post_process(
         self,
         row: dict,
-        context: dict | None = None,  # noqa: ARG002
+        context: Context | None = None,  # noqa: ARG002
     ) -> dict | None:
         """As needed, append or transform raw data to match expected structure.
 

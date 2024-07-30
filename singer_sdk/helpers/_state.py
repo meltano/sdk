@@ -11,6 +11,8 @@ from singer_sdk.helpers._typing import to_json_compatible
 if t.TYPE_CHECKING:
     import datetime
 
+    from singer_sdk.helpers import types
+
     _T = t.TypeVar("_T", datetime.datetime, str, int, float)
 
 PROGRESS_MARKERS = "progress_markers"
@@ -70,7 +72,7 @@ def get_state_partitions_list(tap_state: dict, tap_stream_id: str) -> list[dict]
 
 def _find_in_partitions_list(
     partitions: list[dict],
-    state_partition_context: dict,
+    state_partition_context: types.Context,
 ) -> dict | None:
     found = [
         partition_state
@@ -88,7 +90,7 @@ def _find_in_partitions_list(
 
 def _create_in_partitions_list(
     partitions: list[dict],
-    state_partition_context: dict,
+    state_partition_context: types.Context,
 ) -> dict:
     # Existing partition not found. Creating new state entry in partitions list...
     new_partition_state = {"context": state_partition_context}
@@ -99,7 +101,7 @@ def _create_in_partitions_list(
 def get_writeable_state_dict(
     tap_state: dict,
     tap_stream_id: str,
-    state_partition_context: dict | None = None,
+    state_partition_context: types.Context | None = None,
 ) -> dict:
     """Return the stream or partition state, creating a new one if it does not exist.
 
@@ -218,6 +220,11 @@ def increment_state(
         progress_dict = stream_or_partition_state[PROGRESS_MARKERS]
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
     new_rk_value = to_json_compatible(latest_record[replication_key])
+
+    if new_rk_value is None:
+        logger.warning("New replication value is null")
+        return
+
     if old_rk_value is None or not check_sorted or new_rk_value >= old_rk_value:
         progress_dict["replication_key"] = replication_key
         progress_dict["replication_key_value"] = new_rk_value
@@ -278,8 +285,8 @@ def log_sort_error(
     ex: Exception,
     log_fn: t.Callable,
     stream_name: str,
-    current_context: dict | None,
-    state_partition_context: dict | None,
+    current_context: types.Context | None,
+    state_partition_context: types.Context | None,
     record_count: int,
     partition_record_count: int,
 ) -> None:
