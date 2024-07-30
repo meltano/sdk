@@ -67,6 +67,7 @@ class AboutInfo:
 
     capabilities: list[CapabilitiesEnum]
     settings: dict
+    env_var_prefix: str
 
 
 class AboutFormatter(abc.ABC):
@@ -118,16 +119,32 @@ class TextFormatter(AboutFormatter, format_name="text"):
         Returns:
             A formatted string.
         """
-        return dedent(
+        output = dedent(
             f"""\
             Name: {about_info.name}
             Description: {about_info.description}
             Version: {about_info.version}
-            SDK Version: {about_info.sdk_version}
-            Supported Python Versions: {about_info.supported_python_versions}
-            Capabilities: {about_info.capabilities}
-            Settings: {about_info.settings}""",
+            SDK Version: {about_info.sdk_version}"""
         )
+
+        if about_info.supported_python_versions:
+            output += "\nSupport Python Versions:\n"
+            output += "\n".join(
+                [f"  - {v}" for v in about_info.supported_python_versions]
+            )
+
+        output += "\nSupport Python Versions:\n"
+        output += "\n".join([f"  - {c}" for c in about_info.capabilities])
+
+        output += "\nSettings:\n"
+        for setting, schema in about_info.settings.get("properties", {}).items():
+            env_var = about_info.env_var_prefix + setting.upper().replace("-", "_")
+            json_type = schema.get("type")
+            output += f"  - Name: {setting}\n"
+            output += f"    Type: {json_type}\n"
+            output += f"    Environment Variable: {env_var}\n"
+
+        return output
 
 
 class JSONFormatter(AboutFormatter, format_name="json"):
@@ -227,31 +244,34 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
         Returns:
             A formatted string.
         """
-        # Empty list for string parts
-        md_list = []
+        # Header
+        output = dedent(f"""\
+            # `{about_info.name}`\n
+            {about_info.description}\n
+            Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n
+        """)
 
-        # Iterate over Dict to set md
-        md_list.append(
-            f"# `{about_info.name}`\n\n"
-            f"{about_info.description}\n\n"
-            f"Built with the [Meltano Singer SDK](https://sdk.meltano.com).\n\n",
-        )
+        # Process capabilities
+        output += "## Capabilities\n\n"
+        output += "\n".join([f"* `{v}`" for v in about_info.capabilities])
+        output += "\n\n"
 
-        # Process capabilities and settings
+        # Process Supported Python Versions
+        if about_info.supported_python_versions:
+            output += "## Supported Python Versions\n\n"
+            output += "\n".join(
+                [f"* {v}" for v in about_info.supported_python_versions],
+            )
+            output += "\n\n"
 
-        capabilities = "## Capabilities\n\n"
-        capabilities += "\n".join([f"* `{v}`" for v in about_info.capabilities])
-        capabilities += "\n\n"
-        md_list.append(capabilities)
-
-        setting = "## Settings\n\n"
-        settings_table = (
+        # Process settings
+        output += "## Settings\n\n"
+        output += (
             "| Setting | Required | Default | Description |\n"
             "|:--------|:--------:|:-------:|:------------|\n"
         )
-        settings_table += "\n".join(self._generate_property_rows(about_info.settings))
-        setting += settings_table
-        setting += (
+        output += "\n".join(self._generate_property_rows(about_info.settings))
+        output += (
             "\n\n"
             + "\n".join(
                 [
@@ -261,17 +281,5 @@ class MarkdownFormatter(AboutFormatter, format_name="markdown"):
             )
             + "\n"
         )
-        setting += "\n"
-        md_list.append(setting)
 
-        # Process Supported Python Versions
-
-        if about_info.supported_python_versions:
-            supported_python_versions = "## Supported Python Versions\n\n"
-            supported_python_versions += "\n".join(
-                [f"* {v}" for v in about_info.supported_python_versions],
-            )
-            supported_python_versions += "\n"
-            md_list.append(supported_python_versions)
-
-        return "".join(md_list)
+        return output

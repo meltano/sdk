@@ -1,0 +1,53 @@
+name: API Changes
+
+on:
+  pull_request:
+    paths:
+    - singer_sdk/**
+    - .github/workflows/api-changes.yml
+    - CHANGELOG.md
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:  # added using https://github.com/step-security/secure-repo
+  contents: read
+
+jobs:
+  check-api-changes:
+    name: Check API Changes
+    runs-on: ubuntu-latest
+    env:
+      NOXSESSION: api
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.12
+
+    - name: Install tools
+      env:
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
+      run: |
+        python -Im pip install -U pip
+        pipx install griffe nox
+        pipx inject nox nox-poetry
+        pipx list
+
+    - name: Set REF
+      id: set-ref
+      if: always() && !startsWith(github.head_ref, 'release/')
+      run: |
+        echo "ref=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
+
+    # Check API against the latest commit on the base branch
+    - name: Run Nox
+      run: |
+        nox -- ${{ steps.set-ref.outputs.ref }}

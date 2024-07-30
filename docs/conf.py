@@ -14,7 +14,9 @@
 #
 from __future__ import annotations
 
+import os
 import sys
+from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path("..").resolve()))
@@ -23,11 +25,11 @@ sys.path.insert(0, str(Path("..").resolve()))
 # -- Project information -----------------------------------------------------
 
 project = "Meltano Singer SDK"
-copyright = "2021, Meltano Core Team and Contributors"  # noqa: A001
+copyright = f"{datetime.now().year}, Arch Data, Inc and Contributors"  # noqa: A001, DTZ005
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.38.0"
+release = "0.39.0"
 
 
 # -- General configuration -------------------------------------------------------------
@@ -59,10 +61,19 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # -- Options for HTML output -----------------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
+
+# Define the canonical URL for sdk.meltano.com
+html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL", "")
+html_context = {}
+
+# Tell Jinja2 templates the build is running on Read the Docs
+if os.environ.get("READTHEDOCS", "") == "True":
+    html_context["READTHEDOCS"] = True
+
 html_logo = "_static/img/logo.svg"
 html_theme = "furo"
 html_theme_options = {
@@ -154,6 +165,7 @@ extlinks = {
 intersphinx_mapping = {
     "requests": ("https://requests.readthedocs.io/en/latest/", None),
     "python": ("https://docs.python.org/3/", None),
+    "faker": ("https://faker.readthedocs.io/en/master/", None),
 }
 
 # -- Options for linkcode --------------------------------------------------------------

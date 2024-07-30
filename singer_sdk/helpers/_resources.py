@@ -8,7 +8,7 @@ if t.TYPE_CHECKING:
 
     from singer_sdk.helpers._compat import Traversable
 
-if sys.version_info < (3, 9):
+if sys.version_info < (3, 10):
     import importlib_resources
 else:
     import importlib.resources as importlib_resources
