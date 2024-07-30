@@ -511,7 +511,7 @@ def _conform_primitive_property(  # noqa: PLR0911
     if isinstance(elem, (datetime.datetime,)):
         return to_json_compatible(elem)
     if isinstance(elem, datetime.date):
-        return f"{elem.isoformat()}T00:00:00+00:00"
+        return elem.isoformat()
     if isinstance(elem, datetime.timedelta):
         epoch = datetime.datetime.fromtimestamp(0, UTC)
         timedelta_from_epoch = epoch + elem
