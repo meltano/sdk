@@ -249,7 +249,7 @@ can be referenced directly by mapping expressions.
 - `fake` - a [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config`
   (see previous example) - see the built-in [standard providers](inv:faker:std:doc#providers)
   for available methods
-- `Faker` - the [`Faker`](nv:faker:std:doc#fakerclass) class. This was made available to enable consistent data
+- `Faker` - the [`Faker`](inv:faker:std:doc#fakerclass) class. This was made available to enable consistent data
   masking by allowing users to call `Faker.seed()`.
 
   ```{tip}
