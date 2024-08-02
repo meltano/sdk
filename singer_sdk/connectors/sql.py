@@ -1001,7 +1001,7 @@ class SQLConnector:  # noqa: PLR0904
         compiled = create_column_clause.compile(self._engine).string
         return sa.DDL(
             "ALTER TABLE %(table_name)s ADD COLUMN %(create_column_clause)s",
-            {  # type: ignore[arg-type]
+            {
                 "table_name": table_name,
                 "create_column_clause": compiled,
             },
