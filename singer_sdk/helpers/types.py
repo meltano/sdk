@@ -1,4 +1,4 @@
-"""Type aliases for use in the SDK."""
+"""Type aliases for use in the SDK."""  # noqa: A005
 
 from __future__ import annotations
 
