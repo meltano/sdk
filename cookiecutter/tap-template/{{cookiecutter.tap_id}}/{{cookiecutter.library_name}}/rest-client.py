@@ -6,7 +6,7 @@ import sys
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
 from functools import cached_property
 {%- endif %}
-from typing import TYPE_CHECKING, Any, Callable, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
 {% if cookiecutter.auth_method  == "API Key" -%}
 from singer_sdk.authenticators import APIKeyAuthenticator
