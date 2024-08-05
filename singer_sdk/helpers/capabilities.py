@@ -253,7 +253,7 @@ class DeprecatedEnumMeta(EnumMeta):
             obj.emit_warning()
         return obj
 
-    def __getattribute__(cls, name: str) -> t.Any:  # noqa: ANN401, N805
+    def __getattribute__(cls, name: str) -> t.Any:  # noqa: ANN401
         """Retrieve enum attribute.
 
         Args:
