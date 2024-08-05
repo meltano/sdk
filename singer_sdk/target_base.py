@@ -334,7 +334,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._assert_line_requires(message_dict, requires={"stream", "record"})
 
         stream_name = message_dict["stream"]
-        self._assert_sink_exists(stream_name)
+        if not stream_name in self.mapper.stream_maps:
+            self._assert_sink_exists(stream_name)
 
         for stream_map in self.mapper.stream_maps[stream_name]:
             raw_record = copy.copy(message_dict["record"])
@@ -343,6 +344,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 # Record was filtered out by the map transform
                 continue
 
+            self._assert_sink_exists(stream_map.stream_alias)
             sink = self.get_sink(stream_map.stream_alias, record=transformed_record)
             context = sink._get_context(transformed_record)  # noqa: SLF001
             if sink.include_sdc_metadata_properties:
