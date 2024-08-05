@@ -47,7 +47,11 @@ else:
 
 if TYPE_CHECKING:
     import requests
+    {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
     from singer_sdk.helpers.types import Auth, Context
+    {%- else %}
+    from singer_sdk.helpers.types import Context
+    {%- endif %}
 
 
 # TODO: Delete this is if not using json files for schema definition
