@@ -26,25 +26,18 @@ from singer_sdk.pagination import (
 from singer_sdk.streams.core import Stream
 
 if t.TYPE_CHECKING:
-    import sys
     from datetime import datetime
 
     from backoff.types import Details
 
     from singer_sdk._singerlib import Schema
-    from singer_sdk.helpers.types import Context
+    from singer_sdk.helpers.types import Auth, Context
     from singer_sdk.tap_base import Tap
-
-    if sys.version_info >= (3, 10):
-        from typing import TypeAlias  # noqa: ICN003
-    else:
-        from typing_extensions import TypeAlias
 
 DEFAULT_PAGE_SIZE = 1000
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 
 _TToken = t.TypeVar("_TToken")
-_Auth: TypeAlias = t.Callable[[requests.PreparedRequest], requests.PreparedRequest]
 
 
 class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PLR0904
@@ -610,7 +603,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
     # Abstract methods:
 
     @property
-    def authenticator(self) -> _Auth:
+    def authenticator(self) -> Auth:
         """Return or set the authenticator for managing HTTP auth headers.
 
         If an authenticator is not specified, REST-based taps will simply pass
