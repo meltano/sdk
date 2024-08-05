@@ -199,7 +199,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
                 else:
                     entry = Metadata(inclusion=Metadata.InclusionType.AVAILABLE)
 
-                mapping[("properties", field_name)] = entry
+                mapping["properties", field_name] = entry
 
         mapping[()] = root
 
