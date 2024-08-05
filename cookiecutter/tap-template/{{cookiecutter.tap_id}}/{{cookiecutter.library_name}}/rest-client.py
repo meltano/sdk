@@ -47,10 +47,8 @@ else:
     import importlib_resources
 
 if TYPE_CHECKING:
-    from singer_sdk.helpers.types import Context
+    from singer_sdk.helpers.types import Auth, Context
 
-
-_Auth = Callable[[requests.PreparedRequest], requests.PreparedRequest]
 
 # TODO: Delete this is if not using json files for schema definition
 SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
@@ -74,7 +72,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}
 
     @cached_property
-    def authenticator(self) -> _Auth:
+    def authenticator(self) -> Auth:
         """Return a new authenticator object.
 
         Returns:

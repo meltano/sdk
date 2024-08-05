@@ -5,6 +5,8 @@ from __future__ import annotations
 import sys
 import typing as t
 
+import requests
+
 if sys.version_info < (3, 9):
     from typing import Mapping  # noqa: ICN003
 else:
@@ -15,6 +17,7 @@ if sys.version_info < (3, 10):
 else:
     from typing import TypeAlias  # noqa: ICN003
 
+
 __all__ = [
     "Context",
     "Record",
@@ -22,3 +25,4 @@ __all__ = [
 
 Context: TypeAlias = Mapping[str, t.Any]
 Record: TypeAlias = t.Dict[str, t.Any]
+Auth: TypeAlias = t.Callable[[requests.PreparedRequest], requests.PreparedRequest]
