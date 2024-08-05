@@ -25,6 +25,8 @@ nox.options.default_venv_backend = "uv|virtualenv"
 
 RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
+
+[lint]
 extend-ignore = ["TD002", "TD003", "FIX002"]
 """
 

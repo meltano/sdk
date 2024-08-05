@@ -8,7 +8,6 @@ from functools import cached_property
 {%- endif %}
 from typing import TYPE_CHECKING, Any, Callable, Iterable
 
-import requests
 {% if cookiecutter.auth_method  == "API Key" -%}
 from singer_sdk.authenticators import APIKeyAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
@@ -47,6 +46,7 @@ else:
     import importlib_resources
 
 if TYPE_CHECKING:
+    import requests
     from singer_sdk.helpers.types import Auth, Context
 
 
