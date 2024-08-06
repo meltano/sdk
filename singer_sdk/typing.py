@@ -48,7 +48,7 @@ Note:
   other valid implementations which are not syntactically identical to those generated
   here.
 
-"""
+"""  # noqa: A005
 
 from __future__ import annotations
 
@@ -612,7 +612,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
     """Generic Property. Should be nested within a `PropertiesList`."""
 
     # TODO: Make some of these arguments keyword-only. This is a breaking change.
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         name: str,
         wrapped: JSONTypeHelper[T] | type[JSONTypeHelper[T]],

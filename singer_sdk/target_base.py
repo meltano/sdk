@@ -452,8 +452,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             message_dict: TODO
         """
         stream_name = message_dict["stream"]
-        sink = self.get_sink(stream_name)
-        sink.activate_version(message_dict["version"])
+
+        for stream_map in self.mapper.stream_maps[stream_name]:
+            sink = self.get_sink(stream_map.stream_alias)
+            sink.activate_version(message_dict["version"])
 
     def _process_batch_message(self, message_dict: dict) -> None:
         """Handle the optional BATCH message extension.

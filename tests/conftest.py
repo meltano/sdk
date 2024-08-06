@@ -138,7 +138,7 @@ class SQLConnectorMock(SQLConnector):
     """A Mock SQLConnector class."""
 
 
-class SQLSinkMock(SQLSink):
+class SQLSinkMock(SQLSink[SQLConnectorMock]):
     """A mock Sink class."""
 
     name = "sql-sink-mock"
