@@ -117,6 +117,7 @@ class Meter(metaclass=abc.ABCMeta):
         """
         self.metric = metric
         self.tags = tags or {}
+        self.tags[Tag.PID] = os.getpid()
         self.logger = get_metrics_logger()
 
     @property

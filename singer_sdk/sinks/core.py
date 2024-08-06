@@ -6,7 +6,6 @@ import abc
 import copy
 import datetime
 import importlib.util
-import os
 import time
 import typing as t
 from functools import cached_property
@@ -190,14 +189,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         )
 
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
-        self._record_counter: metrics.Counter = metrics.Counter(
-            metrics.Metric.RECORD_COUNT,
-            {
-                metrics.Tag.STREAM: stream_name,
-                metrics.Tag.PID: os.getpid(),
-            },
-            log_interval=metrics.DEFAULT_LOG_INTERVAL,
-        )
+        self._record_counter: metrics.Counter = metrics.record_counter(stream_name)
 
     @property
     def record_counter_metric(self) -> metrics.Counter:
