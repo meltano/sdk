@@ -974,8 +974,8 @@ class SQLConnector:  # noqa: PLR0904
 
         return column.type
 
-    @staticmethod
     def get_column_add_ddl(
+        self,
         table_name: str,
         column_name: str,
         column_type: sa.types.TypeEngine,
@@ -998,11 +998,12 @@ class SQLConnector:  # noqa: PLR0904
                 column_type,
             ),
         )
+        compiled = create_column_clause.compile(self._engine).string
         return sa.DDL(
             "ALTER TABLE %(table_name)s ADD COLUMN %(create_column_clause)s",
             {
                 "table_name": table_name,
-                "create_column_clause": create_column_clause,
+                "create_column_clause": compiled,
             },
         )
 
