@@ -334,7 +334,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._assert_line_requires(message_dict, requires={"stream", "record"})
 
         stream_name = message_dict["stream"]
-        if not stream_name in self.mapper.stream_maps:
+        if stream_name not in self.mapper.stream_maps:
             self._assert_sink_exists(stream_name)
 
         for stream_map in self.mapper.stream_maps[stream_name]:
