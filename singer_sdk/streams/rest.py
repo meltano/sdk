@@ -158,7 +158,10 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         Returns:
             The user agent string.
         """
-        return f"{self.tap_name}/{self._tap.plugin_version}"
+        return self.config.get(
+            "user_agent",
+            f"{self.tap_name}/{self._tap.plugin_version}",
+        )
 
     def validate_response(self, response: requests.Response) -> None:
         """Validate HTTP response.
