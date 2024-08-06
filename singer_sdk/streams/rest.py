@@ -6,6 +6,7 @@ import abc
 import copy
 import logging
 import typing as t
+from functools import cached_property
 from http import HTTPStatus
 from urllib.parse import urlparse
 from warnings import warn
@@ -157,7 +158,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
             self._requests_session = requests.Session()
         return self._requests_session
 
-    @property
+    @cached_property
     def user_agent(self) -> str:
         """Get the user agent string for the stream.
 
