@@ -1,8 +1,13 @@
-# Tap Metrics
+# Tap and Target Metrics
 
 Metrics logging is specified in the
-[Singer Spec](https://hub.meltano.com/singer/spec#metrics). The SDK will automatically
-emit metrics for `record_count`, `http_request_duration` and `sync_duration`.
+[Singer Spec](https://hub.meltano.com/singer/spec#metrics).
+
+The SDK will automatically the following metrics:
+
+- `record_count`: The number of records processed by the tap or target.
+- `http_request_duration`: The duration of HTTP requests made by the tap.
+- `sync_duration`: The duration of the sync operation.
 
 ## Customization options
 
