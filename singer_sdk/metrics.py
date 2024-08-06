@@ -59,6 +59,7 @@ class Metric(str, enum.Enum):
     HTTP_REQUEST_COUNT = "http_request_count"
     JOB_DURATION = "job_duration"
     SYNC_DURATION = "sync_duration"
+    BATCH_PROCESSING_TIME = "batch_processing_time"
 
 
 @dataclass

@@ -189,16 +189,31 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         )
 
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
-        self._record_counter: metrics.Counter = metrics.record_counter(stream_name)
+        self._record_counter: metrics.Counter = metrics.record_counter(self.stream_name)
+        self._batch_timer = metrics.Timer(
+            metrics.Metric.BATCH_PROCESSING_TIME,
+            tags={
+                metrics.Tag.STREAM: self.stream_name,
+            },
+        )
 
     @property
     def record_counter_metric(self) -> metrics.Counter:
-        """Get the record counter metric.
+        """Get the record counter for this sink.
 
         Returns:
-            The record counter metric.
+            The Meter instance for the record counter.
         """
         return self._record_counter
+
+    @property
+    def batch_processing_timer(self) -> metrics.Timer:
+        """Get the batch processing timer for this sink.
+
+        Returns:
+            The Meter instance for the batch processing timer.
+        """
+        return self._batch_timer
 
     @cached_property
     def validate_schema(self) -> bool:

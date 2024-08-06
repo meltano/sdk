@@ -512,7 +512,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             return
 
         draining_status = sink.start_drain()
-        sink.process_batch(draining_status)
+        with sink.batch_processing_timer:
+            sink.process_batch(draining_status)
         sink.mark_drained()
 
     def _drain_all(self, sink_list: list[Sink], parallelism: int) -> None:
