@@ -128,12 +128,12 @@ class TextFormatter(AboutFormatter, format_name="text"):
         )
 
         if about_info.supported_python_versions:
-            output += "\nSupport Python Versions:\n"
+            output += "\nSupported Python Versions:\n"
             output += "\n".join(
                 [f"  - {v}" for v in about_info.supported_python_versions]
             )
 
-        output += "\nSupport Python Versions:\n"
+        output += "\nCapabilities:\n"
         output += "\n".join([f"  - {c}" for c in about_info.capabilities])
 
         output += "\nSettings:\n"
