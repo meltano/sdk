@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ⚙️ Under the Hood
 
-- Remove deprecated dependencies
+- [#2520](https://github.com/meltano/sdk/issues/2520) Remove unused dependencies `pendulum` and `python-dateutil`
 
 ### 📚 Documentation Improvements
 
