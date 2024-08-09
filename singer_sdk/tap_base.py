@@ -33,6 +33,7 @@ if t.TYPE_CHECKING:
     from pathlib import PurePath
 
     from singer_sdk.connectors import SQLConnector
+    from singer_sdk.helpers._state import TapStateDict
     from singer_sdk.mapper import PluginMapper
     from singer_sdk.streams import SQLStream, Stream
 
@@ -92,7 +93,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         # Declare private members
         self._streams: dict[str, Stream] | None = None
         self._input_catalog: Catalog | None = None
-        self._state: dict[str, Stream] = {}
+        self._state: TapStateDict = {}
         self._catalog: Catalog | None = None  # Tap's working catalog
 
         # Process input catalog
@@ -138,7 +139,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self._streams
 
     @property
-    def state(self) -> dict:
+    def state(self) -> TapStateDict:  # type: ignore[override]
         """Get tap state.
 
         Returns:
@@ -445,7 +446,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         """Sync all streams."""
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
-        self.write_message(StateMessage(value=self.state))
+        self.write_message(StateMessage(value=self.state))  # type: ignore[arg-type]
 
         stream: Stream
         for stream in self.streams.values():

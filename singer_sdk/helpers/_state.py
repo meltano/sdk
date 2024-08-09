@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 import logging
+import sys
 import typing as t
 
 from singer_sdk.exceptions import InvalidStreamSortException
 from singer_sdk.helpers._typing import to_json_compatible
+
+if sys.version_info < (3, 10):
+    from typing_extensions import TypeAlias
+else:
+    from typing import TypeAlias  # noqa: ICN003
 
 if t.TYPE_CHECKING:
     import datetime
@@ -21,14 +27,25 @@ SIGNPOST_MARKER = "replication_key_signpost"
 STARTING_MARKER = "starting_replication_value"
 
 logger = logging.getLogger("singer_sdk")
+StreamStateDict: TypeAlias = t.Dict[str, t.Any]
+
+
+class PartitionsStateDict(t.TypedDict, total=False):
+    partitions: list[StreamStateDict]
+
+
+class TapStateDict(t.TypedDict, total=False):
+    """State dictionary type."""
+
+    bookmarks: dict[str, StreamStateDict | PartitionsStateDict]
 
 
 def get_state_if_exists(
-    tap_state: dict,
+    tap_state: TapStateDict,
     tap_stream_id: str,
-    state_partition_context: dict | None = None,
+    state_partition_context: dict[str, t.Any] | None = None,
     key: str | None = None,
-) -> t.Any | None:  # noqa: ANN401
+) -> StreamStateDict | None:
     """Return the stream or partition state, creating a new one if it does not exist.
 
     Args:
@@ -46,34 +63,49 @@ def get_state_if_exists(
         ValueError: Raised if state is invalid or cannot be parsed.
     """
     if "bookmarks" not in tap_state:
-        return None
-    if tap_stream_id not in tap_state["bookmarks"]:
+        # Not a valid state, e.g. {}
         return None
 
+    if tap_stream_id not in tap_state["bookmarks"]:
+        # Stream not present in state, e.g. {"bookmarks": {}}
+        return None
+
+    # At this point state looks like {"bookmarks": {"my_stream": {"key": "value""}}}
+
+    # stream_state: {"key": "value", "partitions"?: ...}
     stream_state = tap_state["bookmarks"][tap_stream_id]
     if not state_partition_context:
-        return stream_state.get(key, None) if key else stream_state
+        # Either 'value' if key is specified, or {}
+        return stream_state.get(key, None) if key else stream_state  # type: ignore[return-value]
+
     if "partitions" not in stream_state:
         return None  # No partitions defined
+
+    # stream_state: {"partitions": [{"context": {"key": "value"}}]}  # noqa: ERA001
 
     matched_partition = _find_in_partitions_list(
         stream_state["partitions"],
         state_partition_context,
     )
+
     if matched_partition is None:
         return None  # Partition definition not present
+
     return matched_partition.get(key, None) if key else matched_partition
 
 
-def get_state_partitions_list(tap_state: dict, tap_stream_id: str) -> list[dict] | None:
+def get_state_partitions_list(
+    tap_state: TapStateDict,
+    tap_stream_id: str,
+) -> list[StreamStateDict] | None:
     """Return a list of partitions defined in the state, or None if not defined."""
     return (get_state_if_exists(tap_state, tap_stream_id) or {}).get("partitions", None)  # type: ignore[no-any-return]
 
 
 def _find_in_partitions_list(
-    partitions: list[dict],
+    partitions: list[StreamStateDict],
     state_partition_context: types.Context,
-) -> dict | None:
+) -> StreamStateDict | None:
     found = [
         partition_state
         for partition_state in partitions
@@ -99,10 +131,10 @@ def _create_in_partitions_list(
 
 
 def get_writeable_state_dict(
-    tap_state: dict,
+    tap_state: TapStateDict,
     tap_stream_id: str,
     state_partition_context: types.Context | None = None,
-) -> dict:
+) -> StreamStateDict:
     """Return the stream or partition state, creating a new one if it does not exist.
 
     Args:
@@ -125,13 +157,13 @@ def get_writeable_state_dict(
         tap_state["bookmarks"] = {}
     if tap_stream_id not in tap_state["bookmarks"]:
         tap_state["bookmarks"][tap_stream_id] = {}
-    stream_state = t.cast(dict, tap_state["bookmarks"][tap_stream_id])
+    stream_state = tap_state["bookmarks"][tap_stream_id]
     if not state_partition_context:
-        return stream_state
+        return stream_state  # type: ignore[return-value]
 
     if "partitions" not in stream_state:
         stream_state["partitions"] = []
-    stream_state_partitions: list[dict] = stream_state["partitions"]
+    stream_state_partitions: list[StreamStateDict] = stream_state["partitions"]
     if found := _find_in_partitions_list(
         stream_state_partitions,
         state_partition_context,
@@ -142,7 +174,7 @@ def get_writeable_state_dict(
 
 
 def write_stream_state(
-    tap_state: dict,
+    tap_state: TapStateDict,
     tap_stream_id: str,
     key: str,
     val: t.Any,  # noqa: ANN401
@@ -158,12 +190,14 @@ def write_stream_state(
     state_dict[key] = val
 
 
-def reset_state_progress_markers(stream_or_partition_state: dict) -> dict | None:
+def reset_state_progress_markers(
+    stream_or_partition_state: StreamStateDict | PartitionsStateDict,
+) -> dict | None:
     """Wipe the state once sync is complete.
 
     For logging purposes, return the wiped 'progress_markers' object if it existed.
     """
-    progress_markers = stream_or_partition_state.pop(PROGRESS_MARKERS, {})
+    progress_markers = stream_or_partition_state.pop(PROGRESS_MARKERS, {})  # type: ignore[misc]
     # Remove auto-generated human-readable note:
     progress_markers.pop(PROGRESS_MARKER_NOTE, None)
     # Return remaining 'progress_markers' if any:
