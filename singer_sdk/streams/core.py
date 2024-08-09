@@ -277,6 +277,11 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         and datetime replication keys. For non-datetime replication keys, use
         :meth:`~singer_sdk.Stream.get_starting_replication_key_value()`
 
+        .. note::
+
+           This method requires :attr:`~singer_sdk.Stream.replication_key` to be set
+           to a non-null value, indicating the stream should be synced incrementally.
+
         Args:
             context: Stream partition or context dictionary.
 
@@ -285,11 +290,6 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         Raises:
             ValueError: If the replication value is not a valid timestamp.
-
-        .. note::
-
-           This method requires :attr:`~singer_sdk.Stream.replication_key` to be set
-           to a non-null value, indicating the stream should be synced incrementally.
         """
         value = self.get_starting_replication_key_value(context)
 
@@ -358,9 +358,6 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             context: Stream partition or context dictionary.
             value: TODO
-
-        Returns:
-            TODO
         """
         if not value:
             return
@@ -1175,9 +1172,6 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         Args:
             context: Stream partition or context dictionary.
-
-        Raises:
-            Exception: Any exception raised by the sync process.
         """
         msg = f"Beginning {self.replication_method.lower()} sync of '{self.name}'"
         if context:

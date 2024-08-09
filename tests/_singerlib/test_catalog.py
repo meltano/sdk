@@ -86,19 +86,19 @@ def test_selection_mask():
     assert mask[()] is True
 
     # Explicitly deselected
-    assert mask[("properties", "id")] is False
+    assert mask["properties", "id"] is False
 
     # Missing defaults to parent selection
-    assert mask[("properties", "name")] is True
+    assert mask["properties", "name"] is True
 
     # Explicitly selected
-    assert mask[("properties", "an_object")] is False
+    assert mask["properties", "an_object"] is False
 
     # Missing defaults to parent selection
-    assert mask[("properties", "an_object", "properties", "id")] is False
+    assert mask["properties", "an_object", "properties", "id"] is False
 
     # Explicitly selected nested property
-    assert mask[("properties", "an_object", "properties", "a_string")] is True
+    assert mask["properties", "an_object", "properties", "a_string"] is True
 
 
 def test_metadata_mapping():
@@ -112,27 +112,27 @@ def test_metadata_mapping():
             forced_replication_method="FULL_TABLE",
         )
     )
-    assert mapping[("properties", "id")] == Metadata(
+    assert mapping["properties", "id"] == Metadata(
         inclusion=Metadata.InclusionType.AUTOMATIC,
         selected=True,
     )
-    assert mapping[("properties", "name")] == Metadata(
+    assert mapping["properties", "name"] == Metadata(
         inclusion=Metadata.InclusionType.AVAILABLE,
         selected=True,
     )
-    assert mapping[("properties", "missing")] == Metadata()
+    assert mapping["properties", "missing"] == Metadata()
 
     selection_mask = mapping.resolve_selection()
     assert selection_mask[()] is True
-    assert selection_mask[("properties", "id")] is True
-    assert selection_mask[("properties", "updated_at")] is True
-    assert selection_mask[("properties", "name")] is True
-    assert selection_mask[("properties", "missing")] is True
-    assert selection_mask[("properties", "an_object")] is False
-    assert selection_mask[("properties", "an_object", "properties", "nested")] is False
-    assert selection_mask[("properties", "not_supported_selected")] is False
-    assert selection_mask[("properties", "not_supported_not_selected")] is False
-    assert selection_mask[("properties", "selected_by_default")] is True
+    assert selection_mask["properties", "id"] is True
+    assert selection_mask["properties", "updated_at"] is True
+    assert selection_mask["properties", "name"] is True
+    assert selection_mask["properties", "missing"] is True
+    assert selection_mask["properties", "an_object"] is False
+    assert selection_mask["properties", "an_object", "properties", "nested"] is False
+    assert selection_mask["properties", "not_supported_selected"] is False
+    assert selection_mask["properties", "not_supported_not_selected"] is False
+    assert selection_mask["properties", "selected_by_default"] is True
 
 
 def test_empty_metadata_mapping():
@@ -264,11 +264,11 @@ def test_standard_metadata(
     assert stream_metadata.schema_name == schema_name
 
     for pk in key_properties:
-        pk_metadata = metadata[("properties", pk)]
+        pk_metadata = metadata["properties", pk]
         assert pk_metadata.inclusion == Metadata.InclusionType.AUTOMATIC
         assert pk_metadata.selected is None
 
     for rk in valid_replication_keys or []:
-        rk_metadata = metadata[("properties", rk)]
+        rk_metadata = metadata["properties", rk]
         assert rk_metadata.inclusion == Metadata.InclusionType.AUTOMATIC
         assert rk_metadata.selected is None
