@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.39.1 (2024-08-07)
+
+### 🐛 Fixes
+
+- [#2589](https://github.com/meltano/sdk/issues/2589) Make sink assertion compatible with stream maps -- _**Thanks @JCotton1123!**_
+- [#2592](https://github.com/meltano/sdk/issues/2592) Fixed typos in `--about` plain text output
+- [#2580](https://github.com/meltano/sdk/issues/2580) Date fields are now properly serialized as ISO dates, i.e. "YYYY-MM-DD"
+- [#2583](https://github.com/meltano/sdk/issues/2583) Quote add-column-ddl with column starting with `_` (underscore) based on engine -- _**Thanks @haleemur!**_
+- [#2582](https://github.com/meltano/sdk/issues/2582) DDL for adding a column now uses a SQLAlchemy-compiled clause to apply proper quoting -- _**Thanks @haleemur!**_
+- [#2418](https://github.com/meltano/sdk/issues/2418) Check replication method instead of key to determine if a SQL stream is sorted
+
+### ⚙️ Under the Hood
+
+- [#2520](https://github.com/meltano/sdk/issues/2520) Remove unused dependencies `pendulum` and `python-dateutil`
+
+### 📚 Documentation Improvements
+
+- [#2579](https://github.com/meltano/sdk/issues/2579) Documented support for `packaging` semantic type in contributing guide
+
 ## v0.39.0 (2024-07-27)
 
 ### ✨ New
