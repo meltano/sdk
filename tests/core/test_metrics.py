@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 
 import pytest
@@ -15,6 +16,32 @@ class CustomObject:
 
     def __str__(self) -> str:
         return f"{self.name}={self.value}"
+
+
+def test_singer_metrics_formatter():
+    formatter = metrics.SingerMetricsFormatter(fmt="{metric_json}", style="{")
+
+    record = logging.LogRecord(
+        name="test",
+        level=logging.INFO,
+        pathname="test.py",
+        lineno=1,
+        msg="METRIC",
+        args=(),
+        exc_info=None,
+    )
+
+    assert formatter.format(record) == ""
+
+    metric_dict = {
+        "type": "counter",
+        "metric": "test_metric",
+        "tags": {"test_tag": "test_value"},
+        "value": 1,
+    }
+    record.__dict__["point"] = metric_dict
+
+    assert formatter.format(record) == json.dumps(metric_dict)
 
 
 def test_meter():
@@ -38,6 +65,9 @@ def test_meter():
 
 
 def test_record_counter(caplog: pytest.LogCaptureFixture):
+    metrics_logger = logging.getLogger(metrics.METRICS_LOGGER_NAME)
+    metrics_logger.propagate = True
+
     caplog.set_level(logging.INFO, logger=metrics.METRICS_LOGGER_NAME)
     custom_object = CustomObject("test", 1)
 
@@ -56,29 +86,33 @@ def test_record_counter(caplog: pytest.LogCaptureFixture):
     total = 0
 
     assert len(caplog.records) == 100 + 1
+    # raise AssertionError
 
     for record in caplog.records:
         assert record.levelname == "INFO"
-        assert record.msg == "METRIC: %s"
-        assert "test=1" in record.message
+        assert record.msg.startswith("METRIC")
 
-        point: metrics.Point[int] = record.args[0]
-        assert point.metric_type == "counter"
-        assert point.metric == "record_count"
-        assert point.tags == {
+        point = record.__dict__["point"]
+        assert point["type"] == "counter"
+        assert point["metric"] == "record_count"
+        assert point["tags"] == {
             metrics.Tag.STREAM: "test_stream",
             metrics.Tag.ENDPOINT: "test_endpoint",
             "custom_tag": "pytest",
             "custom_obj": custom_object,
         }
 
-        total += point.value
+        total += point["value"]
 
     assert total == 100
 
 
 def test_sync_timer(caplog: pytest.LogCaptureFixture):
+    metrics_logger = logging.getLogger(metrics.METRICS_LOGGER_NAME)
+    metrics_logger.propagate = True
+
     caplog.set_level(logging.INFO, logger=metrics.METRICS_LOGGER_NAME)
+
     traveler = time_machine.travel(0, tick=False)
     traveler.start()
 
@@ -92,15 +126,15 @@ def test_sync_timer(caplog: pytest.LogCaptureFixture):
 
     record = caplog.records[0]
     assert record.levelname == "INFO"
-    assert record.msg == "METRIC: %s"
+    assert record.msg.startswith("METRIC")
 
-    point: metrics.Point[float] = record.args[0]
-    assert point.metric_type == "timer"
-    assert point.metric == "sync_duration"
-    assert point.tags == {
+    point = record.__dict__["point"]
+    assert point["type"] == "timer"
+    assert point["metric"] == "sync_duration"
+    assert point["tags"] == {
         metrics.Tag.STREAM: "test_stream",
         metrics.Tag.STATUS: "succeeded",
         "custom_tag": "pytest",
     }
 
-    assert pytest.approx(point.value, rel=0.001) == 10.0
+    assert pytest.approx(point["value"], rel=0.001) == 10.0

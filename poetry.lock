@@ -1549,6 +1549,17 @@ files = [
 cli = ["click (>=5.0)"]
 
 [[package]]
+name = "python-json-logger"
+version = "2.0.7"
+description = "A python library adding a json log formatter"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "python-json-logger-2.0.7.tar.gz", hash = "sha256:23e7ec02d34237c5aa1e29a070193a4ea87583bb4e7f8fd06d3de8264c4b2e1c"},
+    {file = "python_json_logger-2.0.7-py3-none-any.whl", hash = "sha256:f380b826a991ebbe3de4d897aeec42760035ac760345e57b812938dc8b35e2bd"},
+]
+
+[[package]]
 name = "pytz"
 version = "2024.1"
 description = "World timezone definitions, modern and historical"
@@ -2524,4 +2535,4 @@ testing = ["pytest", "pytest-durations"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "a9608352516ffcc098a93ce4e3375b11989c328c7520cad28ab89c458c1dbc3b"
+content-hash = "28ee351d183666c76b2d1dcdd9acb0e35d1173d4c2e979489e048564f6a8a732"

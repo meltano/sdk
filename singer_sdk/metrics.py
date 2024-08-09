@@ -69,29 +69,35 @@ class Point(t.Generic[_TVal]):
     value: _TVal
     tags: dict[str, t.Any] = field(default_factory=dict)
 
-    def __str__(self) -> str:
-        """Get string representation of this measurement.
+    def to_dict(self) -> dict[str, t.Any]:
+        """Convert this measure to a dictionary.
 
         Returns:
-            A string representation of this measurement.
+            A dictionary.
         """
-        return self.to_json()
+        return {
+            "type": self.metric_type,
+            "metric": self.metric.value,
+            "value": self.value,
+            "tags": self.tags,
+        }
 
-    def to_json(self) -> str:
-        """Convert this measure to a JSON object.
+
+class SingerMetricsFormatter(logging.Formatter):
+    """Logging formatter that adds a ``metric_json`` field to the log record."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        """Format a log record.
+
+        Args:
+            record: A log record.
 
         Returns:
-            A JSON object.
+            A formatted log record.
         """
-        return json.dumps(
-            {
-                "type": self.metric_type,
-                "metric": self.metric.value,
-                "value": self.value,
-                "tags": self.tags,
-            },
-            default=str,
-        )
+        point = record.__dict__.get("point")
+        record.__dict__["metric_json"] = json.dumps(point, default=str) if point else ""
+        return super().format(record)
 
 
 def log(logger: logging.Logger, point: Point) -> None:
@@ -101,7 +107,7 @@ def log(logger: logging.Logger, point: Point) -> None:
         logger: An logger instance.
         point: A measurement.
     """
-    logger.info("METRIC: %s", point)
+    logger.info("METRIC", extra={"point": point.to_dict()})
 
 
 class Meter(metaclass=abc.ABCMeta):
