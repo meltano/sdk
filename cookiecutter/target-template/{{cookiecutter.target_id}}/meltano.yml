@@ -5,7 +5,15 @@ default_environment: test
 environments:
 - name: test
 plugins:
-  extractors: []
+  extractors:
+  - name: tap-smoke-test
+    variant: meltano
+    pip_url: git+https://github.com/meltano/tap-smoke-test.git
+    config:
+      streams:
+      - stream_name: animals
+        input_filename: https://raw.githubusercontent.com/meltano/tap-smoke-test/main/demo-data/animals-data.jsonl
+
   loaders:
   - name: "{{cookiecutter.target_id}}"
     namespace: "{{cookiecutter.library_name}}"
@@ -14,13 +22,19 @@ plugins:
     - about
     - stream-maps
     - record-flattening
-    config:
-      start_date: '2010-01-01T00:00:00Z'
+
+    # TODO: Declare settings and their types here:
     settings:
-    # TODO: To configure using Meltano, declare settings and their types here:
     - name: username
+      label: Username
+      description: The username to use for authentication
+
     - name: password
       kind: password
+      label: Password
+      description: The password to use for authentication
       sensitive: true
-    - name: start_date
-      value: '2010-01-01T00:00:00Z'
+
+    # TODO: Declare required settings here:
+    settings_group_validation:
+    - [username, password]

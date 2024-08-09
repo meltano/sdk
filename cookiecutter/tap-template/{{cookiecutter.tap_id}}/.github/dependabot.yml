@@ -8,19 +8,34 @@ updates:
   - package-ecosystem: pip
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: weekly
     commit-message:
       prefix: "chore(deps): "
       prefix-development: "chore(deps-dev): "
+    groups:
+      development-dependencies:
+        dependency-type: development
+      runtime-dependencies:
+        dependency-type: production
+        update-types:
+          - "patch"
   - package-ecosystem: pip
     directory: "/.github/workflows"
     schedule:
-      interval: daily
+      interval: weekly
     commit-message:
       prefix: "ci: "
+    groups:
+      ci:
+        patterns:
+          - "*"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: weekly
     commit-message:
       prefix: "ci: "
+    groups:
+      actions:
+        patterns:
+          - "*"

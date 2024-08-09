@@ -43,14 +43,14 @@ repos:
         )$
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.28.4
+  rev: 0.29.1
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
   - id: check-readthedocs
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.4.5
+  rev: v0.5.7
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]
@@ -63,18 +63,6 @@ repos:
       (?x)^(
         cookiecutter/.*
       )$
-
-- repo: https://github.com/pycqa/flake8
-  rev: 7.0.0
-  hooks:
-  - id: flake8
-    additional_dependencies:
-    - darglint==1.8.1
-    files: |
-        (?x)^(
-          singer_sdk/.*|
-          samples/.*
-        )$
 
 - repo: https://github.com/python-poetry/poetry
   rev: 1.8.0
