@@ -2,14 +2,20 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 from abc import ABCMeta, abstractmethod
 from urllib.parse import ParseResult, urlparse
 
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override  # noqa: ICN003
+
 if t.TYPE_CHECKING:
-    from requests import Response
+    import requests
 
 T = t.TypeVar("T")
 TPageToken = t.TypeVar("TPageToken")
@@ -87,7 +93,7 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
         """
         return str(self)
 
-    def advance(self, response: Response) -> None:
+    def advance(self, response: requests.Response) -> None:
         """Get a new page value and advance the current one.
 
         Args:
@@ -118,7 +124,7 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
         else:
             self._value = new_value
 
-    def has_more(self, response: Response) -> bool:  # noqa: ARG002, PLR6301
+    def has_more(self, response: requests.Response) -> bool:  # noqa: ARG002, PLR6301
         """Override this method to check if the endpoint has any pages left.
 
         Args:
@@ -130,7 +136,7 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
         return True
 
     @abstractmethod
-    def get_next(self, response: Response) -> TPageToken | None:
+    def get_next(self, response: requests.Response) -> TPageToken | None:
         """Get the next pagination token or index from the API response.
 
         Args:
@@ -155,15 +161,12 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
         """
         super().__init__(None, *args, **kwargs)
 
-    def get_next(self, response: Response) -> None:  # noqa: ARG002, PLR6301
-        """Get the next pagination token or index from the API response.
+    @override
+    def get_next(self, response: requests.Response) -> None:
+        """Always return None to indicate pagination is complete after the first page.
 
         Args:
             response: API response object.
-
-        Returns:
-            The next page token or index. Return `None` from this method to indicate
-                the end of pagination.
         """
         return
 
@@ -220,7 +223,7 @@ class BaseHATEOASPaginator(
         super().__init__(None, *args, **kwargs)
 
     @abstractmethod
-    def get_next_url(self, response: Response) -> str | None:
+    def get_next_url(self, response: requests.Response) -> str | None:
         """Override this method to extract a HATEOAS link from the response.
 
         Args:
@@ -228,7 +231,8 @@ class BaseHATEOASPaginator(
         """
         ...
 
-    def get_next(self, response: Response) -> ParseResult | None:
+    @override
+    def get_next(self, response: requests.Response) -> ParseResult | None:
         """Get the next pagination token or index from the API response.
 
         Args:
@@ -249,7 +253,8 @@ class HeaderLinkPaginator(BaseHATEOASPaginator):
         - https://datatracker.ietf.org/doc/html/rfc8288#section-3
     """
 
-    def get_next_url(self, response: Response) -> str | None:  # noqa: PLR6301
+    @override
+    def get_next_url(self, response: requests.Response) -> str | None:
         """Override this method to extract a HATEOAS link from the response.
 
         Args:
@@ -281,7 +286,8 @@ class JSONPathPaginator(BaseAPIPaginator[t.Optional[str]]):
         super().__init__(None, *args, **kwargs)
         self._jsonpath = jsonpath
 
-    def get_next(self, response: Response) -> str | None:
+    @override
+    def get_next(self, response: requests.Response) -> str | None:
         """Get the next page token.
 
         Args:
@@ -313,7 +319,8 @@ class SimpleHeaderPaginator(BaseAPIPaginator[t.Optional[str]]):
         super().__init__(None, *args, **kwargs)
         self._key = key
 
-    def get_next(self, response: Response) -> str | None:
+    @override
+    def get_next(self, response: requests.Response) -> str | None:
         """Get the next page token.
 
         Args:
@@ -328,7 +335,8 @@ class SimpleHeaderPaginator(BaseAPIPaginator[t.Optional[str]]):
 class BasePageNumberPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
     """Paginator class for APIs that use page number."""
 
-    def get_next(self, response: Response) -> int | None:  # noqa: ARG002
+    @override
+    def get_next(self, response: requests.Response) -> int | None:
         """Get the next page number.
 
         Args:
@@ -361,7 +369,8 @@ class BaseOffsetPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         super().__init__(start_value, *args, **kwargs)
         self._page_size = page_size
 
-    def get_next(self, response: Response) -> int | None:  # noqa: ARG002
+    @override
+    def get_next(self, response: requests.Response) -> int | None:
         """Get the next page offset.
 
         Args:
@@ -378,7 +387,7 @@ class LegacyPaginatedStreamProtocol(t.Protocol[TPageToken]):
 
     def get_next_page_token(
         self,
-        response: Response,
+        response: requests.Response,
         previous_token: TPageToken | None,
     ) -> TPageToken | None:
         """Get the next page token.
@@ -411,7 +420,8 @@ class LegacyStreamPaginator(
         super().__init__(None, *args, **kwargs)
         self.stream = stream
 
-    def get_next(self, response: Response) -> TPageToken | None:
+    @override
+    def get_next(self, response: requests.Response) -> TPageToken | None:
         """Get next page value by calling the stream method.
 
         Args:

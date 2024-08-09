@@ -224,9 +224,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         Returns:
             A new sink for the stream.
-
-        Raises:
-            Exception: If sink setup fails.
         """
         self.logger.info("Initializing '%s' target sink...", self.name)
         sink_class = self.get_sink_class(stream_name=stream_name)
@@ -316,7 +313,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._assert_line_requires(message_dict, requires={"stream", "record"})
 
         stream_name = message_dict["stream"]
-        self._assert_sink_exists(stream_name)
+        if stream_name not in self.mapper.stream_maps:
+            self._assert_sink_exists(stream_name)
 
         for stream_map in self.mapper.stream_maps[stream_name]:
             raw_record = copy.copy(message_dict["record"])
@@ -325,6 +323,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 # Record was filtered out by the map transform
                 continue
 
+            self._assert_sink_exists(stream_map.stream_alias)
             sink = self.get_sink(stream_map.stream_alias, record=transformed_record)
             context = sink._get_context(transformed_record)  # noqa: SLF001
             if sink.include_sdc_metadata_properties:
@@ -433,8 +432,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             message_dict: TODO
         """
         stream_name = message_dict["stream"]
-        sink = self.get_sink(stream_name)
-        sink.activate_version(message_dict["version"])
+
+        for stream_map in self.mapper.stream_maps[stream_name]:
+            sink = self.get_sink(stream_map.stream_alias)
+            sink.activate_version(message_dict["version"])
 
     def _process_batch_message(self, message_dict: dict) -> None:
         """Handle the optional BATCH message extension.

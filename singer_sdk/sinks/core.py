@@ -6,7 +6,6 @@ import abc
 import copy
 import datetime
 import importlib.util
-import json
 import time
 import typing as t
 from gzip import GzipFile
@@ -16,6 +15,7 @@ from types import MappingProxyType
 import jsonschema
 from typing_extensions import override
 
+from singer_sdk._singerlib.json import deserialize_json
 from singer_sdk.exceptions import (
     InvalidJSONSchema,
     InvalidRecord,
@@ -707,7 +707,9 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     context_file = (
                         gzip_open(file) if encoding.compression == "gzip" else file
                     )
-                    context = {"records": [json.loads(line) for line in context_file]}  # type: ignore[attr-defined]
+                    context = {
+                        "records": [deserialize_json(line) for line in context_file]  # type: ignore[attr-defined]
+                    }
                     self.process_batch(context)
             elif (
                 importlib.util.find_spec("pyarrow")

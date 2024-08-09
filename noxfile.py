@@ -25,6 +25,8 @@ nox.options.default_venv_backend = "uv|virtualenv"
 
 RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
+
+[lint]
 extend-ignore = ["TD002", "TD003", "FIX002"]
 """
 
@@ -186,7 +188,7 @@ def docs_serve(session: Session) -> None:
         "build",
         "-W",
     ]
-    session.install(".[docs]")
+    session.install(".[docs]", "sphinx-autobuild")
 
     build_dir = Path("build")
     if build_dir.exists():
@@ -254,7 +256,7 @@ def test_cookiecutter(session: Session, replay_file_path: str) -> None:
     session.run("poetry", "lock", external=True)
     session.run("poetry", "install", external=True)
 
-    session.run("git", "init", external=True)
+    session.run("git", "init", "-b", "main", external=True)
     session.run("git", "add", ".", external=True)
     session.run("pre-commit", "run", "--all-files", external=True)
 
@@ -279,3 +281,18 @@ def version_bump(session: Session) -> None:
         "bump",
         *args,
     )
+
+
+@nox.session(name="api")
+def api_changes(session: nox.Session) -> None:
+    """Check for API changes."""
+    args = [
+        "griffe",
+        "check",
+        "singer_sdk",
+    ]
+
+    if session.posargs:
+        args.append(f"-a={session.posargs[0]}")
+
+    session.run(*args, external=True)
