@@ -174,7 +174,7 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.39.0"
+version = "0.39.1"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -314,6 +314,7 @@ select = [
     "E",    # pycodestyle (error)
     "W",    # pycodestyle (warning)
     "C90",  # mccabe
+    "DOC",  # pydocstyle
     "I",    # isort
     "N",    # pep8-naming
     "D",    # pydocstyle/flake8-docstrings
@@ -373,6 +374,7 @@ unfixable = [
     "ANN",
     "D1",
     "D2",
+    "DOC",
     "FBT001",
     "FBT003",
     "PLR2004",
@@ -381,8 +383,10 @@ unfixable = [
     "PLC2701",  # Allow usage of private members in tests
     "PLR6301",  # Don't suggest making test methods static, etc.
 ]
+# Disabled some checks in helper modules
+"singer_sdk/helpers/_*.py" = ["DOC"]
 # Disabled some checks in samples code
-"samples/*" = ["ANN", "D"]
+"samples/*" = ["ANN", "D", "DOC"]
 # Templates support a generic resource of type Any.
 "singer_sdk/testing/*.py" = ["S101"]
 "singer_sdk/testing/templates.py" = ["ANN401"]
