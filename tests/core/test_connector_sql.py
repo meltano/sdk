@@ -341,6 +341,32 @@ class TestDuckDBConnector:
             assert result.keys() == ["id", "name"]
             assert result.cursor.description[1][1] == "STRING"
 
+    @pytest.mark.parametrize(
+        "skip_schemas,expected_streams",
+        [
+            ([], 1),
+            (["memory.my_schema"], 0),
+        ],
+    )
+    def test_discover_catalog_entries_skip_schemas(
+        self,
+        connector: DuckDBConnector,
+        skip_schemas: list[str],
+        expected_streams: int,
+    ):
+        with connector._engine.connect() as conn, conn.begin():
+            conn.execute(sa.text("CREATE SCHEMA my_schema"))
+            conn.execute(
+                sa.text(
+                    "CREATE TABLE my_schema.test_table (id INTEGER PRIMARY KEY, name STRING)",  # noqa: E501
+                )
+            )
+        entries = connector.discover_catalog_entries(
+            skip_schemas=skip_schemas,
+            reflect_indices=False,
+        )
+        assert len(entries) == expected_streams
+
 
 def test_adapter_without_json_serde():
     registry.register(
