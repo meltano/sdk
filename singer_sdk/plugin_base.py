@@ -13,7 +13,7 @@ from pathlib import Path, PurePath
 from types import MappingProxyType
 
 import click
-from jsonschema import Draft7Validator
+from jsonschema import Draft202012Validator
 
 from singer_sdk import about, metrics
 from singer_sdk.cli import plugin_cli
@@ -36,7 +36,7 @@ from singer_sdk.typing import extend_validator_with_defaults
 
 SDK_PACKAGE_NAME = "singer_sdk"
 
-JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
+JSONSchemaValidator = extend_validator_with_defaults(Draft202012Validator)
 
 
 class MapperNotInitialized(Exception):

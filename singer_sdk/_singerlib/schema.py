@@ -11,6 +11,11 @@ from referencing.jsonschema import DRAFT202012
 if t.TYPE_CHECKING:
     from referencing._core import Resolver
 
+META_KEYS = [
+    "id",
+    "schema",
+]
+
 # These are keys defined in the JSON Schema spec that do not themselves contain
 # schemas (or lists of schemas)
 STANDARD_KEYS = [
@@ -51,6 +56,9 @@ class Schema:
     https://github.com/transferwise/pipelinewise-singer-python/blob/master/singer/schema.py.
     This is because we wanted to expand it with extra STANDARD_KEYS.
     """
+
+    id: str | None = None
+    schema: str | None = None
 
     type: str | list[str] | None = None
     default: t.Any | None = None
@@ -94,6 +102,10 @@ class Schema:
             if self.__dict__.get(key) is not None:
                 result[key] = self.__dict__[key]
 
+        for key in META_KEYS:
+            if self.__dict__.get(key) is not None:
+                result[f"${key}"] = self.__dict__[key]
+
         return result
 
     @classmethod
@@ -110,7 +122,40 @@ class Schema:
 
         Returns:
             The initialized Schema object.
-        """
+
+        Example:
+            >>> data = {
+            ...     "$id": "https://example.com/person.schema.json",
+            ...     "$schema": "http://json-schema.org/draft/2020-12/schema",
+            ...     "title": "Person",
+            ...     "type": "object",
+            ...     "properties": {
+            ...         "firstName": {
+            ...             "type": "string",
+            ...             "description": "The person's first name.",
+            ...         },
+            ...         "lastName": {
+            ...             "type": "string",
+            ...             "description": "The person's last name.",
+            ...         },
+            ...         "age": {
+            ...             "description": "Age in years which must be equal to or greater than zero.",
+            ...             "type": "integer",
+            ...             "minimum": 0,
+            ...         },
+            ...     },
+            ...     "required": ["firstName", "lastName"],
+            ... }
+            >>> schema = Schema.from_dict(data)
+            >>> schema.title
+            'Person'
+            >>> schema.properties["firstName"].description
+            "The person's first name."
+            >>> schema.properties["age"].minimum
+            0
+            >>> schema.schema
+            'http://json-schema.org/draft/2020-12/schema'
+        """  # noqa: E501
         kwargs = schema_defaults.copy()
         properties = data.get("properties")
         items = data.get("items")
@@ -121,9 +166,15 @@ class Schema:
             }
         if items is not None:
             kwargs["items"] = cls.from_dict(items, **schema_defaults)
+
         for key in STANDARD_KEYS:
             if key in data:
                 kwargs[key] = data[key]
+
+        for key in META_KEYS:
+            if f"${key}" in data:
+                kwargs[key] = data[f"${key}"]
+
         return cls(**kwargs)
 
 
