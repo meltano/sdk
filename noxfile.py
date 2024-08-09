@@ -25,6 +25,8 @@ nox.options.default_venv_backend = "uv|virtualenv"
 
 RUFF_OVERRIDES = """\
 extend = "./pyproject.toml"
+
+[lint]
 extend-ignore = ["TD002", "TD003", "FIX002"]
 """
 
@@ -254,7 +256,7 @@ def test_cookiecutter(session: Session, replay_file_path: str) -> None:
     session.run("poetry", "lock", external=True)
     session.run("poetry", "install", external=True)
 
-    session.run("git", "init", external=True)
+    session.run("git", "init", "-b", "main", external=True)
     session.run("git", "add", ".", external=True)
     session.run("pre-commit", "run", "--all-files", external=True)
 

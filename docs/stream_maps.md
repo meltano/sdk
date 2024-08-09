@@ -435,21 +435,7 @@ stream_maps:
 ```
 ````
 
-#### Q: What is the difference between `primary_keys` and `key_properties`?
-
-**A:** These two are _generally_ identical - and will only differ in cases like the above where `key_properties` is manually
-overridden or nullified by the user of the tap. Developers will specify `primary_keys` for each stream in the tap,
-but they do not control if the user will override `key_properties` behavior when initializing the stream. Primary keys
-describe the nature of the upstream data as known by the source system. However, either through manual catalog manipulation and/or by
-setting stream map transformations, the in-flight dedupe keys (`key_properties`) may be overridden or nullified by the user at any time.
-
-Additionally, some targets do not support primary key distinctions, and there are valid use cases to intentionally unset
-the `key_properties` in an extract-load pipeline. For instance, it is common to intentionally nullify key properties to trigger
-"append-only" loading behavior in certain targets, as may be required for historical reporting. This does not change the
-underlying nature of the `primary_key` configuration in the upstream source data, only how it will be landed or deduped
-in the downstream source.
-
-## Aliasing a stream using `__alias__`
+### Aliasing a stream using `__alias__`
 
 To alias a stream, simply add the operation `"__alias__": "new_name"` to the stream
 definition. For example, to alias the `customers` stream as `customer_v2`, use the
@@ -475,7 +461,7 @@ stream_maps:
 ```
 ````
 
-## Duplicating or splitting a stream using `__source__`
+### Duplicating or splitting a stream using `__source__`
 
 To create a new stream as a copy of the original, specify the operation
 `"__source__": "stream_name"`. For example, you can create a copy of the `customers` stream
@@ -519,7 +505,7 @@ stream_maps:
 ```
 ````
 
-## Filtering out records from a stream using `__filter__` operation
+### Filtering out records from a stream using `__filter__` operation
 
 The `__filter__` operation accepts a string expression which must evaluate to `true` or
 `false`. Filter expressions should be wrapped in `bool()` to ensure proper type conversion.
@@ -545,6 +531,62 @@ stream_maps:
 }
 ```
 ````
+
+### Aliasing properties
+
+This uses a "copy-and-delete" approach with the help of `__NULL__`:
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  customers:
+    new_field: old_field
+    old_field: __NULL__
+```
+````
+
+````{tab} JSON
+```json
+{
+    "stream_maps": {
+        "customers": {
+            "new_field": "old_field",
+            "old_field": "__NULL__"
+        }
+    }
+}
+```
+````
+
+### Applying a mapping across two or more streams
+
+You can use glob expressions to apply a stream map configuration to more than one stream:
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  "*":
+    name: first_name
+    first_name: __NULL__
+```
+````
+
+````{tab} JSON
+```json
+{
+    "stream_maps": {
+        "*": {
+            "name": "first_name",
+            "first_name": "__NULL__"
+        }
+    }
+}
+```
+````
+
+:::{versionadded} 0.37.0
+Support for stream glob expressions.
+:::
 
 ### Understanding Filters' Affects on Parent-Child Streams
 
@@ -625,3 +667,17 @@ Additionally, plugins are generally expected to fail if they receive unexpected 
 arguments. The intended use cases for stream map config values are user-defined in nature
 (such as the hashing use case defined above), and are unlikely to overlap with the
 plugin's already-existing settings.
+
+### Q: What is the difference between `primary_keys` and `key_properties`?
+
+**Answer:** These two are _generally_ identical - and will only differ in cases like the above where `key_properties` is manually
+overridden or nullified by the user of the tap. Developers will specify `primary_keys` for each stream in the tap,
+but they do not control if the user will override `key_properties` behavior when initializing the stream. Primary keys
+describe the nature of the upstream data as known by the source system. However, either through manual catalog manipulation and/or by
+setting stream map transformations, the in-flight dedupe keys (`key_properties`) may be overridden or nullified by the user at any time.
+
+Additionally, some targets do not support primary key distinctions, and there are valid use cases to intentionally unset
+the `key_properties` in an extract-load pipeline. For instance, it is common to intentionally nullify key properties to trigger
+"append-only" loading behavior in certain targets, as may be required for historical reporting. This does not change the
+underlying nature of the `primary_key` configuration in the upstream source data, only how it will be landed or deduped
+in the downstream source.
