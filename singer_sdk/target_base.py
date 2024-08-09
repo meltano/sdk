@@ -242,9 +242,6 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         Returns:
             A new sink for the stream.
-
-        Raises:
-            Exception: If sink setup fails.
         """
         self.logger.info("Initializing '%s' target sink...", self.name)
         sink_class = self.get_sink_class(stream_name=stream_name)
