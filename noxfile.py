@@ -66,14 +66,6 @@ def tests(session: Session) -> None:
     session.install(".[faker,jwt,parquet,s3]")
     session.install(*test_dependencies)
 
-    sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
-    if sqlalchemy_version:
-        # Bypass nox-poetry use of --constraint so we can install a version of
-        # SQLAlchemy that doesn't match what's in poetry.lock.
-        session.poetry.session.install(  # type: ignore[attr-defined]
-            f"sqlalchemy=={sqlalchemy_version}.*",
-        )
-
     env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
 
     try:
