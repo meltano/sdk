@@ -199,15 +199,18 @@ class JSONTypeHelper(t.Generic[T]):
         *,
         allowed_values: list[T] | None = None,
         examples: list[T] | None = None,
+        nullable: bool | None = None,
     ) -> None:
         """Initialize the type helper.
 
         Args:
             allowed_values: A list of allowed values.
             examples: A list of example values.
+            nullable: If True, the property may be null.
         """
         self.allowed_values = allowed_values
         self.examples = examples
+        self.nullable = nullable
 
     @DefaultInstanceProperty
     def type_dict(self) -> dict:
@@ -266,6 +269,8 @@ class StringType(JSONTypeHelper[str]):
         {'type': ['string'], 'enum': ['a', 'b']}
         >>> StringType(max_length=10).type_dict
         {'type': ['string'], 'maxLength': 10}
+        >>> StringType(max_length=10, nullable=True).type_dict
+        {'type': ['string', 'null'], 'maxLength': 10}
     """
 
     string_format: str | None = None
@@ -314,7 +319,7 @@ class StringType(JSONTypeHelper[str]):
             A dictionary describing the type.
         """
         result = {
-            "type": ["string"],
+            "type": ["string", "null"] if self.nullable else ["string"],
             **self._format,
             **self.extras,
         }
@@ -453,7 +458,10 @@ class BooleanType(JSONTypeHelper[bool]):
         Returns:
             A dictionary describing the type.
         """
-        return {"type": ["boolean"], **self.extras}
+        return {
+            "type": ["boolean", "null"] if self.nullable else ["boolean"],
+            **self.extras,
+        }
 
 
 class _NumericType(JSONTypeHelper[T]):
@@ -500,7 +508,12 @@ class _NumericType(JSONTypeHelper[T]):
         Returns:
             A dictionary describing the type.
         """
-        result = {"type": [self.__type_name__], **self.extras}
+        result = {
+            "type": [self.__type_name__, "null"]
+            if self.nullable
+            else [self.__type_name__],
+            **self.extras,
+        }
 
         if self.minimum is not None:
             result["minimum"] = self.minimum
@@ -585,7 +598,11 @@ class ArrayType(JSONTypeHelper[list], t.Generic[W]):
         Returns:
             A dictionary describing the type.
         """
-        return {"type": "array", "items": self.wrapped_type.type_dict, **self.extras}
+        return {
+            "type": ["array", "null"] if self.nullable else "array",
+            "items": self.wrapped_type.type_dict,
+            **self.extras,
+        }
 
 
 class AnyType(JSONTypeHelper):
@@ -815,7 +832,10 @@ class ObjectType(JSONTypeHelper):
             merged_props.update(w.to_dict())
             if not w.optional:
                 required.append(w.name)
-        result: dict[str, t.Any] = {"type": "object", "properties": merged_props}
+        result: dict[str, t.Any] = {
+            "type": ["object", "null"] if self.nullable else "object",
+            "properties": merged_props,
+        }
 
         if required:
             result["required"] = required
