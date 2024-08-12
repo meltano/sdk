@@ -1007,7 +1007,7 @@ testing = ["coverage", "pytest", "pytest-cov", "pytest-regressions"]
 name = "markupsafe"
 version = "2.1.5"
 description = "Safely add untrusted strings to HTML/XML markup."
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "MarkupSafe-2.1.5-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:a17a92de5231666cfbe003f0e4b9b3a7ae3afb1ec2845aadc2bacc93ff85febc"},
@@ -1492,6 +1492,20 @@ setuptools = {version = "*", markers = "python_full_version >= \"3.12.0\""}
 compat = ["pytest-benchmark (>=4.0.0,<4.1.0)", "pytest-xdist (>=2.0.0,<2.1.0)"]
 lint = ["mypy (>=1.3.0,<1.4.0)", "ruff (>=0.3.3,<0.4.0)"]
 test = ["pytest (>=7.0,<8.0)", "pytest-cov (>=4.0.0,<4.1.0)"]
+
+[[package]]
+name = "pytest-httpserver"
+version = "1.0.12"
+description = "pytest-httpserver is a httpserver for pytest"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pytest_httpserver-1.0.12-py3-none-any.whl", hash = "sha256:dae1c79ec7aeda83bfaaf4d0a400867a4b1bc6bf668244daaf13aa814e3022da"},
+    {file = "pytest_httpserver-1.0.12.tar.gz", hash = "sha256:c14600b8efb9ea8d7e63251a242ab987f13028b36d3d397ffaca3c929f67eb16"},
+]
+
+[package.dependencies]
+Werkzeug = ">=2.0.0"
 
 [[package]]
 name = "pytest-snapshot"
@@ -2463,6 +2477,23 @@ secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "ipaddress", "p
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
+name = "werkzeug"
+version = "3.0.3"
+description = "The comprehensive WSGI web application library."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "werkzeug-3.0.3-py3-none-any.whl", hash = "sha256:fc9645dc43e03e4d630d23143a04a7f947a9a3b5727cd535fdfe155a17cc48c8"},
+    {file = "werkzeug-3.0.3.tar.gz", hash = "sha256:097e5bfda9f0aba8da6b8545146def481d06aa7d3266e7448e2cccf67dd8bd18"},
+]
+
+[package.dependencies]
+MarkupSafe = ">=2.1.1"
+
+[package.extras]
+watchdog = ["watchdog (>=2.3)"]
+
+[[package]]
 name = "xdoctest"
 version = "1.1.6"
 description = "A rewrite of the builtin doctest module"
@@ -2511,4 +2542,4 @@ testing = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "8d0665d7e5397609e616976d470dca9863a925a12f513c0b78439f055aeb664a"
+content-hash = "6469b9ee5115b54975583b6b110a2c60e6d3bffd60529caef99c3d54585f16b3"

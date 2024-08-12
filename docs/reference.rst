@@ -143,3 +143,12 @@ Batch
 
     batch.BaseBatcher
     batch.JSONLinesBatcher
+
+Abstract Connector Classes
+--------------------------
+
+.. autosummary::
+    :toctree: classes
+    :template: class.rst
+
+    connectors.BaseConnector
