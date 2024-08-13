@@ -41,6 +41,9 @@ singer-sdk = { version="~=0.39.1", extras = ["testing"] }
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
 
+[tool.pytest.ini_options]
+addopts = '--durations=10'
+
 [tool.mypy]
 python_version = "3.12"
 warn_unused_configs = true
