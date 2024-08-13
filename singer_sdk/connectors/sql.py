@@ -473,6 +473,25 @@ class SQLConnector:  # noqa: PLR0904
             view_names = []
         return [(t, False) for t in table_names] + [(v, True) for v in view_names]
 
+    def _get_stream_name(  # noqa: PLR6301
+        self,
+        table_name: str,
+        *,
+        schema_name: str | None = None,
+    ) -> str:
+        """Return a unique stream name.
+
+        Args:
+            schema_name: Schema name
+            table_name: Table or view name
+
+        Returns:
+            A unique stream name
+        """
+        if schema_name:
+            return f"{schema_name}-{table_name}"
+        return table_name
+
     # TODO maybe should be splitted into smaller parts?
     def discover_catalog_entry(
         self,
@@ -495,15 +514,7 @@ class SQLConnector:  # noqa: PLR0904
             `CatalogEntry` object for the given table or a view
         """
         # Initialize unique stream name
-        # We cast UserString to str to make s.join() happy
-        unique_stream_id = str(
-            self.get_fully_qualified_name(
-                db_name=None,
-                schema_name=schema_name,
-                table_name=table_name,
-                delimiter="-",
-            )
-        )
+        unique_stream_id = self._get_stream_name(table_name, schema_name=schema_name)
 
         # Detect key properties
         possible_primary_keys: list[list[str]] = []
