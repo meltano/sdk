@@ -7,9 +7,11 @@ from unittest import mock
 import pytest
 import sqlalchemy as sa
 from sqlalchemy.dialects import registry, sqlite
+from sqlalchemy.engine.default import DefaultDialect
 
 from samples.sample_duckdb import DuckDBConnector
 from singer_sdk.connectors import SQLConnector
+from singer_sdk.connectors.sql import FullyQualifiedName
 from singer_sdk.exceptions import ConfigValidationError
 
 if t.TYPE_CHECKING:
@@ -355,3 +357,38 @@ def test_adapter_without_json_serde():
 
     connector = CustomConnector(config={"sqlalchemy_url": "myrdbms:///"})
     connector.create_engine()
+
+
+def test_fully_qualified_name():
+    fqn = FullyQualifiedName(table="my_table")
+    assert fqn == "my_table"
+
+    fqn = FullyQualifiedName(schema="my_schema", table="my_table")
+    assert fqn == "my_schema.my_table"
+
+    fqn = FullyQualifiedName(
+        database="my_catalog",
+        schema="my_schema",
+        table="my_table",
+    )
+    assert fqn == "my_catalog.my_schema.my_table"
+
+
+def test_fully_qualified_name_with_quoting():
+    class QuotedFullyQualifiedName(FullyQualifiedName):
+        def __init__(self, *, dialect: sa.engine.Dialect, **kwargs: t.Any):
+            self.dialect = dialect
+            super().__init__(**kwargs)
+
+        def prepare_part(self, part: str) -> str:
+            return self.dialect.identifier_preparer.quote(part)
+
+    dialect = DefaultDialect()
+
+    fqn = QuotedFullyQualifiedName(table="order", schema="public", dialect=dialect)
+    assert fqn == 'public."order"'
+
+
+def test_fully_qualified_name_empty_error():
+    with pytest.raises(ValueError, match="Could not generate fully qualified name"):
+        FullyQualifiedName()
