@@ -28,10 +28,6 @@ class DummyJSONStream(RESTStream):
             password=self.config["password"],
         )
 
-    @property
-    def http_headers(self):
-        return {"User-Agent": "tap-dummyjson"}
-
     def get_new_paginator(self):
         return BaseOffsetPaginator(start_value=0, page_size=PAGE_SIZE)
 
