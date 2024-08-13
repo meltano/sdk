@@ -48,7 +48,7 @@ class FullyQualifiedName(UserString):
     def __init__(
         self,
         *,
-        table: str | None = None,
+        table: str = "",
         schema: str | None = None,
         database: str | None = None,
         delimiter: str = ".",
@@ -341,7 +341,7 @@ class SQLConnector:  # noqa: PLR0904
             The fully qualified name as a string.
         """
         return FullyQualifiedName(
-            table=table_name,
+            table=table_name,  # type: ignore[arg-type]
             schema=schema_name,
             database=db_name,
             delimiter=delimiter,
@@ -473,25 +473,6 @@ class SQLConnector:  # noqa: PLR0904
             view_names = []
         return [(t, False) for t in table_names] + [(v, True) for v in view_names]
 
-    def _get_stream_name(  # noqa: PLR6301
-        self,
-        table_name: str,
-        *,
-        schema_name: str | None = None,
-    ) -> str:
-        """Return a unique stream name.
-
-        Args:
-            schema_name: Schema name
-            table_name: Table or view name
-
-        Returns:
-            A unique stream name
-        """
-        if schema_name:
-            return f"{schema_name}-{table_name}"
-        return table_name
-
     # TODO maybe should be splitted into smaller parts?
     def discover_catalog_entry(
         self,
@@ -514,7 +495,7 @@ class SQLConnector:  # noqa: PLR0904
             `CatalogEntry` object for the given table or a view
         """
         # Initialize unique stream name
-        unique_stream_id = self._get_stream_name(table_name, schema_name=schema_name)
+        unique_stream_id = f"{schema_name}-{table_name}"
 
         # Detect key properties
         possible_primary_keys: list[list[str]] = []
@@ -647,7 +628,7 @@ class SQLConnector:  # noqa: PLR0904
 
         return db_name, schema_name, table_name
 
-    def table_exists(self, full_table_name: str) -> bool:
+    def table_exists(self, full_table_name: str | FullyQualifiedName) -> bool:
         """Determine if the target table already exists.
 
         Args:
@@ -1067,7 +1048,7 @@ class SQLConnector:  # noqa: PLR0904
 
     def get_column_add_ddl(
         self,
-        table_name: str,
+        table_name: str | FullyQualifiedName,
         column_name: str,
         column_type: sa.types.TypeEngine,
     ) -> sa.DDL:
@@ -1100,7 +1081,7 @@ class SQLConnector:  # noqa: PLR0904
 
     @staticmethod
     def get_column_rename_ddl(
-        table_name: str,
+        table_name: str | FullyQualifiedName,
         column_name: str,
         new_column_name: str,
     ) -> sa.DDL:
@@ -1128,7 +1109,7 @@ class SQLConnector:  # noqa: PLR0904
 
     @staticmethod
     def get_column_alter_ddl(
-        table_name: str,
+        table_name: str | FullyQualifiedName,
         column_name: str,
         column_type: sa.types.TypeEngine,
     ) -> sa.DDL:
