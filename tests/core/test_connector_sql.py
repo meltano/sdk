@@ -360,32 +360,35 @@ def test_adapter_without_json_serde():
 
 
 def test_fully_qualified_name():
-    dialect = DefaultDialect()
-
-    fqn = FullyQualifiedName(table="my_table", dialect=dialect)
+    fqn = FullyQualifiedName(table="my_table")
     assert fqn == "my_table"
 
-    fqn = FullyQualifiedName(schema="my_schema", table="my_table", dialect=dialect)
+    fqn = FullyQualifiedName(schema="my_schema", table="my_table")
     assert fqn == "my_schema.my_table"
 
     fqn = FullyQualifiedName(
         database="my_catalog",
         schema="my_schema",
         table="my_table",
-        dialect=dialect,
     )
     assert fqn == "my_catalog.my_schema.my_table"
 
 
 def test_fully_qualified_name_with_quoting():
+    class QuotedFullyQualifiedName(FullyQualifiedName):
+        def __init__(self, *, dialect: sa.engine.Dialect, **kwargs: t.Any):
+            self.dialect = dialect
+            super().__init__(**kwargs)
+
+        def prepare_part(self, part: str) -> str:
+            return self.dialect.identifier_preparer.quote(part)
+
     dialect = DefaultDialect()
 
-    fqn = FullyQualifiedName(table="order", schema="public", dialect=dialect)
+    fqn = QuotedFullyQualifiedName(table="order", schema="public", dialect=dialect)
     assert fqn == 'public."order"'
 
 
 def test_fully_qualified_name_empty_error():
-    dialect = DefaultDialect()
-
     with pytest.raises(ValueError, match="Could not generate fully qualified name"):
-        FullyQualifiedName(dialect=dialect)
+        FullyQualifiedName()

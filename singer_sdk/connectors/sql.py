@@ -52,7 +52,6 @@ class FullyQualifiedName(UserString):
         schema: str | None = None,
         database: str | None = None,
         delimiter: str = ".",
-        dialect: sa.engine.Dialect,
     ) -> None:
         """Initialize the fully qualified table name.
 
@@ -61,7 +60,6 @@ class FullyQualifiedName(UserString):
             schema: The name of the schema. Defaults to None.
             database: The name of the database. Defaults to None.
             delimiter: The delimiter to use between parts. Defaults to '.'.
-            dialect: The SQLAlchemy dialect to use for quoting.
 
         Raises:
             ValueError: If the fully qualified name could not be generated.
@@ -70,7 +68,6 @@ class FullyQualifiedName(UserString):
         self.schema = schema
         self.database = database
         self.delimiter = delimiter
-        self.dialect = dialect
 
         parts = []
         if self.database:
@@ -94,7 +91,7 @@ class FullyQualifiedName(UserString):
 
         super().__init__(self.delimiter.join(parts))
 
-    def prepare_part(self, part: str) -> str:
+    def prepare_part(self, part: str) -> str:  # noqa: PLR6301
         """Prepare a part of the fully qualified name.
 
         Args:
@@ -103,7 +100,7 @@ class FullyQualifiedName(UserString):
         Returns:
             The prepared part.
         """
-        return self.dialect.identifier_preparer.quote(part)
+        return part
 
 
 class SQLConnector:  # noqa: PLR0904
@@ -322,8 +319,8 @@ class SQLConnector:  # noqa: PLR0904
         """
         return th.to_sql_type(jsonschema_type)
 
+    @staticmethod
     def get_fully_qualified_name(
-        self,
         table_name: str | None = None,
         schema_name: str | None = None,
         db_name: str | None = None,
@@ -345,7 +342,6 @@ class SQLConnector:  # noqa: PLR0904
             schema=schema_name,
             database=db_name,
             delimiter=delimiter,
-            dialect=self._dialect,
         )
 
     @property
