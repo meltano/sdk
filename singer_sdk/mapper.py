@@ -337,7 +337,10 @@ class CustomStreamMap(StreamMap):
         names["config"] = self.map_config  # Allow map config access within transform
 
         if self.fake:
+            from faker import Faker  # noqa: PLC0415
+
             names["fake"] = self.fake
+            names["Faker"] = Faker
 
         if property_name and property_name in record:
             # Allow access to original property value if applicable
