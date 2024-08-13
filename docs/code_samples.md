@@ -12,7 +12,7 @@ The following are full project samples, contributed by members of the community:
 - A Cloud Service - [MeltanoLabs/tap-cloudwatch](https://github.com/MeltanoLabs/tap-cloudwatch)
 - A REST Stream with complex and varied auth options - [MeltanoLabs/tap-github](https://github.com/MeltanoLabs/tap-github)
 
-There are many more examples in the Meltano Hub: go to https://hub.meltano.com and type `sdk` in the searchbar to see a list of taps and targets created with the Singer SDK.
+There are many more examples available: go to [Meltano Hub](https://hub.meltano.com) and type `sdk` in the searchbar to see a list of taps and targets created with the Singer SDK.
 
 To add your project to Meltano Hub, please
 [submit an issue](https://github.com/meltano/hub/issues/new?assignees=edgarrmondragon%2Cpnadolny13&labels=valuestream%2FHub&projects=&template=new_plugin.yml&title=Add+Plugin%3A+%3Cinsert+plugin+name%3E).
