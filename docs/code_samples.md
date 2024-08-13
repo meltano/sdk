@@ -6,11 +6,11 @@ Below you will find a collection of code samples which can be used for inspirati
 
 The following are full project samples, contributed by members of the community:
 
-- A REST Stream - [MeltanoLabs/tap-pulumi-cloud](https://github.com/MeltanoLabs/tap-pulumi-cloud)
-- A SQL Target - [MeltanoLabs/target-postgres](https://github.com/MeltanoLabs/target-postgres)
-- A SQL Tap - [MeltanoLabs/tap-postgres](https://github.com/MeltanoLabs/tap-postgres)
-- A Cloud Service - [MeltanoLabs/tap-cloudwatch](https://github.com/MeltanoLabs/tap-cloudwatch)
-- A REST Stream with complex and varied auth options - [MeltanoLabs/tap-github](https://github.com/MeltanoLabs/tap-github)
+- A REST Stream: [MeltanoLabs/tap-pulumi-cloud](https://github.com/MeltanoLabs/tap-pulumi-cloud)
+- A SQL Target: [MeltanoLabs/target-postgres](https://github.com/MeltanoLabs/target-postgres)
+- A SQL Tap: [MeltanoLabs/tap-postgres](https://github.com/MeltanoLabs/tap-postgres)
+- A Cloud Service: [MeltanoLabs/tap-cloudwatch](https://github.com/MeltanoLabs/tap-cloudwatch)
+- A REST Stream with complex and varied auth options: [MeltanoLabs/tap-github](https://github.com/MeltanoLabs/tap-github)
 
 There are many more examples available: go to [Meltano Hub](https://hub.meltano.com) and type `sdk` in the searchbar to see a list of taps and targets created with the Singer SDK.
 
