@@ -50,6 +50,16 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
             default="https://api.mysample.com",
             description="The url for the API service",
         ),
+        {%- if cookiecutter.stream_type in ("GraphQL", "REST") %}
+        th.Property(
+            "user_agent",
+            th.StringType,
+            description=(
+                "A custom User-Agent header to send with each request. Default is "
+                "'<tap_name>/<tap_version>'"
+            ),
+        ),
+        {%- endif %}
     ).to_dict()
 {%- if cookiecutter.stream_type in ("GraphQL", "REST", "Other") %}
 

@@ -182,7 +182,9 @@ def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
     props_a: dict[str, dict] = {"col_a": th.StringType().to_dict()}
     props_b = deepcopy(props_a)
     props_b["col_b"] = th.IntegerType().to_dict()
-    schema_msg_a, schema_msg_b = (
+    props_c = deepcopy(props_b)
+    props_c["_col_c"] = th.IntegerType().to_dict()
+    schema_msg_a, schema_msg_b, schema_msg_c = (
         {
             "type": "SCHEMA",
             "stream": test_tbl,
@@ -191,7 +193,7 @@ def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
                 "properties": props,
             },
         }
-        for props in [props_a, props_b]
+        for props in [props_a, props_b, props_c]
     )
     tap_output_a = "\n".join(
         json.dumps(msg)
@@ -211,8 +213,20 @@ def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
             },
         ]
     )
+    tap_output_c = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg_c,
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"col_a": "samplerow2", "col_b": 2, "_col_c": 3},
+            },
+        ]
+    )
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output_a), finalize=True)
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output_b), finalize=True)
+    target_sync_test(sqlite_sample_target, input=StringIO(tap_output_c), finalize=True)
 
 
 def test_sqlite_activate_version(

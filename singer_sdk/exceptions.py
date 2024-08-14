@@ -5,6 +5,8 @@ from __future__ import annotations
 import abc
 import typing as t
 
+from singer_sdk._singerlib.exceptions import InvalidInputLine  # noqa: F401
+
 if t.TYPE_CHECKING:
     import requests
 
@@ -137,11 +139,7 @@ class ConformedNameClashException(Exception):
 
 
 class MissingKeyPropertiesError(Exception):
-    """Raised when a recieved (and/or transformed) record is missing key properties."""
-
-
-class InvalidInputLine(Exception):
-    """Raised when an input line is not a valid Singer message."""
+    """Raised when a received (and/or transformed) record is missing key properties."""
 
 
 class InvalidJSONSchema(Exception):

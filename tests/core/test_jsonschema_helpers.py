@@ -8,7 +8,6 @@ from logging import WARNING
 from textwrap import dedent
 
 import pytest
-from jsonschema import Draft6Validator
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -27,6 +26,7 @@ from singer_sdk.helpers._typing import (
 )
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
+    DEFAULT_JSONSCHEMA_VALIDATOR,
     AllOf,
     AnyType,
     ArrayType,
@@ -639,7 +639,7 @@ def test_array_type():
     assert ArrayType(wrapped_type).type_dict == expected_json_schema
 
 
-@pytest.mark.snapshot()
+@pytest.mark.snapshot
 @pytest.mark.parametrize(
     "schema_obj,snapshot_name",
     [
@@ -932,7 +932,7 @@ def test_discriminated_union():
         ),
     )
 
-    validator = Draft6Validator(th.to_dict())
+    validator = DEFAULT_JSONSCHEMA_VALIDATOR(th.to_dict())
 
     assert validator.is_valid(
         {

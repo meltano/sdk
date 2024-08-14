@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Iterable
+from typing import TYPE_CHECKING, Iterable
 
 from singer_sdk.streams import Stream
+
+if TYPE_CHECKING:
+    from singer_sdk.helpers.types import Context
 
 
 class {{ cookiecutter.source_name }}Stream(Stream):
@@ -12,7 +15,7 @@ class {{ cookiecutter.source_name }}Stream(Stream):
 
     def get_records(
         self,
-        context: dict | None,  # noqa: ARG002
+        context: Context | None,  # noqa: ARG002
     ) -> Iterable[dict]:
         """Return a generator of record-type dictionary objects.
 

@@ -98,6 +98,10 @@ detailed guide.
   ```
 ````
 
+### Application configuration
+
+The SDK lets you define a configuration schema for your tap or target with full support for JSON schema validation. Read the more in-depth guide on [defining a configuration schema](./guides/config-schema.md).
+
 ### Using an existing library
 
 In some cases, there may already be a library that connects to the API and all you need the SDK for

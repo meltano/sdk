@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import base64
+import datetime
 import math
 import typing as t
 import warnings
-from datetime import timedelta
 from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
@@ -16,8 +16,6 @@ from singer_sdk.helpers._util import utc_now
 
 if t.TYPE_CHECKING:
     import logging
-
-    from pendulum import DateTime
 
     from singer_sdk.streams.rest import RESTStream
 
@@ -81,7 +79,12 @@ class SingletonMeta(type):
 
 
 class APIAuthenticatorBase:
-    """Base class for offloading API auth."""
+    """Base class for offloading API auth.
+
+    Attributes:
+        auth_headers: HTTP headers for authentication.
+        auth_params: URL query parameters for authentication.
+    """
 
     def __init__(self, stream: RESTStream) -> None:
         """Init authenticator.
@@ -91,8 +94,8 @@ class APIAuthenticatorBase:
         """
         self.tap_name: str = stream.tap_name
         self._config: dict[str, t.Any] = dict(stream.config)
-        self._auth_headers: dict[str, t.Any] = {}
-        self._auth_params: dict[str, t.Any] = {}
+        self.auth_headers: dict[str, t.Any] = {}
+        self.auth_params: dict[str, t.Any] = {}
         self.logger: logging.Logger = stream.logger
 
     @property
@@ -103,24 +106,6 @@ class APIAuthenticatorBase:
             A frozen (read-only) config dictionary map.
         """
         return MappingProxyType(self._config)
-
-    @property
-    def auth_headers(self) -> dict:
-        """Get headers.
-
-        Returns:
-            HTTP headers for authentication.
-        """
-        return self._auth_headers or {}
-
-    @property
-    def auth_params(self) -> dict:
-        """Get query parameters.
-
-        Returns:
-            URL query parameters for authentication.
-        """
-        return self._auth_params or {}
 
     def authenticate_request(
         self,
@@ -179,10 +164,10 @@ class SimpleAuthenticator(APIAuthenticatorBase):
             auth_headers: Authentication headers.
         """
         super().__init__(stream=stream)
-        if self._auth_headers is None:
-            self._auth_headers = {}
+        if self.auth_headers is None:
+            self.auth_headers = {}
         if auth_headers:
-            self._auth_headers.update(auth_headers)
+            self.auth_headers.update(auth_headers)
 
 
 class APIKeyAuthenticator(APIAuthenticatorBase):
@@ -220,13 +205,13 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
             raise ValueError(msg)
 
         if location == "header":
-            if self._auth_headers is None:
-                self._auth_headers = {}
-            self._auth_headers.update(auth_credentials)
+            if self.auth_headers is None:
+                self.auth_headers = {}
+            self.auth_headers.update(auth_credentials)
         elif location == "params":
-            if self._auth_params is None:
-                self._auth_params = {}
-            self._auth_params.update(auth_credentials)
+            if self.auth_params is None:
+                self.auth_params = {}
+            self.auth_params.update(auth_credentials)
 
     @classmethod
     def create_for_stream(
@@ -269,9 +254,9 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
         super().__init__(stream=stream)
         auth_credentials = {"Authorization": f"Bearer {token}"}
 
-        if self._auth_headers is None:
-            self._auth_headers = {}
-        self._auth_headers.update(auth_credentials)
+        if self.auth_headers is None:
+            self.auth_headers = {}
+        self.auth_headers.update(auth_credentials)
 
     @classmethod
     def create_for_stream(
@@ -328,9 +313,9 @@ class BasicAuthenticator(APIAuthenticatorBase):
         auth_token = base64.b64encode(credentials).decode("ascii")
         auth_credentials = {"Authorization": f"Basic {auth_token}"}
 
-        if self._auth_headers is None:
-            self._auth_headers = {}
-        self._auth_headers.update(auth_credentials)
+        if self.auth_headers is None:
+            self.auth_headers = {}
+        self.auth_headers.update(auth_credentials)
 
     @classmethod
     def create_for_stream(
@@ -382,23 +367,26 @@ class OAuthAuthenticator(APIAuthenticatorBase):
         # Initialize internal tracking attributes
         self.access_token: str | None = None
         self.refresh_token: str | None = None
-        self.last_refreshed: DateTime | None = None
+        self.last_refreshed: datetime.datetime | None = None
         self.expires_in: int | None = None
 
-    @property
-    def auth_headers(self) -> dict:
-        """Return a dictionary of auth headers to be applied.
+    def authenticate_request(
+        self,
+        request: requests.PreparedRequest,
+    ) -> requests.PreparedRequest:
+        """Authenticate an OAuth request.
 
-        These will be merged with any `http_headers` specified in the stream.
+        Args:
+            request: A :class:`requests.PreparedRequest` object.
 
         Returns:
-            HTTP headers for authentication.
+            The authenticated request object.
         """
         if not self.is_token_valid():
             self.update_access_token()
-        result = super().auth_headers
-        result["Authorization"] = f"Bearer {self.access_token}"
-        return result
+
+        self.auth_headers["Authorization"] = f"Bearer {self.access_token}"
+        return super().authenticate_request(request)
 
     @property
     def auth_endpoint(self) -> str:
@@ -558,7 +546,7 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             "iss": self.client_id,
             "scope": self.oauth_scopes,
             "aud": self.auth_endpoint,
-            "exp": math.floor((request_time + timedelta(hours=1)).timestamp()),
+            "exp": math.floor((request_time + datetime.timedelta(hours=1)).timestamp()),
             "iat": math.floor(request_time.timestamp()),
         }
 
@@ -570,13 +558,18 @@ class OAuthJWTAuthenticator(OAuthAuthenticator):
             Payload object for OAuth.
 
         Raises:
+            RuntimeError: If the JWT dependencies are not installed.
             ValueError: If the private key is not set.
         """
-        import jwt  # noqa: PLC0415
-        from cryptography.hazmat.backends import default_backend  # noqa: PLC0415
-        from cryptography.hazmat.primitives import serialization  # noqa: PLC0415
+        try:
+            import jwt  # noqa: PLC0415
+            from cryptography.hazmat.backends import default_backend  # noqa: PLC0415
+            from cryptography.hazmat.primitives import serialization  # noqa: PLC0415
+        except ModuleNotFoundError as ex:  # pragma: no cover
+            msg = "Install singer-sdk[jwt] to use OAuthJWTAuthenticator."
+            raise RuntimeError(msg) from ex
 
-        if not self.private_key:
+        if not self.private_key:  # pragma: no cover
             msg = "Missing 'private_key' property for OAuth payload."
             raise ValueError(msg)
 

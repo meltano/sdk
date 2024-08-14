@@ -246,7 +246,7 @@ class DeprecatedEnum(Enum):
 class DeprecatedEnumMeta(EnumMeta):
     """Metaclass for enumeration with deprecation support."""
 
-    def __getitem__(self, name: str) -> t.Any:  # noqa: ANN401
+    def __getitem__(cls, name: str) -> t.Any:  # noqa: ANN401
         """Retrieve mapping item.
 
         Args:
@@ -260,7 +260,7 @@ class DeprecatedEnumMeta(EnumMeta):
             obj.emit_warning()
         return obj
 
-    def __getattribute__(cls, name: str) -> t.Any:  # noqa: ANN401, N805
+    def __getattribute__(cls, name: str) -> t.Any:  # noqa: ANN401
         """Retrieve enum attribute.
 
         Args:
@@ -274,7 +274,7 @@ class DeprecatedEnumMeta(EnumMeta):
             obj.emit_warning()
         return obj
 
-    def __call__(self, *args: t.Any, **kwargs: t.Any) -> t.Any:  # noqa: ANN401
+    def __call__(cls, *args: t.Any, **kwargs: t.Any) -> t.Any:  # noqa: ANN401
         """Call enum member.
 
         Args:

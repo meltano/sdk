@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import datetime
 import logging
 import typing as t
 
-import pendulum
 import pytest
 import requests
 
@@ -14,6 +14,7 @@ from singer_sdk.exceptions import (
     InvalidReplicationKeyException,
 )
 from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._compat import datetime_fromisoformat as parse
 from singer_sdk.helpers.jsonpath import _compile_jsonpath, extract_jsonpath
 from singer_sdk.pagination import first
 from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMENTAL
@@ -22,11 +23,11 @@ from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 from tests.core.conftest import SimpleTestStream
 
-CONFIG_START_DATE = "2021-01-01"
-
 if t.TYPE_CHECKING:
     from singer_sdk import Stream, Tap
     from tests.core.conftest import SimpleTestTap
+
+CONFIG_START_DATE = "2021-01-01"
 
 
 class RestTestStream(RESTStream):
@@ -116,14 +117,14 @@ def test_stream_apply_catalog(stream: Stream):
             "test",
             None,
             None,
-            pendulum.parse(CONFIG_START_DATE),
+            parse(CONFIG_START_DATE).replace(tzinfo=datetime.timezone.utc),
             id="datetime-repl-key-no-state",
         ),
         pytest.param(
             "test",
             None,
             "2021-02-01",
-            pendulum.datetime(2021, 2, 1),
+            datetime.datetime(2021, 2, 1, tzinfo=datetime.timezone.utc),
             id="datetime-repl-key-recent-bookmark",
         ),
         pytest.param(
@@ -137,7 +138,7 @@ def test_stream_apply_catalog(stream: Stream):
             "test",
             None,
             "2020-01-01",
-            pendulum.parse(CONFIG_START_DATE),
+            parse(CONFIG_START_DATE).replace(tzinfo=datetime.timezone.utc),
             id="datetime-repl-key-old-bookmark",
         ),
         pytest.param(
@@ -179,7 +180,7 @@ def test_stream_apply_catalog(stream: Stream):
             "unix_ts_override",
             None,
             "1577858400",
-            pendulum.parse(CONFIG_START_DATE).format("X"),
+            parse(CONFIG_START_DATE).timestamp(),
             id="unix-ts-repl-key-old-bookmark",
         ),
     ],

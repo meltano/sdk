@@ -187,6 +187,7 @@ In general, PR titles should follow the format `<type>: <desc>`, where type is a
 - `docs`
 - `feat`
 - `fix`
+- `packaging`
 - `perf`
 - `refactor`
 - `revert`

@@ -121,8 +121,8 @@ def test_validate_fastjsonschema():
 
 
 @pytest.fixture
-def draft7_sink_stop():
-    """Return a sink object with Draft7 checks enabled."""
+def default_draft_sink_stop():
+    """Return a sink object with the default draft checks enabled."""
 
     class CustomSink(BatchSinkMock):
         """Custom sink class."""
@@ -147,8 +147,8 @@ def draft7_sink_stop():
 
 
 @pytest.fixture
-def draft7_sink_continue():
-    """Return a sink object with Draft7 checks enabled."""
+def default_draft_sink_continue():
+    """Return a sink object with the default draft checks enabled."""
 
     class CustomSink(BatchSinkMock):
         """Custom sink class."""
@@ -174,9 +174,9 @@ def draft7_sink_continue():
 
 
 def test_validate_record_jsonschema_format_checking_enabled_stop_on_error(
-    draft7_sink_stop,
+    default_draft_sink_stop,
 ):
-    sink: BatchSinkMock = draft7_sink_stop
+    sink: BatchSinkMock = default_draft_sink_stop
 
     record = {
         "id": 1,
@@ -195,9 +195,9 @@ def test_validate_record_jsonschema_format_checking_enabled_stop_on_error(
 
 def test_validate_record_jsonschema_format_checking_enabled_continue_on_error(
     capsys: pytest.CaptureFixture,
-    draft7_sink_continue,
+    default_draft_sink_continue,
 ):
-    sink: BatchSinkMock = draft7_sink_continue
+    sink: BatchSinkMock = default_draft_sink_continue
 
     record = {
         "id": 1,
