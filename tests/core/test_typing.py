@@ -294,7 +294,7 @@ def test_conform_primitives():
     )
     assert (
         _conform_primitive_property(datetime.date(2020, 5, 17), {"type": "string"})
-        == "2020-05-17T00:00:00+00:00"
+        == "2020-05-17"
     )
     assert (
         _conform_primitive_property(datetime.timedelta(365), {"type": "string"})

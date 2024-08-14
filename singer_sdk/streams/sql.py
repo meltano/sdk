@@ -11,10 +11,11 @@ import sqlalchemy as sa
 import singer_sdk.helpers._catalog as catalog
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping
 from singer_sdk.connectors import SQLConnector
-from singer_sdk.streams.core import Stream
+from singer_sdk.streams.core import REPLICATION_INCREMENTAL, Stream
 
 if t.TYPE_CHECKING:
-    from singer_sdk.streams.core import Context
+    from singer_sdk.connectors.sql import FullyQualifiedName
+    from singer_sdk.helpers.types import Context
     from singer_sdk.tap_base import Tap
 
 
@@ -124,7 +125,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         self._singer_catalog_entry.metadata.root.table_key_properties = new_value
 
     @property
-    def fully_qualified_name(self) -> str:
+    def fully_qualified_name(self) -> FullyQualifiedName:
         """Generate the fully qualified version of the table name.
 
         Raises:
@@ -227,7 +228,7 @@ class SQLStream(Stream, metaclass=abc.ABCMeta):
         Returns:
             `True` if stream is sorted. Defaults to `False`.
         """
-        return self.replication_key is not None
+        return self.replication_method == REPLICATION_INCREMENTAL
 
 
 __all__ = ["SQLConnector", "SQLStream"]

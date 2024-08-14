@@ -7,8 +7,11 @@ from unittest import mock
 import pytest
 import sqlalchemy as sa
 from sqlalchemy.dialects import registry, sqlite
+from sqlalchemy.engine.default import DefaultDialect
 
+from samples.sample_duckdb import DuckDBConnector
 from singer_sdk.connectors import SQLConnector
+from singer_sdk.connectors.sql import FullyQualifiedName
 from singer_sdk.exceptions import ConfigValidationError
 
 if t.TYPE_CHECKING:
@@ -289,25 +292,6 @@ class TestConnectorSQL:  # noqa: PLR0904
             ]
 
 
-class DuckDBConnector(SQLConnector):
-    allow_column_alter = True
-
-    @staticmethod
-    def get_column_alter_ddl(
-        table_name: str,
-        column_name: str,
-        column_type: sa.types.TypeEngine,
-    ) -> sa.DDL:
-        return sa.DDL(
-            "ALTER TABLE %(table_name)s ALTER COLUMN %(column_name)s TYPE %(column_type)s",  # noqa: E501
-            {
-                "table_name": table_name,
-                "column_name": column_name,
-                "column_type": column_type,
-            },
-        )
-
-
 class TestDuckDBConnector:
     @pytest.fixture
     def connector(self):
@@ -317,7 +301,7 @@ class TestDuckDBConnector:
         engine = connector._engine
         connector.create_schema("test_schema")
         inspector = sa.inspect(engine)
-        assert "test_schema" in inspector.get_schema_names()
+        assert "memory.test_schema" in inspector.get_schema_names()
 
     def test_column_rename(self, connector: DuckDBConnector):
         engine = connector._engine
@@ -373,3 +357,38 @@ def test_adapter_without_json_serde():
 
     connector = CustomConnector(config={"sqlalchemy_url": "myrdbms:///"})
     connector.create_engine()
+
+
+def test_fully_qualified_name():
+    fqn = FullyQualifiedName(table="my_table")
+    assert fqn == "my_table"
+
+    fqn = FullyQualifiedName(schema="my_schema", table="my_table")
+    assert fqn == "my_schema.my_table"
+
+    fqn = FullyQualifiedName(
+        database="my_catalog",
+        schema="my_schema",
+        table="my_table",
+    )
+    assert fqn == "my_catalog.my_schema.my_table"
+
+
+def test_fully_qualified_name_with_quoting():
+    class QuotedFullyQualifiedName(FullyQualifiedName):
+        def __init__(self, *, dialect: sa.engine.Dialect, **kwargs: t.Any):
+            self.dialect = dialect
+            super().__init__(**kwargs)
+
+        def prepare_part(self, part: str) -> str:
+            return self.dialect.identifier_preparer.quote(part)
+
+    dialect = DefaultDialect()
+
+    fqn = QuotedFullyQualifiedName(table="order", schema="public", dialect=dialect)
+    assert fqn == 'public."order"'
+
+
+def test_fully_qualified_name_empty_error():
+    with pytest.raises(ValueError, match="Could not generate fully qualified name"):
+        FullyQualifiedName()

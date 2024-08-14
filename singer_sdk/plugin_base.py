@@ -13,7 +13,6 @@ from pathlib import Path, PurePath
 from types import MappingProxyType
 
 import click
-from jsonschema import Draft7Validator
 
 from singer_sdk import about, metrics
 from singer_sdk.cli import plugin_cli
@@ -32,11 +31,14 @@ from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
 )
 from singer_sdk.mapper import PluginMapper
-from singer_sdk.typing import extend_validator_with_defaults
+from singer_sdk.typing import (
+    DEFAULT_JSONSCHEMA_VALIDATOR,
+    extend_validator_with_defaults,
+)
 
 SDK_PACKAGE_NAME = "singer_sdk"
 
-JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
+JSONSchemaValidator = extend_validator_with_defaults(DEFAULT_JSONSCHEMA_VALIDATOR)
 
 
 class MapperNotInitialized(Exception):
@@ -162,7 +164,10 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             if self._is_secret_config(k):
                 config_dict[k] = SecretString(v)
         self._config = config_dict
-        metrics._setup_logging(self.config)  # noqa: SLF001
+        metrics._setup_logging(  # noqa: SLF001
+            self.config,
+            package=self.__module__.split(".", maxsplit=1)[0],
+        )
         self.metrics_logger = metrics.get_metrics_logger()
 
         self._validate_config(raise_errors=validate_config)
@@ -227,6 +232,10 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         ]
 
     @classproperty
+    def _env_var_prefix(cls) -> str:  # noqa: N805
+        return f"{cls.name.upper().replace('-', '_')}_"
+
+    @classproperty
     def _env_var_config(cls) -> dict[str, t.Any]:  # noqa: N805
         """Return any config specified in environment variables.
 
@@ -236,11 +245,10 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             Dictionary of configuration parsed from the environment.
         """
-        plugin_env_prefix = f"{cls.name.upper().replace('-', '_')}_"
         config_jsonschema = cls.config_jsonschema
         cls.append_builtin_config(config_jsonschema)
 
-        return parse_environment_config(config_jsonschema, plugin_env_prefix)
+        return parse_environment_config(config_jsonschema, cls._env_var_prefix)
 
     # Core plugin metadata:
 
@@ -425,6 +433,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             supported_python_versions=cls.get_supported_python_versions(),
             capabilities=cls.capabilities,
             settings=config_jsonschema,
+            env_var_prefix=cls._env_var_prefix,
         )
 
     @classmethod

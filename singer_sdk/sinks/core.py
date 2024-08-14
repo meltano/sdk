@@ -6,7 +6,6 @@ import abc
 import copy
 import datetime
 import importlib.util
-import json
 import time
 import typing as t
 from functools import cached_property
@@ -15,8 +14,11 @@ from gzip import open as gzip_open
 from types import MappingProxyType
 
 import jsonschema
+import jsonschema.validators
 from typing_extensions import override
 
+from singer_sdk import metrics
+from singer_sdk._singerlib.json import deserialize_json
 from singer_sdk.exceptions import (
     InvalidJSONSchema,
     InvalidRecord,
@@ -38,6 +40,7 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
     handle_invalid_timestamp_in_record,
 )
+from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
 
 if t.TYPE_CHECKING:
     from logging import Logger
@@ -88,7 +91,10 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
         Raises:
             InvalidJSONSchema: If the schema provided from tap or mapper is invalid.
         """
-        jsonschema_validator = jsonschema.Draft7Validator
+        jsonschema_validator = jsonschema.validators.validator_for(
+            schema,
+            DEFAULT_JSONSCHEMA_VALIDATOR,
+        )
 
         super().__init__(schema)
         if validate_formats:
@@ -188,6 +194,31 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         )
 
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
+        self._record_counter: metrics.Counter = metrics.record_counter(self.stream_name)
+        self._batch_timer = metrics.Timer(
+            metrics.Metric.BATCH_PROCESSING_TIME,
+            tags={
+                metrics.Tag.STREAM: self.stream_name,
+            },
+        )
+
+    @property
+    def record_counter_metric(self) -> metrics.Counter:
+        """Get the record counter for this sink.
+
+        Returns:
+            The Meter instance for the record counter.
+        """
+        return self._record_counter
+
+    @property
+    def batch_processing_timer(self) -> metrics.Timer:
+        """Get the batch processing timer for this sink.
+
+        Returns:
+            The Meter instance for the batch processing timer.
+        """
+        return self._batch_timer
 
     @cached_property
     def validate_schema(self) -> bool:
@@ -495,9 +526,9 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             try:
                 self._validator.validate(record)
             except InvalidRecord:
+                self.logger.exception("Record validation failed")
                 if self.fail_on_record_validation_exception:
                     raise
-                self.logger.exception("Record validation failed")
 
         self._parse_timestamps_in_record(
             record=record,
@@ -680,6 +711,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         should not be relied on, it's recommended to use a uuid as well.
         """
         self.logger.info("Cleaning up %s", self.stream_name)
+        self.record_counter_metric.exit()
 
     def process_batch_files(
         self,
@@ -714,7 +746,9 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     context_file = (
                         gzip_open(file) if encoding.compression == "gzip" else file
                     )
-                    context = {"records": [json.loads(line) for line in context_file]}  # type: ignore[attr-defined]
+                    context = {
+                        "records": [deserialize_json(line) for line in context_file]  # type: ignore[attr-defined]
+                    }
                     self.process_batch(context)
             elif (
                 importlib.util.find_spec("pyarrow")

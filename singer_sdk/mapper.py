@@ -12,6 +12,7 @@ import datetime
 import fnmatch
 import hashlib
 import importlib.util
+import json
 import logging
 import typing as t
 
@@ -306,6 +307,7 @@ class CustomStreamMap(StreamMap):
         funcs["md5"] = md5
         funcs["datetime"] = datetime
         funcs["bool"] = bool
+        funcs["json"] = json
         return funcs
 
     def _eval(
@@ -335,7 +337,10 @@ class CustomStreamMap(StreamMap):
         names["config"] = self.map_config  # Allow map config access within transform
 
         if self.fake:
+            from faker import Faker  # noqa: PLC0415
+
             names["fake"] = self.fake
+            names["Faker"] = Faker
 
         if property_name and property_name in record:
             # Allow access to original property value if applicable
