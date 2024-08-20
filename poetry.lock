@@ -129,17 +129,17 @@ lxml = ["lxml"]
 
 [[package]]
 name = "boto3"
-version = "1.34.157"
+version = "1.35.2"
 description = "The AWS SDK for Python"
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "boto3-1.34.157-py3-none-any.whl", hash = "sha256:3cc357156df5482154a016f138d1953061a181b4c594f8b6302c9d6c024bd950"},
-    {file = "boto3-1.34.157.tar.gz", hash = "sha256:7ef19ed38cba9863b58430fb4a66a72a5c250304f234bd1c16b860f9bf25677b"},
+    {file = "boto3-1.35.2-py3-none-any.whl", hash = "sha256:c2f0837a259002489e59d1c30008791e3b3bb59e30e48c64e1d2d270147a4549"},
+    {file = "boto3-1.35.2.tar.gz", hash = "sha256:cbf197ce28f04bc1ffa1db0aa26a1903d9bfa57a490f70537932e84367cdd15b"},
 ]
 
 [package.dependencies]
-botocore = ">=1.34.157,<1.35.0"
+botocore = ">=1.35.2,<1.36.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.10.0,<0.11.0"
 
@@ -148,13 +148,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.34.157"
+version = "1.35.2"
 description = "Low-level, data-driven core of boto 3."
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "botocore-1.34.157-py3-none-any.whl", hash = "sha256:c6cba6de8eb86ca4d2f934e009b37adbe1e7fdcfa52fbab74783f4c30676e07d"},
-    {file = "botocore-1.34.157.tar.gz", hash = "sha256:5628a36cec123cdc8c1158d05a7b06aa5e53649ad73796c50ef3fb51199785fb"},
+    {file = "botocore-1.35.2-py3-none-any.whl", hash = "sha256:92b168d8be79055bb25754aa34d699866d8aa66abc69f8ce99b0c191bd9c6e70"},
+    {file = "botocore-1.35.2.tar.gz", hash = "sha256:96c8eb6f0baed623a1b57ca9f24cb21d5508872cf0dfebb55527a85b6dbc76ba"},
 ]
 
 [package.dependencies]
@@ -831,13 +831,13 @@ files = [
 
 [[package]]
 name = "importlib-metadata"
-version = "8.2.0"
+version = "8.4.0"
 description = "Read metadata from Python packages"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "importlib_metadata-8.2.0-py3-none-any.whl", hash = "sha256:11901fa0c2f97919b288679932bb64febaeacf289d18ac84dd68cb2e74213369"},
-    {file = "importlib_metadata-8.2.0.tar.gz", hash = "sha256:72e8d4399996132204f9a16dcc751af254a48f8d1b20b9ff0f98d4a8f901e73d"},
+    {file = "importlib_metadata-8.4.0-py3-none-any.whl", hash = "sha256:66f342cc6ac9818fc6ff340576acd24d65ba0b3efabb2b4ac08b598965a4a2f1"},
+    {file = "importlib_metadata-8.4.0.tar.gz", hash = "sha256:9a547d3bc3608b025f93d403fdd1aae741c24fbb8314df4b155675742ce303c5"},
 ]
 
 [package.dependencies]
@@ -1806,19 +1806,19 @@ crt = ["botocore[crt] (>=1.33.2,<2.0a.0)"]
 
 [[package]]
 name = "setuptools"
-version = "72.1.0"
+version = "73.0.1"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "setuptools-72.1.0-py3-none-any.whl", hash = "sha256:5a03e1860cf56bb6ef48ce186b0e557fdba433237481a9a625176c2831be15d1"},
-    {file = "setuptools-72.1.0.tar.gz", hash = "sha256:8d243eff56d095e5817f796ede6ae32941278f542e0f941867cc05ae52b162ec"},
+    {file = "setuptools-73.0.1-py3-none-any.whl", hash = "sha256:b208925fcb9f7af924ed2dc04708ea89791e24bde0d3020b27df0e116088b34e"},
+    {file = "setuptools-73.0.1.tar.gz", hash = "sha256:d59a3e788ab7e012ab2c4baed1b376da6366883ee20d7a5fc426816e3d7b1193"},
 ]
 
 [package.extras]
-core = ["importlib-metadata (>=6)", "importlib-resources (>=5.10.2)", "jaraco.text (>=3.7)", "more-itertools (>=8.8)", "ordered-set (>=3.1.1)", "packaging (>=24)", "platformdirs (>=2.6.2)", "tomli (>=2.0.1)", "wheel (>=0.43.0)"]
-doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "pygments-github-lexers (==0.0.5)", "pyproject-hooks (!=1.1)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-favicon", "sphinx-inline-tabs", "sphinx-lint", "sphinx-notfound-page (>=1,<2)", "sphinx-reredirects", "sphinxcontrib-towncrier"]
-test = ["build[virtualenv] (>=1.0.3)", "filelock (>=3.4.0)", "importlib-metadata", "ini2toml[lite] (>=0.14)", "jaraco.develop (>=7.21)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "jaraco.test", "mypy (==1.11.*)", "packaging (>=23.2)", "pip (>=19.1)", "pyproject-hooks (!=1.1)", "pytest (>=6,!=8.1.*)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-home (>=0.5)", "pytest-mypy", "pytest-perf", "pytest-ruff (<0.4)", "pytest-ruff (>=0.2.1)", "pytest-ruff (>=0.3.2)", "pytest-subprocess", "pytest-timeout", "pytest-xdist (>=3)", "tomli", "tomli-w (>=1.0.0)", "virtualenv (>=13.0.0)", "wheel"]
+core = ["importlib-metadata (>=6)", "importlib-resources (>=5.10.2)", "jaraco.text (>=3.7)", "more-itertools (>=8.8)", "packaging (>=24)", "platformdirs (>=2.6.2)", "tomli (>=2.0.1)", "wheel (>=0.43.0)"]
+doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "pygments-github-lexers (==0.0.5)", "pyproject-hooks (!=1.1)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-favicon", "sphinx-inline-tabs", "sphinx-lint", "sphinx-notfound-page (>=1,<2)", "sphinx-reredirects", "sphinxcontrib-towncrier", "towncrier (<24.7)"]
+test = ["build[virtualenv] (>=1.0.3)", "filelock (>=3.4.0)", "importlib-metadata", "ini2toml[lite] (>=0.14)", "jaraco.develop (>=7.21)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "jaraco.test", "mypy (==1.11.*)", "packaging (>=23.2)", "pip (>=19.1)", "pyproject-hooks (!=1.1)", "pytest (>=6,!=8.1.*)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-home (>=0.5)", "pytest-mypy", "pytest-perf", "pytest-ruff (<0.4)", "pytest-ruff (>=0.2.1)", "pytest-ruff (>=0.3.2)", "pytest-subprocess", "pytest-timeout", "pytest-xdist (>=3)", "tomli", "tomli-w (>=1.0.0)", "virtualenv (>=13.0.0)", "wheel (>=0.44.0)"]
 
 [[package]]
 name = "simpleeval"
@@ -1974,13 +1974,13 @@ files = [
 
 [[package]]
 name = "soupsieve"
-version = "2.5"
+version = "2.6"
 description = "A modern CSS selector implementation for Beautiful Soup."
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "soupsieve-2.5-py3-none-any.whl", hash = "sha256:eaa337ff55a1579b6549dc679565eac1e3d000563bcb1c8ab0d0fefbc0c2cdc7"},
-    {file = "soupsieve-2.5.tar.gz", hash = "sha256:5663d5a7b3bfaeee0bc4372e7fc48f9cff4940b3eec54a6451cc5299f1097690"},
+    {file = "soupsieve-2.6-py3-none-any.whl", hash = "sha256:e72c4ff06e4fb6e4b5a9f0f55fe6e81514581fca1515028625d0f299c602ccc9"},
+    {file = "soupsieve-2.6.tar.gz", hash = "sha256:e2e68417777af359ec65daac1057404a3c8a5455bb8abc36f1a9866ab1a51abb"},
 ]
 
 [[package]]
@@ -2476,36 +2476,40 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "xdoctest"
-version = "1.1.6"
+version = "1.2.0"
 description = "A rewrite of the builtin doctest module"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.8"
 files = [
-    {file = "xdoctest-1.1.6-py3-none-any.whl", hash = "sha256:a6f673df8c82b8fe0adc536f14c523464f25c6d2b733ed78888b8f8d6c46012e"},
-    {file = "xdoctest-1.1.6.tar.gz", hash = "sha256:00ec7bde36addbedf5d1db0db57b6b669a7a4b29ad2d16480950556644f02109"},
+    {file = "xdoctest-1.2.0-py3-none-any.whl", hash = "sha256:0f1ecf5939a687bd1fc8deefbff1743c65419cce26dff908f8b84c93fbe486bc"},
+    {file = "xdoctest-1.2.0.tar.gz", hash = "sha256:d8cfca6d8991e488d33f756e600d35b9fdf5efd5c3a249d644efcbbbd2ed5863"},
 ]
 
 [package.extras]
-all = ["IPython (>=7.10.0)", "IPython (>=7.23.1)", "Pygments (>=2.0.0)", "Pygments (>=2.4.1)", "attrs (>=19.2.0)", "colorama (>=0.4.1)", "debugpy (>=1.0.0)", "debugpy (>=1.0.0)", "debugpy (>=1.0.0)", "debugpy (>=1.3.0)", "debugpy (>=1.6.0)", "ipykernel (>=5.2.0)", "ipykernel (>=6.0.0)", "ipykernel (>=6.11.0)", "ipython-genutils (>=0.2.0)", "jedi (>=0.16)", "jinja2 (>=3.0.0)", "jupyter-client (>=6.1.5)", "jupyter-client (>=7.0.0)", "jupyter-core (>=4.7.0)", "nbconvert (>=6.0.0)", "nbconvert (>=6.1.0)", "pyflakes (>=2.2.0)", "pytest (>=4.6.0)", "pytest (>=4.6.0)", "pytest (>=6.2.5)", "pytest-cov (>=3.0.0)", "tomli (>=0.2.0)", "typing (>=3.7.4)"]
-all-strict = ["IPython (==7.10.0)", "IPython (==7.23.1)", "Pygments (==2.0.0)", "Pygments (==2.4.1)", "attrs (==19.2.0)", "colorama (==0.4.1)", "debugpy (==1.0.0)", "debugpy (==1.0.0)", "debugpy (==1.0.0)", "debugpy (==1.3.0)", "debugpy (==1.6.0)", "ipykernel (==5.2.0)", "ipykernel (==6.0.0)", "ipykernel (==6.11.0)", "ipython-genutils (==0.2.0)", "jedi (==0.16)", "jinja2 (==3.0.0)", "jupyter-client (==6.1.5)", "jupyter-client (==7.0.0)", "jupyter-core (==4.7.0)", "nbconvert (==6.0.0)", "nbconvert (==6.1.0)", "pyflakes (==2.2.0)", "pytest (==4.6.0)", "pytest (==4.6.0)", "pytest (==6.2.5)", "pytest-cov (==3.0.0)", "tomli (==0.2.0)", "typing (==3.7.4)"]
-colors = ["Pygments", "Pygments", "colorama"]
-jupyter = ["IPython", "IPython", "attrs", "debugpy", "debugpy", "debugpy", "debugpy", "debugpy", "ipykernel", "ipykernel", "ipykernel", "ipython-genutils", "jedi", "jinja2", "jupyter-client", "jupyter-client", "jupyter-core", "nbconvert", "nbconvert"]
-optional = ["IPython (>=7.10.0)", "IPython (>=7.23.1)", "Pygments (>=2.0.0)", "Pygments (>=2.4.1)", "attrs (>=19.2.0)", "colorama (>=0.4.1)", "debugpy (>=1.0.0)", "debugpy (>=1.0.0)", "debugpy (>=1.0.0)", "debugpy (>=1.3.0)", "debugpy (>=1.6.0)", "ipykernel (>=5.2.0)", "ipykernel (>=6.0.0)", "ipykernel (>=6.11.0)", "ipython-genutils (>=0.2.0)", "jedi (>=0.16)", "jinja2 (>=3.0.0)", "jupyter-client (>=6.1.5)", "jupyter-client (>=7.0.0)", "jupyter-core (>=4.7.0)", "nbconvert (>=6.0.0)", "nbconvert (>=6.1.0)", "pyflakes (>=2.2.0)", "tomli (>=0.2.0)"]
-optional-strict = ["IPython (==7.10.0)", "IPython (==7.23.1)", "Pygments (==2.0.0)", "Pygments (==2.4.1)", "attrs (==19.2.0)", "colorama (==0.4.1)", "debugpy (==1.0.0)", "debugpy (==1.0.0)", "debugpy (==1.0.0)", "debugpy (==1.3.0)", "debugpy (==1.6.0)", "ipykernel (==5.2.0)", "ipykernel (==6.0.0)", "ipykernel (==6.11.0)", "ipython-genutils (==0.2.0)", "jedi (==0.16)", "jinja2 (==3.0.0)", "jupyter-client (==6.1.5)", "jupyter-client (==7.0.0)", "jupyter-core (==4.7.0)", "nbconvert (==6.0.0)", "nbconvert (==6.1.0)", "pyflakes (==2.2.0)", "tomli (==0.2.0)"]
-tests = ["pytest (>=4.6.0)", "pytest (>=4.6.0)", "pytest (>=6.2.5)", "pytest-cov (>=3.0.0)", "typing (>=3.7.4)"]
-tests-binary = ["cmake", "cmake", "ninja", "ninja", "pybind11", "pybind11", "scikit-build", "scikit-build"]
+all = ["IPython (>=7.23.1)", "Pygments (>=2.0.0)", "Pygments (>=2.4.1)", "attrs (>=19.2.0)", "colorama (>=0.4.1)", "debugpy (>=1.0.0)", "debugpy (>=1.3.0)", "debugpy (>=1.6.0)", "ipykernel (>=6.0.0)", "ipykernel (>=6.11.0)", "ipython-genutils (>=0.2.0)", "jedi (>=0.16)", "jinja2 (>=3.0.0)", "jupyter-client (>=7.0.0)", "jupyter-core (>=4.7.0)", "nbconvert (>=6.0.0)", "nbconvert (>=6.1.0)", "pyflakes (>=2.2.0)", "pytest (>=4.6.0)", "pytest (>=6.2.5)", "pytest-cov (>=3.0.0)", "tomli (>=0.2.0)"]
+all-strict = ["IPython (==7.23.1)", "Pygments (==2.0.0)", "Pygments (==2.4.1)", "attrs (==19.2.0)", "colorama (==0.4.1)", "debugpy (==1.0.0)", "debugpy (==1.3.0)", "debugpy (==1.6.0)", "ipykernel (==6.0.0)", "ipykernel (==6.11.0)", "ipython-genutils (==0.2.0)", "jedi (==0.16)", "jinja2 (==3.0.0)", "jupyter-client (==7.0.0)", "jupyter-core (==4.7.0)", "nbconvert (==6.0.0)", "nbconvert (==6.1.0)", "pyflakes (==2.2.0)", "pytest (==4.6.0)", "pytest (==6.2.5)", "pytest-cov (==3.0.0)", "tomli (==0.2.0)"]
+colors = ["Pygments (>=2.0.0)", "Pygments (>=2.4.1)", "colorama (>=0.4.1)"]
+colors-strict = ["Pygments (==2.0.0)", "Pygments (==2.4.1)", "colorama (==0.4.1)"]
+docs = ["Pygments (>=2.9.0)", "myst-parser (>=0.18.0)", "sphinx (>=5.0.1)", "sphinx-autoapi (>=1.8.4)", "sphinx-autobuild (>=2021.3.14)", "sphinx-reredirects (>=0.0.1)", "sphinx-rtd-theme (>=1.0.0)", "sphinxcontrib-napoleon (>=0.7)"]
+docs-strict = ["Pygments (==2.9.0)", "myst-parser (==0.18.0)", "sphinx (==5.0.1)", "sphinx-autoapi (==1.8.4)", "sphinx-autobuild (==2021.3.14)", "sphinx-reredirects (==0.0.1)", "sphinx-rtd-theme (==1.0.0)", "sphinxcontrib-napoleon (==0.7)"]
+jupyter = ["IPython (>=7.23.1)", "attrs (>=19.2.0)", "debugpy (>=1.0.0)", "debugpy (>=1.3.0)", "debugpy (>=1.6.0)", "ipykernel (>=6.0.0)", "ipykernel (>=6.11.0)", "ipython-genutils (>=0.2.0)", "jedi (>=0.16)", "jinja2 (>=3.0.0)", "jupyter-client (>=7.0.0)", "jupyter-core (>=4.7.0)", "nbconvert (>=6.0.0)", "nbconvert (>=6.1.0)"]
+jupyter-strict = ["IPython (==7.23.1)", "attrs (==19.2.0)", "debugpy (==1.0.0)", "debugpy (==1.3.0)", "debugpy (==1.6.0)", "ipykernel (==6.0.0)", "ipykernel (==6.11.0)", "ipython-genutils (==0.2.0)", "jedi (==0.16)", "jinja2 (==3.0.0)", "jupyter-client (==7.0.0)", "jupyter-core (==4.7.0)", "nbconvert (==6.0.0)", "nbconvert (==6.1.0)"]
+optional = ["IPython (>=7.23.1)", "Pygments (>=2.0.0)", "Pygments (>=2.4.1)", "attrs (>=19.2.0)", "colorama (>=0.4.1)", "debugpy (>=1.0.0)", "debugpy (>=1.3.0)", "debugpy (>=1.6.0)", "ipykernel (>=6.0.0)", "ipykernel (>=6.11.0)", "ipython-genutils (>=0.2.0)", "jedi (>=0.16)", "jinja2 (>=3.0.0)", "jupyter-client (>=7.0.0)", "jupyter-core (>=4.7.0)", "nbconvert (>=6.0.0)", "nbconvert (>=6.1.0)", "pyflakes (>=2.2.0)", "tomli (>=0.2.0)"]
+optional-strict = ["IPython (==7.23.1)", "Pygments (==2.0.0)", "Pygments (==2.4.1)", "attrs (==19.2.0)", "colorama (==0.4.1)", "debugpy (==1.0.0)", "debugpy (==1.3.0)", "debugpy (==1.6.0)", "ipykernel (==6.0.0)", "ipykernel (==6.11.0)", "ipython-genutils (==0.2.0)", "jedi (==0.16)", "jinja2 (==3.0.0)", "jupyter-client (==7.0.0)", "jupyter-core (==4.7.0)", "nbconvert (==6.0.0)", "nbconvert (==6.1.0)", "pyflakes (==2.2.0)", "tomli (==0.2.0)"]
+tests = ["pytest (>=4.6.0)", "pytest (>=6.2.5)", "pytest-cov (>=3.0.0)"]
+tests-binary = ["cmake (>=3.21.2)", "cmake (>=3.25.0)", "ninja (>=1.10.2)", "ninja (>=1.11.1)", "pybind11 (>=2.10.3)", "pybind11 (>=2.7.1)", "scikit-build (>=0.11.1)", "scikit-build (>=0.16.1)"]
 tests-binary-strict = ["cmake (==3.21.2)", "cmake (==3.25.0)", "ninja (==1.10.2)", "ninja (==1.11.1)", "pybind11 (==2.10.3)", "pybind11 (==2.7.1)", "scikit-build (==0.11.1)", "scikit-build (==0.16.1)"]
-tests-strict = ["pytest (==4.6.0)", "pytest (==4.6.0)", "pytest (==6.2.5)", "pytest-cov (==3.0.0)", "typing (==3.7.4)"]
+tests-strict = ["pytest (==4.6.0)", "pytest (==6.2.5)", "pytest-cov (==3.0.0)"]
 
 [[package]]
 name = "zipp"
-version = "3.19.2"
+version = "3.20.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "zipp-3.19.2-py3-none-any.whl", hash = "sha256:f091755f667055f2d02b32c53771a7a6c8b47e1fdbc4b72a8b9072b3eef8015c"},
-    {file = "zipp-3.19.2.tar.gz", hash = "sha256:bf1dcf6450f873a13e952a29504887c89e6de7506209e5b1bcc3460135d4de19"},
+    {file = "zipp-3.20.0-py3-none-any.whl", hash = "sha256:58da6168be89f0be59beb194da1250516fdaa062ccebd30127ac65d30045e10d"},
+    {file = "zipp-3.20.0.tar.gz", hash = "sha256:0145e43d89664cfe1a2e533adc75adafed82fe2da404b4bbb6b026c0157bdb31"},
 ]
 
 [package.extras]
