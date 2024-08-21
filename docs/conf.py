@@ -158,6 +158,10 @@ extlinks = {
         "https://json-schema.org/understanding-json-schema/reference/%s",
         "%s",
     ),
+    "column_type": (
+        "https://docs.sqlalchemy.org/en/20/core/type_basics.html#sqlalchemy.types.%s",
+        "%s",
+    ),
 }
 
 # -- Options for intersphinx -----------------------------------------------------------
