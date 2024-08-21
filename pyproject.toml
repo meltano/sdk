@@ -75,6 +75,10 @@ sphinx-reredirects = {version = ">=0.1.5", python = ">=3.9", optional = true}
 fs-s3fs = {version = ">=1.1.1", optional = true}
 
 # Parquet file dependencies installed as optional 'parquet' extras
+# We add Python constraints to force Poetry to add the latest supported Numpy version
+# for all Python versions to 'poetry.lock'. If we don't do this, Poetry will add only
+# the version of Numpy that is compatible with the earliest Python version supported
+# by this project, but that may not be compatible with the latest Python version.
 numpy = [
     { version = ">=1.22,<1.25", python = "==3.8", optional = true },
     { version = ">=1.22,<2.1", python = "==3.9", optional = true },
