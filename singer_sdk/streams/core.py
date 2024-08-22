@@ -378,7 +378,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         # Ensure datetime is timezone-aware
         if not result.tzinfo:
-            result = result.astimezone()
+            result = result.replace(tzinfo=datetime.timezone.utc)
 
         return result
 
