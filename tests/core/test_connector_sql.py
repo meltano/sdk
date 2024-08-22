@@ -11,7 +11,7 @@ from sqlalchemy.engine.default import DefaultDialect
 
 from samples.sample_duckdb import DuckDBConnector
 from singer_sdk.connectors import SQLConnector
-from singer_sdk.connectors.sql import FullyQualifiedName, SQLToJSONSchemaMap
+from singer_sdk.connectors.sql import FullyQualifiedName, SQLToJSONSchema
 from singer_sdk.exceptions import ConfigValidationError
 
 if t.TYPE_CHECKING:
@@ -446,13 +446,13 @@ def test_sql_to_json_schema_map(
     sql_type: sa.types.TypeEngine,
     expected_jsonschema_type: dict,
 ):
-    m = SQLToJSONSchemaMap()
+    m = SQLToJSONSchema()
     assert m.to_jsonschema(sql_type) == expected_jsonschema_type
 
 
 def test_custom_type():
-    class MyMap(SQLToJSONSchemaMap):
-        @SQLToJSONSchemaMap.to_jsonschema.register
+    class MyMap(SQLToJSONSchema):
+        @SQLToJSONSchema.to_jsonschema.register
         def custom_number_to_jsonschema(self, column_type: sa.types.NUMERIC) -> dict:
             """Custom number to JSON schema.
 
@@ -460,7 +460,7 @@ def test_custom_type():
             """
             return {"type": ["number"], "multipleOf": 10**-column_type.scale}
 
-        @SQLToJSONSchemaMap.to_jsonschema.register(MyType)
+        @SQLToJSONSchema.to_jsonschema.register(MyType)
         def my_type_to_jsonschema(self, column_type) -> dict:  # noqa: ARG002
             return {"type": ["string"], "contentEncoding": "base64"}
 

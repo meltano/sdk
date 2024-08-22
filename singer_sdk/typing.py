@@ -1092,7 +1092,7 @@ class PropertiesList(ObjectType):
 
 
 @deprecated(
-    "Use `SQLToJSONSchemaMap` instead.",
+    "Use `SQLToJSONSchema` instead.",
     category=DeprecationWarning,
 )
 def to_jsonschema_type(

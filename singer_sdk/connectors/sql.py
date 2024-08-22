@@ -104,7 +104,7 @@ class FullyQualifiedName(UserString):
         return part
 
 
-class SQLToJSONSchemaMap:
+class SQLToJSONSchema:
     """SQLAlchemy to JSON Schema type mapping helper.
 
     This class provides a mapping from SQLAlchemy types to JSON Schema types.
@@ -235,7 +235,7 @@ class SQLConnector:  # noqa: PLR0904
         return logging.getLogger("sqlconnector")
 
     @functools.cached_property
-    def type_mapping(self) -> SQLToJSONSchemaMap:
+    def type_mapping(self) -> SQLToJSONSchema:
         """Return the type mapper object.
 
         Override this method to provide a custom mapping for your SQL dialect.
@@ -243,7 +243,7 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             The type mapper object.
         """
-        return SQLToJSONSchemaMap()
+        return SQLToJSONSchema()
 
     @contextmanager
     def _connect(self) -> t.Iterator[sa.engine.Connection]:

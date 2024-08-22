@@ -5,7 +5,7 @@
 The Singer SDK automatically handles the most common SQLAlchemy column types, using [`functools.singledispatchmethod`](inv:python:py:class:#functools.singledispatchmethod) to process each type:
 
 ```{eval-rst}
-.. autoclass:: singer_sdk.connectors.sql.SQLToJSONSchemaMap
+.. autoclass:: singer_sdk.connectors.sql.SQLToJSONSchema
     :members:
 ```
 
@@ -19,13 +19,13 @@ import functools
 from sqlalchemy import Numeric
 from singer_sdk import typing as th
 from singer_sdk.connectors import SQLConnector
-from singer_sdk.connectors.sql import SQLToJSONSchemaMap
+from singer_sdk.connectors.sql import SQLToJSONSchema
 
 from my_sqlalchemy_dialect import VectorType
 
 
-class CustomSQLToJSONSchemaMap(SQLToJSONSchemaMap):
-    @SQLToJSONSchemaMap.to_jsonschema.register
+class CustomSQLToJSONSchema(SQLToJSONSchema):
+    @SQLToJSONSchema.to_jsonschema.register
     def custom_number_to_jsonschema(self, column_type: Numeric) -> dict:
         """Override the default mapping for NUMERIC columns.
 
@@ -33,7 +33,7 @@ class CustomSQLToJSONSchemaMap(SQLToJSONSchemaMap):
         """
         return {"type": ["number"], "multipleOf": 10**-column_type.scale}
 
-    @SQLToJSONSchemaMap.to_jsonschema.register(VectorType)
+    @SQLToJSONSchema.to_jsonschema.register(VectorType)
     def vector_to_json_schema(self, column_type):
         """Custom vector to JSON schema."""
         return th.ArrayType(items=th.NumberType())
@@ -43,7 +43,7 @@ class CustomSQLToJSONSchemaMap(SQLToJSONSchemaMap):
 You can also use a type annotation to specify the type of the column when registering a new method:
 
 ```python
-@SQLToJSONSchemaMap.to_jsonschema.register
+@SQLToJSONSchema.to_jsonschema.register
 def vector_to_json_schema(self, column_type: VectorType):
     return th.ArrayType(items=th.NumberType())
 ```
@@ -55,5 +55,5 @@ Then, you need to use your custom type mapping in your connector:
 class MyConnector(SQLConnector):
     @functools.cached_property
     def type_mapping(self):
-        return CustomSQLToJSONSchemaMap()
+        return CustomSQLToJSONSchema()
 ```
