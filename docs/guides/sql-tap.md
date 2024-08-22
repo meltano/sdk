@@ -2,12 +2,7 @@
 
 ## Default type mapping
 
-The Singer SDK automatically handles the most common SQLAlchemy column types, using [`functools.singledispatchmethod`](inv:python:py:class:#functools.singledispatchmethod) to process each type:
-
-```{eval-rst}
-.. autoclass:: singer_sdk.connectors.sql.SQLToJSONSchema
-    :members:
-```
+The Singer SDK automatically handles the most common SQLAlchemy column types, using [`functools.singledispatchmethod`](inv:python:py:class:#functools.singledispatchmethod) to process each type. See the [`SQLToJSONSchema`](connectors.sql.SQLToJSONSchema) reference documentation for details.
 
 ## Custom type mapping
 
