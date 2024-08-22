@@ -26,7 +26,7 @@ from my_sqlalchemy_dialect import VectorType
 
 class CustomSQLToJSONSchema(SQLToJSONSchema):
     @SQLToJSONSchema.to_jsonschema.register
-    def custom_number_to_jsonschema(self, column_type: Numeric) -> dict:
+    def custom_number_to_jsonschema(self, column_type: Numeric):
         """Override the default mapping for NUMERIC columns.
 
         For example, a scale of 4 translates to a multipleOf 0.0001.
