@@ -31,7 +31,7 @@ class CustomSQLToJSONSchema(SQLToJSONSchema):
     @SQLToJSONSchema.to_jsonschema.register(VectorType)
     def vector_to_json_schema(self, column_type):
         """Custom vector to JSON schema."""
-        return th.ArrayType(items=th.NumberType())
+        return th.ArrayType(th.NumberType()).to_dict()
 ```
 
 ````{tip}
@@ -40,7 +40,7 @@ You can also use a type annotation to specify the type of the column when regist
 ```python
 @SQLToJSONSchema.to_jsonschema.register
 def vector_to_json_schema(self, column_type: VectorType):
-    return th.ArrayType(items=th.NumberType())
+    return th.ArrayType(th.NumberType()).to_dict()
 ```
 ````
 
