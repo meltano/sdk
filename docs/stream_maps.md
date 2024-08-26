@@ -249,6 +249,8 @@ can be referenced directly by mapping expressions.
 - `fake` - a [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config`
   (see previous example) - see the built-in [standard providers](inv:faker:std:doc#providers)
   for available methods
+- `Faker` - the [`Faker`](inv:faker:std:doc#fakerclass) class. This was made available to enable consistent data
+  masking by allowing users to call `Faker.seed()`.
 
   ```{tip}
   The `fake` object is only available if the plugin specifies `faker` as an additional dependency (through the `singer-sdk` `faker` extra, or directly).
@@ -434,6 +436,46 @@ stream_maps:
 }
 ```
 ````
+
+### Masking data with Faker
+
+It is best practice (or even a legal requirement) to mask PII/PHI in lower environments. Stream mappers have access to the `Faker` library, which can be used to generate random data in various forms/formats.
+
+```yaml
+stream_maps:
+  customers:
+    # IMPORTANT: the `fake` variable name will only be available if faker_config is defined
+    first_name: fake.first_name() # generates a new random name each time
+faker_config:
+  # set specific seed
+  seed: 0
+  # set specific locales
+  locale:
+    - en_US
+    - en_GB
+```
+
+Be sure to checkout the [`faker` documentation](https://faker.readthedocs.io/en/master/) for all the fake data generation possibilities.
+
+Note that in the example above, `faker` will generate a new random value each time the `first_name()` function is invoked. This means if 3 records have a `first_name` value of `Mike`, then they will each have a different name after being mapped (for example, `Alistair`, `Debra`, `Scooby`).  This can actually lead to issues when developing in the lower environments.
+
+Some users require consistent masking (for example, the first name `Mike` is always masked as `Debra`). Consistent masking preserves the relationship between tables and rows, while still hiding the real value. When a random mask is generated every time, relationships between tables/rows are effectively lost, making it impossible to test things like sql `JOIN`s. This can cause highly unpredictable behavior when running the same code in lower environments vs production.
+
+To generate consistent masked values, you must provide the **same seed each time** before invoking the faker function.
+
+```yaml
+stream_maps:
+  customers:
+    # will always generate the same value for the same seed
+    first_name: Faker.seed(_['first_name']) or fake.first_name()
+faker_config:
+  # IMPORTANT: `fake` and `Faker` names are only available if faker_config is defined.
+  locale: en_US
+```
+
+Remember, these expressions are evaluated by the [`simpleval`](https://github.com/danthedeckie/simpleeval) expression library, which only allows a single python expression (which is the reason for the `or` syntax above).
+
+This means if you require more advanced masking logic, which cannot be defined in a single python expression, you may need to consider a custom stream mapper.
 
 ### Aliasing a stream using `__alias__`
 

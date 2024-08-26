@@ -365,6 +365,23 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         state = self.get_context_state(context)
         write_replication_key_signpost(state, value)
 
+    def _parse_datetime(self, value: str) -> datetime.datetime:  # noqa: PLR6301
+        """Parse a datetime string.
+
+        Args:
+            value: The datetime string.
+
+        Returns:
+            The parsed datetime, timezone-aware preferred.
+        """
+        result = datetime_fromisoformat(value)
+
+        # Ensure datetime is timezone-aware
+        if not result.tzinfo:
+            result = result.replace(tzinfo=datetime.timezone.utc)
+
+        return result
+
     def compare_start_date(self, value: str, start_date_value: str) -> str:
         """Compare a bookmark value to a start date and return the most recent value.
 
@@ -384,7 +401,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             The most recent value between the bookmark and start date.
         """
         if self.is_timestamp_replication_key:
-            return max(value, start_date_value, key=datetime_fromisoformat)
+            return max(value, start_date_value, key=self._parse_datetime)
 
         return value
 
