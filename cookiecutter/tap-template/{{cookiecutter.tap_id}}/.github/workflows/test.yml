@@ -3,7 +3,26 @@
 
 name: Test {{cookiecutter.tap_id}}
 
-on: [push]
+on:
+  push:
+    branches: [main]
+    paths:
+    - .github/workflows/test.yml
+    - {{ cookiecutter.library_name }}/**
+    - tests/**
+    - poetry.lock
+    - pyproject.toml
+    - tox.ini
+  pull_request:
+    branches: [main]
+    paths:
+    - .github/workflows/test.yml
+    - {{ cookiecutter.library_name }}/**
+    - tests/**
+    - poetry.lock
+    - pyproject.toml
+    - tox.ini
+  workflow_dispatch:
 
 jobs:
   pytest:
@@ -13,7 +32,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version:
+        - "3.8"
+        - "3.9"
+        - "3.10"
+        - "3.11"
+        - "3.12"
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python {{ '${{ matrix.python-version }}' }}
