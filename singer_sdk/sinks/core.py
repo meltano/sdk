@@ -763,8 +763,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     tail,
                     mode="rb",
                 ) as file:
-                    context_file = file
-                    table = pq.read_table(context_file)
+                    table = pq.read_table(file)
                     context = {"records": table.to_pylist()}
                     self.process_batch(context)
             else:
