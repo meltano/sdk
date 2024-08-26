@@ -611,7 +611,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     # SDK developer overrides:
 
-    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: ARG002, PLR6301
+    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: PLR6301, ARG002
         """Process incoming record and return a modified result.
 
         Args:
@@ -743,12 +743,15 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     tail,
                     mode="rb",
                 ) as file:
-                    context_file = (
-                        gzip_open(file) if encoding.compression == "gzip" else file
-                    )
-                    context = {
-                        "records": [deserialize_json(line) for line in context_file]  # type: ignore[attr-defined]
-                    }
+                    if encoding.compression == "gzip":
+                        with gzip_open(file) as context_file:
+                            context = {
+                                "records": [
+                                    deserialize_json(line) for line in context_file
+                                ]
+                            }
+                    else:
+                        context = {"records": [deserialize_json(line) for line in file]}
                     self.process_batch(context)
             elif (
                 importlib.util.find_spec("pyarrow")
