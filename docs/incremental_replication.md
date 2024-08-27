@@ -38,7 +38,7 @@ class CommentsStream(RESTStream):
 
 3. Last, we have to adapt the query to the remote system, in this example by adding a query parameter with the ISO timestamp.
 
-   The [`get_starting_timestamp`][singer_sdk.Stream.get_starting_timestamp] method and the related [`get_starting_replication_key_value`](singer_sdk.Stream.get_starting_replication_key_value) method are provided by the SDK and return the last replication key value seen in the previous run. If the tap is run for the first time and the value for the `start_date` setting is null, the method will return `None`.
+   The [`get_starting_timestamp`](singer_sdk.Stream.get_starting_timestamp) method and the related [`get_starting_replication_key_value`](singer_sdk.Stream.get_starting_replication_key_value) method are provided by the SDK and return the last replication key value seen in the previous run. If the tap is run for the first time and the value for the `start_date` setting is null, the method will return `None`.
 
 ```{note}
 - The SDK will throw an error if records come out of order when `is_sorted` is true.
