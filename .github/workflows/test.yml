@@ -72,7 +72,8 @@ jobs:
         uv tool install nox
 
     - if: ${{ startsWith(matrix.os, 'windows') }}
-      run: $env:PATH = "C:\Users\runneradmin\.local\bin;$env:PATH"
+      run: |
+        echo "PATH: C:/Users/runneradmin/.local/bin;$PATH" >> $GITHUB_ENV
 
     - name: Run Nox
       env:
