@@ -54,8 +54,6 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
-        cache: 'pip'
-        cache-dependency-path: 'poetry.lock'
 
     - name: Install pre-commit
       run: |
