@@ -34,35 +34,31 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Upgrade pip
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
-      run: |
-        pip install pip
-        pip --version
-
-    - name: Install Poetry
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
-      run: |
-        pipx install poetry
-        poetry --version
-
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
+    - uses: hynek/setup-cached-uv@v2.1.0
+
+    - name: Install Poetry
+      env:
+        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
+      run: |
+        uv tool install poetry
+        poetry --version
 
     - name: Install pre-commit
+      env:
+        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        pipx install pre-commit
+        uv install tool pre-commit
         pre-commit --version
 
     - name: Install Nox
       env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
+        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        pipx install nox
+        uv install tool nox
         nox --version
 
     - name: Run Nox

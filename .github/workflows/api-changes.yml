@@ -32,13 +32,15 @@ jobs:
       with:
         python-version: 3.12
 
+    - uses: hynek/setup-cached-uv@v2.1.0
+
     - name: Install tools
       env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
+        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        python -Im pip install -U pip
-        pipx install griffe nox
-        pipx list
+        uv tool install griffe
+        uv tool install nox
+        uv tool list
 
     - name: Set REF
       id: set-ref

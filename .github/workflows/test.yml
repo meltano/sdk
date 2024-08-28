@@ -63,18 +63,13 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Upgrade pip
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
-      run: |
-        pip install pip
-        pip --version
+    - uses: hynek/setup-cached-uv@v2.1.0
 
     - name: Install Nox
       env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
+        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        pipx install 'nox[uv]'
+        uv tool install nox
         nox --version
 
     - name: Run Nox
@@ -110,18 +105,12 @@ jobs:
       with:
         python-version: ${{ env.NOXPYTHON }}
 
-    - name: Upgrade pip
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
-      run: |
-        pip install pip
-        pip --version
-
+    - uses: hynek/setup-cached-uv@v2.1.0
     - name: Install Nox
       env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
+        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        pipx install 'nox[uv]'
+        uv tool install nox
         nox --version
 
     - name: Run Nox
@@ -141,23 +130,18 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Upgrade pip
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
-      run: |
-        pip install pip
-        pip --version
-
     - uses: actions/download-artifact@v4
       with:
         pattern: coverage-data-*
         merge-multiple: true
 
+    - uses: hynek/setup-cached-uv@v2.1.0
+
     - name: Install Nox
       env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
+        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        pipx install 'nox[uv]'
+        uv tool install nox
         nox --version
 
     - run: nox --install-only
