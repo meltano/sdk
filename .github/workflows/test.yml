@@ -69,11 +69,8 @@ jobs:
       env:
         UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
+        uv tool update-shell
         uv tool install nox
-
-    - if: ${{ startsWith(matrix.os, 'windows') }}
-      run: |
-        echo "PATH: C:/Users/runneradmin/.local/bin;$PATH" >> $GITHUB_ENV
 
     - name: Run Nox
       env:
