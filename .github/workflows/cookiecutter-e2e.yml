@@ -51,14 +51,14 @@ jobs:
       env:
         UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        uv install tool pre-commit
+        uv tool install pre-commit
         pre-commit --version
 
     - name: Install Nox
       env:
         UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        uv install tool nox
+        uv tool install nox
         nox --version
 
     - name: Run Nox
