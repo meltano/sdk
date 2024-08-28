@@ -10,6 +10,11 @@ import typing as t
 import pytest
 import sqlalchemy as sa
 
+try:
+    from numpy import __version__ as np_version
+except ImportError:
+    np_version = "not installed"
+
 from singer_sdk import SQLConnector
 from singer_sdk import typing as th
 from singer_sdk.helpers._typing import DatetimeErrorTreatmentEnum
@@ -46,7 +51,10 @@ def pytest_runtest_setup(item):
 
 def pytest_report_header() -> list[str]:
     """Return a list of strings to be displayed in the header of the report."""
-    return [f"sqlalchemy: {sa.__version__}"]
+    return [
+        f"sqlalchemy: {sa.__version__}",
+        f"numpy: {np_version}",
+    ]
 
 
 @pytest.fixture(autouse=True)

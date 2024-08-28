@@ -67,7 +67,6 @@ jobs:
         PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pipx install nox
-        pipx inject nox nox-poetry
         nox --version
 
     - name: Run Nox

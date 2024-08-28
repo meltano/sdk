@@ -1,5 +1,6 @@
-# Local Poetry configuration file
+# Local Poetry configuration
 
+poetry.lock
 poetry.toml
 
 # CI

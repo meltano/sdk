@@ -7,18 +7,9 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
-from textwrap import dedent
 
 import nox
-
-try:
-    from nox_poetry import Session, session
-except ImportError:
-    message = f"""\
-    Nox failed to import the 'nox-poetry' package.
-    Please install it using the following command:
-    {sys.executable} -m pip install nox-poetry"""
-    raise SystemExit(dedent(message)) from None
+from nox import Session, session
 
 nox.needs_version = ">=2024.4.15"
 nox.options.default_venv_backend = "uv|virtualenv"
@@ -66,13 +57,8 @@ def tests(session: Session) -> None:
     session.install(".[faker,jwt,parquet,s3]")
     session.install(*test_dependencies)
 
-    sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
-    if sqlalchemy_version:
-        # Bypass nox-poetry use of --constraint so we can install a version of
-        # SQLAlchemy that doesn't match what's in poetry.lock.
-        session.poetry.session.install(  # type: ignore[attr-defined]
-            f"sqlalchemy=={sqlalchemy_version}.*",
-        )
+    if sqlalchemy_version := os.environ.get("SQLALCHEMY_VERSION"):
+        session.install(f"sqlalchemy=={sqlalchemy_version}.*")
 
     env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
 
@@ -98,13 +84,10 @@ def benches(session: Session) -> None:
     """Run benchmarks."""
     session.install(".[jwt,s3]")
     session.install(*test_dependencies)
-    sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
-    if sqlalchemy_version:
-        # Bypass nox-poetry use of --constraint so we can install a version of
-        # SQLAlchemy that doesn't match what's in poetry.lock.
-        session.poetry.session.install(  # type: ignore[attr-defined]
-            f"sqlalchemy=={sqlalchemy_version}",
-        )
+
+    if sqlalchemy_version := os.environ.get("SQLALCHEMY_VERSION"):
+        session.install(f"sqlalchemy=={sqlalchemy_version}")
+
     session.run(
         "pytest",
         "--benchmark-only",
