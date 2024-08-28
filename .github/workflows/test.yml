@@ -65,20 +65,11 @@ jobs:
 
     - uses: hynek/setup-cached-uv@v2.1.0
 
-    - name: Install Nox
-      env:
-        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
-      run: |
-        uv tool install nox
-
-    - if: ${{ startsWith(matrix.os, 'windows') }}
-      run: $env:PATH = "C:\Users\runneradmin\.local\bin;$env:PATH"
-
     - name: Run Nox
       env:
         SQLALCHEMY_VERSION: ${{ matrix.sqlalchemy }}
       run: |
-        nox --verbose
+        uvx nox --verbose
 
     - uses: actions/upload-artifact@v4
       if: always() && (matrix.session == 'tests')
