@@ -12,6 +12,16 @@ from singer_sdk.exceptions import (
 from .templates import TargetFileTestTemplate, TargetTestTemplate
 
 
+class TargetVersionTest(TargetTestTemplate):
+    """Test that the target is able to track its own version."""
+
+    name = "version"
+
+    def test(self) -> None:
+        """Run test."""
+        assert "[could not be detected]" not in self.target.get_plugin_version()
+
+
 class TargetArrayData(TargetFileTestTemplate):
     """Test Target handles array data."""
 

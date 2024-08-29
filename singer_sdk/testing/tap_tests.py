@@ -20,6 +20,16 @@ if t.TYPE_CHECKING:
     from singer_sdk.streams.core import Stream
 
 
+class TapVersionTest(TapTestTemplate):
+    """Test that the tap is able to track its own version."""
+
+    name = "version"
+
+    def test(self) -> None:
+        """Run test."""
+        assert "[could not be detected]" not in self.tap.get_plugin_version()
+
+
 class TapCLIPrintsTest(TapTestTemplate):
     """Test that the tap is able to print standard metadata."""
 

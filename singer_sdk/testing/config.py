@@ -20,3 +20,4 @@ class SuiteConfig:
     max_records_limit: int | None = 150
     ignore_no_records: bool = False
     ignore_no_records_for_streams: list[str] = field(default_factory=list)
+    selected_tests: set[str] = field(default_factory=set)

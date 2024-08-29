@@ -70,6 +70,7 @@ class TapTestClassFactory:
         include_stream_attribute_tests: bool = True,
         custom_suites: list | None = None,
         suite_config: SuiteConfig | None = None,
+        selected_tests: set[str] | None = None,
         **kwargs: t.Any,
     ) -> type[BaseTestClass]:
         """Get a new test class.
@@ -81,6 +82,7 @@ class TapTestClassFactory:
                 Include stream attribute tests in the test class.
             custom_suites: List of custom test suites to include in the test class.
             suite_config: SuiteConfig instance to be used when instantiating tests.
+            selected_tests: Set of test names to include in the test class.
             kwargs: Default arguments to be passed to tap on create.
 
         Returns:
@@ -115,6 +117,7 @@ class TapTestClassFactory:
             empty_test_class=empty_test_class,
             test_suites=suites,
             test_runner=test_runner,
+            selected_tests=selected_tests,
         )
 
     def _get_empty_test_class(  # noqa: PLR6301
@@ -156,6 +159,7 @@ class TapTestClassFactory:
         empty_test_class: type[BaseTestClass],
         test_suites: list[TestSuite],
         test_runner: TapTestRunner,
+        selected_tests: set[str] | None = None,
     ) -> type[BaseTestClass]:
         """Annotate test class with test methods.
 
@@ -163,13 +167,18 @@ class TapTestClassFactory:
             empty_test_class: Empty test class to be annotated.
             test_suites: List of test suites to include in the test class.
             test_runner: Test runner to be used in the test class.
+            selected_tests: Set of test names to include in the test class.
 
         Returns:
             An annotated test class.
         """
         for suite in test_suites:
             if suite.kind == "tap":
-                self._with_tap_tests(empty_test_class, suite)
+                self._with_tap_tests(
+                    empty_test_class,
+                    suite,
+                    selected_tests=selected_tests,
+                )
 
             if suite.kind in {"tap_stream", "tap_stream_attribute"}:
                 streams = list(test_runner.new_tap().streams.values())
@@ -186,8 +195,13 @@ class TapTestClassFactory:
         self,
         empty_test_class: type[BaseTestClass],
         suite: TestSuite[TapTestTemplate],
+        *,
+        selected_tests: set[str] | None = None,
     ) -> None:
         for test_class in suite.tests:
+            if selected_tests is not None and test_class.name not in selected_tests:
+                continue
+
             test = test_class()
             test_name = f"test_{suite.kind}_{test.name}"
             setattr(empty_test_class, test_name, test.run)
@@ -197,6 +211,8 @@ class TapTestClassFactory:
         empty_test_class: type[BaseTestClass],
         suite: TestSuite[StreamTestTemplate],
         streams: list[Stream],
+        *,
+        selected_tests: set[str] | None = None,
     ) -> None:
         params = [
             {
@@ -207,6 +223,9 @@ class TapTestClassFactory:
         param_ids = [stream.name for stream in streams]
 
         for test_class in suite.tests:
+            if selected_tests is not None and test_class.name not in selected_tests:
+                continue
+
             test = test_class()
             test_name = f"test_{suite.kind}_{test.name}"
             setattr(
@@ -222,8 +241,13 @@ class TapTestClassFactory:
         empty_test_class: type[BaseTestClass],
         suite: TestSuite[AttributeTestTemplate],
         streams: list[Stream],
+        *,
+        selected_tests: set[str] | None = None,
     ) -> None:
         for test_class in suite.tests:
+            if selected_tests is not None and test_class.name not in selected_tests:
+                continue
+
             test = test_class()
             test_name = f"test_{suite.kind}_{test.name}"
             test_params = []
@@ -285,6 +309,7 @@ class TargetTestClassFactory:
         custom_suites: list | None = None,
         suite_config: SuiteConfig | None = None,
         include_target_tests: bool = True,
+        selected_tests: set[str] | None = None,
         **kwargs: t.Any,
     ) -> type[BaseTestClass]:
         """Get a new Target test class.
@@ -293,6 +318,7 @@ class TargetTestClassFactory:
             custom_suites: List of custom test suites to include in the test class.
             suite_config: SuiteConfig instance to be used when instantiating tests.
             include_target_tests: Whether to include target tests in the test class.
+            selected_tests: Set of test names to include in the test class.
             kwargs: Keyword arguments to be passed to the Target on run.
 
         Returns:
@@ -316,6 +342,7 @@ class TargetTestClassFactory:
         return self._annotate_test_class(
             empty_test_class=empty_test_class,
             test_suites=suites,
+            selected_tests=selected_tests,
         )
 
     def _get_empty_test_class(  # noqa: PLR6301
@@ -364,12 +391,15 @@ class TargetTestClassFactory:
         self,
         empty_test_class: type[BaseTestClass],
         test_suites: list,
+        *,
+        selected_tests: set[str] | None = None,
     ) -> type[BaseTestClass]:
         """Annotate test class with test methods.
 
         Args:
             empty_test_class: Empty test class to be annotated.
             test_suites: List of test suites to be included in the test class.
+            selected_tests: Set of test names to include in the test class.
 
         Returns:
             Annotated test class.
@@ -377,6 +407,12 @@ class TargetTestClassFactory:
         for suite in test_suites:
             if suite.kind == "target":
                 for test_class in suite.tests:
+                    if (
+                        selected_tests is not None
+                        and test_class.name not in selected_tests
+                    ):
+                        continue
+
                     test = test_class()
                     test_name = f"test_{suite.kind}_{test.name}"
                     setattr(empty_test_class, test_name, test.run)
