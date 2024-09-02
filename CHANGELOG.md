@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.40.0 (2024-09-02)
+
+### ✨ New
+
+- [#2486](https://github.com/meltano/sdk/issues/2486) Emit target metrics
+- [#2567](https://github.com/meltano/sdk/issues/2567) A new `schema_is_valid` built-in tap test validates stream schemas against the JSON Schema specification
+- [#2598](https://github.com/meltano/sdk/issues/2598) Stream map expressions now have access to the `Faker` class, rather than just a faker instance
+- [#2549](https://github.com/meltano/sdk/issues/2549) Added a default user agent for REST and GraphQL taps
+
+### 🐛 Fixes
+
+- [#2613](https://github.com/meltano/sdk/issues/2613) Mismatch between timezone-aware and naive datetimes in start date and bookmarks is now correctly handled
+
+### ⚙️ Under the Hood
+
+- [#2628](https://github.com/meltano/sdk/issues/2628) Use context manager to read gzip batch files
+- [#2619](https://github.com/meltano/sdk/issues/2619) Default to UTC when parsing dates without a known timezone
+- [#2603](https://github.com/meltano/sdk/issues/2603) Backwards-compatible identifier quoting in fully qualified names
+- [#2601](https://github.com/meltano/sdk/issues/2601) Improved SQL identifier (de)normalization
+- [#2599](https://github.com/meltano/sdk/issues/2599) Remove `pytest-durations` dependency from `testing` and use native pytest option `--durations`
+- [#2597](https://github.com/meltano/sdk/issues/2597) Mark pagination classes with `@override` decorator
+- [#2596](https://github.com/meltano/sdk/issues/2596) Made `auth_headers` and `auth_params` of `APIAuthenticatorBase` simple instance attributes instead of decorated properties
+
+### 📚 Documentation Improvements
+
+- [#2639](https://github.com/meltano/sdk/issues/2639) Documented versions where `fake` and `Faker` objects were added to the stream maps context
+- [#2629](https://github.com/meltano/sdk/issues/2629) Reference `get_starting_timestamp` in incremental replication guide
+- [#2604](https://github.com/meltano/sdk/issues/2604) Update project sample links
+- [#2595](https://github.com/meltano/sdk/issues/2595) Documented examples of stream glob expressions and property aliasing
+
+### 📦 Packaging changes
+
+- [#2640](https://github.com/meltano/sdk/issues/2640) Remove upper constraint on `faker` extra
+
 ## v0.39.1 (2024-08-07)
 
 ### 🐛 Fixes
