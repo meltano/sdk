@@ -253,8 +253,16 @@ can be referenced directly by mapping expressions.
   masking by allowing users to call `Faker.seed()`.
 
   ```{tip}
-  The `fake` object is only available if the plugin specifies `faker` as an additional dependency (through the `singer-sdk` `faker` extra, or directly).
+  The `fake` object and `Faker` are only available if the plugin specifies `faker` as an additional dependency (through the `singer-sdk` `faker` extra, or directly).
   ```
+
+:::{versionadded} 0.35.0
+The `faker` object.
+:::
+
+:::{versionadded} 0.40.0
+The `Faker` class.
+:::
 
 #### Automatic Schema Detection
 
