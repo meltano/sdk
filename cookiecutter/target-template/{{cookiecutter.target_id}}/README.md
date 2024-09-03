@@ -51,7 +51,7 @@ This Singer target will automatically import any environment variables within th
 `.env` if the `--config=ENV` is provided, such that config values will be considered if a matching
 environment variable is set either in the terminal context or in the `.env` file.
 
-### Source Authentication and Authorization
+### Authentication and Authorization
 
 <!--
 Developer TODO: If your target requires special access on the destination system, or any special authentication requirements, provide those here.

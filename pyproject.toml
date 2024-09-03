@@ -75,9 +75,14 @@ sphinx-reredirects = {version = ">=0.1.5", python = ">=3.9", optional = true}
 fs-s3fs = {version = ">=1.1.1", optional = true}
 
 # Parquet file dependencies installed as optional 'parquet' extras
+# We add Python constraints to force Poetry to add the latest supported Numpy version
+# for all Python versions to 'poetry.lock'. If we don't do this, Poetry will add only
+# the version of Numpy that is compatible with the earliest Python version supported
+# by this project, but that may not be compatible with the latest Python version.
 numpy = [
-    { version = ">=1.22,<1.25", python = ">=3.8,<3.9", optional = true },
-    { version = ">=1.22", python = ">=3.9", optional = true },
+    { version = ">=1.22,<1.25", python = "==3.8", optional = true },
+    { version = ">=1.22,<2.1", python = "==3.9", optional = true },
+    { version = ">=1.22", python = ">=3.10", optional = true },
 ]
 pyarrow = { version = ">=13", optional = true }
 
@@ -85,7 +90,7 @@ pyarrow = { version = ">=13", optional = true }
 pytest = {version=">=7.2.1", optional = true}
 
 # installed as optional 'faker' extra
-faker = {version = ">=22.5,<27.0", optional = true}
+faker = {version = ">=22.5", optional = true}
 
 # Crypto extras
 cryptography = { version = ">=3.4.6", optional = true }
@@ -172,7 +177,7 @@ norecursedirs = "cookiecutter"
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.39.1"
+version = "0.40.0"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"

@@ -5,11 +5,13 @@ from __future__ import annotations
 import typing as t
 import warnings
 
-from jsonschema import Draft7Validator
+from jsonschema import validators
+from jsonschema.exceptions import SchemaError
 
 import singer_sdk.helpers._typing as th
 from singer_sdk import Tap
 from singer_sdk.helpers._compat import datetime_fromisoformat
+from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
 
 from .templates import AttributeTestTemplate, StreamTestTemplate, TapTestTemplate
 
@@ -69,6 +71,28 @@ class TapValidFinalStateTest(TapTestTemplate):
         """Run test."""
         final_state = self.runner.state_messages[-1]
         assert "progress_markers" not in final_state, self.message
+
+
+class StreamSchemaIsValidTest(StreamTestTemplate):
+    """Test that a stream's schema is valid."""
+
+    name = "schema_is_valid"
+
+    def test(self) -> None:
+        """Run test.
+
+        Raises:
+            AssertionError: if schema is not valid.
+        """
+        schema = self.stream.schema
+        default = DEFAULT_JSONSCHEMA_VALIDATOR
+        validator = validators.validator_for(schema, default=default)
+
+        try:
+            validator.check_schema(schema)
+        except SchemaError as e:  # pragma: no cover
+            msg = f"Schema is not valid: {e}"
+            raise AssertionError(msg) from e
 
 
 class StreamReturnsRecordTest(StreamTestTemplate):
@@ -134,10 +158,10 @@ class StreamRecordMatchesStreamSchema(StreamTestTemplate):
     def test(self) -> None:
         """Run test."""
         schema = self.stream.schema
-        validator = Draft7Validator(
-            schema,
-            format_checker=Draft7Validator.FORMAT_CHECKER,
-        )
+        default = DEFAULT_JSONSCHEMA_VALIDATOR
+        validator = validators.validator_for(schema, default=default)(schema)
+        validator.format_checker = default.FORMAT_CHECKER
+
         for record in self.stream_records:
             errors = list(validator.iter_errors(record))
             error_messages = "\n".join(
