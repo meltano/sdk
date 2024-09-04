@@ -398,7 +398,7 @@ class CustomStreamMap(StreamMap):
         if expr.startswith("bool("):
             return th.BooleanType()
 
-        if expr.startswith("datetime.date"):
+        if expr.startswith("datetime.date") or expr.endswith(".date()"):
             return th.DateType()
 
         if expr.startswith("datetime.datetime"):
