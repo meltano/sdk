@@ -398,6 +398,12 @@ class CustomStreamMap(StreamMap):
         if expr.startswith("bool("):
             return th.BooleanType()
 
+        if expr.startswith("datetime.date"):
+            return th.DateType()
+
+        if expr.startswith("datetime.datetime"):
+            return th.DateTimeType()
+
         return th.StringType() if expr[0] == "'" and expr[-1] == "'" else default
 
     def _init_functions_and_schema(  # noqa: PLR0912, PLR0915, C901
