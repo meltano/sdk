@@ -156,7 +156,7 @@ class TestConnectorSQL:  # noqa: PLR0904
         engine2 = connector._cached_engine
         assert engine1 is engine2
 
-    def test_deprecated_functions_warn(self, connector):
+    def test_deprecated_functions_warn(self, connector: SQLConnector):
         with pytest.deprecated_call():
             connector.create_sqlalchemy_engine()
         with pytest.deprecated_call():

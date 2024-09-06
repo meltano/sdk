@@ -5,14 +5,19 @@ from __future__ import annotations
 import base64
 import datetime
 import math
+import sys
 import typing as t
-import warnings
 from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import requests
 
 from singer_sdk.helpers._util import utc_now
+
+if sys.version_info < (3, 13):
+    from typing_extensions import deprecated
+else:
+    from warnings import deprecated
 
 if t.TYPE_CHECKING:
     import logging
@@ -277,6 +282,10 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
         return cls(stream=stream, token=token)
 
 
+@deprecated(
+    "BasicAuthenticator is deprecated. Use requests.auth.HTTPBasicAuth instead.",
+    category=DeprecationWarning,
+)
 class BasicAuthenticator(APIAuthenticatorBase):
     """Implements basic authentication for REST Streams.
 
@@ -302,12 +311,6 @@ class BasicAuthenticator(APIAuthenticatorBase):
             password: API password.
         """
         super().__init__(stream=stream)
-        warnings.warn(
-            "BasicAuthenticator is deprecated. Use "
-            "requests.auth.HTTPBasicAuth instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
         credentials = f"{username}:{password}".encode()
         auth_token = base64.b64encode(credentials).decode("ascii")
