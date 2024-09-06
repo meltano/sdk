@@ -146,7 +146,15 @@ types-PyYAML = ">=6.0.12"
 pytest-codspeed = ">=2.2.0"
 
 [tool.pytest.ini_options]
-addopts = '--durations=10 --ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
+addopts = [
+    "--durations=10",
+    "--ignore=singer_sdk/helpers/_simpleeval.py",
+    "-m",
+    "not external",
+    "-ra",
+    "--strict-config",
+    "--strict-markers",
+]
 filterwarnings = [
     "error",
     "ignore:Could not configure external gitlab tests:UserWarning",
@@ -167,13 +175,16 @@ filterwarnings = [
     # https://github.com/joblib/joblib/pull/1518
     "ignore:Attribute n is deprecated:DeprecationWarning:joblib._utils",
 ]
+log_cli_level = "INFO"
 markers = [
     "external: Tests relying on external resources",
     "windows: Tests that only run on Windows",
     "snapshot: Tests that use pytest-snapshot",
 ]
+minversion = "7"
 testpaths = ["tests"]
 norecursedirs = "cookiecutter"
+xfail_strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
@@ -257,11 +268,14 @@ DEP002 = [
 ]
 
 [tool.mypy]
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 exclude = "tests"
 files = "singer_sdk"
 local_partial_types = true
+strict = false
 warn_redundant_casts = true
 warn_return_any = true
+warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
@@ -295,7 +309,6 @@ extend-exclude = [
     "*simpleeval*",
 ]
 line-length = 88
-src = ["samples", "singer_sdk", "tests"]
 target-version = "py38"
 
 [tool.ruff.format]

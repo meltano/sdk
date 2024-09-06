@@ -148,7 +148,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             RuntimeError: If state has not been initialized.
         """
         if self._state is None:
-            msg = "Could not read from uninitialized state."
+            msg = "Could not read from uninitialized state."  # type: ignore[unreachable]
             raise RuntimeError(msg)
         return self._state
 
@@ -398,7 +398,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
                 initialized.
         """
         if self.state is None:
-            msg = "Cannot write to uninitialized state dictionary."
+            msg = "Cannot write to uninitialized state dictionary."  # type: ignore[unreachable]
             raise ValueError(msg)
 
         for stream_name, stream_state in state.get("bookmarks", {}).items():

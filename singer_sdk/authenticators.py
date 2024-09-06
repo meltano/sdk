@@ -71,7 +71,7 @@ class SingletonMeta(type):
             A singleton instance of the derived class.
         """
         if cls.__single_instance:
-            return cls.__single_instance
+            return cls.__single_instance  # type: ignore[unreachable]
         single_obj = cls.__new__(cls, None)  # type: ignore[call-overload]
         single_obj.__init__(*args, **kwargs)
         cls.__single_instance = single_obj
@@ -165,7 +165,7 @@ class SimpleAuthenticator(APIAuthenticatorBase):
         """
         super().__init__(stream=stream)
         if self.auth_headers is None:
-            self.auth_headers = {}
+            self.auth_headers = {}  # type: ignore[unreachable]
         if auth_headers:
             self.auth_headers.update(auth_headers)
 
@@ -206,11 +206,11 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
 
         if location == "header":
             if self.auth_headers is None:
-                self.auth_headers = {}
+                self.auth_headers = {}  # type: ignore[unreachable]
             self.auth_headers.update(auth_credentials)
         elif location == "params":
             if self.auth_params is None:
-                self.auth_params = {}
+                self.auth_params = {}  # type: ignore[unreachable]
             self.auth_params.update(auth_credentials)
 
     @classmethod
@@ -255,7 +255,7 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
         auth_credentials = {"Authorization": f"Bearer {token}"}
 
         if self.auth_headers is None:
-            self.auth_headers = {}
+            self.auth_headers = {}  # type: ignore[unreachable]
         self.auth_headers.update(auth_credentials)
 
     @classmethod
@@ -314,7 +314,7 @@ class BasicAuthenticator(APIAuthenticatorBase):
         auth_credentials = {"Authorization": f"Basic {auth_token}"}
 
         if self.auth_headers is None:
-            self.auth_headers = {}
+            self.auth_headers = {}  # type: ignore[unreachable]
         self.auth_headers.update(auth_credentials)
 
     @classmethod
