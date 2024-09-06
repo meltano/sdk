@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import functools
 import logging
 import sys
 import typing as t
@@ -109,6 +110,83 @@ class FullyQualifiedName(UserString):
         return part
 
 
+class SQLToJSONSchema:
+    """SQLAlchemy to JSON Schema type mapping helper.
+
+    This class provides a mapping from SQLAlchemy types to JSON Schema types.
+    """
+
+    @functools.singledispatchmethod
+    def to_jsonschema(self, column_type: sa.types.TypeEngine) -> dict:  # noqa: ARG002, D102, PLR6301
+        return th.StringType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def datetime_to_jsonschema(self, column_type: sa.types.DateTime) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a generic datetime type.
+
+        Args:
+            column_type (:column_type:`DateTime`): The column type.
+        """
+        return th.DateTimeType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def date_to_jsonschema(self, column_type: sa.types.Date) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a date type.
+
+        Args:
+            column_type (:column_type:`Date`): The column type.
+        """
+        return th.DateType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def time_to_jsonschema(self, column_type: sa.types.Time) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a time type.
+
+        Args:
+            column_type (:column_type:`Time`): The column type.
+        """
+        return th.TimeType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def integer_to_jsonschema(self, column_type: sa.types.Integer) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a an integer type.
+
+        Args:
+            column_type (:column_type:`Integer`): The column type.
+        """
+        return th.IntegerType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def float_to_jsonschema(self, column_type: sa.types.Numeric) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a generic number type.
+
+        Args:
+            column_type (:column_type:`Numeric`): The column type.
+        """
+        return th.NumberType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def string_to_jsonschema(self, column_type: sa.types.String) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a generic string type.
+
+        Args:
+            column_type (:column_type:`String`): The column type.
+        """
+        # TODO: Enable support for maxLength.
+        # if sa_type.length:
+        #     return StringType(max_length=sa_type.length).type_dict  # noqa: ERA001
+        return th.StringType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def boolean_to_jsonschema(self, column_type: sa.types.Boolean) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a boolean type.
+
+        Args:
+            column_type (:column_type:`Boolean`): The column type.
+        """
+        return th.BooleanType.type_dict  # type: ignore[no-any-return]
+
+
 class SQLConnector:  # noqa: PLR0904
     """Base class for SQLAlchemy-based connectors.
 
@@ -161,6 +239,17 @@ class SQLConnector:  # noqa: PLR0904
             Plugin logger.
         """
         return logging.getLogger("sqlconnector")
+
+    @functools.cached_property
+    def type_mapping(self) -> SQLToJSONSchema:
+        """Return the type mapper object.
+
+        Override this method to provide a custom mapping for your SQL dialect.
+
+        Returns:
+            The type mapper object.
+        """
+        return SQLToJSONSchema()
 
     @contextmanager
     def _connect(self) -> t.Iterator[sa.engine.Connection]:
@@ -266,8 +355,8 @@ class SQLConnector:  # noqa: PLR0904
 
         return t.cast(str, config["sqlalchemy_url"])
 
-    @staticmethod
     def to_jsonschema_type(
+        self,
         sql_type: (
             str  # noqa: ANN401
             | sa.types.TypeEngine
@@ -293,10 +382,25 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             The JSON Schema representation of the provided type.
         """
-        if isinstance(sql_type, (str, sa.types.TypeEngine)):
+        if isinstance(sql_type, sa.types.TypeEngine):
+            return self.type_mapping.to_jsonschema(sql_type)
+
+        if isinstance(sql_type, str):  # pragma: no cover
+            warnings.warn(
+                "Passing string types to `to_jsonschema_type` is deprecated. "
+                "Please pass a SQLAlchemy type object instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             return th.to_jsonschema_type(sql_type)
 
-        if isinstance(sql_type, type):
+        if isinstance(sql_type, type):  # pragma: no cover
+            warnings.warn(
+                "Passing type classes to `to_jsonschema_type` is deprecated. "
+                "Please pass a SQLAlchemy type object instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             if issubclass(sql_type, sa.types.TypeEngine):
                 return th.to_jsonschema_type(sql_type)
 
