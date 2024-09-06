@@ -118,10 +118,17 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
     def _process_state_message(self, message_dict: dict) -> None: ...
 
     @abc.abstractmethod
-    def _process_activate_version_message(self, message_dict: dict) -> None: ...
-
-    @abc.abstractmethod
     def _process_batch_message(self, message_dict: dict) -> None: ...
+
+    def _process_activate_version_message(self, message_dict: dict) -> None:  # noqa: ARG002, PLR6301
+        """Default implementation for ACTIVATE_VERSION messages.
+
+        Override this method in a subclass to handle ACTIVATE_VERSION messages.
+
+        Args:
+            message_dict: Dictionary representation of the Singer message.
+        """
+        logger.warning("ACTIVATE_VERSION messages are not supported")
 
     def _process_unknown_message(self, message_dict: dict) -> None:  # noqa: PLR6301
         """Internal method to process unknown message types from a Singer tap.
