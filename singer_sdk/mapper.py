@@ -337,7 +337,10 @@ class CustomStreamMap(StreamMap):
         names["config"] = self.map_config  # Allow map config access within transform
 
         if self.fake:
+            from faker import Faker  # noqa: PLC0415
+
             names["fake"] = self.fake
+            names["Faker"] = Faker
 
         if property_name and property_name in record:
             # Allow access to original property value if applicable
@@ -374,7 +377,7 @@ class CustomStreamMap(StreamMap):
             ValueError: If the expression is ``None``.
         """
         if expr is None:
-            msg = "Expression should be str, not None"
+            msg = "Expression should be str, not None"  # type: ignore[unreachable]
             raise ValueError(msg)
 
         default = default or th.StringType()
@@ -561,7 +564,7 @@ class CustomStreamMap(StreamMap):
         elif filter_rule is None:
             filter_fn = always_true
         else:
-            msg = (
+            msg = (  # type: ignore[unreachable]
                 f"Unexpected filter rule type '{type(filter_rule).__name__}' in "
                 f"expression {filter_rule!s}. Expected 'str' or 'None'."
             )
@@ -780,9 +783,7 @@ class PluginMapper:
                     key_properties=key_properties,
                     flattening_options=self.flattening_options,
                 )
-            elif stream_def is None or (
-                isinstance(stream_def, str) and stream_def == NULL_STRING
-            ):
+            elif stream_def is None or (stream_def == NULL_STRING):
                 mapper = RemoveRecordTransform(
                     stream_alias=stream_alias,
                     raw_schema=schema,
@@ -797,7 +798,7 @@ class PluginMapper:
                 raise StreamMapConfigError(msg)
 
             else:
-                msg = (
+                msg = (  # type: ignore[unreachable]
                     f"Unexpected stream definition type. Expected str, dict, or None. "
                     f"Got '{type(stream_def).__name__}'."
                 )

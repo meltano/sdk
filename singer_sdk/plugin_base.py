@@ -13,7 +13,6 @@ from pathlib import Path, PurePath
 from types import MappingProxyType
 
 import click
-from jsonschema import Draft7Validator
 
 from singer_sdk import about, metrics
 from singer_sdk.cli import plugin_cli
@@ -32,11 +31,14 @@ from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
 )
 from singer_sdk.mapper import PluginMapper
-from singer_sdk.typing import extend_validator_with_defaults
+from singer_sdk.typing import (
+    DEFAULT_JSONSCHEMA_VALIDATOR,
+    extend_validator_with_defaults,
+)
 
 SDK_PACKAGE_NAME = "singer_sdk"
 
-JSONSchemaValidator = extend_validator_with_defaults(Draft7Validator)
+JSONSchemaValidator = extend_validator_with_defaults(DEFAULT_JSONSCHEMA_VALIDATOR)
 
 
 class MapperNotInitialized(Exception):
@@ -151,7 +153,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         elif isinstance(config, dict):
             config_dict = config
         else:
-            msg = f"Error parsing config of type '{type(config).__name__}'."
+            msg = f"Error parsing config of type '{type(config).__name__}'."  # type: ignore[unreachable]
             raise ValueError(msg)
         if parse_env_config:
             self.logger.info("Parsing env var for settings config...")

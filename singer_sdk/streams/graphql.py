@@ -71,7 +71,7 @@ class GraphQLStream(RESTStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         query = self.query
 
         if query is None:
-            msg = "Graphql `query` property not set."
+            msg = "Graphql `query` property not set."  # type: ignore[unreachable]
             raise ValueError(msg)
 
         if not query.lstrip().startswith("query"):

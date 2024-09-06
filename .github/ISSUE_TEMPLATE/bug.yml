@@ -13,7 +13,7 @@ body:
     attributes:
       label: Singer SDK Version
       description: Version of the library you are using
-      placeholder: "0.39.1"
+      placeholder: "0.40.0"
     validations:
       required: true
   - type: checkboxes
@@ -29,13 +29,12 @@ body:
       label: Python Version
       description: Version of Python you are using
       options:
-        - "3.6 (EOL)"
-        - "3.7 (EOL)"
-        - "3.8"
-        - "3.9"
-        - "3.10"
-        - "3.11"
         - "3.12"
+        - "3.11"
+        - "3.10"
+        - "3.9"
+        - "3.8"
+        - "3.7 or earlier"
         - "NA"
     validations:
       required: true
@@ -78,3 +77,9 @@ body:
       render: Python
     validations:
       required: false
+  - type: input
+    id: slack_or_linen
+    attributes:
+      label: Link to Slack/Linen
+      description: Provide a link to the Slack or Linen conversation, if applicable
+      placeholder: "https://..."

@@ -142,6 +142,18 @@ def test_stream_apply_catalog(stream: Stream):
             id="datetime-repl-key-old-bookmark",
         ),
         pytest.param(
+            "test",
+            None,
+            "2021-01-02T00:00:00-08:00",
+            datetime.datetime(
+                2021,
+                1,
+                2,
+                tzinfo=datetime.timezone(datetime.timedelta(hours=-8)),
+            ),
+            id="datetime-repl-key-recent-bookmark-tz-aware",
+        ),
+        pytest.param(
             "unix_ts",
             None,
             None,

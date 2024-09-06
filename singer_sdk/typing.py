@@ -53,13 +53,11 @@ Note:
 from __future__ import annotations
 
 import json
+import sys
 import typing as t
 
 import sqlalchemy as sa
 from jsonschema import ValidationError, validators
-
-if t.TYPE_CHECKING:
-    from jsonschema.protocols import Validator
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -68,8 +66,14 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
 )
 
+if sys.version_info < (3, 13):
+    from typing_extensions import deprecated
+else:
+    from typing import deprecated  # noqa: ICN003 # pragma: no cover
+
+
 if t.TYPE_CHECKING:
-    import sys
+    from jsonschema.protocols import Validator
 
     if sys.version_info >= (3, 10):
         from typing import TypeAlias  # noqa: ICN003
@@ -78,6 +82,7 @@ if t.TYPE_CHECKING:
 
 
 __all__ = [
+    "DEFAULT_JSONSCHEMA_VALIDATOR",
     "ArrayType",
     "BooleanType",
     "CustomType",
@@ -118,11 +123,13 @@ _JsonValue: TypeAlias = t.Union[
     None,
 ]
 
+DEFAULT_JSONSCHEMA_VALIDATOR: type[Validator] = validators.Draft7Validator  # type: ignore[assignment]
+
 T = t.TypeVar("T", bound=_JsonValue)
 P = t.TypeVar("P")
 
 
-def extend_validator_with_defaults(validator_class):  # noqa: ANN001, ANN201
+def extend_validator_with_defaults(validator_class: type[Validator]):  # noqa: ANN201
     """Fill in defaults, before validating with the provided JSON Schema Validator.
 
     See
@@ -187,7 +194,7 @@ class DefaultInstanceProperty:
             The property value.
         """
         if instance is None:
-            instance = owner()
+            instance = owner()  # type: ignore[unreachable]
         return self.fget(instance)
 
 
@@ -1084,6 +1091,10 @@ class PropertiesList(ObjectType):
         return self.wrapped.values().__iter__()
 
 
+@deprecated(
+    "Use `SQLToJSONSchema` instead.",
+    category=DeprecationWarning,
+)
 def to_jsonschema_type(
     from_type: str | sa.types.TypeEngine | type[sa.types.TypeEngine],
 ) -> dict:
@@ -1117,17 +1128,14 @@ def to_jsonschema_type(
         "bool": BooleanType.type_dict,
         "variant": StringType.type_dict,
     }
-    if isinstance(from_type, str):
+    if isinstance(from_type, str):  # pragma: no cover
         type_name = from_type
-    elif isinstance(from_type, sa.types.TypeEngine):
+    elif isinstance(from_type, sa.types.TypeEngine):  # pragma: no cover
         type_name = type(from_type).__name__
-    elif isinstance(from_type, type) and issubclass(
-        from_type,
-        sa.types.TypeEngine,
-    ):
+    elif issubclass(from_type, sa.types.TypeEngine):
         type_name = from_type.__name__
     else:  # pragma: no cover
-        msg = "Expected `str` or a SQLAlchemy `TypeEngine` object or type."
+        msg = "Expected `str` or a SQLAlchemy `TypeEngine` object or type."  # type: ignore[unreachable]
         # TODO: this should be a TypeError, but it's a breaking change.
         raise ValueError(msg)  # noqa: TRY004
 

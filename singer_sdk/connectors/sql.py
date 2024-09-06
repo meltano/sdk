@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import functools
 import logging
+import sys
 import typing as t
 import warnings
+from collections import UserString
 from contextlib import contextmanager
 from datetime import datetime
 from functools import lru_cache
@@ -17,9 +20,170 @@ from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._util import dump_json, load_json
 from singer_sdk.helpers.capabilities import TargetLoadMethods
 
+if sys.version_info < (3, 13):
+    from typing_extensions import deprecated
+else:
+    from warnings import deprecated
+
 if t.TYPE_CHECKING:
     from sqlalchemy.engine import Engine
     from sqlalchemy.engine.reflection import Inspector
+
+
+class FullyQualifiedName(UserString):
+    """A fully qualified table name.
+
+    This class provides a simple way to represent a fully qualified table name
+    as a single object. The string representation of this object is the fully
+    qualified table name, with the parts separated by periods.
+
+    The parts of the fully qualified table name are:
+    - database
+    - schema
+    - table
+
+    The database and schema are optional. If only the table name is provided,
+    the string representation of the object will be the table name alone.
+
+    Example:
+    ```
+    table_name = FullyQualifiedName("my_table", "my_schema", "my_db")
+    print(table_name)  # my_db.my_schema.my_table
+    ```
+    """
+
+    def __init__(
+        self,
+        *,
+        table: str = "",
+        schema: str | None = None,
+        database: str | None = None,
+        delimiter: str = ".",
+    ) -> None:
+        """Initialize the fully qualified table name.
+
+        Args:
+            table: The name of the table.
+            schema: The name of the schema. Defaults to None.
+            database: The name of the database. Defaults to None.
+            delimiter: The delimiter to use between parts. Defaults to '.'.
+
+        Raises:
+            ValueError: If the fully qualified name could not be generated.
+        """
+        self.table = table
+        self.schema = schema
+        self.database = database
+        self.delimiter = delimiter
+
+        parts = []
+        if self.database:
+            parts.append(self.prepare_part(self.database))
+        if self.schema:
+            parts.append(self.prepare_part(self.schema))
+        if self.table:
+            parts.append(self.prepare_part(self.table))
+
+        if not parts:
+            raise ValueError(
+                "Could not generate fully qualified name: "
+                + ":".join(
+                    [
+                        self.database or "(unknown-db)",
+                        self.schema or "(unknown-schema)",
+                        self.table or "(unknown-table-name)",
+                    ],
+                ),
+            )
+
+        super().__init__(self.delimiter.join(parts))
+
+    def prepare_part(self, part: str) -> str:  # noqa: PLR6301
+        """Prepare a part of the fully qualified name.
+
+        Args:
+            part: The part to prepare.
+
+        Returns:
+            The prepared part.
+        """
+        return part
+
+
+class SQLToJSONSchema:
+    """SQLAlchemy to JSON Schema type mapping helper.
+
+    This class provides a mapping from SQLAlchemy types to JSON Schema types.
+    """
+
+    @functools.singledispatchmethod
+    def to_jsonschema(self, column_type: sa.types.TypeEngine) -> dict:  # noqa: ARG002, D102, PLR6301
+        return th.StringType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def datetime_to_jsonschema(self, column_type: sa.types.DateTime) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a generic datetime type.
+
+        Args:
+            column_type (:column_type:`DateTime`): The column type.
+        """
+        return th.DateTimeType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def date_to_jsonschema(self, column_type: sa.types.Date) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a date type.
+
+        Args:
+            column_type (:column_type:`Date`): The column type.
+        """
+        return th.DateType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def time_to_jsonschema(self, column_type: sa.types.Time) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a time type.
+
+        Args:
+            column_type (:column_type:`Time`): The column type.
+        """
+        return th.TimeType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def integer_to_jsonschema(self, column_type: sa.types.Integer) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a an integer type.
+
+        Args:
+            column_type (:column_type:`Integer`): The column type.
+        """
+        return th.IntegerType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def float_to_jsonschema(self, column_type: sa.types.Numeric) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a generic number type.
+
+        Args:
+            column_type (:column_type:`Numeric`): The column type.
+        """
+        return th.NumberType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def string_to_jsonschema(self, column_type: sa.types.String) -> dict:  # noqa: PLR6301
+        """Return a JSON Schema representation of a generic string type.
+
+        Args:
+            column_type (:column_type:`String`): The column type.
+        """
+        if column_type.length:
+            return th.StringType(max_length=column_type.length).type_dict  # type: ignore[no-any-return]
+        return th.StringType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def boolean_to_jsonschema(self, column_type: sa.types.Boolean) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a boolean type.
+
+        Args:
+            column_type (:column_type:`Boolean`): The column type.
+        """
+        return th.BooleanType.type_dict  # type: ignore[no-any-return]
 
 
 class SQLConnector:  # noqa: PLR0904
@@ -75,11 +239,30 @@ class SQLConnector:  # noqa: PLR0904
         """
         return logging.getLogger("sqlconnector")
 
+    @functools.cached_property
+    def sql_to_jsonschema(self) -> SQLToJSONSchema:
+        """Return the type mapper object.
+
+        Override this method to provide a custom mapping for your SQL dialect.
+
+        Returns:
+            The type mapper object.
+        """
+        return SQLToJSONSchema()
+
     @contextmanager
     def _connect(self) -> t.Iterator[sa.engine.Connection]:
         with self._engine.connect().execution_options(stream_results=True) as conn:
             yield conn
 
+    @deprecated(
+        "`SQLConnector.create_sqlalchemy_connection` is deprecated. "
+        "If you need to execute something that isn't available "
+        "on the connector currently, make a child class and "
+        "add your required method on that connector.",
+        category=DeprecationWarning,
+        stacklevel=1,
+    )
     def create_sqlalchemy_connection(self) -> sa.engine.Connection:
         """(DEPRECATED) Return a new SQLAlchemy connection using the provided config.
 
@@ -99,16 +282,14 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             A newly created SQLAlchemy engine object.
         """
-        warnings.warn(
-            "`SQLConnector.create_sqlalchemy_connection` is deprecated. "
-            "If you need to execute something that isn't available "
-            "on the connector currently, make a child class and "
-            "add your required method on that connector.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         return self._engine.connect().execution_options(stream_results=True)
 
+    @deprecated(
+        "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override "
+        "`_engine` or `sqlalchemy_url` instead.",
+        category=DeprecationWarning,
+        stacklevel=1,
+    )
     def create_sqlalchemy_engine(self) -> Engine:
         """(DEPRECATED) Return a new SQLAlchemy engine using the provided config.
 
@@ -118,12 +299,6 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             A newly created SQLAlchemy engine object.
         """
-        warnings.warn(
-            "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override"
-            "`_engine` or sqlalchemy_url` instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         return self._engine
 
     @property
@@ -179,8 +354,8 @@ class SQLConnector:  # noqa: PLR0904
 
         return t.cast(str, config["sqlalchemy_url"])
 
-    @staticmethod
     def to_jsonschema_type(
+        self,
         sql_type: (
             str  # noqa: ANN401
             | sa.types.TypeEngine
@@ -206,10 +381,25 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             The JSON Schema representation of the provided type.
         """
-        if isinstance(sql_type, (str, sa.types.TypeEngine)):
+        if isinstance(sql_type, sa.types.TypeEngine):
+            return self.sql_to_jsonschema.to_jsonschema(sql_type)
+
+        if isinstance(sql_type, str):  # pragma: no cover
+            warnings.warn(
+                "Passing string types to `to_jsonschema_type` is deprecated. "
+                "Please pass a SQLAlchemy type object instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             return th.to_jsonschema_type(sql_type)
 
-        if isinstance(sql_type, type):
+        if isinstance(sql_type, type):  # pragma: no cover
+            warnings.warn(
+                "Passing type classes to `to_jsonschema_type` is deprecated. "
+                "Please pass a SQLAlchemy type object instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             if issubclass(sql_type, sa.types.TypeEngine):
                 return th.to_jsonschema_type(sql_type)
 
@@ -244,7 +434,7 @@ class SQLConnector:  # noqa: PLR0904
         schema_name: str | None = None,
         db_name: str | None = None,
         delimiter: str = ".",
-    ) -> str:
+    ) -> FullyQualifiedName:
         """Concatenates a fully qualified name from the parts.
 
         Args:
@@ -253,34 +443,15 @@ class SQLConnector:  # noqa: PLR0904
             db_name: The name of the database. Defaults to None.
             delimiter: Generally: '.' for SQL names and '-' for Singer names.
 
-        Raises:
-            ValueError: If all 3 name parts not supplied.
-
         Returns:
             The fully qualified name as a string.
         """
-        parts = []
-
-        if db_name:
-            parts.append(db_name)
-        if schema_name:
-            parts.append(schema_name)
-        if table_name:
-            parts.append(table_name)
-
-        if not parts:
-            raise ValueError(
-                "Could not generate fully qualified name: "
-                + ":".join(
-                    [
-                        db_name or "(unknown-db)",
-                        schema_name or "(unknown-schema)",
-                        table_name or "(unknown-table-name)",
-                    ],
-                ),
-            )
-
-        return delimiter.join(parts)
+        return FullyQualifiedName(
+            table=table_name,  # type: ignore[arg-type]
+            schema=schema_name,
+            database=db_name,
+            delimiter=delimiter,
+        )
 
     @property
     def _dialect(self) -> sa.engine.Dialect:
@@ -429,17 +600,12 @@ class SQLConnector:  # noqa: PLR0904
             `CatalogEntry` object for the given table or a view
         """
         # Initialize unique stream name
-        unique_stream_id = self.get_fully_qualified_name(
-            db_name=None,
-            schema_name=schema_name,
-            table_name=table_name,
-            delimiter="-",
-        )
+        unique_stream_id = f"{schema_name}-{table_name}"
 
         # Detect key properties
         possible_primary_keys: list[list[str]] = []
         pk_def = inspected.get_pk_constraint(table_name, schema=schema_name)
-        if pk_def and "constrained_columns" in pk_def:
+        if pk_def and "constrained_columns" in pk_def:  # type: ignore[redundant-expr]
             possible_primary_keys.append(pk_def["constrained_columns"])
 
         # An element of the columns list is ``None`` if it's an expression and is
@@ -528,7 +694,7 @@ class SQLConnector:  # noqa: PLR0904
 
     def parse_full_table_name(  # noqa: PLR6301
         self,
-        full_table_name: str,
+        full_table_name: str | FullyQualifiedName,
     ) -> tuple[str | None, str | None, str]:
         """Parse a fully qualified table name into its parts.
 
@@ -547,6 +713,13 @@ class SQLConnector:  # noqa: PLR0904
             A three part tuple (db_name, schema_name, table_name) with any unspecified
             or unused parts returned as None.
         """
+        if isinstance(full_table_name, FullyQualifiedName):
+            return (
+                full_table_name.database,
+                full_table_name.schema,
+                full_table_name.table,
+            )
+
         db_name: str | None = None
         schema_name: str | None = None
 
@@ -560,7 +733,7 @@ class SQLConnector:  # noqa: PLR0904
 
         return db_name, schema_name, table_name
 
-    def table_exists(self, full_table_name: str) -> bool:
+    def table_exists(self, full_table_name: str | FullyQualifiedName) -> bool:
         """Determine if the target table already exists.
 
         Args:
@@ -587,7 +760,7 @@ class SQLConnector:  # noqa: PLR0904
 
     def get_table_columns(
         self,
-        full_table_name: str,
+        full_table_name: str | FullyQualifiedName,
         column_names: list[str] | None = None,
     ) -> dict[str, sa.Column]:
         """Return a list of table columns.
@@ -618,7 +791,7 @@ class SQLConnector:  # noqa: PLR0904
 
     def get_table(
         self,
-        full_table_name: str,
+        full_table_name: str | FullyQualifiedName,
         column_names: list[str] | None = None,
     ) -> sa.Table:
         """Return a table object.
@@ -643,7 +816,9 @@ class SQLConnector:  # noqa: PLR0904
             schema=schema_name,
         )
 
-    def column_exists(self, full_table_name: str, column_name: str) -> bool:
+    def column_exists(
+        self, full_table_name: str | FullyQualifiedName, column_name: str
+    ) -> bool:
         """Determine if the target table already exists.
 
         Args:
@@ -666,7 +841,7 @@ class SQLConnector:  # noqa: PLR0904
 
     def create_empty_table(
         self,
-        full_table_name: str,
+        full_table_name: str | FullyQualifiedName,
         schema: dict,
         primary_keys: t.Sequence[str] | None = None,
         partition_keys: list[str] | None = None,
@@ -715,7 +890,7 @@ class SQLConnector:  # noqa: PLR0904
 
     def _create_empty_column(
         self,
-        full_table_name: str,
+        full_table_name: str | FullyQualifiedName,
         column_name: str,
         sql_type: sa.types.TypeEngine,
     ) -> None:
@@ -753,7 +928,7 @@ class SQLConnector:  # noqa: PLR0904
 
     def prepare_table(
         self,
-        full_table_name: str,
+        full_table_name: str | FullyQualifiedName,
         schema: dict,
         primary_keys: t.Sequence[str],
         partition_keys: list[str] | None = None,
@@ -797,7 +972,7 @@ class SQLConnector:  # noqa: PLR0904
 
     def prepare_column(
         self,
-        full_table_name: str,
+        full_table_name: str | FullyQualifiedName,
         column_name: str,
         sql_type: sa.types.TypeEngine,
     ) -> None:
@@ -822,7 +997,9 @@ class SQLConnector:  # noqa: PLR0904
             sql_type=sql_type,
         )
 
-    def rename_column(self, full_table_name: str, old_name: str, new_name: str) -> None:
+    def rename_column(
+        self, full_table_name: str | FullyQualifiedName, old_name: str, new_name: str
+    ) -> None:
         """Rename the provided columns.
 
         Args:
@@ -885,7 +1062,7 @@ class SQLConnector:  # noqa: PLR0904
         # Get the generic type class
         for opt in sql_types:
             # Get the length
-            opt_len: int = getattr(opt, "length", 0)
+            opt_len: int | None = getattr(opt, "length", 0)
             generic_type = type(opt.as_generic())
 
             if isinstance(generic_type, type):
@@ -951,7 +1128,7 @@ class SQLConnector:  # noqa: PLR0904
 
     def _get_column_type(
         self,
-        full_table_name: str,
+        full_table_name: str | FullyQualifiedName,
         column_name: str,
     ) -> sa.types.TypeEngine:
         """Get the SQL type of the declared column.
@@ -976,7 +1153,7 @@ class SQLConnector:  # noqa: PLR0904
 
     def get_column_add_ddl(
         self,
-        table_name: str,
+        table_name: str | FullyQualifiedName,
         column_name: str,
         column_type: sa.types.TypeEngine,
     ) -> sa.DDL:
@@ -1009,7 +1186,7 @@ class SQLConnector:  # noqa: PLR0904
 
     @staticmethod
     def get_column_rename_ddl(
-        table_name: str,
+        table_name: str | FullyQualifiedName,
         column_name: str,
         new_column_name: str,
     ) -> sa.DDL:
@@ -1037,7 +1214,7 @@ class SQLConnector:  # noqa: PLR0904
 
     @staticmethod
     def get_column_alter_ddl(
-        table_name: str,
+        table_name: str | FullyQualifiedName,
         column_name: str,
         column_type: sa.types.TypeEngine,
     ) -> sa.DDL:
@@ -1096,7 +1273,7 @@ class SQLConnector:  # noqa: PLR0904
 
     def _adapt_column_type(
         self,
-        full_table_name: str,
+        full_table_name: str | FullyQualifiedName,
         column_name: str,
         sql_type: sa.types.TypeEngine,
     ) -> None:
@@ -1187,7 +1364,7 @@ class SQLConnector:  # noqa: PLR0904
     def delete_old_versions(
         self,
         *,
-        full_table_name: str,
+        full_table_name: str | FullyQualifiedName,
         version_column_name: str,
         current_version: int,
     ) -> None:
