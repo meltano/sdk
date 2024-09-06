@@ -6,6 +6,7 @@ import typing as t
 
 from singer_sdk import SQLConnector, SQLStream, SQLTap
 from singer_sdk import typing as th
+from singer_sdk._singerlib.encoding._msgspec import MsgSpecWriter  # noqa: PLC2701
 
 DB_PATH_CONFIG = "path_to_db"
 
@@ -39,7 +40,7 @@ class SQLiteStream(SQLStream):
     STATE_MSG_FREQUENCY = 10
 
 
-class SQLiteTap(SQLTap):
+class SQLiteTap(MsgSpecWriter, SQLTap):
     """The Tap class for SQLite."""
 
     name = "tap-sqlite-sample"
