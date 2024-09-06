@@ -496,7 +496,7 @@ class SQLConnector:  # noqa: PLR0904
         # Detect key properties
         possible_primary_keys: list[list[str]] = []
         pk_def = inspected.get_pk_constraint(table_name, schema=schema_name)
-        if pk_def and "constrained_columns" in pk_def:
+        if pk_def and "constrained_columns" in pk_def:  # type: ignore[redundant-expr]
             possible_primary_keys.append(pk_def["constrained_columns"])
 
         # An element of the columns list is ``None`` if it's an expression and is
@@ -953,7 +953,7 @@ class SQLConnector:  # noqa: PLR0904
         # Get the generic type class
         for opt in sql_types:
             # Get the length
-            opt_len: int = getattr(opt, "length", 0)
+            opt_len: int | None = getattr(opt, "length", 0)
             generic_type = type(opt.as_generic())
 
             if isinstance(generic_type, type):
