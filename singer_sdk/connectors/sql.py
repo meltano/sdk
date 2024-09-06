@@ -166,15 +166,14 @@ class SQLToJSONSchema:
         return th.NumberType.type_dict  # type: ignore[no-any-return]
 
     @to_jsonschema.register
-    def string_to_jsonschema(self, column_type: sa.types.String) -> dict:  # noqa: ARG002, PLR6301
+    def string_to_jsonschema(self, column_type: sa.types.String) -> dict:  # noqa: PLR6301
         """Return a JSON Schema representation of a generic string type.
 
         Args:
             column_type (:column_type:`String`): The column type.
         """
-        # TODO: Enable support for maxLength.
-        # if sa_type.length:
-        #     return StringType(max_length=sa_type.length).type_dict  # noqa: ERA001
+        if column_type.length:
+            return th.StringType(max_length=column_type.length).type_dict  # type: ignore[no-any-return]
         return th.StringType.type_dict  # type: ignore[no-any-return]
 
     @to_jsonschema.register
