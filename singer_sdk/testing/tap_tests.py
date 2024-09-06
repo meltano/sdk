@@ -48,7 +48,7 @@ class TapDiscoveryTest(TapTestTemplate):
             catalog=catalog,
             **kwargs,
         )
-        assert tap2
+        assert tap2  # type: ignore[truthy-bool]
 
 
 class TapStreamConnectionTest(TapTestTemplate):
@@ -218,7 +218,7 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
         try:
             for v in self.non_null_attribute_values:
                 error_message = f"Unable to parse value ('{v}') with datetime parser."
-                assert datetime_fromisoformat(v), error_message
+                assert datetime_fromisoformat(v), error_message  # type: ignore[truthy-bool]
         except ValueError as e:
             raise AssertionError(error_message) from e
 

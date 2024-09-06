@@ -189,7 +189,7 @@ class DefaultInstanceProperty:
             The property value.
         """
         if instance is None:
-            instance = owner()
+            instance = owner()  # type: ignore[unreachable]
         return self.fget(instance)
 
 
@@ -1134,13 +1134,10 @@ def to_jsonschema_type(
         type_name = from_type
     elif isinstance(from_type, sa.types.TypeEngine):
         type_name = type(from_type).__name__
-    elif isinstance(from_type, type) and issubclass(
-        from_type,
-        sa.types.TypeEngine,
-    ):
+    elif issubclass(from_type, sa.types.TypeEngine):
         type_name = from_type.__name__
     else:  # pragma: no cover
-        msg = "Expected `str` or a SQLAlchemy `TypeEngine` object or type."
+        msg = "Expected `str` or a SQLAlchemy `TypeEngine` object or type."  # type: ignore[unreachable]
         # TODO: this should be a TypeError, but it's a breaking change.
         raise ValueError(msg)  # noqa: TRY004
 

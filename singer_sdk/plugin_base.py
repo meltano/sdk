@@ -153,7 +153,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         elif isinstance(config, dict):
             config_dict = config
         else:
-            msg = f"Error parsing config of type '{type(config).__name__}'."
+            msg = f"Error parsing config of type '{type(config).__name__}'."  # type: ignore[unreachable]
             raise ValueError(msg)
         if parse_env_config:
             self.logger.info("Parsing env var for settings config...")
