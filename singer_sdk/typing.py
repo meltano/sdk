@@ -53,6 +53,7 @@ Note:
 from __future__ import annotations
 
 import json
+import sys
 import typing as t
 
 import sqlalchemy as sa
@@ -65,9 +66,13 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
 )
 
-if t.TYPE_CHECKING:
-    import sys
+if sys.version_info < (3, 13):
+    from typing_extensions import deprecated
+else:
+    from typing import deprecated  # noqa: ICN003 # pragma: no cover
 
+
+if t.TYPE_CHECKING:
     from jsonschema.protocols import Validator
 
     if sys.version_info >= (3, 10):
@@ -1086,6 +1091,10 @@ class PropertiesList(ObjectType):
         return self.wrapped.values().__iter__()
 
 
+@deprecated(
+    "Use `SQLToJSONSchema` instead.",
+    category=DeprecationWarning,
+)
 def to_jsonschema_type(
     from_type: str | sa.types.TypeEngine | type[sa.types.TypeEngine],
 ) -> dict:
@@ -1119,9 +1128,9 @@ def to_jsonschema_type(
         "bool": BooleanType.type_dict,
         "variant": StringType.type_dict,
     }
-    if isinstance(from_type, str):
+    if isinstance(from_type, str):  # pragma: no cover
         type_name = from_type
-    elif isinstance(from_type, sa.types.TypeEngine):
+    elif isinstance(from_type, sa.types.TypeEngine):  # pragma: no cover
         type_name = type(from_type).__name__
     elif issubclass(from_type, sa.types.TypeEngine):
         type_name = from_type.__name__

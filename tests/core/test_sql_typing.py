@@ -70,5 +70,7 @@ def test_convert_sql_type_to_jsonschema_type(
     sql_type: sa.types.TypeEngine,
     is_of_jsonschema_type: dict,
 ):
-    result = th.to_jsonschema_type(sql_type)
+    with pytest.warns(DeprecationWarning):
+        result = th.to_jsonschema_type(sql_type)
+
     assert result == is_of_jsonschema_type
