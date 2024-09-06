@@ -49,6 +49,6 @@ Then, you need to use your custom type mapping in your connector:
 ```python
 class MyConnector(SQLConnector):
     @functools.cached_property
-    def type_mapping(self):
+    def sql_to_jsonschema(self):
         return CustomSQLToJSONSchema()
 ```

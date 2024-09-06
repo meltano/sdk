@@ -241,7 +241,7 @@ class SQLConnector:  # noqa: PLR0904
         return logging.getLogger("sqlconnector")
 
     @functools.cached_property
-    def type_mapping(self) -> SQLToJSONSchema:
+    def sql_to_jsonschema(self) -> SQLToJSONSchema:
         """Return the type mapper object.
 
         Override this method to provide a custom mapping for your SQL dialect.
@@ -383,7 +383,7 @@ class SQLConnector:  # noqa: PLR0904
             The JSON Schema representation of the provided type.
         """
         if isinstance(sql_type, sa.types.TypeEngine):
-            return self.type_mapping.to_jsonschema(sql_type)
+            return self.sql_to_jsonschema.to_jsonschema(sql_type)
 
         if isinstance(sql_type, str):  # pragma: no cover
             warnings.warn(
