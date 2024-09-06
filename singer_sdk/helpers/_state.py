@@ -118,7 +118,7 @@ def get_writeable_state_dict(
         ValueError: Raise an error if duplicate entries are found.
     """
     if tap_state is None:
-        msg = "Cannot write state to missing state dictionary."
+        msg = "Cannot write state to missing state dictionary."  # type: ignore[unreachable]
         raise ValueError(msg)
 
     if "bookmarks" not in tap_state:

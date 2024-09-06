@@ -161,9 +161,9 @@ class SchemaMessage(Message):
         self.type = SingerMessageType.SCHEMA
 
         if isinstance(self.bookmark_properties, (str, bytes)):
-            self.bookmark_properties = [self.bookmark_properties]
+            self.bookmark_properties = [self.bookmark_properties]  # type: ignore[unreachable]
         if self.bookmark_properties and not isinstance(self.bookmark_properties, list):
-            msg = "bookmark_properties must be a string or list of strings"
+            msg = "bookmark_properties must be a string or list of strings"  # type: ignore[unreachable]
             raise ValueError(msg)
 
 
