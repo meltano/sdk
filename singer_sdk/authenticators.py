@@ -5,14 +5,19 @@ from __future__ import annotations
 import base64
 import datetime
 import math
+import sys
 import typing as t
-import warnings
 from types import MappingProxyType
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 import requests
 
 from singer_sdk.helpers._util import utc_now
+
+if sys.version_info < (3, 13):
+    from typing_extensions import deprecated
+else:
+    from warnings import deprecated
 
 if t.TYPE_CHECKING:
     import logging
@@ -71,7 +76,7 @@ class SingletonMeta(type):
             A singleton instance of the derived class.
         """
         if cls.__single_instance:
-            return cls.__single_instance
+            return cls.__single_instance  # type: ignore[unreachable]
         single_obj = cls.__new__(cls, None)  # type: ignore[call-overload]
         single_obj.__init__(*args, **kwargs)
         cls.__single_instance = single_obj
@@ -165,7 +170,7 @@ class SimpleAuthenticator(APIAuthenticatorBase):
         """
         super().__init__(stream=stream)
         if self.auth_headers is None:
-            self.auth_headers = {}
+            self.auth_headers = {}  # type: ignore[unreachable]
         if auth_headers:
             self.auth_headers.update(auth_headers)
 
@@ -206,11 +211,11 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
 
         if location == "header":
             if self.auth_headers is None:
-                self.auth_headers = {}
+                self.auth_headers = {}  # type: ignore[unreachable]
             self.auth_headers.update(auth_credentials)
         elif location == "params":
             if self.auth_params is None:
-                self.auth_params = {}
+                self.auth_params = {}  # type: ignore[unreachable]
             self.auth_params.update(auth_credentials)
 
     @classmethod
@@ -255,7 +260,7 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
         auth_credentials = {"Authorization": f"Bearer {token}"}
 
         if self.auth_headers is None:
-            self.auth_headers = {}
+            self.auth_headers = {}  # type: ignore[unreachable]
         self.auth_headers.update(auth_credentials)
 
     @classmethod
@@ -277,6 +282,10 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
         return cls(stream=stream, token=token)
 
 
+@deprecated(
+    "BasicAuthenticator is deprecated. Use requests.auth.HTTPBasicAuth instead.",
+    category=DeprecationWarning,
+)
 class BasicAuthenticator(APIAuthenticatorBase):
     """Implements basic authentication for REST Streams.
 
@@ -302,19 +311,13 @@ class BasicAuthenticator(APIAuthenticatorBase):
             password: API password.
         """
         super().__init__(stream=stream)
-        warnings.warn(
-            "BasicAuthenticator is deprecated. Use "
-            "requests.auth.HTTPBasicAuth instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
         credentials = f"{username}:{password}".encode()
         auth_token = base64.b64encode(credentials).decode("ascii")
         auth_credentials = {"Authorization": f"Basic {auth_token}"}
 
         if self.auth_headers is None:
-            self.auth_headers = {}
+            self.auth_headers = {}  # type: ignore[unreachable]
         self.auth_headers.update(auth_credentials)
 
     @classmethod

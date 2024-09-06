@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import logging
+import sys
 import typing as t
 import warnings
 from collections import UserString
@@ -18,6 +19,11 @@ from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._util import dump_json, load_json
 from singer_sdk.helpers.capabilities import TargetLoadMethods
+
+if sys.version_info < (3, 13):
+    from typing_extensions import deprecated
+else:
+    from warnings import deprecated
 
 if t.TYPE_CHECKING:
     from sqlalchemy.engine import Engine
@@ -250,6 +256,14 @@ class SQLConnector:  # noqa: PLR0904
         with self._engine.connect().execution_options(stream_results=True) as conn:
             yield conn
 
+    @deprecated(
+        "`SQLConnector.create_sqlalchemy_connection` is deprecated. "
+        "If you need to execute something that isn't available "
+        "on the connector currently, make a child class and "
+        "add your required method on that connector.",
+        category=DeprecationWarning,
+        stacklevel=1,
+    )
     def create_sqlalchemy_connection(self) -> sa.engine.Connection:
         """(DEPRECATED) Return a new SQLAlchemy connection using the provided config.
 
@@ -269,16 +283,14 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             A newly created SQLAlchemy engine object.
         """
-        warnings.warn(
-            "`SQLConnector.create_sqlalchemy_connection` is deprecated. "
-            "If you need to execute something that isn't available "
-            "on the connector currently, make a child class and "
-            "add your required method on that connector.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         return self._engine.connect().execution_options(stream_results=True)
 
+    @deprecated(
+        "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override "
+        "`_engine` or `sqlalchemy_url` instead.",
+        category=DeprecationWarning,
+        stacklevel=1,
+    )
     def create_sqlalchemy_engine(self) -> Engine:
         """(DEPRECATED) Return a new SQLAlchemy engine using the provided config.
 
@@ -288,12 +300,6 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             A newly created SQLAlchemy engine object.
         """
-        warnings.warn(
-            "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override"
-            "`_engine` or sqlalchemy_url` instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         return self._engine
 
     @property
@@ -600,7 +606,7 @@ class SQLConnector:  # noqa: PLR0904
         # Detect key properties
         possible_primary_keys: list[list[str]] = []
         pk_def = inspected.get_pk_constraint(table_name, schema=schema_name)
-        if pk_def and "constrained_columns" in pk_def:
+        if pk_def and "constrained_columns" in pk_def:  # type: ignore[redundant-expr]
             possible_primary_keys.append(pk_def["constrained_columns"])
 
         # An element of the columns list is ``None`` if it's an expression and is
@@ -1057,7 +1063,7 @@ class SQLConnector:  # noqa: PLR0904
         # Get the generic type class
         for opt in sql_types:
             # Get the length
-            opt_len: int = getattr(opt, "length", 0)
+            opt_len: int | None = getattr(opt, "length", 0)
             generic_type = type(opt.as_generic())
 
             if isinstance(generic_type, type):
