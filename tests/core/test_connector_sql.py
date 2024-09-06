@@ -405,7 +405,6 @@ def test_fully_qualified_name_empty_error():
         pytest.param(
             sa.types.VARCHAR(length=127),
             {"type": ["string"], "maxLength": 127},
-            marks=pytest.mark.xfail,
             id="varchar-length",
         ),
         pytest.param(sa.types.TEXT(), {"type": ["string"]}, id="text"),
