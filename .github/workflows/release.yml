@@ -65,7 +65,7 @@ jobs:
         name: Packages
         path: dist
     - name: Publish
-      uses: pypa/gh-action-pypi-publish@v1.10.0
+      uses: pypa/gh-action-pypi-publish@v1.10.1
 
   upload-to-release:
     name: Upload files to release
