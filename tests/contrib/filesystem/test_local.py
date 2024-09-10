@@ -34,23 +34,24 @@ def test_directory_list_contents(tmp_path: pathlib.Path):
     """Test listing a directory."""
 
     # Create a directory with a file and a root-level file
-    dirpath = tmp_path / "test"
+    (tmp_path / "a.txt").write_text("Hello from the root!")
+    dirpath = tmp_path / "b"
     dirpath.mkdir()
-    (dirpath / "file.txt").write_text("Hello from a directory!")
-    (tmp_path / "file.txt").write_text("Hello from the root!")
+    (dirpath / "c.txt").write_text("Hello from a directory!")
 
     directory = local.LocalDirectory(tmp_path)
     contents = list(directory.list_contents())
     assert len(contents) == 3
 
-    root_file, directory, nested_file = contents
+    # Get the root file, the directory, and the nested file regardless of order
+    root_file, directory, nested_file = sorted(contents, key=lambda x: x.path.name)
     assert isinstance(root_file, local.LocalFile)
-    assert root_file.path.name == "file.txt"
+    assert root_file.path.name == "a.txt"
     assert root_file.read_text() == "Hello from the root!"
 
     assert isinstance(directory, local.LocalDirectory)
-    assert directory.path.name == "test"
+    assert directory.path.name == "b"
 
     assert isinstance(nested_file, local.LocalFile)
-    assert nested_file.path.name == "file.txt"
+    assert nested_file.path.name == "c.txt"
     assert nested_file.read_text() == "Hello from a directory!"
