@@ -39,7 +39,7 @@ class LocalFile(base.AbstractFile):
             return file.read(size)
 
 
-class LocalDirectory(base.AbstractDirectory[t.Union[LocalFile, "LocalDirectory"]]):
+class LocalDirectory(base.AbstractDirectory[LocalFile]):
     """Local directory operations."""
 
     def __init__(self, dirpath: str | pathlib.Path):

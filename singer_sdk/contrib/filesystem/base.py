@@ -5,7 +5,7 @@ from __future__ import annotations
 import abc
 import typing as t
 
-__all__ = ["AbstractDirectory", "AbstractFile", "AbstractFileSystem", "Node"]
+__all__ = ["AbstractDirectory", "AbstractFile", "AbstractFileSystem"]
 
 
 class AbstractFile(abc.ABC):
@@ -24,14 +24,15 @@ class AbstractFile(abc.ABC):
         return self.read()
 
 
-Node = t.TypeVar("Node", AbstractFile, "AbstractDirectory")
+_F = t.TypeVar("_F")
+_D = t.TypeVar("_D")
 
 
-class AbstractDirectory(abc.ABC, t.Generic[Node]):
+class AbstractDirectory(abc.ABC, t.Generic[_F]):
     """Abstract class for directory operations."""
 
     @abc.abstractmethod
-    def list_contents(self) -> t.Generator[Node, None, None]:
+    def list_contents(self: _D) -> t.Generator[_F | _D, None, None]:
         """List files in the directory.
 
         Yields:
