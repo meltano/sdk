@@ -1,10 +1,14 @@
 # Building SQL taps
 
-## Default type mapping
+## Mapping SQL types to JSON Schema
+
+Starting with the `v0.41.0`, the Meltano Singer SDK provides a clean way to map SQL types to JSON Schema. This is useful when the SQL dialect you are using has custom types that need to be mapped accordingly to JSON Schema.
+
+### Default type mapping
 
 The Singer SDK automatically handles the most common SQLAlchemy column types, using [`functools.singledispatchmethod`](inv:python:py:class:#functools.singledispatchmethod) to process each type. See the [`SQLToJSONSchema`](connectors.sql.SQLToJSONSchema) reference documentation for details.
 
-## Custom type mapping
+### Custom type mapping
 
 If the class above doesn't cover all the types supported by the SQLAlchemy dialect in your tap, you can subclass it and override or extend with a new method for the type you need to support:
 
