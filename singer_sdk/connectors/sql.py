@@ -175,8 +175,8 @@ class SQLToJSONSchema:
             column_type (:column_type:`String`): The column type.
 
         .. versionchanged:: 0.41.0
-           The ``length`` attribute is now used to determine the maximum length of the
-           string type.
+           The :column_type:`length <String.params.length>` attribute is now used to
+           determine the maximum length of the string type.
         """
         if column_type.length:
             return th.StringType(max_length=column_type.length).type_dict  # type: ignore[no-any-return]
