@@ -162,7 +162,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             elif isinstance(schema, singer.Schema):
                 self._schema = schema.to_dict()
             else:
-                msg = f"Unexpected type {type(schema).__name__} for arg 'schema'."
+                msg = f"Unexpected type {type(schema).__name__} for arg 'schema'."  # type: ignore[unreachable]
                 raise ValueError(msg)
 
         if self.schema_filepath:
@@ -187,7 +187,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if self._stream_maps:
             return self._stream_maps
 
-        if self._tap.mapper:
+        if self._tap.mapper:  # type: ignore[truthy-bool]
             self._stream_maps = self._tap.mapper.stream_maps[self.name]
             self.logger.info(
                 "Tap has custom mapper. Using %d provided map(s).",

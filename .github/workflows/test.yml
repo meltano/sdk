@@ -106,6 +106,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       if: always() && (matrix.session == 'tests')
       with:
+        include-hidden-files: true
         name: coverage-data-nox_${{ matrix.session }}-${{ matrix.os }}-py${{ matrix.python-version }}_sqlalchemy_${{ matrix.sqlalchemy }}
         path: ".coverage.*"
 

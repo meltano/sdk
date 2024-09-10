@@ -11,7 +11,7 @@ from sqlalchemy.engine.default import DefaultDialect
 
 from samples.sample_duckdb import DuckDBConnector
 from singer_sdk.connectors import SQLConnector
-from singer_sdk.connectors.sql import FullyQualifiedName
+from singer_sdk.connectors.sql import FullyQualifiedName, SQLToJSONSchema
 from singer_sdk.exceptions import ConfigValidationError
 
 if t.TYPE_CHECKING:
@@ -20,6 +20,10 @@ if t.TYPE_CHECKING:
 
 def stringify(in_dict):
     return {k: str(v) for k, v in in_dict.items()}
+
+
+class MyType(sa.types.TypeDecorator):
+    impl = sa.types.LargeBinary
 
 
 class TestConnectorSQL:  # noqa: PLR0904
@@ -156,7 +160,7 @@ class TestConnectorSQL:  # noqa: PLR0904
         engine2 = connector._cached_engine
         assert engine1 is engine2
 
-    def test_deprecated_functions_warn(self, connector):
+    def test_deprecated_functions_warn(self, connector: SQLConnector):
         with pytest.deprecated_call():
             connector.create_sqlalchemy_engine()
         with pytest.deprecated_call():
@@ -393,3 +397,81 @@ def test_fully_qualified_name_with_quoting():
 def test_fully_qualified_name_empty_error():
     with pytest.raises(ValueError, match="Could not generate fully qualified name"):
         FullyQualifiedName()
+
+
+@pytest.mark.parametrize(
+    "sql_type, expected_jsonschema_type",
+    [
+        pytest.param(sa.types.VARCHAR(), {"type": ["string"]}, id="varchar"),
+        pytest.param(
+            sa.types.VARCHAR(length=127),
+            {"type": ["string"], "maxLength": 127},
+            id="varchar-length",
+        ),
+        pytest.param(sa.types.TEXT(), {"type": ["string"]}, id="text"),
+        pytest.param(sa.types.INTEGER(), {"type": ["integer"]}, id="integer"),
+        pytest.param(sa.types.BOOLEAN(), {"type": ["boolean"]}, id="boolean"),
+        pytest.param(sa.types.DECIMAL(), {"type": ["number"]}, id="decimal"),
+        pytest.param(sa.types.FLOAT(), {"type": ["number"]}, id="float"),
+        pytest.param(sa.types.REAL(), {"type": ["number"]}, id="real"),
+        pytest.param(sa.types.NUMERIC(), {"type": ["number"]}, id="numeric"),
+        pytest.param(
+            sa.types.DATE(),
+            {"type": ["string"], "format": "date"},
+            id="date",
+        ),
+        pytest.param(
+            sa.types.DATETIME(),
+            {"type": ["string"], "format": "date-time"},
+            id="datetime",
+        ),
+        pytest.param(
+            sa.types.TIMESTAMP(),
+            {"type": ["string"], "format": "date-time"},
+            id="timestamp",
+        ),
+        pytest.param(
+            sa.types.TIME(),
+            {"type": ["string"], "format": "time"},
+            id="time",
+        ),
+        pytest.param(
+            sa.types.BLOB(),
+            {"type": ["string"]},
+            id="unknown",
+        ),
+    ],
+)
+def test_sql_to_json_schema_map(
+    sql_type: sa.types.TypeEngine,
+    expected_jsonschema_type: dict,
+):
+    m = SQLToJSONSchema()
+    assert m.to_jsonschema(sql_type) == expected_jsonschema_type
+
+
+def test_custom_type():
+    class MyMap(SQLToJSONSchema):
+        @SQLToJSONSchema.to_jsonschema.register
+        def custom_number_to_jsonschema(self, column_type: sa.types.NUMERIC) -> dict:
+            """Custom number to JSON schema.
+
+            For example, a scale of 4 translates to a multipleOf 0.0001.
+            """
+            return {"type": ["number"], "multipleOf": 10**-column_type.scale}
+
+        @SQLToJSONSchema.to_jsonschema.register(MyType)
+        def my_type_to_jsonschema(self, column_type) -> dict:  # noqa: ARG002
+            return {"type": ["string"], "contentEncoding": "base64"}
+
+    m = MyMap()
+
+    assert m.to_jsonschema(MyType()) == {
+        "type": ["string"],
+        "contentEncoding": "base64",
+    }
+    assert m.to_jsonschema(sa.types.NUMERIC(scale=2)) == {
+        "type": ["number"],
+        "multipleOf": 0.01,
+    }
+    assert m.to_jsonschema(sa.types.BOOLEAN()) == {"type": ["boolean"]}
