@@ -114,6 +114,8 @@ class SQLToJSONSchema:
     """SQLAlchemy to JSON Schema type mapping helper.
 
     This class provides a mapping from SQLAlchemy types to JSON Schema types.
+
+    .. versionadded:: 0.41.0
     """
 
     @functools.singledispatchmethod
@@ -171,6 +173,10 @@ class SQLToJSONSchema:
 
         Args:
             column_type (:column_type:`String`): The column type.
+
+        .. versionchanged:: 0.41.0
+           The :column_type:`length <String.params.length>` attribute is now used to
+           determine the maximum length of the string type.
         """
         if column_type.length:
             return th.StringType(max_length=column_type.length).type_dict  # type: ignore[no-any-return]
@@ -241,12 +247,11 @@ class SQLConnector:  # noqa: PLR0904
 
     @functools.cached_property
     def sql_to_jsonschema(self) -> SQLToJSONSchema:
-        """Return the type mapper object.
+        """The SQL-to-JSON type mapper object for this SQL connector.
 
-        Override this method to provide a custom mapping for your SQL dialect.
+        Override this property to provide a custom mapping for your SQL dialect.
 
-        Returns:
-            The type mapper object.
+        .. versionadded:: 0.41.0
         """
         return SQLToJSONSchema()
 
@@ -380,6 +385,10 @@ class SQLConnector:  # noqa: PLR0904
 
         Returns:
             The JSON Schema representation of the provided type.
+
+        .. versionchanged:: 0.40.0
+           Support for SQLAlchemy type classes and strings in the ``sql_type`` argument
+           was deprecated. Please pass a SQLAlchemy type object instead.
         """
         if isinstance(sql_type, sa.types.TypeEngine):
             return self.sql_to_jsonschema.to_jsonschema(sql_type)
@@ -445,6 +454,9 @@ class SQLConnector:  # noqa: PLR0904
 
         Returns:
             The fully qualified name as a string.
+
+        .. versionchanged:: 0.40.0
+           A ``FullyQualifiedName`` object is now returned.
         """
         return FullyQualifiedName(
             table=table_name,  # type: ignore[arg-type]
