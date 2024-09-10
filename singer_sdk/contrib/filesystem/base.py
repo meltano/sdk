@@ -5,15 +5,14 @@ from __future__ import annotations
 import abc
 import typing as t
 
+if t.TYPE_CHECKING:
+    import datetime
+
 __all__ = ["AbstractDirectory", "AbstractFile", "AbstractFileSystem"]
 
 
 class AbstractFile(abc.ABC):
     """Abstract class for file operations."""
-
-    @abc.abstractmethod
-    def read(self, size: int = -1) -> str:
-        """Read the file contents."""
 
     def read_text(self) -> str:
         """Read the entire file as text.
@@ -22,6 +21,20 @@ class AbstractFile(abc.ABC):
             The file contents as a string.
         """
         return self.read()
+
+    @abc.abstractmethod
+    def read(self, size: int = -1) -> str:
+        """Read the file contents."""
+
+    @property
+    def creation_time(self) -> datetime.datetime:
+        """Get the creation time of the file."""
+        raise NotImplementedError
+
+    @property
+    def modified_time(self) -> datetime.datetime:
+        """Get the last modified time of the file."""
+        raise NotImplementedError
 
 
 _F = t.TypeVar("_F")

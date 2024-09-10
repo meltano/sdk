@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import pathlib
 import typing as t
+from datetime import datetime
+from pathlib import Path
 
 from singer_sdk.contrib.filesystem import base
 
@@ -13,10 +14,10 @@ __all__ = ["LocalDirectory", "LocalFile"]
 class LocalFile(base.AbstractFile):
     """Local file operations."""
 
-    def __init__(self, filepath: str | pathlib.Path):
+    def __init__(self, filepath: str | Path):
         """Create a new LocalFile instance."""
         self._filepath = filepath
-        self.path = pathlib.Path(self._filepath).absolute()
+        self.path = Path(self._filepath).absolute()
 
     def __repr__(self) -> str:
         """A string representation of the LocalFile.
@@ -38,14 +39,36 @@ class LocalFile(base.AbstractFile):
         with self.path.open("r") as file:
             return file.read(size)
 
+    @property
+    def creation_time(self) -> datetime:
+        """Get the creation time of the file.
+
+        Returns:
+            The creation time of the file.
+        """
+        stat = self.path.stat()
+        try:
+            return datetime.fromtimestamp(stat.st_birthtime).astimezone()  # type: ignore[attr-defined]
+        except AttributeError:
+            return datetime.fromtimestamp(stat.st_ctime).astimezone()
+
+    @property
+    def modified_time(self) -> datetime:
+        """Get the last modified time of the file.
+
+        Returns:
+            The last modified time of the file.
+        """
+        return datetime.fromtimestamp(self.path.stat().st_mtime).astimezone()
+
 
 class LocalDirectory(base.AbstractDirectory[LocalFile]):
     """Local directory operations."""
 
-    def __init__(self, dirpath: str | pathlib.Path):
+    def __init__(self, dirpath: str | Path):
         """Create a new LocalDirectory instance."""
         self._dirpath = dirpath
-        self.path = pathlib.Path(self._dirpath).absolute()
+        self.path = Path(self._dirpath).absolute()
 
     def __repr__(self) -> str:
         """A string representation of the LocalDirectory.

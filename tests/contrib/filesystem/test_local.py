@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import datetime
 import typing as t
+import unittest.mock
 
 from singer_sdk.contrib.filesystem import local
 
@@ -28,6 +30,36 @@ def test_file_read(tmp_path: pathlib.Path):
 
     file = local.LocalFile(path)
     assert file.read(3) == "Hel"
+
+
+def test_file_creation_time(tmp_path: pathlib.Path):
+    """Test getting the creation time of a file."""
+
+    path = tmp_path / "test.txt"
+    path.write_text("Hello, world!")
+
+    file = local.LocalFile(path)
+    assert isinstance(file.creation_time, datetime.datetime)
+
+    with unittest.mock.patch("pathlib.Path.stat") as mock_stat:
+        ts = 1704067200
+        mock_stat.return_value = unittest.mock.Mock(st_birthtime=ts, st_ctime=ts)
+        assert file.creation_time.timestamp() == ts
+
+
+def test_file_modified_time(tmp_path: pathlib.Path):
+    """Test getting the last modified time of a file."""
+
+    path = tmp_path / "test.txt"
+    path.write_text("Hello, world!")
+
+    file = local.LocalFile(path)
+    assert isinstance(file.modified_time, datetime.datetime)
+
+    with unittest.mock.patch("pathlib.Path.stat") as mock_stat:
+        ts = 1704067200
+        mock_stat.return_value = unittest.mock.Mock(st_mtime=ts)
+        assert file.modified_time.timestamp() == ts
 
 
 def test_directory_list_contents(tmp_path: pathlib.Path):
