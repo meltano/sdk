@@ -392,6 +392,7 @@ unfixable = [
     "DOC",
     "FBT001",
     "FBT003",
+    "INP",      # Allow implicit namespace packages in tests
     "PLR2004",
     "S101",
     "SLF001",
