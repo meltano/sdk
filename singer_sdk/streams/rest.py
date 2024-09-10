@@ -157,6 +157,8 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
 
         Returns:
             The user agent string.
+
+        .. versionadded:: 0.40.0
         """
         return self.config.get(
             "user_agent",
