@@ -247,12 +247,9 @@ class SQLConnector:  # noqa: PLR0904
 
     @functools.cached_property
     def sql_to_jsonschema(self) -> SQLToJSONSchema:
-        """Return the type mapper object.
+        """The SQL-to-JSON type mapper object for this SQL connector.
 
-        Override this method to provide a custom mapping for your SQL dialect.
-
-        Returns:
-            The type mapper object.
+        Override this property to provide a custom mapping for your SQL dialect.
 
         .. versionadded:: 0.41.0
         """
