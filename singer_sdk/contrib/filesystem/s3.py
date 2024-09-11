@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import functools
 import typing as t
 
 from singer_sdk.contrib.filesystem import base
@@ -24,6 +23,7 @@ class S3File(base.AbstractFile):
         self._client = client
         self._bucket = bucket
         self._key = key
+        self._s3_object: GetObjectOutputTypeDef | None = None
 
     def __repr__(self) -> str:
         """A string representation of the S3File.
@@ -33,10 +33,16 @@ class S3File(base.AbstractFile):
         """
         return f"S3File({self._key})"
 
-    @functools.cached_property
+    @property
     def s3_object(self) -> GetObjectOutputTypeDef:
         """Get the S3 object."""
-        return self._client.get_object(Bucket=self._bucket, Key=self._key)
+        if self._s3_object is None:
+            self._s3_object = self._client.get_object(
+                Bucket=self._bucket,
+                Key=self._key,
+            )
+
+        return self._s3_object
 
     def read(self, size: int = -1) -> bytes:
         """Read the file contents.
@@ -48,8 +54,9 @@ class S3File(base.AbstractFile):
             The file contents as a string.
         """
         data = self.s3_object["Body"].read(amt=size)
+
         # Clear the cache so that the next read will re-fetch the object
-        del self.s3_object
+        self._s3_object = None
         return data
 
     @property
