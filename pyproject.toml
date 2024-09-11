@@ -126,6 +126,7 @@ duckdb = ">=0.8.0"
 duckdb-engine = { version = ">=0.9.4", python = "<4" }
 
 fastjsonschema = ">=2.19.1"
+moto = ">=5.0.14"
 pytest-benchmark = ">=4.0.0"
 pytest-snapshot = ">=0.9.0"
 pytz = ">=2022.2.1"
@@ -135,6 +136,7 @@ time-machine = ">=2.10.0"
 xdoctest = ">=1.1.1"
 
 [tool.poetry.group.typing.dependencies]
+boto3-stubs = {extras = ["s3"], version = ">=1.35.16"}
 mypy = ">=1.9"
 types-jsonschema = ">=4.17.0.6"
 types-pytz = ">=2022.7.1.2"
@@ -174,6 +176,8 @@ filterwarnings = [
     "ignore:ast.Str is deprecated:DeprecationWarning:simpleeval",
     # https://github.com/joblib/joblib/pull/1518
     "ignore:Attribute n is deprecated:DeprecationWarning:joblib._utils",
+    # https://github.com/boto/boto3/issues/3889
+    "ignore:datetime\\.datetime\\.utcnow\\(\\) is deprecated:DeprecationWarning:botocore",
 ]
 log_cli_level = "INFO"
 markers = [
