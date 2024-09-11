@@ -17,8 +17,8 @@ import sqlalchemy as sa
 from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.helpers import capabilities
 from singer_sdk.helpers._util import dump_json, load_json
-from singer_sdk.helpers.capabilities import TargetLoadMethods
 
 if sys.version_info < (3, 13):
     from typing_extensions import deprecated
@@ -964,7 +964,7 @@ class SQLConnector:  # noqa: PLR0904
                 as_temp_table=as_temp_table,
             )
             return
-        if self.config["load_method"] == TargetLoadMethods.OVERWRITE:
+        if self.config["load_method"] == capabilities.TargetLoadMethods.OVERWRITE:
             self.get_table(full_table_name=full_table_name).drop(self._engine)
             self.create_empty_table(
                 full_table_name=full_table_name,
