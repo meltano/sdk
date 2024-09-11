@@ -48,15 +48,15 @@ class TestS3Filesystem:
         assert file.modified_time is not None
         assert isinstance(file.modified_time, datetime.datetime)
 
-    def test_directory_list_contents(self, client: S3Client, bucket: str):
+    def test_root_list_contents(self, client: S3Client, bucket: str):
         """Test listing a directory."""
-        bucket = "test-bucket"
-        client.put_object(
-            Bucket=bucket, Key="path/to/dir/test.txt", Body=b"Hello, world!"
-        )
+        prefix = "path/to/dir/"
+        key = "path/to/dir/test.txt"
 
-        directory = s3fs.S3Directory(client, bucket=bucket, prefix="path/to/dir/")
-        contents = list(directory.list_contents())
+        client.put_object(Bucket=bucket, Key=key, Body=b"Hello, world!")
+        fs = s3fs.S3FileSystem(client, bucket=bucket, prefix=prefix)
+
+        contents = list(fs.root.list_contents())
         assert len(contents) == 1
         assert isinstance(contents[0], s3fs.S3File)
         assert contents[0]._key == "path/to/dir/test.txt"

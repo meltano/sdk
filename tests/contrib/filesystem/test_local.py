@@ -59,7 +59,7 @@ class TestLocalFilesystem:
             mock_stat.return_value = unittest.mock.Mock(st_mtime=ts)
             assert file.modified_time.timestamp() == ts
 
-    def test_directory_list_contents(self, tmp_path: pathlib.Path):
+    def test_root_list_contents(self, tmp_path: pathlib.Path):
         """Test listing a directory."""
 
         # Create a directory with a file and a root-level file
@@ -68,8 +68,8 @@ class TestLocalFilesystem:
         dirpath.mkdir()
         (dirpath / "c.txt").write_text("Hello from a directory!")
 
-        directory = local.LocalDirectory(tmp_path)
-        contents = list(directory.list_contents())
+        fs = local.LocalFileSystem(tmp_path)
+        contents = list(fs.root.list_contents())
         assert len(contents) == 3
 
         # Get the root file, the directory, and the nested file regardless of order

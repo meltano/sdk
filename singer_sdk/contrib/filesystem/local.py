@@ -8,7 +8,7 @@ from pathlib import Path
 
 from singer_sdk.contrib.filesystem import base
 
-__all__ = ["LocalDirectory", "LocalFile"]
+__all__ = ["LocalDirectory", "LocalFile", "LocalFileSystem"]
 
 
 class LocalFile(base.AbstractFile):
@@ -91,3 +91,16 @@ class LocalDirectory(base.AbstractDirectory[LocalFile]):
                 yield from subdir.list_contents()
             else:
                 yield LocalFile(child)
+
+
+class LocalFileSystem(base.AbstractFileSystem[LocalFile, LocalDirectory]):
+    """Local filesystem operations."""
+
+    def __init__(self, root: str) -> None:
+        """Create a new LocalFileSystem instance."""
+        self._root_dir = LocalDirectory(root)
+
+    @property
+    def root(self) -> LocalDirectory:
+        """Get the root path."""
+        return self._root_dir

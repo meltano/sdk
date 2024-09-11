@@ -13,7 +13,7 @@ if t.TYPE_CHECKING:
     from mypy_boto3_s3.client import S3Client
     from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
 
-__all__ = ["S3Directory", "S3File"]
+__all__ = ["S3Directory", "S3File", "S3FileSystem"]
 
 
 class S3File(base.AbstractFile):
@@ -93,3 +93,19 @@ class S3Directory(base.AbstractDirectory[S3File]):
                     yield S3Directory(self._client, self._bucket, key)
                 else:
                     yield S3File(self._client, self._bucket, key)
+
+
+class S3FileSystem(base.AbstractFileSystem):
+    """S3 file system operations."""
+
+    def __init__(self, client: S3Client, *, bucket: str, prefix: str):
+        """Create a new S3FileSystem instance."""
+        super().__init__()
+        self._client = client
+        self._bucket = bucket
+        self._prefix = prefix
+
+    @property
+    def root(self) -> S3Directory:
+        """Get the root directory."""
+        return S3Directory(self._client, self._bucket, self._prefix)

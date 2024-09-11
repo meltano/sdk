@@ -55,9 +55,11 @@ class AbstractDirectory(abc.ABC, t.Generic[_F]):
         yield from []
 
 
-class AbstractFileSystem(abc.ABC):
+class AbstractFileSystem(abc.ABC, t.Generic[_F, _D]):
     """Abstract class for file system operations."""
 
+    @property
     @abc.abstractmethod
-    def open(self, path: str) -> AbstractFile:
-        """Open a file for reading."""
+    def root(self) -> _D:
+        """Get the root path."""
+        raise NotImplementedError
