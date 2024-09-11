@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import functools
 import logging
+import sys
 import typing as t
 import warnings
 from collections import UserString
@@ -17,6 +19,11 @@ from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._util import dump_json, load_json
 from singer_sdk.helpers.capabilities import TargetLoadMethods
+
+if sys.version_info < (3, 13):
+    from typing_extensions import deprecated
+else:
+    from warnings import deprecated
 
 if t.TYPE_CHECKING:
     from sqlalchemy.engine import Engine
@@ -103,6 +110,88 @@ class FullyQualifiedName(UserString):
         return part
 
 
+class SQLToJSONSchema:
+    """SQLAlchemy to JSON Schema type mapping helper.
+
+    This class provides a mapping from SQLAlchemy types to JSON Schema types.
+
+    .. versionadded:: 0.41.0
+    """
+
+    @functools.singledispatchmethod
+    def to_jsonschema(self, column_type: sa.types.TypeEngine) -> dict:  # noqa: ARG002, D102, PLR6301
+        return th.StringType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def datetime_to_jsonschema(self, column_type: sa.types.DateTime) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a generic datetime type.
+
+        Args:
+            column_type (:column_type:`DateTime`): The column type.
+        """
+        return th.DateTimeType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def date_to_jsonschema(self, column_type: sa.types.Date) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a date type.
+
+        Args:
+            column_type (:column_type:`Date`): The column type.
+        """
+        return th.DateType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def time_to_jsonschema(self, column_type: sa.types.Time) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a time type.
+
+        Args:
+            column_type (:column_type:`Time`): The column type.
+        """
+        return th.TimeType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def integer_to_jsonschema(self, column_type: sa.types.Integer) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a an integer type.
+
+        Args:
+            column_type (:column_type:`Integer`): The column type.
+        """
+        return th.IntegerType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def float_to_jsonschema(self, column_type: sa.types.Numeric) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a generic number type.
+
+        Args:
+            column_type (:column_type:`Numeric`): The column type.
+        """
+        return th.NumberType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def string_to_jsonschema(self, column_type: sa.types.String) -> dict:  # noqa: PLR6301
+        """Return a JSON Schema representation of a generic string type.
+
+        Args:
+            column_type (:column_type:`String`): The column type.
+
+        .. versionchanged:: 0.41.0
+           The :column_type:`length <String.params.length>` attribute is now used to
+           determine the maximum length of the string type.
+        """
+        if column_type.length:
+            return th.StringType(max_length=column_type.length).type_dict  # type: ignore[no-any-return]
+        return th.StringType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def boolean_to_jsonschema(self, column_type: sa.types.Boolean) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a boolean type.
+
+        Args:
+            column_type (:column_type:`Boolean`): The column type.
+        """
+        return th.BooleanType.type_dict  # type: ignore[no-any-return]
+
+
 class SQLConnector:  # noqa: PLR0904
     """Base class for SQLAlchemy-based connectors.
 
@@ -156,11 +245,29 @@ class SQLConnector:  # noqa: PLR0904
         """
         return logging.getLogger("sqlconnector")
 
+    @functools.cached_property
+    def sql_to_jsonschema(self) -> SQLToJSONSchema:
+        """The SQL-to-JSON type mapper object for this SQL connector.
+
+        Override this property to provide a custom mapping for your SQL dialect.
+
+        .. versionadded:: 0.41.0
+        """
+        return SQLToJSONSchema()
+
     @contextmanager
     def _connect(self) -> t.Iterator[sa.engine.Connection]:
         with self._engine.connect().execution_options(stream_results=True) as conn:
             yield conn
 
+    @deprecated(
+        "`SQLConnector.create_sqlalchemy_connection` is deprecated. "
+        "If you need to execute something that isn't available "
+        "on the connector currently, make a child class and "
+        "add your required method on that connector.",
+        category=DeprecationWarning,
+        stacklevel=1,
+    )
     def create_sqlalchemy_connection(self) -> sa.engine.Connection:
         """(DEPRECATED) Return a new SQLAlchemy connection using the provided config.
 
@@ -180,16 +287,14 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             A newly created SQLAlchemy engine object.
         """
-        warnings.warn(
-            "`SQLConnector.create_sqlalchemy_connection` is deprecated. "
-            "If you need to execute something that isn't available "
-            "on the connector currently, make a child class and "
-            "add your required method on that connector.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         return self._engine.connect().execution_options(stream_results=True)
 
+    @deprecated(
+        "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override "
+        "`_engine` or `sqlalchemy_url` instead.",
+        category=DeprecationWarning,
+        stacklevel=1,
+    )
     def create_sqlalchemy_engine(self) -> Engine:
         """(DEPRECATED) Return a new SQLAlchemy engine using the provided config.
 
@@ -199,12 +304,6 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             A newly created SQLAlchemy engine object.
         """
-        warnings.warn(
-            "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override"
-            "`_engine` or sqlalchemy_url` instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         return self._engine
 
     @property
@@ -260,8 +359,8 @@ class SQLConnector:  # noqa: PLR0904
 
         return t.cast(str, config["sqlalchemy_url"])
 
-    @staticmethod
     def to_jsonschema_type(
+        self,
         sql_type: (
             str  # noqa: ANN401
             | sa.types.TypeEngine
@@ -286,11 +385,30 @@ class SQLConnector:  # noqa: PLR0904
 
         Returns:
             The JSON Schema representation of the provided type.
+
+        .. versionchanged:: 0.40.0
+           Support for SQLAlchemy type classes and strings in the ``sql_type`` argument
+           was deprecated. Please pass a SQLAlchemy type object instead.
         """
-        if isinstance(sql_type, (str, sa.types.TypeEngine)):
+        if isinstance(sql_type, sa.types.TypeEngine):
+            return self.sql_to_jsonschema.to_jsonschema(sql_type)
+
+        if isinstance(sql_type, str):  # pragma: no cover
+            warnings.warn(
+                "Passing string types to `to_jsonschema_type` is deprecated. "
+                "Please pass a SQLAlchemy type object instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             return th.to_jsonschema_type(sql_type)
 
-        if isinstance(sql_type, type):
+        if isinstance(sql_type, type):  # pragma: no cover
+            warnings.warn(
+                "Passing type classes to `to_jsonschema_type` is deprecated. "
+                "Please pass a SQLAlchemy type object instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             if issubclass(sql_type, sa.types.TypeEngine):
                 return th.to_jsonschema_type(sql_type)
 
@@ -336,6 +454,9 @@ class SQLConnector:  # noqa: PLR0904
 
         Returns:
             The fully qualified name as a string.
+
+        .. versionchanged:: 0.40.0
+           A ``FullyQualifiedName`` object is now returned.
         """
         return FullyQualifiedName(
             table=table_name,  # type: ignore[arg-type]
@@ -496,7 +617,7 @@ class SQLConnector:  # noqa: PLR0904
         # Detect key properties
         possible_primary_keys: list[list[str]] = []
         pk_def = inspected.get_pk_constraint(table_name, schema=schema_name)
-        if pk_def and "constrained_columns" in pk_def:
+        if pk_def and "constrained_columns" in pk_def:  # type: ignore[redundant-expr]
             possible_primary_keys.append(pk_def["constrained_columns"])
 
         # An element of the columns list is ``None`` if it's an expression and is
@@ -953,7 +1074,7 @@ class SQLConnector:  # noqa: PLR0904
         # Get the generic type class
         for opt in sql_types:
             # Get the length
-            opt_len: int = getattr(opt, "length", 0)
+            opt_len: int | None = getattr(opt, "length", 0)
             generic_type = type(opt.as_generic())
 
             if isinstance(generic_type, type):
