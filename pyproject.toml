@@ -74,6 +74,9 @@ sphinx-inline-tabs = {version = ">=2023.4.21", python = ">=3.9", optional = true
 sphinx-notfound-page = {version = ">=1.0.0", python = ">=3.9", optional = true}
 sphinx-reredirects = {version = ">=0.1.5", python = ">=3.9", optional = true}
 
+# AWS-speficic dependencies
+boto3 = { version = ">=1.35", optional = true }
+
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = ">=1.1.1", optional = true}
 
@@ -114,7 +117,7 @@ docs = [
     "sphinx-notfound-page",
     "sphinx-reredirects",
 ]
-s3 = ["fs-s3fs"]
+s3 = ["boto3", "fs-s3fs"]
 testing = [
     "pytest",
 ]
