@@ -359,7 +359,7 @@ class CustomStreamMap(StreamMap):
 
         return result
 
-    def _eval_type(
+    def _eval_type(  # noqa: PLR0911
         self,
         expr: str,
         default: th.JSONTypeHelper | None = None,
