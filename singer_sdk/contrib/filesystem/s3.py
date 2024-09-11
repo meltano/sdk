@@ -95,11 +95,7 @@ class S3Directory(base.AbstractDirectory[S3File]):
         paginator = self._client.get_paginator("list_objects_v2")
         for page in paginator.paginate(Bucket=self._bucket, Prefix=self._prefix):
             for obj in page.get("Contents", []):
-                key = obj["Key"]
-                if key.endswith("/"):
-                    yield S3Directory(self._client, self._bucket, key)
-                else:
-                    yield S3File(self._client, self._bucket, key)
+                yield S3File(self._client, bucket=self._bucket, key=obj["Key"])
 
 
 class S3FileSystem(base.AbstractFileSystem):
