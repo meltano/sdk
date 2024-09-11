@@ -54,6 +54,7 @@ python-dotenv = ">=0.20"
 PyYAML = ">=6.0"
 referencing = ">=0.30.0"
 requests = ">=2.25.1"
+# TODO: remove this constraint once we get rid of the `fs` dependency
 # newer setuptools versions are incompatible with some dependencies (fs)
 setuptools = "<=70.3.0"
 simpleeval = ">=0.9.13"
@@ -254,6 +255,7 @@ types-requests = "requests"
 DEP002 = [
     # Transitive constraints
     "numpy",
+    "setuptools",
     "urllib3",
     # Python version-specific dependencies
     "backports-datetime-fromisoformat",
