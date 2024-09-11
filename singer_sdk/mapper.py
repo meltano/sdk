@@ -359,7 +359,7 @@ class CustomStreamMap(StreamMap):
 
         return result
 
-    def _eval_type(
+    def _eval_type(  # noqa: PLR0911
         self,
         expr: str,
         default: th.JSONTypeHelper | None = None,
@@ -397,6 +397,12 @@ class CustomStreamMap(StreamMap):
 
         if expr.startswith("bool("):
             return th.BooleanType()
+
+        if expr.startswith("datetime.date") or expr.endswith(".date()"):
+            return th.DateType()
+
+        if expr.startswith("datetime.datetime"):
+            return th.DateTimeType()
 
         return th.StringType() if expr[0] == "'" and expr[-1] == "'" else default
 
@@ -484,6 +490,12 @@ class CustomStreamMap(StreamMap):
                     )
                     raise StreamMapConfigError(msg)
                 transformed_schema["properties"].pop(prop_key, None)
+                if "required" in transformed_schema:
+                    transformed_schema["required"] = [
+                        item
+                        for item in transformed_schema["required"]
+                        if item != prop_key
+                    ]
                 stream_map_parsed.append((prop_key, prop_def, None))
             elif isinstance(prop_def, str):
                 default_type: th.JSONTypeHelper = th.StringType()  # Fallback to string
