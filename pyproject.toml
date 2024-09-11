@@ -253,6 +253,9 @@ types-PyYAML = "yaml"
 types-requests = "requests"
 
 [tool.deptry.per_rule_ignores]
+DEP001 = [
+    "mypy_boto3_s3",
+]
 DEP002 = [
     # Transitive constraints
     "numpy",
