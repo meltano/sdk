@@ -27,7 +27,7 @@ class LocalFile(base.AbstractFile):
         """
         return f"LocalFile({self._filepath})"
 
-    def read(self, size: int = -1) -> str:
+    def read(self, size: int = -1) -> bytes:
         """Read the file contents.
 
         Args:
@@ -36,7 +36,7 @@ class LocalFile(base.AbstractFile):
         Returns:
             The file contents as a string.
         """
-        with self.path.open("r") as file:
+        with self.path.open("rb") as file:
             return file.read(size)
 
     @property

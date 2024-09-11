@@ -38,7 +38,7 @@ class TestS3Filesystem:
         client.put_object(Bucket=bucket, Key="test.txt", Body=b"Hello, world!")
 
         file = s3fs.S3File(client, bucket=bucket, key="test.txt")
-        assert file.read(3) == "Hel"
+        assert file.read(3) == b"Hel"
 
     def test_file_modified_time(self, client: S3Client, bucket: str):
         """Test getting the last modified time of a file."""

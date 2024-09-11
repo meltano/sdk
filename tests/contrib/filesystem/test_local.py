@@ -29,7 +29,7 @@ class TestLocalFilesystem:
         path.write_text("Hello, world!")
 
         file = local.LocalFile(path)
-        assert file.read(3) == "Hel"
+        assert file.read(3) == b"Hel"
 
     def test_file_creation_time(self, tmp_path: pathlib.Path):
         """Test getting the creation time of a file."""

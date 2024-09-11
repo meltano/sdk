@@ -38,7 +38,7 @@ class S3File(base.AbstractFile):
         """Get the S3 object."""
         return self._client.get_object(Bucket=self._bucket, Key=self._key)
 
-    def read(self, size: int = -1) -> str:
+    def read(self, size: int = -1) -> bytes:
         """Read the file contents.
 
         Args:
@@ -47,7 +47,7 @@ class S3File(base.AbstractFile):
         Returns:
             The file contents as a string.
         """
-        data = self.s3_object["Body"].read(amt=size).decode("utf-8")
+        data = self.s3_object["Body"].read(amt=size)
         # Clear the cache so that the next read will re-fetch the object
         del self.s3_object
         return data

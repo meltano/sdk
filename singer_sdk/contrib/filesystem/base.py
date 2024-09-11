@@ -14,16 +14,19 @@ __all__ = ["AbstractDirectory", "AbstractFile", "AbstractFileSystem"]
 class AbstractFile(abc.ABC):
     """Abstract class for file operations."""
 
-    def read_text(self) -> str:
+    def read_text(self, *, encoding: str = "utf-8") -> str:
         """Read the entire file as text.
+
+        Args:
+            encoding: The text encoding to use.
 
         Returns:
             The file contents as a string.
         """
-        return self.read()
+        return self.read().decode(encoding)
 
     @abc.abstractmethod
-    def read(self, size: int = -1) -> str:
+    def read(self, size: int = -1) -> bytes:
         """Read the file contents."""
 
     @property
