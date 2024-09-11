@@ -610,7 +610,7 @@ class MappedStream(Stream):
 
     name = "mystream"
     schema = PropertiesList(
-        Property("email", StringType),
+        Property("email", StringType, required=True),
         Property("count", IntegerType),
         Property(
             "user",

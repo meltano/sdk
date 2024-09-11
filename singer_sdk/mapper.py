@@ -484,6 +484,12 @@ class CustomStreamMap(StreamMap):
                     )
                     raise StreamMapConfigError(msg)
                 transformed_schema["properties"].pop(prop_key, None)
+                if "required" in transformed_schema:
+                    transformed_schema["required"] = [
+                        item
+                        for item in transformed_schema["required"]
+                        if item != prop_key
+                    ]
                 stream_map_parsed.append((prop_key, prop_def, None))
             elif isinstance(prop_def, str):
                 default_type: th.JSONTypeHelper = th.StringType()  # Fallback to string
