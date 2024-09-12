@@ -8,99 +8,54 @@ from pathlib import Path
 
 from singer_sdk.contrib.filesystem import base
 
-__all__ = ["LocalDirectory", "LocalFile", "LocalFileSystem"]
+if t.TYPE_CHECKING:
+    import contextlib
+
+__all__ = ["LocalFile", "LocalFileSystem"]
 
 
 class LocalFile(base.AbstractFile):
     """Local file operations."""
 
-    def __init__(self, filepath: str | Path):
-        """Create a new LocalFile instance."""
-        self._filepath = filepath
-        self.path = Path(self._filepath).absolute()
+    def close(self) -> None:
+        """Close the file."""
+        return self.buffer.close()
 
-    def __repr__(self) -> str:
-        """A string representation of the LocalFile.
+    def seekable(self) -> bool:  # noqa: D102, PLR6301
+        return True
 
-        Returns:
-            A string representation of the LocalFile.
-        """
-        return f"LocalFile({self._filepath})"
-
-    def read(self, size: int = -1) -> bytes:
-        """Read the file contents.
-
-        Args:
-            size: Number of bytes to read. If not specified, the entire file is read.
-
-        Returns:
-            The file contents as a string.
-        """
-        with self.path.open("rb") as file:
-            return file.read(size)
-
-    @property
-    def creation_time(self) -> datetime:
-        """Get the creation time of the file.
-
-        Returns:
-            The creation time of the file.
-        """
-        stat = self.path.stat()
-        try:
-            return datetime.fromtimestamp(stat.st_birthtime).astimezone()  # type: ignore[attr-defined]
-        except AttributeError:
-            return datetime.fromtimestamp(stat.st_ctime).astimezone()
-
-    @property
-    def modified_time(self) -> datetime:
-        """Get the last modified time of the file.
-
-        Returns:
-            The last modified time of the file.
-        """
-        return datetime.fromtimestamp(self.path.stat().st_mtime).astimezone()
+    def __iter__(self) -> contextlib.Iterator[str]:  # noqa: D105
+        return iter(self.buffer)
 
 
-class LocalDirectory(base.AbstractDirectory[LocalFile]):
-    """Local directory operations."""
-
-    def __init__(self, dirpath: str | Path):
-        """Create a new LocalDirectory instance."""
-        self._dirpath = dirpath
-        self.path = Path(self._dirpath).absolute()
-
-    def __repr__(self) -> str:
-        """A string representation of the LocalDirectory.
-
-        Returns:
-            A string representation of the LocalDirectory.
-        """
-        return f"LocalDirectory({self._dirpath})"
-
-    def list_contents(self) -> t.Generator[LocalFile | LocalDirectory, None, None]:
-        """List files in the directory.
-
-        Yields:
-            A file or directory node
-        """
-        for child in self.path.iterdir():
-            if child.is_dir():
-                subdir = LocalDirectory(child)
-                yield subdir
-                yield from subdir.list_contents()
-            else:
-                yield LocalFile(child)
-
-
-class LocalFileSystem(base.AbstractFileSystem[LocalFile, LocalDirectory]):
+class LocalFileSystem(base.AbstractFileSystem[LocalFile]):
     """Local filesystem operations."""
 
     def __init__(self, root: str) -> None:
         """Create a new LocalFileSystem instance."""
-        self._root_dir = LocalDirectory(root)
+        self._root_path = Path(root).absolute()
 
     @property
-    def root(self) -> LocalDirectory:
+    def root(self) -> Path:
         """Get the root path."""
-        return self._root_dir
+        return self._root_path
+
+    def open(  # noqa: D102
+        self,
+        filename: str,
+        *,
+        mode: base.FileMode = base.FileMode.read,
+    ) -> LocalFile:
+        filepath = self.root / filename
+        return LocalFile(filepath.open(mode=mode), filename)
+
+    def modified(self, filename: str) -> datetime:  # noqa: D102
+        stat = (self.root / filename).stat()
+        return datetime.fromtimestamp(stat.st_mtime).astimezone()
+
+    def created(self, filename: str) -> datetime:  # noqa: D102
+        stat = (self.root / filename).stat()
+        try:
+            return datetime.fromtimestamp(stat.st_birthtime).astimezone()  # type: ignore[attr-defined]
+        except AttributeError:
+            return datetime.fromtimestamp(stat.st_ctime).astimezone()

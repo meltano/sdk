@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import io
 import typing as t
+from datetime import datetime
 
 from singer_sdk.contrib.filesystem import base
 
@@ -10,105 +12,88 @@ if t.TYPE_CHECKING:
     from datetime import datetime
 
     from mypy_boto3_s3.client import S3Client
-    from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
 
-__all__ = ["S3Directory", "S3File", "S3FileSystem"]
+__all__ = ["S3File", "S3FileSystem"]
 
 
 class S3File(base.AbstractFile):
     """S3 file operations."""
 
-    def __init__(self, client: S3Client, bucket: str, key: str):
-        """Create a new S3File instance."""
-        self._client = client
-        self._bucket = bucket
-        self._key = key
-        self._s3_object: GetObjectOutputTypeDef | None = None
-
-    def __repr__(self) -> str:
-        """A string representation of the S3File.
+    def seekable(self) -> bool:  # noqa: PLR6301
+        """Check if the file is seekable.
 
         Returns:
-            A string representation of the S3File.
+            False
         """
-        return f"S3File({self._key})"
+        return False
 
-    @property
-    def s3_object(self) -> GetObjectOutputTypeDef:
-        """Get the S3 object."""
-        if self._s3_object is None:
-            self._s3_object = self._client.get_object(
-                Bucket=self._bucket,
-                Key=self._key,
-            )
-
-        return self._s3_object
-
-    def read(self, size: int = -1) -> bytes:
-        """Read the file contents.
-
-        Args:
-            size: Number of bytes to read. If not specified, the entire file is read.
-
-        Returns:
-            The file contents as a string.
-        """
-        data = self.s3_object["Body"].read(amt=size)
-
-        # Clear the cache so that the next read will re-fetch the object
-        self._s3_object = None
-        return data
-
-    @property
-    def modified_time(self) -> datetime:
-        """Get the last modified time of the file.
-
-        Returns:
-            The last modified time of the file.
-        """
-        return self.s3_object["LastModified"]
-
-
-class S3Directory(base.AbstractDirectory[S3File]):
-    """S3 directory operations."""
-
-    def __init__(self, client: S3Client, bucket: str, prefix: str):
-        """Create a new S3Directory instance."""
-        self._client = client
-        self._bucket = bucket
-        self._prefix = prefix
-
-    def __repr__(self) -> str:
-        """A string representation of the S3Directory.
-
-        Returns:
-            A string representation of the S3Directory.
-        """
-        return f"S3Directory({self._prefix})"
-
-    def list_contents(self) -> t.Generator[S3File | S3Directory, None, None]:
-        """List files in the directory.
-
-        Yields:
-            A file or directory node
-        """
-        paginator = self._client.get_paginator("list_objects_v2")
-        for page in paginator.paginate(Bucket=self._bucket, Prefix=self._prefix):
-            for obj in page.get("Contents", []):
-                yield S3File(self._client, bucket=self._bucket, key=obj["Key"])
+    def __iter__(self) -> t.Iterator[str]:  # noqa: D105
+        return iter(self.buffer)
 
 
 class S3FileSystem(base.AbstractFileSystem):
     """S3 file system operations."""
 
-    def __init__(self, client: S3Client, *, bucket: str, prefix: str):
-        """Create a new S3FileSystem instance."""
+    def __init__(  # noqa: D107
+        self,
+        *,
+        bucket: str,
+        prefix: str = "",
+        region: str | None = None,
+        endpoint_url: str | None = None,
+    ):
         super().__init__()
-        self._client = client
         self._bucket = bucket
         self._prefix = prefix
+        self._region = region
+        self._endpoint_url = endpoint_url
+
+        self._client: S3Client | None = None
 
     @property
-    def root(self) -> S3Directory:
-        """Get the root directory."""
-        return S3Directory(self._client, self._bucket, self._prefix)
+    def client(self) -> S3Client:
+        """Get the S3 client."""
+        if self._client is None:
+            import boto3  # noqa: PLC0415
+
+            self._client = boto3.client(
+                "s3",
+                region_name=self._region,
+                endpoint_url=self._endpoint_url,
+            )
+
+        return self._client
+
+    @property
+    def bucket(self) -> str:  # noqa: D102
+        return self._bucket
+
+    @property
+    def prefix(self) -> str:  # noqa: D102
+        return self._prefix
+
+    def open(  # noqa: D102
+        self,
+        filename: str,
+        *,
+        mode: base.FileMode = base.FileMode.read,
+    ) -> S3File:
+        key = f"{self.prefix}{filename}"
+        if mode == base.FileMode.read:
+            response = self._client.get_object(Bucket=self._bucket, Key=key)
+            return S3File(response["Body"], filename)
+        if mode == base.FileMode.write:
+            buffer = io.BytesIO()
+            self._client.upload_fileobj(buffer, self._bucket, key)
+            return S3File(buffer, filename)
+
+        msg = "Only read mode is supported."
+        raise ValueError(msg)
+
+    def modified(self, filename: str) -> datetime:  # noqa: D102
+        response = self._client.get_object_attributes(Bucket=self._bucket, Key=filename)
+        return response["LastModified"]
+
+    def created(self, filename: str) -> datetime:  # noqa: ARG002, D102, PLR6301
+        msg = "S3 does not support file creation time."
+        raise NotImplementedError(msg)
