@@ -14,6 +14,7 @@ The following capabilities are supported by default.
 .. autoattribute:: PluginCapabilities.ABOUT
 .. autoattribute:: PluginCapabilities.BATCH
 .. autoattribute:: PluginCapabilities.STREAM_MAPS
+.. autoattribute:: PluginCapabilities.FLATTENING
 
 ========================
 Custom base capabilities
