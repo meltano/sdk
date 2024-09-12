@@ -21,7 +21,7 @@ plugins:
     capabilities:
     - about
     - stream-maps
-    - record-flattening
+    - schema-flattening
 
     # TODO: Declare settings and their types here:
     settings:
