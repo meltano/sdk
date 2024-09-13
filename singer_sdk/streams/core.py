@@ -880,6 +880,27 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     time_extracted=utc_now(),
                 )
 
+    def _generate_batch_messages(
+        self,
+        encoding: BaseBatchFileEncoding,
+        manifest: list[str],
+    ) -> t.Generator[SDKBatchMessage, None, None]:
+        """Write out a BATCH message.
+
+        Args:
+            encoding: The encoding to use for the batch.
+            manifest: A list of filenames for the batch.
+
+        Yields:
+            Batch message objects.
+        """
+        for stream_map in self.stream_maps:
+            yield SDKBatchMessage(
+                stream=stream_map.stream_alias,
+                encoding=encoding,
+                manifest=manifest,
+            )
+
     def _write_record_message(self, record: types.Record) -> None:
         """Write out a RECORD message.
 
@@ -902,13 +923,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             encoding: The encoding to use for the batch.
             manifest: A list of filenames for the batch.
         """
-        self._tap.write_message(
-            SDKBatchMessage(
-                stream=self.name,
-                encoding=encoding,
-                manifest=manifest,
-            ),
-        )
+        for batch_message in self._generate_batch_messages(encoding, manifest):
+            self._tap.write_message(batch_message)
+
         self._is_state_flushed = False
 
     def _log_metric(self, point: metrics.Point) -> None:
