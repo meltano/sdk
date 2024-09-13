@@ -657,7 +657,7 @@ class MappedStream(Stream):
             },
         }
 
-    def get_batches(self, batch_config, context):
+    def get_batches(self, batch_config, context):  # noqa: ARG002
         yield batch_config.encoding, ["file:///tmp/stream.json.gz"]
 
 
