@@ -657,6 +657,9 @@ class MappedStream(Stream):
             },
         }
 
+    def get_batches(self, batch_config, context):
+        yield batch_config.encoding, ["file:///tmp/stream.json.gz"]
+
 
 class MappedTap(Tap):
     """A tap with mapped streams."""
@@ -751,6 +754,19 @@ class MappedTap(Tap):
             {"flattening_enabled": False, "flattening_max_depth": 0},
             "aliased_stream.jsonl",
             id="aliased_stream",
+        ),
+        pytest.param(
+            {"mystream": {"__alias__": "aliased_stream"}},
+            {
+                "flattening_enabled": False,
+                "flattening_max_depth": 0,
+                "batch_config": {
+                    "encoding": {"format": "jsonl", "compression": "gzip"},
+                    "storage": {"root": "file:///tmp"},
+                },
+            },
+            "aliased_stream_batch.jsonl",
+            id="aliased_stream_batch",
         ),
         pytest.param(
             {},
