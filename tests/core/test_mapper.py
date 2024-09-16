@@ -853,6 +853,43 @@ class MappedTap(Tap):
             "fake_credit_card_number.jsonl",
             id="fake_credit_card_number",
         ),
+        pytest.param(
+            {
+                "mystream": {
+                    "email": "Faker.seed(email) or fake.email()",
+                    "__else__": None,
+                },
+            },
+            {
+                "flattening_enabled": False,
+                "flattening_max_depth": 0,
+                "faker_config": {
+                    "locale": "en_US",
+                },
+            },
+            "fake_email_seed_class.jsonl",
+            id="fake_email_seed_class",
+            marks=pytest.mark.filterwarnings(
+                "default:Class 'Faker' is deprecated:DeprecationWarning"
+            ),
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "email": "fake.seed_instance(email) or fake.email()",
+                    "__else__": None,
+                },
+            },
+            {
+                "flattening_enabled": False,
+                "flattening_max_depth": 0,
+                "faker_config": {
+                    "locale": "en_US",
+                },
+            },
+            "fake_email_seed_instance.jsonl",
+            id="fake_email_seed_instance",
+        ),
     ],
 )
 def test_mapped_stream(
