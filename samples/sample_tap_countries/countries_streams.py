@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import abc
 import sys
+from typing import Iterable  # noqa: ICN003
 
 from singer_sdk import typing as th
 from singer_sdk.streams.graphql import GraphQLStream
@@ -81,6 +82,14 @@ class CountriesStream(CountriesAPIStream):
             ),
         ),
     ).to_dict()
+
+    # FIXME: revert these changes before merging
+    def request_records(self, context) -> Iterable[dict]:
+        import time  # noqa: PLC0415
+
+        time.sleep(60)  # Simulate a slow stream
+
+        return super().request_records(context)
 
 
 class ContinentsStream(CountriesAPIStream):

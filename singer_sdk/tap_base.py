@@ -31,6 +31,7 @@ from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
+    from types import FrameType
 
     from singer_sdk.connectors import SQLConnector
     from singer_sdk.mapper import PluginMapper
@@ -472,6 +473,20 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             stream.log_sync_costs()
 
     # Command Line Execution
+
+    def _handle_termination(  # pragma: no cover
+        self,
+        signum: int,
+        frame: FrameType | None,
+    ) -> None:
+        """Handle termination signal.
+
+        Args:
+            signum: Signal number.
+            frame: Frame.
+        """
+        self.write_message(StateMessage(value=self.state))
+        super()._handle_termination(signum, frame)
 
     @classmethod
     def invoke(  # type: ignore[override]

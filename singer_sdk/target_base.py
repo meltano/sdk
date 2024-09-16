@@ -32,6 +32,7 @@ from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
+    from types import FrameType
 
     from singer_sdk.connectors import SQLConnector
     from singer_sdk.mapper import PluginMapper
@@ -541,6 +542,24 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         sys.stdout.flush()
 
     # CLI handler
+
+    def _handle_termination(  # pragma: no cover
+        self,
+        signum: int,
+        frame: FrameType | None,
+    ) -> None:
+        """Handle termination signals.
+
+        Args:
+            signum: Signal number.
+            frame: Frame object.
+        """
+        self.logger.info(
+            "Received termination signal %d, draining all sinks...",
+            signum,
+        )
+        self.drain_all(is_endofpipe=True)
+        super()._handle_termination(signum, frame)
 
     @classmethod
     def invoke(  # type: ignore[override]
