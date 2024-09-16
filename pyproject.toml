@@ -56,7 +56,7 @@ referencing = ">=0.30.0"
 requests = ">=2.25.1"
 # TODO: remove this constraint once we get rid of the `fs` dependency
 # newer setuptools versions are incompatible with some dependencies (fs)
-setuptools = "<=70.3.0"
+setuptools = "<=75.0.0"
 simpleeval = ">=0.9.13"
 simplejson = ">=3.17.6"
 sqlalchemy = ">=1.4,<3.0"
