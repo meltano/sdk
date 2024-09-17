@@ -10,6 +10,8 @@ import singer_sdk.typing as th
 from samples.sample_tap_csv.client import SDC_META_FILEPATH, CSVStream
 from singer_sdk import Tap
 
+DEFAULT_MERGE_STREAM_NAME = "files"
+
 
 def file_path_to_stream_name(file_path: str) -> str:
     """Convert a file path to a stream name."""
@@ -26,7 +28,7 @@ class ReadMode(str, enum.Enum):
 class SampleTapCSV(Tap):
     """Sample Tap for CSV files."""
 
-    name = "sample-tap-countries"
+    name = "sample-tap-csv"
 
     config_jsonschema = th.PropertiesList(
         th.Property(
@@ -51,7 +53,8 @@ class SampleTapCSV(Tap):
         th.Property(
             "stream_name",
             th.StringType,
-            required=False,
+            required=True,
+            default=DEFAULT_MERGE_STREAM_NAME,
             description="Name of the stream to use when `read_mode` is `merge`.",
         ),
         # TODO(edgarmondragon): Other configuration options.
@@ -96,7 +99,7 @@ class SampleTapCSV(Tap):
             return [
                 CSVStream(
                     tap=self,
-                    name=self.config.get("stream_name", "merged_stream"),
+                    name=self.config["stream_name"],
                     partitions=contexts,
                 )
             ]
