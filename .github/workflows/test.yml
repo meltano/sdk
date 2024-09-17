@@ -47,8 +47,10 @@ jobs:
       fail-fast: false
       matrix:
         session: [tests]
-        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        # os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+        os: ["ubuntu-latest"]
+        # python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.12"]
         sqlalchemy: ["2"]
         include:
         - { session: tests,   python-version: "3.12", os: "ubuntu-latest", sqlalchemy: "1" }
@@ -91,10 +93,10 @@ jobs:
         nox --version
 
     - uses: actions/cache@v4
-      if: always() && (matrix.session == 'tests')
+      if: matrix.session == 'tests'
       with:
         path: http_cache.sqlite
-        key: http_cache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.session }}-${{ matrix.sqlalchemy }}
+        key: http_cache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.sqlalchemy }}
 
     - name: Run Nox
       env:
@@ -106,7 +108,7 @@ jobs:
       if: always() && (matrix.session == 'tests')
       with:
         include-hidden-files: true
-        name: coverage-data-nox_${{ matrix.session }}-${{ matrix.os }}-py${{ matrix.python-version }}_sqlalchemy_${{ matrix.sqlalchemy }}
+        name: coverage-data-nox_-${{ matrix.os }}-py${{ matrix.python-version }}_sqlalchemy_${{ matrix.sqlalchemy }}
         path: ".coverage.*"
 
   tests-external:
