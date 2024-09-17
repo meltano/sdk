@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import csv
 import datetime
-import os
 import typing as t
 
+import fsspec
+
 from singer_sdk import Stream
+from singer_sdk.helpers._util import utc_now  # noqa: PLC2701
 from singer_sdk.streams.core import REPLICATION_INCREMENTAL
 
 if t.TYPE_CHECKING:
@@ -47,11 +49,14 @@ class CSVStream(Stream):
 
         self._partitions = partitions or []
 
+        self.filesystem: fsspec.AbstractFileSystem = fsspec.filesystem("local")
+        self._sync_start_time = utc_now()
+
     @property
     def partitions(self) -> list[Context]:
         return self._partitions
 
-    def _read_file(self, path: str) -> t.Iterable[Record]:  # noqa: PLR6301
+    def _read_file(self, path: str) -> t.Iterable[Record]:
         # Make these configurable.
         delimiter = ","
         quotechar = '"'
@@ -59,8 +64,7 @@ class CSVStream(Stream):
         doublequote = True
         lineterminator = "\r\n"
 
-        # TODO: Use filesytem-specific file open method.
-        with open(path, encoding="utf-8") as file:  # noqa: PTH123
+        with self.filesystem.open(path, mode="r") as file:
             reader = csv.DictReader(
                 file,
                 delimiter=delimiter,
@@ -76,16 +80,23 @@ class CSVStream(Stream):
         context: Context | None,
     ) -> t.Iterable[Record | tuple[Record, Context | None]]:
         path: str = context[SDC_META_FILEPATH]
-        mtime = os.path.getmtime(path)  # noqa: PTH204
+
+        mtime: datetime.datetime | None
+        try:
+            mtime: datetime.datetime = self.filesystem.modified(path)
+        except NotImplementedError:
+            self.logger.warning("Filesystem does not support modified time")
+            mtime = None
 
         if (
             self.replication_method is REPLICATION_INCREMENTAL
             and (previous_bookmark := self.get_starting_timestamp(context))
-            and _to_datetime(mtime) < previous_bookmark
+            and mtime is not None
+            and mtime < previous_bookmark
         ):
             self.logger.info("File has not been modified since last read, skipping")
             return
 
         for record in self._read_file(path):
-            record[SDC_META_MODIFIED_AT] = _to_datetime(mtime)
+            record[SDC_META_MODIFIED_AT] = mtime or self._sync_start_time
             yield record
