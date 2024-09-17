@@ -91,10 +91,10 @@ jobs:
         nox --version
 
     - uses: actions/cache@v4
-      if: always() && (matrix.session == 'tests')
+      if: matrix.session == 'tests'
       with:
         path: http_cache.sqlite
-        key: http_cache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.session }}-${{ matrix.sqlalchemy }}
+        key: http_cache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.sqlalchemy }}
 
     - name: Run Nox
       env:
@@ -106,7 +106,7 @@ jobs:
       if: always() && (matrix.session == 'tests')
       with:
         include-hidden-files: true
-        name: coverage-data-nox_${{ matrix.session }}-${{ matrix.os }}-py${{ matrix.python-version }}_sqlalchemy_${{ matrix.sqlalchemy }}
+        name: coverage-data-nox_-${{ matrix.os }}-py${{ matrix.python-version }}_sqlalchemy_${{ matrix.sqlalchemy }}
         path: ".coverage.*"
 
   tests-external:
