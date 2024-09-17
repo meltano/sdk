@@ -14,7 +14,9 @@ import hashlib
 import importlib.util
 import json
 import logging
+import sys
 import typing as t
+import warnings
 
 import simpleeval  # type: ignore[import-untyped]
 
@@ -515,6 +517,12 @@ class CustomStreamMap(StreamMap):
                         self._eval_type(prop_def, default=default_type),
                     ).to_dict(),
                 )
+                if "Faker" in prop_def:
+                    warnings.warn(
+                        "Class 'Faker' is deprecated in stream maps. Use instance methods, like 'fake.seed_instance.'",  # noqa: E501
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
                 try:
                     parsed_def: ast.Expr = ast.parse(prop_def).body[0]  # type: ignore[assignment]
                     stream_map_parsed.append((prop_key, prop_def, parsed_def))

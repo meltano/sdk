@@ -249,11 +249,9 @@ can be referenced directly by mapping expressions.
 - `fake` - a [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config`
   (see previous example) - see the built-in [standard providers](inv:faker:std:doc#providers)
   for available methods
-- `Faker` - the [`Faker`](inv:faker:std:doc#fakerclass) class. This was made available to enable consistent data
-  masking by allowing users to call `Faker.seed()`.
 
   ```{tip}
-  The `fake` object and `Faker` are only available if the plugin specifies `faker` as an additional dependency (through the `singer-sdk` `faker` extra, or directly).
+  The `fake` object is only available if the plugin specifies `faker` as an additional dependency (through the `singer-sdk` `faker` extra, or directly).
   ```
 
 :::{versionadded} 0.35.0
@@ -262,6 +260,10 @@ The `faker` object.
 
 :::{versionadded} 0.40.0
 The `Faker` class.
+:::
+
+:::{versionchanged} TODO
+The `Faker` class was deprecated in favor of instance methods on the `fake` object.
 :::
 
 #### Automatic Schema Detection
@@ -475,9 +477,9 @@ To generate consistent masked values, you must provide the **same seed each time
 stream_maps:
   customers:
     # will always generate the same value for the same seed
-    first_name: Faker.seed(_['first_name']) or fake.first_name()
+    first_name: fake.seed_instance(_['first_name']) or fake.first_name()
 faker_config:
-  # IMPORTANT: `fake` and `Faker` names are only available if faker_config is defined.
+  # IMPORTANT: `fake` is only available if the `faker` extra is installed
   locale: en_US
 ```
 

@@ -657,6 +657,9 @@ class MappedStream(Stream):
             },
         }
 
+    def get_batches(self, batch_config, context):  # noqa: ARG002
+        yield batch_config.encoding, ["file:///tmp/stream.json.gz"]
+
 
 class MappedTap(Tap):
     """A tap with mapped streams."""
@@ -753,6 +756,19 @@ class MappedTap(Tap):
             id="aliased_stream",
         ),
         pytest.param(
+            {"mystream": {"__alias__": "aliased_stream"}},
+            {
+                "flattening_enabled": False,
+                "flattening_max_depth": 0,
+                "batch_config": {
+                    "encoding": {"format": "jsonl", "compression": "gzip"},
+                    "storage": {"root": "file:///tmp"},
+                },
+            },
+            "aliased_stream_batch.jsonl",
+            id="aliased_stream_batch",
+        ),
+        pytest.param(
             {},
             {"flattening_enabled": True, "flattening_max_depth": 0},
             "flatten_depth_0.jsonl",
@@ -836,6 +852,43 @@ class MappedTap(Tap):
             },
             "fake_credit_card_number.jsonl",
             id="fake_credit_card_number",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "email": "Faker.seed(email) or fake.email()",
+                    "__else__": None,
+                },
+            },
+            {
+                "flattening_enabled": False,
+                "flattening_max_depth": 0,
+                "faker_config": {
+                    "locale": "en_US",
+                },
+            },
+            "fake_email_seed_class.jsonl",
+            id="fake_email_seed_class",
+            marks=pytest.mark.filterwarnings(
+                "default:Class 'Faker' is deprecated:DeprecationWarning"
+            ),
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "email": "fake.seed_instance(email) or fake.email()",
+                    "__else__": None,
+                },
+            },
+            {
+                "flattening_enabled": False,
+                "flattening_max_depth": 0,
+                "faker_config": {
+                    "locale": "en_US",
+                },
+            },
+            "fake_email_seed_instance.jsonl",
+            id="fake_email_seed_instance",
         ),
     ],
 )
