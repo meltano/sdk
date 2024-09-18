@@ -5,14 +5,14 @@ from __future__ import annotations
 import abc
 import typing as t
 
-import fsspec
-
 from singer_sdk import Stream
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.streams.core import REPLICATION_INCREMENTAL
 
 if t.TYPE_CHECKING:
     import datetime
+
+    import fsspec
 
     from singer_sdk.helpers.types import Context, Record
     from singer_sdk.tap_base import Tap
@@ -40,6 +40,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
         tap: Tap,
         name: str,
         *,
+        filesystem: fsspec.AbstractFileSystem,
         partitions: list[dict[str, t.Any]] | None = None,
     ) -> None:
         """Create a new FileStream instance.
@@ -47,6 +48,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
         Args:
             tap: The tap for this stream.
             name: The name of the stream.
+            filesystem: The filesystem implementation object to use.
             partitions: List of partitions for this stream.
         """
         # TODO(edgarmondragon): Build schema from file.
@@ -54,8 +56,8 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
 
         # TODO(edgarrmondragon): Make this None if the filesytem does not support it.
         self.replication_key = SDC_META_MODIFIED_AT
+        self.filesystem = filesystem
         self._sync_start_time = utc_now()
-        self.filesystem: fsspec.AbstractFileSystem = fsspec.filesystem("local")
         self._partitions = partitions or []
 
     @property

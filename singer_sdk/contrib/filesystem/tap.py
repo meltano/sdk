@@ -52,6 +52,13 @@ class FolderTap(Tap, t.Generic[_T]):
 
     config_jsonschema = th.PropertiesList(
         th.Property(
+            "filesystem",
+            th.StringType,
+            default="local",
+            allowed_values=["local"],
+            description="The filesystem to use",
+        ),
+        th.Property(
             "path",
             th.StringType,
             required=True,
@@ -82,20 +89,21 @@ class FolderTap(Tap, t.Generic[_T]):
         """Folder read mode."""
         return ReadMode(self.config["read_mode"])
 
+    @functools.cached_property
+    def fs(self) -> fsspec.AbstractFileSystem:
+        """Return the filesystem object."""
+        return fsspec.filesystem(self.config["filesystem"])
+
     def discover_streams(self) -> list:
         """Return a list of discovered streams.
 
         Raises:
             ValueError: If the path does not exist or is not a directory.
         """
-        # TODO(edgarmondragon): Implement stream discovery, based on the configured path
-        # and read mode.
         # A directory for now, but could be a glob pattern.
         path: str = self.config["path"]
 
-        fs: fsspec.AbstractFileSystem = fsspec.filesystem("local")
-
-        if not fs.exists(path) or not fs.isdir(path):  # pragma: no cover
+        if not self.fs.exists(path) or not self.fs.isdir(path):  # pragma: no cover
             # Raise a more specific error if the path is not a directory.
             msg = f"Path {path} does not exist or is not a directory"
             raise ValueError(msg)
@@ -106,6 +114,7 @@ class FolderTap(Tap, t.Generic[_T]):
                 self.default_stream_class(
                     tap=self,
                     name=file_path_to_stream_name(member),
+                    filesystem=self.fs,
                     partitions=[{SDC_META_FILEPATH: os.path.join(path, member)}],  # noqa: PTH118
                 )
                 for member in os.listdir(path)
@@ -124,6 +133,7 @@ class FolderTap(Tap, t.Generic[_T]):
             self.default_stream_class(
                 tap=self,
                 name=self.config["stream_name"],
+                filesystem=self.fs,
                 partitions=contexts,
             )
         ]
