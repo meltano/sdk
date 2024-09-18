@@ -13,6 +13,7 @@ _TestCSVMerge = get_tap_test_class(
         "path": "fixtures/csv",
         "read_mode": "merge",
         "stream_name": "people",
+        "delimiter": "\t",
     },
 )
 
@@ -28,6 +29,7 @@ _TestCSVOneStreamPerFile = get_tap_test_class(
     config={
         "path": "fixtures/csv",
         "read_mode": "one_stream_per_file",
+        "delimiter": "\t",
     },
 )
 
@@ -70,6 +72,7 @@ _TestCSVOneStreamPerFileIncremental = get_tap_test_class(
     config={
         "path": "fixtures/csv",
         "read_mode": "one_stream_per_file",
+        "delimiter": "\t",
     },
     state=STATE,
     suite_config=SuiteConfig(ignore_no_records=True),
