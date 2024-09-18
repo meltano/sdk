@@ -82,7 +82,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
         Raises:
             RuntimeError: If context is not provided.
         """
-        if not context:
+        if not context:  # pragma: no cover
             # TODO: Raise a more specific error.
             msg = f"Context is required for {self.name}"
             raise RuntimeError(msg)
