@@ -13,20 +13,13 @@ class CSVStream(FileStream):
     """CSV stream class."""
 
     def read_file(self, path: str) -> t.Iterable[Record]:
-        # Make these configurable.
-        delimiter = ","
-        quotechar = '"'
-        escapechar = None
-        doublequote = True
-        lineterminator = "\r\n"
-
         with self.filesystem.open(path, mode="r") as file:
             reader = csv.DictReader(
                 file,
-                delimiter=delimiter,
-                quotechar=quotechar,
-                escapechar=escapechar,
-                doublequote=doublequote,
-                lineterminator=lineterminator,
+                delimiter=self.config["delimiter"],
+                quotechar=self.config["quotechar"],
+                escapechar=self.config.get("escapechar"),
+                doublequote=self.config["doublequote"],
+                lineterminator=self.config["lineterminator"],
             )
             yield from reader
