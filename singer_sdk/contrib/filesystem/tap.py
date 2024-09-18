@@ -5,14 +5,14 @@ from __future__ import annotations
 import enum
 import functools
 import os
+import typing as t
 from pathlib import Path
 
 import fsspec
 
 import singer_sdk.typing as th
-from samples.sample_tap_csv.client import CSVStream
 from singer_sdk import Tap
-from singer_sdk.contrib.filesystem.stream import SDC_META_FILEPATH
+from singer_sdk.contrib.filesystem.stream import SDC_META_FILEPATH, FileStream
 
 DEFAULT_MERGE_STREAM_NAME = "files"
 
@@ -40,10 +40,15 @@ class ReadMode(str, enum.Enum):
     merge = "merge"
 
 
-class FolderTap(Tap):
+_T = t.TypeVar("_T", bound=FileStream)
+
+
+class FolderTap(Tap, t.Generic[_T]):
     """Singer tap for files in a directory."""
 
     valid_extensions: tuple[str, ...]
+
+    default_stream_class: type[_T]
 
     config_jsonschema = th.PropertiesList(
         th.Property(
@@ -101,7 +106,7 @@ class FolderTap(Tap):
         # One stream per file
         if self.read_mode == ReadMode.one_stream_per_file:
             return [
-                CSVStream(
+                self.default_stream_class(
                     tap=self,
                     name=file_path_to_stream_name(member),
                     partitions=[{SDC_META_FILEPATH: os.path.join(path, member)}],  # noqa: PTH118
@@ -119,7 +124,7 @@ class FolderTap(Tap):
             if member.endswith(self.valid_extensions)
         ]
         return [
-            CSVStream(
+            self.default_stream_class(
                 tap=self,
                 name=self.config["stream_name"],
                 partitions=contexts,
