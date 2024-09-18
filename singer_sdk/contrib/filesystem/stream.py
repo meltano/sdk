@@ -40,7 +40,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
         tap: Tap,
         name: str,
         *,
-        partitions: list[Context] | None = None,
+        partitions: list[dict[str, t.Any]] | None = None,
     ) -> None:
         """Create a new FileStream instance.
 
@@ -59,7 +59,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
         self._partitions = partitions or []
 
     @property
-    def partitions(self) -> list[Context]:
+    def partitions(self) -> list[dict[str, t.Any]]:
         """Return the list of partitions for this stream."""
         return self._partitions
 
