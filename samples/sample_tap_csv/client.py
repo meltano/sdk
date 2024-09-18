@@ -3,7 +3,7 @@ from __future__ import annotations
 import csv
 import typing as t
 
-from singer_sdk.contrib.filesystem.stream import FileStream
+from singer_sdk.contrib.filesystem import FileStream
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import Record

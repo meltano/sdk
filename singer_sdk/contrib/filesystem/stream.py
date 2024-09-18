@@ -25,6 +25,16 @@ SDC_META_MODIFIED_AT = "_sdc_modified_at"
 class FileStream(Stream, metaclass=abc.ABCMeta):
     """Abstract base class for file streams."""
 
+    BASE_SCHEMA: t.ClassVar[dict[str, t.Any]] = {
+        "type": ["object"],
+        "properties": {
+            SDC_META_FILEPATH: {"type": "string"},
+            SDC_META_MODIFIED_AT: {"type": ["string", "null"], "format": "date-time"},
+        },
+        "required": [],
+        "additionalProperties": {"type": "string"},
+    }
+
     def __init__(
         self,
         tap: Tap,
@@ -40,16 +50,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
             partitions: List of partitions for this stream.
         """
         # TODO(edgarmondragon): Build schema from file.
-        schema = {
-            "type": ["object"],
-            "properties": {
-                SDC_META_FILEPATH: {"type": "string"},
-                SDC_META_MODIFIED_AT: {"type": "string", "format": "date-time"},
-            },
-            "required": [],
-            "additionalProperties": {"type": "string"},
-        }
-        super().__init__(tap, schema, name)
+        super().__init__(tap, self.BASE_SCHEMA, name)
 
         # TODO(edgarrmondragon): Make this None if the filesytem does not support it.
         self.replication_key = SDC_META_MODIFIED_AT

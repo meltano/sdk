@@ -75,11 +75,9 @@ sphinx-inline-tabs = {version = ">=2023.4.21", python = ">=3.9", optional = true
 sphinx-notfound-page = {version = ">=1.0.0", python = ">=3.9", optional = true}
 sphinx-reredirects = {version = ">=0.1.5", python = ">=3.9", optional = true}
 
-# AWS-speficic dependencies
-boto3 = { version = ">=1.35", optional = true }
-
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = ">=1.1.1", optional = true}
+s3fs = { version = ">=2024.9.0", optional = true }
 
 # Parquet file dependencies installed as optional 'parquet' extras
 # We add Python constraints to force Poetry to add the latest supported Numpy version
@@ -118,7 +116,7 @@ docs = [
     "sphinx-notfound-page",
     "sphinx-reredirects",
 ]
-s3 = ["boto3", "fs-s3fs"]
+s3 = ["fs-s3fs", "s3fs"]
 testing = [
     "pytest",
 ]
@@ -145,7 +143,6 @@ time-machine = ">=2.10.0"
 xdoctest = ">=1.1.1"
 
 [tool.poetry.group.typing.dependencies]
-boto3-stubs = {extras = ["s3"], version = ">=1.35.16"}
 mypy = ">=1.9"
 types-jsonschema = ">=4.17.0.6"
 types-pytz = ">=2022.7.1.2"
@@ -186,7 +183,7 @@ filterwarnings = [
     # https://github.com/joblib/joblib/pull/1518
     "ignore:Attribute n is deprecated:DeprecationWarning:joblib._utils",
     # https://github.com/boto/boto3/issues/3889
-    "ignore:datetime\\.datetime\\.utcnow\\(\\) is deprecated:DeprecationWarning:botocore",
+    # "ignore:datetime\\.datetime\\.utcnow\\(\\) is deprecated:DeprecationWarning:botocore",
 ]
 log_cli_level = "INFO"
 markers = [
@@ -262,9 +259,6 @@ types-PyYAML = "yaml"
 types-requests = "requests"
 
 [tool.deptry.per_rule_ignores]
-DEP001 = [
-    "mypy_boto3_s3",
-]
 DEP002 = [
     # Transitive constraints
     "numpy",

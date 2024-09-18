@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from singer_sdk.contrib.filesystem import local, s3
+from singer_sdk.contrib.filesystem.stream import FileStream
 
-__all__ = ["local", "s3"]
+__all__ = ["FileStream"]
