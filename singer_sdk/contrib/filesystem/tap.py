@@ -54,15 +54,16 @@ class FolderTap(Tap, t.Generic[_T]):
         th.Property(
             "filesystem",
             th.StringType,
+            required=True,
             default="local",
             allowed_values=["local"],
-            description="The filesystem to use",
+            description="The filesystem to use.",
         ),
         th.Property(
             "path",
             th.StringType,
             required=True,
-            description="Path to CSV files.",
+            description="Path to the directory where the files are stored.",
         ),
         th.Property(
             "read_mode",
