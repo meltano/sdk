@@ -54,7 +54,7 @@ def mypy(session: Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
     session.install(".[faker,jwt,parquet,s3,testing]")
-    session.install(*typing_dependencies, "boto3-stubs[s3]")
+    session.install(*typing_dependencies)
     session.run("mypy", *args)
     if not session.posargs:
         session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
