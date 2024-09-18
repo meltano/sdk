@@ -7,8 +7,9 @@ import functools
 import os
 
 import singer_sdk.typing as th
-from samples.sample_tap_csv.client import SDC_META_FILEPATH, CSVStream
+from samples.sample_tap_csv.client import CSVStream
 from singer_sdk import Tap
+from singer_sdk.contrib.filesystem.stream import SDC_META_FILEPATH
 
 DEFAULT_MERGE_STREAM_NAME = "files"
 
