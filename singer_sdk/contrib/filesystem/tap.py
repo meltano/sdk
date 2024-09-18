@@ -65,10 +65,7 @@ class FolderTap(Tap, t.Generic[_T]):
                 "Use `one_stream_per_file` to read each file as a separate stream, or "
                 "`merge` to merge all files into a single stream."
             ),
-            allowed_values=[
-                ReadMode.one_stream_per_file,
-                ReadMode.merge,
-            ],
+            allowed_values=list(ReadMode),
         ),
         th.Property(
             "stream_name",
@@ -98,7 +95,7 @@ class FolderTap(Tap, t.Generic[_T]):
 
         fs: fsspec.AbstractFileSystem = fsspec.filesystem("local")
 
-        if not fs.exists(path) or not fs.isdir(path):
+        if not fs.exists(path) or not fs.isdir(path):  # pragma: no cover
             # Raise a more specific error if the path is not a directory.
             msg = f"Path {path} does not exist or is not a directory"
             raise ValueError(msg)
