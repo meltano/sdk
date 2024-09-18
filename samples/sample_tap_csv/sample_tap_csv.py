@@ -6,6 +6,8 @@ import enum
 import functools
 import os
 
+import fsspec
+
 import singer_sdk.typing as th
 from samples.sample_tap_csv.client import CSVStream
 from singer_sdk import Tap
@@ -68,13 +70,14 @@ class SampleTapCSV(Tap):
     def discover_streams(self) -> list:
         # TODO(edgarmondragon): Implement stream discovery, based on the configured path
         # and read mode.
-        path: str = self.config[
-            "path"
-        ]  # a directory for now, but could be a glob pattern
+        # A directory for now, but could be a glob pattern.
+        path: str = self.config["path"]
+
+        fs: fsspec.AbstractFileSystem = fsspec.filesystem("local")
 
         # One stream per file
         if self.read_mode == ReadMode.one_stream_per_file:
-            if os.path.isdir(path):  # noqa: PTH112
+            if fs.isdir(path):
                 return [
                     CSVStream(
                         tap=self,
@@ -89,7 +92,7 @@ class SampleTapCSV(Tap):
             raise ValueError(msg)
 
         # Merge
-        if os.path.isdir(path):  # noqa: PTH112
+        if fs.isdir(path):
             contexts = [
                 {
                     SDC_META_FILEPATH: os.path.join(path, member),  # noqa: PTH118

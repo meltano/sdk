@@ -70,7 +70,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
     def get_records(
         self,
         context: Context | None,
-    ) -> t.Iterable[Record | tuple[Record, Context | None]]:
+    ) -> t.Iterable[dict | tuple[dict, dict | None]]:
         """Read records from the file.
 
         Args:
