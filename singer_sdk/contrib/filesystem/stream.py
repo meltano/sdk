@@ -84,7 +84,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
         mtime: datetime.datetime | None
         try:
             mtime: datetime.datetime = self.filesystem.modified(path)
-        except NotImplementedError:
+        except NotImplementedError:  # pragma: no cover
             self.logger.warning("Filesystem does not support modified time")
             mtime = None
 

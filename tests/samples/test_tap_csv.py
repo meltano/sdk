@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import datetime
+
 import pytest
 
 from samples.sample_tap_csv.sample_tap_csv import SampleTapCSV
-from singer_sdk.testing import get_tap_test_class
+from singer_sdk.testing import SuiteConfig, get_tap_test_class
 
 _TestCSVMerge = get_tap_test_class(
     tap_class=SampleTapCSV,
@@ -21,7 +23,7 @@ class TestCSVMerge(_TestCSVMerge):
         super().test_tap_stream_record_schema_matches_transformed_catalog(stream)
 
 
-TestCSVOneStreamPerFile = get_tap_test_class(
+_TestCSVOneStreamPerFile = get_tap_test_class(
     tap_class=SampleTapCSV,
     config={
         "path": "fixtures/csv",
@@ -30,7 +32,59 @@ TestCSVOneStreamPerFile = get_tap_test_class(
 )
 
 
-class TestCSVOneStreamPerFile(TestCSVOneStreamPerFile):
+class TestCSVOneStreamPerFile(_TestCSVOneStreamPerFile):
     @pytest.mark.xfail(reason="Schema generation not implemented", strict=True)
     def test_tap_stream_record_schema_matches_transformed_catalog(self, stream: str):
         super().test_tap_stream_record_schema_matches_transformed_catalog(stream)
+
+
+# Three days into the future.
+FUTURE = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(days=3)
+
+STATE = {
+    "bookmarks": {
+        "customers": {
+            "partitions": [
+                {
+                    "context": {"_sdc_path": "fixtures/csv/customers.csv"},
+                    "replication_key": "_sdc_modified_at",
+                    "replication_key_value": FUTURE.isoformat(),
+                }
+            ]
+        },
+        "employees": {
+            "partitions": [
+                {
+                    "context": {"_sdc_path": "fixtures/csv/employees.csv"},
+                    "replication_key": "_sdc_modified_at",
+                    "replication_key_value": FUTURE.isoformat(),
+                }
+            ]
+        },
+    }
+}
+
+
+_TestCSVOneStreamPerFileIncremental = get_tap_test_class(
+    tap_class=SampleTapCSV,
+    config={
+        "path": "fixtures/csv",
+        "read_mode": "one_stream_per_file",
+    },
+    state=STATE,
+    suite_config=SuiteConfig(ignore_no_records=True),
+)
+
+
+class TestCSVOneStreamPerFileIncremental(_TestCSVOneStreamPerFileIncremental):
+    @pytest.mark.xfail(reason="Schema generation not implemented", strict=True)
+    def test_tap_stream_record_schema_matches_transformed_catalog(self, stream: str):
+        super().test_tap_stream_record_schema_matches_transformed_catalog(stream)
+
+    @pytest.mark.xfail(reason="No records are extracted", strict=True)
+    def test_tap_stream_transformed_catalog_schema_matches_record(self, stream: str):
+        super().test_tap_stream_transformed_catalog_schema_matches_record(stream)
+
+    @pytest.mark.xfail(reason="No records are extracted", strict=True)
+    def test_tap_stream_returns_record(self, stream: str):
+        super().test_tap_stream_returns_record(stream)
