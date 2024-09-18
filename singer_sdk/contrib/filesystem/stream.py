@@ -64,7 +64,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
         return self._partitions
 
     @abc.abstractmethod
-    def read_file(self, context: Context | None) -> t.Iterable[Record]:
+    def read_file(self, path: str) -> t.Iterable[Record]:
         """Return a generator of records from the file."""
 
     def get_records(
@@ -78,12 +78,20 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
 
         Yields:
             Record or tuple of Record and child context.
+
+        Raises:
+            RuntimeError: If context is not provided.
         """
+        if not context:
+            # TODO: Raise a more specific error.
+            msg = f"Context is required for {self.name}"
+            raise RuntimeError(msg)
+
         path: str = context[SDC_META_FILEPATH]
 
         mtime: datetime.datetime | None
         try:
-            mtime: datetime.datetime = self.filesystem.modified(path)
+            mtime: datetime.datetime = self.filesystem.modified(path)  # type: ignore[no-redef]
         except NotImplementedError:  # pragma: no cover
             self.logger.warning("Filesystem does not support modified time")
             mtime = None
