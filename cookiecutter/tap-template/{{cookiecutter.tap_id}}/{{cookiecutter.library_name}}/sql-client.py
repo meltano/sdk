@@ -5,7 +5,7 @@ This includes {{ cookiecutter.source_name }}Stream and {{ cookiecutter.source_na
 
 from __future__ import annotations
 
-from typing import Any, Iterable
+import typing as t
 
 import sqlalchemy  # noqa: TCH002
 from singer_sdk import SQLConnector, SQLStream
@@ -77,7 +77,7 @@ class {{ cookiecutter.source_name }}Stream(SQLStream):
 
     connector_class = {{ cookiecutter.source_name }}Connector
 
-    def get_records(self, partition: dict | None) -> Iterable[dict[str, Any]]:
+    def get_records(self, partition: dict | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
 
         Developers may optionally add custom logic before calling the default
