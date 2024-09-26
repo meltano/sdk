@@ -97,6 +97,12 @@ jobs:
         pipx inject nox nox-poetry
         nox --version
 
+    - uses: actions/cache@v4
+      if: matrix.session == 'tests'
+      with:
+        path: http_cache.sqlite
+        key: http_cache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.sqlalchemy }}
+
     - name: Run Nox
       env:
         SQLALCHEMY_VERSION: ${{ matrix.sqlalchemy }}
@@ -107,7 +113,7 @@ jobs:
       if: always() && (matrix.session == 'tests')
       with:
         include-hidden-files: true
-        name: coverage-data-nox_${{ matrix.session }}-${{ matrix.os }}-py${{ matrix.python-version }}_sqlalchemy_${{ matrix.sqlalchemy }}
+        name: coverage-data-nox_-${{ matrix.os }}-py${{ matrix.python-version }}_sqlalchemy_${{ matrix.sqlalchemy }}
         path: ".coverage.*"
 
   tests-external:

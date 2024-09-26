@@ -15,7 +15,6 @@ keywords = [
 classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -29,7 +28,7 @@ packages = [
 {%- endif %}
 
 [tool.poetry.dependencies]
-python = ">=3.8"
+python = ">=3.9"
 singer-sdk = { version="~=0.40.0"{{ ', extras = ["faker"]' if cookiecutter.faker_extra }} }
 fs-s3fs = { version = "~=1.1.1", optional = true }
 {%- if cookiecutter.serialization_method != "SQL" %}
@@ -52,7 +51,7 @@ warn_unused_configs = true
 
 [tool.ruff]
 src = ["{{cookiecutter.library_name}}"]
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.lint]
 ignore = [

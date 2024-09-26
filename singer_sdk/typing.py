@@ -69,7 +69,7 @@ from singer_sdk.helpers._typing import (
 if sys.version_info < (3, 13):
     from typing_extensions import deprecated
 else:
-    from typing import deprecated  # noqa: ICN003 # pragma: no cover
+    from warnings import deprecated  # pragma: no cover
 
 
 if t.TYPE_CHECKING:
