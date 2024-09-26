@@ -20,6 +20,7 @@ class DummyJSONAuthenticator(metaclass=SingletonMeta):
         self.refresh_token = None
 
         self.expires = 0
+        self.session = requests.Session()
 
     def __call__(self, request):
         if not self.refresh_token:
@@ -45,13 +46,13 @@ class DummyJSONAuthenticator(metaclass=SingletonMeta):
             response.raise_for_status()
 
         data = response.json()
-        self.token = data["token"]
+        self.token = data["accessToken"]
         self.refresh_token = data["refreshToken"]
         self.expires = time.time() + EXPIRES_IN_MINS * 60
         logger.info("Authenticated")
 
     def refresh(self):
-        response = requests.post(
+        response = self.session.post(
             self.refresh_token_url,
             json={
                 "refreshToken": self.refresh_token,
@@ -61,7 +62,7 @@ class DummyJSONAuthenticator(metaclass=SingletonMeta):
         self._handle_response(response)
 
     def auth(self):
-        response = requests.post(
+        response = self.session.post(
             self.auth_url,
             json={
                 "username": self.username,
