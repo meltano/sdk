@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import abc
-import enum
 import functools
 import typing as t
 
@@ -22,13 +21,6 @@ if t.TYPE_CHECKING:
 
 SDC_META_FILEPATH = "_sdc_path"
 SDC_META_MODIFIED_AT = "_sdc_modified_at"
-
-
-class ReadMode(str, enum.Enum):
-    """Sync mode for the tap."""
-
-    one_stream_per_file = "one_stream_per_file"
-    merge = "merge"
 
 
 class FileStream(Stream, metaclass=abc.ABCMeta):

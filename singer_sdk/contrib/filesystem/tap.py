@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import enum
 import functools
 import os
 import typing as t
@@ -11,9 +12,17 @@ import fsspec
 
 import singer_sdk.typing as th
 from singer_sdk import Tap
-from singer_sdk.contrib.filesystem.stream import FileStream, ReadMode
+from singer_sdk.contrib.filesystem.stream import FileStream
 
 DEFAULT_MERGE_STREAM_NAME = "files"
+
+
+class ReadMode(str, enum.Enum):
+    """Sync mode for the tap."""
+
+    one_stream_per_file = "one_stream_per_file"
+    merge = "merge"
+
 
 BASE_CONFIG_SCHEMA = th.PropertiesList(
     th.Property(
