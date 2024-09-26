@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import abc
+import enum
+import functools
 import typing as t
 
 from singer_sdk import Stream
+from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._util import utc_now
 from singer_sdk.streams.core import REPLICATION_INCREMENTAL
 
@@ -17,22 +20,23 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import Context, Record
     from singer_sdk.tap_base import Tap
 
-
 SDC_META_FILEPATH = "_sdc_path"
 SDC_META_MODIFIED_AT = "_sdc_modified_at"
+
+
+class ReadMode(str, enum.Enum):
+    """Sync mode for the tap."""
+
+    one_stream_per_file = "one_stream_per_file"
+    merge = "merge"
 
 
 class FileStream(Stream, metaclass=abc.ABCMeta):
     """Abstract base class for file streams."""
 
-    BASE_SCHEMA: t.ClassVar[dict[str, t.Any]] = {
-        "type": ["object"],
-        "properties": {
-            SDC_META_FILEPATH: {"type": "string"},
-            SDC_META_MODIFIED_AT: {"type": ["string", "null"], "format": "date-time"},
-        },
-        "required": [],
-        "additionalProperties": {"type": "string"},
+    SDC_PROPERTIES: t.ClassVar[dict[str, dict]] = {
+        SDC_META_FILEPATH: {"type": "string"},
+        SDC_META_MODIFIED_AT: {"type": ["string", "null"], "format": "date-time"},
     }
 
     def __init__(
@@ -40,34 +44,58 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
         tap: Tap,
         name: str,
         *,
+        filepaths: t.Sequence[str],
         filesystem: fsspec.AbstractFileSystem,
-        partitions: list[dict[str, t.Any]] | None = None,
     ) -> None:
         """Create a new FileStream instance.
 
         Args:
             tap: The tap for this stream.
             name: The name of the stream.
+            filepaths: List of file paths to read.
             filesystem: The filesystem implementation object to use.
-            partitions: List of partitions for this stream.
+            mode: The read mode for the stream.
+
+        Raises:
+            ConfigValidationError: If no file paths are provided.
         """
-        # TODO(edgarmondragon): Build schema from file.
-        super().__init__(tap, self.BASE_SCHEMA, name)
+        if not filepaths:
+            msg = "Configuration error"
+            raise ConfigValidationError(msg, errors=["No file paths provided"])
+
+        self._filepaths = filepaths
+        self.filesystem = filesystem
+
+        super().__init__(tap, schema=None, name=name)
 
         # TODO(edgarrmondragon): Make this None if the filesytem does not support it.
         self.replication_key = SDC_META_MODIFIED_AT
-        self.filesystem = filesystem
         self._sync_start_time = utc_now()
-        self._partitions = partitions or []
+        self._partitions = [{SDC_META_FILEPATH: path} for path in self._filepaths]
 
     @property
     def partitions(self) -> list[dict[str, t.Any]]:
         """Return the list of partitions for this stream."""
         return self._partitions
 
-    @abc.abstractmethod
-    def read_file(self, path: str) -> t.Iterable[Record]:
-        """Return a generator of records from the file."""
+    def _get_full_schema(self) -> dict[str, t.Any]:
+        """Return the full schema for the stream.
+
+        Args:
+            context: Stream partition or context dictionary.
+
+        Returns:
+            The full schema for the stream.
+        """
+        path: str = self._filepaths[0]
+        schema = self.get_schema(path)
+        schema["properties"].update(self.SDC_PROPERTIES)
+        return schema
+
+    @functools.cached_property
+    def schema(self) -> dict[str, t.Any]:
+        """Return the schema for the stream."""
+        return self._get_full_schema()
 
     def get_records(
         self,
@@ -109,4 +137,13 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
 
         for record in self.read_file(path):
             record[SDC_META_MODIFIED_AT] = mtime or self._sync_start_time
+            record[SDC_META_FILEPATH] = path
             yield record
+
+    @abc.abstractmethod
+    def read_file(self, path: str) -> t.Iterable[Record]:
+        """Return a generator of records from the file."""
+
+    @abc.abstractmethod
+    def get_schema(self, path: str) -> dict[str, t.Any]:
+        """Return the schema for the file."""

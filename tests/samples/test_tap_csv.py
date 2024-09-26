@@ -19,9 +19,7 @@ _TestCSVMerge = get_tap_test_class(
 
 
 class TestCSVMerge(_TestCSVMerge):
-    @pytest.mark.xfail(reason="Schema generation not implemented", strict=True)
-    def test_tap_stream_record_schema_matches_transformed_catalog(self, stream: str):
-        super().test_tap_stream_record_schema_matches_transformed_catalog(stream)
+    pass
 
 
 _TestCSVOneStreamPerFile = get_tap_test_class(
@@ -35,9 +33,7 @@ _TestCSVOneStreamPerFile = get_tap_test_class(
 
 
 class TestCSVOneStreamPerFile(_TestCSVOneStreamPerFile):
-    @pytest.mark.xfail(reason="Schema generation not implemented", strict=True)
-    def test_tap_stream_record_schema_matches_transformed_catalog(self, stream: str):
-        super().test_tap_stream_record_schema_matches_transformed_catalog(stream)
+    pass
 
 
 # Three days into the future.
@@ -80,10 +76,6 @@ _TestCSVOneStreamPerFileIncremental = get_tap_test_class(
 
 
 class TestCSVOneStreamPerFileIncremental(_TestCSVOneStreamPerFileIncremental):
-    @pytest.mark.xfail(reason="Schema generation not implemented", strict=True)
-    def test_tap_stream_record_schema_matches_transformed_catalog(self, stream: str):
-        super().test_tap_stream_record_schema_matches_transformed_catalog(stream)
-
     @pytest.mark.xfail(reason="No records are extracted", strict=True)
     def test_tap_stream_transformed_catalog_schema_matches_record(self, stream: str):
         super().test_tap_stream_transformed_catalog_schema_matches_record(stream)
