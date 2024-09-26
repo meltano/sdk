@@ -178,6 +178,8 @@ filterwarnings = [
     "ignore:ast.Str is deprecated:DeprecationWarning:simpleeval",
     # https://github.com/joblib/joblib/pull/1518
     "ignore:Attribute n is deprecated:DeprecationWarning:joblib._utils",
+    # TODO: Address this SQLite warning in Python 3.13+
+    "ignore::ResourceWarning",
 ]
 log_cli_level = "INFO"
 markers = [
