@@ -208,6 +208,10 @@ def test_schema_selection(
                     Property("col_a_3", StringType),
                 ),
             ),
+            Property(
+                "col_b",
+                ObjectType(),
+            ),
             Property("col_d", StringType),
             Property("col_e", StringType),
             Property("col_f", StringType),

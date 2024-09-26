@@ -61,11 +61,12 @@ def _pop_deselected_schema(
             property_name,
         )
         selected = mask[property_breadcrumb]
-        if not selected:
+        is_object = is_object_type(property_def)
+        if not selected and not is_object:
             schema_at_breadcrumb["properties"].pop(property_name, None)
             continue
 
-        if is_object_type(property_def):
+        if is_object:
             # call recursively in case any subproperties are deselected.
             _pop_deselected_schema(
                 schema,
