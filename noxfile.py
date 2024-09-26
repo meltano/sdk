@@ -75,10 +75,6 @@ def tests(session: Session) -> None:
         # https://github.com/apache/arrow/issues/43519
         extras.remove("parquet")
 
-        # https://github.com/duckdb/duckdb/discussions/13352
-        test_dependencies.pop("duckdb")
-        test_dependencies.pop("duckdb-engine")
-
     session.install(f".[{','.join(extras)}]")
     session.install(*test_dependencies)
 
