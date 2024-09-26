@@ -296,7 +296,6 @@ class TestConnectorSQL:  # noqa: PLR0904
             ]
 
 
-@pytest.mark.xfail
 class TestDuckDBConnector:
     @pytest.fixture
     def connector(self):

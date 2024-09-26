@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 import typing as t
 
 import pytest
@@ -13,7 +14,11 @@ if t.TYPE_CHECKING:
     from pathlib import Path
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail(
+    sys.version_info >= (3, 13),
+    reason="Parquet not supported on Python 3.13 due to PyArrow incompatibility",
+    strict=True,
+)
 def test_batcher(tmp_path: Path) -> None:
     root = tmp_path.joinpath("batches")
     root.mkdir()
@@ -33,7 +38,11 @@ def test_batcher(tmp_path: Path) -> None:
     assert batches[0][0].endswith(".parquet")
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail(
+    sys.version_info >= (3, 13),
+    reason="Parquet not supported on Python 3.13 due to PyArrow incompatibility",
+    strict=True,
+)
 def test_batcher_gzip(tmp_path: Path) -> None:
     root = tmp_path.joinpath("batches")
     root.mkdir()

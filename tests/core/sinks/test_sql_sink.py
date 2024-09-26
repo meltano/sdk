@@ -22,7 +22,6 @@ class DuckDBTarget(SQLTarget):
     default_sink_class = DuckDBSink
 
 
-@pytest.mark.xfail
 class TestDuckDBSink:
     @pytest.fixture
     def target(self) -> DuckDBTarget:
