@@ -59,7 +59,7 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
         Raises:
             ConfigValidationError: If no file paths are provided.
         """
-        if not filepaths:
+        if not filepaths:  # pragma: no cover
             msg = "Configuration error"
             raise ConfigValidationError(msg, errors=["No file paths provided"])
 
