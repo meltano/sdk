@@ -27,7 +27,7 @@ StandardTests = get_target_test_class(
 @pytest.mark.xfail(
     sys.version_info >= (3, 13),
     reason="Parquet not supported on Python 3.13 due to PyArrow incompatibility",
-    strict=True,
+    raises=NameError,
 )
 class TestSampleTargetParquet(StandardTests):
     """Standard Target Tests."""
