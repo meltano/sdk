@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from singer_sdk import typing as th  # JSON schema typing helpers
 
+# https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.implementations.ftp.FTPFileSystem
 FTP = th.Property(
     "ftp",
     th.ObjectType(
@@ -47,6 +48,7 @@ FTP = th.Property(
 )
 
 
+# https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.implementations.sftp.SFTPFileSystem
 SFTP = th.Property(
     "sftp",
     th.ObjectType(
