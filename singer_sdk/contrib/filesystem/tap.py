@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import enum
 import functools
+import logging
 import os
 import typing as t
 from pathlib import Path
@@ -12,7 +13,11 @@ import fsspec
 
 import singer_sdk.typing as th
 from singer_sdk import Tap
+from singer_sdk.contrib.filesystem import config as filesystem_config
 from singer_sdk.contrib.filesystem.stream import FileStream
+from singer_sdk.exceptions import ConfigValidationError
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_MERGE_STREAM_NAME = "files"
 
@@ -30,7 +35,7 @@ BASE_CONFIG_SCHEMA = th.PropertiesList(
         th.StringType,
         required=True,
         default="local",
-        allowed_values=["local"],
+        allowed_values=["local", "ftp", "sftp"],
         description="The filesystem to use.",
     ),
     th.Property(
@@ -56,6 +61,8 @@ BASE_CONFIG_SCHEMA = th.PropertiesList(
         default=DEFAULT_MERGE_STREAM_NAME,
         description="Name of the stream to use when `read_mode` is `merge`.",
     ),
+    filesystem_config.FTP,
+    filesystem_config.SFTP,
 ).to_dict()
 
 
@@ -121,8 +128,20 @@ class FolderTap(Tap, t.Generic[_T]):
 
     @functools.cached_property
     def fs(self) -> fsspec.AbstractFileSystem:
-        """Return the filesystem object."""
-        return fsspec.filesystem(self.config["filesystem"])
+        """Return the filesystem object.
+
+        Raises:
+            ConfigValidationError: If the filesystem configuration is missing.
+        """
+        protocol = self.config["filesystem"]
+        if protocol != "local" and protocol not in self.config:  # pragma: no cover
+            msg = "Filesytem configuration is missing"
+            raise ConfigValidationError(
+                msg,
+                errors=[f"Missing configuration for filesystem {protocol}"],
+            )
+        logger.info("Instatiating filesystem inteface: '%s'", protocol)
+        return fsspec.filesystem(protocol, **self.config.get(protocol, {}))
 
     def discover_streams(self) -> list:
         """Return a list of discovered streams.

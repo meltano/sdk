@@ -101,6 +101,9 @@ faker = {version = ">=22.5", optional = true}
 cryptography = { version = ">=3.4.6", optional = true }
 PyJWT = { version = "~=2.4", optional = true }
 
+# SSH extras
+paramiko = ">=3.3.0"
+
 [tool.poetry.extras]
 jwt = [
     "cryptography",
@@ -117,6 +120,7 @@ docs = [
     "sphinx-reredirects",
 ]
 s3 = ["fs-s3fs", "s3fs"]
+ssh = ["paramiko"]
 testing = [
     "pytest",
 ]
