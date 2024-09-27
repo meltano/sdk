@@ -279,6 +279,7 @@ DEP002 = [
     "sphinx-notfound-page",
     "sphinx-reredirects",
     # Plugins
+    "paramiko",
     "fs-s3fs",
     "s3fs",
 ]
