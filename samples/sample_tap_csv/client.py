@@ -1,3 +1,5 @@
+"""Stream class for CSV files."""
+
 from __future__ import annotations
 
 import csv
@@ -18,9 +20,11 @@ class CSVStream(FileStream):
 
     @property
     def primary_keys(self) -> t.Sequence[str]:
+        """Return the primary key fields for records in this stream."""
         return (SDC_META_FILEPATH, SDC_META_LINE_NUMBER)
 
     def get_schema(self, path: str) -> dict[str, t.Any]:
+        """Return a schema for the given file."""
         with self.filesystem.open(path, mode="r") as file:
             reader = csv.DictReader(
                 file,
@@ -38,6 +42,7 @@ class CSVStream(FileStream):
             return schema
 
     def read_file(self, path: str) -> t.Iterable[Record]:
+        """Read the given file and emit records."""
         with self.filesystem.open(path, mode="r") as file:
             reader = csv.DictReader(
                 file,
