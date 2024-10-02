@@ -186,8 +186,6 @@ filterwarnings = [
     "ignore:ast.Str is deprecated:DeprecationWarning:simpleeval",
     # https://github.com/joblib/joblib/pull/1518
     "ignore:Attribute n is deprecated:DeprecationWarning:joblib._utils",
-    # https://github.com/boto/boto3/issues/3889
-    # "ignore:datetime\\.datetime\\.utcnow\\(\\) is deprecated:DeprecationWarning:botocore",
 ]
 log_cli_level = "INFO"
 markers = [
