@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🐛 Fixes
 
 - [#2697](https://github.com/meltano/sdk/issues/2697) All HTTP timeout exceptions are now retried in REST and GraphQL streams
-- [#2683](https://github.com/meltano/sdk/issues/2683) A clear error message is now emitted when flattening is enable but `flattening_max_depth` is not set
+- [#2683](https://github.com/meltano/sdk/issues/2683) A clear error message is now emitted when flattening is enabled but `flattening_max_depth` is not set
 - [#2665](https://github.com/meltano/sdk/issues/2665) Mapped datetime values are now typed as `date-time` strings in the schema message -- _**Thanks @gregkoutsimp!**_
 - [#2663](https://github.com/meltano/sdk/issues/2663) Properties dropped using `None` or `__NULL__` in stream maps are now also removed from the schema `required` array
 
@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📦 Packaging changes
 
-- [#2694](https://github.com/meltano/sdk/issues/2694) Remove unused backport `importlib_resources` dependency in tap template
+- [#2694](https://github.com/meltano/sdk/issues/2694) Removed unused backport `importlib_resources` dependency in tap template
 - [#2664](https://github.com/meltano/sdk/issues/2664) Added a constraint on setuptools <= 70.3.0 to fix incompatibility with some dependencies
 
 ## v0.40.0 (2024-09-02)
