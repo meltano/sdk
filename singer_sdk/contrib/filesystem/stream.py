@@ -133,9 +133,9 @@ class FileStream(Stream, metaclass=abc.ABCMeta):
             yield record
 
     @abc.abstractmethod
-    def read_file(self, path: str) -> t.Iterable[Record]:
-        """Return a generator of records from the file."""
-
-    @abc.abstractmethod
     def get_schema(self, path: str) -> dict[str, t.Any]:
         """Return the schema for the file."""
+
+    @abc.abstractmethod
+    def read_file(self, path: str) -> t.Iterable[Record]:
+        """Return a generator of records from the file."""

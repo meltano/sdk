@@ -89,8 +89,16 @@ class FolderTap(Tap, t.Generic[_T]):
     """Singer tap for files in a directory."""
 
     valid_extensions: tuple[str, ...]
+    """Valid file extensions for this tap.
+
+    Files with extensions not in this list will be ignored.
+    """
 
     default_stream_class: type[_T]
+    """The default stream class to use for this tap.
+
+    This should be a subclass of `FileStream`.
+    """
 
     config_jsonschema: t.ClassVar[dict] = {"properties": {}}
 
