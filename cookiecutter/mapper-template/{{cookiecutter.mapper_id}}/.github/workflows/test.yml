@@ -24,11 +24,12 @@ on:
     - tox.ini
   workflow_dispatch:
 
+env:
+  FORCE_COLOR: 1
+
 jobs:
   pytest:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: {{ '${{secrets.GITHUB_TOKEN}}' }}
     strategy:
       fail-fast: false
       matrix:

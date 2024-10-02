@@ -122,7 +122,7 @@ Now you can test and orchestrate using Meltano:
 # Test invocation:
 meltano invoke {{ cookiecutter.tap_id }} --version
 # OR run a test `elt` pipeline:
-meltano elt {{ cookiecutter.tap_id }} target-jsonl
+meltano run {{ cookiecutter.tap_id }} target-jsonl
 ```
 
 ### SDK Dev Guide
