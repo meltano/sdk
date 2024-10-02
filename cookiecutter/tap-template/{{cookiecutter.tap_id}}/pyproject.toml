@@ -84,7 +84,7 @@ known-first-party = ["{{cookiecutter.library_name}}"]
 convention = "google"
 
 [build-system]
-requires = ["poetry-core==1.9.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
