@@ -14,7 +14,9 @@ import hashlib
 import importlib.util
 import json
 import logging
+import sys
 import typing as t
+import warnings
 
 import simpleeval  # type: ignore[import-untyped]
 
@@ -359,7 +361,7 @@ class CustomStreamMap(StreamMap):
 
         return result
 
-    def _eval_type(
+    def _eval_type(  # noqa: PLR0911
         self,
         expr: str,
         default: th.JSONTypeHelper | None = None,
@@ -397,6 +399,12 @@ class CustomStreamMap(StreamMap):
 
         if expr.startswith("bool("):
             return th.BooleanType()
+
+        if expr.startswith("datetime.date") or expr.endswith(".date()"):
+            return th.DateType()
+
+        if expr.startswith("datetime.datetime"):
+            return th.DateTimeType()
 
         return th.StringType() if expr[0] == "'" and expr[-1] == "'" else default
 
@@ -484,6 +492,12 @@ class CustomStreamMap(StreamMap):
                     )
                     raise StreamMapConfigError(msg)
                 transformed_schema["properties"].pop(prop_key, None)
+                if "required" in transformed_schema:
+                    transformed_schema["required"] = [
+                        item
+                        for item in transformed_schema["required"]
+                        if item != prop_key
+                    ]
                 stream_map_parsed.append((prop_key, prop_def, None))
             elif isinstance(prop_def, str):
                 default_type: th.JSONTypeHelper = th.StringType()  # Fallback to string
@@ -503,6 +517,12 @@ class CustomStreamMap(StreamMap):
                         self._eval_type(prop_def, default=default_type),
                     ).to_dict(),
                 )
+                if "Faker" in prop_def:
+                    warnings.warn(
+                        "Class 'Faker' is deprecated in stream maps. Use instance methods, like 'fake.seed_instance.'",  # noqa: E501
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
                 try:
                     parsed_def: ast.Expr = ast.parse(prop_def).body[0]  # type: ignore[assignment]
                     stream_map_parsed.append((prop_key, prop_def, parsed_def))

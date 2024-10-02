@@ -143,3 +143,12 @@ Batch
 
     batch.BaseBatcher
     batch.JSONLinesBatcher
+
+Other
+-----
+
+.. autosummary::
+    :toctree: classes
+    :template: class.rst
+
+    connectors.sql.SQLToJSONSchema

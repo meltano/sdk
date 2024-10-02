@@ -365,9 +365,6 @@ class TargetCapabilities(CapabilitiesEnum):
     #: Fail safe for unknown JSON Schema types.
     DATATYPE_FAILSAFE = "datatype-failsafe"
 
-    #: Allow denesting complex properties.
-    RECORD_FLATTENING = "record-flattening"
-
     #: Allow setting the target schema.
     TARGET_SCHEMA = "target-schema"
 

@@ -157,6 +157,8 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
 
         Returns:
             The user agent string.
+
+        .. versionadded:: 0.40.0
         """
         return self.config.get(
             "user_agent",
@@ -251,7 +253,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
             (
                 ConnectionResetError,
                 RetriableAPIError,
-                requests.exceptions.ReadTimeout,
+                requests.exceptions.Timeout,
                 requests.exceptions.ConnectionError,
                 requests.exceptions.ChunkedEncodingError,
                 requests.exceptions.ContentDecodingError,
