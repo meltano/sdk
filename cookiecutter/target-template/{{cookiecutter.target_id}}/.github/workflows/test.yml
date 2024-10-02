@@ -47,4 +47,4 @@ jobs:
     - run: pipx install tox
     - name: Run Tox
       run: |
-        tox -e $(echo py${{ matrix.python-version }} | tr -d .)
+        tox -e $(echo py{{ '${{ matrix.python-version }}' }} | tr -d .)
