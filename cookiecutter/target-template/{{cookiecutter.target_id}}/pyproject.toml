@@ -50,7 +50,6 @@ python_version = "3.12"
 warn_unused_configs = true
 
 [tool.ruff]
-src = ["{{cookiecutter.library_name}}"]
 target-version = "py39"
 
 [tool.ruff.lint]
@@ -64,9 +63,6 @@ select = ["ALL"]
 
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
-
-[tool.ruff.lint.isort]
-known-first-party = ["{{cookiecutter.library_name}}"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
