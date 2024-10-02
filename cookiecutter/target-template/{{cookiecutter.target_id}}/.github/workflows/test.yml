@@ -44,13 +44,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: {{ '${{ matrix.python-version }}' }}
-    - name: Install Poetry
+    - run: pipx install tox
+    - name: Run Tox
       run: |
-        pip install poetry
-    - name: Install dependencies
-      run: |
-        poetry env use {{ '${{ matrix.python-version }}' }}
-        poetry install
-    - name: Test with pytest
-      run: |
-        poetry run pytest
+        tox -e $(echo py${{ matrix.python-version }} | tr -d .)
