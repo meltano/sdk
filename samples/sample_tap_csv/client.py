@@ -1,91 +1,52 @@
 from __future__ import annotations
 
 import csv
-import datetime
-import os
 import typing as t
 
-from singer_sdk import Stream
-from singer_sdk.streams.core import REPLICATION_INCREMENTAL
+from singer_sdk.contrib.filesystem import FileStream
+from singer_sdk.contrib.filesystem.stream import SDC_META_FILEPATH
 
 if t.TYPE_CHECKING:
-    from singer_sdk.helpers.types import Context, Record
-    from singer_sdk.tap_base import Tap
-
-SDC_META_FILEPATH = "_sdc_path"
-SDC_META_MODIFIED_AT = "_sdc_modified_at"
+    from singer_sdk.helpers.types import Record
 
 
-def _to_datetime(value: float) -> str:
-    return datetime.datetime.fromtimestamp(value).astimezone()
+SDC_META_LINE_NUMBER = "_sdc_line_number"
 
 
-class CSVStream(Stream):
+class CSVStream(FileStream):
     """CSV stream class."""
 
-    def __init__(
-        self,
-        tap: Tap,
-        name: str | None = None,
-        *,
-        partitions: list[str] | None = None,
-    ) -> None:
-        # TODO(edgarmondragon): Build schema from CSV file.
-        schema = {
-            "type": ["object"],
-            "properties": {
-                SDC_META_FILEPATH: {"type": "string"},
-                SDC_META_MODIFIED_AT: {"type": "string", "format": "date-time"},
-            },
-            "required": [],
-            "additionalProperties": {"type": "string"},
-        }
-        super().__init__(tap, schema, name)
-
-        # TODO(edgarrmondragon): Make this None if the filesytem does not support it.
-        self.replication_key = SDC_META_MODIFIED_AT
-
-        self._partitions = partitions or []
-
     @property
-    def partitions(self) -> list[Context]:
-        return self._partitions
+    def primary_keys(self) -> t.Sequence[str]:
+        return (SDC_META_FILEPATH, SDC_META_LINE_NUMBER)
 
-    def _read_file(self, path: str) -> t.Iterable[Record]:  # noqa: PLR6301
-        # Make these configurable.
-        delimiter = ","
-        quotechar = '"'
-        escapechar = None
-        doublequote = True
-        lineterminator = "\r\n"
-
-        # TODO: Use filesytem-specific file open method.
-        with open(path, encoding="utf-8") as file:  # noqa: PTH123
+    def get_schema(self, path: str) -> dict[str, t.Any]:
+        with self.filesystem.open(path, mode="r") as file:
             reader = csv.DictReader(
                 file,
-                delimiter=delimiter,
-                quotechar=quotechar,
-                escapechar=escapechar,
-                doublequote=doublequote,
-                lineterminator=lineterminator,
+                delimiter=self.config["delimiter"],
+                quotechar=self.config["quotechar"],
+                escapechar=self.config.get("escapechar"),
+                doublequote=self.config["doublequote"],
+                lineterminator=self.config["lineterminator"],
             )
-            yield from reader
+            schema = {
+                "type": "object",
+                "properties": {key: {"type": "string"} for key in reader.fieldnames},
+            }
+            schema["properties"][SDC_META_LINE_NUMBER] = {"type": "integer"}
+            return schema
 
-    def get_records(
-        self,
-        context: Context | None,
-    ) -> t.Iterable[Record | tuple[Record, Context | None]]:
-        path: str = context[SDC_META_FILEPATH]
-        mtime = os.path.getmtime(path)  # noqa: PTH204
-
-        if (
-            self.replication_method is REPLICATION_INCREMENTAL
-            and (previous_bookmark := self.get_starting_timestamp(context))
-            and _to_datetime(mtime) < previous_bookmark
-        ):
-            self.logger.info("File has not been modified since last read, skipping")
-            return
-
-        for record in self._read_file(path):
-            record[SDC_META_MODIFIED_AT] = _to_datetime(mtime)
-            yield record
+    def read_file(self, path: str) -> t.Iterable[Record]:
+        with self.filesystem.open(path, mode="r") as file:
+            reader = csv.DictReader(
+                file,
+                delimiter=self.config["delimiter"],
+                quotechar=self.config["quotechar"],
+                escapechar=self.config.get("escapechar"),
+                doublequote=self.config["doublequote"],
+                lineterminator=self.config["lineterminator"],
+            )
+            for record in reader:
+                record[SDC_META_LINE_NUMBER] = reader.line_num
+                yield record

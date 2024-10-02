@@ -735,7 +735,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     # Partitions
 
     @property
-    def partitions(self) -> list[types.Context] | None:
+    def partitions(self) -> list[dict] | None:
         """Get stream partitions.
 
         Developers may override this property to provide a default partitions list.
@@ -746,7 +746,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             A list of partition key dicts (if applicable), otherwise `None`.
         """
-        result: list[types.Mapping] = [
+        result: list[dict] = [
             partition_state["context"]
             for partition_state in (
                 get_state_partitions_list(self.tap_state, self.name) or []
@@ -1106,7 +1106,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         record_index = 0
         context_element: types.Context | None
-        context_list: list[types.Context] | None
+        context_list: list[types.Context] | list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
