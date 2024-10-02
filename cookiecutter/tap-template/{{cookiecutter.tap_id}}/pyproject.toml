@@ -29,7 +29,6 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.9"
-importlib-resources = { version = "==6.4.*", python = "<3.9" }
 singer-sdk = { version="~=0.40.0", extras = [
     {%- if cookiecutter.auth_method == "JWT" -%}"jwt", {% endif -%}
     {%- if cookiecutter.faker_extra -%}"faker",{%- endif -%}
