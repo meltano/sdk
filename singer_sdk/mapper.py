@@ -866,6 +866,6 @@ class PluginMapper:
             msg = f"Failed to evaluate simpleeval expressions {expr}."
             raise MapExpressionError(msg) from ex
 
-        logging.debug("Eval result: %s = %s", expr, result)
+        logging.debug("Stream eval result: %s = %s", expr, result)
 
         return result
