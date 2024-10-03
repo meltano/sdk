@@ -850,16 +850,18 @@ class PluginMapper:
         # Allow stream name access within alias transform
         names = {"__stream_name__": stream_name}
 
+        result: str
+
         try:
             expr_evaluator = simpleeval.EvalWithCompoundTypes(names=names)
-            result: str = expr_evaluator.eval(expr)
+            result = expr_evaluator.eval(expr)
         except simpleeval.NameNotDefined:
             logging.debug(
                 "Failed to evaluate simpleeval expression %(expr) - "
                 "falling back to original expression",
                 extra={"expr": expr},
             )
-            result: str = expr
+            result = expr
         except (simpleeval.InvalidExpression, SyntaxError) as ex:
             msg = f"Failed to evaluate simpleeval expressions {expr}."
             raise MapExpressionError(msg) from ex
