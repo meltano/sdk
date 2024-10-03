@@ -29,7 +29,7 @@ copyright = f"{datetime.now().year}, Arch Data, Inc and Contributors"  # noqa: A
 author = "Meltano Core Team and Contributors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.40.0"
+release = "0.41.0"
 
 
 # -- General configuration -------------------------------------------------------------
@@ -156,6 +156,10 @@ redirects = {
 extlinks = {
     "jsonschema": (
         "https://json-schema.org/understanding-json-schema/reference/%s",
+        "%s",
+    ),
+    "column_type": (
+        "https://docs.sqlalchemy.org/en/20/core/type_basics.html#sqlalchemy.types.%s",
         "%s",
     ),
 }

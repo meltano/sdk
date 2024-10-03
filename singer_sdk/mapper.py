@@ -14,7 +14,9 @@ import hashlib
 import importlib.util
 import json
 import logging
+import sys
 import typing as t
+import warnings
 
 import simpleeval  # type: ignore[import-untyped]
 
@@ -359,7 +361,7 @@ class CustomStreamMap(StreamMap):
 
         return result
 
-    def _eval_type(
+    def _eval_type(  # noqa: PLR0911
         self,
         expr: str,
         default: th.JSONTypeHelper | None = None,
@@ -377,7 +379,7 @@ class CustomStreamMap(StreamMap):
             ValueError: If the expression is ``None``.
         """
         if expr is None:
-            msg = "Expression should be str, not None"
+            msg = "Expression should be str, not None"  # type: ignore[unreachable]
             raise ValueError(msg)
 
         default = default or th.StringType()
@@ -397,6 +399,12 @@ class CustomStreamMap(StreamMap):
 
         if expr.startswith("bool("):
             return th.BooleanType()
+
+        if expr.startswith("datetime.date") or expr.endswith(".date()"):
+            return th.DateType()
+
+        if expr.startswith("datetime.datetime"):
+            return th.DateTimeType()
 
         return th.StringType() if expr[0] == "'" and expr[-1] == "'" else default
 
@@ -484,6 +492,12 @@ class CustomStreamMap(StreamMap):
                     )
                     raise StreamMapConfigError(msg)
                 transformed_schema["properties"].pop(prop_key, None)
+                if "required" in transformed_schema:
+                    transformed_schema["required"] = [
+                        item
+                        for item in transformed_schema["required"]
+                        if item != prop_key
+                    ]
                 stream_map_parsed.append((prop_key, prop_def, None))
             elif isinstance(prop_def, str):
                 default_type: th.JSONTypeHelper = th.StringType()  # Fallback to string
@@ -503,6 +517,12 @@ class CustomStreamMap(StreamMap):
                         self._eval_type(prop_def, default=default_type),
                     ).to_dict(),
                 )
+                if "Faker" in prop_def:
+                    warnings.warn(
+                        "Class 'Faker' is deprecated in stream maps. Use instance methods, like 'fake.seed_instance.'",  # noqa: E501
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
                 try:
                     parsed_def: ast.Expr = ast.parse(prop_def).body[0]  # type: ignore[assignment]
                     stream_map_parsed.append((prop_key, prop_def, parsed_def))
@@ -564,7 +584,7 @@ class CustomStreamMap(StreamMap):
         elif filter_rule is None:
             filter_fn = always_true
         else:
-            msg = (
+            msg = (  # type: ignore[unreachable]
                 f"Unexpected filter rule type '{type(filter_rule).__name__}' in "
                 f"expression {filter_rule!s}. Expected 'str' or 'None'."
             )
@@ -783,9 +803,7 @@ class PluginMapper:
                     key_properties=key_properties,
                     flattening_options=self.flattening_options,
                 )
-            elif stream_def is None or (
-                isinstance(stream_def, str) and stream_def == NULL_STRING
-            ):
+            elif stream_def is None or (stream_def == NULL_STRING):
                 mapper = RemoveRecordTransform(
                     stream_alias=stream_alias,
                     raw_schema=schema,
@@ -800,7 +818,7 @@ class PluginMapper:
                 raise StreamMapConfigError(msg)
 
             else:
-                msg = (
+                msg = (  # type: ignore[unreachable]
                     f"Unexpected stream definition type. Expected str, dict, or None. "
                     f"Got '{type(stream_def).__name__}'."
                 )

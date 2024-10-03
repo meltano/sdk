@@ -462,14 +462,16 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         Args:
             message_dict: TODO
         """
-        sink = self.get_sink(message_dict["stream"])
-
+        stream_name = message_dict["stream"]
         encoding = BaseBatchFileEncoding.from_dict(message_dict["encoding"])
-        sink.process_batch_files(
-            encoding,
-            message_dict["manifest"],
-        )
-        self._handle_max_record_age()
+
+        for stream_map in self.mapper.stream_maps[stream_name]:
+            sink = self.get_sink(stream_map.stream_alias)
+            sink.process_batch_files(
+                encoding,
+                message_dict["manifest"],
+            )
+            self._handle_max_record_age()
 
     # Sink drain methods
 

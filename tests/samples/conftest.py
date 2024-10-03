@@ -29,14 +29,15 @@ def _sqlite_sample_db(sqlite_connector):
                     f"""
                     CREATE TABLE t{t} (
                         c1 int PRIMARY KEY NOT NULL,
-                        c2 varchar(10) NOT NULL
+                        c2 varchar(10) NOT NULL,
+                        c3 text NOT NULL
                     )
                     """
                 ),
             )
             for x in range(100):
                 conn.execute(
-                    sa.text(f"INSERT INTO t{t} VALUES ({x}, 'x={x}')"),  # noqa: S608
+                    sa.text(f"INSERT INTO t{t} VALUES ({x}, 'x={x}', 'y={x}')"),  # noqa: S608
                 )
 
 

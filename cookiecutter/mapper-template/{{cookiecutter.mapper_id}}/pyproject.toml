@@ -16,7 +16,6 @@ keywords = [
 classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -30,13 +29,13 @@ packages = [
 {%- endif %}
 
 [tool.poetry.dependencies]
-python = ">=3.8"
-singer-sdk = { version="~=0.40.0"{{ ', extras = ["faker"]' if cookiecutter.faker_extra }} }
+python = ">=3.9"
+singer-sdk = { version="~=0.41.0"{{ ', extras = ["faker"]' if cookiecutter.faker_extra }} }
 fs-s3fs = { version = "~=1.1.1", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8"
-singer-sdk = { version="~=0.40.0", extras = ["testing"] }
+singer-sdk = { version="~=0.41.0", extras = ["testing"] }
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
@@ -49,8 +48,7 @@ python_version = "3.12"
 warn_unused_configs = true
 
 [tool.ruff]
-src = ["{{cookiecutter.library_name}}"]
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.lint]
 ignore = [
@@ -64,14 +62,11 @@ select = ["ALL"]
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
 
-[tool.ruff.lint.isort]
-known-first-party = ["{{cookiecutter.library_name}}"]
-
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [build-system]
-requires = ["poetry-core==1.9.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]

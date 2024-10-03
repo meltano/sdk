@@ -6,6 +6,7 @@ on:
       dry_run:
         description: "Run the action without creating a PR or release draft"
         required: true
+        default: false
         type: boolean
       bump:
         description: "Version bump type"
@@ -84,7 +85,7 @@ jobs:
 
     - name: Create Pull Request
       if: ${{ github.event.inputs.dry_run == 'false' }}
-      uses: peter-evans/create-pull-request@v6
+      uses: peter-evans/create-pull-request@v7
       id: create-pull-request
       with:
         token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}

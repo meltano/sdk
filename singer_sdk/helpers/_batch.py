@@ -232,7 +232,7 @@ class BatchConfig:
             self.storage = StorageTarget.from_dict(self.storage)
 
         if self.batch_size is None:
-            self.batch_size = DEFAULT_BATCH_SIZE
+            self.batch_size = DEFAULT_BATCH_SIZE  # type: ignore[unreachable]
 
     def asdict(self) -> dict[str, t.Any]:
         """Return a dictionary representation of the message.

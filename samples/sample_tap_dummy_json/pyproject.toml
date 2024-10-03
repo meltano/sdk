@@ -11,7 +11,6 @@ keywords = [
 classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -20,13 +19,13 @@ classifiers = [
 license = "Apache-2.0"
 
 [tool.poetry.dependencies]
-python = ">=3.8"
+python = ">=3.9"
 requests = "~=2.32.3"
-singer-sdk = { version="~=0.38.0", extras = [] }
+singer-sdk = {path = "../..", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8"
-singer-sdk = { version="~=0.38.0", extras = ["testing"] }
+singer-sdk = {path = "../..", develop = true, extras = ["testing"]}
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
@@ -36,7 +35,7 @@ python_version = "3.12"
 warn_unused_configs = true
 
 [build-system]
-requires = ["poetry-core==1.9.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]

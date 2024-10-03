@@ -70,7 +70,7 @@ def test_sqlite_discovery(sqlite_sample_tap: SQLTap):
     sqlite_sample_tap.sync_all()
     stream = t.cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
     schema = stream.schema
-    assert len(schema["properties"]) == 2
+    assert len(schema["properties"]) == 3
     assert stream.name == stream.tap_stream_id == "main-t1"
 
     md_map = MetadataMapping.from_iterable(stream.catalog_entry["metadata"])
@@ -90,13 +90,17 @@ def test_sqlite_discovery(sqlite_sample_tap: SQLTap):
 def test_sqlite_input_catalog(sqlite_sample_tap: SQLTap):
     sqlite_sample_tap.sync_all()
     stream = t.cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
-    assert len(stream.schema["properties"]) == 2
-    assert len(stream.stream_maps[0].transformed_schema["properties"]) == 2
+    assert len(stream.schema["properties"]) == 3
+    assert len(stream.stream_maps[0].transformed_schema["properties"]) == 3
 
     for schema in [stream.schema, stream.stream_maps[0].transformed_schema]:
-        assert len(schema["properties"]) == 2
+        assert len(schema["properties"]) == 3
         assert schema["properties"]["c1"] == {"type": ["integer"]}
-        assert schema["properties"]["c2"] == {"type": ["string", "null"]}
+        assert schema["properties"]["c2"] == {
+            "type": ["string", "null"],
+            "maxLength": 10,
+        }
+        assert schema["properties"]["c3"] == {"type": ["string", "null"]}
         assert stream.name == stream.tap_stream_id == "main-t1"
 
     md_map = MetadataMapping.from_iterable(stream.catalog_entry["metadata"])
