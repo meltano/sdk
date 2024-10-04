@@ -786,7 +786,6 @@ class MappedTap(Tap):
             "builtin_variable_stream_name.jsonl",
             id="builtin_variable_stream_name",
         ),
-
         pytest.param(
             {"mystream": {"__alias__": "'aliased_' + __stream_name__"}},
             {"flattening_enabled": False, "flattening_max_depth": 0},
