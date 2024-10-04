@@ -2,6 +2,8 @@ name: Documentation change
 description: Request a documentation change
 title: "docs: <title>"
 labels: ["Documentation", "valuestream/SDK"]
+assignees:
+  - edgarrmondragon
 
 body:
   - type: markdown
