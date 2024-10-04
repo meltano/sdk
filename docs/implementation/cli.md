@@ -1,5 +1,4 @@
 ---
-# TODO: this will be supported after MyST-Parser 0.18.0 is released
 myst:
   heading_anchors: 4
 ---
