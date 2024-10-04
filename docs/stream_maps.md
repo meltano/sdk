@@ -650,7 +650,7 @@ Support for stream glob expressions.
 
 ### Aliasing two or more streams
 
-The `__alias__` operation has built-in variable `__stream_name__`, representing the original stream.
+The `__alias__` operation evaluates simple python expressions.
 
 You can combine this with glob expressions to rename more than one stream:
 
