@@ -675,7 +675,7 @@ stream_maps:
 ````
 
 :::{versionadded} TODO
-Support for __alias__ expression evaluation.
+Support for `__alias__` expression evaluation.
 :::
 
 ### Understanding Filters' Affects on Parent-Child Streams
