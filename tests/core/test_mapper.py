@@ -769,6 +769,37 @@ class MappedTap(Tap):
             id="aliased_stream_batch",
         ),
         pytest.param(
+            {"mystream": {"__alias__": "aliased.stream"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "aliased_stream_not_expr.jsonl",
+            id="aliased_stream_not_expr",
+        ),
+        pytest.param(
+            {"mystream": {"__alias__": "'__stream_name__'"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "aliased_stream_quoted.jsonl",
+            id="aliased_stream_quoted",
+        ),
+        pytest.param(
+            {"mystream": {"source_table": "__stream_name__"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_variable_stream_name.jsonl",
+            id="builtin_variable_stream_name",
+        ),
+
+        pytest.param(
+            {"mystream": {"__alias__": "'aliased_' + __stream_name__"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_variable_stream_name_alias.jsonl",
+            id="builtin_variable_stream_name_alias",
+        ),
+        pytest.param(
+            {"mystream": {"__alias__": "__stream_name__.upper()"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_variable_stream_name_alias_expr.jsonl",
+            id="builtin_variable_stream_name_alias_expr",
+        ),
+        pytest.param(
             {
                 "mystream": {
                     "email": "self.upper()",
@@ -789,12 +820,6 @@ class MappedTap(Tap):
             {"flattening_enabled": False, "flattening_max_depth": 0},
             "builtin_variable_underscore.jsonl",
             id="builtin_variable_underscore",
-        ),
-        pytest.param(
-            {"mystream": {"source_table": "__stream_name__"}},
-            {"flattening_enabled": False, "flattening_max_depth": 0},
-            "builtin_variable_stream_name.jsonl",
-            id="builtin_variable_stream_name",
         ),
         pytest.param(
             {},

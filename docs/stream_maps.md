@@ -266,6 +266,15 @@ The `Faker` class.
 The `Faker` class was deprecated in favor of instance methods on the `fake` object.
 :::
 
+#### Built-in Alias Variable Names
+
+The following variables are available in the context of the `__alias__` expression:
+- `__stream_name__` - the existing stream name
+
+:::{versionadded} TODO
+The `__stream_name__` variable.
+:::
+
 #### Automatic Schema Detection
 
 For performance reasons, type detection is performed at runtime using text analysis
@@ -638,6 +647,36 @@ stream_maps:
 
 :::{versionadded} 0.37.0
 Support for stream glob expressions.
+:::
+
+### Aliasing two or more streams
+
+The `__alias__` operation evaluates simple python expressions.
+
+You can combine this with glob expressions to rename more than one stream:
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  "*":
+    __alias__: "__stream_name__ + '_v2'"
+```
+````
+
+````{tab} JSON
+```json
+{
+    "stream_maps": {
+        "*": {
+            "__alias__": "__stream_name__ + '_v2'"
+        }
+    }
+}
+```
+````
+
+:::{versionadded} TODO
+Support for `__alias__` expression evaluation.
 :::
 
 ### Understanding Filters' Affects on Parent-Child Streams
