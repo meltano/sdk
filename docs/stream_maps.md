@@ -268,6 +268,7 @@ The `Faker` class was deprecated in favor of instance methods on the `fake` obje
 
 #### Built-in Alias Variable Names
 
+The following variables are available in the context of the `__alias__` expression:
 - `__stream_name__` - the existing stream name
 
 :::{versionadded} TODO
