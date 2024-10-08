@@ -58,7 +58,10 @@ requests = ">=2.25.1"
 # TODO: remove this constraint once we get rid of the `fs` dependency
 # newer setuptools versions are incompatible with some dependencies (fs)
 setuptools = "<=70.3.0"
-simpleeval = ">=0.9.13"
+simpleeval = [
+    { version = ">=0.9.13,<1", python = "<3.9" },
+    { version = ">=0.9.13", python = ">=3.9" },
+]
 simplejson = ">=3.17.6"
 sqlalchemy = ">=1.4,<3.0"
 typing-extensions = ">=4.5.0"
@@ -160,7 +163,6 @@ pytest-codspeed = ">=2.2.0"
 [tool.pytest.ini_options]
 addopts = [
     "--durations=10",
-    "--ignore=singer_sdk/helpers/_simpleeval.py",
     "-m",
     "not external",
     "-ra",
@@ -173,19 +175,6 @@ filterwarnings = [
     "ignore:No records were available to test:UserWarning",
     # https://github.com/meltano/sdk/issues/1354
     "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
-    # https://docs.python.org/3.12/whatsnew/3.12.html#deprecated
-    # https://github.com/danthedeckie/simpleeval/blob/master/simpleeval.py
-    "ignore:ast.NameConstant is deprecated:DeprecationWarning:simpleeval",
-    # https://docs.python.org/3.12/whatsnew/3.12.html#deprecated
-    # https://github.com/danthedeckie/simpleeval/blob/master/simpleeval.py
-    "ignore:ast.Num is deprecated:DeprecationWarning:simpleeval",
-    # https://github.com/joblib/joblib/pull/1518
-    "ignore:ast.Num is deprecated:DeprecationWarning:joblib._utils",
-    # https://docs.python.org/3.12/whatsnew/3.12.html#deprecated
-    # https://github.com/danthedeckie/simpleeval/blob/master/simpleeval.py
-    "ignore:ast.Str is deprecated:DeprecationWarning:simpleeval",
-    # https://github.com/joblib/joblib/pull/1518
-    "ignore:Attribute n is deprecated:DeprecationWarning:joblib._utils",
     # TODO: Address this SQLite warning in Python 3.13+
     "ignore::ResourceWarning",
 ]
@@ -202,7 +191,7 @@ xfail_strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.40.0"
+version = "0.41.0"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -324,7 +313,6 @@ parquet = "singer_sdk.contrib.batch_encoder_parquet:ParquetBatcher"
 [tool.ruff]
 extend-exclude = [
     "cookiecutter/*",
-    "*simpleeval*",
 ]
 line-length = 88
 target-version = "py38"
