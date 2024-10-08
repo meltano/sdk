@@ -41,7 +41,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     env:
-      NOXFORCEPYTHON: ${{ matrix.python-version }}
+      NOXPYTHON: ${{ matrix.python-version }}
       NOXSESSION: ${{ matrix.session }}
     strategy:
       fail-fast: false
@@ -54,13 +54,13 @@ jobs:
         - "3.10"
         - "3.11"
         - "3.12"
+        - "3.13"
         sqlalchemy: ["2"]
         include:
-        - { session: tests,   python-version: "3.12", os: "ubuntu-latest", sqlalchemy: "1" }
-        - { session: tests,   python-version: "3.13", os: "ubuntu-latest", sqlalchemy: "2" }
-        - { session: doctest, python-version: "3.12", os: "ubuntu-latest", sqlalchemy: "2" }
-        - { session: mypy,    python-version: "3.12",  os: "ubuntu-latest", sqlalchemy: "2" }
-        - { session: deps,    python-version: "3.12",  os: "ubuntu-latest", sqlalchemy: "2" }
+        - { session: tests,   python-version: "3.13", os: "ubuntu-latest", sqlalchemy: "1" }
+        - { session: doctest, python-version: "3.13", os: "ubuntu-latest", sqlalchemy: "2" }
+        - { session: mypy,    python-version: "3.13",  os: "ubuntu-latest", sqlalchemy: "2" }
+        - { session: deps,    python-version: "3.13",  os: "ubuntu-latest", sqlalchemy: "2" }
 
     steps:
     - uses: actions/checkout@v4
@@ -121,7 +121,6 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.head.repo.fork }}
     env:
-      NOXPYTHON: "3.12"
       NOXSESSION: tests
       SAMPLE_TAP_GITLAB_AUTH_TOKEN: ${{ secrets.SAMPLE_TAP_GITLAB_AUTH_TOKEN }}
       SAMPLE_TAP_GITLAB_GROUP_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_GROUP_IDS }}
@@ -145,7 +144,7 @@ jobs:
 
     - uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.NOXPYTHON }}
+        python-version: 3.x
 
     - name: Upgrade pip
       env:
@@ -186,7 +185,7 @@ jobs:
 
     - uses: actions/setup-python@v5
       with:
-        python-version: '3.12'
+        python-version: '3.x'
 
     - name: Upgrade pip
       env:

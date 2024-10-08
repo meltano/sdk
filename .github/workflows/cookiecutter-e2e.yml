@@ -24,14 +24,8 @@ env:
 
 jobs:
   lint:
-    name: Cookiecutter E2E Python ${{ matrix.python-version }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - { python-version: "3.12",  os: "ubuntu-latest" }
-
+    name: Cookiecutter E2E Python
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - name: Upgrade pip
@@ -52,8 +46,7 @@ jobs:
 
     - uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
-        architecture: x64
+        python-version: 3.x
         cache: 'pip'
         cache-dependency-path: 'poetry.lock'
 
@@ -72,12 +65,12 @@ jobs:
 
     - name: Run Nox
       run: |
-        nox --python=${{ matrix.python-version }} --session=test_cookiecutter
+        nox --session=test_cookiecutter
 
     - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: cookiecutter-${{ matrix.os }}-py${{ matrix.python-version }}
+        name: cookiecutter-ubuntu-latest-py3x
         path: |
           /tmp/tap-*
           /tmp/target-*
