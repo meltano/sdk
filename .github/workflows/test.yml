@@ -59,8 +59,8 @@ jobs:
         include:
         - { session: tests,   python-version: "3.13", os: "ubuntu-latest", sqlalchemy: "1" }
         - { session: doctest, python-version: "3.13", os: "ubuntu-latest", sqlalchemy: "2" }
-        - { session: mypy,    python-version: "3.13",  os: "ubuntu-latest", sqlalchemy: "2" }
-        - { session: deps,    python-version: "3.13",  os: "ubuntu-latest", sqlalchemy: "2" }
+        - { session: mypy,    python-version: "3.12",  os: "ubuntu-latest", sqlalchemy: "2" }
+        - { session: deps,    python-version: "3.12",  os: "ubuntu-latest", sqlalchemy: "2" }
 
     steps:
     - uses: actions/checkout@v4
