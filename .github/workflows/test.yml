@@ -121,6 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.head.repo.fork }}
     env:
+      NOXPYTHON: "3.12"
       NOXSESSION: tests
       SAMPLE_TAP_GITLAB_AUTH_TOKEN: ${{ secrets.SAMPLE_TAP_GITLAB_AUTH_TOKEN }}
       SAMPLE_TAP_GITLAB_GROUP_IDS: ${{ secrets.SAMPLE_TAP_GITLAB_GROUP_IDS }}
@@ -144,7 +145,7 @@ jobs:
 
     - uses: actions/setup-python@v5
       with:
-        python-version: 3.x
+        python-version: ${{ env.NOXPYTHON }}
 
     - name: Upgrade pip
       env:
