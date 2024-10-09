@@ -31,12 +31,14 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
             th.StringType,
             required=True,
             secret=True,  # Flag config as protected.
+            title="Auth Token",
             description="The token to authenticate against the API service",
         ),
         th.Property(
             "project_ids",
             th.ArrayType(th.StringType),
             required=True,
+            title="Project IDs",
             description="Project IDs to replicate",
         ),
         th.Property(
@@ -47,6 +49,7 @@ class Tap{{ cookiecutter.source_name }}({{ 'SQL' if cookiecutter.stream_type == 
         th.Property(
             "api_url",
             th.StringType,
+            title="API URL",
             default="https://api.mysample.com",
             description="The url for the API service",
         ),

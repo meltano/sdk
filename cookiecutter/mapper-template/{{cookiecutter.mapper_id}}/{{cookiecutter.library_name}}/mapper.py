@@ -23,6 +23,7 @@ class {{ cookiecutter.name }}Mapper(InlineMapper):
         th.Property(
             "example_config",
             th.StringType,
+            title="Example Configuration",
             description="An example config, replace or remove based on your needs.",
         ),
     ).to_dict()

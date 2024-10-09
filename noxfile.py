@@ -8,18 +8,8 @@ import sys
 import tempfile
 import typing as t
 from pathlib import Path
-from textwrap import dedent
 
 import nox
-
-try:
-    from nox_poetry import Session, session
-except ImportError:
-    message = f"""\
-    Nox failed to import the 'nox-poetry' package.
-    Please install it using the following command:
-    {sys.executable} -m pip install nox-poetry"""
-    raise SystemExit(dedent(message)) from None
 
 nox.needs_version = ">=2024.4.15"
 nox.options.default_venv_backend = "uv|virtualenv"
@@ -57,8 +47,8 @@ test_dependencies: dict[str, t.Any] = poetry_config["group"]["dev"]["dependencie
 typing_dependencies = poetry_config["group"]["typing"]["dependencies"].keys()
 
 
-@session(python=main_python_version)
-def mypy(session: Session) -> None:
+@nox.session(python=main_python_version)
+def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
     session.install(".[faker,jwt,parquet,s3,testing]")
@@ -68,8 +58,8 @@ def mypy(session: Session) -> None:
         session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
 
 
-@session(python=python_versions)
-def tests(session: Session) -> None:
+@nox.session(python=python_versions)
+def tests(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
     extras = [
         "faker",
@@ -87,11 +77,7 @@ def tests(session: Session) -> None:
 
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
     if sqlalchemy_version:
-        # Bypass nox-poetry use of --constraint so we can install a version of
-        # SQLAlchemy that doesn't match what's in poetry.lock.
-        session.poetry.session.install(  # type: ignore[attr-defined]
-            f"sqlalchemy=={sqlalchemy_version}.*",
-        )
+        session.install(f"sqlalchemy=={sqlalchemy_version}.*")
 
     env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
 
@@ -112,18 +98,14 @@ def tests(session: Session) -> None:
             session.notify("coverage", posargs=[])
 
 
-@session(python=main_python_version)
-def benches(session: Session) -> None:
+@nox.session(python=main_python_version)
+def benches(session: nox.Session) -> None:
     """Run benchmarks."""
     session.install(".[jwt,s3]")
     session.install(*test_dependencies)
     sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
     if sqlalchemy_version:
-        # Bypass nox-poetry use of --constraint so we can install a version of
-        # SQLAlchemy that doesn't match what's in poetry.lock.
-        session.poetry.session.install(  # type: ignore[attr-defined]
-            f"sqlalchemy=={sqlalchemy_version}",
-        )
+        session.install(f"sqlalchemy=={sqlalchemy_version}")
     session.run(
         "pytest",
         "--benchmark-only",
@@ -132,16 +114,16 @@ def benches(session: Session) -> None:
     )
 
 
-@session(name="deps", python=main_python_version)
-def dependencies(session: Session) -> None:
+@nox.session(name="deps", python=main_python_version)
+def dependencies(session: nox.Session) -> None:
     """Check issues with dependencies."""
     session.install(".[s3,testing]")
     session.install("deptry")
     session.run("deptry", "singer_sdk", *session.posargs)
 
 
-@session(python=main_python_version)
-def update_snapshots(session: Session) -> None:
+@nox.session(python=main_python_version)
+def update_snapshots(session: nox.Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
 
@@ -150,8 +132,8 @@ def update_snapshots(session: Session) -> None:
     session.run("pytest", "--snapshot-update", *args)
 
 
-@session(python=python_versions)
-def doctest(session: Session) -> None:
+@nox.session(python=python_versions)
+def doctest(session: nox.Session) -> None:
     """Run examples with xdoctest."""
     if session.posargs:
         args = [package, *session.posargs]
@@ -165,8 +147,8 @@ def doctest(session: Session) -> None:
     session.run("pytest", "--xdoctest", *args)
 
 
-@session(python=main_python_version)
-def coverage(session: Session) -> None:
+@nox.session(python=main_python_version)
+def coverage(session: nox.Session) -> None:
     """Generate coverage report."""
     args = session.posargs or ["report", "-m"]
 
@@ -178,8 +160,8 @@ def coverage(session: Session) -> None:
     session.run("coverage", *args)
 
 
-@session(name="docs", python=main_python_version)
-def docs(session: Session) -> None:
+@nox.session(name="docs", python=main_python_version)
+def docs(session: nox.Session) -> None:
     """Build the documentation."""
     args = session.posargs or ["docs", "build", "-W"]
     if not session.posargs and "FORCE_COLOR" in os.environ:
@@ -194,8 +176,8 @@ def docs(session: Session) -> None:
     session.run("sphinx-build", *args)
 
 
-@session(name="docs-serve", python=main_python_version)
-def docs_serve(session: Session) -> None:
+@nox.session(name="docs-serve", python=main_python_version)
+def docs_serve(session: nox.Session) -> None:
     """Build the documentation."""
     args = session.posargs or [
         "--open-browser",
@@ -217,8 +199,8 @@ def docs_serve(session: Session) -> None:
 
 
 @nox.parametrize("replay_file_path", COOKIECUTTER_REPLAY_FILES)
-@session(python=main_python_version)
-def test_cookiecutter(session: Session, replay_file_path: str) -> None:
+@nox.session(python=main_python_version)
+def test_cookiecutter(session: nox.Session, replay_file_path: str) -> None:
     """Uses the tap template to build an empty cookiecutter.
 
     Runs the lint task on the created test project.
@@ -280,8 +262,8 @@ def test_cookiecutter(session: Session, replay_file_path: str) -> None:
     session.run("pre-commit", "run", "--all-files", external=True)
 
 
-@session(name="version-bump")
-def version_bump(session: Session) -> None:
+@nox.session(name="version-bump")
+def version_bump(session: nox.Session) -> None:
     """Run commitizen."""
     session.install(
         "commitizen",
