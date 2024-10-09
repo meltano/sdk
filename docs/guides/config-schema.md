@@ -29,6 +29,7 @@ Explanation of the configuration schema defined above:
 - The `th.StringType`, `th.DateTimeType`, etc. helpers are used to define the type of the property.
 - The `required` attribute is used to mark a property as required. The tap will throw an error if the user does not provide a value for a required property.
 - The `default` attribute is used to provide a default value for a property. The tap will use this if the user does not provide a value, so this can be accessed in the tap or streams with square bracket syntax, i.e. `self.config["base_url"]`.
+- The `title` attribute is used to provide a human-readable title for the property.
 - The `to_dict()` method is used to convert the JSON object to a Python dictionary.
 
 See the full reference for the [typing module](../typing.rst) for more information on how to define a configuration schema.
