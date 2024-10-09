@@ -779,6 +779,7 @@ class PluginMapper:
                 elif MAPPER_ALIAS_OPTION in stream_def:
                     # <source>: __alias__: <alias>
                     stream_alias = stream_def.pop(MAPPER_ALIAS_OPTION)
+                    stream_alias = PluginMapper._eval_stream(stream_alias, stream_name)
 
             if stream_name == source_stream:
                 # Exact match
@@ -831,3 +832,40 @@ class PluginMapper:
             else:
                 # Additional mappers for aliasing and multi-projection:
                 self.stream_maps[source_stream].append(mapper)
+
+    @staticmethod
+    def _eval_stream(expr: str, stream_name: str) -> str:
+        """Solve an alias expression.
+
+        Args:
+            expr: String expression to evaluate.
+            stream_name: Name of stream to transform.
+
+        Returns:
+            Evaluated expression.
+
+        Raises:
+            MapExpressionError: If the mapping expression failed to evaluate.
+        """
+        # Allow stream name access within alias transform
+        names = {"__stream_name__": stream_name}
+
+        result: str
+
+        try:
+            expr_evaluator = simpleeval.EvalWithCompoundTypes(names=names)
+            result = expr_evaluator.eval(expr)
+        except simpleeval.NameNotDefined:
+            logging.debug(
+                "Failed to evaluate simpleeval expression %(expr) - "
+                "falling back to original expression",
+                extra={"expr": expr},
+            )
+            result = expr
+        except (simpleeval.InvalidExpression, SyntaxError) as ex:
+            msg = f"Failed to evaluate simpleeval expressions {expr}."
+            raise MapExpressionError(msg) from ex
+
+        logging.debug("Stream eval result: %s = %s", expr, result)
+
+        return result
