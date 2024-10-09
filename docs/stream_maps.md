@@ -262,7 +262,7 @@ The `faker` object.
 The `Faker` class.
 :::
 
-:::{versionchanged} TODO
+:::{versionchanged} 0.41.0
 The `Faker` class was deprecated in favor of instance methods on the `fake` object.
 :::
 
@@ -271,7 +271,7 @@ The `Faker` class was deprecated in favor of instance methods on the `fake` obje
 The following variables are available in the context of the `__alias__` expression:
 - `__stream_name__` - the existing stream name
 
-:::{versionadded} TODO
+:::{versionadded} 0.42.0
 The `__stream_name__` variable.
 :::
 
@@ -675,7 +675,7 @@ stream_maps:
 ```
 ````
 
-:::{versionadded} TODO
+:::{versionadded} 0.42.0
 Support for `__alias__` expression evaluation.
 :::
 
