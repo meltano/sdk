@@ -87,7 +87,6 @@ jobs:
         PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pipx install 'nox[uv]'
-        pipx inject nox nox-poetry
         nox --version
 
     - uses: actions/cache@v4
@@ -152,7 +151,6 @@ jobs:
         PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pipx install 'nox[uv]'
-        pipx inject nox nox-poetry
         nox --version
 
     - name: Run Nox
@@ -198,7 +196,6 @@ jobs:
         PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pipx install 'nox[uv]'
-        pipx inject nox nox-poetry
         nox --version
 
     - run: nox --install-only

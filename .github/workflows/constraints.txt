@@ -5,4 +5,3 @@ poetry-plugin-export==1.8.0
 poetry-dynamic-versioning==1.4.1
 pre-commit==4.0.0
 nox==2024.4.15
-nox-poetry==1.0.3
