@@ -40,6 +40,7 @@ class StreamTransform(InlineMapper):
                 ),
             ),
             required=True,
+            title="Stream Maps",
             description="Stream maps",
         ),
     ).to_dict()
