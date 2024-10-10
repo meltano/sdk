@@ -249,6 +249,8 @@ can be referenced directly by mapping expressions.
 - `fake` - a [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config`
   (see previous example) - see the built-in [standard providers](inv:faker:std:doc#providers)
   for available methods
+- `__stream_name__` - the name of the stream. Useful when [applying the same transformation
+  to multiple streams](#applying-a-mapping-across-two-or-more-streams).
 
   ```{tip}
   The `fake` object is only available if the plugin specifies `faker` as an additional dependency (through the `singer-sdk` `faker` extra, or directly).
@@ -264,6 +266,10 @@ The `Faker` class.
 
 :::{versionchanged} 0.41.0
 The `Faker` class was deprecated in favor of instance methods on the `fake` object.
+:::
+
+:::{versionadded} 0.42.0
+The `__stream_name__` variable.
 :::
 
 #### Built-in Alias Variable Names
