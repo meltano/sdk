@@ -1,5 +1,5 @@
 src = ["tap_dummyjson"]
-target-version = "py38"
+target-version = "py39"
 
 [lint]
 ignore = [
