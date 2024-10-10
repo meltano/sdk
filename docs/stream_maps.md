@@ -228,6 +228,8 @@ can be referenced directly by mapping expressions.
 
 #### Built-In Functions
 
+The following functions and namespaces are available for use in mapping expressions:
+
 | Function                                     | Description                                                                                                                                                                                                                                                            |
 | :------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`md5()`](inv:python:py:module:#hashlib)     | Returns an inline MD5 hash of any string, outputting the string representation of the hash's hex digest. This is defined by the SDK internally with native python: [`hashlib.md5(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest). |
@@ -235,6 +237,8 @@ can be referenced directly by mapping expressions.
 | [`json`](inv:python:py:module:#json)         | This is the json module object from the Python standard library. Primarily used for calling [`json.dumps()`](inv:python:py:function:#json.dumps) and [`json.loads()`](inv:python:py:function:#json.loads).                                                             |
 
 #### Built-in Variable Names
+
+The following variables are available in the context of a mapping expression:
 
 | Variable          | Description                                                                                                                                                                                       |
 | :---------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -246,7 +250,7 @@ can be referenced directly by mapping expressions.
 | `__stream_name__` | The name of the stream. Useful when [applying the same transformation to multiple streams](#applying-a-mapping-across-two-or-more-streams).                                                       |
 
   ```{tip}
-  The `fake` object is only available if the plugin specifies `faker` as an additional dependency (through the `singer-sdk` `faker` extra, or directly).
+  To use the `fake` object, the `faker` library must be installed.
   ```
 
 :::{versionadded} 0.35.0
