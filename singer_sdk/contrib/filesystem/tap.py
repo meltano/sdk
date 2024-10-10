@@ -36,18 +36,21 @@ BASE_CONFIG_SCHEMA = th.PropertiesList(
         required=True,
         default="local",
         allowed_values=["local", "ftp", "sftp"],
+        title="Filesystem",
         description="The filesystem to use.",
     ),
     th.Property(
         "path",
         th.StringType,
         required=True,
+        title="Directory Path",
         description="Path to the directory where the files are stored.",
     ),
     th.Property(
         "read_mode",
         th.StringType,
         required=True,
+        title="Read Mode",
         description=(
             "Use `one_stream_per_file` to read each file as a separate stream, or "
             "`merge` to merge all files into a single stream."
@@ -59,6 +62,7 @@ BASE_CONFIG_SCHEMA = th.PropertiesList(
         th.StringType,
         required=True,
         default=DEFAULT_MERGE_STREAM_NAME,
+        title="Stream Name (Merge Mode)",
         description="Name of the stream to use when `read_mode` is `merge`.",
     ),
     filesystem_config.FTP,

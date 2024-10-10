@@ -254,6 +254,17 @@ def test_property_description():
     }
 
 
+def test_property_title():
+    title = "My Test Property"
+    prop = Property("test_property", StringType, title=title)
+    assert prop.to_dict() == {
+        "test_property": {
+            "type": ["string", "null"],
+            "title": title,
+        },
+    }
+
+
 @pytest.mark.parametrize(
     "json_type,expected_json_schema",
     [

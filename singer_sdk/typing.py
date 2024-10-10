@@ -619,7 +619,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
     """Generic Property. Should be nested within a `PropertiesList`."""
 
     # TODO: Make some of these arguments keyword-only. This is a breaking change.
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         wrapped: JSONTypeHelper[T] | type[JSONTypeHelper[T]],
@@ -631,6 +631,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         examples: list[T] | None = None,
         *,
         nullable: bool | None = None,
+        title: str | None = None,
     ) -> None:
         """Initialize Property object.
 
@@ -652,6 +653,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
             examples: Optional. A list of one or more sample values. These may be
                 displayed to the user as hints of the expected format of inputs.
             nullable: If True, the property may be null.
+            title: Optional. A short, human-readable title for the property.
         """
         self.name = name
         self.wrapped = wrapped
@@ -662,6 +664,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         self.allowed_values = allowed_values or None
         self.examples = examples or None
         self.nullable = nullable
+        self.title = title
 
     @property
     def type_dict(self) -> dict:  # type: ignore[override]
@@ -690,8 +693,18 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
 
         Returns:
             A JSON Schema dictionary describing the object.
+
+        Examples:
+            >>> p = Property("name", StringType, required=True)
+            >>> print(p.to_dict())
+            {'name': {'type': ['string']}}
+            >>> p = Property("name", StringType, required=True, title="App Name")
+            >>> print(p.to_dict())
+            {'name': {'type': ['string'], 'title': 'App Name'}}
         """
         type_dict = self.type_dict
+        if self.title:
+            type_dict.update({"title": self.title})
         if self.nullable or self.optional:
             type_dict = append_type(type_dict, "null")
         if self.default is not None:
