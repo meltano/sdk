@@ -72,6 +72,7 @@ furo = {version = ">=2024.5.6", python = ">=3.9", optional = true}
 myst-parser = {version = ">=3", python = ">=3.9", optional = true}
 sphinx = {version = ">=7", python = ">=3.9", optional = true}
 sphinx-copybutton = {version = ">=0.5.2", python = ">=3.9", optional = true}
+sphinx-design = {version = ">=0.6.1", python = ">=3.9", optional = true}
 sphinx-inline-tabs = {version = ">=2023.4.21", python = ">=3.9", optional = true}
 sphinx-notfound-page = {version = ">=1.0.0", python = ">=3.9", optional = true}
 sphinx-reredirects = {version = ">=0.1.5", python = ">=3.9", optional = true}

@@ -47,8 +47,9 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinx_copybutton",
     "myst_parser",
-    "sphinx_reredirects",
+    "sphinx_design",
     "sphinx_inline_tabs",
+    "sphinx_reredirects",
     "notfound.extension",
 ]
 

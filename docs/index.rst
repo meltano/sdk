@@ -12,6 +12,39 @@ data extractors and loaders! Taps and targets built on the SDK are automatically
 
 If you're looking to add support to Meltano for a new data tool that would be listed on the `Meltano Hub`_ as a utility, check out the `Meltano EDK`_ (Extension Development Kit) instead.
 
+
+.. grid:: 2
+    :gutter: 3
+
+    .. grid-item-card:: Tutorials
+
+        If you're new to the Meltano Singer SDK, check out
+        the hands-on introductions in the `Tutorials`_ section.
+
+        +++
+
+        .. button-ref:: tutorials
+            :expand:
+            :color: primary
+            :click-parent:
+
+            To the beginner guides
+
+    .. grid-item-card:: In-Depth Guides
+
+        For more advanced topics and recipes for common use cases,
+        check out the in-depth guides.
+
+        +++
+
+        .. button-ref:: guides/index
+            :expand:
+            :color: primary
+            :click-parent:
+
+            To the advanced guides
+
+
 Future-proof extractors and loaders, with less code
 ---------------------------------------------------
 
