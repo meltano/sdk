@@ -1,4 +1,4 @@
-griffe==1.4.1
+griffe~=1.4
 pip==24.2
 poetry==1.8.3
 pre-commit==4.0.1
