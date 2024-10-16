@@ -279,6 +279,17 @@ def is_boolean_type(property_schema: dict) -> bool | None:
     return False
 
 
+def _is_exclusive_boolean_type(property_schema: dict) -> bool:
+    if "type" not in property_schema:
+        return False
+
+    return (
+        property_schema["type"] == "boolean"
+        or property_schema["type"] == ["boolean"]
+        or set(property_schema["type"]) == {"boolean", "null"}
+    )
+
+
 def is_integer_type(property_schema: dict) -> bool | None:
     """Return true if the JSON Schema type is an integer or None if detection fails."""
     if "anyOf" not in property_schema and "type" not in property_schema:
@@ -503,7 +514,7 @@ def _conform_uniform_list(
     return output, unmapped_properties
 
 
-def _conform_primitive_property(
+def _conform_primitive_property(  # noqa: PLR0911
     elem: t.Any,  # noqa: ANN401
     property_schema: dict,
 ) -> t.Any:  # noqa: ANN401
@@ -523,4 +534,6 @@ def _conform_primitive_property(
     if isinstance(elem, bytes):
         # for BIT value, treat 0 as False and anything else as True
         return elem != b"\x00" if is_boolean_type(property_schema) else elem.hex()
+    if _is_exclusive_boolean_type(property_schema):
+        return None if elem is None else elem != 0
     return elem
