@@ -313,6 +313,12 @@ def test_conform_primitives():
 
     assert _conform_primitive_property(None, {"type": "boolean"}) is None
     assert _conform_primitive_property(0, {"type": "boolean"}) is False
+    assert (
+        _conform_primitive_property(
+            0, {"anyOf": [{"type": "boolean"}, {"type": "integer"}]}
+        )
+        == 0
+    )
     assert _conform_primitive_property(0, {"type": ["boolean", "integer"]}) == 0
     assert _conform_primitive_property(1, {"type": "boolean"}) is True
     assert _conform_primitive_property(1, {"type": ["boolean", "null"]}) is True
