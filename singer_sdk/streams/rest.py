@@ -253,7 +253,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
             (
                 ConnectionResetError,
                 RetriableAPIError,
-                requests.exceptions.ReadTimeout,
+                requests.exceptions.Timeout,
                 requests.exceptions.ConnectionError,
                 requests.exceptions.ChunkedEncodingError,
                 requests.exceptions.ContentDecodingError,

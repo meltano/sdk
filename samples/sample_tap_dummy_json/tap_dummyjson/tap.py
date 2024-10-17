@@ -14,6 +14,7 @@ class TapDummyJSON(Tap):
             "username",
             th.StringType,
             required=True,
+            title="DummyJSON Username",
             description="Username for the API service",
         ),
         th.Property(
@@ -21,16 +22,19 @@ class TapDummyJSON(Tap):
             th.StringType,
             required=True,
             secret=True,  # Flag config as protected.
+            title="DummyJSON Password",
             description="Password for the API service",
         ),
         th.Property(
             "start_date",
             th.DateTimeType,
+            title="Start Date",
             description="The earliest record date to sync",
         ),
         th.Property(
             "api_url",
             th.StringType,
+            title="API URL",
             default="https://dummyjson.com",
             description="The base url for the API service",
         ),

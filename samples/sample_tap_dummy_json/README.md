@@ -122,7 +122,7 @@ Now you can test and orchestrate using Meltano:
 # Test invocation:
 meltano invoke tap-dummyjson --version
 # OR run a test `elt` pipeline:
-meltano elt tap-dummyjson target-jsonl
+meltano run tap-dummyjson target-jsonl
 ```
 
 ### SDK Dev Guide

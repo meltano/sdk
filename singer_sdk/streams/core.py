@@ -735,7 +735,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     # Partitions
 
     @property
-    def partitions(self) -> list[types.Context] | None:
+    def partitions(self) -> list[dict] | None:
         """Get stream partitions.
 
         Developers may override this property to provide a default partitions list.
@@ -746,7 +746,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             A list of partition key dicts (if applicable), otherwise `None`.
         """
-        result: list[types.Mapping] = [
+        result: list[dict] = [
             partition_state["context"]
             for partition_state in (
                 get_state_partitions_list(self.tap_state, self.name) or []
@@ -880,6 +880,27 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     time_extracted=utc_now(),
                 )
 
+    def _generate_batch_messages(
+        self,
+        encoding: BaseBatchFileEncoding,
+        manifest: list[str],
+    ) -> t.Generator[SDKBatchMessage, None, None]:
+        """Write out a BATCH message.
+
+        Args:
+            encoding: The encoding to use for the batch.
+            manifest: A list of filenames for the batch.
+
+        Yields:
+            Batch message objects.
+        """
+        for stream_map in self.stream_maps:
+            yield SDKBatchMessage(
+                stream=stream_map.stream_alias,
+                encoding=encoding,
+                manifest=manifest,
+            )
+
     def _write_record_message(self, record: types.Record) -> None:
         """Write out a RECORD message.
 
@@ -902,13 +923,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             encoding: The encoding to use for the batch.
             manifest: A list of filenames for the batch.
         """
-        self._tap.write_message(
-            SDKBatchMessage(
-                stream=self.name,
-                encoding=encoding,
-                manifest=manifest,
-            ),
-        )
+        for batch_message in self._generate_batch_messages(encoding, manifest):
+            self._tap.write_message(batch_message)
+
         self._is_state_flushed = False
 
     def _log_metric(self, point: metrics.Point) -> None:
@@ -1089,7 +1106,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         record_index = 0
         context_element: types.Context | None
-        context_list: list[types.Context] | None
+        context_list: list[types.Context] | list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 

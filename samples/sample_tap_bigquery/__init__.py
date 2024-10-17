@@ -52,6 +52,7 @@ class TapBigQuery(SQLTap):
             "project_id",
             th.StringType,
             required=True,
+            title="Project ID",
             description="GCP Project",
         ),
     ).to_dict()

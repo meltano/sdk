@@ -1,7 +1,9 @@
 name: Bug Report
 description: File a bug report
 title: "bug: <title>"
-labels: ["kind/Bug", "valuestream/SDK"]
+type: Bug
+assignees:
+  - edgarrmondragon
 
 body:
   - type: markdown
@@ -13,7 +15,7 @@ body:
     attributes:
       label: Singer SDK Version
       description: Version of the library you are using
-      placeholder: "0.40.0"
+      placeholder: "0.41.0"
     validations:
       required: true
   - type: checkboxes
@@ -29,13 +31,12 @@ body:
       label: Python Version
       description: Version of Python you are using
       options:
+        - "NA"
         - "3.12"
         - "3.11"
         - "3.10"
         - "3.9"
-        - "3.8"
-        - "3.7 or earlier"
-        - "NA"
+        - "3.8 or earlier"
     validations:
       required: true
   - type: dropdown
@@ -60,7 +61,7 @@ body:
       description: What operating system you are using
       placeholder: "Windows"
     validations:
-      required: true
+      required: false
   - type: textarea
     id: what-happened
     attributes:
