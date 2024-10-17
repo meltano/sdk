@@ -180,7 +180,7 @@ plugins:
 | Configuration store | Config JSON file (`--config=path/to/config.json`) or environment variables (`--config=ENV`) | `meltano.yml`, `.env`, environment variables, or Meltano's system db |
 | Simple invocation   | `my-tap --config=...`                                                                       | `meltano invoke my-tap`                                              |
 | Other CLI options   | `my-tap --about --format=json`                                                              | `meltano invoke my-tap --about --format=json`                        |
-| ELT                 | `my-tap --config=... \| path/to/target-jsonl --config=...`                                  | `meltano elt my-tap target-jsonl`                                    |
+| ELT                 | `my-tap --config=... \| path/to/target-jsonl --config=...`                                  | `meltano run my-tap target-jsonl`                                    |
 
 [Meltano]: https://www.meltano.com
 [declare settings]: https://docs.meltano.com/reference/command-line-interface#how-to-use-2

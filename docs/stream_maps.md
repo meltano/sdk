@@ -228,30 +228,29 @@ can be referenced directly by mapping expressions.
 
 #### Built-In Functions
 
-- [`md5()`](inv:python:py:module:#hashlib) - returns an inline MD5 hash of any string, outputting
-    the string representation of the hash's hex digest.
-  - This is defined by the SDK internally with native python:
-    [`hashlib.md5(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest).
-- [`datetime`](inv:python:py:module:#datetime) - This is the datetime module object from the Python
-    standard library. You can access [`datetime.datetime`](inv:python:py:class:#datetime.datetime),
-    [`datetime.timedelta`](inv:python:py:class:#datetime.timedelta), etc.
-- [`json`](inv:python:py:module:#json) - This is the json module object from the Python standard
-    library. Primarily used for calling [`json.dumps()`](inv:python:py:function:#json.dumps)
-    and [`json.loads()`](inv:python:py:function:#json.loads).
+The following functions and namespaces are available for use in mapping expressions:
+
+| Function                                     | Description                                                                                                                                                                                                                                                            |
+| :------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`md5()`](inv:python:py:module:#hashlib)     | Returns an inline MD5 hash of any string, outputting the string representation of the hash's hex digest. This is defined by the SDK internally with native python: [`hashlib.md5(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest). |
+| [`datetime`](inv:python:py:module:#datetime) | This is the datetime module object from the Python standard library. You can access [`datetime.datetime`](inv:python:py:class:#datetime.datetime), [`datetime.timedelta`](inv:python:py:class:#datetime.timedelta), etc.                                               |
+| [`json`](inv:python:py:module:#json)         | This is the json module object from the Python standard library. Primarily used for calling [`json.dumps()`](inv:python:py:function:#json.dumps) and [`json.loads()`](inv:python:py:function:#json.loads).                                                             |
 
 #### Built-in Variable Names
 
-- `config` - a dictionary with the `stream_map_config` values from settings. This can be used
-  to provide a secret hash seed, for instance.
-- `record` - an alias for the record values dictionary in the current stream.
-- `_` - same as `record` but shorter to type
-- `self` - the existing property value if the property already exists
-- `fake` - a [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config`
-  (see previous example) - see the built-in [standard providers](inv:faker:std:doc#providers)
-  for available methods
+The following variables are available in the context of a mapping expression:
+
+| Variable          | Description                                                                                                                                                                                       |
+| :---------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `config`          | A dictionary with the `stream_map_config` values from settings. This can be used to provide a secret hash seed, for instance.                                                                     |
+| `record`          | An alias for the record values dictionary in the current stream.                                                                                                                                  |
+| `_`               | Same as `record` but shorter to type.                                                                                                                                                             |
+| `self`            | The existing property value if the property already exists.                                                                                                                                       |
+| `fake`            | A [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config` (see previous example) - see the built-in [standard providers](inv:faker:std:doc#providers) for available methods. |
+| `__stream_name__` | The name of the stream. Useful when [applying the same transformation to multiple streams](#applying-a-mapping-across-two-or-more-streams).                                                       |
 
   ```{tip}
-  The `fake` object is only available if the plugin specifies `faker` as an additional dependency (through the `singer-sdk` `faker` extra, or directly).
+  To use the `fake` object, the `faker` library must be installed.
   ```
 
 :::{versionadded} 0.35.0
@@ -266,10 +265,17 @@ The `Faker` class.
 The `Faker` class was deprecated in favor of instance methods on the `fake` object.
 :::
 
+:::{versionadded} 0.42.0
+The `__stream_name__` variable.
+:::
+
 #### Built-in Alias Variable Names
 
 The following variables are available in the context of the `__alias__` expression:
-- `__stream_name__` - the existing stream name
+
+| Variable          | Description              |
+| :---------------- | :----------------------- |
+| `__stream_name__` | The existing stream name |
 
 :::{versionadded} 0.42.0
 The `__stream_name__` variable.
