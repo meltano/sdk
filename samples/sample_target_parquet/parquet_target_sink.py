@@ -4,10 +4,13 @@ from __future__ import annotations
 
 import typing as t
 
-import pyarrow as pa
-import pyarrow.parquet as pq
-
 from singer_sdk.sinks import BatchSink
+
+try:
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+except ImportError:
+    pass
 
 
 def json_schema_to_arrow(schema: dict[str, t.Any]) -> pa.Schema:
