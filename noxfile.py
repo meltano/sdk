@@ -32,6 +32,7 @@ python_versions = [
     "3.9",
     "3.8",
 ]
+main_python_version = "3.12"
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = (
     "mypy",
@@ -46,7 +47,7 @@ test_dependencies: dict[str, t.Any] = poetry_config["group"]["dev"]["dependencie
 typing_dependencies = poetry_config["group"]["typing"]["dependencies"].keys()
 
 
-@nox.session()
+@nox.session(python=main_python_version)
 def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
@@ -97,7 +98,7 @@ def tests(session: nox.Session) -> None:
             session.notify("coverage", posargs=[])
 
 
-@nox.session()
+@nox.session(python=main_python_version)
 def benches(session: nox.Session) -> None:
     """Run benchmarks."""
     session.install(".[jwt,s3]")
@@ -113,7 +114,7 @@ def benches(session: nox.Session) -> None:
     )
 
 
-@nox.session(name="deps")
+@nox.session(name="deps", python=main_python_version)
 def dependencies(session: nox.Session) -> None:
     """Check issues with dependencies."""
     session.install(".[s3,testing]")
@@ -121,7 +122,7 @@ def dependencies(session: nox.Session) -> None:
     session.run("deptry", "singer_sdk", *session.posargs)
 
 
-@nox.session()
+@nox.session(python=main_python_version)
 def update_snapshots(session: nox.Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
@@ -146,7 +147,7 @@ def doctest(session: nox.Session) -> None:
     session.run("pytest", "--xdoctest", *args)
 
 
-@nox.session()
+@nox.session(python=main_python_version)
 def coverage(session: nox.Session) -> None:
     """Generate coverage report."""
     args = session.posargs or ["report", "-m"]
@@ -159,7 +160,7 @@ def coverage(session: nox.Session) -> None:
     session.run("coverage", *args)
 
 
-@nox.session(name="docs")
+@nox.session(name="docs", python=main_python_version)
 def docs(session: nox.Session) -> None:
     """Build the documentation."""
     args = session.posargs or ["docs", "build", "-W"]
@@ -175,7 +176,7 @@ def docs(session: nox.Session) -> None:
     session.run("sphinx-build", *args)
 
 
-@nox.session(name="docs-serve")
+@nox.session(name="docs-serve", python=main_python_version)
 def docs_serve(session: nox.Session) -> None:
     """Build the documentation."""
     args = session.posargs or [
@@ -198,7 +199,7 @@ def docs_serve(session: nox.Session) -> None:
 
 
 @nox.parametrize("replay_file_path", COOKIECUTTER_REPLAY_FILES)
-@nox.session()
+@nox.session(python=main_python_version)
 def test_cookiecutter(session: nox.Session, replay_file_path: str) -> None:
     """Uses the tap template to build an empty cookiecutter.
 
