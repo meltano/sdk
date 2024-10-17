@@ -1,5 +1,5 @@
 griffe~=1.4
 pip==24.2
-poetry==1.8.3
+poetry @ git+https://github.com/python-poetry/poetry.git@main
 pre-commit==4.0.1
 nox==2024.10.9
