@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 import os
 import typing as t
-import warnings
 from pathlib import Path
 
 from dotenv import find_dotenv
@@ -68,10 +67,11 @@ def parse_environment_config(
                 try:
                     result[config_key] = _parse_array(env_var_value)
                 except Exception:  # noqa: BLE001
-                    warnings.warn(
-                        "Parsing array from deprecated string format 'x,y,z'",
-                        DeprecationWarning,
-                        stacklevel=2,
+                    # TODO(edgarrmondragon): Make this a deprecation warning.
+                    # https://github.com/meltano/sdk/issues/2724
+                    logger.warning(
+                        "Parsing array of the form 'x,y,z' is deprecated and will be "
+                        "removed in future versions.",
                     )
                     result[config_key] = _legacy_parse_array_of_strings(env_var_value)
             elif _typing.is_array_type(schema):

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import typing as t
 from pathlib import Path
 
@@ -50,7 +51,11 @@ def config_file2(tmpdir) -> str:
     return filepath
 
 
-def test_get_env_var_config(monkeypatch: pytest.MonkeyPatch, subtests: SubTests):
+def test_get_env_var_config(
+    monkeypatch: pytest.MonkeyPatch,
+    subtests: SubTests,
+    caplog: pytest.LogCaptureFixture,
+):
     """Test settings parsing from environment variables."""
     with monkeypatch.context() as m:
         m.setenv("PLUGIN_TEST_PROP1", "hello")
@@ -85,11 +90,16 @@ def test_get_env_var_config(monkeypatch: pytest.MonkeyPatch, subtests: SubTests)
             assert not set.intersection(missing_props, env_config)
 
         m.setenv("PLUGIN_TEST_PROP3", "val1,val2")
-        with subtests.test(msg="Legacy array parsing"), pytest.warns(
-            DeprecationWarning
+        with subtests.test(msg="Legacy array parsing"), caplog.at_level(
+            logging.WARNING,
         ):
             parsed = parse_environment_config(CONFIG_JSONSCHEMA, "PLUGIN_TEST_")
             assert parsed["prop3"] == ["val1", "val2"]
+
+            assert any(
+                "Parsing array of the form 'x,y,z'" in log.message
+                for log in caplog.records
+            )
 
     no_env_config = parse_environment_config(CONFIG_JSONSCHEMA, "PLUGIN_TEST_")
     missing_props = {
