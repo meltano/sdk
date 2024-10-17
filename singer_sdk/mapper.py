@@ -337,6 +337,7 @@ class CustomStreamMap(StreamMap):
         names["_"] = record  # Add a shorthand alias in case of reserved words in names
         names["record"] = record  # ...and a longhand alias
         names["config"] = self.map_config  # Allow map config access within transform
+        names["__stream_name__"] = self.stream_alias  # Access stream name in transform
 
         if self.fake:
             from faker import Faker  # noqa: PLC0415

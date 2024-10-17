@@ -296,4 +296,7 @@ def api_changes(session: nox.Session) -> None:
     if session.posargs:
         args.append(f"-a={session.posargs[0]}")
 
+    if "GITHUB_ACTIONS" in os.environ:
+        args.append("-f=github")
+
     session.run(*args, external=True)

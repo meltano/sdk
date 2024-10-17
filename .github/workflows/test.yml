@@ -95,6 +95,8 @@ jobs:
     - name: Run Nox
       env:
         SQLALCHEMY_VERSION: ${{ matrix.sqlalchemy }}
+        PIP_PRE: "1"
+        UV_PRERELEASE: allow
       run: |
         nox --verbose
 
@@ -141,6 +143,9 @@ jobs:
         nox --version
 
     - name: Run Nox
+      env:
+        PIP_PRE: "1"
+        UV_PRERELEASE: allow
       run: |
         nox -- -m "external"
 
