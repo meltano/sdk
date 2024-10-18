@@ -75,10 +75,6 @@ def tests(session: nox.Session) -> None:
     session.install(f".[{','.join(extras)}]")
     session.install(*test_dependencies)
 
-    sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
-    if sqlalchemy_version:
-        session.install(f"sqlalchemy=={sqlalchemy_version}.*")
-
     env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
 
     try:
@@ -103,9 +99,6 @@ def benches(session: nox.Session) -> None:
     """Run benchmarks."""
     session.install(".[jwt,s3]")
     session.install(*test_dependencies)
-    sqlalchemy_version = os.environ.get("SQLALCHEMY_VERSION")
-    if sqlalchemy_version:
-        session.install(f"sqlalchemy=={sqlalchemy_version}")
     session.run(
         "pytest",
         "--benchmark-only",
