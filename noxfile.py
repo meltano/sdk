@@ -6,6 +6,7 @@ import os
 import shutil
 import sys
 import tempfile
+import typing as t
 from pathlib import Path
 
 import nox
@@ -23,7 +24,14 @@ extend-ignore = ["TD002", "TD003", "FIX002"]
 COOKIECUTTER_REPLAY_FILES = list(Path("./e2e-tests/cookiecutters").glob("*.json"))
 
 package = "singer_sdk"
-python_versions = ["3.12", "3.11", "3.10", "3.9", "3.8"]
+python_versions = [
+    "3.13",
+    "3.12",
+    "3.11",
+    "3.10",
+    "3.9",
+    "3.8",
+]
 main_python_version = "3.12"
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = (
@@ -35,7 +43,7 @@ nox.options.sessions = (
 )
 
 poetry_config = nox.project.load_toml("pyproject.toml")["tool"]["poetry"]
-test_dependencies = poetry_config["group"]["dev"]["dependencies"].keys()
+test_dependencies: dict[str, t.Any] = poetry_config["group"]["dev"]["dependencies"]
 typing_dependencies = poetry_config["group"]["typing"]["dependencies"].keys()
 
 
@@ -53,7 +61,18 @@ def mypy(session: nox.Session) -> None:
 @nox.session(python=python_versions)
 def tests(session: nox.Session) -> None:
     """Execute pytest tests and compute coverage."""
-    session.install(".[faker,jwt,parquet,s3]")
+    extras = [
+        "faker",
+        "jwt",
+        "parquet",
+        "s3",
+    ]
+
+    if session.python == "3.13":
+        # https://github.com/apache/arrow/issues/43519
+        extras.remove("parquet")
+
+    session.install(f".[{','.join(extras)}]")
     session.install(*test_dependencies)
 
     env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
@@ -88,7 +107,7 @@ def benches(session: nox.Session) -> None:
     )
 
 
-@nox.session(name="deps", python=python_versions)
+@nox.session(name="deps", python=main_python_version)
 def dependencies(session: nox.Session) -> None:
     """Check issues with dependencies."""
     session.install(".[s3,testing]")
