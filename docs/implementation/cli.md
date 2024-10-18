@@ -68,9 +68,19 @@ values from environment variables, and from a `.env` file if present within the 
 working directory, which match the exact name of a setting, along with a prefix determined
 by the plugin name.
 
-> For example: For a sample plugin named `tap-my-example` and settings named "username" and "access_key", the SDK will automatically scrape
-> the settings from environment variables `TAP_MY_EXAMPLE_USERNAME` and
-> `TAP_MY_EXAMPLE_ACCESS_KEY`, if they exist.
+```{note}
+For example, for a sample plugin named `tap-my-example` and settings named `username` and `access_key`, the SDK will automatically scrape
+the settings from environment variables `TAP_MY_EXAMPLE_USERNAME` and
+`TAP_MY_EXAMPLE_ACCESS_KEY` respectively, if they exist.
+```
+
+The following value types are automatically cast to the appropriate Python type:
+
+- integer (e.g. `TAP_MY_EXAMPLE_PORT=5432`)
+- boolean (e.g. `TAP_MY_EXAMPLE_DEBUG=true`)
+- JSON arrays (e.g. `TAP_MY_EXAMPLE_ARRAY='["a", "b", "c"]'`)
+- JSON objects (e.g. `TAP_MY_EXAMPLE_OBJECT='{"key": "value"}'`)
+
 
 ## Tap-Specific CLI Options
 
