@@ -48,11 +48,17 @@ jobs:
       matrix:
         session: [tests]
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version:
+        - "3.8"
+        - "3.9"
+        - "3.10"
+        - "3.11"
+        - "3.12"
+        - "3.13"
         sqlalchemy: ["2"]
         include:
-        - { session: tests,   python-version: "3.12", os: "ubuntu-latest", sqlalchemy: "1" }
-        - { session: doctest, python-version: "3.12", os: "ubuntu-latest", sqlalchemy: "2" }
+        - { session: tests,   python-version: "3.13", os: "ubuntu-latest", sqlalchemy: "1" }
+        - { session: doctest, python-version: "3.13", os: "ubuntu-latest", sqlalchemy: "2" }
         - { session: mypy,    python-version: "3.12",  os: "ubuntu-latest", sqlalchemy: "2" }
         - { session: deps,    python-version: "3.12",  os: "ubuntu-latest", sqlalchemy: "2" }
 
@@ -64,6 +70,7 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+        allow-prereleases: true
 
     - name: Upgrade pip
       env:
@@ -88,6 +95,8 @@ jobs:
     - name: Run Nox
       env:
         SQLALCHEMY_VERSION: ${{ matrix.sqlalchemy }}
+        PIP_PRE: "1"
+        UV_PRERELEASE: allow
       run: |
         nox --verbose
 
@@ -134,6 +143,9 @@ jobs:
         nox --version
 
     - name: Run Nox
+      env:
+        PIP_PRE: "1"
+        UV_PRERELEASE: allow
       run: |
         nox -- -m "external"
 
@@ -147,7 +159,7 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
       with:
-        python-version: '3.12'
+        python-version: '3.x'
 
     - name: Upgrade pip
       env:
