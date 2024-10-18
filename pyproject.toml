@@ -173,6 +173,8 @@ filterwarnings = [
     "ignore:No records were available to test:UserWarning",
     # https://github.com/meltano/sdk/issues/1354
     "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
+    # TODO: Address this SQLite warning in Python 3.13+
+    "ignore::ResourceWarning",
 ]
 log_cli_level = "INFO"
 markers = [
