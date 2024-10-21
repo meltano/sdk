@@ -1002,7 +1002,7 @@ class SQLConnector:  # noqa: PLR0904
         _, schema_name, table_name = self.parse_full_table_name(full_table_name)
         meta = sa.MetaData(schema=schema_name)
         meta.reflect(bind=self._engine, only=[table_name])
-        table = meta.tables[full_table_name]
+        table = meta.tables[full_table_name]  # type: ignore[index]
         current_pk_cols = [col.name for col in table.primary_key.columns]
 
         # Nothing to do
