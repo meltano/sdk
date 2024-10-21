@@ -292,7 +292,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
             INSERT INTO {full_table_name}
             ({", ".join(column_identifiers)})
             VALUES ({", ".join([f":{name}" for name in property_names])})
-            """,  # noqa: S608
+            """,
         )
         return statement.rstrip()
 
