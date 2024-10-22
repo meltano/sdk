@@ -321,9 +321,7 @@ class TestDuckDBConnector:
         connector.rename_column("test_table", "old_name", "new_name")
 
         with engine.connect() as conn:
-            result = conn.execute(
-                sa.text("SELECT * FROM test_table"),
-            )
+            result = conn.execute(sa.text("SELECT * FROM test_table"))
             assert result.keys() == ["id", "new_name"]
 
     def test_adapt_column_type(self, connector: DuckDBConnector):
@@ -341,9 +339,7 @@ class TestDuckDBConnector:
         connector._adapt_column_type("test_table", "name", sa.types.String())
 
         with engine.connect() as conn:
-            result = conn.execute(
-                sa.text("SELECT * FROM test_table"),
-            )
+            result = conn.execute(sa.text("SELECT * FROM test_table"))
             assert result.keys() == ["id", "name"]
             assert result.cursor.description[1][1] == "STRING"
 

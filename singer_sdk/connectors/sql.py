@@ -982,6 +982,28 @@ class SQLConnector:  # noqa: PLR0904
                 self.to_sql_type(property_def),
             )
 
+        self.prepare_primary_key(
+            full_table_name=full_table_name,
+            primary_keys=primary_keys,
+        )
+
+    def prepare_primary_key(
+        self,
+        *,
+        full_table_name: str | FullyQualifiedName,  # noqa: ARG002
+        primary_keys: t.Sequence[str],  # noqa: ARG002
+    ) -> None:
+        """Adapt target table primary key to provided schema if possible.
+
+        Implement this method in a subclass to adapt the primary key of the target table
+        to the provided one if possible.
+
+        Args:
+            full_table_name: the target table name.
+            primary_keys: list of key properties.
+        """
+        self.logger.debug("Primary key adaptation is not implemented")
+
     def prepare_column(
         self,
         full_table_name: str | FullyQualifiedName,
