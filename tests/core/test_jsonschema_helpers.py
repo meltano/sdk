@@ -161,7 +161,8 @@ def test_to_json():
             "required": [
                 "test_property"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "$schema": "https://json-schema.org/draft/2020-12/schema"
         }""",
     )
 
@@ -172,6 +173,7 @@ def test_any_type(caplog: pytest.LogCaptureFixture):
     )
     with caplog.at_level(WARNING):
         assert schema.to_dict() == {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
                 "any_type": {
