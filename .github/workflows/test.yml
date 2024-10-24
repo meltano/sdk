@@ -37,7 +37,7 @@ env:
 
 jobs:
   tests:
-    name: "Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }} / SQLAlchemy: ${{ matrix.sqlalchemy }}"
+    name: "Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     env:
@@ -55,12 +55,10 @@ jobs:
         - "3.11"
         - "3.12"
         - "3.13"
-        sqlalchemy: ["2"]
         include:
-        - { session: tests,   python-version: "3.13", os: "ubuntu-latest", sqlalchemy: "1" }
-        - { session: doctest, python-version: "3.13", os: "ubuntu-latest", sqlalchemy: "2" }
-        - { session: mypy,    python-version: "3.12",  os: "ubuntu-latest", sqlalchemy: "2" }
-        - { session: deps,    python-version: "3.12",  os: "ubuntu-latest", sqlalchemy: "2" }
+        - { session: doctest, python-version: "3.13", os: "ubuntu-latest" }
+        - { session: mypy,    python-version: "3.12", os: "ubuntu-latest" }
+        - { session: deps,    python-version: "3.12", os: "ubuntu-latest" }
 
     steps:
     - uses: actions/checkout@v4
@@ -94,7 +92,6 @@ jobs:
 
     - name: Run Nox
       env:
-        SQLALCHEMY_VERSION: ${{ matrix.sqlalchemy }}
         PIP_PRE: "1"
         UV_PRERELEASE: allow
       run: |

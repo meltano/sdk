@@ -135,6 +135,12 @@ class TargetSchemaUpdates(TargetFileTestTemplate):
     name = "schema_updates"
 
 
+class TargetPrimaryKeyUpdates(TargetFileTestTemplate):
+    """Test Target handles Primary Key updates."""
+
+    name = "pk_updates"
+
+
 class TargetSpecialCharsInAttributes(TargetFileTestTemplate):
     """Test Target handles special chars in attributes."""
 

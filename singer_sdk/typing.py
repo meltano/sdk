@@ -1227,6 +1227,12 @@ def to_sql_type(  # noqa: PLR0911, C901
     Returns:
         The SQL type.
     """
+    if _jsonschema_type_check(jsonschema_type, ("object",)):
+        return sa.types.VARCHAR()
+
+    if _jsonschema_type_check(jsonschema_type, ("array",)):
+        return sa.types.VARCHAR()
+
     if _jsonschema_type_check(jsonschema_type, ("string",)):
         datelike_type = get_datelike_property_type(jsonschema_type)
         if datelike_type:
@@ -1246,11 +1252,5 @@ def to_sql_type(  # noqa: PLR0911, C901
         return sa.types.DECIMAL()
     if _jsonschema_type_check(jsonschema_type, ("boolean",)):
         return sa.types.BOOLEAN()
-
-    if _jsonschema_type_check(jsonschema_type, ("object",)):
-        return sa.types.VARCHAR()
-
-    if _jsonschema_type_check(jsonschema_type, ("array",)):
-        return sa.types.VARCHAR()
 
     return sa.types.VARCHAR()

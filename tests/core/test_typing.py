@@ -345,6 +345,10 @@ def test_conform_primitives():
             sa.types.DATETIME,
         ),
         ({"anyOf": [{"type": "integer"}, {"type": "null"}]}, sa.types.INTEGER),
+        (
+            {"type": ["array", "object", "boolean", "null"]},
+            sa.types.VARCHAR,
+        ),
     ],
 )
 def test_to_sql_type(jsonschema_type, expected):
