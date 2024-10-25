@@ -587,17 +587,29 @@ class TestJSONSchemaToSQL:
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
         assert isinstance(result, sa.types.INTEGER)
 
-    def test_complex(self, json_schema_to_sql: JSONSchemaToSQL):
-        jsonschema_type = {
-            "type": [
-                "array",
-                "object",
-                "boolean",
-                "null",
-            ]
-        }
+    @pytest.mark.parametrize(
+        "jsonschema_type,expected_type",
+        [
+            pytest.param(
+                {"type": ["array", "object", "boolean", "null"]},
+                sa.types.VARCHAR,
+                id="array-first",
+            ),
+            pytest.param(
+                {"type": ["boolean", "array", "object", "null"]},
+                sa.types.VARCHAR,
+                id="boolean-first",
+            ),
+        ],
+    )
+    def test_complex(
+        self,
+        json_schema_to_sql: JSONSchemaToSQL,
+        jsonschema_type: dict,
+        expected_type: type[sa.types.TypeEngine],
+    ):
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
-        assert isinstance(result, sa.types.VARCHAR)
+        assert isinstance(result, expected_type)
 
     def test_unknown_type(self, json_schema_to_sql: JSONSchemaToSQL):
         jsonschema_type = {"cannot": "compute"}
