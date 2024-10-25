@@ -476,7 +476,7 @@ def test_custom_type_to_jsonschema():
     assert m.to_jsonschema(sa.types.BOOLEAN()) == {"type": ["boolean"]}
 
 
-class TestJSONSchemaToSQL:
+class TestJSONSchemaToSQL:  # noqa: PLR0904
     @pytest.fixture
     def json_schema_to_sql(self) -> JSONSchemaToSQL:
         return JSONSchemaToSQL()
@@ -580,12 +580,22 @@ class TestJSONSchemaToSQL:
     def test_anyof_integer(self, json_schema_to_sql: JSONSchemaToSQL):
         jsonschema_type = {
             "anyOf": [
-                {"type": "integer"},
                 {"type": "null"},
+                {"type": "integer"},
             ],
         }
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
         assert isinstance(result, sa.types.INTEGER)
+
+    def test_anyof_unknown(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {
+            "anyOf": [
+                {"type": "null"},
+                {"type": "unknown"},
+            ],
+        }
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.VARCHAR)
 
     @pytest.mark.parametrize(
         "jsonschema_type,expected_type",
