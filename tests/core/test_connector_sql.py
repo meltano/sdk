@@ -11,7 +11,11 @@ from sqlalchemy.engine.default import DefaultDialect
 
 from samples.sample_duckdb import DuckDBConnector
 from singer_sdk.connectors import SQLConnector
-from singer_sdk.connectors.sql import FullyQualifiedName, SQLToJSONSchema
+from singer_sdk.connectors.sql import (
+    FullyQualifiedName,
+    JSONSchemaToSQL,
+    SQLToJSONSchema,
+)
 from singer_sdk.exceptions import ConfigValidationError
 
 if t.TYPE_CHECKING:
@@ -445,7 +449,7 @@ def test_sql_to_json_schema_map(
     assert m.to_jsonschema(sql_type) == expected_jsonschema_type
 
 
-def test_custom_type():
+def test_custom_type_to_jsonschema():
     class MyMap(SQLToJSONSchema):
         @SQLToJSONSchema.to_jsonschema.register
         def custom_number_to_jsonschema(self, column_type: sa.types.NUMERIC) -> dict:
@@ -470,3 +474,49 @@ def test_custom_type():
         "multipleOf": 0.01,
     }
     assert m.to_jsonschema(sa.types.BOOLEAN()) == {"type": ["boolean"]}
+
+
+@pytest.mark.parametrize(
+    "jsonschema_type,expected",
+    [
+        ({"type": ["string", "null"]}, sa.types.VARCHAR),
+        ({"type": ["integer", "null"]}, sa.types.INTEGER),
+        ({"type": ["number", "null"]}, sa.types.DECIMAL),
+        ({"type": ["boolean", "null"]}, sa.types.BOOLEAN),
+        ({"type": "object", "properties": {}}, sa.types.VARCHAR),
+        ({"type": "array"}, sa.types.VARCHAR),
+        ({"format": "date", "type": ["string", "null"]}, sa.types.DATE),
+        ({"format": "time", "type": ["string", "null"]}, sa.types.TIME),
+        ({"format": "uuid", "type": ["string", "null"]}, sa.types.UUID),
+        (
+            {"format": "date-time", "type": ["string", "null"]},
+            sa.types.DATETIME,
+        ),
+        (
+            {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+            sa.types.DATETIME,
+        ),
+        ({"anyOf": [{"type": "integer"}, {"type": "null"}]}, sa.types.INTEGER),
+        (
+            {"type": ["array", "object", "boolean", "null"]},
+            sa.types.VARCHAR,
+        ),
+    ],
+)
+def test_to_sql_type(jsonschema_type, expected):
+    to_sql = JSONSchemaToSQL()
+    assert isinstance(to_sql.to_sql_type(jsonschema_type), expected)
+
+
+def test_register_jsonschema_type_handler():
+    to_sql = JSONSchemaToSQL()
+    to_sql.register_type_handler("my-type", sa.types.LargeBinary)
+    result = to_sql.to_sql_type({"type": "my-type"})
+    assert isinstance(result, sa.types.LargeBinary)
+
+
+def test_register_jsonschema_format_handler():
+    to_sql = JSONSchemaToSQL()
+    to_sql.register_format_handler("my-format", sa.types.LargeBinary)
+    result = to_sql.to_sql_type({"type": "string", "format": "my-format"})
+    assert isinstance(result, sa.types.LargeBinary)

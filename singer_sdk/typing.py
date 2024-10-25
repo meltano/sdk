@@ -1205,6 +1205,10 @@ def _jsonschema_type_check(jsonschema_type: dict, type_check: tuple[str]) -> boo
     )
 
 
+@deprecated(
+    "Use `JSONSchemaToSQL` instead.",
+    category=DeprecationWarning,
+)
 def to_sql_type(  # noqa: PLR0911, C901
     jsonschema_type: dict,
 ) -> sa.types.TypeEngine:
