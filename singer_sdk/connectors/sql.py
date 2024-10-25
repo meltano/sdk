@@ -316,8 +316,8 @@ class JSONSchemaToSQL:
                     handler = self._type_mapping[non_null_types[0]]
                     return self._invoke_handler(handler, schema)
 
-            elif handler := self._type_mapping.get(schema_type):
-                return self._invoke_handler(handler, schema)
+            elif type_handler := self._type_mapping.get(schema_type):
+                return self._invoke_handler(type_handler, schema)
 
         return None
 
