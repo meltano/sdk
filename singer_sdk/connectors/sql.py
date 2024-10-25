@@ -275,6 +275,17 @@ class JSONSchemaToSQL:
         """  # noqa: E501
         self._format_handlers[format_name] = handler
 
+    def handle_multiple_types(self, types: t.Sequence[str]) -> sa.types.TypeEngine:  # noqa: ARG002, PLR6301
+        """Handle multiple types by returning a VARCHAR.
+
+        Args:
+            types: The list of types to handle.
+
+        Returns:
+            A VARCHAR type.
+        """
+        return sa.types.VARCHAR()
+
     def _get_type_from_schema(self, schema: dict) -> sa.types.TypeEngine | None:
         """Try to get a SQL type from a single schema object.
 
@@ -291,15 +302,21 @@ class JSONSchemaToSQL:
                 return format_type
 
         # Then check regular types
-        if "type" in schema:
-            schema_type = schema["type"]
+        if schema_type := schema.get("type"):
             if isinstance(schema_type, (list, tuple)):
-                # For type arrays, try each type
-                for t in schema_type:
-                    if handler := self._type_mapping.get(t):
-                        return self._invoke_handler(handler, schema)
-            elif schema_type in self._type_mapping:
-                handler = self._type_mapping[schema_type]
+                # Filter out null type if present
+                non_null_types = [t for t in schema_type if t != "null"]
+
+                # If we have multiple non-null types, use VARCHAR
+                if len(non_null_types) > 1:
+                    self.handle_multiple_types(non_null_types)
+
+                # If we have exactly one non-null type, use its handler
+                if len(non_null_types) == 1 and non_null_types[0] in self._type_mapping:
+                    handler = self._type_mapping[non_null_types[0]]
+                    return self._invoke_handler(handler, schema)
+
+            elif handler := self._type_mapping.get(schema_type):
                 return self._invoke_handler(handler, schema)
 
         return None
