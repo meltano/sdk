@@ -325,6 +325,7 @@ def test_conform_primitives():
     assert _conform_primitive_property(1, {"type": ["boolean"]}) is True
 
 
+@pytest.mark.filterwarnings("ignore:Use `JSONSchemaToSQL` instead.:DeprecationWarning")
 @pytest.mark.parametrize(
     "jsonschema_type,expected",
     [

@@ -11,7 +11,11 @@ from sqlalchemy.engine.default import DefaultDialect
 
 from samples.sample_duckdb import DuckDBConnector
 from singer_sdk.connectors import SQLConnector
-from singer_sdk.connectors.sql import FullyQualifiedName, SQLToJSONSchema
+from singer_sdk.connectors.sql import (
+    FullyQualifiedName,
+    JSONSchemaToSQL,
+    SQLToJSONSchema,
+)
 from singer_sdk.exceptions import ConfigValidationError
 
 if t.TYPE_CHECKING:
@@ -445,7 +449,7 @@ def test_sql_to_json_schema_map(
     assert m.to_jsonschema(sql_type) == expected_jsonschema_type
 
 
-def test_custom_type():
+def test_custom_type_to_jsonschema():
     class MyMap(SQLToJSONSchema):
         @SQLToJSONSchema.to_jsonschema.register
         def custom_number_to_jsonschema(self, column_type: sa.types.NUMERIC) -> dict:
@@ -470,3 +474,137 @@ def test_custom_type():
         "multipleOf": 0.01,
     }
     assert m.to_jsonschema(sa.types.BOOLEAN()) == {"type": ["boolean"]}
+
+
+class TestJSONSchemaToSQL:
+    @pytest.fixture
+    def json_schema_to_sql(self) -> JSONSchemaToSQL:
+        return JSONSchemaToSQL()
+
+    def test_register_jsonschema_type_handler(
+        self,
+        json_schema_to_sql: JSONSchemaToSQL,
+    ):
+        json_schema_to_sql.register_type_handler("my-type", sa.types.LargeBinary)
+        result = json_schema_to_sql.to_sql_type({"type": "my-type"})
+        assert isinstance(result, sa.types.LargeBinary)
+
+    def test_register_jsonschema_format_handler(
+        self,
+        json_schema_to_sql: JSONSchemaToSQL,
+    ):
+        json_schema_to_sql.register_format_handler("my-format", sa.types.LargeBinary)
+        result = json_schema_to_sql.to_sql_type(
+            {
+                "type": "string",
+                "format": "my-format",
+            }
+        )
+        assert isinstance(result, sa.types.LargeBinary)
+
+    def test_string(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {"type": ["string", "null"]}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.VARCHAR)
+        assert result.length is None
+
+    def test_string_max_length(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {"type": ["string", "null"], "maxLength": 10}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(
+            json_schema_to_sql.to_sql_type(jsonschema_type),
+            sa.types.VARCHAR,
+        )
+        assert result.length == 10
+
+    def test_integer(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {"type": ["integer", "null"]}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.INTEGER)
+
+    def test_number(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {"type": ["number", "null"]}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.DECIMAL)
+
+    def test_boolean(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {"type": ["boolean", "null"]}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.BOOLEAN)
+
+    def test_object(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {"type": "object", "properties": {}}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.VARCHAR)
+
+    def test_array(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {"type": "array"}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.VARCHAR)
+
+    def test_array_items(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {"type": "array", "items": {"type": "string"}}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.VARCHAR)
+
+    def test_date(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {"format": "date", "type": ["string", "null"]}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.DATE)
+
+    def test_time(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {"format": "time", "type": ["string", "null"]}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.TIME)
+
+    def test_uuid(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {"format": "uuid", "type": ["string", "null"]}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.UUID)
+
+    def test_datetime(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {"format": "date-time", "type": ["string", "null"]}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.DATETIME)
+
+    def test_anyof_datetime(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {
+            "anyOf": [
+                {"type": "string", "format": "date-time"},
+                {"type": "null"},
+            ],
+        }
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.DATETIME)
+
+    def test_anyof_integer(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {
+            "anyOf": [
+                {"type": "integer"},
+                {"type": "null"},
+            ],
+        }
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.INTEGER)
+
+    def test_complex(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {
+            "type": [
+                "array",
+                "object",
+                "boolean",
+                "null",
+            ]
+        }
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.VARCHAR)
+
+    def test_unknown_type(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {"cannot": "compute"}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.VARCHAR)
+
+    def test_unknown_format(self, json_schema_to_sql: JSONSchemaToSQL):
+        jsonschema_type = {"type": "string", "format": "unknown"}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.VARCHAR)
