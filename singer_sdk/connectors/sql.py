@@ -204,7 +204,12 @@ JSONtoSQLHandler: TypeAlias = t.Union[
 
 
 class JSONSchemaToSQL:
-    """A configurable mapper for converting JSON Schema types to SQLAlchemy types."""
+    """A configurable mapper for converting JSON Schema types to SQLAlchemy types.
+
+    This class provides a mapping from JSON Schema types to SQLAlchemy types.
+
+    .. versionadded:: 0.42.0
+    """
 
     def __init__(self) -> None:
         """Initialize the mapper with default type mappings."""
