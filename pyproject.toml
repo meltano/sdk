@@ -90,7 +90,10 @@ numpy = [
     { version = ">=1.22,<2.1", python = "==3.9", optional = true },
     { version = ">=1.22", python = ">=3.10", optional = true },
 ]
-pyarrow = { version = ">=13", optional = true }
+pyarrow = [
+    { version = ">=13,<18", python = "==3.8", optional = true },
+    { version = ">=13", python = ">=3.9", optional = true },
+]
 
 # Testing dependencies installed as optional 'testing' extras
 pytest = {version=">=7.2.1", optional = true}
