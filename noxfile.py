@@ -68,10 +68,6 @@ def tests(session: nox.Session) -> None:
         "s3",
     ]
 
-    if session.python == "3.13":
-        # https://github.com/apache/arrow/issues/43519
-        extras.remove("parquet")
-
     session.install(f".[{','.join(extras)}]")
     session.install(*test_dependencies)
 
