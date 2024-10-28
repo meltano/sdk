@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import shutil
-import sys
 import uuid
 from pathlib import Path
 
@@ -24,11 +23,6 @@ StandardTests = get_target_test_class(
 )
 
 
-@pytest.mark.xfail(
-    sys.version_info >= (3, 13),
-    reason="Parquet not supported on Python 3.13 due to PyArrow incompatibility",
-    raises=NameError,
-)
 class TestSampleTargetParquet(StandardTests):
     """Standard Target Tests."""
 
