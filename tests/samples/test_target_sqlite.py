@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import sqlite3
-import sys
 import typing as t
 from copy import deepcopy
 from io import StringIO
@@ -368,11 +367,6 @@ def test_sqlite_process_batch_message(
     assert cursor.fetchone()[0] == 4
 
 
-@pytest.mark.xfail(
-    sys.version_info >= (3, 13),
-    reason="Parquet not supported on Python 3.13 due to PyArrow incompatibility",
-    strict=True,
-)
 def test_sqlite_process_batch_parquet(
     sqlite_target_test_config: dict,
     sqlite_sample_target_batch: SQLiteTarget,
