@@ -249,9 +249,9 @@ class AttributeTestTemplate(TestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,  # noqa: ARG003
-        property_name: str,  # noqa: ARG003
-        property_schema: dict,  # noqa: ARG003
+        stream: Stream,
+        property_name: str,
+        property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
 
