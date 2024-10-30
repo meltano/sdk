@@ -18,7 +18,7 @@ from singer_sdk.connectors import JSONSchemaToSQL, SQLConnector
 from my_sqlalchemy_dialect import VectorType
 
 
-def custom_array_to_sql(jsonschema: dict) -> VectorType | sa.types.ARRAY:
+def custom_array_to_sql(jsonschema: dict) -> VectorType | sa.types.VARCHAR:
     """Custom mapping for arrays of numbers."""
     if items := jsonschema.get("items"):
         if items.get("type") == "number":
