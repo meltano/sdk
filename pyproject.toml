@@ -60,7 +60,7 @@ requests = ">=2.25.1"
 setuptools = "<=70.3.0"
 simpleeval = [
     { version = ">=0.9.13,<1", python = "<3.9" },
-    { version = ">=0.9.13", python = ">=3.9" },
+    { version = ">=0.9.13,!=1.0.1", python = ">=3.9" },
 ]
 simplejson = ">=3.17.6"
 sqlalchemy = ">=1.4,<3.0"
