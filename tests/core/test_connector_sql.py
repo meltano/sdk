@@ -597,13 +597,6 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
         assert isinstance(result, sa.types.VARCHAR)
 
-    def test_custom_fallback(self):
-        json_schema_to_sql = JSONSchemaToSQL()
-        json_schema_to_sql.fallback_type = sa.types.CHAR
-        jsonschema_type = {"cannot": "compute"}
-        result = json_schema_to_sql.to_sql_type(jsonschema_type)
-        assert isinstance(result, sa.types.CHAR)
-
     @pytest.mark.parametrize(
         "jsonschema_type,expected_type",
         [
@@ -637,3 +630,39 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         jsonschema_type = {"type": "string", "format": "unknown"}
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
         assert isinstance(result, sa.types.VARCHAR)
+
+    def test_custom_fallback(self):
+        json_schema_to_sql = JSONSchemaToSQL()
+        json_schema_to_sql.fallback_type = sa.types.CHAR
+        jsonschema_type = {"cannot": "compute"}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.CHAR)
+
+    def test_custom_handle_raw_string(self):
+        class CustomJSONSchemaToSQL(JSONSchemaToSQL):
+            def handle_raw_string(self, schema):
+                if schema.get("contentMediaType") == "image/png":
+                    return sa.types.LargeBinary()
+
+                return super().handle_raw_string(schema)
+
+        json_schema_to_sql = CustomJSONSchemaToSQL()
+
+        vanilla = {"type": ["string"]}
+        result = json_schema_to_sql.to_sql_type(vanilla)
+        assert isinstance(result, sa.types.VARCHAR)
+
+        non_image_type = {
+            "type": "string",
+            "contentMediaType": "text/html",
+        }
+        result = json_schema_to_sql.to_sql_type(non_image_type)
+        assert isinstance(result, sa.types.VARCHAR)
+
+        image_type = {
+            "type": "string",
+            "contentEncoding": "base64",
+            "contentMediaType": "image/png",
+        }
+        result = json_schema_to_sql.to_sql_type(image_type)
+        assert isinstance(result, sa.types.LargeBinary)

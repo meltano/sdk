@@ -238,7 +238,7 @@ class JSONSchemaToSQL:
             "ipv6": lambda _: sa.types.VARCHAR(45),
         }
 
-        self._fallback_type = sa.types.VARCHAR
+        self._fallback_type: type[sa.types.TypeEngine] = sa.types.VARCHAR
 
     def _invoke_handler(  # noqa: PLR6301
         self,
@@ -311,6 +311,18 @@ class JSONSchemaToSQL:
         """
         return sa.types.VARCHAR()
 
+    def handle_raw_string(self, schema: dict) -> sa.types.TypeEngine:  # noqa: PLR6301
+        """Handle a string type generically.
+
+        Args:
+            schema: The JSON Schema object.
+
+        Returns:
+            Appropriate SQLAlchemy type.
+        """
+        max_length: int | None = schema.get("maxLength")
+        return sa.types.VARCHAR(max_length)
+
     def _get_type_from_schema(self, schema: dict) -> sa.types.TypeEngine | None:
         """Try to get a SQL type from a single schema object.
 
@@ -378,9 +390,7 @@ class JSONSchemaToSQL:
         if format_type := self._handle_format(schema):
             return format_type
 
-        # Default string handling
-        max_length: int | None = schema.get("maxLength")
-        return sa.types.VARCHAR(max_length)
+        return self.handle_raw_string(schema)
 
     def to_sql_type(self, schema: dict) -> sa.types.TypeEngine:
         """Convert a JSON Schema type definition to a SQLAlchemy type.
