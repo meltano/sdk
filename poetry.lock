@@ -1984,17 +1984,6 @@ gssapi = ["gssapi (>=1.4.1)", "pyasn1 (>=0.1.7)", "pywin32 (>=2.1.8)"]
 invoke = ["invoke (>=2.0)"]
 
 [[package]]
-name = "pip"
-version = "24.3.1"
-description = "The PyPA recommended tool for installing Python packages."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "pip-24.3.1-py3-none-any.whl", hash = "sha256:3790624780082365f47549d032f3770eeb2b1e8bd1f7b2e02dace1afa361b4ed"},
-    {file = "pip-24.3.1.tar.gz", hash = "sha256:ebcb60557f2aefabc2e0f918751cd24ea0d56d8ec5445fe1807f1d2109660b99"},
-]
-
-[[package]]
 name = "pkgutil-resolve-name"
 version = "1.3.10"
 description = "Resolve a name to an object."
@@ -2825,17 +2814,14 @@ files = [
 
 [[package]]
 name = "simpleeval"
-version = "1.0.1"
+version = "1.0.0"
 description = "A simple, safe single expression evaluator library."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "simpleeval-1.0.1-py3-none-any.whl", hash = "sha256:1928b4a5528099012e73de532d3293a5c7038c103111dda69da679ba3bee4352"},
-    {file = "simpleeval-1.0.1.tar.gz", hash = "sha256:3b95f8b04d35cf1f793749fc3034d332dafb20e71fadf56631b4642fcc84a26a"},
+    {file = "simpleeval-1.0.0-py3-none-any.whl", hash = "sha256:704817f39879b42d81777f02e2dd28dde45c7f9c3fd84cea0d6dbde85c3efcff"},
+    {file = "simpleeval-1.0.0.tar.gz", hash = "sha256:f3d259deeb751d34c63e56747bab384efad63a2dbdb4f130281c42279788ac3c"},
 ]
-
-[package.dependencies]
-pip = ">=24.2"
 
 [[package]]
 name = "simplejson"
@@ -3810,4 +3796,4 @@ testing = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "22dab2c83f8699338a49a77e1c1af382acec467805e24d6dd53b0f464f43f304"
+content-hash = "6f38eebb28c428474d044342264d4b3c331081d58b399cb1be393f29b6b27f25"
