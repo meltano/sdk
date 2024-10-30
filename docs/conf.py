@@ -45,6 +45,8 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "sphinx.ext.linkcode",
+    # Third-party extensions
+    "autoapi.extension",
     "sphinx_copybutton",
     "myst_parser",
     "sphinx_reredirects",
@@ -174,6 +176,38 @@ intersphinx_mapping = {
 
 # -- Options for linkcode --------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/linkcode.html#configuration
+
+# -- Options for autoapi ---------------------------------------------------------------
+autoapi_dirs = ["../singer_sdk"]
+autoapi_options = [
+    "members",
+    "show-module-summary",
+    "special-members",
+]
+
+
+def skip_top_level_module(app, what: str, name: str, obj, skip: bool, options) -> bool:  # noqa: ANN001, ARG001, FBT001
+    """Skip top-level modules.
+
+    Args:
+        app: Sphinx application object.
+        what: Type of the object.
+        name: Name of the object.
+        obj: Object itself.
+        skip: Skip flag.
+        options: Options.
+
+    Returns:
+        A boolean.
+    """
+    if name == "singer_sdk" and what == "module":
+        skip = True
+
+    return skip
+
+
+def setup(sphinx) -> None:  # noqa: ANN001
+    sphinx.connect("autoapi-skip-member", skip_top_level_module)
 
 
 def linkcode_resolve(domain: str, info: dict) -> str | None:

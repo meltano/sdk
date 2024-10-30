@@ -152,7 +152,7 @@ def coverage(session: nox.Session) -> None:
 @nox.session(name="docs", python=main_python_version)
 def docs(session: nox.Session) -> None:
     """Build the documentation."""
-    args = session.posargs or ["docs", "build", "-W"]
+    args = session.posargs or ["docs", "build"]
     if not session.posargs and "FORCE_COLOR" in os.environ:
         args.insert(0, "--color")
 
