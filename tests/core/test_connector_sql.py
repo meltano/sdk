@@ -597,6 +597,13 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
         assert isinstance(result, sa.types.VARCHAR)
 
+    def test_custom_fallback(self):
+        json_schema_to_sql = JSONSchemaToSQL()
+        json_schema_to_sql.fallback_type = sa.types.CHAR
+        jsonschema_type = {"cannot": "compute"}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.CHAR)
+
     @pytest.mark.parametrize(
         "jsonschema_type,expected_type",
         [

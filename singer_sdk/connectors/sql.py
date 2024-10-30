@@ -238,6 +238,8 @@ class JSONSchemaToSQL:
             "ipv6": lambda _: sa.types.VARCHAR(45),
         }
 
+        self._fallback_type = sa.types.VARCHAR
+
     def _invoke_handler(  # noqa: PLR6301
         self,
         handler: JSONtoSQLHandler,
@@ -255,6 +257,24 @@ class JSONSchemaToSQL:
         if isinstance(handler, type):
             return handler()  # type: ignore[no-any-return]
         return handler(schema)
+
+    @property
+    def fallback_type(self) -> type[sa.types.TypeEngine]:
+        """Return the fallback type.
+
+        Returns:
+            The fallback type.
+        """
+        return self._fallback_type
+
+    @fallback_type.setter
+    def fallback_type(self, value: type[sa.types.TypeEngine]) -> None:
+        """Set the fallback type.
+
+        Args:
+            value: The new fallback type.
+        """
+        self._fallback_type = value
 
     def register_type_handler(self, json_type: str, handler: JSONtoSQLHandler) -> None:
         """Register a custom type handler.
@@ -385,7 +405,7 @@ class JSONSchemaToSQL:
                     return sql_type
 
         # Fallback
-        return sa.types.VARCHAR()
+        return self.fallback_type()
 
 
 class SQLConnector:  # noqa: PLR0904
