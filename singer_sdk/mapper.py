@@ -401,10 +401,12 @@ class CustomStreamMap(StreamMap):
         if expr.startswith("bool("):
             return th.BooleanType()
 
-        if expr.startswith("datetime.date") or expr.endswith(".date()"):
+        if expr.startswith(("datetime.date.", "datetime.date(")) or expr.endswith(
+            ".date()"
+        ):
             return th.DateType()
 
-        if expr.startswith("datetime.datetime"):
+        if expr.startswith(("datetime.datetime.", "datetime.datetime(")):
             return th.DateTimeType()
 
         return th.StringType() if expr[0] == "'" and expr[-1] == "'" else default
