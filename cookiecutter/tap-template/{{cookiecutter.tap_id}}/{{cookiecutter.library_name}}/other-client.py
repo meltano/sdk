@@ -15,7 +15,7 @@ class {{ cookiecutter.source_name }}Stream(Stream):
 
     def get_records(
         self,
-        context: Context | None,  # noqa: ARG002
+        context: Context | None,
     ) -> t.Iterable[dict]:
         """Return a generator of record-type dictionary objects.
 
