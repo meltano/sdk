@@ -45,19 +45,21 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: 3.x
-        cache: 'pip'
-        cache-dependency-path: 'poetry.lock'
+
+    - uses: astral-sh/setup-uv@v3
+      with:
+        version: ">=0.4.30"
 
     - name: Install pre-commit
       run: |
-        pipx install pre-commit
+        uv tool install --with=pre-commit-uv pre-commit
         pre-commit --version
 
     - name: Install Nox
       env:
         PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        pipx install nox
+        uv tool install nox
         nox --version
 
     - name: Run Nox
