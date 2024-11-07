@@ -2,7 +2,7 @@ name: Feature request
 description: Request a new feature
 title: "feat: <title>"
 labels: ["kind/Feature", "valuestream/SDK"]
-type: Enhancement
+type: Feat
 assignees:
   - edgarrmondragon
 
