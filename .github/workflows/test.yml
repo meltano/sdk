@@ -14,7 +14,9 @@ on:
       - ".github/workflows/test.yml"
       - ".github/workflows/constraints.txt"
   push:
-    branches: [main]
+    branches:
+      - main
+      - v*
     paths:
       - "cookiecutter/**"
       - "samples/**"
