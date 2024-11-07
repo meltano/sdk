@@ -8,7 +8,9 @@ on:
     - "e2e-tests/cookiecutters/**"
     - ".github/workflows/cookiecutter-e2e.yml"
   push:
-    branches: [main]
+    branches:
+    - main
+    - v*
     paths:
     - "cookiecutter/**"
     - "e2e-tests/cookiecutters/**"
