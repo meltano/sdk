@@ -8,7 +8,6 @@ from logging import WARNING
 from textwrap import dedent
 
 import pytest
-from jsonschema import Draft6Validator
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -27,6 +26,7 @@ from singer_sdk.helpers._typing import (
 )
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
+    DEFAULT_JSONSCHEMA_VALIDATOR,
     AllOf,
     AnyType,
     ArrayType,
@@ -248,6 +248,17 @@ def test_property_description():
         "test_property": {
             "type": ["string", "null"],
             "description": text,
+        },
+    }
+
+
+def test_property_title():
+    title = "My Test Property"
+    prop = Property("test_property", StringType, title=title)
+    assert prop.to_dict() == {
+        "test_property": {
+            "type": ["string", "null"],
+            "title": title,
         },
     }
 
@@ -932,7 +943,7 @@ def test_discriminated_union():
         ),
     )
 
-    validator = Draft6Validator(th.to_dict())
+    validator = DEFAULT_JSONSCHEMA_VALIDATOR(th.to_dict())
 
     assert validator.is_valid(
         {

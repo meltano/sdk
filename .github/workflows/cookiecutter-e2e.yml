@@ -8,7 +8,9 @@ on:
     - "e2e-tests/cookiecutters/**"
     - ".github/workflows/cookiecutter-e2e.yml"
   push:
-    branches: [main]
+    branches:
+    - main
+    - v*
     paths:
     - "cookiecutter/**"
     - "e2e-tests/cookiecutters/**"
@@ -24,14 +26,8 @@ env:
 
 jobs:
   lint:
-    name: Cookiecutter E2E Python ${{ matrix.python-version }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - { python-version: "3.12",  os: "ubuntu-latest" }
-
+    name: Cookiecutter E2E Python
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - name: Upgrade pip
@@ -46,38 +42,36 @@ jobs:
         PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pipx install poetry
-        pipx inject poetry poetry-plugin-export
         poetry --version
-        poetry self show plugins
 
     - uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
-        architecture: x64
-        cache: 'pip'
-        cache-dependency-path: 'poetry.lock'
+        python-version: 3.x
+
+    - uses: astral-sh/setup-uv@v3
+      with:
+        version: ">=0.4.30"
 
     - name: Install pre-commit
       run: |
-        pipx install pre-commit
+        uv tool install --with=pre-commit-uv pre-commit
         pre-commit --version
 
     - name: Install Nox
       env:
         PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        pipx install nox
-        pipx inject nox nox-poetry
+        uv tool install nox
         nox --version
 
     - name: Run Nox
       run: |
-        nox --python=${{ matrix.python-version }} --session=test_cookiecutter
+        nox --session=test_cookiecutter
 
     - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: cookiecutter-${{ matrix.os }}-py${{ matrix.python-version }}
+        name: cookiecutter-ubuntu-latest-py3x
         path: |
           /tmp/tap-*
           /tmp/target-*

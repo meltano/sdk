@@ -23,6 +23,7 @@ from singer_sdk.typing import (
     ArrayType,
     BooleanType,
     CustomType,
+    DateTimeType,
     IntegerType,
     NumberType,
     ObjectType,
@@ -610,7 +611,7 @@ class MappedStream(Stream):
 
     name = "mystream"
     schema = PropertiesList(
-        Property("email", StringType),
+        Property("email", StringType, required=True),
         Property("count", IntegerType),
         Property(
             "user",
@@ -626,6 +627,7 @@ class MappedStream(Stream):
                 Property("some_numbers", ArrayType(NumberType())),
             ),
         ),
+        Property("joined_at", DateTimeType),
     ).to_dict()
 
     def get_records(self, context):  # noqa: ARG002
@@ -637,6 +639,7 @@ class MappedStream(Stream):
                 "sub": {"num": 1, "custom_obj": CustomObj("hello")},
                 "some_numbers": [Decimal("3.14"), Decimal("2.718")],
             },
+            "joined_at": "2022-01-01T00:00:00Z",
         }
         yield {
             "email": "bob@example.com",
@@ -646,6 +649,7 @@ class MappedStream(Stream):
                 "sub": {"num": 2, "custom_obj": CustomObj("world")},
                 "some_numbers": [Decimal("10.32"), Decimal("1.618")],
             },
+            "joined_at": "2022-01-01T00:00:00Z",
         }
         yield {
             "email": "charlie@example.com",
@@ -655,7 +659,11 @@ class MappedStream(Stream):
                 "sub": {"num": 3, "custom_obj": CustomObj("hello")},
                 "some_numbers": [Decimal("1.414"), Decimal("1.732")],
             },
+            "joined_at": "2022-01-01T00:00:00Z",
         }
+
+    def get_batches(self, batch_config, context):  # noqa: ARG002
+        yield batch_config.encoding, ["file:///tmp/stream.json.gz"]
 
 
 class MappedTap(Tap):
@@ -753,6 +761,71 @@ class MappedTap(Tap):
             id="aliased_stream",
         ),
         pytest.param(
+            {"mystream": {"__alias__": "aliased_stream"}},
+            {
+                "flattening_enabled": False,
+                "flattening_max_depth": 0,
+                "batch_config": {
+                    "encoding": {"format": "jsonl", "compression": "gzip"},
+                    "storage": {"root": "file:///tmp"},
+                },
+            },
+            "aliased_stream_batch.jsonl",
+            id="aliased_stream_batch",
+        ),
+        pytest.param(
+            {"mystream": {"__alias__": "aliased.stream"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "aliased_stream_not_expr.jsonl",
+            id="aliased_stream_not_expr",
+        ),
+        pytest.param(
+            {"mystream": {"__alias__": "'__stream_name__'"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "aliased_stream_quoted.jsonl",
+            id="aliased_stream_quoted",
+        ),
+        pytest.param(
+            {"mystream": {"source_table": "__stream_name__"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_variable_stream_name.jsonl",
+            id="builtin_variable_stream_name",
+        ),
+        pytest.param(
+            {"mystream": {"__alias__": "'aliased_' + __stream_name__"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_variable_stream_name_alias.jsonl",
+            id="builtin_variable_stream_name_alias",
+        ),
+        pytest.param(
+            {"mystream": {"__alias__": "__stream_name__.upper()"}},
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_variable_stream_name_alias_expr.jsonl",
+            id="builtin_variable_stream_name_alias_expr",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "email": "self.upper()",
+                    "__else__": None,
+                }
+            },
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_variable_self.jsonl",
+            id="builtin_variable_self",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "email": "_['email'].upper()",
+                    "__else__": None,
+                }
+            },
+            {"flattening_enabled": False, "flattening_max_depth": 0},
+            "builtin_variable_underscore.jsonl",
+            id="builtin_variable_underscore",
+        ),
+        pytest.param(
             {},
             {"flattening_enabled": True, "flattening_max_depth": 0},
             "flatten_depth_0.jsonl",
@@ -836,6 +909,59 @@ class MappedTap(Tap):
             },
             "fake_credit_card_number.jsonl",
             id="fake_credit_card_number",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "email": "Faker.seed(email) or fake.email()",
+                    "__else__": None,
+                },
+            },
+            {
+                "flattening_enabled": False,
+                "flattening_max_depth": 0,
+                "faker_config": {
+                    "locale": "en_US",
+                },
+            },
+            "fake_email_seed_class.jsonl",
+            id="fake_email_seed_class",
+            marks=pytest.mark.filterwarnings(
+                "default:Class 'Faker' is deprecated:DeprecationWarning"
+            ),
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "email": "fake.seed_instance(email) or fake.email()",
+                    "__else__": None,
+                },
+            },
+            {
+                "flattening_enabled": False,
+                "flattening_max_depth": 0,
+                "faker_config": {
+                    "locale": "en_US",
+                },
+            },
+            "fake_email_seed_instance.jsonl",
+            id="fake_email_seed_instance",
+        ),
+        pytest.param(
+            {
+                "mystream": {
+                    "joined_date": "datetime.datetime.fromisoformat(joined_at).date()",
+                    "joined_timestamp": "float(datetime.datetime.fromisoformat(joined_at).timestamp())",  # noqa: E501
+                    "some_datetime": "datetime.datetime.fromisoformat(config['some_date_string'])",  # noqa: E501
+                },
+            },
+            {
+                "stream_map_config": {
+                    "some_date_string": "2024-10-10T10:10:10Z",
+                },
+            },
+            "dates.jsonl",
+            id="dates",
         ),
     ],
 )

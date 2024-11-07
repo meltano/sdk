@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable
+import typing as t
 
 import requests  # noqa: TCH002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
@@ -12,7 +12,7 @@ from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
 {%- endif %}
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import Context
 
 
@@ -54,7 +54,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
 {%- endif %}
         return headers
 
-    def parse_response(self, response: requests.Response) -> Iterable[dict]:
+    def parse_response(self, response: requests.Response) -> t.Iterable[dict]:
         """Parse the response and return an iterator of result records.
 
         Args:

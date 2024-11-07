@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from singer_sdk.helpers._flattening import flatten_record
+from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.helpers._flattening import flatten_record, get_flattening_options
 
 
 @pytest.mark.parametrize(
@@ -72,3 +73,15 @@ def test_flatten_record(flattened_schema, max_level, expected):
         record, max_level=max_level, flattened_schema=flattened_schema
     )
     assert expected == result
+
+
+def test_get_flattening_options_missing_max_depth():
+    with pytest.raises(
+        ConfigValidationError, match="Flattening is misconfigured"
+    ) as exc:
+        get_flattening_options({"flattening_enabled": True})
+
+    assert (
+        exc.value.errors[0]
+        == "flattening_max_depth is required when flattening is enabled"
+    )

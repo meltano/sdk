@@ -6,6 +6,7 @@ import abc
 import copy
 import logging
 import typing as t
+from functools import cached_property
 from http import HTTPStatus
 from urllib.parse import urlparse
 from warnings import warn
@@ -100,7 +101,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         super().__init__(name=name, schema=schema, tap=tap)
         if path:
             self.path = path
-        self._http_headers: dict = {}
+        self._http_headers: dict = {"User-Agent": self.user_agent}
         self._requests_session = requests.Session()
         self._compiled_jsonpath = None
         self._next_page_token_compiled_jsonpath = None
@@ -149,6 +150,20 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         if not self._requests_session:
             self._requests_session = requests.Session()
         return self._requests_session
+
+    @cached_property
+    def user_agent(self) -> str:
+        """Get the user agent string for the stream.
+
+        Returns:
+            The user agent string.
+
+        .. versionadded:: 0.40.0
+        """
+        return self.config.get(
+            "user_agent",
+            f"{self.tap_name}/{self._tap.plugin_version}",
+        )
 
     def validate_response(self, response: requests.Response) -> None:
         """Validate HTTP response.
@@ -238,7 +253,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
             (
                 ConnectionResetError,
                 RetriableAPIError,
-                requests.exceptions.ReadTimeout,
+                requests.exceptions.Timeout,
                 requests.exceptions.ConnectionError,
                 requests.exceptions.ChunkedEncodingError,
                 requests.exceptions.ContentDecodingError,
@@ -553,10 +568,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         Returns:
             Dictionary of HTTP headers to use as a base for every request.
         """
-        result = self._http_headers
-        if "user_agent" in self.config:
-            result["User-Agent"] = self.config.get("user_agent")
-        return result
+        return self._http_headers
 
     @property
     def timeout(self) -> int:

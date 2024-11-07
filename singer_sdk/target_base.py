@@ -359,6 +359,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
             sink.tally_record_read()
             sink.process_record(transformed_record, context)
+            sink.record_counter_metric.increment()
             sink._after_process_record(context)  # noqa: SLF001
 
             if sink.is_full:
@@ -461,14 +462,16 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         Args:
             message_dict: TODO
         """
-        sink = self.get_sink(message_dict["stream"])
-
+        stream_name = message_dict["stream"]
         encoding = BaseBatchFileEncoding.from_dict(message_dict["encoding"])
-        sink.process_batch_files(
-            encoding,
-            message_dict["manifest"],
-        )
-        self._handle_max_record_age()
+
+        for stream_map in self.mapper.stream_maps[stream_name]:
+            sink = self.get_sink(stream_map.stream_alias)
+            sink.process_batch_files(
+                encoding,
+                message_dict["manifest"],
+            )
+            self._handle_max_record_age()
 
     # Sink drain methods
 
@@ -510,7 +513,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             return
 
         draining_status = sink.start_drain()
-        sink.process_batch(draining_status)
+        with sink.batch_processing_timer:
+            sink.process_batch(draining_status)
         sink.mark_drained()
 
     def _drain_all(self, sink_list: list[Sink], parallelism: int) -> None:

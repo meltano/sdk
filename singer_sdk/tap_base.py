@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import contextlib
 import typing as t
+import warnings
 from enum import Enum
 
 import click
@@ -18,6 +19,7 @@ from singer_sdk.exceptions import (
 )
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import dump_json, read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -102,6 +104,12 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             self._input_catalog = Catalog.from_dict(catalog)  # type: ignore[arg-type]
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
+            warnings.warn(
+                "Passsing a catalog file path is deprecated. Please pass the catalog "
+                "as a dictionary or Catalog object instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
 
         self._mapper: PluginMapper | None = None
 
@@ -114,6 +122,12 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             state_dict = state
         elif state:
             state_dict = read_json_file(state)
+            warnings.warn(
+                "Passsing a state file path is deprecated. Please pass the state "
+                "as a dictionary instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
         self.load_state(state_dict)
 
     # Class properties
@@ -148,7 +162,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             RuntimeError: If state has not been initialized.
         """
         if self._state is None:
-            msg = "Could not read from uninitialized state."
+            msg = "Could not read from uninitialized state."  # type: ignore[unreachable]
             raise RuntimeError(msg)
         return self._state
 
@@ -398,7 +412,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
                 initialized.
         """
         if self.state is None:
-            msg = "Cannot write to uninitialized state dictionary."
+            msg = "Cannot write to uninitialized state dictionary."  # type: ignore[unreachable]
             raise ValueError(msg)
 
         for stream_name, stream_state in state.get("bookmarks", {}).items():

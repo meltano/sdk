@@ -11,6 +11,7 @@ from copy import deepcopy
 import inflection
 
 from singer_sdk._singerlib.json import serialize_json
+from singer_sdk.exceptions import ConfigValidationError
 
 DEFAULT_FLATTENING_SEPARATOR = "__"
 
@@ -35,7 +36,14 @@ def get_flattening_options(
         A new FlatteningOptions object or None if flattening is disabled.
     """
     if plugin_config.get("flattening_enabled", False):
-        return FlatteningOptions(max_level=int(plugin_config["flattening_max_depth"]))
+        if (max_depth := plugin_config.get("flattening_max_depth")) is not None:
+            return FlatteningOptions(max_level=int(max_depth))
+
+        msg = "Flattening is misconfigured"
+        raise ConfigValidationError(
+            msg,
+            errors=["flattening_max_depth is required when flattening is enabled"],
+        )
 
     return None
 
