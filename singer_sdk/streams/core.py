@@ -7,6 +7,7 @@ import copy
 import datetime
 import json
 import typing as t
+import warnings
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
@@ -27,7 +28,10 @@ from singer_sdk.helpers._batch import (
     SDKBatchMessage,
 )
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
-from singer_sdk.helpers._compat import datetime_fromisoformat
+from singer_sdk.helpers._compat import (
+    SingerSDKDeprecationWarning,
+    datetime_fromisoformat,
+)
 from singer_sdk.helpers._flattening import get_flattening_options
 from singer_sdk.helpers._state import (
     finalize_state_progress_markers,
@@ -157,6 +161,12 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     raise FileNotFoundError(msg)
 
                 self._schema_filepath = Path(schema)
+                warnings.warn(
+                    "Passing a schema filepath is deprecated. Please pass the schema "
+                    "dictionary or a Singer Schema object instead.",
+                    SingerSDKDeprecationWarning,
+                    stacklevel=2,
+                )
             elif isinstance(schema, dict):
                 self._schema = schema
             elif isinstance(schema, singer.Schema):

@@ -31,7 +31,13 @@ datetime_fromisoformat = datetime.datetime.fromisoformat
 date_fromisoformat = datetime.date.fromisoformat
 time_fromisoformat = datetime.time.fromisoformat
 
+
+class SingerSDKDeprecationWarning(DeprecationWarning):
+    """Custom deprecation warning for the Singer SDK."""
+
+
 __all__ = [
+    "SingerSDKDeprecationWarning",
     "Traversable",
     "date_fromisoformat",
     "datetime_fromisoformat",
