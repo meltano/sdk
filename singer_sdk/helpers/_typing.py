@@ -6,6 +6,7 @@ import copy
 import datetime
 import logging
 import typing as t
+import uuid
 from enum import Enum
 from functools import lru_cache
 
@@ -42,6 +43,8 @@ def to_json_compatible(val: t.Any) -> t.Any:  # noqa: ANN401
     if isinstance(val, (datetime.datetime,)):
         # Make naive datetimes UTC
         return (val.replace(tzinfo=UTC) if val.tzinfo is None else val).isoformat("T")
+    if isinstance(val, (uuid.UUID,)):
+        return str(val)
     return val
 
 
