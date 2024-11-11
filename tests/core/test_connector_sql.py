@@ -189,9 +189,7 @@ class TestConnectorSQL:  # noqa: PLR0904
 
     def test_connect_raises_on_operational_failure(self, connector):
         with (
-            pytest.raises(
-                sa.exc.OperationalError,
-            ) as _,
+            pytest.raises(sa.exc.OperationalError) as _,
             connector._connect() as conn,
         ):
             conn.execute(sa.text("SELECT * FROM fake_table"))
