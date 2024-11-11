@@ -902,13 +902,13 @@ files = [
 
 [[package]]
 name = "duckdb-engine"
-version = "0.13.4"
+version = "0.13.5"
 description = "SQLAlchemy driver for duckdb"
 optional = false
 python-versions = "<4,>=3.8"
 files = [
-    {file = "duckdb_engine-0.13.4-py3-none-any.whl", hash = "sha256:0fdf84fe3b77268d031830f0e96b0b3f8cbb67816300baf9d7475bb9533959a1"},
-    {file = "duckdb_engine-0.13.4.tar.gz", hash = "sha256:3deda72f136f30689e00b35278cedd031dd84bb2606d01014b90d13253490a49"},
+    {file = "duckdb_engine-0.13.5-py3-none-any.whl", hash = "sha256:c32c553bf145cd32d1f9e9acfacea2b0288c4d014abd766a3f1f13efd11d0d90"},
+    {file = "duckdb_engine-0.13.5.tar.gz", hash = "sha256:5265cf2401c7053d34ceb8222cf03eb5e7a51c73e999ad4b286769e3546e9532"},
 ]
 
 [package.dependencies]
@@ -1955,13 +1955,13 @@ files = [
 
 [[package]]
 name = "packaging"
-version = "24.1"
+version = "24.2"
 description = "Core utilities for Python packages"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "packaging-24.1-py3-none-any.whl", hash = "sha256:5b8f2217dbdbd2f7f384c41c628544e6d52f2d0f53c6d0c3ea61aa5d1d7ff124"},
-    {file = "packaging-24.1.tar.gz", hash = "sha256:026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002"},
+    {file = "packaging-24.2-py3-none-any.whl", hash = "sha256:09abb1bccd265c01f4a3aa3f7a7db064b36514d2cba19a2f694fe6150451a759"},
+    {file = "packaging-24.2.tar.gz", hash = "sha256:c228a6dc5e932d346bc5739379109d49e8853dd8223571c7c5b55260edc0b97f"},
 ]
 
 [[package]]
