@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.42.0 (2024-11-11)
+
+### ✨ New
+
+- [#2742](https://github.com/meltano/sdk/issues/2742) Update dependencies in templates
+- [#2732](https://github.com/meltano/sdk/issues/2732) SQL target developers can now more easily override the mapping from JSON schema to SQL column type
+- [#2730](https://github.com/meltano/sdk/issues/2730) Added `SQLConnector.prepare_primary_key` for target to implement for custom table primary key adaptation
+- [#2488](https://github.com/meltano/sdk/issues/2488) Nested schema properties can now be defined as nullable
+- [#2518](https://github.com/meltano/sdk/issues/2518) Python 3.13 is officially supported
+- [#2637](https://github.com/meltano/sdk/issues/2637) Environment variables are now parsed for boolean, integer, array and object setting values
+- [#2699](https://github.com/meltano/sdk/issues/2699) Stream name can now be accessed in stream maps -- _**Thanks @holly-evans!**_
+- [#2712](https://github.com/meltano/sdk/issues/2712) JSON schema `title` is now supported in configuration and stream properties
+- [#2707](https://github.com/meltano/sdk/issues/2707) Bumped simpleeval to 1.0
+- [#2701](https://github.com/meltano/sdk/issues/2701) Stream name can now be accessed in `__alias__` context of stream maps -- _**Thanks @holly-evans!**_
+
+### 🐛 Fixes
+
+- [#2741](https://github.com/meltano/sdk/issues/2741) `datetime.datetime` instances in stream maps are now correctly mapped to `date-time` JSON schema strings
+- [#2727](https://github.com/meltano/sdk/issues/2727) Object and array JSON types are now handled before primitive types when converting them to SQL types
+- [#2723](https://github.com/meltano/sdk/issues/2723) JSON schema union types are no longer conformed into boolean values
+
+### ⚙️ Under the Hood
+
+- [#2743](https://github.com/meltano/sdk/issues/2743) Deprecate passing file paths to plugin and stream initialization
+
+### 📚 Documentation Improvements
+
+- [#2745](https://github.com/meltano/sdk/issues/2745) Document the current release process
+- [#2717](https://github.com/meltano/sdk/issues/2717) Update Meltano commands in examples
+
+### 📦 Packaging changes
+
+- [#2736](https://github.com/meltano/sdk/issues/2736) Skip `simpleeval` 1.0.1
+- [#2716](https://github.com/meltano/sdk/issues/2716) Stopped testing with SQLAlchemy 1.4
+- [#2714](https://github.com/meltano/sdk/issues/2714) Remove constraint on `urllib3`
+
 ## v0.41.0 (2024-10-02)
 
 ### ✨ New
