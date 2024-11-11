@@ -63,7 +63,7 @@ def md5(string: str) -> str:
     return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
 
 
-StreamMapsDict: TypeAlias = t.Dict[str, t.Union[str, dict, None]]
+StreamMapsDict: TypeAlias = dict[str, t.Union[str, dict, None]]
 
 
 class StreamMap(metaclass=abc.ABCMeta):

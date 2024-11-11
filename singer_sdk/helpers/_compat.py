@@ -4,15 +4,9 @@ from __future__ import annotations
 
 import datetime
 import sys
+from importlib import resources as importlib_resources
 
-if sys.version_info < (3, 9):
-    import importlib_resources
-else:
-    from importlib import resources as importlib_resources
-
-if sys.version_info < (3, 9):
-    from importlib_resources.abc import Traversable
-elif sys.version_info < (3, 12):
+if sys.version_info < (3, 12):
     from importlib.abc import Traversable
 else:
     from importlib.resources.abc import Traversable

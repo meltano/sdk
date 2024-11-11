@@ -198,7 +198,7 @@ class SQLToJSONSchema:
 
 
 JSONtoSQLHandler: TypeAlias = t.Union[
-    t.Type[sa.types.TypeEngine],
+    type[sa.types.TypeEngine],
     t.Callable[[dict], sa.types.TypeEngine],
 ]
 

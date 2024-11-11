@@ -30,9 +30,8 @@ python_versions = [
     "3.11",
     "3.10",
     "3.9",
-    "3.8",
 ]
-main_python_version = "3.12"
+main_python_version = "3.13"
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
 nox.options.sessions = (
     "mypy",

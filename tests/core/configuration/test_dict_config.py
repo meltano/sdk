@@ -90,8 +90,9 @@ def test_get_env_var_config(
             assert not set.intersection(missing_props, env_config)
 
         m.setenv("PLUGIN_TEST_PROP3", "val1,val2")
-        with subtests.test(msg="Legacy array parsing"), caplog.at_level(
-            logging.WARNING,
+        with (
+            subtests.test(msg="Legacy array parsing"),
+            caplog.at_level(logging.WARNING),
         ):
             parsed = parse_environment_config(CONFIG_JSONSCHEMA, "PLUGIN_TEST_")
             assert parsed["prop3"] == ["val1", "val2"]
