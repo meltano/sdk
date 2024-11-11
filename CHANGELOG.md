@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixes
 
-- [#2756](https://github.com/meltano/sdk/issues/2756) Safely compare UUID replication keys with state bookmarks
+- [#2756](https://github.com/meltano/sdk/issues/2756) Safely compare UUID replication keys with state bookmarks -- _**Thanks @nikzavada!**_
 
 ## v0.42.0 (2024-11-11)
 
