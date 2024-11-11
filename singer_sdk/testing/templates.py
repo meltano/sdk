@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import contextlib
+import importlib.resources
 import typing as t
 import warnings
 
-from singer_sdk.helpers._compat import importlib_resources
 from singer_sdk.testing import target_test_streams
 
 if t.TYPE_CHECKING:
@@ -337,4 +337,4 @@ class TargetFileTestTemplate(TargetTestTemplate):
         Returns:
             The expected Path to this tests singer file.
         """
-        return importlib_resources.files(target_test_streams) / f"{self.name}.singer"
+        return importlib.resources.files(target_test_streams) / f"{self.name}.singer"
