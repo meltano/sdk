@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import datetime
+import uuid
 import logging
 import typing as t
 from enum import Enum
@@ -42,6 +43,8 @@ def to_json_compatible(val: t.Any) -> t.Any:  # noqa: ANN401
     if isinstance(val, (datetime.datetime,)):
         # Make naive datetimes UTC
         return (val.replace(tzinfo=UTC) if val.tzinfo is None else val).isoformat("T")
+    elif isinstance(val, (uuid.UUID,)):
+        return str(val)
     return val
 
 
