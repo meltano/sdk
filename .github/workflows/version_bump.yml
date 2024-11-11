@@ -101,6 +101,5 @@ jobs:
 
           [Release Draft](${{ steps.draft-release.outputs.url }})
         branch: release/v${{ steps.cz-bump.outputs.version }}
-        base: main
         labels: release
         assignees: "${{ github.actor }}"
