@@ -19,11 +19,11 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
@@ -38,7 +38,7 @@ license = "Apache-2.0"
 "Youtube" = "https://www.youtube.com/meltano"
 
 [tool.poetry.dependencies]
-python = ">=3.8"
+python = ">=3.9"
 backoff = { version = ">=2.0.0", python = "<4" }
 backports-datetime-fromisoformat = { version = ">=2.0.1", python = "<3.11" }
 click = "~=8.0"
@@ -58,23 +58,20 @@ requests = ">=2.25.1"
 # TODO: remove this constraint once we get rid of the `fs` dependency
 # newer setuptools versions are incompatible with some dependencies (fs)
 setuptools = "<=70.3.0"
-simpleeval = [
-    { version = ">=0.9.13,<1", python = "<3.9" },
-    { version = ">=0.9.13,!=1.0.1", python = ">=3.9" },
-]
+simpleeval = ">=0.9.13,!=1.0.1"
 simplejson = ">=3.17.6"
 sqlalchemy = ">=1.4,<3.0"
 typing-extensions = ">=4.5.0"
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
-furo = {version = ">=2024.5.6", python = ">=3.9", optional = true}
-myst-parser = {version = ">=3", python = ">=3.9", optional = true}
-sphinx = {version = ">=7", python = ">=3.9", optional = true}
-sphinx-copybutton = {version = ">=0.5.2", python = ">=3.9", optional = true}
-sphinx-inline-tabs = {version = ">=2023.4.21", python = ">=3.9", optional = true}
-sphinx-notfound-page = {version = ">=1.0.0", python = ">=3.9", optional = true}
-sphinx-reredirects = {version = ">=0.1.5", python = ">=3.9", optional = true}
+furo = {version = ">=2024.5.6", optional = true}
+myst-parser = {version = ">=3", optional = true}
+sphinx = {version = ">=7", optional = true}
+sphinx-copybutton = {version = ">=0.5.2", optional = true}
+sphinx-inline-tabs = {version = ">=2023.4.21", optional = true}
+sphinx-notfound-page = {version = ">=1.0.0", optional = true}
+sphinx-reredirects = {version = ">=0.1.5", optional = true}
 
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = ">=1.1.1", optional = true}
@@ -86,14 +83,10 @@ s3fs = { version = ">=2024.9.0", optional = true }
 # the version of Numpy that is compatible with the earliest Python version supported
 # by this project, but that may not be compatible with the latest Python version.
 numpy = [
-    { version = ">=1.22,<1.25", python = "==3.8", optional = true },
     { version = ">=1.22,<2.1", python = "==3.9", optional = true },
     { version = ">=1.22", python = ">=3.10", optional = true },
 ]
-pyarrow = [
-    { version = ">=13,<18", python = "==3.8", optional = true },
-    { version = ">=13", python = ">=3.9", optional = true },
-]
+pyarrow = { version = ">=13", optional = true }
 
 # Testing dependencies installed as optional 'testing' extras
 pytest = {version=">=7.2.1", optional = true}
@@ -318,7 +311,7 @@ extend-exclude = [
     "cookiecutter/*",
 ]
 line-length = 88
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.format]
 docstring-code-format = true

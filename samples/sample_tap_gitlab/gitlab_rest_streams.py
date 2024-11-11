@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import sys
+import importlib.resources
 import typing as t
 
 from singer_sdk.authenticators import SimpleAuthenticator
@@ -19,13 +19,7 @@ from singer_sdk.typing import (
     StringType,
 )
 
-if sys.version_info < (3, 9):
-    import importlib_resources
-else:
-    from importlib import resources as importlib_resources
-
-
-SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
+SCHEMAS_DIR = importlib.resources.files(__package__) / "schemas"
 
 DEFAULT_URL_BASE = "https://gitlab.com/api/v4"
 
