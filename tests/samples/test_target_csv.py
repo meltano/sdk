@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import importlib.resources
 import json
 import shutil
 import typing as t
@@ -16,7 +17,6 @@ from click.testing import CliRunner
 from samples.sample_mapper.mapper import StreamTransform
 from samples.sample_tap_countries.countries_tap import SampleTapCountries
 from samples.sample_target_csv.csv_target import SampleTargetCSV
-from singer_sdk.helpers._compat import importlib_resources
 from singer_sdk.testing import (
     get_target_test_class,
     sync_end_to_end,
@@ -149,7 +149,7 @@ def test_target_batching():
 
 
 SAMPLE_FILENAME = (
-    importlib_resources.files("tests.samples") / "resources/messages.jsonl"
+    importlib.resources.files("tests.samples") / "resources/messages.jsonl"
 )
 EXPECTED_OUTPUT = """"id"	"name"
 1	"Chris"

@@ -6,19 +6,13 @@
 
 from __future__ import annotations
 
-import sys
+import importlib.resources
 
 from singer_sdk.streams import GraphQLStream
 
-if sys.version_info < (3, 9):
-    import importlib_resources
-else:
-    from importlib import resources as importlib_resources
-
-
 SITE_URL = "https://gitlab.com/graphql"
 
-SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
+SCHEMAS_DIR = importlib.resources.files(__package__) / "schemas"
 
 
 class GitlabGraphQLStream(GraphQLStream):
