@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.42.1 (2024-11-11)
+
+### 🐛 Fixes
+
+- [#2756](https://github.com/meltano/sdk/issues/2756) Safely compare UUID replication keys with state bookmarks -- _**Thanks @nikzavada!**_
+
 ## v0.42.0 (2024-11-11)
 
 ### ✨ New
