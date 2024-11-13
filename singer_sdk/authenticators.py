@@ -22,7 +22,7 @@ else:
 if t.TYPE_CHECKING:
     import logging
 
-    from singer_sdk.streams.rest import RESTStream
+    from singer_sdk.streams.rest import _HTTPStream
 
 
 def _add_parameters(initial_url: str, extra_parameters: dict) -> str:
@@ -91,7 +91,7 @@ class APIAuthenticatorBase:
         auth_params: URL query parameters for authentication.
     """
 
-    def __init__(self, stream: RESTStream) -> None:
+    def __init__(self, stream: _HTTPStream) -> None:
         """Init authenticator.
 
         Args:
@@ -156,7 +156,7 @@ class SimpleAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: RESTStream,
+        stream: _HTTPStream,
         auth_headers: dict | None = None,
     ) -> None:
         """Create a new authenticator.
@@ -186,7 +186,7 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: RESTStream,
+        stream: _HTTPStream,
         key: str,
         value: str,
         location: str = "header",
@@ -221,7 +221,7 @@ class APIKeyAuthenticator(APIAuthenticatorBase):
     @classmethod
     def create_for_stream(
         cls: type[APIKeyAuthenticator],
-        stream: RESTStream,
+        stream: _HTTPStream,
         key: str,
         value: str,
         location: str,
@@ -249,7 +249,7 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
     'Bearer '. The token will be merged with HTTP headers on the stream.
     """
 
-    def __init__(self, stream: RESTStream, token: str) -> None:
+    def __init__(self, stream: _HTTPStream, token: str) -> None:
         """Create a new authenticator.
 
         Args:
@@ -266,7 +266,7 @@ class BearerTokenAuthenticator(APIAuthenticatorBase):
     @classmethod
     def create_for_stream(
         cls: type[BearerTokenAuthenticator],
-        stream: RESTStream,
+        stream: _HTTPStream,
         token: str,
     ) -> BearerTokenAuthenticator:
         """Create an Authenticator object specific to the Stream class.
@@ -299,7 +299,7 @@ class BasicAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: RESTStream,
+        stream: _HTTPStream,
         username: str,
         password: str,
     ) -> None:
@@ -323,7 +323,7 @@ class BasicAuthenticator(APIAuthenticatorBase):
     @classmethod
     def create_for_stream(
         cls: type[BasicAuthenticator],
-        stream: RESTStream,
+        stream: _HTTPStream,
         username: str,
         password: str,
     ) -> BasicAuthenticator:
@@ -346,7 +346,7 @@ class OAuthAuthenticator(APIAuthenticatorBase):
 
     def __init__(
         self,
-        stream: RESTStream,
+        stream: _HTTPStream,
         auth_endpoint: str | None = None,
         oauth_scopes: str | None = None,
         default_expiration: int | None = None,
