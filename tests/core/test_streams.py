@@ -16,8 +16,7 @@ from singer_sdk.exceptions import (
 )
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import datetime_fromisoformat as parse
-from singer_sdk.helpers.jsonpath import _compile_jsonpath, extract_jsonpath
-from singer_sdk.pagination import first
+from singer_sdk.helpers.jsonpath import _compile_jsonpath
 from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMENTAL
 from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
@@ -45,22 +44,16 @@ class RestTestStream(RESTStream):
     ).to_dict()
     replication_key = "updatedAt"
 
+
+class RestTestStreamLegacyPagination(RestTestStream):
+    """Test RESTful stream class with pagination."""
+
     def get_next_page_token(
         self,
-        response: requests.Response,
-        previous_token: str | None,  # noqa: ARG002
-    ) -> str | None:
-        if not self.next_page_token_jsonpath:
-            return response.headers.get("X-Next-Page", None)
-
-        all_matches = extract_jsonpath(
-            self.next_page_token_jsonpath,
-            response.json(),
-        )
-        try:
-            return first(all_matches)
-        except StopIteration:
-            return None
+        response: requests.Response,  # noqa: ARG002
+        previous_token: int | None,
+    ) -> int:
+        return previous_token + 1 if previous_token is not None else 1
 
 
 class GraphqlTestStream(GraphQLStream):
@@ -319,6 +312,21 @@ def test_jsonpath_rest_stream(tap: Tap, path: str, content: str, result: list[di
     assert list(records) == result
 
 
+def test_legacy_pagination(tap: Tap):
+    """Validate legacy pagination is handled correctly."""
+    stream = RestTestStreamLegacyPagination(tap)
+
+    with pytest.deprecated_call():
+        stream.get_new_paginator()
+
+    page: int | None = None
+    page = stream.get_next_page_token(None, page)
+    assert page == 1
+
+    page = stream.get_next_page_token(None, page)
+    assert page == 2
+
+
 def test_jsonpath_graphql_stream_default(tap: Tap):
     """Validate graphql JSONPath, defaults to the stream name."""
     content = """{
@@ -440,11 +448,8 @@ def test_next_page_token_jsonpath(
     RestTestStream.next_page_token_jsonpath = path
     stream = RestTestStream(tap)
 
-    with pytest.warns(DeprecationWarning):
-        paginator = stream.get_new_paginator()
-
+    paginator = stream.get_new_paginator()
     next_page = paginator.get_next(fake_response)
-
     assert next_page == result
 
 
@@ -519,9 +524,7 @@ def test_non_json_payload(tap: Tap, requests_mock: requests_mock.Mocker):
         json=callback,
     )
 
-    with pytest.deprecated_call():
-        records = list(stream.request_records(None))
-
+    records = list(stream.request_records(None))
     assert records == [
         {"id": 1, "value": "my_value_1"},
         {"id": 2, "value": "my_value_2"},
