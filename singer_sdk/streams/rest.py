@@ -392,7 +392,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         request_data = self.prepare_request_payload(context, next_page_token)
         headers = self.http_headers
 
-        prepare_kwargs = {
+        prepare_kwargs: dict[str, t.Any] = {
             "method": http_method,
             "url": url,
             "params": params,
