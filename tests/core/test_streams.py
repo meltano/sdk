@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import logging
 import typing as t
+import urllib.parse
 
 import pytest
 import requests
@@ -24,6 +25,8 @@ from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 from tests.core.conftest import SimpleTestStream
 
 if t.TYPE_CHECKING:
+    import requests_mock
+
     from singer_sdk import Stream, Tap
     from tests.core.conftest import SimpleTestTap
 
@@ -482,6 +485,47 @@ def test_sync_costs_calculation(tap: Tap, caplog):
     for record in caplog.records:
         assert record.levelname == "INFO"
         assert f"Total Sync costs for stream {stream.name}" in record.message
+
+
+def test_non_json_payload(tap: Tap, requests_mock: requests_mock.Mocker):
+    """Test non-JSON payload is handled correctly."""
+
+    def callback(request: requests.PreparedRequest, context: requests_mock.Context):  # noqa: ARG001
+        assert request.headers["Content-Type"] == "application/x-www-form-urlencoded"
+        assert request.body == "my_key=my_value"
+
+        data = urllib.parse.parse_qs(request.body)
+
+        return {
+            "data": [
+                {"id": 1, "value": f"{data['my_key'][0]}_1"},
+                {"id": 2, "value": f"{data['my_key'][0]}_2"},
+            ]
+        }
+
+    class NonJsonStream(RestTestStream):
+        payload_as_json = False
+        http_method = "POST"
+        path = "/non-json"
+        records_jsonpath = "$.data[*]"
+
+        def prepare_request_payload(self, context, next_page_token):  # noqa: ARG002
+            return {"my_key": "my_value"}
+
+    stream = NonJsonStream(tap)
+
+    requests_mock.post(
+        "https://example.com/non-json",
+        json=callback,
+    )
+
+    with pytest.deprecated_call():
+        records = list(stream.request_records(None))
+
+    assert records == [
+        {"id": 1, "value": "my_value_1"},
+        {"id": 2, "value": "my_value_2"},
+    ]
 
 
 @pytest.mark.parametrize(
