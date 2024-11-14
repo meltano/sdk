@@ -6,6 +6,7 @@ import decimal
 import io
 import itertools
 import json
+import logging
 from contextlib import nullcontext, redirect_stdout
 from textwrap import dedent
 
@@ -81,6 +82,29 @@ def test_listen_unknown_message():
     input_lines = io.StringIO('{"type": "UNKNOWN"}\n')
     with pytest.raises(ValueError, match="Unknown message type"):
         reader.listen(input_lines)
+
+
+def test_listen_error(caplog: pytest.LogCaptureFixture):
+    class ErrorReader(DummyReader):
+        def _process_record_message(self, message_dict: dict) -> None:  # noqa: ARG002
+            msg = "Bad record"
+            raise ValueError(msg)
+
+    message = RecordMessage(
+        stream="users",
+        record={"id": 1, "value": 1.23},
+    )
+
+    input_lines = io.StringIO(json.dumps(message.to_dict()) + "\n")
+
+    reader = ErrorReader()
+    with caplog.at_level(logging.INFO), pytest.raises(ValueError, match="Bad record"):
+        reader.listen(input_lines)
+
+    assert caplog.records
+
+    message = caplog.records[0].message
+    assert "Failed while processing Singer message" in message
 
 
 def test_write_message():

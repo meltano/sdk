@@ -38,6 +38,10 @@ class SingerMessageType(str, enum.Enum):
 class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
     """Interface for all plugins reading Singer messages as strings or bytes."""
 
+    def __init__(self) -> None:
+        super().__init__()
+        self._current_message: T | None = None
+
     @t.final
     def listen(self, file_input: t.IO[T] | None = None) -> None:
         """Read from input until all messages are processed.
@@ -45,7 +49,14 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
         Args:
             file_input: Readable stream of messages. Defaults to standard in.
         """
-        self._process_lines(file_input or self.default_input)
+        try:
+            self._process_lines(file_input or self.default_input)
+        except Exception:
+            logger.info(
+                "Failed while processing Singer message: %s",
+                self._current_message,
+            )
+            raise
         self._process_endofpipe()
 
     def _process_lines(self, file_input: t.IO[T]) -> t.Counter[str]:
@@ -59,6 +70,8 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
         """
         stats: dict[str, int] = defaultdict(int)
         for line in file_input:
+            self._current_message = line
+
             line_dict = self.deserialize_json(line)
             self._assert_line_requires(line_dict, requires={"type"})
 
