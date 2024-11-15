@@ -63,7 +63,7 @@ def md5(string: str) -> str:
     return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
 
 
-StreamMapsDict: TypeAlias = t.Dict[str, t.Union[str, dict, None]]
+StreamMapsDict: TypeAlias = dict[str, t.Union[str, dict, None]]
 
 
 class StreamMap(metaclass=abc.ABCMeta):
@@ -337,6 +337,7 @@ class CustomStreamMap(StreamMap):
         names["_"] = record  # Add a shorthand alias in case of reserved words in names
         names["record"] = record  # ...and a longhand alias
         names["config"] = self.map_config  # Allow map config access within transform
+        names["__stream_name__"] = self.stream_alias  # Access stream name in transform
 
         if self.fake:
             from faker import Faker  # noqa: PLC0415
@@ -400,10 +401,12 @@ class CustomStreamMap(StreamMap):
         if expr.startswith("bool("):
             return th.BooleanType()
 
-        if expr.startswith("datetime.date") or expr.endswith(".date()"):
+        if expr.startswith(("datetime.date.", "datetime.date(")) or expr.endswith(
+            ".date()"
+        ):
             return th.DateType()
 
-        if expr.startswith("datetime.datetime"):
+        if expr.startswith(("datetime.datetime.", "datetime.datetime(")):
             return th.DateTimeType()
 
         return th.StringType() if expr[0] == "'" and expr[-1] == "'" else default
@@ -779,6 +782,7 @@ class PluginMapper:
                 elif MAPPER_ALIAS_OPTION in stream_def:
                     # <source>: __alias__: <alias>
                     stream_alias = stream_def.pop(MAPPER_ALIAS_OPTION)
+                    stream_alias = PluginMapper._eval_stream(stream_alias, stream_name)
 
             if stream_name == source_stream:
                 # Exact match
@@ -831,3 +835,40 @@ class PluginMapper:
             else:
                 # Additional mappers for aliasing and multi-projection:
                 self.stream_maps[source_stream].append(mapper)
+
+    @staticmethod
+    def _eval_stream(expr: str, stream_name: str) -> str:
+        """Solve an alias expression.
+
+        Args:
+            expr: String expression to evaluate.
+            stream_name: Name of stream to transform.
+
+        Returns:
+            Evaluated expression.
+
+        Raises:
+            MapExpressionError: If the mapping expression failed to evaluate.
+        """
+        # Allow stream name access within alias transform
+        names = {"__stream_name__": stream_name}
+
+        result: str
+
+        try:
+            expr_evaluator = simpleeval.EvalWithCompoundTypes(names=names)
+            result = expr_evaluator.eval(expr)
+        except simpleeval.NameNotDefined:
+            logging.debug(
+                "Failed to evaluate simpleeval expression %(expr) - "
+                "falling back to original expression",
+                extra={"expr": expr},
+            )
+            result = expr
+        except (simpleeval.InvalidExpression, SyntaxError) as ex:
+            msg = f"Failed to evaluate simpleeval expressions {expr}."
+            raise MapExpressionError(msg) from ex
+
+        logging.debug("Stream eval result: %s = %s", expr, result)
+
+        return result

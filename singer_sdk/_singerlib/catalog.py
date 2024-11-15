@@ -11,12 +11,12 @@ if t.TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
 
-Breadcrumb = t.Tuple[str, ...]
+Breadcrumb = tuple[str, ...]
 
 logger = logging.getLogger(__name__)
 
 
-class SelectionMask(t.Dict[Breadcrumb, bool]):
+class SelectionMask(dict[Breadcrumb, bool]):
     """Boolean mask for property selection in schemas and records."""
 
     def __missing__(self, breadcrumb: Breadcrumb) -> bool:
@@ -95,7 +95,7 @@ class StreamMetadata(Metadata):
 AnyMetadata: TypeAlias = t.Union[Metadata, StreamMetadata]
 
 
-class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
+class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
     """Stream metadata mapping."""
 
     @classmethod
@@ -352,7 +352,7 @@ class CatalogEntry:
         return result
 
 
-class Catalog(t.Dict[str, CatalogEntry]):
+class Catalog(dict[str, CatalogEntry]):
     """Singer catalog mapping of stream entries."""
 
     @classmethod

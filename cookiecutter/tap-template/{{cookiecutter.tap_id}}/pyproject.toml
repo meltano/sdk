@@ -19,6 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 license = "Apache-2.0"
 {%- if cookiecutter.variant != "None (Skip)" %}
@@ -29,7 +30,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.9"
-singer-sdk = { version="~=0.41.0", extras = [
+singer-sdk = { version="~=0.42.1", extras = [
     {%- if cookiecutter.auth_method == "JWT" -%}"jwt", {% endif -%}
     {%- if cookiecutter.faker_extra -%}"faker",{%- endif -%}
 ] }
@@ -41,9 +42,9 @@ requests = "~=2.32.3"
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8"
 {%- if cookiecutter.auth_method == "JWT" %}
-singer-sdk = { version="~=0.41.0", extras = ["jwt", "testing"] }
+singer-sdk = { version="~=0.42.1", extras = ["jwt", "testing"] }
 {%- else %}
-singer-sdk = { version="~=0.41.0", extras = ["testing"] }
+singer-sdk = { version="~=0.42.1", extras = ["testing"] }
 {%- endif %}
 
 [tool.poetry.extras]

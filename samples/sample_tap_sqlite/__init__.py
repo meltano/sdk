@@ -48,6 +48,7 @@ class SQLiteTap(SQLTap):
         th.Property(
             DB_PATH_CONFIG,
             th.StringType,
+            title="Database Path",
             description="The path to your SQLite database file(s).",
             required=True,
             examples=["./path/to/my.db", "/absolute/path/to/my.db"],
