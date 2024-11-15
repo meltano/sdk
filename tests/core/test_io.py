@@ -98,7 +98,7 @@ def test_listen_error(caplog: pytest.LogCaptureFixture):
     input_lines = io.StringIO(json.dumps(message.to_dict()) + "\n")
 
     reader = ErrorReader()
-    with caplog.at_level(logging.INFO), pytest.raises(ValueError, match="Bad record"):
+    with caplog.at_level(logging.DEBUG), pytest.raises(ValueError, match="Bad record"):
         reader.listen(input_lines)
 
     assert caplog.records

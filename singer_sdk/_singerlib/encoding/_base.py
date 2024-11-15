@@ -52,7 +52,7 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
         try:
             self._process_lines(file_input or self.default_input)
         except Exception:
-            logger.info(
+            logger.debug(
                 "Failed while processing Singer message: %s",
                 self._current_message,
             )
