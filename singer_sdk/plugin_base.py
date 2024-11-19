@@ -8,6 +8,7 @@ import os
 import sys
 import time
 import typing as t
+import warnings
 from importlib import metadata
 from pathlib import Path, PurePath
 from types import MappingProxyType
@@ -22,6 +23,7 @@ from singer_sdk.configuration._dict_config import (
 )
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -144,16 +146,28 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             config_dict = {}
         elif isinstance(config, (str, PurePath)):
             config_dict = read_json_file(config)
+            warnings.warn(
+                "Passsing a config file path is deprecated. Please pass the config "
+                "as a dictionary instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
         elif isinstance(config, list):
             config_dict = {}
             for config_path in config:
                 # Read each config file sequentially. Settings from files later in the
                 # list will override those of earlier ones.
                 config_dict.update(read_json_file(config_path))
+            warnings.warn(
+                "Passsing a list of config file paths is deprecated. Please pass the "
+                "config as a dictionary instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
         elif isinstance(config, dict):
             config_dict = config
         else:
-            msg = f"Error parsing config of type '{type(config).__name__}'."
+            msg = f"Error parsing config of type '{type(config).__name__}'."  # type: ignore[unreachable]
             raise ValueError(msg)
         if parse_env_config:
             self.logger.info("Parsing env var for settings config...")

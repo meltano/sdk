@@ -140,7 +140,7 @@ class TapTestClassFactory:
                 return suite_config or SuiteConfig()
 
             @pytest.fixture
-            def resource(self) -> t.Any:  # noqa: ANN401, PLR6301, PT004
+            def resource(self) -> t.Any:  # noqa: ANN401, PLR6301
                 yield  # noqa: PT022
 
             @pytest.fixture(scope="class")
@@ -345,7 +345,7 @@ class TargetTestClassFactory:
                 return suite_config or SuiteConfig()
 
             @pytest.fixture
-            def resource(self) -> t.Any:  # noqa: ANN401, PLR6301, PT004
+            def resource(self) -> t.Any:  # noqa: ANN401, PLR6301
                 yield  # noqa: PT022
 
             @pytest.fixture

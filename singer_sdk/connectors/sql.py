@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import functools
 import logging
+import sys
 import typing as t
 import warnings
 from collections import UserString
@@ -17,6 +19,16 @@ from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._util import dump_json, load_json
 from singer_sdk.helpers.capabilities import TargetLoadMethods
+
+if sys.version_info < (3, 13):
+    from typing_extensions import deprecated
+else:
+    from warnings import deprecated
+
+if sys.version_info < (3, 10):
+    from typing_extensions import TypeAlias
+else:
+    from typing import TypeAlias  # noqa: ICN003
 
 if t.TYPE_CHECKING:
     from sqlalchemy.engine import Engine
@@ -103,6 +115,309 @@ class FullyQualifiedName(UserString):
         return part
 
 
+class SQLToJSONSchema:
+    """SQLAlchemy to JSON Schema type mapping helper.
+
+    This class provides a mapping from SQLAlchemy types to JSON Schema types.
+
+    .. versionadded:: 0.41.0
+    """
+
+    @functools.singledispatchmethod
+    def to_jsonschema(self, column_type: sa.types.TypeEngine) -> dict:  # noqa: ARG002, D102, PLR6301
+        return th.StringType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def datetime_to_jsonschema(self, column_type: sa.types.DateTime) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a generic datetime type.
+
+        Args:
+            column_type (:column_type:`DateTime`): The column type.
+        """
+        return th.DateTimeType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def date_to_jsonschema(self, column_type: sa.types.Date) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a date type.
+
+        Args:
+            column_type (:column_type:`Date`): The column type.
+        """
+        return th.DateType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def time_to_jsonschema(self, column_type: sa.types.Time) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a time type.
+
+        Args:
+            column_type (:column_type:`Time`): The column type.
+        """
+        return th.TimeType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def integer_to_jsonschema(self, column_type: sa.types.Integer) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a an integer type.
+
+        Args:
+            column_type (:column_type:`Integer`): The column type.
+        """
+        return th.IntegerType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def float_to_jsonschema(self, column_type: sa.types.Numeric) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a generic number type.
+
+        Args:
+            column_type (:column_type:`Numeric`): The column type.
+        """
+        return th.NumberType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def string_to_jsonschema(self, column_type: sa.types.String) -> dict:  # noqa: PLR6301
+        """Return a JSON Schema representation of a generic string type.
+
+        Args:
+            column_type (:column_type:`String`): The column type.
+
+        .. versionchanged:: 0.41.0
+           The :column_type:`length <String.params.length>` attribute is now used to
+           determine the maximum length of the string type.
+        """
+        if column_type.length:
+            return th.StringType(max_length=column_type.length).type_dict  # type: ignore[no-any-return]
+        return th.StringType.type_dict  # type: ignore[no-any-return]
+
+    @to_jsonschema.register
+    def boolean_to_jsonschema(self, column_type: sa.types.Boolean) -> dict:  # noqa: ARG002, PLR6301
+        """Return a JSON Schema representation of a boolean type.
+
+        Args:
+            column_type (:column_type:`Boolean`): The column type.
+        """
+        return th.BooleanType.type_dict  # type: ignore[no-any-return]
+
+
+JSONtoSQLHandler: TypeAlias = t.Union[
+    type[sa.types.TypeEngine],
+    t.Callable[[dict], sa.types.TypeEngine],
+]
+
+
+class JSONSchemaToSQL:
+    """A configurable mapper for converting JSON Schema types to SQLAlchemy types.
+
+    This class provides a mapping from JSON Schema types to SQLAlchemy types.
+
+    .. versionadded:: 0.42.0
+    """
+
+    def __init__(self) -> None:
+        """Initialize the mapper with default type mappings."""
+        # Default type mappings
+        self._type_mapping: dict[str, JSONtoSQLHandler] = {
+            "string": self._handle_string_type,
+            "integer": sa.types.INTEGER,
+            "number": sa.types.DECIMAL,
+            "boolean": sa.types.BOOLEAN,
+            "object": sa.types.VARCHAR,
+            "array": sa.types.VARCHAR,
+        }
+
+        # Format handlers for string types
+        self._format_handlers: dict[str, JSONtoSQLHandler] = {
+            # Default date-like formats
+            "date-time": sa.types.DATETIME,
+            "time": sa.types.TIME,
+            "date": sa.types.DATE,
+            # Common string formats with sensible defaults
+            "uuid": sa.types.UUID,
+            "email": lambda _: sa.types.VARCHAR(254),  # RFC 5321
+            "uri": lambda _: sa.types.VARCHAR(2083),  # Common browser limit
+            "hostname": lambda _: sa.types.VARCHAR(253),  # RFC 1035
+            "ipv4": lambda _: sa.types.VARCHAR(15),
+            "ipv6": lambda _: sa.types.VARCHAR(45),
+        }
+
+        self._fallback_type: type[sa.types.TypeEngine] = sa.types.VARCHAR
+
+    def _invoke_handler(  # noqa: PLR6301
+        self,
+        handler: JSONtoSQLHandler,
+        schema: dict,
+    ) -> sa.types.TypeEngine:
+        """Invoke a handler, handling both type classes and callables.
+
+        Args:
+            handler: The handler to invoke.
+            schema: The schema to pass to callable handlers.
+
+        Returns:
+            The resulting SQLAlchemy type.
+        """
+        if isinstance(handler, type):
+            return handler()  # type: ignore[no-any-return]
+        return handler(schema)
+
+    @property
+    def fallback_type(self) -> type[sa.types.TypeEngine]:
+        """Return the fallback type.
+
+        Returns:
+            The fallback type.
+        """
+        return self._fallback_type
+
+    @fallback_type.setter
+    def fallback_type(self, value: type[sa.types.TypeEngine]) -> None:
+        """Set the fallback type.
+
+        Args:
+            value: The new fallback type.
+        """
+        self._fallback_type = value
+
+    def register_type_handler(self, json_type: str, handler: JSONtoSQLHandler) -> None:
+        """Register a custom type handler.
+
+        Args:
+            json_type: The JSON Schema type to handle.
+            handler: Either a SQLAlchemy type class or a callable that takes a schema
+                    dict and returns a SQLAlchemy type instance.
+        """
+        self._type_mapping[json_type] = handler
+
+    def register_format_handler(
+        self,
+        format_name: str,
+        handler: JSONtoSQLHandler,
+    ) -> None:
+        """Register a custom format handler.
+
+        Args:
+            format_name: The format string (e.g., "date-time", "email", "custom-format").
+            handler: Either a SQLAlchemy type class or a callable that takes a schema
+                    dict and returns a SQLAlchemy type instance.
+        """  # noqa: E501
+        self._format_handlers[format_name] = handler
+
+    def handle_multiple_types(self, types: t.Sequence[str]) -> sa.types.TypeEngine:  # noqa: ARG002, PLR6301
+        """Handle multiple types by returning a VARCHAR.
+
+        Args:
+            types: The list of types to handle.
+
+        Returns:
+            A VARCHAR type.
+        """
+        return sa.types.VARCHAR()
+
+    def handle_raw_string(self, schema: dict) -> sa.types.TypeEngine:  # noqa: PLR6301
+        """Handle a string type generically.
+
+        Args:
+            schema: The JSON Schema object.
+
+        Returns:
+            Appropriate SQLAlchemy type.
+        """
+        max_length: int | None = schema.get("maxLength")
+        return sa.types.VARCHAR(max_length)
+
+    def _get_type_from_schema(self, schema: dict) -> sa.types.TypeEngine | None:
+        """Try to get a SQL type from a single schema object.
+
+        Args:
+            schema: The JSON Schema object.
+
+        Returns:
+            SQL type if one can be determined, None otherwise.
+        """
+        # Check if this is a string with format first
+        if schema.get("type") == "string" and "format" in schema:
+            format_type = self._handle_format(schema)
+            if format_type is not None:
+                return format_type
+
+        # Then check regular types
+        if schema_type := schema.get("type"):
+            if isinstance(schema_type, (list, tuple)):
+                # Filter out null type if present
+                non_null_types = [t for t in schema_type if t != "null"]
+
+                # If we have multiple non-null types, use VARCHAR
+                if len(non_null_types) > 1:
+                    self.handle_multiple_types(non_null_types)
+
+                # If we have exactly one non-null type, use its handler
+                if len(non_null_types) == 1 and non_null_types[0] in self._type_mapping:
+                    handler = self._type_mapping[non_null_types[0]]
+                    return self._invoke_handler(handler, schema)
+
+            elif type_handler := self._type_mapping.get(schema_type):
+                return self._invoke_handler(type_handler, schema)
+
+        return None
+
+    def _handle_format(self, schema: dict) -> sa.types.TypeEngine | None:
+        """Handle format-specific type conversion.
+
+        Args:
+            schema: The JSON Schema object.
+
+        Returns:
+            The format-specific SQL type if applicable, None otherwise.
+        """
+        if "format" not in schema:
+            return None
+
+        format_string: str = schema["format"]
+
+        if handler := self._format_handlers.get(format_string):
+            return self._invoke_handler(handler, schema)
+
+        return None
+
+    def _handle_string_type(self, schema: dict) -> sa.types.TypeEngine:
+        """Handle string type conversion with special cases for formats.
+
+        Args:
+            schema: The JSON Schema object.
+
+        Returns:
+            Appropriate SQLAlchemy type.
+        """
+        # Check for format-specific handling first
+        if format_type := self._handle_format(schema):
+            return format_type
+
+        return self.handle_raw_string(schema)
+
+    def to_sql_type(self, schema: dict) -> sa.types.TypeEngine:
+        """Convert a JSON Schema type definition to a SQLAlchemy type.
+
+        Args:
+            schema: The JSON Schema object.
+
+        Returns:
+            The corresponding SQLAlchemy type.
+        """
+        if sql_type := self._get_type_from_schema(schema):
+            return sql_type
+
+        # Handle anyOf
+        if "anyOf" in schema:
+            for subschema in schema["anyOf"]:
+                # Skip null types in anyOf
+                if subschema.get("type") == "null":
+                    continue
+
+                if sql_type := self._get_type_from_schema(subschema):
+                    return sql_type
+
+        # Fallback
+        return self.fallback_type()
+
+
 class SQLConnector:  # noqa: PLR0904
     """Base class for SQLAlchemy-based connectors.
 
@@ -156,11 +471,39 @@ class SQLConnector:  # noqa: PLR0904
         """
         return logging.getLogger("sqlconnector")
 
+    @functools.cached_property
+    def sql_to_jsonschema(self) -> SQLToJSONSchema:
+        """The SQL-to-JSON type mapper object for this SQL connector.
+
+        Override this property to provide a custom mapping for your SQL dialect.
+
+        .. versionadded:: 0.41.0
+        """
+        return SQLToJSONSchema()
+
+    @functools.cached_property
+    def jsonschema_to_sql(self) -> JSONSchemaToSQL:
+        """The JSON-to-SQL type mapper object for this SQL connector.
+
+        Override this property to provide a custom mapping for your SQL dialect.
+
+        .. versionadded:: 0.42.0
+        """
+        return JSONSchemaToSQL()
+
     @contextmanager
     def _connect(self) -> t.Iterator[sa.engine.Connection]:
         with self._engine.connect().execution_options(stream_results=True) as conn:
             yield conn
 
+    @deprecated(
+        "`SQLConnector.create_sqlalchemy_connection` is deprecated. "
+        "If you need to execute something that isn't available "
+        "on the connector currently, make a child class and "
+        "add your required method on that connector.",
+        category=DeprecationWarning,
+        stacklevel=1,
+    )
     def create_sqlalchemy_connection(self) -> sa.engine.Connection:
         """(DEPRECATED) Return a new SQLAlchemy connection using the provided config.
 
@@ -180,16 +523,14 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             A newly created SQLAlchemy engine object.
         """
-        warnings.warn(
-            "`SQLConnector.create_sqlalchemy_connection` is deprecated. "
-            "If you need to execute something that isn't available "
-            "on the connector currently, make a child class and "
-            "add your required method on that connector.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         return self._engine.connect().execution_options(stream_results=True)
 
+    @deprecated(
+        "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override "
+        "`_engine` or `sqlalchemy_url` instead.",
+        category=DeprecationWarning,
+        stacklevel=1,
+    )
     def create_sqlalchemy_engine(self) -> Engine:
         """(DEPRECATED) Return a new SQLAlchemy engine using the provided config.
 
@@ -199,12 +540,6 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             A newly created SQLAlchemy engine object.
         """
-        warnings.warn(
-            "`SQLConnector.create_sqlalchemy_engine` is deprecated. Override"
-            "`_engine` or sqlalchemy_url` instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         return self._engine
 
     @property
@@ -260,8 +595,8 @@ class SQLConnector:  # noqa: PLR0904
 
         return t.cast(str, config["sqlalchemy_url"])
 
-    @staticmethod
     def to_jsonschema_type(
+        self,
         sql_type: (
             str  # noqa: ANN401
             | sa.types.TypeEngine
@@ -286,11 +621,30 @@ class SQLConnector:  # noqa: PLR0904
 
         Returns:
             The JSON Schema representation of the provided type.
+
+        .. versionchanged:: 0.40.0
+           Support for SQLAlchemy type classes and strings in the ``sql_type`` argument
+           was deprecated. Please pass a SQLAlchemy type object instead.
         """
-        if isinstance(sql_type, (str, sa.types.TypeEngine)):
+        if isinstance(sql_type, sa.types.TypeEngine):
+            return self.sql_to_jsonschema.to_jsonschema(sql_type)
+
+        if isinstance(sql_type, str):  # pragma: no cover
+            warnings.warn(
+                "Passing string types to `to_jsonschema_type` is deprecated. "
+                "Please pass a SQLAlchemy type object instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             return th.to_jsonschema_type(sql_type)
 
-        if isinstance(sql_type, type):
+        if isinstance(sql_type, type):  # pragma: no cover
+            warnings.warn(
+                "Passing type classes to `to_jsonschema_type` is deprecated. "
+                "Please pass a SQLAlchemy type object instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             if issubclass(sql_type, sa.types.TypeEngine):
                 return th.to_jsonschema_type(sql_type)
 
@@ -300,8 +654,7 @@ class SQLConnector:  # noqa: PLR0904
         msg = f"Unexpected type received: '{type(sql_type).__name__}'"
         raise ValueError(msg)
 
-    @staticmethod
-    def to_sql_type(jsonschema_type: dict) -> sa.types.TypeEngine:
+    def to_sql_type(self, jsonschema_type: dict) -> sa.types.TypeEngine:
         """Return a JSON Schema representation of the provided type.
 
         By default will call `typing.to_sql_type()`.
@@ -317,7 +670,7 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             The SQLAlchemy type representation of the data type.
         """
-        return th.to_sql_type(jsonschema_type)
+        return self.jsonschema_to_sql.to_sql_type(jsonschema_type)
 
     @staticmethod
     def get_fully_qualified_name(
@@ -336,6 +689,9 @@ class SQLConnector:  # noqa: PLR0904
 
         Returns:
             The fully qualified name as a string.
+
+        .. versionchanged:: 0.40.0
+           A ``FullyQualifiedName`` object is now returned.
         """
         return FullyQualifiedName(
             table=table_name,  # type: ignore[arg-type]
@@ -496,7 +852,7 @@ class SQLConnector:  # noqa: PLR0904
         # Detect key properties
         possible_primary_keys: list[list[str]] = []
         pk_def = inspected.get_pk_constraint(table_name, schema=schema_name)
-        if pk_def and "constrained_columns" in pk_def:
+        if pk_def and "constrained_columns" in pk_def:  # type: ignore[redundant-expr]
             possible_primary_keys.append(pk_def["constrained_columns"])
 
         # An element of the columns list is ``None`` if it's an expression and is
@@ -891,6 +1247,28 @@ class SQLConnector:  # noqa: PLR0904
                     sql_type=self.to_sql_type(property_def),
                 )
 
+        self.prepare_primary_key(
+            full_table_name=full_table_name,
+            primary_keys=primary_keys,
+        )
+
+    def prepare_primary_key(
+        self,
+        *,
+        full_table_name: str | FullyQualifiedName,  # noqa: ARG002
+        primary_keys: t.Sequence[str],  # noqa: ARG002
+    ) -> None:
+        """Adapt target table primary key to provided schema if possible.
+
+        Implement this method in a subclass to adapt the primary key of the target table
+        to the provided one if possible.
+
+        Args:
+            full_table_name: the target table name.
+            primary_keys: list of key properties.
+        """
+        self.logger.debug("Primary key adaptation is not implemented")
+
     def prepare_column(
         self,
         full_table_name: str | FullyQualifiedName,
@@ -983,7 +1361,7 @@ class SQLConnector:  # noqa: PLR0904
         # Get the generic type class
         for opt in sql_types:
             # Get the length
-            opt_len: int = getattr(opt, "length", 0)
+            opt_len: int | None = getattr(opt, "length", 0)
             generic_type = type(opt.as_generic())
 
             if isinstance(generic_type, type):
