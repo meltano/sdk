@@ -126,7 +126,7 @@ def test_stream_apply_catalog__singer_standard(stream: Stream):
                                 "breadcrumb": [],
                                 "metadata": {
                                     "table-key-properties": ["id"],
-                                    "replication-key": None,
+                                    "replication-key": "newReplicationKey",
                                     "forced-replication-method": REPLICATION_FULL_TABLE,
                                 },
                             },
@@ -138,7 +138,7 @@ def test_stream_apply_catalog__singer_standard(stream: Stream):
     )
 
     assert stream.primary_keys == ["id"]
-    assert stream.replication_key is None
+    assert stream.replication_key == "newReplicationKey"
     assert stream.replication_method == REPLICATION_FULL_TABLE
     assert stream.forced_replication_method == REPLICATION_FULL_TABLE
 
