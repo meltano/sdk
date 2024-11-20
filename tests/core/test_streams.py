@@ -106,6 +106,43 @@ def test_stream_apply_catalog(stream: Stream):
     assert stream.forced_replication_method == REPLICATION_FULL_TABLE
 
 
+def test_stream_apply_catalog__singer_standard(stream: Stream):
+    """Applying a catalog to a stream should overwrite fields."""
+    assert stream.primary_keys == []
+    assert stream.replication_key == "updatedAt"
+    assert stream.replication_method == REPLICATION_INCREMENTAL
+    assert stream.forced_replication_method is None
+
+    stream.apply_catalog(
+        catalog=Catalog.from_dict(
+            {
+                "streams": [
+                    {
+                        "tap_stream_id": stream.name,
+                        "stream": stream.name,
+                        "schema": stream.schema,
+                        "metadata": [
+                            {
+                                "breadcrumb": [],
+                                "metadata": {
+                                    "table-key-properties": ["id"],
+                                    "replication-key": None,
+                                    "forced-replication-method": REPLICATION_FULL_TABLE,
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        ),
+    )
+
+    assert stream.primary_keys == ["id"]
+    assert stream.replication_key is None
+    assert stream.replication_method == REPLICATION_FULL_TABLE
+    assert stream.forced_replication_method == REPLICATION_FULL_TABLE
+
+
 @pytest.mark.parametrize(
     "stream_name,forced_replication_method,bookmark_value,expected_starting_value",
     [
