@@ -440,6 +440,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 else:
                     value = self.compare_start_date(value, start_date_value)
 
+            self.logger.info("Starting incremental sync with bookmark value: %s", value)
+
         write_starting_replication_value(state, value)
 
     def get_replication_key_signpost(
