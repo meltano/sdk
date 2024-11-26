@@ -752,6 +752,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
                             }
                     else:
                         context = {"records": [deserialize_json(line) for line in file]}
+                    self.record_counter_metric.increment(len(context["records"]))
                     self.process_batch(context)
             elif (
                 importlib.util.find_spec("pyarrow")
@@ -765,6 +766,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 ):
                     table = pq.read_table(file)
                     context = {"records": table.to_pylist()}
+                    self.record_counter_metric.increment(len(context["records"]))
                     self.process_batch(context)
             else:
                 msg = f"Unsupported batch encoding format: {encoding.format}"
