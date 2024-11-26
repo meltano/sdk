@@ -211,8 +211,15 @@ class JSONSchemaToSQL:
     .. versionadded:: 0.42.0
     """
 
-    def __init__(self) -> None:
-        """Initialize the mapper with default type mappings."""
+    def __init__(self, *, max_varchar_length: int | None = None) -> None:
+        """Initialize the mapper with default type mappings.
+
+        Args:
+            max_varchar_length: The absolute maximum length for VARCHAR columns that
+                the database supports.
+        """
+        self._max_varchar_length = max_varchar_length
+
         # Default type mappings
         self._type_mapping: dict[str, JSONtoSQLHandler] = {
             "string": self._handle_string_type,
@@ -311,7 +318,7 @@ class JSONSchemaToSQL:
         """
         return sa.types.VARCHAR()
 
-    def handle_raw_string(self, schema: dict) -> sa.types.TypeEngine:  # noqa: PLR6301
+    def handle_raw_string(self, schema: dict) -> sa.types.TypeEngine:
         """Handle a string type generically.
 
         Args:
@@ -321,6 +328,10 @@ class JSONSchemaToSQL:
             Appropriate SQLAlchemy type.
         """
         max_length: int | None = schema.get("maxLength")
+
+        if max_length and self._max_varchar_length:
+            max_length = min(max_length, self._max_varchar_length)
+
         return sa.types.VARCHAR(max_length)
 
     def _get_type_from_schema(self, schema: dict) -> sa.types.TypeEngine | None:
@@ -439,6 +450,9 @@ class SQLConnector:  # noqa: PLR0904
     allow_temp_tables: bool = True  # Whether temp tables are supported.
     _cached_engine: Engine | None = None
 
+    #: The absolute maximum length for VARCHAR columns that the database supports.
+    max_varchar_length: int | None = None
+
     def __init__(
         self,
         config: dict | None = None,
@@ -489,7 +503,7 @@ class SQLConnector:  # noqa: PLR0904
 
         .. versionadded:: 0.42.0
         """
-        return JSONSchemaToSQL()
+        return JSONSchemaToSQL(max_varchar_length=self.max_varchar_length)
 
     @contextmanager
     def _connect(self) -> t.Iterator[sa.engine.Connection]:
