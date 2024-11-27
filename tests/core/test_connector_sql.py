@@ -480,7 +480,7 @@ def test_custom_type_to_jsonschema():
 class TestJSONSchemaToSQL:  # noqa: PLR0904
     @pytest.fixture
     def json_schema_to_sql(self) -> JSONSchemaToSQL:
-        return JSONSchemaToSQL()
+        return JSONSchemaToSQL(max_varchar_length=65_535)
 
     def test_register_jsonschema_type_handler(
         self,
@@ -509,14 +509,30 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         assert isinstance(result, sa.types.VARCHAR)
         assert result.length is None
 
-    def test_string_max_length(self, json_schema_to_sql: JSONSchemaToSQL):
-        jsonschema_type = {"type": ["string", "null"], "maxLength": 10}
+    @pytest.mark.parametrize(
+        "jsonschema_type,expected_length",
+        [
+            pytest.param(
+                {"type": ["string", "null"], "maxLength": 10},
+                10,
+                id="max-length",
+            ),
+            pytest.param(
+                {"type": ["string", "null"], "maxLength": 1_000_000},
+                65_535,
+                id="max-length-clamped",
+            ),
+        ],
+    )
+    def test_string_max_length(
+        self,
+        json_schema_to_sql: JSONSchemaToSQL,
+        jsonschema_type: dict,
+        expected_length: int,
+    ):
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
-        assert isinstance(
-            json_schema_to_sql.to_sql_type(jsonschema_type),
-            sa.types.VARCHAR,
-        )
-        assert result.length == 10
+        assert isinstance(result, sa.types.VARCHAR)
+        assert result.length == expected_length
 
     def test_integer(self, json_schema_to_sql: JSONSchemaToSQL):
         jsonschema_type = {"type": ["integer", "null"]}

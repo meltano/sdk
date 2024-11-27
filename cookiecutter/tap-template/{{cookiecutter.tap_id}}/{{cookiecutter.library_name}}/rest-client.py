@@ -132,14 +132,11 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         Returns:
             A dictionary of HTTP headers.
         """
-        headers = {}
-        if "user_agent" in self.config:
-            headers["User-Agent"] = self.config.get("user_agent")
 {%- if cookiecutter.auth_method not in ("OAuth2", "JWT") %}
         # If not using an authenticator, you may also provide inline auth headers:
         # headers["Private-Token"] = self.config.get("auth_token")  # noqa: ERA001
 {%- endif %}
-        return headers
+        return {}
 
     def get_new_paginator(self) -> BaseAPIPaginator:
         """Create a new pagination helper instance.

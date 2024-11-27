@@ -218,6 +218,10 @@ def increment_state(
                 extra={"replication_key": replication_key},
             )
         progress_dict = stream_or_partition_state[PROGRESS_MARKERS]
+    # TODO: Instead of forcing all values to be JSON-compatible strings and hope
+    # we catch all cases, we should allow the stream to define how to
+    # the values from the state and the record should be pre-processed.
+    # https://github.com/meltano/sdk/issues/2753
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
     new_rk_value = to_json_compatible(latest_record[replication_key])
 

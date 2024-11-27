@@ -19,6 +19,7 @@ updates:
         dependency-type: production
         update-types:
           - "patch"
+    versioning-strategy: increase-if-necessary
   - package-ecosystem: pip
     directory: "/.github/workflows"
     schedule:

@@ -87,6 +87,7 @@ class StreamMetadata(Metadata):
     """Stream metadata."""
 
     table_key_properties: t.Sequence[str] | None = None
+    replication_key: str | None = None
     forced_replication_method: str | None = None
     valid_replication_keys: list[str] | None = None
     schema_name: str | None = None

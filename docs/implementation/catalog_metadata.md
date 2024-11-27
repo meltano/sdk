@@ -1,6 +1,6 @@
 # Catalog Metadata
 
-The SDK automatically generates catalog metadata during catalog discovery. Selection rules overrided by a user will be respected.
+The SDK automatically generates catalog metadata during catalog discovery. Selection rules overridden by a user will be respected.
 
 Primary key properties may not be deselected, as these are required for `key_properties` to be declared in stream messages.
 

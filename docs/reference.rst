@@ -21,7 +21,7 @@ Stream Classes
 
 .. autosummary::
     :toctree: classes
-    :template: class.rst
+    :template: stream_class.rst
 
     Stream
     RESTStream

@@ -56,6 +56,7 @@ from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, Stream
 if t.TYPE_CHECKING:
     import logging
 
+    from singer_sdk._singerlib.catalog import StreamMetadata
     from singer_sdk.helpers import types
     from singer_sdk.helpers._compat import Traversable
     from singer_sdk.tap_base import Tap
@@ -438,6 +439,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     value = start_date_value
                 else:
                     value = self.compare_start_date(value, start_date_value)
+
+            self.logger.info("Starting incremental sync with bookmark value: %s", value)
 
         write_starting_replication_value(state, value)
 
@@ -1277,10 +1280,26 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         catalog_entry = catalog.get_stream(self.name)
         if catalog_entry:
-            self.primary_keys = catalog_entry.key_properties
-            self.replication_key = catalog_entry.replication_key
-            if catalog_entry.replication_method:
-                self.forced_replication_method = catalog_entry.replication_method
+            stream_metadata: StreamMetadata | None
+            if stream_metadata := catalog_entry.metadata.get(()):  # type: ignore[assignment]
+                table_key_properties = stream_metadata.table_key_properties
+                table_replication_key = stream_metadata.replication_key
+                table_replication_method = stream_metadata.forced_replication_method
+            else:
+                table_key_properties = None
+                table_replication_key = None
+                table_replication_method = None
+
+            self.primary_keys = catalog_entry.key_properties or table_key_properties
+            self.replication_key = (
+                catalog_entry.replication_key or table_replication_key
+            )
+
+            replication_method = (
+                catalog_entry.replication_method or table_replication_method
+            )
+            if replication_method:
+                self.forced_replication_method = replication_method
 
     def _get_state_partition_context(
         self,
