@@ -83,7 +83,7 @@ class InlineMapper(PluginBase, SingerReader, SingerWriter, metaclass=abc.ABCMeta
 
     def map_batch_message(  # noqa: PLR6301
         self,
-        message_dict: dict,  # noqa: ARG002
+        message_dict: dict,
     ) -> t.Iterable[singer.Message]:
         """Map a batch message to zero or more new messages.
 

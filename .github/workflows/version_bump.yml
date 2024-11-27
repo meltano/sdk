@@ -6,6 +6,7 @@ on:
       dry_run:
         description: "Run the action without creating a PR or release draft"
         required: true
+        default: false
         type: boolean
       bump:
         description: "Version bump type"
@@ -46,12 +47,11 @@ jobs:
 
     - uses: actions/setup-python@v5
       with:
-        python-version: "3.12"
-        architecture: x64
+        python-version: "3.x"
 
     - name: Bump version
       id: cz-bump
-      uses: commitizen-tools/commitizen-action@0.21.0
+      uses: commitizen-tools/commitizen-action@0.22.0
       with:
         increment: ${{ github.event.inputs.bump != 'auto' && github.event.inputs.bump || '' }}
         prerelease: ${{ github.event.inputs.prerelease != 'none' && github.event.inputs.prerelease || '' }}
@@ -84,7 +84,7 @@ jobs:
 
     - name: Create Pull Request
       if: ${{ github.event.inputs.dry_run == 'false' }}
-      uses: peter-evans/create-pull-request@v6
+      uses: peter-evans/create-pull-request@v7
       id: create-pull-request
       with:
         token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}
@@ -101,6 +101,5 @@ jobs:
 
           [Release Draft](${{ steps.draft-release.outputs.url }})
         branch: release/v${{ steps.cz-bump.outputs.version }}
-        base: main
         labels: release
         assignees: "${{ github.actor }}"

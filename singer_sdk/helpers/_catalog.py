@@ -43,7 +43,7 @@ def _pop_deselected_schema(
         schema_at_breadcrumb = schema_at_breadcrumb.get(crumb, {})
 
     if not isinstance(schema_at_breadcrumb, dict):  # pragma: no cover
-        msg = (
+        msg = (  # type: ignore[unreachable]
             "Expected dictionary type instead of "
             f"'{type(schema_at_breadcrumb).__name__}' '{schema_at_breadcrumb}' for "
             f"'{stream_name}' bookmark '{breadcrumb!s}' in '{schema}'"
@@ -123,7 +123,7 @@ def set_catalog_stream_selected(
     """
     breadcrumb = breadcrumb or ()
     if not isinstance(breadcrumb, tuple):  # pragma: no cover
-        msg = (
+        msg = (  # type: ignore[unreachable]
             f"Expected tuple value for breadcrumb '{breadcrumb}'. Got "
             f"{type(breadcrumb).__name__}"
         )

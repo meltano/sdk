@@ -9,4 +9,6 @@ porting
 pagination-classes
 custom-clis
 config-schema
+sql-tap
+sql-target
 ```

@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import logging
 import typing as t
+import urllib.parse
 
 import pytest
 import requests
@@ -15,8 +16,7 @@ from singer_sdk.exceptions import (
 )
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import datetime_fromisoformat as parse
-from singer_sdk.helpers.jsonpath import _compile_jsonpath, extract_jsonpath
-from singer_sdk.pagination import first
+from singer_sdk.helpers.jsonpath import _compile_jsonpath
 from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMENTAL
 from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
@@ -24,6 +24,8 @@ from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
 from tests.core.conftest import SimpleTestStream
 
 if t.TYPE_CHECKING:
+    import requests_mock
+
     from singer_sdk import Stream, Tap
     from tests.core.conftest import SimpleTestTap
 
@@ -42,22 +44,16 @@ class RestTestStream(RESTStream):
     ).to_dict()
     replication_key = "updatedAt"
 
+
+class RestTestStreamLegacyPagination(RestTestStream):
+    """Test RESTful stream class with pagination."""
+
     def get_next_page_token(
         self,
-        response: requests.Response,
-        previous_token: str | None,  # noqa: ARG002
-    ) -> str | None:
-        if not self.next_page_token_jsonpath:
-            return response.headers.get("X-Next-Page", None)
-
-        all_matches = extract_jsonpath(
-            self.next_page_token_jsonpath,
-            response.json(),
-        )
-        try:
-            return first(all_matches)
-        except StopIteration:
-            return None
+        response: requests.Response,  # noqa: ARG002
+        previous_token: int | None,
+    ) -> int:
+        return previous_token + 1 if previous_token is not None else 1
 
 
 class GraphqlTestStream(GraphQLStream):
@@ -110,6 +106,43 @@ def test_stream_apply_catalog(stream: Stream):
     assert stream.forced_replication_method == REPLICATION_FULL_TABLE
 
 
+def test_stream_apply_catalog__singer_standard(stream: Stream):
+    """Applying a catalog to a stream should overwrite fields."""
+    assert stream.primary_keys == []
+    assert stream.replication_key == "updatedAt"
+    assert stream.replication_method == REPLICATION_INCREMENTAL
+    assert stream.forced_replication_method is None
+
+    stream.apply_catalog(
+        catalog=Catalog.from_dict(
+            {
+                "streams": [
+                    {
+                        "tap_stream_id": stream.name,
+                        "stream": stream.name,
+                        "schema": stream.schema,
+                        "metadata": [
+                            {
+                                "breadcrumb": [],
+                                "metadata": {
+                                    "table-key-properties": ["id"],
+                                    "replication-key": "newReplicationKey",
+                                    "forced-replication-method": REPLICATION_FULL_TABLE,
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        ),
+    )
+
+    assert stream.primary_keys == ["id"]
+    assert stream.replication_key == "newReplicationKey"
+    assert stream.replication_method == REPLICATION_FULL_TABLE
+    assert stream.forced_replication_method == REPLICATION_FULL_TABLE
+
+
 @pytest.mark.parametrize(
     "stream_name,forced_replication_method,bookmark_value,expected_starting_value",
     [
@@ -140,6 +173,18 @@ def test_stream_apply_catalog(stream: Stream):
             "2020-01-01",
             parse(CONFIG_START_DATE).replace(tzinfo=datetime.timezone.utc),
             id="datetime-repl-key-old-bookmark",
+        ),
+        pytest.param(
+            "test",
+            None,
+            "2021-01-02T00:00:00-08:00",
+            datetime.datetime(
+                2021,
+                1,
+                2,
+                tzinfo=datetime.timezone(datetime.timedelta(hours=-8)),
+            ),
+            id="datetime-repl-key-recent-bookmark-tz-aware",
         ),
         pytest.param(
             "unix_ts",
@@ -304,6 +349,21 @@ def test_jsonpath_rest_stream(tap: Tap, path: str, content: str, result: list[di
     assert list(records) == result
 
 
+def test_legacy_pagination(tap: Tap):
+    """Validate legacy pagination is handled correctly."""
+    stream = RestTestStreamLegacyPagination(tap)
+
+    with pytest.deprecated_call():
+        stream.get_new_paginator()
+
+    page: int | None = None
+    page = stream.get_next_page_token(None, page)
+    assert page == 1
+
+    page = stream.get_next_page_token(None, page)
+    assert page == 2
+
+
 def test_jsonpath_graphql_stream_default(tap: Tap):
     """Validate graphql JSONPath, defaults to the stream name."""
     content = """{
@@ -425,11 +485,8 @@ def test_next_page_token_jsonpath(
     RestTestStream.next_page_token_jsonpath = path
     stream = RestTestStream(tap)
 
-    with pytest.warns(DeprecationWarning):
-        paginator = stream.get_new_paginator()
-
+    paginator = stream.get_new_paginator()
     next_page = paginator.get_next(fake_response)
-
     assert next_page == result
 
 
@@ -470,6 +527,45 @@ def test_sync_costs_calculation(tap: Tap, caplog):
     for record in caplog.records:
         assert record.levelname == "INFO"
         assert f"Total Sync costs for stream {stream.name}" in record.message
+
+
+def test_non_json_payload(tap: Tap, requests_mock: requests_mock.Mocker):
+    """Test non-JSON payload is handled correctly."""
+
+    def callback(request: requests.PreparedRequest, context: requests_mock.Context):  # noqa: ARG001
+        assert request.headers["Content-Type"] == "application/x-www-form-urlencoded"
+        assert request.body == "my_key=my_value"
+
+        data = urllib.parse.parse_qs(request.body)
+
+        return {
+            "data": [
+                {"id": 1, "value": f"{data['my_key'][0]}_1"},
+                {"id": 2, "value": f"{data['my_key'][0]}_2"},
+            ]
+        }
+
+    class NonJsonStream(RestTestStream):
+        payload_as_json = False
+        http_method = "POST"
+        path = "/non-json"
+        records_jsonpath = "$.data[*]"
+
+        def prepare_request_payload(self, context, next_page_token):  # noqa: ARG002
+            return {"my_key": "my_value"}
+
+    stream = NonJsonStream(tap)
+
+    requests_mock.post(
+        "https://example.com/non-json",
+        json=callback,
+    )
+
+    records = list(stream.request_records(None))
+    assert records == [
+        {"id": 1, "value": "my_value_1"},
+        {"id": 2, "value": "my_value_2"},
+    ]
 
 
 @pytest.mark.parametrize(
