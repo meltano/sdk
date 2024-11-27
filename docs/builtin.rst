@@ -8,10 +8,26 @@ The Singer SDK library provides a number of built-in settings and capabilities.
 .. autodata:: ADD_RECORD_METADATA
    :no-value:
 
-   .. autoattribute:: ADD_RECORD_METADATA.schema
-
 .. autodata:: BATCH
    :no-value:
 
-   .. autoattribute:: BATCH.schema
-   .. autoattribute:: BATCH.capability
+.. autodata:: FLATTENING
+   :no-value:
+
+.. autodata:: STREAM_MAPS
+   :no-value:
+
+.. autodata:: TARGET_BATCH_SIZE_ROWS
+   :no-value:
+
+.. autodata:: TARGET_HARD_DELETE
+   :no-value:
+
+.. autodata:: TARGET_LOAD_METHOD
+   :no-value:
+
+.. autodata:: TARGET_SCHEMA
+   :no-value:
+
+.. autodata:: TARGET_VALIDATE_RECORDS
+   :no-value:
