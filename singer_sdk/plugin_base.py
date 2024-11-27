@@ -38,6 +38,9 @@ from singer_sdk.typing import (
     extend_validator_with_defaults,
 )
 
+if t.TYPE_CHECKING:
+    from jsonschema import ValidationError
+
 SDK_PACKAGE_NAME = "singer_sdk"
 
 JSONSchemaValidator = extend_validator_with_defaults(DEFAULT_JSONSCHEMA_VALIDATOR)
@@ -86,6 +89,23 @@ class SingerCommand(click.Command):
             for error in exc.errors:
                 self.logger.error("Config validation error: %s", error)  # noqa: TRY400
             sys.exit(1)
+
+
+def _format_validation_error(error: ValidationError) -> str:
+    """Format a JSON Schema validation error.
+
+    Args:
+        error: A JSON Schema validation error.
+
+    Returns:
+        A formatted error message.
+    """
+    result = f"{error.message}"
+
+    if error.path:
+        result += f" in config[{']['.join(repr(index) for index in error.path)}]"
+
+    return result
 
 
 class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
@@ -402,7 +422,9 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 config_jsonschema,
             )
             validator = JSONSchemaValidator(config_jsonschema)
-            errors = [e.message for e in validator.iter_errors(self._config)]
+            errors = [
+                _format_validation_error(e) for e in validator.iter_errors(self._config)
+            ]
 
         if errors:
             summary = (
