@@ -123,7 +123,7 @@ _JsonValue: TypeAlias = t.Union[
     None,
 ]
 
-DEFAULT_JSONSCHEMA_VALIDATOR: type[Validator] = validators.Draft7Validator  # type: ignore[assignment]
+DEFAULT_JSONSCHEMA_VALIDATOR: type[Validator] = validators.Draft202012Validator  # type: ignore[assignment]
 
 T = t.TypeVar("T", bound=_JsonValue)
 P = t.TypeVar("P")
@@ -1114,6 +1114,17 @@ class PropertiesList(ObjectType):
             property: Property to add
         """
         self.wrapped[property.name] = property
+
+    @property
+    def type_dict(self) -> dict:  # type: ignore[override]
+        """Get type dictionary.
+
+        Returns:
+            A dictionary describing the type.
+        """
+        d = super().type_dict
+        d["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+        return d
 
     def __iter__(self) -> t.Iterator[Property]:
         """Iterate all properties of the property list.
