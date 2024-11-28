@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import decimal
 import typing as t
 {% if cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 from functools import cached_property
@@ -204,7 +205,10 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
             Each record from the source.
         """
         # TODO: Parse response body and return a set of records.
-        yield from extract_jsonpath(self.records_jsonpath, input=response.json())
+        yield from extract_jsonpath(
+            self.records_jsonpath,
+            input=response.json(parse_float=decimal.Decimal),
+        )
 
     def post_process(
         self,
