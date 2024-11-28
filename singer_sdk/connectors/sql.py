@@ -839,10 +839,7 @@ class SQLConnector:  # noqa: PLR0904
             view_names = []
         return [(t, False) for t in table_names] + [(v, True) for v in view_names]
 
-    def discover_catalog_entry_sql_datatype(  # noqa: PLR6301
-        self,
-        data_type: sa.types.TypeEngine,
-    ) -> str:
+    def _sa_type_to_str(self, data_type: sa.types.TypeEngine) -> str:  # noqa: PLR6301
         """Retrun SQL Datatype as a string to utilize in the catalog.
 
         Args:
@@ -908,6 +905,7 @@ class SQLConnector:  # noqa: PLR0904
 
         # Initialize columns list
         table_schema = th.PropertiesList()
+        datatypes = {}
         for column_def in inspected.get_columns(table_name, schema=schema_name):
             column_name = column_def["name"]
             is_nullable = column_def.get("nullable", False)
@@ -920,13 +918,9 @@ class SQLConnector:  # noqa: PLR0904
                     required=column_name in key_properties if key_properties else False,
                 ),
             )
-        schema = table_schema.to_dict()
+            datatypes[column_def["name"]] = self._sa_type_to_str(column_def["type"])
 
-        sql_datatypes = {}
-        for column_def in inspected.get_columns(table_name, schema=schema_name):
-            sql_datatypes[str(column_def["name"])] = (
-                self.discover_catalog_entry_sql_datatype(column_def["type"])
-            )
+        schema = table_schema.to_dict()
 
         # Initialize available replication methods
         addl_replication_methods: list[str] = [""]  # By default an empty list.
@@ -952,7 +946,7 @@ class SQLConnector:  # noqa: PLR0904
                 replication_method=replication_method,
                 key_properties=key_properties,
                 valid_replication_keys=None,  # Must be defined by user
-                sql_datatypes=sql_datatypes,
+                sql_datatypes=datatypes,
             ),
             database=None,  # Expects single-database context
             row_count=None,
