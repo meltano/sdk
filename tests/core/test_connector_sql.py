@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import typing as t
 from decimal import Decimal
 from unittest import mock
@@ -452,15 +453,19 @@ def test_sql_to_json_schema_map(
 
 def test_custom_type_to_jsonschema():
     class MyMap(SQLToJSONSchema):
-        @SQLToJSONSchema.to_jsonschema.register
-        def custom_number_to_jsonschema(self, column_type: sa.types.NUMERIC) -> dict:
+        @functools.singledispatchmethod
+        def to_jsonschema(self, column_type: sa.types.TypeEngine):
+            return super().to_jsonschema(column_type)
+
+        @to_jsonschema.register
+        def custom_number_to_jsonschema(self, column_type: sa.types.Numeric) -> dict:
             """Custom number to JSON schema.
 
             For example, a scale of 4 translates to a multipleOf 0.0001.
             """
             return {"type": ["number"], "multipleOf": 10**-column_type.scale}
 
-        @SQLToJSONSchema.to_jsonschema.register(MyType)
+        @to_jsonschema.register(MyType)
         def my_type_to_jsonschema(self, column_type) -> dict:  # noqa: ARG002
             return {"type": ["string"], "contentEncoding": "base64"}
 
