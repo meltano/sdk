@@ -654,7 +654,7 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         assert isinstance(result, sa.types.VARCHAR)
 
     def test_custom_fallback(self):
-        json_schema_to_sql = JSONSchemaToSQL()
+        json_schema_to_sql = JSONSchemaToSQL(max_varchar_length=None)
         json_schema_to_sql.fallback_type = sa.types.CHAR
         jsonschema_type = {"cannot": "compute"}
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
@@ -668,7 +668,7 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
 
                 return super().handle_raw_string(schema)
 
-        json_schema_to_sql = CustomJSONSchemaToSQL()
+        json_schema_to_sql = CustomJSONSchemaToSQL(max_varchar_length=None)
 
         vanilla = {"type": ["string"]}
         result = json_schema_to_sql.to_sql_type(vanilla)
