@@ -1,0 +1,24 @@
+src = ["tap_dummyjson"]
+target-version = "py39"
+
+[lint]
+ignore = [
+    "ANN",
+    "ARG",
+    "D",
+    "COM812",  # missing-trailing-comma
+    "ISC001",  # single-line-implicit-string-concatenation
+    "S113",    # request-without-timeout
+    "PLR2004", # magic-value-comparison
+    "RUF012",  # mutable-class-default
+]
+select = ["ALL"]
+
+[lint.flake8-annotations]
+allow-star-arg-any = true
+
+[lint.isort]
+known-first-party = ["tap_dummyjson"]
+
+[lint.pydocstyle]
+convention = "google"

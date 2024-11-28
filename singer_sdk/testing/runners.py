@@ -8,10 +8,14 @@ import json
 import typing as t
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
-from pathlib import Path
 
 from singer_sdk import Tap, Target
 from singer_sdk.testing.config import SuiteConfig
+
+if t.TYPE_CHECKING:
+    from pathlib import Path
+
+    from singer_sdk.helpers._compat import Traversable
 
 
 class SingerTestRunner(metaclass=abc.ABCMeta):
@@ -149,7 +153,7 @@ class TapTestRunner(SingerTestRunner):
         Args:
             kwargs: Unused keyword arguments.
         """
-        stdout, stderr = self._execute_sync()
+        stdout, _ = self._execute_sync()
         messages = self._clean_sync_output(stdout)
         self._parse_records(messages)
 
@@ -197,7 +201,7 @@ class TargetTestRunner(SingerTestRunner):
         target_class: type[Target],
         config: dict | None = None,
         suite_config: SuiteConfig | None = None,
-        input_filepath: Path | None = None,
+        input_filepath: Path | Traversable | None = None,
         input_io: io.StringIO | None = None,
         **kwargs: t.Any,
     ) -> None:
@@ -242,9 +246,7 @@ class TargetTestRunner(SingerTestRunner):
             if self.input_io:
                 self._input = self.input_io
             elif self.input_filepath:
-                self._input = Path(self.input_filepath).open(  # noqa: SIM115
-                    encoding="utf8",
-                )
+                self._input = self.input_filepath.open(encoding="utf8")
         return t.cast(t.IO[str], self._input)
 
     @target_input.setter
@@ -273,7 +275,7 @@ class TargetTestRunner(SingerTestRunner):
         self.stdout, self.stderr = (stdout.read(), stderr.read())
         self.state_messages.extend(self._clean_sync_output(self.stdout))
 
-    def _execute_sync(
+    def _execute_sync(  # noqa: PLR6301
         self,
         target: Target,
         target_input: t.IO[str],
@@ -297,9 +299,9 @@ class TargetTestRunner(SingerTestRunner):
 
         with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
             if target_input is not None:
-                target._process_lines(target_input)
+                target._process_lines(target_input)  # noqa: SLF001
             if finalize:
-                target._process_endofpipe()
+                target._process_endofpipe()  # noqa: SLF001
 
         stdout_buf.seek(0)
         stderr_buf.seek(0)

@@ -1,0 +1,44 @@
+[tool.poetry]
+name = "tap-dummyjson"
+version = "0.0.1"
+description = "Singer tap for DummyJSON, built with the Meltano Singer SDK."
+readme = "README.md"
+authors = ["Edgar Ramírez-Mondragón <edgar@arch.dev>"]
+keywords = [
+    "ELT",
+    "DummyJSON",
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+license = "Apache-2.0"
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+requests = "~=2.32.3"
+singer-sdk = {path = "../..", develop = true}
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8"
+singer-sdk = {path = "../..", develop = true, extras = ["testing"]}
+
+[tool.poetry.extras]
+s3 = ["fs-s3fs"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_unused_configs = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+# CLI declaration
+tap-dummyjson = 'tap_dummyjson.tap:TapDummyJSON.cli'

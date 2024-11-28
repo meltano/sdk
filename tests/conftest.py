@@ -8,10 +8,10 @@ import shutil
 import typing as t
 
 import pytest
-from sqlalchemy import __version__ as sqlalchemy_version
 
 from singer_sdk import SQLConnector
 from singer_sdk import typing as th
+from singer_sdk.helpers._typing import DatetimeErrorTreatmentEnum
 from singer_sdk.helpers.capabilities import PluginCapabilities
 from singer_sdk.sinks import BatchSink, SQLSink
 from singer_sdk.target_base import SQLTarget, Target
@@ -23,8 +23,6 @@ if t.TYPE_CHECKING:
 
 
 SYSTEMS = {"linux", "darwin", "windows"}
-
-pytest_plugins = ("singer_sdk.testing.pytest_plugin",)
 
 
 def pytest_collection_modifyitems(config: Config, items: list[pytest.Item]):
@@ -45,14 +43,16 @@ def pytest_runtest_setup(item):
         pytest.skip(f"cannot run on platform {system}")
 
 
-def pytest_report_header() -> list[str]:
-    """Return a list of strings to be displayed in the header of the report."""
-    return [f"sqlalchemy: {sqlalchemy_version}"]
+@pytest.fixture(autouse=True)
+def _reset_envvars(monkeypatch: pytest.MonkeyPatch):
+    """Remove envvars that might interfere with tests."""
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
+    monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
 
 
 @pytest.fixture(scope="class")
 def outdir() -> t.Generator[str, None, None]:
-    """Create a temporary directory for cookiecutters and target output."""
+    """Create a temporary directory for target output."""
     name = ".output/"
     try:
         pathlib.Path(name).mkdir(parents=True)
@@ -75,6 +75,7 @@ class BatchSinkMock(BatchSink):
     """A mock Sink class."""
 
     name = "batch-sink-mock"
+    datetime_error_treatment = DatetimeErrorTreatmentEnum.MAX
 
     def __init__(
         self,
@@ -131,7 +132,7 @@ class SQLConnectorMock(SQLConnector):
     """A Mock SQLConnector class."""
 
 
-class SQLSinkMock(SQLSink):
+class SQLSinkMock(SQLSink[SQLConnectorMock]):
     """A mock Sink class."""
 
     name = "sql-sink-mock"

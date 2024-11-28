@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import re
 import typing as t
+from logging import WARNING
 from textwrap import dedent
 
 import pytest
-from jsonschema import Draft6Validator
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -26,6 +26,9 @@ from singer_sdk.helpers._typing import (
 )
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
+    DEFAULT_JSONSCHEMA_VALIDATOR,
+    AllOf,
+    AnyType,
     ArrayType,
     BooleanType,
     CustomType,
@@ -101,6 +104,13 @@ def test_to_json():
             StringType,
             description="A test property",
         ),
+        Property(
+            "test_property_3",
+            AllOf(
+                ObjectType(Property("test_property_4", StringType)),
+                ObjectType(Property("test_property_5", StringType)),
+            ),
+        ),
         additional_properties=False,
     )
     assert schema.to_json(indent=4) == dedent(
@@ -120,14 +130,62 @@ def test_to_json():
                         "null"
                     ],
                     "description": "A test property"
+                },
+                "test_property_3": {
+                    "allOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "test_property_4": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "test_property_5": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
                 }
             },
             "required": [
                 "test_property"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "$schema": "https://json-schema.org/draft/2020-12/schema"
         }""",
     )
+
+
+def test_any_type(caplog: pytest.LogCaptureFixture):
+    schema = PropertiesList(
+        Property("any_type", AnyType, description="Can be anything"),
+    )
+    with caplog.at_level(WARNING):
+        assert schema.to_dict() == {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+                "any_type": {
+                    "description": "Can be anything",
+                },
+            },
+        }
+        assert caplog.records[0].levelname == "WARNING"
+        assert caplog.records[0].message == (
+            "Could not append type because the JSON schema for the dictionary `{}` "
+            "appears to be invalid."
+        )
 
 
 def test_nested_complex_objects():
@@ -192,6 +250,17 @@ def test_property_description():
         "test_property": {
             "type": ["string", "null"],
             "description": text,
+        },
+    }
+
+
+def test_property_title():
+    title = "My Test Property"
+    prop = Property("test_property", StringType, title=title)
+    assert prop.to_dict() == {
+        "test_property": {
+            "type": ["string", "null"],
+            "title": title,
         },
     }
 
@@ -480,6 +549,50 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
             },
             {is_array_type, is_string_array_type},
         ),
+        (
+            Property(
+                "my_prop12",
+                StringType(min_length=5, max_length=10, pattern="^a.*b$"),
+            ),
+            {
+                "my_prop12": {
+                    "type": ["string", "null"],
+                    "minLength": 5,
+                    "maxLength": 10,
+                    "pattern": "^a.*b$",
+                },
+            },
+            {is_string_type},
+        ),
+        (
+            Property(
+                "my_prop13",
+                IntegerType(minimum=5, maximum=10),
+            ),
+            {
+                "my_prop13": {
+                    "type": ["integer", "null"],
+                    "minimum": 5,
+                    "maximum": 10,
+                },
+            },
+            {is_integer_type},
+        ),
+        (
+            Property(
+                "my_prop14",
+                IntegerType(exclusive_minimum=5, exclusive_maximum=10, multiple_of=2),
+            ),
+            {
+                "my_prop14": {
+                    "type": ["integer", "null"],
+                    "exclusiveMinimum": 5,
+                    "exclusiveMaximum": 10,
+                    "multipleOf": 2,
+                },
+            },
+            {is_integer_type},
+        ),
     ],
 )
 def test_property_creation(
@@ -539,7 +652,7 @@ def test_array_type():
     assert ArrayType(wrapped_type).type_dict == expected_json_schema
 
 
-@pytest.mark.snapshot()
+@pytest.mark.snapshot
 @pytest.mark.parametrize(
     "schema_obj,snapshot_name",
     [
@@ -832,7 +945,7 @@ def test_discriminated_union():
         ),
     )
 
-    validator = Draft6Validator(th.to_dict())
+    validator = DEFAULT_JSONSCHEMA_VALIDATOR(th.to_dict())
 
     assert validator.is_valid(
         {
@@ -858,5 +971,127 @@ def test_discriminated_union():
         {
             "flow": "password",
             "client_id": "123",
+        },
+    )
+
+
+def test_is_datetime_type():
+    assert is_datetime_type({"type": "string", "format": "date-time"})
+    assert not is_datetime_type({"type": "string"})
+
+    assert is_datetime_type({"anyOf": [{"type": "string", "format": "date-time"}]})
+    assert not is_datetime_type({"anyOf": [{"type": "string"}]})
+
+    assert is_datetime_type({"allOf": [{"type": "string", "format": "date-time"}]})
+    assert not is_datetime_type({"allOf": [{"type": "string"}]})
+
+
+def test_is_date_or_datetime_type():
+    assert is_date_or_datetime_type({"type": "string", "format": "date"})
+    assert is_date_or_datetime_type({"type": "string", "format": "date-time"})
+    assert not is_date_or_datetime_type({"type": "string"})
+
+    assert is_date_or_datetime_type(
+        {"anyOf": [{"type": "string", "format": "date-time"}]},
+    )
+    assert is_date_or_datetime_type({"anyOf": [{"type": "string", "format": "date"}]})
+    assert not is_date_or_datetime_type({"anyOf": [{"type": "string"}]})
+
+    assert is_date_or_datetime_type(
+        {"allOf": [{"type": "string", "format": "date-time"}]},
+    )
+    assert is_date_or_datetime_type({"allOf": [{"type": "string", "format": "date"}]})
+    assert not is_date_or_datetime_type({"allOf": [{"type": "string"}]})
+
+
+def test_is_string_array_type():
+    assert is_string_array_type(
+        {
+            "type": "array",
+            "items": {"type": "string"},
+        },
+    )
+    assert not is_string_array_type(
+        {
+            "type": "array",
+            "items": {"type": "integer"},
+        },
+    )
+
+    assert is_string_array_type(
+        {
+            "anyOf": [
+                {"type": "array", "items": {"type": "string"}},
+                {"type": "null"},
+            ],
+        },
+    )
+    assert not is_string_array_type(
+        {
+            "anyOf": [
+                {"type": "array", "items": {"type": "integer"}},
+                {"type": "null"},
+            ],
+        },
+    )
+
+    assert is_string_array_type(
+        {
+            "allOf": [
+                {"type": "array", "items": {"type": "string"}},
+            ],
+        },
+    )
+    assert not is_string_array_type(
+        {
+            "allOf": [
+                {"type": "array", "items": {"type": "integer"}},
+            ],
+        },
+    )
+
+
+def test_is_array_type():
+    assert is_array_type(
+        {
+            "type": "array",
+            "items": {"type": "string"},
+        },
+    )
+    assert not is_array_type(
+        {
+            "type": "string",
+        },
+    )
+
+    assert is_array_type(
+        {
+            "anyOf": [
+                {"type": "array"},
+                {"type": "null"},
+            ],
+        },
+    )
+    assert not is_array_type(
+        {
+            "anyOf": [
+                {"type": "string"},
+                {"type": "null"},
+            ],
+        },
+    )
+
+    assert is_array_type(
+        {
+            "allOf": [
+                {"type": "array"},
+            ],
+        },
+    )
+    assert not is_array_type(
+        {
+            "allOf": [
+                {"type": "string"},
+            ],
         },
     )

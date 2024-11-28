@@ -2,13 +2,16 @@
     "cookiecutter": {
       "source_name": "GraphQLJWTTemplateTest",
       "admin_name": "Automatic Tester",
+      "admin_email": "auto.tester@example.com",
       "tap_id": "tap-graphql-jwt",
       "library_name": "tap_graphql_jwt",
       "variant": "None (Skip)",
       "stream_type": "GraphQL",
       "auth_method": "JWT",
       "include_ci_files": "None (Skip)",
+      "faker_extra": false,
       "license": "Apache-2.0",
+      "ide": "VSCode",
       "_template": "../tap-template/",
       "_output_dir": "."
     }

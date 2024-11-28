@@ -11,12 +11,12 @@ if t.TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
 
-Breadcrumb = t.Tuple[str, ...]
+Breadcrumb = tuple[str, ...]
 
 logger = logging.getLogger(__name__)
 
 
-class SelectionMask(t.Dict[Breadcrumb, bool]):
+class SelectionMask(dict[Breadcrumb, bool]):
     """Boolean mask for property selection in schemas and records."""
 
     def __missing__(self, breadcrumb: Breadcrumb) -> bool:
@@ -31,11 +31,7 @@ class SelectionMask(t.Dict[Breadcrumb, bool]):
         Returns:
             True if the breadcrumb is selected, False otherwise.
         """
-        if len(breadcrumb) >= 2:  # noqa: PLR2004
-            parent = breadcrumb[:-2]
-            return self[parent]
-
-        return True
+        return self[breadcrumb[:-2]] if len(breadcrumb) >= 2 else True  # noqa: PLR2004
 
 
 @dataclass
@@ -71,7 +67,7 @@ class Metadata:
         )
 
     def to_dict(self) -> dict[str, t.Any]:
-        """Convert metadata to a JSON-encodeable dictionary.
+        """Convert metadata to a JSON-encodable dictionary.
 
         Returns:
             Metadata object.
@@ -90,21 +86,22 @@ class Metadata:
 class StreamMetadata(Metadata):
     """Stream metadata."""
 
-    table_key_properties: list[str] | None = None
+    table_key_properties: t.Sequence[str] | None = None
+    replication_key: str | None = None
     forced_replication_method: str | None = None
     valid_replication_keys: list[str] | None = None
     schema_name: str | None = None
 
 
 @dataclass
-class SqlMetadata(Metadata):
+class SQLMetadata(Metadata):
     sql_datatype: str | None = None
 
 
 AnyMetadata: TypeAlias = t.Union[Metadata, StreamMetadata]
 
 
-class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
+class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
     """Stream metadata mapping."""
 
     @classmethod
@@ -168,7 +165,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
         *,
         schema: dict[str, t.Any] | None = None,
         schema_name: str | None = None,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
         valid_replication_keys: list[str] | None = None,
         replication_method: str | None = None,
         selected_by_default: bool | None = None,
@@ -206,7 +203,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
                 if sql_datatypes is None:
                     entry = Metadata()
                 else:
-                    entry = SqlMetadata(sql_datatype=sql_datatypes.get(field_name))
+                    entry = SQLMetadata(sql_datatype=sql_datatypes.get(field_name))
 
                 if (key_properties and field_name in key_properties) or (
                     valid_replication_keys and field_name in valid_replication_keys
@@ -215,7 +212,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
                 else:
                     entry.inclusion = Metadata.InclusionType.AVAILABLE
 
-                mapping[("properties", field_name)] = entry
+                mapping["properties", field_name] = entry
 
         mapping[()] = root
 
@@ -299,7 +296,7 @@ class CatalogEntry:
     metadata: MetadataMapping
     schema: Schema
     stream: str | None = None
-    key_properties: list[str] | None = None
+    key_properties: t.Sequence[str] | None = None
     replication_key: str | None = None
     is_view: bool | None = None
     database: str | None = None
@@ -368,7 +365,7 @@ class CatalogEntry:
         return result
 
 
-class Catalog(t.Dict[str, CatalogEntry]):
+class Catalog(dict[str, CatalogEntry]):
     """Singer catalog mapping of stream entries."""
 
     @classmethod
@@ -399,7 +396,7 @@ class Catalog(t.Dict[str, CatalogEntry]):
         return {"streams": [stream.to_dict() for stream in self.streams]}
 
     @property
-    def streams(self) -> list[CatalogEntry]:
+    def streams(self) -> t.Sequence[CatalogEntry]:
         """Get catalog entries.
 
         Returns:

@@ -12,20 +12,20 @@ from textwrap import dedent
 from uuid import uuid4
 
 import pytest
-import sqlalchemy
+import sqlalchemy as sa
 
 from samples.sample_tap_hostile import SampleTapHostile
 from samples.sample_tap_sqlite import SQLiteTap
 from samples.sample_target_sqlite import SQLiteSink, SQLiteTarget
 from singer_sdk import typing as th
 from singer_sdk.testing import (
-    _get_tap_catalog,
     tap_sync_test,
     tap_to_target_sync_test,
     target_sync_test,
 )
 
 if t.TYPE_CHECKING:
+    from singer_sdk._singerlib import Catalog
     from singer_sdk.tap_base import SQLTap
     from singer_sdk.target_base import SQLTarget
 
@@ -36,7 +36,7 @@ def path_to_target_db(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def sqlite_target_test_config(path_to_target_db: str) -> dict:
+def sqlite_target_test_config(path_to_target_db: Path) -> dict:
     """Get configuration dictionary for target-csv."""
     return {"path_to_db": str(path_to_target_db)}
 
@@ -48,9 +48,9 @@ def sqlite_sample_target(sqlite_target_test_config):
 
 
 @pytest.fixture
-def sqlite_sample_target_soft_delete(sqlite_target_test_config):
+def sqlite_sample_target_hard_delete(sqlite_target_test_config):
     """Get a sample target object with hard_delete disabled."""
-    return SQLiteTarget(config={**sqlite_target_test_config, "hard_delete": False})
+    return SQLiteTarget(config={**sqlite_target_test_config, "hard_delete": True})
 
 
 @pytest.fixture
@@ -67,6 +67,7 @@ def sqlite_sample_target_batch(sqlite_target_test_config):
 def test_sync_sqlite_to_sqlite(
     sqlite_sample_tap: SQLTap,
     sqlite_sample_target: SQLTarget,
+    sqlite_sample_db_catalog: Catalog,
 ):
     """End-to-end-to-end test for SQLite tap and target.
 
@@ -84,8 +85,10 @@ def test_sync_sqlite_to_sqlite(
     )
     orig_stdout.seek(0)
     tapped_config = dict(sqlite_sample_target.config)
-    catalog = _get_tap_catalog(SQLiteTap, config=tapped_config, select_all=True)
-    tapped_target = SQLiteTap(config=tapped_config, catalog=catalog)
+    tapped_target = SQLiteTap(
+        config=tapped_config,
+        catalog=sqlite_sample_db_catalog.to_dict(),
+    )
     new_stdout, _ = tap_sync_test(tapped_target)
 
     orig_stdout.seek(0)
@@ -157,7 +160,7 @@ def test_sqlite_schema_addition(sqlite_sample_target: SQLTarget):
         ]
     )
     # sqlite doesn't support schema creation
-    with pytest.raises(sqlalchemy.exc.OperationalError) as excinfo:
+    with pytest.raises(sa.exc.OperationalError) as excinfo:
         target_sync_test(
             sqlite_sample_target,
             input=StringIO(tap_output),
@@ -179,7 +182,9 @@ def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
     props_a: dict[str, dict] = {"col_a": th.StringType().to_dict()}
     props_b = deepcopy(props_a)
     props_b["col_b"] = th.IntegerType().to_dict()
-    schema_msg_a, schema_msg_b = (
+    props_c = deepcopy(props_b)
+    props_c["_col_c"] = th.IntegerType().to_dict()
+    schema_msg_a, schema_msg_b, schema_msg_c = (
         {
             "type": "SCHEMA",
             "stream": test_tbl,
@@ -188,7 +193,7 @@ def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
                 "properties": props,
             },
         }
-        for props in [props_a, props_b]
+        for props in [props_a, props_b, props_c]
     )
     tap_output_a = "\n".join(
         json.dumps(msg)
@@ -208,13 +213,25 @@ def test_sqlite_column_addition(sqlite_sample_target: SQLTarget):
             },
         ]
     )
+    tap_output_c = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg_c,
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"col_a": "samplerow2", "col_b": 2, "_col_c": 3},
+            },
+        ]
+    )
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output_a), finalize=True)
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output_b), finalize=True)
+    target_sync_test(sqlite_sample_target, input=StringIO(tap_output_c), finalize=True)
 
 
 def test_sqlite_activate_version(
     sqlite_sample_target: SQLTarget,
-    sqlite_sample_target_soft_delete: SQLTarget,
+    sqlite_sample_target_hard_delete: SQLTarget,
 ):
     """Test handling the activate_version message for the SQLite target.
 
@@ -246,7 +263,7 @@ def test_sqlite_activate_version(
 
     target_sync_test(sqlite_sample_target, input=StringIO(tap_output), finalize=True)
     target_sync_test(
-        sqlite_sample_target_soft_delete,
+        sqlite_sample_target_hard_delete,
         input=StringIO(tap_output),
         finalize=True,
     )
@@ -350,6 +367,52 @@ def test_sqlite_process_batch_message(
     assert cursor.fetchone()[0] == 4
 
 
+def test_sqlite_process_batch_parquet(
+    sqlite_target_test_config: dict,
+    sqlite_sample_target_batch: SQLiteTarget,
+):
+    """Test handling a Parquet batch message for the SQLite target."""
+    config = {
+        **sqlite_target_test_config,
+        "batch_config": {
+            "encoding": {"format": "parquet", "compression": "gzip"},
+            "batch_size": 100,
+        },
+    }
+    schema_message = {
+        "type": "SCHEMA",
+        "stream": "continents",
+        "key_properties": ["id"],
+        "schema": {
+            "required": ["id"],
+            "type": "object",
+            "properties": {
+                "code": {"type": "string"},
+                "name": {"type": "string"},
+            },
+        },
+    }
+    batch_message = {
+        "type": "BATCH",
+        "stream": "continents",
+        "encoding": {"format": "parquet", "compression": "gzip"},
+        "manifest": [
+            "file://tests/core/resources/continents.parquet.gz",
+        ],
+    }
+    tap_output = "\n".join([json.dumps(schema_message), json.dumps(batch_message)])
+
+    target_sync_test(
+        sqlite_sample_target_batch,
+        input=StringIO(tap_output),
+        finalize=True,
+    )
+    db = sqlite3.connect(config["path_to_db"])
+    cursor = db.cursor()
+    cursor.execute("SELECT COUNT(*) as count FROM continents")
+    assert cursor.fetchone()[0] == 7
+
+
 def test_sqlite_column_no_morph(sqlite_sample_target: SQLTarget):
     """End-to-end-to-end test for SQLite tap and target.
 
@@ -435,14 +498,15 @@ def test_record_with_missing_properties(
                 "properties": {
                     "id": {"type": "integer"},
                     "name": {"type": "string"},
+                    "table": {"type": "string"},
                 },
             },
             [],
             dedent(
                 """\
                 INSERT INTO test_stream
-                (id, name)
-                VALUES (:id, :name)""",
+                (id, name, "table")
+                VALUES (:id, :name, :table)""",
             ),
         ),
     ],
@@ -508,3 +572,48 @@ def test_hostile_to_sqlite(
         "hname_starts_with_number",
         "name_with_emoji_",
     }
+
+
+def test_overwrite_load_method(
+    sqlite_target_test_config: dict,
+):
+    sqlite_target_test_config["load_method"] = "overwrite"
+    target = SQLiteTarget(config=sqlite_target_test_config)
+    test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
+    schema_msg = {
+        "type": "SCHEMA",
+        "stream": test_tbl,
+        "schema": {
+            "type": "object",
+            "properties": {"col_a": th.StringType().to_dict()},
+        },
+    }
+
+    tap_output_a = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg,
+            {"type": "RECORD", "stream": test_tbl, "record": {"col_a": "123"}},
+        ]
+    )
+    # Assert
+    db = sqlite3.connect(sqlite_target_test_config["path_to_db"])
+    cursor = db.cursor()
+
+    target_sync_test(target, input=StringIO(tap_output_a), finalize=True)
+    cursor.execute(f"SELECT col_a FROM {test_tbl} ;")  # noqa: S608
+    records = [res[0] for res in cursor.fetchall()]
+    assert records == ["123"]
+
+    tap_output_b = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg,
+            {"type": "RECORD", "stream": test_tbl, "record": {"col_a": "456"}},
+        ]
+    )
+    target = SQLiteTarget(config=sqlite_target_test_config)
+    target_sync_test(target, input=StringIO(tap_output_b), finalize=True)
+    cursor.execute(f"SELECT col_a FROM {test_tbl} ;")  # noqa: S608
+    records = [res[0] for res in cursor.fetchall()]
+    assert records == ["456"]

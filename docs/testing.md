@@ -10,18 +10,11 @@ The Meltano SDK test framework consists of 4 main components:
 1. A runner class (`TapTestRunner` and `TargetTestRunner`), responsible for executing Taps/Targets and capturing their output.
 1. A suite dataclass, containing a list of tests.
 1. A test template classes (`TapTestTemplate`, `StreamTestTemplate`, `AttributeTestTemplate` and `TargetTestTemplate`), with methods to `.setup()`, `.test()`, `.validate()` and `.teardown()` (called in that order using `.run()`).
-1. `get_tap_test_class` and `get_target_test_class` factory methods. These wrap a `get_test_class` factory method, which takes a runner and a list of suites and return a `pytest` test class.
+1. {func}`get_tap_test_class <singer_sdk.testing.get_tap_test_class>` and {func}`get_target_test_class <singer_sdk.testing.get_target_test_class>` factory methods. These wrap a `get_test_class` factory method, which takes a runner and a list of suites and return a `pytest` test class.
 
 ## Example Usage
 
 If you created your Tap/Target using the provided cookiecutter templates, you will find the following snippets in `tests/test_core.py`.
-You will also find a `conftest.py` file containing configuration of the SDK as a `pytest` plugin.
-This is required for tests to collect correctly:
-
-```python
-# register the singer_sdk pytest plugin
-pytest_plugins = ("singer_sdk.testing.pytest_plugin",)
-```
 
 ### Testing Taps
 
@@ -83,7 +76,7 @@ class TestTargetExample(StandardTargetTests):
 
 ## Configuring Tests
 
-Test suite behaviors can be configured by passing a `SuiteConfig` instance to the `get_test_class` functions:
+Test suite behaviors can be configured by passing a {func}`SuiteConfig <singer_sdk.testing.SuiteConfig>` instance to the `get_test_class` functions:
 
 ```python
 from singer_sdk.testing import SuiteConfig, get_tap_test_class
@@ -108,7 +101,7 @@ TestTapStackExchange = get_tap_test_class(
 )
 ```
 
-Check out [`singer_sdk/testing/config.py`](https://github.com/meltano/sdk/tree/main/singer_sdk/testing/config.py) for available config options.
+Check out [the reference](#reference) for more information on the available configuration options.
 
 ## Writing New Tests
 
@@ -134,6 +127,21 @@ my_custom_tap_tests = TestSuite(
 )
 ```
 
-This suite can now be passed to `get_tap_test_class` or `get_target_test_class` in a list of `custom_suites` along with any other suites, to generate your custom test class.
+This suite can now be passed to {func}`get_tap_test_class <singer_sdk.testing.get_tap_test_class>` or {func}`get_target_test_class <singer_sdk.testing.get_target_test_class>` in a list of `custom_suites` along with any other suites, to generate your custom test class.
 
 If your new test covers a common or general case, consider contributing to the standard test library via a pull request to [meltano/sdk](https://github.com/meltano/sdk).
+
+## Reference
+
+```{eval-rst}
+.. autofunction:: singer_sdk.testing.get_tap_test_class
+```
+
+```{eval-rst}
+.. autofunction:: singer_sdk.testing.get_target_test_class
+```
+
+```{eval-rst}
+.. autoclass:: singer_sdk.testing.SuiteConfig
+    :members:
+```

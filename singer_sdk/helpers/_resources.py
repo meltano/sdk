@@ -6,12 +6,12 @@ import typing as t
 if t.TYPE_CHECKING:
     from types import ModuleType
 
-if sys.version_info < (3, 9):
+    from singer_sdk.helpers._compat import Traversable
+
+if sys.version_info < (3, 10):
     import importlib_resources
-    from importlib_resources.abc import Traversable
 else:
     import importlib.resources as importlib_resources
-    from importlib.abc import Traversable
 
 
 def get_package_files(package: str | ModuleType) -> Traversable:
@@ -24,4 +24,4 @@ def get_package_files(package: str | ModuleType) -> Traversable:
     Returns:
         The file as a Traversable object.
     """
-    return t.cast(Traversable, importlib_resources.files(package))
+    return importlib_resources.files(package)

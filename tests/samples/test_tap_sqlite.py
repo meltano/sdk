@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import datetime
 import json
 import typing as t
 
+import pytest
+import time_machine
 from click.testing import CliRunner
 
 from samples.sample_tap_sqlite import SQLiteTap
@@ -11,6 +14,7 @@ from singer_sdk import SQLStream
 from singer_sdk._singerlib import MetadataMapping, StreamMetadata
 from singer_sdk.testing import (
     get_standard_tap_tests,
+    tap_sync_test,
     tap_to_target_sync_test,
 )
 
@@ -54,8 +58,11 @@ def test_sql_metadata(sqlite_sample_tap: SQLTap):
     assert detected_root_md["schema-name"] == translated_metadata.schema_name
     assert detected_root_md == translated_metadata.to_dict()
     md_map = MetadataMapping.from_iterable(stream.catalog_entry["metadata"])
-    assert md_map[()].schema_name == "main"
-    assert md_map[()].table_key_properties == ["c1"]
+
+    stream_metadata = md_map[()]
+    assert isinstance(stream_metadata, StreamMetadata)
+    assert stream_metadata.schema_name == "main"
+    assert stream_metadata.table_key_properties == ["c1"]
 
 
 def test_sqlite_discovery(sqlite_sample_tap: SQLTap):
@@ -63,7 +70,7 @@ def test_sqlite_discovery(sqlite_sample_tap: SQLTap):
     sqlite_sample_tap.sync_all()
     stream = t.cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
     schema = stream.schema
-    assert len(schema["properties"]) == 2
+    assert len(schema["properties"]) == 3
     assert stream.name == stream.tap_stream_id == "main-t1"
 
     md_map = MetadataMapping.from_iterable(stream.catalog_entry["metadata"])
@@ -76,18 +83,24 @@ def test_sqlite_discovery(sqlite_sample_tap: SQLTap):
 
     assert stream.metadata.root.table_key_properties == ["c1"]
     assert stream.primary_keys == ["c1"]
+    assert stream.schema["properties"]["c1"] == {"type": ["integer"]}
+    assert stream.schema["required"] == ["c1"]
 
 
 def test_sqlite_input_catalog(sqlite_sample_tap: SQLTap):
     sqlite_sample_tap.sync_all()
     stream = t.cast(SQLStream, sqlite_sample_tap.streams["main-t1"])
-    assert len(stream.schema["properties"]) == 2
-    assert len(stream.stream_maps[0].transformed_schema["properties"]) == 2
+    assert len(stream.schema["properties"]) == 3
+    assert len(stream.stream_maps[0].transformed_schema["properties"]) == 3
 
     for schema in [stream.schema, stream.stream_maps[0].transformed_schema]:
-        assert len(schema["properties"]) == 2
-        assert schema["properties"]["c1"] == {"type": ["integer", "null"]}
-        assert schema["properties"]["c2"] == {"type": ["string", "null"]}
+        assert len(schema["properties"]) == 3
+        assert schema["properties"]["c1"] == {"type": ["integer"]}
+        assert schema["properties"]["c2"] == {
+            "type": ["string", "null"],
+            "maxLength": 10,
+        }
+        assert schema["properties"]["c3"] == {"type": ["string", "null"]}
         assert stream.name == stream.tap_stream_id == "main-t1"
 
     md_map = MetadataMapping.from_iterable(stream.catalog_entry["metadata"])
@@ -112,7 +125,31 @@ def test_sqlite_tap_standard_tests(sqlite_sample_tap: SQLTap):
 
 def test_sync_sqlite_to_csv(sqlite_sample_tap: SQLTap, tmp_path: Path):
     _discover_and_select_all(sqlite_sample_tap)
-    orig_stdout, _, _, _ = tap_to_target_sync_test(
+    _, _, _, _ = tap_to_target_sync_test(
         sqlite_sample_tap,
         SampleTargetCSV(config={"target_folder": f"{tmp_path}/"}),
+    )
+
+
+@pytest.fixture
+@time_machine.travel(
+    datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc),
+    tick=False,
+)
+def sqlite_sample_tap_state_messages(sqlite_sample_tap: SQLTap) -> list[dict]:
+    stdout, _ = tap_sync_test(sqlite_sample_tap)
+    state_messages = []
+    for line in stdout.readlines():
+        message = json.loads(line)
+        if message["type"] == "STATE":
+            state_messages.append(message)
+
+    return state_messages
+
+
+def test_sqlite_state(sqlite_sample_tap_state_messages):
+    assert all(
+        "progress_markers" not in bookmark
+        for message in sqlite_sample_tap_state_messages
+        for bookmark in message["value"]["bookmarks"].values()
     )

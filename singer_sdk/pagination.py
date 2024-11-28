@@ -9,13 +9,13 @@ from urllib.parse import ParseResult, urlparse
 
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 
-if sys.version_info >= (3, 8):
-    from typing import Protocol  # noqa: ICN003
+if sys.version_info < (3, 12):
+    from typing_extensions import override
 else:
-    from typing_extensions import Protocol
+    from typing import override  # noqa: ICN003
 
 if t.TYPE_CHECKING:
-    from requests import Response
+    import requests
 
 T = t.TypeVar("T")
 TPageToken = t.TypeVar("TPageToken")
@@ -30,7 +30,7 @@ def first(iterable: t.Iterable[T]) -> T:
     Returns:
         The first element of the iterable.
 
-    >>> first('ABC')
+    >>> first("ABC")
     'A'
     """
     return next(iter(iterable))
@@ -93,7 +93,7 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
         """
         return str(self)
 
-    def advance(self, response: Response) -> None:
+    def advance(self, response: requests.Response) -> None:
         """Get a new page value and advance the current one.
 
         Args:
@@ -124,7 +124,7 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
         else:
             self._value = new_value
 
-    def has_more(self, response: Response) -> bool:  # noqa: ARG002
+    def has_more(self, response: requests.Response) -> bool:  # noqa: ARG002, PLR6301
         """Override this method to check if the endpoint has any pages left.
 
         Args:
@@ -136,7 +136,7 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
         return True
 
     @abstractmethod
-    def get_next(self, response: Response) -> TPageToken | None:
+    def get_next(self, response: requests.Response) -> TPageToken | None:
         """Get the next pagination token or index from the API response.
 
         Args:
@@ -150,7 +150,7 @@ class BaseAPIPaginator(t.Generic[TPageToken], metaclass=ABCMeta):
 
 
 class SinglePagePaginator(BaseAPIPaginator[None]):
-    """A paginator that does works with single-page endpoints."""
+    """A paginator that works with single-page endpoints."""
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """Create a new paginator.
@@ -161,15 +161,12 @@ class SinglePagePaginator(BaseAPIPaginator[None]):
         """
         super().__init__(None, *args, **kwargs)
 
-    def get_next(self, response: Response) -> None:  # noqa: ARG002
-        """Get the next pagination token or index from the API response.
+    @override
+    def get_next(self, response: requests.Response) -> None:
+        """Always return None to indicate pagination is complete after the first page.
 
         Args:
             response: API response object.
-
-        Returns:
-            The next page token or index. Return `None` from this method to indicate
-                the end of pagination.
         """
         return
 
@@ -187,7 +184,7 @@ class BaseHATEOASPaginator(
     like "https://api.com/link/to/next-item".
 
     The :attr:`~singer_sdk.pagination.BaseAPIPaginator.current_value` attribute of
-    this paginator is a `urllib.parse.ParseResult`_ object. This object
+    this paginator is a :class:`urllib.parse.ParseResult` object. This object
     contains the following attributes:
 
     - scheme
@@ -205,6 +202,7 @@ class BaseHATEOASPaginator(
            def get_next_url(self, response):
                return response.json().get("next")
 
+
        class MyStream(Stream):
            def get_new_paginator(self):
                return MyHATEOASPaginator()
@@ -213,9 +211,6 @@ class BaseHATEOASPaginator(
                if next_page_token:
                    return dict(parse_qsl(next_page_token.query))
                return {}
-
-    .. _`urllib.parse.ParseResult`:
-         https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlparse
     """
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
@@ -228,7 +223,7 @@ class BaseHATEOASPaginator(
         super().__init__(None, *args, **kwargs)
 
     @abstractmethod
-    def get_next_url(self, response: Response) -> str | None:
+    def get_next_url(self, response: requests.Response) -> str | None:
         """Override this method to extract a HATEOAS link from the response.
 
         Args:
@@ -236,7 +231,8 @@ class BaseHATEOASPaginator(
         """
         ...
 
-    def get_next(self, response: Response) -> ParseResult | None:
+    @override
+    def get_next(self, response: requests.Response) -> ParseResult | None:
         """Get the next pagination token or index from the API response.
 
         Args:
@@ -257,7 +253,8 @@ class HeaderLinkPaginator(BaseHATEOASPaginator):
         - https://datatracker.ietf.org/doc/html/rfc8288#section-3
     """
 
-    def get_next_url(self, response: Response) -> str | None:
+    @override
+    def get_next_url(self, response: requests.Response) -> str | None:
         """Override this method to extract a HATEOAS link from the response.
 
         Args:
@@ -289,7 +286,8 @@ class JSONPathPaginator(BaseAPIPaginator[t.Optional[str]]):
         super().__init__(None, *args, **kwargs)
         self._jsonpath = jsonpath
 
-    def get_next(self, response: Response) -> str | None:
+    @override
+    def get_next(self, response: requests.Response) -> str | None:
         """Get the next page token.
 
         Args:
@@ -321,7 +319,8 @@ class SimpleHeaderPaginator(BaseAPIPaginator[t.Optional[str]]):
         super().__init__(None, *args, **kwargs)
         self._key = key
 
-    def get_next(self, response: Response) -> str | None:
+    @override
+    def get_next(self, response: requests.Response) -> str | None:
         """Get the next page token.
 
         Args:
@@ -336,20 +335,8 @@ class SimpleHeaderPaginator(BaseAPIPaginator[t.Optional[str]]):
 class BasePageNumberPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
     """Paginator class for APIs that use page number."""
 
-    @abstractmethod
-    def has_more(self, response: Response) -> bool:
-        """Override this method to check if the endpoint has any pages left.
-
-        Args:
-            response: API response object.
-
-        Returns:
-            Boolean flag used to indicate if the endpoint has more pages.
-
-        """
-        ...
-
-    def get_next(self, response: Response) -> int | None:  # noqa: ARG002
+    @override
+    def get_next(self, response: requests.Response) -> int | None:
         """Get the next page number.
 
         Args:
@@ -382,19 +369,8 @@ class BaseOffsetPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         super().__init__(start_value, *args, **kwargs)
         self._page_size = page_size
 
-    @abstractmethod
-    def has_more(self, response: Response) -> bool:
-        """Override this method to check if the endpoint has any pages left.
-
-        Args:
-            response: API response object.
-
-        Returns:
-            Boolean flag used to indicate if the endpoint has more pages.
-        """
-        ...
-
-    def get_next(self, response: Response) -> int | None:  # noqa: ARG002
+    @override
+    def get_next(self, response: requests.Response) -> int | None:
         """Get the next page offset.
 
         Args:
@@ -406,12 +382,12 @@ class BaseOffsetPaginator(BaseAPIPaginator[int], metaclass=ABCMeta):
         return self._value + self._page_size
 
 
-class LegacyPaginatedStreamProtocol(Protocol[TPageToken]):
+class LegacyPaginatedStreamProtocol(t.Protocol[TPageToken]):
     """Protocol for legacy paginated streams classes."""
 
     def get_next_page_token(
         self,
-        response: Response,
+        response: requests.Response,
         previous_token: TPageToken | None,
     ) -> TPageToken | None:
         """Get the next page token.
@@ -420,7 +396,6 @@ class LegacyPaginatedStreamProtocol(Protocol[TPageToken]):
             response: API response object.
             previous_token: Previous page token.
         """
-        ...  # pragma: no cover
 
 
 class LegacyStreamPaginator(
@@ -445,7 +420,8 @@ class LegacyStreamPaginator(
         super().__init__(None, *args, **kwargs)
         self.stream = stream
 
-    def get_next(self, response: Response) -> TPageToken | None:
+    @override
+    def get_next(self, response: requests.Response) -> TPageToken | None:
         """Get next page value by calling the stream method.
 
         Args:

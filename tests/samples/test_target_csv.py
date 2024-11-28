@@ -1,6 +1,9 @@
 """Test tap-to-target sync."""
+
 from __future__ import annotations
 
+import datetime
+import importlib.resources
 import json
 import shutil
 import typing as t
@@ -8,8 +11,8 @@ import uuid
 from pathlib import Path
 
 import pytest
+import time_machine
 from click.testing import CliRunner
-from freezegun import freeze_time
 
 from samples.sample_mapper.mapper import StreamTransform
 from samples.sample_tap_countries.countries_tap import SampleTapCountries
@@ -77,12 +80,33 @@ def test_target_batching():
 
     buf, _ = tap_sync_test(tap)
 
-    mocked_starttime = "2012-01-01 12:00:00"
-    mocked_jumptotime2 = "2012-01-01 12:31:00"
-    mocked_jumptotime3 = "2012-01-01 13:02:00"
+    mocked_starttime = datetime.datetime(
+        2012,
+        1,
+        1,
+        12,
+        0,
+        tzinfo=datetime.timezone.utc,
+    )
+    mocked_jumptotime2 = datetime.datetime(
+        2012,
+        1,
+        1,
+        12,
+        31,
+        tzinfo=datetime.timezone.utc,
+    )
+    mocked_jumptotime3 = datetime.datetime(
+        2012,
+        1,
+        1,
+        13,
+        2,
+        tzinfo=datetime.timezone.utc,
+    )
     countries_record_count = 257
 
-    with freeze_time(mocked_starttime):
+    with time_machine.travel(mocked_starttime, tick=False):
         target = TargetMock(config={})
         target.max_parallelism = 1  # Limit unit test to 1 process
         assert target.num_records_processed == 0
@@ -96,7 +120,7 @@ def test_target_batching():
         assert len(target.records_written) == 0  # Drain not yet called
         assert len(target.state_messages_written) == 0  # Drain not yet called
 
-    with freeze_time(mocked_jumptotime2):
+    with time_machine.travel(mocked_jumptotime2, tick=False):
         buf.seek(0)
         target_sync_test(target, buf, finalize=False)
 
@@ -105,7 +129,7 @@ def test_target_batching():
         assert len(target.records_written) == countries_record_count + 1
         assert len(target.state_messages_written) == 1
 
-    with freeze_time(mocked_jumptotime3):
+    with time_machine.travel(mocked_jumptotime3, tick=False):
         buf.seek(0)
         target_sync_test(target, buf, finalize=False)
 
@@ -124,7 +148,9 @@ def test_target_batching():
     }
 
 
-SAMPLE_FILENAME = Path(__file__).parent / Path("./resources/messages.jsonl")
+SAMPLE_FILENAME = (
+    importlib.resources.files("tests.samples") / "resources/messages.jsonl"
+)
 EXPECTED_OUTPUT = """"id"	"name"
 1	"Chris"
 2	"Mike"

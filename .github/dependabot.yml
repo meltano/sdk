@@ -3,22 +3,37 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: daily
+      interval: weekly
       time: "12:00"
-      timezone: "UTC"
     reviewers: [meltano/engineering]
-    labels: [deps]
+    labels: [Dependencies]
+    groups:
+      development-dependencies:
+        dependency-type: development
+      runtime-dependencies:
+        dependency-type: production
+        update-types:
+          - "minor"
+          - "patch"
+    versioning-strategy: increase-if-necessary
   - package-ecosystem: pip
     directory: "/.github/workflows"
     schedule:
-      interval: daily
+      interval: weekly
       time: "12:00"
-      timezone: "UTC"
     reviewers: [meltano/engineering]
-    labels: [deps]
+    labels: [Dependencies]
+    groups:
+      ci:
+        patterns:
+          - "*"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: weekly
     reviewers: [meltano/engineering]
-    labels: [deps]
+    labels: [Dependencies]
+    groups:
+      actions:
+        patterns:
+          - "*"

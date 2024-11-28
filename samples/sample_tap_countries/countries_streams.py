@@ -9,12 +9,15 @@ See the online explorer and query builder here:
 from __future__ import annotations
 
 import abc
-from pathlib import Path
+import importlib.resources
+import typing as t
+
+from requests_cache.session import CachedSession
 
 from singer_sdk import typing as th
 from singer_sdk.streams.graphql import GraphQLStream
 
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+SCHEMAS_DIR = importlib.resources.files(__package__) / "schemas"
 
 
 class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
@@ -24,6 +27,10 @@ class CountriesAPIStream(GraphQLStream, metaclass=abc.ABCMeta):
     """
 
     url_base = "https://countries.trevorblades.com/"
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._requests_session = CachedSession()
 
 
 class CountriesStream(CountriesAPIStream):

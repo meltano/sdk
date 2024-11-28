@@ -47,6 +47,24 @@ three distinct fields:
 - `user__last_name`
 - `user__id`
 
+#### Flattening Example
+
+````{tab} meltano.yml
+```yaml
+flattening_enabled: true
+flattening_max_depth: 1   # flatten only top-level properties
+```
+````
+
+````{tab} JSON
+```json
+{
+  "flattening_enabled": true,
+  "flattening_max_depth": 1
+}
+```
+````
+
 ## Out-of-scope capabilities
 
 These capabilities are all out of scope _by design_:
@@ -62,23 +80,13 @@ These capabilities are all out of scope _by design_:
     a transformation tool like [dbt](https://www.getdbt.com), or (b) create a custom mapper
     plugin with inline lookup logic.
 
-### A feature for all Singer users, enabled by the SDK
+## A feature for all Singer users, enabled by the SDK
 
-The mapping features described here are create for the **_users_** of SDK-based taps and targets.
+The mapping features described here are created for the **_users_** of SDK-based taps and targets, which support inline transformations with `stream_maps` and `stream_map_config` out-of-box.
 
-Developers simply enable the feature using the instructions below, and then users can benefit from having inline transformation capabilities out-of-box on their favorite taps and targets.
+**Note:** to support non-SDK taps and targets, the standalone inline mapper plugin [`meltano-map-transformer`](https://hub.meltano.com/mappers/meltano-map-transformer/) follows all specifications defined here and can apply mapping transformations between _any_ Singer tap and target, even if they are not built using the SDK.
 
-**Note:** to support non-SDK taps and targets, we are also creating a standalone inline mapper plugin (`meltano-map-transform`), which follows all specifications defined here and can apply mapping transformations between _any_ Singer tap and target, even if they are not built using the SDK.
-
-## Enabling Stream Maps in SDK-Based Plugins
-
-To support inline mapping functions, the developer only needs to declare two plugin settings,
-called `stream_maps` and `stream_map_config`, and declare both settings as `object` type. (For example:
-`Property("stream_maps, ObjectType())` if using the python helper classes or
-`"stream_maps": {"type": "object"}` if using native JSON Schema declarations.)
-
-If the `stream_maps` setting is detected, the following behaviors will be implemented
-by the SDK automatically:
+The following behaviors are implemented by the SDK automatically:
 
 1. For taps, the SCHEMA and RECORD messages will automatically be transformed,
    duplicated, filtered, or aliased, as per the `stream_maps` config settings _after_
@@ -90,7 +98,7 @@ by the SDK automatically:
    setting _prior_ to any Sink processing functions.
    - This means that the target developer can assume that all streams and records are
      transformed, aliased, filtered, etc. _before_ any custom target code is executed.
-3. The upcoming standalone mapper plugin (`meltano-map-transform`) is a hybrid tap/target which
+3. The standalone mapper plugin [`meltano-map-transformer`](https://hub.meltano.com/mappers/meltano-map-transformer/) is a hybrid tap/target which
    simply receives input from a tap, transforms all stream and schema messages via the
    `stream_maps` config option, and then emits the resulting stream(s) to a downstream
    target.
@@ -104,8 +112,7 @@ by the SDK automatically:
 
 The `stream_maps` config expects a mapping of stream names to a structured transform object.
 
-Here is a sample `stream_maps` transformation which removes all references to `email` and
-adds `email_domain` and `email_hash` as new properties:
+Here is a sample `stream_maps` transformation which obfuscates `phone_number` with a fake value, removes all references to `email` and adds `email_domain` and `email_hash` as new properties:
 
 `meltano.yml` or `config.json`:
 
@@ -120,9 +127,18 @@ stream_maps:
     email_domain: owner_email.split('@')[-1]
     # for uniqueness checks
     email_hash: md5(config['hash_seed'] + owner_email)
+    # generate a fake phone number
+    phone_number: fake.phone_number()
 stream_map_config:
   # hash outputs are not able to be replicated without the original seed:
   hash_seed: 01AWZh7A6DzGm6iJZZ2T
+faker_config:
+  # set specific seed
+  seed: 0
+  # set specific locales
+  locale:
+  - en_US
+  - en_GB
 ```
 ````
 
@@ -133,11 +149,19 @@ stream_map_config:
         "customers": {
             "email": null,
             "email_domain": "owner_email.split('@')[-1]",
-            "email_hash": "md5(config['hash_seed'] + owner_email)"
+            "email_hash": "md5(config['hash_seed'] + owner_email)",
+            "phone_number": "fake.phone_number()"
         }
     },
     "stream_map_config": {
         "hash_seed": "01AWZh7A6DzGm6iJZZ2T"
+    },
+    "faker_config": {
+        "seed": 0,
+        "locale": [
+            "en_US",
+            "en_GB"
+        ]
     }
 }
 ```
@@ -154,6 +178,32 @@ Expressions are defined and parsed using the
 [`simpleval`](https://github.com/danthedeckie/simpleeval) expression library. This library
 accepts most native python expressions and is extended by custom functions which have been declared
 within the SDK.
+
+#### Compound Expressions
+
+Starting in version 0.33.0, the SDK supports the use of simple comprehensions, e.g. `[x + 1 for x in [1,2,3]]`. This is a powerful feature which allows you to perform complex transformations on lists of values. For example, you can use comprehensions to filter out values in an array:
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  users:
+    id: id
+    fields: "[f for f in fields if f['key'] != 'age']"
+```
+````
+
+````{tab} JSON
+```json
+{
+  "stream_maps": {
+    "users": {
+      "id": "id",
+      "fields": "[f for f in fields if f['key'] != 'age']"
+    }
+  }
+}
+```
+````
 
 ### Accessing Stream Properties within Mapping Expressions
 
@@ -178,20 +228,58 @@ can be referenced directly by mapping expressions.
 
 #### Built-In Functions
 
-- `md5()` - returns an inline MD5 hash of any string, outputting the string representation
-    of the hash's hex digest.
-  - This is defined by the SDK internally with native python:
-    `hashlib.md5(<input>.encode("utf-8")).hexdigest()`.
-- `datetime` - This is the datetime module object from the Python standard library. You can access
-    datetime.datetime, datetime.timedelta, etc.
+The following functions and namespaces are available for use in mapping expressions:
+
+| Function                                     | Description                                                                                                                                                                                                                                                            |
+| :------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`md5()`](inv:python:py:module:#hashlib)     | Returns an inline MD5 hash of any string, outputting the string representation of the hash's hex digest. This is defined by the SDK internally with native python: [`hashlib.md5(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest). |
+| [`datetime`](inv:python:py:module:#datetime) | This is the datetime module object from the Python standard library. You can access [`datetime.datetime`](inv:python:py:class:#datetime.datetime), [`datetime.timedelta`](inv:python:py:class:#datetime.timedelta), etc.                                               |
+| [`json`](inv:python:py:module:#json)         | This is the json module object from the Python standard library. Primarily used for calling [`json.dumps()`](inv:python:py:function:#json.dumps) and [`json.loads()`](inv:python:py:function:#json.loads).                                                             |
 
 #### Built-in Variable Names
 
-- `config` - a dictionary with the `stream_map_config` values from settings. This can be used
-  to provide a secret hash seed, for instance.
-- `record` - an alias for the record values dictionary in the current stream.
-- `_` - same as `record` but shorter to type
-- `self` - the existing property value if the property already exists
+The following variables are available in the context of a mapping expression:
+
+| Variable          | Description                                                                                                                                                                                       |
+| :---------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `config`          | A dictionary with the `stream_map_config` values from settings. This can be used to provide a secret hash seed, for instance.                                                                     |
+| `record`          | An alias for the record values dictionary in the current stream.                                                                                                                                  |
+| `_`               | Same as `record` but shorter to type.                                                                                                                                                             |
+| `self`            | The existing property value if the property already exists.                                                                                                                                       |
+| `fake`            | A [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config` (see previous example) - see the built-in [standard providers](inv:faker:std:doc#providers) for available methods. |
+| `__stream_name__` | The name of the stream. Useful when [applying the same transformation to multiple streams](#applying-a-mapping-across-two-or-more-streams).                                                       |
+
+  ```{tip}
+  To use the `fake` object, the `faker` library must be installed.
+  ```
+
+:::{versionadded} 0.35.0
+The `faker` object.
+:::
+
+:::{versionadded} 0.40.0
+The `Faker` class.
+:::
+
+:::{versionchanged} 0.41.0
+The `Faker` class was deprecated in favor of instance methods on the `fake` object.
+:::
+
+:::{versionadded} 0.42.0
+The `__stream_name__` variable.
+:::
+
+#### Built-in Alias Variable Names
+
+The following variables are available in the context of the `__alias__` expression:
+
+| Variable          | Description              |
+| :---------------- | :----------------------- |
+| `__stream_name__` | The existing stream name |
+
+:::{versionadded} 0.42.0
+The `__stream_name__` variable.
+:::
 
 #### Automatic Schema Detection
 
@@ -346,7 +434,7 @@ stream_maps:
 
 Notes:
 
-- To sync the stream as if it did not contain a primary key, simply set `__key_properties__` to `null`.
+- To sync the stream as if it did not contain a primary key, simply set `__key_properties__` to `null` or an empty list.
 - Key properties _must_ be present in the transformed stream result. Otherwise, an error will be raised.
 
 ### Add a property with a string literal value
@@ -374,21 +462,47 @@ stream_maps:
 ```
 ````
 
-#### Q: What is the difference between `primary_keys` and `key_properties`?
+### Masking data with Faker
 
-**A:** These two are _generally_ identical - and will only differ in cases like the above where `key_properties` is manually
-overridden or nullified by the user of the tap. Developers will specify `primary_keys` for each stream in the tap,
-but they do not control if the user will override `key_properties` behavior when initializing the stream. Primary keys
-describe the nature of the upstream data as known by the source system. However, either through manual catalog manipulation and/or by
-setting stream map transformations, the in-flight dedupe keys (`key_properties`) may be overridden or nullified by the user at any time.
+It is best practice (or even a legal requirement) to mask PII/PHI in lower environments. Stream mappers have access to the `Faker` library, which can be used to generate random data in various forms/formats.
 
-Additionally, some targets do not support primary key distinctions, and there are valid use cases to intentionally unset
-the `key_properties` in an extract-load pipeline. For instance, it is common to intentionally nullify key properties to trigger
-"append-only" loading behavior in certain targets, as may be required for historical reporting. This does not change the
-underlying nature of the `primary_key` configuration in the upstream source data, only how it will be landed or deduped
-in the downstream source.
+```yaml
+stream_maps:
+  customers:
+    # IMPORTANT: the `fake` variable name will only be available if faker_config is defined
+    first_name: fake.first_name() # generates a new random name each time
+faker_config:
+  # set specific seed
+  seed: 0
+  # set specific locales
+  locale:
+    - en_US
+    - en_GB
+```
 
-## Aliasing a stream using `__alias__`
+Be sure to checkout the [`faker` documentation](https://faker.readthedocs.io/en/master/) for all the fake data generation possibilities.
+
+Note that in the example above, `faker` will generate a new random value each time the `first_name()` function is invoked. This means if 3 records have a `first_name` value of `Mike`, then they will each have a different name after being mapped (for example, `Alistair`, `Debra`, `Scooby`).  This can actually lead to issues when developing in the lower environments.
+
+Some users require consistent masking (for example, the first name `Mike` is always masked as `Debra`). Consistent masking preserves the relationship between tables and rows, while still hiding the real value. When a random mask is generated every time, relationships between tables/rows are effectively lost, making it impossible to test things like sql `JOIN`s. This can cause highly unpredictable behavior when running the same code in lower environments vs production.
+
+To generate consistent masked values, you must provide the **same seed each time** before invoking the faker function.
+
+```yaml
+stream_maps:
+  customers:
+    # will always generate the same value for the same seed
+    first_name: fake.seed_instance(_['first_name']) or fake.first_name()
+faker_config:
+  # IMPORTANT: `fake` is only available if the `faker` extra is installed
+  locale: en_US
+```
+
+Remember, these expressions are evaluated by the [`simpleval`](https://github.com/danthedeckie/simpleeval) expression library, which only allows a single python expression (which is the reason for the `or` syntax above).
+
+This means if you require more advanced masking logic, which cannot be defined in a single python expression, you may need to consider a custom stream mapper.
+
+### Aliasing a stream using `__alias__`
 
 To alias a stream, simply add the operation `"__alias__": "new_name"` to the stream
 definition. For example, to alias the `customers` stream as `customer_v2`, use the
@@ -414,7 +528,7 @@ stream_maps:
 ```
 ````
 
-## Duplicating or splitting a stream using `__source__`
+### Duplicating or splitting a stream using `__source__`
 
 To create a new stream as a copy of the original, specify the operation
 `"__source__": "stream_name"`. For example, you can create a copy of the `customers` stream
@@ -458,9 +572,9 @@ stream_maps:
 ```
 ````
 
-## Filtering out records from a stream using `__filter__` operation
+### Filtering out records from a stream using `__filter__` operation
 
-The `__filter__` operation accept a string expression which must evaluate to `true` or
+The `__filter__` operation accepts a string expression which must evaluate to `true` or
 `false`. Filter expressions should be wrapped in `bool()` to ensure proper type conversion.
 
 For example, to only include customers with emails from the `example.com` company domain:
@@ -484,6 +598,92 @@ stream_maps:
 }
 ```
 ````
+
+### Aliasing properties
+
+This uses a "copy-and-delete" approach with the help of `__NULL__`:
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  customers:
+    new_field: old_field
+    old_field: __NULL__
+```
+````
+
+````{tab} JSON
+```json
+{
+    "stream_maps": {
+        "customers": {
+            "new_field": "old_field",
+            "old_field": "__NULL__"
+        }
+    }
+}
+```
+````
+
+### Applying a mapping across two or more streams
+
+You can use glob expressions to apply a stream map configuration to more than one stream:
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  "*":
+    name: first_name
+    first_name: __NULL__
+```
+````
+
+````{tab} JSON
+```json
+{
+    "stream_maps": {
+        "*": {
+            "name": "first_name",
+            "first_name": "__NULL__"
+        }
+    }
+}
+```
+````
+
+:::{versionadded} 0.37.0
+Support for stream glob expressions.
+:::
+
+### Aliasing two or more streams
+
+The `__alias__` operation evaluates simple python expressions.
+
+You can combine this with glob expressions to rename more than one stream:
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  "*":
+    __alias__: "__stream_name__ + '_v2'"
+```
+````
+
+````{tab} JSON
+```json
+{
+    "stream_maps": {
+        "*": {
+            "__alias__": "__stream_name__ + '_v2'"
+        }
+    }
+}
+```
+````
+
+:::{versionadded} 0.42.0
+Support for `__alias__` expression evaluation.
+:::
 
 ### Understanding Filters' Affects on Parent-Child Streams
 
@@ -564,3 +764,17 @@ Additionally, plugins are generally expected to fail if they receive unexpected 
 arguments. The intended use cases for stream map config values are user-defined in nature
 (such as the hashing use case defined above), and are unlikely to overlap with the
 plugin's already-existing settings.
+
+### Q: What is the difference between `primary_keys` and `key_properties`?
+
+**Answer:** These two are _generally_ identical - and will only differ in cases like the above where `key_properties` is manually
+overridden or nullified by the user of the tap. Developers will specify `primary_keys` for each stream in the tap,
+but they do not control if the user will override `key_properties` behavior when initializing the stream. Primary keys
+describe the nature of the upstream data as known by the source system. However, either through manual catalog manipulation and/or by
+setting stream map transformations, the in-flight dedupe keys (`key_properties`) may be overridden or nullified by the user at any time.
+
+Additionally, some targets do not support primary key distinctions, and there are valid use cases to intentionally unset
+the `key_properties` in an extract-load pipeline. For instance, it is common to intentionally nullify key properties to trigger
+"append-only" loading behavior in certain targets, as may be required for historical reporting. This does not change the
+underlying nature of the `primary_key` configuration in the upstream source data, only how it will be landed or deduped
+in the downstream source.

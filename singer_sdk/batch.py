@@ -1,17 +1,34 @@
 """Batching utilities for Singer SDK."""
+
 from __future__ import annotations
 
-import gzip
 import itertools
-import json
 import typing as t
+import warnings
 from abc import ABC, abstractmethod
-from uuid import uuid4
+
+from singer_sdk.helpers._compat import entry_points
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._batch import BatchConfig
 
 _T = t.TypeVar("_T")
+
+
+def __getattr__(name: str) -> t.Any:  # noqa: ANN401 # pragma: no cover
+    if name == "JSONLinesBatcher":
+        warnings.warn(
+            "The class JSONLinesBatcher was moved to singer_sdk.contrib.batch_encoder_jsonl.",  # noqa: E501
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+        from singer_sdk.contrib.batch_encoder_jsonl import JSONLinesBatcher  # noqa: PLC0415, I001
+
+        return JSONLinesBatcher
+
+    msg = f"module {__name__} has no attribute {name}"
+    raise AttributeError(msg)
 
 
 def lazy_chunked_generator(
@@ -71,41 +88,46 @@ class BaseBatcher(ABC):
         raise NotImplementedError
 
 
-class JSONLinesBatcher(BaseBatcher):
-    """JSON Lines Record Batcher."""
+class Batcher(BaseBatcher):
+    """Determines batch type and then serializes batches to that format."""
 
-    def get_batches(
-        self,
-        records: t.Iterator[dict],
-    ) -> t.Iterator[list[str]]:
-        """Yield manifest of batches.
+    def get_batches(self, records: t.Iterator[dict]) -> t.Iterator[list[str]]:
+        """Manifest of batches.
 
         Args:
             records: The records to batch.
 
-        Yields:
+        Returns:
             A list of file paths (called a manifest).
         """
-        sync_id = f"{self.tap_name}--{self.stream_name}-{uuid4()}"
-        prefix = self.batch_config.storage.prefix or ""
+        encoding_format = self.batch_config.encoding.format
+        batcher_type = self.get_batcher(encoding_format)
+        batcher = batcher_type(
+            self.tap_name,
+            self.stream_name,
+            self.batch_config,
+        )
+        return batcher.get_batches(records)
 
-        for i, chunk in enumerate(
-            lazy_chunked_generator(
-                records,
-                self.batch_config.batch_size,
-            ),
-            start=1,
-        ):
-            filename = f"{prefix}{sync_id}-{i}.json.gz"
-            with self.batch_config.storage.fs(create=True) as fs:
-                # TODO: Determine compression from config.
-                with fs.open(filename, "wb") as f, gzip.GzipFile(
-                    fileobj=f,
-                    mode="wb",
-                ) as gz:
-                    gz.writelines(
-                        (json.dumps(record, default=str) + "\n").encode()
-                        for record in chunk
-                    )
-                file_url = fs.geturl(filename)
-            yield [file_url]
+    @classmethod
+    def get_batcher(cls, name: str) -> type[BaseBatcher]:
+        """Get a batcher by name.
+
+        Args:
+            name: The name of the batcher.
+
+        Returns:
+            The batcher class.
+
+        Raises:
+            ValueError: If the batcher is not found.
+        """
+        plugins = entry_points(group="singer_sdk.batch_encoders")
+
+        try:
+            plugin = next(filter(lambda x: x.name == name, plugins))
+        except StopIteration:
+            message = f"Unsupported batcher: {name}"
+            raise ValueError(message) from None
+
+        return plugin.load()  # type: ignore[no-any-return]

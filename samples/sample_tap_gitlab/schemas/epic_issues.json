@@ -115,14 +115,14 @@
       "type": "string"
     },
     "discussion_locked": {
-      "type": "null"
+      "type": ["boolean", "null"]
     },
     "downvotes": {
       "type": "integer"
     },
     "due_date": {
       "type": ["string", "null"],
-      "format": "date-time"
+      "format": "date"
     },
     "epic_issue_id": {
       "type": "integer"
@@ -150,7 +150,7 @@
         },
         "due_date": {
           "type": ["string", "null"],
-          "format": "date-time"
+          "format": "date"
         },
         "id": {
           "type": "integer"
@@ -163,7 +163,7 @@
         },
         "start_date": {
           "type": ["string", "null"],
-          "format": "date-time"
+          "format": "date"
         },
         "state": {
           "type": "string"

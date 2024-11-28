@@ -6,13 +6,13 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+import importlib.resources
 
 from singer_sdk.streams import GraphQLStream
 
 SITE_URL = "https://gitlab.com/graphql"
 
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+SCHEMAS_DIR = importlib.resources.files(__package__) / "schemas"
 
 
 class GitlabGraphQLStream(GraphQLStream):
@@ -41,7 +41,7 @@ class GraphQLCurrentUserStream(GitlabGraphQLStream):
         currentUser {
             name
         }
-        """
+        """  # noqa: RUF027
 
 
 class GraphQLProjectsStream(GitlabGraphQLStream):

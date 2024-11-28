@@ -9,7 +9,7 @@ from singer_sdk import typing as th  # JSON schema typing helpers
 class BigQueryConnector(SQLConnector):
     """Connects to the BigQuery SQL source."""
 
-    def get_sqlalchemy_url(self, config: dict) -> str:
+    def get_sqlalchemy_url(self, config: dict) -> str:  # noqa: PLR6301
         """Concatenate a SQLAlchemy URL for use in connecting to the source."""
         return f"bigquery://{config['project_id']}"
 
@@ -52,6 +52,7 @@ class TapBigQuery(SQLTap):
             "project_id",
             th.StringType,
             required=True,
+            title="Project ID",
             description="GCP Project",
         ),
     ).to_dict()
@@ -59,4 +60,4 @@ class TapBigQuery(SQLTap):
     default_stream_class: type[SQLStream] = BigQueryStream
 
 
-__all__ = ["TapBigQuery", "BigQueryConnector", "BigQueryStream"]
+__all__ = ["BigQueryConnector", "BigQueryStream", "TapBigQuery"]

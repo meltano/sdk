@@ -8,4 +8,7 @@ The following pages contain useful information for developers building on top of
 porting
 pagination-classes
 custom-clis
+config-schema
+sql-tap
+sql-target
 ```

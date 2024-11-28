@@ -1,3 +1,10 @@
+# HTTP cache
+http_cache.sqlite
+
+# Local Poetry configuration file
+
+poetry.toml
+
 # CI
 
 _changelog_fragment.md

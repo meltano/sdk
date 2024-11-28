@@ -19,13 +19,14 @@ class SQLiteConnector(SQLConnector):
     allow_temp_tables = False
     allow_column_alter = False
     allow_merge_upsert = True
+    allow_overwrite: bool = True
 
-    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:
+    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:  # noqa: PLR6301
         """Generates a SQLAlchemy URL for SQLite."""
         return f"sqlite:///{config[DB_PATH_CONFIG]}"
 
 
-class SQLiteSink(SQLSink):
+class SQLiteSink(SQLSink[SQLiteConnector]):
     """The Sink class for SQLite.
 
     This class allows developers to optionally override `get_records()` and other
@@ -50,9 +51,11 @@ class SQLiteTarget(SQLTarget):
         th.Property(
             DB_PATH_CONFIG,
             th.StringType,
+            title="Database Path",
             description="The path to your SQLite database file(s).",
+            required=True,
         ),
     ).to_dict()
 
 
-__all__ = ["SQLiteTarget", "SQLiteConnector", "SQLiteSink"]
+__all__ = ["SQLiteConnector", "SQLiteSink", "SQLiteTarget"]

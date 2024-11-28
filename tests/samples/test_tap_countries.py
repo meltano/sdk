@@ -5,7 +5,6 @@ from __future__ import annotations
 import copy
 import io
 import json
-import logging
 import typing as t
 from contextlib import redirect_stdout
 
@@ -49,7 +48,7 @@ def test_countries_primary_key():
     )
     assert key_props_2 == ("code",), (
         f"Incorrect 'key_properties' in catalog: ({key_props_2})\n\n"
-        "Catalog entry was: {countries_entry}"
+        f"Catalog entry was: {countries_entry}"
     )
 
 
@@ -89,7 +88,6 @@ def test_with_catalog_entry():
         record=copied_record,
         schema=stream.schema,
         mask=stream.mask,
-        logger=logging.getLogger(),
     )
     assert copied_record == record
 
@@ -97,7 +95,6 @@ def test_with_catalog_entry():
         stream_name=stream.name,
         schema=stream.schema,
         mask=stream.metadata.resolve_selection(),
-        logger=logging.getLogger(),
     )
     assert new_schema == stream.schema
 
@@ -143,10 +140,10 @@ def test_batch_mode(outdir):
     assert counter["SCHEMA", "countries"] == 1
     assert counter["BATCH", "countries"] == 1
 
-    assert counter[("STATE",)] == 3
+    assert counter["STATE",] == 3
 
 
-@pytest.mark.snapshot()
+@pytest.mark.snapshot
 def test_write_schema(
     snapshot: Snapshot,
     snapshot_dir: Path,

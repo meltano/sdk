@@ -16,7 +16,7 @@ class SQLiteConnector(SQLConnector):
     This class handles all DDL and type conversions.
     """
 
-    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:
+    def get_sqlalchemy_url(self, config: dict[str, t.Any]) -> str:  # noqa: PLR6301
         """Generates a SQLAlchemy URL for SQLite."""
         return f"sqlite:///{config[DB_PATH_CONFIG]}"
 
@@ -33,6 +33,10 @@ class SQLiteStream(SQLStream):
     """
 
     connector_class = SQLiteConnector
+    supports_nulls_first = True
+
+    # Use a smaller state message frequency to check intermediate state.
+    STATE_MSG_FREQUENCY = 10
 
 
 class SQLiteTap(SQLTap):
@@ -44,10 +48,12 @@ class SQLiteTap(SQLTap):
         th.Property(
             DB_PATH_CONFIG,
             th.StringType,
+            title="Database Path",
             description="The path to your SQLite database file(s).",
+            required=True,
             examples=["./path/to/my.db", "/absolute/path/to/my.db"],
         ),
     ).to_dict()
 
 
-__all__ = ["SQLiteTap", "SQLiteConnector", "SQLiteStream"]
+__all__ = ["SQLiteConnector", "SQLiteStream", "SQLiteTap"]

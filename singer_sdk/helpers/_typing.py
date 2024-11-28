@@ -4,20 +4,19 @@ from __future__ import annotations
 
 import copy
 import datetime
+import logging
 import typing as t
+import uuid
 from enum import Enum
 from functools import lru_cache
-
-import pendulum
-
-if t.TYPE_CHECKING:
-    import logging
 
 _MAX_TIMESTAMP = "9999-12-31 23:59:59.999999"
 _MAX_TIME = "23:59:59.999999"
 JSONSCHEMA_ANNOTATION_SECRET = "secret"  # noqa: S105
 JSONSCHEMA_ANNOTATION_WRITEONLY = "writeOnly"
 UTC = datetime.timezone.utc
+
+logger = logging.getLogger(__name__)
 
 
 class DatetimeErrorTreatmentEnum(Enum):
@@ -39,13 +38,13 @@ class EmptySchemaTypeError(Exception):
         super().__init__(msg, *args)
 
 
-def to_json_compatible(val: t.Any) -> t.Any:
-    """Return as string if datetime. JSON does not support proper datetime types.
-
-    If given a naive datetime object, pendulum automatically makes it utc
-    """
-    if isinstance(val, (datetime.datetime, pendulum.DateTime)):
-        return pendulum.instance(val).isoformat()
+def to_json_compatible(val: t.Any) -> t.Any:  # noqa: ANN401
+    """Return as string if datetime. JSON does not support proper datetime types."""
+    if isinstance(val, (datetime.datetime,)):
+        # Make naive datetimes UTC
+        return (val.replace(tzinfo=UTC) if val.tzinfo is None else val).isoformat("T")
+    if isinstance(val, (uuid.UUID,)):
+        return str(val)
     return val
 
 
@@ -59,6 +58,10 @@ def append_type(type_dict: dict, new_type: str) -> dict:
             result["anyOf"] = [result["anyOf"], new_type]
         return result
 
+    if "oneOf" in result:
+        result["oneOf"].append({"type": new_type})
+        return result
+
     if "type" in result:
         type_array = (
             result["type"] if isinstance(result["type"], list) else [result["type"]]
@@ -67,18 +70,19 @@ def append_type(type_dict: dict, new_type: str) -> dict:
             result["type"] = [*type_array, new_type]
         return result
 
-    msg = (
+    logger.warning(
         "Could not append type because the JSON schema for the dictionary "
-        f"`{type_dict}` appears to be invalid."
+        "`%s` appears to be invalid.",
+        type_dict,
     )
-    raise ValueError(msg)
+    return result
 
 
 def is_secret_type(type_dict: dict) -> bool:
     """Return True if JSON Schema type definition appears to be a secret.
 
     Will return true if either `writeOnly` or `secret` are true on this type
-    or any of the type's subproperties.
+    or any of the type's sub-properties.
 
     Args:
         type_dict: The JSON Schema type to check.
@@ -95,7 +99,7 @@ def is_secret_type(type_dict: dict) -> bool:
         return True
 
     if "properties" in type_dict:
-        # Recursively check subproperties and return True if any child is secret.
+        # Recursively check sub-properties and return True if any child is secret.
         return any(
             is_secret_type(child_type_dict)
             for child_type_dict in type_dict["properties"].values()
@@ -140,6 +144,8 @@ def is_datetime_type(type_dict: dict) -> bool:
         raise EmptySchemaTypeError
     if "anyOf" in type_dict:
         return any(is_datetime_type(type_dict) for type_dict in type_dict["anyOf"])
+    if "allOf" in type_dict:
+        return all(is_datetime_type(type_dict) for type_dict in type_dict["allOf"])
     if "type" in type_dict:
         return type_dict.get("format") == "date-time"
     msg = f"Could not detect type of replication key using schema '{type_dict}'"
@@ -163,6 +169,11 @@ def is_date_or_datetime_type(type_dict: dict) -> bool:
     if "anyOf" in type_dict:
         return any(is_date_or_datetime_type(option) for option in type_dict["anyOf"])
 
+    if "allOf" in type_dict:
+        return all(
+            is_date_or_datetime_type(type_dict) for type_dict in type_dict["allOf"]
+        )
+
     if "type" in type_dict:
         return type_dict.get("format") in {"date", "date-time"}
 
@@ -184,7 +195,7 @@ def get_datelike_property_type(property_schema: dict) -> str | None:
     return None
 
 
-def _is_string_with_format(type_dict):
+def _is_string_with_format(type_dict: dict[str, t.Any]) -> bool | None:
     if "string" in type_dict.get("type", []) and type_dict.get("format") in {
         "date-time",
         "time",
@@ -195,14 +206,14 @@ def _is_string_with_format(type_dict):
 
 
 def handle_invalid_timestamp_in_record(
-    record,  # noqa: ARG001
+    record: dict[str, t.Any],  # noqa: ARG001
     key_breadcrumb: list[str],
     invalid_value: str,
     datelike_typename: str,
     ex: Exception,
     treatment: DatetimeErrorTreatmentEnum | None,
     logger: logging.Logger,
-) -> t.Any:
+) -> t.Any:  # noqa: ANN401
     """Apply treatment or raise an error for invalid time values."""
     treatment = treatment or DatetimeErrorTreatmentEnum.ERROR
     msg = (
@@ -228,6 +239,9 @@ def is_string_array_type(type_dict: dict) -> bool:
     if "anyOf" in type_dict:
         return any(is_string_array_type(t) for t in type_dict["anyOf"])
 
+    if "allOf" in type_dict:
+        return all(is_string_array_type(t) for t in type_dict["allOf"])
+
     if "type" not in type_dict:
         msg = f"Could not detect type from schema '{type_dict}'"
         raise ValueError(msg)
@@ -242,6 +256,9 @@ def is_array_type(type_dict: dict) -> bool:
 
     if "anyOf" in type_dict:
         return any(is_array_type(t) for t in type_dict["anyOf"])
+
+    if "allOf" in type_dict:
+        return all(is_array_type(t) for t in type_dict["allOf"])
 
     if "type" not in type_dict:
         msg = f"Could not detect type from schema '{type_dict}'"
@@ -263,6 +280,17 @@ def is_boolean_type(property_schema: dict) -> bool | None:
         if "boolean" in schema_type or schema_type == "boolean":
             return True
     return False
+
+
+def _is_exclusive_boolean_type(property_schema: dict) -> bool:
+    if "type" not in property_schema:
+        return False
+
+    return (
+        property_schema["type"] == "boolean"
+        or property_schema["type"] == ["boolean"]
+        or set(property_schema["type"]) == {"boolean", "null"}
+    )
 
 
 def is_integer_type(property_schema: dict) -> bool | None:
@@ -325,12 +353,12 @@ def is_number_type(property_schema: dict) -> bool | None:
     return False
 
 
-@lru_cache()
+@lru_cache
 def _warn_unmapped_properties(
     stream_name: str,
     property_names: tuple[str],
     logger: logging.Logger,
-):
+) -> None:
     logger.warning(
         "Properties %s were present in the '%s' stream but "
         "not found in catalog schema. Ignoring.",
@@ -387,7 +415,8 @@ def conform_record_data_types(
     return rec
 
 
-def _conform_record_data_types(  # noqa: PLR0912
+# TODO: This is in dire need of refactoring. It's a mess.
+def _conform_record_data_types(
     input_object: dict[str, t.Any],
     schema: dict,
     level: TypeConformanceLevel,
@@ -404,7 +433,7 @@ def _conform_record_data_types(  # noqa: PLR0912
         input_object: A single record
         schema: JSON schema the given input_object is expected to meet
         level:  Specifies how recursive the conformance process should be
-        parent: '.' seperated path to this element from the object root (for logging)
+        parent: '.' separated path to this element from the object root (for logging)
     """
     output_object: dict[str, t.Any] = {}
     unmapped_properties: list[str] = []
@@ -415,30 +444,22 @@ def _conform_record_data_types(  # noqa: PLR0912
     for property_name, elem in input_object.items():
         property_path = property_name if parent is None else f"{parent}.{property_name}"
         if property_name not in schema["properties"]:
+            if schema.get("additionalProperties"):
+                output_object[property_name] = elem
             unmapped_properties.append(property_path)
             continue
 
         property_schema = schema["properties"][property_name]
         if isinstance(elem, list) and is_uniform_list(property_schema):
             if level == TypeConformanceLevel.RECURSIVE:
-                item_schema = property_schema["items"]
-                output = []
-                for item in elem:
-                    if is_object_type(item_schema) and isinstance(item, dict):
-                        (
-                            output_item,
-                            sub_unmapped_properties,
-                        ) = _conform_record_data_types(
-                            item,
-                            item_schema,
-                            level,
-                            property_path,
-                        )
-                        unmapped_properties.extend(sub_unmapped_properties)
-                        output.append(output_item)
-                    else:
-                        output.append(_conform_primitive_property(item, item_schema))
+                output, sub_unmapped_properties = _conform_uniform_list(
+                    elem,
+                    path=property_path,
+                    schema=property_schema,
+                    level=level,
+                )
                 output_object[property_name] = output
+                unmapped_properties.extend(sub_unmapped_properties)
             else:
                 output_object[property_name] = elem
         elif (
@@ -467,15 +488,44 @@ def _conform_record_data_types(  # noqa: PLR0912
     return output_object, unmapped_properties
 
 
+def _conform_uniform_list(
+    element: list,
+    *,
+    path: str,
+    schema: dict,
+    level: TypeConformanceLevel,
+) -> tuple[list, list[str]]:
+    item_schema = schema["items"]
+    unmapped_properties = []
+    output = []
+    for item in element:
+        if is_object_type(item_schema) and isinstance(item, dict):
+            (
+                output_item,
+                sub_unmapped_properties,
+            ) = _conform_record_data_types(
+                item,
+                item_schema,
+                level,
+                path,
+            )
+            unmapped_properties.extend(sub_unmapped_properties)
+            output.append(output_item)
+        else:
+            output.append(_conform_primitive_property(item, item_schema))
+
+    return output, unmapped_properties
+
+
 def _conform_primitive_property(  # noqa: PLR0911
-    elem: t.Any,
+    elem: t.Any,  # noqa: ANN401
     property_schema: dict,
-) -> t.Any:
+) -> t.Any:  # noqa: ANN401
     """Converts a primitive (i.e. not object or array) to a json compatible type."""
-    if isinstance(elem, (datetime.datetime, pendulum.DateTime)):
+    if isinstance(elem, (datetime.datetime,)):
         return to_json_compatible(elem)
     if isinstance(elem, datetime.date):
-        return f"{elem.isoformat()}T00:00:00+00:00"
+        return elem.isoformat()
     if isinstance(elem, datetime.timedelta):
         epoch = datetime.datetime.fromtimestamp(0, UTC)
         timedelta_from_epoch = epoch + elem
@@ -487,6 +537,6 @@ def _conform_primitive_property(  # noqa: PLR0911
     if isinstance(elem, bytes):
         # for BIT value, treat 0 as False and anything else as True
         return elem != b"\x00" if is_boolean_type(property_schema) else elem.hex()
-    if is_boolean_type(property_schema):
+    if _is_exclusive_boolean_type(property_schema):
         return None if elem is None else elem != 0
     return elem

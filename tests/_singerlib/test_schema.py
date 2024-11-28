@@ -4,10 +4,10 @@ import pytest
 
 from singer_sdk._singerlib import Schema, resolve_schema_references
 
-STRING_SCHEMA = Schema(type="string", maxLength=32)
-STRING_DICT = {"type": "string", "maxLength": 32}
-INTEGER_SCHEMA = Schema(type="integer", maximum=1000000)
-INTEGER_DICT = {"type": "integer", "maximum": 1000000}
+STRING_SCHEMA = Schema(type="string", maxLength=32, default="")
+STRING_DICT = {"type": "string", "maxLength": 32, "default": ""}
+INTEGER_SCHEMA = Schema(type="integer", maximum=1000000, default=0)
+INTEGER_DICT = {"type": "integer", "maximum": 1000000, "default": 0}
 ARRAY_SCHEMA = Schema(type="array", items=INTEGER_SCHEMA)
 ARRAY_DICT = {"type": "array", "items": INTEGER_DICT}
 OBJECT_SCHEMA = Schema(
@@ -244,6 +244,24 @@ def test_schema_from_dict(pydict, expected):
             },
             {"anyOf": [{"type": "string"}, {"type": "integer"}]},
             id="resolve_schema_any_of",
+        ),
+        pytest.param(
+            {
+                "allOf": [
+                    {"$ref": "references.json#/definitions/first_type"},
+                    {"$ref": "references.json#/definitions/second_type"},
+                ],
+            },
+            {
+                "references.json": {
+                    "definitions": {
+                        "first_type": {"type": "string"},
+                        "second_type": {"type": "integer"},
+                    },
+                },
+            },
+            {"allOf": [{"type": "string"}, {"type": "integer"}]},
+            id="resolve_schema_all_of",
         ),
     ],
 )

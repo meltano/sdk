@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
+import importlib.resources
 import json
-from pathlib import Path
 
 from singer_sdk import Stream, Tap
 
-PROJECT_DIR = Path(__file__).parent
+PROJECT_DIR = importlib.resources.files("samples.aapl")
 
 
 class AAPL(Stream):
@@ -16,7 +16,7 @@ class AAPL(Stream):
     name = "aapl"
     schema_filepath = PROJECT_DIR / "fundamentals.json"
 
-    def get_records(self, _):
+    def get_records(self, _):  # noqa: PLR6301
         """Generate a single record."""
         with PROJECT_DIR.joinpath("AAPL.json").open() as f:
             record = json.load(f)

@@ -40,7 +40,7 @@ def get_standard_tap_tests(  # noqa: C901
         catalog1 = _get_tap_catalog(tap_class, config or {})
         # Reset and re-initialize with an input catalog
         tap2: Tap = tap_class(config=config, parse_env_config=True, catalog=catalog1)
-        assert tap2
+        assert tap2  # type: ignore[truthy-bool]
 
     def _test_stream_connections() -> None:
         # Initialize with basic config
@@ -150,10 +150,7 @@ def _get_tap_catalog(
     # Test discovery
     tap.run_discovery()
     catalog_dict = tap.catalog_dict
-    if select_all:
-        return _select_all(catalog_dict)
-
-    return catalog_dict
+    return _select_all(catalog_dict) if select_all else catalog_dict
 
 
 def _select_all(catalog_dict: dict) -> dict:
@@ -194,9 +191,9 @@ def target_sync_test(
 
     with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
         if input is not None:
-            target._process_lines(input)
+            target._process_lines(input)  # noqa: SLF001
         if finalize:
-            target._process_endofpipe()
+            target._process_endofpipe()  # noqa: SLF001
 
     stdout_buf.seek(0)
     stderr_buf.seek(0)

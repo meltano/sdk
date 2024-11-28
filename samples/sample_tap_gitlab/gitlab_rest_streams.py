@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+import importlib.resources
 import typing as t
-from pathlib import Path
 
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.pagination import SimpleHeaderPaginator
@@ -11,13 +11,15 @@ from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import (
     ArrayType,
     DateTimeType,
+    DateType,
     IntegerType,
+    ObjectType,
     PropertiesList,
     Property,
     StringType,
 )
 
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+SCHEMAS_DIR = importlib.resources.files(__package__) / "schemas"
 
 DEFAULT_URL_BASE = "https://gitlab.com/api/v4"
 
@@ -54,7 +56,7 @@ class GitlabStream(RESTStream[str]):
             params["order_by"] = self.replication_key
         return params
 
-    def get_new_paginator(self) -> SimpleHeaderPaginator:
+    def get_new_paginator(self) -> SimpleHeaderPaginator:  # noqa: PLR6301
         """Return a new paginator for GitLab API endpoints.
 
         Returns:
@@ -157,18 +159,28 @@ class EpicsStream(ProjectBasedStream):
         Property("title", StringType),
         Property("description", StringType),
         Property("state", StringType),
-        Property("author_id", IntegerType),
-        Property("start_date", DateTimeType),
-        Property("end_date", DateTimeType),
-        Property("due_date", DateTimeType),
+        Property("start_date", DateType),
+        Property("end_date", DateType),
+        Property("due_date", DateType),
         Property("created_at", DateTimeType),
         Property("updated_at", DateTimeType),
         Property("labels", ArrayType(StringType)),
         Property("upvotes", IntegerType),
         Property("downvotes", IntegerType),
+        Property(
+            "author",
+            ObjectType(
+                Property("id", IntegerType),
+                Property("name", StringType),
+                Property("username", StringType),
+                Property("state", StringType),
+                Property("avatar_url", StringType),
+                Property("web_url", StringType),
+            ),
+        ),
     ).to_dict()
 
-    def get_child_context(
+    def get_child_context(  # noqa: PLR6301
         self,
         record: dict,
         context: dict | None,  # noqa: ARG002

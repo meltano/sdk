@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import typing as t
 
 from singer_sdk.exceptions import InvalidStreamSortException
@@ -10,6 +11,8 @@ from singer_sdk.helpers._typing import to_json_compatible
 if t.TYPE_CHECKING:
     import datetime
 
+    from singer_sdk.helpers import types
+
     _T = t.TypeVar("_T", datetime.datetime, str, int, float)
 
 PROGRESS_MARKERS = "progress_markers"
@@ -17,13 +20,15 @@ PROGRESS_MARKER_NOTE = "Note"
 SIGNPOST_MARKER = "replication_key_signpost"
 STARTING_MARKER = "starting_replication_value"
 
+logger = logging.getLogger("singer_sdk")
 
-def get_state_if_exists(  # noqa: PLR0911
+
+def get_state_if_exists(
     tap_state: dict,
     tap_stream_id: str,
     state_partition_context: dict | None = None,
     key: str | None = None,
-) -> t.Any | None:
+) -> t.Any | None:  # noqa: ANN401
     """Return the stream or partition state, creating a new one if it does not exist.
 
     Args:
@@ -47,9 +52,7 @@ def get_state_if_exists(  # noqa: PLR0911
 
     stream_state = tap_state["bookmarks"][tap_stream_id]
     if not state_partition_context:
-        if key:
-            return stream_state.get(key, None)
-        return stream_state
+        return stream_state.get(key, None) if key else stream_state
     if "partitions" not in stream_state:
         return None  # No partitions defined
 
@@ -59,19 +62,17 @@ def get_state_if_exists(  # noqa: PLR0911
     )
     if matched_partition is None:
         return None  # Partition definition not present
-    if key:
-        return matched_partition.get(key, None)
-    return matched_partition
+    return matched_partition.get(key, None) if key else matched_partition
 
 
 def get_state_partitions_list(tap_state: dict, tap_stream_id: str) -> list[dict] | None:
     """Return a list of partitions defined in the state, or None if not defined."""
-    return (get_state_if_exists(tap_state, tap_stream_id) or {}).get("partitions", None)
+    return (get_state_if_exists(tap_state, tap_stream_id) or {}).get("partitions", None)  # type: ignore[no-any-return]
 
 
 def _find_in_partitions_list(
     partitions: list[dict],
-    state_partition_context: dict,
+    state_partition_context: types.Context,
 ) -> dict | None:
     found = [
         partition_state
@@ -81,18 +82,15 @@ def _find_in_partitions_list(
     if len(found) > 1:
         msg = (
             "State file contains duplicate entries for partition: "
-            f"{{state_partition_context}}.\nMatching state values were: {found!s}"
+            f"{state_partition_context}.\nMatching state values were: {found!s}"
         )
         raise ValueError(msg)
-    if found:
-        return t.cast(dict, found[0])
-
-    return None
+    return found[0] if found else None
 
 
 def _create_in_partitions_list(
     partitions: list[dict],
-    state_partition_context: dict,
+    state_partition_context: types.Context,
 ) -> dict:
     # Existing partition not found. Creating new state entry in partitions list...
     new_partition_state = {"context": state_partition_context}
@@ -103,7 +101,7 @@ def _create_in_partitions_list(
 def get_writeable_state_dict(
     tap_state: dict,
     tap_stream_id: str,
-    state_partition_context: dict | None = None,
+    state_partition_context: types.Context | None = None,
 ) -> dict:
     """Return the stream or partition state, creating a new one if it does not exist.
 
@@ -120,7 +118,7 @@ def get_writeable_state_dict(
         ValueError: Raise an error if duplicate entries are found.
     """
     if tap_state is None:
-        msg = "Cannot write state to missing state dictionary."
+        msg = "Cannot write state to missing state dictionary."  # type: ignore[unreachable]
         raise ValueError(msg)
 
     if "bookmarks" not in tap_state:
@@ -134,18 +132,20 @@ def get_writeable_state_dict(
     if "partitions" not in stream_state:
         stream_state["partitions"] = []
     stream_state_partitions: list[dict] = stream_state["partitions"]
-    found = _find_in_partitions_list(stream_state_partitions, state_partition_context)
-    if found:
+    if found := _find_in_partitions_list(
+        stream_state_partitions,
+        state_partition_context,
+    ):
         return found
 
     return _create_in_partitions_list(stream_state_partitions, state_partition_context)
 
 
 def write_stream_state(
-    tap_state,
+    tap_state: dict,
     tap_stream_id: str,
-    key,
-    val,
+    key: str,
+    val: t.Any,  # noqa: ANN401
     *,
     state_partition_context: dict | None = None,
 ) -> None:
@@ -172,7 +172,7 @@ def reset_state_progress_markers(stream_or_partition_state: dict) -> dict | None
 
 def write_replication_key_signpost(
     stream_or_partition_state: dict,
-    new_signpost_value: t.Any,
+    new_signpost_value: t.Any,  # noqa: ANN401
 ) -> None:
     """Write signpost value."""
     stream_or_partition_state[SIGNPOST_MARKER] = to_json_compatible(new_signpost_value)
@@ -180,13 +180,13 @@ def write_replication_key_signpost(
 
 def write_starting_replication_value(
     stream_or_partition_state: dict,
-    initial_value: t.Any,
+    initial_value: t.Any,  # noqa: ANN401
 ) -> None:
     """Write initial replication value to state."""
     stream_or_partition_state[STARTING_MARKER] = to_json_compatible(initial_value)
 
 
-def get_starting_replication_value(stream_or_partition_state: dict):
+def get_starting_replication_value(stream_or_partition_state: dict) -> t.Any | None:  # noqa: ANN401
     """Retrieve initial replication marker value from state."""
     if not stream_or_partition_state:
         return None
@@ -212,9 +212,23 @@ def increment_state(
             stream_or_partition_state[PROGRESS_MARKERS] = {
                 PROGRESS_MARKER_NOTE: "Progress is not resumable if interrupted.",
             }
+            logger.warning(
+                "Stream is assumed to be unsorted, progress is not resumable if "
+                "interrupted",
+                extra={"replication_key": replication_key},
+            )
         progress_dict = stream_or_partition_state[PROGRESS_MARKERS]
+    # TODO: Instead of forcing all values to be JSON-compatible strings and hope
+    # we catch all cases, we should allow the stream to define how to
+    # the values from the state and the record should be pre-processed.
+    # https://github.com/meltano/sdk/issues/2753
     old_rk_value = to_json_compatible(progress_dict.get("replication_key_value"))
     new_rk_value = to_json_compatible(latest_record[replication_key])
+
+    if new_rk_value is None:
+        logger.warning("New replication value is null")
+        return
+
     if old_rk_value is None or not check_sorted or new_rk_value >= old_rk_value:
         progress_dict["replication_key"] = replication_key
         progress_dict["replication_key_value"] = new_rk_value
@@ -275,8 +289,8 @@ def log_sort_error(
     ex: Exception,
     log_fn: t.Callable,
     stream_name: str,
-    current_context: dict | None,
-    state_partition_context: dict | None,
+    current_context: types.Context | None,
+    state_partition_context: types.Context | None,
     record_count: int,
     partition_record_count: int,
 ) -> None:

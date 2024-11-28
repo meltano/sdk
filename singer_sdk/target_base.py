@@ -10,16 +10,19 @@ import time
 import typing as t
 
 import click
-from joblib import Parallel, delayed, parallel_backend
+from joblib import Parallel, delayed, parallel_config
 
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers._compat import final
 from singer_sdk.helpers.capabilities import (
     ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
+    TARGET_BATCH_SIZE_ROWS_CONFIG,
+    TARGET_HARD_DELETE_CONFIG,
+    TARGET_LOAD_METHOD_CONFIG,
     TARGET_SCHEMA_CONFIG,
+    TARGET_VALIDATE_RECORDS_CONFIG,
     CapabilitiesEnum,
     PluginCapabilities,
     TargetCapabilities,
@@ -93,7 +96,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             self.setup_mapper()
 
     @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:
+    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
         """Get target capabilities.
 
         Returns:
@@ -103,6 +106,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             PluginCapabilities.ABOUT,
             PluginCapabilities.STREAM_MAPS,
             PluginCapabilities.FLATTENING,
+            TargetCapabilities.VALIDATE_RECORDS,
         ]
 
     @property
@@ -136,7 +140,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         *,
         record: dict | None = None,
         schema: dict | None = None,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
     ) -> Sink:
         """Return a sink for the given stream name.
 
@@ -220,12 +224,12 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         """
         return stream_name in self._sinks_active
 
-    @final
+    @t.final
     def add_sink(
         self,
         stream_name: str,
         schema: dict,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
     ) -> Sink:
         """Create a sink and register it.
 
@@ -247,7 +251,13 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             schema=schema,
             key_properties=key_properties,
         )
-        sink.setup()
+
+        try:
+            sink.setup()
+        except Exception:  # pragma: no cover
+            self.logger.error("Error initializing '%s' target sink", self.name)  # noqa: TRY400
+            raise
+
         self._sinks_active[stream_name] = sink
         return sink
 
@@ -321,7 +331,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._assert_line_requires(message_dict, requires={"stream", "record"})
 
         stream_name = message_dict["stream"]
-        self._assert_sink_exists(stream_name)
+        if stream_name not in self.mapper.stream_maps:
+            self._assert_sink_exists(stream_name)
 
         for stream_map in self.mapper.stream_maps[stream_name]:
             raw_record = copy.copy(message_dict["record"])
@@ -330,29 +341,32 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                 # Record was filtered out by the map transform
                 continue
 
+            self._assert_sink_exists(stream_map.stream_alias)
             sink = self.get_sink(stream_map.stream_alias, record=transformed_record)
-            context = sink._get_context(transformed_record)
+            context = sink._get_context(transformed_record)  # noqa: SLF001
             if sink.include_sdc_metadata_properties:
-                sink._add_sdc_metadata_to_record(
+                sink._add_sdc_metadata_to_record(  # noqa: SLF001
                     transformed_record,
                     message_dict,
                     context,
                 )
             else:
-                sink._remove_sdc_metadata_from_record(transformed_record)
+                sink._remove_sdc_metadata_from_record(transformed_record)  # noqa: SLF001
 
-            sink._validate_and_parse(transformed_record)
+            sink._validate_and_parse(transformed_record)  # noqa: SLF001
             transformed_record = sink.preprocess_record(transformed_record, context)
-            sink._singer_validate_message(transformed_record)
+            sink._singer_validate_message(transformed_record)  # noqa: SLF001
 
             sink.tally_record_read()
             sink.process_record(transformed_record, context)
-            sink._after_process_record(context)
+            sink.record_counter_metric.increment()
+            sink._after_process_record(context)  # noqa: SLF001
 
             if sink.is_full:
                 self.logger.info(
-                    "Target sink for '%s' is full. Draining...",
+                    "Target sink for '%s' is full. Current size is '%s'. Draining...",
                     sink.stream_name,
+                    sink.current_size,
                 )
                 self.drain_one(sink)
 
@@ -369,7 +383,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         stream_name = message_dict["stream"]
         schema = message_dict["schema"]
-        key_properties = message_dict.get("key_properties", None)
+        key_properties = message_dict.get("key_properties")
         do_registration = False
         if stream_name not in self.mapper.stream_maps:
             do_registration = True
@@ -437,8 +451,10 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             message_dict: TODO
         """
         stream_name = message_dict["stream"]
-        sink = self.get_sink(stream_name)
-        sink.activate_version(message_dict["version"])
+
+        for stream_map in self.mapper.stream_maps[stream_name]:
+            sink = self.get_sink(stream_map.stream_alias)
+            sink.activate_version(message_dict["version"])
 
     def _process_batch_message(self, message_dict: dict) -> None:
         """Handle the optional BATCH message extension.
@@ -446,18 +462,20 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         Args:
             message_dict: TODO
         """
-        sink = self.get_sink(message_dict["stream"])
-
+        stream_name = message_dict["stream"]
         encoding = BaseBatchFileEncoding.from_dict(message_dict["encoding"])
-        sink.process_batch_files(
-            encoding,
-            message_dict["manifest"],
-        )
-        self._handle_max_record_age()
+
+        for stream_map in self.mapper.stream_maps[stream_name]:
+            sink = self.get_sink(stream_map.stream_alias)
+            sink.process_batch_files(
+                encoding,
+                message_dict["manifest"],
+            )
+            self._handle_max_record_age()
 
     # Sink drain methods
 
-    @final
+    @t.final
     def drain_all(self, *, is_endofpipe: bool = False) -> None:
         """Drains all sinks, starting with those cleared due to changed schema.
 
@@ -482,8 +500,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         self._write_state_message(state)
         self._reset_max_record_age()
 
-    @final
-    def drain_one(self, sink: Sink) -> None:
+    @t.final
+    def drain_one(self, sink: Sink) -> None:  # noqa: PLR6301
         """Drain a specific sink.
 
         This method is internal to the SDK and should not need to be overridden.
@@ -495,7 +513,8 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             return
 
         draining_status = sink.start_drain()
-        sink.process_batch(draining_status)
+        with sink.batch_processing_timer:
+            sink.process_batch(draining_status)
         sink.mark_drained()
 
     def _drain_all(self, sink_list: list[Sink], parallelism: int) -> None:
@@ -507,7 +526,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         def _drain_sink(sink: Sink) -> None:
             self.drain_one(sink)
 
-        with parallel_backend("threading", n_jobs=parallelism):
+        with parallel_config(backend="threading", n_jobs=parallelism):
             Parallel()(delayed(_drain_sink)(sink=sink) for sink in sink_list)
 
     def _write_state_message(self, state: dict) -> None:
@@ -597,15 +616,18 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
                     target_jsonschema["properties"][k] = v
 
         _merge_missing(ADD_RECORD_METADATA_CONFIG, config_jsonschema)
+        _merge_missing(TARGET_LOAD_METHOD_CONFIG, config_jsonschema)
+        _merge_missing(TARGET_BATCH_SIZE_ROWS_CONFIG, config_jsonschema)
 
         capabilities = cls.capabilities
 
         if PluginCapabilities.BATCH in capabilities:
             _merge_missing(BATCH_CONFIG, config_jsonschema)
 
-        super().append_builtin_config(config_jsonschema)
+        if TargetCapabilities.VALIDATE_RECORDS in capabilities:
+            _merge_missing(TARGET_VALIDATE_RECORDS_CONFIG, config_jsonschema)
 
-    pass
+        super().append_builtin_config(config_jsonschema)
 
 
 class SQLTarget(Target):
@@ -636,7 +658,12 @@ class SQLTarget(Target):
             A list of capabilities supported by this target.
         """
         sql_target_capabilities: list[CapabilitiesEnum] = super().capabilities
-        sql_target_capabilities.extend([TargetCapabilities.TARGET_SCHEMA])
+        sql_target_capabilities.extend(
+            [
+                TargetCapabilities.TARGET_SCHEMA,
+                TargetCapabilities.HARD_DELETE,
+            ]
+        )
 
         return sql_target_capabilities
 
@@ -668,16 +695,17 @@ class SQLTarget(Target):
         if TargetCapabilities.TARGET_SCHEMA in capabilities:
             _merge_missing(TARGET_SCHEMA_CONFIG, config_jsonschema)
 
+        if TargetCapabilities.HARD_DELETE in capabilities:
+            _merge_missing(TARGET_HARD_DELETE_CONFIG, config_jsonschema)
+
         super().append_builtin_config(config_jsonschema)
 
-    pass
-
-    @final
+    @t.final
     def add_sqlsink(
         self,
         stream_name: str,
         schema: dict,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
     ) -> Sink:
         """Create a sink and register it.
 
@@ -735,7 +763,7 @@ class SQLTarget(Target):
         *,
         record: dict | None = None,
         schema: dict | None = None,
-        key_properties: list[str] | None = None,
+        key_properties: t.Sequence[str] | None = None,
     ) -> Sink:
         """Return a sink for the given stream name.
 

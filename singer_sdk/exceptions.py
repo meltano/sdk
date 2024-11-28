@@ -5,6 +5,8 @@ from __future__ import annotations
 import abc
 import typing as t
 
+from singer_sdk._singerlib.exceptions import InvalidInputLine  # noqa: F401
+
 if t.TYPE_CHECKING:
     import requests
 
@@ -12,9 +14,28 @@ if t.TYPE_CHECKING:
 class ConfigValidationError(Exception):
     """Raised when a user's config settings fail validation."""
 
+    def __init__(
+        self,
+        message: str,
+        *,
+        errors: list[str] | None = None,
+    ) -> None:
+        """Initialize a ConfigValidationError.
+
+        Args:
+            message: A message describing the error.
+            errors: A list of errors which caused the validation error.
+        """
+        super().__init__(message)
+        self.errors = errors or []
+
 
 class FatalAPIError(Exception):
     """Exception raised when a failed request should not be considered retriable."""
+
+
+class InvalidReplicationKeyException(Exception):
+    """Exception to raise if the replication key is not in the stream properties."""
 
 
 class InvalidStreamSortException(Exception):
@@ -118,4 +139,23 @@ class ConformedNameClashException(Exception):
 
 
 class MissingKeyPropertiesError(Exception):
-    """Raised when a recieved (and/or transformed) record is missing key properties."""
+    """Raised when a received (and/or transformed) record is missing key properties."""
+
+
+class InvalidJSONSchema(Exception):
+    """Raised when a JSON schema is invalid."""
+
+
+class InvalidRecord(Exception):
+    """Raised when a stream record is invalid according to its declared schema."""
+
+    def __init__(self, error_message: str, record: dict) -> None:
+        """Initialize an InvalidRecord exception.
+
+        Args:
+            error_message: A message describing the error.
+            record: The invalid record.
+        """
+        super().__init__(f"Record Message Validation Error: {error_message}")
+        self.error_message = error_message
+        self.record = record

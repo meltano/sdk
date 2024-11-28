@@ -5,12 +5,21 @@ name = "{{cookiecutter.variant}}-{{cookiecutter.target_id}}"
 name = "{{cookiecutter.target_id}}"
 {%- endif %}
 version = "0.0.1"
-description = "`{{cookiecutter.target_id}}` is a Singer target for {{cookiecutter.destination_name}}, built with the Meltano Singer SDK."
+description = "Singer target for {{cookiecutter.destination_name}}, built with the Meltano Singer SDK."
 readme = "README.md"
-authors = ["{{ cookiecutter.admin_name }}"]
+authors = ["{{ cookiecutter.admin_name }} <{{ cookiecutter.admin_email }}>"]
 keywords = [
     "ELT",
     "{{cookiecutter.destination_name}}",
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 license = "Apache-2.0"
 {%- if cookiecutter.variant != "None (Skip)" %}
@@ -20,40 +29,47 @@ packages = [
 {%- endif %}
 
 [tool.poetry.dependencies]
-python = "<3.12,>=3.7.1"
-singer-sdk = { version="^0.31.0" }
-fs-s3fs = { version = "^1.1.1", optional = true }
+python = ">=3.9"
+singer-sdk = { version="~=0.42.1"{{ ', extras = ["faker"]' if cookiecutter.faker_extra }} }
+fs-s3fs = { version = "~=1.1.1", optional = true }
 {%- if cookiecutter.serialization_method != "SQL" %}
-requests = "^2.31.0"
+requests = "~=2.32.3"
 {%- endif %}
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.4.0"
-singer-sdk = { version="^0.31.0", extras = ["testing"] }
+pytest = ">=8"
+singer-sdk = { version="~=0.42.1", extras = ["testing"] }
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
 
+[tool.pytest.ini_options]
+addopts = '--durations=10'
+
+[tool.mypy]
+python_version = "3.12"
+warn_unused_configs = true
+
 [tool.ruff]
+target-version = "py39"
+
+[tool.ruff.lint]
 ignore = [
     "ANN101",  # missing-type-self
     "ANN102",  # missing-type-cls
+    "COM812",  # missing-trailing-comma
+    "ISC001",  # single-line-implicit-string-concatenation
 ]
 select = ["ALL"]
-src = ["{{cookiecutter.library_name}}"]
-target-version = "py37"
 
-[tool.ruff.flake8-annotations]
+[tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
 
-[tool.ruff.isort]
-known-first-party = ["{{cookiecutter.library_name}}"]
-
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [build-system]
-requires = ["poetry-core>=1.0.8"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]

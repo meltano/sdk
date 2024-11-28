@@ -2,79 +2,34 @@
 
 from __future__ import annotations
 
+import datetime
 import logging
 import typing as t
+import urllib.parse
 
-import pendulum
 import pytest
 import requests
 
 from singer_sdk._singerlib import Catalog, MetadataMapping
-from singer_sdk.helpers._classproperty import classproperty
-from singer_sdk.helpers.jsonpath import _compile_jsonpath, extract_jsonpath
-from singer_sdk.pagination import first
-from singer_sdk.streams.core import (
-    REPLICATION_FULL_TABLE,
-    REPLICATION_INCREMENTAL,
-    Stream,
+from singer_sdk.exceptions import (
+    InvalidReplicationKeyException,
 )
+from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._compat import datetime_fromisoformat as parse
+from singer_sdk.helpers.jsonpath import _compile_jsonpath
+from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMENTAL
 from singer_sdk.streams.graphql import GraphQLStream
 from singer_sdk.streams.rest import RESTStream
-from singer_sdk.tap_base import Tap
-from singer_sdk.typing import (
-    DateTimeType,
-    IntegerType,
-    PropertiesList,
-    Property,
-    StringType,
-)
+from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
+from tests.core.conftest import SimpleTestStream
+
+if t.TYPE_CHECKING:
+    import requests_mock
+
+    from singer_sdk import Stream, Tap
+    from tests.core.conftest import SimpleTestTap
 
 CONFIG_START_DATE = "2021-01-01"
-
-
-class SimpleTestStream(Stream):
-    """Test stream class."""
-
-    name = "test"
-    schema = PropertiesList(
-        Property("id", IntegerType, required=True),
-        Property("value", StringType, required=True),
-        Property("updatedAt", DateTimeType, required=True),
-    ).to_dict()
-    replication_key = "updatedAt"
-
-    def __init__(self, tap: Tap):
-        """Create a new stream."""
-        super().__init__(tap, schema=self.schema, name=self.name)
-
-    def get_records(
-        self,
-        context: dict | None,  # noqa: ARG002
-    ) -> t.Iterable[dict[str, t.Any]]:
-        """Generate records."""
-        yield {"id": 1, "value": "Egypt"}
-        yield {"id": 2, "value": "Germany"}
-        yield {"id": 3, "value": "India"}
-
-
-class UnixTimestampIncrementalStream(SimpleTestStream):
-    name = "unix_ts"
-    schema = PropertiesList(
-        Property("id", IntegerType, required=True),
-        Property("value", StringType, required=True),
-        Property("updatedAt", IntegerType, required=True),
-    ).to_dict()
-    replication_key = "updatedAt"
-
-
-class UnixTimestampIncrementalStream2(UnixTimestampIncrementalStream):
-    name = "unix_ts_override"
-
-    def compare_start_date(self, value: str, start_date_value: str) -> str:
-        """Compare a value to a start date value."""
-
-        start_timestamp = pendulum.parse(start_date_value).format("X")
-        return max(value, start_timestamp, key=float)
 
 
 class RestTestStream(RESTStream):
@@ -89,23 +44,16 @@ class RestTestStream(RESTStream):
     ).to_dict()
     replication_key = "updatedAt"
 
+
+class RestTestStreamLegacyPagination(RestTestStream):
+    """Test RESTful stream class with pagination."""
+
     def get_next_page_token(
         self,
-        response: requests.Response,
-        previous_token: str | None,  # noqa: ARG002
-    ) -> str | None:
-        if self.next_page_token_jsonpath:
-            all_matches = extract_jsonpath(
-                self.next_page_token_jsonpath,
-                response.json(),
-            )
-            try:
-                return first(all_matches)
-            except StopIteration:
-                return None
-
-        else:
-            return response.headers.get("X-Next-Page", None)
+        response: requests.Response,  # noqa: ARG002
+        previous_token: int | None,
+    ) -> int:
+        return previous_token + 1 if previous_token is not None else 1
 
 
 class GraphqlTestStream(GraphQLStream):
@@ -121,43 +69,13 @@ class GraphqlTestStream(GraphQLStream):
     replication_key = "updatedAt"
 
 
-class SimpleTestTap(Tap):
-    """Test tap class."""
-
-    name = "test-tap"
-    settings_jsonschema = PropertiesList(Property("start_date", DateTimeType)).to_dict()
-
-    def discover_streams(self) -> list[Stream]:
-        """List all streams."""
-        return [
-            SimpleTestStream(self),
-            UnixTimestampIncrementalStream(self),
-            UnixTimestampIncrementalStream2(self),
-        ]
-
-
 @pytest.fixture
-def tap() -> SimpleTestTap:
-    """Tap instance."""
-    return SimpleTestTap(
-        config={"start_date": CONFIG_START_DATE},
-        parse_env_config=False,
-    )
-
-
-@pytest.fixture
-def stream(tap: SimpleTestTap) -> SimpleTestStream:
+def stream(tap):
     """Create a new stream instance."""
-    return t.cast(SimpleTestStream, tap.load_streams()[0])
+    return tap.load_streams()[0]
 
 
-@pytest.fixture
-def unix_timestamp_stream(tap: SimpleTestTap) -> UnixTimestampIncrementalStream:
-    """Create a new stream instance."""
-    return t.cast(UnixTimestampIncrementalStream, tap.load_streams()[1])
-
-
-def test_stream_apply_catalog(stream: SimpleTestStream):
+def test_stream_apply_catalog(stream: Stream):
     """Applying a catalog to a stream should overwrite fields."""
     assert stream.primary_keys == []
     assert stream.replication_key == "updatedAt"
@@ -188,41 +106,103 @@ def test_stream_apply_catalog(stream: SimpleTestStream):
     assert stream.forced_replication_method == REPLICATION_FULL_TABLE
 
 
+def test_stream_apply_catalog__singer_standard(stream: Stream):
+    """Applying a catalog to a stream should overwrite fields."""
+    assert stream.primary_keys == []
+    assert stream.replication_key == "updatedAt"
+    assert stream.replication_method == REPLICATION_INCREMENTAL
+    assert stream.forced_replication_method is None
+
+    stream.apply_catalog(
+        catalog=Catalog.from_dict(
+            {
+                "streams": [
+                    {
+                        "tap_stream_id": stream.name,
+                        "stream": stream.name,
+                        "schema": stream.schema,
+                        "metadata": [
+                            {
+                                "breadcrumb": [],
+                                "metadata": {
+                                    "table-key-properties": ["id"],
+                                    "replication-key": "newReplicationKey",
+                                    "forced-replication-method": REPLICATION_FULL_TABLE,
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        ),
+    )
+
+    assert stream.primary_keys == ["id"]
+    assert stream.replication_key == "newReplicationKey"
+    assert stream.replication_method == REPLICATION_FULL_TABLE
+    assert stream.forced_replication_method == REPLICATION_FULL_TABLE
+
+
 @pytest.mark.parametrize(
-    "stream_name,bookmark_value,expected_starting_value",
+    "stream_name,forced_replication_method,bookmark_value,expected_starting_value",
     [
         pytest.param(
             "test",
             None,
-            pendulum.parse(CONFIG_START_DATE),
+            None,
+            parse(CONFIG_START_DATE).replace(tzinfo=datetime.timezone.utc),
             id="datetime-repl-key-no-state",
         ),
         pytest.param(
             "test",
+            None,
             "2021-02-01",
-            pendulum.datetime(2021, 2, 1),
+            datetime.datetime(2021, 2, 1, tzinfo=datetime.timezone.utc),
             id="datetime-repl-key-recent-bookmark",
         ),
         pytest.param(
             "test",
+            REPLICATION_FULL_TABLE,
+            "2021-02-01",
+            None,
+            id="datetime-forced-full-table",
+        ),
+        pytest.param(
+            "test",
+            None,
             "2020-01-01",
-            pendulum.parse(CONFIG_START_DATE),
+            parse(CONFIG_START_DATE).replace(tzinfo=datetime.timezone.utc),
             id="datetime-repl-key-old-bookmark",
         ),
         pytest.param(
+            "test",
+            None,
+            "2021-01-02T00:00:00-08:00",
+            datetime.datetime(
+                2021,
+                1,
+                2,
+                tzinfo=datetime.timezone(datetime.timedelta(hours=-8)),
+            ),
+            id="datetime-repl-key-recent-bookmark-tz-aware",
+        ),
+        pytest.param(
             "unix_ts",
+            None,
             None,
             CONFIG_START_DATE,
             id="naive-unix-ts-repl-key-no-state",
         ),
         pytest.param(
             "unix_ts",
+            None,
             "1612137600",
             "1612137600",
             id="naive-unix-ts-repl-key-recent-bookmark",
         ),
         pytest.param(
             "unix_ts",
+            None,
             "1577858400",
             "1577858400",
             id="naive-unix-ts-repl-key-old-bookmark",
@@ -230,26 +210,30 @@ def test_stream_apply_catalog(stream: SimpleTestStream):
         pytest.param(
             "unix_ts_override",
             None,
+            None,
             CONFIG_START_DATE,
             id="unix-ts-repl-key-no-state",
         ),
         pytest.param(
             "unix_ts_override",
+            None,
             "1612137600",
             "1612137600",
             id="unix-ts-repl-key-recent-bookmark",
         ),
         pytest.param(
             "unix_ts_override",
+            None,
             "1577858400",
-            pendulum.parse(CONFIG_START_DATE).format("X"),
+            parse(CONFIG_START_DATE).timestamp(),
             id="unix-ts-repl-key-old-bookmark",
         ),
     ],
 )
 def test_stream_starting_timestamp(
-    tap: SimpleTestTap,
+    tap: Tap,
     stream_name: str,
+    forced_replication_method: str | None,
     bookmark_value: str,
     expected_starting_value: t.Any,
 ):
@@ -272,7 +256,27 @@ def test_stream_starting_timestamp(
         },
     )
     stream._write_starting_replication_value(None)
-    assert get_starting_value(None) == expected_starting_value
+
+    with stream.with_replication_method(forced_replication_method):
+        assert get_starting_value(None) == expected_starting_value
+
+
+def test_stream_invalid_replication_key(tap: SimpleTestTap):
+    """Validate an exception is raised if replication_key not in schema."""
+
+    class InvalidReplicationKeyStream(SimpleTestStream):
+        replication_key = "INVALID"
+
+    stream = InvalidReplicationKeyStream(tap)
+
+    with pytest.raises(
+        InvalidReplicationKeyException,
+        match=(
+            f"Field '{stream.replication_key}' is not in schema for stream "
+            f"'{stream.name}'"
+        ),
+    ):
+        _check = stream.is_timestamp_replication_key
 
 
 @pytest.mark.parametrize(
@@ -332,12 +336,7 @@ def test_stream_starting_timestamp(
         "nested_values",
     ],
 )
-def test_jsonpath_rest_stream(
-    tap: SimpleTestTap,
-    path: str,
-    content: str,
-    result: list[dict],
-):
+def test_jsonpath_rest_stream(tap: Tap, path: str, content: str, result: list[dict]):
     """Validate records are extracted correctly from the API response."""
     fake_response = requests.Response()
     fake_response._content = str.encode(content)
@@ -350,7 +349,22 @@ def test_jsonpath_rest_stream(
     assert list(records) == result
 
 
-def test_jsonpath_graphql_stream_default(tap: SimpleTestTap):
+def test_legacy_pagination(tap: Tap):
+    """Validate legacy pagination is handled correctly."""
+    stream = RestTestStreamLegacyPagination(tap)
+
+    with pytest.deprecated_call():
+        stream.get_new_paginator()
+
+    page: int | None = None
+    page = stream.get_next_page_token(None, page)
+    assert page == 1
+
+    page = stream.get_next_page_token(None, page)
+    assert page == 2
+
+
+def test_jsonpath_graphql_stream_default(tap: Tap):
     """Validate graphql JSONPath, defaults to the stream name."""
     content = """{
                 "data": {
@@ -370,7 +384,7 @@ def test_jsonpath_graphql_stream_default(tap: SimpleTestTap):
     assert list(records) == [{"id": 1, "value": "abc"}, {"id": 2, "value": "def"}]
 
 
-def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
+def test_jsonpath_graphql_stream_override(tap: Tap):
     """Validate graphql jsonpath can be updated."""
     content = """[
                         {"id": 1, "value": "abc"},
@@ -457,7 +471,7 @@ def test_jsonpath_graphql_stream_override(tap: SimpleTestTap):
     ],
 )
 def test_next_page_token_jsonpath(
-    tap: SimpleTestTap,
+    tap: Tap,
     path: str,
     content: str,
     headers: dict,
@@ -471,11 +485,8 @@ def test_next_page_token_jsonpath(
     RestTestStream.next_page_token_jsonpath = path
     stream = RestTestStream(tap)
 
-    with pytest.warns(DeprecationWarning):
-        paginator = stream.get_new_paginator()
-
+    paginator = stream.get_new_paginator()
     next_page = paginator.get_next(fake_response)
-
     assert next_page == result
 
 
@@ -489,7 +500,7 @@ def test_cached_jsonpath():
     assert recompiled is compiled
 
 
-def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
+def test_sync_costs_calculation(tap: Tap, caplog):
     """Test sync costs are added up correctly."""
     fake_request = requests.PreparedRequest()
     fake_response = requests.Response()
@@ -516,6 +527,45 @@ def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
     for record in caplog.records:
         assert record.levelname == "INFO"
         assert f"Total Sync costs for stream {stream.name}" in record.message
+
+
+def test_non_json_payload(tap: Tap, requests_mock: requests_mock.Mocker):
+    """Test non-JSON payload is handled correctly."""
+
+    def callback(request: requests.PreparedRequest, context: requests_mock.Context):  # noqa: ARG001
+        assert request.headers["Content-Type"] == "application/x-www-form-urlencoded"
+        assert request.body == "my_key=my_value"
+
+        data = urllib.parse.parse_qs(request.body)
+
+        return {
+            "data": [
+                {"id": 1, "value": f"{data['my_key'][0]}_1"},
+                {"id": 2, "value": f"{data['my_key'][0]}_2"},
+            ]
+        }
+
+    class NonJsonStream(RestTestStream):
+        payload_as_json = False
+        http_method = "POST"
+        path = "/non-json"
+        records_jsonpath = "$.data[*]"
+
+        def prepare_request_payload(self, context, next_page_token):  # noqa: ARG002
+            return {"my_key": "my_value"}
+
+    stream = NonJsonStream(tap)
+
+    requests_mock.post(
+        "https://example.com/non-json",
+        json=callback,
+    )
+
+    records = list(stream.request_records(None))
+    assert records == [
+        {"id": 1, "value": "my_value_1"},
+        {"id": 2, "value": "my_value_2"},
+    ]
 
 
 @pytest.mark.parametrize(
@@ -574,7 +624,7 @@ def test_sync_costs_calculation(tap: SimpleTestTap, caplog):
         ),
     ],
 )
-def test_stream_class_selection(input_catalog, selection):
+def test_stream_class_selection(tap_class, input_catalog, selection):
     """Test stream class selection."""
 
     class SelectedStream(RESTStream):
@@ -586,11 +636,12 @@ def test_stream_class_selection(input_catalog, selection):
         name = "unselected_stream"
         selected_by_default = False
 
-    class MyTap(SimpleTestTap):
+    class MyTap(tap_class):
         def discover_streams(self):
             return [SelectedStream(self), UnselectedStream(self)]
 
     # Check that the selected stream is selected
-    tap = MyTap(config=None, catalog=input_catalog)
-    for stream in selection:
-        assert tap.streams[stream].selected is selection[stream]
+    tap = MyTap(config=None, catalog=input_catalog, validate_config=False)
+    assert all(
+        tap.streams[stream].selected is selection[stream] for stream in selection
+    )

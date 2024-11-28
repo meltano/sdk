@@ -6,7 +6,7 @@ import datetime
 import logging
 
 import pytest
-import sqlalchemy
+import sqlalchemy as sa
 
 from singer_sdk.helpers._typing import (
     TypeConformanceLevel,
@@ -19,6 +19,7 @@ from singer_sdk.typing import (
     PropertiesList,
     Property,
     StringType,
+    append_type,
     to_sql_type,
 )
 
@@ -262,6 +263,27 @@ def test_object_arrays_remove_types(caplog: pytest.LogCaptureFixture):
         )
 
 
+def test_conform_object_additional_properties():
+    schema = PropertiesList(
+        Property(
+            "object",
+            PropertiesList(additional_properties=True),
+        ),
+    ).to_dict()
+
+    record = {"object": {"extra": "value"}}
+    expected_output = {"object": {"extra": "value"}}
+
+    actual_output = conform_record_data_types(
+        "test_stream",
+        record,
+        schema,
+        TypeConformanceLevel.RECURSIVE,
+        logger,
+    )
+    assert actual_output == expected_output
+
+
 def test_conform_primitives():
     assert (
         _conform_primitive_property(
@@ -272,7 +294,7 @@ def test_conform_primitives():
     )
     assert (
         _conform_primitive_property(datetime.date(2020, 5, 17), {"type": "string"})
-        == "2020-05-17T00:00:00+00:00"
+        == "2020-05-17"
     )
     assert (
         _conform_primitive_property(datetime.timedelta(365), {"type": "string"})
@@ -284,37 +306,93 @@ def test_conform_primitives():
     )
 
     assert _conform_primitive_property(b"\x00", {"type": "string"}) == "00"
-    assert _conform_primitive_property(b"\xBC", {"type": "string"}) == "bc"
+    assert _conform_primitive_property(b"\xbc", {"type": "string"}) == "bc"
 
     assert _conform_primitive_property(b"\x00", {"type": "boolean"}) is False
-    assert _conform_primitive_property(b"\xBC", {"type": "boolean"}) is True
+    assert _conform_primitive_property(b"\xbc", {"type": "boolean"}) is True
 
     assert _conform_primitive_property(None, {"type": "boolean"}) is None
     assert _conform_primitive_property(0, {"type": "boolean"}) is False
+    assert (
+        _conform_primitive_property(
+            0, {"anyOf": [{"type": "boolean"}, {"type": "integer"}]}
+        )
+        == 0
+    )
+    assert _conform_primitive_property(0, {"type": ["boolean", "integer"]}) == 0
     assert _conform_primitive_property(1, {"type": "boolean"}) is True
+    assert _conform_primitive_property(1, {"type": ["boolean", "null"]}) is True
+    assert _conform_primitive_property(1, {"type": ["boolean"]}) is True
 
 
+@pytest.mark.filterwarnings("ignore:Use `JSONSchemaToSQL` instead.:DeprecationWarning")
 @pytest.mark.parametrize(
     "jsonschema_type,expected",
     [
-        ({"type": ["string", "null"]}, sqlalchemy.types.VARCHAR),
-        ({"type": ["integer", "null"]}, sqlalchemy.types.INTEGER),
-        ({"type": ["number", "null"]}, sqlalchemy.types.DECIMAL),
-        ({"type": ["boolean", "null"]}, sqlalchemy.types.BOOLEAN),
-        ({"type": "object", "properties": {}}, sqlalchemy.types.VARCHAR),
-        ({"type": "array"}, sqlalchemy.types.VARCHAR),
-        ({"format": "date", "type": ["string", "null"]}, sqlalchemy.types.DATE),
-        ({"format": "time", "type": ["string", "null"]}, sqlalchemy.types.TIME),
+        ({"type": ["string", "null"]}, sa.types.VARCHAR),
+        ({"type": ["integer", "null"]}, sa.types.INTEGER),
+        ({"type": ["number", "null"]}, sa.types.DECIMAL),
+        ({"type": ["boolean", "null"]}, sa.types.BOOLEAN),
+        ({"type": "object", "properties": {}}, sa.types.VARCHAR),
+        ({"type": "array"}, sa.types.VARCHAR),
+        ({"format": "date", "type": ["string", "null"]}, sa.types.DATE),
+        ({"format": "time", "type": ["string", "null"]}, sa.types.TIME),
         (
             {"format": "date-time", "type": ["string", "null"]},
-            sqlalchemy.types.DATETIME,
+            sa.types.DATETIME,
         ),
         (
             {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
-            sqlalchemy.types.DATETIME,
+            sa.types.DATETIME,
         ),
-        ({"anyOf": [{"type": "integer"}, {"type": "null"}]}, sqlalchemy.types.INTEGER),
+        ({"anyOf": [{"type": "integer"}, {"type": "null"}]}, sa.types.INTEGER),
+        (
+            {"type": ["array", "object", "boolean", "null"]},
+            sa.types.VARCHAR,
+        ),
     ],
 )
 def test_to_sql_type(jsonschema_type, expected):
     assert isinstance(to_sql_type(jsonschema_type), expected)
+
+
+@pytest.mark.parametrize(
+    "type_dict,expected",
+    [
+        pytest.param({"type": "string"}, {"type": ["string", "null"]}, id="string"),
+        pytest.param({"type": "integer"}, {"type": ["integer", "null"]}, id="integer"),
+        pytest.param({"type": "number"}, {"type": ["number", "null"]}, id="number"),
+        pytest.param({"type": "boolean"}, {"type": ["boolean", "null"]}, id="boolean"),
+        pytest.param(
+            {"type": "object", "properties": {}},
+            {"type": ["object", "null"], "properties": {}},
+            id="object",
+        ),
+        pytest.param({"type": "array"}, {"type": ["array", "null"]}, id="array"),
+        pytest.param(
+            {"anyOf": [{"type": "integer"}, {"type": "number"}]},
+            {"anyOf": [{"type": "integer"}, {"type": "number"}, "null"]},
+            id="anyOf",
+        ),
+        pytest.param(
+            {"oneOf": [{"type": "integer"}, {"type": "number"}]},
+            {"oneOf": [{"type": "integer"}, {"type": "number"}, {"type": "null"}]},
+            id="oneOf",
+        ),
+    ],
+)
+def test_append_null(type_dict: dict, expected: dict):
+    result = append_type(type_dict, "null")
+    assert result == expected
+
+
+def test_iterate_properties_list():
+    primitive_property = Property("primitive", BooleanType)
+    object_property = Property("object", PropertiesList(Property("value", BooleanType)))
+    list_property = Property("list", ArrayType(BooleanType))
+
+    properties_list = PropertiesList(primitive_property, object_property, list_property)
+
+    assert primitive_property in properties_list
+    assert object_property in properties_list
+    assert list_property in properties_list

@@ -8,18 +8,21 @@ from a parent record each time the child stream is invoked.
 
 1. Set `parent_stream_type` in the child-stream's class to the class of the parent.
 2. Implement one of the below methods to pass context from the parent to the child:
-   1. If using `get_records(context)` you can simply return a tuple instead of a `record`
+   1. If using [`get_records`](singer_sdk.Stream.get_child_context) you can simply return a tuple instead of a `record`
       dictionary. A tuple return value will be interpreted by the SDK as
       `(record: dict, child_context: dict)`.
-   1. Override `get_child_context(record, context: Dict) -> dict` to return a new
+   2. Override [`get_child_context`](singer_sdk.Stream.get_child_context) to return a new
       child context object based on records and any existing context from the parent stream.
+   3. If you need to sync more than one child stream per parent record, you can override
+      [`generate_child_contexts`](singer_sdk.Stream.generate_child_contexts) to yield as many
+      contexts as you need.
 3. If the parent stream's replication key won't get updated when child items are changed,
    indicate this by adding `ignore_parent_replication_key = True` in the child stream
    class declaration.
 4. If the number of _parent_ items is very large (thousands or tens of thousands), you can
-   optionally set `state_partitioning_keys` on the child stream to specify a subset of context keys to use
+   optionally set [`state_partitioning_keys`](singer_sdk.Stream.state_partitioning_keys) on the child stream to specify a subset of context keys to use
    in state bookmarks. (When not set, the number of bookmarks will be equal to the number
-   of parent items.) If you do not wish to store any state bookmarks for the child stream, set `state_partitioning_keys` to `[]`.
+   of parent items.) If you do not wish to store any state bookmarks for the child stream, set[`state_partitioning_keys`](singer_sdk.Stream.state_partitioning_keys) to `[]`.
 
 ## Example parent-child implementation
 
@@ -64,6 +67,10 @@ class EpicIssuesStream(GitlabStream):
     path = "/groups/{group_id}/epics/{epic_iid}/issues"
 
     # ...
+```
+
+```{note}
+All the keys in the `context` dictionary are added to the child's record, but they will be automatically removed if they are not present in the child's schema. If you wish to preserve these keys in the child's record, you must add them to the child's schema.
 ```
 
 ## Additional Parent-Child References

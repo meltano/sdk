@@ -4,9 +4,12 @@
   "version": "0.1.1",
   "sdk_version": "1.0.0",
   "supported_python_versions": [
-    "3.6",
-    "3.7",
-    "3.8"
+    "3.8",
+    "3.9",
+    "3.10",
+    "3.11",
+    "3.12",
+    "3.13"
   ],
   "capabilities": [
     "catalog",
@@ -23,6 +26,16 @@
       "api_key": {
         "type": "string",
         "description": "API key for the tap to use."
+      },
+      "complex_setting": {
+        "type": "object",
+        "description": "A complex setting, with sub-settings.",
+        "properties": {
+          "sub_setting": {
+            "type": "string",
+            "description": "A sub-setting."
+          }
+        }
       }
     },
     "required": [

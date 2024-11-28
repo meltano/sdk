@@ -1,0 +1,51 @@
+### A CI workflow template that runs linting and python testing
+### TODO: Modify as needed or as desired.
+
+name: Test {{cookiecutter.mapper_id}}
+
+on:
+  push:
+    branches: [main]
+    paths:
+    - .github/workflows/test.yml
+    - {{ cookiecutter.library_name }}/**
+    - tests/**
+    - poetry.lock
+    - pyproject.toml
+    - tox.ini
+  pull_request:
+    branches: [main]
+    paths:
+    - .github/workflows/test.yml
+    - {{ cookiecutter.library_name }}/**
+    - tests/**
+    - poetry.lock
+    - pyproject.toml
+    - tox.ini
+  workflow_dispatch:
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+        - "3.9"
+        - "3.10"
+        - "3.11"
+        - "3.12"
+        - "3.13"
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python {{ '${{ matrix.python-version }}' }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: {{ '${{ matrix.python-version }}' }}
+    - run: pipx install tox
+    - name: Run Tox
+      run: |
+        tox -e $(echo py{{ '${{ matrix.python-version }}' }} | tr -d .)
