@@ -208,10 +208,8 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
                 else:
                     entry = SqlMetadata(sql_datatype=sql_datatypes.get(field_name))
 
-                if (
-                    key_properties
-                    and field_name in key_properties
-                    or (valid_replication_keys and field_name in valid_replication_keys)
+                if (key_properties and field_name in key_properties) or (
+                    valid_replication_keys and field_name in valid_replication_keys
                 ):
                     entry.inclusion = Metadata.InclusionType.AUTOMATIC
                 else:
