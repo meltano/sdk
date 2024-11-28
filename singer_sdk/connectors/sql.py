@@ -916,7 +916,8 @@ class SQLConnector:  # noqa: PLR0904
                 th.Property(
                     name=column_name,
                     wrapped=th.CustomType(jsonschema_type),
-                    required=not is_nullable,
+                    nullable=is_nullable,
+                    required=column_name in key_properties if key_properties else False,
                 ),
             )
         schema = table_schema.to_dict()
