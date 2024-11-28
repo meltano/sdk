@@ -905,7 +905,7 @@ class SQLConnector:  # noqa: PLR0904
 
         # Initialize columns list
         table_schema = th.PropertiesList()
-        datatypes = {}
+        datatypes: dict[str, str] = {}
         for column_def in inspected.get_columns(table_name, schema=schema_name):
             column_name = column_def["name"]
             is_nullable = column_def.get("nullable", False)

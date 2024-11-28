@@ -7,10 +7,6 @@ from dataclasses import dataclass, fields
 
 from singer_sdk._singerlib.schema import Schema
 
-if t.TYPE_CHECKING:
-    from typing_extensions import TypeAlias
-
-
 Breadcrumb = tuple[str, ...]
 
 logger = logging.getLogger(__name__)
@@ -35,7 +31,7 @@ class SelectionMask(dict[Breadcrumb, bool]):
 
 
 @dataclass
-class Metadata:
+class _BaseMetadata:
     """Base stream or property metadata."""
 
     class InclusionType(str, enum.Enum):
@@ -50,7 +46,7 @@ class Metadata:
     selected_by_default: bool | None = None
 
     @classmethod
-    def from_dict(cls: type[Metadata], value: dict[str, t.Any]) -> Metadata:
+    def from_dict(cls: type[_BaseMetadata], value: dict[str, t.Any]) -> _BaseMetadata:
         """Parse metadata dictionary.
 
         Args:
@@ -83,6 +79,11 @@ class Metadata:
 
 
 @dataclass
+class Metadata(_BaseMetadata):
+    sql_datatype: str | None = None
+
+
+@dataclass
 class StreamMetadata(Metadata):
     """Stream metadata."""
 
@@ -93,15 +94,7 @@ class StreamMetadata(Metadata):
     schema_name: str | None = None
 
 
-@dataclass
-class SQLMetadata(Metadata):
-    sql_datatype: str | None = None
-
-
-AnyMetadata: TypeAlias = t.Union[Metadata, StreamMetadata]
-
-
-class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
+class MetadataMapping(dict[Breadcrumb, _BaseMetadata]):
     """Stream metadata mapping."""
 
     @classmethod
@@ -138,7 +131,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
             {"breadcrumb": list(k), "metadata": v.to_dict()} for k, v in self.items()
         ]
 
-    def __missing__(self, breadcrumb: Breadcrumb) -> AnyMetadata:
+    def __missing__(self, breadcrumb: Breadcrumb) -> _BaseMetadata:
         """Handle missing metadata entries.
 
         Args:
@@ -169,7 +162,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
         valid_replication_keys: list[str] | None = None,
         replication_method: str | None = None,
         selected_by_default: bool | None = None,
-        sql_datatypes: dict | None = None,
+        sql_datatypes: dict[str, str] | None = None,
     ) -> MetadataMapping:
         """Get default metadata for a stream.
 
@@ -200,17 +193,23 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
                 root.schema_name = schema_name
 
             for field_name in schema.get("properties", {}):
-                if sql_datatypes is None:
-                    entry = Metadata()
+                if sql_datatypes and field_name in sql_datatypes:
+                    sql_datatype = sql_datatypes[field_name]
                 else:
-                    entry = SQLMetadata(sql_datatype=sql_datatypes.get(field_name))
+                    sql_datatype = None
 
                 if (key_properties and field_name in key_properties) or (
                     valid_replication_keys and field_name in valid_replication_keys
                 ):
-                    entry.inclusion = Metadata.InclusionType.AUTOMATIC
+                    entry = Metadata(
+                        inclusion=Metadata.InclusionType.AUTOMATIC,
+                        sql_datatype=sql_datatype,
+                    )
                 else:
-                    entry.inclusion = Metadata.InclusionType.AVAILABLE
+                    entry = Metadata(
+                        inclusion=Metadata.InclusionType.AVAILABLE,
+                        sql_datatype=sql_datatype,
+                    )
 
                 mapping["properties", field_name] = entry
 
