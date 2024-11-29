@@ -148,6 +148,7 @@ ACTIVATE_VERSION_CONFIG = PropertiesList(
     Property(
         "activate_version",
         BooleanType,
+        default=True,
         title="Process `ACTIVATE_VERSION` messages",
         description="Whether to process `ACTIVATE_VERSION` messages.",
     ),
