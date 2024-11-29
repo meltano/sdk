@@ -16,6 +16,7 @@ from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import (
+    ACTIVATE_VERSION_CONFIG,
     ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
     TARGET_BATCH_SIZE_ROWS_CONFIG,
@@ -634,6 +635,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         capabilities = cls.capabilities
 
+        if PluginCapabilities.ACTIVATE_VERSION in capabilities:
+            _merge_missing(ACTIVATE_VERSION_CONFIG, config_jsonschema)
+
         if PluginCapabilities.BATCH in capabilities:
             _merge_missing(BATCH_CONFIG, config_jsonschema)
 
@@ -673,6 +677,7 @@ class SQLTarget(Target):
         sql_target_capabilities: list[CapabilitiesEnum] = super().capabilities
         sql_target_capabilities.extend(
             [
+                PluginCapabilities.ACTIVATE_VERSION,
                 TargetCapabilities.TARGET_SCHEMA,
                 TargetCapabilities.HARD_DELETE,
             ]
