@@ -457,17 +457,17 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             sink = self.get_sink(stream_map.stream_alias)
             if not sink.process_activate_version_messages:
                 self.logger.warning(
-                    "Activate version messages are not enabled for '%s'. Ignoring.",
+                    "`ACTIVATE_VERSION` messages are not enabled for '%s'. Ignoring.",
                     stream_map.stream_alias,
                 )
                 continue
             if not sink.include_sdc_metadata_properties:
                 self.logger.warning(
-                    "ACTIVATE_VERSION requires _sdc_* metadata properties to be "
-                    "included. Set `add_record_metadata` to `True` if you wanna use "
-                    "this feature."
+                    "The `ACTIVATE_VERSION` feature uses the `_sdc_deleted_at` and "
+                    "`_sdc_deleted_at` metadata properties so they will be added to "
+                    "the schema for '%s' even though `add_record_metadata` is "
+                    "disabled.",
                 )
-                continue
             sink.activate_version(message_dict["version"])
 
     def _process_batch_message(self, message_dict: dict) -> None:
