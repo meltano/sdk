@@ -296,6 +296,7 @@ def test_sqlite_add_record_metadata(sqlite_target_add_record_metadata: SQLTarget
         json.dumps(msg)
         for msg in [
             schema_msg,
+            {"type": "ACTIVATE_VERSION", "stream": test_tbl, "version": 12345},
             {
                 "type": "RECORD",
                 "stream": test_tbl,
@@ -323,6 +324,9 @@ def test_sqlite_add_record_metadata(sqlite_target_add_record_metadata: SQLTarget
 
     assert "_sdc_sync_started_at" in table.columns
     assert type(table.columns["_sdc_sync_started_at"].type) is sa.INTEGER
+
+    assert "_sdc_table_version" in table.columns
+    assert type(table.columns["_sdc_table_version"].type) is sa.INTEGER
 
 
 def test_sqlite_column_morph(sqlite_sample_target: SQLTarget):
