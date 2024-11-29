@@ -38,7 +38,7 @@ def path_to_target_db(tmp_path: Path) -> Path:
 @pytest.fixture
 def sqlite_target_test_config(path_to_target_db: Path) -> dict:
     """Get configuration dictionary for target-csv."""
-    return {"path_to_db": str(path_to_target_db), "add_record_metadata": True}
+    return {"path_to_db": str(path_to_target_db)}
 
 
 @pytest.fixture
@@ -51,6 +51,14 @@ def sqlite_sample_target(sqlite_target_test_config):
 def sqlite_sample_target_hard_delete(sqlite_target_test_config):
     """Get a sample target object with hard_delete disabled."""
     return SQLiteTarget(config={**sqlite_target_test_config, "hard_delete": True})
+
+
+@pytest.fixture
+def sqlite_target_add_record_metadata(sqlite_target_test_config):
+    """Get a sample target object with add_record_metadata enabled."""
+    return SQLiteTarget(
+        config={**sqlite_target_test_config, "add_record_metadata": True}
+    )
 
 
 @pytest.fixture
@@ -267,6 +275,54 @@ def test_sqlite_activate_version(
         input=StringIO(tap_output),
         finalize=True,
     )
+
+
+def test_sqlite_add_record_metadata(sqlite_target_add_record_metadata: SQLTarget):
+    """Test handling the activate_version message for the SQLite target.
+
+    Test performs the following actions:
+
+    - Sends an activate_version message for a table that doesn't exist (which should
+      have no effect)
+    """
+    test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
+    schema_msg = {
+        "type": "SCHEMA",
+        "stream": test_tbl,
+        "schema": th.PropertiesList(th.Property("col_a", th.StringType())).to_dict(),
+    }
+
+    tap_output = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg,
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"col_a": "samplerow1"},
+                "version": 12345,
+            },
+        ]
+    )
+
+    target_sync_test(
+        sqlite_target_add_record_metadata,
+        input=StringIO(tap_output),
+        finalize=True,
+    )
+
+    # Check that the record metadata was added
+    db_path = sqlite_target_add_record_metadata.config["path_to_db"]
+    engine = sa.create_engine(f"sqlite:///{db_path}")
+    meta = sa.MetaData()
+    meta.reflect(bind=engine)
+    table = meta.tables[test_tbl]
+
+    assert "_sdc_received_at" in table.columns
+    assert type(table.columns["_sdc_received_at"].type) is sa.DATETIME
+
+    assert "_sdc_sync_started_at" in table.columns
+    assert type(table.columns["_sdc_sync_started_at"].type) is sa.INTEGER
 
 
 def test_sqlite_column_morph(sqlite_sample_target: SQLTarget):
@@ -505,8 +561,8 @@ def test_record_with_missing_properties(
             dedent(
                 """\
                 INSERT INTO test_stream
-                (id, name, "table", _sdc_extracted_at, _sdc_received_at, _sdc_batched_at, _sdc_deleted_at, _sdc_sequence, _sdc_table_version, _sdc_sync_started_at)
-                VALUES (:id, :name, :table, :_sdc_extracted_at, :_sdc_received_at, :_sdc_batched_at, :_sdc_deleted_at, :_sdc_sequence, :_sdc_table_version, :_sdc_sync_started_at)""",  # noqa: E501
+                (id, name, "table")
+                VALUES (:id, :name, :table)""",
             ),
         ),
     ],
@@ -563,13 +619,6 @@ def test_hostile_to_sqlite(
     )
     columns = {res[0] for res in cursor.fetchall()}
     assert columns == {
-        "_sdc_batched_at",
-        "_sdc_deleted_at",
-        "_sdc_extracted_at",
-        "_sdc_received_at",
-        "_sdc_sequence",
-        "_sdc_sync_started_at",
-        "_sdc_table_version",
         "name_with_spaces",
         "nameiscamelcase",
         "name_with_dashes",
