@@ -9,12 +9,12 @@ import typing as t
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
 
-from singer_sdk import Tap, Target
 from singer_sdk.testing.config import SuiteConfig
 
 if t.TYPE_CHECKING:
     from pathlib import Path
 
+    from singer_sdk import Tap, Target
     from singer_sdk.helpers._compat import Traversable
 
 
