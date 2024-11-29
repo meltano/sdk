@@ -178,7 +178,7 @@ class FolderTap(Tap, t.Generic[_T]):
                     filepaths=[os.path.join(path, member)],  # noqa: PTH118
                     filesystem=self.fs,
                 )
-                for member in os.listdir(path)
+                for member in self.fs.listdir(path, detail=False)
                 if member.endswith(self.valid_extensions)
             ]
 
@@ -189,7 +189,7 @@ class FolderTap(Tap, t.Generic[_T]):
                 name=self.config["stream_name"],
                 filepaths=[
                     os.path.join(path, member)  # noqa: PTH118
-                    for member in os.listdir(path)
+                    for member in self.fs.listdir(path, detail=False)
                     if member.endswith(self.valid_extensions)
                 ],
                 filesystem=self.fs,
