@@ -397,7 +397,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             True if metadata columns should be added.
         """
-        return self.config.get("add_record_metadata", False)
+        return self.config.get("add_record_metadata", True)
 
     @property
     def process_activate_version_messages(self) -> bool:
