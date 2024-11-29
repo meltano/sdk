@@ -400,6 +400,15 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self.config.get("add_record_metadata", False)
 
     @property
+    def process_activate_version_messages(self) -> bool:
+        """Check if activate version messages should be processed.
+
+        Returns:
+            True if activate version messages should be processed.
+        """
+        return self.config.get("activate_version", True)
+
+    @property
     def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:
         """Return a treatment to use for datetime parse errors: ERROR. MAX, or NULL.
 

@@ -454,6 +454,19 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         for stream_map in self.mapper.stream_maps[stream_name]:
             sink = self.get_sink(stream_map.stream_alias)
+            if not sink.process_activate_version_messages:
+                self.logger.warning(
+                    "Activate version messages are not enabled for '%s'. Ignoring.",
+                    stream_map.stream_alias,
+                )
+                continue
+            if not sink.include_sdc_metadata_properties:
+                self.logger.warning(
+                    "ACTIVATE_VERSION requires _sdc_* metadata properties to be "
+                    "included. Set `add_record_metadata` to `True` if you wanna use "
+                    "this feature."
+                )
+                continue
             sink.activate_version(message_dict["version"])
 
     def _process_batch_message(self, message_dict: dict) -> None:
