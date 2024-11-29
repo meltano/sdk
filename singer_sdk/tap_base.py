@@ -316,7 +316,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             The tap's catalog as a dict
         """
-        return t.cast(dict, self._singer_catalog.to_dict())
+        return t.cast("dict", self._singer_catalog.to_dict())
 
     @property
     def catalog_json_text(self) -> str:
