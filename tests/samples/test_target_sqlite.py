@@ -38,7 +38,7 @@ def path_to_target_db(tmp_path: Path) -> Path:
 @pytest.fixture
 def sqlite_target_test_config(path_to_target_db: Path) -> dict:
     """Get configuration dictionary for target-csv."""
-    return {"path_to_db": str(path_to_target_db)}
+    return {"path_to_db": str(path_to_target_db), "add_record_metadata": True}
 
 
 @pytest.fixture
@@ -505,8 +505,8 @@ def test_record_with_missing_properties(
             dedent(
                 """\
                 INSERT INTO test_stream
-                (id, name, "table")
-                VALUES (:id, :name, :table)""",
+                (id, name, "table", _sdc_extracted_at, _sdc_received_at, _sdc_batched_at, _sdc_deleted_at, _sdc_sequence, _sdc_table_version, _sdc_sync_started_at)
+                VALUES (:id, :name, :table, :_sdc_extracted_at, :_sdc_received_at, :_sdc_batched_at, :_sdc_deleted_at, :_sdc_sequence, :_sdc_table_version, :_sdc_sync_started_at)""",  # noqa: E501
             ),
         ),
     ],
@@ -563,6 +563,13 @@ def test_hostile_to_sqlite(
     )
     columns = {res[0] for res in cursor.fetchall()}
     assert columns == {
+        "_sdc_batched_at",
+        "_sdc_deleted_at",
+        "_sdc_extracted_at",
+        "_sdc_received_at",
+        "_sdc_sequence",
+        "_sdc_sync_started_at",
+        "_sdc_table_version",
         "name_with_spaces",
         "nameiscamelcase",
         "name_with_dashes",
