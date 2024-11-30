@@ -975,6 +975,52 @@ def test_discriminated_union():
     )
 
 
+def test_schema_dependencies():
+    th = ObjectType(
+        # username/password
+        Property("username", StringType, requires_properties="password"),
+        Property("password", StringType, secret=True),
+        # OAuth
+        Property(
+            "client_id",
+            StringType,
+            requires_properties=["client_secret", "refresh_token"],
+        ),
+        Property("client_secret", StringType, secret=True),
+        Property("refresh_token", StringType, secret=True),
+    )
+
+    validator = DEFAULT_JSONSCHEMA_VALIDATOR(th.to_dict())
+
+    assert validator.is_valid(
+        {
+            "username": "foo",
+            "password": "bar",
+        },
+    )
+
+    assert validator.is_valid(
+        {
+            "client_id": "foo",
+            "client_secret": "bar",
+            "refresh_token": "baz",
+        },
+    )
+
+    assert not validator.is_valid(
+        {
+            "username": "foo",
+        },
+    )
+
+    assert not validator.is_valid(
+        {
+            "client_id": "foo",
+            "client_secret": "bar",
+        },
+    )
+
+
 def test_is_datetime_type():
     assert is_datetime_type({"type": "string", "format": "date-time"})
     assert not is_datetime_type({"type": "string"})
