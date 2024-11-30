@@ -174,12 +174,12 @@ class FolderTap(Tap, t.Generic[_T]):
             return [
                 self.default_stream_class(
                     tap=self,
-                    name=file_path_to_stream_name(member),
-                    filepaths=[os.path.join(path, member)],  # noqa: PTH118
+                    name=file_path_to_stream_name(member["name"]),
+                    filepaths=[os.path.join(path, member["name"])],  # noqa: PTH118
                     filesystem=self.fs,
                 )
-                for member in self.fs.listdir(path, detail=False)
-                if member.endswith(self.valid_extensions)
+                for member in self.fs.listdir(path)
+                if member["name"].endswith(self.valid_extensions)
             ]
 
         # Merge
@@ -188,9 +188,9 @@ class FolderTap(Tap, t.Generic[_T]):
                 tap=self,
                 name=self.config["stream_name"],
                 filepaths=[
-                    os.path.join(path, member)  # noqa: PTH118
-                    for member in self.fs.listdir(path, detail=False)
-                    if member.endswith(self.valid_extensions)
+                    os.path.join(path, member["name"])  # noqa: PTH118
+                    for member in self.fs.listdir(path)
+                    if member["name"].endswith(self.valid_extensions)
                 ],
                 filesystem=self.fs,
             )
