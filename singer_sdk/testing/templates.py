@@ -103,7 +103,7 @@ class TestTemplate:
         Raises:
             ValueError: if Test instance does not have `name` and `type` properties.
         """
-        if not self.name or not self.plugin_type:
+        if not self.name or not self.plugin_type:  # pragma: no cover
             msg = "Test must have 'name' and 'plugin_type' properties."
             raise ValueError(msg)
 
