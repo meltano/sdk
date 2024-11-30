@@ -48,7 +48,7 @@ STATE = {
         "customers": {
             "partitions": [
                 {
-                    "context": {"_sdc_path": "fixtures/csv/customers.csv"},
+                    "context": {"_sdc_path": "./customers.csv"},
                     "replication_key": "_sdc_modified_at",
                     "replication_key_value": FUTURE.isoformat(),
                 }
@@ -57,7 +57,7 @@ STATE = {
         "employees": {
             "partitions": [
                 {
-                    "context": {"_sdc_path": "fixtures/csv/employees.csv"},
+                    "context": {"_sdc_path": "./employees.csv"},
                     "replication_key": "_sdc_modified_at",
                     "replication_key_value": FUTURE.isoformat(),
                 }
@@ -80,6 +80,21 @@ _TestCSVOneStreamPerFileIncremental = get_tap_test_class(
 
 
 class TestCSVOneStreamPerFileIncremental(_TestCSVOneStreamPerFileIncremental):
+    def test_tap_stream_transformed_catalog_schema_matches_record(
+        self,
+        config: SuiteConfig,
+        resource: t.Any,
+        runner: TapTestRunner,
+        stream: CSVStream,
+    ):
+        with pytest.warns(UserWarning):
+            super().test_tap_stream_transformed_catalog_schema_matches_record(
+                config,
+                resource,
+                runner,
+                stream,
+            )
+
     def test_tap_stream_returns_record(
         self,
         config: SuiteConfig,

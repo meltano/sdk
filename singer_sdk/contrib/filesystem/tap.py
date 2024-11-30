@@ -5,11 +5,12 @@ from __future__ import annotations
 import enum
 import functools
 import logging
-import os
 import typing as t
 from pathlib import Path
 
 import fsspec
+import fsspec.implementations
+import fsspec.implementations.dirfs
 
 import singer_sdk.typing as th
 from singer_sdk import Tap
@@ -139,6 +140,11 @@ class FolderTap(Tap, t.Generic[_T]):
         return ReadMode(self.config["read_mode"])
 
     @functools.cached_property
+    def path(self) -> str:
+        """Return the path to the directory."""
+        return self.config["path"]
+
+    @functools.cached_property
     def fs(self) -> fsspec.AbstractFileSystem:
         """Return the filesystem object.
 
@@ -147,13 +153,14 @@ class FolderTap(Tap, t.Generic[_T]):
         """
         protocol = self.config["filesystem"]
         if protocol != "local" and protocol not in self.config:  # pragma: no cover
-            msg = "Filesytem configuration is missing"
+            msg = "Filesystem configuration is missing"
             raise ConfigValidationError(
                 msg,
                 errors=[f"Missing configuration for filesystem {protocol}"],
             )
-        logger.info("Instatiating filesystem inteface: '%s'", protocol)
-        return fsspec.filesystem(protocol, **self.config.get(protocol, {}))
+        logger.info("Instantiating filesystem interface: '%s'", protocol)
+        fs = fsspec.filesystem(protocol, **self.config.get(protocol, {}))
+        return fsspec.implementations.dirfs.DirFileSystem(path=self.path, fs=fs)
 
     def discover_streams(self) -> list:
         """Return a list of discovered streams.
@@ -162,11 +169,9 @@ class FolderTap(Tap, t.Generic[_T]):
             ValueError: If the path does not exist or is not a directory.
         """
         # A directory for now, but could be a glob pattern.
-        path: str = self.config["path"]
-
-        if not self.fs.exists(path) or not self.fs.isdir(path):  # pragma: no cover
+        if not self.fs.exists(".") or not self.fs.isdir("."):  # pragma: no cover
             # Raise a more specific error if the path is not a directory.
-            msg = f"Path {path} does not exist or is not a directory"
+            msg = f"Path {self.path} does not exist or is not a directory"
             raise ValueError(msg)
 
         # One stream per file
@@ -175,11 +180,12 @@ class FolderTap(Tap, t.Generic[_T]):
                 self.default_stream_class(
                     tap=self,
                     name=file_path_to_stream_name(member["name"]),
-                    filepaths=[os.path.join(path, member["name"])],  # noqa: PTH118
+                    filepaths=[member["name"]],
                     filesystem=self.fs,
                 )
-                for member in self.fs.listdir(path)
-                if member["name"].endswith(self.valid_extensions)
+                for member in self.fs.listdir(".")
+                if member["type"] == "file"
+                and member["name"].endswith(self.valid_extensions)
             ]
 
         # Merge
@@ -189,7 +195,7 @@ class FolderTap(Tap, t.Generic[_T]):
                 name=self.config["stream_name"],
                 filepaths=[
                     member["name"]
-                    for member in self.fs.listdir(path)
+                    for member in self.fs.listdir(".")
                     if member["type"] == "file"
                     and member["name"].endswith(self.valid_extensions)
                 ],
