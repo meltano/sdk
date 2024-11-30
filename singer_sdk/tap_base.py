@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import abc
 import contextlib
+import pathlib
 import typing as t
 import warnings
 from enum import Enum
@@ -494,8 +495,8 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         about: bool = False,
         about_format: str | None = None,
         config: tuple[str, ...] = (),
-        state: str | None = None,
-        catalog: str | None = None,
+        state: pathlib.Path | None = None,
+        catalog: pathlib.Path | None = None,
     ) -> None:
         """Invoke the tap's command line interface.
 
@@ -619,12 +620,20 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
                 click.Option(
                     ["--catalog"],
                     help="Use a Singer catalog file with the tap.",
-                    type=click.Path(),
+                    type=click.Path(
+                        path_type=pathlib.Path,
+                        exists=True,
+                        dir_okay=False,
+                    ),
                 ),
                 click.Option(
                     ["--state"],
                     help="Use a bookmarks file for incremental replication.",
-                    type=click.Path(),
+                    type=click.Path(
+                        path_type=pathlib.Path,
+                        exists=True,
+                        dir_okay=False,
+                    ),
                 ),
             ],
         )
