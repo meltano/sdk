@@ -166,7 +166,7 @@ def _select_all(catalog_dict: dict) -> dict:
     for catalog_entry in catalog.streams:
         catalog_entry.metadata.root.selected = True
 
-    return t.cast(dict, catalog.to_dict())
+    return t.cast("dict", catalog.to_dict())
 
 
 def target_sync_test(

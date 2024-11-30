@@ -384,7 +384,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             A frozen (read-only) config dictionary map.
         """
-        return t.cast(dict, MappingProxyType(self._config))
+        return t.cast("dict", MappingProxyType(self._config))
 
     @staticmethod
     def _is_secret_config(config_key: str) -> bool:
