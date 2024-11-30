@@ -482,6 +482,14 @@ def test_custom_type_to_jsonschema():
     assert m.to_jsonschema(sa.types.BOOLEAN()) == {"type": ["boolean"]}
 
 
+def test_numeric_to_singer_decimal():
+    converter = SQLToJSONSchema(use_singer_decimal=True)
+    assert converter.to_jsonschema(sa.types.NUMERIC()) == {
+        "type": ["string"],
+        "format": "singer.decimal",
+    }
+
+
 class TestJSONSchemaToSQL:  # noqa: PLR0904
     @pytest.fixture
     def json_schema_to_sql(self) -> JSONSchemaToSQL:

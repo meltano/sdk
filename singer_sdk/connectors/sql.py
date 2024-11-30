@@ -124,10 +124,21 @@ class SQLToJSONSchema:
     .. versionchanged:: 0.43.0
        Added the :meth:`singer_sdk.connectors.sql.SQLToJSONSchema.from_config` class
        method.
+    .. versionchanged:: 0.43.0
+       Added support for the `use_singer_decimal` option.
     """
 
+    def __init__(self, *, use_singer_decimal: bool) -> None:
+        """Initialize the SQL to JSON Schema converter.
+
+        Args:
+            use_singer_decimal: Whether to represent numbers as `string` with
+                the `singer.decimal` format instead of as `number`.
+        """
+        self.use_singer_decimal = use_singer_decimal
+
     @classmethod
-    def from_config(cls: type[SQLToJSONSchema], config: dict) -> SQLToJSONSchema:  # noqa: ARG003
+    def from_config(cls: type[SQLToJSONSchema], config: dict) -> SQLToJSONSchema:
         """Create a new instance from a configuration dictionary.
 
         Override this to instantiate this converter with values from the tap's
@@ -146,11 +157,13 @@ class SQLToJSONSchema:
 
         Args:
             config: The configuration dictionary.
+            use_singer_decimal: Whether to represent numbers as `string` with
+                the `singer.decimal` format instead of as `number`.
 
         Returns:
             A new instance of the class.
         """
-        return cls()
+        return cls(use_singer_decimal=config.get("use_singer_decimal", False))
 
     @functools.singledispatchmethod
     def to_jsonschema(self, column_type: sa.types.TypeEngine) -> dict:  # noqa: ARG002, D102, PLR6301
@@ -193,12 +206,14 @@ class SQLToJSONSchema:
         return th.IntegerType.type_dict  # type: ignore[no-any-return]
 
     @to_jsonschema.register
-    def float_to_jsonschema(self, column_type: sa.types.Numeric) -> dict:  # noqa: ARG002, PLR6301
+    def float_to_jsonschema(self, column_type: sa.types.Numeric) -> dict:  # noqa: ARG002
         """Return a JSON Schema representation of a generic number type.
 
         Args:
             column_type (:column_type:`Numeric`): The column type.
         """
+        if self.use_singer_decimal:
+            return th.SingerDecimalType.type_dict  # type: ignore[no-any-return]
         return th.NumberType.type_dict  # type: ignore[no-any-return]
 
     @to_jsonschema.register
@@ -272,6 +287,7 @@ class JSONSchemaToSQL:
             "hostname": lambda _: sa.types.VARCHAR(253),  # RFC 1035
             "ipv4": lambda _: sa.types.VARCHAR(15),
             "ipv6": lambda _: sa.types.VARCHAR(45),
+            "singer.decimal": self._handle_singer_decimal,
         }
 
         self._fallback_type: type[sa.types.TypeEngine] = sa.types.VARCHAR
@@ -322,6 +338,17 @@ class JSONSchemaToSQL:
         if isinstance(handler, type):
             return handler()  # type: ignore[no-any-return]
         return handler(schema)
+
+    def _handle_singer_decimal(self, schema: dict) -> sa.types.TypeEngine:  # noqa: PLR6301
+        """Handle a singer.decimal format.
+
+        Args:
+            schema: The JSON Schema object.
+
+        Returns:
+            The appropriate SQLAlchemy type.
+        """
+        return sa.types.DECIMAL(schema.get("precision"), schema.get("scale"))
 
     @property
     def fallback_type(self) -> type[sa.types.TypeEngine]:
