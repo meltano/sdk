@@ -30,6 +30,23 @@ if t.TYPE_CHECKING:
     from singer_sdk.target_base import SQLTarget
 
 
+def get_table(config: dict, table_name: str) -> sa.Table:
+    """Get SQLAlchemy metadata and table for inspection.
+
+    Args:
+        config: Target configuration dictionary containing database path
+        table_name: Name of the table to inspect
+
+    Returns:
+        Tuple of (metadata, table)
+    """
+    db_path = config["path_to_db"]
+    engine = sa.create_engine(f"sqlite:///{db_path}")
+    meta = sa.MetaData()
+    meta.reflect(bind=engine)
+    return meta.tables[table_name]
+
+
 @pytest.fixture
 def path_to_target_db(tmp_path: Path) -> Path:
     return Path(f"{tmp_path}/target_test.db")
@@ -289,11 +306,7 @@ def test_sqlite_activate_version(
     )
 
     # Check that the record metadata was added
-    db_path = sqlite_sample_target_hard_delete.config["path_to_db"]
-    engine = sa.create_engine(f"sqlite:///{db_path}")
-    meta = sa.MetaData()
-    meta.reflect(bind=engine)
-    table = meta.tables[test_tbl]
+    table = get_table(sqlite_sample_target_hard_delete.config, test_tbl)
 
     assert "_sdc_table_version" in table.columns
     assert type(table.columns["_sdc_table_version"].type) is sa.INTEGER
@@ -340,11 +353,7 @@ def test_sqlite_no_activate_version(
     )
 
     # Check that the record metadata was added
-    db_path = sqlite_sample_target_no_activate_version.config["path_to_db"]
-    engine = sa.create_engine(f"sqlite:///{db_path}")
-    meta = sa.MetaData()
-    meta.reflect(bind=engine)
-    table = meta.tables[test_tbl]
+    table = get_table(sqlite_sample_target_no_activate_version.config, test_tbl)
 
     assert "col_a" in table.columns
     assert "_sdc_table_version" not in table.columns
@@ -387,11 +396,7 @@ def test_sqlite_add_record_metadata(sqlite_target_add_record_metadata: SQLTarget
     )
 
     # Check that the record metadata was added
-    db_path = sqlite_target_add_record_metadata.config["path_to_db"]
-    engine = sa.create_engine(f"sqlite:///{db_path}")
-    meta = sa.MetaData()
-    meta.reflect(bind=engine)
-    table = meta.tables[test_tbl]
+    table = get_table(sqlite_target_add_record_metadata.config, test_tbl)
 
     assert "_sdc_received_at" in table.columns
     assert type(table.columns["_sdc_received_at"].type) is sa.DATETIME
