@@ -104,7 +104,7 @@ class TestTemplate:
             ValueError: if Test instance does not have `name` and `type` properties.
         """
         if not self.name or not self.plugin_type:
-            msg = "Test must have 'name' and 'type' properties."
+            msg = "Test must have 'name' and 'plugin_type' properties."
             raise ValueError(msg)
 
         self.config = config
