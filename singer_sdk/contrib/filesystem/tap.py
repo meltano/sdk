@@ -142,7 +142,7 @@ class FolderTap(Tap, t.Generic[_T]):
     @functools.cached_property
     def path(self) -> str:
         """Return the path to the directory."""
-        return self.config["path"]
+        return self.config["path"]  # type: ignore[no-any-return]
 
     @functools.cached_property
     def fs(self) -> fsspec.AbstractFileSystem:
@@ -159,8 +159,12 @@ class FolderTap(Tap, t.Generic[_T]):
                 errors=[f"Missing configuration for filesystem {protocol}"],
             )
         logger.info("Instantiating filesystem interface: '%s'", protocol)
-        fs = fsspec.filesystem(protocol, **self.config.get(protocol, {}))
-        return fsspec.implementations.dirfs.DirFileSystem(path=self.path, fs=fs)
+
+        return fsspec.implementations.dirfs.DirFileSystem(
+            path=self.path,
+            target_protocol=protocol,
+            target_options=self.config.get(protocol),
+        )
 
     def discover_streams(self) -> list:
         """Return a list of discovered streams.
