@@ -187,11 +187,11 @@ def get_datelike_property_type(property_schema: dict) -> str | None:
     Otherwise return None.
     """
     if _is_string_with_format(property_schema):
-        return t.cast(str, property_schema["format"])
+        return t.cast("str", property_schema["format"])
     if "anyOf" in property_schema:
         for type_dict in property_schema["anyOf"]:
             if _is_string_with_format(type_dict):
-                return t.cast(str, type_dict["format"])
+                return t.cast("str", type_dict["format"])
     return None
 
 

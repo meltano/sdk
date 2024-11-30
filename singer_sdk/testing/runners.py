@@ -9,12 +9,12 @@ import typing as t
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
 
-from singer_sdk import Tap, Target
 from singer_sdk.testing.config import SuiteConfig
 
 if t.TYPE_CHECKING:
     from pathlib import Path
 
+    from singer_sdk import Tap, Target
     from singer_sdk.helpers._compat import Traversable
 
 
@@ -115,7 +115,7 @@ class TapTestRunner(SingerTestRunner):
         Returns:
             A configured Tap instance.
         """
-        return t.cast(Tap, self.create())
+        return t.cast("Tap", self.create())
 
     def run_discovery(self) -> str:
         """Run tap discovery.
@@ -233,7 +233,7 @@ class TargetTestRunner(SingerTestRunner):
         Returns:
             A configured Target instance.
         """
-        return t.cast(Target, self.create())
+        return t.cast("Target", self.create())
 
     @property
     def target_input(self) -> t.IO[str]:
@@ -247,7 +247,7 @@ class TargetTestRunner(SingerTestRunner):
                 self._input = self.input_io
             elif self.input_filepath:
                 self._input = self.input_filepath.open(encoding="utf8")
-        return t.cast(t.IO[str], self._input)
+        return t.cast("t.IO[str]", self._input)
 
     @target_input.setter
     def target_input(self, value: t.IO[str]) -> None:
