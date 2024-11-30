@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import datetime
+import typing as t
 
 import pytest
 
 from samples.sample_tap_csv.sample_tap_csv import SampleTapCSV
-from singer_sdk.testing import SuiteConfig, get_tap_test_class
+from singer_sdk.testing import SuiteConfig, TapTestRunner, get_tap_test_class
+
+if t.TYPE_CHECKING:
+    from samples.sample_tap_csv.client import CSVStream
 
 _TestCSVMerge = get_tap_test_class(
     tap_class=SampleTapCSV,
@@ -44,7 +48,7 @@ STATE = {
         "customers": {
             "partitions": [
                 {
-                    "context": {"_sdc_path": "fixtures/csv/customers.csv"},
+                    "context": {"_sdc_path": "./customers.csv"},
                     "replication_key": "_sdc_modified_at",
                     "replication_key_value": FUTURE.isoformat(),
                 }
@@ -53,7 +57,7 @@ STATE = {
         "employees": {
             "partitions": [
                 {
-                    "context": {"_sdc_path": "fixtures/csv/employees.csv"},
+                    "context": {"_sdc_path": "./employees.csv"},
                     "replication_key": "_sdc_modified_at",
                     "replication_key_value": FUTURE.isoformat(),
                 }
@@ -76,10 +80,27 @@ _TestCSVOneStreamPerFileIncremental = get_tap_test_class(
 
 
 class TestCSVOneStreamPerFileIncremental(_TestCSVOneStreamPerFileIncremental):
-    @pytest.mark.xfail(reason="No records are extracted", strict=True)
-    def test_tap_stream_transformed_catalog_schema_matches_record(self, stream: str):
-        super().test_tap_stream_transformed_catalog_schema_matches_record(stream)
+    def test_tap_stream_transformed_catalog_schema_matches_record(
+        self,
+        config: SuiteConfig,
+        resource: t.Any,
+        runner: TapTestRunner,
+        stream: CSVStream,
+    ):
+        with pytest.warns(UserWarning):
+            super().test_tap_stream_transformed_catalog_schema_matches_record(
+                config,
+                resource,
+                runner,
+                stream,
+            )
 
-    @pytest.mark.xfail(reason="No records are extracted", strict=True)
-    def test_tap_stream_returns_record(self, stream: str):
-        super().test_tap_stream_returns_record(stream)
+    def test_tap_stream_returns_record(
+        self,
+        config: SuiteConfig,
+        resource: t.Any,
+        runner: TapTestRunner,
+        stream: CSVStream,
+    ):
+        with pytest.warns(UserWarning):
+            super().test_tap_stream_returns_record(config, resource, runner, stream)
