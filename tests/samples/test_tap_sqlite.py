@@ -11,7 +11,7 @@ from click.testing import CliRunner
 from samples.sample_tap_sqlite import SQLiteTap
 from samples.sample_target_csv.csv_target import SampleTargetCSV
 from singer_sdk import SQLStream
-from singer_sdk._singerlib import MetadataMapping, StreamMetadata
+from singer_sdk._singerlib import Metadata, MetadataMapping, StreamMetadata
 from singer_sdk.testing import (
     get_standard_tap_tests,
     tap_sync_test,
@@ -83,6 +83,11 @@ def test_sqlite_discovery(sqlite_sample_tap: SQLTap):
 
     assert stream.metadata.root.table_key_properties == ["c1"]
     assert stream.primary_keys == ["c1"]
+
+    field_metadata = stream.metadata["properties", "c1"]
+    assert isinstance(field_metadata, Metadata)
+    assert field_metadata.sql_datatype == "INTEGER()"
+
     assert stream.schema["properties"]["c1"] == {"type": ["integer"]}
     assert stream.schema["required"] == ["c1"]
 
