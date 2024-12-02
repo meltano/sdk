@@ -155,6 +155,11 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         default=False,
     )
 
+    process_activate_version_messages = capabilities.ACTIVATE_VERSION.attribute(
+        "activate_version",
+        default=True,
+    )
+
     def __init__(
         self,
         target: Target,

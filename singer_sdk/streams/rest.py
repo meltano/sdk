@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import abc
 import copy
+import decimal
 import logging
 import sys
 import typing as t
@@ -779,7 +780,10 @@ class RESTStream(_HTTPStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         Yields:
             One item for every item found in the response.
         """
-        yield from extract_jsonpath(self.records_jsonpath, input=response.json())
+        yield from extract_jsonpath(
+            self.records_jsonpath,
+            input=response.json(parse_float=decimal.Decimal),
+        )
 
     def get_new_paginator(self) -> BaseAPIPaginator:
         """Get a fresh paginator for this API endpoint.

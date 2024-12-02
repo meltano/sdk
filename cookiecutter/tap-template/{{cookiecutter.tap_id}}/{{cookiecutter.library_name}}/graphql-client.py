@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import decimal
 import typing as t
 
 import requests  # noqa: TCH002
@@ -61,7 +62,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
             Each record from the source.
         """
         # TODO: Parse response body and return a set of records.
-        resp_json = response.json()
+        resp_json = response.json(parse_float=decimal.Decimal)
         yield from resp_json.get("<TODO>")
 
     def post_process(

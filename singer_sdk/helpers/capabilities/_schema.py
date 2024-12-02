@@ -142,6 +142,16 @@ TARGET_SCHEMA_CONFIG = PropertiesList(
     ),
 ).to_dict()
 
+ACTIVATE_VERSION_CONFIG = PropertiesList(
+    Property(
+        "activate_version",
+        BooleanType,
+        default=True,
+        title="Process `ACTIVATE_VERSION` messages",
+        description="Whether to process `ACTIVATE_VERSION` messages.",
+    ),
+).to_dict()
+
 ADD_RECORD_METADATA_CONFIG = PropertiesList(
     Property(
         "add_record_metadata",

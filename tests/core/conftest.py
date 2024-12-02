@@ -11,8 +11,10 @@ from typing_extensions import override
 from singer_sdk import Stream, Tap
 from singer_sdk.helpers._compat import datetime_fromisoformat
 from singer_sdk.typing import (
+    ArrayType,
     DateTimeType,
     IntegerType,
+    ObjectType,
     PropertiesList,
     Property,
     StringType,
@@ -82,6 +84,22 @@ class SimpleTestTap(Tap):
         Property("username", StringType, required=True),
         Property("password", StringType, required=True),
         Property("start_date", DateTimeType),
+        Property(
+            "nested",
+            ObjectType(
+                Property("key", StringType, required=True),
+            ),
+            required=False,
+        ),
+        Property(
+            "array",
+            ArrayType(
+                ObjectType(
+                    Property("key", StringType, required=True),
+                ),
+            ),
+            required=False,
+        ),
         additional_properties=False,
     ).to_dict()
 

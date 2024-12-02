@@ -31,6 +31,19 @@ __all__ = [
     "TargetLoadMethods",
 ]
 
+#: Support the `ACTIVATE_VERSION <https://hub.meltano.com/singer/docs#activate-version>`_
+#: extension.
+#:
+#: Example:
+#:
+#: .. code-block:: json
+#:
+#:    {
+#:        "activate_version": true
+#:    }
+#:
+ACTIVATE_VERSION = Builtin(schema=schema.ACTIVATE_VERSION_CONFIG)
+
 #: Add metadata to records.
 #:
 #: Example:

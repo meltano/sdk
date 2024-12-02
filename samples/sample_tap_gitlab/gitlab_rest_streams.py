@@ -74,7 +74,7 @@ class ProjectBasedStream(GitlabStream):
         if "{project_id}" in self.path:
             return [
                 {"project_id": pid}
-                for pid in t.cast(list, self.config.get("project_ids"))
+                for pid in t.cast("list", self.config.get("project_ids"))
             ]
         if "{group_id}" in self.path:
             if "group_ids" not in self.config:
@@ -84,7 +84,8 @@ class ProjectBasedStream(GitlabStream):
                 )
                 raise ValueError(msg)
             return [
-                {"group_id": gid} for gid in t.cast(list, self.config.get("group_ids"))
+                {"group_id": gid}
+                for gid in t.cast("list", self.config.get("group_ids"))
             ]
         msg = (
             f"Could not detect partition type for Gitlab stream '{self.name}' "

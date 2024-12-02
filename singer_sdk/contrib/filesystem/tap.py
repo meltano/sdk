@@ -5,11 +5,12 @@ from __future__ import annotations
 import enum
 import functools
 import logging
-import os
 import typing as t
 from pathlib import Path
 
 import fsspec
+import fsspec.implementations
+import fsspec.implementations.dirfs
 
 import singer_sdk.typing as th
 from singer_sdk import Tap
@@ -104,6 +105,8 @@ class FolderTap(Tap, t.Generic[_T]):
     This should be a subclass of `FileStream`.
     """
 
+    dynamic_catalog: bool = True
+
     config_jsonschema: t.ClassVar[dict] = {"properties": {}}
 
     @classmethod
@@ -123,11 +126,16 @@ class FolderTap(Tap, t.Generic[_T]):
             config_jsonschema: [description]
         """
 
-        def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
+        def _merge_missing(src: dict, tgt: dict) -> None:
             # Append any missing properties in the target with those from source.
-            for k, v in source_jsonschema["properties"].items():
-                if k not in target_jsonschema["properties"]:
-                    target_jsonschema["properties"][k] = v
+            for k, v in src["properties"].items():
+                if k not in tgt["properties"]:
+                    tgt["properties"][k] = v
+
+                # Merge the required fields
+                source_required = src.get("required", [])
+                target_required = tgt.get("required", [])
+                tgt["required"] = list(set(source_required + target_required))
 
         _merge_missing(BASE_CONFIG_SCHEMA, config_jsonschema)
 
@@ -139,6 +147,11 @@ class FolderTap(Tap, t.Generic[_T]):
         return ReadMode(self.config["read_mode"])
 
     @functools.cached_property
+    def path(self) -> str:
+        """Return the path to the directory."""
+        return self.config["path"]  # type: ignore[no-any-return]
+
+    @functools.cached_property
     def fs(self) -> fsspec.AbstractFileSystem:
         """Return the filesystem object.
 
@@ -147,13 +160,18 @@ class FolderTap(Tap, t.Generic[_T]):
         """
         protocol = self.config["filesystem"]
         if protocol != "local" and protocol not in self.config:  # pragma: no cover
-            msg = "Filesytem configuration is missing"
+            msg = "Filesystem configuration is missing"
             raise ConfigValidationError(
                 msg,
                 errors=[f"Missing configuration for filesystem {protocol}"],
             )
-        logger.info("Instatiating filesystem inteface: '%s'", protocol)
-        return fsspec.filesystem(protocol, **self.config.get(protocol, {}))
+        logger.info("Instantiating filesystem interface: '%s'", protocol)
+
+        return fsspec.implementations.dirfs.DirFileSystem(
+            path=self.path,
+            target_protocol=protocol,
+            target_options=self.config.get(protocol),
+        )
 
     def discover_streams(self) -> list:
         """Return a list of discovered streams.
@@ -162,11 +180,9 @@ class FolderTap(Tap, t.Generic[_T]):
             ValueError: If the path does not exist or is not a directory.
         """
         # A directory for now, but could be a glob pattern.
-        path: str = self.config["path"]
-
-        if not self.fs.exists(path) or not self.fs.isdir(path):  # pragma: no cover
+        if not self.fs.exists(".") or not self.fs.isdir("."):  # pragma: no cover
             # Raise a more specific error if the path is not a directory.
-            msg = f"Path {path} does not exist or is not a directory"
+            msg = f"Path {self.path} does not exist or is not a directory"
             raise ValueError(msg)
 
         # One stream per file
@@ -174,12 +190,13 @@ class FolderTap(Tap, t.Generic[_T]):
             return [
                 self.default_stream_class(
                     tap=self,
-                    name=file_path_to_stream_name(member),
-                    filepaths=[os.path.join(path, member)],  # noqa: PTH118
+                    name=file_path_to_stream_name(member["name"]),
+                    filepaths=[member["name"]],
                     filesystem=self.fs,
                 )
-                for member in os.listdir(path)
-                if member.endswith(self.valid_extensions)
+                for member in self.fs.listdir(".")
+                if member["type"] == "file"
+                and member["name"].endswith(self.valid_extensions)
             ]
 
         # Merge
@@ -188,9 +205,10 @@ class FolderTap(Tap, t.Generic[_T]):
                 tap=self,
                 name=self.config["stream_name"],
                 filepaths=[
-                    os.path.join(path, member)  # noqa: PTH118
-                    for member in os.listdir(path)
-                    if member.endswith(self.valid_extensions)
+                    member["name"]
+                    for member in self.fs.listdir(".")
+                    if member["type"] == "file"
+                    and member["name"].endswith(self.valid_extensions)
                 ],
                 filesystem=self.fs,
             )

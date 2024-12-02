@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import decimal
 import logging
 import typing as t
 import urllib.parse
@@ -565,6 +566,37 @@ def test_non_json_payload(tap: Tap, requests_mock: requests_mock.Mocker):
     assert records == [
         {"id": 1, "value": "my_value_1"},
         {"id": 2, "value": "my_value_2"},
+    ]
+
+
+def test_parse_response(tap: Tap):
+    content = """[
+        {"id": 1, "value": 3.14159},
+        {"id": 2, "value": 2.71828}
+    ]
+    """
+
+    class MyRESTStream(RESTStream):
+        url_base = "https://example.com"
+        path = "/dummy"
+        name = "dummy"
+        schema = {  # noqa: RUF012
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "value": {"type": "number"},
+            },
+        }
+
+    stream = MyRESTStream(tap=tap)
+
+    response = requests.Response()
+    response._content = content.encode("utf-8")
+
+    records = list(stream.parse_response(response))
+    assert records == [
+        {"id": 1, "value": decimal.Decimal("3.14159")},
+        {"id": 2, "value": decimal.Decimal("2.71828")},
     ]
 
 

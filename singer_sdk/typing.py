@@ -703,7 +703,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
             # TODO: this should be a TypeError, but it's a breaking change.
             raise ValueError(msg)  # noqa: TRY004
 
-        return t.cast(dict, wrapped.type_dict)
+        return t.cast("dict", wrapped.type_dict)
 
     def to_dict(self) -> dict:
         """Return a dict mapping the property name to its definition.

@@ -121,7 +121,36 @@ class SQLToJSONSchema:
     This class provides a mapping from SQLAlchemy types to JSON Schema types.
 
     .. versionadded:: 0.41.0
+    .. versionchanged:: 0.43.0
+       Added the :meth:`singer_sdk.connectors.sql.SQLToJSONSchema.from_config` class
+       method.
     """
+
+    @classmethod
+    def from_config(cls: type[SQLToJSONSchema], config: dict) -> SQLToJSONSchema:  # noqa: ARG003
+        """Create a new instance from a configuration dictionary.
+
+        Override this to instantiate this converter with values from the tap's
+        configuration dictionary.
+
+        .. code-block:: python
+
+           class CustomSQLToJSONSchema(SQLToJSONSchema):
+               def __init__(self, *, my_custom_option, **kwargs):
+                   super().__init__(**kwargs)
+                   self.my_custom_option = my_custom_option
+
+               @classmethod
+               def from_config(cls, config):
+                   return cls(my_custom_option=config.get("my_custom_option"))
+
+        Args:
+            config: The configuration dictionary.
+
+        Returns:
+            A new instance of the class.
+        """
+        return cls()
 
     @functools.singledispatchmethod
     def to_jsonschema(self, column_type: sa.types.TypeEngine) -> dict:  # noqa: ARG002, D102, PLR6301
@@ -453,6 +482,11 @@ class SQLConnector:  # noqa: PLR0904
     #: The absolute maximum length for VARCHAR columns that the database supports.
     max_varchar_length: int | None = None
 
+    #: The SQL-to-JSON type mapper class for this SQL connector. Override this property
+    #: with a subclass of :class:`~singer_sdk.connectors.sql.SQLToJSONSchema` to provide
+    #: a custom mapping for your SQL dialect.
+    sql_to_jsonschema_converter: type[SQLToJSONSchema] = SQLToJSONSchema
+
     def __init__(
         self,
         config: dict | None = None,
@@ -493,7 +527,7 @@ class SQLConnector:  # noqa: PLR0904
 
         .. versionadded:: 0.41.0
         """
-        return SQLToJSONSchema()
+        return self.sql_to_jsonschema_converter.from_config(self.config)
 
     @functools.cached_property
     def jsonschema_to_sql(self) -> JSONSchemaToSQL:
@@ -607,7 +641,7 @@ class SQLConnector:  # noqa: PLR0904
             msg = "Could not find or create 'sqlalchemy_url' for connection."
             raise ConfigValidationError(msg)
 
-        return t.cast(str, config["sqlalchemy_url"])
+        return t.cast("str", config["sqlalchemy_url"])
 
     def to_jsonschema_type(
         self,
@@ -1395,7 +1429,7 @@ class SQLConnector:  # noqa: PLR0904
 
             _len = int(getattr(sql_type, "length", 0) or 0)
 
-            _pytype = t.cast(type, sql_type.python_type)
+            _pytype = t.cast("type", sql_type.python_type)
             if issubclass(_pytype, (str, bytes)):
                 return 900, _len
             if issubclass(_pytype, datetime):

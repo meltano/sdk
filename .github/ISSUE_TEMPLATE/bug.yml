@@ -67,18 +67,10 @@ body:
     id: what-happened
     attributes:
       label: Description
-      description: Describe what you were trying to get done
+      description: Describe what you were trying to get done, what you expected to happen, and what actually happened. Include any error messages you received, or a snippet of the code that caused the issue.
       placeholder: Tell us what happened, what went wrong, and what you expected to happen
     validations:
       required: true
-  - type: textarea
-    id: failing-code
-    attributes:
-      label: Code
-      description: Paste the failing code and/or traceback, if applicable
-      render: Python
-    validations:
-      required: false
   - type: input
     id: slack_or_linen
     attributes:

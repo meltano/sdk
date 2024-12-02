@@ -125,7 +125,7 @@ def get_writeable_state_dict(
         tap_state["bookmarks"] = {}
     if tap_stream_id not in tap_state["bookmarks"]:
         tap_state["bookmarks"][tap_stream_id] = {}
-    stream_state = t.cast(dict, tap_state["bookmarks"][tap_stream_id])
+    stream_state = t.cast("dict", tap_state["bookmarks"][tap_stream_id])
     if not state_partition_context:
         return stream_state
 

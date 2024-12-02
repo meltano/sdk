@@ -436,6 +436,19 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         for stream_map in self.mapper.stream_maps[stream_name]:
             sink = self.get_sink(stream_map.stream_alias)
+            if not sink.process_activate_version_messages:
+                self.logger.warning(
+                    "`ACTIVATE_VERSION` messages are not enabled for '%s'. Ignoring.",
+                    stream_map.stream_alias,
+                )
+                continue
+            if not sink.include_sdc_metadata_properties:
+                self.logger.warning(
+                    "The `ACTIVATE_VERSION` feature uses the `_sdc_deleted_at` and "
+                    "`_sdc_deleted_at` metadata properties so they will be added to "
+                    "the schema for '%s' even though `add_record_metadata` is "
+                    "disabled.",
+                )
             sink.activate_version(message_dict["version"])
 
     def _process_batch_message(self, message_dict: dict) -> None:
@@ -601,6 +614,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         _merge_missing(capabilities.TARGET_LOAD_METHOD.schema, config_jsonschema)
         _merge_missing(capabilities.TARGET_BATCH_SIZE_ROWS.schema, config_jsonschema)
 
+        if capabilities.ACTIVATE_VERSION.capability in cls.capabilities:
+            _merge_missing(capabilities.ACTIVATE_VERSION.schema, config_jsonschema)
+
         if capabilities.BATCH.capability in cls.capabilities:
             _merge_missing(capabilities.BATCH.schema, config_jsonschema)
 
@@ -623,6 +639,7 @@ class SQLTarget(Target):
     #: Target capabilities.
     capabilities: t.ClassVar[list[capabilities.CapabilitiesEnum]] = [
         *Target.capabilities,
+        capabilities.PluginCapabilities.ACTIVATE_VERSION,
         capabilities.TargetCapabilities.TARGET_SCHEMA,
         capabilities.TargetCapabilities.HARD_DELETE,
     ]
