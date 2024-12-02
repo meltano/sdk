@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import abc
 import contextlib
+import enum
 import pathlib
 import typing as t
 import warnings
-from enum import Enum
 
 import click
 
@@ -42,7 +42,7 @@ if t.TYPE_CHECKING:
 STREAM_MAPS_CONFIG = "stream_maps"
 
 
-class CliTestOptionValue(Enum):
+class CliTestOptionValue(enum.Enum):
     """Values for CLI option --test."""
 
     All = "all"
@@ -463,6 +463,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         self.write_message(StateMessage(value=self.state))
 
         stream: Stream
+        synced_count = 0
         for stream in self.streams.values():
             if not stream.selected and not stream.has_selected_descendents:
                 self.logger.info("Skipping deselected stream '%s'.", stream.name)
@@ -485,6 +486,9 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         # including child streams which are otherwise skipped in the loop above
         for stream in self.streams.values():
             stream.log_sync_costs()
+
+        if not synced_count:
+            self.logger.warning("No streams selected for sync.")
 
     # Command Line Execution
 
