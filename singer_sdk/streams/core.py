@@ -5,6 +5,7 @@ from __future__ import annotations
 import abc
 import copy
 import datetime
+import enum
 import json
 import typing as t
 import warnings
@@ -65,6 +66,11 @@ if t.TYPE_CHECKING:
 REPLICATION_FULL_TABLE = "FULL_TABLE"
 REPLICATION_INCREMENTAL = "INCREMENTAL"
 REPLICATION_LOG_BASED = "LOG_BASED"
+
+
+class StreamSyncOutcome(enum.Flag):
+    SYNCED = 0
+    SKIPPED = enum.auto()
 
 
 class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
@@ -1116,6 +1122,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         # Initialize metrics
         record_counter = metrics.record_counter(self.name)
         timer = metrics.sync_timer(self.name)
+        outcome = StreamSyncOutcome.SKIPPED
 
         record_index = 0
         context_element: types.Context | None
@@ -1165,6 +1172,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                         raise
 
                     if selected:
+                        outcome = StreamSyncOutcome.SYNCED
                         if write_messages:
                             self._write_record_message(record)
 
@@ -1191,6 +1199,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if write_messages:
             # Write final state message if we haven't already
             self._write_state_message()
+
+        return StreamSyncOutcome
 
     def _sync_batches(
         self,

@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import io
 import json
+import logging
 import typing as t
 from contextlib import redirect_stdout
 
@@ -52,12 +53,18 @@ def test_countries_primary_key():
     )
 
 
-def test_with_catalog_mismatch():
+def test_with_catalog_mismatch(caplog: pytest.LogCaptureFixture):
     """Test catalog apply with no matching stream catalog entries."""
     tap = SampleTapCountries(config=None, catalog={"streams": []})
     for stream in tap.streams.values():
         # All streams should be deselected:
         assert not stream.selected
+
+    with caplog.at_level(logging.WARNING):
+        tap.sync_all()
+
+    assert len(caplog.records) == 1
+    assert caplog.records[0].message == "N"
 
 
 def test_with_catalog_entry():

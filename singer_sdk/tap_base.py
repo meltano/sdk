@@ -488,7 +488,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             stream.log_sync_costs()
 
         if not synced_count:
-            self.logger.warning("No streams selected for sync.")
+            self.logger.warning("No streams selected for sync")
 
     # Command Line Execution
 
