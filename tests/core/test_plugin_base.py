@@ -16,6 +16,12 @@ class PluginTest(PluginBase):
     ).to_dict()
 
 
+def test_invalid_config_type():
+    """Test that invalid config types raise an error."""
+    with pytest.raises(TypeError, match="Error parsing config of type 'tuple'"):
+        PluginTest(config=(("prop1", "hello"), ("prop2", 123)))
+
+
 def test_get_env_var_config(monkeypatch: pytest.MonkeyPatch):
     """Test settings parsing from environment variables."""
     monkeypatch.delenv("PLUGIN_TEST_PROP1", raising=False)
