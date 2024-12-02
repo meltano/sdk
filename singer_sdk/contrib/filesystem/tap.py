@@ -105,6 +105,8 @@ class FolderTap(Tap, t.Generic[_T]):
     This should be a subclass of `FileStream`.
     """
 
+    dynamic_catalog: bool = True
+
     config_jsonschema: t.ClassVar[dict] = {"properties": {}}
 
     @classmethod
@@ -124,11 +126,16 @@ class FolderTap(Tap, t.Generic[_T]):
             config_jsonschema: [description]
         """
 
-        def _merge_missing(source_jsonschema: dict, target_jsonschema: dict) -> None:
+        def _merge_missing(src: dict, tgt: dict) -> None:
             # Append any missing properties in the target with those from source.
-            for k, v in source_jsonschema["properties"].items():
-                if k not in target_jsonschema["properties"]:
-                    target_jsonschema["properties"][k] = v
+            for k, v in src["properties"].items():
+                if k not in tgt["properties"]:
+                    tgt["properties"][k] = v
+
+                # Merge the required fields
+                source_required = src.get("required", [])
+                target_required = tgt.get("required", [])
+                tgt["required"] = list(set(source_required + target_required))
 
         _merge_missing(BASE_CONFIG_SCHEMA, config_jsonschema)
 

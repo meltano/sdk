@@ -160,14 +160,13 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             validate_config: True to require validation of config settings.
 
         Raises:
-            ValueError: If config is not a dict or path string.
+            TypeError: If config is not a dict or path string.
         """
-        if not config:
-            config_dict = {}
-        elif isinstance(config, (str, PurePath)):
+        config = config or {}
+        if isinstance(config, (str, PurePath)):
             config_dict = read_json_file(config)
             warnings.warn(
-                "Passsing a config file path is deprecated. Please pass the config "
+                "Passing a config file path is deprecated. Please pass the config "
                 "as a dictionary instead.",
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
@@ -179,7 +178,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 # list will override those of earlier ones.
                 config_dict.update(read_json_file(config_path))
             warnings.warn(
-                "Passsing a list of config file paths is deprecated. Please pass the "
+                "Passing a list of config file paths is deprecated. Please pass the "
                 "config as a dictionary instead.",
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
@@ -188,7 +187,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             config_dict = config
         else:
             msg = f"Error parsing config of type '{type(config).__name__}'."  # type: ignore[unreachable]
-            raise ValueError(msg)
+            raise TypeError(msg)
         if parse_env_config:
             self.logger.info("Parsing env var for settings config...")
             config_dict.update(self._env_var_config)

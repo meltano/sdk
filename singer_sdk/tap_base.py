@@ -106,7 +106,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
             warnings.warn(
-                "Passsing a catalog file path is deprecated. Please pass the catalog "
+                "Passing a catalog file path is deprecated. Please pass the catalog "
                 "as a dictionary or Catalog object instead.",
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
@@ -124,7 +124,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         elif state:
             state_dict = read_json_file(state)
             warnings.warn(
-                "Passsing a state file path is deprecated. Please pass the state "
+                "Passing a state file path is deprecated. Please pass the state "
                 "as a dictionary instead.",
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
