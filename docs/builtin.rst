@@ -5,6 +5,9 @@ Built-in Settings and Capabilities
 
 The Singer SDK library provides a number of built-in settings and capabilities.
 
+.. autodata:: ACTIVATE_VERSION
+   :no-value:
+
 .. autodata:: ADD_RECORD_METADATA
    :no-value:
 
