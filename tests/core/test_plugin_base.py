@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import typing as t
+
 import pytest
 
 from singer_sdk.plugin_base import SDK_PACKAGE_NAME, MapperNotInitialized, PluginBase
 from singer_sdk.typing import IntegerType, PropertiesList, Property, StringType
+
+if t.TYPE_CHECKING:
+    from pathlib import Path
 
 
 class PluginTest(PluginBase):
@@ -14,6 +19,18 @@ class PluginTest(PluginBase):
         Property("prop1", StringType, required=True),
         Property("prop2", IntegerType),
     ).to_dict()
+
+
+def test_config_path(tmp_path: Path):
+    """Test that the config path is correctly set."""
+    config_json = '{"prop1": "hello", "prop2": 123}'
+    config_path = tmp_path / "config.json"
+    config_path.write_text(config_json)
+
+    with pytest.deprecated_call():
+        plugin = PluginTest(config=config_path)
+
+    assert plugin.config == {"prop1": "hello", "prop2": 123}
 
 
 def test_invalid_config_type():
