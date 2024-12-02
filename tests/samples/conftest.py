@@ -15,7 +15,7 @@ from singer_sdk.testing import _get_tap_catalog
 @pytest.fixture
 def csv_config(outdir: str) -> dict:
     """Get configuration dictionary for target-csv."""
-    return {"target_folder": outdir}
+    return {"target_folder": outdir, "add_record_metadata": False}
 
 
 @pytest.fixture

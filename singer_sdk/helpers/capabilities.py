@@ -144,6 +144,15 @@ TARGET_SCHEMA_CONFIG = PropertiesList(
         description="The default target database schema name to use for all streams.",
     ),
 ).to_dict()
+ACTIVATE_VERSION_CONFIG = PropertiesList(
+    Property(
+        "activate_version",
+        BooleanType,
+        default=True,
+        title="Process `ACTIVATE_VERSION` messages",
+        description="Whether to process `ACTIVATE_VERSION` messages.",
+    ),
+).to_dict()
 ADD_RECORD_METADATA_CONFIG = PropertiesList(
     Property(
         "add_record_metadata",
