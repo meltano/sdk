@@ -42,7 +42,10 @@ __all__ = [
 #:        "activate_version": true
 #:    }
 #:
-ACTIVATE_VERSION = Builtin(schema=schema.ACTIVATE_VERSION_CONFIG)
+ACTIVATE_VERSION = Builtin(
+    schema=schema.ACTIVATE_VERSION_CONFIG,
+    capability=PluginCapabilities.ACTIVATE_VERSION,
+)
 
 #: Add metadata to records.
 #:
