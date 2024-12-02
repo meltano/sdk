@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable
+import decimal
+import typing as t
 
 import requests  # noqa: TCH002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
@@ -12,7 +13,7 @@ from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator
 {%- endif %}
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import Context
 
 
@@ -45,16 +46,13 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
         Returns:
             A dictionary of HTTP headers.
         """
-        headers = {}
-        if "user_agent" in self.config:
-            headers["User-Agent"] = self.config.get("user_agent")
 {%- if cookiecutter.auth_method not in ("OAuth2", "JWT") %}
         # If not using an authenticator, you may also provide inline auth headers:
         # headers["Private-Token"] = self.config.get("auth_token")
 {%- endif %}
-        return headers
+        return {}
 
-    def parse_response(self, response: requests.Response) -> Iterable[dict]:
+    def parse_response(self, response: requests.Response) -> t.Iterable[dict]:
         """Parse the response and return an iterator of result records.
 
         Args:
@@ -64,7 +62,7 @@ class {{ cookiecutter.source_name }}Stream({{ cookiecutter.stream_type }}Stream)
             Each record from the source.
         """
         # TODO: Parse response body and return a set of records.
-        resp_json = response.json()
+        resp_json = response.json(parse_float=decimal.Decimal)
         yield from resp_json.get("<TODO>")
 
     def post_process(

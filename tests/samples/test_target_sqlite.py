@@ -30,6 +30,23 @@ if t.TYPE_CHECKING:
     from singer_sdk.target_base import SQLTarget
 
 
+def get_table(config: dict, table_name: str) -> sa.Table:
+    """Get SQLAlchemy metadata and table for inspection.
+
+    Args:
+        config: Target configuration dictionary containing database path
+        table_name: Name of the table to inspect
+
+    Returns:
+        Tuple of (metadata, table)
+    """
+    db_path = config["path_to_db"]
+    engine = sa.create_engine(f"sqlite:///{db_path}")
+    meta = sa.MetaData()
+    meta.reflect(bind=engine)
+    return meta.tables[table_name]
+
+
 @pytest.fixture
 def path_to_target_db(tmp_path: Path) -> Path:
     return Path(f"{tmp_path}/target_test.db")
@@ -50,7 +67,27 @@ def sqlite_sample_target(sqlite_target_test_config):
 @pytest.fixture
 def sqlite_sample_target_hard_delete(sqlite_target_test_config):
     """Get a sample target object with hard_delete disabled."""
-    return SQLiteTarget(config={**sqlite_target_test_config, "hard_delete": True})
+    return SQLiteTarget(
+        config={
+            **sqlite_target_test_config,
+            "hard_delete": True,
+            "add_record_metadata": False,
+        }
+    )
+
+
+@pytest.fixture
+def sqlite_sample_target_no_activate_version(sqlite_target_test_config):
+    """Get a sample target object with hard_delete disabled."""
+    return SQLiteTarget(config={**sqlite_target_test_config, "activate_version": False})
+
+
+@pytest.fixture
+def sqlite_target_add_record_metadata(sqlite_target_test_config):
+    """Get a sample target object with add_record_metadata enabled."""
+    return SQLiteTarget(
+        config={**sqlite_target_test_config, "add_record_metadata": True}
+    )
 
 
 @pytest.fixture
@@ -267,6 +304,108 @@ def test_sqlite_activate_version(
         input=StringIO(tap_output),
         finalize=True,
     )
+
+    # Check that the record metadata was added
+    table = get_table(sqlite_sample_target_hard_delete.config, test_tbl)
+
+    assert "_sdc_table_version" in table.columns
+    assert type(table.columns["_sdc_table_version"].type) is sa.INTEGER
+
+    assert "_sdc_deleted_at" in table.columns
+    assert type(table.columns["_sdc_deleted_at"].type) is sa.DATETIME
+
+
+def test_sqlite_no_activate_version(
+    sqlite_sample_target_no_activate_version: SQLTarget,
+):
+    """Test handling the activate_version message for the SQLite target.
+
+    Test performs the following actions:
+
+    - Sends an activate_version message for a table that doesn't exist (which should
+      have no effect)
+    """
+    test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
+    schema_msg = {
+        "type": "SCHEMA",
+        "stream": test_tbl,
+        "schema": th.PropertiesList(th.Property("col_a", th.StringType())).to_dict(),
+    }
+
+    tap_output = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg,
+            {"type": "ACTIVATE_VERSION", "stream": test_tbl, "version": 12345},
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"col_a": "samplerow1"},
+                "version": 12345,
+            },
+        ]
+    )
+
+    target_sync_test(
+        sqlite_sample_target_no_activate_version,
+        input=StringIO(tap_output),
+        finalize=True,
+    )
+
+    # Check that the record metadata was added
+    table = get_table(sqlite_sample_target_no_activate_version.config, test_tbl)
+
+    assert "col_a" in table.columns
+    assert "_sdc_table_version" not in table.columns
+    assert "_sdc_deleted_at" not in table.columns
+
+
+def test_sqlite_add_record_metadata(sqlite_target_add_record_metadata: SQLTarget):
+    """Test handling the activate_version message for the SQLite target.
+
+    Test performs the following actions:
+
+    - Sends an activate_version message for a table that doesn't exist (which should
+      have no effect)
+    """
+    test_tbl = f"zzz_tmp_{str(uuid4()).split('-')[-1]}"
+    schema_msg = {
+        "type": "SCHEMA",
+        "stream": test_tbl,
+        "schema": th.PropertiesList(th.Property("col_a", th.StringType())).to_dict(),
+    }
+
+    tap_output = "\n".join(
+        json.dumps(msg)
+        for msg in [
+            schema_msg,
+            {"type": "ACTIVATE_VERSION", "stream": test_tbl, "version": 12345},
+            {
+                "type": "RECORD",
+                "stream": test_tbl,
+                "record": {"col_a": "samplerow1"},
+                "version": 12345,
+            },
+        ]
+    )
+
+    target_sync_test(
+        sqlite_target_add_record_metadata,
+        input=StringIO(tap_output),
+        finalize=True,
+    )
+
+    # Check that the record metadata was added
+    table = get_table(sqlite_target_add_record_metadata.config, test_tbl)
+
+    assert "_sdc_received_at" in table.columns
+    assert type(table.columns["_sdc_received_at"].type) is sa.DATETIME
+
+    assert "_sdc_sync_started_at" in table.columns
+    assert type(table.columns["_sdc_sync_started_at"].type) is sa.INTEGER
+
+    assert "_sdc_table_version" in table.columns
+    assert type(table.columns["_sdc_table_version"].type) is sa.INTEGER
 
 
 def test_sqlite_column_morph(sqlite_sample_target: SQLTarget):

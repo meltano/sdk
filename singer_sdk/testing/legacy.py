@@ -40,7 +40,7 @@ def get_standard_tap_tests(  # noqa: C901
         catalog1 = _get_tap_catalog(tap_class, config or {})
         # Reset and re-initialize with an input catalog
         tap2: Tap = tap_class(config=config, parse_env_config=True, catalog=catalog1)
-        assert tap2
+        assert tap2  # type: ignore[truthy-bool]
 
     def _test_stream_connections() -> None:
         # Initialize with basic config
@@ -166,7 +166,7 @@ def _select_all(catalog_dict: dict) -> dict:
     for catalog_entry in catalog.streams:
         catalog_entry.metadata.root.selected = True
 
-    return t.cast(dict, catalog.to_dict())
+    return t.cast("dict", catalog.to_dict())
 
 
 def target_sync_test(

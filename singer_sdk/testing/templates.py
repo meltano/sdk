@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import contextlib
+import importlib.resources
 import typing as t
 import warnings
 
-from singer_sdk.helpers._compat import importlib_resources
 from singer_sdk.testing import target_test_streams
 
 if t.TYPE_CHECKING:
@@ -103,8 +103,8 @@ class TestTemplate:
         Raises:
             ValueError: if Test instance does not have `name` and `type` properties.
         """
-        if not self.name or not self.plugin_type:
-            msg = "Test must have 'name' and 'type' properties."
+        if not self.name or not self.plugin_type:  # pragma: no cover
+            msg = "Test must have 'name' and 'plugin_type' properties."
             raise ValueError(msg)
 
         self.config = config
@@ -249,9 +249,9 @@ class AttributeTestTemplate(TestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,  # noqa: ARG003
-        property_name: str,  # noqa: ARG003
-        property_schema: dict,  # noqa: ARG003
+        stream: Stream,
+        property_name: str,
+        property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
 
@@ -337,4 +337,4 @@ class TargetFileTestTemplate(TargetTestTemplate):
         Returns:
             The expected Path to this tests singer file.
         """
-        return importlib_resources.files(target_test_streams) / f"{self.name}.singer"
+        return importlib.resources.files(target_test_streams) / f"{self.name}.singer"

@@ -313,9 +313,19 @@ def test_conform_primitives():
 
     assert _conform_primitive_property(None, {"type": "boolean"}) is None
     assert _conform_primitive_property(0, {"type": "boolean"}) is False
+    assert (
+        _conform_primitive_property(
+            0, {"anyOf": [{"type": "boolean"}, {"type": "integer"}]}
+        )
+        == 0
+    )
+    assert _conform_primitive_property(0, {"type": ["boolean", "integer"]}) == 0
     assert _conform_primitive_property(1, {"type": "boolean"}) is True
+    assert _conform_primitive_property(1, {"type": ["boolean", "null"]}) is True
+    assert _conform_primitive_property(1, {"type": ["boolean"]}) is True
 
 
+@pytest.mark.filterwarnings("ignore:Use `JSONSchemaToSQL` instead.:DeprecationWarning")
 @pytest.mark.parametrize(
     "jsonschema_type,expected",
     [
@@ -336,6 +346,10 @@ def test_conform_primitives():
             sa.types.DATETIME,
         ),
         ({"anyOf": [{"type": "integer"}, {"type": "null"}]}, sa.types.INTEGER),
+        (
+            {"type": ["array", "object", "boolean", "null"]},
+            sa.types.VARCHAR,
+        ),
     ],
 )
 def test_to_sql_type(jsonschema_type, expected):

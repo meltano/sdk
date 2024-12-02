@@ -14,7 +14,9 @@ import hashlib
 import importlib.util
 import json
 import logging
+import sys
 import typing as t
+import warnings
 
 import simpleeval  # type: ignore[import-untyped]
 
@@ -61,7 +63,7 @@ def md5(string: str) -> str:
     return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
 
 
-StreamMapsDict: TypeAlias = t.Dict[str, t.Union[str, dict, None]]
+StreamMapsDict: TypeAlias = dict[str, t.Union[str, dict, None]]
 
 
 class StreamMap(metaclass=abc.ABCMeta):
@@ -335,9 +337,13 @@ class CustomStreamMap(StreamMap):
         names["_"] = record  # Add a shorthand alias in case of reserved words in names
         names["record"] = record  # ...and a longhand alias
         names["config"] = self.map_config  # Allow map config access within transform
+        names["__stream_name__"] = self.stream_alias  # Access stream name in transform
 
         if self.fake:
+            from faker import Faker  # noqa: PLC0415
+
             names["fake"] = self.fake
+            names["Faker"] = Faker
 
         if property_name and property_name in record:
             # Allow access to original property value if applicable
@@ -356,7 +362,7 @@ class CustomStreamMap(StreamMap):
 
         return result
 
-    def _eval_type(
+    def _eval_type(  # noqa: PLR0911
         self,
         expr: str,
         default: th.JSONTypeHelper | None = None,
@@ -374,7 +380,7 @@ class CustomStreamMap(StreamMap):
             ValueError: If the expression is ``None``.
         """
         if expr is None:
-            msg = "Expression should be str, not None"
+            msg = "Expression should be str, not None"  # type: ignore[unreachable]
             raise ValueError(msg)
 
         default = default or th.StringType()
@@ -394,6 +400,14 @@ class CustomStreamMap(StreamMap):
 
         if expr.startswith("bool("):
             return th.BooleanType()
+
+        if expr.startswith(("datetime.date.", "datetime.date(")) or expr.endswith(
+            ".date()"
+        ):
+            return th.DateType()
+
+        if expr.startswith(("datetime.datetime.", "datetime.datetime(")):
+            return th.DateTimeType()
 
         return th.StringType() if expr[0] == "'" and expr[-1] == "'" else default
 
@@ -481,6 +495,12 @@ class CustomStreamMap(StreamMap):
                     )
                     raise StreamMapConfigError(msg)
                 transformed_schema["properties"].pop(prop_key, None)
+                if "required" in transformed_schema:
+                    transformed_schema["required"] = [
+                        item
+                        for item in transformed_schema["required"]
+                        if item != prop_key
+                    ]
                 stream_map_parsed.append((prop_key, prop_def, None))
             elif isinstance(prop_def, str):
                 default_type: th.JSONTypeHelper = th.StringType()  # Fallback to string
@@ -500,6 +520,12 @@ class CustomStreamMap(StreamMap):
                         self._eval_type(prop_def, default=default_type),
                     ).to_dict(),
                 )
+                if "Faker" in prop_def:
+                    warnings.warn(
+                        "Class 'Faker' is deprecated in stream maps. Use instance methods, like 'fake.seed_instance.'",  # noqa: E501
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
                 try:
                     parsed_def: ast.Expr = ast.parse(prop_def).body[0]  # type: ignore[assignment]
                     stream_map_parsed.append((prop_key, prop_def, parsed_def))
@@ -561,7 +587,7 @@ class CustomStreamMap(StreamMap):
         elif filter_rule is None:
             filter_fn = always_true
         else:
-            msg = (
+            msg = (  # type: ignore[unreachable]
                 f"Unexpected filter rule type '{type(filter_rule).__name__}' in "
                 f"expression {filter_rule!s}. Expected 'str' or 'None'."
             )
@@ -756,6 +782,7 @@ class PluginMapper:
                 elif MAPPER_ALIAS_OPTION in stream_def:
                     # <source>: __alias__: <alias>
                     stream_alias = stream_def.pop(MAPPER_ALIAS_OPTION)
+                    stream_alias = PluginMapper._eval_stream(stream_alias, stream_name)
 
             if stream_name == source_stream:
                 # Exact match
@@ -780,9 +807,7 @@ class PluginMapper:
                     key_properties=key_properties,
                     flattening_options=self.flattening_options,
                 )
-            elif stream_def is None or (
-                isinstance(stream_def, str) and stream_def == NULL_STRING
-            ):
+            elif stream_def is None or (stream_def == NULL_STRING):
                 mapper = RemoveRecordTransform(
                     stream_alias=stream_alias,
                     raw_schema=schema,
@@ -797,7 +822,7 @@ class PluginMapper:
                 raise StreamMapConfigError(msg)
 
             else:
-                msg = (
+                msg = (  # type: ignore[unreachable]
                     f"Unexpected stream definition type. Expected str, dict, or None. "
                     f"Got '{type(stream_def).__name__}'."
                 )
@@ -810,3 +835,40 @@ class PluginMapper:
             else:
                 # Additional mappers for aliasing and multi-projection:
                 self.stream_maps[source_stream].append(mapper)
+
+    @staticmethod
+    def _eval_stream(expr: str, stream_name: str) -> str:
+        """Solve an alias expression.
+
+        Args:
+            expr: String expression to evaluate.
+            stream_name: Name of stream to transform.
+
+        Returns:
+            Evaluated expression.
+
+        Raises:
+            MapExpressionError: If the mapping expression failed to evaluate.
+        """
+        # Allow stream name access within alias transform
+        names = {"__stream_name__": stream_name}
+
+        result: str
+
+        try:
+            expr_evaluator = simpleeval.EvalWithCompoundTypes(names=names)
+            result = expr_evaluator.eval(expr)
+        except simpleeval.NameNotDefined:
+            logging.debug(
+                "Failed to evaluate simpleeval expression %(expr) - "
+                "falling back to original expression",
+                extra={"expr": expr},
+            )
+            result = expr
+        except (simpleeval.InvalidExpression, SyntaxError) as ex:
+            msg = f"Failed to evaluate simpleeval expressions {expr}."
+            raise MapExpressionError(msg) from ex
+
+        logging.debug("Stream eval result: %s = %s", expr, result)
+
+        return result

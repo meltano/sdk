@@ -2,8 +2,9 @@ name: Feature request
 description: Request a new feature
 title: "feat: <title>"
 labels: ["kind/Feature", "valuestream/SDK"]
+type: Feat
 assignees:
-  - meltano/engineering
+  - edgarrmondragon
 
 body:
   - type: markdown
@@ -16,7 +17,8 @@ body:
       label: Feature scope
       description: Functionality this new feature would impact
       options:
-        - Taps (catalog, state, stream maps, tests, etc.)
+        - Taps (catalog, state, tests, etc.)
+        - Inline mapping (stream maps, flattening, etc.)
         - Targets (data type handling, batching, SQL object generation, tests, etc.)
         - Configuration (settings parsing, validation, etc.)
         - CLI (options, error messages, logging, etc.)

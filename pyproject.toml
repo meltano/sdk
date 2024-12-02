@@ -19,11 +19,11 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
@@ -38,13 +38,14 @@ license = "Apache-2.0"
 "Youtube" = "https://www.youtube.com/meltano"
 
 [tool.poetry.dependencies]
-python = ">=3.8"
+python = ">=3.9"
 backoff = { version = ">=2.0.0", python = "<4" }
 backports-datetime-fromisoformat = { version = ">=2.0.1", python = "<3.11" }
 click = "~=8.0"
 fs = ">=2.4.16"
-importlib-metadata = {version = "<9.0.0", python = "<3.12"}
-importlib-resources = {version = ">=5.12.0,!=6.2.0,!=6.3.0,!=6.3.1", python = "<3.10"}
+fsspec = ">=2024.9.0"
+importlib-metadata = { version = "<9.0.0", python = "<3.12" }
+importlib-resources = { version = ">=5.12.0,!=6.2.0,!=6.3.0,!=6.3.1", python = "<3.10" }
 inflection = ">=0.5.1"
 joblib = ">=1.3.0"
 jsonpath-ng = ">=1.5.3"
@@ -54,30 +55,36 @@ python-dotenv = ">=0.20"
 PyYAML = ">=6.0"
 referencing = ">=0.30.0"
 requests = ">=2.25.1"
-simpleeval = ">=0.9.13"
+# TODO: remove this constraint once we get rid of the `fs` dependency
+# newer setuptools versions are incompatible with some dependencies (fs)
+setuptools = "<=70.3.0"
+simpleeval = ">=0.9.13,!=1.0.1"
 simplejson = ">=3.17.6"
 sqlalchemy = ">=1.4,<3.0"
 typing-extensions = ">=4.5.0"
-# urllib3 2.0 is not compatible with botocore
-urllib3 = ">=1.26,<2"
 
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
-furo = {version = ">=2024.5.6", python = ">=3.9", optional = true}
-myst-parser = {version = ">=3", python = ">=3.9", optional = true}
-sphinx = {version = ">=7", python = ">=3.9", optional = true}
-sphinx-copybutton = {version = ">=0.5.2", python = ">=3.9", optional = true}
-sphinx-inline-tabs = {version = ">=2023.4.21", python = ">=3.9", optional = true}
-sphinx-notfound-page = {version = ">=1.0.0", python = ">=3.9", optional = true}
-sphinx-reredirects = {version = ">=0.1.5", python = ">=3.9", optional = true}
+furo = {version = ">=2024.5.6", optional = true}
+myst-parser = {version = ">=3", optional = true}
+sphinx = {version = ">=7", optional = true}
+sphinx-copybutton = {version = ">=0.5.2", optional = true}
+sphinx-inline-tabs = {version = ">=2023.4.21", optional = true}
+sphinx-notfound-page = {version = ">=1.0.0", optional = true}
+sphinx-reredirects = {version = ">=0.1.5", optional = true}
 
 # File storage dependencies installed as optional 'filesystem' extras
 fs-s3fs = {version = ">=1.1.1", optional = true}
+s3fs = { version = ">=2024.9.0", optional = true }
 
 # Parquet file dependencies installed as optional 'parquet' extras
+# We add Python constraints to force Poetry to add the latest supported Numpy version
+# for all Python versions to 'poetry.lock'. If we don't do this, Poetry will add only
+# the version of Numpy that is compatible with the earliest Python version supported
+# by this project, but that may not be compatible with the latest Python version.
 numpy = [
-    { version = ">=1.22,<1.25", python = ">=3.8,<3.9", optional = true },
-    { version = ">=1.22", python = ">=3.9", optional = true },
+    { version = ">=1.22,<2.1", python = "==3.9", optional = true },
+    { version = ">=1.22", python = ">=3.10", optional = true },
 ]
 pyarrow = { version = ">=13", optional = true }
 
@@ -85,11 +92,14 @@ pyarrow = { version = ">=13", optional = true }
 pytest = {version=">=7.2.1", optional = true}
 
 # installed as optional 'faker' extra
-faker = {version = ">=22.5,<27.0", optional = true}
+faker = {version = ">=22.5", optional = true}
 
 # Crypto extras
 cryptography = { version = ">=3.4.6", optional = true }
 PyJWT = { version = "~=2.4", optional = true }
+
+# SSH extras
+paramiko = ">=3.3.0"
 
 [tool.poetry.extras]
 jwt = [
@@ -106,7 +116,8 @@ docs = [
     "sphinx-notfound-page",
     "sphinx-reredirects",
 ]
-s3 = ["fs-s3fs"]
+s3 = ["fs-s3fs", "s3fs"]
+ssh = ["paramiko"]
 testing = [
     "pytest",
 ]
@@ -121,9 +132,12 @@ duckdb = ">=0.8.0"
 duckdb-engine = { version = ">=0.9.4", python = "<4" }
 
 fastjsonschema = ">=2.19.1"
+moto = ">=5.0.14"
 pytest-benchmark = ">=4.0.0"
 pytest-snapshot = ">=0.9.0"
+pytest-subtests = ">=0.13.1"
 pytz = ">=2022.2.1"
+requests-cache = ">=1.2.1"
 requests-mock = ">=1.10.0"
 rfc3339-validator = ">=0.1.4"
 time-machine = ">=2.10.0"
@@ -141,38 +155,39 @@ types-PyYAML = ">=6.0.12"
 pytest-codspeed = ">=2.2.0"
 
 [tool.pytest.ini_options]
-addopts = '--durations=10 --ignore=singer_sdk/helpers/_simpleeval.py -m "not external"'
+addopts = [
+    "--durations=10",
+    "-m",
+    "not external",
+    "-ra",
+    "--strict-config",
+    "--strict-markers",
+]
 filterwarnings = [
     "error",
     "ignore:Could not configure external gitlab tests:UserWarning",
     "ignore:No records were available to test:UserWarning",
     # https://github.com/meltano/sdk/issues/1354
     "ignore:The function singer_sdk.testing.get_standard_tap_tests is deprecated:DeprecationWarning",
-    # https://docs.python.org/3.12/whatsnew/3.12.html#deprecated
-    # https://github.com/danthedeckie/simpleeval/blob/master/simpleeval.py
-    "ignore:ast.NameConstant is deprecated:DeprecationWarning:simpleeval",
-    # https://docs.python.org/3.12/whatsnew/3.12.html#deprecated
-    # https://github.com/danthedeckie/simpleeval/blob/master/simpleeval.py
-    "ignore:ast.Num is deprecated:DeprecationWarning:simpleeval",
-    # https://github.com/joblib/joblib/pull/1518
-    "ignore:ast.Num is deprecated:DeprecationWarning:joblib._utils",
-    # https://docs.python.org/3.12/whatsnew/3.12.html#deprecated
-    # https://github.com/danthedeckie/simpleeval/blob/master/simpleeval.py
-    "ignore:ast.Str is deprecated:DeprecationWarning:simpleeval",
-    # https://github.com/joblib/joblib/pull/1518
-    "ignore:Attribute n is deprecated:DeprecationWarning:joblib._utils",
+    # https://github.com/meltano/sdk/issues/2744
+    "default::singer_sdk.helpers._compat.SingerSDKDeprecationWarning",
+    # TODO: Address this SQLite warning in Python 3.13+
+    "ignore::ResourceWarning",
 ]
+log_cli_level = "INFO"
 markers = [
     "external: Tests relying on external resources",
     "windows: Tests that only run on Windows",
     "snapshot: Tests that use pytest-snapshot",
 ]
+minversion = "7"
 testpaths = ["tests"]
 norecursedirs = "cookiecutter"
+xfail_strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.39.1"
+version = "0.42.1"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -236,6 +251,7 @@ types-requests = "requests"
 DEP002 = [
     # Transitive constraints
     "numpy",
+    "setuptools",
     "urllib3",
     # Python version-specific dependencies
     "backports-datetime-fromisoformat",
@@ -248,15 +264,20 @@ DEP002 = [
     "sphinx-notfound-page",
     "sphinx-reredirects",
     # Plugins
+    "paramiko",
     "fs-s3fs",
+    "s3fs",
 ]
 
 [tool.mypy]
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 exclude = "tests"
 files = "singer_sdk"
 local_partial_types = true
+strict = false
 warn_redundant_casts = true
 warn_return_any = true
+warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
@@ -264,6 +285,7 @@ warn_unused_ignores = true
 ignore_missing_imports = true
 module = [
     "backports.datetime_fromisoformat.*",
+    "fsspec.*",       # TODO: Remove when https://github.com/fsspec/filesystem_spec/issues/625 is addressed
     "joblib.*",       # TODO: Remove when https://github.com/joblib/joblib/issues/1516 is shipped
     "jsonpath_ng.*",  # TODO: Remove when https://github.com/h2non/jsonpath-ng/issues/152 is implemented and released
     "pyarrow.*",      # TODO: Remove when https://github.com/apache/arrow/issues/32609 if implemented and released
@@ -287,11 +309,9 @@ parquet = "singer_sdk.contrib.batch_encoder_parquet:ParquetBatcher"
 [tool.ruff]
 extend-exclude = [
     "cookiecutter/*",
-    "*simpleeval*",
 ]
 line-length = 88
-src = ["samples", "singer_sdk", "tests"]
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -299,8 +319,6 @@ docstring-code-format = true
 [tool.ruff.lint]
 explicit-preview-rules = false
 ignore = [
-    "ANN101",  # Missing type annotation for `self` in method
-    "ANN102",  # Missing type annotation for `cls` in class method
     "N818",    # Exception name should be named with an Error suffix
     "COM812",  # missing-trailing-comma
     "ISC001",  # single-line-implicit-string-concatenation
@@ -342,7 +360,7 @@ select = [
     "SLF",  # flake8-self
     "SIM",  # flake8-simplify
     "TID",  # flake8-tidy-imports
-    "TCH",  # flake8-type-checking
+    "TC",   # flake8-type-checking
     "ARG",  # flake8-unused-arguments
     "PTH",  # flake8-use-pathlib
     "ERA",  # eradicate
@@ -374,6 +392,7 @@ unfixable = [
     "DOC",
     "FBT001",
     "FBT003",
+    "INP",      # Allow implicit namespace packages in tests
     "PLR2004",
     "S101",
     "SLF001",

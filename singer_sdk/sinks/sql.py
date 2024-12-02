@@ -21,6 +21,7 @@ from singer_sdk.sinks.batch import BatchSink
 if t.TYPE_CHECKING:
     from sqlalchemy.sql import Executable
 
+    from singer_sdk.connectors.sql import FullyQualifiedName
     from singer_sdk.target_base import Target
 
 _C = t.TypeVar("_C", bound=SQLConnector)
@@ -109,7 +110,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         # Assumes single-DB target context.
 
     @property
-    def full_table_name(self) -> str:
+    def full_table_name(self) -> FullyQualifiedName:
         """Return the fully qualified table name.
 
         Returns:
@@ -122,7 +123,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         )
 
     @property
-    def full_schema_name(self) -> str:
+    def full_schema_name(self) -> FullyQualifiedName:
         """Return the fully qualified schema name.
 
         Returns:
@@ -269,7 +270,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
 
     def generate_insert_statement(
         self,
-        full_table_name: str,
+        full_table_name: str | FullyQualifiedName,
         schema: dict,
     ) -> str | Executable:
         """Generate an insert statement for the given records.
@@ -291,13 +292,13 @@ class SQLSink(BatchSink, t.Generic[_C]):
             INSERT INTO {full_table_name}
             ({", ".join(column_identifiers)})
             VALUES ({", ".join([f":{name}" for name in property_names])})
-            """,  # noqa: S608
+            """,
         )
         return statement.rstrip()
 
     def bulk_insert_records(
         self,
-        full_table_name: str,
+        full_table_name: str | FullyQualifiedName,
         schema: dict,
         records: t.Iterable[dict[str, t.Any]],
     ) -> int | None:
