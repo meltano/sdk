@@ -972,7 +972,7 @@ class SQLConnector:  # noqa: PLR0904
         schema_name: str | None,
         columns: list[reflection.ReflectedColumn],
         primary_key: reflection.ReflectedPrimaryKeyConstraint | None,
-        unique_constraints: list[reflection.ReflectedUniqueConstraint],
+        indices: list[reflection.ReflectedIndex],
         is_view: bool = False,
     ) -> CatalogEntry:
         unique_stream_id = f"{schema_name}-{table_name}" if schema_name else table_name
@@ -982,10 +982,11 @@ class SQLConnector:  # noqa: PLR0904
         if primary_key and "constrained_columns" in primary_key:
             possible_primary_keys.append(primary_key["constrained_columns"])
 
-        # Check UNIQUE constraints
+        # Get key property candidates from indices
         possible_primary_keys.extend(
-            unique_constraint["column_names"]
-            for unique_constraint in unique_constraints
+            index_def["column_names"]  # type: ignore[misc]
+            for index_def in indices
+            if index_def.get("unique", False)
         )
 
         key_properties = next(iter(possible_primary_keys), [])
@@ -1059,9 +1060,9 @@ class SQLConnector:  # noqa: PLR0904
             primary_keys = inspected.get_multi_pk_constraint(schema=schema_name)
 
             if reflect_indices:
-                constraints = inspected.get_multi_unique_constraints(schema=schema_name)
+                indices = inspected.get_multi_indexes(schema=schema_name)
             else:
-                constraints = {}
+                indices = {}
 
             for object_kind, is_view in object_kinds:
                 columns = inspected.get_multi_columns(
@@ -1075,7 +1076,7 @@ class SQLConnector:  # noqa: PLR0904
                         schema_name=schema,
                         columns=columns[schema, table],
                         primary_key=primary_keys.get((schema, table)),
-                        unique_constraints=constraints.get((schema, table), []),
+                        indices=indices.get((schema, table), []),
                         is_view=is_view,
                     ).to_dict()
                     for schema, table in columns
