@@ -7,7 +7,6 @@ import typing as t
 
 import click
 
-from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
 from singer_sdk.io_base import SingerReader, SingerWriter
 from singer_sdk.plugin_base import PluginBase
@@ -19,16 +18,10 @@ if t.TYPE_CHECKING:
 class InlineMapper(PluginBase, SingerReader, SingerWriter, metaclass=abc.ABCMeta):
     """Abstract base class for inline mappers."""
 
-    @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
-        """Get capabilities.
-
-        Returns:
-            A list of plugin capabilities.
-        """
-        return [
-            PluginCapabilities.STREAM_MAPS,
-        ]
+    #: A list of plugin capabilities.
+    capabilities: t.ClassVar[list[CapabilitiesEnum]] = [
+        PluginCapabilities.STREAM_MAPS,
+    ]
 
     def _write_messages(self, messages: t.Iterable[singer.Message]) -> None:
         for message in messages:

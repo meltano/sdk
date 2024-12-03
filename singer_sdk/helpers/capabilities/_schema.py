@@ -1,10 +1,6 @@
-"""Module with helpers to declare capabilities and plugin behavior."""
+"""Default JSON Schema to support config for built-in capabilities."""
 
 from __future__ import annotations
-
-import typing as t
-from enum import Enum, EnumMeta
-from warnings import warn
 
 from singer_sdk.typing import (
     ArrayType,
@@ -18,9 +14,7 @@ from singer_sdk.typing import (
     StringType,
 )
 
-_EnumMemberT = t.TypeVar("_EnumMemberT")
-
-# Default JSON Schema to support config for built-in capabilities:
+from ._enum import TargetLoadMethods
 
 STREAM_MAPS_CONFIG = PropertiesList(
     Property(
@@ -65,11 +59,12 @@ STREAM_MAPS_CONFIG = PropertiesList(
         description=(
             "Config for the [`Faker`](https://faker.readthedocs.io/en/master/) "
             "instance variable `fake` used within map expressions. Only applicable if "
-            "the plugin specifies `faker` as an addtional dependency (through the "
+            "the plugin specifies `faker` as an additional dependency (through the "
             "`singer-sdk` `faker` extra or directly)."
         ),
     ),
 ).to_dict()
+
 FLATTENING_CONFIG = PropertiesList(
     Property(
         "flattening_enabled",
@@ -87,6 +82,7 @@ FLATTENING_CONFIG = PropertiesList(
         description="The max depth to flatten schemas.",
     ),
 ).to_dict()
+
 BATCH_CONFIG = PropertiesList(
     Property(
         "batch_config",
@@ -136,6 +132,7 @@ BATCH_CONFIG = PropertiesList(
         ),
     ),
 ).to_dict()
+
 TARGET_SCHEMA_CONFIG = PropertiesList(
     Property(
         "default_target_schema",
@@ -144,6 +141,7 @@ TARGET_SCHEMA_CONFIG = PropertiesList(
         description="The default target database schema name to use for all streams.",
     ),
 ).to_dict()
+
 ACTIVATE_VERSION_CONFIG = PropertiesList(
     Property(
         "activate_version",
@@ -153,6 +151,7 @@ ACTIVATE_VERSION_CONFIG = PropertiesList(
         description="Whether to process `ACTIVATE_VERSION` messages.",
     ),
 ).to_dict()
+
 ADD_RECORD_METADATA_CONFIG = PropertiesList(
     Property(
         "add_record_metadata",
@@ -161,6 +160,7 @@ ADD_RECORD_METADATA_CONFIG = PropertiesList(
         description="Whether to add metadata fields to records.",
     ),
 ).to_dict()
+
 TARGET_HARD_DELETE_CONFIG = PropertiesList(
     Property(
         "hard_delete",
@@ -170,6 +170,7 @@ TARGET_HARD_DELETE_CONFIG = PropertiesList(
         default=False,
     ),
 ).to_dict()
+
 TARGET_VALIDATE_RECORDS_CONFIG = PropertiesList(
     Property(
         "validate_records",
@@ -179,6 +180,7 @@ TARGET_VALIDATE_RECORDS_CONFIG = PropertiesList(
         default=True,
     ),
 ).to_dict()
+
 TARGET_BATCH_SIZE_ROWS_CONFIG = PropertiesList(
     Property(
         "batch_size_rows",
@@ -187,20 +189,6 @@ TARGET_BATCH_SIZE_ROWS_CONFIG = PropertiesList(
         description="Maximum number of rows in each batch.",
     ),
 ).to_dict()
-
-
-class TargetLoadMethods(str, Enum):
-    """Target-specific capabilities."""
-
-    # always write all input records whether that records already exists or not
-    APPEND_ONLY = "append-only"
-
-    # update existing records and insert new records
-    UPSERT = "upsert"
-
-    # delete all existing records and insert all input records
-    OVERWRITE = "overwrite"
-
 
 TARGET_LOAD_METHOD_CONFIG = PropertiesList(
     Property(
@@ -221,180 +209,3 @@ TARGET_LOAD_METHOD_CONFIG = PropertiesList(
         default=TargetLoadMethods.APPEND_ONLY,
     ),
 ).to_dict()
-
-
-class DeprecatedEnum(Enum):
-    """Base class for capabilities enumeration."""
-
-    def __new__(
-        cls,
-        value: _EnumMemberT,
-        deprecation: str | None = None,
-    ) -> DeprecatedEnum:
-        """Create a new enum member.
-
-        Args:
-            value: Enum member value.
-            deprecation: Deprecation message.
-
-        Returns:
-            An enum member value.
-        """
-        member: DeprecatedEnum = object.__new__(cls)
-        member._value_ = value
-        member.deprecation = deprecation
-        return member
-
-    @property
-    def deprecation_message(self) -> str | None:
-        """Get deprecation message.
-
-        Returns:
-            Deprecation message.
-        """
-        self.deprecation: str | None
-        return self.deprecation
-
-    def emit_warning(self) -> None:
-        """Emit deprecation warning."""
-        warn(
-            f"{self.name} is deprecated. {self.deprecation_message}",
-            DeprecationWarning,
-            stacklevel=3,
-        )
-
-
-class DeprecatedEnumMeta(EnumMeta):
-    """Metaclass for enumeration with deprecation support."""
-
-    def __getitem__(cls, name: str) -> t.Any:  # noqa: ANN401
-        """Retrieve mapping item.
-
-        Args:
-            name: Item name.
-
-        Returns:
-            Enum member.
-        """
-        obj: Enum = super().__getitem__(name)
-        if isinstance(obj, DeprecatedEnum) and obj.deprecation_message:
-            obj.emit_warning()
-        return obj
-
-    def __getattribute__(cls, name: str) -> t.Any:  # noqa: ANN401
-        """Retrieve enum attribute.
-
-        Args:
-            name: Attribute name.
-
-        Returns:
-            Attribute.
-        """
-        obj = super().__getattribute__(name)
-        if isinstance(obj, DeprecatedEnum) and obj.deprecation_message:
-            obj.emit_warning()
-        return obj
-
-    def __call__(cls, *args: t.Any, **kwargs: t.Any) -> t.Any:  # noqa: ANN401
-        """Call enum member.
-
-        Args:
-            args: Positional arguments.
-            kwargs: Keyword arguments.
-
-        Returns:
-            Enum member.
-        """
-        obj = super().__call__(*args, **kwargs)
-        if isinstance(obj, DeprecatedEnum) and obj.deprecation_message:
-            obj.emit_warning()
-        return obj
-
-
-class CapabilitiesEnum(DeprecatedEnum, metaclass=DeprecatedEnumMeta):
-    """Base capabilities enumeration."""
-
-    def __str__(self) -> str:
-        """String representation.
-
-        Returns:
-            Stringified enum value.
-        """
-        return str(self.value)
-
-    def __repr__(self) -> str:
-        """String representation.
-
-        Returns:
-            Stringified enum value.
-        """
-        return str(self.value)
-
-
-class PluginCapabilities(CapabilitiesEnum):
-    """Core capabilities which can be supported by taps and targets."""
-
-    #: Support plugin capability and setting discovery.
-    ABOUT = "about"
-
-    #: Support :doc:`inline stream map transforms</stream_maps>`.
-    STREAM_MAPS = "stream-maps"
-
-    #: Support schema flattening, aka denesting of complex properties.
-    FLATTENING = "schema-flattening"
-
-    #: Support the
-    #: `ACTIVATE_VERSION <https://hub.meltano.com/singer/docs#activate-version>`_
-    #: extension.
-    ACTIVATE_VERSION = "activate-version"
-
-    #: Input and output from
-    #: `batched files <https://hub.meltano.com/singer/docs#batch>`_.
-    #: A.K.A ``FAST_SYNC``.
-    BATCH = "batch"
-
-
-class TapCapabilities(CapabilitiesEnum):
-    """Tap-specific capabilities."""
-
-    #: Generate a catalog with `--discover`.
-    DISCOVER = "discover"
-
-    #: Accept input catalog, apply metadata and selection rules.
-    CATALOG = "catalog"
-
-    #: Incremental refresh by means of state tracking.
-    STATE = "state"
-
-    #: Automatic connectivity and stream init test via :ref:`--test<Test connectivity>`.
-    TEST = "test"
-
-    #: Support for ``replication_method: LOG_BASED``. You can read more about this
-    #: feature in `MeltanoHub <https://hub.meltano.com/singer/docs#log-based>`_.
-    LOG_BASED = "log-based"
-
-    #: Deprecated. Please use :attr:`~TapCapabilities.CATALOG` instead.
-    PROPERTIES = "properties", "Please use CATALOG instead."
-
-
-class TargetCapabilities(CapabilitiesEnum):
-    """Target-specific capabilities."""
-
-    #: Allows a ``soft_delete=True`` config option.
-    #: Requires a tap stream supporting :attr:`PluginCapabilities.ACTIVATE_VERSION`
-    #: and/or :attr:`TapCapabilities.LOG_BASED`.
-    SOFT_DELETE = "soft-delete"
-
-    #: Allows a ``hard_delete=True`` config option.
-    #: Requires a tap stream supporting :attr:`PluginCapabilities.ACTIVATE_VERSION`
-    #: and/or :attr:`TapCapabilities.LOG_BASED`.
-    HARD_DELETE = "hard-delete"
-
-    #: Fail safe for unknown JSON Schema types.
-    DATATYPE_FAILSAFE = "datatype-failsafe"
-
-    #: Allow setting the target schema.
-    TARGET_SCHEMA = "target-schema"
-
-    #: Validate the schema of the incoming records.
-    VALIDATE_RECORDS = "validate-records"

@@ -8,7 +8,6 @@ import datetime
 import importlib.util
 import time
 import typing as t
-from functools import cached_property
 from gzip import GzipFile
 from gzip import open as gzip_open
 from types import MappingProxyType
@@ -24,6 +23,7 @@ from singer_sdk.exceptions import (
     InvalidRecord,
     MissingKeyPropertiesError,
 )
+from singer_sdk.helpers import capabilities
 from singer_sdk.helpers._batch import (
     BaseBatchFileEncoding,
     BatchConfig,
@@ -144,6 +144,22 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
     fail_on_record_validation_exception: bool = True
     """Interrupt the target execution when a record fails schema validation."""
 
+    #: Enable JSON schema record validation.
+    validate_schema = capabilities.TARGET_VALIDATE_RECORDS.attribute(
+        "validate_records",
+        default=True,
+    )
+
+    include_sdc_metadata_properties = capabilities.ADD_RECORD_METADATA.attribute(
+        "add_record_metadata",
+        default=False,
+    )
+
+    process_activate_version_messages = capabilities.ACTIVATE_VERSION.attribute(
+        "activate_version",
+        default=True,
+    )
+
     def __init__(
         self,
         target: Target,
@@ -219,15 +235,6 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             The Meter instance for the batch processing timer.
         """
         return self._batch_timer
-
-    @cached_property
-    def validate_schema(self) -> bool:
-        """Enable JSON schema record validation.
-
-        Returns:
-            True if JSON schema validation is enabled.
-        """
-        return self.config.get("validate_records", True)
 
     def get_validator(self) -> BaseJSONSchemaValidator | None:
         """Get a record validator for this sink.
@@ -389,24 +396,6 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         raw = self.config.get("batch_config")
         return BatchConfig.from_dict(raw) if raw else None
-
-    @property
-    def include_sdc_metadata_properties(self) -> bool:
-        """Check if metadata columns should be added.
-
-        Returns:
-            True if metadata columns should be added.
-        """
-        return self.config.get("add_record_metadata", False)
-
-    @property
-    def process_activate_version_messages(self) -> bool:
-        """Check if activate version messages should be processed.
-
-        Returns:
-            True if activate version messages should be processed.
-        """
-        return self.config.get("activate_version", True)
 
     @property
     def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:

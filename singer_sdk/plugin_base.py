@@ -22,16 +22,11 @@ from singer_sdk.configuration._dict_config import (
     parse_environment_config,
 )
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.helpers import capabilities
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._util import read_json_file
-from singer_sdk.helpers.capabilities import (
-    FLATTENING_CONFIG,
-    STREAM_MAPS_CONFIG,
-    CapabilitiesEnum,
-    PluginCapabilities,
-)
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import (
     DEFAULT_JSONSCHEMA_VALIDATOR,
@@ -108,7 +103,7 @@ def _format_validation_error(error: ValidationError) -> str:
     return result
 
 
-class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
+class PluginBase(metaclass=abc.ABCMeta):
     """Abstract base class for taps."""
 
     #: The executable name of the tap or target plugin. e.g. tap-foo
@@ -121,6 +116,14 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     # A JSON Schema object defining the config options that this tap will accept.
 
     _config: dict
+
+    #: Advertised built-in plugin capabilities. Developers may override this property
+    #: in order to add or remove advertised capabilities for this plugin.
+    capabilities: t.ClassVar[list[capabilities.CapabilitiesEnum]] = [
+        capabilities.PluginCapabilities.STREAM_MAPS,
+        capabilities.PluginCapabilities.FLATTENING,
+        capabilities.PluginCapabilities.BATCH,
+    ]
 
     @classproperty
     def logger(cls) -> logging.Logger:  # noqa: N805
@@ -247,22 +250,6 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             The start time of the plugin.
         """
         return self.__initialized_at
-
-    @classproperty
-    def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
-        """Get capabilities.
-
-        Developers may override this property in oder to add or remove
-        advertised capabilities for this plugin.
-
-        Returns:
-            A list of plugin capabilities.
-        """
-        return [
-            PluginCapabilities.STREAM_MAPS,
-            PluginCapabilities.FLATTENING,
-            PluginCapabilities.BATCH,
-        ]
 
     @classproperty
     def _env_var_prefix(cls) -> str:  # noqa: N805
@@ -487,12 +474,17 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Args:
             config_jsonschema: [description]
         """
-        capabilities = cls.capabilities
-        if PluginCapabilities.STREAM_MAPS in capabilities:
-            merge_missing_config_jsonschema(STREAM_MAPS_CONFIG, config_jsonschema)
+        if capabilities.STREAM_MAPS.capability in cls.capabilities:
+            merge_missing_config_jsonschema(
+                capabilities.STREAM_MAPS.schema,
+                config_jsonschema,
+            )
 
-        if PluginCapabilities.FLATTENING in capabilities:
-            merge_missing_config_jsonschema(FLATTENING_CONFIG, config_jsonschema)
+        if capabilities.FLATTENING.capability in cls.capabilities:
+            merge_missing_config_jsonschema(
+                capabilities.FLATTENING.schema,
+                config_jsonschema,
+            )
 
     @classmethod
     def print_about(
