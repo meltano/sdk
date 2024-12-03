@@ -20,6 +20,8 @@ from singer_sdk.connectors.sql import (
 from singer_sdk.exceptions import ConfigValidationError
 
 if t.TYPE_CHECKING:
+    from pathlib import Path
+
     from sqlalchemy.engine import Engine
 
 
@@ -688,3 +690,42 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         }
         result = json_schema_to_sql.to_sql_type(image_type)
         assert isinstance(result, sa.types.LargeBinary)
+
+
+def test_bench_discovery(benchmark, tmp_path: Path):
+    def _discover_catalog(connector):
+        connector.discover_catalog_entries()
+
+    number_of_tables = 250
+    number_of_views = 250
+    number_of_columns = 10
+    db_path = tmp_path / "foo.db"
+    engine = sa.create_engine(f"sqlite:///{db_path}")
+
+    columns_fragment = ",".join(f"col_{i} VARCHAR" for i in range(number_of_columns))
+
+    # Seed a large number of tables
+    table_ddl = f"""
+    CREATE TABLE table_{{n}} (
+        id INTEGER NOT NULL,
+        {columns_fragment},
+        PRIMARY KEY (id)
+    );
+    """
+
+    # Seed a large number of views
+    view_ddl = """
+    CREATE VIEW view_{n} AS
+        SELECT * FROM table_{n};
+    """
+
+    with engine.connect() as conn:
+        for i in range(number_of_tables):
+            conn.execute(sa.text(table_ddl.format(n=i)))
+
+        for i in range(number_of_views):
+            conn.execute(sa.text(view_ddl.format(n=i)))
+
+    connector = SQLConnector(config={"sqlalchemy_url": f"sqlite:///{db_path}"})
+
+    benchmark(_discover_catalog, connector)
