@@ -883,9 +883,9 @@ class SQLConnector:  # noqa: PLR0904
         table_name: str,
         is_view: bool,  # noqa: FBT001
         *,
-        reflected_columns: list[reflection.ReflectedColumn],
-        reflected_pk: reflection.ReflectedPrimaryKeyConstraint | None,
-        reflected_indices: list[reflection.ReflectedIndex],
+        reflected_columns: list[reflection.ReflectedColumn] | None = None,
+        reflected_pk: reflection.ReflectedPrimaryKeyConstraint | None = None,
+        reflected_indices: list[reflection.ReflectedIndex] | None = None,
     ) -> CatalogEntry:
         """Create `CatalogEntry` object for the given table or a view.
 
@@ -905,6 +905,10 @@ class SQLConnector:  # noqa: PLR0904
         """
         # Initialize unique stream name
         unique_stream_id = f"{schema_name}-{table_name}" if schema_name else table_name
+
+        # Backwards-compatibility
+        reflected_columns = reflected_columns or []
+        reflected_indices = reflected_indices or []
 
         # Detect key properties
         possible_primary_keys: list[list[str]] = []
