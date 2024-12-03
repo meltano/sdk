@@ -1056,21 +1056,22 @@ class SQLConnector:  # noqa: PLR0904
             if schema_name in exclude_schemas:
                 continue
 
-            columns = inspected.get_multi_columns(schema=schema_name)
-            primary_keys = inspected.get_multi_pk_constraint(schema=schema_name)
-
-            if reflect_indices:
-                unique_constraints = inspected.get_multi_unique_constraints(
-                    schema=schema_name,
-                )
-            else:
-                unique_constraints = {}
-
             for object_kind, is_view in object_kinds:
                 columns = inspected.get_multi_columns(
                     schema=schema_name,
                     kind=object_kind,
                 )
+                primary_keys = inspected.get_multi_pk_constraint(
+                    schema=schema_name, kind=object_kind
+                )
+
+                if reflect_indices:
+                    unique_constraints = inspected.get_multi_unique_constraints(
+                        schema=schema_name,
+                        kind=object_kind,
+                    )
+                else:
+                    unique_constraints = {}
 
                 result.extend(
                     self._discover_catalog_entry_from_inspected(
