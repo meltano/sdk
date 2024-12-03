@@ -878,15 +878,14 @@ class SQLConnector:  # noqa: PLR0904
     def discover_catalog_entry(
         self,
         engine: Engine,  # noqa: ARG002
-        inspected: Inspector,
+        inspected: Inspector,  # noqa: ARG002
         schema_name: str | None,
         table_name: str,
         is_view: bool,  # noqa: FBT001
         *,
-        reflect_indices: bool = True,
-        reflected_columns: list[reflection.ReflectedColumn] | None = None,
-        reflected_pk: reflection.ReflectedPrimaryKeyConstraint | None = None,
-        reflected_indices: list[reflection.ReflectedIndex] | None = None,
+        reflected_columns: list[reflection.ReflectedColumn],
+        reflected_pk: reflection.ReflectedPrimaryKeyConstraint | None,
+        reflected_indices: list[reflection.ReflectedIndex],
     ) -> CatalogEntry:
         """Create `CatalogEntry` object for the given table or a view.
 
@@ -909,33 +908,20 @@ class SQLConnector:  # noqa: PLR0904
 
         # Detect key properties
         possible_primary_keys: list[list[str]] = []
-        pk_def = reflected_pk or inspected.get_pk_constraint(
-            table_name,
-            schema=schema_name,
-        )
-        if pk_def and "constrained_columns" in pk_def:  # type: ignore[redundant-expr]
-            possible_primary_keys.append(pk_def["constrained_columns"])
+        if reflected_pk and "constrained_columns" in reflected_pk:
+            possible_primary_keys.append(reflected_pk["constrained_columns"])
 
         # An element of the columns list is ``None`` if it's an expression and is
         # returned in the ``expressions`` list of the reflected index.
-        if reflect_indices:
-            indexes = reflected_indices or inspected.get_indexes(
-                table_name,
-                schema=schema_name,
-            )
-            possible_primary_keys.extend(
-                index_def["column_names"]  # type: ignore[misc]
-                for index_def in indexes
-                if index_def.get("unique", False)
-            )
+        possible_primary_keys.extend(
+            index_def["column_names"]  # type: ignore[misc]
+            for index_def in reflected_indices
+            if index_def.get("unique", False)
+        )
 
         key_properties = next(iter(possible_primary_keys), [])
 
         # Initialize columns list
-        columns = reflected_columns or inspected.get_columns(
-            table_name,
-            schema=schema_name,
-        )
         properties = [
             th.Property(
                 name=column["name"],
@@ -944,7 +930,7 @@ class SQLConnector:  # noqa: PLR0904
                 required=column["name"] in key_properties,
                 description=column.get("comment"),
             )
-            for column in columns
+            for column in reflected_columns
         ]
         schema = th.PropertiesList(*properties).to_dict()
 
@@ -1026,10 +1012,9 @@ class SQLConnector:  # noqa: PLR0904
                         schema_name,
                         table,
                         is_view,
-                        reflect_indices=reflect_indices,
                         reflected_columns=columns[schema, table],
                         reflected_pk=primary_keys.get((schema, table)),
-                        reflected_indices=indices.get((schema, table)),
+                        reflected_indices=indices.get((schema, table), []),
                     ).to_dict()
                     for schema, table in columns
                 )
