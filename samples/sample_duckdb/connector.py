@@ -6,8 +6,6 @@ from singer_sdk.connectors import SQLConnector
 
 
 class DuckDBConnector(SQLConnector):
-    allow_column_alter = True
-
     @staticmethod
     def get_column_alter_ddl(
         table_name: str,

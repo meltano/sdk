@@ -18,7 +18,10 @@ from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._util import dump_json, load_json
-from singer_sdk.helpers.capabilities import TargetLoadMethods
+from singer_sdk.helpers.capabilities import (
+    TARGET_ALLOW_COLUMN_ALTER_CONFIG,
+    TargetLoadMethods,
+)
 
 if sys.version_info < (3, 13):
     from typing_extensions import deprecated
@@ -473,7 +476,10 @@ class SQLConnector:  # noqa: PLR0904
 
     allow_column_add: bool = True  # Whether ADD COLUMN is supported.
     allow_column_rename: bool = True  # Whether RENAME COLUMN is supported.
-    allow_column_alter: bool = False  # Whether altering column types is supported.
+
+    #: Whether altering column types is supported.
+    allow_column_alter = TARGET_ALLOW_COLUMN_ALTER_CONFIG.attribute(default=False)
+
     allow_merge_upsert: bool = False  # Whether MERGE UPSERT is supported.
     allow_overwrite: bool = False  # Whether overwrite load method is supported.
     allow_temp_tables: bool = True  # Whether temp tables are supported.
@@ -1619,7 +1625,7 @@ class SQLConnector:  # noqa: PLR0904
             return
 
         # Not the same type, generic type or compatible types
-        # calling merge_sql_types for assistnace
+        # calling merge_sql_types for assistance
         compatible_sql_type = self.merge_sql_types([current_type, sql_type])
 
         if str(compatible_sql_type) == str(current_type):

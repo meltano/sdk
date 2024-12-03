@@ -307,7 +307,12 @@ class TestConnectorSQL:  # noqa: PLR0904
 class TestDuckDBConnector:
     @pytest.fixture
     def connector(self):
-        return DuckDBConnector(config={"sqlalchemy_url": "duckdb:///"})
+        return DuckDBConnector(
+            config={
+                "sqlalchemy_url": "duckdb:///",
+                "allow_column_alter": True,
+            },
+        )
 
     def test_create_schema(self, connector: DuckDBConnector):
         engine = connector._engine
@@ -333,7 +338,6 @@ class TestDuckDBConnector:
             assert result.keys() == ["id", "new_name"]
 
     def test_adapt_column_type(self, connector: DuckDBConnector):
-        connector.allow_column_alter = True
         engine = connector._engine
         meta = sa.MetaData()
         _ = sa.Table(
@@ -350,6 +354,24 @@ class TestDuckDBConnector:
             result = conn.execute(sa.text("SELECT * FROM test_table"))
             assert result.keys() == ["id", "name"]
             assert result.cursor.description[1][1] == "STRING"
+
+    def test_adapt_column_type_not_allowed(self, connector: DuckDBConnector):
+        connector.config["allow_column_alter"] = False
+        engine = connector._engine
+        meta = sa.MetaData()
+        _ = sa.Table(
+            "test_table",
+            meta,
+            sa.Column("id", sa.Integer),
+            sa.Column("name", sa.Integer),
+        )
+        meta.create_all(engine)
+
+        with pytest.raises(
+            NotImplementedError,
+            match="Altering columns is not supported",
+        ):
+            connector._adapt_column_type("test_table", "name", sa.types.String())
 
 
 def test_adapter_without_json_serde():

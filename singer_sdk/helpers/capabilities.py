@@ -6,6 +6,7 @@ import typing as t
 from enum import Enum, EnumMeta
 from warnings import warn
 
+from singer_sdk.helpers._config_property import ConfigProperty
 from singer_sdk.typing import (
     ArrayType,
     BooleanType,
@@ -19,6 +20,47 @@ from singer_sdk.typing import (
 )
 
 _EnumMemberT = t.TypeVar("_EnumMemberT")
+T = t.TypeVar("T")
+
+
+class Builtin:
+    """Use this class to define built-in setting(s) for a plugin."""
+
+    def __init__(
+        self,
+        schema: dict[str, t.Any],
+        *,
+        capability: CapabilitiesEnum | None = None,
+        **kwargs: t.Any,
+    ):
+        """Initialize the descriptor.
+
+        Args:
+            schema: The JSON schema for the setting.
+            capability: The capability that the setting is associated with.
+            kwargs: Additional keyword arguments.
+        """
+        self.schema = schema
+        self.capability = capability
+        self.kwargs = kwargs
+
+    def attribute(  # noqa: PLR6301
+        self,
+        custom_key: str | None = None,
+        *,
+        default: T | None = None,
+    ) -> ConfigProperty[T]:
+        """Generate a class attribute for the setting.
+
+        Args:
+            custom_key: Custom key to use in the config.
+            default: Default value for the setting.
+
+        Returns:
+            Class attribute for the setting.
+        """
+        return ConfigProperty(custom_key=custom_key, default=default)
+
 
 # Default JSON Schema to support config for built-in capabilities:
 
@@ -187,6 +229,16 @@ TARGET_BATCH_SIZE_ROWS_CONFIG = PropertiesList(
         description="Maximum number of rows in each batch.",
     ),
 ).to_dict()
+
+TARGET_ALLOW_COLUMN_ALTER_CONFIG = Builtin(
+    schema=PropertiesList(
+        Property(
+            "allow_column_alter",
+            BooleanType,
+            description="Allow altering columns in the target database.",
+        ),
+    ).to_dict(),
+)
 
 
 class TargetLoadMethods(str, Enum):

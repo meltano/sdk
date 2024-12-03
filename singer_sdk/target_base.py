@@ -19,6 +19,7 @@ from singer_sdk.helpers.capabilities import (
     ACTIVATE_VERSION_CONFIG,
     ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
+    TARGET_ALLOW_COLUMN_ALTER_CONFIG,
     TARGET_BATCH_SIZE_ROWS_CONFIG,
     TARGET_HARD_DELETE_CONFIG,
     TARGET_LOAD_METHOD_CONFIG,
@@ -707,6 +708,8 @@ class SQLTarget(Target):
             for k, v in source_jsonschema["properties"].items():
                 if k not in target_jsonschema["properties"]:
                     target_jsonschema["properties"][k] = v
+
+        _merge_missing(TARGET_ALLOW_COLUMN_ALTER_CONFIG.schema, config_jsonschema)
 
         capabilities = cls.capabilities
 
