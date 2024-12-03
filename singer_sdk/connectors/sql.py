@@ -18,6 +18,7 @@ from sqlalchemy.engine import reflection
 from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._util import dump_json, load_json
 from singer_sdk.helpers.capabilities import TargetLoadMethods
 
@@ -848,7 +849,12 @@ class SQLConnector:  # noqa: PLR0904
         """
         return inspected.get_schema_names()
 
-    def get_object_names(
+    @deprecated(
+        "This method is deprecated.",
+        category=SingerSDKDeprecationWarning,
+        stacklevel=1,
+    )
+    def get_object_names(  # pragma: no cover
         self,
         engine: Engine,  # noqa: ARG002
         inspected: Inspector,
