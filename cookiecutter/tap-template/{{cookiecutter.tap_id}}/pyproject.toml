@@ -38,6 +38,9 @@ fs-s3fs = { version = "~=1.1.1", optional = true }
 {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
 requests = "~=2.32.3"
 {%- endif %}
+{%- if cookiecutter.stream_type == "SQL" %}
+sqlalchemy = "~=2.0.36"
+{%- endif %}
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8"
