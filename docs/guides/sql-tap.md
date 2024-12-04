@@ -1,5 +1,9 @@
 # Building SQL taps
 
+```{warning}
+Starting with version `0.43.0`, SQL taps require SQLAlchemy 2.0 or newer.
+```
+
 ## Mapping SQL types to JSON Schema
 
 Starting with version `0.41.0`, the Meltano Singer SDK provides a clean way to map SQL types to JSON Schema. This is useful when the SQL dialect you are using has custom types that need to be mapped accordingly to JSON Schema.
