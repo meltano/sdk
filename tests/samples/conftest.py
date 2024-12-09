@@ -72,12 +72,12 @@ def sqlite_sample_db_catalog(sqlite_sample_db_config) -> Catalog:
 
 @pytest.fixture
 def sqlite_sample_tap(
-    _sqlite_sample_db,
+    sqlite_sample_db,
     sqlite_sample_db_config,
     sqlite_sample_db_state,
     sqlite_sample_db_catalog,
 ) -> SQLiteTap:
-    _ = _sqlite_sample_db
+    _ = sqlite_sample_db
     return SQLiteTap(
         config=sqlite_sample_db_config,
         catalog=sqlite_sample_db_catalog.to_dict(),
