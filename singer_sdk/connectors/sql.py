@@ -1470,19 +1470,19 @@ class SQLConnector:  # noqa: PLR0904
         ) -> tuple[int, int]:
             # return rank, with higher numbers ranking first
 
-            _len = int(getattr(sql_type, "length", 0) or 0)
+            len_ = int(getattr(sql_type, "length", 0) or 0)
 
-            _pytype = t.cast("type", sql_type.python_type)
-            if issubclass(_pytype, (str, bytes)):
-                return 900, _len
-            if issubclass(_pytype, datetime):
-                return 600, _len
-            if issubclass(_pytype, float):
-                return 400, _len
-            if issubclass(_pytype, int):
-                return 300, _len
+            pytype = t.cast("type", sql_type.python_type)
+            if issubclass(pytype, (str, bytes)):
+                return 900, len_
+            if issubclass(pytype, datetime):
+                return 600, len_
+            if issubclass(pytype, float):
+                return 400, len_
+            if issubclass(pytype, int):
+                return 300, len_
 
-            return 0, _len
+            return 0, len_
 
         return sorted(sql_types, key=_get_type_sort_key, reverse=True)
 
