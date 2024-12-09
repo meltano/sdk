@@ -456,7 +456,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             or datetime.datetime.now(tz=datetime.timezone.utc)
         ).isoformat()
         record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
-        record["_sdc_sequence"] = int(round(time.time() * 1000))
+        record["_sdc_sequence"] = round(time.time() * 1000)
         record["_sdc_table_version"] = message.get("version")
         record["_sdc_sync_started_at"] = self.sync_started_at
 
