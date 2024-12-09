@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import json
+import logging
 import typing as t
 
 import pytest
@@ -129,6 +130,17 @@ def test_sync_sqlite_to_csv(sqlite_sample_tap: SQLTap, tmp_path: Path):
         sqlite_sample_tap,
         SampleTargetCSV(config={"target_folder": f"{tmp_path}/"}),
     )
+
+
+def test_sync_without_catalog(
+    sqlite_sample_db_config: dict, caplog: pytest.LogCaptureFixture
+):
+    tap = SQLiteTap(config=sqlite_sample_db_config)
+    with caplog.at_level(logging.WARNING):
+        tap.sync_all()
+
+    assert len(caplog.records) == 1
+    assert caplog.records[0].message == "No streams selected for sync"
 
 
 @pytest.fixture
