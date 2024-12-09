@@ -20,6 +20,8 @@ from singer_sdk.connectors.sql import (
 from singer_sdk.exceptions import ConfigValidationError
 
 if t.TYPE_CHECKING:
+    from pathlib import Path
+
     from sqlalchemy.engine import Engine
 
 
@@ -348,6 +350,32 @@ class TestDuckDBConnector:
             result = conn.execute(sa.text("SELECT * FROM test_table"))
             assert result.keys() == ["id", "name"]
             assert result.cursor.description[1][1] == "STRING"
+
+    @pytest.mark.parametrize(
+        "exclude_schemas,expected_streams",
+        [
+            ([], 1),
+            (["memory.my_schema"], 0),
+        ],
+    )
+    def test_discover_catalog_entries_exclude_schemas(
+        self,
+        connector: DuckDBConnector,
+        exclude_schemas: list[str],
+        expected_streams: int,
+    ):
+        with connector._engine.connect() as conn, conn.begin():
+            conn.execute(sa.text("CREATE SCHEMA my_schema"))
+            conn.execute(
+                sa.text(
+                    "CREATE TABLE my_schema.test_table (id INTEGER PRIMARY KEY, name STRING)",  # noqa: E501
+                )
+            )
+        entries = connector.discover_catalog_entries(
+            exclude_schemas=exclude_schemas,
+            reflect_indices=False,
+        )
+        assert len(entries) == expected_streams
 
 
 def test_adapter_without_json_serde():
@@ -688,3 +716,42 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         }
         result = json_schema_to_sql.to_sql_type(image_type)
         assert isinstance(result, sa.types.LargeBinary)
+
+
+def test_bench_discovery(benchmark, tmp_path: Path):
+    def _discover_catalog(connector):
+        connector.discover_catalog_entries()
+
+    number_of_tables = 250
+    number_of_views = 250
+    number_of_columns = 10
+    db_path = tmp_path / "foo.db"
+    engine = sa.create_engine(f"sqlite:///{db_path}")
+
+    columns_fragment = ",".join(f"col_{i} VARCHAR" for i in range(number_of_columns))
+
+    # Seed a large number of tables
+    table_ddl = f"""
+    CREATE TABLE table_{{n}} (
+        id INTEGER NOT NULL,
+        {columns_fragment},
+        PRIMARY KEY (id)
+    );
+    """
+
+    # Seed a large number of views
+    view_ddl = """
+    CREATE VIEW view_{n} AS
+        SELECT * FROM table_{n};
+    """
+
+    with engine.connect() as conn:
+        for i in range(number_of_tables):
+            conn.execute(sa.text(table_ddl.format(n=i)))
+
+        for i in range(number_of_views):
+            conn.execute(sa.text(view_ddl.format(n=i)))
+
+    connector = SQLConnector(config={"sqlalchemy_url": f"sqlite:///{db_path}"})
+
+    benchmark(_discover_catalog, connector)
