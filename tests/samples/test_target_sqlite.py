@@ -79,7 +79,12 @@ def sqlite_sample_target_hard_delete(sqlite_target_test_config):
 @pytest.fixture
 def sqlite_sample_target_no_activate_version(sqlite_target_test_config):
     """Get a sample target object with hard_delete disabled."""
-    return SQLiteTarget(config={**sqlite_target_test_config, "activate_version": False})
+    return SQLiteTarget(
+        config={
+            **sqlite_target_test_config,
+            "process_activate_version_messages": False,
+        }
+    )
 
 
 @pytest.fixture
