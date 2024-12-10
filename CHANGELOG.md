@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.43.1 (2024-12-10)
+
+### 🐛 Fixes
+
+- [#2807](https://github.com/meltano/sdk/issues/2807) Allow developers to set `RESTStream.http_method`
+
 ## v0.43.0 (2024-12-10)
 
 ### ✨ New
