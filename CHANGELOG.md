@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.43.0 (2024-12-10)
+
+### ✨ New
+
+- [#2482](https://github.com/meltano/sdk/issues/2482) Allow SQL tap developers to auto-skip certain schemas from discovery
+- [#2784](https://github.com/meltano/sdk/issues/2784) Added a new built-in setting `activate_version` for targets to optionally disable processing of `ACTIVATE_VERSION` messages
+- [#2780](https://github.com/meltano/sdk/issues/2780) Numeric values are now parsed as `decimal.Decimal` in REST and GraphQL stream responses
+- [#2775](https://github.com/meltano/sdk/issues/2775) Log a stream's bookmark (if it's avaiable) when its sync starts
+- [#2703](https://github.com/meltano/sdk/issues/2703) Targets now emit record count from the built-in batch file processor
+- [#2774](https://github.com/meltano/sdk/issues/2774) Accept a `maxLength` limit for VARCHARs
+- [#2769](https://github.com/meltano/sdk/issues/2769) Add `versioning-strategy` to dependabot config of Cookiecutter templates
+- [#2765](https://github.com/meltano/sdk/issues/2765) The last received Singer message is now logged when the target fails
+- [#2762](https://github.com/meltano/sdk/issues/2762) Support other content-types in REST streams
+
+### 🐛 Fixes
+
+- [#2790](https://github.com/meltano/sdk/issues/2790) Ensure the required global folder tap settings are merged into the concrete implementation settings
+- [#2785](https://github.com/meltano/sdk/issues/2785) Use FS-specific `listdir` in folder tap
+- [#2778](https://github.com/meltano/sdk/issues/2778) The path of the offending field is now printed for config validation errors
+- [#2770](https://github.com/meltano/sdk/issues/2770) Respect standard Singer stream metadata `table-key-properties`, `replication-key` and `forced-replication-method`
+- [#2755](https://github.com/meltano/sdk/issues/2755) Safely compare UUID replication keys with state bookmarks -- _**Thanks @nikzavada!**_
+
+### ⚙️ Under the Hood
+
+- [#2805](https://github.com/meltano/sdk/issues/2805) Rename setting `activate_version` to `process_activate_version_messages`
+- [#2788](https://github.com/meltano/sdk/issues/2788) Fail early if input files to `--catalog` or `--state` do not exist
+- [#2781](https://github.com/meltano/sdk/issues/2781) Added a class method to instantiate `SQLToJSONSchema` from the tap configuration
+- [#2566](https://github.com/meltano/sdk/issues/2566) Standardize on JSON Schema Draft 2020-12 to validate stream schemas
+- [#2751](https://github.com/meltano/sdk/issues/2751) Dropped support for Python 3.8
+
+### ⚡ Performance Improvements
+
+- [#2793](https://github.com/meltano/sdk/issues/2793) Improved discovery performance for SQL taps
+
+### 📚 Documentation Improvements
+
+- [#2796](https://github.com/meltano/sdk/issues/2796) Document how to configure nested stream maps values with environment variables in Meltano
+
+### 📦 Packaging changes
+
+- [#2797](https://github.com/meltano/sdk/issues/2797) SQL taps now require SQLAlchemy 2.0+
+
 ## v0.42.1 (2024-11-11)
 
 ### 🐛 Fixes
