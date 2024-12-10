@@ -91,6 +91,8 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         name: str | None = None,
         schema: dict[str, t.Any] | Schema | None = None,
         path: str | None = None,
+        *,
+        http_method: str | None = None,
     ) -> None:
         """Initialize the HTTP stream.
 
@@ -99,11 +101,13 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             schema: JSON schema for records in this stream.
             name: Name of this stream.
             path: URL path for this entity stream.
+            http_method: HTTP method to use for requests.
         """
         super().__init__(name=name, schema=schema, tap=tap)
         if path:
             self.path = path
         self._http_headers: dict = {"User-Agent": self.user_agent}
+        self._http_method = http_method
         self._requests_session = requests.Session()
 
     @staticmethod
@@ -151,12 +155,37 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
         .. deprecated:: 0.43.0
            Override :meth:`~singer_sdk.RESTStream.http_method` instead.
         """
-        return "GET"
+        return self._http_method or "GET"
+
+    @rest_method.setter
+    @deprecated(
+        "Use `http_method` instead.",
+        category=SingerSDKDeprecationWarning,
+    )
+    def rest_method(self, value: str) -> None:
+        """Set the HTTP method for requests.
+
+        Args:
+            value: The HTTP method to use for requests.
+
+        .. deprecated:: 0.43.0
+           Override :meth:`~singer_sdk.RESTStream.http_method` instead.
+        """
+        self._http_method = value
 
     @property
     def http_method(self) -> str:
         """HTTP method to use for requests. Defaults to "GET"."""
-        return self.rest_method
+        return self._http_method or self.rest_method
+
+    @http_method.setter
+    def http_method(self, value: str) -> None:
+        """Set the HTTP method for requests.
+
+        Args:
+            value: The HTTP method to use for requests.
+        """
+        self._http_method = value
 
     @property
     def requests_session(self) -> requests.Session:
@@ -758,6 +787,8 @@ class RESTStream(_HTTPStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
         name: str | None = None,
         schema: dict[str, t.Any] | Schema | None = None,
         path: str | None = None,
+        *,
+        http_method: str | None = None,
     ) -> None:
         """Initialize the REST stream.
 
@@ -766,8 +797,9 @@ class RESTStream(_HTTPStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
             schema: JSON schema for records in this stream.
             name: Name of this stream.
             path: URL path for this entity stream.
+            http_method: HTTP method to use for requests
         """
-        super().__init__(tap, name, schema, path)
+        super().__init__(tap, name, schema, path, http_method=http_method)
         self._compiled_jsonpath = None
         self._next_page_token_compiled_jsonpath = None
 
