@@ -194,7 +194,7 @@ class DefaultInstanceProperty:
             The property value.
         """
         if instance is None:
-            instance = owner()  # type: ignore[unreachable]
+            instance = owner()
         return self.fget(instance)
 
 
