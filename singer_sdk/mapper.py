@@ -68,6 +68,7 @@ def sha256(value: str) -> str:
 
     Args:
         string: String to digest.
+
     Returns:
         A string digested into SHA256.
     """
