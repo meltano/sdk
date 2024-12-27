@@ -64,7 +64,13 @@ def md5(string: str) -> str:
 
 
 def sha256(value: str) -> str:
-    """Digest a string using SHA256. This is a function for inline calculations."""
+    """Digest a string using SHA256. This is a function for inline calculations.
+
+    Args:
+        string: String to digest.
+    Returns:
+        A string digested into SHA256.
+    """
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
