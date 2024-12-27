@@ -704,6 +704,7 @@ class MappedTap(Tap):
             {
                 "mystream": {
                     "email_hash": "md5(email)",
+                    "email_hash_sha256": "sha256(email)",
                     "fixed_count": "int(count-1)",
                     "__else__": None,
                 },
