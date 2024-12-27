@@ -63,6 +63,12 @@ def md5(string: str) -> str:
     return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
 
 
+def sha256(value: str) -> str:
+    """Digest a string using SHA256. This is a function for inline calculations."""
+
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
 StreamMapsDict: TypeAlias = dict[str, t.Union[str, dict, None]]
 
 
@@ -307,6 +313,7 @@ class CustomStreamMap(StreamMap):
         """
         funcs: dict[str, t.Any] = simpleeval.DEFAULT_FUNCTIONS.copy()
         funcs["md5"] = md5
+        funcs["sha256"] = sha256
         funcs["datetime"] = datetime
         funcs["bool"] = bool
         funcs["json"] = json
