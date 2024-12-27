@@ -63,7 +63,7 @@ def md5(string: str) -> str:
     return hashlib.md5(string.encode("utf-8")).hexdigest()  # noqa: S324
 
 
-def sha256(value: str) -> str:
+def sha256(string: str) -> str:
     """Digest a string using SHA256. This is a function for inline calculations.
 
     Args:
@@ -72,7 +72,7 @@ def sha256(value: str) -> str:
     Returns:
         A string digested into SHA256.
     """
-    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+    return hashlib.sha256(string.encode("utf-8")).hexdigest()
 
 
 StreamMapsDict: TypeAlias = dict[str, t.Union[str, dict, None]]
