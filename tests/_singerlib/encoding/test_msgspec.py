@@ -1,4 +1,4 @@
-"""Test IO operations for msgspec Singer reader and writer."""  # noqa: INP001
+"""Test IO operations for msgspec Singer reader and writer."""
 
 from __future__ import annotations
 
