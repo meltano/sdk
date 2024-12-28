@@ -400,6 +400,15 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self.config.get("add_record_metadata", False)
 
     @property
+    def process_activate_version_messages(self) -> bool:
+        """Check if activate version messages should be processed.
+
+        Returns:
+            True if activate version messages should be processed.
+        """
+        return self.config.get("process_activate_version_messages", True)
+
+    @property
     def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:
         """Return a treatment to use for datetime parse errors: ERROR. MAX, or NULL.
 
@@ -447,7 +456,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             or datetime.datetime.now(tz=datetime.timezone.utc)
         ).isoformat()
         record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
-        record["_sdc_sequence"] = int(round(time.time() * 1000))
+        record["_sdc_sequence"] = round(time.time() * 1000)
         record["_sdc_table_version"] = message.get("version")
         record["_sdc_sync_started_at"] = self.sync_started_at
 
@@ -739,10 +748,10 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 storage = StorageTarget.from_url(head)
 
             if encoding.format == BatchFileFormat.JSONL:
-                with storage.fs(create=False) as batch_fs, batch_fs.open(
-                    tail,
-                    mode="rb",
-                ) as file:
+                with (
+                    storage.fs(create=False) as batch_fs,
+                    batch_fs.open(tail, mode="rb") as file,
+                ):
                     if encoding.compression == "gzip":
                         with gzip_open(file) as context_file:
                             context = {
@@ -752,6 +761,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
                             }
                     else:
                         context = {"records": [deserialize_json(line) for line in file]}
+                    self.record_counter_metric.increment(len(context["records"]))
                     self.process_batch(context)
             elif (
                 importlib.util.find_spec("pyarrow")
@@ -759,12 +769,13 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             ):
                 import pyarrow.parquet as pq  # noqa: PLC0415
 
-                with storage.fs(create=False) as batch_fs, batch_fs.open(
-                    tail,
-                    mode="rb",
-                ) as file:
+                with (
+                    storage.fs(create=False) as batch_fs,
+                    batch_fs.open(tail, mode="rb") as file,
+                ):
                     table = pq.read_table(file)
                     context = {"records": table.to_pylist()}
+                    self.record_counter_metric.increment(len(context["records"]))
                     self.process_batch(context)
             else:
                 msg = f"Unsupported batch encoding format: {encoding.format}"

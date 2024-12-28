@@ -5,7 +5,7 @@ ci:
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.6.0
+  rev: v5.0.0
   hooks:
   - id: check-json
     exclude: |
@@ -35,22 +35,16 @@ repos:
         tests/snapshots/.*
       )$
   - id: trailing-whitespace
-    exclude: |
-        (?x)^(
-            .bumpversion.cfg|
-            singer_sdk/helpers/_simpleeval.py|
-            tests/core/test_simpleeval.py
-        )$
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.29.2
+  rev: 0.30.0
   hooks:
   - id: check-dependabot
   - id: check-github-workflows
   - id: check-readthedocs
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.6.4
+  rev: v0.8.4
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]

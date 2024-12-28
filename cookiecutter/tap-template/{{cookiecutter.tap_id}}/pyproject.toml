@@ -15,11 +15,11 @@ keywords = [
 classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 license = "Apache-2.0"
 {%- if cookiecutter.variant != "None (Skip)" %}
@@ -29,9 +29,8 @@ packages = [
 {%- endif %}
 
 [tool.poetry.dependencies]
-python = ">=3.8"
-importlib-resources = { version = "==6.4.*", python = "<3.9" }
-singer-sdk = { version="~=0.40.0", extras = [
+python = ">=3.9"
+singer-sdk = { version="~=0.43.1", extras = [
     {%- if cookiecutter.auth_method == "JWT" -%}"jwt", {% endif -%}
     {%- if cookiecutter.faker_extra -%}"faker",{%- endif -%}
 ] }
@@ -39,13 +38,16 @@ fs-s3fs = { version = "~=1.1.1", optional = true }
 {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
 requests = "~=2.32.3"
 {%- endif %}
+{%- if cookiecutter.stream_type == "SQL" %}
+sqlalchemy = "~=2.0.36"
+{%- endif %}
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8"
 {%- if cookiecutter.auth_method == "JWT" %}
-singer-sdk = { version="~=0.40.0", extras = ["jwt", "testing"] }
+singer-sdk = { version="~=0.43.1", extras = ["jwt", "testing"] }
 {%- else %}
-singer-sdk = { version="~=0.40.0", extras = ["testing"] }
+singer-sdk = { version="~=0.43.1", extras = ["testing"] }
 {%- endif %}
 
 [tool.poetry.extras]
@@ -64,13 +66,10 @@ plugins = "sqlmypy"
 {%- endif %}
 
 [tool.ruff]
-src = ["{{cookiecutter.library_name}}"]
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.lint]
 ignore = [
-    "ANN101",  # missing-type-self
-    "ANN102",  # missing-type-cls
     "COM812",  # missing-trailing-comma
     "ISC001",  # single-line-implicit-string-concatenation
 ]
@@ -79,14 +78,11 @@ select = ["ALL"]
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
 
-[tool.ruff.lint.isort]
-known-first-party = ["{{cookiecutter.library_name}}"]
-
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [build-system]
-requires = ["poetry-core==1.9.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]

@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import typing as t
-from typing import TYPE_CHECKING
 
 import singer_sdk.typing as th
 from singer_sdk import _singerlib as singer
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.mapper_base import InlineMapper
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from pathlib import PurePath
 
 
@@ -24,6 +23,7 @@ class {{ cookiecutter.name }}Mapper(InlineMapper):
         th.Property(
             "example_config",
             th.StringType,
+            title="Example Configuration",
             description="An example config, replace or remove based on your needs.",
         ),
     ).to_dict()

@@ -8,6 +8,7 @@ import os
 import sys
 import time
 import typing as t
+import warnings
 from importlib import metadata
 from pathlib import Path, PurePath
 from types import MappingProxyType
@@ -22,6 +23,7 @@ from singer_sdk.configuration._dict_config import (
 )
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._secrets import SecretString, is_common_secret_key
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -35,6 +37,9 @@ from singer_sdk.typing import (
     DEFAULT_JSONSCHEMA_VALIDATOR,
     extend_validator_with_defaults,
 )
+
+if t.TYPE_CHECKING:
+    from jsonschema import ValidationError
 
 SDK_PACKAGE_NAME = "singer_sdk"
 
@@ -84,6 +89,23 @@ class SingerCommand(click.Command):
             for error in exc.errors:
                 self.logger.error("Config validation error: %s", error)  # noqa: TRY400
             sys.exit(1)
+
+
+def _format_validation_error(error: ValidationError) -> str:
+    """Format a JSON Schema validation error.
+
+    Args:
+        error: A JSON Schema validation error.
+
+    Returns:
+        A formatted error message.
+    """
+    result = f"{error.message}"
+
+    if error.path:
+        result += f" in config[{']['.join(repr(index) for index in error.path)}]"
+
+    return result
 
 
 class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
@@ -138,23 +160,34 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             validate_config: True to require validation of config settings.
 
         Raises:
-            ValueError: If config is not a dict or path string.
+            TypeError: If config is not a dict or path string.
         """
-        if not config:
-            config_dict = {}
-        elif isinstance(config, (str, PurePath)):
+        config = config or {}
+        if isinstance(config, (str, PurePath)):
             config_dict = read_json_file(config)
+            warnings.warn(
+                "Passing a config file path is deprecated. Please pass the config "
+                "as a dictionary instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
         elif isinstance(config, list):
             config_dict = {}
             for config_path in config:
                 # Read each config file sequentially. Settings from files later in the
                 # list will override those of earlier ones.
                 config_dict.update(read_json_file(config_path))
+            warnings.warn(
+                "Passing a list of config file paths is deprecated. Please pass the "
+                "config as a dictionary instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
         elif isinstance(config, dict):
             config_dict = config
         else:
             msg = f"Error parsing config of type '{type(config).__name__}'."  # type: ignore[unreachable]
-            raise ValueError(msg)
+            raise TypeError(msg)
         if parse_env_config:
             self.logger.info("Parsing env var for settings config...")
             config_dict.update(self._env_var_config)
@@ -350,7 +383,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             A frozen (read-only) config dictionary map.
         """
-        return t.cast(dict, MappingProxyType(self._config))
+        return t.cast("dict", MappingProxyType(self._config))
 
     @staticmethod
     def _is_secret_config(config_key: str) -> bool:
@@ -388,7 +421,9 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 config_jsonschema,
             )
             validator = JSONSchemaValidator(config_jsonschema)
-            errors = [e.message for e in validator.iter_errors(self._config)]
+            errors = [
+                _format_validation_error(e) for e in validator.iter_errors(self._config)
+            ]
 
         if errors:
             summary = (

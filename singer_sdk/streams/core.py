@@ -7,6 +7,7 @@ import copy
 import datetime
 import json
 import typing as t
+import warnings
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
@@ -27,7 +28,10 @@ from singer_sdk.helpers._batch import (
     SDKBatchMessage,
 )
 from singer_sdk.helpers._catalog import pop_deselected_record_properties
-from singer_sdk.helpers._compat import datetime_fromisoformat
+from singer_sdk.helpers._compat import (
+    SingerSDKDeprecationWarning,
+    datetime_fromisoformat,
+)
 from singer_sdk.helpers._flattening import get_flattening_options
 from singer_sdk.helpers._state import (
     finalize_state_progress_markers,
@@ -52,6 +56,7 @@ from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, Stream
 if t.TYPE_CHECKING:
     import logging
 
+    from singer_sdk._singerlib.catalog import StreamMetadata
     from singer_sdk.helpers import types
     from singer_sdk.helpers._compat import Traversable
     from singer_sdk.tap_base import Tap
@@ -157,6 +162,12 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     raise FileNotFoundError(msg)
 
                 self._schema_filepath = Path(schema)
+                warnings.warn(
+                    "Passing a schema filepath is deprecated. Please pass the schema "
+                    "dictionary or a Singer Schema object instead.",
+                    SingerSDKDeprecationWarning,
+                    stacklevel=2,
+                )
             elif isinstance(schema, dict):
                 self._schema = schema
             elif isinstance(schema, singer.Schema):
@@ -428,6 +439,8 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     value = start_date_value
                 else:
                     value = self.compare_start_date(value, start_date_value)
+
+            self.logger.info("Starting incremental sync with bookmark value: %s", value)
 
         write_starting_replication_value(state, value)
 
@@ -735,7 +748,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     # Partitions
 
     @property
-    def partitions(self) -> list[types.Context] | None:
+    def partitions(self) -> list[dict] | None:
         """Get stream partitions.
 
         Developers may override this property to provide a default partitions list.
@@ -746,7 +759,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             A list of partition key dicts (if applicable), otherwise `None`.
         """
-        result: list[types.Mapping] = [
+        result: list[dict] = [
             partition_state["context"]
             for partition_state in (
                 get_state_partitions_list(self.tap_state, self.name) or []
@@ -880,6 +893,27 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                     time_extracted=utc_now(),
                 )
 
+    def _generate_batch_messages(
+        self,
+        encoding: BaseBatchFileEncoding,
+        manifest: list[str],
+    ) -> t.Generator[SDKBatchMessage, None, None]:
+        """Write out a BATCH message.
+
+        Args:
+            encoding: The encoding to use for the batch.
+            manifest: A list of filenames for the batch.
+
+        Yields:
+            Batch message objects.
+        """
+        for stream_map in self.stream_maps:
+            yield SDKBatchMessage(
+                stream=stream_map.stream_alias,
+                encoding=encoding,
+                manifest=manifest,
+            )
+
     def _write_record_message(self, record: types.Record) -> None:
         """Write out a RECORD message.
 
@@ -902,13 +936,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             encoding: The encoding to use for the batch.
             manifest: A list of filenames for the batch.
         """
-        self._tap.write_message(
-            SDKBatchMessage(
-                stream=self.name,
-                encoding=encoding,
-                manifest=manifest,
-            ),
-        )
+        for batch_message in self._generate_batch_messages(encoding, manifest):
+            self._tap.write_message(batch_message)
+
         self._is_state_flushed = False
 
     def _log_metric(self, point: metrics.Point) -> None:
@@ -1089,7 +1119,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         record_index = 0
         context_element: types.Context | None
-        context_list: list[types.Context] | None
+        context_list: list[types.Context] | list[dict] | None
         context_list = [context] if context is not None else self.partitions
         selected = self.selected
 
@@ -1250,10 +1280,26 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         catalog_entry = catalog.get_stream(self.name)
         if catalog_entry:
-            self.primary_keys = catalog_entry.key_properties
-            self.replication_key = catalog_entry.replication_key
-            if catalog_entry.replication_method:
-                self.forced_replication_method = catalog_entry.replication_method
+            stream_metadata: StreamMetadata | None
+            if stream_metadata := catalog_entry.metadata.get(()):  # type: ignore[assignment]
+                table_key_properties = stream_metadata.table_key_properties
+                table_replication_key = stream_metadata.replication_key
+                table_replication_method = stream_metadata.forced_replication_method
+            else:
+                table_key_properties = None
+                table_replication_key = None
+                table_replication_method = None
+
+            self.primary_keys = catalog_entry.key_properties or table_key_properties
+            self.replication_key = (
+                catalog_entry.replication_key or table_replication_key
+            )
+
+            replication_method = (
+                catalog_entry.replication_method or table_replication_method
+            )
+            if replication_method:
+                self.forced_replication_method = replication_method
 
     def _get_state_partition_context(
         self,

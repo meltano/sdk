@@ -16,6 +16,7 @@ from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import (
+    ACTIVATE_VERSION_CONFIG,
     ADD_RECORD_METADATA_CONFIG,
     BATCH_CONFIG,
     TARGET_BATCH_SIZE_ROWS_CONFIG,
@@ -454,6 +455,19 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         for stream_map in self.mapper.stream_maps[stream_name]:
             sink = self.get_sink(stream_map.stream_alias)
+            if not sink.process_activate_version_messages:
+                self.logger.warning(
+                    "`ACTIVATE_VERSION` messages are not enabled for '%s'. Ignoring.",
+                    stream_map.stream_alias,
+                )
+                continue
+            if not sink.include_sdc_metadata_properties:
+                self.logger.warning(
+                    "The `ACTIVATE_VERSION` feature uses the `_sdc_deleted_at` and "
+                    "`_sdc_deleted_at` metadata properties so they will be added to "
+                    "the schema for '%s' even though `add_record_metadata` is "
+                    "disabled.",
+                )
             sink.activate_version(message_dict["version"])
 
     def _process_batch_message(self, message_dict: dict) -> None:
@@ -462,14 +476,16 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
         Args:
             message_dict: TODO
         """
-        sink = self.get_sink(message_dict["stream"])
-
+        stream_name = message_dict["stream"]
         encoding = BaseBatchFileEncoding.from_dict(message_dict["encoding"])
-        sink.process_batch_files(
-            encoding,
-            message_dict["manifest"],
-        )
-        self._handle_max_record_age()
+
+        for stream_map in self.mapper.stream_maps[stream_name]:
+            sink = self.get_sink(stream_map.stream_alias)
+            sink.process_batch_files(
+                encoding,
+                message_dict["manifest"],
+            )
+            self._handle_max_record_age()
 
     # Sink drain methods
 
@@ -619,6 +635,9 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
 
         capabilities = cls.capabilities
 
+        if PluginCapabilities.ACTIVATE_VERSION in capabilities:
+            _merge_missing(ACTIVATE_VERSION_CONFIG, config_jsonschema)
+
         if PluginCapabilities.BATCH in capabilities:
             _merge_missing(BATCH_CONFIG, config_jsonschema)
 
@@ -658,6 +677,7 @@ class SQLTarget(Target):
         sql_target_capabilities: list[CapabilitiesEnum] = super().capabilities
         sql_target_capabilities.extend(
             [
+                PluginCapabilities.ACTIVATE_VERSION,
                 TargetCapabilities.TARGET_SCHEMA,
                 TargetCapabilities.HARD_DELETE,
             ]

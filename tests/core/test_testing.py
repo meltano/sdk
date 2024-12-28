@@ -18,7 +18,7 @@ def test_module_deprecations():
 
     with pytest.raises(
         AttributeError,
-        match="module singer_sdk.testing has no attribute",
+        match="module singer_sdk\\.testing has no attribute",
     ):
         testing.foo  # noqa: B018
 

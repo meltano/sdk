@@ -43,7 +43,7 @@ class TapDiscoveryTest(TapTestTemplate):
         catalog = tap1.catalog_dict
         # Reset and re-initialize with discovered catalog
         kwargs = {k: v for k, v in self.runner.default_kwargs.items() if k != "catalog"}
-        tap2: Tap = t.cast(t.Type[Tap], self.runner.singer_class)(
+        tap2: Tap = t.cast("type[Tap]", self.runner.singer_class)(
             config=self.runner.config,
             catalog=catalog,
             **kwargs,

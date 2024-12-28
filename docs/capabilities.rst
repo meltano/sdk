@@ -14,6 +14,7 @@ The following capabilities are supported by default.
 .. autoattribute:: PluginCapabilities.ABOUT
 .. autoattribute:: PluginCapabilities.BATCH
 .. autoattribute:: PluginCapabilities.STREAM_MAPS
+.. autoattribute:: PluginCapabilities.FLATTENING
 
 ========================
 Custom base capabilities
@@ -60,5 +61,4 @@ The following capabilities have to be implemented in the target.
 .. autoattribute:: TargetCapabilities.SOFT_DELETE
 .. autoattribute:: TargetCapabilities.HARD_DELETE
 .. autoattribute:: TargetCapabilities.DATATYPE_FAILSAFE
-.. autoattribute:: TargetCapabilities.RECORD_FLATTENING
 .. autoattribute:: TargetCapabilities.TARGET_SCHEMA

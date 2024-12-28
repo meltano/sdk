@@ -35,6 +35,30 @@ if t.TYPE_CHECKING:
             id="extra_property",
         ),
         pytest.param(
+            {"username": None, "password": "ptest"},
+            pytest.raises(ConfigValidationError, match="Config validation failed"),
+            ["None is not of type 'string' in config['username']"],
+            id="null_username",
+        ),
+        pytest.param(
+            {"username": "utest", "password": "ptest", "nested": {}},
+            pytest.raises(ConfigValidationError, match="Config validation failed"),
+            ["'key' is a required property in config['nested']"],
+            id="missing_required_nested_key",
+        ),
+        pytest.param(
+            {"username": "utest", "password": "ptest", "array": []},
+            nullcontext(),
+            [],
+            id="empty_array",
+        ),
+        pytest.param(
+            {"username": "utest", "password": "ptest", "array": [{}]},
+            pytest.raises(ConfigValidationError, match="Config validation failed"),
+            ["'key' is a required property in config['array'][0]"],
+            id="array_with_empty_object",
+        ),
+        pytest.param(
             {"username": "utest", "password": "ptest"},
             nullcontext(),
             [],

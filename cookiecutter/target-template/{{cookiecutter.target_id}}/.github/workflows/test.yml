@@ -24,33 +24,28 @@ on:
     - tox.ini
   workflow_dispatch:
 
+env:
+  FORCE_COLOR: 1
+
 jobs:
   pytest:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: {{ '${{secrets.GITHUB_TOKEN}}' }}
     strategy:
       fail-fast: false
       matrix:
         python-version:
-        - "3.8"
         - "3.9"
         - "3.10"
         - "3.11"
         - "3.12"
+        - "3.13"
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python {{ '${{ matrix.python-version }}' }}
       uses: actions/setup-python@v5
       with:
         python-version: {{ '${{ matrix.python-version }}' }}
-    - name: Install Poetry
+    - run: pipx install tox
+    - name: Run Tox
       run: |
-        pip install poetry
-    - name: Install dependencies
-      run: |
-        poetry env use {{ '${{ matrix.python-version }}' }}
-        poetry install
-    - name: Test with pytest
-      run: |
-        poetry run pytest
+        tox -e $(echo py{{ '${{ matrix.python-version }}' }} | tr -d .)

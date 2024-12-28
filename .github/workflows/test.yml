@@ -14,7 +14,9 @@ on:
       - ".github/workflows/test.yml"
       - ".github/workflows/constraints.txt"
   push:
-    branches: [main]
+    branches:
+      - main
+      - v*
     paths:
       - "cookiecutter/**"
       - "samples/**"
@@ -37,7 +39,7 @@ env:
 
 jobs:
   tests:
-    name: "Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }} / SQLAlchemy: ${{ matrix.sqlalchemy }}"
+    name: "Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     env:
@@ -48,32 +50,26 @@ jobs:
       matrix:
         session: [tests]
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-        sqlalchemy: ["2"]
+        python-version:
+        - "3.9"
+        - "3.10"
+        - "3.11"
+        - "3.12"
+        - "3.13"
         include:
-        - { session: tests,   python-version: "3.12", os: "ubuntu-latest", sqlalchemy: "1" }
-        - { session: doctest, python-version: "3.12", os: "ubuntu-latest", sqlalchemy: "2" }
-        - { session: mypy,    python-version: "3.12",  os: "ubuntu-latest", sqlalchemy: "2" }
-        - { session: deps,    python-version: "3.12",  os: "ubuntu-latest", sqlalchemy: "2" }
+        - { session: doctest, python-version: "3.13", os: "ubuntu-latest" }
+        - { session: mypy,    python-version: "3.13", os: "ubuntu-latest" }
+        - { session: deps,    python-version: "3.13", os: "ubuntu-latest" }
 
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    - name: Install Poetry
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
-      run: |
-        pipx install poetry
-        pipx inject poetry poetry-plugin-export
-        pipx inject poetry poetry-dynamic-versioning[plugin]
-        poetry --version
-        poetry self show plugins
-
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+        allow-prereleases: true
 
     - name: Upgrade pip
       env:
@@ -87,12 +83,18 @@ jobs:
         PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pipx install 'nox[uv]'
-        pipx inject nox nox-poetry
         nox --version
+
+    - uses: actions/cache@v4
+      if: matrix.session == 'tests'
+      with:
+        path: http_cache.sqlite
+        key: http_cache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.sqlalchemy }}
 
     - name: Run Nox
       env:
-        SQLALCHEMY_VERSION: ${{ matrix.sqlalchemy }}
+        PIP_PRE: "1"
+        UV_PRERELEASE: allow
       run: |
         nox --verbose
 
@@ -100,7 +102,7 @@ jobs:
       if: always() && (matrix.session == 'tests')
       with:
         include-hidden-files: true
-        name: coverage-data-nox_${{ matrix.session }}-${{ matrix.os }}-py${{ matrix.python-version }}_sqlalchemy_${{ matrix.sqlalchemy }}
+        name: coverage-data-nox_-${{ matrix.os }}-py${{ matrix.python-version }}_sqlalchemy_${{ matrix.sqlalchemy }}
         path: ".coverage.*"
 
   tests-external:
@@ -120,16 +122,6 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Install Poetry
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
-      run: |
-        pipx install poetry
-        pipx inject poetry poetry-plugin-export
-        pipx inject poetry poetry-dynamic-versioning[plugin]
-        poetry --version
-        poetry self show plugins
-
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ env.NOXPYTHON }}
@@ -146,10 +138,12 @@ jobs:
         PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pipx install 'nox[uv]'
-        pipx inject nox nox-poetry
         nox --version
 
     - name: Run Nox
+      env:
+        PIP_PRE: "1"
+        UV_PRERELEASE: allow
       run: |
         nox -- -m "external"
 
@@ -161,19 +155,9 @@ jobs:
       NOXSESSION: coverage
     steps:
     - uses: actions/checkout@v4
-
-    - name: Install Poetry
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
-      run: |
-        pipx install poetry
-        pipx inject poetry poetry-plugin-export
-        poetry --version
-        poetry self show plugins
-
     - uses: actions/setup-python@v5
       with:
-        python-version: '3.12'
+        python-version: '3.x'
 
     - name: Upgrade pip
       env:
@@ -192,7 +176,6 @@ jobs:
         PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
         pipx install 'nox[uv]'
-        pipx inject nox nox-poetry
         nox --version
 
     - run: nox --install-only
@@ -206,7 +189,7 @@ jobs:
       run: |
         nox -r --no-install -- xml
 
-    - uses: codecov/codecov-action@v4
+    - uses: codecov/codecov-action@v5
       with:
         fail_ci_if_error: true
         token: ${{ secrets.CODECOV_TOKEN }}

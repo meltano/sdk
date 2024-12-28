@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import abc
 import contextlib
+import pathlib
 import typing as t
+import warnings
 from enum import Enum
 
 import click
@@ -18,6 +20,7 @@ from singer_sdk.exceptions import (
 )
 from singer_sdk.helpers import _state
 from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import dump_json, read_json_file
 from singer_sdk.helpers.capabilities import (
@@ -102,6 +105,12 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             self._input_catalog = Catalog.from_dict(catalog)  # type: ignore[arg-type]
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
+            warnings.warn(
+                "Passing a catalog file path is deprecated. Please pass the catalog "
+                "as a dictionary or Catalog object instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
 
         self._mapper: PluginMapper | None = None
 
@@ -114,6 +123,12 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
             state_dict = state
         elif state:
             state_dict = read_json_file(state)
+            warnings.warn(
+                "Passing a state file path is deprecated. Please pass the state "
+                "as a dictionary instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
         self.load_state(state_dict)
 
     # Class properties
@@ -302,7 +317,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             The tap's catalog as a dict
         """
-        return t.cast(dict, self._singer_catalog.to_dict())
+        return t.cast("dict", self._singer_catalog.to_dict())
 
     @property
     def catalog_json_text(self) -> str:
@@ -480,8 +495,8 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         about: bool = False,
         about_format: str | None = None,
         config: tuple[str, ...] = (),
-        state: str | None = None,
-        catalog: str | None = None,
+        state: pathlib.Path | None = None,
+        catalog: pathlib.Path | None = None,
     ) -> None:
         """Invoke the tap's command line interface.
 
@@ -605,12 +620,20 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
                 click.Option(
                     ["--catalog"],
                     help="Use a Singer catalog file with the tap.",
-                    type=click.Path(),
+                    type=click.Path(
+                        path_type=pathlib.Path,
+                        exists=True,
+                        dir_okay=False,
+                    ),
                 ),
                 click.Option(
                     ["--state"],
                     help="Use a bookmarks file for incremental replication.",
-                    type=click.Path(),
+                    type=click.Path(
+                        path_type=pathlib.Path,
+                        exists=True,
+                        dir_okay=False,
+                    ),
                 ),
             ],
         )
@@ -633,6 +656,9 @@ class SQLTap(Tap):
     discovery mode. Set to True if the catalog is generated dynamically (e.g. by
     querying a database's system tables).
     """
+
+    exclude_schemas: t.Sequence[str] = []
+    """Hard-coded list of stream names to skip when discovering the catalog."""
 
     _tap_connector: SQLConnector | None = None
 
@@ -677,7 +703,9 @@ class SQLTap(Tap):
         connector = self.tap_connector
 
         result: dict[str, list[dict]] = {"streams": []}
-        result["streams"].extend(connector.discover_catalog_entries())
+        result["streams"].extend(
+            connector.discover_catalog_entries(exclude_schemas=self.exclude_schemas),
+        )
 
         self._catalog_dict = result
         return self._catalog_dict
