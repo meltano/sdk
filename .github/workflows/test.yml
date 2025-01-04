@@ -4,7 +4,6 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - "cookiecutter/**"
       - "samples/**"
       - "singer_sdk/**"
       - "tests/**"
@@ -18,7 +17,6 @@ on:
       - main
       - v*
     paths:
-      - "cookiecutter/**"
       - "samples/**"
       - "singer_sdk/**"
       - "tests/**"

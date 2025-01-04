@@ -121,7 +121,8 @@ Now you can test and orchestrate using Meltano:
 ```bash
 # Test invocation:
 meltano invoke {{ cookiecutter.tap_id }} --version
-# OR run a test `elt` pipeline:
+
+# OR run a test ELT pipeline:
 meltano run {{ cookiecutter.tap_id }} target-jsonl
 ```
 
