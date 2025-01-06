@@ -299,7 +299,7 @@ files = [
 name = "bcrypt"
 version = "4.2.1"
 description = "Modern password hashing for your software and your servers"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "bcrypt-4.2.1-cp37-abi3-macosx_10_12_universal2.whl", hash = "sha256:1340411a0894b7d3ef562fb233e4b6ed58add185228650942bdc885362f32c17"},
@@ -1881,7 +1881,7 @@ files = [
 name = "paramiko"
 version = "3.5.0"
 description = "SSH2 protocol library"
-optional = false
+optional = true
 python-versions = ">=3.6"
 files = [
     {file = "paramiko-3.5.0-py3-none-any.whl", hash = "sha256:1fedf06b085359051cd7d0d270cebe19e755a8a921cc2ddbfa647fb0cd7d68f9"},
@@ -2142,7 +2142,7 @@ tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
 name = "pynacl"
 version = "1.5.0"
 description = "Python binding to the Networking and Cryptography (NaCl) library"
-optional = false
+optional = true
 python-versions = ">=3.6"
 files = [
     {file = "PyNaCl-1.5.0-cp36-abi3-macosx_10_10_universal2.whl", hash = "sha256:401002a4aaa07c9414132aaed7f6836ff98f59277a234704ff66878c2ee4a0d1"},
@@ -3648,4 +3648,4 @@ testing = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9"
-content-hash = "5980afaf60427d3c9d4ab286a2bf890950b325d218d4485a801aaa8de1d7782f"
+content-hash = "e232734d4ae14a05f1938a021e2c90904efcdef03b42977389432a75c0dbe9a1"
