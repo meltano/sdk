@@ -39,7 +39,7 @@ creating and managing virtual environments, these two tools automate the process
     `poetry add -D <pippable-dev-only-ref>`.
   - If version conflicts occur, relax the version constraints in `pyproject.toml` for the
     libraries where the conflict is reported, then try again.
-  - Poetry can also publish your libraries to PyPi.
+  - Poetry can also publish your libraries to PyPI.
 - **pipx**: Install pipx once, and then use pipx _instead of_ pip.
   - If you are using poetry for development, then all other pip-installables should be
     executable tools and programs, which is what pipx is designed for.
