@@ -1,13 +1,11 @@
-[tool.poetry]
+[project]
 name = "singer-sdk"
-version = "0.0.0"
+dynamic = [
+    "version"
+]
 description = "A framework for building Singer taps"
-authors = ["Meltano Team and Contributors <hello@meltano.com>"]
-maintainers = ["Meltano Team and Contributors <hello@meltano.com>"]
-readme = "README.md"
-homepage = "https://sdk.meltano.com/en/latest/"
-repository = "https://github.com/meltano/sdk"
-documentation = "https://sdk.meltano.com/en/latest/"
+authors = [{ name = "Meltano Team and Contributors", email = "hello@meltano.com" }]
+maintainers = [{ name = "Meltano Team and Contributors", email = "hello@meltano.com" }]
 keywords = [
     "Meltano",
     "Singer",
@@ -28,105 +26,103 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Typing :: Typed",
 ]
-license = "Apache-2.0"
+readme = "README.md"
+license.file = "LICENSE"
+requires-python = ">=3.9"
 
-[tool.poetry.urls]
-"Issue Tracker" = "https://github.com/meltano/sdk/issues"
-"Twitter" = "https://twitter.com/meltanodata/"
-"Changelog" = "https://github.com/meltano/sdk/blob/main/CHANGELOG.md"
-"Slack" = "https://meltano.com/slack"
-"Youtube" = "https://www.youtube.com/meltano"
-
-[tool.poetry.dependencies]
-python = ">=3.9"
-backoff = { version = ">=2.0.0", python = "<4" }
-backports-datetime-fromisoformat = { version = ">=2.0.1", python = "<3.11" }
-click = "~=8.0"
-fs = ">=2.4.16"
-fsspec = ">=2024.9.0"
-importlib-metadata = { version = "<9.0.0", python = "<3.12" }
-importlib-resources = { version = ">=5.12.0,!=6.2.0,!=6.3.0,!=6.3.1", python = "<3.10" }
-inflection = ">=0.5.1"
-joblib = ">=1.3.0"
-jsonpath-ng = ">=1.5.3"
-jsonschema = ">=4.16.0"
-packaging = ">=23.1"
-python-dotenv = ">=0.20"
-PyYAML = ">=6.0"
-referencing = ">=0.30.0"
-requests = ">=2.25.1"
-# TODO: remove this constraint once we get rid of the `fs` dependency
-# newer setuptools versions are incompatible with some dependencies (fs)
-setuptools = "<=70.3.0"
-simpleeval = ">=0.9.13,!=1.0.1"
-simplejson = ">=3.17.6"
-sqlalchemy = ">=1.4,<3.0"
-typing-extensions = ">=4.5.0"
-urllib3 = [
-    { version = "<2", python = "<3.10" },
-    { version = "*", python = ">=3.10" },
+dependencies = [
+    'backoff>=2.0.0; python_version<"4"',
+    'backports-datetime-fromisoformat>=2.0.1; python_version<"3.11"',
+    "click~=8.0",
+    "fs>=2.4.16",
+    "fsspec>=2024.9.0",
+    'importlib-metadata<9.0.0; python_version<"3.12"',
+    'importlib-resources>=5.12.0,!=6.2.0,!=6.3.0,!=6.3.1; python_version<"3.10"',
+    "inflection>=0.5.1",
+    "joblib>=1.3.0",
+    "jsonpath-ng>=1.5.3",
+    "jsonschema>=4.16.0",
+    "packaging>=23.1",
+    "python-dotenv>=0.20",
+    "PyYAML>=6.0",
+    "referencing>=0.30.0",
+    "requests>=2.25.1",
+    # TODO: remove this constraint once we get rid of the `fs` dependency
+    # newer setuptools versions are incompatible with some dependencies (fs)
+    "setuptools<=70.3.0",
+    "simpleeval>=0.9.13,!=1.0.1",
+    "simplejson>=3.17.6",
+    "sqlalchemy>=1.4,<3.0",
+    "typing-extensions>=4.5.0",
+    'urllib3<2; python_version<"3.10"',
+    'urllib3; python_version>="3.10"',
 ]
 
+[project.optional-dependencies]
 # Sphinx dependencies installed as optional 'docs' extras
 # https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
-furo = {version = ">=2024.5.6", optional = true}
-myst-parser = {version = ">=3", optional = true}
-sphinx = {version = ">=7", optional = true}
-sphinx-copybutton = {version = ">=0.5.2", optional = true}
-sphinx-inline-tabs = {version = ">=2023.4.21", optional = true}
-sphinx-notfound-page = {version = ">=1.0.0", optional = true}
-sphinx-reredirects = {version = ">=0.1.5", optional = true}
+docs = [
+    "furo>=2024.5.6",
+    "myst-parser>=3",
+    "pytest>=7.2.1",
+    "sphinx>=7",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-inline-tabs>=2023.4.21",
+    "sphinx-notfound-page>=1.0.0",
+    "sphinx-reredirects>=0.1.5",
+]
 
 # File storage dependencies installed as optional 'filesystem' extras
-fs-s3fs = {version = ">=1.1.1", optional = true}
-s3fs = { version = ">=2024.9.0", optional = true }
+s3 = [
+    "fs-s3fs>=1.1.1",
+    "s3fs>=2024.9.0",
+]
 
 # Parquet file dependencies installed as optional 'parquet' extras
 # We add Python constraints to force Poetry to add the latest supported Numpy version
 # for all Python versions to 'poetry.lock'. If we don't do this, Poetry will add only
 # the version of Numpy that is compatible with the earliest Python version supported
 # by this project, but that may not be compatible with the latest Python version.
-numpy = [
-    { version = ">=1.22,<2.1", python = "==3.9", optional = true },
-    { version = ">=1.22", python = ">=3.10", optional = true },
+parquet = [
+    "numpy>=1.22,<2.1; python_version=='3.9'",
+    "numpy>=1.22; python_version>='3.10'",
+    "pyarrow>=13",
 ]
-pyarrow = { version = ">=13", optional = true }
 
 # Testing dependencies installed as optional 'testing' extras
-pytest = {version=">=7.2.1", optional = true}
+testing = [
+    "pytest>=7.2.1",
+]
 
 # installed as optional 'faker' extra
-faker = {version = ">=22.5", optional = true}
+faker = [
+    "faker>=22.5",
+]
 
 # Crypto extras
-cryptography = { version = ">=3.4.6", optional = true }
-PyJWT = { version = "~=2.4", optional = true }
+jwt = [
+    "cryptography>=3.4.6",
+    "PyJWT~=2.4",
+]
 
 # SSH extras
-paramiko = { version = ">=3.3.0", optional = true }
+ssh = [
+    "paramiko>=3.3.0",
+]
 
-[tool.poetry.extras]
-jwt = [
-    "cryptography",
-    "PyJWT",
-]
-docs = [
-    "furo",
-    "myst-parser",
-    "pytest",
-    "sphinx",
-    "sphinx-copybutton",
-    "sphinx-inline-tabs",
-    "sphinx-notfound-page",
-    "sphinx-reredirects",
-]
-s3 = ["fs-s3fs", "s3fs"]
-ssh = ["paramiko"]
-testing = [
-    "pytest",
-]
-parquet = ["numpy", "pyarrow"]
-faker = ["faker"]
+[project.urls]
+Homepage = "https://sdk.meltano.com/en/latest/"
+Repository = "https://github.com/meltano/sdk"
+Documentation = "https://sdk.meltano.com/en/latest/"
+"Issue Tracker" = "https://github.com/meltano/sdk/issues"
+"Twitter" = "https://twitter.com/meltanodata/"
+"Changelog" = "https://github.com/meltano/sdk/blob/main/CHANGELOG.md"
+"Slack" = "https://meltano.com/slack"
+"Youtube" = "https://www.youtube.com/meltano"
+
+[tool.poetry]
+requires-poetry = ">=2.0"
+version = "0.0.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = ">=7.4"}
@@ -239,17 +235,13 @@ show_missing = true
 
 [tool.deptry]
 known_first_party = ["singer_sdk"]
-pep621_dev_dependency_groups = ["testing"]
+pep621_dev_dependency_groups = ["docs", "testing"]
 
 [tool.deptry.package_module_name_map]
 backports-datetime-fromisoformat = "backports"
 importlib-metadata = "importlib_metadata"
 importlib-resources = "importlib_resources"
 PyJWT = "jwt"
-types-jsonschema = "jsonschema"
-types-pytz = "pytz"
-types-PyYAML = "yaml"
-types-requests = "requests"
 
 [tool.deptry.per_rule_ignores]
 DEP002 = [
@@ -257,20 +249,14 @@ DEP002 = [
     "numpy",
     "setuptools",
     "urllib3",
-    # Python version-specific dependencies
-    "backports-datetime-fromisoformat",
-    # Docs extras
-    "furo",
-    "myst-parser",
-    "sphinx",
-    "sphinx-copybutton",
-    "sphinx-inline-tabs",
-    "sphinx-notfound-page",
-    "sphinx-reredirects",
     # Plugins
     "paramiko",
     "fs-s3fs",
     "s3fs",
+]
+DEP004 = [
+    # TODO: Make pytest a runtime dependency?
+    "pytest",
 ]
 
 [tool.mypy]
@@ -300,13 +286,16 @@ enable = true
 style = "pep440"
 
 [build-system]
-requires = ["poetry-core==1.9.0", "poetry-dynamic-versioning==1.4.0"]
+requires = [
+    "poetry-core>=2,<3",
+    "poetry-dynamic-versioning",
+]
 build-backend = "poetry_dynamic_versioning.backend"
 
-[tool.poetry.plugins."pytest11"]
+[project.entry-points."pytest11"]
 singer_testing = "singer_sdk.testing.pytest_plugin"
 
-[tool.poetry.plugins."singer_sdk.batch_encoders"]
+[project.entry-points."singer_sdk.batch_encoders"]
 jsonl = "singer_sdk.contrib.batch_encoder_jsonl:JSONLinesBatcher"
 parquet = "singer_sdk.contrib.batch_encoder_parquet:ParquetBatcher"
 
@@ -315,7 +304,6 @@ extend-exclude = [
     "cookiecutter/*",
 ]
 line-length = 88
-target-version = "py39"
 
 [tool.ruff.format]
 docstring-code-format = true
