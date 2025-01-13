@@ -245,6 +245,6 @@ def test_record_property_pop(
         breadcrumb=(),
     )
 
-    assert (
-        record_pop == record_selected
-    ), f"Expected record={record_selected}, got {record_pop}"
+    assert record_pop == record_selected, (
+        f"Expected record={record_selected}, got {record_pop}"
+    )

@@ -158,9 +158,9 @@ def test_sync_sqlite_to_sqlite(
             msg = f"Could not parse JSON in new line {line_num}: {new_out}"
             raise RuntimeError(msg) from e
 
-        assert (
-            tapped_json["type"] == orig_json["type"]
-        ), f"Mismatched message type on line {line_num}."
+        assert tapped_json["type"] == orig_json["type"], (
+            f"Mismatched message type on line {line_num}."
+        )
         if tapped_json["type"] == "SCHEMA":
             assert (
                 tapped_json["schema"]["properties"].keys()

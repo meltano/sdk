@@ -322,9 +322,9 @@ class TargetFileTestTemplate(TargetTestTemplate):
         """
         # get input from file
         if getattr(self, "singer_filepath", None):
-            assert (
-                self.singer_filepath.is_file()
-            ), f"Singer file {self.singer_filepath} does not exist."
+            assert self.singer_filepath.is_file(), (
+                f"Singer file {self.singer_filepath} does not exist."
+            )
             runner.input_filepath = self.singer_filepath
         super().run(config, resource, runner)
 
