@@ -106,7 +106,7 @@ def benches(session: nox.Session) -> None:
 @nox.session(name="deps", python=main_python_version)
 def dependencies(session: nox.Session) -> None:
     """Check issues with dependencies."""
-    session.install(".[msgspec,s3,testing]")
+    session.install(".[docs,faker,jwt,msgspec,parquet,s3,ssh,testing]")
     session.install("deptry")
     session.run("deptry", "singer_sdk", *session.posargs)
 
