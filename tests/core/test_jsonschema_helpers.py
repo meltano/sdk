@@ -606,13 +606,13 @@ def test_property_creation(
         property_name = next(iter(property_dict.keys()))
         property_node = property_dict[property_name]
         if check_fn in type_fn_checks_true:
-            assert (
-                check_fn(property_node) is True
-            ), f"{check_fn.__name__} was not True for {property_dict!r}"
+            assert check_fn(property_node) is True, (
+                f"{check_fn.__name__} was not True for {property_dict!r}"
+            )
         else:
-            assert (
-                check_fn(property_node) is False
-            ), f"{check_fn.__name__} was not False for {property_dict!r}"
+            assert check_fn(property_node) is False, (
+                f"{check_fn.__name__} was not False for {property_dict!r}"
+            )
 
 
 def test_wrapped_type_dict():
