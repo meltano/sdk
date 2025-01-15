@@ -146,7 +146,7 @@ TARGET_SCHEMA_CONFIG = PropertiesList(
 ).to_dict()
 ACTIVATE_VERSION_CONFIG = PropertiesList(
     Property(
-        "activate_version",
+        "process_activate_version_messages",
         BooleanType,
         default=True,
         title="Process `ACTIVATE_VERSION` messages",

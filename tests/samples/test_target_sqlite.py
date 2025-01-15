@@ -79,7 +79,12 @@ def sqlite_sample_target_hard_delete(sqlite_target_test_config):
 @pytest.fixture
 def sqlite_sample_target_no_activate_version(sqlite_target_test_config):
     """Get a sample target object with hard_delete disabled."""
-    return SQLiteTarget(config={**sqlite_target_test_config, "activate_version": False})
+    return SQLiteTarget(
+        config={
+            **sqlite_target_test_config,
+            "process_activate_version_messages": False,
+        }
+    )
 
 
 @pytest.fixture
@@ -153,9 +158,9 @@ def test_sync_sqlite_to_sqlite(
             msg = f"Could not parse JSON in new line {line_num}: {new_out}"
             raise RuntimeError(msg) from e
 
-        assert (
-            tapped_json["type"] == orig_json["type"]
-        ), f"Mismatched message type on line {line_num}."
+        assert tapped_json["type"] == orig_json["type"], (
+            f"Mismatched message type on line {line_num}."
+        )
         if tapped_json["type"] == "SCHEMA":
             assert (
                 tapped_json["schema"]["properties"].keys()

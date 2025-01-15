@@ -30,7 +30,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.9"
-singer-sdk = { version="~=0.42.1", extras = [
+singer-sdk = { version="~=0.43.1", extras = [
     {%- if cookiecutter.auth_method == "JWT" -%}"jwt", {% endif -%}
     {%- if cookiecutter.faker_extra -%}"faker",{%- endif -%}
 ] }
@@ -45,9 +45,9 @@ sqlalchemy = "~=2.0.36"
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8"
 {%- if cookiecutter.auth_method == "JWT" %}
-singer-sdk = { version="~=0.42.1", extras = ["jwt", "testing"] }
+singer-sdk = { version="~=0.43.1", extras = ["jwt", "testing"] }
 {%- else %}
-singer-sdk = { version="~=0.42.1", extras = ["testing"] }
+singer-sdk = { version="~=0.43.1", extras = ["testing"] }
 {%- endif %}
 
 [tool.poetry.extras]

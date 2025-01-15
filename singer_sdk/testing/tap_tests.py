@@ -199,9 +199,9 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
             f"Length of set of records IDs ({count_unique_records})"
             f" is not equal to number of records ({count_records})."
         )
-        assert all(
-            all(k is not None for k in pk) for pk in record_ids
-        ), "Primary keys contain some key values that are null."
+        assert all(all(k is not None for k in pk) for pk in record_ids), (
+            "Primary keys contain some key values that are null."
+        )
 
 
 class AttributeIsDateTimeTest(AttributeTestTemplate):
@@ -382,9 +382,9 @@ class AttributeNotNullTest(AttributeTestTemplate):
     def test(self) -> None:
         """Run test."""
         for r in self.stream_records:
-            assert (
-                r.get(self.attribute_name) is not None
-            ), f"Detected null values for attribute ('{self.attribute_name}')."
+            assert r.get(self.attribute_name) is not None, (
+                f"Detected null values for attribute ('{self.attribute_name}')."
+            )
 
     @classmethod
     def evaluate(

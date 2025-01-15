@@ -10,12 +10,15 @@ import urllib.parse
 
 import pytest
 import requests
+import requests_mock.adapter as requests_mock_adapter
 
 from singer_sdk._singerlib import Catalog, MetadataMapping
 from singer_sdk.exceptions import (
+    FatalAPIError,
     InvalidReplicationKeyException,
 )
 from singer_sdk.helpers._classproperty import classproperty
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._compat import datetime_fromisoformat as parse
 from singer_sdk.helpers.jsonpath import _compile_jsonpath
 from singer_sdk.streams.core import REPLICATION_FULL_TABLE, REPLICATION_INCREMENTAL
@@ -566,6 +569,52 @@ def test_non_json_payload(tap: Tap, requests_mock: requests_mock.Mocker):
     assert records == [
         {"id": 1, "value": "my_value_1"},
         {"id": 2, "value": "my_value_2"},
+    ]
+
+
+def test_mutate_http_method(tap: Tap, requests_mock: requests_mock.Mocker):
+    """Test HTTP method can be overridden."""
+
+    def callback(request: requests.PreparedRequest, context: requests_mock.Context):
+        if request.method == "POST":
+            return {
+                "data": [
+                    {"id": 1, "value": "abc"},
+                    {"id": 2, "value": "def"},
+                ]
+            }
+
+        # Method not allowed
+        context.status_code = 405
+        context.reason = "Method Not Allowed"
+        return {"error": "Check your method"}
+
+    class PostStream(RestTestStream):
+        records_jsonpath = "$.data[*]"
+        path = "/endpoint"
+
+    stream = PostStream(tap, http_method="PUT")
+    requests_mock.request(
+        requests_mock_adapter.ANY,
+        url="https://example.com/endpoint",
+        json=callback,
+    )
+
+    with pytest.raises(FatalAPIError, match="Method Not Allowed"):
+        list(stream.request_records(None))
+
+    with pytest.warns(SingerSDKDeprecationWarning):
+        stream.rest_method = "GET"
+
+    with pytest.raises(FatalAPIError, match="Method Not Allowed"):
+        list(stream.request_records(None))
+
+    stream.http_method = "POST"
+
+    records = list(stream.request_records(None))
+    assert records == [
+        {"id": 1, "value": "abc"},
+        {"id": 2, "value": "def"},
     ]
 
 
