@@ -649,6 +649,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         *,
         nullable: bool | None = None,
         title: str | None = None,
+        requires_properties: str | list[str] | None = None,
     ) -> None:
         """Initialize Property object.
 
@@ -671,6 +672,8 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
                 displayed to the user as hints of the expected format of inputs.
             nullable: If True, the property may be null.
             title: Optional. A short, human-readable title for the property.
+            requires_properties: A list of property names that must be present if this
+                property is present.
         """
         self.name = name
         self.wrapped = wrapped
@@ -682,6 +685,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         self.examples = examples or None
         self.nullable = nullable
         self.title = title
+        self.requires_properties = requires_properties
 
     @property
     def type_dict(self) -> dict:  # type: ignore[override]
@@ -848,10 +852,20 @@ class ObjectType(JSONTypeHelper):
         """
         merged_props = {}
         required = []
+        dependent_required: dict[str, list[str]] = {}
         for w in self.wrapped.values():
             merged_props.update(w.to_dict())
             if not w.optional:
                 required.append(w.name)
+            if w.requires_properties:
+                # Convert single string to list for consistent handling
+                required_props = (
+                    [w.requires_properties]
+                    if isinstance(w.requires_properties, str)
+                    else w.requires_properties
+                )
+                dependent_required[w.name] = required_props
+
         result: dict[str, t.Any] = {
             "type": ["object", "null"] if self.nullable else "object",
             "properties": merged_props,
@@ -859,6 +873,9 @@ class ObjectType(JSONTypeHelper):
 
         if required:
             result["required"] = required
+
+        if dependent_required:
+            result["dependentRequired"] = dependent_required
 
         if self.additional_properties is not None:
             if isinstance(self.additional_properties, bool):
@@ -1097,7 +1114,75 @@ class CustomType(JSONTypeHelper):
 
 
 class PropertiesList(ObjectType):
-    """Properties list. A convenience wrapper around the ObjectType class."""
+    """Properties list. A convenience wrapper around the ObjectType class.
+
+    Examples:
+        >>> schema = PropertiesList(
+        ...     # username/password
+        ...     Property("username", StringType, requires_properties="password"),
+        ...     Property("password", StringType, secret=True),
+        ...     # OAuth
+        ...     Property(
+        ...         "client_id",
+        ...         StringType,
+        ...         requires_properties=["client_secret", "refresh_token"],
+        ...     ),
+        ...     Property("client_secret", StringType, secret=True),
+        ...     Property("refresh_token", StringType, secret=True),
+        ... )
+        >>> print(schema.to_json(indent=2))
+        {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "password": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "secret": true,
+              "writeOnly": true
+            },
+            "client_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "client_secret": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "secret": true,
+              "writeOnly": true
+            },
+            "refresh_token": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "secret": true,
+              "writeOnly": true
+            }
+          },
+          "dependentRequired": {
+            "username": [
+              "password"
+            ],
+            "client_id": [
+              "client_secret",
+              "refresh_token"
+            ]
+          },
+          "$schema": "https://json-schema.org/draft/2020-12/schema"
+        }
+    """
 
     def items(self) -> t.ItemsView[str, Property]:
         """Get wrapped properties.
