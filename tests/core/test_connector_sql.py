@@ -724,6 +724,15 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
         assert isinstance(result, sa.types.JSON)
 
+        unknown_type = {"type": ["string"], "x-sql-datatype": "unknown"}
+        with pytest.warns(
+            UserWarning,
+            match="This target does not support the x-sql-datatype",
+        ):
+            result = json_schema_to_sql.to_sql_type(unknown_type)
+
+        assert isinstance(result, sa.types.VARCHAR)
+
 
 def test_bench_discovery(benchmark, tmp_path: Path):
     def _discover_catalog(connector):

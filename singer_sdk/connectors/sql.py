@@ -400,9 +400,15 @@ class JSONSchemaToSQL:
             SQL type if one can be determined, None otherwise.
         """
         # Check x-sql-datatype first
-        if x_sql_datatype := schema.get("x-sql-datatype"):  # noqa: SIM102
+        if x_sql_datatype := schema.get("x-sql-datatype"):
             if handler := self._sql_datatype_mapping.get(x_sql_datatype):
                 return self._invoke_handler(handler, schema)
+
+            warnings.warn(
+                f"This target does not support the x-sql-datatype '{x_sql_datatype}'",
+                UserWarning,
+                stacklevel=2,
+            )
 
         # Check if this is a string with format then
         if schema.get("type") == "string" and "format" in schema:  # noqa: SIM102
