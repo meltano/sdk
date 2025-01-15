@@ -717,6 +717,13 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         result = json_schema_to_sql.to_sql_type(image_type)
         assert isinstance(result, sa.types.LargeBinary)
 
+    def test_annotation_sql_datatype(self):
+        json_schema_to_sql = JSONSchemaToSQL()
+        json_schema_to_sql.register_sql_datatype_handler("json", sa.types.JSON)
+        jsonschema_type = {"type": ["string"], "x-sql-datatype": "json"}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.JSON)
+
 
 def test_bench_discovery(benchmark, tmp_path: Path):
     def _discover_catalog(connector):

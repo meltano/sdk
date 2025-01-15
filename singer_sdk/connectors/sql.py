@@ -240,6 +240,10 @@ class JSONSchemaToSQL:
     This class provides a mapping from JSON Schema types to SQLAlchemy types.
 
     .. versionadded:: 0.42.0
+    .. versionchanged:: 0.44.0
+       Added the
+       :meth:`singer_sdk.connectors.sql.JSONSchemaToSQL.register_sql_datatype_handler`
+       method to map custom ``x-sql-datatype`` annotations into SQLAlchemy types.
     """
 
     def __init__(self, *, max_varchar_length: int | None = None) -> None:
@@ -275,6 +279,8 @@ class JSONSchemaToSQL:
             "ipv4": lambda _: sa.types.VARCHAR(15),
             "ipv6": lambda _: sa.types.VARCHAR(45),
         }
+
+        self._sql_datatype_mapping: dict[str, JSONtoSQLHandler] = {}
 
         self._fallback_type: type[sa.types.TypeEngine] = sa.types.VARCHAR
 
@@ -338,6 +344,20 @@ class JSONSchemaToSQL:
         """  # noqa: E501
         self._format_handlers[format_name] = handler
 
+    def register_sql_datatype_handler(
+        self,
+        sql_datatype: str,
+        handler: JSONtoSQLHandler,
+    ) -> None:
+        """Register a custom x-sql-datatype handler.
+
+        Args:
+            sql_datatype: The x-sql-datatype string.
+            handler: Either a SQLAlchemy type class or a callable that takes a schema
+                    dict and returns a SQLAlchemy type instance.
+        """
+        self._sql_datatype_mapping[sql_datatype] = handler
+
     def handle_multiple_types(self, types: t.Sequence[str]) -> sa.types.TypeEngine:  # noqa: ARG002, PLR6301
         """Handle multiple types by returning a VARCHAR.
 
@@ -374,10 +394,14 @@ class JSONSchemaToSQL:
         Returns:
             SQL type if one can be determined, None otherwise.
         """
-        # Check if this is a string with format first
-        if schema.get("type") == "string" and "format" in schema:
-            format_type = self._handle_format(schema)
-            if format_type is not None:
+        # Check x-sql-datatype first
+        if x_sql_datatype := schema.get("x-sql-datatype"):  # noqa: SIM102
+            if handler := self._sql_datatype_mapping.get(x_sql_datatype):
+                return self._invoke_handler(handler, schema)
+
+        # Check if this is a string with format then
+        if schema.get("type") == "string" and "format" in schema:  # noqa: SIM102
+            if (format_type := self._handle_format(schema)) is not None:
                 return format_type
 
         # Then check regular types
