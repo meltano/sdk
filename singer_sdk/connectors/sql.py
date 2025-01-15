@@ -349,12 +349,17 @@ class JSONSchemaToSQL:
         sql_datatype: str,
         handler: JSONtoSQLHandler,
     ) -> None:
-        """Register a custom x-sql-datatype handler.
+        """Register a custom ``x-sql-datatype`` handler.
 
         Args:
             sql_datatype: The x-sql-datatype string.
             handler: Either a SQLAlchemy type class or a callable that takes a schema
                     dict and returns a SQLAlchemy type instance.
+
+        Example:
+            >>> from sqlalchemy.types import SMALLINT
+            >>> to_sql = JSONSchemaToSQL()
+            >>> to_sql.register_sql_datatype_handler("smallint", SMALLINT)
         """
         self._sql_datatype_mapping[sql_datatype] = handler
 
