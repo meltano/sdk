@@ -57,6 +57,7 @@ jobs:
         - "3.12"
         - "3.13"
         include:
+        - { session: tests,   python-version: "3.13", os: "ubuntu-24.04-arm" }
         - { session: doctest, python-version: "3.13", os: "ubuntu-latest" }
         - { session: mypy,    python-version: "3.13", os: "ubuntu-latest" }
         - { session: deps,    python-version: "3.13", os: "ubuntu-latest" }
