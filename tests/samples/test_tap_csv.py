@@ -87,7 +87,10 @@ class TestCSVOneStreamPerFileIncremental(_TestCSVOneStreamPerFileIncremental):
         runner: TapTestRunner,
         stream: CSVStream,
     ):
-        with pytest.warns(UserWarning):
+        with pytest.warns(
+            UserWarning,
+            match="Fields in transformed catalog but not in records",
+        ):
             super().test_tap_stream_transformed_catalog_schema_matches_record(
                 config,
                 resource,
@@ -102,5 +105,8 @@ class TestCSVOneStreamPerFileIncremental(_TestCSVOneStreamPerFileIncremental):
         runner: TapTestRunner,
         stream: CSVStream,
     ):
-        with pytest.warns(UserWarning):
+        with pytest.warns(
+            UserWarning,
+            match="No records returned in stream",
+        ):
             super().test_tap_stream_returns_record(config, resource, runner, stream)
