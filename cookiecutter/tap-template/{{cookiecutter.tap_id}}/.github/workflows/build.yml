@@ -10,11 +10,12 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      version: {{ '${{ steps.baipp.outputs.package_version }}' }}
     steps:
     - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
     - uses: hynek/build-and-inspect-python-package@v2
+      id: baipp
 
   publish:
     name: Publish to PyPI
@@ -23,7 +24,13 @@ jobs:
     ## TODO: optionally provide the name of the environment for the trusted
     ## publisher on PyPI
     ## https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment
-    # environment: pypi
+    # environment:
+    #   name: pypi
+    {%- if cookiecutter.variant != "None (Skip)" %}
+    #   url: https://pypi.org/project/"{{cookiecutter.variant}}-{{cookiecutter.tap_id}}"/{{ '${{ steps.baipp.outputs.package_version }}' }}
+    {%- else %}
+    #   url: https://pypi.org/project/"{{cookiecutter.tap_id}}"/{{ '${{ steps.baipp.outputs.package_version }}' }}
+    {%- endif %}
     if: startsWith(github.ref, 'refs/tags/')
     steps:
     - uses: actions/download-artifact@v4

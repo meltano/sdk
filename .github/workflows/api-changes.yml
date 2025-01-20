@@ -34,7 +34,7 @@ jobs:
 
     - name: Install tools
       env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
       run: |
         python -Im pip install -U pip
         pipx install griffe nox

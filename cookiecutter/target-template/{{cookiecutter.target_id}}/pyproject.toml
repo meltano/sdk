@@ -1,4 +1,4 @@
-[tool.poetry]
+[project]
 {%- if cookiecutter.variant != "None (Skip)" %}
 name = "{{cookiecutter.variant}}-{{cookiecutter.target_id}}"
 {%- else %}
@@ -7,13 +7,14 @@ name = "{{cookiecutter.target_id}}"
 version = "0.0.1"
 description = "Singer target for {{cookiecutter.destination_name}}, built with the Meltano Singer SDK."
 readme = "README.md"
-authors = ["{{ cookiecutter.admin_name }} <{{ cookiecutter.admin_email }}>"]
+authors = [{ name = "{{ cookiecutter.admin_name }}", email = "{{ cookiecutter.admin_email }}" }]
 keywords = [
     "ELT",
     "{{cookiecutter.destination_name}}",
 ]
 classifiers = [
     "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -22,6 +23,11 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 license = "Apache-2.0"
+license-files = [ "LICENSE" ]
+requires-python = ">=3.9"
+dynamic = ["dependencies"]
+
+[tool.poetry]
 {%- if cookiecutter.variant != "None (Skip)" %}
 packages = [
     { include = "{{cookiecutter.library_name}}" },
@@ -29,7 +35,6 @@ packages = [
 {%- endif %}
 
 [tool.poetry.dependencies]
-python = ">=3.9"
 singer-sdk = { version="~=0.43.1"{{ ', extras = ["faker"]' if cookiecutter.faker_extra }} }
 fs-s3fs = { version = "~=1.1.1", optional = true }
 {%- if cookiecutter.serialization_method != "SQL" %}
@@ -43,9 +48,6 @@ singer-sdk = { version="~=0.43.1", extras = ["testing"] }
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
 
-[tool.pytest.ini_options]
-addopts = '--durations=10'
-
 [tool.mypy]
 python_version = "3.12"
 warn_unused_configs = true
@@ -56,7 +58,6 @@ target-version = "py39"
 [tool.ruff.lint]
 ignore = [
     "COM812",  # missing-trailing-comma
-    "ISC001",  # single-line-implicit-string-concatenation
 ]
 select = ["ALL"]
 
@@ -67,7 +68,7 @@ allow-star-arg-any = true
 convention = "google"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2,<3"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]

@@ -4,7 +4,6 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - "cookiecutter/**"
       - "samples/**"
       - "singer_sdk/**"
       - "tests/**"
@@ -12,13 +11,12 @@ on:
       - "poetry.lock"
       - "pyproject.toml"
       - ".github/workflows/test.yml"
-      - ".github/workflows/constraints.txt"
+      - ".github/workflows/resources/requirements.txt"
   push:
     branches:
       - main
       - v*
     paths:
-      - "cookiecutter/**"
       - "samples/**"
       - "singer_sdk/**"
       - "tests/**"
@@ -26,7 +24,7 @@ on:
       - "poetry.lock"
       - "pyproject.toml"
       - ".github/workflows/test.yml"
-      - ".github/workflows/constraints.txt"
+      - ".github/workflows/resources/requirements.txt"
   workflow_dispatch:
     inputs: {}
 
@@ -73,14 +71,14 @@ jobs:
 
     - name: Upgrade pip
       env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
       run: |
         pip install pip
         pip --version
 
     - name: Install Nox
       env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
       run: |
         pipx install 'nox[uv]'
         nox --version
@@ -128,14 +126,14 @@ jobs:
 
     - name: Upgrade pip
       env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
       run: |
         pip install pip
         pip --version
 
     - name: Install Nox
       env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
       run: |
         pipx install 'nox[uv]'
         nox --version
@@ -161,7 +159,7 @@ jobs:
 
     - name: Upgrade pip
       env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
       run: |
         pip install pip
         pip --version
@@ -173,7 +171,7 @@ jobs:
 
     - name: Install Nox
       env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
+        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
       run: |
         pipx install 'nox[uv]'
         nox --version
