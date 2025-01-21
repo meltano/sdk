@@ -2,9 +2,13 @@
 
 import datetime
 
+from dotenv import load_dotenv
 from singer_sdk.testing import get_tap_test_class
 
 from {{ cookiecutter.library_name }}.tap import Tap{{ cookiecutter.source_name }}
+
+load_dotenv()
+
 
 SAMPLE_CONFIG = {
     "start_date": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"),
