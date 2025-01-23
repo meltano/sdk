@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.44.0 (2025-01-23)
+
+### ✨ New
+
+- [#2830](https://github.com/meltano/sdk/issues/2830) Allow developers to mark stream schema and settings fields as deprecated
+- [#2829](https://github.com/meltano/sdk/issues/2829) Support a `x-sql-datatype` JSON Schema annotation to let targets customize SQL type handling
+- [#2819](https://github.com/meltano/sdk/issues/2819) Add SHA256 encryption method to inline stream maps -- _**Thanks @ben-schulz-mh!**_
+
+### 📦 Packaging changes
+
+- [#2407](https://github.com/meltano/sdk/issues/2407) Use Poetry support for PEP 621
+- [#2822](https://github.com/meltano/sdk/issues/2822) Make paramiko and transitive SSH dependencies optional
+- [#2821](https://github.com/meltano/sdk/issues/2821) Require urllib3 < 2 on Python < 3.10
+
 ## v0.43.1 (2024-12-10)
 
 ### 🐛 Fixes
