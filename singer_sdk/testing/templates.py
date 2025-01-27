@@ -47,7 +47,7 @@ class TestTemplate:
         msg = "ID not implemented."
         raise NotImplementedError(msg)
 
-    def setup(self) -> None:  # noqa: PLR6301
+    def setup(self) -> None:
         """Test setup, called before `.test()`.
 
         This method is useful for preparing external resources (databases, folders etc.)
@@ -63,7 +63,7 @@ class TestTemplate:
         """Main Test body, called after `.setup()` and before `.validate()`."""
         self.runner.sync_all()
 
-    def validate(self) -> None:  # noqa: PLR6301
+    def validate(self) -> None:
         """Test validation, called after `.test()`.
 
         This method is particularly useful in Target tests, to validate that records
@@ -75,7 +75,7 @@ class TestTemplate:
         msg = "Method not implemented."
         raise NotImplementedError(msg)
 
-    def teardown(self) -> None:  # noqa: PLR6301
+    def teardown(self) -> None:
         """Test Teardown.
 
         This method is useful for cleaning up external resources
