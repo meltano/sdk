@@ -50,7 +50,7 @@ typing_dependencies = poetry_config["group"]["typing"]["dependencies"].keys()
 def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
-    session.install(".[faker,jwt,parquet,s3,testing]")
+    session.install(".[faker,jwt,msgspec,parquet,s3,testing]")
     session.install(*typing_dependencies)
     session.run("mypy", *args)
     if not session.posargs:
@@ -63,6 +63,7 @@ def tests(session: nox.Session) -> None:
     extras = [
         "faker",
         "jwt",
+        "msgspec",
         "parquet",
         "s3",
     ]
@@ -92,7 +93,7 @@ def tests(session: nox.Session) -> None:
 @nox.session(python=main_python_version)
 def benches(session: nox.Session) -> None:
     """Run benchmarks."""
-    session.install(".[jwt,s3]")
+    session.install(".[jwt,msgspec,s3]")
     session.install(*test_dependencies)
     session.run(
         "pytest",
@@ -105,7 +106,7 @@ def benches(session: nox.Session) -> None:
 @nox.session(name="deps", python=main_python_version)
 def dependencies(session: nox.Session) -> None:
     """Check issues with dependencies."""
-    session.install(".[docs,faker,jwt,parquet,s3,ssh,testing]")
+    session.install(".[docs,faker,jwt,msgspec,parquet,s3,ssh,testing]")
     session.install("deptry")
     session.run("deptry", "singer_sdk", *session.posargs)
 
@@ -115,7 +116,7 @@ def update_snapshots(session: nox.Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
 
-    session.install(".[faker,jwt,parquet]")
+    session.install(".[faker,jwt,msgspec,parquet]")
     session.install(*test_dependencies)
     session.run("pytest", "--snapshot-update", *args)
 
