@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import typing as t
-from textwrap import dedent
 
 import pytest
+from sqlalchemy.sql import Insert
 
 from samples.sample_duckdb import DuckDBConnector
 from singer_sdk.sinks.sql import SQLSink
@@ -55,10 +55,12 @@ class TestDuckDBSink:
 
     def test_generate_insert_statement(self, sink: DuckDBSink, schema: dict):
         """Test that the insert statement is generated correctly."""
-        expected = dedent(
-            """\
-            INSERT INTO foo
-            (id, col_ts, "table")
-            VALUES (:id, :col_ts, :table)"""
+        stmt = sink.generate_insert_statement("foo", schema=schema)
+        assert isinstance(stmt, Insert)
+        assert stmt.table.name == "foo"
+        assert stmt.table.columns.keys() == ["id", "col_ts", "table"]
+
+        # Rendered SQL should look like:
+        assert str(stmt) == (
+            'INSERT INTO foo (id, col_ts, "table") VALUES (:id, :col_ts, :table)'
         )
-        assert sink.generate_insert_statement("foo", schema=schema) == expected
