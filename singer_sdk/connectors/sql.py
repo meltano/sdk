@@ -840,6 +840,10 @@ class SQLConnector:  # noqa: PLR0904
                 pool_pre_ping=True,
             )
 
+    @deprecated(
+        "This method is deprecated. Use or override `FullyQualifiedName` instead.",
+        category=SingerSDKDeprecationWarning,
+    )
     def quote(self, name: str) -> str:
         """Quote a name if it needs quoting, using '.' as a name-part delimiter.
 
@@ -853,7 +857,7 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             str: The quoted name.
         """
-        return ".".join(
+        return ".".join(  # pragma: no cover
             [
                 self._dialect.identifier_preparer.quote(name_part)
                 for name_part in name.split(".")

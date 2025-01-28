@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import re
 import typing as t
+import warnings
 from collections import defaultdict
 from copy import copy
-from textwrap import dedent
 
 import sqlalchemy as sa
-from sqlalchemy.sql import quoted_name
+from sqlalchemy.sql import insert
 from sqlalchemy.sql.expression import bindparam
 
 from singer_sdk.connectors import SQLConnector
@@ -282,19 +282,26 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Returns:
             An insert statement.
         """
-        property_names = list(self.conform_schema(schema)["properties"].keys())
-        column_identifiers = [
-            self.connector.quote(quoted_name(name, quote=True))
-            for name in property_names
-        ]
-        statement = dedent(
-            f"""\
-            INSERT INTO {full_table_name}
-            ({", ".join(column_identifiers)})
-            VALUES ({", ".join([f":{name}" for name in property_names])})
-            """,
+        conformed_schema = self.conform_schema(schema)
+        property_names = list(conformed_schema["properties"])
+
+        _, schema_name, table_name = self.connector.parse_full_table_name(
+            full_table_name
         )
-        return statement.rstrip()
+
+        table = sa.Table(
+            table_name,
+            sa.MetaData(),
+            *[
+                sa.Column(
+                    name, sa.String
+                )  # Assuming all columns are of type String for simplicity  # noqa: E501
+                for name in property_names
+            ],
+            schema=schema_name,
+        )
+
+        return insert(table)
 
     def bulk_insert_records(
         self,
@@ -321,7 +328,13 @@ class SQLSink(BatchSink, t.Generic[_C]):
             full_table_name,
             schema,
         )
-        if isinstance(insert_sql, str):
+        if isinstance(insert_sql, str):  # pragma: no cover
+            warnings.warn(
+                "Generating a SQL insert statement as a string is deprecated. "
+                "Please return an SQLAlchemy Executable object instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             insert_sql = sa.text(insert_sql)
 
         conformed_records = [self.conform_record(record) for record in records]
