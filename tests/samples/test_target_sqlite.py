@@ -646,12 +646,7 @@ def test_record_with_missing_properties(
                 },
             },
             [],
-            dedent(
-                """\
-                INSERT INTO test_stream
-                (id, name, "table")
-                VALUES (:id, :name, :table)""",
-            ),
+            'INSERT INTO test_stream (id, name, "table") VALUES (:id, :name, :table)',
         ),
     ],
     ids=[
@@ -676,7 +671,7 @@ def test_sqlite_generate_insert_statement(
         sink.full_table_name,
         sink.schema,
     )
-    assert dml == expected_dml
+    assert str(dml) == expected_dml
 
 
 def test_hostile_to_sqlite(
