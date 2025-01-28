@@ -460,8 +460,8 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         """Sync all streams."""
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
-        raise Exception(self.state)
-        self.write_message(StateMessage(value=self.state))
+        if self.state:
+            self.write_message(StateMessage(value=self.state))
 
         stream: Stream
         for stream in self.streams.values():
