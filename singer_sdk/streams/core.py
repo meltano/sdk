@@ -817,7 +817,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     def _write_state_message(self) -> None:
         """Write out a STATE message with the latest state."""
-        if (not self._is_state_flushed) and self.tap_state and (
+        if (not self._is_state_flushed) and (
             self.tap_state != self._last_emitted_state
         ):
             self._tap.write_message(singer.StateMessage(value=self.tap_state))
