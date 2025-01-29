@@ -696,3 +696,9 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         }
         result = json_schema_to_sql.to_sql_type(image_type)
         assert isinstance(result, sa.types.LargeBinary)
+
+    def test_singer_decimal(self):
+        json_schema_to_sql = JSONSchemaToSQL()
+        jsonschema_type = {"type": ["string"], "format": "singer.decimal"}
+        result = json_schema_to_sql.to_sql_type(jsonschema_type)
+        assert isinstance(result, sa.types.DECIMAL)
