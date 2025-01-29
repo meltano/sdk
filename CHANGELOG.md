@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.44.1 (2025-01-29)
+
+### 🐛 Fixes
+
+- [#2847](https://github.com/meltano/sdk/issues/2847) Update Cookiecutter templates
+- [#2844](https://github.com/meltano/sdk/issues/2844) Avoid writing an empty state -- _**Thanks @joaopamaral!**_
+- [#2843](https://github.com/meltano/sdk/issues/2843) Use a SQLAlchemy to generate an insert statement
+
 ## v0.44.0 (2025-01-23)
 
 ### ✨ New
