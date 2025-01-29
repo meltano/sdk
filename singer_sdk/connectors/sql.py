@@ -128,7 +128,7 @@ class SQLToJSONSchema:
        Added support for the `use_singer_decimal` option.
     """
 
-    def __init__(self, *, use_singer_decimal: bool) -> None:
+    def __init__(self, *, use_singer_decimal: bool = False) -> None:
         """Initialize the SQL to JSON Schema converter.
 
         Args:
