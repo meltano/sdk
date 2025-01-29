@@ -27,9 +27,9 @@ jobs:
     # environment:
     #   name: pypi
     {%- if cookiecutter.variant != "None (Skip)" %}
-    #   url: https://pypi.org/project/"{{cookiecutter.variant}}-{{cookiecutter.mapper_id}}"/{{ '${{ steps.baipp.outputs.package_version }}' }}
+    #   url: https://pypi.org/project/{{cookiecutter.variant}}-{{cookiecutter.mapper_id}}/{{ '${{ steps.baipp.outputs.package_version }}' }}
     {%- else %}
-    #   url: https://pypi.org/project/"{{cookiecutter.mapper_id}}"/{{ '${{ steps.baipp.outputs.package_version }}' }}
+    #   url: https://pypi.org/project/{{cookiecutter.mapper_id}}/{{ '${{ steps.baipp.outputs.package_version }}' }}
     {%- endif %}
     if: startsWith(github.ref, 'refs/tags/')
     steps:
