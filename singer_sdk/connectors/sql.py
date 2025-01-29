@@ -124,7 +124,7 @@ class SQLToJSONSchema:
     .. versionchanged:: 0.43.0
        Added the :meth:`singer_sdk.connectors.sql.SQLToJSONSchema.from_config` class
        method.
-    .. versionchanged:: 0.43.0
+    .. versionchanged:: 0.45.0
        Added support for the `use_singer_decimal` option.
     """
 
