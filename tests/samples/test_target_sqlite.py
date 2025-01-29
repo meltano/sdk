@@ -121,6 +121,7 @@ def test_sync_sqlite_to_sqlite(
     - Confirm the STDOUT from the original sample DB matches with the
       STDOUT from the re-tapped target DB.
     """
+    initial_state = deepcopy(sqlite_sample_tap.state)
     orig_stdout, _, _, _ = tap_to_target_sync_test(
         sqlite_sample_tap,
         sqlite_sample_target,
@@ -129,6 +130,7 @@ def test_sync_sqlite_to_sqlite(
     tapped_config = dict(sqlite_sample_target.config)
     tapped_target = SQLiteTap(
         config=tapped_config,
+        state=initial_state,
         catalog=sqlite_sample_db_catalog.to_dict(),
     )
     new_stdout, _ = tap_sync_test(tapped_target)
@@ -138,6 +140,8 @@ def test_sync_sqlite_to_sqlite(
     new_lines = new_stdout.readlines()
     assert len(orig_lines) > 0, "Orig tap output should not be empty."
     assert len(new_lines) > 0, "(Re-)tapped target output should not be empty."
+    assert orig_lines[0] == new_lines[0]
+    assert "STATE" in new_lines[0]
     assert len(orig_lines) == len(new_lines)
 
     line_num = 0
