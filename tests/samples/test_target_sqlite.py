@@ -141,6 +141,7 @@ def test_sync_sqlite_to_sqlite(
     assert len(orig_lines) > 0, "Orig tap output should not be empty."
     assert len(new_lines) > 0, "(Re-)tapped target output should not be empty."
     assert orig_lines[0] == new_lines[0]
+    assert "STATE" in new_lines[0]
     assert len(orig_lines) == len(new_lines)
 
     line_num = 0
