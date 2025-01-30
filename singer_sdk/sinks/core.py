@@ -400,6 +400,15 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self.config.get("add_record_metadata", False)
 
     @property
+    def process_activate_version_messages(self) -> bool:
+        """Check if activate version messages should be processed.
+
+        Returns:
+            True if activate version messages should be processed.
+        """
+        return self.config.get("process_activate_version_messages", True)
+
+    @property
     def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:
         """Return a treatment to use for datetime parse errors: ERROR. MAX, or NULL.
 
@@ -447,7 +456,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             or datetime.datetime.now(tz=datetime.timezone.utc)
         ).isoformat()
         record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
-        record["_sdc_sequence"] = int(round(time.time() * 1000))
+        record["_sdc_sequence"] = round(time.time() * 1000)
         record["_sdc_table_version"] = message.get("version")
         record["_sdc_sync_started_at"] = self.sync_started_at
 

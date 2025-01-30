@@ -194,7 +194,7 @@ class DefaultInstanceProperty:
             The property value.
         """
         if instance is None:
-            instance = owner()  # type: ignore[unreachable]
+            instance = owner()
         return self.fget(instance)
 
 
@@ -649,6 +649,8 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         *,
         nullable: bool | None = None,
         title: str | None = None,
+        deprecated: bool | None = None,
+        **kwargs: t.Any,
     ) -> None:
         """Initialize Property object.
 
@@ -671,6 +673,8 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
                 displayed to the user as hints of the expected format of inputs.
             nullable: If True, the property may be null.
             title: Optional. A short, human-readable title for the property.
+            deprecated: If True, mark this property as deprecated.
+            **kwargs: Additional keyword arguments to pass to the parent class.
         """
         self.name = name
         self.wrapped = wrapped
@@ -682,6 +686,8 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         self.examples = examples or None
         self.nullable = nullable
         self.title = title
+        self.deprecated = deprecated
+        self.kwargs = kwargs
 
     @property
     def type_dict(self) -> dict:  # type: ignore[override]
@@ -739,6 +745,12 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
             type_dict.update({"enum": self.allowed_values})
         if self.examples:
             type_dict.update({"examples": self.examples})
+
+        if self.deprecated is not None:
+            type_dict["deprecated"] = self.deprecated
+
+        type_dict.update(self.kwargs)
+
         return {self.name: type_dict}
 
 

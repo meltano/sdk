@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import typing as t
 
-import sqlalchemy  # noqa: TCH002
+import sqlalchemy  # noqa: TC002
 from singer_sdk import SQLConnector, SQLStream
 
 

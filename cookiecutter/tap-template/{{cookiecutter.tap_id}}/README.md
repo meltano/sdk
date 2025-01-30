@@ -6,11 +6,11 @@ Built with the [Meltano Tap SDK](https://sdk.meltano.com) for Singer Taps.
 
 <!--
 
-Developer TODO: Update the below as needed to correctly describe the install procedure. For instance, if you do not have a PyPi repo, or if you want users to directly install from your git repo, you can modify this step as appropriate.
+Developer TODO: Update the below as needed to correctly describe the install procedure. For instance, if you do not have a PyPI repo, or if you want users to directly install from your git repo, you can modify this step as appropriate.
 
 ## Installation
 
-Install from PyPi:
+Install from PyPI:
 
 ```bash
 pipx install {{ cookiecutter.tap_id }}
@@ -121,7 +121,8 @@ Now you can test and orchestrate using Meltano:
 ```bash
 # Test invocation:
 meltano invoke {{ cookiecutter.tap_id }} --version
-# OR run a test `elt` pipeline:
+
+# OR run a test ELT pipeline:
 meltano run {{ cookiecutter.tap_id }} target-jsonl
 ```
 

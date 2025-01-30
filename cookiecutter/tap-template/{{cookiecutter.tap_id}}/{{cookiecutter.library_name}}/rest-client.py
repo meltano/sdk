@@ -12,29 +12,29 @@ from importlib import resources
 {% if cookiecutter.auth_method  == "API Key" -%}
 from singer_sdk.authenticators import APIKeyAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
+from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {% elif cookiecutter.auth_method  == "Bearer Token" -%}
 from singer_sdk.authenticators import BearerTokenAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
+from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {% elif cookiecutter.auth_method == "Basic Auth" -%}
 from requests.auth import HTTPBasicAuth
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
+from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {% elif cookiecutter.auth_method == "Custom or N/A" -%}
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
+from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {% elif cookiecutter.auth_method in ("OAuth2", "JWT") -%}
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseAPIPaginator  # noqa: TCH002
+from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 from {{ cookiecutter.library_name }}.auth import {{ cookiecutter.source_name }}Authenticator

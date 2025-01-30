@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import abc
 import contextlib
+import pathlib
 import typing as t
 import warnings
 from enum import Enum
@@ -105,7 +106,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         elif catalog is not None:
             self._input_catalog = Catalog.from_dict(read_json_file(catalog))
             warnings.warn(
-                "Passsing a catalog file path is deprecated. Please pass the catalog "
+                "Passing a catalog file path is deprecated. Please pass the catalog "
                 "as a dictionary or Catalog object instead.",
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
@@ -123,7 +124,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         elif state:
             state_dict = read_json_file(state)
             warnings.warn(
-                "Passsing a state file path is deprecated. Please pass the state "
+                "Passing a state file path is deprecated. Please pass the state "
                 "as a dictionary instead.",
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
@@ -459,7 +460,8 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         """Sync all streams."""
         self._reset_state_progress_markers()
         self._set_compatible_replication_methods()
-        self.write_message(StateMessage(value=self.state))
+        if self.state:
+            self.write_message(StateMessage(value=self.state))
 
         stream: Stream
         for stream in self.streams.values():
@@ -494,8 +496,8 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         about: bool = False,
         about_format: str | None = None,
         config: tuple[str, ...] = (),
-        state: str | None = None,
-        catalog: str | None = None,
+        state: pathlib.Path | None = None,
+        catalog: pathlib.Path | None = None,
     ) -> None:
         """Invoke the tap's command line interface.
 
@@ -619,12 +621,20 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
                 click.Option(
                     ["--catalog"],
                     help="Use a Singer catalog file with the tap.",
-                    type=click.Path(),
+                    type=click.Path(
+                        path_type=pathlib.Path,
+                        exists=True,
+                        dir_okay=False,
+                    ),
                 ),
                 click.Option(
                     ["--state"],
                     help="Use a bookmarks file for incremental replication.",
-                    type=click.Path(),
+                    type=click.Path(
+                        path_type=pathlib.Path,
+                        exists=True,
+                        dir_okay=False,
+                    ),
                 ),
             ],
         )
@@ -647,6 +657,9 @@ class SQLTap(Tap):
     discovery mode. Set to True if the catalog is generated dynamically (e.g. by
     querying a database's system tables).
     """
+
+    exclude_schemas: t.Sequence[str] = []
+    """Hard-coded list of stream names to skip when discovering the catalog."""
 
     _tap_connector: SQLConnector | None = None
 
@@ -691,7 +704,9 @@ class SQLTap(Tap):
         connector = self.tap_connector
 
         result: dict[str, list[dict]] = {"streams": []}
-        result["streams"].extend(connector.discover_catalog_entries())
+        result["streams"].extend(
+            connector.discover_catalog_entries(exclude_schemas=self.exclude_schemas),
+        )
 
         self._catalog_dict = result
         return self._catalog_dict

@@ -88,7 +88,7 @@ class InlineMapper(PluginBase, SingerReader, SingerWriter, metaclass=abc.ABCMeta
         """
         ...
 
-    def map_batch_message(  # noqa: PLR6301
+    def map_batch_message(
         self,
         message_dict: dict,
     ) -> t.Iterable[singer.Message]:

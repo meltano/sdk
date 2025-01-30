@@ -13,10 +13,12 @@ from datetime import datetime
 from functools import lru_cache
 
 import sqlalchemy as sa
+from sqlalchemy.engine import reflection
 
 from singer_sdk import typing as th
 from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._util import dump_json, load_json
 from singer_sdk.helpers.capabilities import TargetLoadMethods
 
@@ -238,6 +240,10 @@ class JSONSchemaToSQL:
     This class provides a mapping from JSON Schema types to SQLAlchemy types.
 
     .. versionadded:: 0.42.0
+    .. versionchanged:: 0.44.0
+       Added the
+       :meth:`singer_sdk.connectors.sql.JSONSchemaToSQL.register_sql_datatype_handler`
+       method to map custom ``x-sql-datatype`` annotations into SQLAlchemy types.
     """
 
     def __init__(self, *, max_varchar_length: int | None = None) -> None:
@@ -273,6 +279,8 @@ class JSONSchemaToSQL:
             "ipv4": lambda _: sa.types.VARCHAR(15),
             "ipv6": lambda _: sa.types.VARCHAR(45),
         }
+
+        self._sql_datatype_mapping: dict[str, JSONtoSQLHandler] = {}
 
         self._fallback_type: type[sa.types.TypeEngine] = sa.types.VARCHAR
 
@@ -365,6 +373,25 @@ class JSONSchemaToSQL:
         """  # noqa: E501
         self._format_handlers[format_name] = handler
 
+    def register_sql_datatype_handler(
+        self,
+        sql_datatype: str,
+        handler: JSONtoSQLHandler,
+    ) -> None:
+        """Register a custom ``x-sql-datatype`` handler.
+
+        Args:
+            sql_datatype: The x-sql-datatype string.
+            handler: Either a SQLAlchemy type class or a callable that takes a schema
+                    dict and returns a SQLAlchemy type instance.
+
+        Example:
+            >>> from sqlalchemy.types import SMALLINT
+            >>> to_sql = JSONSchemaToSQL()
+            >>> to_sql.register_sql_datatype_handler("smallint", SMALLINT)
+        """
+        self._sql_datatype_mapping[sql_datatype] = handler
+
     def handle_multiple_types(self, types: t.Sequence[str]) -> sa.types.TypeEngine:  # noqa: ARG002, PLR6301
         """Handle multiple types by returning a VARCHAR.
 
@@ -401,10 +428,20 @@ class JSONSchemaToSQL:
         Returns:
             SQL type if one can be determined, None otherwise.
         """
-        # Check if this is a string with format first
-        if schema.get("type") == "string" and "format" in schema:
-            format_type = self._handle_format(schema)
-            if format_type is not None:
+        # Check x-sql-datatype first
+        if x_sql_datatype := schema.get("x-sql-datatype"):
+            if handler := self._sql_datatype_mapping.get(x_sql_datatype):
+                return self._invoke_handler(handler, schema)
+
+            warnings.warn(
+                f"This target does not support the x-sql-datatype '{x_sql_datatype}'",
+                UserWarning,
+                stacklevel=2,
+            )
+
+        # Check if this is a string with format then
+        if schema.get("type") == "string" and "format" in schema:  # noqa: SIM102
+            if (format_type := self._handle_format(schema)) is not None:
                 return format_type
 
         # Then check regular types
@@ -840,6 +877,10 @@ class SQLConnector:  # noqa: PLR0904
                 pool_pre_ping=True,
             )
 
+    @deprecated(
+        "This method is deprecated. Use or override `FullyQualifiedName` instead.",
+        category=SingerSDKDeprecationWarning,
+    )
     def quote(self, name: str) -> str:
         """Quote a name if it needs quoting, using '.' as a name-part delimiter.
 
@@ -853,7 +894,7 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             str: The quoted name.
         """
-        return ".".join(
+        return ".".join(  # pragma: no cover
             [
                 self._dialect.identifier_preparer.quote(name_part)
                 for name_part in name.split(".")
@@ -884,7 +925,12 @@ class SQLConnector:  # noqa: PLR0904
         """
         return inspected.get_schema_names()
 
-    def get_object_names(
+    @deprecated(
+        "This method is deprecated.",
+        category=SingerSDKDeprecationWarning,
+        stacklevel=1,
+    )
+    def get_object_names(  # pragma: no cover
         self,
         engine: Engine,  # noqa: ARG002
         inspected: Inspector,
@@ -914,10 +960,14 @@ class SQLConnector:  # noqa: PLR0904
     def discover_catalog_entry(
         self,
         engine: Engine,  # noqa: ARG002
-        inspected: Inspector,
-        schema_name: str,
+        inspected: Inspector,  # noqa: ARG002
+        schema_name: str | None,
         table_name: str,
         is_view: bool,  # noqa: FBT001
+        *,
+        reflected_columns: list[reflection.ReflectedColumn] | None = None,
+        reflected_pk: reflection.ReflectedPrimaryKeyConstraint | None = None,
+        reflected_indices: list[reflection.ReflectedIndex] | None = None,
     ) -> CatalogEntry:
         """Create `CatalogEntry` object for the given table or a view.
 
@@ -927,44 +977,48 @@ class SQLConnector:  # noqa: PLR0904
             schema_name: Schema name to inspect
             table_name: Name of the table or a view
             is_view: Flag whether this object is a view, returned by `get_object_names`
+            reflect_indices: Whether to reflect indices
+            reflected_columns: List of reflected columns
+            reflected_pk: Reflected primary key
+            reflected_indices: List of reflected indices
 
         Returns:
             `CatalogEntry` object for the given table or a view
         """
         # Initialize unique stream name
-        unique_stream_id = f"{schema_name}-{table_name}"
+        unique_stream_id = f"{schema_name}-{table_name}" if schema_name else table_name
+
+        # Backwards-compatibility
+        reflected_columns = reflected_columns or []
+        reflected_indices = reflected_indices or []
 
         # Detect key properties
         possible_primary_keys: list[list[str]] = []
-        pk_def = inspected.get_pk_constraint(table_name, schema=schema_name)
-        if pk_def and "constrained_columns" in pk_def:  # type: ignore[redundant-expr]
-            possible_primary_keys.append(pk_def["constrained_columns"])
+        if reflected_pk and "constrained_columns" in reflected_pk:
+            possible_primary_keys.append(reflected_pk["constrained_columns"])
 
         # An element of the columns list is ``None`` if it's an expression and is
         # returned in the ``expressions`` list of the reflected index.
         possible_primary_keys.extend(
             index_def["column_names"]  # type: ignore[misc]
-            for index_def in inspected.get_indexes(table_name, schema=schema_name)
+            for index_def in reflected_indices
             if index_def.get("unique", False)
         )
 
-        key_properties = next(iter(possible_primary_keys), None)
+        key_properties = next(iter(possible_primary_keys), [])
 
         # Initialize columns list
-        table_schema = th.PropertiesList()
-        for column_def in inspected.get_columns(table_name, schema=schema_name):
-            column_name = column_def["name"]
-            is_nullable = column_def.get("nullable", False)
-            jsonschema_type: dict = self.to_jsonschema_type(column_def["type"])
-            table_schema.append(
-                th.Property(
-                    name=column_name,
-                    wrapped=th.CustomType(jsonschema_type),
-                    nullable=is_nullable,
-                    required=column_name in key_properties if key_properties else False,
-                ),
+        properties = [
+            th.Property(
+                name=column["name"],
+                wrapped=th.CustomType(self.to_jsonschema_type(column["type"])),
+                nullable=column.get("nullable", False),
+                required=column["name"] in key_properties,
+                description=column.get("comment"),
             )
-        schema = table_schema.to_dict()
+            for column in reflected_columns
+        ]
+        schema = th.PropertiesList(*properties).to_dict()
 
         # Initialize available replication methods
         addl_replication_methods: list[str] = [""]  # By default an empty list.
@@ -997,8 +1051,18 @@ class SQLConnector:  # noqa: PLR0904
             replication_key=None,  # Must be defined by user
         )
 
-    def discover_catalog_entries(self) -> list[dict]:
+    def discover_catalog_entries(
+        self,
+        *,
+        exclude_schemas: t.Sequence[str] = (),
+        reflect_indices: bool = True,
+    ) -> list[dict]:
         """Return a list of catalog entries from discovery.
+
+        Args:
+            exclude_schemas: A list of schema names to exclude from discovery.
+            reflect_indices: Whether to reflect indices to detect potential primary
+                keys.
 
         Returns:
             The discovered catalog entries as a list.
@@ -1006,21 +1070,40 @@ class SQLConnector:  # noqa: PLR0904
         result: list[dict] = []
         engine = self._engine
         inspected = sa.inspect(engine)
+        object_kinds = (
+            (reflection.ObjectKind.TABLE, False),
+            (reflection.ObjectKind.ANY_VIEW, True),
+        )
         for schema_name in self.get_schema_names(engine, inspected):
-            # Iterate through each table and view
-            for table_name, is_view in self.get_object_names(
-                engine,
-                inspected,
-                schema_name,
-            ):
-                catalog_entry = self.discover_catalog_entry(
-                    engine,
-                    inspected,
-                    schema_name,
-                    table_name,
-                    is_view,
+            if schema_name in exclude_schemas:
+                continue
+
+            primary_keys = inspected.get_multi_pk_constraint(schema=schema_name)
+
+            if reflect_indices:
+                indices = inspected.get_multi_indexes(schema=schema_name)
+            else:
+                indices = {}
+
+            for object_kind, is_view in object_kinds:
+                columns = inspected.get_multi_columns(
+                    schema=schema_name,
+                    kind=object_kind,
                 )
-                result.append(catalog_entry.to_dict())
+
+                result.extend(
+                    self.discover_catalog_entry(
+                        engine,
+                        inspected,
+                        schema_name,
+                        table,
+                        is_view,
+                        reflected_columns=columns[schema, table],
+                        reflected_pk=primary_keys.get((schema, table)),
+                        reflected_indices=indices.get((schema, table), []),
+                    ).to_dict()
+                    for schema, table in columns
+                )
 
         return result
 
@@ -1254,8 +1337,7 @@ class SQLConnector:  # noqa: PLR0904
         Args:
             schema_name: The target schema name.
         """
-        schema_exists = self.schema_exists(schema_name)
-        if not schema_exists:
+        if not self.schema_exists(schema_name):
             self.create_schema(schema_name)
 
     def prepare_table(
@@ -1464,19 +1546,19 @@ class SQLConnector:  # noqa: PLR0904
         ) -> tuple[int, int]:
             # return rank, with higher numbers ranking first
 
-            _len = int(getattr(sql_type, "length", 0) or 0)
+            len_ = int(getattr(sql_type, "length", 0) or 0)
 
-            _pytype = t.cast("type", sql_type.python_type)
-            if issubclass(_pytype, (str, bytes)):
-                return 900, _len
-            if issubclass(_pytype, datetime):
-                return 600, _len
-            if issubclass(_pytype, float):
-                return 400, _len
-            if issubclass(_pytype, int):
-                return 300, _len
+            pytype = t.cast("type", sql_type.python_type)
+            if issubclass(pytype, (str, bytes)):
+                return 900, len_
+            if issubclass(pytype, datetime):
+                return 600, len_
+            if issubclass(pytype, float):
+                return 400, len_
+            if issubclass(pytype, int):
+                return 300, len_
 
-            return 0, _len
+            return 0, len_
 
         return sorted(sql_types, key=_get_type_sort_key, reverse=True)
 

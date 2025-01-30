@@ -5,7 +5,7 @@ from __future__ import annotations
 import decimal
 import typing as t
 
-import requests  # noqa: TCH002
+import requests  # noqa: TC002
 from singer_sdk.streams import {{ cookiecutter.stream_type }}Stream
 
 {%- if cookiecutter.auth_method in ("OAuth2", "JWT") %}

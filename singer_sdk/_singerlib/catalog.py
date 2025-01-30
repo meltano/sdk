@@ -268,8 +268,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
             return md_entry.selected_by_default
 
         logger.debug(
-            "Selection metadata omitted for '%s'. "
-            "Using parent value of selected=%s.",
+            "Selection metadata omitted for '%s'. Using parent value of selected=%s.",
             breadcrumb,
             parent_value,
         )

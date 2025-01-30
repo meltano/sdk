@@ -6,11 +6,11 @@ Build with the [Meltano Target SDK](https://sdk.meltano.com).
 
 <!--
 
-Developer TODO: Update the below as needed to correctly describe the install procedure. For instance, if you do not have a PyPi repo, or if you want users to directly install from your git repo, you can modify this step as appropriate.
+Developer TODO: Update the below as needed to correctly describe the install procedure. For instance, if you do not have a PyPI repo, or if you want users to directly install from your git repo, you can modify this step as appropriate.
 
 ## Installation
 
-Install from PyPi:
+Install from PyPI:
 
 ```bash
 pipx install {{ cookiecutter.target_id }}
@@ -66,8 +66,8 @@ You can easily run `{{ cookiecutter.target_id }}` by itself or in a pipeline usi
 ```bash
 {{ cookiecutter.target_id }} --version
 {{ cookiecutter.target_id }} --help
-# Test using the "Carbon Intensity" sample:
-tap-carbon-intensity | {{ cookiecutter.target_id }} --config /path/to/{{ cookiecutter.target_id }}-config.json
+# Test using the "Smoke Test" tap:
+tap-smoke-test | {{ cookiecutter.target_id }} --config /path/to/{{ cookiecutter.target_id }}-config.json
 ```
 
 ## Developer Resources
@@ -122,8 +122,9 @@ Now you can test and orchestrate using Meltano:
 ```bash
 # Test invocation:
 meltano invoke {{ cookiecutter.target_id }} --version
-# OR run a test `elt` pipeline with the Carbon Intensity sample tap:
-meltano run tap-carbon-intensity {{ cookiecutter.target_id }}
+
+# OR run a test ELT pipeline with the Smoke Test sample tap:
+meltano run tap-smoke-test {{ cookiecutter.target_id }}
 ```
 
 ### SDK Dev Guide
