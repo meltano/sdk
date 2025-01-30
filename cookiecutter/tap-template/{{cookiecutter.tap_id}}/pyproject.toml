@@ -1,4 +1,4 @@
-[tool.poetry]
+[project]
 {%- if cookiecutter.variant != "None (Skip)" %}
 name = "{{cookiecutter.variant}}-{{cookiecutter.tap_id}}"
 {%- else %}
@@ -7,13 +7,14 @@ name = "{{cookiecutter.tap_id}}"
 version = "0.0.1"
 description = "Singer tap for {{cookiecutter.source_name}}, built with the Meltano Singer SDK."
 readme = "README.md"
-authors = ["{{ cookiecutter.admin_name }} <{{ cookiecutter.admin_email }}>"]
+authors = [{ name = "{{ cookiecutter.admin_name }}", email = "{{ cookiecutter.admin_email }}" }]
 keywords = [
     "ELT",
     "{{cookiecutter.source_name}}",
 ]
 classifiers = [
     "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -22,6 +23,11 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 license = "Apache-2.0"
+license-files = [ "LICENSE" ]
+requires-python = ">=3.9"
+dynamic = ["dependencies"]
+
+[tool.poetry]
 {%- if cookiecutter.variant != "None (Skip)" %}
 packages = [
     { include = "{{cookiecutter.library_name}}" },
@@ -29,8 +35,7 @@ packages = [
 {%- endif %}
 
 [tool.poetry.dependencies]
-python = ">=3.9"
-singer-sdk = { version="~=0.42.1", extras = [
+singer-sdk = { version="~=0.44.1", extras = [
     {%- if cookiecutter.auth_method == "JWT" -%}"jwt", {% endif -%}
     {%- if cookiecutter.faker_extra -%}"faker",{%- endif -%}
 ] }
@@ -38,20 +43,25 @@ fs-s3fs = { version = "~=1.1.1", optional = true }
 {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
 requests = "~=2.32.3"
 {%- endif %}
+{%- if cookiecutter.stream_type == "SQL" %}
+sqlalchemy = "~=2.0.36"
+{%- endif %}
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8"
 {%- if cookiecutter.auth_method == "JWT" %}
-singer-sdk = { version="~=0.42.1", extras = ["jwt", "testing"] }
+singer-sdk = { version="~=0.44.1", extras = ["jwt", "testing"] }
 {%- else %}
-singer-sdk = { version="~=0.42.1", extras = ["testing"] }
+singer-sdk = { version="~=0.44.1", extras = ["testing"] }
 {%- endif %}
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
 
 [tool.pytest.ini_options]
-addopts = '--durations=10'
+addopts = [
+    "--durations=10",
+]
 
 [tool.mypy]
 python_version = "3.12"
@@ -67,10 +77,7 @@ target-version = "py39"
 
 [tool.ruff.lint]
 ignore = [
-    "ANN101",  # missing-type-self
-    "ANN102",  # missing-type-cls
     "COM812",  # missing-trailing-comma
-    "ISC001",  # single-line-implicit-string-concatenation
 ]
 select = ["ALL"]
 
@@ -81,7 +88,7 @@ allow-star-arg-any = true
 convention = "google"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2,<3"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]

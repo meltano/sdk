@@ -56,3 +56,56 @@ class MyConnector(SQLConnector):
         to_sql.register_format_handler("uri", URI)
         return to_sql
 ```
+
+### Use the `x-sql-datatype` JSON Schema extension
+
+You can register new type handlers for the `x-sql-datatype` extension:
+
+```python
+from my_sqlalchemy_dialect import URI
+
+
+class MyConnector(SQLConnector):
+    @functools.cached_property
+    def jsonschema_to_sql(self):
+        to_sql = JSONSchemaToSQL()
+        to_sql.register_sql_datatype_handler("smallint", sa.types.SMALLINT)
+        return to_sql
+```
+
+Then you can annotate the tap' catalog to specify the SQL type:
+
+````{tab} meltano.yml
+```yaml
+# https://docs.meltano.com/concepts/plugins/#schema-extra
+plugins:
+  extractors:
+  - name: tap-example
+    schema:
+      addresses:
+        number:
+          x-sql-datatype: smallint
+```
+````
+
+````{tab} JSON catalog
+```json
+{
+  "streams": [
+    {
+      "stream": "addresses",
+      "tap_stream_id": "addresses",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "x-sql-datatype": "smallint"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+````

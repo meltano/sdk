@@ -230,11 +230,12 @@ can be referenced directly by mapping expressions.
 
 The following functions and namespaces are available for use in mapping expressions:
 
-| Function                                     | Description                                                                                                                                                                                                                                                            |
-| :------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`md5()`](inv:python:py:module:#hashlib)     | Returns an inline MD5 hash of any string, outputting the string representation of the hash's hex digest. This is defined by the SDK internally with native python: [`hashlib.md5(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest). |
-| [`datetime`](inv:python:py:module:#datetime) | This is the datetime module object from the Python standard library. You can access [`datetime.datetime`](inv:python:py:class:#datetime.datetime), [`datetime.timedelta`](inv:python:py:class:#datetime.timedelta), etc.                                               |
-| [`json`](inv:python:py:module:#json)         | This is the json module object from the Python standard library. Primarily used for calling [`json.dumps()`](inv:python:py:function:#json.dumps) and [`json.loads()`](inv:python:py:function:#json.loads).                                                             |
+| Function                                             | Description                                                                                                                                                                                                                                                                  |
+| :--------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`md5()`](inv:python:py:function:#hashlib.md5)       | Returns an inline MD5 hash of any string, outputting the string representation of the hash's hex digest. This is defined by the SDK internally with native python: [`hashlib.md5(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest).       |
+| [`sha256()`](inv:python:py:function:#hashlib.sha256) | Returns an inline SHA256 hash of any string, outputting the string representation of the hash's hex digest. This is defined by the SDK internally with native python: [`hashlib.sha256(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest). |
+| [`datetime`](inv:python:py:module:#datetime)         | This is the datetime module object from the Python standard library. You can access [`datetime.datetime`](inv:python:py:class:#datetime.datetime), [`datetime.timedelta`](inv:python:py:class:#datetime.timedelta), etc.                                                     |
+| [`json`](inv:python:py:module:#json)                 | This is the json module object from the Python standard library. Primarily used for calling [`json.dumps()`](inv:python:py:function:#json.dumps) and [`json.loads()`](inv:python:py:function:#json.loads).                                                                   |
 
 #### Built-in Variable Names
 
@@ -778,3 +779,31 @@ the `key_properties` in an extract-load pipeline. For instance, it is common to 
 "append-only" loading behavior in certain targets, as may be required for historical reporting. This does not change the
 underlying nature of the `primary_key` configuration in the upstream source data, only how it will be landed or deduped
 in the downstream source.
+
+
+### Q: How do I use Meltano environment variables to configure stream maps?
+
+**Answer:** Environment variables in Meltano can be used to configure stream maps, but you first need to add the corresponding settings
+to your plugins `settings` option. For example:
+
+```yaml
+plugins:
+  extractors:
+  - name: tap-csv
+    variant: meltanolabs
+    pip_url: git+https://github.com/MeltanoLabs/tap-csv.git
+    settings:
+    - name: stream_maps.customers.email
+    - name: stream_maps.customers.email_domain
+    - name: stream_maps.customers.email_hash
+    - name: stream_maps.customers.__else__
+    - name: stream_maps.stream_map_config
+```
+
+Then, you can set the following environment variables:
+
+```shell
+TAP_CSV_STREAM_MAPS_CUSTOMERS_EMAIL_DOMAIN='email.split("@")[-1]'
+TAP_CSV_STREAM_MAPS_CUSTOMERS_EMAIL_HASH='md5(config["hash_seed"] + email)'
+TAP_CSV_STREAM_MAP_CONFIG_HASH_SEED='01AWZh7A6DzGm6iJZZ2T'
+```

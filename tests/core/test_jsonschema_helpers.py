@@ -495,12 +495,14 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                 IntegerType,
                 allowed_values=[1, 2, 3, 4, 5, 6, 7, 8, 9],
                 examples=[1, 2, 3],
+                deprecated=True,
             ),
             {
                 "my_prop9": {
                     "type": ["integer", "null"],
                     "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9],
                     "examples": [1, 2, 3],
+                    "deprecated": True,
                 },
             },
             {is_integer_type},
@@ -606,13 +608,13 @@ def test_property_creation(
         property_name = next(iter(property_dict.keys()))
         property_node = property_dict[property_name]
         if check_fn in type_fn_checks_true:
-            assert (
-                check_fn(property_node) is True
-            ), f"{check_fn.__name__} was not True for {property_dict!r}"
+            assert check_fn(property_node) is True, (
+                f"{check_fn.__name__} was not True for {property_dict!r}"
+            )
         else:
-            assert (
-                check_fn(property_node) is False
-            ), f"{check_fn.__name__} was not False for {property_dict!r}"
+            assert check_fn(property_node) is False, (
+                f"{check_fn.__name__} was not False for {property_dict!r}"
+            )
 
 
 def test_wrapped_type_dict():
