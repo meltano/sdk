@@ -287,4 +287,4 @@ def api_changes(session: nox.Session) -> None:
     if "GITHUB_ACTIONS" in os.environ:
         args.append("-f=github")
 
-    session.run(*args, external=True)
+    session.run("uv", "tool", "run", *args, external=True)
