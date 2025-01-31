@@ -14,6 +14,7 @@ concurrency:
 
 env:
   FORCE_COLOR: 1
+  UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
   UV_VERSION: 0.5.26
 
 permissions:  # added using https://github.com/step-security/secure-repo
@@ -41,8 +42,6 @@ jobs:
         version: ${{ env.UV_VERSION }}
 
     - name: Install tools
-      env:
-        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
       run: |
         uv tool install griffe
         uv tool install nox
