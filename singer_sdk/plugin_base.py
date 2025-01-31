@@ -257,7 +257,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
         """Get capabilities.
 
-        Developers may override this property in oder to add or remove
+        Developers may override this property in order to add or remove
         advertised capabilities for this plugin.
 
         Returns:

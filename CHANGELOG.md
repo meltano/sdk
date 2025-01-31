@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#2482](https://github.com/meltano/sdk/issues/2482) Allow SQL tap developers to auto-skip certain schemas from discovery
 - [#2784](https://github.com/meltano/sdk/issues/2784) Added a new built-in setting `activate_version` for targets to optionally disable processing of `ACTIVATE_VERSION` messages
 - [#2780](https://github.com/meltano/sdk/issues/2780) Numeric values are now parsed as `decimal.Decimal` in REST and GraphQL stream responses
-- [#2775](https://github.com/meltano/sdk/issues/2775) Log a stream's bookmark (if it's avaiable) when its sync starts
+- [#2775](https://github.com/meltano/sdk/issues/2775) Log a stream's bookmark (if it's available) when its sync starts
 - [#2703](https://github.com/meltano/sdk/issues/2703) Targets now emit record count from the built-in batch file processor
 - [#2774](https://github.com/meltano/sdk/issues/2774) Accept a `maxLength` limit for VARCHARs
 - [#2769](https://github.com/meltano/sdk/issues/2769) Add `versioning-strategy` to dependabot config of Cookiecutter templates
@@ -210,7 +210,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### ✨ New
 
 - [#2432](https://github.com/meltano/sdk/issues/2432) Developers can now customize the default logging configuration for their taps/targets by adding `default_logging.yml` to their package
-- [#2531](https://github.com/meltano/sdk/issues/2531) The `json` module is now avaiable to stream maps -- _**Thanks @grigi!**_
+- [#2531](https://github.com/meltano/sdk/issues/2531) The `json` module is now available to stream maps -- _**Thanks @grigi!**_
 - [#2529](https://github.com/meltano/sdk/issues/2529) Stream sync context is now available to all instances methods as a `Stream.context` attribute
 
 ### 🐛 Fixes
@@ -330,7 +330,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 📚 Documentation Improvements
 
 - [#2239](https://github.com/meltano/sdk/issues/2239) Linked reference docs to source code
-- [#2231](https://github.com/meltano/sdk/issues/2231) Added an example implemetation of JSON schema validation that uses `fastjsonschema`
+- [#2231](https://github.com/meltano/sdk/issues/2231) Added an example implementation of JSON schema validation that uses `fastjsonschema`
 - [#2219](https://github.com/meltano/sdk/issues/2219) Added reference docs for tap & target testing helpers
 
 ## v0.35.0 (2024-02-02)
@@ -748,7 +748,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ New
 
-- [#1262](https://github.com/meltano/sdk/issues/1262) Support string `"__NULL__"` whereever null values are allowed in stream maps configuration
+- [#1262](https://github.com/meltano/sdk/issues/1262) Support string `"__NULL__"` wherever null values are allowed in stream maps configuration
 
 ### 🐛 Fixes
 
@@ -1286,7 +1286,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changes
 
-- Target SDK: Improved performance for Batch Sinks by skipping extra drain operations when newly recieved STATE messages are unchanged from the prior received STATE (#172, !125) -- _Thanks, **[Pat Nadolny](https://gitlab.com/pnadolny13)**!_
+- Target SDK: Improved performance for Batch Sinks by skipping extra drain operations when newly received STATE messages are unchanged from the prior received STATE (#172, !125) -- _Thanks, **[Pat Nadolny](https://gitlab.com/pnadolny13)**!_
 
 ### Fixes
 
