@@ -8,8 +8,8 @@ on:
       - "singer_sdk/**"
       - "tests/**"
       - "noxfile.py"
-      - "poetry.lock"
       - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/test.yml"
       - ".github/workflows/resources/requirements.txt"
   push:
@@ -21,8 +21,8 @@ on:
       - "singer_sdk/**"
       - "tests/**"
       - "noxfile.py"
-      - "poetry.lock"
       - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/test.yml"
       - ".github/workflows/resources/requirements.txt"
   workflow_dispatch:

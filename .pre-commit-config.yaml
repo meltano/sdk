@@ -2,6 +2,8 @@ ci:
   autofix_prs: true
   autoupdate_schedule: weekly
   autoupdate_commit_msg: 'chore: pre-commit autoupdate'
+  skip:
+  - uv-lock
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -58,7 +60,8 @@ repos:
         cookiecutter/.*
       )$
 
-- repo: https://github.com/python-poetry/poetry
-  rev: 2.0.1
+- repo: https://github.com/astral-sh/uv-pre-commit
+  rev: 0.5.26
   hooks:
-  - id: poetry-check
+  - id: uv-lock
+  - id: uv-sync
