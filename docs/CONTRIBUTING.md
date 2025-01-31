@@ -16,7 +16,7 @@ Contributors are expected to follow our [Code of Conduct](https://docs.meltano.c
 
 Make sure [`uv`](https://docs.astral.sh/uv/),
 [`pre-commit`](https://pre-commit.com/) and [`nox`](https://nox.thea.codes/en/stable/)
-are installed. Once you have installed `uv`, you can it to install other tools:
+are installed. Once you have installed `uv`, you can use it to install other tools:
 
 ```bash
 uv tool install pre-commit
