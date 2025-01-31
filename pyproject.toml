@@ -307,6 +307,7 @@ extend-exclude = [
     "cookiecutter/*",
 ]
 line-length = 88
+required-version = ">=0.9"
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -316,7 +317,6 @@ explicit-preview-rules = false
 ignore = [
     "N818",    # Exception name should be named with an Error suffix
     "COM812",  # missing-trailing-comma
-    "ISC001",  # single-line-implicit-string-concatenation
 ]
 preview = true
 select = [
