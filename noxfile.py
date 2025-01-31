@@ -234,7 +234,6 @@ def test_cookiecutter(session: nox.Session, replay_file_path: Path) -> None:
 
     # Use the local singer-sdk
     session.run("uv", "add", f"singer-sdk @ {sdk_dir}", external=True)
-    session.run("cat", "pyproject.toml")
 
     # Check that the project can be installed for development
     session.run("uv", "lock", external=True)
