@@ -10,8 +10,8 @@ on:
     - .github/workflows/test.yml
     - {{ cookiecutter.library_name }}/**
     - tests/**
-    - poetry.lock
     - pyproject.toml
+    - uv.lock
     - tox.ini
   pull_request:
     branches: [main]
@@ -19,8 +19,8 @@ on:
     - .github/workflows/test.yml
     - {{ cookiecutter.library_name }}/**
     - tests/**
-    - poetry.lock
     - pyproject.toml
+    - uv.lock
     - tox.ini
   workflow_dispatch:
 

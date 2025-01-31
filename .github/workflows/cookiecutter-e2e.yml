@@ -33,14 +33,7 @@ jobs:
 
     - uses: astral-sh/setup-uv@v5
       with:
-        version: ">=0.4.30"
-
-    - name: Install Poetry
-      env:
-        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
-      run: |
-        uv tool install poetry
-        poetry --version
+        version: ">=0.5.19"
 
     - uses: actions/setup-python@v5
       with:
@@ -52,6 +45,13 @@ jobs:
       run: |
         uv tool install --with=pre-commit-uv pre-commit
         pre-commit --version
+
+    - name: Install twine
+      env:
+        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
+      run: |
+        uv tool install twine
+        twine --version
 
     - name: Install Nox
       env:
