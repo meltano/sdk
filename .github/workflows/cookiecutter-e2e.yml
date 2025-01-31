@@ -4,6 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
+    - noxfile.py
     - "cookiecutter/**"
     - "e2e-tests/cookiecutters/**"
     - ".github/workflows/cookiecutter-e2e.yml"
@@ -12,6 +13,7 @@ on:
     - main
     - v*
     paths:
+    - noxfile.py
     - "cookiecutter/**"
     - "e2e-tests/cookiecutters/**"
     - ".github/workflows/cookiecutter-e2e.yml"
@@ -39,20 +41,6 @@ jobs:
       with:
         python-version: 3.x
 
-    - name: Install pre-commit
-      env:
-        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
-      run: |
-        uv tool install --with=pre-commit-uv pre-commit
-        pre-commit --version
-
-    - name: Install twine
-      env:
-        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
-      run: |
-        uv tool install twine
-        twine --version
-
     - name: Install Nox
       env:
         UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
@@ -61,6 +49,8 @@ jobs:
         nox --version
 
     - name: Run Nox
+      env:
+        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
       run: |
         nox --session=test_cookiecutter
 

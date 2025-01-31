@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 import shutil
 import sys
-import tempfile
 from pathlib import Path
 
 import nox
@@ -32,13 +31,13 @@ python_versions = [
 ]
 main_python_version = "3.13"
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
-nox.options.sessions = (
+nox.options.sessions = [
     "mypy",
     "tests",
     "benches",
     "doctest",
     "test_cookiecutter",
-)
+]
 
 dependency_groups = nox.project.load_toml("pyproject.toml")["dependency-groups"]
 test_dependencies: list[str] = dependency_groups["dev"]
@@ -187,14 +186,14 @@ def docs_serve(session: nox.Session) -> None:
 
 @nox.parametrize("replay_file_path", COOKIECUTTER_REPLAY_FILES)
 @nox.session(python=main_python_version)
-def test_cookiecutter(session: nox.Session, replay_file_path: str) -> None:
+def test_cookiecutter(session: nox.Session, replay_file_path: Path) -> None:
     """Uses the tap template to build an empty cookiecutter.
 
     Runs the lint task on the created test project.
     """
-    cc_build_path = Path(tempfile.gettempdir())
+    cc_build_path = Path(session.create_tmp())
     folder_base_path = Path("./cookiecutter")
-    replay_file = Path(replay_file_path).resolve()
+    replay_file = replay_file_path.resolve()
 
     if replay_file.name.startswith("tap"):
         folder = "tap-template"
@@ -202,7 +201,7 @@ def test_cookiecutter(session: nox.Session, replay_file_path: str) -> None:
         folder = "target-template"
     else:
         folder = "mapper-template"
-    template = folder_base_path.joinpath(folder).resolve()
+    template = folder_base_path.joinpath(folder)
 
     if not template.exists():
         return
@@ -210,17 +209,19 @@ def test_cookiecutter(session: nox.Session, replay_file_path: str) -> None:
     if not replay_file.is_file():
         return
 
-    sdk_dir = template.parent.parent
+    sdk_dir = template.parent.parent.resolve()
     cc_output_dir = replay_file.name.replace(".json", "")
     cc_test_output = cc_build_path.joinpath(cc_output_dir)
 
     if cc_test_output.exists():
         session.run("rm", "-fr", str(cc_test_output), external=True)
 
-    session.install(".")
-    session.install("cookiecutter", "pythonsed")
-
+    # TODO: Use uvx
+    # https://github.com/wntrblm/nox/pull/920
     session.run(
+        "uv",
+        "tool",
+        "run",
         "cookiecutter",
         "--replay-file",
         str(replay_file),
@@ -233,26 +234,20 @@ def test_cookiecutter(session: nox.Session, replay_file_path: str) -> None:
     with Path("ruff.toml").open("w", encoding="utf-8") as ruff_toml:
         ruff_toml.write(RUFF_OVERRIDES)
 
-    session.run(
-        "pythonsed",
-        "-i.bak",
-        's|singer-sdk =.*|singer-sdk = \\{ path = "'
-        + str(sdk_dir)
-        + '", develop = true \\}|',
-        "pyproject.toml",
-    )
+    # Use the local singer-sdk
+    session.run("uv", "add", f"singer-sdk @ {sdk_dir}")
 
     # Check that the project can be installed for development
-    session.run("uv", "lock", external=True)
-    session.run("uv", "sync", external=True)
+    session.run("uv", "lock")
+    session.run("uv", "sync")
 
     # Check that the project can be built for distribution
-    session.run("uv", "build", external=True)
-    session.run("twine", "check", "dist/*", external=True)
+    session.run("uv", "build")
+    session.run("uv", "tool", "run", "twine", "check", "dist/*")
 
     session.run("git", "init", "-b", "main", external=True)
     session.run("git", "add", ".", external=True)
-    session.run("pre-commit", "run", "--all-files", external=True)
+    session.run("uv", "tool", "run", "pre-commit", "run", "--all-files", external=True)
 
 
 @nox.session(name="version-bump")
