@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.44.2 (2025-01-31)
+
+### 🐛 Fixes
+
+- [#2862](https://github.com/meltano/sdk/issues/2862) Include package license metadata conditionally in templates -- _**Thanks @ReubenFrankel!**_
+- [#2859](https://github.com/meltano/sdk/issues/2859) Use uv in tap, target and mapper templates
+
+### 📚 Documentation Improvements
+
+- [#2861](https://github.com/meltano/sdk/issues/2861) Document plugin development with uv and how to migrate existing ones
+
+### 📦 Packaging changes
+
+- [#2856](https://github.com/meltano/sdk/issues/2856) Remove some upper Python version constraints from dependencies
+- [#2854](https://github.com/meltano/sdk/issues/2854) Use PEP 639
+- [#2852](https://github.com/meltano/sdk/issues/2852) Remove `urllib3` constraint
+- [#2851](https://github.com/meltano/sdk/issues/2851) Use uv to manage this project
+
 ## v0.44.1 (2025-01-29)
 
 ### 🐛 Fixes
