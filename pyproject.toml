@@ -54,8 +54,6 @@ dependencies = [
     "simplejson>=3.17.6",
     "sqlalchemy>=1.4,<3.0",
     "typing-extensions>=4.5.0",
-    'urllib3<2; python_version<"3.10"',
-    'urllib3; python_version>="3.10"',
 ]
 
 [project.optional-dependencies]
