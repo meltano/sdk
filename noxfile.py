@@ -6,7 +6,6 @@ import os
 import shutil
 import sys
 import tempfile
-import typing as t
 from pathlib import Path
 
 import nox
@@ -41,9 +40,9 @@ nox.options.sessions = (
     "test_cookiecutter",
 )
 
-poetry_config = nox.project.load_toml("pyproject.toml")["tool"]["poetry"]
-test_dependencies: dict[str, t.Any] = poetry_config["group"]["dev"]["dependencies"]
-typing_dependencies = poetry_config["group"]["typing"]["dependencies"].keys()
+dependency_groups = nox.project.load_toml("pyproject.toml")["dependency-groups"]
+test_dependencies: list[str] = dependency_groups["dev"]
+typing_dependencies: list[str] = dependency_groups["typing"]
 
 
 @nox.session(python=main_python_version)
