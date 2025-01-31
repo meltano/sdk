@@ -31,13 +31,13 @@ python_versions = [
 ]
 main_python_version = "3.13"
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
-nox.options.sessions = (
+nox.options.sessions = [
     "mypy",
     "tests",
     "benches",
     "doctest",
     "test_cookiecutter",
-)
+]
 
 dependency_groups = nox.project.load_toml("pyproject.toml")["dependency-groups"]
 test_dependencies: list[str] = dependency_groups["dev"]
@@ -216,6 +216,8 @@ def test_cookiecutter(session: nox.Session, replay_file_path: Path) -> None:
     if cc_test_output.exists():
         session.run("rm", "-fr", str(cc_test_output), external=True)
 
+    # TODO: Use uvx
+    # https://github.com/wntrblm/nox/pull/920
     session.run(
         "uv",
         "tool",
