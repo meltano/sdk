@@ -2289,8 +2289,6 @@ dependencies = [
     { name = "simplejson" },
     { name = "sqlalchemy" },
     { name = "typing-extensions" },
-    { name = "urllib3", version = "1.26.20", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "urllib3", version = "2.3.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
 ]
 
 [package.optional-dependencies]
@@ -2400,8 +2398,6 @@ requires-dist = [
     { name = "sphinx-reredirects", marker = "extra == 'docs'", specifier = ">=0.1.5" },
     { name = "sqlalchemy", specifier = ">=1.4,<3.0" },
     { name = "typing-extensions", specifier = ">=4.5.0" },
-    { name = "urllib3", marker = "python_full_version < '3.10'", specifier = "<2" },
-    { name = "urllib3", marker = "python_full_version >= '3.10'" },
 ]
 
 [package.metadata.requires-dev]
