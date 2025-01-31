@@ -241,8 +241,14 @@ def test_cookiecutter(session: nox.Session, replay_file_path: str) -> None:
         + '", develop = true \\}|',
         "pyproject.toml",
     )
-    session.run("poetry", "lock", external=True)
-    session.run("poetry", "install", external=True)
+
+    # Check that the project can be installed for development
+    session.run("uv", "lock", external=True)
+    session.run("uv", "sync", external=True)
+
+    # Check that the project can be built for distribution
+    session.run("uv", "build", external=True)
+    session.run("twine", "check", "dist/*", external=True)
 
     session.run("git", "init", "-b", "main", external=True)
     session.run("git", "add", ".", external=True)
