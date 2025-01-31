@@ -27,8 +27,8 @@ classifiers = [
 ]
 {%- if cookiecutter.license != "None" %}
 license = "{{cookiecutter.license}}"
-license-files = [ "LICENSE" ]
 {%- endif %}
+license-files = [ "LICENSE" ]
 requires-python = ">=3.9"
 dependencies = [
     {%- if cookiecutter.faker_extra %}
