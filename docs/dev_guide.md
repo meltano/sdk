@@ -39,20 +39,13 @@ for more information on differences between a target's `Sink` class versus a tap
 
 ## Building a New Tap or Target
 
-First, install [cookiecutter](https://cookiecutter.readthedocs.io),
-[Poetry](https://python-poetry.org/docs/), and optionally [Tox](https://tox.wiki/):
+First, install [uv](https://docs.astral.sh/uv/), [cookiecutter](https://cookiecutter.readthedocs.io), and optionally [Tox](https://tox.wiki/):
 
 ```bash
-# Install pipx if you haven't already
-pip install pipx
-pipx ensurepath
-
-# Restart your terminal here, if needed, to get the updated PATH
-pipx install cookiecutter
-pipx install poetry
+uv tool install cookiecutter
 
 # Optional: Install Tox if you want to use it to run auto-formatters, linters, tests, etc.
-pipx install tox
+uv tool install tox
 ```
 
 :::{tip}
@@ -222,7 +215,7 @@ Also using breakpoints is a great way to become familiar with the internals of t
 
 #### VSCode Debugging
 
-Ensure the interpreter you're using in VSCode is set to use poetry.
+Ensure the interpreter you're using in VSCode is set to use the one in the project's virtual environment (usually `.venv` in the project root).
 You can change this by using the command palette to go to interpreter settings.
 Doing this will also help with autocompletion.
 
@@ -274,22 +267,47 @@ We've had success using [`viztracer`](https://github.com/gaogaotiantian/viztrace
 
 You can start doing the same in your package. Start by installing `viztracer`.
 
+````{tab} Poetry
 ```console
 $ poetry add --group dev viztracer
 ```
+````
+
+````{tab} uv
+```console
+$ uv add --group dev viztracer
+```
+````
 
 Then simply run your package's CLI as normal, preceded by the `viztracer` command
 
+````{tab} Poetry
 ```console
 $ poetry run viztracer my-tap
 $ poetry run viztracer -- my-target --config=config.json --input=messages.json
 ```
+````
+
+````{tab} uv
+```console
+$ uv run viztracer my-tap
+$ uv run viztracer -- my-target --config=config.json --input=messages.json
+```
+````
 
 That command will produce a `result.json` file which you can explore with the `vizviewer` tool.
 
+````{tab} Poetry
 ```console
 $ poetry run vizviewer result.json
 ```
+````
+
+````{tab} uv
+```console
+$ uv run vizviewer result.json
+```
+````
 
 The output should look like this
 
