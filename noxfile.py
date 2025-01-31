@@ -216,10 +216,8 @@ def test_cookiecutter(session: nox.Session, replay_file_path: Path) -> None:
     if cc_test_output.exists():
         session.run("rm", "-fr", str(cc_test_output), external=True)
 
-    session.install(".")
-    session.install("cookiecutter")
-
     session.run(
+        "uvx",
         "cookiecutter",
         "--replay-file",
         str(replay_file),
@@ -233,19 +231,19 @@ def test_cookiecutter(session: nox.Session, replay_file_path: Path) -> None:
         ruff_toml.write(RUFF_OVERRIDES)
 
     # Use the local singer-sdk
-    session.run("uv", "add", f"singer-sdk @ {sdk_dir}", external=True)
+    session.run("uv", "add", f"singer-sdk @ {sdk_dir}")
 
     # Check that the project can be installed for development
-    session.run("uv", "lock", external=True)
-    session.run("uv", "sync", external=True)
+    session.run("uv", "lock")
+    session.run("uv", "sync")
 
     # Check that the project can be built for distribution
-    session.run("uv", "build", external=True)
-    session.run("twine", "check", "dist/*", external=True)
+    session.run("uv", "build")
+    session.run("uvx", "twine", "check", "dist/*")
 
     session.run("git", "init", "-b", "main", external=True)
     session.run("git", "add", ".", external=True)
-    session.run("pre-commit", "run", "--all-files", external=True)
+    session.run("uvx", "pre-commit", "run", "--all-files", external=True)
 
 
 @nox.session(name="version-bump")
