@@ -275,7 +275,6 @@ def version_bump(session: nox.Session) -> None:
 def api_changes(session: nox.Session) -> None:
     """Check for API changes."""
     args = [
-        "griffe",
         "check",
         "singer_sdk",
     ]
@@ -286,4 +285,4 @@ def api_changes(session: nox.Session) -> None:
     if "GITHUB_ACTIONS" in os.environ:
         args.append("-f=github")
 
-    session.run("uv", "tool", "run", *args, external=True)
+    session.run("uvx", "griffe", *args, external=True)
