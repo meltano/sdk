@@ -31,14 +31,15 @@ python_versions = [
 ]
 main_python_version = "3.13"
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
-nox.options.sessions = [
+nox.options.sessions = (
     "mypy",
     "tests",
     "benches",
     "doctest",
     "test_cookiecutter",
-]
+)
 
+# TODO: https://github.com/wntrblm/nox/pull/917
 dependency_groups = nox.project.load_toml("pyproject.toml")["dependency-groups"]
 test_dependencies: list[str] = dependency_groups["dev"]
 typing_dependencies: list[str] = dependency_groups["typing"]
@@ -219,9 +220,7 @@ def test_cookiecutter(session: nox.Session, replay_file_path: Path) -> None:
     # TODO: Use uvx
     # https://github.com/wntrblm/nox/pull/920
     session.run(
-        "uv",
-        "tool",
-        "run",
+        "uvx",
         "cookiecutter",
         "--replay-file",
         str(replay_file),
@@ -243,11 +242,11 @@ def test_cookiecutter(session: nox.Session, replay_file_path: Path) -> None:
 
     # Check that the project can be built for distribution
     session.run("uv", "build")
-    session.run("uv", "tool", "run", "twine", "check", "dist/*")
+    session.run("uvx", "twine", "check", "dist/*")
 
     session.run("git", "init", "-b", "main", external=True)
     session.run("git", "add", ".", external=True)
-    session.run("uv", "tool", "run", "pre-commit", "run", "--all-files", external=True)
+    session.run("uvx", "pre-commit", "run", "--all-files", external=True)
 
 
 @nox.session(name="version-bump")
@@ -276,7 +275,6 @@ def version_bump(session: nox.Session) -> None:
 def api_changes(session: nox.Session) -> None:
     """Check for API changes."""
     args = [
-        "griffe",
         "check",
         "singer_sdk",
     ]
@@ -287,4 +285,4 @@ def api_changes(session: nox.Session) -> None:
     if "GITHUB_ACTIONS" in os.environ:
         args.append("-f=github")
 
-    session.run("uv", "tool", "run", *args, external=True)
+    session.run("uvx", "griffe", *args, external=True)
