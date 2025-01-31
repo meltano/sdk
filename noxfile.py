@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 import shutil
 import sys
-import tempfile
 from pathlib import Path
 
 import nox
@@ -187,14 +186,14 @@ def docs_serve(session: nox.Session) -> None:
 
 @nox.parametrize("replay_file_path", COOKIECUTTER_REPLAY_FILES)
 @nox.session(python=main_python_version)
-def test_cookiecutter(session: nox.Session, replay_file_path: str) -> None:
+def test_cookiecutter(session: nox.Session, replay_file_path: Path) -> None:
     """Uses the tap template to build an empty cookiecutter.
 
     Runs the lint task on the created test project.
     """
-    cc_build_path = Path(tempfile.gettempdir())
+    cc_build_path = Path(session.create_tmp())
     folder_base_path = Path("./cookiecutter")
-    replay_file = Path(replay_file_path).resolve()
+    replay_file = replay_file_path.resolve()
 
     if replay_file.name.startswith("tap"):
         folder = "tap-template"
@@ -202,7 +201,7 @@ def test_cookiecutter(session: nox.Session, replay_file_path: str) -> None:
         folder = "target-template"
     else:
         folder = "mapper-template"
-    template = folder_base_path.joinpath(folder).resolve()
+    template = folder_base_path.joinpath(folder)
 
     if not template.exists():
         return
@@ -210,7 +209,7 @@ def test_cookiecutter(session: nox.Session, replay_file_path: str) -> None:
     if not replay_file.is_file():
         return
 
-    sdk_dir = template.parent.parent
+    sdk_dir = template.parent.parent.resolve()
     cc_output_dir = replay_file.name.replace(".json", "")
     cc_test_output = cc_build_path.joinpath(cc_output_dir)
 
@@ -218,7 +217,7 @@ def test_cookiecutter(session: nox.Session, replay_file_path: str) -> None:
         session.run("rm", "-fr", str(cc_test_output), external=True)
 
     session.install(".")
-    session.install("cookiecutter", "pythonsed")
+    session.install("cookiecutter")
 
     session.run(
         "cookiecutter",
@@ -233,14 +232,9 @@ def test_cookiecutter(session: nox.Session, replay_file_path: str) -> None:
     with Path("ruff.toml").open("w", encoding="utf-8") as ruff_toml:
         ruff_toml.write(RUFF_OVERRIDES)
 
-    session.run(
-        "pythonsed",
-        "-i.bak",
-        's|singer-sdk =.*|singer-sdk = \\{ path = "'
-        + str(sdk_dir)
-        + '", develop = true \\}|',
-        "pyproject.toml",
-    )
+    # Use the local singer-sdk
+    session.run("uv", "add", f"singer-sdk @ {sdk_dir}", external=True)
+    session.run("cat", "pyproject.toml")
 
     # Check that the project can be installed for development
     session.run("uv", "lock", external=True)
