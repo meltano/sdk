@@ -5,6 +5,9 @@ ci:
   skip:
   - uv-lock
 
+default_language_version:
+  python: python3.13
+
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v5.0.0
@@ -65,3 +68,8 @@ repos:
   hooks:
   - id: uv-lock
   - id: uv-sync
+
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.4.1
+  hooks:
+  - id: codespell

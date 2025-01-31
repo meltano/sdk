@@ -291,7 +291,7 @@ That command will produce a `result.json` file which you can explore with the `v
 $ poetry run vizviewer result.json
 ```
 
-Thet output should look like this
+The output should look like this
 
 ![SDK Flame Graph](https://gitlab.com/meltano/sdk/uploads/07633ba1217de6eb1bb0e018133c608d/_write_record_message.png)
 

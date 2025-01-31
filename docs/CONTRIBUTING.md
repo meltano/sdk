@@ -161,7 +161,7 @@ Sphinx will automatically generate class stubs, so be sure to `git add` them.
 
 ## Semantic Pull Requests
 
-This repo uses the [semantic-prs](https://github.com/Ezard/semantic-prs) GitHub app to check all PRs againts the conventional commit syntax.
+This repo uses the [semantic-prs](https://github.com/Ezard/semantic-prs) GitHub app to check all PRs against the conventional commit syntax.
 
 Pull requests should be named according to the conventional commit syntax to streamline changelog and release notes management. We encourage (but do not require) the use of conventional commits in commit messages as well.
 

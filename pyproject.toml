@@ -421,3 +421,7 @@ max-args = 9
 
 [tool.uv]
 required-version = ">=0.5.19"
+
+[tool.codespell]
+skip = "*.csv,samples/aapl/*.json,samples/*/schemas/*.json"
+ignore-words-list = "fo,intoto"

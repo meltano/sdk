@@ -444,7 +444,7 @@ def test_jsonpath_graphql_stream_override(tap: Tap):
             {
               "link": [
                 {
-                  "releation": "previous",
+                  "relation": "previous",
                   "url": "https://myapi.test/6"
                 },
                 {
