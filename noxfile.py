@@ -217,7 +217,9 @@ def test_cookiecutter(session: nox.Session, replay_file_path: Path) -> None:
         session.run("rm", "-fr", str(cc_test_output), external=True)
 
     session.run(
-        "uvx",
+        "uv",
+        "tool",
+        "run",
         "cookiecutter",
         "--replay-file",
         str(replay_file),
@@ -239,11 +241,11 @@ def test_cookiecutter(session: nox.Session, replay_file_path: Path) -> None:
 
     # Check that the project can be built for distribution
     session.run("uv", "build")
-    session.run("uvx", "twine", "check", "dist/*")
+    session.run("uv", "tool", "run", "twine", "check", "dist/*")
 
     session.run("git", "init", "-b", "main", external=True)
     session.run("git", "add", ".", external=True)
-    session.run("uvx", "pre-commit", "run", "--all-files", external=True)
+    session.run("uv", "tool", "run", "pre-commit", "run", "--all-files", external=True)
 
 
 @nox.session(name="version-bump")
