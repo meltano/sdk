@@ -27,7 +27,8 @@ classifiers = [
     "Typing :: Typed",
 ]
 readme = "README.md"
-license.file = "LICENSE"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 requires-python = ">=3.9"
 
 dependencies = [
