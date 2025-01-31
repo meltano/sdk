@@ -25,6 +25,7 @@ concurrency:
 
 env:
   FORCE_COLOR: "1"
+  UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
 
 jobs:
   lint:
@@ -44,15 +45,11 @@ jobs:
         python-version: 3.x
 
     - name: Install Nox
-      env:
-        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
       run: |
         uv tool install nox
         nox --version
 
     - name: Run Nox
-      env:
-        UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
       run: |
         nox --session=test_cookiecutter
 
