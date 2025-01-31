@@ -1,0 +1,59 @@
+# Meltano Singer SDK
+
+The [Meltano] Singer SDK for Taps and Targets is the fastest way to build custom data extractors and loaders! Taps and targets built on the SDK are automatically compliant with the [Singer Spec], the de-facto open source standard for extract and load pipelines, and therefore Meltano.
+
+If you're looking to add support to Meltano for a new data tool that would be listed on the [Meltano Hub] as a utility, check out the [Meltano EDK] (Extension Development Kit) instead.
+
+## Future-proof extractors and loaders, with less code
+
+On average, developers tell us that they write about 70% less code by using the SDK, which makes learning the SDK a great investment. Furthermore, as new features and capabilities are added to the SDK, your taps and targets can always take advantage of the latest capabilities and bug fixes, simply by updating your SDK dependency to the latest version.
+
+## Built by Meltano and the Singer Community
+
+The SDK is built with love by the [Meltano] core team and contributors, with contributions from developers across the [Singer] open source community. SDK-based plugins can easily be [integrated with Meltano](https://docs.meltano.com/tutorials/custom-extractor#add-the-plugin-to-your-meltano-project), but they can also be used in any data pipeline tool that supports the [Singer Spec](https://hub.meltano.com/singer/spec).
+
+The SDK project is 100% open source, licensed under the [Apache 2.0](https://en.wikipedia.org/wiki/Apache_License) permissive license. Please visit our code repo [here in GitHub](https://github.com/meltano/sdk), where you can read the [source code](https://github.com/meltano/sdk), [log an issue or feature request](https://github.com/meltano/sdk/-/issues), and [contribute back](https://github.com/meltano/sdk/issues?q=is%3Aopen+is%3Aissue+label%3A%22accepting+merge+requests%22) to the SDK. We also regularly discuss SDK topics in our [Meltano Slack](https://meltano.com/slack) community, within the [#singer-tap-development](https://meltano.slack.com/archives/C01PKLU5D1R) and [#singer-target-development](https://meltano.slack.com/archives/C01RKUVUG4S) Slack channels.
+
+## Developer Resources
+
+- [Developer Guide](dev_guide.md)
+- [Guides](guides/index.md)
+- [Python Tips](python_tips.md)
+- [Code Samples](code_samples.md)
+- [CLI Commands](cli_commands.md)
+- [FAQ](faq.md)
+
+## Reference
+
+- [Reference](reference.md)
+- [Implementation](implementation/index.md)
+- [Typing](typing.md)
+- [Capabilities](capabilities.md)
+
+## Advanced Concepts
+
+- [Incremental Replication](incremental_replication.md)
+- [Parent Streams](parent_streams.md)
+- [Partitioning](partitioning.md)
+- [Context Object](context_object.md)
+- [Stream Maps](stream_maps.md)
+- [Batch](batch.md)
+- [Sinks](sinks.md)
+- [Testing](testing.md)
+
+## SDK Development
+
+- [Contributing](CONTRIBUTING.md)
+- [Release Process](release_process.md)
+- [Deprecation](deprecation.md)
+
+## Index and Search
+
+- [Index](genindex.md)
+- [Search](search.md)
+
+[Meltano]: https://www.meltano.com
+[Meltano EDK]: https://edk.meltano.com
+[Meltano Hub]: https://hub.meltano.com/utilities/
+[Singer]: https://singer.io
+[Singer Spec]: https://hub.meltano.com/singer/spec
