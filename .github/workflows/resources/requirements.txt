@@ -1,4 +1,4 @@
 griffe~=1.5
-nox @ git+https://github.com/wntrblm/nox.git@refs/pull/921/head
+nox==2025.2.9
 pre-commit==4.1.0
 twine==6.1.0

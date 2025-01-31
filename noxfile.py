@@ -9,7 +9,7 @@ from pathlib import Path
 
 import nox
 
-nox.needs_version = ">=2024.4.15"
+nox.needs_version = ">=2025.2.9"
 nox.options.default_venv_backend = "uv"
 
 RUFF_OVERRIDES = """\
@@ -31,16 +31,15 @@ python_versions = [
 ]
 main_python_version = "3.13"
 locations = "singer_sdk", "tests", "noxfile.py", "docs/conf.py"
-nox.options.sessions = (
+nox.options.sessions = [
     "mypy",
     "tests",
     "benches",
     "doctest",
     "test_cookiecutter",
-)
+]
 
-# TODO: https://github.com/wntrblm/nox/pull/917
-dependency_groups = nox.project.load_toml("pyproject.toml")["dependency-groups"]
+dependency_groups = nox.project.load_toml()["dependency-groups"]
 test_dependencies: list[str] = dependency_groups["dev"]
 typing_dependencies: list[str] = dependency_groups["typing"]
 
@@ -275,7 +274,6 @@ def version_bump(session: nox.Session) -> None:
 def api_changes(session: nox.Session) -> None:
     """Check for API changes."""
     args = [
-        "griffe",
         "check",
         "singer_sdk",
     ]
@@ -286,4 +284,4 @@ def api_changes(session: nox.Session) -> None:
     if "GITHUB_ACTIONS" in os.environ:
         args.append("-f=github")
 
-    session.run("uv", "tool", "run", *args, external=True)
+    session.run("uvx", "griffe", *args, external=True)
