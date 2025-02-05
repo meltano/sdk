@@ -32,9 +32,9 @@ license-files = [ "LICENSE" ]
 requires-python = ">=3.9"
 dependencies = [
     {%- if cookiecutter.faker_extra %}
-    "singer-sdk[faker]~=0.44.2",
+    "singer-sdk[faker]~=0.44.3",
     {%- else %}
-    "singer-sdk~=0.44.2",
+    "singer-sdk~=0.44.3",
     {%- endif %}
 ]
 
@@ -50,7 +50,7 @@ s3 = [
 [dependency-groups]
 dev = [
     "pytest>=8",
-    "singer-sdk[testing]~=0.44.2",
+    "singer-sdk[testing]~=0.44.3",
 ]
 
 {%- if cookiecutter.variant != "None (Skip)" %}
