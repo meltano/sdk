@@ -150,7 +150,7 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
                 SingerSDKDeprecationWarning,
                 stacklevel=2,
             )
-            return self.rest_method
+            return self.rest_method  # type: ignore[no-any-return]
 
         return "GET"
 
