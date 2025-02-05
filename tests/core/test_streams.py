@@ -7,6 +7,7 @@ import decimal
 import logging
 import typing as t
 import urllib.parse
+import warnings
 
 import pytest
 import requests
@@ -589,6 +590,10 @@ def test_mutate_http_method(tap: Tap, requests_mock: requests_mock.Mocker):
         context.reason = "Method Not Allowed"
         return {"error": "Check your method"}
 
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert RestTestStream(tap).http_method == "GET"
+
     class PostStream(RestTestStream):
         records_jsonpath = "$.data[*]"
         path = "/endpoint"
@@ -603,10 +608,16 @@ def test_mutate_http_method(tap: Tap, requests_mock: requests_mock.Mocker):
     with pytest.raises(FatalAPIError, match="Method Not Allowed"):
         list(stream.request_records(None))
 
-    with pytest.warns(SingerSDKDeprecationWarning):
-        stream.rest_method = "GET"
+    assert hasattr(stream, "http_method")
+    assert not hasattr(stream, "rest_method")
 
-    with pytest.raises(FatalAPIError, match="Method Not Allowed"):
+    stream.http_method = None
+    stream.rest_method = "GET"
+
+    with (
+        pytest.raises(FatalAPIError, match="Method Not Allowed"),
+        pytest.warns(SingerSDKDeprecationWarning),
+    ):
         list(stream.request_records(None))
 
     stream.http_method = "POST"
