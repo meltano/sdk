@@ -980,7 +980,7 @@ def test_discriminated_union():
 def test_schema_dependencies():
     th = ObjectType(
         # username/password
-        Property("username", StringType, requires_properties="password"),
+        Property("username", StringType, requires_properties=["password"]),
         Property("password", StringType, secret=True),
         # OAuth
         Property(

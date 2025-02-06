@@ -650,7 +650,7 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
         nullable: bool | None = None,
         title: str | None = None,
         deprecated: bool | None = None,
-        requires_properties: str | list[str] | None = None,
+        requires_properties: list[str] | None = None,
         **kwargs: t.Any,
     ) -> None:
         """Initialize Property object.
@@ -870,13 +870,7 @@ class ObjectType(JSONTypeHelper):
             if not w.optional:
                 required.append(w.name)
             if w.requires_properties:
-                # Convert single string to list for consistent handling
-                required_props = (
-                    [w.requires_properties]
-                    if isinstance(w.requires_properties, str)
-                    else w.requires_properties
-                )
-                dependent_required[w.name] = required_props
+                dependent_required[w.name] = w.requires_properties
 
         result: dict[str, t.Any] = {
             "type": ["object", "null"] if self.nullable else "object",
@@ -1131,7 +1125,7 @@ class PropertiesList(ObjectType):
     Examples:
         >>> schema = PropertiesList(
         ...     # username/password
-        ...     Property("username", StringType, requires_properties="password"),
+        ...     Property("username", StringType, requires_properties=["password"]),
         ...     Property("password", StringType, secret=True),
         ...     # OAuth
         ...     Property(
