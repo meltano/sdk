@@ -175,7 +175,7 @@ to expressions using the `config` dictionary.
 ### Constructing Expressions
 
 Expressions are defined and parsed using the
-[`simpleval`](https://github.com/danthedeckie/simpleeval) expression library. This library
+[`simpleeval`](https://github.com/danthedeckie/simpleeval) expression library. This library
 accepts most native python expressions and is extended by custom functions which have been declared
 within the SDK.
 
@@ -499,7 +499,7 @@ faker_config:
   locale: en_US
 ```
 
-Remember, these expressions are evaluated by the [`simpleval`](https://github.com/danthedeckie/simpleeval) expression library, which only allows a single python expression (which is the reason for the `or` syntax above).
+Remember, these expressions are evaluated by the [`simpleeval`](https://github.com/danthedeckie/simpleeval) expression library, which only allows a single python expression (which is the reason for the `or` syntax above).
 
 This means if you require more advanced masking logic, which cannot be defined in a single python expression, you may need to consider a custom stream mapper.
 
@@ -749,7 +749,7 @@ excluded at the tap level, then the stream will be skipped exactly as if it were
 in the catalog metadata.
 
 If a stream is specified to be excluded at the target level, or in a standalone mapper
-between the tap and target, the filtering occurs downstream from the tap and therefor cannot
+between the tap and target, the filtering occurs downstream from the tap and therefore cannot
 affect the selection rules of the tap itself. Except in special test cases or in cases where
 runtime is trivial, we highly recommend implementing stream-level exclusions at the tap
 level rather than within the downstream target or mapper plugins.

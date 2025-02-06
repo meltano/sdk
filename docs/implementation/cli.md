@@ -99,7 +99,7 @@ The SDK automatically applies selection logic as described by the
 
 Selection rules are applied at three levels:
 
-1. **Streams** are filtered out if they are deselected or ommitted in the input catalog.
+1. **Streams** are filtered out if they are deselected or omitted in the input catalog.
 2. **RECORD messages** are filtered based upon selection rules in the input catalog.
 3. **SCHEMA messages** are filtered based upon selection rules in the input catalog.
 

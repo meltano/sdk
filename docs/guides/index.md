@@ -11,4 +11,6 @@ custom-clis
 config-schema
 sql-tap
 sql-target
+
+migrate-to-uv
 ```

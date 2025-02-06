@@ -42,6 +42,8 @@ STANDARD_KEYS = [
     "anyOf",
     "patternProperties",
     "allOf",
+    # JSON Schema extensions
+    "x-sql-datatype",
 ]
 
 
@@ -84,6 +86,9 @@ class Schema:
     contentMediaType: str | None = None  # noqa: N815
     contentEncoding: str | None = None  # noqa: N815
 
+    # JSON Schema extensions
+    x_sql_datatype: str | None = None
+
     def to_dict(self) -> dict[str, t.Any]:
         """Return the raw JSON Schema as a (possibly nested) dict.
 
@@ -99,12 +104,14 @@ class Schema:
             result["items"] = self.items.to_dict()
 
         for key in STANDARD_KEYS:
-            if self.__dict__.get(key) is not None:
-                result[key] = self.__dict__[key]
+            attr = key.replace("-", "_")
+            if (val := self.__dict__.get(attr)) is not None:
+                result[key] = val
 
         for key in META_KEYS:
-            if self.__dict__.get(key) is not None:
-                result[f"${key}"] = self.__dict__[key]
+            attr = key.replace("-", "_")
+            if (val := self.__dict__.get(attr)) is not None:
+                result[f"${key}"] = val
 
         return result
 
@@ -142,6 +149,7 @@ class Schema:
             ...             "description": "Age in years which must be equal to or greater than zero.",
             ...             "type": "integer",
             ...             "minimum": 0,
+            ...             "x-sql-datatype": "smallint",
             ...         },
             ...     },
             ...     "required": ["firstName", "lastName"],
@@ -153,6 +161,8 @@ class Schema:
             "The person's first name."
             >>> schema.properties["age"].minimum
             0
+            >>> schema.properties["age"].x_sql_datatype
+            'smallint'
             >>> schema.schema
             'http://json-schema.org/draft/2020-12/schema'
         """  # noqa: E501
@@ -168,12 +178,14 @@ class Schema:
             kwargs["items"] = cls.from_dict(items, **schema_defaults)
 
         for key in STANDARD_KEYS:
+            attr = key.replace("-", "_")
             if key in data:
-                kwargs[key] = data[key]
+                kwargs[attr] = data[key]
 
         for key in META_KEYS:
+            attr = key.replace("-", "_")
             if f"${key}" in data:
-                kwargs[key] = data[f"${key}"]
+                kwargs[attr] = data[f"${key}"]
 
         return cls(**kwargs)
 

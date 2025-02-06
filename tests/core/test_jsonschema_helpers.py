@@ -495,12 +495,14 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                 IntegerType,
                 allowed_values=[1, 2, 3, 4, 5, 6, 7, 8, 9],
                 examples=[1, 2, 3],
+                deprecated=True,
             ),
             {
                 "my_prop9": {
                     "type": ["integer", "null"],
                     "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9],
                     "examples": [1, 2, 3],
+                    "deprecated": True,
                 },
             },
             {is_integer_type},
