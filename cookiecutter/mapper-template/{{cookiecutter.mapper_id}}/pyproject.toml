@@ -49,8 +49,14 @@ s3 = [
 
 [dependency-groups]
 dev = [
+    { include-group = "test" },
+]
+test = [
     "pytest>=8",
-    "singer-sdk[testing]~=0.44.3",
+    {%- if cookiecutter.include_ci_files == "GitHub" %}
+    "pytest-github-actions-annotate-failures>=0.3",
+    {%- endif %}
+    "singer-sdk[testing]",
 ]
 
 {%- if cookiecutter.variant != "None (Skip)" %}
