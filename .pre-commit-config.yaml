@@ -108,11 +108,12 @@ repos:
   - id: uv-export
     name: Export Codspeed requirements
     args:
-    - "--no-emit-project"
+    - "--no-editable"
     - "--frozen"
     - "--no-hashes"
+    - "--no-dev"
     - "--all-extras"
-    - "--only-group"
+    - "--group"
     - "benchmark"
     - "--output-file"
     - "requirements/requirements.codspeed.txt"
