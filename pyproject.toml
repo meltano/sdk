@@ -58,19 +58,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Sphinx dependencies installed as optional 'docs' extras
-# https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
-docs = [
-    "furo>=2024.5.6",
-    "myst-parser>=3",
-    "pytest>=7.2.1",
-    "sphinx>=7",
-    "sphinx-copybutton>=0.5.2",
-    "sphinx-inline-tabs>=2023.4.21",
-    "sphinx-notfound-page>=1.0.0",
-    "sphinx-reredirects>=0.1.5",
-]
-
 # File storage dependencies installed as optional 'filesystem' extras
 s3 = [
     "fs-s3fs>=1.1.1",
@@ -116,6 +103,8 @@ Documentation = "https://sdk.meltano.com/en/latest/"
 
 [dependency-groups]
 dev = [
+    {"include-group" = "docs"},
+    {"include-group" = "typing"},
     "coverage[toml]>=7.4",
     "deptry>=0.15.0",
     "duckdb>=0.8.0",
@@ -131,6 +120,16 @@ dev = [
     "rfc3339-validator>=0.1.4",
     "time-machine>=2.10.0",
     "xdoctest>=1.1.1",
+]
+docs = [
+    "furo>=2024.5.6",
+    "myst-parser>=3",
+    "pytest>=7.2.1",
+    "sphinx>=7",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-inline-tabs>=2023.4.21",
+    "sphinx-notfound-page>=1.0.0",
+    "sphinx-reredirects>=0.1.5",
 ]
 typing = [
     "mypy>=1.9",

@@ -68,6 +68,9 @@ repos:
   hooks:
   - id: uv-lock
   - id: uv-sync
+  - id: uv-export
+    args: ["--frozen", "--no-dev", "--group", "docs", "--output-file=docs/requirements.txt"]
+
 
 - repo: https://github.com/codespell-project/codespell
   rev: v2.4.1
