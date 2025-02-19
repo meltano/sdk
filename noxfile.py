@@ -153,7 +153,8 @@ def docs(session: nox.Session) -> None:
     if not session.posargs and "FORCE_COLOR" in os.environ:
         args.insert(0, "--color")
 
-    session.install(".[docs]")
+    session.install(".")
+    session.install(*dependency_groups["docs"])
 
     build_dir = Path("build")
     if build_dir.exists():
