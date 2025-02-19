@@ -103,7 +103,7 @@ def benches(session: nox.Session) -> None:
 @nox.session(name="deps", python=main_python_version)
 def dependencies(session: nox.Session) -> None:
     """Check issues with dependencies."""
-    session.install(".[docs,faker,jwt,parquet,s3,ssh,testing]")
+    session.install(".[faker,jwt,parquet,s3,ssh,testing]")
     session.install("deptry")
     session.run("deptry", "singer_sdk", *session.posargs)
 
@@ -154,7 +154,7 @@ def docs(session: nox.Session) -> None:
         args.insert(0, "--color")
 
     session.install(".")
-    session.install(*dependency_groups["docs"])
+    session.install("-r", "docs/requirements.txt")
 
     build_dir = Path("build")
     if build_dir.exists():
@@ -176,7 +176,8 @@ def docs_serve(session: nox.Session) -> None:
         "build",
         "-W",
     ]
-    session.install(".[docs]", "sphinx-autobuild")
+    session.install(".")
+    session.install("-r", "docs/requirements.txt", "sphinx-autobuild")
 
     build_dir = Path("build")
     if build_dir.exists():
