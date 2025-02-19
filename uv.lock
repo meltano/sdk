@@ -2343,7 +2343,22 @@ testing = [
 
 [package.dev-dependencies]
 benchmark = [
+    { name = "coverage", extra = ["toml"] },
+    { name = "duckdb" },
+    { name = "duckdb-engine", marker = "python_full_version < '4'" },
+    { name = "fastjsonschema" },
+    { name = "moto" },
+    { name = "pytest" },
+    { name = "pytest-benchmark" },
     { name = "pytest-codspeed" },
+    { name = "pytest-snapshot" },
+    { name = "pytest-subtests" },
+    { name = "pytz" },
+    { name = "requests-cache" },
+    { name = "requests-mock" },
+    { name = "rfc3339-validator" },
+    { name = "time-machine" },
+    { name = "xdoctest" },
 ]
 dev = [
     { name = "coverage", extra = ["toml"] },
@@ -2393,6 +2408,23 @@ docs = [
     { name = "sphinx-notfound-page" },
     { name = "sphinx-reredirects" },
 ]
+testing = [
+    { name = "coverage", extra = ["toml"] },
+    { name = "duckdb" },
+    { name = "duckdb-engine", marker = "python_full_version < '4'" },
+    { name = "fastjsonschema" },
+    { name = "moto" },
+    { name = "pytest" },
+    { name = "pytest-benchmark" },
+    { name = "pytest-snapshot" },
+    { name = "pytest-subtests" },
+    { name = "pytz" },
+    { name = "requests-cache" },
+    { name = "requests-mock" },
+    { name = "rfc3339-validator" },
+    { name = "time-machine" },
+    { name = "xdoctest" },
+]
 typing = [
     { name = "mypy" },
     { name = "types-jsonschema" },
@@ -2439,7 +2471,24 @@ requires-dist = [
 provides-extras = ["faker", "jwt", "parquet", "s3", "ssh", "testing"]
 
 [package.metadata.requires-dev]
-benchmark = [{ name = "pytest-codspeed", specifier = ">=2.2.0" }]
+benchmark = [
+    { name = "coverage", extras = ["toml"], specifier = ">=7.4" },
+    { name = "duckdb", specifier = ">=0.8.0" },
+    { name = "duckdb-engine", marker = "python_full_version < '4'", specifier = ">=0.9.4" },
+    { name = "fastjsonschema", specifier = ">=2.19.1" },
+    { name = "moto", specifier = ">=5.0.14" },
+    { name = "pytest", specifier = ">=7.2.1" },
+    { name = "pytest-benchmark", specifier = ">=4.0.0" },
+    { name = "pytest-codspeed", specifier = ">=2.2.0" },
+    { name = "pytest-snapshot", specifier = ">=0.9.0" },
+    { name = "pytest-subtests", specifier = ">=0.13.1" },
+    { name = "pytz", specifier = ">=2022.2.1" },
+    { name = "requests-cache", specifier = ">=1.2.1" },
+    { name = "requests-mock", specifier = ">=1.10.0" },
+    { name = "rfc3339-validator", specifier = ">=0.1.4" },
+    { name = "time-machine", specifier = ">=2.10.0" },
+    { name = "xdoctest", specifier = ">=1.1.1" },
+]
 dev = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.4" },
     { name = "deptry", specifier = ">=0.15.0" },
@@ -2480,6 +2529,23 @@ docs = [
     { name = "sphinx-inline-tabs", specifier = ">=2023.4.21" },
     { name = "sphinx-notfound-page", specifier = ">=1.0.0" },
     { name = "sphinx-reredirects", specifier = ">=0.1.5" },
+]
+testing = [
+    { name = "coverage", extras = ["toml"], specifier = ">=7.4" },
+    { name = "duckdb", specifier = ">=0.8.0" },
+    { name = "duckdb-engine", marker = "python_full_version < '4'", specifier = ">=0.9.4" },
+    { name = "fastjsonschema", specifier = ">=2.19.1" },
+    { name = "moto", specifier = ">=5.0.14" },
+    { name = "pytest", specifier = ">=7.2.1" },
+    { name = "pytest-benchmark", specifier = ">=4.0.0" },
+    { name = "pytest-snapshot", specifier = ">=0.9.0" },
+    { name = "pytest-subtests", specifier = ">=0.13.1" },
+    { name = "pytz", specifier = ">=2022.2.1" },
+    { name = "requests-cache", specifier = ">=1.2.1" },
+    { name = "requests-mock", specifier = ">=1.10.0" },
+    { name = "rfc3339-validator", specifier = ">=0.1.4" },
+    { name = "time-machine", specifier = ">=2.10.0" },
+    { name = "xdoctest", specifier = ">=1.1.1" },
 ]
 typing = [
     { name = "mypy", specifier = ">=1.9" },

@@ -69,8 +69,53 @@ repos:
   - id: uv-lock
   - id: uv-sync
   - id: uv-export
-    args: ["--no-emit-project", "--frozen", "--no-dev", "--group", "docs", "--output-file=docs/requirements.txt"]
-
+    name: Export docs requirements
+    args:
+    - "--no-emit-project"
+    - "--frozen"
+    - "--no-dev"
+    - "--group"
+    - "docs"
+    - "--output-file"
+    - "requirements/requirements.docs.txt"
+  - id: uv-export
+    name: Export package requirements, including extras
+    args:
+    - "--no-emit-project"
+    - "--frozen"
+    - "--all-extras"
+    - "--no-dev"
+    - "--output-file"
+    - "requirements/requirements.txt"
+  - id: uv-export
+    name: Export testing requirements
+    args:
+    - "--no-emit-project"
+    - "--frozen"
+    - "--only-group"
+    - "testing"
+    - "--output-file"
+    - "requirements/requirements.test.txt"
+  - id: uv-export
+    name: Export typing requirements
+    args:
+    - "--no-emit-project"
+    - "--frozen"
+    - "--only-group"
+    - "typing"
+    - "--output-file"
+    - "requirements/requirements.typing.txt"
+  - id: uv-export
+    name: Export Codspeed requirements
+    args:
+    - "--no-emit-project"
+    - "--frozen"
+    - "--no-hashes"
+    - "--all-extras"
+    - "--only-group"
+    - "benchmark"
+    - "--output-file"
+    - "requirements/requirements.codspeed.txt"
 
 - repo: https://github.com/codespell-project/codespell
   rev: v2.4.1
