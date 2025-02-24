@@ -24,7 +24,7 @@ class GraphQLStream(RESTStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
     """
 
     path = ""
-    rest_method = "POST"
+    http_method = "POST"
 
     @classproperty
     def records_jsonpath(cls) -> str:  # type: ignore[override] # noqa: N805

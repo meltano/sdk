@@ -38,6 +38,11 @@ from singer_sdk.typing import (
     extend_validator_with_defaults,
 )
 
+if sys.version_info >= (3, 11):
+    _LOG_LEVELS_MAPPING = logging.getLevelNamesMapping()
+else:
+    _LOG_LEVELS_MAPPING = logging._nameToLevel  # noqa: SLF001
+
 if t.TYPE_CHECKING:
     from jsonschema import ValidationError
 
@@ -137,7 +142,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
         logger = logging.getLogger(cls.name)
 
-        if log_level is not None and log_level.upper() in logging._levelToName.values():  # noqa: SLF001
+        if log_level is not None and log_level.upper() in _LOG_LEVELS_MAPPING:
             logger.setLevel(log_level.upper())
 
         return logger
@@ -252,7 +257,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301
         """Get capabilities.
 
-        Developers may override this property in oder to add or remove
+        Developers may override this property in order to add or remove
         advertised capabilities for this plugin.
 
         Returns:

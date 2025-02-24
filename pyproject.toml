@@ -27,7 +27,8 @@ classifiers = [
     "Typing :: Typed",
 ]
 readme = "README.md"
-license.file = "LICENSE"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 requires-python = ">=3.9"
 
 dependencies = [
@@ -54,24 +55,9 @@ dependencies = [
     "simplejson>=3.17.6",
     "sqlalchemy>=1.4,<3.0",
     "typing-extensions>=4.5.0",
-    'urllib3<2; python_version<"3.10"',
-    'urllib3; python_version>="3.10"',
 ]
 
 [project.optional-dependencies]
-# Sphinx dependencies installed as optional 'docs' extras
-# https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
-docs = [
-    "furo>=2024.5.6",
-    "myst-parser>=3",
-    "pytest>=7.2.1",
-    "sphinx>=7",
-    "sphinx-copybutton>=0.5.2",
-    "sphinx-inline-tabs>=2023.4.21",
-    "sphinx-notfound-page>=1.0.0",
-    "sphinx-reredirects>=0.1.5",
-]
-
 # File storage dependencies installed as optional 'filesystem' extras
 s3 = [
     "fs-s3fs>=1.1.1",
@@ -79,13 +65,8 @@ s3 = [
 ]
 
 # Parquet file dependencies installed as optional 'parquet' extras
-# We add Python constraints to force Poetry to add the latest supported Numpy version
-# for all Python versions to 'poetry.lock'. If we don't do this, Poetry will add only
-# the version of Numpy that is compatible with the earliest Python version supported
-# by this project, but that may not be compatible with the latest Python version.
 parquet = [
-    "numpy>=1.22,<2.1; python_version=='3.9'",
-    "numpy>=1.22; python_version>='3.10'",
+    "numpy>=1.22",
     "pyarrow>=13",
 ]
 
@@ -120,42 +101,55 @@ Documentation = "https://sdk.meltano.com/en/latest/"
 "Slack" = "https://meltano.com/slack"
 "Youtube" = "https://www.youtube.com/meltano"
 
-[tool.poetry]
-requires-poetry = ">=2.0"
-version = "0.0.0"
+[dependency-groups]
+dev = [
+    {"include-group" = "docs"},
+    {"include-group" = "testing"},
+    {"include-group" = "typing"},
+    "deptry>=0.15.0",
+]
+docs = [
+    "furo>=2024.5.6",
+    "myst-parser>=3",
+    "pytest>=7.2.1",
+    "sphinx>=7",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-inline-tabs>=2023.4.21",
+    "sphinx-notfound-page>=1.0.0",
+    "sphinx-reredirects>=0.1.5",
+]
+testing = [
+    "coverage[toml]>=7.4",
+    "duckdb>=0.8.0",
+    "duckdb-engine>=0.9.4; python_version<'4'",
+    "fastjsonschema>=2.19.1",
+    "moto>=5.0.14",
+    "pytest>=7.2.1",
+    "pytest-benchmark>=4.0.0",
+    "pytest-snapshot>=0.9.0",
+    "pytest-subtests>=0.13.1",
+    "pytz>=2022.2.1",
+    "requests-cache>=1.2.1",
+    "requests-mock>=1.10.0",
+    "rfc3339-validator>=0.1.4",
+    "time-machine>=2.10.0",
+    "xdoctest>=1.1.1",
+]
+typing = [
+    "mypy>=1.9",
+    "types-jsonschema>=4.17.0.6",
+    "types-pytz>=2022.7.1.2",
+    "types-requests>=2.28.11",
+    "types-simplejson>=3.18.0",
+    "types-PyYAML>=6.0.12",
+]
+benchmark = [
+    {"include-group" = "testing"},
+    "pytest-codspeed>=2.2.0",
+]
 
-[tool.poetry.requires-plugins]
-poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
-
-[tool.poetry.group.dev.dependencies]
-coverage = {extras = ["toml"], version = ">=7.4"}
-deptry = ">=0.15.0"
-
-duckdb = ">=0.8.0"
-duckdb-engine = { version = ">=0.9.4", python = "<4" }
-
-fastjsonschema = ">=2.19.1"
-moto = ">=5.0.14"
-pytest-benchmark = ">=4.0.0"
-pytest-snapshot = ">=0.9.0"
-pytest-subtests = ">=0.13.1"
-pytz = ">=2022.2.1"
-requests-cache = ">=1.2.1"
-requests-mock = ">=1.10.0"
-rfc3339-validator = ">=0.1.4"
-time-machine = ">=2.10.0"
-xdoctest = ">=1.1.1"
-
-[tool.poetry.group.typing.dependencies]
-mypy = ">=1.9"
-types-jsonschema = ">=4.17.0.6"
-types-pytz = ">=2022.7.1.2"
-types-requests = ">=2.28.11"
-types-simplejson = ">=3.18.0"
-types-PyYAML = ">=6.0.12"
-
-[tool.poetry.group.benchmark.dependencies]
-pytest-codspeed = ">=2.2.0"
+[tool.hatch.version]
+source = "vcs"
 
 [tool.pytest.ini_options]
 addopts = [
@@ -190,7 +184,7 @@ xfail_strict = false
 
 [tool.commitizen]
 name = "cz_version_bump"
-version = "0.44.1"
+version = "0.44.3"
 changelog_merge_prerelease = true
 prerelease_offset = 1
 tag_format = "v$major.$minor.$patch$prerelease"
@@ -284,16 +278,12 @@ module = [
     "pyarrow.*",      # TODO: Remove when https://github.com/apache/arrow/issues/32609 if implemented and released
 ]
 
-[tool.poetry-dynamic-versioning]
-enable = true
-style = "pep440"
-
 [build-system]
 requires = [
-    "poetry-core>=2,<3",
-    "poetry-dynamic-versioning",
+    "hatchling==1.27",
+    "hatch-vcs==0.4",
 ]
-build-backend = "poetry_dynamic_versioning.backend"
+build-backend = "hatchling.build"
 
 [project.entry-points."pytest11"]
 singer_testing = "singer_sdk.testing.pytest_plugin"
@@ -307,6 +297,7 @@ extend-exclude = [
     "cookiecutter/*",
 ]
 line-length = 88
+required-version = ">=0.9"
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -316,7 +307,6 @@ explicit-preview-rules = false
 ignore = [
     "N818",    # Exception name should be named with an Error suffix
     "COM812",  # missing-trailing-comma
-    "ISC001",  # single-line-implicit-string-concatenation
 ]
 preview = true
 select = [
@@ -432,3 +422,10 @@ convention = "google"
 
 [tool.ruff.lint.pylint]
 max-args = 9
+
+[tool.uv]
+required-version = ">=0.5.19"
+
+[tool.codespell]
+skip = "*.csv,samples/aapl/*.json,samples/*/schemas/*.json"
+ignore-words-list = "fo,intoto"

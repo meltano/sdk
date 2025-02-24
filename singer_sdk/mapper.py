@@ -667,7 +667,7 @@ class CustomStreamMap(StreamMap):
 
 
 class PluginMapper:
-    """Inline map tranformer."""
+    """Inline map transformer."""
 
     def __init__(
         self,
