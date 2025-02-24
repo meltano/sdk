@@ -91,7 +91,7 @@ class SQLSink(BatchSink, t.Generic[_C]):
         Returns:
             The target schema name.
         """
-        # Look for a default_target_scheme in the configuraion fle
+        # Look for a default_target_scheme in the configuration file
         default_target_schema: str = self.config.get("default_target_schema", None)
         parts = self.stream_name.split("-")
 

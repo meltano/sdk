@@ -14,7 +14,9 @@ keywords = [
 ]
 classifiers = [
     "Intended Audience :: Developers",
+{%- if cookiecutter.license == "Apache-2.0" %}
     "License :: OSI Approved :: Apache Software License",
+{%- endif %}
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -22,38 +24,47 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
-license = "Apache-2.0"
+{%- if cookiecutter.license != "None" %}
+license = "{{cookiecutter.license}}"
+{%- endif %}
 license-files = [ "LICENSE" ]
 requires-python = ">=3.9"
-dynamic = ["dependencies"]
+dependencies = [
+    {%- if cookiecutter.faker_extra %}
+    "singer-sdk[faker]~=0.44.3",
+    {%- else %}
+    "singer-sdk~=0.44.3",
+    {%- endif %}
+    {%- if cookiecutter.serialization_method != "SQL" %}
+    "requests~=2.32.3",
+    {%- endif %}
+]
 
-[tool.poetry]
+[project.optional-dependencies]
+s3 = [
+    "fs-s3fs~=1.1.1",
+]
+
+[project.scripts]
+# CLI declaration
+{{cookiecutter.target_id}} = '{{cookiecutter.library_name}}.target:Target{{ cookiecutter.destination_name }}.cli'
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "singer-sdk[testing]~=0.44.3",
+]
+
 {%- if cookiecutter.variant != "None (Skip)" %}
+[tool.hatch.build.targets.wheel]
 packages = [
-    { include = "{{cookiecutter.library_name}}" },
+    "{{cookiecutter.library_name}}",
 ]
 {%- endif %}
-
-[tool.poetry.dependencies]
-singer-sdk = { version="~=0.44.1"{{ ', extras = ["faker"]' if cookiecutter.faker_extra }} }
-fs-s3fs = { version = "~=1.1.1", optional = true }
-{%- if cookiecutter.serialization_method != "SQL" %}
-requests = "~=2.32.3"
-{%- endif %}
-
-[tool.poetry.dev-dependencies]
-pytest = ">=8"
-singer-sdk = { version="~=0.44.1", extras = ["testing"] }
-
-[tool.poetry.extras]
-s3 = ["fs-s3fs"]
 
 [tool.mypy]
 python_version = "3.12"
 warn_unused_configs = true
-
-[tool.ruff]
-target-version = "py39"
 
 [tool.ruff.lint]
 ignore = [
@@ -68,9 +79,7 @@ allow-star-arg-any = true
 convention = "google"
 
 [build-system]
-requires = ["poetry-core>=2,<3"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-# CLI declaration
-{{cookiecutter.target_id}} = '{{cookiecutter.library_name}}.target:Target{{ cookiecutter.destination_name }}.cli'
+requires = [
+    "hatchling>=1,<2",
+]
+build-backend = "hatchling.build"

@@ -8,8 +8,8 @@ on:
       - "singer_sdk/**"
       - "tests/**"
       - "noxfile.py"
-      - "poetry.lock"
       - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/test.yml"
       - ".github/workflows/resources/requirements.txt"
   push:
@@ -21,8 +21,8 @@ on:
       - "singer_sdk/**"
       - "tests/**"
       - "noxfile.py"
-      - "poetry.lock"
       - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/test.yml"
       - ".github/workflows/resources/requirements.txt"
   workflow_dispatch:
@@ -34,6 +34,8 @@ concurrency:
 
 env:
   FORCE_COLOR: "1"
+  UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
+  UV_VERSION: 0.5.26
 
 jobs:
   tests:
@@ -69,29 +71,23 @@ jobs:
         python-version: ${{ matrix.python-version }}
         allow-prereleases: true
 
-    - name: Upgrade pip
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
-      run: |
-        pip install pip
-        pip --version
+    - uses: astral-sh/setup-uv@v5
+      with:
+        version: ${{ env.UV_VERSION }}
 
     - name: Install Nox
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
       run: |
-        pipx install 'nox[uv]'
+        uv tool install 'nox[uv]'
         nox --version
 
     - uses: actions/cache@v4
       if: matrix.session == 'tests'
       with:
         path: http_cache.sqlite
-        key: http_cache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.sqlalchemy }}
+        key: http_cache-${{ runner.os }}-${{ matrix.python-version }}
 
     - name: Run Nox
       env:
-        PIP_PRE: "1"
         UV_PRERELEASE: allow
       run: |
         nox --verbose
@@ -100,7 +96,7 @@ jobs:
       if: always() && (matrix.session == 'tests')
       with:
         include-hidden-files: true
-        name: coverage-data-nox_-${{ matrix.os }}-py${{ matrix.python-version }}_sqlalchemy_${{ matrix.sqlalchemy }}
+        name: coverage-data-nox_-${{ matrix.os }}-py${{ matrix.python-version }}
         path: ".coverage.*"
 
   tests-external:
@@ -124,23 +120,17 @@ jobs:
       with:
         python-version: ${{ env.NOXPYTHON }}
 
-    - name: Upgrade pip
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
-      run: |
-        pip install pip
-        pip --version
+    - uses: astral-sh/setup-uv@v5
+      with:
+        version: ${{ env.UV_VERSION }}
 
     - name: Install Nox
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
       run: |
-        pipx install 'nox[uv]'
+        uv tool install 'nox[uv]'
         nox --version
 
     - name: Run Nox
       env:
-        PIP_PRE: "1"
         UV_PRERELEASE: allow
       run: |
         nox -- -m "external"
@@ -157,23 +147,18 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Upgrade pip
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
-      run: |
-        pip install pip
-        pip --version
-
     - uses: actions/download-artifact@v4
       with:
         pattern: coverage-data-*
         merge-multiple: true
 
+    - uses: astral-sh/setup-uv@v5
+      with:
+        version: ${{ env.UV_VERSION }}
+
     - name: Install Nox
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
       run: |
-        pipx install 'nox[uv]'
+        uv tool install 'nox[uv]'
         nox --version
 
     - run: nox --install-only

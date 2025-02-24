@@ -983,7 +983,7 @@ class SQLConnector:  # noqa: PLR0904
             view_names = []
         return [(t, False) for t in table_names] + [(v, True) for v in view_names]
 
-    # TODO maybe should be splitted into smaller parts?
+    # TODO maybe should be split into smaller parts?
     def discover_catalog_entry(
         self,
         engine: Engine,  # noqa: ARG002
