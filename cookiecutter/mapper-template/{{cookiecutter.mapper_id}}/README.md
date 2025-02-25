@@ -74,9 +74,13 @@ Follow these instructions to contribute to this project.
 
 ### Initialize your Development Environment
 
+Prerequisites:
+
+- Python 3.9+
+- [uv](https://docs.astral.sh/uv/)
+
 ```bash
-pipx install poetry
-poetry install
+uv sync
 ```
 
 ### Create and Run Tests
@@ -85,13 +89,13 @@ Create tests within the `tests` subfolder and
   then run:
 
 ```bash
-poetry run pytest
+uv run pytest
 ```
 
-You can also test the `{{cookiecutter.mapper_id}}` CLI interface directly using `poetry run`:
+You can also test the `{{cookiecutter.mapper_id}}` CLI interface directly using `uv run`:
 
 ```bash
-poetry run {{cookiecutter.mapper_id}} --help
+uv run {{cookiecutter.mapper_id}} --help
 ```
 
 ### Testing with [Meltano](https://www.meltano.com)

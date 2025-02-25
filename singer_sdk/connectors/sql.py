@@ -284,6 +284,35 @@ class JSONSchemaToSQL:
 
         self._fallback_type: type[sa.types.TypeEngine] = sa.types.VARCHAR
 
+    @classmethod
+    def from_config(
+        cls: type[JSONSchemaToSQL],
+        config: dict,  # noqa: ARG003
+        *,
+        max_varchar_length: int | None,
+    ) -> JSONSchemaToSQL:
+        """Create a new instance from a configuration dictionary.
+
+        Override this to instantiate this converter with values from the target's
+        configuration dictionary.
+
+        .. code-block:: python
+
+              class CustomJSONSchemaToSQL(JSONSchemaToSQL):
+                  @classmethod
+                  def from_config(cls, config, **kwargs):
+                      return cls(max_varchar_length=config.get("max_varchar_length"))
+
+        Args:
+            config: The configuration dictionary.
+            max_varchar_length: The absolute maximum length for VARCHAR columns that
+                the database supports.
+
+        Returns:
+            A new instance of the class.
+        """
+        return cls(max_varchar_length=max_varchar_length)
+
     def _invoke_handler(  # noqa: PLR6301
         self,
         handler: JSONtoSQLHandler,
@@ -524,6 +553,11 @@ class SQLConnector:  # noqa: PLR0904
     #: a custom mapping for your SQL dialect.
     sql_to_jsonschema_converter: type[SQLToJSONSchema] = SQLToJSONSchema
 
+    #: The JSON-to-SQL type mapper class for this SQL connector. Override this property
+    #: with a subclass of :class:`~singer_sdk.connectors.sql.JSONSchemaToSQL` to provide
+    #: a custom mapping for your SQL dialect.
+    jsonschema_to_sql_converter: type[JSONSchemaToSQL] = JSONSchemaToSQL
+
     def __init__(
         self,
         config: dict | None = None,
@@ -574,7 +608,10 @@ class SQLConnector:  # noqa: PLR0904
 
         .. versionadded:: 0.42.0
         """
-        return JSONSchemaToSQL(max_varchar_length=self.max_varchar_length)
+        return self.jsonschema_to_sql_converter.from_config(
+            self.config,
+            max_varchar_length=self.max_varchar_length,
+        )
 
     @contextmanager
     def _connect(self) -> t.Iterator[sa.engine.Connection]:
@@ -840,6 +877,10 @@ class SQLConnector:  # noqa: PLR0904
                 pool_pre_ping=True,
             )
 
+    @deprecated(
+        "This method is deprecated. Use or override `FullyQualifiedName` instead.",
+        category=SingerSDKDeprecationWarning,
+    )
     def quote(self, name: str) -> str:
         """Quote a name if it needs quoting, using '.' as a name-part delimiter.
 
@@ -853,7 +894,7 @@ class SQLConnector:  # noqa: PLR0904
         Returns:
             str: The quoted name.
         """
-        return ".".join(
+        return ".".join(  # pragma: no cover
             [
                 self._dialect.identifier_preparer.quote(name_part)
                 for name_part in name.split(".")
@@ -915,7 +956,7 @@ class SQLConnector:  # noqa: PLR0904
             view_names = []
         return [(t, False) for t in table_names] + [(v, True) for v in view_names]
 
-    # TODO maybe should be splitted into smaller parts?
+    # TODO maybe should be split into smaller parts?
     def discover_catalog_entry(
         self,
         engine: Engine,  # noqa: ARG002

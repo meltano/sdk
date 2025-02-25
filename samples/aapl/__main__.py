@@ -2,7 +2,7 @@
 
 Run:
 
-$ poetry run python samples/aapl
+$ uv run python samples/aapl
 """
 
 from __future__ import annotations
