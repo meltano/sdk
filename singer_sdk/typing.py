@@ -48,7 +48,7 @@ Note:
   other valid implementations which are not syntactically identical to those generated
   here.
 
-"""  # noqa: A005
+"""
 
 from __future__ import annotations
 

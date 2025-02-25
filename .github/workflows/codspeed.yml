@@ -48,8 +48,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        uv export --no-hashes --frozen --all-extras --group benchmark -o requirements.txt
-        uv pip install --system -r requirements.txt
+        uv pip install --system -r requirements/requirements.codspeed.txt
 
     - uses: CodSpeedHQ/action@v3
       with:

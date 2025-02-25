@@ -30,7 +30,10 @@ def custom_array_to_sql(jsonschema: dict) -> VectorType | sa.types.VARCHAR:
 class MyConnector(SQLConnector):
     @functools.cached_property
     def jsonschema_to_sql(self):
-        to_sql = JSONSchemaToSQL()
+        to_sql = JSONSchemaToSQL.from_config(
+            self.config,
+            max_varchar_length=self.max_varchar_length,
+        )
         to_sql.register_type_handler("array", custom_array_to_sql)
         return to_sql
 ```
@@ -46,7 +49,10 @@ from my_sqlalchemy_dialect import URI
 class MyConnector(SQLConnector):
     @functools.cached_property
     def jsonschema_to_sql(self):
-        to_sql = JSONSchemaToSQL()
+        to_sql = JSONSchemaToSQL.from_config(
+            self.config,
+            max_varchar_length=self.max_varchar_length,
+        )
         to_sql.register_format_handler("uri", URI)
         return to_sql
 ```
