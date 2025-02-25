@@ -8,6 +8,7 @@ on:
     - "cookiecutter/**"
     - "e2e-tests/cookiecutters/**"
     - ".github/workflows/cookiecutter-e2e.yml"
+    - ".github/workflows/resources/requirements.txt"
   push:
     branches:
     - main
@@ -17,6 +18,7 @@ on:
     - "cookiecutter/**"
     - "e2e-tests/cookiecutters/**"
     - ".github/workflows/cookiecutter-e2e.yml"
+    - ".github/workflows/resources/requirements.txt"
   workflow_dispatch:
 
 concurrency:

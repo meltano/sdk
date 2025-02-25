@@ -9,7 +9,7 @@ from pathlib import Path
 
 import nox
 
-nox.needs_version = ">=2024.4.15"
+nox.needs_version = ">=2025.2.9"
 nox.options.default_venv_backend = "uv"
 
 RUFF_OVERRIDES = """\
@@ -39,17 +39,17 @@ nox.options.sessions = [
     "test_cookiecutter",
 ]
 
-dependency_groups = nox.project.load_toml("pyproject.toml")["dependency-groups"]
-test_dependencies: list[str] = dependency_groups["dev"]
-typing_dependencies: list[str] = dependency_groups["typing"]
-
 
 @nox.session(python=main_python_version)
 def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
-    session.install(".[faker,jwt,parquet,s3,testing]")
-    session.install(*typing_dependencies)
+    session.install(
+        ".[faker,jwt,parquet,s3,testing]",
+        "-c",
+        "requirements/requirements.txt",
+    )
+    session.install("-r", "requirements/requirements.typing.txt")
     session.run("mypy", *args)
     if not session.posargs:
         session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
@@ -65,8 +65,8 @@ def tests(session: nox.Session) -> None:
         "s3",
     ]
 
-    session.install(f".[{','.join(extras)}]")
-    session.install(*test_dependencies)
+    session.install(f".[{','.join(extras)}]", "-c", "requirements/requirements.txt")
+    session.install("-r", "requirements/requirements.test.txt")
 
     env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
 
@@ -90,8 +90,8 @@ def tests(session: nox.Session) -> None:
 @nox.session(python=main_python_version)
 def benches(session: nox.Session) -> None:
     """Run benchmarks."""
-    session.install(".[jwt,s3]")
-    session.install(*test_dependencies)
+    session.install(".[jwt,s3]", "-c", "requirements/requirements.txt")
+    session.install("-r", "requirements/requirements.test.txt")
     session.run(
         "pytest",
         "--benchmark-only",
@@ -103,7 +103,11 @@ def benches(session: nox.Session) -> None:
 @nox.session(name="deps", python=main_python_version)
 def dependencies(session: nox.Session) -> None:
     """Check issues with dependencies."""
-    session.install(".[docs,faker,jwt,parquet,s3,ssh,testing]")
+    session.install(
+        ".[faker,jwt,parquet,s3,ssh,testing]",
+        "-c",
+        "requirements/requirements.txt",
+    )
     session.install("deptry")
     session.run("deptry", "singer_sdk", *session.posargs)
 
@@ -113,8 +117,8 @@ def update_snapshots(session: nox.Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
 
-    session.install(".[faker,jwt,parquet]")
-    session.install(*test_dependencies)
+    session.install(".[faker,jwt,parquet]", "-c", "requirements/requirements.txt")
+    session.install("-r", "requirements/requirements.test.txt")
     session.run("pytest", "--snapshot-update", *args)
 
 
@@ -128,7 +132,7 @@ def doctest(session: nox.Session) -> None:
         if "FORCE_COLOR" in os.environ:
             args.append("--xdoctest-colored=1")
 
-    session.install(".")
+    session.install(".", "-c", "requirements/requirements.txt")
     session.install("pytest", "xdoctest[colors]")
     session.run("pytest", "--xdoctest", *args)
 
@@ -153,7 +157,8 @@ def docs(session: nox.Session) -> None:
     if not session.posargs and "FORCE_COLOR" in os.environ:
         args.insert(0, "--color")
 
-    session.install(".[docs]")
+    session.install(".", "-c", "requirements/requirements.txt")
+    session.install("-r", "requirements/requirements.docs.txt")
 
     build_dir = Path("build")
     if build_dir.exists():
@@ -175,7 +180,8 @@ def docs_serve(session: nox.Session) -> None:
         "build",
         "-W",
     ]
-    session.install(".[docs]", "sphinx-autobuild")
+    session.install(".", "-c", "requirements/requirements.txt")
+    session.install("-r", "requirements/requirements.docs.txt", "sphinx-autobuild")
 
     build_dir = Path("build")
     if build_dir.exists():
@@ -219,9 +225,7 @@ def test_cookiecutter(session: nox.Session, replay_file_path: Path) -> None:
     # TODO: Use uvx
     # https://github.com/wntrblm/nox/pull/920
     session.run(
-        "uv",
-        "tool",
-        "run",
+        "uvx",
         "cookiecutter",
         "--replay-file",
         str(replay_file),
@@ -243,11 +247,11 @@ def test_cookiecutter(session: nox.Session, replay_file_path: Path) -> None:
 
     # Check that the project can be built for distribution
     session.run("uv", "build")
-    session.run("uv", "tool", "run", "twine", "check", "dist/*")
+    session.run("uvx", "twine", "check", "dist/*")
 
     session.run("git", "init", "-b", "main", external=True)
     session.run("git", "add", ".", external=True)
-    session.run("uv", "tool", "run", "pre-commit", "run", "--all-files", external=True)
+    session.run("uvx", "pre-commit", "run", "--all-files", external=True)
 
 
 @nox.session(name="version-bump")
@@ -276,7 +280,6 @@ def version_bump(session: nox.Session) -> None:
 def api_changes(session: nox.Session) -> None:
     """Check for API changes."""
     args = [
-        "griffe",
         "check",
         "singer_sdk",
     ]
@@ -287,4 +290,4 @@ def api_changes(session: nox.Session) -> None:
     if "GITHUB_ACTIONS" in os.environ:
         args.append("-f=github")
 
-    session.run("uv", "tool", "run", *args, external=True)
+    session.run("uvx", "griffe", *args, external=True)
