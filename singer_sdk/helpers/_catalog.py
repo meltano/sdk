@@ -86,7 +86,7 @@ def pop_deselected_record_properties(
     Walk through properties, starting at the index in breadcrumb, recursively
     updating in place.
     """
-    for property_name, val in list(record.items()):
+    for property_name, val in record.copy().items():
         property_breadcrumb = (*breadcrumb, "properties", property_name)
         selected = mask[property_breadcrumb]
         if not selected:
