@@ -132,7 +132,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         if name:
             self.name: str = name
-        if not self.name:
+        if not self.__abstract__ and not self.name:
             msg = "Missing argument or class variable 'name'."
             raise ValueError(msg)
 
@@ -182,7 +182,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if self.schema_filepath:
             self._schema = json.loads(self.schema_filepath.read_text())
 
-        if not self.schema:
+        if not self.__abstract__ and not self.schema:
             msg = (
                 f"Could not initialize schema for stream '{self.name}'. A valid schema "
                 "object or filepath was not provided."
