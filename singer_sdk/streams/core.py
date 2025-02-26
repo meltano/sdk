@@ -110,6 +110,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     selected_by_default: bool = True
     """Whether this stream is selected by default in the catalog."""
 
+    __abstract__: bool = False
+    """Flag to indicate this stream is abstract and will not generate a catalog entry."""  # noqa: E501
+
     def __init__(
         self,
         tap: Tap,
@@ -321,6 +324,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         Returns:
             True if the stream is selected.
         """
+        if self.__abstract__:
+            return self.has_selected_descendents
+
         return self.mask.get((), True)
 
     @selected.setter
