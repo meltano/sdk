@@ -204,7 +204,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         if self._stream_maps:
             return self._stream_maps
 
-        if self._tap.mapper:  # type: ignore[truthy-bool]
+        if not self.__abstract__ and self._tap.mapper:  # type: ignore[truthy-bool]
             self._stream_maps = self._tap.mapper.stream_maps[self.name]
             self.logger.info(
                 "Tap has custom mapper. Using %d provided map(s).",
@@ -1175,7 +1175,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
                         )
                         raise
 
-                    if selected:
+                    if not self.__abstract__ and selected:
                         if write_messages:
                             self._write_record_message(record)
 
@@ -1243,7 +1243,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
             self._write_replication_key_signpost(context, signpost)
 
         # Send a SCHEMA message to the downstream target:
-        if self.selected:
+        if not self.__abstract__ and self.selected:
             self._write_schema_message()
 
         try:

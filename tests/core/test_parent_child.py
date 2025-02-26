@@ -10,6 +10,11 @@ import pytest
 from singer_sdk import Stream, Tap
 from singer_sdk.io_base import SingerMessageType
 
+if t.TYPE_CHECKING:
+    from pathlib import Path
+
+    from pytest_snapshot.plugin import Snapshot
+
 
 class Parent(Stream):
     """A parent stream."""
@@ -169,7 +174,7 @@ def test_child_deselected_parent(tap_with_deselected_parent: MyTap):
     assert all("pid" in msg["record"] for msg in child_record_messages)
 
 
-def test_one_parent_many_children(tap: MyTap):
+def test_one_parent_many_children():
     """Test tap output with parent stream deselected."""
 
     class ParentMany(Stream):
@@ -264,3 +269,59 @@ def test_one_parent_many_children(tap: MyTap):
     # Parent record is emitted
     assert messages[10]
     assert messages[10]["type"] == SingerMessageType.RECORD
+
+
+def test_abstract_parent_streams(snapshot: Snapshot, snapshot_dir: Path):
+    """Test that abstract parent streams are skipped."""
+
+    class AbstractParent(Stream):
+        """An abstract parent stream."""
+
+        __abstract__ = True
+
+        def get_records(self, context):  # noqa: ARG002
+            yield {"id": 1}
+            yield {"id": 2}
+
+        def generate_child_contexts(self, record, context):  # noqa: ARG002
+            yield {"pid": record["id"]}
+
+    class ChildOfAbstract(Stream):
+        """A child stream of an abstract parent."""
+
+        name = "child_of_abstract"
+        parent_stream_type = AbstractParent
+
+        schema = {  # noqa: RUF012
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "pid": {"type": "integer"},
+            },
+        }
+
+        def get_records(self, context):  # noqa: ARG002
+            yield {"id": 1}
+            yield {"id": 2}
+
+    class MyTapAbstract(Tap):
+        """A tap with streams having a parent-child relationship."""
+
+        name = "my-tap-abstract"
+
+        def discover_streams(self):
+            """Discover streams."""
+            return [
+                AbstractParent(self),
+                ChildOfAbstract(self),
+            ]
+
+    tap = MyTapAbstract()
+
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        tap.sync_all()
+
+    buf.seek(0)
+    snapshot.snapshot_dir = snapshot_dir.joinpath("abstract_parent_streams")
+    snapshot.assert_match(buf.read(), "singer.jsonl")
