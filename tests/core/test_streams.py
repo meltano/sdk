@@ -728,9 +728,13 @@ def test_stream_class_selection(tap_class, input_catalog, selection):
         name = "unselected_stream"
         selected_by_default = False
 
+    class AbstractStream(RESTStream):
+        url_base = "https://example.com"
+        __abstract__ = True
+
     class MyTap(tap_class):
         def discover_streams(self):
-            return [SelectedStream(self), UnselectedStream(self)]
+            return [SelectedStream(self), UnselectedStream(self), AbstractStream(self)]
 
     # Check that the selected stream is selected
     tap = MyTap(config=None, catalog=input_catalog, validate_config=False)
