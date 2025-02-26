@@ -7,6 +7,7 @@ import copy
 import datetime
 import json
 import typing as t
+import uuid
 import warnings
 from os import PathLike
 from pathlib import Path
@@ -113,7 +114,7 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
     __abstract__: bool = False
     """Flag to indicate this stream is abstract and will not generate a catalog entry."""  # noqa: E501
 
-    def __init__(
+    def __init__(  # noqa: C901
         self,
         tap: Tap,
         schema: str | PathLike | dict[str, t.Any] | singer.Schema | None = None,
@@ -132,7 +133,9 @@ class Stream(metaclass=abc.ABCMeta):  # noqa: PLR0904
         """
         if name:
             self.name: str = name
-        if not self.__abstract__ and not self.name:
+        if self.__abstract__:
+            self.name = f"abstract_{uuid.uuid4().hex[:8]}"
+        if not self.name:
             msg = "Missing argument or class variable 'name'."
             raise ValueError(msg)
 
