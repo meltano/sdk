@@ -338,6 +338,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         return Catalog(
             (stream.tap_stream_id, stream._singer_catalog_entry)  # noqa: SLF001
             for stream in self.streams.values()
+            if not stream.__abstract__
         )
 
     def discover_streams(self) -> t.Sequence[Stream]:
