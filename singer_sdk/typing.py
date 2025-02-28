@@ -207,6 +207,7 @@ class JSONTypeHelper(t.Generic[T]):
         allowed_values: list[T] | None = None,
         examples: list[T] | None = None,
         nullable: bool | None = None,
+        title: str | None = None,
     ) -> None:
         """Initialize the type helper.
 
@@ -214,10 +215,12 @@ class JSONTypeHelper(t.Generic[T]):
             allowed_values: A list of allowed values.
             examples: A list of example values.
             nullable: If True, the property may be null.
+            title: An optional title for this JSON schema type.
         """
         self.allowed_values = allowed_values
         self.examples = examples
         self.nullable = nullable
+        self.title = title
 
     @DefaultInstanceProperty
     def type_dict(self) -> dict:
@@ -241,6 +244,9 @@ class JSONTypeHelper(t.Generic[T]):
 
         if self.examples:
             result["examples"] = self.examples
+
+        if self.title:
+            result["title"] = self.title
 
         return result
 
@@ -996,14 +1002,33 @@ class Constant(JSONTypeHelper):
         {
             "const": "foo"
         }
+        >>> t2 = OneOf(
+        ...     Constant("https://api.example.com", title="US"),
+        ...     Constant("https://api-eu.example.com", title="EU"),
+        ... )
+        >>> print(t2.to_json(indent=2))
+        {
+          "oneOf": [
+            {
+              "const": "https://api.example.com",
+              "title": "US"
+            },
+            {
+              "const": "https://api-eu.example.com",
+              "title": "EU"
+            }
+          ]
+        }
     """
 
-    def __init__(self, value: _JsonValue) -> None:
+    def __init__(self, value: _JsonValue, **kwargs: t.Any) -> None:
         """Initialize Constant.
 
         Args:
             value: Value of the constant.
+            kwargs: Keyword-arguments.
         """
+        super().__init__(**kwargs)
         self.value = value
 
     @property
@@ -1013,7 +1038,13 @@ class Constant(JSONTypeHelper):
         Returns:
             A dictionary describing the type.
         """
-        return {"const": self.value}
+        result = {"const": self.value}
+
+        extras = self.extras
+        if "title" in extras:
+            result["title"] = extras["title"]
+
+        return result
 
 
 class DiscriminatedUnion(OneOf):
