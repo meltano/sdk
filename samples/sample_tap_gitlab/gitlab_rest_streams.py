@@ -7,6 +7,7 @@ import typing as t
 
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.pagination import SimpleHeaderPaginator
+from singer_sdk.schema import LocalSchemaSource
 from singer_sdk.streams.rest import RESTStream
 from singer_sdk.typing import (
     ArrayType,
@@ -19,7 +20,7 @@ from singer_sdk.typing import (
     StringType,
 )
 
-SCHEMAS_DIR = importlib.resources.files(__package__) / "schemas"
+LOCAL_SCHEMAS = LocalSchemaSource(importlib.resources.files(__package__) / "schemas")
 
 DEFAULT_URL_BASE = "https://gitlab.com/api/v4"
 
@@ -103,7 +104,7 @@ class ProjectsStream(ProjectBasedStream):
     primary_keys = ("id",)
     replication_key = "last_activity_at"
     is_sorted = True
-    schema_filepath = SCHEMAS_DIR / "projects.json"
+    schema = LOCAL_SCHEMAS("projects")
 
 
 class ReleasesStream(ProjectBasedStream):
@@ -113,7 +114,7 @@ class ReleasesStream(ProjectBasedStream):
     path = "/projects/{project_id}/releases"
     primary_keys = ("project_id", "tag_name")
     replication_key = None
-    schema_filepath = SCHEMAS_DIR / "releases.json"
+    schema = LOCAL_SCHEMAS("releases")
 
 
 class IssuesStream(ProjectBasedStream):
@@ -124,7 +125,7 @@ class IssuesStream(ProjectBasedStream):
     primary_keys = ("id",)
     replication_key = "updated_at"
     is_sorted = False
-    schema_filepath = SCHEMAS_DIR / "issues.json"
+    schema = LOCAL_SCHEMAS("issues")
 
 
 class CommitsStream(ProjectBasedStream):
@@ -137,7 +138,7 @@ class CommitsStream(ProjectBasedStream):
     primary_keys = ("id",)
     replication_key = "created_at"
     is_sorted = False
-    schema_filepath = SCHEMAS_DIR / "commits.json"
+    schema = LOCAL_SCHEMAS("commits")
 
 
 class EpicsStream(ProjectBasedStream):
@@ -202,7 +203,7 @@ class EpicIssuesStream(GitlabStream):
     path = "/groups/{group_id}/epics/{epic_iid}/issues"
     primary_keys = ("id",)
     replication_key = None
-    schema_filepath = SCHEMAS_DIR / "epic_issues.json"
+    schema = LOCAL_SCHEMAS("epic_issues")
     parent_stream_type = EpicsStream  # Stream should wait for parents to complete.
 
     def get_url_params(
