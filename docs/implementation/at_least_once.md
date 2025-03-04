@@ -18,7 +18,7 @@ According to the Singer spec, bookmark comparisons are performed on the basis of
 
 [Replication Key Signposts](./state.md#replication-key-signposts) are an internal and automatic feature of the SDK. Signposts are necessary in order to deliver the 'at least once' delivery promise for unsorted streams and parent-child streams. The function of a signpost is to ensure that bookmark keys do not advance past a point where we may have not synced all records, such as for unsorted or reverse-sorted streams. This feature also enables developers to override `state_partitioning_key`, which reduces the number of bookmarks needed to track state on parent-child streams with a large number of parent records.
 
-In all applications, the signpost prevents the bookmark's value from advancing too far and prevents records from being skipped in future sync operations. We _intentionally_ do not advance the bookmark as far as the max replication key value from all records we've synced, with the knowlege that _some_ records with equal or lower replication key values may have not yet been synced. It follows then, that any records whose replication key is greater than the signpost value will necessarily be re-synced in the next execution, causing some amount of record duplication downstream.
+In all applications, the signpost prevents the bookmark's value from advancing too far and prevents records from being skipped in future sync operations. We _intentionally_ do not advance the bookmark as far as the max replication key value from all records we've synced, with the knowledge that _some_ records with equal or lower replication key values may have not yet been synced. It follows then, that any records whose replication key is greater than the signpost value will necessarily be re-synced in the next execution, causing some amount of record duplication downstream.
 
 ### Cause #3: Stream interruption
 
@@ -32,11 +32,11 @@ There are two generally recommended approaches for dealing with record duplicati
 
 Assuming that a primary key exists, most target implementation will simply use the primary key to merge newly received records with their prior versions, eliminating any risk of duplication in the destination dataset.
 
-However, this approach will not work for streams that lack primary keys or in implentations running in pure 'append only' mode. For these cases, some amount of record duplication should be expected and planned for by the end user.
+However, this approach will not work for streams that lack primary keys or in implementations running in pure 'append only' mode. For these cases, some amount of record duplication should be expected and planned for by the end user.
 
 ### Strategy #2: Removing duplicates using `dbt` transformations
 
-For cases where the destination table _does not_ use primary keys, the most common way of resolving duplicates after they've landed in the downstream dataset is to apply a `ROW_NUMBER()` function in a tool like [dbt](https://www.getdbt.com). The `ROW_NUMBER()` function can caculate a `dedupe_rank` and/or a `recency_rank` in the transformation layer, and then downstream queries can easily filter out any duplicates using the calculated rank. Users can write these transformations by hand or leverage the [deduplicate-source](https://github.com/dbt-labs/dbt-utils#deduplicate-source) macro from the [dbt-utils](https://github.com/dbt-labs/dbt-utils) package.
+For cases where the destination table _does not_ use primary keys, the most common way of resolving duplicates after they've landed in the downstream dataset is to apply a `ROW_NUMBER()` function in a tool like [dbt](https://www.getdbt.com). The `ROW_NUMBER()` function can calculate a `dedupe_rank` and/or a `recency_rank` in the transformation layer, and then downstream queries can easily filter out any duplicates using the calculated rank. Users can write these transformations by hand or leverage the [deduplicate-source](https://github.com/dbt-labs/dbt-utils#deduplicate-source) macro from the [dbt-utils](https://github.com/dbt-labs/dbt-utils) package.
 
 #### Sample dedupe implementation using `dbt`:
 

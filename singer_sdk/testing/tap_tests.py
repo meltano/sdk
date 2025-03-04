@@ -5,11 +5,13 @@ from __future__ import annotations
 import typing as t
 import warnings
 
-from jsonschema import Draft7Validator
+from jsonschema import validators
+from jsonschema.exceptions import SchemaError
 
 import singer_sdk.helpers._typing as th
 from singer_sdk import Tap
 from singer_sdk.helpers._compat import datetime_fromisoformat
+from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
 
 from .templates import AttributeTestTemplate, StreamTestTemplate, TapTestTemplate
 
@@ -41,12 +43,12 @@ class TapDiscoveryTest(TapTestTemplate):
         catalog = tap1.catalog_dict
         # Reset and re-initialize with discovered catalog
         kwargs = {k: v for k, v in self.runner.default_kwargs.items() if k != "catalog"}
-        tap2: Tap = t.cast(t.Type[Tap], self.runner.singer_class)(
+        tap2: Tap = t.cast("type[Tap]", self.runner.singer_class)(
             config=self.runner.config,
             catalog=catalog,
             **kwargs,
         )
-        assert tap2
+        assert tap2  # type: ignore[truthy-bool]
 
 
 class TapStreamConnectionTest(TapTestTemplate):
@@ -69,6 +71,28 @@ class TapValidFinalStateTest(TapTestTemplate):
         """Run test."""
         final_state = self.runner.state_messages[-1]
         assert "progress_markers" not in final_state, self.message
+
+
+class StreamSchemaIsValidTest(StreamTestTemplate):
+    """Test that a stream's schema is valid."""
+
+    name = "schema_is_valid"
+
+    def test(self) -> None:
+        """Run test.
+
+        Raises:
+            AssertionError: if schema is not valid.
+        """
+        schema = self.stream.schema
+        default = DEFAULT_JSONSCHEMA_VALIDATOR
+        validator = validators.validator_for(schema, default=default)
+
+        try:
+            validator.check_schema(schema)
+        except SchemaError as e:  # pragma: no cover
+            msg = f"Schema is not valid: {e}"
+            raise AssertionError(msg) from e
 
 
 class StreamReturnsRecordTest(StreamTestTemplate):
@@ -134,10 +158,10 @@ class StreamRecordMatchesStreamSchema(StreamTestTemplate):
     def test(self) -> None:
         """Run test."""
         schema = self.stream.schema
-        validator = Draft7Validator(
-            schema,
-            format_checker=Draft7Validator.FORMAT_CHECKER,
-        )
+        default = DEFAULT_JSONSCHEMA_VALIDATOR
+        validator = validators.validator_for(schema, default=default)(schema)
+        validator.format_checker = default.FORMAT_CHECKER
+
         for record in self.stream_records:
             errors = list(validator.iter_errors(record))
             error_messages = "\n".join(
@@ -175,9 +199,9 @@ class StreamPrimaryKeysTest(StreamTestTemplate):
             f"Length of set of records IDs ({count_unique_records})"
             f" is not equal to number of records ({count_records})."
         )
-        assert all(
-            all(k is not None for k in pk) for pk in record_ids
-        ), "Primary keys contain some key values that are null."
+        assert all(all(k is not None for k in pk) for pk in record_ids), (
+            "Primary keys contain some key values that are null."
+        )
 
 
 class AttributeIsDateTimeTest(AttributeTestTemplate):
@@ -194,7 +218,7 @@ class AttributeIsDateTimeTest(AttributeTestTemplate):
         try:
             for v in self.non_null_attribute_values:
                 error_message = f"Unable to parse value ('{v}') with datetime parser."
-                assert datetime_fromisoformat(v), error_message
+                assert datetime_fromisoformat(v), error_message  # type: ignore[truthy-bool]
         except ValueError as e:
             raise AssertionError(error_message) from e
 
@@ -358,9 +382,9 @@ class AttributeNotNullTest(AttributeTestTemplate):
     def test(self) -> None:
         """Run test."""
         for r in self.stream_records:
-            assert (
-                r.get(self.attribute_name) is not None
-            ), f"Detected null values for attribute ('{self.attribute_name}')."
+            assert r.get(self.attribute_name) is not None, (
+                f"Detected null values for attribute ('{self.attribute_name}')."
+            )
 
     @classmethod
     def evaluate(

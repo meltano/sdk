@@ -49,13 +49,13 @@ def test_gitlab_replication_keys(gitlab_config: dict | None):
         f"Incorrect 'replication_key' in catalog: ({key_props_2})\n\n"
         f"Catalog entry was: {catalog_entry}"
     )
-    assert tap.streams[
-        stream_name
-    ].is_timestamp_replication_key, "Failed to detect `is_timestamp_replication_key`"
+    assert tap.streams[stream_name].is_timestamp_replication_key, (
+        "Failed to detect `is_timestamp_replication_key`"
+    )
 
-    assert tap.streams[
-        "commits"
-    ].is_timestamp_replication_key, "Failed to detect `is_timestamp_replication_key`"
+    assert tap.streams["commits"].is_timestamp_replication_key, (
+        "Failed to detect `is_timestamp_replication_key`"
+    )
 
 
 def test_gitlab_sync_epic_issues(gitlab_config: dict | None):

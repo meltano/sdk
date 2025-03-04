@@ -6,6 +6,7 @@ import copy
 import datetime
 import logging
 import typing as t
+import uuid
 from enum import Enum
 from functools import lru_cache
 
@@ -42,6 +43,8 @@ def to_json_compatible(val: t.Any) -> t.Any:  # noqa: ANN401
     if isinstance(val, (datetime.datetime,)):
         # Make naive datetimes UTC
         return (val.replace(tzinfo=UTC) if val.tzinfo is None else val).isoformat("T")
+    if isinstance(val, (uuid.UUID,)):
+        return str(val)
     return val
 
 
@@ -184,11 +187,11 @@ def get_datelike_property_type(property_schema: dict) -> str | None:
     Otherwise return None.
     """
     if _is_string_with_format(property_schema):
-        return t.cast(str, property_schema["format"])
+        return t.cast("str", property_schema["format"])
     if "anyOf" in property_schema:
         for type_dict in property_schema["anyOf"]:
             if _is_string_with_format(type_dict):
-                return t.cast(str, type_dict["format"])
+                return t.cast("str", type_dict["format"])
     return None
 
 
@@ -277,6 +280,17 @@ def is_boolean_type(property_schema: dict) -> bool | None:
         if "boolean" in schema_type or schema_type == "boolean":
             return True
     return False
+
+
+def _is_exclusive_boolean_type(property_schema: dict) -> bool:
+    if "type" not in property_schema:
+        return False
+
+    return (
+        property_schema["type"] == "boolean"
+        or property_schema["type"] == ["boolean"]
+        or set(property_schema["type"]) == {"boolean", "null"}
+    )
 
 
 def is_integer_type(property_schema: dict) -> bool | None:
@@ -523,6 +537,6 @@ def _conform_primitive_property(  # noqa: PLR0911
     if isinstance(elem, bytes):
         # for BIT value, treat 0 as False and anything else as True
         return elem != b"\x00" if is_boolean_type(property_schema) else elem.hex()
-    if is_boolean_type(property_schema):
+    if _is_exclusive_boolean_type(property_schema):
         return None if elem is None else elem != 0
     return elem

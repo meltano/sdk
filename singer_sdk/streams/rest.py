@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import abc
 import copy
+import decimal
 import logging
 import typing as t
+from functools import cached_property
 from http import HTTPStatus
 from urllib.parse import urlparse
 from warnings import warn
@@ -16,6 +18,7 @@ import requests
 from singer_sdk import metrics
 from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
+from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import (
     BaseAPIPaginator,
@@ -26,6 +29,7 @@ from singer_sdk.pagination import (
 from singer_sdk.streams.core import Stream
 
 if t.TYPE_CHECKING:
+    from collections.abc import Iterable, Mapping
     from datetime import datetime
 
     from backoff.types import Details
@@ -40,27 +44,20 @@ DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes
 _TToken = t.TypeVar("_TToken")
 
 
-class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PLR0904
-    """Abstract base class for REST API streams."""
+class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PLR0904
+    """Abstract base class for HTTP streams."""
 
     _page_size: int = DEFAULT_PAGE_SIZE
     _requests_session: requests.Session | None
 
-    #: HTTP method to use for requests. Defaults to "GET".
-    rest_method = "GET"
-
-    #: JSONPath expression to extract records from the API response.
-    records_jsonpath: str = "$[*]"
-
     #: Response code reference for rate limit retries
     extra_retry_statuses: t.Sequence[int] = [HTTPStatus.TOO_MANY_REQUESTS]
 
-    #: Optional JSONPath expression to extract a pagination token from the API response.
-    #: Example: `"$.next_page"`
-    next_page_token_jsonpath: str | None = None
-
     #: Optional flag to disable HTTP redirects. Defaults to False.
     allow_redirects: bool = True
+
+    #: Set this to True if the API expects a JSON payload in the request body.
+    payload_as_json: bool = False
 
     # Private constants. May not be supported in future releases:
     _LOG_REQUEST_METRICS: bool = True
@@ -88,22 +85,24 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         name: str | None = None,
         schema: dict[str, t.Any] | Schema | None = None,
         path: str | None = None,
+        *,
+        http_method: str | None = None,
     ) -> None:
-        """Initialize the REST stream.
+        """Initialize the HTTP stream.
 
         Args:
             tap: Singer Tap this stream belongs to.
             schema: JSON schema for records in this stream.
             name: Name of this stream.
             path: URL path for this entity stream.
+            http_method: HTTP method to use for requests.
         """
         super().__init__(name=name, schema=schema, tap=tap)
         if path:
             self.path = path
-        self._http_headers: dict = {}
+        self._http_headers: dict = {"User-Agent": self.user_agent}
+        self._http_method = http_method
         self._requests_session = requests.Session()
-        self._compiled_jsonpath = None
-        self._next_page_token_compiled_jsonpath = None
 
     @staticmethod
     def _url_encode(val: str | datetime | bool | int | list[str]) -> str:  # noqa: FBT001
@@ -140,6 +139,31 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
     # HTTP Request functions
 
     @property
+    def http_method(self) -> str:
+        """HTTP method to use for requests. Defaults to "GET"."""
+        if self._http_method:
+            return self._http_method
+
+        if hasattr(self, "rest_method"):
+            warn(
+                "Use `http_method` instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
+            return self.rest_method  # type: ignore[no-any-return]
+
+        return "GET"
+
+    @http_method.setter
+    def http_method(self, value: str) -> None:
+        """Set the HTTP method for requests.
+
+        Args:
+            value: The HTTP method to use for requests.
+        """
+        self._http_method = value
+
+    @property
     def requests_session(self) -> requests.Session:
         """Get requests session.
 
@@ -149,6 +173,20 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         if not self._requests_session:
             self._requests_session = requests.Session()
         return self._requests_session
+
+    @cached_property
+    def user_agent(self) -> str:
+        """Get the user agent string for the stream.
+
+        Returns:
+            The user agent string.
+
+        .. versionadded:: 0.40.0
+        """
+        return self.config.get(
+            "user_agent",
+            f"{self.tap_name}/{self._tap.plugin_version}",
+        )
 
     def validate_response(self, response: requests.Response) -> None:
         """Validate HTTP response.
@@ -238,7 +276,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
             (
                 ConnectionResetError,
                 RetriableAPIError,
-                requests.exceptions.ReadTimeout,
+                requests.exceptions.Timeout,
                 requests.exceptions.ConnectionError,
                 requests.exceptions.ChunkedEncodingError,
                 requests.exceptions.ContentDecodingError,
@@ -354,19 +392,25 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
             Build a request with the stream's URL, path, query parameters,
             HTTP headers and authenticator.
         """
-        http_method = self.rest_method
+        http_method = self.http_method
         url: str = self.get_url(context)
         params: dict | str = self.get_url_params(context, next_page_token)
         request_data = self.prepare_request_payload(context, next_page_token)
         headers = self.http_headers
 
-        return self.build_prepared_request(
-            method=http_method,
-            url=url,
-            params=params,
-            headers=headers,
-            json=request_data,
-        )
+        prepare_kwargs: dict[str, t.Any] = {
+            "method": http_method,
+            "url": url,
+            "params": params,
+            "headers": headers,
+        }
+
+        if self.payload_as_json:
+            prepare_kwargs["json"] = request_data
+        else:
+            prepare_kwargs["data"] = request_data
+
+        return self.build_prepared_request(**prepare_kwargs)
 
     def request_records(self, context: Context | None) -> t.Iterable[dict]:
         """Request records from REST endpoint(s), returning response records.
@@ -507,8 +551,16 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         self,
         context: Context | None,
         next_page_token: _TToken | None,
-    ) -> dict | None:
-        """Prepare the data payload for the REST API request.
+    ) -> (
+        Iterable[bytes]
+        | str
+        | bytes
+        | list[tuple[t.Any, t.Any]]
+        | tuple[tuple[t.Any, t.Any]]
+        | Mapping[str, t.Any]
+        | None
+    ):
+        """Prepare the data payload for the HTTP request.
 
         By default, no payload will be sent (return None).
 
@@ -522,27 +574,6 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
                 next page of data.
         """
 
-    def get_new_paginator(self) -> BaseAPIPaginator:
-        """Get a fresh paginator for this API endpoint.
-
-        Returns:
-            A paginator instance.
-        """
-        if hasattr(self, "get_next_page_token"):
-            warn(
-                "`RESTStream.get_next_page_token` is deprecated and will not be used "
-                "in a future version of the Meltano Singer SDK. "
-                "Override `RESTStream.get_new_paginator` instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            return LegacyStreamPaginator(self)
-
-        if self.next_page_token_jsonpath:
-            return JSONPathPaginator(self.next_page_token_jsonpath)
-
-        return SimpleHeaderPaginator("X-Next-Page")
-
     @property
     def http_headers(self) -> dict:
         """Return headers dict to be used for HTTP requests.
@@ -553,10 +584,7 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         Returns:
             Dictionary of HTTP headers to use as a base for every request.
         """
-        result = self._http_headers
-        if "user_agent" in self.config:
-            result["User-Agent"] = self.config.get("user_agent")
-        return result
+        return self._http_headers
 
     @property
     def timeout(self) -> int:
@@ -589,6 +617,9 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
                 continue
             yield transformed_record
 
+    # Abstract methods:
+
+    @abc.abstractmethod
     def parse_response(self, response: requests.Response) -> t.Iterable[dict]:
         """Parse the response and return an iterator of result records.
 
@@ -598,9 +629,16 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         Yields:
             One item for every item found in the response.
         """
-        yield from extract_jsonpath(self.records_jsonpath, input=response.json())
+        ...
 
-    # Abstract methods:
+    @abc.abstractmethod
+    def get_new_paginator(self) -> BaseAPIPaginator:
+        """Get a fresh paginator for this endpoint.
+
+        Returns:
+            A paginator instance.
+        """
+        ...
 
     @property
     def authenticator(self) -> Auth:
@@ -700,3 +738,78 @@ class RESTStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: PL
         exception = yield  # type: ignore[misc]
         while True:
             exception = yield value(exception)
+
+
+class RESTStream(_HTTPStream, t.Generic[_TToken], metaclass=abc.ABCMeta):
+    """Abstract base class for REST API streams."""
+
+    #: JSONPath expression to extract records from the API response.
+    records_jsonpath: str = "$[*]"
+
+    #: Optional JSONPath expression to extract a pagination token from the API response.
+    #: Example: `"$.next_page"`
+    next_page_token_jsonpath: str | None = None
+
+    payload_as_json: bool = True
+    """Set this to False if the API expects something other than JSON in the request
+    body.
+
+    .. versionadded:: 0.43.0
+    """
+
+    def __init__(
+        self,
+        tap: Tap,
+        name: str | None = None,
+        schema: dict[str, t.Any] | Schema | None = None,
+        path: str | None = None,
+        *,
+        http_method: str | None = None,
+    ) -> None:
+        """Initialize the REST stream.
+
+        Args:
+            tap: Singer Tap this stream belongs to.
+            schema: JSON schema for records in this stream.
+            name: Name of this stream.
+            path: URL path for this entity stream.
+            http_method: HTTP method to use for requests
+        """
+        super().__init__(tap, name, schema, path, http_method=http_method)
+        self._compiled_jsonpath = None
+        self._next_page_token_compiled_jsonpath = None
+
+    def parse_response(self, response: requests.Response) -> t.Iterable[dict]:
+        """Parse the response and return an iterator of result records.
+
+        Args:
+            response: A raw :class:`requests.Response`
+
+        Yields:
+            One item for every item found in the response.
+        """
+        yield from extract_jsonpath(
+            self.records_jsonpath,
+            input=response.json(parse_float=decimal.Decimal),
+        )
+
+    def get_new_paginator(self) -> BaseAPIPaginator:
+        """Get a fresh paginator for this API endpoint.
+
+        Returns:
+            A paginator instance.
+        """
+        if hasattr(self, "get_next_page_token"):
+            warn(
+                "`RESTStream.get_next_page_token` is deprecated and will not be used "
+                "in a future version of the Meltano Singer SDK. "
+                "Override `RESTStream.get_new_paginator` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            return LegacyStreamPaginator(self)
+
+        if self.next_page_token_jsonpath:
+            return JSONPathPaginator(self.next_page_token_jsonpath)
+
+        return SimpleHeaderPaginator("X-Next-Page")

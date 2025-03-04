@@ -26,6 +26,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
     Property(
         "stream_maps",
         ObjectType(),
+        title="Stream Maps",
         description=(
             "Config object for stream maps capability. "
             "For more information check out "
@@ -35,6 +36,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
     Property(
         "stream_map_config",
         ObjectType(),
+        title="User Stream Map Configuration",
         description="User-defined config values to be used within map expressions.",
     ),
     Property(
@@ -43,6 +45,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
             Property(
                 "seed",
                 OneOf(NumberType, StringType, BooleanType),
+                title="Faker Seed",
                 description=(
                     "Value to seed the Faker generator for deterministic output: "
                     "https://faker.readthedocs.io/en/master/#seeding-the-generator"
@@ -51,16 +54,18 @@ STREAM_MAPS_CONFIG = PropertiesList(
             Property(
                 "locale",
                 OneOf(StringType, ArrayType(StringType)),
+                title="Faker Locale",
                 description=(
                     "One or more LCID locale strings to produce localized output for: "
                     "https://faker.readthedocs.io/en/master/#localization"
                 ),
             ),
         ),
+        title="Faker Configuration",
         description=(
             "Config for the [`Faker`](https://faker.readthedocs.io/en/master/) "
             "instance variable `fake` used within map expressions. Only applicable if "
-            "the plugin specifies `faker` as an addtional dependency (through the "
+            "the plugin specifies `faker` as an additional dependency (through the "
             "`singer-sdk` `faker` extra or directly)."
         ),
     ),
@@ -69,6 +74,7 @@ FLATTENING_CONFIG = PropertiesList(
     Property(
         "flattening_enabled",
         BooleanType(),
+        title="Enable Schema Flattening",
         description=(
             "'True' to enable schema flattening and automatically expand nested "
             "properties."
@@ -77,44 +83,52 @@ FLATTENING_CONFIG = PropertiesList(
     Property(
         "flattening_max_depth",
         IntegerType(),
+        title="Max Flattening Depth",
         description="The max depth to flatten schemas.",
     ),
 ).to_dict()
 BATCH_CONFIG = PropertiesList(
     Property(
         "batch_config",
-        description="",
+        title="Batch Configuration",
+        description="Configuration for BATCH message capabilities.",
         wrapped=ObjectType(
             Property(
                 "encoding",
+                title="Batch Encoding Configuration",
                 description="Specifies the format and compression of the batch files.",
                 wrapped=ObjectType(
                     Property(
                         "format",
                         StringType,
                         allowed_values=["jsonl", "parquet"],
+                        title="Batch Encoding Format",
                         description="Format to use for batch files.",
                     ),
                     Property(
                         "compression",
                         StringType,
                         allowed_values=["gzip", "none"],
+                        title="Batch Compression Format",
                         description="Compression format to use for batch files.",
                     ),
                 ),
             ),
             Property(
                 "storage",
+                title="Batch Storage Configuration",
                 description="Defines the storage layer to use when writing batch files",
                 wrapped=ObjectType(
                     Property(
                         "root",
                         StringType,
+                        title="Batch Storage Root",
                         description="Root path to use when writing batch files.",
                     ),
                     Property(
                         "prefix",
                         StringType,
+                        title="Batch Storage Prefix",
                         description="Prefix to use when writing batch files.",
                     ),
                 ),
@@ -126,20 +140,32 @@ TARGET_SCHEMA_CONFIG = PropertiesList(
     Property(
         "default_target_schema",
         StringType(),
+        title="Default Target Schema",
         description="The default target database schema name to use for all streams.",
+    ),
+).to_dict()
+ACTIVATE_VERSION_CONFIG = PropertiesList(
+    Property(
+        "process_activate_version_messages",
+        BooleanType,
+        default=True,
+        title="Process `ACTIVATE_VERSION` messages",
+        description="Whether to process `ACTIVATE_VERSION` messages.",
     ),
 ).to_dict()
 ADD_RECORD_METADATA_CONFIG = PropertiesList(
     Property(
         "add_record_metadata",
         BooleanType(),
-        description="Add metadata to records.",
+        title="Add Record Metadata",
+        description="Whether to add metadata fields to records.",
     ),
 ).to_dict()
 TARGET_HARD_DELETE_CONFIG = PropertiesList(
     Property(
         "hard_delete",
         BooleanType(),
+        title="Hard Delete",
         description="Hard delete records.",
         default=False,
     ),
@@ -148,6 +174,7 @@ TARGET_VALIDATE_RECORDS_CONFIG = PropertiesList(
     Property(
         "validate_records",
         BooleanType(),
+        title="Validate Records",
         description="Whether to validate the schema of the incoming streams.",
         default=True,
     ),
@@ -156,6 +183,7 @@ TARGET_BATCH_SIZE_ROWS_CONFIG = PropertiesList(
     Property(
         "batch_size_rows",
         IntegerType,
+        title="Batch Size Rows",
         description="Maximum number of rows in each batch.",
     ),
 ).to_dict()
@@ -312,7 +340,7 @@ class PluginCapabilities(CapabilitiesEnum):
     #: Support :doc:`inline stream map transforms</stream_maps>`.
     STREAM_MAPS = "stream-maps"
 
-    #: Support schema flattening, aka denesting of complex properties.
+    #: Support schema flattening, aka unnesting of complex properties.
     FLATTENING = "schema-flattening"
 
     #: Support the
@@ -364,9 +392,6 @@ class TargetCapabilities(CapabilitiesEnum):
 
     #: Fail safe for unknown JSON Schema types.
     DATATYPE_FAILSAFE = "datatype-failsafe"
-
-    #: Allow denesting complex properties.
-    RECORD_FLATTENING = "record-flattening"
 
     #: Allow setting the target schema.
     TARGET_SCHEMA = "target-schema"

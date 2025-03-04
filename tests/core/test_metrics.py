@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 
 import pytest
 import time_machine
@@ -31,7 +32,7 @@ def test_singer_metrics_formatter():
         exc_info=None,
     )
 
-    assert formatter.format(record) == ""
+    assert not formatter.format(record)
 
     metric_dict = {
         "type": "counter",
@@ -45,6 +46,8 @@ def test_singer_metrics_formatter():
 
 
 def test_meter():
+    pid = os.getpid()
+
     class _MyMeter(metrics.Meter):
         def __enter__(self):
             return self
@@ -54,11 +57,14 @@ def test_meter():
 
     meter = _MyMeter(metrics.Metric.RECORD_COUNT)
 
-    assert meter.tags == {}
+    assert meter.tags == {metrics.Tag.PID: pid}
 
     stream_context = {"parent_id": 1}
     meter.context = stream_context
-    assert meter.tags == {metrics.Tag.CONTEXT: stream_context}
+    assert meter.tags == {
+        metrics.Tag.CONTEXT: stream_context,
+        metrics.Tag.PID: pid,
+    }
 
     meter.context = None
     assert metrics.Tag.CONTEXT not in meter.tags
@@ -69,6 +75,7 @@ def test_record_counter(caplog: pytest.LogCaptureFixture):
     metrics_logger.propagate = True
 
     caplog.set_level(logging.INFO, logger=metrics.METRICS_LOGGER_NAME)
+    pid = os.getpid()
     custom_object = CustomObject("test", 1)
 
     with metrics.record_counter(
@@ -98,6 +105,7 @@ def test_record_counter(caplog: pytest.LogCaptureFixture):
         assert point["tags"] == {
             metrics.Tag.STREAM: "test_stream",
             metrics.Tag.ENDPOINT: "test_endpoint",
+            metrics.Tag.PID: pid,
             "custom_tag": "pytest",
             "custom_obj": custom_object,
         }
@@ -113,6 +121,7 @@ def test_sync_timer(caplog: pytest.LogCaptureFixture):
 
     caplog.set_level(logging.INFO, logger=metrics.METRICS_LOGGER_NAME)
 
+    pid = os.getpid()
     traveler = time_machine.travel(0, tick=False)
     traveler.start()
 
@@ -134,6 +143,7 @@ def test_sync_timer(caplog: pytest.LogCaptureFixture):
     assert point["tags"] == {
         metrics.Tag.STREAM: "test_stream",
         metrics.Tag.STATUS: "succeeded",
+        metrics.Tag.PID: pid,
         "custom_tag": "pytest",
     }
 

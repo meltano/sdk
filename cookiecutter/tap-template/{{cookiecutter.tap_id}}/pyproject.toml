@@ -1,4 +1,8 @@
-[tool.poetry]
+{%- set extras = [] -%}
+{%- if cookiecutter.faker_extra -%}{%- set extras = extras + ["faker"] -%}{%- endif -%}
+{%- if cookiecutter.auth_method == "JWT" -%}{%- set extras = extras + ["jwt"] -%}{%- endif -%}
+
+[project]
 {%- if cookiecutter.variant != "None (Skip)" %}
 name = "{{cookiecutter.variant}}-{{cookiecutter.tap_id}}"
 {%- else %}
@@ -7,49 +11,74 @@ name = "{{cookiecutter.tap_id}}"
 version = "0.0.1"
 description = "Singer tap for {{cookiecutter.source_name}}, built with the Meltano Singer SDK."
 readme = "README.md"
-authors = ["{{ cookiecutter.admin_name }} <{{ cookiecutter.admin_email }}>"]
+authors = [{ name = "{{ cookiecutter.admin_name }}", email = "{{ cookiecutter.admin_email }}" }]
 keywords = [
     "ELT",
     "{{cookiecutter.source_name}}",
 ]
 classifiers = [
     "Intended Audience :: Developers",
+{%- if cookiecutter.license == "Apache-2.0" %}
+    "License :: OSI Approved :: Apache Software License",
+{%- endif %}
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
-license = "Apache-2.0"
+{%- if cookiecutter.license != "None" %}
+license = "{{cookiecutter.license}}"
+{%- endif %}
+license-files = [ "LICENSE" ]
+requires-python = ">=3.9"
+dependencies = [
+    {%- if extras %}
+    "singer-sdk[{{ extras|join(',') }}]~=0.44.3",
+    {%- else %}
+    "singer-sdk~=0.44.3",
+    {%- endif %}
+    {%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
+    "requests~=2.32.3",
+    {%- endif %}
+    {%- if cookiecutter.stream_type == "SQL" %}
+    "sqlalchemy~=2.0.36",
+    {%- endif %}
+]
+
+[project.optional-dependencies]
+s3 = [
+    "fs-s3fs~=1.1.1",
+]
+
+[project.scripts]
+# CLI declaration
+{{cookiecutter.tap_id}} = '{{cookiecutter.library_name}}.tap:Tap{{cookiecutter.source_name}}.cli'
+
+[dependency-groups]
+dev = [
+    { include-group = "test" },
+]
+test = [
+    "pytest>=8",
+    {%- if cookiecutter.include_ci_files == "GitHub" %}
+    "pytest-github-actions-annotate-failures>=0.3",
+    {%- endif %}
+    "singer-sdk[testing]",
+]
+
 {%- if cookiecutter.variant != "None (Skip)" %}
+[tool.hatch.build.targets.wheel]
 packages = [
-    { include = "{{cookiecutter.library_name}}" },
+    "{{cookiecutter.library_name}}",
 ]
 {%- endif %}
 
-[tool.poetry.dependencies]
-python = ">=3.8"
-importlib-resources = { version = "==6.4.*", python = "<3.9" }
-singer-sdk = { version="~=0.39.1", extras = [
-    {%- if cookiecutter.auth_method == "JWT" -%}"jwt", {% endif -%}
-    {%- if cookiecutter.faker_extra -%}"faker",{%- endif -%}
-] }
-fs-s3fs = { version = "~=1.1.1", optional = true }
-{%- if cookiecutter.stream_type in ["REST", "GraphQL"] %}
-requests = "~=2.32.3"
-{%- endif %}
-
-[tool.poetry.group.dev.dependencies]
-pytest = ">=8"
-{%- if cookiecutter.auth_method == "JWT" %}
-singer-sdk = { version="~=0.39.1", extras = ["jwt", "testing"] }
-{%- else %}
-singer-sdk = { version="~=0.39.1", extras = ["testing"] }
-{%- endif %}
-
-[tool.poetry.extras]
-s3 = ["fs-s3fs"]
+[tool.pytest.ini_options]
+addopts = [
+    "--durations=10",
+]
 
 [tool.mypy]
 python_version = "3.12"
@@ -61,31 +90,22 @@ plugins = "sqlmypy"
 {%- endif %}
 
 [tool.ruff]
-src = ["{{cookiecutter.library_name}}"]
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.lint]
 ignore = [
-    "ANN101",  # missing-type-self
-    "ANN102",  # missing-type-cls
     "COM812",  # missing-trailing-comma
-    "ISC001",  # single-line-implicit-string-concatenation
 ]
 select = ["ALL"]
 
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
 
-[tool.ruff.lint.isort]
-known-first-party = ["{{cookiecutter.library_name}}"]
-
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [build-system]
-requires = ["poetry-core==1.9.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-# CLI declaration
-{{cookiecutter.tap_id}} = '{{cookiecutter.library_name}}.tap:Tap{{cookiecutter.source_name}}.cli'
+requires = [
+    "hatchling>=1,<2",
+]
+build-backend = "hatchling.build"

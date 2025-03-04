@@ -1,16 +1,12 @@
-"""Type aliases for use in the SDK."""  # noqa: A005
+"""Type aliases for use in the SDK."""
 
 from __future__ import annotations
 
 import sys
 import typing as t
+from collections.abc import Mapping
 
 import requests
-
-if sys.version_info < (3, 9):
-    from typing import Mapping  # noqa: ICN003
-else:
-    from collections.abc import Mapping
 
 if sys.version_info < (3, 10):
     from typing_extensions import TypeAlias
@@ -24,5 +20,5 @@ __all__ = [
 ]
 
 Context: TypeAlias = Mapping[str, t.Any]
-Record: TypeAlias = t.Dict[str, t.Any]
+Record: TypeAlias = dict[str, t.Any]
 Auth: TypeAlias = t.Callable[[requests.PreparedRequest], requests.PreparedRequest]

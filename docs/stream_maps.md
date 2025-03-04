@@ -175,7 +175,7 @@ to expressions using the `config` dictionary.
 ### Constructing Expressions
 
 Expressions are defined and parsed using the
-[`simpleval`](https://github.com/danthedeckie/simpleeval) expression library. This library
+[`simpleeval`](https://github.com/danthedeckie/simpleeval) expression library. This library
 accepts most native python expressions and is extended by custom functions which have been declared
 within the SDK.
 
@@ -228,31 +228,59 @@ can be referenced directly by mapping expressions.
 
 #### Built-In Functions
 
-- [`md5()`](inv:python:py:module:#hashlib) - returns an inline MD5 hash of any string, outputting
-    the string representation of the hash's hex digest.
-  - This is defined by the SDK internally with native python:
-    [`hashlib.md5(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest).
-- [`datetime`](inv:python:py:module:#datetime) - This is the datetime module object from the Python
-    standard library. You can access [`datetime.datetime`](inv:python:py:class:#datetime.datetime),
-    [`datetime.timedelta`](inv:python:py:class:#datetime.timedelta), etc.
-- [`json`](inv:python:py:module:#json) - This is the json module object from the Python standard
-    library. Primarily used for calling [`json.dumps()`](inv:python:py:function:#json.dumps)
-    and [`json.loads()`](inv:python:py:function:#json.loads).
+The following functions and namespaces are available for use in mapping expressions:
+
+| Function                                             | Description                                                                                                                                                                                                                                                                  |
+| :--------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`md5()`](inv:python:py:function:#hashlib.md5)       | Returns an inline MD5 hash of any string, outputting the string representation of the hash's hex digest. This is defined by the SDK internally with native python: [`hashlib.md5(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest).       |
+| [`sha256()`](inv:python:py:function:#hashlib.sha256) | Returns an inline SHA256 hash of any string, outputting the string representation of the hash's hex digest. This is defined by the SDK internally with native python: [`hashlib.sha256(<input>.encode("utf-8")).hexdigest()`](inv:python:py:method:#hashlib.hash.hexdigest). |
+| [`datetime`](inv:python:py:module:#datetime)         | This is the datetime module object from the Python standard library. You can access [`datetime.datetime`](inv:python:py:class:#datetime.datetime), [`datetime.timedelta`](inv:python:py:class:#datetime.timedelta), etc.                                                     |
+| [`json`](inv:python:py:module:#json)                 | This is the json module object from the Python standard library. Primarily used for calling [`json.dumps()`](inv:python:py:function:#json.dumps) and [`json.loads()`](inv:python:py:function:#json.loads).                                                                   |
 
 #### Built-in Variable Names
 
-- `config` - a dictionary with the `stream_map_config` values from settings. This can be used
-  to provide a secret hash seed, for instance.
-- `record` - an alias for the record values dictionary in the current stream.
-- `_` - same as `record` but shorter to type
-- `self` - the existing property value if the property already exists
-- `fake` - a [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config`
-  (see previous example) - see the built-in [standard providers](inv:faker:std:doc#providers)
-  for available methods
+The following variables are available in the context of a mapping expression:
+
+| Variable          | Description                                                                                                                                                                                       |
+| :---------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `config`          | A dictionary with the `stream_map_config` values from settings. This can be used to provide a secret hash seed, for instance.                                                                     |
+| `record`          | An alias for the record values dictionary in the current stream.                                                                                                                                  |
+| `_`               | Same as `record` but shorter to type.                                                                                                                                                             |
+| `self`            | The existing property value if the property already exists.                                                                                                                                       |
+| `fake`            | A [`Faker`](inv:faker:std:doc#index) instance, configurable via `faker_config` (see previous example) - see the built-in [standard providers](inv:faker:std:doc#providers) for available methods. |
+| `__stream_name__` | The name of the stream. Useful when [applying the same transformation to multiple streams](#applying-a-mapping-across-two-or-more-streams).                                                       |
 
   ```{tip}
-  The `fake` object is only available if the plugin specifies `faker` as an additional dependency (through the `singer-sdk` `faker` extra, or directly).
+  To use the `fake` object, the `faker` library must be installed.
   ```
+
+:::{versionadded} 0.35.0
+The `faker` object.
+:::
+
+:::{versionadded} 0.40.0
+The `Faker` class.
+:::
+
+:::{versionchanged} 0.41.0
+The `Faker` class was deprecated in favor of instance methods on the `fake` object.
+:::
+
+:::{versionadded} 0.42.0
+The `__stream_name__` variable.
+:::
+
+#### Built-in Alias Variable Names
+
+The following variables are available in the context of the `__alias__` expression:
+
+| Variable          | Description              |
+| :---------------- | :----------------------- |
+| `__stream_name__` | The existing stream name |
+
+:::{versionadded} 0.42.0
+The `__stream_name__` variable.
+:::
 
 #### Automatic Schema Detection
 
@@ -435,6 +463,46 @@ stream_maps:
 ```
 ````
 
+### Masking data with Faker
+
+It is best practice (or even a legal requirement) to mask PII/PHI in lower environments. Stream mappers have access to the `Faker` library, which can be used to generate random data in various forms/formats.
+
+```yaml
+stream_maps:
+  customers:
+    # IMPORTANT: the `fake` variable name will only be available if faker_config is defined
+    first_name: fake.first_name() # generates a new random name each time
+faker_config:
+  # set specific seed
+  seed: 0
+  # set specific locales
+  locale:
+    - en_US
+    - en_GB
+```
+
+Be sure to checkout the [`faker` documentation](https://faker.readthedocs.io/en/master/) for all the fake data generation possibilities.
+
+Note that in the example above, `faker` will generate a new random value each time the `first_name()` function is invoked. This means if 3 records have a `first_name` value of `Mike`, then they will each have a different name after being mapped (for example, `Alistair`, `Debra`, `Scooby`).  This can actually lead to issues when developing in the lower environments.
+
+Some users require consistent masking (for example, the first name `Mike` is always masked as `Debra`). Consistent masking preserves the relationship between tables and rows, while still hiding the real value. When a random mask is generated every time, relationships between tables/rows are effectively lost, making it impossible to test things like sql `JOIN`s. This can cause highly unpredictable behavior when running the same code in lower environments vs production.
+
+To generate consistent masked values, you must provide the **same seed each time** before invoking the faker function.
+
+```yaml
+stream_maps:
+  customers:
+    # will always generate the same value for the same seed
+    first_name: fake.seed_instance(_['first_name']) or fake.first_name()
+faker_config:
+  # IMPORTANT: `fake` is only available if the `faker` extra is installed
+  locale: en_US
+```
+
+Remember, these expressions are evaluated by the [`simpleeval`](https://github.com/danthedeckie/simpleeval) expression library, which only allows a single python expression (which is the reason for the `or` syntax above).
+
+This means if you require more advanced masking logic, which cannot be defined in a single python expression, you may need to consider a custom stream mapper.
+
 ### Aliasing a stream using `__alias__`
 
 To alias a stream, simply add the operation `"__alias__": "new_name"` to the stream
@@ -588,6 +656,36 @@ stream_maps:
 Support for stream glob expressions.
 :::
 
+### Aliasing two or more streams
+
+The `__alias__` operation evaluates simple python expressions.
+
+You can combine this with glob expressions to rename more than one stream:
+
+````{tab} meltano.yml
+```yaml
+stream_maps:
+  "*":
+    __alias__: "__stream_name__ + '_v2'"
+```
+````
+
+````{tab} JSON
+```json
+{
+    "stream_maps": {
+        "*": {
+            "__alias__": "__stream_name__ + '_v2'"
+        }
+    }
+}
+```
+````
+
+:::{versionadded} 0.42.0
+Support for `__alias__` expression evaluation.
+:::
+
 ### Understanding Filters' Affects on Parent-Child Streams
 
 Nested child streams iterations will be skipped if their parent stream has a record-level
@@ -651,7 +749,7 @@ excluded at the tap level, then the stream will be skipped exactly as if it were
 in the catalog metadata.
 
 If a stream is specified to be excluded at the target level, or in a standalone mapper
-between the tap and target, the filtering occurs downstream from the tap and therefor cannot
+between the tap and target, the filtering occurs downstream from the tap and therefore cannot
 affect the selection rules of the tap itself. Except in special test cases or in cases where
 runtime is trivial, we highly recommend implementing stream-level exclusions at the tap
 level rather than within the downstream target or mapper plugins.
@@ -681,3 +779,31 @@ the `key_properties` in an extract-load pipeline. For instance, it is common to 
 "append-only" loading behavior in certain targets, as may be required for historical reporting. This does not change the
 underlying nature of the `primary_key` configuration in the upstream source data, only how it will be landed or deduped
 in the downstream source.
+
+
+### Q: How do I use Meltano environment variables to configure stream maps?
+
+**Answer:** Environment variables in Meltano can be used to configure stream maps, but you first need to add the corresponding settings
+to your plugins `settings` option. For example:
+
+```yaml
+plugins:
+  extractors:
+  - name: tap-csv
+    variant: meltanolabs
+    pip_url: git+https://github.com/MeltanoLabs/tap-csv.git
+    settings:
+    - name: stream_maps.customers.email
+    - name: stream_maps.customers.email_domain
+    - name: stream_maps.customers.email_hash
+    - name: stream_maps.customers.__else__
+    - name: stream_maps.stream_map_config
+```
+
+Then, you can set the following environment variables:
+
+```shell
+TAP_CSV_STREAM_MAPS_CUSTOMERS_EMAIL_DOMAIN='email.split("@")[-1]'
+TAP_CSV_STREAM_MAPS_CUSTOMERS_EMAIL_HASH='md5(config["hash_seed"] + email)'
+TAP_CSV_STREAM_MAP_CONFIG_HASH_SEED='01AWZh7A6DzGm6iJZZ2T'
+```

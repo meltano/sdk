@@ -11,12 +11,12 @@ if t.TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
 
-Breadcrumb = t.Tuple[str, ...]
+Breadcrumb = tuple[str, ...]
 
 logger = logging.getLogger(__name__)
 
 
-class SelectionMask(t.Dict[Breadcrumb, bool]):
+class SelectionMask(dict[Breadcrumb, bool]):
     """Boolean mask for property selection in schemas and records."""
 
     def __missing__(self, breadcrumb: Breadcrumb) -> bool:
@@ -87,6 +87,7 @@ class StreamMetadata(Metadata):
     """Stream metadata."""
 
     table_key_properties: t.Sequence[str] | None = None
+    replication_key: str | None = None
     forced_replication_method: str | None = None
     valid_replication_keys: list[str] | None = None
     schema_name: str | None = None
@@ -95,7 +96,7 @@ class StreamMetadata(Metadata):
 AnyMetadata: TypeAlias = t.Union[Metadata, StreamMetadata]
 
 
-class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
+class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
     """Stream metadata mapping."""
 
     @classmethod
@@ -267,8 +268,7 @@ class MetadataMapping(t.Dict[Breadcrumb, AnyMetadata]):
             return md_entry.selected_by_default
 
         logger.debug(
-            "Selection metadata omitted for '%s'. "
-            "Using parent value of selected=%s.",
+            "Selection metadata omitted for '%s'. Using parent value of selected=%s.",
             breadcrumb,
             parent_value,
         )
@@ -352,7 +352,7 @@ class CatalogEntry:
         return result
 
 
-class Catalog(t.Dict[str, CatalogEntry]):
+class Catalog(dict[str, CatalogEntry]):
     """Singer catalog mapping of stream entries."""
 
     @classmethod

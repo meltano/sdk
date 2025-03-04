@@ -8,7 +8,6 @@ from logging import WARNING
 from textwrap import dedent
 
 import pytest
-from jsonschema import Draft6Validator
 
 from singer_sdk.helpers._typing import (
     JSONSCHEMA_ANNOTATION_SECRET,
@@ -27,6 +26,7 @@ from singer_sdk.helpers._typing import (
 )
 from singer_sdk.tap_base import Tap
 from singer_sdk.typing import (
+    DEFAULT_JSONSCHEMA_VALIDATOR,
     AllOf,
     AnyType,
     ArrayType,
@@ -161,7 +161,8 @@ def test_to_json():
             "required": [
                 "test_property"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "$schema": "https://json-schema.org/draft/2020-12/schema"
         }""",
     )
 
@@ -172,6 +173,7 @@ def test_any_type(caplog: pytest.LogCaptureFixture):
     )
     with caplog.at_level(WARNING):
         assert schema.to_dict() == {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
                 "any_type": {
@@ -248,6 +250,17 @@ def test_property_description():
         "test_property": {
             "type": ["string", "null"],
             "description": text,
+        },
+    }
+
+
+def test_property_title():
+    title = "My Test Property"
+    prop = Property("test_property", StringType, title=title)
+    assert prop.to_dict() == {
+        "test_property": {
+            "type": ["string", "null"],
+            "title": title,
         },
     }
 
@@ -482,12 +495,14 @@ def test_inbuilt_type(json_type: JSONTypeHelper, expected_json_schema: dict):
                 IntegerType,
                 allowed_values=[1, 2, 3, 4, 5, 6, 7, 8, 9],
                 examples=[1, 2, 3],
+                deprecated=True,
             ),
             {
                 "my_prop9": {
                     "type": ["integer", "null"],
                     "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9],
                     "examples": [1, 2, 3],
+                    "deprecated": True,
                 },
             },
             {is_integer_type},
@@ -593,13 +608,13 @@ def test_property_creation(
         property_name = next(iter(property_dict.keys()))
         property_node = property_dict[property_name]
         if check_fn in type_fn_checks_true:
-            assert (
-                check_fn(property_node) is True
-            ), f"{check_fn.__name__} was not True for {property_dict!r}"
+            assert check_fn(property_node) is True, (
+                f"{check_fn.__name__} was not True for {property_dict!r}"
+            )
         else:
-            assert (
-                check_fn(property_node) is False
-            ), f"{check_fn.__name__} was not False for {property_dict!r}"
+            assert check_fn(property_node) is False, (
+                f"{check_fn.__name__} was not False for {property_dict!r}"
+            )
 
 
 def test_wrapped_type_dict():
@@ -932,7 +947,7 @@ def test_discriminated_union():
         ),
     )
 
-    validator = Draft6Validator(th.to_dict())
+    validator = DEFAULT_JSONSCHEMA_VALIDATOR(th.to_dict())
 
     assert validator.is_valid(
         {

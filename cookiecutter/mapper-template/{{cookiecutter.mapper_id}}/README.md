@@ -6,11 +6,11 @@ Built with the [Meltano Mapper SDK](https://sdk.meltano.com) for Singer Mappers.
 
 <!--
 
-Developer TODO: Update the below as needed to correctly describe the install procedure. For instance, if you do not have a PyPi repo, or if you want users to directly install from your git repo, you can modify this step as appropriate.
+Developer TODO: Update the below as needed to correctly describe the install procedure. For instance, if you do not have a PyPI repo, or if you want users to directly install from your git repo, you can modify this step as appropriate.
 
 ## Installation
 
-Install from PyPi:
+Install from PyPI:
 
 ```bash
 pipx install {{ cookiecutter.mapper_id }}
@@ -74,9 +74,13 @@ Follow these instructions to contribute to this project.
 
 ### Initialize your Development Environment
 
+Prerequisites:
+
+- Python 3.9+
+- [uv](https://docs.astral.sh/uv/)
+
 ```bash
-pipx install poetry
-poetry install
+uv sync
 ```
 
 ### Create and Run Tests
@@ -85,13 +89,13 @@ Create tests within the `tests` subfolder and
   then run:
 
 ```bash
-poetry run pytest
+uv run pytest
 ```
 
-You can also test the `{{cookiecutter.mapper_id}}` CLI interface directly using `poetry run`:
+You can also test the `{{cookiecutter.mapper_id}}` CLI interface directly using `uv run`:
 
 ```bash
-poetry run {{cookiecutter.mapper_id}} --help
+uv run {{cookiecutter.mapper_id}} --help
 ```
 
 ### Testing with [Meltano](https://www.meltano.com)

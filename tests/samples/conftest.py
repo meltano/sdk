@@ -15,11 +15,11 @@ from singer_sdk.testing import _get_tap_catalog
 @pytest.fixture
 def csv_config(outdir: str) -> dict:
     """Get configuration dictionary for target-csv."""
-    return {"target_folder": outdir}
+    return {"target_folder": outdir, "add_record_metadata": False}
 
 
 @pytest.fixture
-def _sqlite_sample_db(sqlite_connector):
+def sqlite_sample_db(sqlite_connector: SQLiteConnector):
     """Return a path to a newly constructed sample DB."""
     with sqlite_connector._connect() as conn, conn.begin():
         for t in range(3):
@@ -29,14 +29,15 @@ def _sqlite_sample_db(sqlite_connector):
                     f"""
                     CREATE TABLE t{t} (
                         c1 int PRIMARY KEY NOT NULL,
-                        c2 varchar(10) NOT NULL
+                        c2 varchar(10) NOT NULL,
+                        c3 text NOT NULL
                     )
                     """
                 ),
             )
             for x in range(100):
                 conn.execute(
-                    sa.text(f"INSERT INTO t{t} VALUES ({x}, 'x={x}')"),  # noqa: S608
+                    sa.text(f"INSERT INTO t{t} VALUES ({x}, 'x={x}', 'y={x}')"),  # noqa: S608
                 )
 
 
@@ -71,12 +72,12 @@ def sqlite_sample_db_catalog(sqlite_sample_db_config) -> Catalog:
 
 @pytest.fixture
 def sqlite_sample_tap(
-    _sqlite_sample_db,
+    sqlite_sample_db,
     sqlite_sample_db_config,
     sqlite_sample_db_state,
     sqlite_sample_db_catalog,
 ) -> SQLiteTap:
-    _ = _sqlite_sample_db
+    _ = sqlite_sample_db
     return SQLiteTap(
         config=sqlite_sample_db_config,
         catalog=sqlite_sample_db_catalog.to_dict(),

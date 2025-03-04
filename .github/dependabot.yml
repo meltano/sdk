@@ -15,8 +15,9 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    versioning-strategy: increase-if-necessary
   - package-ecosystem: pip
-    directory: "/.github/workflows"
+    directory: "/.github/workflows/resources"
     schedule:
       interval: weekly
       time: "12:00"

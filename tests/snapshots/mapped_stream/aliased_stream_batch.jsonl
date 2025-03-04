@@ -1,0 +1,3 @@
+{"type":"SCHEMA","stream":"aliased_stream","schema":{"properties":{"email":{"type":["string"]},"count":{"type":["integer","null"]},"user":{"properties":{"id":{"type":["integer","null"]},"sub":{"properties":{"num":{"type":["integer","null"]},"custom_obj":{"type":["string","null"]}},"type":["object","null"]},"some_numbers":{"items":{"type":["number"]},"type":["array","null"]}},"type":["object","null"]},"joined_at":{"format":"date-time","type":["string","null"]}},"type":"object","required":["email"],"$schema":"https://json-schema.org/draft/2020-12/schema"},"key_properties":[]}
+{"type":"BATCH","stream":"aliased_stream","encoding":{"format":"jsonl","compression":"gzip"},"manifest":["file:///tmp/stream.json.gz"]}
+{"type":"STATE","value":{"bookmarks":{"mystream":{}}}}

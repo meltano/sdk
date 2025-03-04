@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import contextlib
+import importlib.resources
 import typing as t
 import warnings
 
-from singer_sdk.helpers._compat import importlib_resources
 from singer_sdk.testing import target_test_streams
 
 if t.TYPE_CHECKING:
@@ -47,7 +47,7 @@ class TestTemplate:
         msg = "ID not implemented."
         raise NotImplementedError(msg)
 
-    def setup(self) -> None:  # noqa: PLR6301
+    def setup(self) -> None:
         """Test setup, called before `.test()`.
 
         This method is useful for preparing external resources (databases, folders etc.)
@@ -63,7 +63,7 @@ class TestTemplate:
         """Main Test body, called after `.setup()` and before `.validate()`."""
         self.runner.sync_all()
 
-    def validate(self) -> None:  # noqa: PLR6301
+    def validate(self) -> None:
         """Test validation, called after `.test()`.
 
         This method is particularly useful in Target tests, to validate that records
@@ -75,7 +75,7 @@ class TestTemplate:
         msg = "Method not implemented."
         raise NotImplementedError(msg)
 
-    def teardown(self) -> None:  # noqa: PLR6301
+    def teardown(self) -> None:
         """Test Teardown.
 
         This method is useful for cleaning up external resources
@@ -103,8 +103,8 @@ class TestTemplate:
         Raises:
             ValueError: if Test instance does not have `name` and `type` properties.
         """
-        if not self.name or not self.plugin_type:
-            msg = "Test must have 'name' and 'type' properties."
+        if not self.name or not self.plugin_type:  # pragma: no cover
+            msg = "Test must have 'name' and 'plugin_type' properties."
             raise ValueError(msg)
 
         self.config = config
@@ -249,9 +249,9 @@ class AttributeTestTemplate(TestTemplate):
     @classmethod
     def evaluate(
         cls,
-        stream: Stream,  # noqa: ARG003
-        property_name: str,  # noqa: ARG003
-        property_schema: dict,  # noqa: ARG003
+        stream: Stream,
+        property_name: str,
+        property_schema: dict,
     ) -> bool:
         """Determine if this attribute test is applicable to the given property.
 
@@ -322,9 +322,9 @@ class TargetFileTestTemplate(TargetTestTemplate):
         """
         # get input from file
         if getattr(self, "singer_filepath", None):
-            assert (
-                self.singer_filepath.is_file()
-            ), f"Singer file {self.singer_filepath} does not exist."
+            assert self.singer_filepath.is_file(), (
+                f"Singer file {self.singer_filepath} does not exist."
+            )
             runner.input_filepath = self.singer_filepath
         super().run(config, resource, runner)
 
@@ -337,4 +337,4 @@ class TargetFileTestTemplate(TargetTestTemplate):
         Returns:
             The expected Path to this tests singer file.
         """
-        return importlib_resources.files(target_test_streams) / f"{self.name}.singer"
+        return importlib.resources.files(target_test_streams) / f"{self.name}.singer"

@@ -14,8 +14,10 @@ from gzip import open as gzip_open
 from types import MappingProxyType
 
 import jsonschema
+import jsonschema.validators
 from typing_extensions import override
 
+from singer_sdk import metrics
 from singer_sdk._singerlib.json import deserialize_json
 from singer_sdk.exceptions import (
     InvalidJSONSchema,
@@ -38,6 +40,7 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
     handle_invalid_timestamp_in_record,
 )
+from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
 
 if t.TYPE_CHECKING:
     from logging import Logger
@@ -88,7 +91,10 @@ class JSONSchemaValidator(BaseJSONSchemaValidator):
         Raises:
             InvalidJSONSchema: If the schema provided from tap or mapper is invalid.
         """
-        jsonschema_validator = jsonschema.Draft7Validator
+        jsonschema_validator = jsonschema.validators.validator_for(
+            schema,
+            DEFAULT_JSONSCHEMA_VALIDATOR,
+        )
 
         super().__init__(schema)
         if validate_formats:
@@ -188,6 +194,31 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         )
 
         self._validator: BaseJSONSchemaValidator | None = self.get_validator()
+        self._record_counter: metrics.Counter = metrics.record_counter(self.stream_name)
+        self._batch_timer = metrics.Timer(
+            metrics.Metric.BATCH_PROCESSING_TIME,
+            tags={
+                metrics.Tag.STREAM: self.stream_name,
+            },
+        )
+
+    @property
+    def record_counter_metric(self) -> metrics.Counter:
+        """Get the record counter for this sink.
+
+        Returns:
+            The Meter instance for the record counter.
+        """
+        return self._record_counter
+
+    @property
+    def batch_processing_timer(self) -> metrics.Timer:
+        """Get the batch processing timer for this sink.
+
+        Returns:
+            The Meter instance for the batch processing timer.
+        """
+        return self._batch_timer
 
     @cached_property
     def validate_schema(self) -> bool:
@@ -369,6 +400,15 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return self.config.get("add_record_metadata", False)
 
     @property
+    def process_activate_version_messages(self) -> bool:
+        """Check if activate version messages should be processed.
+
+        Returns:
+            True if activate version messages should be processed.
+        """
+        return self.config.get("process_activate_version_messages", True)
+
+    @property
     def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:
         """Return a treatment to use for datetime parse errors: ERROR. MAX, or NULL.
 
@@ -416,7 +456,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             or datetime.datetime.now(tz=datetime.timezone.utc)
         ).isoformat()
         record["_sdc_deleted_at"] = record.get("_sdc_deleted_at")
-        record["_sdc_sequence"] = int(round(time.time() * 1000))
+        record["_sdc_sequence"] = round(time.time() * 1000)
         record["_sdc_table_version"] = message.get("version")
         record["_sdc_sync_started_at"] = self.sync_started_at
 
@@ -580,7 +620,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     # SDK developer overrides:
 
-    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: ARG002, PLR6301
+    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: PLR6301, ARG002
         """Process incoming record and return a modified result.
 
         Args:
@@ -680,6 +720,7 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
         should not be relied on, it's recommended to use a uuid as well.
         """
         self.logger.info("Cleaning up %s", self.stream_name)
+        self.record_counter_metric.exit()
 
     def process_batch_files(
         self,
@@ -707,16 +748,20 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
                 storage = StorageTarget.from_url(head)
 
             if encoding.format == BatchFileFormat.JSONL:
-                with storage.fs(create=False) as batch_fs, batch_fs.open(
-                    tail,
-                    mode="rb",
-                ) as file:
-                    context_file = (
-                        gzip_open(file) if encoding.compression == "gzip" else file
-                    )
-                    context = {
-                        "records": [deserialize_json(line) for line in context_file]  # type: ignore[attr-defined]
-                    }
+                with (
+                    storage.fs(create=False) as batch_fs,
+                    batch_fs.open(tail, mode="rb") as file,
+                ):
+                    if encoding.compression == "gzip":
+                        with gzip_open(file) as context_file:
+                            context = {
+                                "records": [
+                                    deserialize_json(line) for line in context_file
+                                ]
+                            }
+                    else:
+                        context = {"records": [deserialize_json(line) for line in file]}
+                    self.record_counter_metric.increment(len(context["records"]))
                     self.process_batch(context)
             elif (
                 importlib.util.find_spec("pyarrow")
@@ -724,13 +769,13 @@ class Sink(metaclass=abc.ABCMeta):  # noqa: PLR0904
             ):
                 import pyarrow.parquet as pq  # noqa: PLC0415
 
-                with storage.fs(create=False) as batch_fs, batch_fs.open(
-                    tail,
-                    mode="rb",
-                ) as file:
-                    context_file = file
-                    table = pq.read_table(context_file)
+                with (
+                    storage.fs(create=False) as batch_fs,
+                    batch_fs.open(tail, mode="rb") as file,
+                ):
+                    table = pq.read_table(file)
                     context = {"records": table.to_pylist()}
+                    self.record_counter_metric.increment(len(context["records"]))
                     self.process_batch(context)
             else:
                 msg = f"Unsupported batch encoding format: {encoding.format}"

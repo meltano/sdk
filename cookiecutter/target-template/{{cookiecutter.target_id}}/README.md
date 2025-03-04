@@ -6,11 +6,11 @@ Build with the [Meltano Target SDK](https://sdk.meltano.com).
 
 <!--
 
-Developer TODO: Update the below as needed to correctly describe the install procedure. For instance, if you do not have a PyPi repo, or if you want users to directly install from your git repo, you can modify this step as appropriate.
+Developer TODO: Update the below as needed to correctly describe the install procedure. For instance, if you do not have a PyPI repo, or if you want users to directly install from your git repo, you can modify this step as appropriate.
 
 ## Installation
 
-Install from PyPi:
+Install from PyPI:
 
 ```bash
 pipx install {{ cookiecutter.target_id }}
@@ -51,7 +51,7 @@ This Singer target will automatically import any environment variables within th
 `.env` if the `--config=ENV` is provided, such that config values will be considered if a matching
 environment variable is set either in the terminal context or in the `.env` file.
 
-### Source Authentication and Authorization
+### Authentication and Authorization
 
 <!--
 Developer TODO: If your target requires special access on the destination system, or any special authentication requirements, provide those here.
@@ -66,8 +66,8 @@ You can easily run `{{ cookiecutter.target_id }}` by itself or in a pipeline usi
 ```bash
 {{ cookiecutter.target_id }} --version
 {{ cookiecutter.target_id }} --help
-# Test using the "Carbon Intensity" sample:
-tap-carbon-intensity | {{ cookiecutter.target_id }} --config /path/to/{{ cookiecutter.target_id }}-config.json
+# Test using the "Smoke Test" tap:
+tap-smoke-test | {{ cookiecutter.target_id }} --config /path/to/{{ cookiecutter.target_id }}-config.json
 ```
 
 ## Developer Resources
@@ -76,9 +76,13 @@ Follow these instructions to contribute to this project.
 
 ### Initialize your Development Environment
 
+Prerequisites:
+
+- Python 3.9+
+- [uv](https://docs.astral.sh/uv/)
+
 ```bash
-pipx install poetry
-poetry install
+uv sync
 ```
 
 ### Create and Run Tests
@@ -87,13 +91,13 @@ Create tests within the `tests` subfolder and
   then run:
 
 ```bash
-poetry run pytest
+uv run pytest
 ```
 
-You can also test the `{{cookiecutter.target_id}}` CLI interface directly using `poetry run`:
+You can also test the `{{cookiecutter.target_id}}` CLI interface directly using `uv run`:
 
 ```bash
-poetry run {{cookiecutter.target_id}} --help
+uv run {{cookiecutter.target_id}} --help
 ```
 
 ### Testing with [Meltano](https://meltano.com/)
@@ -122,8 +126,9 @@ Now you can test and orchestrate using Meltano:
 ```bash
 # Test invocation:
 meltano invoke {{ cookiecutter.target_id }} --version
-# OR run a test `elt` pipeline with the Carbon Intensity sample tap:
-meltano run tap-carbon-intensity {{ cookiecutter.target_id }}
+
+# OR run a test ELT pipeline with the Smoke Test sample tap:
+meltano run tap-smoke-test {{ cookiecutter.target_id }}
 ```
 
 ### SDK Dev Guide
