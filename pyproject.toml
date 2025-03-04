@@ -45,7 +45,6 @@ dependencies = [
     "jsonschema>=4.16.0",
     "packaging>=23.1",
     "python-dotenv>=0.20",
-    "python-json-logger>=2",
     "PyYAML>=6.0",
     "referencing>=0.30.0",
     "requests>=2.25.1",
