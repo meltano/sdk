@@ -10,8 +10,8 @@ from copy import deepcopy
 
 import inflection
 
-from singer_sdk._singerlib.json import serialize_json
 from singer_sdk.exceptions import ConfigValidationError
+from singer_sdk.singerlib.json import serialize_json
 
 DEFAULT_FLATTENING_SEPARATOR = "__"
 

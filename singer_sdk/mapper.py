@@ -40,7 +40,7 @@ if t.TYPE_CHECKING:
     else:
         from typing_extensions import TypeAlias
 
-    from singer_sdk._singerlib.catalog import Catalog
+    from singer_sdk.singerlib.catalog import Catalog
 
 
 MAPPER_ELSE_OPTION = "__else__"
