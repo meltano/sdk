@@ -12,6 +12,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+env:
+  FORCE_COLOR: 1
+  UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
+  UV_VERSION: 0.5.26
+
 permissions:  # added using https://github.com/step-security/secure-repo
   contents: read
 
@@ -32,13 +37,14 @@ jobs:
       with:
         python-version: 3.x
 
+    - uses: astral-sh/setup-uv@v5
+      with:
+        version: ${{ env.UV_VERSION }}
+
     - name: Install tools
-      env:
-        PIP_CONSTRAINT: ${{ github.workspace }}/.github/workflows/constraints.txt
       run: |
-        python -Im pip install -U pip
-        pipx install griffe nox
-        pipx list
+        uv tool install nox
+        uv tool list
 
     - name: Set REF
       id: set-ref

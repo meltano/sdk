@@ -1,3 +1,5 @@
+"""Singer catalog and metadata."""
+
 from __future__ import annotations
 
 import enum
@@ -5,7 +7,7 @@ import logging
 import typing as t
 from dataclasses import dataclass, fields
 
-from singer_sdk._singerlib.schema import Schema
+from singer_sdk.singerlib.schema import Schema
 
 if t.TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -268,8 +270,7 @@ class MetadataMapping(dict[Breadcrumb, AnyMetadata]):
             return md_entry.selected_by_default
 
         logger.debug(
-            "Selection metadata omitted for '%s'. "
-            "Using parent value of selected=%s.",
+            "Selection metadata omitted for '%s'. Using parent value of selected=%s.",
             breadcrumb,
             parent_value,
         )

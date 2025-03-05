@@ -121,6 +121,7 @@ def test_sync_sqlite_to_sqlite(
     - Confirm the STDOUT from the original sample DB matches with the
       STDOUT from the re-tapped target DB.
     """
+    initial_state = deepcopy(sqlite_sample_tap.state)
     orig_stdout, _, _, _ = tap_to_target_sync_test(
         sqlite_sample_tap,
         sqlite_sample_target,
@@ -129,6 +130,7 @@ def test_sync_sqlite_to_sqlite(
     tapped_config = dict(sqlite_sample_target.config)
     tapped_target = SQLiteTap(
         config=tapped_config,
+        state=initial_state,
         catalog=sqlite_sample_db_catalog.to_dict(),
     )
     new_stdout, _ = tap_sync_test(tapped_target)
@@ -138,6 +140,8 @@ def test_sync_sqlite_to_sqlite(
     new_lines = new_stdout.readlines()
     assert len(orig_lines) > 0, "Orig tap output should not be empty."
     assert len(new_lines) > 0, "(Re-)tapped target output should not be empty."
+    assert orig_lines[0] == new_lines[0]
+    assert "STATE" in new_lines[0]
     assert len(orig_lines) == len(new_lines)
 
     line_num = 0
@@ -158,9 +162,9 @@ def test_sync_sqlite_to_sqlite(
             msg = f"Could not parse JSON in new line {line_num}: {new_out}"
             raise RuntimeError(msg) from e
 
-        assert (
-            tapped_json["type"] == orig_json["type"]
-        ), f"Mismatched message type on line {line_num}."
+        assert tapped_json["type"] == orig_json["type"], (
+            f"Mismatched message type on line {line_num}."
+        )
         if tapped_json["type"] == "SCHEMA":
             assert (
                 tapped_json["schema"]["properties"].keys()
@@ -646,12 +650,7 @@ def test_record_with_missing_properties(
                 },
             },
             [],
-            dedent(
-                """\
-                INSERT INTO test_stream
-                (id, name, "table")
-                VALUES (:id, :name, :table)""",
-            ),
+            'INSERT INTO test_stream (id, name, "table") VALUES (:id, :name, :table)',
         ),
     ],
     ids=[
@@ -676,7 +675,7 @@ def test_sqlite_generate_insert_statement(
         sink.full_table_name,
         sink.schema,
     )
-    assert dml == expected_dml
+    assert str(dml) == expected_dml
 
 
 def test_hostile_to_sqlite(

@@ -65,7 +65,7 @@ STREAM_MAPS_CONFIG = PropertiesList(
         description=(
             "Config for the [`Faker`](https://faker.readthedocs.io/en/master/) "
             "instance variable `fake` used within map expressions. Only applicable if "
-            "the plugin specifies `faker` as an addtional dependency (through the "
+            "the plugin specifies `faker` as an additional dependency (through the "
             "`singer-sdk` `faker` extra or directly)."
         ),
     ),
@@ -340,7 +340,7 @@ class PluginCapabilities(CapabilitiesEnum):
     #: Support :doc:`inline stream map transforms</stream_maps>`.
     STREAM_MAPS = "stream-maps"
 
-    #: Support schema flattening, aka denesting of complex properties.
+    #: Support schema flattening, aka unnesting of complex properties.
     FLATTENING = "schema-flattening"
 
     #: Support the

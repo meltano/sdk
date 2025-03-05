@@ -6,7 +6,6 @@ import abc
 import copy
 import decimal
 import logging
-import sys
 import typing as t
 from functools import cached_property
 from http import HTTPStatus
@@ -29,19 +28,14 @@ from singer_sdk.pagination import (
 )
 from singer_sdk.streams.core import Stream
 
-if sys.version_info < (3, 13):
-    from typing_extensions import deprecated
-else:
-    from warnings import deprecated  # pragma: no cover
-
 if t.TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
     from datetime import datetime
 
     from backoff.types import Details
 
-    from singer_sdk._singerlib import Schema
     from singer_sdk.helpers.types import Auth, Context
+    from singer_sdk.singerlib import Schema
     from singer_sdk.tap_base import Tap
 
 DEFAULT_PAGE_SIZE = 1000
@@ -145,38 +139,20 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
     # HTTP Request functions
 
     @property
-    @deprecated(
-        "Use `http_method` instead.",
-        category=SingerSDKDeprecationWarning,
-    )
-    def rest_method(self) -> str:
-        """HTTP method to use for requests. Defaults to "GET".
-
-        .. deprecated:: 0.43.0
-           Override :meth:`~singer_sdk.RESTStream.http_method` instead.
-        """
-        return self._http_method or "GET"
-
-    @rest_method.setter
-    @deprecated(
-        "Use `http_method` instead.",
-        category=SingerSDKDeprecationWarning,
-    )
-    def rest_method(self, value: str) -> None:
-        """Set the HTTP method for requests.
-
-        Args:
-            value: The HTTP method to use for requests.
-
-        .. deprecated:: 0.43.0
-           Override :meth:`~singer_sdk.RESTStream.http_method` instead.
-        """
-        self._http_method = value
-
-    @property
     def http_method(self) -> str:
         """HTTP method to use for requests. Defaults to "GET"."""
-        return self._http_method or self.rest_method
+        if self._http_method:
+            return self._http_method
+
+        if hasattr(self, "rest_method"):
+            warn(
+                "Use `http_method` instead.",
+                SingerSDKDeprecationWarning,
+                stacklevel=2,
+            )
+            return self.rest_method  # type: ignore[no-any-return]
+
+        return "GET"
 
     @http_method.setter
     def http_method(self, value: str) -> None:

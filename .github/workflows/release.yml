@@ -7,11 +7,14 @@ jobs:
   build:
     name: Build artifacts
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.baipp.outputs.package_version }}
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - uses: hynek/build-and-inspect-python-package@v2
+      id: baipp
 
   check-tag:
     name: Check tag
@@ -55,7 +58,7 @@ jobs:
     needs: [build]
     environment:
       name: publishing
-      url: https://pypi.org/p/singer-sdk
+      url: https://pypi.org/project/singer-sdk/${{ needs.build.outputs.version }}
     if: startsWith(github.ref, 'refs/tags/')
     permissions:
       id-token: write  # Needed for OIDC PyPI publishing
@@ -65,7 +68,7 @@ jobs:
         name: Packages
         path: dist
     - name: Publish
-      uses: pypa/gh-action-pypi-publish@v1.12.3
+      uses: pypa/gh-action-pypi-publish@v1.12.4
 
   upload-to-release:
     name: Upload files to release

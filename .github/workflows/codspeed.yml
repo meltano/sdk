@@ -9,16 +9,16 @@ on:
       - "singer_sdk/**"
       - "tests/**"
       - "noxfile.py"
-      - "poetry.lock"
       - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/codspeed.yml"
   pull_request:
     paths:
       - "singer_sdk/**"
       - "tests/**"
       - "noxfile.py"
-      - "poetry.lock"
       - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/codspeed.yml"
   # `workflow_dispatch` allows CodSpeed to trigger backtest
   # performance analysis in order to generate initial data.
@@ -41,20 +41,14 @@ jobs:
         python-version: 3.x
         architecture: x64
 
-    - name: Install poetry
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        version: ">=0.5.19"
+
+    - name: Install dependencies
       run: |
-        curl -fsS https://install.python-poetry.org | python - -y
-
-    - name: Configure poetry
-      run: poetry config virtualenvs.create false
-
-    - name: Install project
-      run: >
-        poetry install
-        -vvv
-        --with dev
-        --with benchmark
-        --all-extras
+        uv pip install --system -r requirements/requirements.codspeed.txt
 
     - uses: CodSpeedHQ/action@v3
       with:

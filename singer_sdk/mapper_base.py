@@ -13,7 +13,7 @@ from singer_sdk.io_base import SingerReader, SingerWriter
 from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:
-    import singer_sdk._singerlib as singer
+    import singer_sdk.singerlib as singer
 
 
 class InlineMapper(PluginBase, SingerReader, SingerWriter, metaclass=abc.ABCMeta):
@@ -88,7 +88,7 @@ class InlineMapper(PluginBase, SingerReader, SingerWriter, metaclass=abc.ABCMeta
         """
         ...
 
-    def map_batch_message(  # noqa: PLR6301
+    def map_batch_message(
         self,
         message_dict: dict,
     ) -> t.Iterable[singer.Message]:

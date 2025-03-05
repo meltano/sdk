@@ -6,7 +6,7 @@ import typing as t
 
 from singer_sdk import SQLConnector, SQLStream, SQLTap
 from singer_sdk import typing as th
-from singer_sdk._singerlib.encoding._msgspec import MsgSpecWriter  # noqa: PLC2701
+from singer_sdk.singerlib.encoding.msgspec import MsgSpecWriter
 
 DB_PATH_CONFIG = "path_to_db"
 

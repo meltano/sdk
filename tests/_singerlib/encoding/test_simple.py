@@ -12,11 +12,11 @@ from textwrap import dedent
 import pytest
 
 from singer_sdk._singerlib import RecordMessage
-from singer_sdk._singerlib.encoding._simple import (
+from singer_sdk._singerlib.exceptions import InvalidInputLine
+from singer_sdk.singerlib.encoding.simple import (
     SimpleSingerReader,
     SimpleSingerWriter,
 )
-from singer_sdk._singerlib.exceptions import InvalidInputLine
 
 
 class DummyReader(SimpleSingerReader):

@@ -1,3 +1,5 @@
+"""Singer message encoding using msgspec."""
+
 from __future__ import annotations
 
 import datetime
@@ -10,8 +12,8 @@ import msgspec
 
 from singer_sdk._singerlib.exceptions import InvalidInputLine
 
-from ._base import GenericSingerReader, GenericSingerWriter
-from ._simple import Message
+from .base import GenericSingerReader, GenericSingerWriter
+from .simple import Message
 
 logger = logging.getLogger(__name__)
 

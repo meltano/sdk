@@ -1,7 +1,9 @@
+"""Singer IO reader and writer classes."""
+
 from __future__ import annotations
 
-from ._base import GenericSingerReader, GenericSingerWriter, SingerMessageType
-from ._simple import SimpleSingerReader, SimpleSingerWriter
+from .base import GenericSingerReader, GenericSingerWriter, SingerMessageType
+from .simple import SimpleSingerReader, SimpleSingerWriter
 
 __all__ = [
     "GenericSingerReader",

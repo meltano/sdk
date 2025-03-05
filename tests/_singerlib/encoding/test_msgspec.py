@@ -10,13 +10,13 @@ from textwrap import dedent
 import pytest
 
 from singer_sdk._singerlib import RecordMessage
-from singer_sdk._singerlib.encoding._msgspec import (
+from singer_sdk._singerlib.exceptions import InvalidInputLine
+from singer_sdk.singerlib.encoding.msgspec import (
     MsgSpecReader,
     MsgSpecWriter,
     dec_hook,
     enc_hook,
 )
-from singer_sdk._singerlib.exceptions import InvalidInputLine
 
 
 @pytest.mark.parametrize(

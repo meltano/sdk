@@ -6,7 +6,7 @@ import io
 import typing as t
 from contextlib import redirect_stderr, redirect_stdout
 
-import singer_sdk._singerlib as singer
+import singer_sdk.singerlib as singer
 
 if t.TYPE_CHECKING:
     from singer_sdk.mapper_base import InlineMapper

@@ -8,7 +8,7 @@ from copy import deepcopy
 from singer_sdk.helpers._typing import is_object_type
 
 if t.TYPE_CHECKING:
-    from singer_sdk._singerlib import Catalog, SelectionMask
+    from singer_sdk.singerlib import Catalog, SelectionMask
 
 
 # TODO: this was previously cached using the `memoization` library. However, the
@@ -86,7 +86,7 @@ def pop_deselected_record_properties(
     Walk through properties, starting at the index in breadcrumb, recursively
     updating in place.
     """
-    for property_name, val in list(record.items()):
+    for property_name, val in record.copy().items():
         property_breadcrumb = (*breadcrumb, "properties", property_name)
         selected = mask[property_breadcrumb]
         if not selected:

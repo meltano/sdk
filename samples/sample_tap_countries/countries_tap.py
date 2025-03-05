@@ -13,7 +13,7 @@ from samples.sample_tap_countries.countries_streams import (
     CountriesStream,
 )
 from singer_sdk import Stream, Tap
-from singer_sdk._singerlib.encoding._msgspec import MsgSpecWriter  # noqa: PLC2701
+from singer_sdk.singerlib.encoding.msgspec import MsgSpecWriter
 from singer_sdk.typing import PropertiesList
 
 
