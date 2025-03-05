@@ -57,24 +57,7 @@ def test_bench_format_message(benchmark, bench_record_message: RecordMessage):
 def test_bench_deserialize_json(benchmark, bench_encoded_record: str):
     """Run benchmark for Sink._validator method validate."""
     number_of_runs = 1000
-
-    class DummyReader(MsgSpecReader):
-        def _process_activate_version_message(self, message_dict: dict) -> None:
-            pass
-
-        def _process_batch_message(self, message_dict: dict) -> None:
-            pass
-
-        def _process_record_message(self, message_dict: dict) -> None:
-            pass
-
-        def _process_schema_message(self, message_dict: dict) -> None:
-            pass
-
-        def _process_state_message(self, message_dict: dict) -> None:
-            pass
-
-    reader = DummyReader()
+    reader = MsgSpecReader()
 
     def run_deserialize_json():
         for record in itertools.repeat(bench_encoded_record, number_of_runs):
