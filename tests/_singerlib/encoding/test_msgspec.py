@@ -11,7 +11,7 @@ import pytest
 
 from singer_sdk._singerlib import RecordMessage
 from singer_sdk._singerlib.exceptions import InvalidInputLine
-from singer_sdk.singerlib.encoding.msgspec import (
+from singer_sdk.contrib.msgspec import (
     MsgSpecReader,
     MsgSpecWriter,
     dec_hook,

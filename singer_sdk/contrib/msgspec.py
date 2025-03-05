@@ -10,10 +10,9 @@ import typing as t
 
 import msgspec
 
-from singer_sdk._singerlib.exceptions import InvalidInputLine
-
-from .base import GenericSingerReader, GenericSingerWriter
-from .simple import Message
+from singer_sdk.singerlib.encoding.base import GenericSingerReader, GenericSingerWriter
+from singer_sdk.singerlib.encoding.simple import Message
+from singer_sdk.singerlib.exceptions import InvalidInputLine
 
 logger = logging.getLogger(__name__)
 

@@ -8,7 +8,7 @@ import json
 import pytest
 
 from singer_sdk._singerlib import RecordMessage
-from singer_sdk.singerlib.encoding.msgspec import MsgSpecReader, MsgSpecWriter
+from singer_sdk.contrib.msgspec import MsgSpecReader, MsgSpecWriter
 
 # IO Benchmarks
 
