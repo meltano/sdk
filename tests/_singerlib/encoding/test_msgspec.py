@@ -18,6 +18,14 @@ from singer_sdk.contrib.msgspec import (
     enc_hook,
 )
 
+CALLBACKS = {
+    "RECORD": lambda _: None,
+    "SCHEMA": lambda _: None,
+    "STATE": lambda _: None,
+    "ACTIVATE_VERSION": lambda _: None,
+    "BATCH": lambda _: None,
+}
+
 
 @pytest.mark.parametrize(
     "test_type,test_value,expected_value,expected_type",
@@ -55,23 +63,6 @@ def test_enc_hook(test_value, expected_value):
     assert returned == expected_value
 
 
-class DummyReader(MsgSpecReader):
-    def _process_activate_version_message(self, message_dict: dict) -> None:
-        pass
-
-    def _process_batch_message(self, message_dict: dict) -> None:
-        pass
-
-    def _process_record_message(self, message_dict: dict) -> None:
-        pass
-
-    def _process_schema_message(self, message_dict: dict) -> None:
-        pass
-
-    def _process_state_message(self, message_dict: dict) -> None:
-        pass
-
-
 @pytest.mark.parametrize(
     "line,expected,exception",
     [
@@ -94,13 +85,13 @@ class DummyReader(MsgSpecReader):
     ],
 )
 def test_deserialize(line, expected, exception):
-    reader = DummyReader()
+    reader = MsgSpecReader()
     with exception:
         assert reader.deserialize_json(line) == expected
 
 
-def test_listen():
-    reader = DummyReader()
+def test_process_lines():
+    reader = MsgSpecReader()
     input_lines = io.StringIO(
         dedent("""\
         {"type": "SCHEMA", "stream": "users", "schema": {"type": "object", "properties": {"id": {"type": "integer"}, "value": {"type": "number"}}}}
@@ -112,14 +103,14 @@ def test_listen():
         {"type": "STATE", "value": {"bookmarks": {"users": {"id": 2}, "batches": {"id": 1000000}}}}
     """)  # noqa: E501
     )
-    reader.listen(input_lines)
+    reader.process_lines(input_lines, CALLBACKS)
 
 
-def test_listen_unknown_message():
-    reader = DummyReader()
+def test_process_unknown_message():
+    reader = MsgSpecReader()
     input_lines = io.StringIO('{"type": "UNKNOWN"}\n')
     with pytest.raises(ValueError, match="Unknown message type"):
-        reader.listen(input_lines)
+        reader.process_lines(input_lines, CALLBACKS)
 
 
 def test_write_message():

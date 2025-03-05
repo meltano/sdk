@@ -9,15 +9,38 @@ import click
 
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
-from singer_sdk.io_base import SingerReader, SingerWriter
-from singer_sdk.plugin_base import PluginBase
+from singer_sdk.plugin_base import BaseSingerReader, BaseSingerWriter
 
 if t.TYPE_CHECKING:
+    from pathlib import PurePath
+
     import singer_sdk.singerlib as singer
+    from singer_sdk.singerlib.encoding.base import (
+        GenericSingerReader,
+        GenericSingerWriter,
+    )
 
 
-class InlineMapper(PluginBase, SingerReader, SingerWriter, metaclass=abc.ABCMeta):
+class InlineMapper(BaseSingerReader, BaseSingerWriter, metaclass=abc.ABCMeta):
     """Abstract base class for inline mappers."""
+
+    def __init__(
+        self,
+        *,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
+        parse_env_config: bool = False,
+        validate_config: bool = True,
+        message_reader: GenericSingerReader | None = None,
+        message_writer: GenericSingerWriter | None = None,
+    ) -> None:
+        """Initialize the inline mapper."""
+        super().__init__(
+            config=config,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
+        self.message_reader = message_reader or self.message_reader_class()
+        self.message_writer = message_writer or self.message_writer_class()
 
     @classproperty
     def capabilities(self) -> list[CapabilitiesEnum]:  # noqa: PLR6301

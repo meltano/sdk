@@ -40,8 +40,10 @@ class SQLiteStream(SQLStream):
     STATE_MSG_FREQUENCY = 10
 
 
-class SQLiteTap(MsgSpecWriter, SQLTap):
+class SQLiteTap(SQLTap):
     """The Tap class for SQLite."""
+
+    message_writer_class = MsgSpecWriter
 
     name = "tap-sqlite-sample"
     default_stream_class = SQLiteStream

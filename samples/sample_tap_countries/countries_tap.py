@@ -17,11 +17,13 @@ from singer_sdk.contrib.msgspec import MsgSpecWriter
 from singer_sdk.typing import PropertiesList
 
 
-class SampleTapCountries(MsgSpecWriter, Tap):
+class SampleTapCountries(Tap):
     """Sample tap for Countries GraphQL API."""
 
     name: str = "sample-tap-countries"
     config_jsonschema = PropertiesList().to_dict()
+
+    message_writer_class = MsgSpecWriter
 
     def discover_streams(self) -> list[Stream]:
         """Return a list of discovered streams."""

@@ -5,7 +5,6 @@ from __future__ import annotations
 import decimal
 import io
 import json
-import logging
 from contextlib import nullcontext, redirect_stdout
 from textwrap import dedent
 
@@ -18,22 +17,13 @@ from singer_sdk.singerlib.encoding.simple import (
     SimpleSingerWriter,
 )
 
-
-class DummyReader(SimpleSingerReader):
-    def _process_activate_version_message(self, message_dict: dict) -> None:
-        pass
-
-    def _process_batch_message(self, message_dict: dict) -> None:
-        pass
-
-    def _process_record_message(self, message_dict: dict) -> None:
-        pass
-
-    def _process_schema_message(self, message_dict: dict) -> None:
-        pass
-
-    def _process_state_message(self, message_dict: dict) -> None:
-        pass
+CALLBACKS = {
+    "RECORD": lambda _: None,
+    "SCHEMA": lambda _: None,
+    "STATE": lambda _: None,
+    "ACTIVATE_VERSION": lambda _: None,
+    "BATCH": lambda _: None,
+}
 
 
 @pytest.mark.parametrize(
@@ -58,13 +48,13 @@ class DummyReader(SimpleSingerReader):
     ],
 )
 def test_deserialize(line, expected, exception):
-    reader = DummyReader()
+    reader = SimpleSingerReader()
     with exception:
         assert reader.deserialize_json(line) == expected
 
 
-def test_listen():
-    reader = DummyReader()
+def test_process_lines():
+    reader = SimpleSingerReader()
     input_lines = io.StringIO(
         dedent("""\
         {"type": "SCHEMA", "stream": "users", "schema": {"type": "object", "properties": {"id": {"type": "integer"}, "value": {"type": "number"}}}}
@@ -76,33 +66,30 @@ def test_listen():
         {"type": "STATE", "value": {"bookmarks": {"users": {"id": 2}, "batches": {"id": 1000000}}}}
     """)  # noqa: E501
     )
-    reader.listen(input_lines)
+    reader.process_lines(input_lines, CALLBACKS)
 
 
-def test_listen_unknown_message():
-    reader = DummyReader()
+def test_process_unknown_message():
+    reader = SimpleSingerReader()
     input_lines = io.StringIO('{"type": "UNKNOWN"}\n')
     with pytest.raises(ValueError, match="Unknown message type"):
-        reader.listen(input_lines)
+        reader.process_lines(input_lines, CALLBACKS)
 
 
-def test_listen_error(caplog: pytest.LogCaptureFixture):
-    class ErrorReader(DummyReader):
-        def _process_record_message(self, message_dict: dict) -> None:  # noqa: ARG002
-            msg = "Bad record"
-            raise ValueError(msg)
+def test_process_error():
+    def error(message_dict: dict) -> None:  # noqa: ARG001
+        msg = "Bad record"
+        raise ValueError(msg)
 
     message = RecordMessage(
         stream="users",
         record={"id": 1, "value": 1.23},
     )
     input_lines = io.StringIO(json.dumps(message.to_dict()) + "\n")
-    reader = ErrorReader()
-    with caplog.at_level(logging.DEBUG), pytest.raises(ValueError, match="Bad record"):
-        reader.listen(input_lines)
-    assert caplog.records
-    message = caplog.records[0].message
-    assert "Failed while processing Singer message" in message
+    reader = SimpleSingerReader()
+
+    with pytest.raises(ValueError, match="Bad record"):
+        reader.process_lines(input_lines, {**CALLBACKS, "RECORD": error})
 
 
 def test_write_message():
