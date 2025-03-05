@@ -9,7 +9,7 @@ import sys
 import typing as t
 from collections import Counter, defaultdict
 
-from singer_sdk._singerlib import exceptions
+from singer_sdk.singerlib import exceptions
 
 if sys.version_info < (3, 11):
     from backports.datetime_fromisoformat import MonkeyPatch
@@ -39,6 +39,7 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
     """Interface for all plugins reading Singer messages as strings or bytes."""
 
     def __init__(self) -> None:
+        """Initialize the reader."""
         super().__init__()
         self._current_message: T | None = None
 
@@ -100,7 +101,8 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
-    def default_input(self) -> t.IO[T]: ...
+    def default_input(self) -> t.IO[T]:
+        """Default input stream for the reader."""
 
     @staticmethod
     def _assert_line_requires(line_dict: dict, requires: set[str]) -> None:
@@ -119,7 +121,8 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
             raise exceptions.InvalidInputLine(msg)
 
     @abc.abstractmethod
-    def deserialize_json(self, line: T) -> dict: ...
+    def deserialize_json(self, line: T) -> dict:
+        """Deserialize a line of json."""
 
     @abc.abstractmethod
     def _process_schema_message(self, message_dict: dict) -> None: ...
@@ -168,7 +171,9 @@ class GenericSingerWriter(t.Generic[T, M], metaclass=abc.ABCMeta):
         return self.serialize_message(message)
 
     @abc.abstractmethod
-    def serialize_message(self, message: M) -> T: ...
+    def serialize_message(self, message: M) -> T:
+        """Serialize a message into a line of json."""
 
     @abc.abstractmethod
-    def write_message(self, message: M) -> None: ...
+    def write_message(self, message: M) -> None:
+        """Write a message to stdout."""

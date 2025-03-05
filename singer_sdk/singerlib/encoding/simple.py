@@ -1,3 +1,5 @@
+"""Simple encoding for Singer messages."""
+
 from __future__ import annotations
 
 import json
@@ -7,10 +9,10 @@ import typing as t
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
-from singer_sdk._singerlib.exceptions import InvalidInputLine
-from singer_sdk._singerlib.json import deserialize_json, serialize_json
+from singer_sdk.singerlib.exceptions import InvalidInputLine
+from singer_sdk.singerlib.json import deserialize_json, serialize_json
 
-from ._base import GenericSingerReader, GenericSingerWriter, SingerMessageType
+from .base import GenericSingerReader, GenericSingerWriter, SingerMessageType
 
 logger = logging.getLogger(__name__)
 
