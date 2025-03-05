@@ -59,7 +59,7 @@ class Target(BaseSingerReader, metaclass=abc.ABCMeta):
     default_sink_class: type[Sink]
 
     message_reader_class: type[GenericSingerReader] = SingerReader
-    """The message writer class to use for writing messages."""
+    """The message reader class to use for reading messages."""
 
     def __init__(
         self,
