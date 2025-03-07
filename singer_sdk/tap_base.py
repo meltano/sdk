@@ -24,6 +24,7 @@ from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import dump_json, read_json_file
 from singer_sdk.helpers.capabilities import (
     BATCH_CONFIG,
+    SQL_TAP_USE_SINGER_DECIMAL,
     CapabilitiesEnum,
     PluginCapabilities,
     TapCapabilities,
@@ -674,6 +675,16 @@ class SQLTap(Tap):
         """
         self._catalog_dict: dict | None = None
         super().__init__(*args, **kwargs)
+
+    @classmethod
+    def append_builtin_config(cls: type[PluginBase], config_jsonschema: dict) -> None:
+        """Appends built-in config to `config_jsonschema` if not already set.
+
+        Args:
+            config_jsonschema: [description]
+        """
+        merge_missing_config_jsonschema(SQL_TAP_USE_SINGER_DECIMAL, config_jsonschema)
+        super().append_builtin_config(config_jsonschema)
 
     @property
     def tap_connector(self) -> SQLConnector:
