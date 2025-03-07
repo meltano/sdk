@@ -16,11 +16,11 @@ import sqlalchemy as sa
 from sqlalchemy.engine import reflection
 
 from singer_sdk import typing as th
-from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._util import dump_json, load_json
 from singer_sdk.helpers.capabilities import TargetLoadMethods
+from singer_sdk.singerlib import CatalogEntry, MetadataMapping, Schema
 
 if sys.version_info < (3, 13):
     from typing_extensions import deprecated
