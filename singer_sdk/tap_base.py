@@ -677,7 +677,7 @@ class SQLTap(Tap):
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def append_builtin_config(cls: type[PluginBase], config_jsonschema: dict) -> None:
+    def append_builtin_config(cls: type[SQLTap], config_jsonschema: dict) -> None:
         """Appends built-in config to `config_jsonschema` if not already set.
 
         Args:
