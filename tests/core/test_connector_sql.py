@@ -745,6 +745,32 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         assert result.precision == precision
         assert result.scale == scale
 
+    def test_handle_singer_decimal_missing_precision(self):
+        json_schema_to_sql = JSONSchemaToSQL(max_varchar_length=None)
+        schema = {
+            "type": ["string"],
+            "format": "x-singer.decimal",
+            # 'precision' is missing
+            "scale": 2,
+        }
+        result = json_schema_to_sql.to_sql_type(schema)
+        assert isinstance(result, sa.types.DECIMAL)
+        assert result.precision is None
+        assert result.scale == 2
+
+    def test_handle_singer_decimal_missing_scale(self):
+        json_schema_to_sql = JSONSchemaToSQL(max_varchar_length=None)
+        schema = {
+            "type": ["string"],
+            "format": "x-singer.decimal",
+            "precision": 10,
+            # 'scale' is missing
+        }
+        result = json_schema_to_sql.to_sql_type(schema)
+        assert isinstance(result, sa.types.DECIMAL)
+        assert result.precision == 10
+        assert result.scale is None
+
     def test_annotation_sql_datatype(self):
         json_schema_to_sql = JSONSchemaToSQL()
         json_schema_to_sql.register_sql_datatype_handler("json", sa.types.JSON)
