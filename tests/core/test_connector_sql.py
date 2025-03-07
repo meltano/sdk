@@ -727,7 +727,7 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
 
     def test_singer_decimal(self):
         json_schema_to_sql = JSONSchemaToSQL()
-        jsonschema_type = {"type": ["string"], "format": "singer.decimal"}
+        jsonschema_type = {"type": ["string"], "format": "x-singer.decimal"}
         result = json_schema_to_sql.to_sql_type(jsonschema_type)
         assert isinstance(result, sa.types.DECIMAL)
 
@@ -736,7 +736,7 @@ class TestJSONSchemaToSQL:  # noqa: PLR0904
         precision, scale = 12, 3
         jsonschema_type = {
             "type": ["string"],
-            "format": "singer.decimal",
+            "format": "x-singer.decimal",
             "precision": precision,
             "scale": scale,
         }

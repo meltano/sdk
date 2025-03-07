@@ -135,7 +135,7 @@ class SQLToJSONSchema:
 
         Args:
             use_singer_decimal: Whether to represent numbers as `string` with
-                the `singer.decimal` format instead of as `number`.
+                the `x-singer.decimal` format instead of as `number`.
         """
         self.use_singer_decimal = use_singer_decimal
 
@@ -160,7 +160,7 @@ class SQLToJSONSchema:
         Args:
             config: The configuration dictionary.
             use_singer_decimal: Whether to represent numbers as `string` with
-                the `singer.decimal` format instead of as `number`.
+                the `x-singer.decimal` format instead of as `number`.
 
         Returns:
             A new instance of the class.
@@ -293,7 +293,7 @@ class JSONSchemaToSQL:
             "hostname": lambda _: sa.types.VARCHAR(253),  # RFC 1035
             "ipv4": lambda _: sa.types.VARCHAR(15),
             "ipv6": lambda _: sa.types.VARCHAR(45),
-            "singer.decimal": self._handle_singer_decimal,
+            "x-singer.decimal": self._handle_singer_decimal,
         }
 
         self._sql_datatype_mapping: dict[str, JSONtoSQLHandler] = {}
@@ -348,7 +348,7 @@ class JSONSchemaToSQL:
         return handler(schema)
 
     def _handle_singer_decimal(self, schema: dict) -> sa.types.TypeEngine:  # noqa: PLR6301
-        """Handle a singer.decimal format.
+        """Handle a x-singer.decimal format.
 
         Args:
             schema: The JSON Schema object.
