@@ -11,7 +11,6 @@ from enum import Enum
 
 import click
 
-from singer_sdk._singerlib import Catalog, StateMessage
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
@@ -31,6 +30,7 @@ from singer_sdk.helpers.capabilities import (
 )
 from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import PluginBase
+from singer_sdk.singerlib import Catalog, StateMessage
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
@@ -333,7 +333,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         """Return a Catalog object.
 
         Returns:
-            :class:`singer_sdk._singerlib.Catalog`.
+            :class:`singer_sdk.singerlib.Catalog`.
         """
         return Catalog(
             (stream.tap_stream_id, stream._singer_catalog_entry)  # noqa: SLF001

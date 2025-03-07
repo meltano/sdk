@@ -11,7 +11,7 @@ from urllib.parse import ParseResult, urlencode, urlparse
 
 import fs
 
-from singer_sdk._singerlib.messages import Message, SingerMessageType
+from singer_sdk.singerlib.messages import Message, SingerMessageType
 
 if t.TYPE_CHECKING:
     from fs.base import FS

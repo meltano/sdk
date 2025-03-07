@@ -18,7 +18,6 @@ import jsonschema.validators
 from typing_extensions import override
 
 from singer_sdk import metrics
-from singer_sdk._singerlib.json import deserialize_json
 from singer_sdk.exceptions import (
     InvalidJSONSchema,
     InvalidRecord,
@@ -40,6 +39,7 @@ from singer_sdk.helpers._typing import (
     get_datelike_property_type,
     handle_invalid_timestamp_in_record,
 )
+from singer_sdk.singerlib.json import deserialize_json
 from singer_sdk.typing import DEFAULT_JSONSCHEMA_VALIDATOR
 
 if t.TYPE_CHECKING:
