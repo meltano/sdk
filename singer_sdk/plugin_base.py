@@ -32,6 +32,7 @@ from singer_sdk.helpers.capabilities import (
     CapabilitiesEnum,
     PluginCapabilities,
 )
+from singer_sdk.io_base import SingerMessageType, SingerReader, SingerWriter
 from singer_sdk.mapper import PluginMapper
 from singer_sdk.typing import (
     DEFAULT_JSONSCHEMA_VALIDATOR,
@@ -45,6 +46,11 @@ else:
 
 if t.TYPE_CHECKING:
     from jsonschema import ValidationError
+
+    from singer_sdk.singerlib.encoding.base import (
+        GenericSingerReader,
+        GenericSingerWriter,
+    )
 
 SDK_PACKAGE_NAME = "singer_sdk"
 
@@ -645,3 +651,140 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             A callable CLI object.
         """
         return cls.get_singer_command()
+
+
+class BaseSingerReader(PluginBase, metaclass=abc.ABCMeta):
+    """Base class for Singer readers."""
+
+    message_reader_class: type[GenericSingerReader] = SingerReader
+    """The message writer class to use for writing messages."""
+
+    def __init__(
+        self,
+        *,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
+        parse_env_config: bool = False,
+        validate_config: bool = True,
+        message_reader: GenericSingerReader | None = None,
+    ) -> None:
+        """Initialize the Singer reader.
+
+        Args:
+            config: May be one or more paths, either as str or PurePath objects, or
+                it can be a predetermined config dict.
+            parse_env_config: True to parse settings from env vars.
+            validate_config: True to require validation of config settings.
+            message_reader: A message reader object.
+        """
+        super().__init__(
+            config=config,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
+        self.message_reader = message_reader or self.message_reader_class()
+
+    @t.final
+    def listen(self, file_input: t.IO[str] | None = None) -> None:
+        """Read from input until all messages are processed.
+
+        Args:
+            file_input: Readable stream of messages. Defaults to standard in.
+        """
+        counter = self.process_lines(file_input)
+        line_count = sum(counter.values())
+
+        self.logger.info(
+            "Target '%s' completed reading %d lines of input "
+            "(%d schemas, %d records, %d batch manifests, %d state messages).",
+            self.name,
+            line_count,
+            counter[SingerMessageType.SCHEMA],
+            counter[SingerMessageType.RECORD],
+            counter[SingerMessageType.BATCH],
+            counter[SingerMessageType.STATE],
+        )
+        self.process_endofpipe()
+
+    @t.final
+    def process_lines(self, file_input: t.IO[str] | None) -> t.Counter[str]:
+        """Internal method to process jsonl lines from a Singer tap.
+
+        Args:
+            file_input: Readable stream of messages, each on a separate line.
+
+        Returns:
+            A counter object for the processed lines.
+        """
+        return self.message_reader.process_lines(
+            file_input,
+            callbacks={
+                SingerMessageType.SCHEMA: self._process_schema_message,
+                SingerMessageType.RECORD: self._process_record_message,
+                SingerMessageType.STATE: self._process_state_message,
+                SingerMessageType.ACTIVATE_VERSION: self._process_activate_version_message,  # noqa: E501
+                SingerMessageType.BATCH: self._process_batch_message,
+            },
+        )
+
+    def process_endofpipe(self) -> None:
+        """Process end of pipe."""
+
+    def _assert_line_requires(self, message_dict: dict, requires: set[str]) -> None:
+        """Assert that a message contains required fields.
+
+        Args:
+            message_dict: The message to check.
+            requires: The required fields.
+        """
+        self.message_reader.assert_line_requires(message_dict, requires)
+
+    @abc.abstractmethod
+    def _process_schema_message(self, message_dict: dict) -> None: ...
+
+    @abc.abstractmethod
+    def _process_record_message(self, message_dict: dict) -> None: ...
+
+    @abc.abstractmethod
+    def _process_state_message(self, message_dict: dict) -> None: ...
+
+    @abc.abstractmethod
+    def _process_activate_version_message(self, message_dict: dict) -> None: ...
+
+    @abc.abstractmethod
+    def _process_batch_message(self, message_dict: dict) -> None: ...
+
+
+class BaseSingerWriter(PluginBase):
+    """Base class for Singer writers."""
+
+    message_writer_class: type[GenericSingerWriter] = SingerWriter
+    """The message writer class to use for writing messages."""
+
+    def __init__(
+        self,
+        *,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
+        parse_env_config: bool = False,
+        validate_config: bool = True,
+        message_writer: GenericSingerWriter | None = None,
+    ) -> None:
+        """Initialize the Singer writer.
+
+        Args:
+            config: May be one or more paths, either as str or PurePath objects, or
+                it can be a predetermined config dict.
+            parse_env_config: True to parse settings from env vars.
+            validate_config: True to require validation of config settings.
+            message_writer: A message writer object.
+        """
+        super().__init__(
+            config=config,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
+        self.message_writer = message_writer or self.message_writer_class()
+
+    @t.final
+    def write_message(self, message: t.Any) -> None:  # noqa: ANN401
+        """Write a message to the tap's message writer."""
+        self.message_writer.write_message(message)
