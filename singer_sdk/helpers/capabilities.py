@@ -136,6 +136,18 @@ BATCH_CONFIG = PropertiesList(
         ),
     ),
 ).to_dict()
+SQL_TAP_USE_SINGER_DECIMAL = PropertiesList(
+    Property(
+        "use_singer_decimal",
+        BooleanType(),
+        title="Use Singer Decimal",
+        description=(
+            "Whether to use use strings with `x-singer.decimal` format for "
+            "decimals in the discovered schema. "
+            "This is useful to avoid precision loss when working with large numbers."
+        ),
+    ),
+).to_dict()
 TARGET_SCHEMA_CONFIG = PropertiesList(
     Property(
         "default_target_schema",
