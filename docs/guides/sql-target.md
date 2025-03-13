@@ -109,3 +109,9 @@ plugins:
 }
 ```
 ````
+
+### SQL target support for Singer Decimal string format
+
+Starting from version `0.45.0`, the Meltano Singer SDK supports the `x-singer.decimal` format for strings. If the source tap is configured to use this format, the SDK will automatically convert the string to a `DECIMAL` type in the target database.
+
+Read more about target support for `x-singer.decimal` in the [SQL tap guide](./sql-tap.md#sql-tap-support-for-singer-decimal-string-format).

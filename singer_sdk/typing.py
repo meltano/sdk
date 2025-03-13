@@ -448,6 +448,12 @@ class RegexType(StringType):
     string_format = "regex"
 
 
+class SingerDecimalType(StringType):
+    """Decimal type."""
+
+    string_format = "singer.decimal"
+
+
 class BooleanType(JSONTypeHelper[bool]):
     """Boolean type.
 
