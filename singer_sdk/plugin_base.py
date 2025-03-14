@@ -653,7 +653,48 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return cls.get_singer_command()
 
 
-class BaseSingerReader(PluginBase, metaclass=abc.ABCMeta):
+_T = t.TypeVar("_T")
+
+
+class BaseSingerIO(PluginBase):
+    """Base class for Singer taps and targets."""
+
+    def __init__(
+        self,
+        *,
+        config: dict | PurePath | str | list[PurePath | str] | None = None,
+        parse_env_config: bool = False,
+        validate_config: bool = True,
+    ):
+        """Initialize the Singer tap or target.
+
+        Args:
+            config: May be one or more paths, either as str or PurePath objects, or
+                it can be a predetermined config dict.
+            parse_env_config: True to parse settings from env vars.
+            validate_config: True to require validation of config settings.
+        """
+        super().__init__(
+            config=config,
+            parse_env_config=parse_env_config,
+            validate_config=validate_config,
+        )
+
+    @classmethod
+    def instantiate_processor(cls, instance: _T | None, default_cls: type[_T]) -> _T:
+        """Instantiate a processor instance.
+
+        Args:
+            instance: The instance to instantiate.
+            default_cls: The default class to instantiate.
+
+        Returns:
+            The instantiated processor instance.
+        """
+        return instance or default_cls()
+
+
+class BaseSingerReader(BaseSingerIO, metaclass=abc.ABCMeta):
     """Base class for Singer readers."""
 
     message_reader_class: type[GenericSingerReader] = SingerReader
@@ -681,7 +722,10 @@ class BaseSingerReader(PluginBase, metaclass=abc.ABCMeta):
             parse_env_config=parse_env_config,
             validate_config=validate_config,
         )
-        self.message_reader = message_reader or self.message_reader_class()
+        self.message_reader = self.instantiate_processor(
+            message_reader,
+            self.message_reader_class,
+        )
 
     @t.final
     def listen(self, file_input: t.IO[str] | None = None) -> None:
@@ -754,7 +798,7 @@ class BaseSingerReader(PluginBase, metaclass=abc.ABCMeta):
     def _process_batch_message(self, message_dict: dict) -> None: ...
 
 
-class BaseSingerWriter(PluginBase):
+class BaseSingerWriter(BaseSingerIO):
     """Base class for Singer writers."""
 
     message_writer_class: type[GenericSingerWriter] = SingerWriter
@@ -782,7 +826,10 @@ class BaseSingerWriter(PluginBase):
             parse_env_config=parse_env_config,
             validate_config=validate_config,
         )
-        self.message_writer = message_writer or self.message_writer_class()
+        self.message_writer = self.instantiate_processor(
+            message_writer,
+            self.message_writer_class,
+        )
 
     @t.final
     def write_message(self, message: t.Any) -> None:  # noqa: ANN401
