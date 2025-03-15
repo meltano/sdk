@@ -12,6 +12,6 @@ jobs:
   pr-preview-links:
     runs-on: ubuntu-latest
     steps:
-    - uses: readthedocs/actions/preview@v1
+    - uses: readthedocs/actions/preview@b8bba1484329bda1a3abe986df7ebc80a8950333 # v1.5
       with:
         project-slug: "meltano-sdk"
