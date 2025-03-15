@@ -37,6 +37,8 @@ env:
   UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
   UV_VERSION: 0.5.26
 
+permissions: {}
+
 jobs:
   tests:
     name: "Test on ${{ matrix.python-version }} (${{ matrix.session }}) / ${{ matrix.os }}"
@@ -45,6 +47,8 @@ jobs:
     env:
       NOXPYTHON: ${{ matrix.python-version }}
       NOXSESSION: ${{ matrix.session }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
