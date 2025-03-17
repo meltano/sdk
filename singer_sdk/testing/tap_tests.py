@@ -126,7 +126,7 @@ class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
         )
         stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
         diff = stream_transformed_keys - stream_record_keys
-        if diff:
+        if stream_record_keys and diff:
             warnings.warn(
                 UserWarning(
                     f"Fields in transformed catalog but not in records: ({diff})",
