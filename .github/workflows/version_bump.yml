@@ -1,5 +1,7 @@
 name: Version bump
 
+permissions: {}
+
 on:
   workflow_dispatch:
     inputs:
@@ -38,12 +40,12 @@ jobs:
     permissions:
       contents: write       # to create a github release
       pull-requests: write  # to create and update PRs
-      discussions: write    # to create a discussion
 
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         fetch-depth: 0
+        persist-credentials: false
 
     - uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
       with:
@@ -76,7 +78,6 @@ jobs:
         tag_name: v${{ steps.cz-bump.outputs.version }}
         prerelease: ${{ github.event.inputs.prerelease != 'none' }}
         token: ${{ secrets.MELTYBOT_GITHUB_AUTH_TOKEN }}
-        discussion_category_name: ${{ github.event.inputs.prerelease && 'announcements' || '' }}
 
     - name: Set repo file permissions
       run: |
