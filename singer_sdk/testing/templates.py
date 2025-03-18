@@ -242,7 +242,10 @@ class AttributeTestTemplate(TestTemplate[TapTestRunner]):
             for r in self.stream_records
             if r.get(self.attribute_name) is not None
         ]
-        if not values:
+        if (
+            not values
+            and self.stream.name not in self.config.ignore_no_records_for_streams
+        ):
             warnings.warn(
                 UserWarning("No records were available to test."),
                 stacklevel=2,
