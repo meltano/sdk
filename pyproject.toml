@@ -91,6 +91,11 @@ ssh = [
     "paramiko>=3.3.0",
 ]
 
+# msgspec extras
+msgspec = [
+    "msgspec>=0.19.0",
+]
+
 [project.urls]
 Homepage = "https://sdk.meltano.com/en/latest/"
 Repository = "https://github.com/meltano/sdk"

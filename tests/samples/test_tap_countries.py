@@ -116,7 +116,7 @@ def test_batch_mode(outdir):
         },
     )
 
-    buf = io.StringIO()
+    buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
     with redirect_stdout(buf):
         tap.sync_all()
 

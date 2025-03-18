@@ -43,55 +43,31 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
         super().__init__()
         self._current_message: T | None = None
 
-    @t.final
-    def listen(self, file_input: t.IO[T] | None = None) -> None:
-        """Read from input until all messages are processed.
-
-        Args:
-            file_input: Readable stream of messages. Defaults to standard in.
-        """
-        try:
-            self._process_lines(file_input or self.default_input)
-        except Exception:
-            logger.debug(
-                "Failed while processing Singer message: %s",
-                self._current_message,
-            )
-            raise
-        self._process_endofpipe()
-
-    def _process_lines(self, file_input: t.IO[T]) -> t.Counter[str]:
+    def process_lines(
+        self,
+        file_input: t.IO[T] | None,
+        callbacks: dict[str, t.Callable[[dict], None]],
+    ) -> t.Counter[str]:
         """Internal method to process jsonl lines from a Singer tap.
 
         Args:
             file_input: Readable stream of messages, each on a separate line.
+            callbacks: Dictionary of message type to callback function.
 
         Returns:
             A counter object for the processed lines.
         """
         stats: dict[str, int] = defaultdict(int)
-        for line in file_input:
+        filein = file_input or self.default_input
+        for line in filein:
             self._current_message = line
 
             line_dict = self.deserialize_json(line)
-            self._assert_line_requires(line_dict, requires={"type"})
+            self.assert_line_requires(line_dict, requires={"type"})
 
             record_type: SingerMessageType = line_dict["type"]
-            if record_type == SingerMessageType.SCHEMA:
-                self._process_schema_message(line_dict)
-
-            elif record_type == SingerMessageType.RECORD:
-                self._process_record_message(line_dict)
-
-            elif record_type == SingerMessageType.ACTIVATE_VERSION:
-                self._process_activate_version_message(line_dict)
-
-            elif record_type == SingerMessageType.STATE:
-                self._process_state_message(line_dict)
-
-            elif record_type == SingerMessageType.BATCH:
-                self._process_batch_message(line_dict)
-
+            if callback := callbacks.get(record_type):
+                callback(line_dict)
             else:
                 self._process_unknown_message(line_dict)
 
@@ -105,7 +81,7 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
         """Default input stream for the reader."""
 
     @staticmethod
-    def _assert_line_requires(line_dict: dict, requires: set[str]) -> None:
+    def assert_line_requires(line_dict: dict, requires: set[str]) -> None:
         """Check if dictionary .
 
         Args:
@@ -124,21 +100,6 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
     def deserialize_json(self, line: T) -> dict:
         """Deserialize a line of json."""
 
-    @abc.abstractmethod
-    def _process_schema_message(self, message_dict: dict) -> None: ...
-
-    @abc.abstractmethod
-    def _process_record_message(self, message_dict: dict) -> None: ...
-
-    @abc.abstractmethod
-    def _process_state_message(self, message_dict: dict) -> None: ...
-
-    @abc.abstractmethod
-    def _process_activate_version_message(self, message_dict: dict) -> None: ...
-
-    @abc.abstractmethod
-    def _process_batch_message(self, message_dict: dict) -> None: ...
-
     def _process_unknown_message(self, message_dict: dict) -> None:  # noqa: PLR6301
         """Internal method to process unknown message types from a Singer tap.
 
@@ -151,9 +112,6 @@ class GenericSingerReader(t.Generic[T], metaclass=abc.ABCMeta):
         record_type = message_dict["type"]
         msg = f"Unknown message type '{record_type}' in message."
         raise ValueError(msg)
-
-    def _process_endofpipe(self) -> None:  # noqa: PLR6301
-        logger.debug("End of pipe reached")
 
 
 class GenericSingerWriter(t.Generic[T, M], metaclass=abc.ABCMeta):

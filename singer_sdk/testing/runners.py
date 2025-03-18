@@ -185,8 +185,8 @@ class TapTestRunner(SingerTestRunner):
         Returns:
             A 2-item tuple with StringIO buffers from the Tap's output: (stdout, stderr)
         """
-        stdout_buf = io.StringIO()
-        stderr_buf = io.StringIO()
+        stdout_buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
+        stderr_buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
         with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
             self.run_sync_dry_run()
         stdout_buf.seek(0)
@@ -282,7 +282,7 @@ class TargetTestRunner(SingerTestRunner):
         target_input: t.IO[str],
         *,
         finalize: bool = True,
-    ) -> tuple[io.StringIO, io.StringIO]:
+    ) -> tuple[io.TextIOWrapper[io.BytesIO], io.TextIOWrapper[io.BytesIO]]:
         """Invoke the target with the provided input.
 
         Args:
@@ -295,14 +295,14 @@ class TargetTestRunner(SingerTestRunner):
             A 2-item tuple with StringIO buffers from the Target's output:
                 (stdout, stderr)
         """
-        stdout_buf = io.StringIO()
-        stderr_buf = io.StringIO()
+        stdout_buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
+        stderr_buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
 
         with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
             if target_input is not None:
-                target._process_lines(target_input)  # noqa: SLF001
+                target.process_lines(target_input)
             if finalize:
-                target._process_endofpipe()  # noqa: SLF001
+                target.process_endofpipe()
 
         stdout_buf.seek(0)
         stderr_buf.seek(0)
