@@ -121,12 +121,17 @@ class StreamCatalogSchemaMatchesRecordTest(StreamTestTemplate):
 
     def test(self) -> None:
         """Run test."""
-        stream_transformed_keys = set(
+        if not self.stream_records:
+            return
+
+        stream_transformed_keys: set[str] = set(
             self.stream.stream_maps[-1].transformed_schema["properties"].keys(),
         )
-        stream_record_keys = set().union(*(d.keys() for d in self.stream_records))
+        stream_record_keys: set[str] = set().union(
+            *(d.keys() for d in self.stream_records)
+        )
         diff = stream_transformed_keys - stream_record_keys
-        if stream_record_keys and diff:
+        if diff:
             warnings.warn(
                 UserWarning(
                     f"Fields in transformed catalog but not in records: ({diff})",
