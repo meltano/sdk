@@ -11,7 +11,6 @@ from enum import Enum
 
 import click
 
-from singer_sdk._singerlib import Catalog, StateMessage
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
@@ -25,18 +24,21 @@ from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import dump_json, read_json_file
 from singer_sdk.helpers.capabilities import (
     BATCH_CONFIG,
+    SQL_TAP_USE_SINGER_DECIMAL,
     CapabilitiesEnum,
     PluginCapabilities,
     TapCapabilities,
 )
 from singer_sdk.io_base import SingerWriter
-from singer_sdk.plugin_base import PluginBase
+from singer_sdk.plugin_base import BaseSingerWriter, PluginBase
+from singer_sdk.singerlib import Catalog, StateMessage
 
 if t.TYPE_CHECKING:
     from pathlib import PurePath
 
     from singer_sdk.connectors import SQLConnector
     from singer_sdk.mapper import PluginMapper
+    from singer_sdk.singerlib.encoding.base import GenericSingerWriter
     from singer_sdk.streams import SQLStream, Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
@@ -50,7 +52,7 @@ class CliTestOptionValue(Enum):
     Disabled = "disabled"
 
 
-class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
+class Tap(BaseSingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for taps.
 
     The Tap class governs configuration, validation, and stream discovery for tap
@@ -60,6 +62,9 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
     dynamic_catalog: bool = False
     """Whether the tap's catalog is dynamic. Set to True if the catalog is
     generated dynamically (e.g. by querying a database's system tables)."""
+
+    message_writer_class: type[GenericSingerWriter] = SingerWriter
+    """The message writer class to use for writing messages."""
 
     # Constructor
 
@@ -72,6 +77,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         parse_env_config: bool = False,
         validate_config: bool = True,
         setup_mapper: bool = True,
+        message_writer: GenericSingerWriter | None = None,
     ) -> None:
         """Initialize the tap.
 
@@ -85,11 +91,13 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
                 variables.
             validate_config: True to require validation of config settings.
             setup_mapper: True to initialize the plugin mapper.
+            message_writer: The class class to use for writing Singer messages.
         """
         super().__init__(
             config=config,
             parse_env_config=parse_env_config,
             validate_config=validate_config,
+            message_writer=message_writer,
         )
 
         # Declare private members
@@ -333,7 +341,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
         """Return a Catalog object.
 
         Returns:
-            :class:`singer_sdk._singerlib.Catalog`.
+            :class:`singer_sdk.singerlib.Catalog`.
         """
         return Catalog(
             (stream.tap_stream_id, stream._singer_catalog_entry)  # noqa: SLF001
@@ -674,6 +682,16 @@ class SQLTap(Tap):
         """
         self._catalog_dict: dict | None = None
         super().__init__(*args, **kwargs)
+
+    @classmethod
+    def append_builtin_config(cls: type[SQLTap], config_jsonschema: dict) -> None:
+        """Appends built-in config to `config_jsonschema` if not already set.
+
+        Args:
+            config_jsonschema: [description]
+        """
+        merge_missing_config_jsonschema(SQL_TAP_USE_SINGER_DECIMAL, config_jsonschema)
+        super().append_builtin_config(config_jsonschema)
 
     @property
     def tap_connector(self) -> SQLConnector:

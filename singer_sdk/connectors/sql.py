@@ -16,11 +16,11 @@ import sqlalchemy as sa
 from sqlalchemy.engine import reflection
 
 from singer_sdk import typing as th
-from singer_sdk._singerlib import CatalogEntry, MetadataMapping, Schema
 from singer_sdk.exceptions import ConfigValidationError
 from singer_sdk.helpers._compat import SingerSDKDeprecationWarning
 from singer_sdk.helpers._util import dump_json, load_json
 from singer_sdk.helpers.capabilities import TargetLoadMethods
+from singer_sdk.singerlib import CatalogEntry, MetadataMapping, Schema
 
 if sys.version_info < (3, 13):
     from typing_extensions import deprecated
@@ -126,10 +126,21 @@ class SQLToJSONSchema:
     .. versionchanged:: 0.43.0
        Added the :meth:`singer_sdk.connectors.sql.SQLToJSONSchema.from_config` class
        method.
+    .. versionchanged:: 0.45.0
+       Added support for the `use_singer_decimal` option.
     """
 
+    def __init__(self, *, use_singer_decimal: bool = False) -> None:
+        """Initialize the SQL to JSON Schema converter.
+
+        Args:
+            use_singer_decimal: Whether to represent numbers as `string` with
+                the `x-singer.decimal` format instead of as `number`.
+        """
+        self.use_singer_decimal = use_singer_decimal
+
     @classmethod
-    def from_config(cls: type[SQLToJSONSchema], config: dict) -> SQLToJSONSchema:  # noqa: ARG003
+    def from_config(cls: type[SQLToJSONSchema], config: dict) -> SQLToJSONSchema:
         """Create a new instance from a configuration dictionary.
 
         Override this to instantiate this converter with values from the tap's
@@ -148,11 +159,13 @@ class SQLToJSONSchema:
 
         Args:
             config: The configuration dictionary.
+            use_singer_decimal: Whether to represent numbers as `string` with
+                the `x-singer.decimal` format instead of as `number`.
 
         Returns:
             A new instance of the class.
         """
-        return cls()
+        return cls(use_singer_decimal=config.get("use_singer_decimal", False))
 
     @functools.singledispatchmethod
     def to_jsonschema(self, column_type: sa.types.TypeEngine) -> dict:  # noqa: ARG002, D102, PLR6301
@@ -195,12 +208,14 @@ class SQLToJSONSchema:
         return th.IntegerType.type_dict  # type: ignore[no-any-return]
 
     @to_jsonschema.register
-    def float_to_jsonschema(self, column_type: sa.types.Numeric) -> dict:  # noqa: ARG002, PLR6301
+    def float_to_jsonschema(self, column_type: sa.types.Numeric) -> dict:  # noqa: ARG002
         """Return a JSON Schema representation of a generic number type.
 
         Args:
             column_type (:column_type:`Numeric`): The column type.
         """
+        if self.use_singer_decimal:
+            return th.SingerDecimalType.type_dict  # type: ignore[no-any-return]
         return th.NumberType.type_dict  # type: ignore[no-any-return]
 
     @to_jsonschema.register
@@ -278,11 +293,41 @@ class JSONSchemaToSQL:
             "hostname": lambda _: sa.types.VARCHAR(253),  # RFC 1035
             "ipv4": lambda _: sa.types.VARCHAR(15),
             "ipv6": lambda _: sa.types.VARCHAR(45),
+            "x-singer.decimal": self._handle_singer_decimal,
         }
 
         self._sql_datatype_mapping: dict[str, JSONtoSQLHandler] = {}
 
         self._fallback_type: type[sa.types.TypeEngine] = sa.types.VARCHAR
+
+    @classmethod
+    def from_config(
+        cls: type[JSONSchemaToSQL],
+        config: dict,  # noqa: ARG003
+        *,
+        max_varchar_length: int | None,
+    ) -> JSONSchemaToSQL:
+        """Create a new instance from a configuration dictionary.
+
+        Override this to instantiate this converter with values from the target's
+        configuration dictionary.
+
+        .. code-block:: python
+
+              class CustomJSONSchemaToSQL(JSONSchemaToSQL):
+                  @classmethod
+                  def from_config(cls, config, **kwargs):
+                      return cls(max_varchar_length=config.get("max_varchar_length"))
+
+        Args:
+            config: The configuration dictionary.
+            max_varchar_length: The absolute maximum length for VARCHAR columns that
+                the database supports.
+
+        Returns:
+            A new instance of the class.
+        """
+        return cls(max_varchar_length=max_varchar_length)
 
     def _invoke_handler(  # noqa: PLR6301
         self,
@@ -301,6 +346,17 @@ class JSONSchemaToSQL:
         if isinstance(handler, type):
             return handler()  # type: ignore[no-any-return]
         return handler(schema)
+
+    def _handle_singer_decimal(self, schema: dict) -> sa.types.TypeEngine:  # noqa: PLR6301
+        """Handle a x-singer.decimal format.
+
+        Args:
+            schema: The JSON Schema object.
+
+        Returns:
+            The appropriate SQLAlchemy type.
+        """
+        return sa.types.DECIMAL(schema.get("precision"), schema.get("scale"))
 
     @property
     def fallback_type(self) -> type[sa.types.TypeEngine]:
@@ -524,6 +580,11 @@ class SQLConnector:  # noqa: PLR0904
     #: a custom mapping for your SQL dialect.
     sql_to_jsonschema_converter: type[SQLToJSONSchema] = SQLToJSONSchema
 
+    #: The JSON-to-SQL type mapper class for this SQL connector. Override this property
+    #: with a subclass of :class:`~singer_sdk.connectors.sql.JSONSchemaToSQL` to provide
+    #: a custom mapping for your SQL dialect.
+    jsonschema_to_sql_converter: type[JSONSchemaToSQL] = JSONSchemaToSQL
+
     def __init__(
         self,
         config: dict | None = None,
@@ -574,7 +635,10 @@ class SQLConnector:  # noqa: PLR0904
 
         .. versionadded:: 0.42.0
         """
-        return JSONSchemaToSQL(max_varchar_length=self.max_varchar_length)
+        return self.jsonschema_to_sql_converter.from_config(
+            self.config,
+            max_varchar_length=self.max_varchar_length,
+        )
 
     @contextmanager
     def _connect(self) -> t.Iterator[sa.engine.Connection]:

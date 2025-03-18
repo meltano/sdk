@@ -80,24 +80,6 @@ _TestCSVOneStreamPerFileIncremental = get_tap_test_class(
 
 
 class TestCSVOneStreamPerFileIncremental(_TestCSVOneStreamPerFileIncremental):
-    def test_tap_stream_transformed_catalog_schema_matches_record(
-        self,
-        config: SuiteConfig,
-        resource: t.Any,
-        runner: TapTestRunner,
-        stream: CSVStream,
-    ):
-        with pytest.warns(
-            UserWarning,
-            match="Fields in transformed catalog but not in records",
-        ):
-            super().test_tap_stream_transformed_catalog_schema_matches_record(
-                config,
-                resource,
-                runner,
-                stream,
-            )
-
     def test_tap_stream_returns_record(
         self,
         config: SuiteConfig,

@@ -12,7 +12,7 @@ from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
 
-import singer_sdk._singerlib as singer
+import singer_sdk.singerlib as singer
 from singer_sdk import metrics
 from singer_sdk.batch import Batcher
 from singer_sdk.exceptions import (
@@ -56,9 +56,9 @@ from singer_sdk.mapper import RemoveRecordTransform, SameRecordTransform, Stream
 if t.TYPE_CHECKING:
     import logging
 
-    from singer_sdk._singerlib.catalog import StreamMetadata
     from singer_sdk.helpers import types
     from singer_sdk.helpers._compat import Traversable
+    from singer_sdk.singerlib.catalog import StreamMetadata
     from singer_sdk.tap_base import Tap
 
 # Replication methods

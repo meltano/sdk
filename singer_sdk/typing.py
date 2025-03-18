@@ -48,7 +48,7 @@ Note:
   other valid implementations which are not syntactically identical to those generated
   here.
 
-"""  # noqa: A005
+"""
 
 from __future__ import annotations
 
@@ -446,6 +446,12 @@ class RegexType(StringType):
     """Regex type."""
 
     string_format = "regex"
+
+
+class SingerDecimalType(StringType):
+    """Decimal type."""
+
+    string_format = "singer.decimal"
 
 
 class BooleanType(JSONTypeHelper[bool]):

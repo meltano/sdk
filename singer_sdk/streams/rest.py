@@ -34,8 +34,8 @@ if t.TYPE_CHECKING:
 
     from backoff.types import Details
 
-    from singer_sdk._singerlib import Schema
     from singer_sdk.helpers.types import Auth, Context
+    from singer_sdk.singerlib import Schema
     from singer_sdk.tap_base import Tap
 
 DEFAULT_PAGE_SIZE = 1000
