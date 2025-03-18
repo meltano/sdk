@@ -29,14 +29,19 @@ env:
   FORCE_COLOR: "1"
   UV_CONSTRAINT: ${{ github.workspace }}/.github/workflows/resources/requirements.txt
 
+permissions: {}
+
 jobs:
   lint:
     name: Cookiecutter E2E Python
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         fetch-depth: 0
+        persist-credentials: false
 
     - uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
       with:
