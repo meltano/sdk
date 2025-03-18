@@ -16,6 +16,7 @@ if t.TYPE_CHECKING:
 
     from singer_sdk import Tap, Target
     from singer_sdk.helpers._compat import Traversable
+    from singer_sdk.helpers.types import Record
 
 
 class SingerTestRunner(metaclass=abc.ABCMeta):
@@ -46,7 +47,7 @@ class SingerTestRunner(metaclass=abc.ABCMeta):
         self.schema_messages: list[dict] = []
         self.record_messages: list[dict] = []
         self.state_messages: list[dict] = []
-        self.records: defaultdict = defaultdict(list)
+        self.records: defaultdict[str, list[Record]] = defaultdict(list)
 
     @staticmethod
     def _clean_sync_output(raw_records: str) -> list[dict]:
