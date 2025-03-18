@@ -8,16 +8,19 @@ import typing as t
 import warnings
 
 from singer_sdk.testing import target_test_streams
+from singer_sdk.testing.runners import SingerTestRunner, TapTestRunner, TargetTestRunner
 
 if t.TYPE_CHECKING:
     from singer_sdk.helpers._compat import Traversable
     from singer_sdk.streams import Stream
 
     from .config import SuiteConfig
-    from .runners import TapTestRunner, TargetTestRunner
 
 
-class TestTemplate:
+_T = t.TypeVar("_T", bound=SingerTestRunner)
+
+
+class TestTemplate(t.Generic[_T]):
     """Each Test class requires one or more of the following arguments.
 
     Args:
@@ -91,7 +94,7 @@ class TestTemplate:
         self,
         config: SuiteConfig,
         resource: t.Any,
-        runner: TapTestRunner | TargetTestRunner,
+        runner: _T,
     ) -> None:
         """Test main run method.
 
@@ -138,7 +141,7 @@ class TapTestTemplate(TestTemplate):
         """
         return f"tap__{self.name}"
 
-    def run(  # type: ignore[override]
+    def run(
         self,
         config: SuiteConfig,
         resource: t.Any,
@@ -190,7 +193,7 @@ class StreamTestTemplate(TestTemplate):
         super().run(config, resource, runner)
 
 
-class AttributeTestTemplate(TestTemplate):
+class AttributeTestTemplate(TestTemplate[TapTestRunner]):
     """Base Tap Stream Attribute template."""
 
     plugin_type = "attribute"
@@ -270,12 +273,12 @@ class AttributeTestTemplate(TestTemplate):
         raise NotImplementedError(msg)
 
 
-class TargetTestTemplate(TestTemplate):
+class TargetTestTemplate(TestTemplate[TargetTestRunner]):
     """Base Target test template."""
 
     plugin_type = "target"
 
-    def run(  # type: ignore[override]
+    def run(
         self,
         config: SuiteConfig,
         resource: t.Any,
@@ -307,7 +310,7 @@ class TargetFileTestTemplate(TargetTestTemplate):
     Use this when sourcing Target test input from a .singer file.
     """
 
-    def run(  # type: ignore[override]
+    def run(
         self,
         config: SuiteConfig,
         resource: t.Any,
