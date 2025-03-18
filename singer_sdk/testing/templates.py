@@ -6,6 +6,7 @@ import contextlib
 import importlib.resources
 import typing as t
 import warnings
+from functools import cached_property
 
 from singer_sdk.testing import target_test_streams
 from singer_sdk.testing.runners import SingerTestRunner, TapTestRunner, TargetTestRunner
@@ -230,7 +231,7 @@ class AttributeTestTemplate(TestTemplate[TapTestRunner]):
         self.attribute_name = attribute_name
         super().run(config, resource, runner)
 
-    @property
+    @cached_property
     def non_null_attribute_values(self) -> list[t.Any]:
         """Extract attribute values from stream records.
 
@@ -242,7 +243,10 @@ class AttributeTestTemplate(TestTemplate[TapTestRunner]):
             for r in self.stream_records
             if r.get(self.attribute_name) is not None
         ]
-        if not values:
+        if (
+            not values
+            and self.stream.name not in self.config.ignore_no_records_for_streams
+        ):
             warnings.warn(
                 UserWarning("No records were available to test."),
                 stacklevel=2,
