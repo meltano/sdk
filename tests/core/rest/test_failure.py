@@ -106,6 +106,15 @@ def custom_validation_stream(rest_tap):
                 ),
             ),
         ),
+        (
+            403,
+            "Forbidden",
+            b"",
+            pytest.raises(
+                FatalAPIError,
+                match=r"403 Client Error: Forbidden for path: /dummy",
+            ),
+        ),
         (200, "OK", b"OK", nullcontext()),
     ],
     ids=[
@@ -114,6 +123,7 @@ def custom_validation_stream(rest_tap):
         "server-error",
         "rate-limited",
         "forbidden-with-content",
+        "forbidden-empty-content",
         "ok",
     ],
 )
