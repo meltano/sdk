@@ -251,10 +251,15 @@ class _HTTPStream(Stream, t.Generic[_TToken], metaclass=abc.ABCMeta):  # noqa: P
             else "Server"
         )
 
-        return (
+        msg = (
             f"{response.status_code} {error_type} Error: "
             f"{response.reason} for path: {full_path}"
         )
+
+        if response.content:
+            msg += f", content is {response.text}"
+
+        return msg
 
     def request_decorator(self, func: t.Callable) -> t.Callable:
         """Instantiate a decorator for handling request failures.
