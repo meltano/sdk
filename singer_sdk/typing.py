@@ -681,8 +681,8 @@ class Property(JSONTypeHelper[T], t.Generic[T]):
             nullable: If True, the property may be null.
             title: Optional. A short, human-readable title for the property.
             deprecated: If True, mark this property as deprecated.
-            requires_properties: A list of property names that must be present if this
-                property is present.
+            requires_properties: A list of property names that must also be present if
+                this property is present.
             **kwargs: Additional keyword arguments to pass to the parent class.
         """
         self.name = name
