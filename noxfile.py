@@ -45,7 +45,7 @@ def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
     session.install(
-        ".[faker,jwt,parquet,s3,testing]",
+        ".[faker,jwt,msgspec,parquet,s3,testing]",
         "-c",
         "requirements/requirements.txt",
     )
@@ -61,6 +61,7 @@ def tests(session: nox.Session) -> None:
     extras = [
         "faker",
         "jwt",
+        "msgspec",
         "parquet",
         "s3",
     ]
@@ -90,7 +91,7 @@ def tests(session: nox.Session) -> None:
 @nox.session(python=main_python_version)
 def benches(session: nox.Session) -> None:
     """Run benchmarks."""
-    session.install(".[jwt,s3]", "-c", "requirements/requirements.txt")
+    session.install(".[jwt,msgspec,s3]", "-c", "requirements/requirements.txt")
     session.install("-r", "requirements/requirements.test.txt")
     session.run(
         "pytest",
@@ -104,7 +105,7 @@ def benches(session: nox.Session) -> None:
 def dependencies(session: nox.Session) -> None:
     """Check issues with dependencies."""
     session.install(
-        ".[faker,jwt,parquet,s3,ssh,testing]",
+        ".[faker,jwt,msgspec,parquet,s3,ssh,testing]",
         "-c",
         "requirements/requirements.txt",
     )
@@ -117,7 +118,11 @@ def update_snapshots(session: nox.Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
 
-    session.install(".[faker,jwt,parquet]", "-c", "requirements/requirements.txt")
+    session.install(
+        ".[faker,jwt,msgspec,parquet]",
+        "-c",
+        "requirements/requirements.txt",
+    )
     session.install("-r", "requirements/requirements.test.txt")
     session.run("pytest", "--snapshot-update", *args)
 

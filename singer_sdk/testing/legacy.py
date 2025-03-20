@@ -111,7 +111,12 @@ def get_standard_target_tests(
     return []
 
 
-def tap_sync_test(tap: Tap) -> tuple[io.StringIO, io.StringIO]:
+def tap_sync_test(
+    tap: Tap,
+) -> tuple[
+    io.TextIOWrapper[io.BytesIO],
+    io.TextIOWrapper[io.BytesIO],
+]:
     """Invokes a Tap object and return STDOUT and STDERR results in StringIO buffers.
 
     Args:
@@ -120,8 +125,8 @@ def tap_sync_test(tap: Tap) -> tuple[io.StringIO, io.StringIO]:
     Returns:
         A 2-item tuple with StringIO buffers from the Tap's output: (stdout, stderr)
     """
-    stdout_buf = io.StringIO()
-    stderr_buf = io.StringIO()
+    stdout_buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
+    stderr_buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
     with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
         tap.sync_all()
     stdout_buf.seek(0)
@@ -171,10 +176,10 @@ def _select_all(catalog_dict: dict) -> dict:
 
 def target_sync_test(
     target: Target,
-    input: io.StringIO | None,  # noqa: A002
+    input: t.IO[str] | None,  # noqa: A002
     *,
     finalize: bool = True,
-) -> tuple[io.StringIO, io.StringIO]:
+) -> tuple[io.TextIOWrapper[io.BytesIO], io.TextIOWrapper[io.BytesIO]]:
     """Invoke the target with the provided input.
 
     Args:
@@ -186,14 +191,14 @@ def target_sync_test(
     Returns:
         A 2-item tuple with StringIO buffers from the Target's output: (stdout, stderr)
     """
-    stdout_buf = io.StringIO()
-    stderr_buf = io.StringIO()
+    stdout_buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
+    stderr_buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
 
     with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
         if input is not None:
-            target._process_lines(input)  # noqa: SLF001
+            target.process_lines(input)
         if finalize:
-            target._process_endofpipe()  # noqa: SLF001
+            target.process_endofpipe()
 
     stdout_buf.seek(0)
     stderr_buf.seek(0)
@@ -203,7 +208,12 @@ def target_sync_test(
 def tap_to_target_sync_test(
     tap: Tap,
     target: Target,
-) -> tuple[io.StringIO, io.StringIO, io.StringIO, io.StringIO]:
+) -> tuple[
+    io.TextIOWrapper[io.BytesIO],
+    io.TextIOWrapper[io.BytesIO],
+    io.TextIOWrapper[io.BytesIO],
+    io.TextIOWrapper[io.BytesIO],
+]:
     """Test and end-to-end sink from the tap to the target.
 
     Note: This method buffers all output from the tap in memory and should not be
@@ -236,7 +246,7 @@ def sync_end_to_end(tap: Tap, target: Target, *mappers: InlineMapper) -> None:
         mappers: Zero or more inline mapper to apply in between the tap and target, in
             order.
     """
-    buf = io.StringIO()
+    buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
     with redirect_stdout(buf):
         tap.sync_all()
 
@@ -244,7 +254,7 @@ def sync_end_to_end(tap: Tap, target: Target, *mappers: InlineMapper) -> None:
     mapper_output = buf
 
     for mapper in mappers:
-        buf = io.StringIO()
+        buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
         with redirect_stdout(buf):
             mapper.listen(mapper_output)
 
