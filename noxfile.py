@@ -44,12 +44,23 @@ nox.options.sessions = [
 def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
     args = session.posargs or ["singer_sdk"]
-    session.install(
-        ".[faker,jwt,msgspec,parquet,s3,testing]",
-        "-c",
-        "requirements/requirements.txt",
+    extras = [
+        "faker",
+        "jwt",
+        "msgspec",
+        "parquet",
+        "s3",
+        "testing",
+    ]
+    session.run_install(
+        "uv",
+        "sync",
+        "--frozen",
+        "--no-dev",
+        "--group=typing",
+        *(f"--extra={extra}" for extra in extras),
+        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
     )
-    session.install("-r", "requirements/requirements.typing.txt")
     session.run("mypy", *args)
     if not session.posargs:
         session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
@@ -65,9 +76,15 @@ def tests(session: nox.Session) -> None:
         "parquet",
         "s3",
     ]
-
-    session.install(f".[{','.join(extras)}]", "-c", "requirements/requirements.txt")
-    session.install("-r", "requirements/requirements.test.txt")
+    session.run_install(
+        "uv",
+        "sync",
+        "--frozen",
+        "--no-dev",
+        "--group=testing",
+        *(f"--extra={extra}" for extra in extras),
+        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+    )
 
     env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
 
@@ -91,8 +108,20 @@ def tests(session: nox.Session) -> None:
 @nox.session(python=main_python_version)
 def benches(session: nox.Session) -> None:
     """Run benchmarks."""
-    session.install(".[jwt,msgspec,s3]", "-c", "requirements/requirements.txt")
-    session.install("-r", "requirements/requirements.test.txt")
+    extras = [
+        "jwt",
+        "msgspec",
+        "s3",
+    ]
+    session.run_install(
+        "uv",
+        "sync",
+        "--frozen",
+        "--no-dev",
+        "--group=testing",
+        *(f"--extra={extra}" for extra in extras),
+        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+    )
     session.run(
         "pytest",
         "--benchmark-only",
@@ -104,10 +133,25 @@ def benches(session: nox.Session) -> None:
 @nox.session(name="deps", python=main_python_version)
 def dependencies(session: nox.Session) -> None:
     """Check issues with dependencies."""
-    session.install(
-        ".[faker,jwt,msgspec,parquet,s3,ssh,testing]",
-        "-c",
-        "requirements/requirements.txt",
+    extras = [
+        "faker",
+        "jwt",
+        "msgspec",
+        "parquet",
+        "s3",
+        "ssh",
+        "testing",
+    ]
+
+    session.install("deptry")
+    session.run_install(
+        "uv",
+        "sync",
+        "--frozen",
+        "--inexact",
+        "--no-dev",
+        *(f"--extra={extra}" for extra in extras),
+        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
     )
     session.install("deptry")
     session.run("deptry", "singer_sdk", *session.posargs)
@@ -118,12 +162,24 @@ def update_snapshots(session: nox.Session) -> None:
     """Update pytest snapshots."""
     args = session.posargs or ["-m", "snapshot"]
 
-    session.install(
-        ".[faker,jwt,msgspec,parquet]",
-        "-c",
-        "requirements/requirements.txt",
+    extras = [
+        "faker",
+        "jwt",
+        "msgspec",
+        "parquet",
+        "s3",
+    ]
+
+    session.run_install(
+        "uv",
+        "sync",
+        "--frozen",
+        "--no-dev",
+        "--group=testing",
+        *(f"--extra={extra}" for extra in extras),
+        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
     )
-    session.install("-r", "requirements/requirements.test.txt")
+
     session.run("pytest", "--snapshot-update", *args)
 
 
@@ -137,8 +193,14 @@ def doctest(session: nox.Session) -> None:
         if "FORCE_COLOR" in os.environ:
             args.append("--xdoctest-colored=1")
 
-    session.install(".", "-c", "requirements/requirements.txt")
-    session.install("pytest", "xdoctest[colors]")
+    session.run_install(
+        "uv",
+        "sync",
+        "--frozen",
+        "--no-dev",
+        "--group=testing",
+        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+    )
     session.run("pytest", "--xdoctest", *args)
 
 
@@ -147,7 +209,14 @@ def coverage(session: nox.Session) -> None:
     """Generate coverage report."""
     args = session.posargs or ["report", "-m"]
 
-    session.install("coverage[toml]")
+    session.run_install(
+        "uv",
+        "sync",
+        "--frozen",
+        "--no-dev",
+        "--group=testing",
+        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+    )
 
     if not session.posargs and any(Path().glob(".coverage.*")):
         session.run("coverage", "combine")
@@ -162,8 +231,14 @@ def docs(session: nox.Session) -> None:
     if not session.posargs and "FORCE_COLOR" in os.environ:
         args.insert(0, "--color")
 
-    session.install(".", "-c", "requirements/requirements.txt")
-    session.install("-r", "requirements/requirements.docs.txt")
+    session.run_install(
+        "uv",
+        "sync",
+        "--frozen",
+        "--no-dev",
+        "--group=docs",
+        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+    )
 
     build_dir = Path("build")
     if build_dir.exists():
@@ -185,8 +260,16 @@ def docs_serve(session: nox.Session) -> None:
         "build",
         "-W",
     ]
-    session.install(".", "-c", "requirements/requirements.txt")
-    session.install("-r", "requirements/requirements.docs.txt", "sphinx-autobuild")
+    session.install("sphinx-autobuild")
+    session.run_install(
+        "uv",
+        "sync",
+        "--frozen",
+        "--inexact",
+        "--no-dev",
+        "--group=docs",
+        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+    )
 
     build_dir = Path("build")
     if build_dir.exists():

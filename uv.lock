@@ -2420,7 +2420,7 @@ benchmark = [
     { name = "requests-mock" },
     { name = "rfc3339-validator" },
     { name = "time-machine" },
-    { name = "xdoctest" },
+    { name = "xdoctest", extra = ["colors"] },
 ]
 dev = [
     { name = "coverage", extra = ["toml"] },
@@ -2455,7 +2455,7 @@ dev = [
     { name = "types-requests", version = "2.31.0.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "types-requests", version = "2.32.0.20241016", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "types-simplejson" },
-    { name = "xdoctest" },
+    { name = "xdoctest", extra = ["colors"] },
 ]
 docs = [
     { name = "furo" },
@@ -2485,7 +2485,7 @@ testing = [
     { name = "requests-mock" },
     { name = "rfc3339-validator" },
     { name = "time-machine" },
-    { name = "xdoctest" },
+    { name = "xdoctest", extra = ["colors"] },
 ]
 typing = [
     { name = "mypy" },
@@ -2550,7 +2550,7 @@ benchmark = [
     { name = "requests-mock", specifier = ">=1.10.0" },
     { name = "rfc3339-validator", specifier = ">=0.1.4" },
     { name = "time-machine", specifier = ">=2.10.0" },
-    { name = "xdoctest", specifier = ">=1.1.1" },
+    { name = "xdoctest", extras = ["colors"], specifier = ">=1.1.1" },
 ]
 dev = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.4" },
@@ -2581,7 +2581,7 @@ dev = [
     { name = "types-pyyaml", specifier = ">=6.0.12" },
     { name = "types-requests", specifier = ">=2.28.11" },
     { name = "types-simplejson", specifier = ">=3.18.0" },
-    { name = "xdoctest", specifier = ">=1.1.1" },
+    { name = "xdoctest", extras = ["colors"], specifier = ">=1.1.1" },
 ]
 docs = [
     { name = "furo", specifier = ">=2024.5.6" },
@@ -2608,7 +2608,7 @@ testing = [
     { name = "requests-mock", specifier = ">=1.10.0" },
     { name = "rfc3339-validator", specifier = ">=0.1.4" },
     { name = "time-machine", specifier = ">=2.10.0" },
-    { name = "xdoctest", specifier = ">=1.1.1" },
+    { name = "xdoctest", extras = ["colors"], specifier = ">=1.1.1" },
 ]
 typing = [
     { name = "mypy", specifier = ">=1.9" },
@@ -3259,6 +3259,12 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e9/a5/7f6dfdaf3a221e16ff79281d2a3c3e4b58989c92de8964a317feb1e6cbb5/xdoctest-1.2.0.tar.gz", hash = "sha256:d8cfca6d8991e488d33f756e600d35b9fdf5efd5c3a249d644efcbbbd2ed5863", size = 204804 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/58/b8/e4722f5e5f592a665cc8e55a334ea721c359f09574e6b987dc551a1e1f4c/xdoctest-1.2.0-py3-none-any.whl", hash = "sha256:0f1ecf5939a687bd1fc8deefbff1743c65419cce26dff908f8b84c93fbe486bc", size = 151194 },
+]
+
+[package.optional-dependencies]
+colors = [
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "pygments" },
 ]
 
 [[package]]
