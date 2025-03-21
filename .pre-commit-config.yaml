@@ -68,18 +68,6 @@ repos:
   hooks:
   - id: uv-lock
   - id: uv-sync
-  - id: uv-export
-    name: Export Codspeed requirements
-    args:
-    - "--no-editable"
-    - "--frozen"
-    - "--no-hashes"
-    - "--no-dev"
-    - "--all-extras"
-    - "--group"
-    - "benchmark"
-    - "--output-file"
-    - "requirements/requirements.codspeed.txt"
 
 - repo: https://github.com/codespell-project/codespell
   rev: v2.4.1
