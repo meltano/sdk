@@ -69,16 +69,6 @@ repos:
   - id: uv-lock
   - id: uv-sync
   - id: uv-export
-    name: Export docs requirements
-    args:
-    - "--no-emit-project"
-    - "--frozen"
-    - "--no-dev"
-    - "--group"
-    - "docs"
-    - "--output-file"
-    - "requirements/requirements.docs.txt"
-  - id: uv-export
     name: Export Codspeed requirements
     args:
     - "--no-editable"
