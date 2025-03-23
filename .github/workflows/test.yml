@@ -45,7 +45,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     env:
-      NOXPYTHON: ${{ matrix.python-version }}
+      NOXFORCEPYTHON: ${{ matrix.python-version }}
       NOXSESSION: ${{ matrix.session }}
     permissions:
       contents: read

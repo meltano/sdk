@@ -56,7 +56,10 @@ def mypy(session: nox.Session) -> None:
         "--no-dev",
         "--group=typing",
         *(f"--extra={extra}" for extra in extras),
-        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+        env={
+            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
+            "UV_PYTHON": session.python,
+        },
     )
     session.run("mypy", *args)
     if not session.posargs:
@@ -80,7 +83,10 @@ def tests(session: nox.Session) -> None:
         "--no-dev",
         "--group=testing",
         *(f"--extra={extra}" for extra in extras),
-        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+        env={
+            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
+            "UV_PYTHON": session.python,
+        },
     )
 
     env = {"COVERAGE_CORE": "sysmon"} if session.python == "3.12" else {}
@@ -117,7 +123,10 @@ def benches(session: nox.Session) -> None:
         "--no-dev",
         "--group=testing",
         *(f"--extra={extra}" for extra in extras),
-        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+        env={
+            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
+            "UV_PYTHON": session.python,
+        },
     )
     session.run(
         "pytest",
@@ -148,7 +157,10 @@ def dependencies(session: nox.Session) -> None:
         "--inexact",
         "--no-dev",
         *(f"--extra={extra}" for extra in extras),
-        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+        env={
+            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
+            "UV_PYTHON": session.python,
+        },
     )
     session.install("deptry")
     session.run("deptry", "singer_sdk", *session.posargs)
@@ -174,7 +186,10 @@ def update_snapshots(session: nox.Session) -> None:
         "--no-dev",
         "--group=testing",
         *(f"--extra={extra}" for extra in extras),
-        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+        env={
+            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
+            "UV_PYTHON": session.python,
+        },
     )
 
     session.run("pytest", "--snapshot-update", *args)
@@ -196,7 +211,10 @@ def doctest(session: nox.Session) -> None:
         "--frozen",
         "--no-dev",
         "--group=testing",
-        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+        env={
+            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
+            "UV_PYTHON": session.python,
+        },
     )
     session.run("pytest", "--xdoctest", *args)
 
@@ -212,7 +230,10 @@ def coverage(session: nox.Session) -> None:
         "--frozen",
         "--no-dev",
         "--group=testing",
-        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+        env={
+            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
+            "UV_PYTHON": session.python,
+        },
     )
 
     if not session.posargs and any(Path().glob(".coverage.*")):
@@ -234,7 +255,10 @@ def docs(session: nox.Session) -> None:
         "--frozen",
         "--no-dev",
         "--group=docs",
-        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+        env={
+            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
+            "UV_PYTHON": session.python,
+        },
     )
 
     build_dir = Path("build")
@@ -265,7 +289,10 @@ def docs_serve(session: nox.Session) -> None:
         "--inexact",
         "--no-dev",
         "--group=docs",
-        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+        env={
+            "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
+            "UV_PYTHON": session.python,
+        },
     )
 
     build_dir = Path("build")
