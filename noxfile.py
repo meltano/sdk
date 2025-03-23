@@ -37,6 +37,10 @@ nox.options.sessions = [
 ]
 
 
+def _uv_python(session: nox.Session) -> str | None:
+    return str(session.python) if isinstance(session.python, str) else None
+
+
 @nox.session()
 def mypy(session: nox.Session) -> None:
     """Check types with mypy."""
@@ -58,7 +62,7 @@ def mypy(session: nox.Session) -> None:
         *(f"--extra={extra}" for extra in extras),
         env={
             "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": session.python,
+            "UV_PYTHON": _uv_python(session),
         },
     )
     session.run("mypy", *args)
@@ -85,7 +89,7 @@ def tests(session: nox.Session) -> None:
         *(f"--extra={extra}" for extra in extras),
         env={
             "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": session.python,
+            "UV_PYTHON": _uv_python(session),
         },
     )
 
@@ -125,7 +129,7 @@ def benches(session: nox.Session) -> None:
         *(f"--extra={extra}" for extra in extras),
         env={
             "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": session.python,
+            "UV_PYTHON": _uv_python(session),
         },
     )
     session.run(
@@ -159,7 +163,7 @@ def dependencies(session: nox.Session) -> None:
         *(f"--extra={extra}" for extra in extras),
         env={
             "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": session.python,
+            "UV_PYTHON": _uv_python(session),
         },
     )
     session.install("deptry")
@@ -188,7 +192,7 @@ def update_snapshots(session: nox.Session) -> None:
         *(f"--extra={extra}" for extra in extras),
         env={
             "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": session.python,
+            "UV_PYTHON": _uv_python(session),
         },
     )
 
@@ -213,7 +217,7 @@ def doctest(session: nox.Session) -> None:
         "--group=testing",
         env={
             "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": session.python,
+            "UV_PYTHON": _uv_python(session),
         },
     )
     session.run("pytest", "--xdoctest", *args)
@@ -232,7 +236,7 @@ def coverage(session: nox.Session) -> None:
         "--group=testing",
         env={
             "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": session.python,
+            "UV_PYTHON": _uv_python(session),
         },
     )
 
@@ -257,7 +261,7 @@ def docs(session: nox.Session) -> None:
         "--group=docs",
         env={
             "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": session.python,
+            "UV_PYTHON": _uv_python(session),
         },
     )
 
@@ -291,7 +295,7 @@ def docs_serve(session: nox.Session) -> None:
         "--group=docs",
         env={
             "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
-            "UV_PYTHON": session.python,
+            "UV_PYTHON": _uv_python(session),
         },
     )
 
